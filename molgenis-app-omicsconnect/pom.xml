@@ -57,6 +57,12 @@
 			<classifier>classes</classifier>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-core-ui</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
 	</dependencies>
 
 	<build>
