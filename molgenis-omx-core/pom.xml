@@ -3,11 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
-		<artifactId>molgenis-omx</artifactId>
+		<artifactId>molgenis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-omx-core</artifactId>
 	<packaging>jar</packaging>
+	
+
 
 	<build>
 		<plugins>
@@ -93,4 +95,11 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>
