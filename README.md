@@ -19,7 +19,7 @@ Create a new workspace
 
 Clone the repo
 
-	git clone https://github.com/<yourname>/molgenis13.2.git
+	git clone https://github.com/<yourname>/molgenis.git
 
 
 Now you have a folder {{{molgenis13.2}}} in your workspace directory.
