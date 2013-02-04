@@ -22,7 +22,7 @@ Clone the repo
 	git clone https://github.com/<yourname>/molgenis.git
 
 
-Now you have a folder {{{molgenis13.2}}} in your workspace directory.
+Now you have a folder molgenis in your workspace directory.
 
 ## 2. install and configure eclipse == 
 (tested with latest eclipse download, J2EE Juno 4.2 SR1, Mac OSX 64bit)
