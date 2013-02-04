@@ -1,0 +1,17 @@
+/*XREF*/
+div.xrefinput{
+	padding: 0px;
+	margin: 0px;
+	z-index: 10;
+	display: none;
+	position: absolute;
+	background: white;
+	border: solid #999 1px;
+}
+.xrefinput label{
+	font-style: italic;
+}
+
+.xrefinput select{
+	overflow: auto;
+}

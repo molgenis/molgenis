@@ -1,0 +1,289 @@
+/**helper classes for reuse of colors*/
+.colorOfTitle{
+}
+
+.overallBackground{
+}
+
+.highlightBackground{
+}
+
+.shadeHeader{
+}
+
+.highlight{
+}
+
+.shadeBorder{
+}
+
+.fontColor{
+}
+
+.matrixRowColor0{
+}
+
+.matrixRowColor1{
+}
+
+.matrixRowColorEmpty{
+}
+
+/**additional formatting for xgap matrix*/
+.matrixTableCell{
+	border: solid 4px;
+}
+
+.tableBorder{
+		border:10px;
+		border-style:solid;
+}
+
+/**settings within the iframe*/
+/*input[type=text], input[type=password], input[type=file], textarea, select, button {
+	font-size: 8pt;
+	border: 1px #aaa solid;
+	padding-left: 2px;
+}*/
+
+select{
+	min-width: 100px;
+}
+
+td {
+	vertical-align: top;
+}
+
+input[type=hidden] {
+	margin: 0px;
+	padding: 0px;
+}
+
+.readonly{
+	background: #eee;
+	/*readonly fields are greyed out (not automatic in ie)*/
+}
+
+table {
+	border-collapse: collapse; 
+}
+
+.form_header {
+	font-family: arial;
+	font-size: 10pt;
+    font-weight: bold;
+    color: #ffffff;
+	text-align: center;
+	width: 100%;
+	padding: 0px;
+	margin: 0px;
+}
+
+.form_title {
+	font-family: arial;
+	font-size: 10pt;
+    font-weight: bold;
+    color: #ffffff;
+	text-align: center;
+}
+.navigation_button {
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.edit_button {
+	cursor: pointer;
+	vertical-align:middle;
+}
+
+.chzn-container-multi{
+	vertical-align:middle;
+}
+
+.tableheader {
+	cursor: pointer;
+}
+
+.screenbody
+{	
+/* removed widht, hope no problem*/
+	padding: 10px;
+}
+
+label {
+	font-family: arial;
+	font-size: 8pt;
+    font-weight: bold;	
+}
+
+.formscreen{
+	border-style: solid;
+	border-width: thin;
+	margin-top: 0px;
+}
+
+.subscreen{
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+}
+
+.menuscreen{
+	margin: 0px;
+	height: 20px;
+}
+      
+.errormessage{
+	background: red;
+	color: white;
+	text-align: center;
+	font-size: 8pt;
+	margin: 0px;
+	font-weight: bold;
+}
+
+.warningmessage{
+	background: #FBB117;
+	color: white;
+	text-align: center;
+	font-size: 8pt;
+	margin: 0px;
+	font-weight: bold;
+}
+
+.successmessage {
+	background:#52D017;
+	color: black;
+	text-align: center;
+	font-size: 8pt;
+	margin: 0px;
+}
+
+/*form*/
+.form_toolbar {
+	float: left;
+	position: absolute;
+	padding: 5px;
+}
+
+.form_new, .form_filter {
+    border-style: solid;
+    border-width: 1px;
+	padding: 0px;
+	margin: 0px;
+	z-index: 20;
+	display: none;
+	position: absolute;
+}
+.listtable {
+	width: 100%;
+    font-family: arial;
+    font-size: 9pt;
+    border-collapse: separate;
+    margin-top: 3px;
+}
+
+.screenpadding {
+	margin: 10px;
+	/* margin: expression('0px'); */
+}
+
+.listtable th {
+	white-space: nowrap;
+}
+
+.form_listrow0 {
+	vertical-align: top;
+}
+
+td .screenbody{
+	vertical-align: top;
+}
+
+td .form_listrow0{
+	vertical-align: top;
+}	
+
+.form_listrow1 {
+	vertical-align: top;
+}
+
+td .form_listrow1{
+	vertical-align: top;
+}
+
+.embedtable {
+	width: 100%;
+	height: 100%;
+    font-family: arial;
+    font-size: 9pt;
+    border-collapse: separate;
+    margin: 0px;
+}
+
+.link {
+	color: blue;
+	cursor: pointer;
+}
+
+.popup {
+	margin: auto;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.recordview_datavalue {
+	background: white;
+	margin: 2px;
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+.listview_smallcolumn{
+	width: 50px;
+
+}
+
+/*tree*/
+.tree_element {
+	color: #000000;
+	text-decoration: none;
+	font: menu;
+	white-space: nowrap;
+	cursor: pointer;
+}		
+
+.tree_element_open {
+	display: block;
+	color: #000000;  
+	font: menu;
+}	
+
+.tree_element_close {
+	display: none;
+	color: #000000;  
+	font: menu;
+}
+
+.seqQual {
+	font-size: 5pt;
+	font-family: courier, courier new;
+}
+.seqQual0 {
+	background: #cccccc;
+}
+.seqQual1 {
+	background: #ffaaaa;
+}
+.seqQual2 {
+	background: #ffeeee;
+}
+.seqQual3 {
+	background: #ffff99;
+}
+.seqQual4 {
+	background: #88ddff;
+}
+.seqQual5 {
+	background: #88ffdd;
+}

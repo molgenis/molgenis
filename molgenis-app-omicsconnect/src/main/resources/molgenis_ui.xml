@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCTYPE molgenis PUBLIC "MOLGENIS 1.0" "http://molgenis.sourceforge.net/dtd/molgenis_v_1_0.dtd" -->
+<molgenis name="omicsconnect">
+	<plugin name="oc_header" type="org.molgenis.omicsconnect.plugins.header.Header" />
+
+	<menu name="main">
+		<plugin name="Pubmed" type="org.molgenis.omicsconnect.plugins.pubmed.PubMedLookup" />
+		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
+		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
+		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+		<menu name="Admin">
+			<menu name ="Characteristics">
+				<form name="Characteristic" entity="Characteristic" />
+			</menu>
+			<menu name ="Panels">
+				<form name="Panel" entity="Panel" />
+			</menu>
+			<menu name ="Citations">
+				<form name="Citation" entity="Citation" />
+			</menu>
+			<menu name ="Individuals">	
+				<form name="Individual" entity="Individual" />
+			</menu>
+			<menu name ="Features">
+				<form name="Feature" entity="ObservableFeature">
+					<form name="Categories" entity="Category" />
+				</form>
+			</menu>
+			<menu name ="Protocols">
+				<form name="Protocol" entity="Protocol">
+					<form name="Values" entity="DataSet" />
+				</form>
+			</menu>
+			<menu name="Lookups">
+				<form name="Ontologies" entity="Ontology">
+					<form name="OntologyTerms" entity="OntologyTerm" />
+				</form>
+				<form name="Species" entity="Species" />
+			</menu>
+			<menu name="Genomics">
+				<form name="Genomes" entity="Genome">
+					<form name="Chromosomes" entity="Chromosome" />
+				</form>
+				<form name="Genes" entity="Gene"/>
+				<form name="Proteins" entity="Protein"/>
+				<form name="Variants" entity="Variant"/>
+			</menu>
+			<menu name="Investigation">
+				<form name="InvestigationInfo" label="Investigation" entity="Investigation"
+					compact_view="name">
+					<menu name="StudyMenu">
+						<form name="Study" label="Study" entity="Study" compact_view="name">
+							<form name="StudyDetail" label="Study Details" entity="StudyDetails" />
+							<form name="samplePanels" label="SamplePanel" entity="SamplePanel" />
+							<form name="Contributions" entity="Contribution" />
+							<form name="StudyAnalysisMethods" entity="Protocol" />
+							<form name="Experiments" entity="Experiment" compact_view="identifier,experimentType">
+								<menu name="ExperimentMenu">
+									<!-- <form name="DataSets" lalel="DataSets / ResultSets" entity="DataSet"/> 
+										form name="ExperimentLinks" label="Hotlinks" entity="Link" / -->
+									<form name="AassayedPanels" entity="Panel" />
+									<form name="UsedMarkerSets" entity="UsedMarkerSet" />
+									<form name="Significances" entity="FrequencyCluster">
+										<form name="GenotypeFrequencies" entity="GenotypeFrequency" />
+										<form name="AlleleFrequencies" entity="AlleleFrequency" />
+									</form>
+								</menu>
+							</form>
+						</form> <!-- study -->
+					</menu><!-- Studymenu -->
+				</form> <!-- invs -->
+			</menu> <!-- investigation -->
+			<menu name="Contacts">
+				<form name="Persons" entity="Person" />
+				<form name="Institutes" entity="Institute">
+					<form name="IntstitutePersons" entity="Person" />
+				</form>
+			</menu>
+			<menu name="DataSets">
+				<form name="DataSet" entity="DataSet">
+					<form name="ObservationSets" entity="ObservationSet">
+						<form name="ObservedValues" entity="ObservedValue" />
+					</form>
+				</form>		
+			</menu>		
+		</menu> <!-- admin panels -->	
+	</menu> <!-- main -->
+
+	
+</molgenis>

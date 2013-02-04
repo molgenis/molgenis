@@ -1,0 +1,27 @@
+/*DATE*/
+div.dateinput{
+	padding: 0px;
+	margin: 0px;
+	z-index: 10;
+	display: none;
+	position: absolute;
+	background: white;
+	border: solid #999 1px;
+}
+table.dateinput{
+	border-collapse: separate; 
+	border-spacing: 1px;
+}
+th.dateinput{
+	font: menu;	
+/*	background: lightgrey; not W3C, replaced with equivalent hex */
+	background: #D3D3D3;
+	cursor: pointer;
+}
+
+td.dateinput {
+	font: menu;
+	padding-left: 5px;
+	padding-right: 5px;
+	cursor: pointer;
+}

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="observ">
+		<description>
+			Observ-OM is a model to uniformly describe any phenotypic, genotypic
+			or
+			molecular observation. The four core concepts are:
+			<ul>
+				<li>
+					<b>ObservationTarget:</b>
+					the object we are observing.
+					<br />
+					For example: an Individual,
+					a Panel/Strain, a Sample, a Gene, a
+					Marker.
+				</li>
+				<li>
+					<b>ObservableFeature:</b>
+					the question asked or characteristic being
+					oberveded.
+					<br />
+					For example: 'What is height of [Target]?', 'What is genotype of
+					[Target] at
+					[Marker]?', 'Has [Target] ever used medicine [X]', 'What
+					is QTL p-value
+					association of [Marker] with [Gene Expression]?
+				</li>
+				<li>
+					<b>Protocol:</b>
+					the procedure of observation
+					<br />
+					For example: Food Frequency Questionnaire (FFQ), R/QTL mapping
+					method,
+					Genotype array, GWAS protocol.
+				</li>
+				<li>
+					<b>Observation:</b>
+					the actual act of observation. For example:
+					'FFQ asked to
+					[Individual:individual1], 'R/QTL applied to
+					[Marker:pvv4]',
+					'Genotype array applied to [Panel:Mouse RIL BxD 1].
+					Each observation
+					can have multiple ObservedValue AND be grouped into a DataSet.
+				</li>
+			</ul>
+		</description>
+		<entity name="Characteristic" implements="Identifiable"
+			xref_label="Identifier">
+			<description> Characteristics are yes-no
+				statements about things in
+				the world. These can be used as part of an observation, as
+				parameter
+				of ObservableFeature ('measuredCharacteristic'). For
+				example: 'What
+				is allele of [Marker]', here the [Marker] is a
+				characteristic. Also,
+				Characteristics can be used as target of
+				observation. Typical
+				examples are 'Individual' or 'Panel'. But also
+				'Marker' can be an
+				Target when asked the question 'QTL p-value for
+				[phenotype]': here
+				both target and feature are characteristic, for
+				example 'leave count'
+				(phenotype characteristic) and 'PVV4' (marker
+				characteristic).
+			</description>
+			<field name="description" type="text" nillable="true"
+				description="(Optional) Rudimentary meta data about the observable feature. Use of ontology 
+					terms references to establish unambigious descriptions is recommended" />
+		</entity>
+		<entity name="ObservationTarget" extends="Characteristic">
+			<description> ObservationTarget defines subjects of
+				observation, such
+				as Individual, Panel, Sample, etc. For instance: 'target 1' IS A
+				'Individual'.
+			</description>
+		</entity>
+		<entity name="ObservableFeature" extends="Characteristic">
+			<description>
+				ObservableFeature defines anything that can be observed.
+				<p />
+				In other words, ObservableFeature are the
+				questions asked, e.g. 'What
+				is Height?', 'What is Systolic blood
+				pressure?', or 'Has blue eyes?'.
+				<p />
+				Some questions may
+				be repeated for multiple characteristics. For
+				example 'What is [MarkerAllele]
+				observed?' can be applied to all
+				elements of a MarkerSet, and 'What
+				is [medicin codes] uses' can be
+				applied to a set of Medicine codes. This can be specified using the
+				measuredCharacteristic field.
+				<p />
+				The identifier of ObservableFeature is globally
+				unique. It is
+				recommended that
+				each
+				ObservableFeature is named
+				according to a
+				well-defined ontology
+				term or database accession.
+			</description>
+			<field name="unit" type="xref" xref_entity="OntologyTerm"
+				nillable="true"
+				description="(Optional) Reference to the well-defined measurement unit used to observe this feature 
+					(if feature is that concrete). E.g. mmHg" />
+			<field name="dataType" type="enum" default="string"
+				enum_options="[xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe]"
+				description="(Optional) Reference to the technical data type. E.g. 'int'" />
+			<field name="temporal" type="boolean" default="false"
+				description="Whether this feature is time dependent and can have different values when measured 
+					on different times (e.g. weight, temporal=true) or generally only measured once (e.g. birth date, 
+					temporal=false) " />
+		</entity>
+		<entity name="Category" extends="Characteristic">
+			<description>Category is partOf ObservableFeature to define
+				categories for an
+				ObservableFeature, such as the categorical
+				answer codes that are often used in Questionaires. 
+				For example the ObservableFeature 'sex' has
+				{code_string = 1, label=male} and {code_string
+				= 2, label=female}.
+				Category can be linked to well-defined
+				ontology terms via the
+				ontologyReference. Category
+				extends
+				ObservationElement such that it
+				can be referenced by
+				ObservedValue.value.
+				The Category class maps to
+				METABASE::Category
+			</description>
+			<field name="observableFeature" type="xref" xref_entity="ObservableFeature"
+				description="The Measurement these permitted values are part of." />
+			<field name="valueCode" type="string"
+				description="The value used to store this category in ObservedValue. For example '1', '2'." />
+			<field name="isMissing" type="bool" default="false"
+				description="whether this value should be treated as missing value." />
+		</entity>
+		<entity name="Protocol" extends="Characteristic">
+			<!-- has name, identifier, description, accession, accessionVersion. Should 
+				be part of a submission -->
+			<description>
+				The Protocol class defines parameterizable descriptions
+				of
+				(analysis)methods. Examples of protocols are: Questionaires, SOPs,
+				Assay platforms, Statistical analyses, etc.
+				Each protocol has a
+				unique identifier.
+				Protocol has an association to OntologyTerm to
+				represent the type of
+				protocol.
+			</description>
+			<field name="ProtocolType" nillable="true" type="xref"
+				xref_entity="OntologyTerm" description="classification of protocol" />
+			<field name="subprotocols" type="mref" xref_entity="Protocol" nillable="true" description="Subprotocols of this protocol"/>
+			<field name="Features" type="mref" nillable="true" xref_entity="ObservableFeature"
+				description="parameters (in/out) that are used or produced by this protocol." />
+		</entity>
+		<entity name="DataSet" extends="Characteristic">
+			<description>Container for one or more observations that are measured
+				using the same protocol and by the same performer(s). The dataset
+				may be a file (having the same
+				identifier) but in most cases it is a
+				data table consisting of rows (Observation).
+
+				This entity replaces
+				ProtocolApplication.
+			</description>
+			<field name="ProtocolUsed" type="xref" xref_entity="Protocol"
+				nillable="true"
+				description="Reference to the protocol that is being used (if available)" />
+			<field auto="true" name="startTime" type="datetime"
+				description="time when the protocol started." />
+			<field auto="true" name="endTime" type="datetime" nillable="true"
+				description="(Optional) time when the protocol ended." />
+		</entity>
+		<entity name="ObservationSet" implements="Autoid">
+			<description>In practice: Observation is one row within a DataSet.
+			</description>
+			<field name="partOfDataSet" type="xref" xref_entity="DataSet"
+				description="DataSet this ValueSet is part of." />
+			<field name="Time" type="datetime" description="Time of this observationSet" nillable="true" />
+			<unique fields="partOfDataSet,Time" description="No single secondary key" />
+		</entity>
+		<entity name="ObservedValue" implements="Autoid">
+			<description>
+				Generic storage of values as part of one observation
+				event. Values are atomatic observations,
+				e.g.,
+				length (feature) of
+				individual 1 (valueset.target)
+				= 179cm (value).
+				Values can also be
+				qualified by some characteristic,
+				e.g., QTL
+				p-value (feature)
+				between
+				phenotype 'leaf count'
+				(characteristic) and
+				marker 'PVV4'
+				(valueset.target) =
+				0.1^10+3 (value).
+			</description>
+			<field name="ObservationSet" type="xref" xref_entity="ObservationSet"
+				description="Reference to the observation. For example a particular patient visit or the application of a microarray or the calculation of a QTL model" />
+			<field name="Feature" type="xref" xref_entity="ObservableFeature"
+				description="References the ObservableFeature that this observation was made on. For example 'probe123'." />
+			<!-- removed: <field name="Characteristic" nillable="true" type="xref"
+				xref_entity="Characteristic" description="Is brother of [characteristic], or Average of [height]" /> -->
+			<field name="Value" nillable="true" description="The value observed" /> 
+		</entity>
+	</module>
+	<module name="observ.target">
+		<entity name="Species" extends="OntologyTerm">
+			<description>Ontology terms for species. E.g. Arabidopsis thaliana.
+				DISCUSSION: should we avoid subclasses of OntologyTerm and instead
+				make a 'tag' filter on terms so we can make pulldowns context
+				dependent (e.g. to only show particular subqueries of ontologies).
+			</description>
+		</entity>
+		<entity name="Individual" extends="ObservationTarget">
+			<description> The Individuals class defines the subjects that are
+				used
+				as observation target. The Individual class maps to
+				XGAP:Individual
+				and PaGE:Individual. Groups of individuals can be
+				defined via
+				Panel.
+			</description>
+			<field name="Mother" type="xref" nillable="true" xref_entity="Individual"
+				description="Refers to the mother of the individual." />
+			<field name="Father" type="xref" nillable="true" xref_entity="Individual"
+				description="Refers to the father of the individual." />
+		</entity>
+		<entity name="Panel" extends="ObservationTarget">
+			<!-- panel has: identifier, description, accessions -->
+			<description>The Panel class defines groups of individuals based on
+				cohort design, case/controls, families, etc. For instance:
+				'LifeLines
+				cohort', 'middle aged man', 'recombinant mouse inbred Line
+				dba x b6'
+				or 'Smith family'. A Panel can act as a single
+				ObservationTarget.
+				For example: average height (Measurement) in the
+				LifeLines cohort
+				(Panel) is 174cm (ObservedValue). The Panel class
+				maps to XGAP:Strain and PaGE:Panel
+				classes. In METABASE this is
+				assumed there is one panel per study.
+			</description>
+			<field name="PanelType" type="xref" xref_entity="OntologyTerm"
+				nillable="true"
+				description="Indicate the type of Panel (example: Sample panel, AssayedPanel, Natural=wild type, Parental=parents of a cross, F1=First generation of cross, RCC=Recombinant congenic, CSS=chromosome substitution)" />
+			<field name="NumberOfIndividuals" type="int" />
+			<field name="Species" type="xref" nillable="true" xref_entity="Species"
+				description="The species this panel is an instance of/part of/extracted from." />
+			<field name="Individuals" type="mref" xref_entity="Individual"
+				nillable="true" description="The list of individuals in this panel" />
+		</entity>
+		<entity name="PanelSource" implements="Autoid">
+			<!-- todo: this should probably be a subclass of protocolApplication? -->
+			<!-- experimental -->
+			<description>PanelSources is partOf Panel to define how panels are
+				related panels, founder panels,
+				such as overlap,
+				selection criteria,
+				getting assayed panel from a
+				sample panel, etc.
+			</description>
+			<field name="CurrentPanel" type="xref" xref_entity="Panel"
+				description="Panel for which these sources are defined." />
+			<field name="SourcePanel" type="xref" xref_entity="Panel"
+				description="Source that contributed individuals to current panel" />
+			<field name="NumberOfIndividuals" type="int" nillable="true"
+				description="Number of individuals lifted over from this source" />
+			<field name="SelectionCriteria" type="text"
+				description="Inclusion/exclusion criteria used to select these individuals from source into current panel" />
+		</entity>
+		<entity name="Ontology" implements="Identifiable">
+			<description> Ontology defines a reference to an ontology or
+				controlled vocabulary from which well-defined and stable (ontology)
+				terms can be obtained. Each Ontology should have a unique identifer,
+				for instance: Gene Ontology, Mammalian Phenotype, Human Phenotype
+				Ontology, Unified Medical Language System, Medical Subject Headings,
+				etc. Also a abbreviation is required, for instance: GO, MP, HPO,
+				UMLS, MeSH, etc. Use of existing ontologies/vocabularies is
+				recommended to harmonize phenotypic feature and value descriptions.
+				But one can also create a 'local' Ontology. The Ontology class maps
+				to FuGE::Ontology, MAGE-TAB::TermSourceREF.
+			</description>
+			<field auto="false" name="ontologyAccession" type="string"
+				nillable="true"
+				description="A accession that uniquely identifies the ontology (typically an acronym). E.g. GO, MeSH, HPO." />
+			<field nillable="true" auto="false" name="ontologyURI" type="hyperlink"
+				description="(Optional) A URI that references the location of the ontology." />
+		</entity>
+		<entity name="OntologyTerm" implements="Identifiable"
+			xref_label="Identifier">
+			<description>
+				OntologyTerm defines a single entry (term) from an
+				ontology or a controlled vocabulary (defined by Ontology). The
+				identifier is the ontology term is unique. E.g. 'NCI:Antigen Gene'.
+				Other data entities can reference to this OntologyTerm to harmonize
+				naming of concepts. If no suitable ontology term exists then one can
+				define new terms locally (in which case there is no formal accession
+				for the term limiting its use for cross-Investigation queries).
+			</description>
+			<field auto="false" name="ontology" type="xref" nillable="true"
+				description="(Optional) The source ontology or controlled vocabulary list that ontology terms have been obtained from."
+				xref_entity="Ontology" />
+			<field nillable="true" auto="false" name="termAccession" type="varchar"
+				description="(Optional) The accession number assigned to the ontology term in its source ontology. If empty it is assumed to be a locally defined term. " />
+			<field nillable="true" auto="false" name="definition" type="string"
+				description="(Optional) The definition of the term." />
+			<unique fields="ontology,termAccession"
+				description="The term accession is unique within an Ontology" />
+		</entity>
+		<entity name="Accession" extends="OntologyTerm">
+			<description>
+				An external identifier for an annotation. For example:
+				name='R13H8.1', ontology='ensembl' or name='WBgene00000912',
+				ontology='wormbase'.
+			</description>
+		</entity>
+	</module>
+</molgenis>

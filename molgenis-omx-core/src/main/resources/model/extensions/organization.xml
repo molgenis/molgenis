@@ -1,0 +1,240 @@
+<molgenis name="org.molgenis.omx">
+	<module name="organization">
+		<description>Generic entities to organize data in studies, experiments
+			and data sets.
+		</description>
+		<entity name="Study" implements="Identifiable">
+			<description>Investigation defines self-contained units of study. For
+				example: Framingham study. Optionally a description and an accession
+				to a data source can be provided. Each Investigation has a unique
+				identifier.
+			</description>
+			<field name="Description" type="text" nillable="true"
+				description="(Optional) 
+				Rudimentary meta data about the Investigation" />
+			<field name="StartDate" nillable="true" type="datetime"
+				description="The start point of the study." auto="true" />
+			<field name="UpdateDate" auto="true" type="datetime"
+				description="Last time the investigation was modified" />
+			<field name="EndDate" nillable="true" auto="false" type="datetime"
+				description="The end point of the study." />
+			<field name="Contact" type="xref" xref_entity="Person"
+				nillable="true" description="Primary contact person for this study" />
+			<!-- discussion: should this be a PersonAffiliated? Or Role? -->
+			<!--  rkh: added xref to investigation -->
+			<field name="PartOfInvestigation" label="Part of Investigation" type="xref" xref_entity="Investigation" description="xref to the investigation the study is part of"/>
+		</entity>
+		
+		<entity name="Experiment" implements="Identifiable">
+			<!-- discussion: can we not simply create DataSet as part of Study (and 
+				leave out the Study-Experiment structure?) -->
+			<field name="Study" type="xref" xref_entity="Study"
+				description="Part of Study." />
+			<field name="Design" length="50" nillable="true" />
+			<field name="ExperimentType" type="xref" xref_entity="OntologyTerm"
+				label="Experiment type. E.g. 'case-control'." />
+
+			<!-- remove markers stuff as it is too specific! -->
+			<field name="TotalMarkersTested" label="Total markers tested"
+				type="int" nillable="true" />
+			<field name="TotalMarkersImported" label="Total markers imported"
+				type="int" readonly="true" nillable="true" />
+			<field name="Objective" type="text" nillable="true" />
+			<field name="Outcome" type="text" nillable="true" />
+			<field name="Comments" type="text" nillable="true" />
+
+			<!-- too specific? -->
+			<field name="IndividualDataStatement" label="Individual data statement"
+				type="text" nillable="true"
+				default="Access to individual-level data must be made to the study authors" />
+
+			<!-- should we make this standard in an interface? -->
+			<field name="TimeCreated" label="Time created" readonly="true"
+				type="datetime" />
+
+			<!-- too specific? -->
+			<field name="AssayedPanels" label="Assayed panels" type="mref"
+				xref_entity="Panel" />
+
+			<field name="DataSets" type="mref" xref_entity="DataSet"
+				description="DataSets that were input/output of this experiment." />
+
+			<!-- can we have example of this? -->
+			<!-- field name="Explinks" label="Links" hidden="true" nillable="true" 
+				xref_entity="Link" type="mref" / -->
+		</entity>
+		<entity name="Institute" implements="Autoid" xref_label="name">
+			<description> A contact is either a person or an organization. Copied
+				from FuGE::Contact.
+			</description>
+			<field name="name" unique="true" />
+			<field name="Address" type="text" nillable="true"
+				description="The address of the Contact." />
+			<field name="Phone" nillable="true"
+				description="The telephone number of the Contact including the suitable area codes." />
+			<field name="City" type="string" nillable="true"
+				description="Added from the old definition of MolgenisUser. City of this contact." />
+			<field name="Country" type="string" nillable="true"
+				description="Added from the old definition of MolgenisUser. Country of this contact." />
+			<field name="Fax" nillable="true" type="varchar"
+				description="The fax number of the Contact." />
+		</entity>
+		<!--   <entity name="Person" xref_label="Name" implements="Autoid">
+			<description>
+				Person represents one or more people involved with an Investigation.
+				This may include authors on a paper, lab personnel or PIs. Person
+				has last name, firstname, mid initial, address, contact and email. A
+				Person role is included to represent how a Person is involved with
+				an investigation. For submission to repository purposes an allowed
+				value is 'submitter' and the term is present in the MGED Ontology,
+				an alternative use could represent job title. An Example from
+				ArrayExpress is E-MTAB-506
+				<a
+					href="ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt">
+					ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt.
+				</a>
+				.
+				<br />
+				The FUGE equivalent to Person is FuGE::Person.
+			</description>
+			<field name="Name" unique="true" />
+			<field name="Title" label="Title" nillable="true"
+				description="An academic title, e.g. Prof.dr, PhD" />
+			<field name="FirstName" label="First Name" nillable="true" />
+			<field name="MidInitials" label="Mid Initials" nillable="true" />
+			<field name="LastName" label="Last Name" nillable="true" />
+			<field name="Email" type="email" nillable="true" />
+			<field name="Phone" nillable="true"
+				description="The telephone number of the Contact including the suitable area codes." />
+			<unique fields="FirstName,MidInitials,LastName" />
+		</entity> -->
+		
+		
+		<entity name="Person" xref_label="Name" implements="Autoid">
+			<description>
+				Person represents one or more people involved with an Investigation.
+				This may include authors on a paper, lab personnel or PIs. Person
+				has last name, firstname, mid initial, address, contact and email. A
+				Person role is included to represent how a Person is involved with
+				an investigation. For submission to repository purposes an allowed
+				value is 'submitter' and the term is present in the MGED Ontology,
+				an alternative use could represent job title. An Example from
+				ArrayExpress is E-MTAB-506
+				<a
+					href="ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt">
+					ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt.
+				</a>
+				.<!-- From MIBBI : Name should either be of the person or the institutional role holding responsibility for the associated (meta)data. -->
+				<br />
+				The FUGE equivalent to Person is FuGE::Person.
+			</description>
+			<field name="Name" unique="true" />
+			<field name="Title" label="Title" nillable="true"
+				description="An academic title, e.g. Prof.dr, PhD" />
+			<field name="FirstName" label="First Name" nillable="true" />
+			<field name="MidInitials" label="Mid Initials" nillable="true" />
+			<field name="LastName" label="Last Name" nillable="true" />
+			<field name="Email" type="email" nillable="true" />
+			<field name="Phone" nillable="true"
+				description="The telephone number of the Contact including the suitable area codes." />
+			<unique fields="FirstName,MidInitials,LastName" />
+			<!-- RKH: added mref to institue to allow multiple institutions for one person -->
+			<field name="PrimaryAffilation" label="Affliations" type="xref" nillable="true" xref_entity="Institute" />
+			<!-- do we want to capture the role of the researcher at the Instituion -->
+			<!-- Globally-unique person ID (authority and identifier) -->
+			<field name="AffiliateInstitutions" label="Affliated Institutes" type="mref" nillable="true" xref_entity="Institute" />
+			<field name="OrcidPersonReference" nillable="true" type="xref" xref_entity="OntologyTerm"/>				
+		</entity>
+
+		<entity name="Citation" implements="Identifiable">
+			<description>
+				Citation of a document or data set. Publications have
+				attributes of
+				publications Authors and also DOI and Pubmed
+				identifiers (when these
+				are available). These are represented as
+				OntologyTerms as in the
+				MAGE-TAB model all 'xrefs' (cross
+				references) for ontologies and
+				accession numbers are handled
+				generically. An example of a
+				publication is available in an IDF file
+				from ArrayExpress is
+				experiment E-MTAB-506
+				<a
+					href="ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt">ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt
+				</a>
+				.
+				<br />
+				The FuGE equivalent to Publication is FuGE::Bibliographic Reference.
+			</description>
+			<field name="PubmedID" label="Pubmed ID" unique="true"
+				nillable="true" />
+			<field name="DOI" label="Publication DOI" unique="true"
+				nillable="true" />
+			<field name="ontologyTerms" type="mref" xref_entity="OntologyTerm"
+				nillable="true" description="ontology terms such as MeSH" />
+			<field name="authorList" type="text"
+				description="The names of the authors of the publication" nillable="true" />
+			<field name="Title" label="Publication Title" description="The title of the Publication" />
+			<field name="Description" type="text" />
+			<field name="Status" label="Publication Status" description="The status of the Publication"
+				type="xref" xref_entity="OntologyTerm" nillable="true" />
+
+			<!-- what should be xref_label??? -->
+		</entity>
+		<entity name="Contribution" implements="Identifiable">
+			<description>A contribution describes the part a Person has
+				contributed to a Contributable item.
+			</description>
+			<field name="Researcher" label="Researcher" type="xref"
+				xref_entity="Person" description="The person involved" />
+			<field name="Submission" label="Submission" type="xref"
+				xref_entity="Submission" xref_cascade="true"
+				description="The submission contributed to." />
+			<!-- discussion: drop fields below and instead have a list of contributionTypes 
+				(mref OntologyTerm)? -->
+			<field name="IsSubmitter" label="Submitter?" type="enum"
+				enum_options="[yes,no]" />
+			<field name="IsAuthor" label="Author?" type="enum"
+				enum_options="[yes,no]" />
+			<field name="IsSource" label="Source?" type="enum"
+				enum_options="[yes,no]" />
+		</entity>
+		<entity name="Submission" implements="Identifiable">
+			<field name="TimeCreated" label="Time created" type="datetime" />
+			<field name="Study" type="xref" xref_entity="Study" />
+		</entity>
+
+		<!-- how to create links for everything? -->
+
+		<!-- entity name="Link" xref_label="HotlinkLabel">
+			<field name="HotlinkLabel" length="100" label="Hotlink label"
+				description="Indicate where the URL is pointing, e.g. &quot;dbSNP refSNP report&quot;" />
+			<field name="UrlPrefix" length="300" label="URL prefix" />
+			<field name="UrlSuffix" length="100" label="URL suffix"
+				nillable="true" />
+			<field name="Identifier" length="15" label="Identifier"
+				nillable="true" />
+
+			<field name="Studies" label="Studies" nillable="true" type="mref"
+				xref_field="Study.id" xref_label="identifier" mref_name="StudyHotlink"
+				mref_localid="HotlinkID" mref_remoteid="StudyID" />
+			<field name="Experiments" nillable="true" label="Experiments"
+				type="mref" xref_field="Experiment.id" xref_label="identifier"
+				mref_name="ExperimentHotlink" mref_localid="HotlinkID"
+				mref_remoteid="ExperimentID" />
+			<field name="DataSet" nillable="true" label="Result sets" type="mref"
+				xref_field="DataSet.id" xref_label="identifier" mref_name="ResultsetHotlink"
+				mref_localid="HotlinkID" mref_remoteid="ResultsetID" />
+			<field name="PhenotypeMethods" nillable="true" label="Phenotype methods" 
+				type="mref" xref_field="PhenotypeMethod.PhenotypeMethodID" xref_label="Identifier" 
+				mref_name="PhenotypeMethodHotlink" mref_localid="HotlinkID" mref_remoteid="PhenotypeMethodID" 
+				/>
+			<field name="Samplepanels" nillable="true" label="Sample panels"
+				type="mref" xref_field="Panel.id" xref_label="identifier" mref_name="SamplepanelHotlink"
+				mref_localid="HotlinkID" mref_remoteid="SamplepanelID" />
+			<unique fields="HotlinkLabel" />
+		</entity -->
+	</module>
+</molgenis>

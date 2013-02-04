@@ -1,0 +1,55 @@
+.ui-button .ui-icon.save {
+	background-image: url('../img/save.png');
+	width: 22px;
+	height: 22px;
+}
+
+input.error,textarea.error {
+	border: 1px dotted red;
+	background: pink;
+}
+
+label.error {
+	color: red;
+}
+
+input.ui-widget-content, textarea.ui-widget-content {
+	line-height: 22px;
+	font-size: 13px;
+}
+
+label, label.ui-widget {
+	line-height: 22px;
+	font-size: 13px;
+	font-weight: normal;
+}
+
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header {
+	margin-bottom: 8px;
+}
+
+.ui-timepicker-div dl {
+	text-align: left;
+}
+
+.ui-timepicker-div dl dt {
+	height: 25px;
+}
+
+.ui-timepicker-div dl dd {
+	margin: -25px 0 10px 65px;
+}
+
+.ui-timepicker-div td {
+	font-size: 90%;
+}
+
+/** icons */
+.ui-icon-save {
+	background-image: url(../img/save.png)
+}
+
+input.readonly, textarea.readonly, select.readonly {
+	background: #E0E0E0;
+}

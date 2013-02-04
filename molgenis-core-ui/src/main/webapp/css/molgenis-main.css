@@ -1,0 +1,151 @@
+/*settings for the main page*/
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	font-family: arial;
+}
+
+html{
+	height: 100%;
+}
+
+a img {
+	border: none;
+}
+
+#container {
+	position:relative; /* needed for footer positioning*/
+	width: 95%;
+	border-spacing: 5px;
+	margin: 0 auto 0 auto;
+}
+
+
+* html #container
+{
+	height: 100%;
+}
+
+#header {
+	font-family: arial;
+	font-size: 28pt;
+	font-style: italic;
+	width: 100%;
+}
+
+#body {
+	width: 100%;
+	height:100%;
+	top:100px;
+	padding-bottom: 100px;
+}	
+
+#footer, #push {
+	margin: 0;
+	height: 50px; /* .push must be the same height as .footer */
+}
+
+#footer {
+	width: 100%;
+	text-align: center;
+	font: menu;
+}
+
+.leftNavigation {
+	position:relative;
+	border: none;
+	border-collapse: collapse;
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+}
+
+.leftNavigation td {
+	padding: 0px;
+	margin: 0px;
+}
+
+.leftNavigationMenu {
+	padding: 0px;
+	width: 175px;
+	height: 100%;
+}
+
+.leftNavigationSubmenu {
+	margin: 0px;
+	padding-top: 0px;
+	margin-left: 10px;
+}
+
+.leftNavigationSelected {
+	font-family: arial;
+	font-size: 10pt;
+	font-weight: bold;
+	cursor: pointer;
+	border-style: solid;
+	border-width: 1px;
+	height: 20px;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+
+.leftNavigationNotSelected {
+	font-family: arial;
+	font-size: 9pt;
+	font-weight: bold;
+	cursor: pointer;
+	border-style: solid;
+	border-width: 1px;
+	height: 20px;
+	padding: 5px;
+	margin-bottom: 5px;
+	border-right: none;
+}
+
+.navigationSelected {
+	font-family: arial;
+	font-size: 10pt;
+	font-weight: bold;
+	cursor: pointer;
+	border-style: solid;
+	border-width: 1px;
+	padding: 2px;
+	display: inline;
+	height: 20px;
+	margin-right: 5px;
+}
+
+.navigationNotSelected {
+	font-family: arial;
+	font-size: 9pt;
+	font-weight: bold;
+	cursor: pointer;
+	border-style: solid;
+	border-width: 1px;
+	padding: 2px;
+	display: inline;
+	height: 20px;
+	margin-right: 5px;
+	border-bottom: none;
+}
+
+.information {
+	font-family: arial;
+	width: 100%;
+	height: auto;
+}
+
+form {
+	margin: 0px;
+	padding: 0px;
+	display: inline;
+}
+
+td {
+	font: menu;
+}
+
+.edit_button_area {
+	vertical-align: bottom;
+}

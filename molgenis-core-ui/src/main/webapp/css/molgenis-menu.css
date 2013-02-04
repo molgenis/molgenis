@@ -1,0 +1,53 @@
+.form_menu {
+    border-style: solid;
+    border-width: 1px;
+	padding: 5px;
+	z-index: 10;
+	display: none;
+	position: absolute;
+}
+
+.formmenutable{
+	border-collapse: separate;
+}
+
+.menuitem {
+	color: white;
+	text-align: left;
+	text-decoration: none;
+	font-family: arial;
+	font-size: 9pt;
+	font-weight: bold;
+	cursor: pointer;
+	padding-right: 10px;
+	padding-left: 5px;
+}
+
+.submenu {
+	display: none;
+	position: absolute;
+	margin: 0;
+	font: menu;
+	z-index: 10;
+	border-style: outset;
+	border-width: 1px;
+	width: 200px;
+}
+
+.submenuitem {
+	font: menu;
+	text-align: left;
+	cursor: pointer;
+	width: 200px;
+	padding: 5px;
+}
+
+td.submenuitem:hover{
+	color: #FFFFFF;
+}
+	
+img .submenuitem{
+	vertical-align: middle;
+}
+
+

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="gwascentral">
+	
+	<!--  RKH: investigation: A Top Level container for multiple studies: create an mref to Study i.e one investigation can have multiple studies -->
+	<entity name="Investigation" implements="Identifiable">
+	<field name="Title" type="text" nillable="true"
+				description="Nice title of Investigation" />
+			<field name="ShortName" type="text" nillable="true"
+				description="Shorthand name for layout" />
+			<field name="Version" label="Accession version" nillable="true" />
+			<field name="Background" type="text" nillable="true"
+				description="Short piece of information describing why the study is taking place, e.g. risk factors for a population" />
+	
+	</entity>
+	
+<entity name="StudyDetails" implements="Autoid">
+			<field name="Study" type="xref" xref_entity="Study" unique="true" />
+			<!-- Should discuss what in core, and what more to 'StudyDetails' table -->
+
+			<field name="Title" type="text" nillable="true"
+				description="Nice title of the paper" />
+			<field name="ShortName" type="text" nillable="true"
+				description="Shorthand name for layout" />
+			<field name="StudyAbstract" label="Abstract" type="text"
+				description="" />
+			<field name="Version" label="Accession version" nillable="true" />
+			<field name="Background" type="text" nillable="true"
+				description="Short piece of information describing why the study is taking place, e.g. risk factors for a population" />
+			<field name="Objectives" type="text" nillable="true"
+				description="What this study aims to achieve" />
+			<field name="KeyResults" label="Key results" type="text"
+				nillable="true" description="Noticable results from this study" />
+			<field name="Conclusions" type="text" nillable="true"
+				description="Description of the conclusions drawn" />
+			<field name="StudyDesign" label="Study design" type="text"
+				nillable="true" description="" />
+			<field name="StudySizeReason" label="Reason for study size"
+				type="text" nillable="true" description="" />
+			<field name="StudyPower" label="Study power" type="text"
+				nillable="true" description="" />
+			<field name="SourcesOfBias" label="Sources of bias" type="text"
+				nillable="true" description="" />
+			<field name="Limitations" type="text" nillable="true"
+				description="" />
+			<field name="Acknowledgements" type="text" nillable="true"
+				description="" />
+
+			<field name="primaryCitation" type="xref" xref_entity="Citation"
+				nillable="true" />
+			<field name="otherCitations" type="mref" xref_entity="Citation"
+				nillable="true" description="Contact persons for this study" />
+			<field name="Accession" type="hyperlink" nillable="true"
+				description="(Optional) URI or accession number to indicate source of Study. E.g. arrayexpress:M-EXP-2345" />
+		</entity>
+		<!-- todo: model FrequencyCluster as protocolApplication. E.g. PValueHWE 
+			= Measurement; -->
+		<entity name="FrequencyCluster" extends="DataSet">
+			<!-- todo: decorator to verify target == an assayedPanel! -->
+			<field name="DataSet" label="Result set identifier" type="xref"
+				nillable="true" xref_entity="DataSet" />
+			<field name="UsedMarkerSet" label="Used marker set ID" type="xref"
+				xref_entity="UsedMarkerSet" />
+			<field name="MarkerID" label="Marker ID" type="int" />
+			<!-- now via target field name="AssayedPanel" label="Assayed panel ID" 
+				type="xref" xref_entity="Panel" / -->
+			<field name="NumberOfGenotypedSamples" label="Number of genotyped samples"
+				type="int" />
+			<field name="PValueHWE" label="P-value HWE" type="decimal"
+				nillable="true" />
+			<field name="UnadjustedPValue" label="Unadjusted p-value" type="decimal"
+				nillable="true" />
+			<!--field name="AdjustedPValue" label="Adjusted p-value" type="decimal" 
+				nillable="true"/ -->
+			<field name="OddsRatioStatement" label="Odds ratio statement"
+				nillable="true" />
+			<field name="AttributableRiskStatement" label="Attributable risk statement"
+				nillable="true" />
+		</entity>
+		<entity name="GenotypeFrequency" extends="DataSet">
+			<!-- todo: decorator to verify target == an assayedPanel! -->
+			<field name="FrequencyCluster" label="Frequency cluster ID"
+				type="xref" nillable="true" xref_entity="FrequencyCluster" />
+			<field name="GenotypeCombo" label="Genotype combo" type="text"
+				nillable="true" />
+			<field name="FrequencyAsProportion" label="Frequency as proportion"
+				type="decimal" />
+			<field name="NumberSamplesWithGenotype" label="Number of samples with genotype"
+				type="int" nillable="true" />
+		</entity>
+		<entity name="AlleleFrequency" extends="DataSet">
+			<!-- todo: decorator to verify target == an assayedPanel! -->
+			<field name="FrequencyCluster" label="Frequency cluster ID"
+				type="xref" nillable="true" xref_entity="FrequencyCluster" />
+			<field name="AlleleCombo" label="Allele combo" type="text"
+				nillable="true" />
+			<field name="FrequencyAsProportion" label="Frequency as proportion"
+				type="decimal" />
+		</entity>
+
+<!-- phenotype property -->
+		<entity name="PhenotypeProperty" extends="ObservableFeature" implements="Identifiable">
+			<field name="Name" label="Phenotype Property" length="100" nillable="true"/>
+		</entity>
+
+<!-- How do we measure the our measurements? -->
+		<entity name="PhenotypeMethod" extends="DataSet" implements="Identifiable">
+			<field name="StudyID" label="Study identifier" type="xref" description="Points to study that this method came in" xref_entity="Study" />
+			<field name="PhenotypePropertyID" label="Phenotype property name" type="xref" xref_entity="PhenotypeProperty"/>
+			<field name="Name" length="255" nillable="true"/>
+			<field name="Sample" length="100" nillable="true" description="Biological system or sample type being assessed"/>
+		</entity>
+		
+		<entity name="PhenotypeValue" extends="ObservedValue" implements="Identifiable">
+			<field name="PhenotypePropertyID" label="Phenotype property name" type="xref" xref_entity="PhenotypeProperty"/>
+			<field name="Name" length="255" nillable="true"/>
+			<field name="Value" label="Value"/>
+			<field name="ValueRank" label="Value Rank"/>
+			<field name="ValueIsMean" label="Value is mean"/>
+			<field name="STD" label="Standard Deviation"/>
+			<field name="Min" label="Minimum value"/>
+			<field name="Max" label="Maximum value"/>
+		</entity>
+
+
+
+		<entity name="SamplePanel" extends="Panel" implements="Identifiable">
+		
+		<!--  This will probably change -->
+		
+			<field name="CentralIdentifier" label="" type="xref"
+				xref_entity="OntologyTerm" nillable="true"
+				description="The central GWAS identifier for this panel" />
+				<field name="Name" length="100" nillable="true"/>
+				<field name="Label" hidden="true" length="10" nillable="true"/>
+				<field name="Accession" hidden="true" length="15" nillable="true"/>
+				<field name="AccessionVersion" hidden="true" length="10" label="Accession version" nillable="true"/>
+				<field name="Description" type="text" nillable="true"/>
+				<field name="Composition" type="text" nillable="true"/>
+				<field name="TotalNumberOfIndividuals" label="Total number of individuals" type="int" nillable="true" description="*...but required for association datasets"/>
+				<field name="NumberOfSexMale" label="Number of males" type="int" nillable="true"/>
+				<field name="NumberOfSexFemale" label="Number of females" type="int" nillable="true"/>
+				<field name="NumberOfSexUnknown" label="Number of unknown sex" type="int" nillable="true"/>
+				<field name="NumberOfProbands" label="Number of probands" type="int" nillable="true" description="field used only if Composition = 'Trios'"/>
+				<field name="NumberOfParents" label="Number of parents" type="int" nillable="true" description="field used only if Composition = 'Trios'"/>
+				<field name="ModeOfRecruitment" label="Mode of recruitment" nillable="true"/>
+				<field name="DiagnosisAgeRange" length="150" label="Diagnosis age range" nillable="true"/>
+				<field name="DiagnosisPeriod" length="150" label="Diagnosis period" nillable="true"/>
+				<field name="SamplingAgeRange" length="150" label="Sampling age range" nillable="true"/>
+				<field name="SamplingPeriod" length="150" label="Sampling period" nillable="true"/>
+				<field name="PopulationInfo" length="250" label="Population information" nillable="true"/>
+				<field name="GeographicRegionInfo" length="250" label="Geographic region information" nillable="true"/>
+				<field name="EthnicityInfo" length="250" label="Ethnicity information" nillable="true"/>
+				<field name="BirthPlaceInfo" length="250" label="Birth place information" nillable="true"/>
+				<field name="AdmixtureInfo" length="250" label="Admixture information" nillable="true"/>
+				<field name="EnvironmentInfo" label="Environment information" type="text" nillable="true"/>
+				<field name="SourceOfDNA" length="100" label="Source of DNA" nillable="true" description="In (SELECT [SourceOfDNA] FROM [Sampleset_SourceOfDNAList];)"/>
+				<field name="DNAsArePooled" label="Are DNAs pooled?" type="enum" enum_options="[Undefined,Pre-prep,Post-prep,No]" default="Undefined"/>
+				<field name="DNAsAreWGA" label="Are DNAs WGA?" type="enum" enum_options="[Undefined,None,All,Some]" default="Undefined"/>
+			
+			 
+			<!-- contain all fields of assayedPanel that are not yet in Panel: composition, 
+				number of males, number of females, number of probands, number of parents, 
+				mode recruitment, diagnosis age range, diagnosis period, sample age range, 
+				sampling period, population information, geographis region info, ehtnic info, 
+				birht place, admixture, environment, admixyure, source of DNA, DNAsArePooled, 
+				DNAsAreWGA -->
+		</entity>
+
+		<entity name="AssayedPanel" extends="Panel" implements="Identifiable">
+			<!--<field name="Type" label="" type="xref" nillable="true" xref_entity="DataSet"/>-->
+			<field name="Name" length="100" nillable="true"/>
+			<field name="Description" type="text" nillable="true"/>
+			<field name="TotalNumberOfIndividuals" label="Total number of individuals" type="int" nillable="true" description="*...but required for association datasets"/>
+			<field name="NumberOfSexMale" label="Number of males" type="int" nillable="true"/>
+			<field name="NumberOfSexFemale" label="Number of females" type="int" nillable="true"/>
+			<field name="NumberOfSexUnknown" label="Number of unknown sex" type="int" nillable="true"/>
+			<field name="NumberOfProbands" label="Number of probands" type="int" nillable="true" description="field used only if Composition = 'Trios'"/>
+			<field name="NumberOfParents" label="Number of parents" type="int" nillable="true" description="field used only if Composition = 'Trios'"/>
+			
+			
+			<!-- why is there a studyId in there?study id was a short cut i think -->
+		</entity>
+		
+		<entity name="GWASExperiment" extends="Experiment" implements="Identifiable">
+			 <field name="IndividualDataStatement" label="Individual data statement"
+				type="text" nillable="true"
+				default="Access to individual-level data must be made to the study authors" /> 
+		<field name="TotalMarkersTested" label="Total markers tested"
+				type="int" nillable="true" />
+			<field name="TotalMarkersImported" label="Total markers imported"
+				type="int" readonly="true" nillable="true" /> 
+		<!--<field name="Assayedpanels" label="Assayed panels"  default="0" type="mref" xref_entity="AssayedPanel" xref_label="Identifier" mref_name="ExperimentAssayedpanel"/>-->
+		</entity>
+		
+
+
+		<!-- would like a generic way to make (a) marker list and (b) attach it 
+			to experiment -->
+		<entity name="UsedMarkerSet" extends="ObservableFeature">
+			<field name="ExperimentID" label="Experiment ID" type="xref"
+				nillable="true" xref_entity="Experiment" />
+			<!-- field name="MarkersetID" label="Marker set ID" type="int"/ -->
+			<field name="MarkerIdentifier" label="Marker identifier"
+				nillable="true" />
+			<unique fields="ExperimentID,MarkerIdentifier" />
+		</entity>
+		
+	<!--   <entity name="UsedMarkerSet" extends="ObservableFeature">
+			<field name="ExperimentID" label="Exp identifier" type="xref"  xref_entity="GWASExperiment" xref_label="id" />
+			<field name="MarkerID" label="Marker identifier" type="xref"  xref_entity="Marker" xref_label="id" />
+		</entity> -->
+		
+		
+		<entity name="Significance" extends="DataSet"  implements="Autoid">
+			<!--<field name="DatasetID" label="Data set identifier" type="xref" nillable="true" xref_entity="DataSet"  /> -->
+			<field name="UsedmarkersetID" label="Used marker set ID" type="xref" xref_entity="UsedMarkerSet"/>
+			<field name="NegLogPValue" label="Negative log p-value" type="decimal" nillable="true" />
+			<field name="UnadjustedPValue" label="Unadjusted p-value" type="text" nillable="true"/>
+			<field name="AdjustedPValue" label="Adjusted p-value" type="decimal" nillable="true"/>
+		</entity>
+		
+		
+		<entity name="EffectSize" extends="DataSet">
+			<field name="UsedMarkerSetID" label="Used Marker ID" type="xref"
+				nillable="true" xref_entity="UsedMarkerSet" />
+			<field name="Lower95Bound" type="decimal" />
+			<field name="Upper95Bound" type="decimal" />
+			<field name="StdError" type="decimal" />
+		</entity>
+		
+		<entity name="SelectionCriteria" implements="Autoid">
+			<!-- todo: this should probably be a subclass of protocolApplication? -->
+
+			<description>Create relationships between panels, founder panels,
+				such as overlap,
+				selection criteria, getting assayed panel from a
+				sample panel, etc.
+			</description>
+			<field name="SourcePanel" type="xref" xref_entity="Panel" />
+			<field name="TargetPanel" type="xref" xref_entity="Panel" />
+			<field name="NumberOfIndividuals" type="int" />
+			<field name="Details" type="text" />
+		</entity>
+
+	</module>
+</molgenis>

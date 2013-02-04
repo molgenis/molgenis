@@ -1,0 +1,43 @@
+.table {
+	margin-bottom: 10px;	
+}
+
+#container-plugin {
+	border-spacing: 0px;
+}
+
+.grid {
+	margin-bottom: 10px;	
+}
+
+.box-title {
+	font-size: 10pt;
+	font-weight: bold;
+	padding: 2px;
+	margin: 0px;
+	background-color: #BDCDDA;
+}
+
+#dataset-browser {
+	max-height: 500px;
+	overflow-y: auto;
+}
+
+#feature-details {
+	min-height: 270px;
+}
+
+#feature-selection {
+	min-height: 270px;
+	max-height: 370px;
+	overflow-y: auto;
+}
+	
+.feature-table-col1 {
+	background: #DCE3F7;
+	font-weight: bold;
+	padding: 5px;
+	margin: 1px;
+	width: 10px !important;
+	border: solid thin white;
+}

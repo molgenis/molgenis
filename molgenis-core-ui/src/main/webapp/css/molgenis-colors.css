@@ -1,0 +1,52 @@
+/**5DA55B*/ 
+
+/**color of title*/
+.colorOfTitle,#header {
+	color: #5B82A4;
+}
+
+/**overall background*/
+.overallBackground,.matrixRowColorEmpty,body,#header,#navigation,#information,#footer {
+	background: white;
+}
+
+/**matrix inner table and cells*/
+.tableBorder,.matrixTableCell{
+	border-color: white;
+}
+
+/**highlight background*/
+.highlightBackground,.formscreen, .form_new, .form_filter, .embedtable, .popup, .form_new,.form_filter {
+	background: #F8FAFB;
+}
+
+/**shade header*/
+.shadeHeader,.leftNavigationSelected,.navigationSelected,.form_header, td.submenuitem:hover {
+	background: #5B82A4;
+}
+
+/**highlight*/
+.highlight,.leftNavigationNotSelected,.navigationNotSelected, .form_menu, .submenuitem   {
+	background: #BDCDDA;
+	color: black;
+}
+
+/**shade borders*/
+.shadeBorder,.leftNavigationSelected,.navigationSelected,.formscreen,.form_new,.form_filter,.popup, .form_menu 
+{
+	border-color: #5B82A4;
+}
+
+/**font color*/
+.fontColor,.leftNavigationSelected,.navigationSelected {
+	color: white;
+}
+
+.matrixRowColor0,.form_listrow0 {
+	background: #BDCDDA;
+}
+
+.matrixRowColor1,.form_listrow1 {
+	/*background: #BCD6DA;*/
+	background: #CBE2C9;
+}
