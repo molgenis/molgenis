@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
-		<artifactId>molgenis-app-omx</artifactId>
+		<artifactId>molgenis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-app-omx-omicsconnect</artifactId>
