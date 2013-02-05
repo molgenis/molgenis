@@ -196,16 +196,12 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 		}
 	}
 
-	/**
-	 * This is for the dataset chooser
-	 */
 	@Override
 	public String getCustomHtmlHeaders()
 	{
 		StringBuilder s = new StringBuilder();
-		s.append("<link rel=\"stylesheet\" href=\"css/bootstrap.min.css\" type=\"text/css\" />");
-		s.append("<script type=\"text/javascript\" src=\"js/bootstrap.min.js\"></script>");
-
+		s.append("<link rel=\"stylesheet\" href=\"css/ui.jqgrid.css\" type=\"text/css\" />");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.jqGrid.min.js\"></script>");
 		return s.toString();
 	}
 
