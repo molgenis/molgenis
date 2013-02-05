@@ -124,7 +124,7 @@
           			<xmlOutput>true</xmlOutput>
 				</configuration>
 			</plugin>
-			<!-- javadoc -->
+			<!-- javadoc 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -144,6 +144,7 @@
 				  	</reportSet>
 				</reportSets>
 			</plugin>
+			-->
 			<!-- project reports -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
