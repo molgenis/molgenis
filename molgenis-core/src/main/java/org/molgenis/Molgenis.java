@@ -2,13 +2,9 @@ package org.molgenis;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,9 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.ProjectHelper;
-import org.apache.tools.ant.listener.Log4jListener;
 import org.molgenis.MolgenisOptions.MapperImplementation;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.DateField;
@@ -77,7 +70,6 @@ import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
 import org.molgenis.generators.server.MolgenisResourceCopyGen;
-import org.molgenis.generators.server.MolgenisServletContextGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.RestApiGen;
 import org.molgenis.generators.server.SoapApiGen;
@@ -165,8 +157,9 @@ public class Molgenis
 	{
 		this(new MolgenisOptions(propertiesFile), null, generatorsToUse);
 	}
-	
-	public Molgenis(String propertiesFile, String outputPath, Class<? extends Generator>... generatorsToUse) throws Exception
+
+	public Molgenis(String propertiesFile, String outputPath, Class<? extends Generator>... generatorsToUse)
+			throws Exception
 	{
 		this(new MolgenisOptions(propertiesFile), outputPath, generatorsToUse);
 	}
@@ -176,7 +169,7 @@ public class Molgenis
 		this(new MolgenisOptions(propertiesFile), null, new Class[]
 		{});
 	}
-	
+
 	public Molgenis(String propertiesFile, String outputPath) throws Exception
 	{
 		this(new MolgenisOptions(propertiesFile), outputPath, new Class[]
@@ -187,16 +180,18 @@ public class Molgenis
 	{
 	}
 
-	public void init(String propertiesFile, String outputPath, Class<? extends Generator>... generatorsToUse) throws Exception
+	public void init(String propertiesFile, String outputPath, Class<? extends Generator>... generatorsToUse)
+			throws Exception
 	{
 		new Molgenis(new MolgenisOptions(propertiesFile), outputPath, generatorsToUse);
 	}
 
-	public <E extends Generator> Molgenis(MolgenisOptions options, Class<? extends Generator>... generatorsToUse) throws Exception
+	public <E extends Generator> Molgenis(MolgenisOptions options, Class<? extends Generator>... generatorsToUse)
+			throws Exception
 	{
 		this(options, null, generatorsToUse);
 	}
-	
+
 	/**
 	 * Construct a MOLGENIS generator
 	 * 
@@ -206,8 +201,8 @@ public class Molgenis
 	 *            optional list of generator classes to include
 	 * @throws Exception
 	 */
-	public <E extends Generator> Molgenis(MolgenisOptions options, String outputPath, Class<? extends Generator>... generatorsToUse)
-			throws Exception
+	public <E extends Generator> Molgenis(MolgenisOptions options, String outputPath,
+			Class<? extends Generator>... generatorsToUse) throws Exception
 	{
 		BasicConfigurator.configure();
 
@@ -220,37 +215,32 @@ public class Molgenis
 		logger.info("working dir: " + System.getProperty("user.dir"));
 
 		// clean options
-		if(outputPath != null) {
-			// workaround for java string escaping bug in freemarker (see UsedMolgenisOptionsGen.ftl)
+		if (outputPath != null)
+		{
+			// workaround for java string escaping bug in freemarker (see
+			// UsedMolgenisOptionsGen.ftl)
 			outputPath = outputPath.replace('\\', '/');
-			if(!outputPath.endsWith("/")) outputPath = outputPath + "/";
+			if (!outputPath.endsWith("/")) outputPath = outputPath + "/";
 		}
-		
+
 		options.output_src = outputPath != null ? outputPath + options.output_src : options.output_src;
-		if (!options.output_src.endsWith("/"))
-			options.output_src = options.output_src.endsWith("/") + "/";
+		if (!options.output_src.endsWith("/")) options.output_src = options.output_src.endsWith("/") + "/";
 		options.output_python = outputPath != null ? outputPath + options.output_python : options.output_python;
-		if (!options.output_python.endsWith("/"))
-			options.output_python = options.output_python + "/";
+		if (!options.output_python.endsWith("/")) options.output_python = options.output_python + "/";
 		options.output_cpp = outputPath != null ? outputPath + options.output_cpp : options.output_cpp;
-		if (!options.output_cpp.endsWith("/"))
-			options.output_cpp = options.output_cpp + "/";
+		if (!options.output_cpp.endsWith("/")) options.output_cpp = options.output_cpp + "/";
 		options.output_hand = outputPath != null ? outputPath + options.output_hand : options.output_hand;
-		if (!options.output_hand.endsWith("/"))
-			options.output_hand = options.output_hand + "/";
+		if (!options.output_hand.endsWith("/")) options.output_hand = options.output_hand + "/";
 		options.output_sql = outputPath != null ? outputPath + options.output_sql : options.output_sql;
-		if (!options.output_sql.endsWith("/"))
-			options.output_sql = options.output_sql + "/";
+		if (!options.output_sql.endsWith("/")) options.output_sql = options.output_sql + "/";
 		options.output_web = outputPath != null ? outputPath + options.output_web : options.output_web;
-		if (!options.output_web.endsWith("/"))
-			options.output_web = options.output_web + "/";
+		if (!options.output_web.endsWith("/")) options.output_web = options.output_web + "/";
 		options.output_doc = outputPath != null ? outputPath + options.output_doc : options.output_doc;
-		if (!options.output_doc.endsWith("/"))
-			options.output_doc = options.output_doc + "/";
-		
+		if (!options.output_doc.endsWith("/")) options.output_doc = options.output_doc + "/";
+
 		// USED MOLGENIS OPTIONS
 		generators.add(new UsedMolgenisOptionsGen());
-		
+
 		// COPY resources
 		if (options.copy_resources)
 		{
@@ -620,94 +610,6 @@ public class Molgenis
 	}
 
 	/**
-	 * Compile a generated molgenis.
-	 * 
-	 * Currently not implemented but is needed for batch generation. Not needed
-	 * if you are generating inside an IDE such as eclipse.
-	 * 
-	 * @return true if build is succesfull
-	 * @throws IOException
-	 */
-	@Deprecated
-	public boolean compile() throws IOException
-	{
-		// reduce loggin
-		Logger.getLogger("org.apache.tools.ant.UnknownElement").setLevel(Level.ERROR);
-		Logger.getLogger("org.apache.tools.ant.Target").setLevel(Level.ERROR);
-
-		// run the ant build script
-		logger.info("<b>Compile ...</b>");
-
-		File tempdir = new File(options.output_src);
-		// File tempdir = (File) ses.getAttribute("workingdir");
-
-		// copy the buildfile from sjabloon
-		File buildFileSource = new File("sjabloon/build.xml");
-		File buildFile = new File(tempdir.getPath() + "/build.xml");
-		copyFile(buildFileSource, buildFile);
-
-		// create a new ant project
-		Project p = new Project();
-		p.setUserProperty("ant.file", buildFile.getAbsolutePath());
-		p.init();
-
-		// execute the ant target
-		ProjectHelper helper = ProjectHelper.getProjectHelper();
-		p.addReference("ant.projectHelper", helper);
-		p.addBuildListener(new Log4jListener());
-		helper.parse(p, buildFile);
-
-		p.setProperty("jdbc.driver", "mysql-connector-java-5.1.0-bin.jar");
-		p.setProperty("main.class", "MolgenisOnMysqlServer");
-		p.executeTarget("createjar");
-		logger.info("compilation complete.");
-
-		return true;
-	}
-
-	private static void copyFile(File src, File dst) throws IOException
-	{
-		InputStream in = null;
-		OutputStream out = null;
-		try
-		{
-			in = new FileInputStream(src);
-			out = new FileOutputStream(dst);
-
-			// Transfer bytes from in to out
-			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0)
-			{
-				out.write(buf, 0, len);
-			}
-		}
-		finally
-		{
-			if (in != null)
-			{
-				try
-				{
-					in.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-			if (out != null)
-			{
-				try
-				{
-					out.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
-		}
-	}
-
-	/**
 	 * Load the generated SQL into the database.
 	 * 
 	 * Warning: this will overwrite any existing data in the database!.
@@ -774,7 +676,8 @@ public class Molgenis
 			StringBuilder create_tables_sqlBuilder = new StringBuilder();
 			try
 			{
-				BufferedReader in = new BufferedReader(new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(create_tables_file_str), Charset.forName("UTF-8")));
+				BufferedReader in = new BufferedReader(new InputStreamReader(Thread.currentThread()
+						.getContextClassLoader().getResourceAsStream(create_tables_file_str), Charset.forName("UTF-8")));
 
 				try
 				{
@@ -802,8 +705,9 @@ public class Molgenis
 				// READ THE FILE
 				try
 				{
-					BufferedReader in = new BufferedReader(new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(
-							insert_metadata_file), Charset.forName("UTF-8")));
+					BufferedReader in = new BufferedReader(new InputStreamReader(Thread.currentThread()
+							.getContextClassLoader().getResourceAsStream(insert_metadata_file),
+							Charset.forName("UTF-8")));
 					try
 					{
 						String line;
