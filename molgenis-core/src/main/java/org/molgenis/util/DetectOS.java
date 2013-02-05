@@ -49,4 +49,13 @@ public class DetectOS
 
 	}
 
+	/**
+	 * Get OS dependent line separator
+	 * 
+	 * @return
+	 */
+	public static String getLineSeparator()
+	{
+		return System.getProperty("line.separator");
+	}
 }
