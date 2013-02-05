@@ -1,1 +1,5 @@
-target/*
+bin/
+target/
+test-output/
+.classpath
+.project
