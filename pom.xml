@@ -53,6 +53,12 @@
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>1.7</version>
 				</plugin>
+				<!-- specify plugin version -->
+				<plugin>
+        			<groupId>org.apache.maven.plugins</groupId>
+        			<artifactId>maven-site-plugin</artifactId>
+        			<version>3.2</version>
+        		</plugin>
 				<!-- servlet container -->
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
@@ -118,7 +124,7 @@
           			<xmlOutput>true</xmlOutput>
 				</configuration>
 			</plugin>
-			<!-- javadoc -->
+			<!-- javadoc 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -138,6 +144,7 @@
 				  	</reportSet>
 				</reportSets>
 			</plugin>
+			-->
 			<!-- project reports -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
