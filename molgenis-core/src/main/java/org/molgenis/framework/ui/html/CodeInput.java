@@ -70,44 +70,6 @@ public class CodeInput extends StringInput
 	{
 	}
 
-	@Override
-	public String getCustomHtmlHeaders()
-	{
-		// borrow style from mce
-		return "\n<link rel=\"stylesheet\" style=\"text/css\" type=\"text/css\" href=\"lib/tinymce-3.4.4/themes/advanced/skins/o2k7/ui_silver.css\">"
-				+ "\n<link rel=\"stylesheet\" style=\"text/css\" type=\"text/css\" href=\"lib/tinymce-3.4.4/themes/advanced/skins/o2k7/ui.css\">"
-				+ "\n<script src=\"lib/codemirror-1.0/js/codemirror.js\" type=\"text/javascript\"></script>\n"
-				+ "\n<style type=\"text/css\">"
-				+ "\n.CodeMirror-line-numbers {"
-				+ "\n 	width: 2em;"
-				+ "\n 	color: #aaa;"
-				+ "\n 	background-color: #eee;"
-				+ "\n 	text-align: right;"
-				+ "\n 	padding-right: .3em;"
-				+ "\n 	font-family: monospace;"
-				+ "\n	font-size: 12px;"
-				+ "\n 	line-height: normal;"
-				+ "\n 	padding-top: .4em;"
-				+ "\n	margin-bottom: 20px;"
-				+ "\n }"
-				+ "\n.CodeMirror-wrapping {"
-				+ "\n	border: 1px #AAA solid;"
-				+ "\n	margin: 2px;"
-				+ "\n	padding-bottom: 20px;"
-				+ "\n  width: 320px;"
-				+ "\n  background-color: #EEE;"
-				+ "\n}"
-				+ "\n.CodeMirror-iframe {"
-				+ "\n 	border: 1px #AAA solid;"
-				+ "\n}"
-				+ "\n .editbox {"
-				+ "\n	background: white;"
-				+ "\n}"
-				+ "\n.CodeMirror-scroll {"
-				+ "\n  height: auto;"
-				+ "\n  overflow-y: hidden;" + "\n  overflow-x: auto;" + "\n  width: 100%" + "\n}" + "\n</style>";
-	}
-
 	public String getParser()
 	{
 		return this.parser.getPath();
