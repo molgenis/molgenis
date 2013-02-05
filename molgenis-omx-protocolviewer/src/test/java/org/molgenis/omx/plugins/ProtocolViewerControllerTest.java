@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
@@ -319,8 +320,7 @@ public class ProtocolViewerControllerTest
 		when(request.getResponse()).thenReturn(httpResponse);
 
 		controller.handleRequest(db, request);
-		// assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()),
-		// "b9ebba90dfffb52101d4d63faff3a169");
+		assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()), "c9dea8a729c83d5428137bddc77f5540");
 	}
 
 	@Test
@@ -370,8 +370,7 @@ public class ProtocolViewerControllerTest
 		when(request.getResponse()).thenReturn(httpResponse);
 
 		controller.handleRequest(db, request);
-		// assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()),
-		// "0178bb7c663a0e094ef42d82e37c4471");
+		assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()), "ed7513d8dc5ef44e36c51b6595f44dbf");
 	}
 
 	@Test
