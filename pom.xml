@@ -10,42 +10,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
-	<dependencies>
-		<!-- scope: compile -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.2</version>
-			<scope>compile</scope>
-		</dependency>
-		<!-- scope: test -->
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>6.8</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
-		</dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>3.2.1.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-		<!-- scope: provided -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -61,26 +25,31 @@
 				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
 					<version>2.3</version>
 				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>2.4</version>
 				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>jaxb2-maven-plugin</artifactId>
 					<version>1.5</version>
 				</plugin>			
 				<!-- specify plugin version -->
 				<plugin>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.2.1</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.7</version>
 				</plugin>			
 				<!-- specify plugin version -->
 				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>1.7</version>
 				</plugin>
@@ -93,6 +62,32 @@
 						<scanIntervalSeconds>3</scanIntervalSeconds>
 						<stopPort>9999</stopPort>
 						<stopKey>jetty-stop</stopKey>
+						<contextPath>/</contextPath>                     
+                	</configuration>
+				</plugin>
+				<!-- Eclipse m2e mappings -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>[1.7,)</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -156,6 +151,42 @@
 		</plugins>
 	</reporting>
 
+		<dependencies>
+		<!-- scope: compile -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- scope: test -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.8</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>3.2.1.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+		<!-- scope: provided -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
