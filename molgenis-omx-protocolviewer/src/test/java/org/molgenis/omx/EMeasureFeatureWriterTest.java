@@ -1,5 +1,7 @@
 package org.molgenis.omx;
 
+import static org.molgenis.util.DetectOS.getLineSeparator;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,11 +45,14 @@ public class EMeasureFeatureWriterTest
 		{
 			featureWriter.close();
 		}
-		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><QualityMeasureDocument xmlns=\"urn:hl7-org:v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" classCode=\"CONTAINER\" moodCode=\"DEF\" xsi:schemaLocation=\"urn:hl7-org:v3 multicacheschemas/REPC_MT000100UV01.xsd\" xsi:type=\"REPC_MT000100UV01.Organizer\">	<subjectOf>\r\n"
-				+ "		<measureAttribute><code code=\"feature1\" codeSystem=\"TBD\" displayName=\"this is feature1\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"boolean\"/>		</measureAttribute>\r\n"
-				+ "	</subjectOf>	<subjectOf>\r\n"
-				+ "		<measureAttribute><code code=\"feature2\" codeSystem=\"TBD\" displayName=\"this is feature2\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"string\"/>		</measureAttribute>\r\n"
-				+ "	</subjectOf></QualityMeasureDocument>";
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><QualityMeasureDocument xmlns=\"urn:hl7-org:v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" classCode=\"CONTAINER\" moodCode=\"DEF\" xsi:schemaLocation=\"urn:hl7-org:v3 multicacheschemas/REPC_MT000100UV01.xsd\" xsi:type=\"REPC_MT000100UV01.Organizer\">	<subjectOf>"
+				+ getLineSeparator()
+				+ "		<measureAttribute><code code=\"feature1\" codeSystem=\"TBD\" displayName=\"this is feature1\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"boolean\"/>		</measureAttribute>"
+				+ getLineSeparator()
+				+ "	</subjectOf>	<subjectOf>"
+				+ getLineSeparator()
+				+ "		<measureAttribute><code code=\"feature2\" codeSystem=\"TBD\" displayName=\"this is feature2\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"string\"/>		</measureAttribute>"
+				+ getLineSeparator() + "	</subjectOf></QualityMeasureDocument>";
 
 		Assert.assertEquals(bos.toString("UTF-8"), expected);
 	}
