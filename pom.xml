@@ -53,6 +53,12 @@
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>1.7</version>
 				</plugin>
+				<!-- specify plugin version -->
+				<plugin>
+        			<groupId>org.apache.maven.plugins</groupId>
+        			<artifactId>maven-site-plugin</artifactId>
+        			<version>3.2</version>
+        		</plugin>
 				<!-- servlet container -->
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
