@@ -8,6 +8,20 @@
 	<artifactId>molgenis-omx-importer</artifactId>
 	<packaging>war</packaging>
 
+	<build>
+        <plugins>
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <packagingExcludes>WEB-INF/web.xml</packagingExcludes>
+                    <!-- create a separate jar file with classifier "classes" -->
+                    <attachClasses>true</attachClasses>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+	
 	<dependencies>
 		<dependency>
             <groupId>org.molgenis</groupId>
@@ -20,17 +34,4 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-	
-	<build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <packagingExcludes>WEB-INF/web.xml</packagingExcludes>
-                    <!-- create a separate jar file with classifier "classes" -->
-                    <attachClasses>true</attachClasses>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
