@@ -2,12 +2,14 @@
 <molgenis name="lifelines" label="LifeLines">
 	<plugin name="oc_header" type="org.molgenis.lifelines.plugins.header.Header" />
 	<menu name="main">
-		<menu name ="Individuals">
-            <form name="Individual" entity="Individual" />
-        </menu>
-        <plugin label="Importer" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+        <plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
         <plugin label="Data Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
-		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
+		<plugin label="Importer" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<plugin label="Importer (Dataset)" name="HL7StudyDataSetImporter" type="org.molgenis.lifelines.plugins.HL7StudyDataSetImporterController" />
+		<menu name ="Entities">
+            <form name="DataSet" entity="DataSet" />
+            <form name="Protocol" entity="Protocol" />
+            <form name="Feature" entity="ObservableFeature" />
+        </menu>
 	</menu>
 </molgenis>
