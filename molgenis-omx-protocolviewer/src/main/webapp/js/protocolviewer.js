@@ -51,13 +51,16 @@ function updateProtocolView(protocol) {
 		
 		var branches = [];
 		
-		if(protocol.subProtocols){
+		if(protocol != null && protocol.subProtocols){
 			$.each(protocol.subProtocols, function(i, subProtocol) {
-    			branches.push({
+				
+				var subBranches = appendToExistingNode(subProtocol);
+				branches.push({
     				key :  subProtocol.id, 
     				title : subProtocol.name,
     				isLazy : true,
     				isFolder  : true,
+    				children : subBranches,
     			});
     		});
 		}
@@ -119,17 +122,45 @@ function updateProtocolView(protocol) {
 
 			// update feature selection
 			updateFeatureSelection(node.tree);
+			
+			//if it has children? 
+			if(node.hasChildren() != true){
+				
+				$.ajax({
+		            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
+		            data: {
+						'nodeId' : node.data.key,
+						'recursive' : true,
+		            },
+		            success: function(data, textStatus){
+		            	var branches = appendToExistingNode(data);
+		            	node.setLazyNodeStatus(DTNodeStatus_Ok);
+	                    node.addChild(branches);
+	                    if(node.isSelected()){
+	                    	node.getChildren().forEach(function(eachNode){
+	                    		eachNode.select(true);
+	                    	});
+	                    }
+		            }
+		        });
+			}
 		},
 		onLazyRead: function(node){
 			$.ajax({
 	            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
 	            data: {
-					"nodeId": node.data.key,
+					'nodeId': node.data.key,
+					'recursive' : false,
 	            },
 	            success: function(data, textStatus){
 	            	var branches = appendToExistingNode(data);
 	            	node.setLazyNodeStatus(DTNodeStatus_Ok);
                     node.addChild(branches);
+                    if(node.isSelected()){
+                    	node.getChildren().forEach(function(eachNode){
+                    		eachNode.select(true);
+                    	});
+                    }
 	            }
 	        });
 		}
@@ -249,6 +280,13 @@ function clearSearch() {
 			node = node.parent;
 		}
 	}
+}
+
+function searchProtocolServer(text){
+	
+	$.getJSON('molgenis.do?__target=ProtocolViewer&__action=download_json_searchNodes&inputText=' + text, function(data) {
+		
+	});
 }
 
 function searchProtocol(protocol, regexp, hits) {

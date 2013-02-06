@@ -105,9 +105,15 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			Integer nodeId = request.getInt("nodeId");
 
+			boolean recursive = request.getBoolean("recursive");
+
 			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, nodeId));
 
-			if (protocols != null && !protocols.isEmpty()) src = toJSProtocol(db, protocols.get(0));
+			if (protocols != null && !protocols.isEmpty()) src = toJSProtocol(db, protocols.get(0), recursive);
+		}
+		else if (request.getAction().equals("download_json_searchNodes"))
+		{
+
 		}
 		else
 		{
@@ -317,11 +323,11 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		Integer protocolId = dataSet.getProtocolUsed_Id();
 		List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, protocolId));
 		JSProtocol jsProtocol = null;
-		if (protocols != null && !protocols.isEmpty()) jsProtocol = toJSProtocol(db, protocols.get(0));
+		if (protocols != null && !protocols.isEmpty()) jsProtocol = toJSProtocol(db, protocols.get(0), false);
 		return new JSDataSet(dataSet, jsProtocol);
 	}
 
-	private JSProtocol toJSProtocol(Database db, Protocol protocol) throws DatabaseException
+	private JSProtocol toJSProtocol(Database db, Protocol protocol, boolean recursive) throws DatabaseException
 	{
 		// get features
 		List<JSFeature> jsFeatures = null;
@@ -351,7 +357,17 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			jsSubProtocols = new ArrayList<JSProtocol>(subProtocols.size());
 
 			for (Protocol subProtocol : subProtocols)
-				jsSubProtocols.add(new JSProtocol(subProtocol, null, null));
+			{
+				if (recursive)
+				{
+					jsSubProtocols.add(toJSProtocol(db, subProtocol, recursive));
+				}
+				else
+				{
+					jsSubProtocols.add(new JSProtocol(subProtocol, null, null));
+				}
+
+			}
 
 			// sort alphabetically by name
 			Collections.sort(jsSubProtocols, new Comparator<JSProtocol>()
