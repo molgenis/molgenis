@@ -38,11 +38,8 @@ public class HL7StudyDataSetImporterController extends PluginModel<Entity>
 	public String getCustomHtmlHeaders()
 	{
 		StringBuilder s = new StringBuilder();
-		s.append("<link rel=\"stylesheet\" href=\"css/bootstrap.min.css\" type=\"text/css\" />");
-		s.append("<script type=\"text/javascript\" src=\"js/bootstrap.min.js\"></script>");
 		s.append("<link rel=\"stylesheet\" href=\"css/bootstrap-fileupload.min.css\" type=\"text/css\" />");
 		s.append("<script type=\"text/javascript\" src=\"js/bootstrap-fileupload.min.js\"></script>");
-
 		return s.toString();
 	}
 
