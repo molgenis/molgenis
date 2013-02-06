@@ -9,6 +9,8 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,10 +23,10 @@ public class VcfReaderTest
 	private VcfReader reader;
 
 	@BeforeMethod
-	public void setUp() throws IOException
+	public void setUp() throws IOException, URISyntaxException
 	{
-		String f = getClass().getResource("/test.vcf").getFile();
-		reader = new VcfReader(new FileInputStream(new File(f)));
+		URI resource = this.getClass().getResource("/test.vcf").toURI();
+		reader = new VcfReader(new FileInputStream(new File(resource)));
 	}
 
 	@AfterMethod
