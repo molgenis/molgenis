@@ -101,6 +101,14 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					Operator.EQUALS, featureId));
 			if (features != null && !features.isEmpty()) src = toJSFeature(db, features.get(0));
 		}
+		else if (request.getAction().equals("download_json_getLazyLoadingNode"))
+		{
+			Integer nodeId = request.getInt("nodeId");
+
+			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, nodeId));
+
+			if (protocols != null && !protocols.isEmpty()) src = toJSProtocol(db, protocols.get(0));
+		}
 		else
 		{
 			throw new RuntimeException("unknown action: " + request.getAction());
@@ -341,8 +349,9 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		if (subProtocols != null && !subProtocols.isEmpty())
 		{
 			jsSubProtocols = new ArrayList<JSProtocol>(subProtocols.size());
+
 			for (Protocol subProtocol : subProtocols)
-				jsSubProtocols.add(toJSProtocol(db, subProtocol));
+				jsSubProtocols.add(new JSProtocol(subProtocol, null, null));
 
 			// sort alphabetically by name
 			Collections.sort(jsSubProtocols, new Comparator<JSProtocol>()
