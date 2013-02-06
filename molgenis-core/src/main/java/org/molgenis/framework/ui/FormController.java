@@ -370,8 +370,7 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 
 			// check view and set limit accordingly
 			if (model.getMode().equals(Mode.EDIT_VIEW)) pager.setLimit(1);
-			else
-				pager.setLimit(model.getLimit());
+			else pager.setLimit(model.getLimit());
 
 			// refresh pager and options
 			if (model.isReadonly()) pager.refresh(db);
@@ -539,8 +538,7 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 			entity.set(request);
 			int updatedRows = db.remove(entity);
 			if (updatedRows > 0) msg = new ScreenMessage("REMOVE SUCCESS: affected " + updatedRows, null, true);
-			else
-				msg = new ScreenMessage("REMOVE FAILED: call system administrator", null, false);
+			else msg = new ScreenMessage("REMOVE FAILED: call system administrator", null, false);
 		}
 		catch (Exception e)
 		{
@@ -628,6 +626,29 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 			e.printStackTrace();
 		}
 		return showColumns;
+	}
+
+	@Override
+	public String getCustomHtmlHeaders()
+	{
+		// stylesheet and scripts for all inputs
+		StringBuilder s = new StringBuilder();
+		s.append("<link rel=\"stylesheet\" href=\"css/molgenis-dateinput.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/molgenis-jquery_icons.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/molgenis-xrefinput.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/jquery.bt.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/jquery.chosen.css\" type=\"text/css\" />");
+		s.append("<script type=\"text/javascript\" src=\"js/molgenis-textinput.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/molgenis-datetimeinput.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/molgenis-xrefinput.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/molgenis-mrefinput.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.ajax-chosen.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.autogrowinput.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.bt.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.chosen.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.timepicker.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.validate.min.js\"></script>");
+		return s.toString();
 	}
 
 	@Override
