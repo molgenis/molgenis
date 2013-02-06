@@ -51,9 +51,8 @@ function updateProtocolView(protocol) {
 		
 		var branches = [];
 		
-		if(protocol != null && protocol.subProtocols){
+		if(protocol.subProtocols){
 			$.each(protocol.subProtocols, function(i, subProtocol) {
-				
 				var subBranches = appendToExistingNode(subProtocol);
 				branches.push({
     				key :  subProtocol.id, 
@@ -99,6 +98,26 @@ function updateProtocolView(protocol) {
 		return item;
 	};
 	
+	function retrieveNodeInfo(node, recursive){
+		$.ajax({
+            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
+            data: {
+				'nodeId' : node.data.key,
+				'recursive' : recursive,
+            },
+            success: function(data, textStatus){
+            	var branches = appendToExistingNode(data);
+            	node.setLazyNodeStatus(DTNodeStatus_Ok);
+                node.addChild(branches);
+                if(node.isSelected()){
+                	node.getChildren().forEach(function(eachNode){
+                		eachNode.select(true);
+                	});
+                }
+            }
+        });
+	}
+	
 	// append tree to DOM
 	var tree = $('<ul />').append(buildTree(protocol));
 	container.append(tree);
@@ -126,43 +145,11 @@ function updateProtocolView(protocol) {
 			//if it has children? 
 			if(node.hasChildren() != true){
 				
-				$.ajax({
-		            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
-		            data: {
-						'nodeId' : node.data.key,
-						'recursive' : true,
-		            },
-		            success: function(data, textStatus){
-		            	var branches = appendToExistingNode(data);
-		            	node.setLazyNodeStatus(DTNodeStatus_Ok);
-	                    node.addChild(branches);
-	                    if(node.isSelected()){
-	                    	node.getChildren().forEach(function(eachNode){
-	                    		eachNode.select(true);
-	                    	});
-	                    }
-		            }
-		        });
+				retrieveNodeInfo(node, true);
 			}
 		},
 		onLazyRead: function(node){
-			$.ajax({
-	            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
-	            data: {
-					'nodeId': node.data.key,
-					'recursive' : false,
-	            },
-	            success: function(data, textStatus){
-	            	var branches = appendToExistingNode(data);
-	            	node.setLazyNodeStatus(DTNodeStatus_Ok);
-                    node.addChild(branches);
-                    if(node.isSelected()){
-                    	node.getChildren().forEach(function(eachNode){
-                    		eachNode.select(true);
-                    	});
-                    }
-	            }
-	        });
+			retrieveNodeInfo(node, false);
 		}
 	});
 }
