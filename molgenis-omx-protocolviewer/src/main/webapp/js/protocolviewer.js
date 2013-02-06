@@ -34,6 +34,7 @@ function getFeature(id, callback) {
 }
 
 function updateProtocolView(protocol) {
+		
 	var container = $('#dataset-browser');
 	if(container.children('ul').length > 0) {
 		container.dynatree('destroy');
@@ -44,11 +45,38 @@ function updateProtocolView(protocol) {
 		container.append("<p>Catalog does not describe variables</p>");
 		return;
 	}
+
+	//Appending subNodes to exsiting parentNodes
+	function appendToExistingNode(protocol) {
+		
+		var branches = [];
+		
+		if(protocol.subProtocols){
+			$.each(protocol.subProtocols, function(i, subProtocol) {
+    			branches.push({
+    				key :  subProtocol.id, 
+    				title : subProtocol.name,
+    				isLazy : true,
+    				isFolder  : true,
+    			});
+    		});
+		}
+		else if(protocol.features) {
+			$.each(protocol.features, function(i, feature) {
+    			branches.push({
+    				key :  feature.id, 
+    				title : feature.name,
+    			});
+    		});
+		}
+		
+		return branches;
+	}
 	
 	// recursively build tree for protocol	
 	function buildTree(protocol) {
 		// add protocol
-		var item = $('<li class="folder"/>').attr('data', 'key: "' + protocol.id + '", title:"' + protocol.name + '"');
+		var item = $('<li class="folder"/>').attr('data', 'key: "' + protocol.id + '", title:"' + protocol.name + '", isLazy: true');
 		var list = $('<ul />');
 		// add protocol: subprotocols
 		if(protocol.subProtocols) {
@@ -59,7 +87,7 @@ function updateProtocolView(protocol) {
 		// add protocol: features
 		if(protocol.features) {
 			$.each(protocol.features, function(i, feature) {
-				var item = $('<li />').attr('data', 'key: "' + feature.id + '", title:"' + feature.name + '"');
+				var item = $('<li />').attr('data', 'key: "' + feature.id + '", title:"' + feature.name + '", isLazy: true');
 				item.appendTo(list);
 			});
 		}
@@ -91,7 +119,20 @@ function updateProtocolView(protocol) {
 
 			// update feature selection
 			updateFeatureSelection(node.tree);
-		}	
+		},
+		onLazyRead: function(node){
+			$.ajax({
+	            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
+	            data: {
+					"nodeId": node.data.key,
+	            },
+	            success: function(data, textStatus){
+	            	var branches = appendToExistingNode(data);
+	            	node.setLazyNodeStatus(DTNodeStatus_Ok);
+                    node.addChild(branches);
+	            }
+	        });
+		}
 	});
 }
 
