@@ -379,7 +379,7 @@ public class JPAQueryGeneratorUtil
 					join = root.join(attributeName, JoinType.LEFT);
 					joinHash.put(attributeName, join);
 				}
-				Expression<?> attribute = join.get(xrefAttribtename);
+				Expression<?> attribute = join.get(StringUtils.uncapitalize(xrefAttribtename));
 
 				return attribute;
 			}
