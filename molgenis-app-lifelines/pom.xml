@@ -76,6 +76,7 @@
 							<resources>
 								<resource>
 									<directory>target/generated-sources/molgenis/sql</directory>
+									<directory>target/generated-sources/molgenis/java</directory>
 								</resource>
 							</resources>
 						</configuration>
@@ -87,7 +88,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<packagingExcludes>**/molgenis.properties,**/*.xml,**/*.sql</packagingExcludes>
+					<packagingExcludes>pom.xml,**/molgenis.properties,**/molgenis_ui.xml,**/*.sql</packagingExcludes>
 				</configuration>
 			</plugin>
 			<!-- web server -->
