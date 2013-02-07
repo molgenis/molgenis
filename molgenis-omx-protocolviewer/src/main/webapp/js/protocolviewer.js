@@ -100,8 +100,8 @@ function updateProtocolView(protocol) {
 	
 	function retrieveNodeInfo(node, recursive){
 		$.ajax({
-            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
-            data: {
+            url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
+            data : {
 				'nodeId' : node.data.key,
 				'recursive' : recursive,
             },
@@ -138,15 +138,20 @@ function updateProtocolView(protocol) {
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 			else
 				setFeatureDetails(null);
+			
+			//if it has children?
+			if(node.data.isFolder){
+				if(!node.hasChildren()){
+					retrieveNodeInfo(node, true);
+				}else if(!node.childList[0].hasChildren()){
+					node.childList.forEach(function(eachChildNode){
+						retrieveNodeInfo(eachChildNode, true);
+					});
+				}
+			}
 
 			// update feature selection
 			updateFeatureSelection(node.tree);
-			
-			//if it has children? 
-			if(node.hasChildren() != true){
-				
-				retrieveNodeInfo(node, true);
-			}
 		},
 		onLazyRead: function(node){
 			retrieveNodeInfo(node, false);
