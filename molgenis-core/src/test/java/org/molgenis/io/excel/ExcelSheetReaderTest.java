@@ -121,4 +121,38 @@ public class ExcelSheetReaderTest
 		assertEquals(row4.get("col2"), "2.4");
 		assertFalse(it.hasNext());
 	}
+
+	@Test
+	public void colNamesIteratorAndIterator() throws IOException
+	{
+		Iterator<String> colNamesIt = excelSheetReader.colNamesIterator();
+		assertTrue(colNamesIt.hasNext());
+		assertEquals(colNamesIt.next(), "col1");
+		assertTrue(colNamesIt.hasNext());
+		assertEquals(colNamesIt.next(), "col2");
+
+		Iterator<Tuple> it = excelSheetReader.iterator();
+		assertTrue(it.hasNext());
+
+		Tuple row1 = it.next();
+		assertEquals(row1.get("col1"), "val1");
+		assertEquals(row1.get("col2"), "val2");
+		assertTrue(it.hasNext());
+
+		Tuple row2 = it.next();
+		assertEquals(row2.get("col1"), "val3");
+		assertEquals(row2.get("col2"), "val4");
+		assertTrue(it.hasNext());
+
+		Tuple row3 = it.next();
+		assertEquals(row3.get("col1"), "XXX");
+		assertEquals(row3.get("col2"), "val6");
+		assertTrue(it.hasNext());
+
+		// test number cell (col1) and formula cell (col2)
+		Tuple row4 = it.next();
+		assertEquals(row4.get("col1"), "1.2");
+		assertEquals(row4.get("col2"), "2.4");
+		assertFalse(it.hasNext());
+	}
 }
