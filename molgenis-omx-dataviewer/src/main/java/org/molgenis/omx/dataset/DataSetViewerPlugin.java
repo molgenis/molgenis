@@ -202,6 +202,7 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 		StringBuilder s = new StringBuilder();
 		s.append("<link rel=\"stylesheet\" href=\"css/ui.jqgrid.css\" type=\"text/css\" />");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.jqGrid.min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/grid.locale-en.js\"></script>");
 		return s.toString();
 	}
 

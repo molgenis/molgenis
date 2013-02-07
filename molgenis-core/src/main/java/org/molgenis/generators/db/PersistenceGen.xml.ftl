@@ -19,9 +19,6 @@
           <property name="hibernate.c3p0.min_size" value="5"/>
           <property name="hibernate.c3p0.max_size" value="200"/>
           <property name="hibernate.c3p0.max_statements" value="200"/>
-<!-- 
-          <property name="hibernate.connection.datasource" value="java:/comp/env/jdbc/molgenisdb"/>
--->
           <property name="hibernate.dialect" value="org.hibernate.dialect.${options.hibernateDialect}"/>
           <property name="hibernate.show_sql" value="false"/>
           <property name="hibernate.format_sql" value="false"/>
@@ -34,9 +31,6 @@
           <property name="hibernate.cache.use_query_cache" value="false"/>
           <property name="hibernate.cache.use_second_level_cache" value="false"/>
           <property name="hibernate.search.default.directory_provider" value="org.hibernate.search.store.RAMDirectoryProvider"/>
-<!--
-          <property name="hibernate.search.default.directory_provider" value="filesystem"/>
--->
           <property name="hibernate.search.default.indexBase" value="${options.hibernateSearchIndexBase}"/>
           
           <!--
@@ -44,7 +38,7 @@
           With create-drop, the database schema will be dropped when the SessionFactory is closed explicitly.
 		e.g. validate | update | create | create-drop
            -->
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
            
 	    </properties>
 	</persistence-unit>

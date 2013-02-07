@@ -6,18 +6,18 @@ The procedure below tells you how to checkout the molgenis project and build one
 
 ## 1. clone the molgenis repo
 
-Go to directory
+Go to the directory where you keep your git repositories, e.g.
 
 	cd ~/git
 
 
-Create a new workspace
+Create a new workspace directory, e.g.
 
-	mkdir molgenis
-	cd molgenis
+	mkdir workspace
+	cd workspace
 
 
-Clone the repo
+Clone the repo into this directory
 
 	git clone https://github.com/<yourname>/molgenis.git
 
@@ -34,7 +34,7 @@ start eclipse:
 	~/Software/eclipse-juno-4.2/eclipse
 
 
-When asked chose (new) workspace directory. I choose to simply same directory ~/git/molgenis as before
+When asked chose (new) workspace directory. I choose to simply same directory ~/git/workspace as before
 
 Now install the plugins by choosing {{{Help -> Eclipse marketplace}}}. 
 Add the following (you can restart Eclipse when done):
@@ -50,8 +50,8 @@ Start Eclipse, select your workspace if asked.
 
 Click: File -> Import ... -> Existing Maven Projects 
 
-Set root directory to your git checkout folder. E.g. ~/git/molgenis.
-(you can still see the molgenis13.2 folder).
+Set root directory to your git checkout folder. E.g. ~/git/workspace
+(this means you can still see the 'molgenis' folder).
 
 Eclipse discovers all molgenis modules (should be all checked).
 
@@ -63,7 +63,7 @@ If still open, close the 'Welcome' screen
 
 Eclipse will automatically build and download jars
 
-Right mouse 'molgenis13.2' -> Run as -> Maven generate-sources
+Right mouse 'molgenis' -> Run as -> Maven generate-sources
 
 After generation eclipse will compile automagically
 
@@ -93,7 +93,7 @@ TODO: this needs to be improved so it starts immediately without generate/build 
 
 Right click 'molgenis-app-omicsconnect' -> Run as ... -> Maven build ...
 
-In the 'goals' box type in 'jetty:run'
+In the 'goals' box type in 'jetty:start'
 
 Choose Run. Now jetty will be started.
 
