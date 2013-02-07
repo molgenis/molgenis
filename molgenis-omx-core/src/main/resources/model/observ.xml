@@ -172,7 +172,6 @@
 				ProtocolApplication.
 			</description>
 			<field name="ProtocolUsed" type="xref" xref_entity="Protocol"
-				nillable="true"
 				description="Reference to the protocol that is being used (if available)" />
 			<field auto="true" name="startTime" type="datetime"
 				description="time when the protocol started." />
