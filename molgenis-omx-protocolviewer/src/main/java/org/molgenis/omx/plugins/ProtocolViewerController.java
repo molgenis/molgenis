@@ -11,9 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,7 +22,6 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.framework.ui.html.JQueryTreeViewElement;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.EMeasureFeatureWriter;
@@ -47,7 +44,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	private static final long serialVersionUID = -6143910771849972946L;
 	/** Protocol viewer model */
 	private ProtocolViewer protocolViewer;
-	private Map<Integer, JQueryTreeViewElement> treeStates = new HashMap<Integer, JQueryTreeViewElement>();
 
 	public ProtocolViewerController(String name, ScreenController<?> parent)
 	{
@@ -125,19 +121,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
 			if (topProtocol != null && !topProtocol.isEmpty()) src = traverseTreeNode(db, topProtocol.get(0),
 					queryString, true);
-		}
-		else if (request.getAction().equals("download_json_clearSearch"))
-		{
-			String[] featuresStrArr = request.getString("features").split(",");
-			List<Integer> featureIds = new ArrayList<Integer>(featuresStrArr.length);
-			for (String featureStr : featuresStrArr)
-				featureIds.add(Integer.valueOf(featureStr));
-			Integer datasetID = request.getInt("datasetID");
-			List<Protocol> topProtocol = null;
-			List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, datasetID));
-			if (dataSets != null && !dataSets.isEmpty()) topProtocol = db.find(Protocol.class, new QueryRule(
-					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
-
 		}
 		else
 		{
