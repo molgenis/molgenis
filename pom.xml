@@ -215,6 +215,6 @@
 		<module>molgenis-app-tifn</module>
 		
 		
-		<module>molgenis-app-omx-cbm</module>
+		
 	</modules>
 </project>
