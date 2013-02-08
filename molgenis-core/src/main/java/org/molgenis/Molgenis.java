@@ -100,6 +100,8 @@ import org.molgenis.util.cmdline.CmdLineException;
  */
 public class Molgenis
 {
+	private static final Logger logger = Logger.getLogger(Molgenis.class);
+	
 	public static void main(String[] args)
 	{
 		try
@@ -138,7 +140,6 @@ public class Molgenis
 		}
 	}
 
-	protected transient static final Logger logger = Logger.getLogger("MOLGENIS");
 	MolgenisOptions options = null;
 	Model model = null;
 	List<Generator> generators = new ArrayList<Generator>();
@@ -475,9 +476,7 @@ public class Molgenis
 		{
 			logger.info("Skipping Excel importer ....");
 		}
-		// RDF
 
-		// FIXME add more generators
 		// FIXME use configuration to add the generators
 
 		// clean out generators
