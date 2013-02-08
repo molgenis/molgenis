@@ -30,26 +30,31 @@ public class MolgenisModel
 
 			model = MolgenisModelParser.parseDbSchema(options.model_database);
 
+			// determine imported entities (entities that already exist)
 			Model importedModel = MolgenisModelParser.parseDbSchema(options.import_model_database);
+			MolgenisModelValidator.validate(importedModel, options);
+			for (Entity importedEntity : importedModel.getEntities())
+			{
+				importedEntity.setImported(true);
+				importedEntity.setModel(model);
+			}
+
+			// dark magic that does way more then setting a name, location is
+			// important here
 			importedModel.getDatabase().setName("imported");
 
+			// remove imported entities from model
 			for (Module importedModule : importedModel.getModules())
 			{
 				model.getModules().add(importedModule);
 
 				for (Entity importedEntity : importedModule.getEntities())
 				{
-					importedEntity.setImported(true);
-					importedEntity.setModel(model);
-
 					// Prevent duplicate elements (elements of parent are also
 					// in the tree)
 					model.getDatabase().getTreeElements().remove(importedEntity.getName());
-
 					importedEntity.setParent(model.getDatabase());
-
 				}
-
 			}
 
 			// Get the strings of the property 'authorizable' and add the entity
