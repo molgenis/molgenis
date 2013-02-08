@@ -113,22 +113,6 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 					columns = Collections.emptyList();
 				}
 			}
-			else
-			{
-				// determine columns from ObservationSets
-				// TODO do not use hardcoded SQL query
-				String sql = "SELECT DISTINCT Characteristic.identifier as name, Characteristic.name as label FROM Characteristic, ObservedValue, ObservationSet WHERE ObservationSet.partOfDataSet="
-						+ dataSet.getId()
-						+ " AND ObservedValue.ObservationSet=ObservationSet.id AND Characteristic.id = ObservedValue.feature";
-
-				columns = new ArrayList<Field>();
-				for (Tuple t : getDb().sql(sql))
-				{
-					Field f = new Field(t.getString("name"));
-					f.setLabel(t.getString("label"));
-					columns.add(f);
-				}
-			}
 		}
 		catch (Exception e)
 		{

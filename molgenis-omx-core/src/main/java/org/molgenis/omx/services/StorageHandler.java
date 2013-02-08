@@ -9,11 +9,11 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 
-import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.DetectOS;
 
 public class StorageHandler
@@ -185,6 +185,7 @@ public class StorageHandler
 		if (rp == null)
 		{
 			RuntimeProperty rp1 = new RuntimeProperty();
+			rp1.setIdentifier(RuntimeProperty.class.getSimpleName() + '-' + RUNTIME_FILE_STORAGE_PATH);
 			rp1.setName(RUNTIME_FILE_STORAGE_PATH);
 
 			filesource = filesource.replace("\\", "\\\\"); // escape slashes for
@@ -194,6 +195,7 @@ public class StorageHandler
 			db.add(rp1);
 
 			RuntimeProperty rp2 = new RuntimeProperty();
+			rp2.setIdentifier(RuntimeProperty.class.getSimpleName() + '-' + RUNTIME_FILE_STORAGE_VALIDATED);
 			rp2.setName(RUNTIME_FILE_STORAGE_VALIDATED);
 			rp2.setValue("false");
 			db.add(rp2);

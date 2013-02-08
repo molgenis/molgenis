@@ -207,6 +207,30 @@ public class CsvReaderTest
 	}
 
 	@Test
+	public void colNamesIteratorAndIterator() throws IOException
+	{
+		CsvReader csvReader = new CsvReader(new StringReader("col1,col2\nval1,val2"), ',', true);
+		try
+		{
+			Iterator<String> colNamesIt = csvReader.colNamesIterator();
+			assertTrue(colNamesIt.hasNext());
+			assertEquals(colNamesIt.next(), "col1");
+			assertTrue(colNamesIt.hasNext());
+			assertEquals(colNamesIt.next(), "col2");
+
+			Iterator<Tuple> it = csvReader.iterator();
+			Tuple t0 = it.next();
+			assertEquals(t0.get("col1"), "val1");
+			assertEquals(t0.get("col2"), "val2");
+			assertFalse(it.hasNext());
+		}
+		finally
+		{
+			csvReader.close();
+		}
+	}
+
+	@Test
 	public void close() throws IOException
 	{
 		Reader reader = mock(Reader.class);

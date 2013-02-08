@@ -167,7 +167,7 @@
 		</plugins>
 	</reporting>
 
-		<dependencies>
+	<dependencies>
 		<!-- scope: compile -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -207,7 +207,8 @@
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
 		<module>molgenis-omx-core</module>
-		<module>molgenis-omx-dataviewer</module>		
+		<module>molgenis-omx-dataviewer</module>
+		<module>molgenis-omx-filemanager</module>	
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-app-lifelines</module>

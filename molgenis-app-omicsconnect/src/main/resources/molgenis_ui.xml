@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- DOCTYPE molgenis PUBLIC "MOLGENIS 1.0" "http://molgenis.sourceforge.net/dtd/molgenis_v_1_0.dtd" -->
 <molgenis name="omicsconnect">
 	<plugin name="oc_header" type="org.molgenis.omicsconnect.plugins.header.Header" />
 
@@ -7,8 +6,12 @@
 		<plugin name="Pubmed" type="org.molgenis.omicsconnect.plugins.pubmed.PubMedLookup" />
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />	
 		<menu name="Admin">
+			<form name="FileManager" entity="MolgenisFile" label="File manager" header="Navigate files">
+				<plugin name="FileViewer" label="File viewer" type="org.molgenis.omx.filemanager.MolgenisFileManager" />
+			</form>
+			<plugin name="FileViewerSettings" label="Storage settings" type="org.molgenis.omx.filemanager.Settings" />		
 			<menu name ="Characteristics">
 				<form name="Characteristic" entity="Characteristic" />
 			</menu>
