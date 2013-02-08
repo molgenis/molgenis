@@ -18,7 +18,7 @@ import org.molgenis.model.elements.Module;
 
 public class MolgenisModel
 {
-	private static final Logger logger = Logger.getLogger(MolgenisModel.class.getSimpleName());
+	private static final Logger logger = Logger.getLogger(MolgenisModel.class);
 
 	public static Model parse(MolgenisOptions options) throws Exception
 	{
@@ -30,26 +30,26 @@ public class MolgenisModel
 
 			model = MolgenisModelParser.parseDbSchema(options.model_database);
 
-			Model importedModel = MolgenisModelParser.parseDbSchema(options.import_model_database, "imported");
-			MolgenisModelValidator.validate(importedModel, options); // Create
-																		// mref
-																		// links
+			Model importedModel = MolgenisModelParser.parseDbSchema(options.import_model_database);
+			importedModel.getDatabase().setName("imported");
 
 			for (Module importedModule : importedModel.getModules())
 			{
 				model.getModules().add(importedModule);
-			}
 
-			for (Entity importedEntity : importedModel.getEntities())
-			{
-				importedEntity.setImported(true);
-				importedEntity.setModel(model);
+				for (Entity importedEntity : importedModule.getEntities())
+				{
+					importedEntity.setImported(true);
+					importedEntity.setModel(model);
 
-				// Prevent duplicate elements (elements of parent are also in
-				// the tree)
-				model.getDatabase().getTreeElements().remove(importedEntity.getName());
+					// Prevent duplicate elements (elements of parent are also
+					// in the tree)
+					model.getDatabase().getTreeElements().remove(importedEntity.getName());
 
-				importedEntity.setParent(model.getDatabase());
+					importedEntity.setParent(model.getDatabase());
+
+				}
+
 			}
 
 			// Get the strings of the property 'authorizable' and add the entity
