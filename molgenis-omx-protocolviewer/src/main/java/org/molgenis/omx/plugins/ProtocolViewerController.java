@@ -11,7 +11,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,6 +24,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
+import org.molgenis.framework.ui.html.JQueryTreeViewElement;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.EMeasureFeatureWriter;
@@ -44,6 +47,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	private static final long serialVersionUID = -6143910771849972946L;
 	/** Protocol viewer model */
 	private ProtocolViewer protocolViewer;
+	private Map<Integer, JQueryTreeViewElement> treeStates = new HashMap<Integer, JQueryTreeViewElement>();
 
 	public ProtocolViewerController(String name, ScreenController<?> parent)
 	{
@@ -101,18 +105,38 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					Operator.EQUALS, featureId));
 			if (features != null && !features.isEmpty()) src = toJSFeature(db, features.get(0));
 		}
-		else if (request.getAction().equals("download_json_getLazyLoadingNode"))
+		else if (request.getAction().equals("download_json_getprotocol"))
 		{
-			Integer nodeId = request.getInt("nodeId");
+			Integer id = request.getInt("id");
 
 			boolean recursive = request.getBoolean("recursive");
 
-			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, nodeId));
+			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, id));
 
 			if (protocols != null && !protocols.isEmpty()) src = toJSProtocol(db, protocols.get(0), recursive);
 		}
-		else if (request.getAction().equals("download_json_searchNodes"))
+		else if (request.getAction().equals("download_json_searchnodes"))
 		{
+			String queryString = request.getString("queryString");
+			Integer datasetID = request.getInt("datasetID");
+			List<Protocol> topProtocol = null;
+			List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, datasetID));
+			if (dataSets != null && !dataSets.isEmpty()) topProtocol = db.find(Protocol.class, new QueryRule(
+					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
+			if (topProtocol != null && !topProtocol.isEmpty()) src = traverseTreeNode(db, topProtocol.get(0),
+					queryString, true);
+		}
+		else if (request.getAction().equals("download_json_clearSearch"))
+		{
+			String[] featuresStrArr = request.getString("features").split(",");
+			List<Integer> featureIds = new ArrayList<Integer>(featuresStrArr.length);
+			for (String featureStr : featuresStrArr)
+				featureIds.add(Integer.valueOf(featureStr));
+			Integer datasetID = request.getInt("datasetID");
+			List<Protocol> topProtocol = null;
+			List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, datasetID));
+			if (dataSets != null && !dataSets.isEmpty()) topProtocol = db.find(Protocol.class, new QueryRule(
+					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
 
 		}
 		else
@@ -134,6 +158,60 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			}
 		}
 		return Show.SHOW_MAIN;
+	}
+
+	private JSProtocol traverseTreeNode(Database db, Protocol topProtocol, String queryString, boolean expanded)
+			throws DatabaseException
+	{
+		JSProtocol jsProtocol = null;
+		List<Protocol> subProtocols = findSubProtocols(db, topProtocol);
+		List<JSProtocol> jsSubProtocols = new ArrayList<JSProtocol>();
+		List<JSFeature> jsFeatures = new ArrayList<JSFeature>();
+
+		if (subProtocols != null && !subProtocols.isEmpty())
+		{
+			for (Protocol p : subProtocols)
+			{
+				if (p.getName().contains(queryString))
+				{
+					jsSubProtocols.add(toJSProtocol(db, p, true));
+				}
+				else
+				{
+					JSProtocol subJSProtocol = traverseTreeNode(db, p, queryString, expanded);
+					if (subJSProtocol != null) jsSubProtocols.add(subJSProtocol);
+				}
+			}
+		}
+		else
+		{
+			for (ObservableFeature feature : findFeatures(db, topProtocol.getFeatures_Id()))
+			{
+				if (feature.getName().contains(queryString) || feature.getDescription().contains(queryString))
+				{
+					jsFeatures.add(toJSFeature(db, feature));
+				}
+				else
+				{
+					List<Category> categories = findCategories(db, feature);
+					if (categories != null & !categories.isEmpty())
+					{
+						for (Category c : findCategories(db, feature))
+						{
+							if (c.getDescription() != null && c.getDescription().contains(queryString))
+							{
+								jsFeatures.add(toJSFeature(db, feature));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (!jsSubProtocols.isEmpty() || !jsFeatures.isEmpty()) jsProtocol = new JSProtocol(topProtocol, jsFeatures,
+				jsSubProtocols);
+
+		return jsProtocol;
 	}
 
 	@Override
