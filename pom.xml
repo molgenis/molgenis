@@ -213,5 +213,6 @@
 		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-omicsconnect</module>
 		<module>molgenis-app-tifn</module>
+		<module>molgenis-app-cbm</module>
 	</modules>
 </project>
