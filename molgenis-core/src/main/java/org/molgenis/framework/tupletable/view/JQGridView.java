@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
@@ -143,11 +141,6 @@ public class JQGridView extends HtmlWidget
 	{
 		try
 		{
-			if (db.getConnection().isClosed())
-			{
-				throw new HandleRequestDelegationException(new Exception("handleRequest: Connection is closed!"));
-			}
-
 			final TupleTable tupleTable = tupleTableBuilder.create(request);
 			tupleTable.setColLimit(maxVisibleColumnCount);
 
@@ -353,14 +346,6 @@ public class JQGridView extends HtmlWidget
 			throw new HandleRequestDelegationException(e);
 		}
 		catch (TableException e)
-		{
-			throw new HandleRequestDelegationException(e);
-		}
-		catch (SQLException e)
-		{
-			throw new HandleRequestDelegationException(e);
-		}
-		catch (DatabaseException e)
 		{
 			throw new HandleRequestDelegationException(e);
 		}

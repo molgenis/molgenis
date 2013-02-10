@@ -3,14 +3,13 @@ package org.molgenis.omx.decorators;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.omx.core.MolgenisFile;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.core.MolgenisFile;
 import org.molgenis.omx.services.StorageHandler;
 import org.molgenis.util.ValueLabel;
 
@@ -47,26 +46,12 @@ public class MolgenisFileHandler extends StorageHandler
 	 */
 	public File getStorageDirFor(String type, Database db) throws Exception
 	{
-		// lowercase 'type' for directory usage
-		type = type.toLowerCase();
-
-		// create new MolgenisFile and get all subclasses (ie. file types)
-		MolgenisFile mf = new MolgenisFile();
-		List<String> values = new ArrayList<String>();
-		for (ValueLabel vl : mf.get__TypeOptions())
-		{
-			values.add(vl.getValue().toString().toLowerCase());
-		}
-
-		// check if the type is a known subclass
-		if (!values.contains(type))
-		{
-			throw new TypeUnknownException("MolgenisFile type '" + type + "' not known");
-		}
+		// default type if type is unknown
+		if (type == null) type = MolgenisFile.class.getSimpleName();
 
 		// create pointer to storage location, try to mkdir if not exists
 		File storageDir = getFileStorage(db);
-		File typeStorageDir = new File(storageDir.getAbsolutePath() + File.separator + type);
+		File typeStorageDir = new File(storageDir.getAbsolutePath() + File.separator + type.toLowerCase());
 		if (!typeStorageDir.exists())
 		{
 			boolean createSuccess = typeStorageDir.mkdirs();
@@ -120,7 +105,7 @@ public class MolgenisFileHandler extends StorageHandler
 	 */
 	public File getFile(MolgenisFile mf, Database db) throws Exception
 	{
-		File typeStorage = getStorageDirFor(mf.get__Type().toLowerCase(), db);
+		File typeStorage = getStorageDirFor(mf.get__Type(), db);
 		File dataSource = new File(typeStorage.getAbsolutePath() + File.separator
 				+ NameConvention.escapeFileName(mf.getName()) + "." + mf.getExtension());
 		if (!dataSource.exists())
