@@ -85,7 +85,7 @@
  					
  					$('#search-button').click(function(e) {
  						e.preventDefault();
- 						processSearch($('#search-text').val());
+ 						searchProtocolServer($('#search-text').val());
  					});
  					
  					$('#search-clear-button').click(function(e) {

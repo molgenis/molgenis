@@ -101,19 +101,26 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					Operator.EQUALS, featureId));
 			if (features != null && !features.isEmpty()) src = toJSFeature(db, features.get(0));
 		}
-		else if (request.getAction().equals("download_json_getLazyLoadingNode"))
+		else if (request.getAction().equals("download_json_getprotocol"))
 		{
-			Integer nodeId = request.getInt("nodeId");
+			Integer id = request.getInt("id");
 
 			boolean recursive = request.getBoolean("recursive");
 
-			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, nodeId));
+			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, id));
 
 			if (protocols != null && !protocols.isEmpty()) src = toJSProtocol(db, protocols.get(0), recursive);
 		}
-		else if (request.getAction().equals("download_json_searchNodes"))
+		else if (request.getAction().equals("download_json_searchdataset"))
 		{
-
+			String queryString = request.getString("query");
+			Integer datasetID = request.getInt("id");
+			List<Protocol> topProtocol = null;
+			List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, datasetID));
+			if (dataSets != null && !dataSets.isEmpty()) topProtocol = db.find(Protocol.class, new QueryRule(
+					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
+			if (topProtocol != null && !topProtocol.isEmpty()) src = searchProtocol(db, topProtocol.get(0),
+					queryString, true);
 		}
 		else
 		{
@@ -134,6 +141,75 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			}
 		}
 		return Show.SHOW_MAIN;
+	}
+
+	/**
+	 * This function is to search user-typed query in all the features. The
+	 * searching starts from the top-protocol (the one that is used to define
+	 * the dataset), it recursively calls itself until reaching the features. If
+	 * the query is found in some features, their corresponding protocols will
+	 * be informed that the features have been matched. Those protocols which
+	 * have successful "hits" are sent back to clinet side for display.
+	 * 
+	 * @param db
+	 * @param topProtocol
+	 * @param query
+	 * @param expanded
+	 * @return
+	 * @throws DatabaseException
+	 */
+	private JSProtocol searchProtocol(Database db, Protocol topProtocol, String query, boolean expanded)
+			throws DatabaseException
+	{
+		JSProtocol jsProtocol = null;
+		List<Protocol> subProtocols = findSubProtocols(db, topProtocol);
+		List<JSProtocol> jsSubProtocols = new ArrayList<JSProtocol>();
+		List<JSFeature> jsFeatures = new ArrayList<JSFeature>();
+
+		if (subProtocols != null && !subProtocols.isEmpty())
+		{
+			for (Protocol p : subProtocols)
+			{
+				if (p.getName().contains(query))
+				{
+					jsSubProtocols.add(toJSProtocol(db, p, true));
+				}
+				else
+				{
+					JSProtocol subJSProtocol = searchProtocol(db, p, query, expanded);
+					if (subJSProtocol != null) jsSubProtocols.add(subJSProtocol);
+				}
+			}
+		}
+		else
+		{
+			for (ObservableFeature feature : findFeatures(db, topProtocol.getFeatures_Id()))
+			{
+				if (feature.getName().contains(query) || feature.getDescription().contains(query))
+				{
+					jsFeatures.add(toJSFeature(db, feature));
+				}
+				else
+				{
+					List<Category> categories = findCategories(db, feature);
+					if (categories != null & !categories.isEmpty())
+					{
+						for (Category c : findCategories(db, feature))
+						{
+							if (c.getDescription() != null && c.getDescription().contains(query))
+							{
+								jsFeatures.add(toJSFeature(db, feature));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (!jsSubProtocols.isEmpty() || !jsFeatures.isEmpty()) jsProtocol = new JSProtocol(topProtocol, jsFeatures,
+				jsSubProtocols);
+
+		return jsProtocol;
 	}
 
 	@Override
