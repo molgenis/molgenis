@@ -45,35 +45,6 @@ function updateProtocolView(protocol) {
 		container.append("<p>Catalog does not describe variables</p>");
 		return;
 	}
-	
-	// recursively build tree for protocol, this function is similar to createNodes() function
-	// TODO: please merge them in the future!
-	function buildTree(protocol) {
-		// add protocol
-		var item = $('<li class="folder"/>').attr('data', 'key: "' + protocol.id + '", title:"' + protocol.name + '", isLazy: true');
-		var list = $('<ul />');
-		// add protocol: subprotocols
-		if(protocol.subProtocols) {
-			$.each(protocol.subProtocols, function(i, subProtocol) {
-				list.append(buildTree(subProtocol));
-			});
-		}
-		// add protocol: features
-		if(protocol.features) {
-			$.each(protocol.features, function(i, feature) {
-				var item = $('<li />').attr('data', 'key: "' + feature.id + '", title:"' + feature.name + '", isLazy: true');
-				item.appendTo(list);
-			});
-		}
-		list.appendTo(item);
-		
-		return item;
-	};
-	
-	// append tree to DOM
-	var tree = $('<ul />').append(buildTree(protocol));
-	//var tree = $('<ul />').append(createNodes(protocol, null));
-	container.append(tree);
 
 	// render tree and open first branch
 	container.dynatree({
@@ -81,6 +52,13 @@ function updateProtocolView(protocol) {
 		selectMode: 3,
 		minExpandLevel: 2,
 		debugLevel: 0,
+		children: [{
+			key : protocol.id,
+			title : protocol.name,
+			isFolder: true,
+			isLazy : true,
+			children : createNodes(protocol, null),
+		}],
 		onClick: function(node, event) {
 			if(node.getEventTargetType(event) == "title" && !node.data.isFolder)
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
@@ -115,8 +93,8 @@ function updateProtocolView(protocol) {
 	});
 }
 
-//recursively build tree for protocol, this function is similar to createNodes() function
-// TODO: please merge them in the future!
+//recursively build tree for protocol, the extra dynatree node options
+//can be passed to the function to give different features to nodes.
 function createNodes(protocol, options) {
 	var branches = [];
 	if(protocol.subProtocols){
