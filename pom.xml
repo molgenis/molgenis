@@ -228,6 +228,7 @@
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
+		<module>molgenis-omx-auth</module>
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-dataviewer</module>
 		<module>molgenis-omx-filemanager</module>	
