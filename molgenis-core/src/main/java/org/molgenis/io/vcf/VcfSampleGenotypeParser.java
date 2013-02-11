@@ -37,7 +37,9 @@ public class VcfSampleGenotypeParser
 
 	public VcfSampleGenotype parse()
 	{
-		List<Character> alleleIndices = new ArrayList<Character>();
+		//Length will almost always be 2.
+		List<Character> alleleIndices = new ArrayList<Character>(2);
+		
 		List<Boolean> phasing = new ArrayList<Boolean>();
 
 		for (char c : genotype.toCharArray())
