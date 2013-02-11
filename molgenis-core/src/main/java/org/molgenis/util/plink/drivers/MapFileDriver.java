@@ -23,8 +23,8 @@ import org.molgenis.util.plink.datatypes.MapEntry;
 public class MapFileDriver implements PlinkFileParser
 {
 	private BufferedReader reader;
-	private File file;
-	private char separator;
+	private final File file;
+	private final char separator;
 	private long nrElements;
 
 	/**
@@ -63,7 +63,7 @@ public class MapFileDriver implements PlinkFileParser
 		List<MapEntry> entryList = new ArrayList<MapEntry>();
 		String line;
 		for (int i = 0; (line = reader.readLine()) != null && i < to; ++i)
-			if (i >= from) entryList.add(parseEntry(line));
+			if (i >= from) entryList.add(parseEntry(line, this.separator + ""));
 
 		return entryList;
 	}
@@ -81,14 +81,14 @@ public class MapFileDriver implements PlinkFileParser
 		List<MapEntry> entryList = new ArrayList<MapEntry>();
 		String line;
 		while ((line = reader.readLine()) != null)
-			entryList.add(parseEntry(line));
+			entryList.add(parseEntry(line, this.separator + ""));
 
 		return entryList;
 	}
 
-	private MapEntry parseEntry(String line) throws IOException
+	public static MapEntry parseEntry(String line, String separator) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, this.separator + "");
+		StringTokenizer strTokenizer = new StringTokenizer(line, separator);
 		try
 		{
 			String chromosome = strTokenizer.nextToken();
@@ -128,4 +128,5 @@ public class MapFileDriver implements PlinkFileParser
 		if (this.reader != null) close();
 		this.reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), FILE_ENCODING));
 	}
+
 }
