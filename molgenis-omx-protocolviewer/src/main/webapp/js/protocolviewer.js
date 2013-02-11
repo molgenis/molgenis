@@ -45,37 +45,9 @@ function updateProtocolView(protocol) {
 		container.append("<p>Catalog does not describe variables</p>");
 		return;
 	}
-
-	//Appending subNodes to exsiting parentNodes
-	function appendToExistingNode(protocol) {
-		
-		var branches = [];
-		
-		if(protocol.subProtocols){
-			$.each(protocol.subProtocols, function(i, subProtocol) {
-				var subBranches = appendToExistingNode(subProtocol);
-				branches.push({
-    				key :  subProtocol.id, 
-    				title : subProtocol.name,
-    				isLazy : true,
-    				isFolder  : true,
-    				children : subBranches,
-    			});
-    		});
-		}
-		else if(protocol.features) {
-			$.each(protocol.features, function(i, feature) {
-    			branches.push({
-    				key :  feature.id, 
-    				title : feature.name,
-    			});
-    		});
-		}
-		
-		return branches;
-	}
 	
-	// recursively build tree for protocol	
+	// recursively build tree for protocol, this function is similar to createNodes() function
+	// TODO: please merge them in the future!
 	function buildTree(protocol) {
 		// add protocol
 		var item = $('<li class="folder"/>').attr('data', 'key: "' + protocol.id + '", title:"' + protocol.name + '", isLazy: true');
@@ -98,26 +70,6 @@ function updateProtocolView(protocol) {
 		return item;
 	};
 	
-	function retrieveNodeInfo(node, recursive){
-		$.ajax({
-            url: 'molgenis.do?__target=ProtocolViewer&__action=download_json_getLazyLoadingNode',
-            data: {
-				'nodeId' : node.data.key,
-				'recursive' : recursive,
-            },
-            success: function(data, textStatus){
-            	var branches = appendToExistingNode(data);
-            	node.setLazyNodeStatus(DTNodeStatus_Ok);
-                node.addChild(branches);
-                if(node.isSelected()){
-                	node.getChildren().forEach(function(eachNode){
-                		eachNode.select(true);
-                	});
-                }
-            }
-        });
-	}
-	
 	// append tree to DOM
 	var tree = $('<ul />').append(buildTree(protocol));
 	container.append(tree);
@@ -132,26 +84,103 @@ function updateProtocolView(protocol) {
 			if(node.getEventTargetType(event) == "title" && !node.data.isFolder)
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 		},
+		onQuerySelect : function(select, node){
+			//if it has children?
+			if(node.data.isFolder){
+				if(!node.hasChildren()){
+					retrieveNodeInfo(node, true, null);
+				}else{
+					var reRenderNode = false;
+					var listOfChildren = node.childList;
+					for(var i = 0; i < listOfChildren.length; i++){
+						var eachChildNode = listOfChildren[i];
+						if(eachChildNode.data.isFolder && !eachChildNode.hasChildren()){
+							reRenderNode = true;
+							break;
+						}
+					}
+					if(reRenderNode){
+						retrieveNodeInfo(node, true, null);
+					}
+				}
+			}
+		},
 		onSelect: function(select, node) {
 			// update feature details
 			if(select && !node.data.isFolder)
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 			else
 				setFeatureDetails(null);
-
 			// update feature selection
 			updateFeatureSelection(node.tree);
-			
-			//if it has children? 
-			if(node.hasChildren() != true){
-				
-				retrieveNodeInfo(node, true);
-			}
 		},
 		onLazyRead: function(node){
-			retrieveNodeInfo(node, false);
+			retrieveNodeInfo(node, false, null);
 		}
 	});
+}
+
+//recursively build tree for protocol, this function is similar to createNodes() function
+// TODO: please merge them in the future!
+function createNodes(protocol, options) {
+	var branches = [];
+	if(protocol.subProtocols){
+		$.each(protocol.subProtocols, function(i, subProtocol) {
+			var subBranches = createNodes(subProtocol, options);
+			var newBranch = {
+				key :  subProtocol.id, 
+				title : subProtocol.name,
+				isLazy : true,
+				isFolder  : true,
+				children : subBranches,
+			};
+			for (key in options) {
+			    if (options.hasOwnProperty(key)) {
+			    	newBranch[key] = options[key];
+			    }
+			}
+			branches.push(newBranch);
+		});
+	}
+	else if(protocol.features) {
+		$.each(protocol.features, function(i, feature) {
+			var newBranch = {
+				key :  feature.id, 
+				title : feature.name,
+			};
+			for (key in options) {
+			    if (options.hasOwnProperty(key)) {
+			    	newBranch[key] = options[key];
+			    }
+			}
+			branches.push(newBranch);
+		});
+	}
+	return branches;
+}
+
+function retrieveNodeInfo(node, recursive, options){
+	$.ajax({
+        url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_getprotocol',
+        data : {
+			'id' : node.data.key,
+			'recursive' : recursive,
+        },
+        async : false,
+        success: function(data, textStatus){
+        	if(data){
+	        	var branches = createNodes(data, options);
+	        	node.setLazyNodeStatus(DTNodeStatus_Ok);
+	            node.removeChildren();
+	        	node.addChild(branches);
+	            if(node.isSelected()){
+	            	node.getChildren().forEach(function(eachNode){
+	            		eachNode.select(true);
+	            	});
+	            }
+        	}
+        }
+    });
 }
 
 function setFeatureDetails(feature) {
@@ -207,7 +236,7 @@ function updateFeatureSelection(tree) {
 			var name = node.data.title;
 			var protocol_name = node.parent.data.title;
 			
-			var row = $('<tr />');
+			var row = $('<tr />').attr('id', node.data.key + "_row");
 			$('<td />').text(name !== undefined ? name : "").appendTo(row);
 			$('<td />').text(protocol_name != undefined ? protocol_name : "").appendTo(row);
 			
@@ -269,11 +298,51 @@ function clearSearch() {
 	}
 }
 
-function searchProtocolServer(text){
-	
-	$.getJSON('molgenis.do?__target=ProtocolViewer&__action=download_json_searchNodes&inputText=' + text, function(data) {
-		
-	});
+function searchProtocolServer(query){	
+	if(query) {
+		var dataSets = $(document).data('datasets');
+		var dataSet = dataSets[dataSets.selected];	
+		$.ajax({
+			url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_searchdataset',
+			data : {
+				'query' :  query,
+				'id' : dataSet.id,
+			},
+			success: function(data, textStatus){
+				var rootNode = $("#dataset-browser").dynatree("getRoot");
+				insertInExistingNodes(data, rootNode);
+				var keys = getBottomNodes(data, new Array());
+				showNodes(rootNode, keys);
+			}
+        });
+	}
+}
+
+function getBottomNodes(node, hits){
+	if(node.subProtocols && node.subProtocols.length > 0){
+		$.each(node.subProtocols, function(i, subNode){
+			hits.push(getBottomNodes(subNode, hits));
+		});
+	}else{
+		$.each(node.features, function(i, lastNode){
+			hits.push(lastNode.id);
+		});
+	}
+	return hits;
+}
+
+function insertInExistingNodes(candidateNodeData, parentNode){
+	if(!parentNode.tree.getNodeByKey(candidateNodeData.id)){
+		var options = {expand:false};
+		retrieveNodeInfo(parentNode, true, options);
+	}else{
+		var existingNode  = parentNode.tree.getNodeByKey(candidateNodeData.id);
+		if(candidateNodeData.subProtocols && candidateNodeData.subProtocols.length > 0){
+			$.each(candidateNodeData.subProtocols, function(i, subProtocol){
+					insertInExistingNodes(subProtocol, existingNode);
+			});
+		}
+	}
 }
 
 function searchProtocol(protocol, regexp, hits) {
@@ -329,10 +398,10 @@ function matchCategory(category, regexp) {
 	return false;
 }
 
-function showNodes(node, keys) {
-	node.expand(true);
+function showNodes(node, keys) {	
 	var match = $.inArray(parseInt(node.data.key), keys) != -1; 
 	if(node.childList) {
+		node.expand(true);
 		for (var i = 0; i < node.childList.length; i++) {
 			match = match | showNodes(node.childList[i], keys);
 		}
@@ -340,6 +409,9 @@ function showNodes(node, keys) {
 	if(!match) {
 		if(node.li) node.li.hidden = true;
 		else if(node.ul) node.ul.hidden = true;
+	}else{
+		if(node.li) node.li.hidden = false;
+		else if(node.ul) node.ul.hidden = false;
 	}
 	return match;
 }
