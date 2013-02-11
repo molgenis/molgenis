@@ -111,15 +111,15 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 			if (protocols != null && !protocols.isEmpty()) src = toJSProtocol(db, protocols.get(0), recursive);
 		}
-		else if (request.getAction().equals("download_json_searchnodes"))
+		else if (request.getAction().equals("download_json_searchdataset"))
 		{
-			String queryString = request.getString("queryString");
-			Integer datasetID = request.getInt("datasetID");
+			String queryString = request.getString("query");
+			Integer datasetID = request.getInt("id");
 			List<Protocol> topProtocol = null;
 			List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, datasetID));
 			if (dataSets != null && !dataSets.isEmpty()) topProtocol = db.find(Protocol.class, new QueryRule(
 					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
-			if (topProtocol != null && !topProtocol.isEmpty()) src = traverseTreeNode(db, topProtocol.get(0),
+			if (topProtocol != null && !topProtocol.isEmpty()) src = searchProtocol(db, topProtocol.get(0),
 					queryString, true);
 		}
 		else
@@ -143,7 +143,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		return Show.SHOW_MAIN;
 	}
 
-	private JSProtocol traverseTreeNode(Database db, Protocol topProtocol, String queryString, boolean expanded)
+	private JSProtocol searchProtocol(Database db, Protocol topProtocol, String queryString, boolean expanded)
 			throws DatabaseException
 	{
 		JSProtocol jsProtocol = null;
@@ -161,7 +161,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 				}
 				else
 				{
-					JSProtocol subJSProtocol = traverseTreeNode(db, p, queryString, expanded);
+					JSProtocol subJSProtocol = searchProtocol(db, p, queryString, expanded);
 					if (subJSProtocol != null) jsSubProtocols.add(subJSProtocol);
 				}
 			}

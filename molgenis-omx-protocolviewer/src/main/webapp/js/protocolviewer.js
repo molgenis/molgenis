@@ -3,8 +3,8 @@ function selectDataSet(id) {
 	getDataSet(id, function(data) {
 		// update
 		setFeatureDetails(null);
+		updateFeatureSelection(null);
 		updateProtocolView(data.protocol);
-		$('#feature-selection').empty();
 		// set selected data set
 		$(document).data('datasets').selected = id;
 	});
@@ -96,12 +96,13 @@ function updateProtocolView(protocol) {
 				if(!node.hasChildren()){
 					retrieveNodeInfo(node, true, null);
 				}else if(!node.childList[0].hasChildren()){
-					node.childList.forEach(function(eachChildNode){
-						retrieveNodeInfo(eachChildNode, true, null);
-					});
+					if(node.childList[0].data.isFolder){
+						node.childList.forEach(function(eachChildNode){
+								retrieveNodeInfo(eachChildNode, true, null);
+						});
+					}
 				}
 			}
-
 			// update feature selection
 			updateFeatureSelection(node.tree);
 		},
@@ -159,14 +160,17 @@ function retrieveNodeInfo(node, recursive, options){
         },
         async : false,
         success: function(data, textStatus){
-        	var branches = createNodes(data, options);
-        	node.setLazyNodeStatus(DTNodeStatus_Ok);
-            node.addChild(branches);
-            if(node.isSelected()){
-            	node.getChildren().forEach(function(eachNode){
-            		eachNode.select(true);
-            	});
-            }
+        	if(data){
+	        	var branches = createNodes(data, options);
+	        	node.setLazyNodeStatus(DTNodeStatus_Ok);
+	            node.removeChildren();
+	        	node.addChild(branches);
+	            if(node.isSelected()){
+	            	node.getChildren().forEach(function(eachNode){
+	            		eachNode.select(true);
+	            	});
+	            }
+        	}
         }
     });
 }
@@ -291,10 +295,10 @@ function searchProtocolServer(query){
 		var dataSets = $(document).data('datasets');
 		var dataSet = dataSets[dataSets.selected];	
 		$.ajax({
-			url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_searchnodes',
+			url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_searchdataset',
 			data : {
-				'queryString' :  query,
-				'datasetID' : dataSet.id,
+				'query' :  query,
+				'id' : dataSet.id,
 			},
 			success: function(data, textStatus){
 				var rootNode = $("#dataset-browser").dynatree("getRoot");
