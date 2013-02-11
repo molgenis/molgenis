@@ -763,31 +763,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 <#list model.entities as e>
 	<#if !e.abstract && !e.isAssociation()>
 		<#list e.implementedFields as f>
-			<#if f.type=="xref" && f.getXrefEntityName() == entity.name>
-				<#assign multipleXrefs = model.getNumberOfReferencesTo(entity)/>
-//${multipleXrefs}
-	@javax.persistence.OneToMany(fetch=javax.persistence.FetchType.LAZY, mappedBy="${name(f)}"/*, cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/)
-    private java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> ${name(f)}<#if multipleXrefs &gt; 0 >${JavaName(f.entity)}</#if>Collection = new java.util.ArrayList<${f.entity.namespace}.${JavaName(f.entity)}>();
-
-	@javax.xml.bind.annotation.XmlTransient
-	public java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> get${JavaName(f)}<#if multipleXrefs &gt; 0 >${JavaName(f.entity)}</#if>Collection()
-	{
-            return ${name(f)}<#if multipleXrefs &gt; 0 >${JavaName(f.entity)}</#if>Collection;
-	}
-
-    public void set${JavaName(f)}<#if multipleXrefs &gt; 0 >${JavaName(f.entity)}</#if>Collection(java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> collection)
-    {
-        for (${f.entity.namespace}.${JavaName(f.entity)} ${name(f.entity)} : collection) {
-            ${name(f.entity)}.set${JavaName(f)}(this);
-        }
-        ${name(f)}<#if multipleXrefs &gt; 0 >${JavaName(f.entity)}</#if>Collection = collection;
-    }	
-		</#if>
-	</#list></#if>
-</#list>
-<#list model.entities as e>
-	<#if !e.abstract && !e.isAssociation()>
-		<#list e.implementedFields as f>
 			<#if f.type=="mref" && f.getXrefEntityName() == entity.name>
 				<#assign multipleXrefs = model.getNumberOfReferencesTo(entity)/>
 	//${multipleXrefs}
