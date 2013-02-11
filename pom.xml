@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
@@ -98,7 +98,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -213,6 +213,11 @@
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-omicsconnect</module>
+<<<<<<< HEAD
+    <module>molgenis-app-tifn</module>
+  </modules>
+=======
 		<module>molgenis-app-tifn</module>
 	</modules>
+>>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
 </project>

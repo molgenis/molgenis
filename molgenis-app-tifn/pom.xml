@@ -91,6 +91,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+<<<<<<< HEAD
+			<artifactId>molgenis-omx-filemanager</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+=======
+>>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
 			<artifactId>molgenis-omx-importer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
@@ -111,6 +120,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+<<<<<<< HEAD
+			<artifactId>molgenis-omx-filemanager</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+			<classifier>classes</classifier>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+=======
+>>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
 			<artifactId>molgenis-omx-importer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>jar</type>
