@@ -213,6 +213,11 @@
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-omicsconnect</module>
+<<<<<<< HEAD
     <module>molgenis-app-tifn</module>
   </modules>
+=======
+		<module>molgenis-app-tifn</module>
+	</modules>
+>>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
 </project>
