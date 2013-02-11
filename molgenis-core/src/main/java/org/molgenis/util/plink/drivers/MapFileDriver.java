@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -20,11 +21,11 @@ import org.molgenis.util.plink.datatypes.MapEntry;
  * chromosome, SNP, cM, base-position. See:
  * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#map
  */
-public class MapFileDriver implements PlinkFileParser
+public class MapFileDriver implements PlinkFileParser, Iterable<MapEntry>
 {
 	private BufferedReader reader;
-	private File file;
-	private char separator;
+	private final File file;
+	private final char separator;
 	private long nrElements;
 
 	/**
@@ -63,7 +64,7 @@ public class MapFileDriver implements PlinkFileParser
 		List<MapEntry> entryList = new ArrayList<MapEntry>();
 		String line;
 		for (int i = 0; (line = reader.readLine()) != null && i < to; ++i)
-			if (i >= from) entryList.add(parseEntry(line));
+			if (i >= from) entryList.add(parseEntry(line, this.separator + ""));
 
 		return entryList;
 	}
@@ -81,14 +82,14 @@ public class MapFileDriver implements PlinkFileParser
 		List<MapEntry> entryList = new ArrayList<MapEntry>();
 		String line;
 		while ((line = reader.readLine()) != null)
-			entryList.add(parseEntry(line));
+			entryList.add(parseEntry(line, this.separator + ""));
 
 		return entryList;
 	}
 
-	private MapEntry parseEntry(String line) throws IOException
+	public static MapEntry parseEntry(String line, String separator) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, this.separator + "");
+		StringTokenizer strTokenizer = new StringTokenizer(line, separator);
 		try
 		{
 			String chromosome = strTokenizer.nextToken();
@@ -127,5 +128,66 @@ public class MapFileDriver implements PlinkFileParser
 	{
 		if (this.reader != null) close();
 		this.reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), FILE_ENCODING));
+	}
+
+	@Override
+	public Iterator<MapEntry> iterator()
+	{
+		try
+		{
+			reset();
+			return new MapFileIterator();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private class MapFileIterator implements Iterator<MapEntry>
+	{
+		private String line;
+
+		public MapFileIterator()
+		{
+			try
+			{
+				line = reader.readLine();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public boolean hasNext()
+		{
+			return line != null;
+		}
+
+		@Override
+		public MapEntry next()
+		{
+			MapEntry entry;
+			try
+			{
+				entry = parseEntry(line, separator + "");
+				line = reader.readLine();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+
+			return entry;
+		}
+
+		@Override
+		public void remove()
+		{
+			throw new UnsupportedOperationException();
+		}
+
 	}
 }
