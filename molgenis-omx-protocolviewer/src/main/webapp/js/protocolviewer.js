@@ -84,25 +84,33 @@ function updateProtocolView(protocol) {
 			if(node.getEventTargetType(event) == "title" && !node.data.isFolder)
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 		},
+		onQuerySelect : function(select, node){
+			//if it has children?
+			if(node.data.isFolder){
+				if(!node.hasChildren()){
+					retrieveNodeInfo(node, true, null);
+				}else{
+					var reRenderNode = false;
+					var listOfChildren = node.childList;
+					for(var i = 0; i < listOfChildren.length; i++){
+						var eachChildNode = listOfChildren[i];
+						if(eachChildNode.data.isFolder && !eachChildNode.hasChildren()){
+							reRenderNode = true;
+							break;
+						}
+					}
+					if(reRenderNode){
+						retrieveNodeInfo(node, true, null);
+					}
+				}
+			}
+		},
 		onSelect: function(select, node) {
 			// update feature details
 			if(select && !node.data.isFolder)
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 			else
 				setFeatureDetails(null);
-			
-			//if it has children?
-			if(node.data.isFolder){
-				if(!node.hasChildren()){
-					retrieveNodeInfo(node, true, null);
-				}else if(!node.childList[0].hasChildren()){
-					if(node.childList[0].data.isFolder){
-						node.childList.forEach(function(eachChildNode){
-								retrieveNodeInfo(eachChildNode, true, null);
-						});
-					}
-				}
-			}
 			// update feature selection
 			updateFeatureSelection(node.tree);
 		},
