@@ -1,41 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<<<<<<< HEAD
-<molgenis name="tifn">
-	<plugin name="oc_header" type="org.molgenis.tifn.plugins.header.Header" />
-=======
 <!-- DOCTYPE molgenis PUBLIC "MOLGENIS 1.0" "http://molgenis.sourceforge.net/dtd/molgenis_v_1_0.dtd" -->
 <molgenis name="tifn">
-
 <plugin name="tifn_header" type="org.molgenis.tifn.plugins.header.Header" />
->>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
-
 	<menu name="main">
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
-<<<<<<< HEAD
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />	
-		<menu name="Admin">
-			<form name="FileManager" entity="MolgenisFile" label="File manager" header="Navigate files">
-				<plugin name="FileViewer" label="File viewer" type="org.molgenis.omx.filemanager.MolgenisFileManager" />
-			</form>
-			<plugin name="FileViewerSettings" label="Storage settings" type="org.molgenis.omx.filemanager.Settings" />		
-			<menu name ="Characteristics">
-				<form name="Characteristic" entity="Characteristic" />
-			</menu>
-			<menu name ="Panels">
-				<form name="Panel" entity="Panel" />
-			</menu>
-			<menu name ="Citations">
-				<form name="Citation" entity="Citation" />
-			</menu>
-=======
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<menu name="Admin">
 			<menu name ="Characteristics">
 				<form name="Characteristic" entity="Characteristic" />
 			</menu>
-			
->>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
+
 			<menu name ="Individuals">	
 				<form name="Individual" entity="Individual" />
 			</menu>
@@ -49,23 +24,6 @@
 					<form name="Values" entity="DataSet" />
 				</form>
 			</menu>
-<<<<<<< HEAD
-			<menu name="Lookups">
-				<form name="Ontologies" entity="Ontology">
-					<form name="OntologyTerms" entity="OntologyTerm" />
-				</form>
-				<form name="Species" entity="Species" />
-			</menu>
-			<menu name="Genomics">
-				<form name="Genomes" entity="Genome">
-					<form name="Chromosomes" entity="Chromosome" />
-				</form>
-				<form name="Genes" entity="Gene"/>
-				<form name="Proteins" entity="Protein"/>
-				<form name="Variants" entity="Variant"/>
-			</menu>
-=======
->>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
 			<menu name="Investigation">
 				<form name="InvestigationInfo" label="Investigation" entity="Investigation"
 					compact_view="name">
@@ -106,9 +64,4 @@
 			</menu>		
 		</menu> <!-- admin panels -->	
 	</menu> <!-- main -->
-<<<<<<< HEAD
-
-	
-=======
->>>>>>> d303d8c058d0e1c527d1c1b0bfd3708e50759a2c
 </molgenis>
