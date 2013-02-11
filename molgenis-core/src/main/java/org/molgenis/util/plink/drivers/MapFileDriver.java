@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -21,7 +20,7 @@ import org.molgenis.util.plink.datatypes.MapEntry;
  * chromosome, SNP, cM, base-position. See:
  * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#map
  */
-public class MapFileDriver implements PlinkFileParser, Iterable<MapEntry>
+public class MapFileDriver implements PlinkFileParser
 {
 	private BufferedReader reader;
 	private final File file;
@@ -130,64 +129,4 @@ public class MapFileDriver implements PlinkFileParser, Iterable<MapEntry>
 		this.reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), FILE_ENCODING));
 	}
 
-	@Override
-	public Iterator<MapEntry> iterator()
-	{
-		try
-		{
-			reset();
-			return new MapFileIterator();
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	private class MapFileIterator implements Iterator<MapEntry>
-	{
-		private String line;
-
-		public MapFileIterator()
-		{
-			try
-			{
-				line = reader.readLine();
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
-		@Override
-		public boolean hasNext()
-		{
-			return line != null;
-		}
-
-		@Override
-		public MapEntry next()
-		{
-			MapEntry entry;
-			try
-			{
-				entry = parseEntry(line, separator + "");
-				line = reader.readLine();
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			return entry;
-		}
-
-		@Override
-		public void remove()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-	}
 }
