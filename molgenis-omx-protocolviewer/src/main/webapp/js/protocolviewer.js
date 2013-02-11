@@ -72,6 +72,7 @@ function updateProtocolView(protocol) {
 	
 	// append tree to DOM
 	var tree = $('<ul />').append(buildTree(protocol));
+	//var tree = $('<ul />').append(createNodes(protocol, null));
 	container.append(tree);
 
 	// render tree and open first branch
@@ -85,23 +86,16 @@ function updateProtocolView(protocol) {
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 		},
 		onQuerySelect : function(select, node){
+			$('#spinner').modal('show');
 			//if it has children?
 			if(node.data.isFolder){
-				if(!node.hasChildren()){
-					retrieveNodeInfo(node, true, null);
-				}else{
-					var reRenderNode = false;
-					var listOfChildren = node.childList;
-					for(var i = 0; i < listOfChildren.length; i++){
-						var eachChildNode = listOfChildren[i];
-						if(eachChildNode.data.isFolder && !eachChildNode.hasChildren()){
-							reRenderNode = true;
-							break;
-						}
-					}
+				if(node.hasChildren()){
+					var reRenderNode = checkExistenceOfAllSubNodes(node);
 					if(reRenderNode){
 						retrieveNodeInfo(node, true, null);
 					}
+				}else{
+					retrieveNodeInfo(node, true, null);
 				}
 			}
 		},
@@ -113,6 +107,7 @@ function updateProtocolView(protocol) {
 				setFeatureDetails(null);
 			// update feature selection
 			updateFeatureSelection(node.tree);
+			$('#spinner').modal('hide');
 		},
 		onLazyRead: function(node){
 			retrieveNodeInfo(node, false, null);
@@ -157,6 +152,23 @@ function createNodes(protocol, options) {
 		});
 	}
 	return branches;
+}
+
+function checkExistenceOfAllSubNodes(node){
+	var reRenderNode = false;
+	var listOfChildren = node.childList;
+	for(var i = 0; i < listOfChildren.length; i++){
+		var eachChildNode = listOfChildren[i];
+		if(eachChildNode.data.isFolder){
+			if(eachChildNode.hasChildren()){
+				reRenderNode = reRenderNode || checkExistenceOfAllSubNodes(eachChildNode);
+			}else{
+				reRenderNode = true;
+				break;
+			}
+		}
+	}
+	return reRenderNode;
 }
 
 function retrieveNodeInfo(node, recursive, options){
@@ -235,7 +247,6 @@ function updateFeatureSelection(tree) {
 		if(!node.data.isFolder) {
 			var name = node.data.title;
 			var protocol_name = node.parent.data.title;
-			
 			var row = $('<tr />').attr('id', node.data.key + "_row");
 			$('<td />').text(name !== undefined ? name : "").appendTo(row);
 			$('<td />').text(protocol_name != undefined ? protocol_name : "").appendTo(row);
@@ -300,6 +311,7 @@ function clearSearch() {
 
 function searchProtocolServer(query){	
 	if(query) {
+		$('#spinner').modal('show');
 		var dataSets = $(document).data('datasets');
 		var dataSet = dataSets[dataSets.selected];	
 		$.ajax({
@@ -313,6 +325,7 @@ function searchProtocolServer(query){
 				insertInExistingNodes(data, rootNode);
 				var keys = getBottomNodes(data, new Array());
 				showNodes(rootNode, keys);
+				$('#spinner').modal('hide');
 			}
         });
 	}
