@@ -143,7 +143,22 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		return Show.SHOW_MAIN;
 	}
 
-	private JSProtocol searchProtocol(Database db, Protocol topProtocol, String queryString, boolean expanded)
+	/**
+	 * This function is to search user-typed query in all the features. The
+	 * searching starts from the top-protocol (the one that is used to define
+	 * the dataset), it recursively calls itself until reaching the features. If
+	 * the query is found in some features, their corresponding protocols will
+	 * be informed that the features have been matched. Those protocols which
+	 * have successful "hits" are sent back to clinet side for display.
+	 * 
+	 * @param db
+	 * @param topProtocol
+	 * @param query
+	 * @param expanded
+	 * @return
+	 * @throws DatabaseException
+	 */
+	private JSProtocol searchProtocol(Database db, Protocol topProtocol, String query, boolean expanded)
 			throws DatabaseException
 	{
 		JSProtocol jsProtocol = null;
@@ -155,13 +170,13 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			for (Protocol p : subProtocols)
 			{
-				if (p.getName().contains(queryString))
+				if (p.getName().contains(query))
 				{
 					jsSubProtocols.add(toJSProtocol(db, p, true));
 				}
 				else
 				{
-					JSProtocol subJSProtocol = searchProtocol(db, p, queryString, expanded);
+					JSProtocol subJSProtocol = searchProtocol(db, p, query, expanded);
 					if (subJSProtocol != null) jsSubProtocols.add(subJSProtocol);
 				}
 			}
@@ -170,7 +185,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			for (ObservableFeature feature : findFeatures(db, topProtocol.getFeatures_Id()))
 			{
-				if (feature.getName().contains(queryString) || feature.getDescription().contains(queryString))
+				if (feature.getName().contains(query) || feature.getDescription().contains(query))
 				{
 					jsFeatures.add(toJSFeature(db, feature));
 				}
@@ -181,7 +196,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					{
 						for (Category c : findCategories(db, feature))
 						{
-							if (c.getDescription() != null && c.getDescription().contains(queryString))
+							if (c.getDescription() != null && c.getDescription().contains(query))
 							{
 								jsFeatures.add(toJSFeature(db, feature));
 							}
