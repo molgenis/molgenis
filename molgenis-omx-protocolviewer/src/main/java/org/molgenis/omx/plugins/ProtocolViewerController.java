@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -113,14 +114,24 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		}
 		else if (request.getAction().equals("download_json_searchdataset"))
 		{
-			String queryString = request.getString("query");
+			String query = request.getString("query");
 			Integer datasetID = request.getInt("id");
 			List<Protocol> topProtocol = null;
 			List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, datasetID));
 			if (dataSets != null && !dataSets.isEmpty()) topProtocol = db.find(Protocol.class, new QueryRule(
 					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
-			if (topProtocol != null && !topProtocol.isEmpty()) src = searchProtocol(db, topProtocol.get(0),
-					queryString, true);
+			List<Protocol> listOfProtocols = db
+					.find(Protocol.class, new QueryRule(Protocol.NAME, Operator.LIKE, query));
+			List<ObservableFeature> listOfFeatures = db.find(ObservableFeature.class, new QueryRule(
+					ObservableFeature.NAME, Operator.LIKE, query));
+			List<Category> listOfCategories = db.find(Category.class, new QueryRule(Category.DESCRIPTION,
+					Operator.LIKE, query));
+			if (listOfCategories.isEmpty() && listOfFeatures.isEmpty() && listOfProtocols.isEmpty())
+			{
+				src = toJSProtocol(db, topProtocol.get(0), false);
+			}
+			else if (topProtocol != null && !topProtocol.isEmpty()) src = searchProtocol(db, topProtocol.get(0), query,
+					true);
 		}
 		else
 		{
@@ -161,8 +172,9 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	private JSProtocol searchProtocol(Database db, Protocol topProtocol, String query, boolean expanded)
 			throws DatabaseException
 	{
+		query = query.toLowerCase();
 		JSProtocol jsProtocol = null;
-		List<Protocol> subProtocols = findSubProtocols(db, topProtocol);
+		List<Protocol> subProtocols = topProtocol.getSubprotocols();
 		List<JSProtocol> jsSubProtocols = new ArrayList<JSProtocol>();
 		List<JSFeature> jsFeatures = new ArrayList<JSFeature>();
 
@@ -170,7 +182,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			for (Protocol p : subProtocols)
 			{
-				if (p.getName().contains(query))
+				if (p.getName().toLowerCase().contains(query))
 				{
 					jsSubProtocols.add(toJSProtocol(db, p, true));
 				}
@@ -183,20 +195,21 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		}
 		else
 		{
-			for (ObservableFeature feature : findFeatures(db, topProtocol.getFeatures_Id()))
+			for (ObservableFeature feature : topProtocol.getFeatures())
 			{
-				if (feature.getName().contains(query) || feature.getDescription().contains(query))
+				if (feature.getName().toLowerCase().contains(query)
+						|| feature.getDescription().toLowerCase().contains(query))
 				{
 					jsFeatures.add(toJSFeature(db, feature));
 				}
 				else
 				{
-					List<Category> categories = findCategories(db, feature);
+					Collection<Category> categories = feature.getObservableFeatureCategoryCollection();
 					if (categories != null & !categories.isEmpty())
 					{
 						for (Category c : findCategories(db, feature))
 						{
-							if (c.getDescription() != null && c.getDescription().contains(query))
+							if (c.getDescription() != null && c.getDescription().toLowerCase().contains(query))
 							{
 								jsFeatures.add(toJSFeature(db, feature));
 							}
