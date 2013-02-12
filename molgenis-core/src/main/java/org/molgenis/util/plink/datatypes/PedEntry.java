@@ -1,27 +1,42 @@
 package org.molgenis.util.plink.datatypes;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
 
-public class PedEntry extends FamEntry
+public class PedEntry extends FamEntry implements Iterable<Biallele>
 {
 
 	// list iterates SNP's, so 1 list per individual
-	List<Biallele> bialleles;
+	private final Iterator<Biallele> bialleles;
 
 	public PedEntry(String family, String individual, String father, String mother, byte sex, double phenotype,
-			List<Biallele> bialleles)
+			Iterator<Biallele> bialleles)
 	{
 		super(family, individual, father, mother, sex, phenotype);
 		this.bialleles = bialleles;
 	}
 
-	public List<Biallele> getBialleles()
+	@Override
+	public Iterator<Biallele> iterator()
 	{
 		return bialleles;
+	}
+
+	public List<Biallele> getBialleles()
+	{
+		List<Biallele> bialleleList = new ArrayList<Biallele>();
+		Iterator<Biallele> it = iterator();
+		while (it.hasNext())
+		{
+			bialleleList.add(it.next());
+		}
+
+		return bialleleList;
 	}
 
 	public static String[] pedHeader()

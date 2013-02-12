@@ -7,11 +7,11 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 <#if metaData>
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisPermission;
-import org.molgenis.auth.MolgenisRoleGroupLink;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.core.MolgenisEntity;
+import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisPermission;
+import org.molgenis.omx.auth.MolgenisRoleGroupLink;
+import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.core.MolgenisEntity;
 </#if>
 
 import org.molgenis.framework.db.Database;

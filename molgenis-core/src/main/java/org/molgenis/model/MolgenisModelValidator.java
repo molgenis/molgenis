@@ -321,11 +321,14 @@ public class MolgenisModelValidator
 				{
 					// retrieve the references to the entity+field
 					Entity xref_entity_to = xref_field_from.getXrefEntity();
+					if (xref_entity_to.isImported()) continue;
+
 					Field xref_field_to = xref_field_from.getXrefField();
 
 					// TODO: check whether this link is already present
 
-					// create the new entity for the link, if explicitly named
+					// create the new entity for the link, if explicitly
+					// named
 					String mref_name = xref_field_from.getMrefName(); // explicit
 
 					// if mref_name longer than 30 throw error
@@ -1260,8 +1263,7 @@ public class MolgenisModelValidator
 	{
 		if (string == null) return " NULL ";
 		if (string.length() > 0) return string.substring(0, 1).toUpperCase() + string.substring(1);
-		else
-			return " ERROR[STRING EMPTY] ";
+		else return " ERROR[STRING EMPTY] ";
 	}
 
 }

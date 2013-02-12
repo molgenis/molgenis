@@ -42,7 +42,7 @@ public class PedFileWriterTest
 			{
 				fileWriter = new PedFileWriter(file0);
 				fileWriter.write(new PedEntry("1", "1", "0", "0", (byte) 1, 1.0, Arrays.asList(new Biallele('A', 'A'),
-						new Biallele('G', 'T'))));
+						new Biallele('G', 'T')).iterator()));
 			}
 			finally
 			{
@@ -63,9 +63,9 @@ public class PedFileWriterTest
 	{
 		List<PedEntry> entryList = new ArrayList<PedEntry>();
 		entryList.add(new PedEntry("1", "1", "0", "0", (byte) 1, 1.0, Arrays.asList(new Biallele('A', 'A'),
-				new Biallele('G', 'T'))));
+				new Biallele('G', 'T')).iterator()));
 		entryList.add(new PedEntry("2", "1", "0", "0", (byte) 1, 1.0, Arrays.asList(new Biallele('A', 'C'),
-				new Biallele('T', 'G'))));
+				new Biallele('T', 'G')).iterator()));
 
 		File file0 = File.createTempFile("PedFileWriterTest_file0", null);
 		try
