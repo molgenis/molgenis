@@ -72,7 +72,7 @@
 				</div>
 				<div id="spinner" class="modal hide" style="width:180px;margin:150px 100px 0px -100px">
 			  		<div class="modal-header">
-			    		<h3>Loading...</h3>
+			    		<h3></h3>
 			 		 </div>
 			  		<div class="modal-body">
 			    		<div style="width: 32px;margin:10px auto"><img src="img/waiting-spinner.gif" /></div>

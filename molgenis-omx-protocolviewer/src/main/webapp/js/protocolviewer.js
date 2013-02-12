@@ -34,12 +34,10 @@ function getFeature(id, callback) {
 }
 
 function updateProtocolView(protocol) {
-		
 	var container = $('#dataset-browser');
 	if(container.children('ul').length > 0) {
 		container.dynatree('destroy');
 	}
-	
 	container.empty();
 	if(typeof protocol === 'undefined') {
 		container.append("<p>Catalog does not describe variables</p>");
@@ -64,7 +62,7 @@ function updateProtocolView(protocol) {
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 		},
 		onQuerySelect : function(select, node){
-			$('#spinner').modal('show');
+			$('#spinner').modal('show').find('h3:first-child').text('Loading...')
 			//if it has children?
 			if(node.data.isFolder){
 				if(node.hasChildren()){
@@ -287,7 +285,7 @@ function clearSearch() {
 
 function searchProtocolServer(query){	
 	if(query) {
-		$('#spinner').modal('show');
+		$('#spinner').modal('show').find('h3:first-child').text('Searching...');
 		var dataSets = $(document).data('datasets');
 		var dataSet = dataSets[dataSets.selected];	
 		$.ajax({
