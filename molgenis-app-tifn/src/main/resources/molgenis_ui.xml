@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- DOCTYPE molgenis PUBLIC "MOLGENIS 1.0" "http://molgenis.sourceforge.net/dtd/molgenis_v_1_0.dtd" -->
 <molgenis name="tifn">
+
 <plugin name="tifn_header" type="org.molgenis.tifn.plugins.header.Header" />
+
 	<menu name="main">
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<menu name="Admin">
-			<menu name ="Characteristics">
-				<form name="Characteristic" entity="Characteristic" />
-			</menu>
-
-			<menu name ="Individuals">	
-				<form name="Individual" entity="Individual" />
-			</menu>
 			<menu name ="Features">
 				<form name="Feature" entity="ObservableFeature">
 					<form name="Categories" entity="Category" />
@@ -24,31 +19,6 @@
 					<form name="Values" entity="DataSet" />
 				</form>
 			</menu>
-			<menu name="Investigation">
-				<form name="InvestigationInfo" label="Investigation" entity="Investigation"
-					compact_view="name">
-					<menu name="StudyMenu">
-						<form name="Study" label="Study" entity="Study" compact_view="name">
-							<form name="StudyDetail" label="Study Details" entity="StudyDetails" />
-							<form name="samplePanels" label="SamplePanel" entity="SamplePanel" />
-							<form name="Contributions" entity="Contribution" />
-							<form name="StudyAnalysisMethods" entity="Protocol" />
-							<form name="Experiments" entity="Experiment" compact_view="identifier,experimentType">
-								<menu name="ExperimentMenu">
-									<!-- <form name="DataSets" lalel="DataSets / ResultSets" entity="DataSet"/> 
-										form name="ExperimentLinks" label="Hotlinks" entity="Link" / -->
-									<form name="AassayedPanels" entity="Panel" />
-									<form name="UsedMarkerSets" entity="UsedMarkerSet" />
-									<form name="Significances" entity="FrequencyCluster">
-										<form name="GenotypeFrequencies" entity="GenotypeFrequency" />
-										<form name="AlleleFrequencies" entity="AlleleFrequency" />
-									</form>
-								</menu>
-							</form>
-						</form> <!-- study -->
-					</menu><!-- Studymenu -->
-				</form> <!-- invs -->
-			</menu> <!-- investigation -->
 			<menu name="Contacts">
 				<form name="Persons" entity="Person" />
 				<form name="Institutes" entity="Institute">
@@ -63,5 +33,6 @@
 				</form>		
 			</menu>		
 		</menu> <!-- admin panels -->	
+		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
 	</menu> <!-- main -->
 </molgenis>
