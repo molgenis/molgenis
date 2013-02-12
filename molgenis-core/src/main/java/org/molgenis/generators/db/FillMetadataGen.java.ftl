@@ -69,6 +69,7 @@ public class FillMetadata {
 
 		MolgenisUser user1 = new MolgenisUser();
 		user1.setName("admin");
+		user1.setIdentifier("admin");
 		user1.setPassword("md5_21232f297a57a5a743894a0e4a801fc3");
 		user1.setEmail("");
 		user1.setFirstName("admin");
@@ -78,6 +79,7 @@ public class FillMetadata {
 		
 		MolgenisUser user2 = new MolgenisUser();
 		user2.setName("anonymous");
+		user2.setIdentifier("anonymous");
 		user2.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf");
 		user2.setEmail("");
 		user2.setFirstName("anonymous");
@@ -86,8 +88,10 @@ public class FillMetadata {
 
 		MolgenisGroup group1 = new MolgenisGroup();
 		group1.setName("system");
+		group1.setIdentifier("system");
 		MolgenisGroup group2 = new MolgenisGroup();
 		group2.setName("AllUsers");
+		group2.setIdentifier("AllUsers");
 
 <#if databaseImpl == 'JPA'>
         em.persist(user1);
@@ -120,18 +124,26 @@ public class FillMetadata {
 
 		MolgenisRoleGroupLink mrgl1 = new MolgenisRoleGroupLink();
 		mrgl1.setGroup_Id(group1.getId());
+		mrgl1.setIdentifier(group1.getIdentifier());
+		mrgl1.setName(group1.getName());
 		mrgl1.setRole(user1.getId());
 
 		MolgenisRoleGroupLink mrgl2 = new MolgenisRoleGroupLink();
 		mrgl2.setGroup_Id(group2.getId());
+		mrgl2.setIdentifier(group2.getIdentifier());
+		mrgl2.setName(group2.getName());
 		mrgl2.setRole(user1.getId());		
 
 		MolgenisRoleGroupLink mrgl3 = new MolgenisRoleGroupLink();
 		mrgl3.setGroup_Id(group1.getId());
+		mrgl3.setIdentifier(group1.getIdentifier());
+		mrgl3.setName(group1.getName());
 		mrgl3.setRole(user2.getId());
 
 		MolgenisRoleGroupLink mrgl4 = new MolgenisRoleGroupLink();
 		mrgl4.setGroup_Id(group2.getId());
+		mrgl4.setIdentifier(group2.getIdentifier());
+		mrgl4.setName(group2.getName());
 		mrgl4.setRole(user2.getId());		
 		
 		db.add(mrgl1);
