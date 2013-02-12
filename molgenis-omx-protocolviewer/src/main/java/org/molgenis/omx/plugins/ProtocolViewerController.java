@@ -8,7 +8,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -204,7 +203,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 				}
 				else
 				{
-					Collection<Category> categories = feature.getObservableFeatureCategoryCollection();
+					List<Category> categories = findCategories(db, feature);
 					if (categories != null & !categories.isEmpty())
 					{
 						for (Category c : findCategories(db, feature))
