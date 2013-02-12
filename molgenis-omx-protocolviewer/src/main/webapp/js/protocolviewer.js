@@ -45,34 +45,6 @@ function updateProtocolView(protocol) {
 		container.append("<p>Catalog does not describe variables</p>");
 		return;
 	}
-	
-	// recursively build tree for protocol, this function is similar to createNodes() function
-	// TODO: please merge them in the future!
-	function buildTree(protocol) {
-		// add protocol
-		var item = $('<li class="folder"/>').attr('data', 'key: "' + protocol.id + '", title:"' + protocol.name + '", isLazy: true');
-		var list = $('<ul />');
-		// add protocol: subprotocols
-		if(protocol.subProtocols) {
-			$.each(protocol.subProtocols, function(i, subProtocol) {
-				list.append(buildTree(subProtocol));
-			});
-		}
-		// add protocol: features
-		if(protocol.features) {
-			$.each(protocol.features, function(i, feature) {
-				var item = $('<li />').attr('data', 'key: "' + feature.id + '", title:"' + feature.name + '", isLazy: true');
-				item.appendTo(list);
-			});
-		}
-		list.appendTo(item);
-		
-		return item;
-	};
-	
-	// append tree to DOM
-	var tree = $('<ul />').append(buildTree(protocol));
-	container.append(tree);
 
 	// render tree and open first branch
 	container.dynatree({
@@ -80,28 +52,28 @@ function updateProtocolView(protocol) {
 		selectMode: 3,
 		minExpandLevel: 2,
 		debugLevel: 0,
+		children: [{
+			key : protocol.id,
+			title : protocol.name,
+			isFolder: true,
+			isLazy : true,
+			children : createNodes(protocol, null),
+		}],
 		onClick: function(node, event) {
 			if(node.getEventTargetType(event) == "title" && !node.data.isFolder)
 				getFeature(node.data.key, function(data) { setFeatureDetails(data); });
 		},
 		onQuerySelect : function(select, node){
+			$('#spinner').modal('show');
 			//if it has children?
 			if(node.data.isFolder){
-				if(!node.hasChildren()){
-					retrieveNodeInfo(node, true, null);
-				}else{
-					var reRenderNode = false;
-					var listOfChildren = node.childList;
-					for(var i = 0; i < listOfChildren.length; i++){
-						var eachChildNode = listOfChildren[i];
-						if(eachChildNode.data.isFolder && !eachChildNode.hasChildren()){
-							reRenderNode = true;
-							break;
-						}
-					}
+				if(node.hasChildren()){
+					var reRenderNode = checkExistenceOfAllSubNodes(node);
 					if(reRenderNode){
 						retrieveNodeInfo(node, true, null);
 					}
+				}else{
+					retrieveNodeInfo(node, true, null);
 				}
 			}
 		},
@@ -113,6 +85,7 @@ function updateProtocolView(protocol) {
 				setFeatureDetails(null);
 			// update feature selection
 			updateFeatureSelection(node.tree);
+			$('#spinner').modal('hide');
 		},
 		onLazyRead: function(node){
 			retrieveNodeInfo(node, false, null);
@@ -120,8 +93,8 @@ function updateProtocolView(protocol) {
 	});
 }
 
-//recursively build tree for protocol, this function is similar to createNodes() function
-// TODO: please merge them in the future!
+//recursively build tree for protocol, the extra dynatree node options
+//can be passed to the function to give different features to nodes.
 function createNodes(protocol, options) {
 	var branches = [];
 	if(protocol.subProtocols){
@@ -157,6 +130,23 @@ function createNodes(protocol, options) {
 		});
 	}
 	return branches;
+}
+
+function checkExistenceOfAllSubNodes(node){
+	var reRenderNode = false;
+	var listOfChildren = node.childList;
+	for(var i = 0; i < listOfChildren.length; i++){
+		var eachChildNode = listOfChildren[i];
+		if(eachChildNode.data.isFolder){
+			if(eachChildNode.hasChildren()){
+				reRenderNode = reRenderNode || checkExistenceOfAllSubNodes(eachChildNode);
+			}else{
+				reRenderNode = true;
+				break;
+			}
+		}
+	}
+	return reRenderNode;
 }
 
 function retrieveNodeInfo(node, recursive, options){
@@ -235,7 +225,6 @@ function updateFeatureSelection(tree) {
 		if(!node.data.isFolder) {
 			var name = node.data.title;
 			var protocol_name = node.parent.data.title;
-			
 			var row = $('<tr />').attr('id', node.data.key + "_row");
 			$('<td />').text(name !== undefined ? name : "").appendTo(row);
 			$('<td />').text(protocol_name != undefined ? protocol_name : "").appendTo(row);
@@ -300,6 +289,7 @@ function clearSearch() {
 
 function searchProtocolServer(query){	
 	if(query) {
+		$('#spinner').modal('show');
 		var dataSets = $(document).data('datasets');
 		var dataSet = dataSets[dataSets.selected];	
 		$.ajax({
@@ -313,6 +303,7 @@ function searchProtocolServer(query){
 				insertInExistingNodes(data, rootNode);
 				var keys = getBottomNodes(data, new Array());
 				showNodes(rootNode, keys);
+				$('#spinner').modal('hide');
 			}
         });
 	}
