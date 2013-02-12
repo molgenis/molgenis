@@ -26,6 +26,7 @@
 					</form>
 				</form>		
 			</menu>		
-		</menu> <!-- admin panels -->	
+		</menu> <!-- admin panels -->
+		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
 	</menu> <!-- main -->
 </molgenis>
