@@ -30,8 +30,6 @@ import org.molgenis.util.tuple.Tuple;
 
 /**
  * Convert a transformed LifeLines data dictionary to Observ-OMX format
- * 
- * TODO support multiple sheets
  */
 public class LifeLinesDataDictionarytoOMXConvertor
 {
@@ -245,8 +243,10 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			String featureIdentifier = group + '.' + code;
 			String featureName = row.getString(COL_DISPLAY_NAME);
 			String featureDescription = row.getString(COL_DESCRIPTION);
-			if (featureName == null || featureName.isEmpty()) throw new IOException();
-			if (featureDescription == null || featureDescription.isEmpty()) throw new IOException();
+			if (featureName == null || featureName.isEmpty()) throw new IOException("expected value in column "
+					+ COL_DISPLAY_NAME);
+			if (featureDescription == null || featureDescription.isEmpty()) throw new IOException(
+					"expected value in column " + COL_DESCRIPTION);
 			// featureName = "UNKNOWN FEATURE NAME";
 			KeyValueTuple featureMap = new KeyValueTuple();
 			featureMap.set(ENTITY_IDENTIFIER, featureIdentifier);

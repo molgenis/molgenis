@@ -23,8 +23,8 @@ import org.molgenis.io.TupleWriter;
 
 import java.text.ParseException;
 
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.service.MolgenisUserService;
+import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.framework.security.SimpleLogin;
 
 import org.molgenis.framework.db.MapperDecorator;

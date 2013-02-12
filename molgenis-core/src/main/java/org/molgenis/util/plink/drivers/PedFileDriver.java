@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -24,11 +25,11 @@ import org.molgenis.util.plink.datatypes.PedEntry;
  * this? or just PED? See:
  * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#ped
  */
-public class PedFileDriver implements PlinkFileParser
+public class PedFileDriver implements PlinkFileParser, Iterable<PedEntry>
 {
 	private BufferedReader reader;
-	private File file;
-	private char separator;
+	private final File file;
+	private final char separator;
 	private long nrElements;
 
 	/**
@@ -68,6 +69,20 @@ public class PedFileDriver implements PlinkFileParser
 		return entryList;
 	}
 
+	@Override
+	public Iterator<PedEntry> iterator()
+	{
+		try
+		{
+			reset();
+			return new PedFileIterator();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	/**
 	 * Get a specific set of PED file entries
 	 * 
@@ -92,7 +107,7 @@ public class PedFileDriver implements PlinkFileParser
 
 	private PedEntry parseEntry(String line) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, separator + "");
+		final StringTokenizer strTokenizer = new StringTokenizer(line, separator + "");
 		try
 		{
 			String family = strTokenizer.nextToken();
@@ -101,14 +116,31 @@ public class PedFileDriver implements PlinkFileParser
 			String mother = strTokenizer.nextToken();
 			byte sex = Byte.parseByte(strTokenizer.nextToken());
 			double phenotype = Double.parseDouble(strTokenizer.nextToken());
-			List<Biallele> bialleles = new ArrayList<Biallele>();
-			while (strTokenizer.hasMoreTokens())
+
+			return new PedEntry(family, individual, father, mother, sex, phenotype, new Iterator<Biallele>()
 			{
-				char allele1 = strTokenizer.nextToken().charAt(0);
-				char allele2 = strTokenizer.nextToken().charAt(0);
-				bialleles.add(Biallele.create(allele1, allele2));
-			}
-			return new PedEntry(family, individual, father, mother, sex, phenotype, bialleles);
+
+				@Override
+				public boolean hasNext()
+				{
+					return strTokenizer.hasMoreTokens();
+				}
+
+				@Override
+				public Biallele next()
+				{
+					char allele1 = strTokenizer.nextToken().charAt(0);
+					char allele2 = strTokenizer.nextToken().charAt(0);
+					return Biallele.create(allele1, allele2);
+				}
+
+				@Override
+				public void remove()
+				{
+					throw new UnsupportedOperationException();
+				}
+
+			});
 		}
 		catch (NoSuchElementException e)
 		{
@@ -140,5 +172,52 @@ public class PedFileDriver implements PlinkFileParser
 	{
 		if (this.reader != null) close();
 		this.reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), FILE_ENCODING));
+	}
+
+	private class PedFileIterator implements Iterator<PedEntry>
+	{
+		private String line;
+
+		public PedFileIterator()
+		{
+			try
+			{
+				line = reader.readLine();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public boolean hasNext()
+		{
+			return line != null;
+		}
+
+		@Override
+		public PedEntry next()
+		{
+			PedEntry entry;
+			try
+			{
+				entry = parseEntry(line);
+				line = reader.readLine();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+
+			return entry;
+		}
+
+		@Override
+		public void remove()
+		{
+			throw new UnsupportedOperationException();
+		}
+
 	}
 }

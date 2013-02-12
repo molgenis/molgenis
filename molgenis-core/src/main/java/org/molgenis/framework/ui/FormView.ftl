@@ -11,7 +11,7 @@
 		<!--
 			<td colspan="3" class="form_title">
 	<#list screen.getFilters() as filter>
-				<label><#if filter_index=0>where: <#else></#if>${filter}</label><img height="16" class="navigation_button" src="img/cancel.png" alt="Cancel" onclick="setInput('${screen.name}_form','_self','','${screen.name}','filter_remove','iframe'); document.forms.${screen.name}_form.filter_id.value='${filter_index}'; document.forms.${screen.name}_form.submit();" title="remove filter"/>
+				<label style="display:inline;"><#if filter_index=0>where: <#else></#if>${filter}</label><img height="16" class="navigation_button" src="img/cancel.png" alt="Cancel" onclick="setInput('${screen.name}_form','_self','','${screen.name}','filter_remove','iframe'); document.forms.${screen.name}_form.filter_id.value='${filter_index}'; document.forms.${screen.name}_form.submit();" title="remove filter"/>
 	</#list>
 			</td>
         -->
@@ -48,9 +48,9 @@
 	<#if screen.mode.toString() == "listview">
 		<#assign to = screen.offset + screen.limit>
 		<#if to &gt; screen.count><#assign to = screen.count></#if>
-				<label>${from}<#if screen.mode.toString() == "listview"> - ${to}</#if> of ${screen.count}</label>
+				<label style="display:inline;">${from}<#if screen.mode.toString() == "listview"> - ${to}</#if> of ${screen.count}</label>
 	<#else>
-				<label>${from} of ${screen.count}</label>
+				<label style="display:inline;">${from} of ${screen.count}</label>
 	</#if>
 				<img class="navigation_button" id="next_${screen.name}" src="img/next.png" onclick="setInput('${screen.name}_form','_self','','${screen.name}','next','iframe'); document.forms.${screen.name}_form.submit()" title="go to next record"/>
 				<img class="navigation_button" id="last_${screen.name}" src="img/last.png" onclick="setInput('${screen.name}_form','_self','','${screen.name}','last','iframe'); document.forms.${screen.name}_form.submit()" title="go to last record"/>	
@@ -80,7 +80,7 @@
 			<img id="${screen.name}_${command.name}" class="navigation_button" src="${command.icon}" onclick="${command.getJavaScriptAction()}" alt="${command.label}" title="${command.label}"/>&nbsp;
 		</#list>	
 		<!--search box-->
-		<label>Search:</label><select id="${screen.name}_filter_attribute" title="choose attribute" name="__filter_attribute" style="display:none">
+		<label style="display:inline;">Search:</label><select id="${screen.name}_filter_attribute" title="choose attribute" name="__filter_attribute" style="display:none">
 			<option value="all">Any field</option>
 		<#list screen.getNewRecordForm().inputs as input><#if !input.isHidden()>
 			<option value="${screen.getSearchField(input.name)}">${input.label}</option>
@@ -113,7 +113,7 @@
 	<#list screen.getNewRecordForm() as input>
 		<#if !input.isHidden()>
 			<tr>
-				<td title="${input.description}"><label for="${input.name}">${input.label}<#if !input.isNillable()  && !input.isReadonly()> *</#if></label></td>
+				<td title="${input.description}"><label style="display:inline;" for="${input.name}">${input.label}<#if !input.isNillable()  && !input.isReadonly()> *</#if></label></td>
 				<td>${input.toHtml()}</td>
 			</tr>
 		<#else>
@@ -125,7 +125,7 @@
 			<#assign requiredcount = requiredcount + 1 />
 		</#if>
 	</#list>
-			<!--<tr><td><br /><label>Number of copies: </label></td>
+			<!--<tr><td><br /><label style="display:inline;">Number of copies: </label></td>
 		
 			<td><br /><input name="__batchadd" value="1" size="4"/></td></tr>-->
 		</form>
@@ -150,7 +150,7 @@
 	<#list screen.getCurrentCommand().getInputs() as input>
 		<#if !input.isHidden()>
 			<tr>
-				<td title="${input.description}"><label>${input.label}</label></td>
+				<td title="${input.description}"><label style="display:inline;">${input.label}</label></td>
 				<td>${input.toHtml()}<#if !input.isNillable()  && !input.isReadonly()> *</#if></td>
 			</tr>
 		<#else>
@@ -188,7 +188,7 @@ var molgenis_required = new Array(${required});
 			<input type="hidden" name="__target" value="${screen.name}"/>
 			<input type="hidden" name="__action" value="filter_add" />	
 			<tr>
-				<td><label>Field:</label></td>
+				<td><label style="display:inline;">Field:</label></td>
 				<td>
 					<select name="attribute">
 	<#list screen.getNewRecordForm() as input>
@@ -198,7 +198,7 @@ var molgenis_required = new Array(${required});
 				</td>
 			</tr>
 			<tr>
-				<td><label>Operator:</label></td>
+				<td><label style="display:inline;">Operator:</label></td>
 				<td>
 					<select name="operator">
 					<option value="EQUALS">=</option>
@@ -211,7 +211,7 @@ var molgenis_required = new Array(${required});
 					</select>
 				</td>
 			</tr>
-			<tr><td><label>Value:</label></td><td><input type="text" name="value"></td></tr>
+			<tr><td><label style="display:inline;">Value:</label></td><td><input type="text" name="value"></td></tr>
 			<tr>
 				<td></td>
 				<td >					
@@ -245,7 +245,7 @@ var molgenis_required = new Array(${required});
 		<#if !input.isHidden()>
 			<tr>
 				<td><input type="checkbox" name="use_${input.name}" <#if input.readonly>DISABLED</#if> onclick="this.form.${input.name}.disabled = !this.form.${input.name}.disabled;" /></td>
-				<td title="${input.description}"><label>${input.label}</label></td>
+				<td title="${input.description}"><label style="display:inline;">${input.label}</label></td>
 				<td>${input.toHtml()}</td>
 			</tr>
 		</#if>
@@ -281,7 +281,7 @@ var molgenis_required = new Array(${required});
 			
 			<#if !input.isHidden()>
 	<tr <#if input.collapse>class="${screen.name}_collapse" id="${screen.name}_collapse_tr_id" </#if>>
-		<td style="vertical-align:middle"><label class="ui-widget">${input.label} <#if !input.isNillable() && !input.isReadonly()> *</#if></label></td>
+		<td style="vertical-align:middle"><label style="display:inline;" class="ui-widget">${input.label} <#if !input.isNillable() && !input.isReadonly()> *</#if></label></td>
 				<#if screen.readonly >
 					<#if input.getTarget() != "" && input.getObject()?exists >
 					<td class="link" onClick="setInput('${screen.name}_form','_self','','${input.getTarget()}','xref_select','iframe'); document.forms.${screen.name}_form.attribute.value='${input.getTargetfield()}'; document.forms.${screen.name}_form.operator.value='EQUALS'; document.forms.${screen.name}_form.value.value='${input.getObject()}'; document.forms.${screen.name}_form.submit();">${input.getHtmlValue()}</td>	
@@ -328,8 +328,8 @@ var molgenis_required = new Array(${required});
 		<#if count == 0>		
 	<tr>
 		<#--empty headers for the browse button and tick boxes -->
-		<th><label>&nbsp;</label></th>
-			<th align="left"><label><#-- 'select all' tick box -->
+		<th><label style="display:inline;">&nbsp;</label></th>
+			<th align="left"><label style="display:inline;"><#-- 'select all' tick box -->
 				<#list screen.getNewRecordForm().inputs as input>
 					<#if input.getName() == screen.getIdField()>
 						<input title="select all visible" type="checkbox" name="checkall" id="checkall" onclick="Javascript:checkAll('${screen.name}_form','massUpdate')" />
@@ -341,14 +341,14 @@ var molgenis_required = new Array(${required});
 					<#if input.isHidden()>
 					<#else>
 					<th>
-						<label class="tableheader" title="${input.getDescription()}">${input.getLabel()}</label></th>
+						<label style="display:inline;" class="tableheader" title="${input.getDescription()}">${input.getLabel()}</label></th>
 					</#if>
 				<#else>
 					<#if input.isHidden()>
 			<#--<img src="img/open.png" title="show ${input.getLabel()}" onclick="setInput('${screen.name}_form','_self','','${screen.name}','showColumn','iframe'); document.forms.${screen.name}_form.attribute.value ='${input.getName()}'; document.forms.${screen.name}_form.submit();" />-->
 					<#else>
 			<#--<img src="img/close.png" title="hide ${input.getLabel()}" onclick="setInput('${screen.name}_form','_self','','${screen.name}','hideColumn','iframe'); document.forms.${screen.name}_form.attribute.value='${input.getName()}'; document.forms.${screen.name}_form.submit();" />-->
-			<th><label class="tableheader" onclick="setInput('${screen.name}_form','_self','','${screen.name}','sort','iframe'); document.forms.${screen.name}_form.__sortattribute.value='${input.getName()}'; document.forms.${screen.name}_form.submit();">
+			<th><label style="display:inline;" class="tableheader" onclick="setInput('${screen.name}_form','_self','','${screen.name}','sort','iframe'); document.forms.${screen.name}_form.__sortattribute.value='${input.getName()}'; document.forms.${screen.name}_form.submit();">
 					${input.getLabel()}<#if screen.getSort() == input.getName()> <#if screen.getSortMode().toString() == "SORTASC"><img src="img/sort_asc.gif"><#else><img src="img/sort_desc.gif"></#if></#if>
 			</label>
 					</th>
@@ -369,7 +369,7 @@ var molgenis_required = new Array(${required});
 		</#list>
 <tr class="form_listrow${rowcolor}">
 	<td>
-		<label>${offset}. 
+		<label style="display:inline;">${offset}. 
 		<#if readonly == "*" >
 			<img class="edit_button" src="img/recordview.png" title="view record" alt="edit${offset}" onClick="setInput('${screen.name}_form','_self','','${screen.name}','editview','iframe'); document.forms.${screen.name}_form.__offset.value='${offset?string.computer}'; document.forms.${screen.name}_form.submit();">${readonly}</label>
 		<#else>
@@ -395,7 +395,7 @@ var molgenis_required = new Array(${required});
 </tr>
 	</#list>
 	</table>
-	<label> * = this record is readonly.</label>
+	<label style="display:inline;"> * = this record is readonly.</label>
 </#macro>
 
 <#macro form_upload screen>
@@ -407,11 +407,11 @@ var molgenis_required = new Array(${required});
 		<table>
 		<tr><td colspan="2"><i>Set constants (overrides uploaded data).</i></td></tr>
 		<#list screen.getNewRecordForm() as input>
-		<tr><td><label>${input.label}<#if !input.isNillable()  && !input.isReadonly()> *</#if></label></td><td>${input.toHtml()}</td></tr>
+		<tr><td><label style="display:inline;">${input.label}<#if !input.isNillable()  && !input.isReadonly()> *</#if></label></td><td>${input.toHtml()}</td></tr>
 		</#list>
-		<!--<tr><td><br /><label>Number of copies: </label></td><td><br /><input name="__batchadd" value="1" size="4"/></td></tr>-->		
+		<!--<tr><td><br /><label style="display:inline;">Number of copies: </label></td><td><br /><input name="__batchadd" value="1" size="4"/></td></tr>-->		
 		<tr><td colspan="2"><i>Add CSV data.</i></td></tr>					
-		<tr><td><label>CSV data</label></td><td><textarea name="__csvdata" cols="80" rows="20"></textarea></td></tr>
+		<tr><td><label style="display:inline;">CSV data</label></td><td><textarea name="__csvdata" cols="80" rows="20"></textarea></td></tr>
 		<tr><td colspan="2" class="edit_button_area">
 		<!--<img class="edit_button" src="img/save.png" alt="Save" onclick="document.forms.${screen.name}_upload.submit(); window.opener.location.href = window.opener.location.href; window.close();" title="upload csv"/>-->
 		<img class="edit_button" src="img/save.png" alt="Save" onclick="if( window.opener.name == '' ){ window.opener.name = 'molgenis'+Math.random();} document.forms.${screen.name}_upload.target = window.opener.name; document.forms.${screen.name}_upload.submit(); window.close();" title="upload csv"/>

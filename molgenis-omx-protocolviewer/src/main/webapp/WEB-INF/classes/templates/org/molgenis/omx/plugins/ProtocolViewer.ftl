@@ -70,6 +70,14 @@
 		  				</div>
 	  				</div>
 				</div>
+				<div id="spinner" class="modal hide" style="width:180px;margin:150px 100px 0px -100px">
+			  		<div class="modal-header">
+			    		<h3></h3>
+			 		 </div>
+			  		<div class="modal-body">
+			    		<div style="width: 32px;margin:10px auto"><img src="img/waiting-spinner.gif" /></div>
+			  		</div>
+				</div>
  				<script type="text/javascript"> 					
  					// create event handlers
  					$('.btn-datasets button').click(function(e) {
@@ -85,7 +93,7 @@
  					
  					$('#search-button').click(function(e) {
  						e.preventDefault();
- 						processSearch($('#search-text').val());
+ 						searchProtocolServer($('#search-text').val());
  					});
  					
  					$('#search-clear-button').click(function(e) {

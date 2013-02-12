@@ -61,7 +61,8 @@ public abstract class ForEachEntityGenerator extends Generator
 			File targetDir = new File(this.getSourcePath(options) + packageName.replace(".", "/"));
 			if (handwritten) targetDir = new File(this.getHandWrittenPath(options) + packageName.replace(".", "/"));
 
-			if ((!entity.isAbstract() || this.includeAbstract) && (!this.skipSystem() || !entity.isSystem()))
+			if (!entity.isImported() && (!entity.isAbstract() || this.includeAbstract)
+					&& (!this.skipSystem() || !entity.isSystem()))
 			{
 				File targetFile = new File(targetDir + "/" + GeneratorHelper.getJavaName(entity.getName()) + getType()
 						+ getExtension());
