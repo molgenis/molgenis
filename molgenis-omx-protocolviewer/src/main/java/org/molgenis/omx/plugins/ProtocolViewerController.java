@@ -149,7 +149,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	 * the dataset), it recursively calls itself until reaching the features. If
 	 * the query is found in some features, their corresponding protocols will
 	 * be informed that the features have been matched. Those protocols which
-	 * have successful "hits" are sent back to clinet side for display.
+	 * have successful "hits" are sent back to client side for display.
 	 * 
 	 * @param db
 	 * @param topProtocol
