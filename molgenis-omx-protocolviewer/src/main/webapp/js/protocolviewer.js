@@ -248,7 +248,6 @@ function getSelectedFeaturesURL(format) {
 	var features = $.map(tree.getSelectedNodes(), function(node){
         return node.data.isFolder ? null : node.data.key;
     });
-	
 	var id = $(document).data('datasets').selected;
 	return 'molgenis.do?__target=ProtocolViewer&__action=download_' + format + '&datasetid=' + id + '&features=' + features.join();
 }
@@ -267,7 +266,6 @@ function processSearch(query) {
 
 function clearSearch() {
 	var root = $("#dataset-browser").dynatree("getRoot");
-	
 	// reset to initial display
 	root.visit(function(node){
 		if(node.li) node.li.hidden = false;
@@ -315,9 +313,11 @@ function getBottomNodes(node, hits){
 			hits.push(getBottomNodes(subNode, hits));
 		});
 	}else{
-		$.each(node.features, function(i, lastNode){
-			hits.push(lastNode.id);
-		});
+		if(node.features && node.features.length > 0){
+			$.each(node.features, function(i, lastNode){
+				hits.push(lastNode.id);
+			});
+		}
 	}
 	return hits;
 }
