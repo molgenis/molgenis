@@ -63,47 +63,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 </#list>;
 	}	
 
-
-<#--	@Override
-	public java.util.List<${entity.namespace}.${JavaName(entity)}> findAll() 
-	{
-		java.util.List<${entity.namespace}.${JavaName(entity)}> result =
-			getEntityManager().createNamedQuery("${JavaName(entity)}.findAll", ${entity.namespace}.${JavaName(entity)}.class)
-									.getResultList();
-		return result;
-	}
-
-	@Override
-	public java.util.List<${entity.namespace}.${JavaName(entity)}> find(String qlWhereClause, Integer limit, Integer offset) {
-		String ql = "SELECT ${name(entity)} FROM ${JavaName(entity)} ${name(entity)} " + qlWhereClause;
-		javax.persistence.TypedQuery<${entity.namespace}.${JavaName(entity)}> query = getEntityManager().createQuery(ql, ${entity.namespace}.${JavaName(entity)}.class);
-		if(offset != null) {
-			query.setFirstResult(offset);
-		}
-		if(limit != null) {
-			query.setMaxResults(limit);
-		}
-		return query.getResultList();		
-	}
-
-	@Override
-	public int count(String qlWhereClause)
-	{
-		final String QUERY_COUNT = "SELECT count(${name(entity)}) FROM ${JavaName(entity)} ${name(entity)} ";
-	
-		Long result = new Long(-1);
-
-		if(qlWhereClause == null || qlWhereClause.trim().equals("")) {
-			result = (Long)getEntityManager().createNamedQuery("${JavaName(entity)}.count")
-								.getSingleResult();
-		} else {
-			String qlQuery = QUERY_COUNT + qlWhereClause;
-			result = (Long)getEntityManager().createQuery(qlQuery)
-								.getSingleResult();
-		}
-		return result.intValue();
-	}-->
-
 	/** This method first saves the objects that are being refered to by entity, 
 	then the entity itself and 
 	finally the objects that refer to this object*/
@@ -221,21 +180,7 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 			} catch (javax.persistence.EntityNotFoundException enfe) {
 				throw new org.molgenis.framework.db.DatabaseException("The ${name(entity)} with id " + ${name(entity)}.getIdField().toString() + " no longer exists: " + enfe.getMessage());
 			}
-<#--
-<#list model.entities as e>
-<#if !e.abstract && !e.isAssociation()>
-	<#list e.implementedFields as f>
-		<#if f.type=="mref" && Name(f.getXrefEntityName()) == Name(entity) >
-		<#assign multipleXrefs = model.getNumberOfReferencesTo(entity)/>
-		//${multipleXrefs}
-			if(${name(entity)}.get${Name(f)}<#if multipleXrefs &gt; 1 >${Name(e)}</#if>Collection().contains(${name(entity)})) {	
-				${name(entity)}.get${Name(f)}<#if multipleXrefs &gt; 1 >${Name(e)}</#if>Collection().remove(${name(entity)});
-			}
-		</#if>
-	</#list>
-</#if>	
-</#list>
--->
+
 			getEntityManager().remove(${name(entity)});
 		} catch (Exception ex) {
 			try {
@@ -261,19 +206,13 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 	<#if type_label == "xref" || type_label == "mref">
 		<#assign numRef = model.getNumberOfReferencesTo(field.getXrefEntity())>
 			<#assign fieldName = name(field) />
-	<#--		
-			<#if numRef &gt; 1 >
-				<#assign fieldName = fieldName + Name(entity)/>
-			</#if>
-		-->
+
 			//${numRef}
 		<#if type_label == "xref">
 			${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())} ${fieldName}Old = persistent${JavaName(entity)}.get${JavaName(field)}();
 			${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())} ${fieldName}New = ${name(entity)}.get${JavaName(field)}();
 
 			if (${fieldName}New != null) {
-//				${fieldName}New = getEntityManager().getReference(org.hibernate.proxy.HibernateProxyHelper.getClassWithoutInitializingProxy(${fieldName}New), ${fieldName}New.getIdValue());
-//				${fieldName}New = getEntityManager().getReference(${fieldName}New.getClass(), ${fieldName}New.getIdValue());
 				${fieldName}New = getEntityManager().getReference((Class<${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())}>) org.hibernate.Hibernate.getClass(${fieldName}New), ${fieldName}New.getIdValue());
 				${name(entity)}.set${JavaName(field)}(${fieldName}New);
 			} else { //object is reference by xref		
@@ -286,7 +225,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 				if(m.get${Name(pkey(field.getXrefEntity()))}() == null) {
 					getEntityManager().persist(m);
 				}
-				m.get${JavaName(fieldName)}<#if numRef &gt; 1 >${Name(field.getEntity())}</#if>Collection().add(${name(entity)});
 			}
 			
 			for(${pkeyJavaType(field.getXrefEntity())} id : ${name(entity)}.get${JavaName(fieldName)}_Id()) {
@@ -301,31 +239,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 			if(!getEntityManager().contains(${name(entity)})) {
 				${name(entity)} = getEntityManager().merge(${name(entity)});
 			}
-<#--	what does this do? FIXIT		
-<#list model.entities as e>
-	<#if !e.abstract && !e.isAssociation()>
-		<#list e.implementedFields as f>
-			<#if f.type=="xref" && entity.isParent(Name(f.getXrefEntity())) >
-				<#assign multipleXrefs = e.getNumberOfReferencesTo(entity)/>
-			 
-			 //${entity.getName()}
-			 //${Name(f.getXrefEntity())}
-			 
-			if (${fieldName}Old != null && !${fieldName}Old.equals(${fieldName}New)) {
-				${fieldName}Old.get${f.getXrefEntityName()}Collection().remove(${name(entity)});
-				${fieldName}Old = getEntityManager().merge(${fieldName}Old);
-			}
-
-			if (${fieldName}New != null && !${fieldName}New.equals(${fieldName}Old)) {
-				${fieldName}New.get${f.getXrefEntityName()}Collection().add(${name(entity)});
-				${fieldName}New = getEntityManager().merge(${fieldName}New);
-			}			 
-			
-			</#if>
-		</#list>
-	</#if>
-</#list>			
--->	
 			
 <#foreach field in entity.getAllFields()>
 	<#assign type_label = field.getType().toString()>
@@ -418,15 +331,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
         }
 		return count;
 	}
-
-<#--	public ${JavaName(entity)} create()
-	{
-<#if !entity.abstract>	
-		return new ${JavaName(entity)}();
-<#else>
-		return null; //abstract type, cannot be instantiated
-</#if>
-	}-->
 	
 	@Override
 	public String getTableFieldName(String fieldName)
@@ -443,22 +347,9 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 		if("${path.name}".equalsIgnoreCase(fieldName)) return "${path.getParent().name}.${SqlName(path.value.name)}";	
 		if("${entity.name}_${path.name}".equalsIgnoreCase(fieldName)) return "${path.getParent().name}.${SqlName(path.value.name)}";
 		</#if></#list></#list>
-		<#--
-		<#assign xref_entity = f.xrefEntity/> 
-		<#assign xref_field = f.xrefField/>
-		//alias for query on id field of xref entity
-		if("${name(f)}_${name(xref_field)}".equalsIgnoreCase(fieldName)) return "${SqlName(f)}";
-		//alias(es) for query on label of the xref entity
-			<#list f.xrefLabelNames as label>
-		if("${name(f)}_${name(label)}".equalsIgnoreCase(fieldName)) return "xref_${label}.${SqlName(label)}";
-			</#list>
-		</#list>
-		-->		  		
 		return fieldName;
 	}
 	
 	<#include "MapperCommons.java.ftl">
-	
 	<#include "MapperFileAttachments.java.ftl">
-	
 }
