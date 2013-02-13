@@ -30,7 +30,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.db.EntityImporter;
-import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
