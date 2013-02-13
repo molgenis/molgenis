@@ -32,6 +32,7 @@ import org.molgenis.framework.ui.FormModel;
 import org.molgenis.framework.ui.FormController;
 
 import org.molgenis.framework.ui.html.*;
+import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.framework.db.QueryRule.Operator;  
 import org.molgenis.framework.db.DatabaseException;
 
@@ -80,7 +81,7 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 		}
 		</#if>	
 		getModel().setMode(FormModel.Mode.${form.viewType});
-		getModel().setCsvEntityImporter(new EntitiesImporterImpl());
+		getModel().setCsvEntityImporter(EntitiesImporterSingleton.getInstance());
 		getModel().setEntityClass(${entity}.class);
 
 <#-- parent form filtering -->

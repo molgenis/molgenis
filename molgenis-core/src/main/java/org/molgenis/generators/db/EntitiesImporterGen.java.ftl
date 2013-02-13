@@ -30,6 +30,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.db.EntityImporter;
+import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
@@ -53,12 +54,15 @@ public class EntitiesImporterImpl implements EntitiesImporter
 		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", new ${JavaName(entity)}EntityImporter());
 		</#if>
 	</#list>
+	
+		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
 	}
 	
 	private Database db;
 	
 	@Deprecated
-	public EntitiesImporterImpl() {
+	public EntitiesImporterImpl()
+	{
 	}
 	
 	public EntitiesImporterImpl(Database db) {

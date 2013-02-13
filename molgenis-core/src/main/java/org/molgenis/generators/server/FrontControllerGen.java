@@ -50,6 +50,8 @@ public class FrontControllerGen extends Generator
 				options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
 		templateArgs.put("db_mode", options.db_mode);
 		templateArgs.put("generate_BOT", options.generate_BOT);
+		templateArgs.put("generate_entitiesimport", options.generate_entitiesimport);
+		templateArgs.put("generate_ExcelImport", options.generate_ExcelImport);
 		templateArgs.put("db_driver", options.db_driver);
 		templateArgs.put("db_uri", options.db_uri);
 		templateArgs.put("db_user", options.db_user);

@@ -8,25 +8,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.framework.tupletable.impl.CsvTable;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.observ.target.Individual;
-import org.molgenis.util.tuple.Tuple;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import app.DatabaseFactory;
 
 public class DataSetTableTest
 {
