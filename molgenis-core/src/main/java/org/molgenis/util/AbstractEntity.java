@@ -25,12 +25,11 @@ import org.molgenis.util.tuple.Tuple;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class AbstractEntity implements Entity, Serializable
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	@XmlTransient
 	private boolean readonly;
+	/** simple name of entity class */
+	private String __Type;
 
 	public static boolean isObjectRepresentation(String objStr)
 	{
@@ -91,8 +90,7 @@ public abstract class AbstractEntity implements Entity, Serializable
 				Object valueO = get(field);
 				String valueS;
 				if (valueO != null) valueS = valueO.toString();
-				else
-					valueS = "";
+				else valueS = "";
 				valueS = valueS.replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ");
 				valueS = valueS.replaceAll("\t", " ").replaceAll(sep, " ");
 				out.write(valueS);
@@ -143,8 +141,7 @@ public abstract class AbstractEntity implements Entity, Serializable
 	 */
 	public String get__Type()
 	{
-		if (this.get(Field.TYPE_FIELD) != null) return this.get(Field.TYPE_FIELD).toString();
-		return null;
+		return __Type;
 	}
 
 	/**
@@ -170,15 +167,7 @@ public abstract class AbstractEntity implements Entity, Serializable
 
 	public void set__Type(String type)
 	{
-		// throwing would be better but requires more refactoring
-		try
-		{
-			this.set(Field.TYPE_FIELD, type);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		this.__Type = type;
 	}
 
 	@Override
