@@ -6,7 +6,7 @@
 		<artifactId>molgenis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-app-omx-cbm</artifactId>
+	<artifactId>molgenis-app-cbm</artifactId>
 	<packaging>war</packaging>
 	<build>
 		<plugins>

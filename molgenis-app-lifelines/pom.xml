@@ -6,7 +6,7 @@
 		<artifactId>molgenis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-app-omx-lifelines</artifactId>
+	<artifactId>molgenis-app-lifelines</artifactId>
 	<packaging>war</packaging>
 
 	<build>
