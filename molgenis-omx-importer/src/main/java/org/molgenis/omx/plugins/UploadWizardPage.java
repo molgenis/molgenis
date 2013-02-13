@@ -1,6 +1,7 @@
 package org.molgenis.omx.plugins;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,6 +13,9 @@ import java.util.Set;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.framework.db.EntitiesValidator;
+import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
@@ -20,8 +24,6 @@ import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.util.tuple.Tuple;
-
-import app.ImportWizardExcelPrognosis;
 
 public class UploadWizardPage extends WizardPage
 {
@@ -60,7 +62,19 @@ public class UploadWizardPage extends WizardPage
 	private void validateInput(Database db, File file) throws Exception
 	{
 		// validate entity sheets
-		ImportWizardExcelPrognosis xlsValidator = new ImportWizardExcelPrognosis(db, file);
+		EntitiesValidator entitiesValidator = EntitiesValidatorSingleton.getInstance();
+		entitiesValidator.setDatabase(db);
+
+		EntitiesValidationReport xlsValidator;
+		FileInputStream fis = new FileInputStream(file);
+		try
+		{
+			xlsValidator = entitiesValidator.validate(fis);
+		}
+		finally
+		{
+			fis.close();
+		}
 
 		// remove data sheets
 		Map<String, Boolean> entitiesImportable = xlsValidator.getSheetsImportable();
@@ -149,8 +163,7 @@ public class UploadWizardPage extends WizardPage
 						else if (!db
 								.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier))
 								.isEmpty()) canImport = true;
-						else
-							canImport = false;
+						else canImport = false;
 						dataSetValidationMap.put(identifier, canImport);
 					}
 				}

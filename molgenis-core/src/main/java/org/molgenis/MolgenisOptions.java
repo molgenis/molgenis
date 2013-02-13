@@ -280,6 +280,24 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_decorators", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate decorator templates. Default: true")
 	public boolean generate_decorators = true;
 
+	@Option(name = "generate_frontcontroller", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate front controller. Default: true")
+	public boolean generate_frontcontroller = true;
+
+	@Option(name = "generate_options", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate use molgenis options. Default: true")
+	public boolean generate_options = true;
+
+	@Option(name = "generate_entityimport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate entity importer. Default: true")
+	public boolean generate_entityimport = true;
+
+	@Option(name = "generate_entitiesimport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate entities importer. Default: true")
+	public boolean generate_entitiesimport = true;
+
+	@Option(name = "generate_metadata", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate meta data. Default: true")
+	public boolean generate_metadata = true;
+
+	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
+	public boolean generate_db = true;
+
 	@Option(name = "delete_generated_folder", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "delete generated Folder before generators are executed. Default: true")
 	// default set to false as partial generation leads to compile problems in
 	// for example molgenis_apps
@@ -314,26 +332,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "block_webspiders", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Block webcrawler user agents in FrontController")
 	public boolean block_webspiders = false;
-
-	// @Option(name = "force_lowercase_names", param = "force_lowercase_names",
-	// type = Option.Type.REQUIRED_ARGUMENT, usage =
-	// "Expert option. Wether all names should be converted to lowercase. Default: true"
-	// )
-	// public boolean force_lowercase_names = false;
-
-	// @Option(name = "verbose", param = "", type = Option.Type.NO_ARGUMENT,
-	// usage = "This switch turns the verbose-mode on.")
-	// public boolean verbose = true;
-
-	// @Option(name = "compile", param = "c", type = Option.Type.NO_ARGUMENT,
-	// usage =
-	// "This switch makes the factory also compile (usefull outside IDE).")
-	// public boolean compile = false;
-
-	// @Option(name = "force_molgenis_package", param =
-	// "force_molgenis_package", type = Option.Type.REQUIRED_ARGUMENT, usage =
-	// "Expert option. Whether the generated package should be 'molgenis' or the name specified in the model. Default: false")
-	// public boolean force_molgenis_package = false;
 
 	/**
 	 * Initialize with the defaults
@@ -581,16 +579,6 @@ public class MolgenisOptions implements Serializable
 		this.output_doc = output_doc;
 	}
 
-	// public String getOutput_type()
-	// {
-	// return output_type;
-	// }
-	//
-	// public void setOutput_type(String output_type)
-	// {
-	// this.output_type = output_type;
-	// }
-
 	public String getOutputWeb()
 	{
 		return output_web;
@@ -691,16 +679,6 @@ public class MolgenisOptions implements Serializable
 		this.exclude_system = exclude_system;
 	}
 
-	// public boolean isForce_molgenis_package()
-	// {
-	// return force_molgenis_package;
-	// }
-	//
-	// public void setForce_molgenis_package(boolean force_molgenis_package)
-	// {
-	// this.force_molgenis_package = force_molgenis_package;
-	// }
-
 	public String getAuthLoginclass()
 	{
 		return auth_loginclass;
@@ -710,26 +688,6 @@ public class MolgenisOptions implements Serializable
 	{
 		this.auth_loginclass = auth_loginclass;
 	}
-
-	// public boolean isVerbose()
-	// {
-	// return verbose;
-	// }
-	//
-	// public void setVerbose(boolean verbose)
-	// {
-	// this.verbose = verbose;
-	// }
-
-	// public boolean isCompile()
-	// {
-	// return compile;
-	// }
-	//
-	// public void setCompile(boolean compile)
-	// {
-	// this.compile = compile;
-	// }
 
 	// internal
 	public String path = "";

@@ -58,7 +58,8 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	private Database db;
 	
 	@Deprecated
-	public EntitiesImporterImpl() {
+	public EntitiesImporterImpl()
+	{
 	}
 	
 	public EntitiesImporterImpl(Database db) {
