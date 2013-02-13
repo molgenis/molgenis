@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.EntitiesImporterSingleton;
+import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisFrontController;
 import org.molgenis.framework.server.MolgenisService;
@@ -28,6 +30,8 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.security.Login;
 import org.apache.commons.dbcp.BasicDataSource;
 import ${package}.DatabaseFactory;
+import ${package}.EntitiesImporterImpl;
+import ${package}.ImportWizardExcelPrognosis;
 
 <#if generate_BOT>
 import java.io.IOException;
@@ -85,6 +89,14 @@ public class FrontController extends MolgenisFrontController
 		}
 		
 		this.services = services;
+		
+		// register instances in singletons (simulate autowiring)
+		<#if generate_entitiesimport>
+		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
+		</#if>
+		<#if generate_ExcelImport>
+		EntitiesValidatorSingleton.setInstance(new ImportWizardExcelPrognosis());
+		</#if>
 	}
 	
 	@Override

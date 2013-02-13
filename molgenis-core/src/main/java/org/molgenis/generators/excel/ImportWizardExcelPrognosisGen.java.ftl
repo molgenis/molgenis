@@ -16,8 +16,8 @@
 
 package ${package};
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +29,9 @@ import java.util.Map.Entry;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.framework.db.EntitiesValidator;
+import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.model.MolgenisModelException;
@@ -39,34 +42,20 @@ import ${entity.namespace}.${JavaName(entity)};
 
 import com.google.common.collect.Lists;
 
-public class ImportWizardExcelPrognosis {
+public class ImportWizardExcelPrognosis implements EntitiesValidator {
+	// TODO autowire
+	private Database db;
 
-	// map of all sheets, and whether they are importable (recognized) or not
-	private Map<String, Boolean> sheetsImportable = new LinkedHashMap<String, Boolean>();
-
-	// map of importable sheets and their importable fields
-	private Map<String, Collection<String>> fieldsImportable = new LinkedHashMap<String, Collection<String>>();
-
-	// map of importable sheets and their unknown fields
-	private Map<String, Collection<String>> fieldsUnknown = new LinkedHashMap<String, Collection<String>>();
-
-	// map of importable sheets and their required/missing fields
-	private Map<String, Collection<String>> fieldsRequired = new LinkedHashMap<String, Collection<String>>();
-	
-	// map of importable sheets and their available/optional fields
-	private Map<String, Collection<String>> fieldsAvailable = new LinkedHashMap<String, Collection<String>>();
-	
-	// import order of the sheets
-	private List<String> importOrder = new ArrayList<String>();
-
-	public ImportWizardExcelPrognosis(Database db, File excelFile) throws Exception {
-		ExcelReader excelReader = new ExcelReader(excelFile);
-		
+	@Override
+	public EntitiesValidationReport validate(InputStream is) throws IOException
+	{
+		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 		ArrayList<String> lowercasedSheetNames = new ArrayList<String>();
 		Map<String, String> lowerToOriginalName = new LinkedHashMap<String, String>();
 
-		try {
-
+		ExcelReader excelReader = new ExcelReader(is);
+		try
+		{
 			for (int i = 0; i < excelReader.getNumberOfSheets(); i++) {
 				String sheetName = excelReader.getSheetName(i);
 				lowercasedSheetNames.add(sheetName.toLowerCase());
@@ -79,26 +68,41 @@ public class ImportWizardExcelPrognosis {
 				ExcelSheetReader sheetReader = excelReader.getSheet(originalSheetname);
 				List<String> colNames = Lists.newArrayList(sheetReader.colNamesIterator());
 				List<Field> entityFields = db.getMetaData().getEntity(${JavaName(entity)}.class.getSimpleName()).getAllFields();
-				headersToMaps(originalSheetname, colNames, entityFields);
+				headersToMaps(originalSheetname, colNames, entityFields, validationReport);
 			}
 			</#if></#list>
 			
-			for(String sheetName : lowerToOriginalName.values()){
-				if(importOrder.contains(sheetName)){
-					sheetsImportable.put(sheetName, true);
-				}else{
-					sheetsImportable.put(sheetName, false);
-				}
+			for(String sheetName : lowerToOriginalName.values())
+			{
+				boolean contains = validationReport.getImportOrder().contains(sheetName);
+				validationReport.getSheetsImportable().put(sheetName, contains);
 			}
-
-		} 
+		}
+		catch (MolgenisModelException e)
+		{
+			throw new IOException(e);
+		}
+		catch (DatabaseException e)
+		{
+			throw new IOException(e);
+		}
 		finally 
 		{
 			excelReader.close();
 		}
+		
+		return validationReport;
 	}
 	
-	public void headersToMaps(String originalSheetname, List<String> allHeaders, List<Field> entityFields)
+	@Override
+	@Deprecated
+	public void setDatabase(Database db)
+	{
+		if(db == null) throw new IllegalArgumentException();
+		this.db = db;
+	}
+	
+	private void headersToMaps(String originalSheetname, List<String> allHeaders, List<Field> entityFields, EntitiesValidationReport validationReport)
 			throws MolgenisModelException, DatabaseException
 	{
 		// construct a list of all required and optional fields
@@ -179,11 +183,11 @@ public class ImportWizardExcelPrognosis {
 			}
 		}
 
-		importOrder.add(originalSheetname);
-		fieldsImportable.put(originalSheetname, detectedFieldNames);
-		fieldsUnknown.put(originalSheetname, unknownFieldNames);
-		fieldsRequired.put(originalSheetname, requiredFields.keySet());
-		fieldsAvailable.put(originalSheetname, availableFields.keySet());
+		validationReport.getImportOrder().add(originalSheetname);
+		validationReport.getFieldsImportable().put(originalSheetname, detectedFieldNames);
+		validationReport.getFieldsUnknown().put(originalSheetname, unknownFieldNames);
+		validationReport.getFieldsRequired().put(originalSheetname, requiredFields.keySet());
+		validationReport.getFieldsAvailable().put(originalSheetname, availableFields.keySet());
 	}
 
 	private List<String> getXrefNames(Field field) throws MolgenisModelException, DatabaseException
@@ -198,33 +202,68 @@ public class ImportWizardExcelPrognosis {
 		return fieldNames;
 	}
 
-	public Map<String, Boolean> getSheetsImportable()
+	private static class EntitiesValidationReportImpl implements EntitiesValidationReport
 	{
-		return sheetsImportable;
-	}
+		/**
+		 * map of all sheets, and whether they are importable (recognized) or
+		 * not
+		 */
+		private final Map<String, Boolean> sheetsImportable;
+		/** map of importable sheets and their importable fields */
+		private final Map<String, Collection<String>> fieldsImportable;
+		/** map of importable sheets and their unknown fields */
+		private final Map<String, Collection<String>> fieldsUnknown;
+		/** map of importable sheets and their required/missing fields */
+		private final Map<String, Collection<String>> fieldsRequired;
+		/** map of importable sheets and their available/optional fields */
+		private final Map<String, Collection<String>> fieldsAvailable;
+		/** import order of the sheets */
+		private final List<String> importOrder;
 
-	public Map<String, Collection<String>> getFieldsImportable()
-	{
-		return fieldsImportable;
-	}
+		public EntitiesValidationReportImpl()
+		{
+			this.sheetsImportable = new LinkedHashMap<String, Boolean>();
+			this.fieldsImportable = new LinkedHashMap<String, Collection<String>>();
+			this.fieldsUnknown = new LinkedHashMap<String, Collection<String>>();
+			this.fieldsRequired = new LinkedHashMap<String, Collection<String>>();
+			this.fieldsAvailable = new LinkedHashMap<String, Collection<String>>();
+			importOrder = new ArrayList<String>();
+		}
 
-	public Map<String, Collection<String>> getFieldsUnknown()
-	{
-		return fieldsUnknown;
-	}
+		@Override
+		public Map<String, Boolean> getSheetsImportable()
+		{
+			return sheetsImportable;
+		}
 
-	public Map<String, Collection<String>> getFieldsRequired()
-	{
-		return fieldsRequired;
-	}
+		@Override
+		public Map<String, Collection<String>> getFieldsImportable()
+		{
+			return fieldsImportable;
+		}
 
-	public Map<String, Collection<String>> getFieldsAvailable()
-	{
-		return fieldsAvailable;
-	}
+		@Override
+		public Map<String, Collection<String>> getFieldsUnknown()
+		{
+			return fieldsUnknown;
+		}
 
-	public List<String> getImportOrder()
-	{
-		return importOrder;
+		@Override
+		public Map<String, Collection<String>> getFieldsRequired()
+		{
+			return fieldsRequired;
+		}
+
+		@Override
+		public Map<String, Collection<String>> getFieldsAvailable()
+		{
+			return fieldsAvailable;
+		}
+
+		@Override
+		public List<String> getImportOrder()
+		{
+			return importOrder;
+		}
 	}
 }

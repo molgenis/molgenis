@@ -101,7 +101,7 @@ import org.molgenis.util.cmdline.CmdLineException;
 public class Molgenis
 {
 	private static final Logger logger = Logger.getLogger(Molgenis.class);
-	
+
 	public static void main(String[] args)
 	{
 		try
@@ -240,7 +240,10 @@ public class Molgenis
 		if (!options.output_doc.endsWith("/")) options.output_doc = options.output_doc + "/";
 
 		// USED MOLGENIS OPTIONS
-		generators.add(new UsedMolgenisOptionsGen());
+		if (options.generate_options)
+		{
+			generators.add(new UsedMolgenisOptionsGen());
+		}
 
 		// COPY resources
 		if (options.copy_resources)
@@ -271,11 +274,13 @@ public class Molgenis
 		{
 			if (options.mapper_implementation.equals(MapperImplementation.JPA))
 			{
-				System.out.println("--------------JPAGEN--------------");
-				generators.add(new JpaDatabaseGen());
+				if (options.generate_db)
+				{
+					generators.add(new JpaDatabaseGen());
+					generators.add(new JDBCMetaDatabaseGen());
+				}
 				generators.add(new DataTypeGen());
 				generators.add(new JpaMapperGen());
-				generators.add(new JDBCMetaDatabaseGen());
 
 				if (options.generate_persistence)
 				{
@@ -346,10 +351,21 @@ public class Molgenis
 				generators.add(new FillMetadataTablesGen());
 			}
 
-			generators.add(new EntityImporterGen());
-			generators.add(new EntitiesImporterGen());
-			generators.add(new FillMetadataGen());
+			if (options.generate_entityimport)
+			{
+				generators.add(new EntityImporterGen());
 
+			}
+
+			if (options.generate_entitiesimport)
+			{
+				generators.add(new EntitiesImporterGen());
+			}
+
+			if (options.generate_metadata)
+			{
+				generators.add(new FillMetadataGen());
+			}
 			// authorization
 			if (!options.auth_loginclass.endsWith("SimpleLogin"))
 			{
@@ -363,7 +379,10 @@ public class Molgenis
 			}
 
 			// DatabaseFactory
-			generators.add(new DatabaseFactoryGen());
+			if (options.generate_db)
+			{
+				generators.add(new DatabaseFactoryGen());
+			}
 		}
 		else
 		{
@@ -401,11 +420,12 @@ public class Molgenis
 			logger.info("Skipping R interface ....");
 		}
 
-		// always generate frontcontroller
-		generators.add(new FrontControllerGen());
-
-		// also generate context
-		generators.add(new MolgenisContextListenerGen());
+		if (options.generate_frontcontroller)
+		{
+			generators.add(new FrontControllerGen());
+			// also generate context
+			generators.add(new MolgenisContextListenerGen());
+		}
 
 		// optional: the GUI
 		if (options.generate_gui)
