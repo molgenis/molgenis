@@ -54,8 +54,6 @@ public class EntitiesImporterImpl implements EntitiesImporter
 		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", new ${JavaName(entity)}EntityImporter());
 		</#if>
 	</#list>
-	
-		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
 	}
 	
 	private Database db;
