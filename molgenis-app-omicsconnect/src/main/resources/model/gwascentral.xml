@@ -114,15 +114,12 @@
 		<entity name="PhenotypeValue" extends="ObservedValue" implements="Identifiable">
 			<field name="PhenotypePropertyID" label="Phenotype property name" type="xref" xref_entity="PhenotypeProperty"/>
 			<field name="Name" length="255" nillable="true"/>
-			<field name="Value" label="Value"/>
 			<field name="ValueRank" label="Value Rank"/>
 			<field name="ValueIsMean" label="Value is mean"/>
 			<field name="STD" label="Standard Deviation"/>
 			<field name="Min" label="Minimum value"/>
 			<field name="Max" label="Maximum value"/>
 		</entity>
-
-
 
 		<entity name="SamplePanel" extends="Panel" implements="Identifiable">
 		
