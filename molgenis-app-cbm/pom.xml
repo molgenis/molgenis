@@ -49,6 +49,7 @@
 						<configuration>
 							<sources>
 								<source>target/generated-sources/molgenis/java</source>
+								<source>target/generated-sources/jaxb</source>
 							</sources>
 							<resources>
 								<resource>
@@ -66,6 +67,24 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<packagingExcludes>pom.xml,**/molgenis.properties,**/molgenis_ui.xml,**/*.sql</packagingExcludes>
+				</configuration>
+			</plugin>
+			<!-- compile XML schemas -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<quiet>true</quiet>
+					<packageName>org.molgenis.cbm.jaxb</packageName>
+					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
 				</configuration>
 			</plugin>
 			<!-- web server -->
