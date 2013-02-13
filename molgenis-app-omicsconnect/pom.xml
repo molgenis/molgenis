@@ -6,7 +6,7 @@
 		<artifactId>molgenis</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-app-omx-omicsconnect</artifactId>
+	<artifactId>molgenis-app-omicsconnect</artifactId>
 	<packaging>war</packaging>
 
 	<build>
