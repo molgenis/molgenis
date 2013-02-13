@@ -57,38 +57,45 @@ public class Home extends PluginModel<Entity>
 	@Override
 	public void handleRequest(Database db, MolgenisRequest request)
 	{
-		
+
 	}
 
 	@Override
 	public void reload(Database db)
 	{
+
 		System.out.println("RELOAD aangeroepen");
 		List<MolgenisUser> listUsers;
-		try {
-			listUsers = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,"admin"));
-		
-		System.out.println("listUsers: " + listUsers.size());
-		if(listUsers.isEmpty()){
-			
-			FillMetadata.fillMetadata(db,false);
-			System.out.println("BLAAT");
-			this.setMessages(new ScreenMessage("User setup complete!",true));
+		try
+		{
+			listUsers = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS, "admin"));
+
+			System.out.println("listUsers: " + listUsers.size());
+			if (listUsers.isEmpty())
+			{
+
+				FillMetadata.fillMetadata(db, false);
+				System.out.println("BLAAT");
+				this.setMessages(new ScreenMessage("User setup complete!", true));
+			}
+
 		}
-		
-		
-		} catch (DatabaseException e) {
-			this.setMessages(new ScreenMessage("Database error: "+e.getMessage(),false));
+		catch (DatabaseException e)
+		{
+			this.setMessages(new ScreenMessage("Database error: " + e.getMessage(), false));
 			e.printStackTrace();
 		}
-		catch(Exception e){
-			this.setMessages(new ScreenMessage("error: "+e.getMessage(),false));
+		catch (Exception e)
+		{
+			this.setMessages(new ScreenMessage("error: " + e.getMessage(), false));
 			e.printStackTrace();
 		}
-		
-		
+
 	}
-	public boolean isVisible(){
+
+	@Override
+	public boolean isVisible()
+	{
 		return true;
 	}
 
