@@ -25,10 +25,10 @@
 			<h1>Import xml data</h1>
 			<i>Upload Xml file with your data</i>
 			<br /><br />
-			Please upload the data<input type="file" name="uploadData"/>&nbsp;&nbsp;&nbsp;&nbsp;<i>(cbm-demo.xml)</i> <br /><br />
+			<label for="upload">Please upload the data:</label>
+			<input type="file" class="textbox" id="upload" name="upload"/><br /><br />
 			
-			<input type="submit" value="Upload" id="upload_xml" onclick="__action.value='upload';return true;"/><br />
-			
+			<input type="submit" value="Create omx files" id="upload_xml" onclick="__action.value='upload';return true;"/><br />
 			
 		</div>
 	</div>
