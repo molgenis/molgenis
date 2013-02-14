@@ -238,6 +238,5 @@
 		<module>molgenis-app-omicsconnect</module>
 		<module>molgenis-app-tifn</module>
 		<module>molgenis-app-cbm</module>
-    	<module>molgenis-app-gids</module>
   </modules>
 </project>
