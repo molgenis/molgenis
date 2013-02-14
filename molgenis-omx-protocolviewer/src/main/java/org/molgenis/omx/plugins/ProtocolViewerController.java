@@ -2,6 +2,7 @@ package org.molgenis.omx.plugins;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -481,8 +482,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		return new JSFeature(feature, jsCategories, ontologyTerm != null ? new JSOntologyTerm(ontologyTerm) : null);
 	}
 
-	public static class JSDataSet
+	public static class JSDataSet implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final JSProtocol protocol;
@@ -511,8 +514,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSProtocol
+	private static class JSProtocol implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final List<JSFeature> features;
@@ -533,8 +538,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSFeature
+	private static class JSFeature implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final String description;
@@ -559,8 +566,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSOntologyTerm
+	private static class JSOntologyTerm implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 
@@ -572,8 +581,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSCategory
+	private static class JSCategory implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final String code;
