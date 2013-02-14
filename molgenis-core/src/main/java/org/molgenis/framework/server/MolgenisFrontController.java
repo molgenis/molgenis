@@ -35,7 +35,7 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 	// helper vars
 	private static final long serialVersionUID = -2141508157810793106L;
 	protected Logger logger;
-	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss 'on' dd MMMM yyyy");
+	private final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss 'on' dd MMMM yyyy");
 
 	// map of all services for this app
 	protected Map<String, MolgenisService> services;
@@ -97,7 +97,6 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 			DatabaseException, IOException
 	{
 		HttpServletRequest req = request.getRequest();
-
 		if (usedOptions.block_webspiders)
 		{
 			// block spiders (webcrawlers) if the option has been set (default
@@ -115,35 +114,12 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 			}
 		}
 
-		// lots of info about request variables & webservers @
-		// http://gbic.target.rug.nl/forum/showthread.php?tid=690
-
-		// same for every tested webserver: e.g.
-		// "http://localhost:8080/xqtl/api/R"
-		String requestURL = req.getRequestURL().toString();
-
-		// same for every tested webserver: e.g. "/xqtl/api/R"
-		String requestURI = req.getRequestURI();
-
-		// empty for Apache Tomcat, but e.g. "/xqtl" for standalone
-		// FIXME workaround to get http://localhost:8080/molgenis.do (without app name) working with Jetty
-		String appName = req.getServletPath();
-		if (appName.equals("") || req.getClass().getName().equals("org.mortbay.jetty.Request") || req.getClass().getName().equals("org.eclipse.jetty.server.Request"))
-		{
-			// empty for standalone, but e.g. "/xqtl" for Apache Tomcat
-			appName = req.getContextPath();
-		}
-		
-		// turns "http://localhost:8080/xqtl/api/R" into
-		// "http://localhost:8080/xqtl"
-		String appLocation = requestURL.substring(0, requestURL.length() - (requestURI.length() - appName.length()));
-
-		// turns "http://localhost:8080/xqtl/api/R" into "/api/R"
-		String requestPath = requestURL.substring(requestURL.length() - (requestURI.length() - appName.length()));
-
+		String servletPath = req.getServletPath();
+		String baseURL = req.getRequestURL().substring(0, req.getRequestURL().length() - servletPath.length());
 		for (String servicePath : services.keySet())
 		{
-			if (requestPath.startsWith(servicePath))
+			System.out.println("servicePath for service=" + servicePath);
+			if (servletPath.startsWith(servicePath))
 			{
 				long startTime = System.currentTimeMillis();
 				Date date = new Date();
@@ -152,12 +128,12 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 				// not manage security/connections
 				if (servicePath.equals("/"))
 				{
-					System.out.println("> serving file: " + requestPath);
+					System.out.println("> serving file: " + servletPath);
 					services.get(servicePath).handleRequest(request, response);
 				}
 				else
 				{
-					System.out.println("> new request \"" + requestPath + "\" from "
+					System.out.println("> new request \"" + servletPath + "\" from "
 							+ request.getRequest().getRemoteHost() + " at " + dateFormat.format(date) + " handled by "
 							+ services.get(servicePath).getClass().getSimpleName() + " mapped on path " + servicePath);
 					System.out.println("request fields: " + request.toString());
@@ -169,13 +145,13 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 									+ request.getDatabase().getLogin().getUserName() : "not authenticated"));
 
 					// e.g. "http://localhost:8080/xqtl"
-					request.setAppLocation(appLocation);
+					request.setAppLocation(baseURL);
 
 					// e.g. "/api/R/"
 					request.setServicePath(servicePath);
 
 					// e.g. "/api/R/source.R"
-					request.setRequestPath(requestPath);
+					request.setRequestPath(servletPath);
 
 					try
 					{
@@ -303,49 +279,4 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 			throw new ServletException(e);
 		}
 	}
-
-	// private void printSessionInfo(HttpSession session)
-	// {
-	// Date created = new Date(session.getCreationTime());
-	// Date accessed = new Date(session.getLastAccessedTime());
-	// System.out.println("SESSION ID " + session.getId());
-	// //System.out.println("SESSION Created: " + created);
-	// //System.out.println("SESSION Last Accessed: " + accessed);
-	//
-	// // print session contents
-	//
-	// Enumeration e = session.getAttributeNames();
-	// while (e.hasMoreElements())
-	// {
-	// String name = (String) e.nextElement();
-	// String value = session.getAttribute(name).toString();
-	// System.out.println("SESSION_ATTRIB " + name + " = " + value);
-	// }
-	// }
-
-	// if (path != null && path.contains("/api/find"))
-	// {
-	// this.handleDownload(request, response);
-	// }
-	// else if (path != null && path.contains("/api/add"))
-	// {
-	// this.handleUpload(request, response);
-	// }
-	// else if (path != null && path.contains("/api/R"))
-	// {
-	// this.handleRAPIrequest(request, response);
-	// }
-	// else if (path != null && (path.contains("/api/soap")))
-	// {
-	// this.handleSOAPrequest(request, response);
-	// }
-	// else if (path != null && path.contains("/xref/find"))
-	// {
-	// this.handleXREFrequest(request, response);
-	// }
-	// else if (path != null && path.contains("/download/"))
-	// {
-	// this.handleDownloadFile(request, response);
-	// }
-
 }
