@@ -6,8 +6,7 @@
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
-        <plugin label="Convert xml data" name="ConvertXmlData" type="org.molgenis.cbm.plugins.converter.CbmToOmxConverter" />
-		
+        <plugin label="Convert xml data" name="ConvertXmlData" type="org.molgenis.cbm.plugins.converter.CbmToOmxConverter" />	
 		<menu name="Admin">
 			<menu name ="Features">
 				<form name="Feature" entity="ObservableFeature">

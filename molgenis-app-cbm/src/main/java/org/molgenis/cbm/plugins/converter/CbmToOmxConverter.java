@@ -72,11 +72,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			{
 				throw new Exception("File does not end with '.xml', other formats are not supported.");
 			}
-			// TODO: Change this to generic arguments
-			String path = "/Users/Roan/Work/CBM/output/";
-			// File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-			// File inDeTmpDir = new File(tmpDir, "eenBestandje.txt");
-
 			// Create the files needed
 			CsvWriter dataParticipant = new CsvWriter(new File(outputDir + "dataset_participant_cs.csv"));
 			CsvWriter observableFeature = new CsvWriter(new File(outputDir + "observablefeature.csv"));
@@ -379,7 +374,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			zout.close();
 			fout.close();
 
-			System.out.println("Zip file " + zipFile.getAbsolutePath() + " has been created!");
 			URL localURL = zipFile.toURI().toURL();
 			URLConnection conn = localURL.openConnection();
 			InputStream in = new BufferedInputStream(conn.getInputStream());
@@ -411,6 +405,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 			logger.info("serving " + request.getRequest().getRequestURI());
 
+			// FIXME: This is a hack, fix asap
 			EasyPluginController.HTML_WAS_ALREADY_SERVED = true;
 
 		}
@@ -425,7 +420,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 	@Override
 	public void reload(Database db)
 	{
-		System.out.println("blaat");
+
 	}
 
 	@Override
