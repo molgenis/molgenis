@@ -69,14 +69,6 @@
 		  				</div>
 	  				</div>
 				</div>
-				<div id="spinner" class="modal hide">
-			  		<div class="modal-header">
-			    		<h3></h3>
-			 		 </div>
-			  		<div class="modal-body">
-			    		<div class="spinner-body-inner"><img src="img/waiting-spinner.gif" /></div>
-			  		</div>
-				</div>
  				<script type="text/javascript"> 					
  					<#-- create event handlers -->
  					$('.btn-datasets button').click(function(e) {

@@ -161,7 +161,7 @@ function checkExistenceOfAllSubNodes(node) {
 }
 
 function retrieveNodeInfo(node, recursive, options) {
-	$('#spinner').modal('show').find('h3:first-child').text('Loading...');
+	$('#spinner').modal('show');
 	$
 			.ajax({
 				url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_getprotocol',
@@ -311,7 +311,7 @@ function clearSearch() {
 
 function searchProtocolServer(query) {
 	if (query) {
-		$('#spinner').modal('show').find('h3:first-child').text('Searching...');
+		$('#spinner').modal('show');
 		var dataSets = $(document).data('datasets');
 		var dataSet = dataSets[dataSets.selected];
 		$

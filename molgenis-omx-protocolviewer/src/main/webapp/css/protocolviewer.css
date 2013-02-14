@@ -41,16 +41,6 @@
 	padding-top: 10px;	
 }
 
-#spinner {
-	width: 180px;
-	margin:150px 100px 0px -100px;
-}
-
-#spinner.spinner-body-inner {
-	width: 32px;
-	margin:10px auto;
-}
-
 .feature-table-col1 {
 	background: #DCE3F7;
 	font-weight: bold;
