@@ -25,7 +25,7 @@
 			<#if (model.dataSets?size == 0)>
 				<span>No available catalogs</span>
 			<#else>
-				<div class="row-fluid grid">
+				<div class="row-fluid grid" id="dataset-selection">
 					<div class="span2">
 						<label>Choose a dataset:</label>
 					</div>
@@ -54,17 +54,16 @@
 					</div>
 	  				<div class="span8">
   						<div class="row-fluid grid" id="feature-information">
-	  						<p class="box-title">Description</p>
+	  						<p class="box-title">Variable description</p>
 							<div id="feature-details">
 							</div>
 						</div>
 						<div class="row-fluid grid" id="feature-shopping">
-		  					<p class="box-title">Your selection</p>
+		  					<p class="box-title">Variable selection</p>
 							<div id="feature-selection">
 							</div>
 							<div id="download-controls">
 								<button class="btn" id="download-xls-button">Download as Excel</button>
-								<button class="btn" id="download-emeasure-button">Download as eMeasure</button>
 								<button class="btn" id="view-features-button">View</button>
 							</div>
 		  				</div>
@@ -79,7 +78,7 @@
 			  		</div>
 				</div>
  				<script type="text/javascript"> 					
- 					// create event handlers
+ 					<#-- create event handlers -->
  					$('.btn-datasets button').click(function(e) {
  						e.preventDefault();
  						selectDataSet($(this).data('id'));
@@ -106,11 +105,6 @@
  						window.location = getSelectedFeaturesURL('xls');
  					});
  					
- 					$('#download-emeasure-button').click(function(e) {
- 						e.preventDefault();
- 						window.location = getSelectedFeaturesURL('emeasure');
- 					});
- 					
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
  						window.location = getSelectedFeaturesURL('viewer');
@@ -118,7 +112,7 @@
  					
  					// on ready
 					$(function() {
-						// prevent user form submission by pressing enter
+						<#-- prevent user form submission by pressing enter -->
 					    $(window).keydown(function(e){
 					      if(e.keyCode == 13) {
 					        e.preventDefault();
@@ -127,8 +121,15 @@
 					    });
 					    
 						$('.btn').button();
-						// select first dataset
+						
+					<#if (model.dataSets?size == 1)>
+						<#-- hide dataset selection -->
+						$('#dataset-selection').hide();
+					</#if>
+					<#if (model.dataSets?size > 0)>
+						<#-- select first dataset -->
 						$('.btn-datasets button').first().click();
+					</#if>
 					});
  				</script>
  			</#if>

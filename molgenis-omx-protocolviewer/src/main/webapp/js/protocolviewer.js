@@ -118,6 +118,7 @@ function createNodes(protocol, options) {
 			var newBranch = {
 				key :  feature.id, 
 				title : feature.name,
+				tooltip : feature.description ? feature.description : null
 			};
 			for (key in options) {
 			    if (options.hasOwnProperty(key)) {
@@ -199,7 +200,7 @@ function setFeatureDetails(feature) {
 			$('<td />').text(category.description).appendTo(row);
 			row.appendTo(categoryTable);		
 		});
-		
+		categoryTable.addClass('listtable');
 		container.append(categoryTable);
 	}
 }
@@ -218,16 +219,18 @@ function updateFeatureSelection(tree) {
 	}
 	
 	var table = $('<table class="table table-striped table-condensed table-hover" />');
-	$('<thead />').append('<th>Variables</th><th>Protocol</th><th>Delete</th>').appendTo(table);
+	$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Delete</th>').appendTo(table);
 	$.each(nodes, function(i, node) {
 		if(!node.data.isFolder) {
-			var name = node.data.title;
 			var protocol_name = node.parent.data.title;
+			var name = node.data.title;
+			var description = node.data.tooltip;
 			var row = $('<tr />').attr('id', node.data.key + "_row");
-			$('<td />').text(name !== undefined ? name : "").appendTo(row);
 			$('<td />').text(protocol_name != undefined ? protocol_name : "").appendTo(row);
+			$('<td />').text(name !== undefined ? name : "").appendTo(row);
+			$('<td />').text(description !== undefined ? description : "").appendTo(row);
 			
-			var deleteButton = $('<input type="image" src="img/cancel.png" alt="delete">');
+			var deleteButton = $('<i class="icon-remove"></i>');
 			deleteButton.click($.proxy(function() {
 				tree.getNodeByKey(node.data.key).select(false);
 				return false;
