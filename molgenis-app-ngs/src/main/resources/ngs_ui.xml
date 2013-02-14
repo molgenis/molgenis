@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="ngs">
+	<plugin name="ngs_header" type="org.molgenis.ngs.plugins.header.Header" />
+
+	<menu name="main">
+		<form name="Experiments" entity="Experiment" label="NGS experiments" viewtype="list"> />
+			
+		<menu name="projects">
+			<form name="Projects" entity="Project" label="NGS projects" />
+			<form name="Samples" entity="Sample" label="NGS samples" viewtype="list" />
+			<form name="Experiments" entity="Experiment" label="NGS experiments" viewtype="list" />
+		</menu>
+		
+		<menu name="worksheet">
+			<form name="ExperimentList" entity="Experiment" label="NGS experiments" viewtype="list" />
+			<form name="ExperimentObject" entity="Experiment" label="NGS experiment" />
+			</form>
+		</menu>
+		
+		</menu name="settings" >
+			<form name="Users" entity="NgsUser" label="NGS users" />
+		</menu>
+	</menu> <!-- main -->
+	
+</molgenis>

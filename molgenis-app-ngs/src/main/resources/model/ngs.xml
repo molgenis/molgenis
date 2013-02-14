@@ -1,101 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="org.molgenis.omx">
-	<module name="gaf" label="GAF module">
-		<description>Extension to Observ-OM to support Next Gen Sequencing
-			projects
-			using the Illumina platform. Each work consists of NgsStudy
-			having
-			one or more NgsSample. These samples are then put on a=
-			FlowcellLane, optionally with barcode.
+	<module name="ngs" label="NGS module">
+		<description>Extension to Observ-OM to support Next Gen Sequencing (NGS) projects
+			using the Illumina platform. Each project consists of NGS experiments having one NGS sample.
+			One or more samples are placed on a FlowcellLane, optionally with a barcode.
+			An experiment can be performed one time or may on the same sample.
+			Additionally an experiment can contain a merged collection of experiments done on the same sample.   
 		</description>
-		<entity name="Project" extends="Target">
-			<description>A Project bundles information about one project</description>
-			<field name="ProjectName" type="string" description="The name of a project." nillable="true" />
-			<field name="ProjectComment" type="string" description="The name of a project." nillable="true" />
-			<field name="ProjectOwner" type="xref" xref_entity="User" nillable="true" />
-			<field name="ProjectAnalist" type="xref" xref_entity="User" nillable="true" />
-			<field name="ProjectPlannedStartDate" type="date" description="The date a project is expected to start" nillable="true" />
-			<field name="ProjectPlannedFinishDate" type="date" description="The date a project is expected to be finished" nillable="true" /> <!-- TargetDateShipment from Worksheet -->
-			<field name="LaneAmount" type="int" description="Number of lanes planned in this project" nillable="true" />
-			<field name="SampleAmount" type="int" description="Number of samples planned in this project" nillable="true" />
-			<field name="ProjectType" type="enum" enum_options="[NGS,Array]" default="NGS" /> <!-- Normally I would refer to another table here, so using type="xref" etc ...-->
-			<field name="SeqType" type="enum" enum_options="[SR,PE,Multiplex,None]" />
-			<field name="DeclarationNr" type="string" description="The Decalration Nr of a project." nillable="true" />
+		<entity name="Project" implements="Identifiable">
+			<description>A Project bundles information about one project.</description>
+			<field name="ProjectComment" type="string" description="The comment of a project." label="Comment" />
+			<field name="ProjectCustumor" type="xref" xref_entity="NgsUser" description="The user who ordered the project." nillable="true" label="Custumor name" /> <!-- In the GAF-lijst referred to as ProjectOwner -->
+			<field name="ProjectAnalist" type="xref" xref_entity="NgsUser" description="The user which will be responsible for performing the wet-lab activities." nillable="true" label="Analist name" />
+			<field name="ProjectPlannedStartDate" type="datetime" description="The date a project is expected to start" nillable="true" label="Planned start date" />
+			<field name="ProjectPlannedFinishDate" type="datetime" description="The date a project is expected to be finished" nillable="true" label="Planned finish date" /> <!-- In the GAF-lijst referred to as TargetDateShipment -->
+			<field name="LaneAmount" type="int" description="Number of lanes planned in this project" nillable="true" label="Lane amount" />
+			<field name="SampleAmount" type="int" description="Number of samples planned in this project" nillable="true" label="Sample amount" />
+			<field name="SeqType" type="enum" enum_options="[SR,PE,Matepair]" default="PE" description="The type of sequencing." label="Sequencing type" />
+			<field name="Multiplexed" type="bool" description="Indication if samples will be multiplexed (e.g. more then one sample will be added on one lane)." label="Multiplex" />
+			<field name="DeclarationNr" type="string" description="The Declaration Nr of a project." nillable="true" label="Declaration Nr" />
 		</entity>
 		
-		<entity name="User" extends="Target">
-			<description>A User bundles information about one user
-			</description>
-			<field name="UserName" type="string" description="The name of a user" nillable="true" />
-			<field name="UserEmail" type="string" description="The email of a user" nillable="true" />
-			<field name="UserRole" type="enum" enum_options="[Analist,ProjectOwner]" /> <!-- Normally I would refer to another table here, so using type="xref" etc ...-->
-			<field name="UserGroup" type="enum" enum_options="[GAF,GCC]" /> <!-- Normally I would refer to another table here, so using type="xref" etc ...-->
+		<entity name="NgsUser" implements="Identifiable">
+			<description>An NgsUser bundles information about a user.</description>
+			<field name="UserEmail" type="string" description="The email of a user." nillable="true" label="email" />
+			<field name="UserRole" type="enum" enum_options="[Custumor,Analist,Bioinformatician]" description="The role the user has." label="Role" /> <!-- If a user has more than one role more records of the same user will be added? -->
+			<field name="UserGroup" type="enum" enum_options="[GAF,GCC]" description="The group a user belongs to." nillable="true" label="Group" />
 		</entity>
 		
-		<entity name="Sample" extends="Target">
-			<description>Description of the sample/library</description>
-			<field name="Sampletype" type="enum" default="dna" enum_options="[dna,rna]" description="Type of sample" />
-			<field name="SampleName" type="string" nillable="true" description="Sample identifier as known by sample supplier" />
-			<field name="SampleComment" label="Comment" type="text" nillable="true" description="Comments about the sample" />
+		<entity name="Sample" implements="Identifiable">
+			<description>A Sample bundles information about a sample.</description>
+			<field name="Sampletype" type="enum" enum_options="[DNA,RNA]" default="DNA" description="Type of sample" label="Type" />
+			<field name="SampleComment" type="text" description="Comments about the sample" nillable="true" label="Comment" />
 		</entity>
 		
-		<entity name="Experiment" extends="Target">
-			<description>An Experiment bundles information about an experiment. This is actually our worksheet.</description>
-			<field name="Project" type="xref" xref_entity="Project" />
-			<field name="Sample" type="xref" xref_entity="Sample" />
-			<field name="ExperimentComment" label="Comment" type="text" readonly="true" nillable="true" description="Comments about the experiment" />
-			<field name="ArrayFile" label="file" type="string" readonly="true" nillable="true" description="File location of array" />
-			<field name="ArrayID" type="string" description="ID of the sample on the arrayFile" nillable="true" /> <!-- Wouldn't it be nice if the Large Array File was already spliced into Experiment Chunks so this ID wasn't necessary -->
+		<entity name="Experiment" implements="Identifiable">
+			<description>An Experiment bundles information about an experiment.</description>
+			<field name="Project" type="mref" xref_entity="Project" />
+			<field name="Sample" type="mref" xref_entity="Sample" />
+			<field name="ExperimentComment" type="text" description="Comment about the experiment." nillable="true" label="Comment" />
+			<field name="ArrayFile" type="string" description="Location of arrayfile" nillable="true" label="Array file" />
+			<field name="ArrayID" type="string" description="ID of the sample on the arrayFile" nillable="true" label="Array ID"/> <!-- Wouldn't it be nice if the Large Array File was already spliced into Experiment Chunks so this ID wasn't necessary -->
 			<field name="LabStatus" type="enum" default="Not started"
 				enum_options="[Not started,Sample prep - started,Sample prep - failed,Ready for clustering,Clustering and sequencing - started,Clustering and sequencing - failed,Gerald,Finished successfully,Other issue]"
-				description="Lab status phase of this sample" />
+				description="Lab status phase of this sample" label="Lab status" />
 			<!-- override identifier to become an automatic value of flowcell_lane_barcode -->
-			<field name="Identifier" auto="true" default="autogenerated" readonly="true" />
+			<field name="Identifier" auto="true" default="autogenerated" readonly="true" /> <!-- I don't get this ? -->
 			<field name="Flowcell" type="xref" xref_entity="Flowcell" description="The flowcell to which this lane belongs" nillable="true" /> 
-			<!-- I would replace flowcell+lane with a sample container, a sample container has a type and flowcell is one of them with properties like
-			columnAmount, rowAmount(which is lanes), test (NGS, arrayType), genomebuild etc ... See my attached image of the SNPmoudle Database... -->
-			<field name="Lane" type="enum" enum_options="[1,2,3,4,5,6,7,8]" description="The lane number that is unique within a flow cell. In range 1-8" nillable="false" />
-			<field name="SampleBarcode" type="xref" xref_entity="SampleBarcode" nillable="true" description="Multiple samples can be on one flowcell using barcodes" />
-			<field name="ExperimentMerge" type="enum" enum_options="[ExperimentIds of the same Sample]" description="Experiments can be selected performed on the same sample" /> <!-- Not sure how I should configure this -->
-			<field name="PrepKit" type="xref" xref_entity="PrepKit" nillable="true" description="Capturing kit used." />
-			<field name="CapturingKit" type="xref" xref_entity="CapturingKit" nillable="true" description="capturing kit used." />
-			<field name="QcWetMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Quality criteria of the wet lab met" /> <!-- This should automatically be determined through business rules -->
-			<field name="QcWetUser" type="xref" xref_entity=="User" description="The user who checked if the quality score on the lab was met" />
-			<field name="QcWetDate" type="date" nillable="true" description="The date the QcWetUser selected the QcWetMet value" />
-			<field name="GccAnalysis" type="bool" nillable="true" description="Indication if the experiment should be analyzed by members of the GCC" />
-			<field name="QcDryMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Quality criteria met" /> <!-- This should automatically be determined through business rules -->
-			<field name="QcDryUser" type="xref" xref_entity=="User" description="The user who checked if the quality score of the analysis was met" />
-			<field name="QcDryDate" type="date" nillable="true" description="The date the QcWetUser selected the QcWetMet value" />
+			<field name="Lane" type="enum" enum_options="[1,2,3,4,5,6,7,8]" description="The lane number that is unique within a flow cell with a range of 1-8." nillable="true" />
+			<field name="SampleBarcode" type="xref" xref_entity="SampleBarcode" nillable="true" description="Multiple samples can be on one flowcell using barcodes." label="Barcode" />
+			<field name="PrepKit" type="xref" xref_entity="PrepKit" nillable="true" description="Preparation kit used on the sample for this experiment." label="Preparation kit" />
+			<field name="CapturingKit" type="xref" xref_entity="CapturingKit" nillable="true" description="Capturing kit used." label="Capturing kit" />
+			<field name="QcWetMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Quality criteria of the wet lab met" label="QC wet-lab" />
+			<field name="QcWetUser" type="xref" xref_entity="NgsUser" description="The user who checked if the quality score on the wet-lab was met" label="QC wet-lab user" />
+			<field name="QcWetDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value." label="QC wet-lab date" />
+			<unique fields="Flowcell,Lane,SampleBarcode,Sample" description="Lane and barcode per flowcell is unique for a sample." />
+			
+			<field name="VariantCalling" type="boolean" nillable="true" description="Indication if variant calling has to be performed on the experiment." />
+			<field name="MergedExperimentList" type="mref" xref_entity="Experiment" description="Collection of experiments which should be merged." label="Experiments to merge" /> <!-- Not sure how I should configure this? -->
+						
+			<field name="QcDryMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Variant calling quality criteria." />
+			<field name="QcDryUser" type="xref" xref_entity="NgsUser" description="The user who checked if the quality score of the analysis was met" />
+			<field name="QcDryDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value" />
 			<field name="ResultFilesDir" label="file" type="string" readonly="true" nillable="true" description="File location of the resulting files after analysis occurred (for file download purpose)" />
-			<field name="ResultShippedUser" type="xref" xref_entity=="User" description="The user who shipped the date" />
-			<field name="ResultShippedDate" type="date" nillable="true" description="The date the result of the experiment is shipped to the ProjectOwner" />
-			<unique fields="flowcell,lane,barcode,sample" description="Lane and barcode is unique per flowcell" />
+			<field name="ResultShippedUser" type="xref" xref_entity="NgsUser" description="The user who shipped the date." />
+			<field name="ResultShippedTo" type="string" xref_entity="NgsUser" description="Name of the person to which the data has been shipped." />
+			<field name="ResultShippedDate" type="date" nillable="true" description="The date the result of the experiment is shipped to the custumor." />
 		</entity>
 		
-		<entity name="Flowcell" extends="Target">
-			<description> A Flowcell is a unit of measuremnt, currently, 8 lanes
-				measurement on the Illumina Genome Analyzer
-			</description>
+		<entity name="MergedExperiment" implements="Identifiable"> <!-- TODO -->
+			<field name="Sample" type="mref" xref_entity="Sample" />
+			<field name="ExperimentIds" type="mref" xref_entity="Experiment" />
+		</entity>
+		
+		<entity name="Flowcell" implements="Identifiable">
 			<field name="Machine" type="xref" xref_entity="Machine" description="The Illumina machine it was run on" nillable="true" />
-			<field name="Run" type="string"  nillable="true" description="The run number always use 4 digits (with leading 0's)" />
-			<field name="StartDate" type="date" nillable="true" description="The date the flowcell was run on the machine" />
+			<field name="Run" type="string" description="The run number always use 4 digits (with leading 0's)" nillable="true"  />
+			<field name="RunDate" type="datetime" description="The date the flowcell was run on the machine." nillable="true" label="Run date" />
 		</entity>
 				
 		<entity name="SampleBarcode" implements="Autoid" xref_label="name">
-			<field name="name" type="string" unique="true" description="The nucleotide sequence which forms the barcode" />
-			<field name="barcodeType" type="enum" default="GAF" enum_options="[GAF,RPI,None]" nillable="true" />
+			<field name="name" type="string" unique="true" description="The nucleotide sequence which forms the barcode" label="Name" />
+			<field name="barcodeType" type="enum" enum_options="[GAF,RPI,None]" default="GAF" nillable="true" label="Type" />
 		</entity>
 		
 		<entity name="CapturingKit" implements="Autoid" xref_label="name">
-			<field name="name" type="string" unique="true" />
+			<field name="name" type="string" unique="true" label="Name" />
 		</entity>
 		
 		<entity name="PrepKit" implements="Autoid" xref_label="name">
-			<field name="name" type="string" unique="true" />
+			<field name="name" type="string" unique="true" label="Name" />
 		</entity>
 		
 		<entity name="Machine" implements="Autoid" xref_label="name">
-			<field name="name" type="string" unique="true" />
+			<field name="name" type="string" unique="true" label="Name" />
 		</entity>
 	</module>
 </molgenis>
