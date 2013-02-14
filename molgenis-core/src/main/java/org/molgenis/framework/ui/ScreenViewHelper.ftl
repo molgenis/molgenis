@@ -26,6 +26,15 @@
 	<#if applicationHtmlError?exists>${applicationHtmlError}</#if>
 </#macro>
 <#macro molgenis_footer>
+		<#-- spinner that is hidden by default -->
+		<div id="spinner" class="modal hide">
+	  		<div class="modal-header">
+	    		<h3>Loading ...</h3>
+	 		 </div>
+	  		<div class="modal-body">
+	    		<div class="modal-body-inner"><img src="img/waiting-spinner.gif" /></div>
+	  		</div>
+		</div>
 	</body>
 </html>
 </#macro>
