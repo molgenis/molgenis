@@ -1,0 +1,14 @@
+<molgenis name="org.molgenis.omx">
+	<module name="system" label="System module">
+		<description>
+			System settings and other 'non-data'
+			DEPENDS ON: core
+		</description>
+
+		<entity name="RuntimeProperty" implements="Identifiable">
+			<field name="Value" length="127" type="varchar" nillable="false" />
+			<unique fields="Identifier" description="Identifier is unique" />
+		</entity>
+
+	</module>
+</molgenis>

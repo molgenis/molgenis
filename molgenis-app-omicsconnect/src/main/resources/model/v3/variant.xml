@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="variant" label="Variant module">
+		<description>
+			Schema for using genomic elements such as gene, chromosome, protein
+			as extension on 'observ.xml'.
+			Generic schema inspired by Chado. All
+			other properties should already be
+			covered in the core Pheno.xml
+			model, in particular relationship which
+			is in ObservedValue. Some
+			extra may need to be added (e.g. dbXrefs,
+			pubs, etc, for each
+			ObservationElement).
+			<br />
+			There is a crucial difference between the Chado location model and
+			the sequence location model used in other schemas, such as GFF,
+			GenBank, BioSQL, or BioPerl. First, Chado is the only model to use
+			the concept of rank and locgroup. Second, and perhaps more important,
+			all these other models allow discontiguous locations (also known as
+			"split locations").See
+			http://gmod.org/wiki/Chado_Sequence_Module#Table:_feature
+		</description>
+		<entity name="BioSequence" abstract="true">
+			<desciption>Having sequence</desciption>
+			<field name="residues" type="text" nillable="true"
+				description="A sequence of alphabetic characters representing biological residues (nucleic acids, amino acids). This column does not need to be manifested for all features; it is optional for features such as exons where the residues can be derived from the featureloc. It is recommended that the value for this column be manifested for features which may may non-contiguous sublocations (e.g. transcripts), since derivation at query time is non-trivial. For expressed sequence, the DNA sequence should be used rather than the RNA sequence." />
+			<field name="seqlen" type="int" nillable="true"
+				description="The length of the residue feature. See column:residues. This column is partially redundant with the residues column, and also with featureloc. This column is required because the location may be unknown and the residue sequence may not be manifested, yet it may be desirable to store and query the length of the feature. The seqlen should always be manifested where the length of the sequence is known." />
+		</entity>
+		<entity name="GdnaPosition" abstract="true">
+			<description>Having gDNA position</description>
+			<field name="gdna" nillable="true" type="xref" xref_entity="Chromosome"
+				description="The genome this element lies on." />
+			<field name="gdna_start" nillable="true" type="int" index="true"
+				description="Start position on genomic sequence." />
+			<field name="gdna_end" nillable="true" type="int"
+				description="End position on genomic sequence." />
+		</entity>
+		<entity name="CdnaPosition" abstract="true">
+			<desciption>Having cDNA position</desciption>
+			<field name="cdna" type="xref" nillable="true" xref_entity="Gene"
+				description="The gene this element lies on." />
+			<field name="cdna_start" type="int" nillable="true" index="true"
+				description="Start position on cDNA sequence." />
+			<field name="cdna_end" type="int" nillable="true"
+				description="End position on cDNA sequence." />
+		</entity>
+		<entity name="AaPosition" abstract="true">
+			<description>Having aa position</description>
+			<field name="aa" type="xref" nillable="true" xref_entity="Protein"
+				description="The protein sequence this element lies on." />
+			<field name="aa_start" type="int" nillable="true" index="true"
+				description="Start position on amino acid sequence." />
+			<field name="aa_end" type="int" nillable="true"
+				description="End position on amino acid sequence." />
+		</entity>
+		<entity name="Genome" extends="Concept" implements="BioSequence">
+			<field name="species" type="xref" xref_entity="AlternativeIdentifier"
+				nillable="true" description="species this genome belongs to." />
+		</entity>
+		<entity name="VariantChromosome" extends="Concept" implements="BioSequence">
+			<description>Example: b37:chr1.</description>
+			<field name="genome" type="xref" xref_entity="Genome" />
+			<field name="orderNr" type="int" />
+			<field name="isAutosomal" type="bool"
+				description="Is 'yes' when number of chromosomes is equal in male and female individuals, i.e., if not a sex chromosome." />
+		</entity>
+		<entity name="VariantGene" extends="Concept" implements="GdnaPosition,BioSequence">
+			<description>Serves as a view on SequenceCharacteristics that are
+				genes / cdna
+			</description>
+			<field name="strand" type="enum" enum_options="[0,-1,+1]"
+				nillable="false"
+				description="The orientation/directionality of the location. Should be 0, -1 or +1." />
+		</entity>
+		<entity name="VariantProtein" extends="Concept" implements="CdnaPosition,BioSequence">
+			<description>Serves as a view on SequencesCharacteristics that are
+				proteins / aa.
+			</description>
+		</entity>
+		<entity name="ProteinDomain" extends="Concept"
+			implements="CdnaPosition,GdnaPosition">
+			<description>Serves as a view on SequenceCharacteristics that are
+				protein domains.
+			</description>
+		</entity>
+		<entity name="Exon" extends="Concept" implements="CdnaPosition,GdnaPosition">
+			<description>Serves as a view on SequenceCharacteristics that are
+				exons or introns.
+			</description>
+			<field name="isIntron" type="bool" nillable="false" index="true"
+				description="Is this exon actually an intron?" />
+		</entity>
+		<entity name="Variant" extends="Concept"
+			implements="GdnaPosition,CdnaPosition,AaPosition">
+			<description>Convenient entity to define in one place variants on
+				gdna, cdna and aa level.
+			</description>
+			<field name="gdna_notation" nillable="false" index="true"
+				description="gDNA notation of the variant, e.g. g.1234567C>T" />
+			<field name="cdna_notation" nillable="false" index="true"
+				description="cDNA notation of the variant, e.g. c.123C>T" />
+			<field name="aa_notation" nillable="true" index="true"
+				description="Aa notation of the variant, e.g. p.Ser123ArgfsX12" />
+			<field name="variantType" type="xref" xref_entity="AlternativeIdentifier"
+				nillable="true" description="Type of the variant." />
+		</entity>
+	</module>
+</molgenis>

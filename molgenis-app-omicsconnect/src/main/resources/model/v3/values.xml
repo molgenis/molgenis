@@ -1,0 +1,65 @@
+<molgenis name="org.molgenis.omx">
+	<module name="values" label="Values module">
+		<description>
+			Advanced value types for core
+		</description>
+
+		<entity name="PermittedValue" implements="Autoid">
+			<description>Specification of what type of value are acceptable when
+				adding an Value for the Method this PermittedValue refers
+				to. This includes more precise constraints such as the allowed range
+				of numerical data, choosable options for categorical data, or
+				regular expression validation for textual data. For categorical
+				data, multiple PermittedValue records each containing a single
+				string value refers to a Method. For XREF data, the entity type
+				which is the most specific root should be specified. For example:
+				specifying org.molgenis.omx.Individual allows for XREFs to all
+				Individuals, plus all subclasses of this type.
+
+				TODO!!
+
+			</description>
+
+
+			<field name="DataType" type="enum" enum_options="[decimal, integer, xref]" />
+			<!-- enum_options="[xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe]" -->
+
+
+			<field name="Feature" type="xref" xref_entity="Feature"
+				description="The method these permitted values are part of." />
+
+			<field name="ValueCode" type="string" nillable="false"
+				description="The constraint rule that is applied when entering a value for a method to which this permittedvalue belong. Eg: 'm' or 'f' for categorical codes, '0..10' for an integer range, 'Individual' for an XREF value class." />
+			<field name="ValueLabel" type="string" nillable="true"
+				description="The label for the contraint. Eg. in case of categorical values: 'Male' for code 'm' or 'Female' for code 'f'. For an integer range code like 0..100 it could be 'Percentage'. For an XREF class code such as 'Individual' it could provide extra information such as 'Participating persons'." />
+
+		</entity>
+
+		<entity name="ListValue" implements="Value">
+			<description>An observation for which the value is a list of strings.
+			</description>
+			<!--field name="Value" type="list[string]" / -->
+		</entity>
+
+		<entity name="DecimalValue" implements="Value">
+			<description>An observation for which the value is a decimal number.
+			</description>
+			<field name="Value" type="decimal" />
+		</entity>
+
+		<entity name="IntegerValue" implements="Value">
+			<description>An observation for which the value is an integer number.
+			</description>
+			<field name="Value" type="int" />
+		</entity>
+
+		<entity name="XrefValue" implements="Value">
+			<description>An observation for which the value refers to a Concept
+				in the database.
+			</description>
+			<field name="Value" type="xref" xref_entity="Concept" />
+		</entity>
+
+
+	</module>
+</molgenis>

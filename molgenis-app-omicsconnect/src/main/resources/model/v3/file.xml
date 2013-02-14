@@ -1,0 +1,26 @@
+<molgenis name="org.molgenis.omx">
+	<module name="file" label="File module">
+		<description>
+			DEPENDS ON: core
+		</description>
+
+		<entity name="MolgenisFile" implements="Identifiable">
+			<description>
+				Helper entity to deal with files. Has a decorator to regulate
+				storage and coupling to an Entity. Do not make abstract because of
+				subtyping. This means the names of the subclasses will be used to
+				distinguish MolgenisFiles and place them in the correct folders.
+			</description>
+			<field name="Extension" nillable="false" length="8"
+				description="The file extension. This will be mapped to MIME type at runtime. For example, a type 'png' will be served out as 'image/png'." />
+			<unique fields="Name"/>
+		</entity>
+		
+		<entity name="InvestigationFile" extends="MolgenisFile">
+			<description>
+			Todo: a file that is linked to studies?
+			</description>
+		</entity>
+
+	</module>
+</molgenis>

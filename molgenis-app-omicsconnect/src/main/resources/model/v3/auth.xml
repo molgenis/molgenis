@@ -1,0 +1,54 @@
+<molgenis name="org.molgenis.omx">
+	<module name="auth" label="Auth module">
+	<description>
+	DEPENDS ON: core, organization
+	</description>
+	
+	<entity name="MolgenisEntity" implements="Autoid">
+			<description>Referenceable catalog of entity names, menus, forms and
+				plugins.
+			</description>
+			<field name="name" description="Name of the entity" />
+			<field name="type_" description="Type of the entity" />
+			<field name="className" unique="true" description="Full name of the entity" />
+			<unique fields="name,type_" />
+		</entity>
+		
+
+		<entity name="MolgenisGroup" extends="MolgenisRole">
+		</entity>
+		
+		<entity name="MolgenisUser" extends="Person">
+			<description>Anyone who can login</description>
+
+			<field name="password_" type="string" default="secret"
+				description="big fixme: password type" />
+			<field name="activationCode" type="string"
+				description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."
+				nillable="true" />
+			<field name="active" type="bool" default="false"
+				description="Boolean to indicate if this account can be used to login" />
+			<field name="superuser" type="bool" default="false" />
+		</entity>
+		<entity name="MolgenisRoleGroupLink" system="true" implements="Identifiable">
+			<field name="group_" type="xref" xref_entity="MolgenisGroup" />
+			<field name="role_" type="xref" xref_entity="MolgenisGroup" />
+		</entity>
+		<entity name="MolgenisPermission" system="true" implements="Autoid">
+			<field name="role_" type="xref" xref_entity="MolgenisRole"
+				 />
+			<field name="entity" type="xref" xref_entity="MolgenisEntity" />
+			<field name="permission" type="enum" enum_options="[read,write,own]" />
+		</entity>
+		<entity name="Authorizable" abstract="true">
+			<description>Interface for row level security</description>
+			<field name="canRead" type="xref" xref_entity="MolgenisRole"
+				  nillable="true" />
+			<field name="canWrite" type="xref" xref_entity="MolgenisRole"
+				nillable="true" />
+			<field name="owns" type="xref" xref_entity="MolgenisRole"
+				 />
+		</entity>
+
+	</module>
+</molgenis>
