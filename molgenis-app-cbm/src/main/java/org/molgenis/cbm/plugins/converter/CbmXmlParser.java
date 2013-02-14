@@ -1,29 +1,29 @@
 package org.molgenis.cbm.plugins.converter;
 
-
-
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.molgenis.cbm.jaxb.CbmNode;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class CbmXmlParser
 {
 
-	public CbmNode load(File xmlFile, File xsdFile) throws JAXBException, SAXException, ParserConfigurationException,
-			IOException
+	public CbmNode load(File xmlFile, File xsdFile) throws JAXBException, SAXException, FileNotFoundException,
+			XMLStreamException
 	{
 		// set up JAXB
 
@@ -40,17 +40,21 @@ public class CbmXmlParser
 		Schema schema = sf.newSchema(xsdFile);
 		unmarshaller.setSchema(schema);
 
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setNamespaceAware(true);
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(xmlFile);
+		XMLInputFactory factory = XMLInputFactory.newInstance();
 
-		// Unmarshal the XML in the stringWriter back into an object
-		JAXBElement<CbmNode> result = unmarshaller.unmarshal(doc.getFirstChild(), CbmNode.class);
+		XMLStreamReader reader = factory.createXMLStreamReader(new InputStreamReader(new FileInputStream(xmlFile),
+				Charset.forName("UTF-8")));
 
-		// Print out the contents of the JavaObject we just unmarshalled from
-		// the XML
+		try
+		{
+			// Unmarshal the XML in the stringWriter back into an object
+			JAXBElement<CbmNode> result = unmarshaller.unmarshal(reader, CbmNode.class);
+			return result.getValue();
+		}
+		finally
+		{
+			reader.close();
+		}
 
-		return result.getValue();
 	}
 }

@@ -1,10 +1,19 @@
 package org.molgenis.cbm.plugins.converter;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.cbm.jaxb.CbmNode;
@@ -13,6 +22,7 @@ import org.molgenis.cbm.jaxb.Diagnosis;
 import org.molgenis.cbm.jaxb.ParticipantCollectionSummary;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
+import org.molgenis.framework.ui.EasyPluginController;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.io.csv.CsvWriter;
@@ -23,7 +33,9 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 {
 
 	private File currentFile;
-
+	private final String outputDir = System.getProperty("java.io.tmpdir");
+	private final List<String> listFiles = Arrays.asList("dataset.csv", "dataset_collectionprotocols.csv",
+			"dataset_participant_cs.csv", "protocol.csv", "observablefeature.csv");
 	private static final long serialVersionUID = -6143910771849972946L;
 
 	public CbmToOmxConverter(String name, ScreenController<?> parent)
@@ -60,17 +72,12 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			{
 				throw new Exception("File does not end with '.xml', other formats are not supported.");
 			}
-			// TODO: Change this to generic arguments
-			String path = "/Users/Roan/Work/CBM/output/";
-			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-			File inDeTmpDir = new File(tmpDir, "eenBestandje.txt");
-
 			// Create the files needed
-			CsvWriter dataParticipant = new CsvWriter(new File(path + "dataset_participant_cs.csv"));
-			CsvWriter observableFeature = new CsvWriter(new File(path + "observablefeature.csv"));
-			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(path + "dataset_collectionprotocols.csv"));
-			CsvWriter dataSet = new CsvWriter(new File(path + "dataset.csv"));
-			CsvWriter protocol = new CsvWriter(new File(path + "protocol.csv"));
+			CsvWriter dataParticipant = new CsvWriter(new File(outputDir + "dataset_participant_cs.csv"));
+			CsvWriter observableFeature = new CsvWriter(new File(outputDir + "observablefeature.csv"));
+			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(outputDir + "dataset_collectionprotocols.csv"));
+			CsvWriter dataSet = new CsvWriter(new File(outputDir + "dataset.csv"));
+			CsvWriter protocol = new CsvWriter(new File(outputDir + "protocol.csv"));
 			try
 			{
 
@@ -81,7 +88,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				KeyValueTuple kvtdataParticipant = null;
 				KeyValueTuple kvtprotocol_Collection_Protocol = new KeyValueTuple();
 				// get uploaded file and do checks
-				File currentXsdfile = new File("Webcontent/res/schema/CBM.xsd");
+				File currentXsdfile = new File("src/main/resources/schemas/CBM.xsd");
 				// if no error, set file, and continue
 				this.setCurrentFile(file);
 				// Here the actual data is going to be imported.
@@ -287,7 +294,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 						kvtdataParticipant.set("enrolls_row_identifier", "enrolls_row_identifier"
 								+ collectionIdentifier);
-
 						kvtdataParticipant.set("race", pcsummary.getIsClassifiedBy().getRace().get(0).getRace());
 
 						if (pcsummary.getProvides().getSpecimenCollectionSummary().size() > 1)
@@ -329,7 +335,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				kvtprotocol_Collection_Protocol.set("name", "protocol_participant");
 				kvtprotocol_Collection_Protocol.set("subprotocols_identifier", allSubprotocolsParticipants);
 				protocol.write(kvtprotocol_Collection_Protocol);
-				// Write and close collectionprotocol file
 				dataSetCollectionProtocol.write(kvtdataSetCollectionProtocol);
 			}
 			finally
@@ -339,8 +344,69 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				IOUtils.closeQuietly(dataSetCollectionProtocol);
 				IOUtils.closeQuietly(dataSet);
 				IOUtils.closeQuietly(observableFeature);
-
 			}
+
+			File zipFile = new File(outputDir, "zipfile.zip");
+			System.out.println(zipFile);
+			File[] sourceFiles =
+			{ new File(outputDir, "dataset.csv"), new File(outputDir, "dataset_collectionprotocols.csv"),
+					new File(outputDir, "dataset_participant_cs.csv"), new File(outputDir, "protocol.csv"),
+					new File(outputDir, "observablefeature.csv") };
+
+			FileOutputStream fout = new FileOutputStream(zipFile);
+			ZipOutputStream zout = new ZipOutputStream(fout);
+
+			for (File f : sourceFiles)
+			{
+
+				System.out.println("Adding " + f.getAbsolutePath());
+				FileInputStream fin = new FileInputStream(f);
+				zout.putNextEntry(new ZipEntry(f.getName()));
+				byte[] b = new byte[1024];
+				int length;
+				while ((length = fin.read(b)) > 0)
+				{
+					zout.write(b, 0, length);
+				}
+				zout.closeEntry();
+				fin.close();
+			}
+			zout.close();
+			fout.close();
+
+			URL localURL = zipFile.toURI().toURL();
+			URLConnection conn = localURL.openConnection();
+			InputStream in = new BufferedInputStream(conn.getInputStream());
+
+			String mimetype = request.getRequest().getServletContext().getMimeType(zipFile.getName());
+			if (mimetype != null) request.getResponse().setContentType(mimetype);
+
+			request.getResponse()
+					.setHeader("Content-disposition", "attachment; filename=\"" + zipFile.getName() + "\"");
+
+			if (zipFile.length() > Integer.MAX_VALUE)
+			{
+				throw new Exception("Zip file too big to be handled by webserver");
+			}
+			request.getResponse().setContentLength((int) zipFile.length());
+			OutputStream out = request.getResponse().getOutputStream();
+
+			byte[] buffer = new byte[1024];
+			for (;;)
+			{
+				int nBytes = in.read(buffer);
+				if (nBytes <= 0) break;
+				out.write(buffer, 0, nBytes);
+			}
+			out.flush();
+
+			IOUtils.closeQuietly(out);
+			IOUtils.closeQuietly(in);
+
+			logger.info("serving " + request.getRequest().getRequestURI());
+
+			// FIXME: This is a hack, fix asap
+			EasyPluginController.HTML_WAS_ALREADY_SERVED = true;
 
 		}
 	}
@@ -364,6 +430,16 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 		// e.g.
 		// if(!this.getLogin().hasEditPermission(myEntity)) return false;
 		return true;
+	}
+
+	public String getOutputDir()
+	{
+		return outputDir;
+	}
+
+	public List<String> getListFiles()
+	{
+		return listFiles;
 	}
 
 }
