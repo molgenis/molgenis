@@ -299,7 +299,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 						kvtdataParticipant.set("enrolls_row_identifier", "enrolls_row_identifier"
 								+ collectionIdentifier);
-
 						kvtdataParticipant.set("race", pcsummary.getIsClassifiedBy().getRace().get(0).getRace());
 
 						if (pcsummary.getProvides().getSpecimenCollectionSummary().size() > 1)
@@ -341,7 +340,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				kvtprotocol_Collection_Protocol.set("name", "protocol_participant");
 				kvtprotocol_Collection_Protocol.set("subprotocols_identifier", allSubprotocolsParticipants);
 				protocol.write(kvtprotocol_Collection_Protocol);
-				// Write and close collectionprotocol file
 				dataSetCollectionProtocol.write(kvtdataSetCollectionProtocol);
 			}
 			finally
@@ -351,7 +349,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				IOUtils.closeQuietly(dataSetCollectionProtocol);
 				IOUtils.closeQuietly(dataSet);
 				IOUtils.closeQuietly(observableFeature);
-
 			}
 
 			File zipFile = new File(outputDir, "zipfile.zip");
@@ -361,12 +358,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 					new File(outputDir, "dataset_participant_cs.csv"), new File(outputDir, "protocol.csv"),
 					new File(outputDir, "observablefeature.csv") };
 
-			// create byte buffer
-
-			// create object of FileOutputStream
 			FileOutputStream fout = new FileOutputStream(zipFile);
-
-			// create object of ZipOutputStream from FileOutputStream
 			ZipOutputStream zout = new ZipOutputStream(fout);
 
 			for (File f : sourceFiles)
