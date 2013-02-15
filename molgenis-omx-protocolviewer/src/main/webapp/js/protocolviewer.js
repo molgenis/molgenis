@@ -21,8 +21,7 @@ function getDataSet(id, callback) {
 	}
 
 	if (!dataSets[id]) {
-		$
-				.getJSON(
+		$.getJSON(
 						'molgenis.do?__target=ProtocolViewer&__action=download_json_getdataset&datasetid='
 								+ id, function(data) {
 							dataSets[id] = data;
@@ -34,8 +33,7 @@ function getDataSet(id, callback) {
 }
 
 function getFeature(id, callback) {
-	$
-			.getJSON(
+	$.getJSON(
 					'molgenis.do?__target=ProtocolViewer&__action=download_json_getfeature&featureid='
 							+ id, function(data) {
 						callback(data);
@@ -161,15 +159,18 @@ function checkExistenceOfAllSubNodes(node) {
 }
 
 function retrieveNodeInfo(node, recursive, options) {
-	$('#spinner').modal('show');
+	if(recursive)
+		$('#spinner').modal('show');
 	$
 			.ajax({
 				url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_getprotocol',
+				async: false,
 				data : {
 					'id' : node.data.key,
 					'recursive' : recursive
 				},
 				success : function(data) {
+					
 					if (data) {
 						var branches = createNodes(data, options);
 						node.setLazyNodeStatus(DTNodeStatus_Ok);
@@ -181,10 +182,12 @@ function retrieveNodeInfo(node, recursive, options) {
 							});
 						}
 					}
-					$('#spinner').modal('hide');
+					if(recursive)
+						$('#spinner').modal('hide');
 				},
 				error : function() {
-					$('#spinner').modal('hide');
+					if(recursive)
+						$('#spinner').modal('hide');
 				}
 			});
 }
@@ -291,9 +294,9 @@ function clearSearch() {
 	// reset to initial display
 	root.visit(function(node) {
 		if (node.li)
-			node.li.hidden = false;
+			$(node.li).show();
 		if (node.ul)
-			node.ul.hidden = false;
+			$(node.ul).show();
 		node.expand(false);
 	}, true);
 	root.expand(true);
@@ -378,14 +381,14 @@ function showNodes(node, keys) {
 	}
 	if (!match) {
 		if (node.li)
-			node.li.hidden = true;
+			$(node.li).hide();
 		else if (node.ul)
-			node.ul.hidden = true;
+			$(node.ul).hide();
 	} else {
 		if (node.li)
-			node.li.hidden = false;
+			$(node.li).show();
 		else if (node.ul)
-			node.ul.hidden = false;
+			$(node.ul).show();
 	}
 	return match;
 }

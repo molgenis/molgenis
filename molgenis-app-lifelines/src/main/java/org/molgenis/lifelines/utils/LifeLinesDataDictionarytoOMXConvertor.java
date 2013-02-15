@@ -43,6 +43,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 	private static final String COL_SECTION = "Section";
 	private static final String COL_SUB_SECTION = "Sub-section";
 	private static final String COL_SUB_SECTION2 = "Sub-section 2";
+	private static final String COL_SUB_SECTION3 = "Sub-section 3";
 	private static final String COL_COHORT = "Cohort";
 	private static final String COL_TIME = "Time";
 	private static final String COL_TYPE = "Type";
@@ -282,6 +283,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			String section = row.getString(COL_SECTION);
 			String subSection = row.getString(COL_SUB_SECTION);
 			String subSubSection = row.getString(COL_SUB_SECTION2);
+			String subSubSubSection = row.getString(COL_SUB_SECTION3);
 
 			String protocolIdentifier = cohort.replace(",", "");
 			String protocolName = cohort;
@@ -372,8 +374,25 @@ public class LifeLinesDataDictionarytoOMXConvertor
 									protocol.addSubProtocol(subProtocol);
 								}
 
-								// end of the line, add feature
-								subProtocol.addFeatureIdentifier(featureIdentifier);
+								if (subSubSubSection == null || subSubSubSection.isEmpty()) subProtocol
+										.addFeatureIdentifier(featureIdentifier);
+								else
+								{
+									protocolIdentifier = protocolIdentifier + '.' + subSubSubSection.replace(",", "");
+									protocolName = subSubSubSection;
+
+									protocol = subProtocol;
+									subProtocol = protocolMap.get(protocolIdentifier);
+									if (subProtocol == null)
+									{
+										subProtocol = new Protocol(protocolIdentifier, protocolName);
+										protocolMap.put(protocolIdentifier, subProtocol);
+										protocol.addSubProtocol(subProtocol);
+									}
+
+									// end of the line, add feature
+									subProtocol.addFeatureIdentifier(featureIdentifier);
+								}
 							}
 						}
 					}
