@@ -27,7 +27,7 @@
 </#macro>
 <#macro molgenis_footer>
 		<#-- spinner that is hidden by default -->
-		<div id="spinner" class="modal hide">
+		<div id="spinner" class="modal hide fade">
 	  		<div class="modal-header">
 	    		<h3>Loading ...</h3>
 	 		 </div>
