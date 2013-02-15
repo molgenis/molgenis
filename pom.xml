@@ -1,11 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+    	<groupId>org.sonatype.oss</groupId>
+    	<artifactId>oss-parent</artifactId>
+    	<version>7</version>
+  	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+ 	 <!-- More Project Information -->
+ 	<name>Molgenis</name>
+  	<description>
+  		MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life science research
+  	</description>
+  	<url>http://www.molgenis.org</url>
+  	<licenses>
+  		<license>
+    		<name>GNU Library or Lesser General Public License (LGPL)</name>
+  		</license>
+	</licenses>
+	<scm>
+    	<connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
+    	<url>https://github.com/molgenis/molgenis</url>
+  	</scm>
+  	<developers></developers>
+  	
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
