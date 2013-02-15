@@ -5,7 +5,7 @@
  * THIS FILE IS A TEMPLATE. PLEASE EDIT :-)
  */
 
-package org.molgenis.tifn.plugins.home;
+package org.molgenis.gids.plugins.home;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class Home extends PluginModel<Entity>
 	@Override
 	public String getViewTemplate()
 	{
-		return "templates/org/molgenis/tifn/plugins/home/Home.ftl";
+		return "templates/org/molgenis/gids/plugins/home/Home.ftl";
 	}
 
 	@Override
@@ -74,7 +74,8 @@ public class Home extends PluginModel<Entity>
 			if (listUsers.isEmpty())
 			{
 
-				FillMetadata.fillMetadata(db, false, "SimpleUserLoginPlugin");
+				FillMetadata.fillMetadata(db, false);
+				System.out.println("BLAAT");
 				this.setMessages(new ScreenMessage("User setup complete!", true));
 			}
 

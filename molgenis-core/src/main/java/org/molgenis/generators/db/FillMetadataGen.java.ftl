@@ -136,13 +136,13 @@ public class FillMetadata {
 
 		MolgenisRoleGroupLink mrgl3 = new MolgenisRoleGroupLink();
 		mrgl3.setGroup_Id(group1.getId());
-		mrgl3.setIdentifier(group1.getIdentifier());
+		mrgl3.setIdentifier("mrgl3");
 		mrgl3.setName(group1.getName());
 		mrgl3.setRole(user2.getId());
 
 		MolgenisRoleGroupLink mrgl4 = new MolgenisRoleGroupLink();
 		mrgl4.setGroup_Id(group2.getId());
-		mrgl4.setIdentifier(group2.getIdentifier());
+		mrgl4.setIdentifier("mrgl4");
 		mrgl4.setName(group2.getName());
 		mrgl4.setRole(user2.getId());		
 		
@@ -170,6 +170,8 @@ public class FillMetadata {
 			
 			MolgenisPermission mp = new MolgenisPermission();
 			mp.setRole(role.getId());
+			mp.setName(role.getName());
+			mp.setIdentifier(role.getIdentifier());
 			mp.setEntity(entity.getId());
 			mp.setPermission("<#if screen.getGroup()?exists>write<#else>read</#if>");
 			db.add(mp);
@@ -181,6 +183,8 @@ public class FillMetadata {
 			
 			MolgenisPermission mp = new MolgenisPermission();
 			mp.setRole(role.getId());
+			mp.setName(role.getName());
+			mp.setIdentifier(role.getIdentifier());
 			mp.setEntity(entity.getId());
 			mp.setPermission("<#if screen.getGroup()?exists>write<#else>read</#if>");
 			db.add(mp);
@@ -192,6 +196,8 @@ public class FillMetadata {
 			
 			MolgenisPermission mp = new MolgenisPermission();
 			mp.setRole(role.getId());
+			mp.setName(role.getName());
+			mp.setIdentifier(role.getIdentifier());
 			mp.setEntity(entity.getId());
 			mp.setPermission("<#if screen.getGroup()?exists>write<#else>read</#if>");
 			db.add(mp);
@@ -204,6 +210,8 @@ public class FillMetadata {
 			MolgenisEntity insertEntities = db.find(MolgenisEntity.class, new QueryRule("name", Operator.EQUALS, loginPluginName)).get(0);		
 			MolgenisPermission mp = new MolgenisPermission();
 			mp.setRole(user2.getId());
+			mp.setName(user2.getName());
+			mp.setIdentifier(user2.getIdentifier());
 			mp.setEntity(insertEntities.getId());
 			mp.setPermission("read");
 			db.add(mp);

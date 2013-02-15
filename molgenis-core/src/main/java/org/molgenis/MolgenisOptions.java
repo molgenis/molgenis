@@ -171,7 +171,7 @@ public class MolgenisOptions implements Serializable
 	public boolean generate_persistence = true;
 
 	@Option(name = "hibernate_dialect", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Choosing the JPA dialect for persistence.xml. Default: MySQL5Dialect")
-	public String hibernate_dialect = "MySQL5Dialect";
+	public String hibernate_dialect = "MySQL5InnoDBDialect";
 
 	@Option(name = "jpa_use_sequence", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Choosing whether sequence are used to generate primary key (true) or auto (false: default)")
 	public boolean jpa_use_sequence = false;
