@@ -23,6 +23,7 @@
 		<script type="text/javascript" src="js/overlib.js"></script>
 		<#if screen.controller??>${screen.controller.getCustomHtmlHeaders()}</#if>
 	</head>
+	<body>
 	<#if applicationHtmlError?exists>${applicationHtmlError}</#if>
 </#macro>
 <#macro molgenis_footer>
