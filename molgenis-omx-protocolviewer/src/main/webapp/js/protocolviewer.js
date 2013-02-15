@@ -161,7 +161,8 @@ function checkExistenceOfAllSubNodes(node) {
 }
 
 function retrieveNodeInfo(node, recursive, options) {
-	$('#spinner').modal('show');
+	if(recursive)
+		$('#spinner').modal('show');
 	$
 			.ajax({
 				url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_getprotocol',
@@ -181,10 +182,12 @@ function retrieveNodeInfo(node, recursive, options) {
 							});
 						}
 					}
-					$('#spinner').modal('hide');
+					if(recursive)
+						$('#spinner').modal('hide');
 				},
 				error : function() {
-					$('#spinner').modal('hide');
+					if(recursive)
+						$('#spinner').modal('hide');
 				}
 			});
 }
