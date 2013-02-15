@@ -4,7 +4,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
@@ -15,6 +14,7 @@ import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.util.PasswordHasher;
 
 public class MolgenisUserDecorator<E extends MolgenisUser> extends MapperDecorator<E>
 {
@@ -60,7 +60,10 @@ public class MolgenisUserDecorator<E extends MolgenisUser> extends MapperDecorat
 				}
 
 				MolgenisRoleGroupLink mugl = new MolgenisRoleGroupLink();
+				mugl.setIdentifier(e.getIdentifier());
+				mugl.setName(e.getName());
 				mugl.setRole_Id(e.getId());
+
 				mugl.setGroup_Id(mg.getId());
 				try
 				{
