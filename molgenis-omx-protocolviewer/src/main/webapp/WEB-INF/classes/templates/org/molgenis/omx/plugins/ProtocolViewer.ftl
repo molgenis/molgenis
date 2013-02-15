@@ -78,8 +78,8 @@
  					
  					$("#search-text").keyup(function(e){
  						e.preventDefault();
-					    if(e.keyCode == 13) // enter
-					        {$("#search-button").click(); console.log(e);}
+					    if(e.keyCode == 13 || e.which === '13') // enter
+					        {$("#search-button").click();}
 					});
  					
  					$('#search-button').click(function(e) {
@@ -94,7 +94,7 @@
  					
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
- 						window.location = getSelectedFeaturesURL('xls');
+ 						$.fileDownload(getSelectedFeaturesURL('xls'));
  					});
  					
  					$('#view-features-button').click(function(e) {
@@ -104,9 +104,14 @@
  					
  					// on ready
 					$(function() {
+						<#-- disable all form submission -->
+						$('form').submit(function() {
+							return false;
+						});
+						
 						<#-- prevent user form submission by pressing enter -->
 					    $(window).keydown(function(e){
-					      if(e.keyCode == 13) {
+					      if(e.keyCode === 13 || e.which === '13') {
 					        e.preventDefault();
 					        return false;
 					      }

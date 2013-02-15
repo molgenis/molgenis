@@ -170,6 +170,7 @@ function retrieveNodeInfo(node, recursive, options) {
 					'recursive' : recursive
 				},
 				success : function(data) {
+					
 					if (data) {
 						var branches = createNodes(data, options);
 						node.setLazyNodeStatus(DTNodeStatus_Ok);
@@ -293,9 +294,9 @@ function clearSearch() {
 	// reset to initial display
 	root.visit(function(node) {
 		if (node.li)
-			node.li.hidden = false;
+			$(node.li).show();
 		if (node.ul)
-			node.ul.hidden = false;
+			$(node.ul).show();
 		node.expand(false);
 	}, true);
 	root.expand(true);
@@ -380,14 +381,14 @@ function showNodes(node, keys) {
 	}
 	if (!match) {
 		if (node.li)
-			node.li.hidden = true;
+			$(node.li).hide();
 		else if (node.ul)
-			node.ul.hidden = true;
+			$(node.ul).hide();
 	} else {
 		if (node.li)
-			node.li.hidden = false;
+			$(node.li).show();
 		else if (node.ul)
-			node.ul.hidden = false;
+			$(node.ul).show();
 	}
 	return match;
 }
