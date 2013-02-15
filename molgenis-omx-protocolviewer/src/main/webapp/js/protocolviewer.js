@@ -21,8 +21,7 @@ function getDataSet(id, callback) {
 	}
 
 	if (!dataSets[id]) {
-		$
-				.getJSON(
+		$.getJSON(
 						'molgenis.do?__target=ProtocolViewer&__action=download_json_getdataset&datasetid='
 								+ id, function(data) {
 							dataSets[id] = data;
@@ -34,8 +33,7 @@ function getDataSet(id, callback) {
 }
 
 function getFeature(id, callback) {
-	$
-			.getJSON(
+	$.getJSON(
 					'molgenis.do?__target=ProtocolViewer&__action=download_json_getfeature&featureid='
 							+ id, function(data) {
 						callback(data);
@@ -166,6 +164,7 @@ function retrieveNodeInfo(node, recursive, options) {
 	$
 			.ajax({
 				url : 'molgenis.do?__target=ProtocolViewer&__action=download_json_getprotocol',
+				async: false,
 				data : {
 					'id' : node.data.key,
 					'recursive' : recursive
