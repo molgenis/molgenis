@@ -1,0 +1,2 @@
+step,protocol,parameters
+step1,step1.ftl,input=user.input
