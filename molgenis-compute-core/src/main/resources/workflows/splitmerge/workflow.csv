@@ -1,0 +1,4 @@
+step,protocol,parameters
+stepA,stepA.ftl,input=user.A
+stepB,stepB.ftl,input=user.B;merge=stepA.output
+stepC,stepC.ftl,input=user.C;merge=stepB.output

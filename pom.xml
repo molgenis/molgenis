@@ -261,5 +261,6 @@
 		<module>molgenis-app-tifn</module>
 		<module>molgenis-app-cbm</module>
     	<module>molgenis-app-gids</module>
-  </modules>
+    	<module>molgenis-compute-core</module>
+	</modules>
 </project>

@@ -1,0 +1,3 @@
+step,protocol,parameters
+filterInput,filterMapPed.ftl,inputMapPed=user.inputMapPed
+performImputation,performImputation.ftl,inputationInput=filterInput.outputMapPed;resultImputedFiles=user.resultImputedFiles
