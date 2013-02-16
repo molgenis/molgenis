@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -34,8 +35,14 @@ import org.molgenis.util.tuple.WritableTuple;
 public class ComputeCommandLine
 {
 	@SuppressWarnings("static-access")
-	public static void main(String[] args) throws ParseException, ClassNotFoundException
+	public static void main(String[] args) throws ParseException, ClassNotFoundException, IOException
 	{
+		System.out.println("### MOLGENIS COMPUTE ###");
+		System.out.println("Version: "+ ComputeCommandLine.class.getPackage().getImplementationVersion());
+		Properties properties = new Properties();
+		properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
+		System.out.println("Git hash: " + properties.getProperty("git.commit.id.abbrev"));
+		
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
 
@@ -110,7 +117,6 @@ public class ComputeCommandLine
 			t.set(Parameters.WORKDIR_COLUMN, new File(workDir).getAbsolutePath());
 		}
 		
-		System.out.println("### MOLGENIS COMPUTE ###");
 		System.out.println("Using workflow:   " + new File(workflowCsv).getAbsolutePath());
 		System.out.println("Using parameters: "
 				+ parameterFiles);

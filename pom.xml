@@ -1,37 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-    	<groupId>org.sonatype.oss</groupId>
-    	<artifactId>oss-parent</artifactId>
-    	<version>7</version>
-  	</parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
- 	 <!-- More Project Information -->
- 	<name>Molgenis</name>
-  	<description>
+	<!-- More Project Information -->
+	<name>Molgenis</name>
+	<description>
   		MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life science research
   	</description>
-  	<url>http://www.molgenis.org</url>
-  	<licenses>
-  		<license>
-    		<name>GNU Library or Lesser General Public License (LGPL)</name>
-  		</license>
+	<url>http://www.molgenis.org</url>
+	<licenses>
+		<license>
+			<name>GNU Library or Lesser General Public License (LGPL)</name>
+		</license>
 	</licenses>
 	<scm>
-    	<connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
-    	<url>https://github.com/molgenis/molgenis</url>
-  	</scm>
-  	<developers></developers>
-  	
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    
+		<connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
+		<url>https://github.com/molgenis/molgenis</url>
+	</scm>
+	<developers></developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -44,7 +45,7 @@
 						<source>1.6</source>
 						<target>1.6</target>
 						<compilerArguments>
-  							<Xlint/>
+							<Xlint />
 						</compilerArguments>
 					</configuration>
 				</plugin>
@@ -59,6 +60,18 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>2.4</version>
+
+					<configuration>
+						<archive>
+							<manifest>
+								<mainClass>test.App</mainClass>
+								<addDefaultImplementationEntries>
+									true
+								</addDefaultImplementationEntries>
+							</manifest>
+						</archive>
+					</configuration>
+
 				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
@@ -71,13 +84,13 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>jaxb2-maven-plugin</artifactId>
 					<version>1.5</version>
-				</plugin>			
+				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.7</version>
-				</plugin>			
+				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -86,16 +99,16 @@
 				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
-        			<groupId>org.apache.maven.plugins</groupId>
-        			<artifactId>maven-site-plugin</artifactId>
-        			<version>3.2</version>
-        		</plugin>
-        		<!-- specify plugin version -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.2</version>
+				</plugin>
+				<!-- specify plugin version -->
 				<plugin>
-        			<groupId>org.apache.maven.plugins</groupId>
-        			<artifactId>maven-source-plugin</artifactId>
-        			<version>2.2.1</version>
-        		</plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.2.1</version>
+				</plugin>
 				<!-- servlet container -->
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
@@ -105,8 +118,8 @@
 						<scanIntervalSeconds>3</scanIntervalSeconds>
 						<stopPort>9999</stopPort>
 						<stopKey>jetty-stop</stopKey>
-						<contextPath>/</contextPath>                     
-                	</configuration>
+						<contextPath>/</contextPath>
+					</configuration>
 				</plugin>
 				<!-- Eclipse m2e mappings -->
 				<plugin>
@@ -134,6 +147,7 @@
 					</configuration>
 				</plugin>
 			</plugins>
+
 		</pluginManagement>
 
 		<plugins>
@@ -150,9 +164,26 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- git version id plugin -->
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.1.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-	
+
 	<reporting>
 		<plugins>
 			<!-- code coverage -->
@@ -162,11 +193,11 @@
 				<version>2.5.2</version>
 				<configuration>
 					<aggregate>true</aggregate>
-			       	<formats>
-				        <format>html</format>
-				        <format>xml</format>
-			       	</formats>
-		      	</configuration>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
 			</plugin>
 			<!-- code analysis -->
 			<plugin>
@@ -174,30 +205,14 @@
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>2.5.2</version>
 				<configuration>
-          			<xmlOutput>true</xmlOutput>
+					<xmlOutput>true</xmlOutput>
 				</configuration>
 			</plugin>
-			<!-- javadoc 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<reportSets>
-					<reportSet>
-					  <id>non-aggregate</id>
-						<reports>
-					  		<report>javadoc</report>
-						</reports>
-				 	</reportSet>
-				 	<reportSet>
-				   		<id>aggregate</id>
-					    <reports>
-					      	<report>aggregate</report>
-					    </reports>
-				  	</reportSet>
-				</reportSets>
-			</plugin>
-			-->
+			<!-- javadoc <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
+				<version>2.9</version> <reportSets> <reportSet> <id>non-aggregate</id> <reports> 
+				<report>javadoc</report> </reports> </reportSet> <reportSet> <id>aggregate</id> 
+				<reports> <report>aggregate</report> </reports> </reportSet> </reportSets> 
+				</plugin> -->
 			<!-- project reports -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -232,12 +247,12 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>3.2.1.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>3.2.1.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- scope: provided -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -246,21 +261,21 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
 		<module>molgenis-omx-auth</module>
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-dataviewer</module>
-		<module>molgenis-omx-filemanager</module>	
+		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-omicsconnect</module>
 		<module>molgenis-app-tifn</module>
 		<module>molgenis-app-cbm</module>
-    	<module>molgenis-app-gids</module>
-    	<module>molgenis-compute-core</module>
+		<module>molgenis-app-gids</module>
+		<module>molgenis-compute-core</module>
 	</modules>
 </project>
