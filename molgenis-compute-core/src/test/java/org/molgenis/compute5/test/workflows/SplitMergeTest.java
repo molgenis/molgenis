@@ -11,8 +11,8 @@ public class SplitMergeTest
 	@Test
 	public void test() throws IOException
 	{
-		Compute c = ComputeCommandLine.create("workflows/splitmerge/workflow.csv", new String[]
-		{ "workflows/splitmerge/parameters.csv" }, "example-output/splitmerge");
+		Compute c = ComputeCommandLine.create("src/main/resources/workflows/splitmerge/workflow.csv", new String[]
+		{ "src/main/resources/workflows/splitmerge/parameters.csv" }, "target/example-output/splitmerge");
 
 	}
 }

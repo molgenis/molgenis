@@ -18,7 +18,7 @@ public class TupleUtilsTest
 	@Test
 	public void test() throws IOException
 	{
-		Parameters p = ParametersCsvParser.parse(new File("workflows/ngs/constants.csv"), new File("workflows/ngs/parameters.csv"));
+		Parameters p = ParametersCsvParser.parse(new File("src/main/resources/workflows/ngs/settings.csv"), new File("src/main/resources/workflows/ngs/parameters.csv"));
 
 		System.out.println("orginal:\n" + print(p.getValues()));
 

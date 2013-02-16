@@ -41,6 +41,7 @@ Add the following (you can restart Eclipse when done):
 * maven integration for eclipse
 * Apt M2E connector
 * JBoss Tools (ONLY SELECT THE 'FreeMarker IDE feature' later in the wizard!)
+* testng
 
 Now you have configure Eclipse. Restart eclipse.
 
