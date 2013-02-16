@@ -14,9 +14,9 @@ public class ParametersParserTest {
 	@Test
 	public void test() throws IOException
 	{
-		File f1 = new File("workflows/copyFile/constants.csv");
-		File f2 = new File("workflows/copyFile/parameters.csv");
-		File f3 = new File("workflows/copyFile/moreParameters.csv");
+		File f1 = new File("src/main/resources/workflows/copyFile/constants.csv");
+		File f2 = new File("src/main/resources/workflows/copyFile/parameters.csv");
+		File f3 = new File("src/main/resources/workflows/copyFile/moreParameters.csv");
 		
 		Parameters parameters = ParametersCsvParser.parse(f1,f2,f3);
 		

@@ -11,7 +11,7 @@ public class NgsWorkflowTest
 	@Test
 	public void test() throws IOException
 	{
-		Compute c = ComputeCommandLine.create("workflows/ngs/workflow.csv", new String[]
-				{ "workflows/ngs/parameters.csv", "workflows/ngs/constants.csv" }, "example-output/ngs");
+		Compute c = ComputeCommandLine.create("src/main/resources/workflows/ngs/workflow.csv", new String[]
+				{ "src/main/resources/workflows/ngs/parameters.csv", "src/main/resources/workflows/ngs/settings.csv" }, "target/example-output/ngs");
 	}
 }
