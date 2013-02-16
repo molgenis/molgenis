@@ -21,7 +21,9 @@ public class ParametersCsvParser
 {
 	public static Parameters parse(File ... filesArray) throws IOException
 	{
-		return parse(Arrays.asList(filesArray));
+		List<File> filesList = new ArrayList<File>();
+		filesList.addAll(Arrays.asList(filesArray));
+		return parse(filesList);
 	}
 
 	public static Parameters parse(List<File> filesArray) throws IOException

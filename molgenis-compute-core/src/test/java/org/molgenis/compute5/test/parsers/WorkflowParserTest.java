@@ -12,7 +12,7 @@ public class WorkflowParserTest {
 
 	@Test
 	public void test1() throws IOException {
-		String workflow = "workflows/copyFile/workflow.csv";
+		String workflow = "src/main/resources/workflows/copyFile/workflow.csv";
 
 		Workflow result = WorkflowCsvParser.parse(workflow);
 
