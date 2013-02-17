@@ -23,7 +23,8 @@
 									<path refid="maven.compile.classpath" />
 									<pathelement path="${basedir}/src/main/resources" />
 								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath">
+								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath"
+									failonerror="true">
 									<arg value="molgenis.properties" />
 									<arg value="${project.build.directory}/generated-sources/molgenis" />
 								</java>
@@ -34,7 +35,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>		
+			</plugin>
 			<!-- add generated sources -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -69,24 +70,6 @@
 					<packagingExcludes>pom.xml,**/molgenis.properties,**/molgenis_ui.xml,**/*.sql</packagingExcludes>
 				</configuration>
 			</plugin>
-			<!-- compile XML schemas -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxb2-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<quiet>true</quiet>
-					<packageName>org.molgenis.cbm.jaxb</packageName>
-					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
-				</configuration>
-			</plugin>
 			<!-- web server -->
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
@@ -94,7 +77,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -131,7 +114,7 @@
 			<version>0.0.1-SNAPSHOT</version>
 			<type>jar</type>
 			<classifier>classes</classifier>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-dataviewer</artifactId>
@@ -161,6 +144,11 @@
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant-apache-log4j</artifactId>
+			<version>1.8.4</version>
 		</dependency>
 	</dependencies>
 </project>
