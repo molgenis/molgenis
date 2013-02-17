@@ -8,6 +8,7 @@
 	</parent>
 	<artifactId>molgenis-app-gids</artifactId>
 	<packaging>war</packaging>
+
 	<build>
 		<plugins>
 			<!-- execute molgenis generator -->
@@ -23,8 +24,7 @@
 									<path refid="maven.compile.classpath" />
 									<pathelement path="${basedir}/src/main/resources" />
 								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath"
-									failonerror="true">
+								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
 									<arg value="molgenis.properties" />
 									<arg value="${project.build.directory}/generated-sources/molgenis" />
 								</java>
@@ -42,6 +42,7 @@
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>execution-sources</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-source</goal>
@@ -144,11 +145,6 @@
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ant</groupId>
-			<artifactId>ant-apache-log4j</artifactId>
-			<version>1.8.4</version>
 		</dependency>
 	</dependencies>
 </project>
