@@ -10,6 +10,18 @@
 	<packaging>war</packaging>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>**molgenis.properties</exclude>
+					<exclude>**git.properties</exclude>
+					<exclude>**/model/*.xml</exclude>
+					<exclude>**ui.xml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		
 		<plugins>
 			<!-- execute molgenis generator -->
 			<plugin>
@@ -83,12 +95,16 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- exclude files from war -->
+			<!-- Include generated doc in war -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<packagingExcludes>pom.xml,**/molgenis.properties,**/molgenis_ui.xml,**/*.sql</packagingExcludes>
+					<webResources>
+            			<resource>
+              				<directory>target/generated-sources/molgenis/doc</directory>
+            			</resource>
+          			</webResources>
 				</configuration>
 			</plugin>
 			<!-- web server -->

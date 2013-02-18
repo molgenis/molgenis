@@ -44,6 +44,10 @@
 			</resource>
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>**molgenis.properties</exclude>
+					<exclude>**git.properties</exclude>
+				</excludes>
 			</resource>
 		</resources>
 		<pluginManagement>
@@ -130,7 +134,13 @@
 						<scanIntervalSeconds>3</scanIntervalSeconds>
 						<stopPort>9999</stopPort>
 						<stopKey>jetty-stop</stopKey>
-						<contextPath>/</contextPath>
+						
+						<webAppConfig>
+            				<contextPath>/</contextPath>
+            				<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+     							<resourcesAsCSV>src/main/webapp,target/generated-sources/molgenis/doc</resourcesAsCSV>
+    						</baseResource>          
+      					</webAppConfig> 
 					</configuration>
 				</plugin>
 				<!-- Eclipse m2e mappings -->
