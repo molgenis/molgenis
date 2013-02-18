@@ -25,7 +25,7 @@
 									<pathelement path="${basedir}/src/main/resources" />
 								</path>
 								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-									<arg value="molgenis.properties" />
+									<arg value="tifn.molgenis.properties" />
 									<arg value="${project.build.directory}/generated-sources/molgenis" />
 								</java>
 							</tasks>
