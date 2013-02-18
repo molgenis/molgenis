@@ -57,8 +57,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                	<excludes>**/molgenis.properties</excludes>
-                    <packagingExcludes>WEB-INF/web.xml</packagingExcludes>
+                	 <packagingExcludes>WEB-INF/web.xml</packagingExcludes>
                     <!-- create a separate jar file with classifier "classes" -->
                     <attachClasses>true</attachClasses>
                 </configuration>

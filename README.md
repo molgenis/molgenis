@@ -64,7 +64,7 @@ If still open, close the 'Welcome' screen
 
 Eclipse will automatically build and download jars
 
-Right mouse 'molgenis' -> Run as -> Maven generate-sources
+Right mouse 'molgenis' -> Run as -> Maven install
 
 After generation eclipse will compile automagically
 
