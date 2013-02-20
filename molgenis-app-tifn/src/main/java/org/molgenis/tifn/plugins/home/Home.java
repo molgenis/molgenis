@@ -74,8 +74,7 @@ public class Home extends PluginModel<Entity>
 			if (listUsers.isEmpty())
 			{
 
-				FillMetadata.fillMetadata(db, false);
-				System.out.println("BLAAT");
+				FillMetadata.fillMetadata(db, false, "SimpleUserLoginPlugin");
 				this.setMessages(new ScreenMessage("User setup complete!", true));
 			}
 

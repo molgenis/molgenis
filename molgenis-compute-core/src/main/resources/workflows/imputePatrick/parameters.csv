@@ -1,0 +1,18 @@
+#NAMES,#VALUES,#COMMENT,#TYPE,#ABSTRACT,HASONE
+resultFolder,,is abstract so must be overwritten once with correct type. Type is wirtable folder we might want to auto append / or \ depending on backend. It would be really nice if scripts using this variable autocreate if not excist and check for writing cabability. We should atleast check if syntaxticly is a valid path at generation time for better error handeling,WRITABLE_FOLDER,TRUE,
+chr,,is specified as int. Castabilaty to int should be checked at generation time. Allows for better error handeling,INT,TRUE
+chunk,,STRING,TRUE,
+bin,,STRING,TRUE,
+project,,STRING,TRUE,
+reference,,String,TRUE,project
+##
+##Filledin variables
+##
+inputMapPed,${inputData}/${chr},if abstract has value then this is default. Overwriting is in this case not manditory but is possible,STRING,TRUE,
+resultImputedFiles,${resultFolder}/${chr}.imputed,,,,
+filteredMapPed,#{tmpFolder}/filteredMapPed/${chr},,,,
+##
+##comments and types of abstract should be present in generated parameters file
+##If hasone is needed then this should be spefified in workflow paramaters using an abstract variable
+##
+wouldBeCool,x;y;z,lists that can be itterated over using freemarker,LIST,FALSE

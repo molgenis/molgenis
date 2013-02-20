@@ -548,6 +548,7 @@ public class Molgenis
 		if (generatedFolder.exists() && options.delete_generated_folder)
 		{
 			logger.info("removing previous generated folder " + generatedFolder);
+			deleteContentOfDirectory(generatedFolder);
 			deleteContentOfDirectory(new File(options.output_src));
 			deleteContentOfDirectory(new File(options.output_sql));
 		}

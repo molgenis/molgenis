@@ -8,7 +8,19 @@
 	</parent>
 	<artifactId>molgenis-app-gids</artifactId>
 	<packaging>war</packaging>
+
 	<build>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>**molgenis.properties</exclude>
+					<exclude>**git.properties</exclude>
+					<exclude>**/model/*.xml</exclude>
+					<exclude>**ui.xml</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<!-- execute molgenis generator -->
 			<plugin>
@@ -23,8 +35,8 @@
 									<path refid="maven.compile.classpath" />
 									<pathelement path="${basedir}/src/main/resources" />
 								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath">
-									<arg value="molgenis.properties" />
+								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
+									<arg value="gids.molgenis.properties" />
 									<arg value="${project.build.directory}/generated-sources/molgenis" />
 								</java>
 							</tasks>
@@ -34,13 +46,14 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>		
+			</plugin>
 			<!-- add generated sources -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>execution-sources</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-source</goal>
@@ -61,30 +74,16 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- exclude files from war -->
+			<!-- Include generated doc in war -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<packagingExcludes>pom.xml,**/molgenis.properties,**/molgenis_ui.xml,**/*.sql</packagingExcludes>
-				</configuration>
-			</plugin>
-			<!-- compile XML schemas -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxb2-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<quiet>true</quiet>
-					<packageName>org.molgenis.cbm.jaxb</packageName>
-					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
+					<webResources>
+            			<resource>
+              				<directory>target/generated-sources/molgenis/doc</directory>
+            			</resource>
+          			</webResources>
 				</configuration>
 			</plugin>
 			<!-- web server -->
@@ -94,7 +93,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -109,6 +108,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-omx-auth</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-importer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
@@ -118,6 +123,13 @@
 			<artifactId>molgenis-omx-protocolviewer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-omx-auth</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
