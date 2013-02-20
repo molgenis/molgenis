@@ -28,6 +28,8 @@ import org.molgenis.io.processor.TrimProcessor;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
+import com.google.gson.Gson;
+
 /**
  * Convert a transformed LifeLines data dictionary to Observ-OMX format
  */
@@ -39,7 +41,8 @@ public class LifeLinesDataDictionarytoOMXConvertor
 	private static final String COL_GROUP = "Group";
 	private static final String COL_CODE = "Code";
 	private static final String COL_DISPLAY_NAME = "Dysplay name";
-	private static final String COL_DESCRIPTION = "EN Description";
+	private static final String COL_DESCRIPTION_EN = "EN Description";
+	private static final String COL_DESCRIPTION_NL = "NL Description";
 	private static final String COL_SECTION = "Section";
 	private static final String COL_SUB_SECTION = "Sub-section";
 	private static final String COL_SUB_SECTION2 = "Sub-section 2";
@@ -48,7 +51,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 	private static final String COL_TIME = "Time";
 	private static final String COL_TYPE = "Type";
 	private static final String COL_VALUE = "Value";
-	private static final String COL_VALUE_DESCRIPTION = "EN Value Description";
+	private static final String COL_VALUE_DESCRIPTION_EN = "EN Value Description";
 
 	private static final String ENTITY_IDENTIFIER = "identifier";
 	private static final String ENTITY_NAME = "name";
@@ -98,6 +101,13 @@ public class LifeLinesDataDictionarytoOMXConvertor
 		HEADER_DATASET.put(ENTITY_IDENTIFIER, 0);
 		HEADER_DATASET.put(ENTITY_NAME, 1);
 		HEADER_DATASET.put(PROTOCOLUSED_IDENTIFIER, 2);
+	}
+
+	private final Gson gson;
+
+	public LifeLinesDataDictionarytoOMXConvertor()
+	{
+		gson = new Gson();
 	}
 
 	public void convert(InputStream in, OutputStream out) throws IOException
@@ -212,7 +222,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 				{
 					// value row for the last detected feature
 					String value = row.getString(COL_VALUE);
-					String description = row.getString(COL_VALUE_DESCRIPTION);
+					String description = row.getString(COL_VALUE_DESCRIPTION_EN);
 					if (value != null && (description == null || description.isEmpty())) throw new IOException(
 							"missing translation for value '" + value + "'");
 
@@ -243,16 +253,22 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			// add feature
 			String featureIdentifier = group + '.' + code;
 			String featureName = row.getString(COL_DISPLAY_NAME);
-			String featureDescription = row.getString(COL_DESCRIPTION);
+			String featureDescriptionEn = row.getString(COL_DESCRIPTION_EN);
+			String featureDescriptionNl = row.getString(COL_DESCRIPTION_NL);
 			if (featureName == null || featureName.isEmpty()) throw new IOException("expected value in column "
 					+ COL_DISPLAY_NAME);
-			if (featureDescription == null || featureDescription.isEmpty()) throw new IOException(
-					"expected value in column " + COL_DESCRIPTION);
-			// featureName = "UNKNOWN FEATURE NAME";
+
+			if (featureDescriptionNl == null || featureDescriptionNl.isEmpty()) logger.warn("expected value in column "
+					+ COL_DESCRIPTION_NL);
+			if (featureDescriptionEn == null || featureDescriptionEn.isEmpty()) throw new IOException(
+					"expected value in column " + COL_DESCRIPTION_EN);
 			KeyValueTuple featureMap = new KeyValueTuple();
 			featureMap.set(ENTITY_IDENTIFIER, featureIdentifier);
 			featureMap.set(ENTITY_NAME, featureName);
-			featureMap.set(ENTITY_DESCRIPTION, featureDescription);
+			Map<String, String> descriptionMap = new LinkedHashMap<String, String>();
+			if (featureDescriptionEn != null) descriptionMap.put("en", featureDescriptionEn);
+			if (featureDescriptionNl != null) descriptionMap.put("nl", featureDescriptionNl);
+			featureMap.set(ENTITY_DESCRIPTION, gson.toJson(descriptionMap));
 			if (row.getString(COL_VALUE) != null && !row.getString(COL_VALUE).isEmpty()) featureMap.set(
 					FEATURE_DATATYPE, "categorical");
 			sheetMap.get(SHEET_FEATURE).write(featureMap);
@@ -261,7 +277,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 
 			// add category
 			String categoryValue = row.getString(COL_VALUE);
-			String categoryDescription = row.getString(COL_VALUE_DESCRIPTION);
+			String categoryDescription = row.getString(COL_VALUE_DESCRIPTION_EN);
 			if (categoryValue != null && (categoryDescription == null || categoryDescription.isEmpty())) throw new IOException(
 					"missing translation for value '" + categoryValue + "'");
 
@@ -499,8 +515,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 
 		File inFile = new File(args[0]);
 		File outFile = new File(args[1]);
-		// if (outFile.exists()) throw new IOException("file already exists: " +
-		// outFile);
+		if (outFile.exists()) throw new IOException("file already exists: " + outFile);
 
 		FileInputStream fis = new FileInputStream(inFile);
 		FileOutputStream fos = new FileOutputStream(outFile);
