@@ -17,7 +17,7 @@
 
 package ${package};
 
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DLS_DEAD_LOCAL_STORE" }, justification = "Too much template code required to prevent warnings")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DLS_DEAD_LOCAL_STORE", justification = "Too much template code required to prevent warnings")
 public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.AbstractJpaMapper<${entity.namespace}.${JavaName(entity)}>
 {
 	private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(${JavaName(entity)}JpaMapper.class);
