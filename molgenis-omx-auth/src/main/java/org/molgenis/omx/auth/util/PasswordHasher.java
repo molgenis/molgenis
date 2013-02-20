@@ -1,6 +1,7 @@
 package org.molgenis.omx.auth.util;
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -16,7 +17,7 @@ public class PasswordHasher
 	public String toMD5(String input)
 	{
 		m.reset();
-		m.update(input.getBytes());
+		m.update(input.getBytes(Charset.forName("UTF-8")));
 		byte[] digest = m.digest();
 		BigInteger bigInt = new BigInteger(1, digest);
 		String hashtext = bigInt.toString(16);
