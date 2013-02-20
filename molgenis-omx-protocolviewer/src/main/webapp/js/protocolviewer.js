@@ -124,10 +124,21 @@ function createNodes(protocol, options) {
 		});
 	} else if (protocol.features) {
 		$.each(protocol.features, function(i, feature) {
+			// use first description as tooltip
+			var tooltip = null;
+			if(feature.i18nDescription) {
+				for (var key in feature.i18nDescription) {
+					if (feature.i18nDescription.hasOwnProperty(key)) {
+						tooltip = feature.i18nDescription[key];
+						break;
+					}
+				}	
+			}
+			
 			var newBranch = {
 				key : feature.id,
 				title : feature.name,
-				tooltip : feature.description ? feature.description : null
+				tooltip : tooltip
 			};
 			for ( var key in options) {
 				if (options.hasOwnProperty(key)) {
@@ -203,8 +214,14 @@ function setFeatureDetails(feature) {
 	var table = $('<table />');
 	table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name
 			+ '</td></tr>');
-	table.append('<tr><td>' + "Description:" + '</td><td>'
-			+ (feature.description ? feature.description : '') + '</td></tr>');
+	if(feature.i18nDescription) {
+		for (var lang in feature.i18nDescription) {
+		    if (!feature.i18nDescription.hasOwnProperty(lang))
+		        continue;
+		    table.append('<tr><td>' + "Description (" + lang + "):" + '</td><td>' + feature.i18nDescription[lang] + '</td></tr>');
+		}
+	}
+	
 	table.append('<tr><td>' + "Data type:" + '</td><td>'
 			+ (feature.dataType ? feature.dataType : '') + '</td></tr>');
 	if (feature.unit)
