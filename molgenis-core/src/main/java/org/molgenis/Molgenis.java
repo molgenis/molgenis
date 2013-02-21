@@ -47,6 +47,7 @@ import org.molgenis.generators.cpp.CPPCassette;
 import org.molgenis.generators.csv.CsvEntityExporterGen;
 import org.molgenis.generators.db.DatabaseFactoryGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
+import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.FillMetadataGen;
 import org.molgenis.generators.db.JDBCDatabaseGen;
@@ -64,7 +65,6 @@ import org.molgenis.generators.doc.DotDocModuleDependencyGen;
 import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.generators.excel.ExcelEntityExporterGen;
-import org.molgenis.generators.excel.ImportWizardExcelPrognosisGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
@@ -360,6 +360,7 @@ public class Molgenis
 			if (options.generate_entitiesimport)
 			{
 				generators.add(new EntitiesImporterGen());
+				generators.add(new EntitiesValidatorGen());
 			}
 
 			if (options.generate_metadata)
@@ -490,7 +491,6 @@ public class Molgenis
 		if (options.generate_ExcelImport)
 		{
 			generators.add(new ExcelEntityExporterGen());
-			generators.add(new ImportWizardExcelPrognosisGen());
 		}
 		else
 		{

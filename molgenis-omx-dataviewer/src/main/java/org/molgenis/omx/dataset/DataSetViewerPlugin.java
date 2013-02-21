@@ -39,10 +39,11 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(DataSetViewerPlugin.class);
-	private JQGridView tableView;
-	private TupleTable tupleTable;
-	private DataSetChooser dataSetChooser;
-	private DataSetDownloader dataSetDownloader;
+
+	private transient JQGridView tableView;
+	private transient TupleTable tupleTable;
+	private transient DataSetChooser dataSetChooser;
+	private transient DataSetDownloader dataSetDownloader;
 
 	public DataSetViewerPlugin(String name, ScreenController<?> parent)
 	{

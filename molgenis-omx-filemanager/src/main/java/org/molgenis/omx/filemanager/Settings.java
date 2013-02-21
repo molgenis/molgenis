@@ -11,11 +11,10 @@ import org.molgenis.util.Entity;
 
 public class Settings<E extends Entity> extends PluginModel<E>
 {
+	private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 4037475429590054858L;
-	private Report report;
-
-	private StorageHandler sh;
+	private transient Report report;
+	private transient StorageHandler sh;
 
 	public Report getReport()
 	{
