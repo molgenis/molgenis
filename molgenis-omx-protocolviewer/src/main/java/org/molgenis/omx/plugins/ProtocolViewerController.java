@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,6 +36,7 @@ import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.KeyValueTuple;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Protocol viewer controller
@@ -122,11 +124,14 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
 			List<Protocol> listOfProtocols = db
 					.find(Protocol.class, new QueryRule(Protocol.NAME, Operator.LIKE, query));
-			List<ObservableFeature> listOfFeatures = db.find(ObservableFeature.class, new QueryRule(
+			List<ObservableFeature> listOfFeaturesByName = db.find(ObservableFeature.class, new QueryRule(
 					ObservableFeature.NAME, Operator.LIKE, query));
+			List<ObservableFeature> listOfFeaturesByDescription = db.find(ObservableFeature.class, new QueryRule(
+					ObservableFeature.DESCRIPTION, Operator.LIKE, query));
 			List<Category> listOfCategories = db.find(Category.class, new QueryRule(Category.DESCRIPTION,
 					Operator.LIKE, query));
-			if (listOfCategories.isEmpty() && listOfFeatures.isEmpty() && listOfProtocols.isEmpty())
+			if (listOfCategories.isEmpty() && listOfFeaturesByName.isEmpty() && listOfFeaturesByDescription.isEmpty()
+					&& listOfProtocols.isEmpty())
 			{
 				src = toJSProtocol(db, topProtocol.get(0), false);
 			}
@@ -197,21 +202,40 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			for (ObservableFeature feature : topProtocol.getFeatures())
 			{
-				if (feature.getName().toLowerCase().contains(query)
-						|| feature.getDescription().toLowerCase().contains(query))
+
+				if (feature.getName().toLowerCase().contains(query))
 				{
 					jsFeatures.add(toJSFeature(db, feature));
 				}
 				else
 				{
-					List<Category> categories = findCategories(db, feature);
-					if (categories != null & !categories.isEmpty())
-					{
-						for (Category c : findCategories(db, feature))
-						{
-							if (c.getDescription() != null && c.getDescription().toLowerCase().contains(query))
+					Map<String, String> i18nDescription = new Gson().fromJson(feature.getDescription(),
+							new TypeToken<Map<String, String>>()
 							{
-								jsFeatures.add(toJSFeature(db, feature));
+							}.getType());
+
+					boolean descriptionMatch = false;
+					for (String value : i18nDescription.values())
+					{
+						if (value.toLowerCase().contains(query))
+						{
+							descriptionMatch = true;
+							break;
+						}
+					}
+
+					if (descriptionMatch) jsFeatures.add(toJSFeature(db, feature));
+					else
+					{
+						List<Category> categories = findCategories(db, feature);
+						if (categories != null & !categories.isEmpty())
+						{
+							for (Category c : findCategories(db, feature))
+							{
+								if (c.getDescription() != null && c.getDescription().toLowerCase().contains(query))
+								{
+									jsFeatures.add(toJSFeature(db, feature));
+								}
 							}
 						}
 					}
@@ -545,7 +569,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 		private final int id;
 		private final String name;
-		private final String description;
+		private final Map<String, String> i18nDescription;
 		private final String dataType;
 		private final JSOntologyTerm unit;
 		private final List<JSCategory> categories;
@@ -554,7 +578,9 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			this.id = feature.getId();
 			this.name = feature.getName();
-			this.description = feature.getDescription();
+			this.i18nDescription = new Gson().fromJson(feature.getDescription(), new TypeToken<Map<String, String>>()
+			{
+			}.getType());
 			this.dataType = feature.getDataType();
 			this.unit = unit;
 			this.categories = categories;
