@@ -644,7 +644,7 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 		s.append("<script type=\"text/javascript\" src=\"js/molgenis-mrefinput.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.ajax-chosen.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.autogrowinput.js\"></script>");
-		s.append("<script type=\"text/javascript\" src=\"js/jquery.bt.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.bt.min.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.chosen.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.timepicker.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.validate.min.js\"></script>");

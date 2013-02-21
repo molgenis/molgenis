@@ -2,6 +2,7 @@ package org.molgenis.framework.ui.html;
 
 import java.text.ParseException;
 
+import org.apache.commons.lang.StringUtils;
 import org.molgenis.framework.server.services.MolgenisGuiService;
 import org.molgenis.util.tuple.Tuple;
 
@@ -206,10 +207,10 @@ public class ActionInput extends HtmlInput<Object>
 				StringBuffer jScript = new StringBuffer();
 				if (this.uiToolkit == UiToolkit.ORIGINAL) jScript
 						.append("if( validateForm(document.forms[0],molgenis_required) ) { if( window.opener.name == '' ){ window.opener.name = 'molgenis'+new Date().getTime();} document.forms[0].target = window.opener.name; document.forms[0].submit(); window.close();} else return false;");
-				else
-					jScript.append("if( $(this.form).valid() && validateForm(document.forms[0],molgenis_required) ) { if( window.opener.name == '' ){ window.opener.name = 'molgenis'+new Date().getTime();} document.forms[0].__show.value = ''; document.forms[0].__action.value ='"
-							+ this.getValue()
-							+ "'; document.forms[0].target = window.opener.name; document.forms[0].submit(); window.close();} return false;");
+				else jScript
+						.append("if( $(this.form).valid() && validateForm(document.forms[0],molgenis_required) ) { if( window.opener.name == '' ){ window.opener.name = 'molgenis'+new Date().getTime();} document.forms[0].__show.value = ''; document.forms[0].__action.value ='"
+								+ this.getValue()
+								+ "'; document.forms[0].target = window.opener.name; document.forms[0].submit(); window.close();} return false;");
 				// jScript.append("alert('click');");
 
 				return jScript.toString();
@@ -329,13 +330,12 @@ public class ActionInput extends HtmlInput<Object>
 			icons += "{ icons: {primary:'" + iconClass + "', secondary: null}"
 					+ (isShowLabel() ? "}" : ", text: false }");
 		}
-		String result = iconClassCss + "<input type=\"submit\" id=\"" + this.getId() + "\" onclick=\""
-				+ this.getJavaScriptAction() + "\" value=\"" + this.getButtonValue() + "\" />" + "<script>$(\"#"
-				+ this.getId() + "\")" + (width > 0 ? ".width(" + width + ")" : "")
-				// + (getIcon() != null ? ".height(" + (this.getIconHeight() +
-				// 10) + ").width(" + (this.getIconWidth() + 10) + ")" : "")
-				+ ".button(" + icons + ");</script>\n";
 
+		String result = iconClassCss + "<button type=\"submit\" class=\"btn btn-small\" id=\"" + this.getId()
+				+ "\" onclick=\"" + this.getJavaScriptAction() + "\" />"
+				+ StringUtils.capitalize(this.getButtonValue()) + "</button>";
+		// <script>$(\"#" + this.getId() + "\")" + (width > 0 ? ".width(" +
+		// width + ")" : "") + ".button(" + icons + ");</script>\n";
 		return result;
 	}
 

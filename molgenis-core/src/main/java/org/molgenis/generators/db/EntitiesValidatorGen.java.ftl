@@ -16,8 +16,8 @@
 
 package ${package};
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,51 +31,75 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
-import org.molgenis.framework.db.EntitiesValidatorSingleton;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
+import org.molgenis.io.TableReader;
+import org.molgenis.io.TableReaderFactory;
+import org.molgenis.io.TupleReader;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
-<#list model.entities as entity><#if !entity.abstract>
+import org.molgenis.omx.core.MolgenisFile;
+import org.molgenis.omx.core.RuntimeProperty;
+import org.molgenis.util.Entity;
+
+<#list model.entities as entity>
+<#if !entity.abstract && !entity.system>
 import ${entity.namespace}.${JavaName(entity)};
-</#if></#list>
+</#if>
+</#list>
 
-import com.google.common.collect.Lists;
+public class EntitiesValidatorImpl implements EntitiesValidator 
+{
+	/** importable entity names (lowercase) */
+	private static final Map<String, Class<? extends Entity>> ENTITIES_IMPORTABLE;
 
-public class ImportWizardExcelPrognosis implements EntitiesValidator {
-	// TODO autowire
+	static
+	{
+		// entities added in import order
+		ENTITIES_IMPORTABLE = new LinkedHashMap<String, Class<? extends Entity>>();
+	<#list entities as entity>
+		<#if !entity.abstract && !entity.system>
+		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", ${JavaName(entity)}.class);
+		</#if>
+	</#list>
+	}
+	
 	private Database db;
 
+	@Deprecated
+	public EntitiesValidatorImpl()
+	{
+	}
+
+	public EntitiesValidatorImpl(Database db)
+	{
+		if (db == null) throw new IllegalArgumentException();
+		this.db = db;
+	}
+	
 	@Override
-	public EntitiesValidationReport validate(InputStream is) throws IOException
+	public EntitiesValidationReport validate(File file) throws IOException
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
-		ArrayList<String> lowercasedSheetNames = new ArrayList<String>();
-		Map<String, String> lowerToOriginalName = new LinkedHashMap<String, String>();
 
-		ExcelReader excelReader = new ExcelReader(is);
+		TableReader tableReader = TableReaderFactory.create(file);
 		try
 		{
-			for (int i = 0; i < excelReader.getNumberOfSheets(); i++) {
-				String sheetName = excelReader.getSheetName(i);
-				lowercasedSheetNames.add(sheetName.toLowerCase());
-				lowerToOriginalName.put(sheetName.toLowerCase(), sheetName);
-			}
-
-			<#list entities as entity><#if !entity.abstract>
-			if (lowercasedSheetNames.contains("${entity.name?lower_case}")) {
-				String originalSheetname = lowerToOriginalName.get("${entity.name?lower_case}");
-				ExcelSheetReader sheetReader = excelReader.getSheet(originalSheetname);
-				List<String> colNames = Lists.newArrayList(sheetReader.colNamesIterator());
-				List<Field> entityFields = db.getMetaData().getEntity(${JavaName(entity)}.class.getSimpleName()).getAllFields();
-				headersToMaps(originalSheetname, colNames, entityFields, validationReport);
-			}
-			</#if></#list>
-			
-			for(String sheetName : lowerToOriginalName.values())
+			for (String tableName : tableReader.getTableNames())
 			{
-				boolean contains = validationReport.getImportOrder().contains(sheetName);
-				validationReport.getSheetsImportable().put(sheetName, contains);
+				TupleReader tupleReader = tableReader.getTupleReader(tableName);
+				try
+				{
+					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(tableName.toLowerCase());
+					if (isImportableEntity)
+					{
+						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(tableName.toLowerCase());
+						validateTable(tableName, tupleReader, entityClazz, validationReport);
+					}
+					validationReport.getSheetsImportable().put(tableName, isImportableEntity);
+				}
+				finally
+				{
+					tupleReader.close();
+				}
 			}
 		}
 		catch (MolgenisModelException e)
@@ -86,25 +110,27 @@ public class ImportWizardExcelPrognosis implements EntitiesValidator {
 		{
 			throw new IOException(e);
 		}
-		finally 
+		finally
 		{
-			excelReader.close();
+			tableReader.close();
 		}
 		
 		return validationReport;
 	}
-	
+
 	@Override
 	@Deprecated
 	public void setDatabase(Database db)
 	{
-		if(db == null) throw new IllegalArgumentException();
+		if (db == null) throw new IllegalArgumentException();
 		this.db = db;
 	}
 	
-	private void headersToMaps(String originalSheetname, List<String> allHeaders, List<Field> entityFields, EntitiesValidationReport validationReport)
-			throws MolgenisModelException, DatabaseException
+	private void validateTable(String tableName, TupleReader tupleReader, Class<? extends Entity> entityClazz,
+			EntitiesValidationReport validationReport) throws MolgenisModelException, DatabaseException, IOException
 	{
+		List<Field> entityFields = db.getMetaData().getEntity(entityClazz.getSimpleName()).getAllFields();
+		
 		// construct a list of all required and optional fields
 		Map<String, Field> requiredFields = new LinkedHashMap<String, Field>();
 		Map<String, Field> availableFields = new LinkedHashMap<String, Field>();
@@ -141,8 +167,9 @@ public class ImportWizardExcelPrognosis implements EntitiesValidator {
 		// collect
 		List<String> detectedFieldNames = new ArrayList<String>();
 		List<String> unknownFieldNames = new ArrayList<String>();
-		for (String header : allHeaders)
+		for (Iterator<String> it = tupleReader.colNamesIterator(); it.hasNext();)
 		{
+			String header = it.next();
 			if (header == null || header.isEmpty()) continue;
 			
 			String fieldName = header.toLowerCase();
@@ -183,11 +210,11 @@ public class ImportWizardExcelPrognosis implements EntitiesValidator {
 			}
 		}
 
-		validationReport.getImportOrder().add(originalSheetname);
-		validationReport.getFieldsImportable().put(originalSheetname, detectedFieldNames);
-		validationReport.getFieldsUnknown().put(originalSheetname, unknownFieldNames);
-		validationReport.getFieldsRequired().put(originalSheetname, requiredFields.keySet());
-		validationReport.getFieldsAvailable().put(originalSheetname, availableFields.keySet());
+		validationReport.getImportOrder().add(tableName);
+		validationReport.getFieldsImportable().put(tableName, detectedFieldNames);
+		validationReport.getFieldsUnknown().put(tableName, unknownFieldNames);
+		validationReport.getFieldsRequired().put(tableName, requiredFields.keySet());
+		validationReport.getFieldsAvailable().put(tableName, availableFields.keySet());
 	}
 
 	private List<String> getXrefNames(Field field) throws MolgenisModelException, DatabaseException

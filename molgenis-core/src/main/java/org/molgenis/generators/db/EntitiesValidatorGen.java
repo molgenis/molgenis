@@ -1,4 +1,4 @@
-package org.molgenis.generators.excel;
+package org.molgenis.generators.db;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,9 +18,9 @@ import org.molgenis.model.elements.Model;
 
 import freemarker.template.Template;
 
-public class ImportWizardExcelPrognosisGen extends MySqlCreateClassPerTableGen
+public class EntitiesValidatorGen extends MySqlCreateClassPerTableGen
 {
-	private static final Logger logger = Logger.getLogger(ImportWizardExcelPrognosisGen.class);
+	private static final Logger logger = Logger.getLogger(EntitiesValidatorGen.class);
 
 	@Override
 	public String getDescription()
@@ -38,7 +38,7 @@ public class ImportWizardExcelPrognosisGen extends MySqlCreateClassPerTableGen
 		entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
 																				// effect?
 
-		File target = new File(this.getSourcePath(options) + APP_DIR + "/ImportWizardExcelPrognosis.java");
+		File target = new File(this.getSourcePath(options) + APP_DIR + "/EntitiesValidatorImpl.java");
 		boolean created = target.getParentFile().mkdirs();
 		if (!created && !target.getParentFile().exists())
 		{

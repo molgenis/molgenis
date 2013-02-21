@@ -3,7 +3,9 @@ package org.molgenis.omx.filemanager;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.molgenis.framework.db.Database;
@@ -20,23 +22,21 @@ import org.molgenis.util.Entity;
 
 public class MolgenisFileManager extends PluginModel<Entity>
 {
+	private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 7832540415673199206L;
+	private final transient MolgenisFileManagerModel model = new MolgenisFileManagerModel();
+	private transient MolgenisFileHandler mfh;
+	private String appLoc;
 
 	public MolgenisFileManager(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}
 
-	private final MolgenisFileManagerModel model = new MolgenisFileManagerModel();
-	private String appLoc;
-
 	public MolgenisFileManagerModel getMyModel()
 	{
 		return model;
 	}
-
-	private MolgenisFileHandler mfh = null;
 
 	@Override
 	public String getViewName()
@@ -67,7 +67,8 @@ public class MolgenisFileManager extends PluginModel<Entity>
 					String content = request.getString("inputTextArea");
 					File inputTextAreaContent = new File(System.getProperty("java.io.tmpdir") + File.separator
 							+ "tmpTextAreaInput" + System.nanoTime() + ".txt");
-					BufferedWriter out = new BufferedWriter(new FileWriter(inputTextAreaContent));
+					BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+							inputTextAreaContent), Charset.forName("UTF-8")));
 					out.write(content);
 					out.close();
 					file = inputTextAreaContent;

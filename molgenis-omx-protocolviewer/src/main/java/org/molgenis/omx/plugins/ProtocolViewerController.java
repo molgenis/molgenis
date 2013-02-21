@@ -228,7 +228,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					else
 					{
 						List<Category> categories = findCategories(db, feature);
-						if (categories != null & !categories.isEmpty())
+						if (categories != null && !categories.isEmpty())
 						{
 							for (Category c : findCategories(db, feature))
 							{
