@@ -225,5 +225,11 @@ public class SampleTabOmxConverter
 	public static void main(String args[]) throws IOException
 	{
 		new SampleTabOmxConverter("/Users/chaopang/Desktop/sample_data.xlsx", "GCR-ada");
+		if (args.length !=2)
+		{
+		    System.err.println("Usage: <sample_data.xlsx> submission-id ");
+		    return;
+		}
+
 	}
 }
