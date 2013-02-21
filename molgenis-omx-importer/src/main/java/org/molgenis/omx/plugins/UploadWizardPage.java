@@ -78,11 +78,14 @@ public class UploadWizardPage extends WizardPage
 
 		// remove data sheets
 		Map<String, Boolean> entitiesImportable = xlsValidator.getSheetsImportable();
-		for (Iterator<Entry<String, Boolean>> it = entitiesImportable.entrySet().iterator(); it.hasNext();)
+		if (entitiesImportable != null)
 		{
-			if (it.next().getKey().toLowerCase().startsWith("dataset_"))
+			for (Iterator<Entry<String, Boolean>> it = entitiesImportable.entrySet().iterator(); it.hasNext();)
 			{
-				it.remove();
+				if (it.next().getKey().toLowerCase().startsWith("dataset_"))
+				{
+					it.remove();
+				}
 			}
 		}
 
