@@ -18,7 +18,12 @@
           <property name="javax.persistence.validation.mode" value="none"/>    
           <property name="hibernate.c3p0.min_size" value="5"/>
           <property name="hibernate.c3p0.max_size" value="200"/>
-          <property name="hibernate.c3p0.max_statements" value="200"/>
+          <property name="hibernate.c3p0.max_statements" value="0"/> 
+		  <property name="hibernate.c3p0.acquire_increment" value="1"/>
+		  <property name="hibernate.c3p0.idle_test_period" value="20"/>
+		  <property name="hibernate.c3p0.timeout" value="120"/>
+		  <property name="hibernate.c3p0.preferredTestQuery" value="select 1;"/>
+		  <property name="hibernate.connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider"/>
           <property name="hibernate.dialect" value="org.hibernate.dialect.${options.hibernateDialect}"/>
           <property name="hibernate.show_sql" value="false"/>
           <property name="hibernate.format_sql" value="false"/>

@@ -12,7 +12,7 @@ import org.molgenis.util.Entity;
 public class ImportWizardController extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = 6673296137881226020L;
-	private ImportWizard importWizard;
+	private transient ImportWizard importWizard;
 
 	public ImportWizardController(String name, ScreenController<?> parent)
 	{
