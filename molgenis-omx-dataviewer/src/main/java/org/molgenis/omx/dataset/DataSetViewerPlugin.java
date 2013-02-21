@@ -179,7 +179,7 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 				searchOptions.setShowQuery(false);
 
 				tupleTable = table;
-				tableView = new JQGridView(dataSet.getName(), this, table, searchOptions);
+				tableView = new JQGridView("dataset" + dataSet.getId(), this, table, searchOptions);
 				dataSetDownloader = new DataSetDownloader();
 			}
 			dataSetChooser = new DataSetChooser(dataSets, selectedDataSetId);
