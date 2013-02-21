@@ -1,9 +1,9 @@
 package org.molgenis.omx.plugins;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -19,14 +19,17 @@ import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
+import org.molgenis.io.TableReader;
+import org.molgenis.io.TableReaderFactory;
+import org.molgenis.io.TupleReader;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.util.tuple.Tuple;
 
 public class UploadWizardPage extends WizardPage
 {
+	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
+
 	public UploadWizardPage()
 	{
 		super("Upload file");
@@ -40,10 +43,6 @@ public class UploadWizardPage extends WizardPage
 		if (file == null)
 		{
 			getWizard().setErrorMessage("No file selected");
-		}
-		else if (!file.getName().endsWith(".xls"))
-		{
-			getWizard().setErrorMessage("File does not end with '.xls', other formats are not supported.");
 		}
 		else
 		{
@@ -65,19 +64,10 @@ public class UploadWizardPage extends WizardPage
 		EntitiesValidator entitiesValidator = EntitiesValidatorSingleton.getInstance();
 		entitiesValidator.setDatabase(db);
 
-		EntitiesValidationReport xlsValidator;
-		FileInputStream fis = new FileInputStream(file);
-		try
-		{
-			xlsValidator = entitiesValidator.validate(fis);
-		}
-		finally
-		{
-			fis.close();
-		}
+		EntitiesValidationReport validationReport = entitiesValidator.validate(file);
 
 		// remove data sheets
-		Map<String, Boolean> entitiesImportable = xlsValidator.getSheetsImportable();
+		Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();
 		if (entitiesImportable != null)
 		{
 			for (Iterator<Entry<String, Boolean>> it = entitiesImportable.entrySet().iterator(); it.hasNext();)
@@ -100,7 +90,7 @@ public class UploadWizardPage extends WizardPage
 				ok = ok & b;
 			}
 
-			for (Collection<String> fields : xlsValidator.getFieldsRequired().values())
+			for (Collection<String> fields : validationReport.getFieldsRequired().values())
 			{
 				ok = ok & (fields == null || fields.isEmpty());
 			}
@@ -128,55 +118,58 @@ public class UploadWizardPage extends WizardPage
 		// if no error, set prognosis, set file, and continue
 		getWizard().setEntitiesImportable(entitiesImportable);
 		getWizard().setDataImportable(dataSetsImportable);
-		getWizard().setFieldsDetected(xlsValidator.getFieldsImportable());
-		getWizard().setFieldsRequired(xlsValidator.getFieldsRequired());
-		getWizard().setFieldsAvailable(xlsValidator.getFieldsAvailable());
-		getWizard().setFieldsUnknown(xlsValidator.getFieldsUnknown());
+		getWizard().setFieldsDetected(validationReport.getFieldsImportable());
+		getWizard().setFieldsRequired(validationReport.getFieldsRequired());
+		getWizard().setFieldsAvailable(validationReport.getFieldsAvailable());
+		getWizard().setFieldsUnknown(validationReport.getFieldsUnknown());
 	}
 
 	private Map<String, Boolean> validateDataSetInstances(Database db, File file) throws IOException, DatabaseException
 	{
-		Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
-
-		ExcelReader excelReader = new ExcelReader(file);
-		excelReader.addCellProcessor(new LowerCaseProcessor(true, false));
+		TableReader tableReader = TableReaderFactory.create(file);
 		try
 		{
-			ExcelSheetReader dataSetReader = excelReader.getSheet("dataset");
-			if (dataSetReader != null)
+			TupleReader dataSetReader = tableReader.getTupleReader(DATASET_PREFIX);
+			if (dataSetReader == null) return Collections.<String, Boolean> emptyMap();
+
+			// get dataset identifiers (case insensitive)
+			Set<String> datasetIdentifiers = new HashSet<String>();
+			try
 			{
-				// get dataset identifiers
-				Set<String> datasetIdentifiers = new HashSet<String>();
+				dataSetReader.addCellProcessor(new LowerCaseProcessor(true, false));
 				for (Tuple tuple : dataSetReader)
 				{
-					String identifier = tuple.getString("identifier");
+					String identifier = tuple.getString(DataSet.IDENTIFIER.toLowerCase());
 					if (identifier != null) datasetIdentifiers.add(identifier);
 				}
-
-				// check the matrix sheets
-				final int nrSheets = excelReader.getNumberOfSheets();
-				for (int i = 0; i < nrSheets; i++)
-				{
-					String sheetName = excelReader.getSheetName(i);
-					if (sheetName.toLowerCase().startsWith("dataset_"))
-					{
-						String identifier = sheetName.substring("dataset_".length());
-						boolean canImport;
-						if (datasetIdentifiers.contains(identifier)) canImport = true;
-						else if (!db
-								.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier))
-								.isEmpty()) canImport = true;
-						else canImport = false;
-						dataSetValidationMap.put(identifier, canImport);
-					}
-				}
 			}
+			finally
+			{
+				dataSetReader.close();
+			}
+
+			// validate dataset matrices
+			Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
+
+			// determine if dataset matrices can be imported
+			for (String tableName : tableReader.getTableNames())
+			{
+				if (!tableName.toLowerCase().startsWith(DATASET_PREFIX + "_")) continue;
+
+				String identifier = tableName.substring((DATASET_PREFIX + "_").length());
+				boolean canImport;
+				if (datasetIdentifiers.contains(identifier)) canImport = true;
+				else if (!db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier))
+						.isEmpty()) canImport = true;
+				else canImport = false;
+				dataSetValidationMap.put(identifier, canImport);
+			}
+
+			return dataSetValidationMap;
 		}
 		finally
 		{
-			excelReader.close();
+			tableReader.close();
 		}
-
-		return dataSetValidationMap;
 	}
 }

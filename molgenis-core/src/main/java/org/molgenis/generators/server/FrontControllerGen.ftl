@@ -31,7 +31,7 @@ import org.molgenis.framework.security.Login;
 import org.apache.commons.dbcp.BasicDataSource;
 import ${package}.DatabaseFactory;
 import ${package}.EntitiesImporterImpl;
-import ${package}.ImportWizardExcelPrognosis;
+import ${package}.EntitiesValidatorImpl;
 
 <#if generate_BOT>
 import java.io.IOException;
@@ -93,9 +93,7 @@ public class FrontController extends MolgenisFrontController
 		// register instances in singletons (simulate autowiring)
 		<#if generate_entitiesimport>
 		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
-		</#if>
-		<#if generate_ExcelImport>
-		EntitiesValidatorSingleton.setInstance(new ImportWizardExcelPrognosis());
+		EntitiesValidatorSingleton.setInstance(new EntitiesValidatorImpl());
 		</#if>
 	}
 	
