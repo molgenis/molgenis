@@ -215,15 +215,17 @@ public class ProtocolViewerController extends PluginModel<Entity>
 							}.getType());
 
 					boolean descriptionMatch = false;
-					for (String value : i18nDescription.values())
+					if (i18nDescription != null)
 					{
-						if (value.toLowerCase().contains(query))
+						for (String value : i18nDescription.values())
 						{
-							descriptionMatch = true;
-							break;
+							if (value.toLowerCase().contains(query))
+							{
+								descriptionMatch = true;
+								break;
+							}
 						}
 					}
-
 					if (descriptionMatch) jsFeatures.add(toJSFeature(db, feature));
 					else
 					{
