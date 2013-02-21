@@ -12,6 +12,8 @@
 
 package ${package}.servlet;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,7 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseFactory;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.framework.db.EntitiesValidatorSingleton;
@@ -29,7 +31,6 @@ import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.security.Login;
 import org.apache.commons.dbcp.BasicDataSource;
-import ${package}.DatabaseFactory;
 import ${package}.EntitiesImporterImpl;
 import ${package}.EntitiesValidatorImpl;
 
@@ -98,43 +99,76 @@ public class FrontController extends MolgenisFrontController
 	}
 	
 	@Override
+	public void service(HttpServletRequest request, HttpServletResponse response)
+	{
+		try
+		{
+		<#if databaseImp = 'jpa'>
+			DatabaseFactory.create(new ${package}.JpaDatabase());
+		<#else>
+			Connection conn = context.getDataSource().getConnection();
+			DatabaseFactory.create(new ${package}.JDBCDatabase(conn));
+		</#if>
+			
+			Login login = (Login) request.getSession().getAttribute("login");
+			if (login == null)
+			{
+			<#if auth_redirect != ''>
+				login = new ${loginclass}(DatabaseFactory.get(), "${auth_redirect}", context.getTokenFactory());
+			<#else>
+				login = new ${loginclass}(DatabaseFactory.get(), context.getTokenFactory());
+			</#if>			
+				request.getSession().setAttribute("login", login);
+			}
+
+			DatabaseFactory.get().setLogin(login);
+
+			super.service(request, response);
+		}
+		catch (Exception e)
+		{
+			logger.error("Exception creating database", e);
+		}
+		finally
+		{
+			DatabaseFactory.destroy();
+		}
+	}
+	
+	@Override
 	public void createLogin(MolgenisRequest request) throws Exception
 	{
-		Login login = (Login)request.getRequest().getSession().getAttribute("login");
-		if(login == null) {
+		//Login login = (Login)request.getRequest().getSession().getAttribute("login");
+		//if(login == null) {
 			<#if auth_redirect != ''>
-			login = new ${loginclass}(request.getDatabase(), "${auth_redirect}", context.getTokenFactory());
+		//	login = new ${loginclass}(request.getDatabase(), "${auth_redirect}", context.getTokenFactory());
 			<#else>
-			login = new ${loginclass}(request.getDatabase(), context.getTokenFactory());
+	//		login = new ${loginclass}(request.getDatabase(), context.getTokenFactory());
 			</#if>			
-			request.getRequest().getSession().setAttribute("login", login);
-		}
-		request.getDatabase().setLogin(login);
+	//		request.getRequest().getSession().setAttribute("login", login);
+	//	}
+		//request.getDatabase().setLogin(login);
 	}
 	
 	@Override
 	public UUID createDatabase(MolgenisRequest request) throws DatabaseException, SQLException
 	{
-		//TODO: store db instance in session and reuse, with fresh connection?
-		//Database db = (Database)request.getRequest().getSession().getAttribute("database");
-		
-		//get a connection and keep track of it
-		
 		UUID id = UUID.randomUUID();
+		request.setDatabase(DatabaseFactory.get());
 		
 	<#if databaseImp = 'jpa'>
-		Database db = DatabaseFactory.create();
+	//	Database db = DatabaseFactory.create();
 	<#else>
-		Connection conn = context.getDataSource().getConnection();
+		//Connection conn = context.getDataSource().getConnection();
 		<#if db_mode != 'standalone'>
-		Database db = DatabaseFactory.create(conn);
+		//Database db = DatabaseFactory.create(conn);
 		<#else>
 		//Database db = new ${package}.JDBCDatabase(conn);
-		Database db = DatabaseFactory.create(conn);	
+		//Database db = DatabaseFactory.create(conn);	
 		</#if>
-		connections.put(id, conn);
+		//connections.put(id, conn);
 	</#if>
-		request.setDatabase(db);
+		//request.setDatabase(db);
 		return id;
 	}
 	
@@ -147,13 +181,6 @@ public class FrontController extends MolgenisFrontController
 		return null;
 	<#else>
 		<#if db_mode != 'standalone'>
-		//PREVIOUS
-		//The datasource is created by the servletcontext	
-		//ServletContext sc = MolgenisContextListener.getInstance().getContext();
-		//DataSource dataSource = (DataSource)sc.getAttribute("DataSource");
-		//return dataSource;
-		
-		//NEW
 		BasicDataSource data_src = new BasicDataSource();
 		data_src.setDriverClassName("${db_driver}");
 		data_src.setUsername("${db_user}");

@@ -130,10 +130,6 @@ public class RestInterface
 				e.printStackTrace();
 				throw e;
 			}
-			finally
-			{
-				db.close();
-			}
 
 			out.close();
 		}

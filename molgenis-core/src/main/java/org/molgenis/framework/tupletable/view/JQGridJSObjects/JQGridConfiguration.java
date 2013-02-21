@@ -18,7 +18,7 @@ import org.molgenis.model.elements.Field;
 { "URF_UNREAD_FIELD", "SS_SHOULD_BE_STATIC" }, justification = "Gson reads private fields")
 public class JQGridConfiguration
 {
-	private String id;
+	private final String id;
 
 	/** ajax url */
 	private final String url;
@@ -32,31 +32,31 @@ public class JQGridConfiguration
 	private final String pager;
 
 	/** definitions of the columns */
-	private List<JQGridColModel> colModel = new ArrayList<JQGridColModel>();
+	private final List<JQGridColModel> colModel = new ArrayList<JQGridColModel>();
 
 	/** current limit = number of rows to show */
-	private int rowNum = 20;
+	private final int rowNum = 20;
 
 	/** choices of alternative rowNum values */
-	private Integer[] rowList = new Integer[]
+	private final Integer[] rowList = new Integer[]
 	{ 20, 30, 40 };
 
 	/** indicates whether we want to show total records from query in page bar */
-	private boolean viewrecords = true;
+	private final boolean viewrecords = true;
 
 	/** the caption of this table */
 	private String caption = "jqGrid View";
 
-	private boolean autowidth = true;
+	private final boolean autowidth = true;
 
 	/** whether this grid is sortable */
-	private String sortname = "";
+	private final String sortname = "";
 
 	/** default sorting order */
-	private String sortorder = "desc";
+	private final String sortorder = "desc";
 
 	/** default height */
-	private String height = "466px";
+	private final String height = "466px";
 
 	/** the total column count **/
 	private int totalColumnCount;
@@ -68,7 +68,7 @@ public class JQGridConfiguration
 	private int colLimit;
 
 	/** list of hidden columns **/
-	private List<JQGridColModel> hiddenColumns = new ArrayList<JQGridColModel>();
+	private final List<JQGridColModel> hiddenColumns = new ArrayList<JQGridColModel>();
 
 	/** Wether the first column is 'fixed', must always be visible **/
 	private boolean firstColumnFixed;
@@ -80,19 +80,19 @@ public class JQGridConfiguration
 	// note: this is a string value
 	// private String postData =
 	// "{filters : '{\"groupOp\":\"AND\",\"rules\":[{\"field\":\"Country.Code\",\"op\":\"eq\",\"data\":\"AGO\"}]}'}";
-	private JQGridPostData postData = new JQGridPostData();
+	private final JQGridPostData postData = new JQGridPostData();
 
 	/** ???? */
-	private HashMap<String, Object> jsonReader = new HashMap<String, Object>();
+	private final HashMap<String, Object> jsonReader = new HashMap<String, Object>();
 
 	// private String postData = "viewType : JQ_GRID";
 
-	private JQGridSettings settings = new JQGridSettings();
+	private final JQGridSettings settings = new JQGridSettings();
 
 	private JQGridSearchOptions searchOptions = new JQGridSearchOptions();
 
 	@SuppressWarnings("unchecked")
-	private Object[] toolbar = Arrays.asList(true, "top").toArray();
+	private final Object[] toolbar = Arrays.asList(true, "top").toArray();
 
 	public JQGridConfiguration(Database db, String id, String idField, String url, String caption, TupleTable tupleTable)
 			throws TableException
