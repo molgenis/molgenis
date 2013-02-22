@@ -12,6 +12,7 @@
 
 package ${package}.servlet;
 
+import java.sql.Connection;
 import java.util.LinkedHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
