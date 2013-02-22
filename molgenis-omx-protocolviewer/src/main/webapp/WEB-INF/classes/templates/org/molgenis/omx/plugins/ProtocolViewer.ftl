@@ -94,12 +94,18 @@
  					
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
- 						$.fileDownload(molgenis.getSelectedFeaturesURL('xls'));
+ 						$.fileDownload('molgenis.do?__target=ProtocolViewer&__action=download_xls', { 
+ 							httpMethod : "POST",
+ 							data: { 
+ 								datasetid : molgenis.getSelectedDataSet(),
+ 								features : molgenis.getSelectedVariables().join()
+ 							}
+ 						});
  					});
  					
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
- 						window.location = molgenis.getSelectedFeaturesURL('viewer');
+ 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + molgenis.getSelectedVariables().join();
  					});
  					
  					// on ready
