@@ -114,7 +114,6 @@ public class MolgenisUploadService implements MolgenisService
 		{
 			out.flush();
 			out.close();
-			db.close();
 		}
 
 		logger.info("servlet took: " + (System.currentTimeMillis() - start_time) + " ms");
@@ -176,8 +175,7 @@ public class MolgenisUploadService implements MolgenisService
 		{
 			csvReader = new CsvReader(req.getFile(INPUT_FILE));
 		}
-		else
-			csvReader = null;
+		else csvReader = null;
 
 		try
 		{

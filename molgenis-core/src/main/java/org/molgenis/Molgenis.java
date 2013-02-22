@@ -45,7 +45,6 @@ import org.molgenis.generators.R.REntityGen;
 import org.molgenis.generators.R.RMatrixGen;
 import org.molgenis.generators.cpp.CPPCassette;
 import org.molgenis.generators.csv.CsvEntityExporterGen;
-import org.molgenis.generators.db.DatabaseFactoryGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
@@ -377,12 +376,6 @@ public class Molgenis
 			if (options.generate_decorators)
 			{
 				generators.add(new MapperDecoratorGen());
-			}
-
-			// DatabaseFactory
-			if (options.generate_db)
-			{
-				generators.add(new DatabaseFactoryGen());
 			}
 		}
 		else
