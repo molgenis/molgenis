@@ -73,7 +73,7 @@
  					<#-- create event handlers -->
  					$('.btn-datasets button').click(function(e) {
  						e.preventDefault();
- 						selectDataSet($(this).data('id'));
+ 						molgenis.selectDataSet($(this).data('id'));
 					});
  					
  					$("#search-text").keyup(function(e){
@@ -84,22 +84,22 @@
  					
  					$('#search-button').click(function(e) {
  						e.preventDefault();
- 						searchProtocolServer($('#search-text').val());
+ 						molgenis.search($('#search-text').val());
  					});
  					
  					$('#search-clear-button').click(function(e) {
  						e.preventDefault();
- 						clearSearch();
+ 						molgenis.clearSearch();
  					});
  					
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
- 						$.fileDownload(getSelectedFeaturesURL('xls'));
+ 						$.fileDownload(molgenis.getSelectedFeaturesURL('xls'));
  					});
  					
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
- 						window.location = getSelectedFeaturesURL('viewer');
+ 						window.location = molgenis.getSelectedFeaturesURL('viewer');
  					});
  					
  					// on ready
