@@ -12,13 +12,10 @@
 
 package ${package}.servlet;
 
+import java.util.LinkedHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.LinkedHashMap;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseFactory;
@@ -28,7 +25,6 @@ import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisFrontController;
 import org.molgenis.framework.server.MolgenisService;
-import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.security.Login;
 import org.apache.commons.dbcp.BasicDataSource;
 import ${package}.EntitiesImporterImpl;
@@ -69,9 +65,6 @@ public class FrontController extends MolgenisFrontController
 		
 		//now we can create the MolgenisContext with objects reusable over many requests
 		context = new MolgenisContext(this.getServletConfig(), this.createDataSource(), new UsedMolgenisOptions(), "${model.name}");
-		
-		//keep a map of active connections
-		connections = new ConcurrentHashMap<UUID, Connection>();
 		
 		//finally, we store all mapped services, and pass them the context used for databasing, serving, etc.
 		LinkedHashMap<String,MolgenisService> services = new LinkedHashMap<String,MolgenisService>();
@@ -133,43 +126,6 @@ public class FrontController extends MolgenisFrontController
 		{
 			DatabaseFactory.destroy();
 		}
-	}
-	
-	@Override
-	public void createLogin(MolgenisRequest request) throws Exception
-	{
-		//Login login = (Login)request.getRequest().getSession().getAttribute("login");
-		//if(login == null) {
-			<#if auth_redirect != ''>
-		//	login = new ${loginclass}(request.getDatabase(), "${auth_redirect}", context.getTokenFactory());
-			<#else>
-	//		login = new ${loginclass}(request.getDatabase(), context.getTokenFactory());
-			</#if>			
-	//		request.getRequest().getSession().setAttribute("login", login);
-	//	}
-		//request.getDatabase().setLogin(login);
-	}
-	
-	@Override
-	public UUID createDatabase(MolgenisRequest request) throws DatabaseException, SQLException
-	{
-		UUID id = UUID.randomUUID();
-		request.setDatabase(DatabaseFactory.get());
-		
-	<#if databaseImp = 'jpa'>
-	//	Database db = DatabaseFactory.create();
-	<#else>
-		//Connection conn = context.getDataSource().getConnection();
-		<#if db_mode != 'standalone'>
-		//Database db = DatabaseFactory.create(conn);
-		<#else>
-		//Database db = new ${package}.JDBCDatabase(conn);
-		//Database db = DatabaseFactory.create(conn);	
-		</#if>
-		//connections.put(id, conn);
-	</#if>
-		//request.setDatabase(db);
-		return id;
 	}
 	
 	@Override
