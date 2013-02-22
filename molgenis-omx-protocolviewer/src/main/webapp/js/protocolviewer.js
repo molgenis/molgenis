@@ -15,14 +15,16 @@
     	});
     };
 
-    ns.getSelectedFeaturesURL = function(format) {
+    ns.getSelectedDataSet = function() {
+    	return $(document).data('datasets').selected; 
+    }
+    
+    ns.getSelectedVariables = function() {
     	var tree = $('#dataset-browser').dynatree('getTree');
     	var features = $.map(tree.getSelectedNodes(), function(node) {
     		return node.data.isFolder ? null : node.data.key;
     	});
-    	var id = $(document).data('datasets').selected;
-    	return 'molgenis.do?__target=ProtocolViewer&__action=download_' + format
-    			+ '&datasetid=' + id + '&features=' + features.join();
+    	return features;
     };
 
     ns.clearSearch = function() {
