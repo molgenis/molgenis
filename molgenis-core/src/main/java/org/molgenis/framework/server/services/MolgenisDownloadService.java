@@ -24,7 +24,7 @@ public class MolgenisDownloadService implements MolgenisService
 {
 	Logger logger = Logger.getLogger(MolgenisDownloadService.class);
 
-	private MolgenisContext mc;
+	private final MolgenisContext mc;
 
 	public MolgenisDownloadService(MolgenisContext mc)
 	{
@@ -134,7 +134,6 @@ public class MolgenisDownloadService implements MolgenisService
 		{
 			out.flush();
 			out.close();
-			db.close();
 		}
 
 		logger.info("servlet took: " + (System.currentTimeMillis() - start_time));

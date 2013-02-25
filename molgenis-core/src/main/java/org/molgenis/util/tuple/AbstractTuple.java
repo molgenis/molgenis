@@ -39,8 +39,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(colName);
 		if (obj == null) return null;
 		else if (obj instanceof String) return (String) obj;
-		else
-			return obj.toString();
+		else return obj.toString();
 	}
 
 	@Override
@@ -49,8 +48,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(col);
 		if (obj == null) return null;
 		else if (obj instanceof String) return (String) obj;
-		else
-			return obj.toString();
+		else return obj.toString();
 	}
 
 	@Override
@@ -59,8 +57,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(colName);
 		if (obj == null) return null;
 		else if (obj instanceof Integer) return (Integer) obj;
-		else
-			return Integer.parseInt(obj.toString());
+		else return Integer.parseInt(obj.toString());
 	}
 
 	@Override
@@ -69,8 +66,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(col);
 		if (obj == null) return null;
 		else if (obj instanceof Integer) return (Integer) obj;
-		else
-			return Integer.parseInt(obj.toString());
+		else return Integer.parseInt(obj.toString());
 	}
 
 	@Override
@@ -79,8 +75,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(colName);
 		if (obj == null) return null;
 		else if (obj instanceof Long) return (Long) obj;
-		else
-			return Long.parseLong(obj.toString());
+		else return Long.parseLong(obj.toString());
 	}
 
 	@Override
@@ -89,8 +84,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(col);
 		if (obj == null) return null;
 		else if (obj instanceof Long) return (Long) obj;
-		else
-			return Long.parseLong(obj.toString());
+		else return Long.parseLong(obj.toString());
 	}
 
 	@Override
@@ -125,8 +119,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(colName);
 		if (obj == null) return null;
 		else if (obj instanceof Double) return (Double) obj; // FIXME
-		else
-			return Double.parseDouble(obj.toString());
+		else return Double.parseDouble(obj.toString());
 	}
 
 	@Override
@@ -135,8 +128,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(col);
 		if (obj == null) return null;
 		else if (obj instanceof Double) return (Double) obj;
-		else
-			return Double.parseDouble(obj.toString());
+		else return Double.parseDouble(obj.toString());
 	}
 
 	@Override
@@ -145,8 +137,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(colName);
 		if (obj == null) return null;
 		else if (obj instanceof Date) return (Date) obj;
-		else
-			return Date.valueOf(obj.toString());
+		else return Date.valueOf(obj.toString());
 	}
 
 	@Override
@@ -155,8 +146,7 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(col);
 		if (obj == null) return null;
 		else if (obj instanceof Date) return (Date) obj;
-		else
-			return Date.valueOf(obj.toString());
+		else return Date.valueOf(obj.toString());
 	}
 
 	@Override
@@ -165,8 +155,8 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(colName);
 		if (obj == null) return null;
 		else if (obj instanceof Timestamp) return (Timestamp) obj;
-		else
-			return Timestamp.valueOf(obj.toString());
+		else if (obj instanceof Date) return new Timestamp(((Date) obj).getTime());
+		else return Timestamp.valueOf(obj.toString());
 	}
 
 	@Override
@@ -175,8 +165,8 @@ public abstract class AbstractTuple implements Tuple
 		Object obj = get(col);
 		if (obj == null) return null;
 		else if (obj instanceof Timestamp) return (Timestamp) obj;
-		else
-			return Timestamp.valueOf(obj.toString());
+		else if (obj instanceof Date) return new Timestamp(((Date) obj).getTime());
+		else return Timestamp.valueOf(obj.toString());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -188,8 +178,7 @@ public abstract class AbstractTuple implements Tuple
 		if (obj == null) return null;
 		else if (obj instanceof List<?>) return (List<String>) obj;
 		else if (obj instanceof String) return ListEscapeUtils.toList((String) obj);
-		else
-			return ListEscapeUtils.toList(obj.toString());
+		else return ListEscapeUtils.toList(obj.toString());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -200,8 +189,7 @@ public abstract class AbstractTuple implements Tuple
 		if (obj == null) return null;
 		else if (obj instanceof List<?>) return (List<String>) obj;
 		else if (obj instanceof String) return ListEscapeUtils.toList((String) obj);
-		else
-			return ListEscapeUtils.toList(obj.toString());
+		else return ListEscapeUtils.toList(obj.toString());
 	}
 
 	@Override

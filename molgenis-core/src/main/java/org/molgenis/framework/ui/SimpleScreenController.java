@@ -31,7 +31,7 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 {
 	private static final long serialVersionUID = 1L;
 
-	protected static final Logger logger = Logger.getLogger(SimpleScreenController.class);
+	protected final Logger logger = Logger.getLogger(getClass());
 
 	private MODEL model;
 

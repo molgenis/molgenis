@@ -3,16 +3,12 @@ package org.molgenis.framework.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -29,6 +25,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.RollingFileAppender;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.DatabaseFactory;
 
 public abstract class MolgenisFrontController extends HttpServlet implements MolgenisService
 {
@@ -40,26 +37,14 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 	// map of all services for this app
 	protected Map<String, MolgenisService> services;
 
-	// list of all connections
-	protected ConcurrentHashMap<UUID, Connection> connections;
-
 	// the used molgenisoptions, set by generated MolgenisServlet
 	protected MolgenisOptions usedOptions = null;
 
 	// context
 	protected MolgenisContext context;
 
-	// the database given 1 connection per request (setup stored in session,
-	// connectionless after request)
-	// return a UUID of the connection that was given to this database and was
-	// stored in Map<UUID, Connection> connections
-	public abstract UUID createDatabase(MolgenisRequest request) throws DatabaseException, SQLException;
-
 	// the datasource to be put in the context
 	public abstract DataSource createDataSource();
-
-	// get login from session and set it to database, or create new login
-	public abstract void createLogin(MolgenisRequest request) throws Exception;
 
 	// the one and only service() used in the molgenis app
 	@Override
@@ -78,6 +63,8 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 
 			// wrap request and response
 			MolgenisRequest req = new MolgenisRequest(request, response);
+			req.setDatabase(DatabaseFactory.get());
+
 			// TODO: Bad, but needed for redirection. DISCUSS.
 			MolgenisResponse res = new MolgenisResponse(response);
 
@@ -121,7 +108,6 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 			System.out.println("servicePath for service=" + servicePath);
 			if (servletPath.startsWith(servicePath))
 			{
-				long startTime = System.currentTimeMillis();
 				Date date = new Date();
 
 				// if mapped to "/", we assume we are serving out a file, and do
@@ -138,8 +124,6 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 							+ services.get(servicePath).getClass().getSimpleName() + " mapped on path " + servicePath);
 					System.out.println("request fields: " + request.toString());
 
-					UUID connId = getSecuredDatabase(request);
-
 					System.out.println("database status: "
 							+ (request.getDatabase().getLogin().isAuthenticated() ? "authenticated as "
 									+ request.getDatabase().getLogin().getUserName() : "not authenticated"));
@@ -153,65 +137,12 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 					// e.g. "/api/R/source.R"
 					request.setRequestPath(servletPath);
 
-					try
-					{
-						services.get(servicePath).handleRequest(request, response);
-					}
-					finally
-					{
-						manageConnection(connId, startTime);
-					}
+					services.get(servicePath).handleRequest(request, response);
+
 				}
 
 				return;
 			}
-		}
-	}
-
-	protected UUID getSecuredDatabase(MolgenisRequest req) throws DatabaseException
-	{
-		try
-		{
-			// create database, add a single connection from the pool and set in
-			// request for use
-			UUID connId = this.createDatabase(req);
-
-			// setup login credentials, or reuse from session and apply to
-			// database
-			this.createLogin(req);
-
-			// return connection id
-			return connId;
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
-	}
-
-	protected void manageConnection(UUID connId, long startTime) throws DatabaseException
-	{
-		if (connections.containsKey(connId))
-		{
-			try
-			{
-				// close the connection and check if it really was closed
-				connections.get(connId).close();
-				if (!connections.get(connId).isClosed())
-				{
-					throw new DatabaseException("ERROR: connection was not closed!");
-				}
-			}
-			catch (SQLException sqle)
-			{
-				throw new DatabaseException(sqle);
-			}
-
-			// remove from list (does not happen if Exception was thrown)
-			connections.remove(connId);
-
-			System.out.println("< request was handled in " + (System.currentTimeMillis() - startTime)
-					+ "ms , active database connections: " + connections.size());
 		}
 	}
 

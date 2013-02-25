@@ -1,4 +1,3 @@
-<#assign tableId = tableId?replace(" ", "_")?lower_case />
 <script type="text/javascript">
 $.fn.extend({
     molgenisGrid: function(options) { 

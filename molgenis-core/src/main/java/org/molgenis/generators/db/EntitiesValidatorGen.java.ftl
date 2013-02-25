@@ -36,8 +36,6 @@ import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
-import org.molgenis.omx.core.MolgenisFile;
-import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.Entity;
 
 <#list model.entities as entity>
