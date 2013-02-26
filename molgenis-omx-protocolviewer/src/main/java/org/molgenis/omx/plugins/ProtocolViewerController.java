@@ -73,8 +73,8 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	public String getCustomHtmlHeaders()
 	{
 		StringBuilder s = new StringBuilder();
-		s.append("<link rel=\"stylesheet\" href=\"css/protocolviewer.css\" type=\"text/css\" />");
-		s.append("<link rel=\"stylesheet\" href=\"css/ui.dynatree.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/protocolviewer.css\" type=\"text/css\">");
+		s.append("<link rel=\"stylesheet\" href=\"css/ui.dynatree.css\" type=\"text/css\">");
 		s.append("<script type=\"text/javascript\" src=\"js/protocolviewer.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.dynatree.min.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.fileDownload-min.js\"></script>");
