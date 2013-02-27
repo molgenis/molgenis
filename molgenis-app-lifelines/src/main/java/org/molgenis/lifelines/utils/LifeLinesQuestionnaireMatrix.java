@@ -33,12 +33,14 @@ public class LifeLinesQuestionnaireMatrix
 	{
 		if (group == null) throw new IllegalArgumentException("group is null");
 		if (code == null) throw new IllegalArgumentException("code is null");
-		questionnaireMap.put(group + code, cohortTypePairs);
+		String key = (group + code).toLowerCase();
+		questionnaireMap.put(key, cohortTypePairs);
 	}
 
 	public Set<CohortTimePair> get(String group, String code)
 	{
-		return questionnaireMap.get(group + code);
+		String key = (group + code).toLowerCase();
+		return questionnaireMap.get(key);
 	}
 
 	static class CohortTimePair
