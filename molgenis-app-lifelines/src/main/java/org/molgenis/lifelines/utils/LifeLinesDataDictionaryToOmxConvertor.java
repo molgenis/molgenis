@@ -442,6 +442,8 @@ public class LifeLinesDataDictionaryToOmxConvertor
 		// fall back to existing information in translated data dictionary
 		if (cohortTypePairs == null)
 		{
+			if (matrix != null) logger.warn("missing questionnaire matrix entry for: " + row.getString(COL_GROUP) + " "
+					+ row.getString(COL_CODE));
 			String cohort = row.getString(COL_COHORT);
 			String time = row.getString(COL_TIME);
 			cohortTypePairs = Collections.singleton(new CohortTimePair(cohort, time));
