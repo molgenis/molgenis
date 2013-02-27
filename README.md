@@ -41,6 +41,7 @@ Add the following (you can restart Eclipse when done):
 * maven integration for eclipse
 * Apt M2E connector
 * JBoss Tools (ONLY SELECT THE 'FreeMarker IDE feature' later in the wizard!)
+* testng
 
 Now you have configure Eclipse. Restart eclipse.
 
@@ -63,7 +64,7 @@ If still open, close the 'Welcome' screen
 
 Eclipse will automatically build and download jars
 
-Right mouse 'molgenis' -> Run as -> Maven generate-sources
+Right mouse 'molgenis' -> Run as -> Maven install
 
 After generation eclipse will compile automagically
 

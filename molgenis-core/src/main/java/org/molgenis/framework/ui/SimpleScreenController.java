@@ -29,30 +29,21 @@ import org.molgenis.util.SimpleTree;
 public abstract class SimpleScreenController<MODEL extends ScreenModel> extends SimpleTree<ScreenController<?>>
 		implements ScreenController<MODEL>, Serializable
 {
-	// member variables
-	/** */
+	private static final long serialVersionUID = 1L;
+
+	protected final Logger logger = Logger.getLogger(getClass());
+
 	private MODEL model;
 
-	/** */
-	protected static final Logger logger = Logger.getLogger(SimpleScreenController.class);
-	/** */
-	static final long serialVersionUID = 5286068849305140609L;
 	/** Determines which of the subscreens should be shown */
 	protected String selectedId;
 
-	// /** The name of the view to be used. */
-	// private String viewName;
-
-	// constructor
 	public SimpleScreenController(String name, MODEL model, ScreenController<?> parent)
 	{
 		super(name, parent);
 		this.model = model;
-		// logger = Logger.getLogger(this.getClass().getSimpleName() + ":" +
-		// view.getName());
 	}
 
-	// overloadable methods
 	/**
 	 * This method (re)loads the view, making persistant data actual again. This
 	 * method needs to be called when the screen operates on, for instance, a
@@ -62,25 +53,6 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 	 */
 	@Override
 	public abstract void reload(Database db) throws Exception;
-
-	/**
-	 * This is the actual control-method, which changes the view. The view
-	 * itself may delegate requests to other objects (e.g. delegate insert to
-	 * the persistance layer). TODO: A superclass method can delegate all
-	 * requests using reflection.
-	 * 
-	 * @param request
-	 *            The http-request in a convenient map.
-	 * @throws HandleRequestDelegationException
-	 * @throws Exception
-	 */
-	// public abstract void handleRequest(Database db, MolgenisRequest request) throws
-	// Exception, HandleRequestDelegationException;
-
-	// public String getFromRequest(Tuple request, String name)
-	// {
-	// return request.getString(name);
-	// }
 
 	/**
 	 * This method calls the reset-function this instance and all the children
@@ -94,11 +66,6 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 			subform.getModel().reset();
 		}
 	}
-
-	// public Templateable getScreen()
-	// {
-	// return this.model;
-	// }
 
 	@Override
 	public EmailService getEmailService()
@@ -152,10 +119,6 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 	public String getViewTemplate()
 	{
 		return null;
-		// throw new UnsupportedOperationException(
-		// "viewTemplate not set for this screen "
-		// + this.getClass().getSimpleName() + "(name="
-		// + this.getName() + ")");
 	}
 
 	@Override
@@ -230,5 +193,4 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 	{
 		return this.getApplicationController().getDatabase();
 	}
-
 }

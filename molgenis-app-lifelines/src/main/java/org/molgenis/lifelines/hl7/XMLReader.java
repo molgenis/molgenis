@@ -19,7 +19,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import app.DatabaseFactory;
+import app.JpaDatabase;
 
 public class XMLReader
 {
@@ -60,7 +60,7 @@ public class XMLReader
 		{
 
 			// Get a fresh new database object
-			this.db = DatabaseFactory.create();
+			this.db = new JpaDatabase();
 
 			// Begin transaction if anything goes wrong, can always roll back
 			// and the database won`t be screwed up

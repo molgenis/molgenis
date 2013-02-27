@@ -1,0 +1,3 @@
+step,protocol,parameters
+bwaLeft,bwa.ftl,indexFile=user.indexFile;bwaVersion=user.bwaVersion;in_fqgz=user.leftFqGz
+bwaRight,bwa.ftl,indexFile=user.indexFile;bwaVersion=user.bwaVersion;in_fqgz=bwaLeft.out_bam

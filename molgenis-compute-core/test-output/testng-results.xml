@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="7" passed="7">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="2042" started-at="2013-02-16T11:29:59Z" finished-at="2013-02-16T11:30:01Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="2042" started-at="2013-02-16T11:29:59Z" finished-at="2013-02-16T11:30:01Z">
+      <class name="org.molgenis.compute5.test.parsers.WorkflowParserTest">
+        <test-method status="PASS" signature="test1()[pri:0, instance:org.molgenis.compute5.test.parsers.WorkflowParserTest@2c766a24]" name="test1" duration-ms="94" started-at="2013-02-16T12:30:00Z" finished-at="2013-02-16T12:30:00Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test1 -->
+      </class> <!-- org.molgenis.compute5.test.parsers.WorkflowParserTest -->
+      <class name="org.molgenis.compute5.test.workflows.IncludeParameterFileTest">
+        <test-method status="PASS" signature="test()[pri:0, instance:org.molgenis.compute5.test.workflows.IncludeParameterFileTest@1c5d9084]" name="test" duration-ms="277" started-at="2013-02-16T12:30:00Z" finished-at="2013-02-16T12:30:00Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test -->
+      </class> <!-- org.molgenis.compute5.test.workflows.IncludeParameterFileTest -->
+      <class name="org.molgenis.compute5.test.workflows.CopyFileWorkflowTest">
+        <test-method status="PASS" signature="test()[pri:0, instance:org.molgenis.compute5.test.workflows.CopyFileWorkflowTest@2f93c0cf]" name="test" duration-ms="356" started-at="2013-02-16T12:30:00Z" finished-at="2013-02-16T12:30:01Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test -->
+      </class> <!-- org.molgenis.compute5.test.workflows.CopyFileWorkflowTest -->
+      <class name="org.molgenis.compute5.test.workflows.SplitMergeTest">
+        <test-method status="PASS" signature="test()[pri:0, instance:org.molgenis.compute5.test.workflows.SplitMergeTest@78e61fd1]" name="test" duration-ms="890" started-at="2013-02-16T12:29:59Z" finished-at="2013-02-16T12:30:00Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test -->
+      </class> <!-- org.molgenis.compute5.test.workflows.SplitMergeTest -->
+      <class name="org.molgenis.compute5.test.workflows.NgsWorkflowTest">
+        <test-method status="PASS" signature="test()[pri:0, instance:org.molgenis.compute5.test.workflows.NgsWorkflowTest@6a5f6303]" name="test" duration-ms="373" started-at="2013-02-16T12:30:00Z" finished-at="2013-02-16T12:30:00Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test -->
+      </class> <!-- org.molgenis.compute5.test.workflows.NgsWorkflowTest -->
+      <class name="org.molgenis.compute5.test.parsers.ParametersParserTest">
+        <test-method status="PASS" signature="test()[pri:0, instance:org.molgenis.compute5.test.parsers.ParametersParserTest@4c331059]" name="test" duration-ms="4" started-at="2013-02-16T12:30:00Z" finished-at="2013-02-16T12:30:00Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test -->
+      </class> <!-- org.molgenis.compute5.test.parsers.ParametersParserTest -->
+      <class name="org.molgenis.compute5.test.parsers.TupleUtilsTest">
+        <test-method status="PASS" signature="test()[pri:0, instance:org.molgenis.compute5.test.parsers.TupleUtilsTest@42bad8a8]" name="test" duration-ms="3" started-at="2013-02-16T12:30:00Z" finished-at="2013-02-16T12:30:00Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test -->
+      </class> <!-- org.molgenis.compute5.test.parsers.TupleUtilsTest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>

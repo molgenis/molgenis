@@ -1,5 +1,9 @@
 .table {
-	margin-bottom: 10px;	
+	margin-bottom: 10px;
+}
+
+.table-condensed td {
+	padding: 1px 2px;
 }
 
 #container-plugin {
@@ -24,7 +28,7 @@
 }
 
 #feature-details {
-	min-height: 270px;
+	min-height: 200px;
 }
 
 #feature-selection {
@@ -32,7 +36,11 @@
 	max-height: 370px;
 	overflow-y: auto;
 }
-	
+
+#download-controls {
+	padding-top: 10px;	
+}
+
 .feature-table-col1 {
 	background: #DCE3F7;
 	font-weight: bold;
@@ -40,4 +48,8 @@
 	margin: 1px;
 	width: 10px !important;
 	border: solid thin white;
+}
+
+i:hover {
+	cursor: pointer;
 }

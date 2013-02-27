@@ -213,7 +213,7 @@ public class JPAQueryGeneratorUtil
 							case LIKE:
 								if (lhs.getJavaType().getSimpleName().equals("String"))
 								{
-									predicate = cb.like(lhs.as(String.class), (String) rhs);
+									predicate = cb.like(lhs.as(String.class), "%" + (String) rhs + "%");
 								}
 								else
 								{

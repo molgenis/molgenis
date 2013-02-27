@@ -2,6 +2,7 @@ package org.molgenis.omx.plugins;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,7 +26,6 @@ import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.omx.EMeasureFeatureWriter;
 import org.molgenis.omx.dataset.DataSetViewerPlugin;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
@@ -35,6 +36,7 @@ import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.KeyValueTuple;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Protocol viewer controller
@@ -71,10 +73,11 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	public String getCustomHtmlHeaders()
 	{
 		StringBuilder s = new StringBuilder();
-		s.append("<link rel=\"stylesheet\" href=\"css/protocolviewer.css\" type=\"text/css\" />");
-		s.append("<link rel=\"stylesheet\" href=\"css/ui.dynatree.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/protocolviewer.css\" type=\"text/css\">");
+		s.append("<link rel=\"stylesheet\" href=\"css/ui.dynatree.css\" type=\"text/css\">");
 		s.append("<script type=\"text/javascript\" src=\"js/protocolviewer.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.dynatree.min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.fileDownload-min.js\"></script>");
 		return s.toString();
 	}
 
@@ -121,11 +124,14 @@ public class ProtocolViewerController extends PluginModel<Entity>
 					Protocol.ID, Operator.EQUALS, dataSets.get(0).getProtocolUsed_Id()));
 			List<Protocol> listOfProtocols = db
 					.find(Protocol.class, new QueryRule(Protocol.NAME, Operator.LIKE, query));
-			List<ObservableFeature> listOfFeatures = db.find(ObservableFeature.class, new QueryRule(
+			List<ObservableFeature> listOfFeaturesByName = db.find(ObservableFeature.class, new QueryRule(
 					ObservableFeature.NAME, Operator.LIKE, query));
+			List<ObservableFeature> listOfFeaturesByDescription = db.find(ObservableFeature.class, new QueryRule(
+					ObservableFeature.DESCRIPTION, Operator.LIKE, query));
 			List<Category> listOfCategories = db.find(Category.class, new QueryRule(Category.DESCRIPTION,
 					Operator.LIKE, query));
-			if (listOfCategories.isEmpty() && listOfFeatures.isEmpty() && listOfProtocols.isEmpty())
+			if (listOfCategories.isEmpty() && listOfFeaturesByName.isEmpty() && listOfFeaturesByDescription.isEmpty()
+					&& listOfProtocols.isEmpty())
 			{
 				src = toJSProtocol(db, topProtocol.get(0), false);
 			}
@@ -196,21 +202,42 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			for (ObservableFeature feature : topProtocol.getFeatures())
 			{
-				if (feature.getName().toLowerCase().contains(query)
-						|| feature.getDescription().toLowerCase().contains(query))
+
+				if (feature.getName().toLowerCase().contains(query))
 				{
 					jsFeatures.add(toJSFeature(db, feature));
 				}
 				else
 				{
-					List<Category> categories = findCategories(db, feature);
-					if (categories != null & !categories.isEmpty())
-					{
-						for (Category c : findCategories(db, feature))
-						{
-							if (c.getDescription() != null && c.getDescription().toLowerCase().contains(query))
+					Map<String, String> i18nDescription = new Gson().fromJson(feature.getDescription(),
+							new TypeToken<Map<String, String>>()
 							{
-								jsFeatures.add(toJSFeature(db, feature));
+							}.getType());
+
+					boolean descriptionMatch = false;
+					if (i18nDescription != null)
+					{
+						for (String value : i18nDescription.values())
+						{
+							if (value.toLowerCase().contains(query))
+							{
+								descriptionMatch = true;
+								break;
+							}
+						}
+					}
+					if (descriptionMatch) jsFeatures.add(toJSFeature(db, feature));
+					else
+					{
+						List<Category> categories = findCategories(db, feature);
+						if (categories != null && !categories.isEmpty())
+						{
+							for (Category c : findCategories(db, feature))
+							{
+								if (c.getDescription() != null && c.getDescription().toLowerCase().contains(query))
+								{
+									jsFeatures.add(toJSFeature(db, feature));
+								}
 							}
 						}
 					}
@@ -232,9 +259,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 		// get data set
 		Integer dataSetId = request.getInt("datasetid");
-		DataSet dataSet = null;
-		List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, dataSetId));
-		if (dataSets != null && !dataSets.isEmpty()) dataSet = dataSets.get(0);
 
 		// get features
 		String featuresStr = request.getString("features");
@@ -248,52 +272,29 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			features = findFeatures(db, featureIds);
 		}
 
-		if (request.getAction().equals("download_emeasure"))
-		{
-
-			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm");
-			String fileName = "EMeasure_" + dateFormat.format(new Date()) + ".xml";
-
-			// write response headers
-			response.setContentType("application/x-download");
-			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-
-			// write eMeasure XML file
-			EMeasureFeatureWriter eMeasureWriter = new EMeasureFeatureWriter(response.getOutputStream());
-			try
-			{
-				eMeasureWriter.writeFeatures(features);
-			}
-			finally
-			{
-				eMeasureWriter.close();
-			}
-		}
-		else if (request.getAction().equals("download_xls"))
+		if (request.getAction().equals("download_xls"))
 		{
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm");
-			String fileName = "selectedvariables_" + dateFormat.format(new Date()) + ".xls";
+			String fileName = "variables_" + dateFormat.format(new Date()) + ".xls";
 
 			// write response headers
 			response.setContentType("application/vnd.ms-excel");
 			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-			// TODO output not consistent with eMeasure output
 			// write excel file
-			String protocolId = dataSet.getProtocolUsed_Identifier();
-			List<String> header = Arrays.asList("Selected variables", "Descriptions", "Sector/Protocol");
+			List<String> header = Arrays.asList("Id", "Variable", "Description");
 			ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
 			try
 			{
-				TupleWriter sheetWriter = excelWriter.createTupleWriter("variables");
+				TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
 				sheetWriter.writeColNames(header);
 
 				for (ObservableFeature feature : features)
 				{
 					KeyValueTuple tuple = new KeyValueTuple();
-					tuple.set(header.get(0), feature.getName());
-					tuple.set(header.get(1), feature.getDescription());
-					tuple.set(header.get(2), protocolId);
+					tuple.set(header.get(0), feature.getIdentifier());
+					tuple.set(header.get(1), feature.getName());
+					tuple.set(header.get(2), feature.getDescription());
 					sheetWriter.write(tuple);
 				}
 			}
@@ -488,7 +489,18 @@ public class ProtocolViewerController extends PluginModel<Entity>
 				@Override
 				public int compare(JSCategory o1, JSCategory o2)
 				{
-					return o1.getCode().compareTo(o2.getCode());
+					String c1 = o1.getCode();
+					String c2 = o2.getCode();
+					try
+					{
+						// try numerical sort
+						return Integer.valueOf(c1).compareTo(Integer.valueOf(c2));
+					}
+					catch (NumberFormatException e)
+					{
+						// alphabetic sort
+						return c1.compareTo(c2);
+					}
 				}
 			});
 		}
@@ -497,8 +509,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		return new JSFeature(feature, jsCategories, ontologyTerm != null ? new JSOntologyTerm(ontologyTerm) : null);
 	}
 
-	public static class JSDataSet
+	public static class JSDataSet implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final JSProtocol protocol;
@@ -527,8 +541,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSProtocol
+	private static class JSProtocol implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final List<JSFeature> features;
@@ -549,11 +565,13 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSFeature
+	private static class JSFeature implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
-		private final String description;
+		private final Map<String, String> i18nDescription;
 		private final String dataType;
 		private final JSOntologyTerm unit;
 		private final List<JSCategory> categories;
@@ -562,7 +580,9 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			this.id = feature.getId();
 			this.name = feature.getName();
-			this.description = feature.getDescription();
+			this.i18nDescription = new Gson().fromJson(feature.getDescription(), new TypeToken<Map<String, String>>()
+			{
+			}.getType());
 			this.dataType = feature.getDataType();
 			this.unit = unit;
 			this.categories = categories;
@@ -575,8 +595,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSOntologyTerm
+	private static class JSOntologyTerm implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 
@@ -588,8 +610,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	@SuppressWarnings("unused")
-	private static class JSCategory
+	private static class JSCategory implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int id;
 		private final String name;
 		private final String code;

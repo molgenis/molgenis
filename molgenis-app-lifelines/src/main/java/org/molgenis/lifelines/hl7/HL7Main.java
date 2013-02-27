@@ -2,7 +2,7 @@ package org.molgenis.lifelines.hl7;
 
 import org.molgenis.framework.db.Database;
 
-import app.DatabaseFactory;
+import app.JpaDatabase;
 
 /**
  * 
@@ -16,7 +16,7 @@ public class HL7Main
 		String file2 = args[1];
 		HL7Data ll = new HL7LLData(file1, file2);
 
-		Database db = DatabaseFactory.create();
+		Database db = new JpaDatabase();
 
 		HL7OmicsConnectImporter importer = new HL7OmicsConnectImporter();
 

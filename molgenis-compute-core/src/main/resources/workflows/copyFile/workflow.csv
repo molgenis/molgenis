@@ -1,0 +1,2 @@
+step,protocol,parameters
+step1,copyFile.ftl,sourceFile=user.sourceFile

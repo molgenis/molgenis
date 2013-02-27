@@ -24,8 +24,8 @@
 									<path refid="maven.compile.classpath" />
 									<pathelement path="${basedir}/src/main/resources" />
 								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath">
-									<arg value="molgenis.properties" />
+								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
+									<arg value="tifn.molgenis.properties" />
 									<arg value="${project.build.directory}/generated-sources/molgenis" />
 								</java>
 							</tasks>
@@ -118,7 +118,6 @@
 			<version>0.0.1-SNAPSHOT</version>
 			<type>jar</type>
 			<classifier>classes</classifier>
-			<scope>provided</scope>
 		</dependency>			
 		<dependency>
 			<groupId>org.molgenis</groupId>

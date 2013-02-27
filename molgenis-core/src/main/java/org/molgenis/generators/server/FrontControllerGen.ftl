@@ -12,26 +12,24 @@
 
 package ${package}.servlet;
 
-import java.util.LinkedHashMap;
 import java.sql.Connection;
+import java.util.LinkedHashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseFactory;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisFrontController;
 import org.molgenis.framework.server.MolgenisService;
-import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.security.Login;
 import org.apache.commons.dbcp.BasicDataSource;
-import ${package}.DatabaseFactory;
 import ${package}.EntitiesImporterImpl;
-import ${package}.ImportWizardExcelPrognosis;
+import ${package}.EntitiesValidatorImpl;
 
 <#if generate_BOT>
 import java.io.IOException;
@@ -69,9 +67,6 @@ public class FrontController extends MolgenisFrontController
 		//now we can create the MolgenisContext with objects reusable over many requests
 		context = new MolgenisContext(this.getServletConfig(), this.createDataSource(), new UsedMolgenisOptions(), "${model.name}");
 		
-		//keep a map of active connections
-		connections = new ConcurrentHashMap<UUID, Connection>();
-		
 		//finally, we store all mapped services, and pass them the context used for databasing, serving, etc.
 		LinkedHashMap<String,MolgenisService> services = new LinkedHashMap<String,MolgenisService>();
 		
@@ -93,51 +88,45 @@ public class FrontController extends MolgenisFrontController
 		// register instances in singletons (simulate autowiring)
 		<#if generate_entitiesimport>
 		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
-		</#if>
-		<#if generate_ExcelImport>
-		EntitiesValidatorSingleton.setInstance(new ImportWizardExcelPrognosis());
+		EntitiesValidatorSingleton.setInstance(new EntitiesValidatorImpl());
 		</#if>
 	}
 	
 	@Override
-	public void createLogin(MolgenisRequest request) throws Exception
+	public void service(HttpServletRequest request, HttpServletResponse response)
 	{
-		Login login = (Login)request.getRequest().getSession().getAttribute("login");
-		if(login == null) {
-			<#if auth_redirect != ''>
-			login = new ${loginclass}(request.getDatabase(), "${auth_redirect}", context.getTokenFactory());
-			<#else>
-			login = new ${loginclass}(request.getDatabase(), context.getTokenFactory());
-			</#if>			
-			request.getRequest().getSession().setAttribute("login", login);
-		}
-		request.getDatabase().setLogin(login);
-	}
-	
-	@Override
-	public UUID createDatabase(MolgenisRequest request) throws DatabaseException, SQLException
-	{
-		//TODO: store db instance in session and reuse, with fresh connection?
-		//Database db = (Database)request.getRequest().getSession().getAttribute("database");
-		
-		//get a connection and keep track of it
-		
-		UUID id = UUID.randomUUID();
-		
-	<#if databaseImp = 'jpa'>
-		Database db = DatabaseFactory.create();
-	<#else>
-		Connection conn = context.getDataSource().getConnection();
-		<#if db_mode != 'standalone'>
-		Database db = DatabaseFactory.create(conn);
+		try
+		{
+		<#if databaseImp = 'jpa'>
+			DatabaseFactory.create(new ${package}.JpaDatabase());
 		<#else>
-		//Database db = new ${package}.JDBCDatabase(conn);
-		Database db = DatabaseFactory.create(conn);	
+			Connection conn = context.getDataSource().getConnection();
+			DatabaseFactory.create(new ${package}.JDBCDatabase(conn));
 		</#if>
-		connections.put(id, conn);
-	</#if>
-		request.setDatabase(db);
-		return id;
+			
+			Login login = (Login) request.getSession().getAttribute("login");
+			if (login == null)
+			{
+			<#if auth_redirect != ''>
+				login = new ${loginclass}(DatabaseFactory.get(), "${auth_redirect}", context.getTokenFactory());
+			<#else>
+				login = new ${loginclass}(DatabaseFactory.get(), context.getTokenFactory());
+			</#if>			
+				request.getSession().setAttribute("login", login);
+			}
+
+			DatabaseFactory.get().setLogin(login);
+
+			super.service(request, response);
+		}
+		catch (Exception e)
+		{
+			logger.error("Exception creating database", e);
+		}
+		finally
+		{
+			DatabaseFactory.destroy();
+		}
 	}
 	
 	@Override
@@ -149,13 +138,6 @@ public class FrontController extends MolgenisFrontController
 		return null;
 	<#else>
 		<#if db_mode != 'standalone'>
-		//PREVIOUS
-		//The datasource is created by the servletcontext	
-		//ServletContext sc = MolgenisContextListener.getInstance().getContext();
-		//DataSource dataSource = (DataSource)sc.getAttribute("DataSource");
-		//return dataSource;
-		
-		//NEW
 		BasicDataSource data_src = new BasicDataSource();
 		data_src.setDriverClassName("${db_driver}");
 		data_src.setUsername("${db_user}");

@@ -17,24 +17,21 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.omx.auth.service.MolgenisUserService;
-import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisPermission;
-import org.molgenis.omx.auth.MolgenisRole;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.service.MolgenisUserService;
+import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.util.Entity;
 
 public class DatabaseLogin implements Login, Serializable
 {
-
 	private static final long serialVersionUID = 1L;
+
+	private static Logger logger = Logger.getLogger(DatabaseLogin.class);
 
 	private final TokenFactory tm;
 
@@ -60,8 +57,6 @@ public class DatabaseLogin implements Login, Serializable
 	Map<String, Permission> ownMap = new TreeMap<String, Permission>();
 
 	protected String redirect;
-
-	Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
 	public DatabaseLogin(TokenFactory tm)
 	{

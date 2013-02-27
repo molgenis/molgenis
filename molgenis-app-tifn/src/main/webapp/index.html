@@ -1,34 +1,11 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-<title>MOLGENIS load page</title>
-<script type="text/javascript">
-<!--
-//url to move to is path (without any trailing /) + "/molgenis.do"
-var sURL = unescape(window.location.pathname).replace(/\/$/, '') + "/molgenis.do";
-
-function doLoad()
-{
-    // the timeout value should be the same as in the "refresh" meta-tag
-    setTimeout( "refresh()", 0 );
-}
-
-function refresh()
-{
-    //  This version of the refresh function will cause a new
-    //  entry in the visitor's history.  It is provided for
-    //  those browsers that only support JavaScript 1.0.
-    //
-    //alert(sURL);
-    window.location.href = sURL;
-}
-//-->
-</script>
-</head>
-
-<!--
-    Use the "onload" event to start the refresh process.
--->
-<body onload="doLoad()">
-MOLGENIS is being loaded...
-</body>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+		<script type="text/javascript">
+			window.location = "molgenis.do";
+		</script>
+	</head>
+	<body>
+	</body>
 </html>

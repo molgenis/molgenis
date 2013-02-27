@@ -149,3 +149,13 @@ td {
 .edit_button_area {
 	vertical-align: bottom;
 }
+
+#spinner {
+	width: 180px;
+	margin:150px 100px 0px -100px;
+}
+
+#spinner .modal-body-inner {
+	width: 32px;
+	margin:10px auto;
+}
