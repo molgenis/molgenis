@@ -25,29 +25,34 @@ import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.io.processor.TrimProcessor;
+import org.molgenis.lifelines.utils.LifeLinesQuestionnaireMatrix.CohortTimePair;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
+
+import com.google.gson.Gson;
 
 /**
  * Convert a transformed LifeLines data dictionary to Observ-OMX format
  */
-public class LifeLinesDataDictionarytoOMXConvertor
+public class LifeLinesDataDictionaryToOmxConvertor
 {
-	private static final Logger logger = Logger.getLogger(LifeLinesDataDictionarytoOMXConvertor.class);
+	private static final Logger logger = Logger.getLogger(LifeLinesDataDictionaryToOmxConvertor.class);
 
 	private static final String COL_INCLUDE = "ja/nee";
 	private static final String COL_GROUP = "Group";
 	private static final String COL_CODE = "Code";
 	private static final String COL_DISPLAY_NAME = "Dysplay name";
-	private static final String COL_DESCRIPTION = "EN Description";
+	private static final String COL_DESCRIPTION_EN = "EN Description";
+	private static final String COL_DESCRIPTION_NL = "NL Description";
 	private static final String COL_SECTION = "Section";
 	private static final String COL_SUB_SECTION = "Sub-section";
 	private static final String COL_SUB_SECTION2 = "Sub-section 2";
+	private static final String COL_SUB_SECTION3 = "Sub-section 3";
 	private static final String COL_COHORT = "Cohort";
 	private static final String COL_TIME = "Time";
 	private static final String COL_TYPE = "Type";
 	private static final String COL_VALUE = "Value";
-	private static final String COL_VALUE_DESCRIPTION = "EN Value Description";
+	private static final String COL_VALUE_DESCRIPTION_EN = "EN Value Description";
 
 	private static final String ENTITY_IDENTIFIER = "identifier";
 	private static final String ENTITY_NAME = "name";
@@ -99,13 +104,26 @@ public class LifeLinesDataDictionarytoOMXConvertor
 		HEADER_DATASET.put(PROTOCOLUSED_IDENTIFIER, 2);
 	}
 
+	private final Gson gson;
+
+	public LifeLinesDataDictionaryToOmxConvertor()
+	{
+		gson = new Gson();
+	}
+
 	public void convert(InputStream in, OutputStream out) throws IOException
+	{
+		convert(in, out, null);
+	}
+
+	public void convert(InputStream in, OutputStream out, InputStream checklistIn) throws IOException
 	{
 		ExcelReader excelReader = new ExcelReader(in);
 		excelReader.addCellProcessor(new TrimProcessor(false, true));
 		ExcelWriter excelWriter = new ExcelWriter(out);
 		excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
 
+		LifeLinesQuestionnaireMatrix matrix = checklistIn != null ? LifeLinesQuestionnaireMatrix.parse(checklistIn) : null;
 		try
 		{
 			// create entity sheets
@@ -119,7 +137,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			for (String tableName : excelReader.getTableNames())
 			{
 				logger.debug("converting sheet: " + tableName);
-				convertSheet(excelReader.getTupleReader(tableName), sheetMap, protocolMap, rootProtocol);
+				convertSheet(excelReader.getTupleReader(tableName), matrix, sheetMap, protocolMap, rootProtocol);
 			}
 
 			// write protocols
@@ -183,8 +201,9 @@ public class LifeLinesDataDictionarytoOMXConvertor
 		return sheetMap;
 	}
 
-	private void convertSheet(TupleReader sheet, Map<String, TupleWriter> sheetMap, Map<String, Protocol> protocolMap,
-			Protocol rootProtocol) throws IOException
+	private void convertSheet(TupleReader sheet, LifeLinesQuestionnaireMatrix matrix,
+			Map<String, TupleWriter> sheetMap, Map<String, Protocol> protocolMap, Protocol rootProtocol)
+			throws IOException
 	{
 		List<String> featureIdentifiers = new ArrayList<String>();
 
@@ -211,7 +230,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 				{
 					// value row for the last detected feature
 					String value = row.getString(COL_VALUE);
-					String description = row.getString(COL_VALUE_DESCRIPTION);
+					String description = row.getString(COL_VALUE_DESCRIPTION_EN);
 					if (value != null && (description == null || description.isEmpty())) throw new IOException(
 							"missing translation for value '" + value + "'");
 
@@ -242,16 +261,22 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			// add feature
 			String featureIdentifier = group + '.' + code;
 			String featureName = row.getString(COL_DISPLAY_NAME);
-			String featureDescription = row.getString(COL_DESCRIPTION);
+			String featureDescriptionEn = row.getString(COL_DESCRIPTION_EN);
+			String featureDescriptionNl = row.getString(COL_DESCRIPTION_NL);
 			if (featureName == null || featureName.isEmpty()) throw new IOException("expected value in column "
 					+ COL_DISPLAY_NAME);
-			if (featureDescription == null || featureDescription.isEmpty()) throw new IOException(
-					"expected value in column " + COL_DESCRIPTION);
-			// featureName = "UNKNOWN FEATURE NAME";
+
+			if (featureDescriptionNl == null || featureDescriptionNl.isEmpty()) logger.warn("expected value in column "
+					+ COL_DESCRIPTION_NL);
+			if (featureDescriptionEn == null || featureDescriptionEn.isEmpty()) throw new IOException(
+					"expected value in column " + COL_DESCRIPTION_EN);
 			KeyValueTuple featureMap = new KeyValueTuple();
 			featureMap.set(ENTITY_IDENTIFIER, featureIdentifier);
 			featureMap.set(ENTITY_NAME, featureName);
-			featureMap.set(ENTITY_DESCRIPTION, featureDescription);
+			Map<String, String> descriptionMap = new LinkedHashMap<String, String>();
+			if (featureDescriptionEn != null) descriptionMap.put("en", featureDescriptionEn);
+			if (featureDescriptionNl != null) descriptionMap.put("nl", featureDescriptionNl);
+			featureMap.set(ENTITY_DESCRIPTION, gson.toJson(descriptionMap));
 			if (row.getString(COL_VALUE) != null && !row.getString(COL_VALUE).isEmpty()) featureMap.set(
 					FEATURE_DATATYPE, "categorical");
 			sheetMap.get(SHEET_FEATURE).write(featureMap);
@@ -260,7 +285,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 
 			// add category
 			String categoryValue = row.getString(COL_VALUE);
-			String categoryDescription = row.getString(COL_VALUE_DESCRIPTION);
+			String categoryDescription = row.getString(COL_VALUE_DESCRIPTION_EN);
 			if (categoryValue != null && (categoryDescription == null || categoryDescription.isEmpty())) throw new IOException(
 					"missing translation for value '" + categoryValue + "'");
 
@@ -275,46 +300,37 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			}
 
 			// get protocol
-			String cohort = row.getString(COL_COHORT);
-			if (cohort == null) throw new IOException("missing cohort");
-			String time = row.getString(COL_TIME);
+			Set<CohortTimePair> cohortTypePairs = getCohortTimePairs(row, matrix);
+			if (cohortTypePairs == null) throw new IOException("missing cohort-type pair");
+
 			String type = row.getString(COL_TYPE);
 			String section = row.getString(COL_SECTION);
 			String subSection = row.getString(COL_SUB_SECTION);
 			String subSubSection = row.getString(COL_SUB_SECTION2);
+			String subSubSubSection = row.getString(COL_SUB_SECTION3);
 
-			String protocolIdentifier = cohort.replace(",", "");
-			String protocolName = cohort;
-
-			// TODO use recursive function
-			Protocol protocol = rootProtocol;
-			Protocol subProtocol = protocolMap.get(protocolIdentifier);
-			if (subProtocol == null)
+			for (CohortTimePair cohortTypePair : cohortTypePairs)
 			{
-				subProtocol = new Protocol(protocolIdentifier, protocolName);
-				protocolMap.put(protocolIdentifier, subProtocol);
-				protocol.addSubProtocol(subProtocol);
-			}
-			if (time == null || time.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
-			else
-			{
-				protocolIdentifier = protocolIdentifier + '.' + time.replace(",", "");
-				protocolName = time;
+				String cohort = cohortTypePair.getCohort();
+				String time = cohortTypePair.getTime();
 
-				protocol = subProtocol;
-				subProtocol = protocolMap.get(protocolIdentifier);
+				String protocolIdentifier = cohort.replace(",", "");
+				String protocolName = cohort;
+
+				// TODO use recursive function
+				Protocol protocol = rootProtocol;
+				Protocol subProtocol = protocolMap.get(protocolIdentifier);
 				if (subProtocol == null)
 				{
 					subProtocol = new Protocol(protocolIdentifier, protocolName);
 					protocolMap.put(protocolIdentifier, subProtocol);
 					protocol.addSubProtocol(subProtocol);
 				}
-
-				if (type == null || type.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+				if (time == null || time.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
 				else
 				{
-					protocolIdentifier = protocolIdentifier + '.' + type.replace(",", "");
-					protocolName = type;
+					protocolIdentifier = protocolIdentifier + '.' + time.replace(",", "");
+					protocolName = time;
 
 					protocol = subProtocol;
 					subProtocol = protocolMap.get(protocolIdentifier);
@@ -325,11 +341,11 @@ public class LifeLinesDataDictionarytoOMXConvertor
 						protocol.addSubProtocol(subProtocol);
 					}
 
-					if (section == null || section.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+					if (type == null || type.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
 					else
 					{
-						protocolIdentifier = protocolIdentifier + '.' + section.replace(",", "");
-						protocolName = section;
+						protocolIdentifier = protocolIdentifier + '.' + type.replace(",", "");
+						protocolName = type;
 
 						protocol = subProtocol;
 						subProtocol = protocolMap.get(protocolIdentifier);
@@ -340,12 +356,11 @@ public class LifeLinesDataDictionarytoOMXConvertor
 							protocol.addSubProtocol(subProtocol);
 						}
 
-						if (subSection == null || subSection.isEmpty()) subProtocol
-								.addFeatureIdentifier(featureIdentifier);
+						if (section == null || section.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
 						else
 						{
-							protocolIdentifier = protocolIdentifier + '.' + subSection.replace(",", "");
-							protocolName = subSection;
+							protocolIdentifier = protocolIdentifier + '.' + section.replace(",", "");
+							protocolName = section;
 
 							protocol = subProtocol;
 							subProtocol = protocolMap.get(protocolIdentifier);
@@ -356,12 +371,12 @@ public class LifeLinesDataDictionarytoOMXConvertor
 								protocol.addSubProtocol(subProtocol);
 							}
 
-							if (subSubSection == null || subSubSection.isEmpty()) subProtocol
+							if (subSection == null || subSection.isEmpty()) subProtocol
 									.addFeatureIdentifier(featureIdentifier);
 							else
 							{
-								protocolIdentifier = protocolIdentifier + '.' + subSubSection.replace(",", "");
-								protocolName = subSubSection;
+								protocolIdentifier = protocolIdentifier + '.' + subSection.replace(",", "");
+								protocolName = subSection;
 
 								protocol = subProtocol;
 								subProtocol = protocolMap.get(protocolIdentifier);
@@ -372,16 +387,67 @@ public class LifeLinesDataDictionarytoOMXConvertor
 									protocol.addSubProtocol(subProtocol);
 								}
 
-								// end of the line, add feature
-								subProtocol.addFeatureIdentifier(featureIdentifier);
+								if (subSubSection == null || subSubSection.isEmpty()) subProtocol
+										.addFeatureIdentifier(featureIdentifier);
+								else
+								{
+									protocolIdentifier = protocolIdentifier + '.' + subSubSection.replace(",", "");
+									protocolName = subSubSection;
+
+									protocol = subProtocol;
+									subProtocol = protocolMap.get(protocolIdentifier);
+									if (subProtocol == null)
+									{
+										subProtocol = new Protocol(protocolIdentifier, protocolName);
+										protocolMap.put(protocolIdentifier, subProtocol);
+										protocol.addSubProtocol(subProtocol);
+									}
+
+									if (subSubSubSection == null || subSubSubSection.isEmpty()) subProtocol
+											.addFeatureIdentifier(featureIdentifier);
+									else
+									{
+										protocolIdentifier = protocolIdentifier + '.'
+												+ subSubSubSection.replace(",", "");
+										protocolName = subSubSubSection;
+
+										protocol = subProtocol;
+										subProtocol = protocolMap.get(protocolIdentifier);
+										if (subProtocol == null)
+										{
+											subProtocol = new Protocol(protocolIdentifier, protocolName);
+											protocolMap.put(protocolIdentifier, subProtocol);
+											protocol.addSubProtocol(subProtocol);
+										}
+
+										// end of the line, add feature
+										subProtocol.addFeatureIdentifier(featureIdentifier);
+									}
+								}
 							}
 						}
 					}
 				}
-			}
 
-			++rownr;
+				++rownr;
+			}
 		}
+	}
+
+	private Set<CohortTimePair> getCohortTimePairs(Tuple row, LifeLinesQuestionnaireMatrix matrix)
+	{
+		Set<CohortTimePair> cohortTypePairs = matrix != null ? matrix.get(row.getString(COL_GROUP),
+				row.getString(COL_CODE)) : null;
+
+		// fall back to existing information in translated data dictionary
+		if (cohortTypePairs == null)
+		{
+			String cohort = row.getString(COL_COHORT);
+			String time = row.getString(COL_TIME);
+			cohortTypePairs = Collections.singleton(new CohortTimePair(cohort, time));
+		}
+
+		return cohortTypePairs;
 	}
 
 	private boolean includeRow(Tuple row)
@@ -471,21 +537,22 @@ public class LifeLinesDataDictionarytoOMXConvertor
 		BasicConfigurator.configure();
 		logger.setLevel(Level.DEBUG);
 
-		if (args.length != 2)
+		if (args.length < 2 || args.length > 3)
 		{
-			System.err.println("usage: java " + LifeLinesDataDictionarytoOMXConvertor.class.getSimpleName()
-					+ " inputfile outputfile");
+			System.err.println("usage: java " + LifeLinesDataDictionaryToOmxConvertor.class.getSimpleName()
+					+ " inputfile outputfile <checklistfile>");
 			return;
 		}
 
 		File inFile = new File(args[0]);
 		File outFile = new File(args[1]);
-		// if (outFile.exists()) throw new IOException("file already exists: " +
-		// outFile);
+		if (outFile.exists()) throw new IOException("file already exists: " + outFile);
 
 		FileInputStream fis = new FileInputStream(inFile);
 		FileOutputStream fos = new FileOutputStream(outFile);
-		new LifeLinesDataDictionarytoOMXConvertor().convert(fis, fos);
+		FileInputStream checklistFis = args.length == 3 ? new FileInputStream(new File(args[2])) : null;
+
+		new LifeLinesDataDictionaryToOmxConvertor().convert(fis, fos, checklistFis);
 	}
 
 }

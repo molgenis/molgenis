@@ -69,6 +69,7 @@ public abstract class EasyPluginController<M extends ScreenModel> extends Simple
 	public void delegate(String action, Database db, MolgenisRequest request, OutputStream out)
 			throws HandleRequestDelegationException
 	{
+
 		// try/catch for db.rollbackTx
 		try
 		{
@@ -85,26 +86,31 @@ public abstract class EasyPluginController<M extends ScreenModel> extends Simple
 			}
 			catch (NoSuchMethodException e1)
 			{
-				logger.warn(e1);
-
-				if (out != null) try
+				if (out != null)
 				{
-					// db.beginTx();
-					logger.debug("trying to use reflection to call " + this.getClass().getName() + "." + action);
-					Method m = this.getClass().getMethod(action, Database.class, MolgenisRequest.class,
-							OutputStream.class);
-					m.invoke(this, db, request, out);
-					logger.debug("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
-							+ " completed");
-					if (db.inTx()) db.commitTx();
+					try
+					{
+						// db.beginTx();
+						logger.debug("trying to use reflection to call " + this.getClass().getName() + "." + action);
+						Method m = this.getClass().getMethod(action, Database.class, MolgenisRequest.class,
+								OutputStream.class);
+						m.invoke(this, db, request, out);
+						logger.debug("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
+								+ " completed");
+						if (db.inTx()) db.commitTx();
+					}
+					catch (Exception e)
+					{
+						this.getModel().setMessages(new ScreenMessage("Unknown action: " + action, false));
+						logger.error("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
+								+ "(db,tuple) failed: " + e1.getMessage());
+						e.printStackTrace();
+						db.rollbackTx();
+					}
 				}
-				catch (Exception e)
+				else
 				{
-					this.getModel().setMessages(new ScreenMessage("Unknown action: " + action, false));
-					logger.error("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
-							+ "(db,tuple) failed: " + e1.getMessage());
-					e.printStackTrace();
-					db.rollbackTx();
+					logger.error(e1);
 				}
 			}
 			catch (Exception e)
@@ -135,7 +141,7 @@ public abstract class EasyPluginController<M extends ScreenModel> extends Simple
 			}
 			else
 			{
-				parent = (ScreenController<?>) parent.getParent();
+				parent = parent.getParent();
 			}
 		}
 		throw new RuntimeException("Parent form of class " + entityClass.getName() + " is unknown in plugin name="

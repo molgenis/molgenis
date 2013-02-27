@@ -2,7 +2,6 @@ package org.molgenis.omx.plugins;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.util.DetectOS.getLineSeparator;
 import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
@@ -198,83 +197,6 @@ public class ProtocolViewerControllerTest
 		{
 			bos.close();
 		}
-	}
-
-	@Test
-	public void handleRequest_download_emeasure() throws Exception
-	{
-		// mock db
-		Database db = mock(Database.class);
-
-		ObservableFeature feature1 = new ObservableFeature();
-		feature1.setId(1);
-		feature1.setName("feature1");
-		feature1.setIdentifier("featureid1");
-
-		ObservableFeature feature2 = new ObservableFeature();
-		feature2.setId(2);
-		feature2.setName("feature2");
-		feature2.setIdentifier("featureid2");
-
-		ObservableFeature feature3 = new ObservableFeature();
-		feature3.setId(3);
-		feature3.setName("feature3");
-		feature3.setIdentifier("featureid3");
-
-		when(db.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(1, 2, 3))))
-				.thenReturn(Arrays.asList(feature1, feature2, feature3));
-
-		ProtocolViewerController controller = new ProtocolViewerController("test", mock(ScreenController.class));
-
-		// mock request
-		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
-		httpRequest.setMethod("GET");
-		MolgenisRequest request = mock(MolgenisRequest.class);
-		when(request.getRequest()).thenReturn(httpRequest);
-		when(request.getString("features")).thenReturn("1,2,3");
-		when(request.getAction()).thenReturn("download_emeasure");
-		MockHttpServletResponse httpResponse = new MockHttpServletResponse();
-		when(request.getResponse()).thenReturn(httpResponse);
-
-		controller.handleRequest(db, request);
-
-		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><QualityMeasureDocument xmlns=\"urn:hl7-org:v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" classCode=\"CONTAINER\" moodCode=\"DEF\" xsi:schemaLocation=\"urn:hl7-org:v3 multicacheschemas/REPC_MT000100UV01.xsd\" xsi:type=\"REPC_MT000100UV01.Organizer\">	<subjectOf>"
-				+ getLineSeparator()
-				+ "		<measureAttribute><code code=\"feature1\" codeSystem=\"TBD\" displayName=\"null\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"string\"/>		</measureAttribute>"
-				+ getLineSeparator()
-				+ "	</subjectOf>	<subjectOf>"
-				+ getLineSeparator()
-				+ "		<measureAttribute><code code=\"feature2\" codeSystem=\"TBD\" displayName=\"null\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"string\"/>		</measureAttribute>"
-				+ getLineSeparator()
-				+ "	</subjectOf>	<subjectOf>"
-				+ getLineSeparator()
-				+ "		<measureAttribute><code code=\"feature3\" codeSystem=\"TBD\" displayName=\"null\"/><value code=\"dunno\" codeSystem=\"TBD\" displayName=\"This should be the mappingsname\" xsi:type=\"string\"/>		</measureAttribute>"
-				+ getLineSeparator() + "	</subjectOf></QualityMeasureDocument>";
-		assertEquals(httpResponse.getContentAsString(), expected);
-	}
-
-	@Test
-	public void handleRequest_download_emeasure_noFeatures() throws Exception
-	{
-		// mock db
-		Database db = mock(Database.class);
-
-		ProtocolViewerController controller = new ProtocolViewerController("test", mock(ScreenController.class));
-
-		// mock request
-		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
-		httpRequest.setMethod("GET");
-		MolgenisRequest request = mock(MolgenisRequest.class);
-		when(request.getRequest()).thenReturn(httpRequest);
-		when(request.getString("features")).thenReturn(null);
-		when(request.getAction()).thenReturn("download_emeasure");
-		MockHttpServletResponse httpResponse = new MockHttpServletResponse();
-		when(request.getResponse()).thenReturn(httpResponse);
-
-		controller.handleRequest(db, request);
-
-		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><QualityMeasureDocument xmlns=\"urn:hl7-org:v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" classCode=\"CONTAINER\" moodCode=\"DEF\" xsi:schemaLocation=\"urn:hl7-org:v3 multicacheschemas/REPC_MT000100UV01.xsd\" xsi:type=\"REPC_MT000100UV01.Organizer\"/>";
-		assertEquals(httpResponse.getContentAsString(), expected);
 	}
 
 	@Test

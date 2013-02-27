@@ -41,17 +41,7 @@
 				
 			</div>
 		</div>
-	</form>	
-
-	<div id="spinner" class="modal hide" style="width: 180px;margin: -200px 0 0 -90px;">
-  		<div class="modal-header">
-    		<h3>Importing...</h3>
- 		 </div>
-  		<div class="modal-body">
-    		<div style="width: 32px;margin:10px auto"><img src="img/waiting-spinner.gif" /></div>
-  		</div>
-	</div>
-
+	</form>
 	<script type="text/javascript">
 		$("#wizard").bwizard({activeIndex: ${wizard.currentPageIndex}});
 	   	$('.pager').css({"width" : "491px"});//Pager bar with previous/next buttons

@@ -45,7 +45,7 @@ public class VcfRecord
 
 		for (int i = 0; i < values.length; i++)
 		{
-			((WritableTuple) record).set(columnNames.get(i), values[i]);
+			((WritableTuple) record).set(columnNames.get(i), new String(values[i]));
 		}
 
 	}
@@ -196,7 +196,10 @@ public class VcfRecord
 				}
 				else
 				{
-					infoMap.put(kv[0], Arrays.asList(kv[1].split(",")));
+					if (VcfUtils.checkNullValue(kv[1]) != null)
+					{
+						infoMap.put(kv[0], Arrays.asList(kv[1].split(",")));
+					}
 				}
 			}
 		}

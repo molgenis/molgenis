@@ -1,0 +1,13 @@
+digraph G {
+node [fontname = "Arial"
+            fontsize = 8
+            shape = "record"
+            color = "#808080"
+            style="filled"
+            fillcolor = "white"
+            layer = "2"
+            colorscheme = pastel19]
+step1[
+ 	fillcolor =  "1"
+ 	label = "{ step1 | sourceFile=user.sourceFile\n | targetFile CopyOf$\{sourceFile\}\n }"]
+}

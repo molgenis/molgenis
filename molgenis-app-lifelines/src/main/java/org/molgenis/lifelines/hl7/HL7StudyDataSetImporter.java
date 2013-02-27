@@ -14,24 +14,24 @@ import javax.xml.bind.JAXBElement;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.ObservationSet;
-import org.molgenis.omx.observ.ObservedValue;
-import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.hl7.REPCMT000100UV01Component3;
 import org.molgenis.hl7.REPCMT000100UV01Observation;
 import org.molgenis.hl7.REPCMT000100UV01Organizer;
 import org.molgenis.hl7.REPCMT000100UV01RecordTarget;
 import org.molgenis.hl7.REPCMT000400UV01ActCategory;
 import org.molgenis.hl7.REPCMT000400UV01Component4;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.ObservationSet;
+import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.observ.target.OntologyTerm;
 
-import app.DatabaseFactory;
+import app.JpaDatabase;
 
 public class HL7StudyDataSetImporter
 {
-	private Database db;
+	private final Database db;
 
 	public HL7StudyDataSetImporter(Database db)
 	{
@@ -162,7 +162,7 @@ public class HL7StudyDataSetImporter
 		InputStream xmlStream = new FileInputStream(args[0]);
 		try
 		{
-			HL7StudyDataSetImporter importer = new HL7StudyDataSetImporter(DatabaseFactory.create());
+			HL7StudyDataSetImporter importer = new HL7StudyDataSetImporter(new JpaDatabase());
 			importer.importData(xmlStream);
 		}
 		finally
