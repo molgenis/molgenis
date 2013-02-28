@@ -445,7 +445,7 @@ var molgenis_required = new Array(${required});
 <#else>
 	<!--FormScreen ${screen.getName()}-->
 	<div class="formscreen" id="${screen.getName()}_screen">
-		<a name="${screen.name}"/>
+		<a name="${screen.name}" style="text-decoration: none;" />
 		<div style="position: absolute; left: -10000px; top: -10000px;" id="popup_${screen.getName()}" class="popup" position="absolute"></div>
 		<form name="${screen.name}_form"  id="${screen.name}_form" target="#${screen.name}" action="" method="post" style="margin: 0px;" enctype="multipart/form-data">
 			<input type="hidden" name="__target"  value="${screen.name}" />

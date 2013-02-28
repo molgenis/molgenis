@@ -25,6 +25,7 @@ import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.io.processor.TrimProcessor;
+import org.molgenis.lifelines.utils.LifeLinesQuestionnaireMatrix.CohortTimePair;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
@@ -33,9 +34,9 @@ import com.google.gson.Gson;
 /**
  * Convert a transformed LifeLines data dictionary to Observ-OMX format
  */
-public class LifeLinesDataDictionarytoOMXConvertor
+public class LifeLinesDataDictionaryToOmxConvertor
 {
-	private static final Logger logger = Logger.getLogger(LifeLinesDataDictionarytoOMXConvertor.class);
+	private static final Logger logger = Logger.getLogger(LifeLinesDataDictionaryToOmxConvertor.class);
 
 	private static final String COL_INCLUDE = "ja/nee";
 	private static final String COL_GROUP = "Group";
@@ -105,18 +106,24 @@ public class LifeLinesDataDictionarytoOMXConvertor
 
 	private final Gson gson;
 
-	public LifeLinesDataDictionarytoOMXConvertor()
+	public LifeLinesDataDictionaryToOmxConvertor()
 	{
 		gson = new Gson();
 	}
 
 	public void convert(InputStream in, OutputStream out) throws IOException
 	{
+		convert(in, out, null);
+	}
+
+	public void convert(InputStream in, OutputStream out, InputStream checklistIn) throws IOException
+	{
 		ExcelReader excelReader = new ExcelReader(in);
 		excelReader.addCellProcessor(new TrimProcessor(false, true));
 		ExcelWriter excelWriter = new ExcelWriter(out);
 		excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
 
+		LifeLinesQuestionnaireMatrix matrix = checklistIn != null ? LifeLinesQuestionnaireMatrix.parse(checklistIn) : null;
 		try
 		{
 			// create entity sheets
@@ -130,7 +137,7 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			for (String tableName : excelReader.getTableNames())
 			{
 				logger.debug("converting sheet: " + tableName);
-				convertSheet(excelReader.getTupleReader(tableName), sheetMap, protocolMap, rootProtocol);
+				convertSheet(excelReader.getTupleReader(tableName), matrix, sheetMap, protocolMap, rootProtocol);
 			}
 
 			// write protocols
@@ -194,8 +201,9 @@ public class LifeLinesDataDictionarytoOMXConvertor
 		return sheetMap;
 	}
 
-	private void convertSheet(TupleReader sheet, Map<String, TupleWriter> sheetMap, Map<String, Protocol> protocolMap,
-			Protocol rootProtocol) throws IOException
+	private void convertSheet(TupleReader sheet, LifeLinesQuestionnaireMatrix matrix,
+			Map<String, TupleWriter> sheetMap, Map<String, Protocol> protocolMap, Protocol rootProtocol)
+			throws IOException
 	{
 		List<String> featureIdentifiers = new ArrayList<String>();
 
@@ -292,47 +300,37 @@ public class LifeLinesDataDictionarytoOMXConvertor
 			}
 
 			// get protocol
-			String cohort = row.getString(COL_COHORT);
-			if (cohort == null) throw new IOException("missing cohort");
-			String time = row.getString(COL_TIME);
+			Set<CohortTimePair> cohortTypePairs = getCohortTimePairs(row, matrix);
+			if (cohortTypePairs == null) throw new IOException("missing cohort-type pair");
+
 			String type = row.getString(COL_TYPE);
 			String section = row.getString(COL_SECTION);
 			String subSection = row.getString(COL_SUB_SECTION);
 			String subSubSection = row.getString(COL_SUB_SECTION2);
 			String subSubSubSection = row.getString(COL_SUB_SECTION3);
 
-			String protocolIdentifier = cohort.replace(",", "");
-			String protocolName = cohort;
-
-			// TODO use recursive function
-			Protocol protocol = rootProtocol;
-			Protocol subProtocol = protocolMap.get(protocolIdentifier);
-			if (subProtocol == null)
+			for (CohortTimePair cohortTypePair : cohortTypePairs)
 			{
-				subProtocol = new Protocol(protocolIdentifier, protocolName);
-				protocolMap.put(protocolIdentifier, subProtocol);
-				protocol.addSubProtocol(subProtocol);
-			}
-			if (time == null || time.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
-			else
-			{
-				protocolIdentifier = protocolIdentifier + '.' + time.replace(",", "");
-				protocolName = time;
+				String cohort = cohortTypePair.getCohort();
+				String time = cohortTypePair.getTime();
 
-				protocol = subProtocol;
-				subProtocol = protocolMap.get(protocolIdentifier);
+				String protocolIdentifier = cohort.replace(",", "");
+				String protocolName = cohort;
+
+				// TODO use recursive function
+				Protocol protocol = rootProtocol;
+				Protocol subProtocol = protocolMap.get(protocolIdentifier);
 				if (subProtocol == null)
 				{
 					subProtocol = new Protocol(protocolIdentifier, protocolName);
 					protocolMap.put(protocolIdentifier, subProtocol);
 					protocol.addSubProtocol(subProtocol);
 				}
-
-				if (type == null || type.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+				if (time == null || time.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
 				else
 				{
-					protocolIdentifier = protocolIdentifier + '.' + type.replace(",", "");
-					protocolName = type;
+					protocolIdentifier = protocolIdentifier + '.' + time.replace(",", "");
+					protocolName = time;
 
 					protocol = subProtocol;
 					subProtocol = protocolMap.get(protocolIdentifier);
@@ -343,11 +341,11 @@ public class LifeLinesDataDictionarytoOMXConvertor
 						protocol.addSubProtocol(subProtocol);
 					}
 
-					if (section == null || section.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+					if (type == null || type.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
 					else
 					{
-						protocolIdentifier = protocolIdentifier + '.' + section.replace(",", "");
-						protocolName = section;
+						protocolIdentifier = protocolIdentifier + '.' + type.replace(",", "");
+						protocolName = type;
 
 						protocol = subProtocol;
 						subProtocol = protocolMap.get(protocolIdentifier);
@@ -358,12 +356,11 @@ public class LifeLinesDataDictionarytoOMXConvertor
 							protocol.addSubProtocol(subProtocol);
 						}
 
-						if (subSection == null || subSection.isEmpty()) subProtocol
-								.addFeatureIdentifier(featureIdentifier);
+						if (section == null || section.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
 						else
 						{
-							protocolIdentifier = protocolIdentifier + '.' + subSection.replace(",", "");
-							protocolName = subSection;
+							protocolIdentifier = protocolIdentifier + '.' + section.replace(",", "");
+							protocolName = section;
 
 							protocol = subProtocol;
 							subProtocol = protocolMap.get(protocolIdentifier);
@@ -374,12 +371,12 @@ public class LifeLinesDataDictionarytoOMXConvertor
 								protocol.addSubProtocol(subProtocol);
 							}
 
-							if (subSubSection == null || subSubSection.isEmpty()) subProtocol
+							if (subSection == null || subSection.isEmpty()) subProtocol
 									.addFeatureIdentifier(featureIdentifier);
 							else
 							{
-								protocolIdentifier = protocolIdentifier + '.' + subSubSection.replace(",", "");
-								protocolName = subSubSection;
+								protocolIdentifier = protocolIdentifier + '.' + subSection.replace(",", "");
+								protocolName = subSection;
 
 								protocol = subProtocol;
 								subProtocol = protocolMap.get(protocolIdentifier);
@@ -390,12 +387,12 @@ public class LifeLinesDataDictionarytoOMXConvertor
 									protocol.addSubProtocol(subProtocol);
 								}
 
-								if (subSubSubSection == null || subSubSubSection.isEmpty()) subProtocol
+								if (subSubSection == null || subSubSection.isEmpty()) subProtocol
 										.addFeatureIdentifier(featureIdentifier);
 								else
 								{
-									protocolIdentifier = protocolIdentifier + '.' + subSubSubSection.replace(",", "");
-									protocolName = subSubSubSection;
+									protocolIdentifier = protocolIdentifier + '.' + subSubSection.replace(",", "");
+									protocolName = subSubSection;
 
 									protocol = subProtocol;
 									subProtocol = protocolMap.get(protocolIdentifier);
@@ -406,17 +403,53 @@ public class LifeLinesDataDictionarytoOMXConvertor
 										protocol.addSubProtocol(subProtocol);
 									}
 
-									// end of the line, add feature
-									subProtocol.addFeatureIdentifier(featureIdentifier);
+									if (subSubSubSection == null || subSubSubSection.isEmpty()) subProtocol
+											.addFeatureIdentifier(featureIdentifier);
+									else
+									{
+										protocolIdentifier = protocolIdentifier + '.'
+												+ subSubSubSection.replace(",", "");
+										protocolName = subSubSubSection;
+
+										protocol = subProtocol;
+										subProtocol = protocolMap.get(protocolIdentifier);
+										if (subProtocol == null)
+										{
+											subProtocol = new Protocol(protocolIdentifier, protocolName);
+											protocolMap.put(protocolIdentifier, subProtocol);
+											protocol.addSubProtocol(subProtocol);
+										}
+
+										// end of the line, add feature
+										subProtocol.addFeatureIdentifier(featureIdentifier);
+									}
 								}
 							}
 						}
 					}
 				}
-			}
 
-			++rownr;
+				++rownr;
+			}
 		}
+	}
+
+	private Set<CohortTimePair> getCohortTimePairs(Tuple row, LifeLinesQuestionnaireMatrix matrix)
+	{
+		Set<CohortTimePair> cohortTypePairs = matrix != null ? matrix.get(row.getString(COL_GROUP),
+				row.getString(COL_CODE)) : null;
+
+		// fall back to existing information in translated data dictionary
+		if (cohortTypePairs == null)
+		{
+			if (matrix != null) logger.warn("missing questionnaire matrix entry for: " + row.getString(COL_GROUP) + " "
+					+ row.getString(COL_CODE));
+			String cohort = row.getString(COL_COHORT);
+			String time = row.getString(COL_TIME);
+			cohortTypePairs = Collections.singleton(new CohortTimePair(cohort, time));
+		}
+
+		return cohortTypePairs;
 	}
 
 	private boolean includeRow(Tuple row)
@@ -506,10 +539,10 @@ public class LifeLinesDataDictionarytoOMXConvertor
 		BasicConfigurator.configure();
 		logger.setLevel(Level.DEBUG);
 
-		if (args.length != 2)
+		if (args.length < 2 || args.length > 3)
 		{
-			System.err.println("usage: java " + LifeLinesDataDictionarytoOMXConvertor.class.getSimpleName()
-					+ " inputfile outputfile");
+			System.err.println("usage: java " + LifeLinesDataDictionaryToOmxConvertor.class.getSimpleName()
+					+ " inputfile outputfile <checklistfile>");
 			return;
 		}
 
@@ -519,7 +552,9 @@ public class LifeLinesDataDictionarytoOMXConvertor
 
 		FileInputStream fis = new FileInputStream(inFile);
 		FileOutputStream fos = new FileOutputStream(outFile);
-		new LifeLinesDataDictionarytoOMXConvertor().convert(fis, fos);
+		FileInputStream checklistFis = args.length == 3 ? new FileInputStream(new File(args[2])) : null;
+
+		new LifeLinesDataDictionaryToOmxConvertor().convert(fis, fos, checklistFis);
 	}
 
 }
