@@ -2,6 +2,8 @@ package org.molgenis.search;
 
 import java.util.List;
 
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.util.Entity;
 
@@ -13,7 +15,9 @@ import org.molgenis.util.Entity;
  */
 public interface SearchService
 {
-	void updateIndex(String documentName, Iterable<Entity> entities);
+	void indexDatabase(Database db) throws DatabaseException;
+
+	void updateIndex(String documentName, Iterable<? extends Entity> entities);
 
 	SearchResult search(SearchRequest request);
 

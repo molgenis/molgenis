@@ -3,6 +3,7 @@ package org.molgenis.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.molgenis.framework.db.QueryRule;
 
 public class SearchRequest
@@ -35,6 +36,12 @@ public class SearchRequest
 	public List<String> getFieldsToReturn()
 	{
 		return fieldsToReturn;
+	}
+
+	@Override
+	public String toString()
+	{
+		return ToStringBuilder.reflectionToString(this);
 	}
 
 }
