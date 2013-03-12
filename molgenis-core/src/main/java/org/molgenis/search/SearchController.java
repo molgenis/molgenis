@@ -1,5 +1,8 @@
 package org.molgenis.search;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
 
 import org.molgenis.framework.db.Database;
@@ -11,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -32,7 +34,7 @@ public class SearchController
 	@Autowired
 	private Database database;
 
-	@RequestMapping(method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<SearchResult> search(@RequestBody
 	SearchRequest request)
@@ -50,7 +52,7 @@ public class SearchController
 		return new ResponseEntity<SearchResult>(result, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/index", method = RequestMethod.GET)
+	@RequestMapping(value = "/index", method = GET)
 	@ResponseBody
 	public String indexDatabase() throws DatabaseException
 	{
