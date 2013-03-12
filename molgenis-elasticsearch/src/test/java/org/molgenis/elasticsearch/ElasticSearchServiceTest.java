@@ -35,7 +35,7 @@ public class ElasticSearchServiceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		searchService = new ElasticSearchService(node, "test");
+		searchService = new ElasticSearchService(node, "molgenis");
 	}
 
 	@BeforeClass

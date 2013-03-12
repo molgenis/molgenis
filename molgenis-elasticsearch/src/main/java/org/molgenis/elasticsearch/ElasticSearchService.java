@@ -15,6 +15,8 @@ import org.elasticsearch.node.Node;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -33,11 +35,7 @@ public class ElasticSearchService implements SearchService
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
 	private final String indexName;
 	private final Node node;
-	private final ResponseParser responseParser = new ResponseParser(REST_API_BASE_URL);// TODO
-																						// inject
-																						// or
-																						// make
-																						// configurable
+	private final ResponseParser responseParser = new ResponseParser(REST_API_BASE_URL);
 
 	public ElasticSearchService(Node node, String indexName)
 	{
@@ -98,7 +96,7 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void updateIndex(String documentName, Iterable<Entity> entities)
+	public void updateIndex(String documentName, Iterable<? extends Entity> entities)
 	{
 		LOG.info("Going to update index [" + indexName + "]");
 
@@ -130,6 +128,19 @@ public class ElasticSearchService implements SearchService
 		finally
 		{
 			client.close();
+		}
+	}
+
+	@Override
+	public void indexDatabase(Database db) throws DatabaseException
+	{
+		for (String entityName : db.getEntityNames())
+		{
+			System.out.println("Indexing:" + entityName);
+			Class<? extends Entity> clazz = db.getClassForName(entityName);
+			List<? extends Entity> entities = db.find(clazz);
+
+			updateIndex(entityName, entities);
 		}
 	}
 

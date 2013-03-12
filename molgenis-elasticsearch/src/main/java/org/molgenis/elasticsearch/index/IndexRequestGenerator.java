@@ -37,7 +37,7 @@ public class IndexRequestGenerator
 		this.indexName = indexName;
 	}
 
-	public BulkRequestBuilder buildIndexRequest(String documentName, Iterable<Entity> entities)
+	public BulkRequestBuilder buildIndexRequest(String documentName, Iterable<? extends Entity> entities)
 	{
 		BulkRequestBuilder bulkRequest = client.prepareBulk();
 
