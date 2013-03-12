@@ -11,7 +11,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.node.Node;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
@@ -34,14 +33,14 @@ public class ElasticSearchService implements SearchService
 	public static final String REST_API_BASE_URL = "/api/v1";
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
 	private final String indexName;
-	private final Node node;
+	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser(REST_API_BASE_URL);
 
-	public ElasticSearchService(Node node, String indexName)
+	public ElasticSearchService(Client client, String indexName)
 	{
-		if (node == null)
+		if (client == null)
 		{
-			throw new IllegalArgumentException("Node is null");
+			throw new IllegalArgumentException("Client is null");
 		}
 
 		if (indexName == null)
@@ -50,7 +49,7 @@ public class ElasticSearchService implements SearchService
 		}
 
 		this.indexName = indexName;
-		this.node = node;
+		this.client = client;
 	}
 
 	@Override
@@ -70,29 +69,23 @@ public class ElasticSearchService implements SearchService
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
-		Client client = node.client();
-		try
-		{
-			SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
-			SearchRequestBuilder requestBuilder = generator.buildSearchRequest(request.getEntityName(), searchType,
-					request.getQueryRules(), request.getFieldsToReturn());
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("SearchRequestBuilder:" + requestBuilder);
-			}
 
-			SearchResponse response = requestBuilder.execute().actionGet();
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("SearchResponse:" + response);
-			}
-
-			return responseParser.parseSearchResponse(response);
-		}
-		finally
+		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
+		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(request.getEntityName(), searchType,
+				request.getQueryRules(), request.getFieldsToReturn());
+		if (LOG.isDebugEnabled())
 		{
-			client.close();
+			LOG.debug("SearchRequestBuilder:" + requestBuilder);
 		}
+
+		SearchResponse response = requestBuilder.execute().actionGet();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("SearchResponse:" + response);
+		}
+
+		return responseParser.parseSearchResponse(response);
+
 	}
 
 	@Override
@@ -100,48 +93,44 @@ public class ElasticSearchService implements SearchService
 	{
 		LOG.info("Going to update index [" + indexName + "]");
 
-		Client client = node.client();
-		try
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+
+		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentName, entities);
+		LOG.info("Request created");
+		if (LOG.isDebugEnabled())
 		{
-			IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
-
-			BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentName, entities);
-			LOG.info("Request created");
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("BulkRequest:" + request);
-			}
-
-			BulkResponse response = request.execute().actionGet();
-			LOG.info("Request done");
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("BulkResponse:" + response);
-			}
-
-			if (response.hasFailures())
-			{
-				throw new ElasticSearchException(response.buildFailureMessage());
-			}
-
+			LOG.debug("BulkRequest:" + request);
 		}
-		finally
+
+		BulkResponse response = request.execute().actionGet();
+		LOG.info("Request done");
+		if (LOG.isDebugEnabled())
 		{
-			client.close();
+			LOG.debug("BulkResponse:" + response);
 		}
+
+		if (response.hasFailures())
+		{
+			throw new ElasticSearchException(response.buildFailureMessage());
+		}
+
 	}
 
 	@Override
 	public void indexDatabase(Database db) throws DatabaseException
 	{
+		LOG.info("Start indexing database");
+
 		for (String entityName : db.getEntityNames())
 		{
-			System.out.println("Indexing:" + entityName);
+			LOG.info("Indexing [" + entityName + "]");
 			Class<? extends Entity> clazz = db.getClassForName(entityName);
 			List<? extends Entity> entities = db.find(clazz);
 
 			updateIndex(entityName, entities);
 		}
+
+		LOG.info("Indexing ready");
 	}
 
 }

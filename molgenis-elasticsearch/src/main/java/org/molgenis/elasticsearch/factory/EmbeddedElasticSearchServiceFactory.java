@@ -5,9 +5,9 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.node.Node;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.search.SearchServiceFactory;
 
@@ -23,7 +23,7 @@ public class EmbeddedElasticSearchServiceFactory implements SearchServiceFactory
 	private static final Logger LOG = Logger.getLogger(EmbeddedElasticSearchServiceFactory.class);
 	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
 	private static final String DEFAULT_INDEX_NAME = "molgenis";
-	private Node node;
+	private Client client;
 	private final String indexName;
 
 	public EmbeddedElasticSearchServiceFactory()
@@ -31,9 +31,9 @@ public class EmbeddedElasticSearchServiceFactory implements SearchServiceFactory
 		this(DEFAULT_INDEX_NAME);
 
 		Settings settings = ImmutableSettings.settingsBuilder().loadFromClasspath(CONFIG_FILE_NAME).build();
-		System.out.println("DATAPATH:" + settings.get("path.data"));
-		node = nodeBuilder().settings(settings).local(true).node();
-		LOG.info("Embedded elasticsearch server started");
+		client = nodeBuilder().settings(settings).local(true).node().client();
+
+		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
 
 	public EmbeddedElasticSearchServiceFactory(String indexName)
@@ -44,13 +44,13 @@ public class EmbeddedElasticSearchServiceFactory implements SearchServiceFactory
 	@Override
 	public ElasticSearchService create()
 	{
-		return new ElasticSearchService(node, indexName);
+		return new ElasticSearchService(client, indexName);
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		node.close();
+		client.close();
 		LOG.info("Elastic searc server stopped");
 	}
 

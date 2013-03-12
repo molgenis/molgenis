@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.node.Node;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.search.Hit;
@@ -29,29 +29,29 @@ import org.testng.annotations.Test;
 
 public class ElasticSearchServiceTest
 {
-	private Node node;
+	private Client client;
 	private ElasticSearchService searchService;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		searchService = new ElasticSearchService(node, "molgenis");
+		searchService = new ElasticSearchService(client, "molgenis");
 	}
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		Settings settings = ImmutableSettings.settingsBuilder().loadFromClasspath("elasticsearchtest.yml").build();
-		node = nodeBuilder().settings(settings).local(true).node();
+		client = nodeBuilder().settings(settings).local(true).node().client();
 
 		// We wait now for the yellow (or green) status
-		node.client().admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+		client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
 	}
 
 	@AfterClass
 	public void afterClass()
 	{
-		node.close();
+		client.close();
 	}
 
 	@Test
@@ -154,7 +154,7 @@ public class ElasticSearchServiceTest
 
 	private void waitForIndexUpdate()
 	{
-		node.client().admin().indices().prepareRefresh().execute().actionGet();
+		client.admin().indices().prepareRefresh().execute().actionGet();
 	}
 
 	private class TestEntity implements Entity
