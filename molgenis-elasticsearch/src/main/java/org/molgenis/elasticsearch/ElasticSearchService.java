@@ -140,7 +140,7 @@ public class ElasticSearchService implements SearchService
 			e.printStackTrace();
 		}
 
-		LOG.info("Indexing started");
+		LOG.info("Indexing done");
 	}
 
 }
