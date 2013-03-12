@@ -26,5 +26,6 @@ public class WebAppInitializer implements WebApplicationInitializer
 		// molgenis
 		Dynamic frontControllerServlet = servletContext.addServlet("front-controller", new FrontController());
 		frontControllerServlet.addMapping("*.do");
+
 	}
 }

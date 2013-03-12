@@ -2,6 +2,8 @@ package org.molgenis.search;
 
 import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
 
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,9 @@ public class SearchController
 	@Autowired
 	private SearchService searchService;
 
+	@Autowired
+	private Database database;
+
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json")
 	@ResponseBody
 	public ResponseEntity<SearchResult> search(@RequestBody
@@ -43,6 +48,14 @@ public class SearchController
 		}
 
 		return new ResponseEntity<SearchResult>(result, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/index", method = RequestMethod.GET)
+	@ResponseBody
+	public String indexDatabase() throws DatabaseException
+	{
+		searchService.indexDatabase(database);
+		return "Indexing done";
 	}
 
 }
