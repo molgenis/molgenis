@@ -28,3 +28,4 @@ public class WebAppInitializer implements WebApplicationInitializer
 		frontControllerServlet.setLoadOnStartup(2);
 	}
 }
+

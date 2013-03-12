@@ -1,9 +1,11 @@
 package org.molgenis.lifelines;
 
+
 import java.util.List;
 
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
+
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,6 +18,20 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import app.DatabaseConfig;
+import java.util.List;
+
+import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 
 @Configuration
 @EnableWebMvc
@@ -24,6 +40,7 @@ import app.DatabaseConfig;
 { DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
+
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
@@ -49,3 +66,4 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		}
 	}
 }
+
