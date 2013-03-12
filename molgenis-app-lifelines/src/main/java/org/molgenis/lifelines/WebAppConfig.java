@@ -23,6 +23,8 @@ import java.util.List;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.security.Login;
+import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -69,6 +71,13 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 			return "forward:molgenis.do";
 		}
 
+	}
+
+	@Bean
+	@Scope("session")
+	public Login login()
+	{
+		return new SimpleLogin();
 	}
 }
 
