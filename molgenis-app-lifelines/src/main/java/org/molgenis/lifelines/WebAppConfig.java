@@ -21,10 +21,14 @@ import app.DatabaseConfig;
 import java.util.List;
 
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -64,6 +68,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		{
 			return "forward:molgenis.do";
 		}
+
 	}
 }
 
