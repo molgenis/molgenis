@@ -1,0 +1,38 @@
+<html>
+<head>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script>
+		function submit() {
+				
+			$.ajax({
+				contentType: "application/json",
+				dataType: "text",
+				method: "POST",
+				url: "/rs/search",
+				data: $('#request').val(),
+				success: function( data ) {
+						$('#response').val(data);
+					}
+				});
+			
+		}
+	</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<td><textarea cols=75 rows=40 id="request"></textarea><br /><td>
+			<td><textarea cols=75 rows=40 id="response"></textarea></td>
+		</tr>
+		<tr>
+			<td colspan="2"><button onclick="submit()">EXECUTE QUERY </button></td>
+		</tr>
+	</table>
+
+
+	
+	
+
+</body>
+</html>
