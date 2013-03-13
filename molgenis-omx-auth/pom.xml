@@ -75,6 +75,7 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

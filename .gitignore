@@ -3,3 +3,4 @@ target/
 .project
 .classpath
 git.properties
+data/
