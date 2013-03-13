@@ -8,8 +8,6 @@ import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUES
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -60,10 +58,10 @@ public class SearchController
 
 	@RequestMapping(value = "/index", method = GET)
 	@ResponseBody
-	public String indexDatabase(HttpServletRequest request, HttpServletResponse response) throws DatabaseException,
-			IOException, ServletException
+	public String indexDatabase() throws DatabaseException, IOException, ServletException
 	{
 		searchService.indexDatabase(database);
 		return "Indexing done";
 	}
+
 }
