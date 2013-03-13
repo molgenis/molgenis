@@ -39,6 +39,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 
+
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.molgenis")
@@ -51,6 +52,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		converters.add(new GsonHttpMessageConverter());
+	}
+	
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer)
+	{
+		configurer.enable("front-controller");
 	}
 
 	@Override
@@ -73,11 +80,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 
 	}
 
-	@Bean
-	@Scope("session")
-	public Login login()
-	{
-		return new SimpleLogin();
-	}
+
 }
 
