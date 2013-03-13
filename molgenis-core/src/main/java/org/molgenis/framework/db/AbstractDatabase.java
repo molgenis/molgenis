@@ -27,6 +27,7 @@ import org.molgenis.util.tuple.CaseInsensitiveKeyValueTuple;
 import org.molgenis.util.tuple.EntityTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractDatabase implements Database
 {
@@ -661,6 +662,7 @@ public abstract class AbstractDatabase implements Database
 		return login;
 	}
 
+	@Autowired
 	@Override
 	public void setLogin(Login login)
 	{
