@@ -5,6 +5,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +60,10 @@ public class SearchController
 
 	@RequestMapping(value = "/index", method = GET)
 	@ResponseBody
-	public String indexDatabase() throws DatabaseException
+	public String indexDatabase(HttpServletRequest request, HttpServletResponse response) throws DatabaseException,
+			IOException, ServletException
 	{
 		searchService.indexDatabase(database);
 		return "Indexing done";
 	}
-
 }

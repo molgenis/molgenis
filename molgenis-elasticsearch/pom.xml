@@ -9,9 +9,9 @@
 	<packaging>jar</packaging>
 	
 	<dependencies>
-		<dependency>
+        <dependency>
          	<groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core</artifactId>
+            <artifactId>molgenis-search</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
