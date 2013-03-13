@@ -1,8 +1,11 @@
 package org.molgenis.ngs.importer;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.molgenis.framework.db.Database;
@@ -14,6 +17,7 @@ import org.molgenis.omx.ngs.Machine;
 import org.molgenis.omx.ngs.NgsUser;
 import org.molgenis.omx.ngs.PrepKit;
 import org.molgenis.omx.ngs.Project;
+import org.molgenis.omx.ngs.Sample;
 import org.molgenis.omx.ngs.SampleBarcode;
 import org.molgenis.util.tuple.Tuple;
 
@@ -37,46 +41,67 @@ public class ImportWorksheet
 		Map<String, Machine> machines = new LinkedHashMap<String, Machine>();
 		Map<String, Flowcell> flowcells = new LinkedHashMap<String, Flowcell>();
 		Map<String, Project> projects = new LinkedHashMap<String, Project>();
+		Map<String, Sample> samples = new LinkedHashMap<String, Sample>();
 
 		// Import sheet
 		TupleReader reader = new CsvReader(csv);
 
 		for (Tuple row : reader)
 		{
-			// NgsUser
+			// NgsUser customer
 			if (!row.isNull("contact"))
 			{
 				NgsUser u = new NgsUser();
-				// customer
-
 				// get the name and email from the contact value
-				String[] nameEmailParts = row.getString("contact").split("<");
-				u.setUserName(nameEmailParts[0].toLowerCase().trim());
-				if (nameEmailParts[1] != null)
+				String[] contactParts = row.getString("contact").split("<");
+				u.setUserName(contactParts[0].toLowerCase().trim());
+				if (contactParts[1] != null)
 				{
-					u.setUserEmail(nameEmailParts[1].toLowerCase().trim().replace(">", ""));
+					u.setUserEmail(contactParts[1].toLowerCase().trim().replace(">", ""));
 				}
-
-				// u.setUserName(row.getString("contact"));
 				u.setUserRole("Customer");
 				u.setUserGroup("None");
+				users.put(u.getUserName(), u);
+			}
+			if (!row.isNull("DataShippedTo"))
+			{
+				NgsUser u = new NgsUser();
+				String[] dataShippedToParts = row.getString("DataShippedTo").split("<");
+				u.setUserName(dataShippedToParts[0].toLowerCase().trim());
+				u.setUserRole("Customer");
+				u.setUserGroup("None");
+				users.put(u.getUserName(), u);
+			}
 
-				// check if exists, and same
-				// NgsUser exist = users.get(u.getUserName().toLowerCase());
-				// if (exist != null && !exist.equals(u))
-				// {
-				// throw new Exception("Inconsistent: " + u + "!=" + exist);
-				// }
-				// else
-				// {
-				// users.put(u.getUserName().toLowerCase(), u);
-				// }
+			// NgsUser GAF
+			if (!row.isNull("GAF_QC_Name"))
+			{
+				NgsUser u = new NgsUser();
+				String[] gafQcNameParts = row.getString("GAF_QC_Name").split("<");
+				u.setUserName(gafQcNameParts[0].toLowerCase().trim());
+				u.setUserRole("Analist");
+				u.setUserGroup("GAF");
+				users.put(u.getUserName(), u);
+			}
 
-				users.put(u.getUserName().toLowerCase(), u);
-
-				// GAF
-
-				// GCC
+			// NgsUser GCC
+			if (!row.isNull("GCC_QC_Name"))
+			{
+				NgsUser u = new NgsUser();
+				String[] gccQcNameParts = row.getString("GCC_QC_Name").split("<");
+				u.setUserName(gccQcNameParts[0].toLowerCase().trim());
+				u.setUserRole("Bioinformatician");
+				u.setUserGroup("GCC");
+				users.put(u.getUserName(), u);
+			}
+			if (!row.isNull("DataShippedBy"))
+			{
+				NgsUser u = new NgsUser();
+				String[] dataShippedByParts = row.getString("DataShippedBy").split("<");
+				u.setUserName(dataShippedByParts[0].toLowerCase().trim());
+				u.setUserRole("Bioinformatician");
+				u.setUserGroup("GCC");
+				users.put(u.getUserName(), u);
 			}
 
 			// SampleBarcode
@@ -87,8 +112,8 @@ public class ImportWorksheet
 				// SampleBarcodeName
 				if (row.getString("barcode") != null)
 				{
-					if (row.getString("barcode").toLowerCase().trim().contains("none")
-							|| row.getString("barcode").toLowerCase().trim().contains("error"))
+					if (row.getString("barcode").toLowerCase().trim().equals("none")
+							|| row.getString("barcode").toLowerCase().trim().equals("error"))
 					{
 						sb.setSampleBarcodeName("None");
 					}
@@ -105,8 +130,8 @@ public class ImportWorksheet
 				// BarcodeType
 				if (row.getString("barcodeType") != null)
 				{
-					if (row.getString("barcodeType").toLowerCase().trim().contains("none")
-							|| row.getString("barcodeType").toLowerCase().trim().contains("error"))
+					if (row.getString("barcodeType").toLowerCase().trim().equals("none")
+							|| row.getString("barcodeType").toLowerCase().trim().equals("error"))
 					{
 						sb.setBarcodeType("None");
 					}
@@ -130,7 +155,7 @@ public class ImportWorksheet
 
 				if (row.getString("capturingKit") != null)
 				{
-					if (row.getString("capturingKit").toLowerCase().trim().contains("none"))
+					if (row.getString("capturingKit").toLowerCase().trim().equals("none"))
 					{
 						ck.setCapturingKitName("None");
 					}
@@ -160,14 +185,14 @@ public class ImportWorksheet
 
 				if (row.getString("prepKit") != null)
 				{
-					if (row.getString("prepKit").toLowerCase().trim().contains("none")
-							|| row.getString("prepKit").toLowerCase().trim().contains("_"))
+					if (row.getString("prepKit").toLowerCase().trim().equals("none")
+							|| row.getString("prepKit").toLowerCase().trim().equals("_"))
 					{
 						pk.setPrepKitName("None");
 					}
 					else
 					{
-						pk.setPrepKitName(row.getString("prepKit").toUpperCase());
+						pk.setPrepKitName(row.getString("prepKit").toUpperCase().trim());
 					}
 				}
 				else
@@ -185,7 +210,7 @@ public class ImportWorksheet
 
 				if (row.getString("sequencer") != null)
 				{
-					if (row.getString("sequencer").toLowerCase().trim().contains("none"))
+					if (row.getString("sequencer").toLowerCase().trim().equals("none"))
 					{
 						m.setMachineName("None");
 					}
@@ -210,18 +235,33 @@ public class ImportWorksheet
 				f.setMachine_MachineName(row.getString("sequencer"));
 				f.setRun(row.getString("run"));
 
-				// sequencingStartDate notation should be as 110218 "yymmdd"
-				// TODO: Some values exist like 10429 "yymdd" :/
-				// Date runDate = null;
-				// if (row.getString("sequencingStartDate") != null)
-				// {
-				// char[] d =
-				// row.getString("sequencingStartDate").trim().toCharArray();
-				// runDate = new SimpleDateFormat("MM/dd/yy",
-				// Locale.ENGLISH).parse(d[2] + d[3] + "/" + d[4] + d[5]
-				// + "/" + d[0] + d[1]);
-				// }
-				// f.setRunDate(runDate);
+				// RunDate
+				// sequencingStartDate notation should be as 110218 "yymmdd",
+				// some values exist like 10429 "yymdd"
+				Date runDate = null;
+				if (row.getString("sequencingStartDate") != null)
+				{
+					if (!row.getString("sequencingStartDate").toLowerCase().trim().equals("unknown"))
+					{
+						char[] d = row.getString("sequencingStartDate").trim().toCharArray();
+						if (d.length == 8)
+						{
+							runDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1] + d[2]
+									+ d[3] + "/" + d[4] + d[5] + "/" + d[6] + d[7]);
+						}
+						if (d.length == 6)
+						{
+							runDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/"
+									+ d[2] + d[3] + "/" + d[4] + d[5]);
+						}
+						if (d.length == 5)
+						{
+							runDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1]
+									+ "/0" + d[2] + "/" + d[3] + d[4]);
+						}
+					}
+				}
+				f.setRunDate(runDate);
 
 				flowcells.put(f.getFlowcellName(), f);
 			}
@@ -231,14 +271,15 @@ public class ImportWorksheet
 			{
 				Project p = new Project();
 
-				p.setProjectName(row.getString("project"));
+				// ProjectName
+				p.setProjectName(row.getString("project").toLowerCase().trim());
+
 				// get the name from the contact value
 				String contactName = "";
 				if (row.getString("contact") != null)
 				{
 					String[] nameEmailParts = row.getString("contact").split("<");
 					contactName = nameEmailParts[0].toLowerCase().trim();
-					// u.setUserName(nameEmailParts[0].toLowerCase().trim());
 				}
 				p.setProjectCustomer_UserName(contactName);
 
@@ -251,12 +292,82 @@ public class ImportWorksheet
 					p.setSeqType("Unknown");
 				}
 
-				// Cast existing values into the corresponding boolean values
+				// ProjectPlannedFinishDate
+				Date projectPlannedFinishDate = null;
+				if (row.getString("TargetDateShipment") != null)
+				{
+					if (!row.getString("TargetDateShipment").toLowerCase().trim().equals("unknown"))
+					{
+						char[] d = row.getString("TargetDateShipment").trim().toCharArray();
+						if (d.length == 8)
+						{
+							projectPlannedFinishDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0]
+									+ d[1] + d[2] + d[3] + "/" + d[4] + d[5] + "/" + d[6] + d[7]);
+						}
+						if (d.length == 6)
+						{
+							projectPlannedFinishDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20"
+									+ d[0] + d[1] + "/" + d[2] + d[3] + "/" + d[4] + d[5]);
+						}
+						if (d.length == 5)
+						{
+							projectPlannedFinishDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20"
+									+ d[0] + d[1] + "/0" + d[2] + "/" + d[3] + d[4]);
+						}
+					}
+				}
+				p.setProjectPlannedFinishDate(projectPlannedFinishDate);
+
+				// ResultShippedUser (how to get the id of the user)
+				String dataShippedByName = "";
+				if (row.getString("DataShippedBy") != null)
+				{
+					String[] dataShippedByNameParts = row.getString("DataShippedBy").split("<");
+					dataShippedByName = dataShippedByNameParts[0].toLowerCase().trim();
+				}
+				p.setResultShippedUser_UserName(dataShippedByName);
+
+				// ResultShippedTo
+				String dataShippedToName = "";
+				if (row.getString("DataShippedTo") != null)
+				{
+					String[] dataShippedToNameParts = row.getString("DataShippedTo").split("<");
+					dataShippedToName = dataShippedToNameParts[0].toLowerCase().trim();
+				}
+				p.setResultShippedTo_UserName(dataShippedToName);
+
+				// ResultShippedDate
+				Date resultShippedDate = null;
+				if (row.getString("DataShippedDate") != null)
+				{
+					if (!row.getString("DataShippedDate").toLowerCase().trim().equals("unknown"))
+					{
+						char[] d = row.getString("DataShippedDate").trim().toCharArray();
+						if (d.length == 8)
+						{
+							resultShippedDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1]
+									+ d[2] + d[3] + "/" + d[4] + d[5] + "/" + d[6] + d[7]);
+						}
+						if (d.length == 6)
+						{
+							resultShippedDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0]
+									+ d[1] + "/" + d[2] + d[3] + "/" + d[4] + d[5]);
+						}
+						if (d.length == 5)
+						{
+							resultShippedDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0]
+									+ d[1] + "/0" + d[2] + "/" + d[3] + d[4]);
+						}
+					}
+				}
+				p.setResultShippedDate(resultShippedDate);
+
+				// GccAnalysis
 				boolean gccAnalysis = false;
 				if (row.getString("GCC_Analysis") != null)
 				{
 					String gccAnalysisValue = row.getString("GCC_Analysis");
-					if (gccAnalysisValue.toLowerCase().trim().contains("yes"))
+					if (gccAnalysisValue.toLowerCase().trim().equals("yes"))
 					{
 						gccAnalysis = true;
 					}
@@ -267,6 +378,83 @@ public class ImportWorksheet
 			}
 
 			// Sample
+			if (!row.isNull("internalSampleID"))
+			{
+				Sample s = new Sample();
+
+				// InternalId
+				if (row.getString("internalSampleID") != null)
+				{
+					s.setInternalId(row.getString("internalSampleID"));
+				}
+
+				// ExternalId
+				if (row.getString("externalSampleID") != null)
+				{
+					s.setExternalId(row.getString("externalSampleID"));
+				}
+
+				// SampleType
+				s.setSampleType("DNA");
+
+				// SampleComment
+				if (row.getString("labStatusComments") != null)
+				{
+					s.setSampleComment(row.getString("labStatusComments"));
+				}
+
+				// ProjectId
+				if (row.getString("project") != null)
+				{
+					s.setProjectId_ProjectName(row.getString("project").toLowerCase().trim());
+				}
+
+				// ArrayFile
+				if (row.getString("arrayFile") != null)
+				{
+					s.setArrayFile(row.getString("arrayFile"));
+				}
+
+				// ArrayID
+				if (row.getString("arrayID") != null)
+				{
+					s.setArrayId(row.getString("arrayID"));
+				}
+
+				// LabStatus
+				if (row.getString("labStatusPhase") != null)
+				{
+					s.setLabStatus(row.getString("labStatusPhase"));
+				}
+
+				// PrepKit
+				if (row.getString("prepKit") != null)
+				{
+					if (row.getString("prepKit").toLowerCase().trim().equals("none")
+							|| row.getString("prepKit").toLowerCase().trim().equals("_"))
+					{
+						s.setPrepKit_PrepKitName("None");
+					}
+					else
+					{
+						s.setPrepKit_PrepKitName(row.getString("prepKit").toUpperCase().trim());
+					}
+				}
+
+				// QcWetMet ?
+
+				// QcWetUser ?
+
+				// QcWetDate ?
+
+				// QcDryMet
+
+				// QcDryUser
+
+				// QcDryDate
+
+				samples.put(s.getInternalId(), s);
+			}
 
 			// FlowcellLaneSampleBarcode
 
@@ -274,6 +462,10 @@ public class ImportWorksheet
 		reader.close();
 
 		// Show all collected values
+		for (Sample s : samples.values())
+		{
+			System.out.println(s);
+		}
 		for (Project p : projects.values())
 		{
 			System.out.println(p);
@@ -312,6 +504,7 @@ public class ImportWorksheet
 			// clean old stuff (reverse order of foreign keys)
 			if (debug)
 			{
+				db.remove(db.find(Sample.class));
 				db.remove(db.find(Project.class));
 				db.remove(db.find(Flowcell.class));
 				db.remove(db.find(Machine.class));
@@ -330,11 +523,12 @@ public class ImportWorksheet
 			System.out.println("Imported " + db.add(new ArrayList<Machine>(machines.values())) + " Machines");
 			System.out.println("Imported " + db.add(new ArrayList<Flowcell>(flowcells.values())) + " Flowcell");
 			System.out.println("Imported " + db.add(new ArrayList<Project>(projects.values())) + " Project");
+			System.out.println("Imported " + db.add(new ArrayList<Sample>(samples.values())) + " Sample");
 
 			db.commitTx();
 			db.close();
 
-			System.out.println("Import completed succefully.");
+			System.out.println("Import completed succesfully.");
 		}
 		catch (Exception e)
 		{
@@ -345,6 +539,12 @@ public class ImportWorksheet
 
 	private static void importSequencingProjects(File csv, boolean debug) throws Exception
 	{
+		// From sheet GAFSequencingProjects
 
+		// ProjectComment
+		// ProjectAnalist(s)
+		// LaneAmount
+		// SampleAmount
+		// DeclarationNr
 	}
 }
