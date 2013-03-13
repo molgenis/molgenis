@@ -29,7 +29,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.util.Assert;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,13 +42,10 @@ import com.google.gson.JsonSyntaxException;
  */
 public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 {
-
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-
-	private Gson gson;
-
+	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssz";
+	private final Gson gson;
 	private Type type = null;
-
 	private boolean prefixJson = false;
 
 	/**
@@ -58,18 +54,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 */
 	public GsonHttpMessageConverter()
 	{
-		this(new Gson());
-	}
-
-	/**
-	 * Construct a new {@code GsonHttpMessageConverter}.
-	 * 
-	 * @param serializeNulls
-	 *            true to generate json for null values
-	 */
-	public GsonHttpMessageConverter(boolean serializeNulls)
-	{
-		this(serializeNulls ? new GsonBuilder().serializeNulls().create() : new Gson());
+		this(new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).setPrettyPrinting().disableHtmlEscaping().create());
 	}
 
 	/**
@@ -81,22 +66,6 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	public GsonHttpMessageConverter(Gson gson)
 	{
 		super(new MediaType("application", "json", DEFAULT_CHARSET));
-		setGson(gson);
-	}
-
-	/**
-	 * Sets the {@code Gson} for this view. If not set, a default
-	 * {@link Gson#Gson() Gson} is used.
-	 * <p>
-	 * Setting a custom-configured {@code Gson} is one way to take further
-	 * control of the JSON serialization process.
-	 * 
-	 * @throws IllegalArgumentException
-	 *             if gson is null
-	 */
-	public void setGson(Gson gson)
-	{
-		Assert.notNull(gson, "'gson' must not be null");
 		this.gson = gson;
 	}
 

@@ -21,10 +21,11 @@ public class WebAppInitializer implements WebApplicationInitializer
 		// spring
 		Dynamic dispatcherServlet = servletContext.addServlet("dispatcher", new DispatcherServlet(ctx));
 		dispatcherServlet.setLoadOnStartup(1);
-		dispatcherServlet.addMapping("/rs/*");
+		dispatcherServlet.addMapping("/api/*");
 
 		// molgenis
 		Dynamic frontControllerServlet = servletContext.addServlet("front-controller", new FrontController());
+		frontControllerServlet.setLoadOnStartup(2);
 		frontControllerServlet.addMapping("*.do");
 
 	}
