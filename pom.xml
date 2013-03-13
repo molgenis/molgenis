@@ -303,6 +303,7 @@
 		<module>molgenis-app-cbm</module>
 		<module>molgenis-app-gids</module>
 		<module>molgenis-compute-core</module>
+		<module>molgenis-search</module>
 		<module>molgenis-elasticsearch</module>
 	</modules>
 </project>
