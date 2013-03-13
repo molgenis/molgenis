@@ -121,23 +121,16 @@ public class ElasticSearchService implements SearchService
 	{
 		LOG.info("Start indexing database");
 
-		try
+		for (Class<? extends Entity> clazz : db.getEntityClasses())
 		{
-			for (Class<? extends Entity> clazz : db.getEntityClasses())
+			String simpleName = clazz.getSimpleName();
+			List<? extends Entity> entities = db.find(clazz);
+			if ((entities != null) && !entities.isEmpty())
 			{
-				String simpleName = clazz.getSimpleName();
-				List<? extends Entity> entities = db.find(clazz);
-				if ((entities != null) && !entities.isEmpty())
-				{
-					LOG.info("Indexing [" + simpleName + "]. Count=" + entities.size());
+				LOG.info("Indexing [" + simpleName + "]. Count=" + entities.size());
 
-					updateIndex(simpleName, db.find(clazz));
-				}
+				updateIndex(simpleName, db.find(clazz));
 			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
 		}
 
 		LOG.info("Indexing done");
