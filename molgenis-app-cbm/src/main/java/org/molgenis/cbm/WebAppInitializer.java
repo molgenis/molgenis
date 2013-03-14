@@ -1,4 +1,4 @@
-package org.molgenis.lifelines;
+package org.molgenis.cbm;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
