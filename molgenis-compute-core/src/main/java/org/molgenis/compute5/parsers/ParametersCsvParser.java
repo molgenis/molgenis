@@ -4,15 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.xmlbeans.impl.tool.Extension.Param;
 import org.molgenis.compute5.generators.TupleUtils;
 import org.molgenis.compute5.model.Parameters;
 import org.molgenis.io.csv.CsvReader;
@@ -135,9 +135,17 @@ public class ParametersCsvParser
 			// merge new paramFileSet with current one
 			paramFileSet.addAll(newParamFileSet);
 
+			System.out.println(">> VOOR");
+			for (Tuple t : tupleLst)
+				System.out.println(">> " + t);
+
 			// expand tupleLst on col's with lists/iterators (except
 			// 'parameters')
-			System.err.println(">> TO DO: Implement 'expand'");
+			tupleLst = expand(tupleLst);
+
+			System.out.println(">> NA EXPAND");
+			for (Tuple t : tupleLst)
+				System.out.println(">> " + t);
 
 			// join on overlapping col's (except 'parameters')
 			targets = join(targets, tupleLst);
@@ -147,6 +155,86 @@ public class ParametersCsvParser
 
 			// parse rest of param files
 			return parseParamFiles(targets, paramFileSet);
+		}
+	}
+
+	/**
+	 * Expand tupleLst
+	 * 
+	 * @param tupleLst
+	 */
+	private static List<Tuple> expand(List<Tuple> tupleLst)
+	{
+		// all expanded tuples
+		List<Tuple> resultLst = new ArrayList<Tuple>();
+
+		for (Tuple t : tupleLst)
+		{
+			// expanded tuples for this tuple
+			List<WritableTuple> expandedTupleLst = new ArrayList<WritableTuple>();
+			expandedTupleLst.add(new KeyValueTuple(t));
+
+			for (String col : t.getColNames())
+			{
+				if (col.equals(Parameters.PARAMETER_COLUMN)) continue;
+
+				List<String> values = asList(t, col);
+
+				// expand each of the tuples in expandedTupleLst with values in
+				// this column
+				List<WritableTuple> expandedTupleLstTmp = new ArrayList<WritableTuple>();
+				for (WritableTuple wt : expandedTupleLst)
+				{
+					for (String v : values)
+					{
+						// expanded wt
+						WritableTuple ewt = new KeyValueTuple(wt);
+						ewt.set(col, v);
+						expandedTupleLstTmp.add(ewt);
+					}
+				}
+
+				expandedTupleLst.clear();
+				expandedTupleLst.addAll(expandedTupleLstTmp);
+			}
+
+			resultLst.addAll(expandedTupleLst);
+		}
+
+		return resultLst;
+	}
+
+	private static List<String> asList(Tuple t, String col)
+	{
+		String s = t.getString(col);
+
+		if (col.equals("day"))
+		{
+			System.out.println(">> " + s);
+		}
+
+		Pattern pattern = Pattern.compile("([+-]?[0-9]+)\\.\\.([+-]?[0-9]+)");
+		Matcher matcher = pattern.matcher(s);
+
+		// first try as sequence, eg 3..5 (meaning 3, 4, 5)
+		if (matcher.find())
+		{
+			List<String> seq = new ArrayList<String>();
+			int first = Integer.parseInt(matcher.group(1));
+			int second = Integer.parseInt(matcher.group(2));
+			int from = Math.min(first, second);
+			int to = Math.max(first, second);
+
+			for (Integer i = from; i <= to; i++)
+				seq.add(i.toString());
+
+			return seq;
+		}
+		else
+		{
+			// no sequence, then return as list (values will be converted to
+			// list with only that value)
+			return t.getList(col);
 		}
 	}
 
