@@ -33,9 +33,10 @@ bash -c "echo '\documentclass[a4paper]{article}
 }
 \end{table}
 
-\end{document}' > chart.tex"
+\end{document}' > ${team}Chart.tex"
 
 mkdir -p chart
-pdflatex -output-directory=chart chart.tex
-pdflatex -output-directory=chart chart.tex
-open chart/chart.pdf
+pdflatex -output-directory=chart ${team}Chart.tex
+pdflatex -output-directory=chart ${team}Chart.tex
+
+open chart/${team}Chart.pdf
