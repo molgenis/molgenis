@@ -22,12 +22,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import app.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.molgenis")
-@Import(
-{ DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
+@Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 
