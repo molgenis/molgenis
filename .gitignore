@@ -3,4 +3,5 @@ target/
 .project
 .classpath
 git.properties
-molgenis-compute-core/src/main/resources/workflows/burnDownChart/out
+molgenis-compute-core/src/main/resources/workflows/burnDownChart/out/
+molgenis-compute-core/test-output/
