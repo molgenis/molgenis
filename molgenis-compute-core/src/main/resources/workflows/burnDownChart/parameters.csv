@@ -1,0 +1,2 @@
+parameters,workflow
+"/Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/dateParameters.csv,/Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/sprintParameters.csv",/Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/workflow.csv
