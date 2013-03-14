@@ -13,7 +13,7 @@ public class Parameters
 	public final static String ID_COLUMN = "user."+Task.TASKID_COLUMN;
 	public final static String WORKFLOW_COLUMN = "user.workflow";
 	public final static String WORKDIR_COLUMN = "user."+Task.WORKDIR_COLUMN;
-	public static final String PARAMETER_COLUMN = "parameters";
+	public static final String PARAMETER_COLUMN = "parameters"; // why no prefix 'user.'?
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
