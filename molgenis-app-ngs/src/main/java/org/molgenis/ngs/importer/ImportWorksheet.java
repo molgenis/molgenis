@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.molgenis.io.TupleReader;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.omx.ngs.CapturingKit;
 import org.molgenis.omx.ngs.Flowcell;
+import org.molgenis.omx.ngs.FlowcellLaneSampleBarcode;
 import org.molgenis.omx.ngs.Machine;
 import org.molgenis.omx.ngs.NgsUser;
 import org.molgenis.omx.ngs.PrepKit;
@@ -25,13 +27,12 @@ public class ImportWorksheet
 {
 	public static void main(String[] args) throws Exception
 	{
-		// GAFsheet SequencingSampleDetails
-		importSequencingSampleDetails(new File("D:/Downloads/MolgenisStuff/GAFSequencingSampleDetails.csv"), true);
-		// GAFsheet SequencingProjects
-		importSequencingProjects(new File("D:/Downloads/MolgenisStuff/GAFSequencingProjects.csv"), true);
+		// GAFsheet SequencingSampleDetails and GAFsheet SequencingProjects
+		importSequencingSampleDetails(new File("D:/Downloads/MolgenisStuff/GAFSequencingSampleDetails.csv"), new File(
+				"D:/Downloads/MolgenisStuff/GAFSequencingProjects.csv"), true);
 	}
 
-	private static void importSequencingSampleDetails(File csv, boolean debug) throws Exception
+	private static void importSequencingSampleDetails(File csvs, File csvp, boolean debug) throws Exception
 	{
 		// Declare collections to hold collected variables
 		Map<String, NgsUser> users = new LinkedHashMap<String, NgsUser>();
@@ -42,11 +43,13 @@ public class ImportWorksheet
 		Map<String, Flowcell> flowcells = new LinkedHashMap<String, Flowcell>();
 		Map<String, Project> projects = new LinkedHashMap<String, Project>();
 		Map<String, Sample> samples = new LinkedHashMap<String, Sample>();
+		Map<String, FlowcellLaneSampleBarcode> flowcellLaneSampleBarcodes = new LinkedHashMap<String, FlowcellLaneSampleBarcode>();
 
-		// Import sheet
-		TupleReader reader = new CsvReader(csv);
+		// Import sheets
+		TupleReader readers = new CsvReader(csvs);
+		TupleReader readerp = new CsvReader(csvp);
 
-		for (Tuple row : reader)
+		for (Tuple row : readers)
 		{
 			// NgsUser customer
 			if (!row.isNull("contact"))
@@ -113,7 +116,7 @@ public class ImportWorksheet
 				if (row.getString("barcode") != null)
 				{
 					if (row.getString("barcode").toLowerCase().trim().equals("none")
-							|| row.getString("barcode").toLowerCase().trim().equals("error"))
+							|| row.getString("barcode").toLowerCase().trim().contains("error"))
 					{
 						sb.setSampleBarcodeName("None");
 					}
@@ -131,7 +134,7 @@ public class ImportWorksheet
 				if (row.getString("barcodeType") != null)
 				{
 					if (row.getString("barcodeType").toLowerCase().trim().equals("none")
-							|| row.getString("barcodeType").toLowerCase().trim().equals("error"))
+							|| row.getString("barcodeType").toLowerCase().trim().contains("error"))
 					{
 						sb.setBarcodeType("None");
 					}
@@ -153,6 +156,7 @@ public class ImportWorksheet
 			{
 				CapturingKit ck = new CapturingKit();
 
+				// CapturingKitName
 				if (row.getString("capturingKit") != null)
 				{
 					if (row.getString("capturingKit").toLowerCase().trim().equals("none"))
@@ -169,12 +173,6 @@ public class ImportWorksheet
 					ck.setCapturingKitName("None");
 				}
 
-				// Debug
-				if (ck.getCapturingKitName() == "none")
-				{
-					System.out.println(ck.getCapturingKitName());
-				}
-
 				capturingKits.put(ck.getCapturingKitName(), ck);
 			}
 
@@ -183,6 +181,7 @@ public class ImportWorksheet
 			{
 				PrepKit pk = new PrepKit();
 
+				// PrepKitName
 				if (row.getString("prepKit") != null)
 				{
 					if (row.getString("prepKit").toLowerCase().trim().equals("none")
@@ -231,37 +230,26 @@ public class ImportWorksheet
 			if (!row.isNull("flowcell"))
 			{
 				Flowcell f = new Flowcell();
-				f.setFlowcellName(row.getString("flowcell"));
-				f.setMachine_MachineName(row.getString("sequencer"));
-				f.setRun(row.getString("run"));
 
-				// RunDate
-				// sequencingStartDate notation should be as 110218 "yymmdd",
-				// some values exist like 10429 "yymdd"
-				Date runDate = null;
-				if (row.getString("sequencingStartDate") != null)
+				// FlowcellName
+				if (row.getString("flowcell") != null)
 				{
-					if (!row.getString("sequencingStartDate").toLowerCase().trim().equals("unknown"))
-					{
-						char[] d = row.getString("sequencingStartDate").trim().toCharArray();
-						if (d.length == 8)
-						{
-							runDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1] + d[2]
-									+ d[3] + "/" + d[4] + d[5] + "/" + d[6] + d[7]);
-						}
-						if (d.length == 6)
-						{
-							runDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/"
-									+ d[2] + d[3] + "/" + d[4] + d[5]);
-						}
-						if (d.length == 5)
-						{
-							runDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1]
-									+ "/0" + d[2] + "/" + d[3] + d[4]);
-						}
-					}
+					f.setFlowcellName(row.getString("flowcell"));
 				}
-				f.setRunDate(runDate);
+
+				// MachineId
+				if (row.getString("sequencer") != null)
+				{
+					f.setMachine_MachineName(row.getString("sequencer"));
+				}
+
+				// Run
+				if (row.getString("run") != null)
+				{
+					f.setRun(row.getString("run"));
+				}
+				// RunDate
+				f.setRunDate(getFixedDate(row.getString("sequencingStartDate")));
 
 				flowcells.put(f.getFlowcellName(), f);
 			}
@@ -293,30 +281,7 @@ public class ImportWorksheet
 				}
 
 				// ProjectPlannedFinishDate
-				Date projectPlannedFinishDate = null;
-				if (row.getString("TargetDateShipment") != null)
-				{
-					if (!row.getString("TargetDateShipment").toLowerCase().trim().equals("unknown"))
-					{
-						char[] d = row.getString("TargetDateShipment").trim().toCharArray();
-						if (d.length == 8)
-						{
-							projectPlannedFinishDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0]
-									+ d[1] + d[2] + d[3] + "/" + d[4] + d[5] + "/" + d[6] + d[7]);
-						}
-						if (d.length == 6)
-						{
-							projectPlannedFinishDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20"
-									+ d[0] + d[1] + "/" + d[2] + d[3] + "/" + d[4] + d[5]);
-						}
-						if (d.length == 5)
-						{
-							projectPlannedFinishDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20"
-									+ d[0] + d[1] + "/0" + d[2] + "/" + d[3] + d[4]);
-						}
-					}
-				}
-				p.setProjectPlannedFinishDate(projectPlannedFinishDate);
+				p.setProjectPlannedFinishDate(getFixedDate(row.getString("TargetDateShipment")));
 
 				// ResultShippedUser (how to get the id of the user)
 				String dataShippedByName = "";
@@ -337,30 +302,7 @@ public class ImportWorksheet
 				p.setResultShippedTo_UserName(dataShippedToName);
 
 				// ResultShippedDate
-				Date resultShippedDate = null;
-				if (row.getString("DataShippedDate") != null)
-				{
-					if (!row.getString("DataShippedDate").toLowerCase().trim().equals("unknown"))
-					{
-						char[] d = row.getString("DataShippedDate").trim().toCharArray();
-						if (d.length == 8)
-						{
-							resultShippedDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1]
-									+ d[2] + d[3] + "/" + d[4] + d[5] + "/" + d[6] + d[7]);
-						}
-						if (d.length == 6)
-						{
-							resultShippedDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0]
-									+ d[1] + "/" + d[2] + d[3] + "/" + d[4] + d[5]);
-						}
-						if (d.length == 5)
-						{
-							resultShippedDate = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0]
-									+ d[1] + "/0" + d[2] + "/" + d[3] + d[4]);
-						}
-					}
-				}
-				p.setResultShippedDate(resultShippedDate);
+				p.setResultShippedDate(getFixedDate(row.getString("DataShippedDate")));
 
 				// GccAnalysis
 				boolean gccAnalysis = false;
@@ -374,7 +316,51 @@ public class ImportWorksheet
 				}
 				p.setGccAnalysis(gccAnalysis);
 
-				projects.put(p.getProjectName().toLowerCase(), p);
+				// Get remaining values from projectSheet
+				for (Tuple rowp : readerp)
+				{
+					if (rowp.getString("Project").toLowerCase().trim()
+							.equals(row.getString("project").toLowerCase().trim()))
+					{
+						// ProjectComment (original sheet contains no header)
+						// if (rowp.getString("") != null)
+						// {
+						// p.setProjectComment(rowp.getString(""));
+						// }
+
+						// ProjectAnalist(s)
+						if (rowp.getString("Analist") != null)
+						{
+							String[] analistParts = rowp.getString("Analist").split("/");
+							List<String> ngsUsers = new ArrayList<String>();
+							for (int i = 0; i < analistParts.length; i++)
+							{
+								ngsUsers.add(analistParts[i].toLowerCase().trim());
+							}
+							p.setProjectAnalist_UserName(ngsUsers);
+						}
+
+						// LaneAmount
+						if (rowp.getString("Aantal lanes") != null)
+						{
+							p.setLaneAmount(rowp.getInt("Aantal lanes"));
+						}
+
+						// SampleAmount
+						if (rowp.getString("Aantal monsters") != null)
+						{
+							p.setSampleAmount(rowp.getInt("Aantal monsters"));
+						}
+
+						// DeclarationNr
+						if (rowp.getString("Declaratie nr") != null)
+						{
+							p.setDeclarationNr(rowp.getString("Declaratie nr"));
+						}
+					}
+				}
+
+				projects.put(p.getProjectName().toLowerCase().trim(), p);
 			}
 
 			// Sample
@@ -395,7 +381,7 @@ public class ImportWorksheet
 				}
 
 				// SampleType
-				s.setSampleType("DNA");
+				s.setSampleType("DNA"); // Question: Is this ok?
 
 				// SampleComment
 				if (row.getString("labStatusComments") != null)
@@ -441,27 +427,126 @@ public class ImportWorksheet
 					}
 				}
 
-				// QcWetMet ?
+				// QcWetMet
+				if (row.getString("GAF_QC_Status") != null)
+				{
+					s.setQcWetMet(row.getString("GAF_QC_Status"));
+				}
+				else
+				{
+					s.setQcWetMet("Not determined");
+				}
 
-				// QcWetUser ?
+				// QcWetUser
+				if (row.getString("GAF_QC_Name") != null)
+				{
+					s.setQcWetUser_UserName(row.getString("GAF_QC_Name").toLowerCase().trim());
+				}
 
-				// QcWetDate ?
+				// QcWetDate
+				s.setQcWetDate(getFixedDate(row.getString("GAF_QC_Date")));
 
 				// QcDryMet
+				if (row.getString("GCC_QC_Status") != null)
+				{
+					s.setQcDryMet(row.getString("GCC_QC_Status"));
+				}
+				else
+				{
+					s.setQcDryMet("Not determined");
+				}
 
 				// QcDryUser
+				if (row.getString("GCC_QC_Name") != null)
+				{
+					s.setQcDryUser_UserName(row.getString("GCC_QC_Name").toLowerCase().trim());
+				}
 
 				// QcDryDate
+				s.setQcDryDate(getFixedDate(row.getString("GCC_QC_Date")));
 
 				samples.put(s.getInternalId(), s);
 			}
 
 			// FlowcellLaneSampleBarcode
+			if (!row.isNull("internalSampleID"))
+			{
+				// For each Lane
+				if (row.getString("lane") != null)
+				{
+					String[] lanes = row.getString("lane").split(",");
+					for (int i = 0; i < lanes.length; i++)
+					{
+						FlowcellLaneSampleBarcode flsb = new FlowcellLaneSampleBarcode();
 
+						flsb.setLane(lanes[i]);
+
+						// Sample
+						if (row.getString("internalSampleID") != null)
+						{
+							flsb.setSample_InternalId(row.getString("internalSampleID"));
+						}
+
+						// FlowcellLaneSampleBarcodeComment
+						if (row.getString("Comments") != null)
+						{
+							flsb.setFlowcellLaneSampleBarcodeComment(row.getString("Comments").replace("'", ""));
+						}
+
+						// Flowcell
+						if (row.getString("flowcell") != null)
+						{
+							flsb.setFlowcell_FlowcellName(row.getString("flowcell"));
+						}
+
+						// SampleBarcode
+						if (row.getString("barcode") != null)
+						{
+							if (row.getString("barcode").toLowerCase().trim().equals("none")
+									|| row.getString("barcode").toLowerCase().trim().contains("error"))
+							{
+								flsb.setSampleBarcode_SampleBarcodeName("None");
+							}
+							else
+							{
+								flsb.setSampleBarcode_SampleBarcodeName(row.getString("barcode").toUpperCase().trim());
+							}
+						}
+						else
+						{
+							flsb.setSampleBarcode_SampleBarcodeName("None");
+						}
+
+						// CapturingKit
+						if (row.getString("capturingKit") != null)
+						{
+							if (row.getString("capturingKit").toLowerCase().trim().equals("none"))
+							{
+								flsb.setCapturingKit_CapturingKitName("None");
+							}
+							else
+							{
+								flsb.setCapturingKit_CapturingKitName(row.getString("capturingKit").trim());
+							}
+						}
+						else
+						{
+							flsb.setCapturingKit_CapturingKitName("None");
+						}
+
+						flowcellLaneSampleBarcodes.put(flsb.getSample_InternalId(), flsb);
+					}
+				}
+			}
 		}
-		reader.close();
+		readers.close();
+		readerp.close();
 
 		// Show all collected values
+		for (FlowcellLaneSampleBarcode flsb : flowcellLaneSampleBarcodes.values())
+		{
+			System.out.println(flsb);
+		}
 		for (Sample s : samples.values())
 		{
 			System.out.println(s);
@@ -495,15 +580,16 @@ public class ImportWorksheet
 			System.out.println(f);
 		}
 
-		// put in database
+		// Put values in database
 		Database db = new app.JpaDatabase();
 		try
 		{
 			db.beginTx();
 
-			// clean old stuff (reverse order of foreign keys)
+			// Clean old stuff (reverse order of foreign keys)
 			if (debug)
 			{
+				db.remove(db.find(FlowcellLaneSampleBarcode.class));
 				db.remove(db.find(Sample.class));
 				db.remove(db.find(Project.class));
 				db.remove(db.find(Flowcell.class));
@@ -514,16 +600,41 @@ public class ImportWorksheet
 				db.remove(db.find(NgsUser.class));
 			}
 
-			System.out.println("Imported " + db.add(new ArrayList<NgsUser>(users.values())) + " NgsUser");
+			System.out.println("Imported " + db.add(new ArrayList<NgsUser>(users.values())) + " NgsUser(s)");
 			System.out.println("Imported " + db.add(new ArrayList<SampleBarcode>(sampleBarcodes.values()))
-					+ " SampleBarcodes");
+					+ " SampleBarcode(s)");
 			System.out.println("Imported " + db.add(new ArrayList<CapturingKit>(capturingKits.values()))
-					+ " CapturingKits");
-			System.out.println("Imported " + db.add(new ArrayList<PrepKit>(prepKits.values())) + " PrepKits");
-			System.out.println("Imported " + db.add(new ArrayList<Machine>(machines.values())) + " Machines");
-			System.out.println("Imported " + db.add(new ArrayList<Flowcell>(flowcells.values())) + " Flowcell");
-			System.out.println("Imported " + db.add(new ArrayList<Project>(projects.values())) + " Project");
-			System.out.println("Imported " + db.add(new ArrayList<Sample>(samples.values())) + " Sample");
+					+ " CapturingKit(s)");
+			System.out.println("Imported " + db.add(new ArrayList<PrepKit>(prepKits.values())) + " PrepKit(s)");
+			System.out.println("Imported " + db.add(new ArrayList<Machine>(machines.values())) + " Machine(s)");
+			System.out.println("Imported " + db.add(new ArrayList<Flowcell>(flowcells.values())) + " Flowcell(s)");
+			System.out.println("Imported " + db.add(new ArrayList<Project>(projects.values())) + " Project(s)");
+			System.out.println("Imported " + db.add(new ArrayList<Sample>(samples.values())) + " Sample(s)");
+			// System.out.println("Imported "
+			// + db.add(new
+			// ArrayList<FlowcellLaneSampleBarcode>(flowcellLaneSampleBarcodes.values()))
+			// + " FlowcellLaneSampleBarcode(s)");
+
+			// Debug
+			boolean crash = false;
+			for (FlowcellLaneSampleBarcode flsb : flowcellLaneSampleBarcodes.values())
+			{
+				try
+				{
+					db.add(flsb);
+				}
+				catch (Exception ex)
+				{
+					System.out.println("error:" + ex.toString() + ". Value: " + flsb);
+					crash = true;
+				}
+				// System.out.println(flsb);
+			}
+			if (!crash)
+			{
+				System.out.println("Imported " + flowcellLaneSampleBarcodes.values().size()
+						+ " FlowcellLaneSampleBarcode(s)");
+			}
 
 			db.commitTx();
 			db.close();
@@ -537,14 +648,40 @@ public class ImportWorksheet
 		}
 	}
 
-	private static void importSequencingProjects(File csv, boolean debug) throws Exception
+	private static Date getFixedDate(String s)
 	{
-		// From sheet GAFSequencingProjects
+		Date date = null;
 
-		// ProjectComment
-		// ProjectAnalist(s)
-		// LaneAmount
-		// SampleAmount
-		// DeclarationNr
+		try
+		{
+			if (s != null)
+			{
+				if (s.toLowerCase().trim().equals("unknown"))
+				{
+					char[] d = s.trim().toCharArray();
+					if (d.length == 8)
+					{
+						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1] + d[2] + d[3] + "/"
+								+ d[4] + d[5] + "/" + d[6] + d[7]);
+					}
+					if (d.length == 6)
+					{
+						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/" + d[2]
+								+ d[3] + "/" + d[4] + d[5]);
+					}
+					if (d.length == 5)
+					{
+						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/0"
+								+ d[2] + "/" + d[3] + d[4]);
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return date;
 	}
 }

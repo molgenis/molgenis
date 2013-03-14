@@ -51,20 +51,20 @@
 			<field name="LabStatus" type="enum" default="Not started"
 				enum_options="[Not started,Sample prep - started,Sample prep - failed,Ready for clustering,Clustering and sequencing - started,Clustering and sequencing - failed,Gerald,Finished successfully,Other issue]"
 				description="Lab status phase of this sample" label="Lab status" />
-			<field name="PrepKit" type="xref" xref_entity="PrepKit" nillable="true" description="(check)Preparation kit used on the sample for this experiment." label="Preparation kit" />
-			<field name="QcWetMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Quality criteria of the wet lab met" label="QC wet-lab" />
-			<field name="QcWetUser" type="xref" xref_entity="NgsUser" nillable="true" description="The user who checked if the quality score on the wet-lab was met" label="QC wet-lab user" />
-			<field name="QcWetDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value." label="QC wet-lab date" />
-			<field name="QcDryMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Variant calling quality criteria." />
-			<field name="QcDryUser" type="xref" xref_entity="NgsUser" nillable="true" description="The user who checked if the quality score of the analysis was met" />
-			<field name="QcDryDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value" />
+			<field name="PrepKit" type="xref" xref_entity="PrepKit" nillable="true" description="Preparation kit used on the sample for this experiment" label="Preparation kit" />
+			<field name="QcWetMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Quality criteria of the wet lab met" label="QC wet-lab status" /> <!-- GAF_QC_Status -->
+			<field name="QcWetUser" type="xref" xref_entity="NgsUser" nillable="true" description="The user who checked if the quality score on the wet-lab was met" label="QC wet-lab user" /> <!-- GAF_QC_Name -->
+			<field name="QcWetDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value." label="QC wet-lab date" /> <!-- GAF_QC_Date -->
+			<field name="QcDryMet" type="enum" enum_options="[Not determined,Passed,Failed]" default="Not determined" description="Variant calling quality criteria" label="QC dry-lab status" /> <!-- GCC_QC_Status -->
+			<field name="QcDryUser" type="xref" xref_entity="NgsUser" nillable="true" description="The user who checked if the quality score of the analysis was met" label="QC dry-lab user" /> <!-- GCC_QC_Name -->
+			<field name="QcDryDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value" label="QC dry-lab date" /> <!-- GCC_QC_Date -->
 		</entity>
 		
-		<entity name="FlowcellLaneSampleBarcode" implements="Autoid">
-			<description>An Experiment bundles information about an experiment.</description>
+		<entity name="FlowcellLaneSampleBarcode" implements="Autoid" xref_label="Sample">
+			<description>A FlowcellLaneSampleBarcode bundles information about a sample which is added to a lane on a flowcell.</description>
 			<!-- komt het voor dat een sample in meerdere projecten zit, bijvoorbeeld terugkomende klant<field name="Project" type="xref" xref_entity="Project" />-->
 			<field name="Sample" type="xref" xref_entity="Sample" />
-			<field name="FlowcellLaneSampleBarcodeComment" type="text" description="Comment about the experiment." nillable="true" label="Comment" />
+			<field name="FlowcellLaneSampleBarcodeComment" type="text" description="Comment about the experiment." nillable="true" label="Comment" /> <!-- Comments -->
 			<field name="Flowcell" type="xref" xref_entity="Flowcell" description="The flowcell to which this lane belongs" nillable="true" /> 
 			<field name="Lane" type="enum" enum_options="[1,2,3,4,5,6,7,8]" description="The lane number that is unique within a flow cell with a range of 1-8." nillable="true" />
 			<field name="SampleBarcode" type="xref" xref_entity="SampleBarcode" nillable="true" description="Multiple samples can be on one flowcell using barcodes." label="Barcode" />

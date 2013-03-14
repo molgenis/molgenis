@@ -6,21 +6,27 @@
 	
 	<menu name="main">
 		
-		<menu name="samples">
+		<!-- <menu name="Samples">
 			<form name="Samples1" entity="Sample" label="NGS samples" viewtype="list" />
-		</menu>
+		</menu> -->
 		
-		
+		<form name="Samples1" entity="Sample" label="NGS samples" viewtype="list" />
+				
 		<form name="Projects" entity="Project" label="NGS projects" viewtype="list">
 			<form name="Samples2" entity="Sample" label="NGS samples" viewtype="list" />
 		</form>
 
+		<!-- <menu name ="FlowcellLaneSampleBarcodes">
+			<form name="LanesAndBarcodes1" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
+		</menu> -->
+		
+		<form name="LanesAndBarcodes1" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
 		
 		<form name="PoolsAndFlowcells" entity="Flowcell">
-			<form name="LanesAndBarcodes" entity="FlowcellLaneSampleBarcode" label="NGS experiments" viewtype="list" />
+			<form name="LanesAndBarcodes2" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
 		</form>
 		
-		<menu name="settings" >
+		<menu name="Settings" >
 			<form name="Users" entity="NgsUser" label="User" />
 			<form name="Flowcells" entity="Flowcell" label="Flowcell" />
 			<form name="SampleBarcodes" entity="SampleBarcode" label="Barcode" />
