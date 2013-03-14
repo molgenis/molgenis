@@ -30,7 +30,7 @@ public class ParametersCsvParser
 		List<File> fileLst = new ArrayList<File>();
 		for (File f : filesArray)
 			fileLst.add(f);
-		
+
 		return parse(fileLst);
 	}
 
@@ -41,11 +41,11 @@ public class ParametersCsvParser
 		{
 			fileSet.add(f.getAbsolutePath().toString());
 		}
-		
+
 		Parameters targets = parseParamFiles(null, fileSet);
-		
+
 		// solve the templates
-//		TupleUtils.solve(targets);
+		TupleUtils.solve(targets.getValues());
 
 		// mark all columns as 'user.*'
 		int count = 0;
@@ -63,10 +63,10 @@ public class ParametersCsvParser
 
 		targets = new Parameters();
 		targets.setValues(userTargets);
-		
+
 		return targets;
 	}
-	
+
 	/**
 	 * Parse paramFileSet into Parameters targets.
 	 * 
@@ -74,7 +74,7 @@ public class ParametersCsvParser
 	 *            contains Parameters after parsing paramFileSet
 	 * @param paramFileSet
 	 *            Set of parameter files to parse
-	 * @return 
+	 * @return
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
@@ -84,17 +84,17 @@ public class ParametersCsvParser
 		// Pre-process input in (1) and (2):
 		// (1) ensure targets initialized
 		if (targets == null) targets = new Parameters();
-		
+
 		// if no files to parse, then we're done
 		if (paramFileSet.isEmpty()) return targets;
-		
+
 		// (2) ensure paramFileSet is in 'AbsoluteFile notation'
 		Set<String> tempSet = new HashSet<String>();
 		for (String s : paramFileSet)
 			tempSet.add((new File(s)).getAbsoluteFile().toString());
 		paramFileSet.clear();
 		paramFileSet.addAll(tempSet);
-		
+
 		// get a file to parse
 		String fString = paramFileSet.iterator().next();
 		File f = new File(fString);
@@ -121,7 +121,7 @@ public class ParametersCsvParser
 			// add parsed file to the list of parsed files and ensure we'll not
 			// do this file again
 			paramFileSetDone.add(fString);
-			
+
 			// get file f as list of tuples
 			List<Tuple> tupleLst = asTuples(f);
 
@@ -141,10 +141,10 @@ public class ParametersCsvParser
 
 			// join on overlapping col's (except 'parameters')
 			targets = join(targets, tupleLst);
-			
+
 			// update targets with 'parsed file'
 			targets = addParsedFile(targets, paramFileSetDone);
-			
+
 			// parse rest of param files
 			return parseParamFiles(targets, paramFileSet);
 		}
@@ -152,6 +152,7 @@ public class ParametersCsvParser
 
 	/**
 	 * Update targets with actual parsed files
+	 * 
 	 * @param targets
 	 * @param paramFileSetDone
 	 */
@@ -161,7 +162,7 @@ public class ParametersCsvParser
 		{
 			t.set(Parameters.PARAMETER_COLUMN, paramFileSetDone);
 		}
-		
+
 		return targets;
 	}
 
@@ -176,10 +177,10 @@ public class ParametersCsvParser
 	{
 		// joined tuples that we want to return
 		List<WritableTuple> joined = new ArrayList<WritableTuple>();
-		
+
 		// current tuples
 		List<WritableTuple> left = targets.getValues();
-		
+
 		if (0 == right.size())
 		{
 			// nothing to join
@@ -193,17 +194,22 @@ public class ParametersCsvParser
 				KeyValueTuple newValue = new KeyValueTuple(t);
 				joined.add((WritableTuple) newValue);
 			}
-		} else {
-			// determine intersection of col names (except param column): joinFields
-			Set<String> joinFields  = new HashSet<String>();
-			for (String s : left.get(0).getColNames()) joinFields.add(s);
-			
+		}
+		else
+		{
+			// determine intersection of col names (except param column):
+			// joinFields
+			Set<String> joinFields = new HashSet<String>();
+			for (String s : left.get(0).getColNames())
+				joinFields.add(s);
+
 			Set<String> rightFields = new HashSet<String>();
-			for (String s : right.get(0).getColNames()) rightFields.add(s);
-			
+			for (String s : right.get(0).getColNames())
+				rightFields.add(s);
+
 			joinFields.remove(Parameters.PARAMETER_COLUMN);
 			joinFields.retainAll(rightFields);
-			
+
 			for (Tuple l : left)
 			{
 				for (Tuple r : right)
@@ -211,12 +217,14 @@ public class ParametersCsvParser
 					// determine whether tuples match and thus should be joinded
 					boolean match = true;
 					Iterator<String> it = joinFields.iterator();
-					while (it.hasNext()) {
+					while (it.hasNext())
+					{
 						String field = it.next();
 						if (!l.getString(field).equals(r.getString(field))) match = false;
 					}
-					
-					// if joinFields match, then join into new tuple and add that to 'joined'
+
+					// if joinFields match, then join into new tuple and add
+					// that to 'joined'
 					if (match)
 					{
 						WritableTuple t = new KeyValueTuple();
@@ -226,12 +234,12 @@ public class ParametersCsvParser
 					}
 				}
 			}
-			
+
 		}
 
 		targets = new Parameters();
 		targets.setValues(joined);
-		
+
 		return targets;
 	}
 
@@ -244,8 +252,9 @@ public class ParametersCsvParser
 	}
 
 	/**
-	 * (1) Validate that all values in 'parameters' column are equal and (2)
-	 * return them as a set
+	 * (1) Validate that all values (set of files) in 'parameters' column are
+	 * equal and (2) return them as a set. If a file does not have an absolute
+	 * path, then use the path of its parent as a starting point.
 	 * 
 	 * @param tupleLst
 	 * @return set of files (in AbsoluteFile notation) to be included
@@ -280,7 +289,16 @@ public class ParametersCsvParser
 						// return-set
 						for (String fString : t.getList(colName))
 						{
-							fileSet.add(new File(fString).getAbsolutePath().toString());
+							// if file has no absolute path, then use the path
+							// of its parent (file f) as path
+							if (fString.charAt(0) == '/')
+							{
+								fileSet.add(fString);
+							}
+							else
+							{
+								fileSet.add(f.getParent() + File.separator + fString);
+							}
 						}
 					}
 					else
@@ -299,7 +317,6 @@ public class ParametersCsvParser
 
 		return fileSet;
 	}
-
 
 	public static Parameters parseMorris(List<File> filesArray) throws IOException
 	{
