@@ -5,3 +5,4 @@ target/
 git.properties
 molgenis-compute-core/src/main/resources/workflows/burnDownChart/out/
 molgenis-compute-core/test-output/
+molgenis-compute-core/example-output/
