@@ -27,5 +27,6 @@ public class WebAppInitializer implements WebApplicationInitializer
 		Dynamic frontControllerServlet = servletContext.addServlet("front-controller", new FrontController());
 		frontControllerServlet.setLoadOnStartup(2);
 	}
+
 }
 
