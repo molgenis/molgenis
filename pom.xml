@@ -300,9 +300,9 @@
 		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
-		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-omicsconnect</module>
 		<module>molgenis-app-tifn</module>
+		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-cbm</module>
 		<module>molgenis-app-gids</module>
 		<module>molgenis-compute-core</module>
