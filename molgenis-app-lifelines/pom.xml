@@ -133,6 +133,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-omx-auth</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-dataviewer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
