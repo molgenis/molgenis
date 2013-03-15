@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.QueryRule;
@@ -42,7 +43,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseException("No write permission on ${entityClass}");
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
 
 <#if authorizable??>
 			//this.addRowLevelSecurityDefaults(entities); Commented out 07-10-2011 by ER because of unwanted behavior
@@ -58,7 +59,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseException("No write permission on ${entityClass}");
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
 
 <#if authorizable??>
 			this.addRowLevelSecurityFilters(entities);
@@ -74,7 +75,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseException("No write permission on ${entityClass}");
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
 				
 <#if authorizable??>
 			this.addRowLevelSecurityFilters(entities);
@@ -89,7 +90,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseException("No write permission on ${entityClass}");
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
 
 			//TODO: Add column level security filters
 		}
@@ -102,7 +103,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				return 0;
+				throw new DatabaseAccessException("No read permission on ${entityClass}");
 
 <#if authorizable??>
 			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
@@ -117,7 +118,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				return new ArrayList<E>();
+				throw new DatabaseAccessException("No read permission on ${entityClass}");
 
 <#if authorizable??>
 			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
@@ -137,7 +138,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				return;
+				throw new DatabaseAccessException("No read permission on ${entityClass}");
 
 <#if authorizable??>
 			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
@@ -149,12 +150,26 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	}
 
 	@Override
+	public E findById(Object id) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
+				throw new DatabaseAccessException("No read permission on ${entityClass}");
+
+			//TODO: Add column level security filters
+		}
+		
+		return super.findById(id);
+	}
+	
+	@Override
 	public int remove(TupleReader reader) throws DatabaseException
 	{
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseException("No write permission on ${entityClass}");
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
 
 			//TODO: Add row level security filters
 		}
@@ -167,7 +182,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseException("No write permission on ${entityClass}");
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
 
 			//TODO: Add row level security filters
 			//TODO: Add column level security filters
@@ -181,7 +196,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
 			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				return;
+				throw new DatabaseAccessException("No read permission on ${entityClass}");
 
 <#if authorizable??>
 			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
@@ -231,7 +246,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		{
 			if (!(this.getDatabase().getLogin().canWrite(entity) || entity.getOwns().equals(this.getDatabase().getLogin().getUserId())))
 			{
-				throw new DatabaseException("No row level write permission on ${entityClass}");
+				throw new DatabaseAccessException("No row level write permission on ${entityClass}");
 			}
 		}
 	}
