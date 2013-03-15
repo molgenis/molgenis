@@ -167,12 +167,24 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-enforcer-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>enforce</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
 			</plugins>
-
 		</pluginManagement>
 
 		<plugins>
@@ -300,9 +312,9 @@
 		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
-		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-omicsconnect</module>
 		<module>molgenis-app-tifn</module>
+		<module>molgenis-app-lifelines</module>
 		<module>molgenis-app-cbm</module>
 		<module>molgenis-app-gids</module>
 		<module>molgenis-compute-core</module>

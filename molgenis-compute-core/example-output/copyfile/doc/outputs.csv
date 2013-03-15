@@ -1,3 +1,0 @@
-"user.path","user.sourceFile","user.taskId","user.workflow","user.workdir","step1.sourceFile","step1.cores","step1.targetFile","step1.taskId"
-"testData","testData/file1","0","/Users/mswertz/git/maven-test20130201/molgenis/molgenis-compute-core/src/main/resources/workflows/copyFile/workflow.csv","/Users/mswertz/git/maven-test20130201/molgenis/molgenis-compute-core/example-output/copyfile","testData/file1","4","CopyOftestData/file1","step1_1"
-"testData","testData/file2","1","/Users/mswertz/git/maven-test20130201/molgenis/molgenis-compute-core/src/main/resources/workflows/copyFile/workflow.csv","/Users/mswertz/git/maven-test20130201/molgenis/molgenis-compute-core/example-output/copyfile","testData/file2","4","CopyOftestData/file2","step1_2"
