@@ -66,12 +66,12 @@ import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
+import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
 import org.molgenis.generators.server.MolgenisResourceCopyGen;
 import org.molgenis.generators.server.RdfApiGen;
-import org.molgenis.generators.server.RestApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.generators.sql.CountPerEntityGen;
@@ -469,7 +469,7 @@ public class Molgenis
 
 		if (options.generate_rest)
 		{
-			generators.add(new RestApiGen());
+			generators.add(new EntityRestApiGen());
 		}
 		else
 		{
