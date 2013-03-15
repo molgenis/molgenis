@@ -2,6 +2,7 @@ package org.molgenis.gids;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,9 +11,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import app.DatabaseConfig;
+
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.molgenis")
+@Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override

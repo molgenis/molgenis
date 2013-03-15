@@ -167,12 +167,24 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-enforcer-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>enforce</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
 			</plugins>
-
 		</pluginManagement>
 
 		<plugins>
@@ -279,7 +291,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>3.2.1.RELEASE</version>
+			<version>3.2.2.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- scope: provided -->
