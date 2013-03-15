@@ -5,8 +5,6 @@
 #list dayName
 #string sprint
 
-#FOREACH points
-
 bash -c "echo '\documentclass[a4paper]{article}
 \usepackage[left=1cm,top=1cm,right=1cm,bottom=1cm]{geometry}
 \usepackage{graphics}

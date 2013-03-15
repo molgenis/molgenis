@@ -1,2 +1,2 @@
 parameters,workflow
-"paramFiles/sprintParameters.csv,paramFiles/dateParametersSeq.csv",/Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/workflow.csv
+paramFiles/sprintParameters.csv,/Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/workflow.csv
