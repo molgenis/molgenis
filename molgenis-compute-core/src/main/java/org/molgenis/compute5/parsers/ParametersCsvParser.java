@@ -88,12 +88,13 @@ public class ParametersCsvParser
 		// if no files to parse, then we're done
 		if (paramFileSet.isEmpty()) return targets;
 
-		// (2) ensure paramFileSet is in 'AbsoluteFile notation'
-		Set<String> tempSet = new HashSet<String>();
-		for (String s : paramFileSet)
-			tempSet.add((new File(s)).getAbsoluteFile().toString());
-		paramFileSet.clear();
-		paramFileSet.addAll(tempSet);
+		// I think that this is redundant:
+		// // (2) ensure paramFileSet is in 'AbsoluteFile notation'
+		// Set<String> tempSet = new HashSet<String>();
+		// for (String s : paramFileSet)
+		// tempSet.add((new File(s)).getAbsoluteFile().toString());
+		// paramFileSet.clear();
+		// paramFileSet.addAll(tempSet);
 
 		// get a file to parse
 		String fString = paramFileSet.iterator().next();
@@ -125,8 +126,13 @@ public class ParametersCsvParser
 			// get file f as list of tuples
 			List<Tuple> tupleLst = asTuples(f);
 
-			// get other param files we have to parse, and sanity check: are all
-			// values in 'parameters' column equal?
+			// If path to workflow is relative then prepend its parent's path
+			// (f).
+			tupleLst = updateWorkflowPath(tupleLst, f);
+
+			// get other param files we have to parse, and validate that all
+			// values in 'parameters' column equal. If file path is relative
+			// then prepend its parent's path (f)
 			HashSet<String> newParamFileSet = getParamFiles(tupleLst, f);
 
 			// Remove all files that are already done
@@ -135,17 +141,9 @@ public class ParametersCsvParser
 			// merge new paramFileSet with current one
 			paramFileSet.addAll(newParamFileSet);
 
-			System.out.println(">> VOOR");
-			for (Tuple t : tupleLst)
-				System.out.println(">> " + t);
-
 			// expand tupleLst on col's with lists/iterators (except
 			// 'parameters')
 			tupleLst = expand(tupleLst);
-
-			System.out.println(">> NA EXPAND");
-			for (Tuple t : tupleLst)
-				System.out.println(">> " + t);
 
 			// join on overlapping col's (except 'parameters')
 			targets = join(targets, tupleLst);
@@ -207,11 +205,6 @@ public class ParametersCsvParser
 	private static List<String> asList(Tuple t, String col)
 	{
 		String s = t.getString(col);
-
-		if (col.equals("day"))
-		{
-			System.out.println(">> " + s);
-		}
 
 		Pattern pattern = Pattern.compile("([+-]?[0-9]+)\\.\\.([+-]?[0-9]+)");
 		Matcher matcher = pattern.matcher(s);
@@ -341,8 +334,8 @@ public class ParametersCsvParser
 
 	/**
 	 * (1) Validate that all values (set of files) in 'parameters' column are
-	 * equal and (2) return them as a set. If a file does not have an absolute
-	 * path, then use the path of its parent as a starting point.
+	 * equal and (2) return them as a set. (3) If a file does not have an
+	 * absolute path, then use the path of its parent as a starting point.
 	 * 
 	 * @param tupleLst
 	 * @return set of files (in AbsoluteFile notation) to be included
@@ -405,6 +398,58 @@ public class ParametersCsvParser
 
 		return fileSet;
 	}
+	
+
+	/**
+	 * If path to workflow file relative, then prepend parent's path (f)
+	 * @param tupleLst
+	 * @return
+	 */
+	private static List<Tuple> updateWorkflowPath(List<Tuple> tupleLst, File f)
+	{
+		List<Tuple> tupleLstUpdated = new ArrayList<Tuple>();
+		
+		for (Tuple t : tupleLst)
+		{
+			WritableTuple wt = new KeyValueTuple(t);
+			
+			for (String colName : t.getColNames())
+			{
+				if (colName.equals(Parameters.WORKFLOW_COLUMN_INITIAL))
+				{
+					List<String> wfLst = new ArrayList<String>();
+					// iterate through list and add absolute paths to
+					// return-set
+					for (String fString : t.getList(colName))
+					{
+						// if file has no absolute path, then use the path
+						// of its parent (file f) as path
+						if (fString.charAt(0) == '/')
+						{
+							wfLst.add(fString);
+						}
+						else
+						{
+							wfLst.add(f.getParent() + File.separator + fString);
+						}
+					}
+					
+					// put updated paths back in tuple
+					if (wfLst.size() == 1){
+						wt.set(colName, wfLst.get(0));
+					} else {
+						wt.set(colName, wfLst);
+					}
+				}
+			}
+			
+			tupleLstUpdated.add(wt);
+		}
+		
+		
+		return tupleLstUpdated;
+	}
+
 
 	public static Parameters parseMorris(List<File> filesArray) throws IOException
 	{

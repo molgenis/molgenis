@@ -11,6 +11,7 @@ public class Parameters
 {
 	//unique column used to distinguish the parameter rows provided
 	public final static String ID_COLUMN = "user."+Task.TASKID_COLUMN;
+	public static final Object WORKFLOW_COLUMN_INITIAL = "workflow";
 	public final static String WORKFLOW_COLUMN = "user.workflow";
 	public final static String WORKDIR_COLUMN = "user."+Task.WORKDIR_COLUMN;
 	public static final String PARAMETER_COLUMN = "parameters"; // why no prefix 'user.'?
