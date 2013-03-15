@@ -20,7 +20,7 @@ public class DatabaseConfig
 	<#if databaseImp = 'jpa'>
 		Database db = new ${package}.JpaDatabase();
 	<#elseif databaseImp = 'jdbc'>
-		Database db = new ${package}.JDBCDatabase(dataSource.getConnection());
+		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
 		db.setLogin(login());
 		return db;
