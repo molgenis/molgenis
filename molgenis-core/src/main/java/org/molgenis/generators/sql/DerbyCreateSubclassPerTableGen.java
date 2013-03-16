@@ -23,38 +23,44 @@ public class DerbyCreateSubclassPerTableGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		// create an hsqldb connection
-		Class.forName(options.db_driver);
-		Connection conn = DriverManager.getConnection(options.db_uri + ";create=true");
-
-		Statement stmt = null;
-		// create generator
-		Template template = this.createTemplate(this.getClass().getSimpleName() + ".hsql.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		for (Entity entity : model.getEntities())
+		if (options.generate_tests)
 		{
-			// create arguments
-			templateArgs.put("entity", entity);
-			templateArgs.put("model", model);
-
-			// generate
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			template.process(templateArgs, new OutputStreamWriter(out, Charset.forName("UTF-8")));
-
-			// send to database
-			stmt = conn.createStatement();
-			stmt.executeUpdate(out.toString("UTF-8"));
-
-			// send to log
-			logger.debug("created hsql table: " + out.toString("UTF-8"));
 		}
+		else
+		{
+			// create an hsqldb connection
+			Class.forName(options.db_driver);
+			Connection conn = DriverManager.getConnection(options.db_uri + ";create=true");
 
-		// shutdown
-		DriverManager.getConnection("jdbc:derby:;shutdown=true");
+			Statement stmt = null;
+			// create generator
+			Template template = this.createTemplate(this.getClass().getSimpleName() + ".hsql.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		stmt.close();
-		conn.close();
+			for (Entity entity : model.getEntities())
+			{
+				// create arguments
+				templateArgs.put("entity", entity);
+				templateArgs.put("model", model);
+
+				// generate
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				template.process(templateArgs, new OutputStreamWriter(out, Charset.forName("UTF-8")));
+
+				// send to database
+				stmt = conn.createStatement();
+				stmt.executeUpdate(out.toString("UTF-8"));
+
+				// send to log
+				logger.debug("created hsql table: " + out.toString("UTF-8"));
+			}
+
+			// shutdown
+			DriverManager.getConnection("jdbc:derby:;shutdown=true");
+
+			stmt.close();
+			conn.close();
+		}
 
 	}
 

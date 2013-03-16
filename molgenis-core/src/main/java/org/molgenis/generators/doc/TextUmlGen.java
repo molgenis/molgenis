@@ -32,29 +32,35 @@ public class TextUmlGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		File target = new File(this.getDocumentationPath(options) + "/textUML.txt");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		List<Entity> entityList = model.getEntities();
-		List<Module> moduleList = model.getModules();
-		entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
-																				// effect?
+			File target = new File(this.getDocumentationPath(options) + "/textUML.txt");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
 
-		templateArgs.put("model", model);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("modules", moduleList);
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			List<Entity> entityList = model.getEntities();
+			List<Module> moduleList = model.getModules();
+			entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
+																					// effect?
 
-		logger.info("generated " + target);
+			templateArgs.put("model", model);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("modules", moduleList);
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
+		}
 	}
 
 }

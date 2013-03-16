@@ -31,25 +31,31 @@ public class ObjectModelDocGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
+		if (options.generate_tests)
+		{
+		}
+		else
+		{
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		File target = new File(this.getDocumentationPath(options) + "/objectmodel.html");
-		target.getParentFile().mkdirs();
+			File target = new File(this.getDocumentationPath(options) + "/objectmodel.html");
+			target.getParentFile().mkdirs();
 
-		List<Entity> entityList = model.getEntities();
-		List<Module> moduleList = model.getModules();
-		entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
-																				// effect?
+			List<Entity> entityList = model.getEntities();
+			List<Module> moduleList = model.getModules();
+			entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
+																					// effect?
 
-		templateArgs.put("model", model);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("modules", moduleList);
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			templateArgs.put("model", model);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("modules", moduleList);
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
 
-		logger.info("generated " + target);
+			logger.info("generated " + target);
+		}
 	}
 
 }
