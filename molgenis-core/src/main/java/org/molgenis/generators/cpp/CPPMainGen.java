@@ -31,25 +31,31 @@ public class CPPMainGen extends ForEachEntityGenerator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + this.getClass().getSimpleName() + ".cpp.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		List<Entity> entityList = model.getEntities();
-		MolgenisModel.sortEntitiesByDependency(entityList, model);
-		File target = new File(this.getCPPSourcePath(options) + "/main.cpp");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate("/" + this.getClass().getSimpleName() + ".cpp.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		templateArgs.put("model", model);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("UserHome", System.getProperty("user.dir").replace("\\", "/").toString());
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
-		logger.info("generated " + target);
+			List<Entity> entityList = model.getEntities();
+			MolgenisModel.sortEntitiesByDependency(entityList, model);
+			File target = new File(this.getCPPSourcePath(options) + "/main.cpp");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			templateArgs.put("model", model);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("UserHome", System.getProperty("user.dir").replace("\\", "/").toString());
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+			logger.info("generated " + target);
+		}
 	}
 
 	@Override
