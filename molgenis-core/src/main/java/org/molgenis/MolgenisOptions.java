@@ -252,9 +252,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_sql", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_sql = true;
 
-	@Option(name = "copy_resources", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Copy resources to generated-res. Default: true")
-	public boolean copy_resources = true;
-
 	@Option(name = "generate_html", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate HTML. Default: true")
 	public boolean generate_html = true;
 
