@@ -20,9 +20,9 @@ import freemarker.template.Template;
 public class PythonDataTypeGen extends ForEachEntityGenerator
 {
 
-	private boolean includeAbstract = false;
+	private final boolean includeAbstract = false;
 
-	private boolean handwritten = false;
+	private final boolean handwritten = false;
 
 	public PythonDataTypeGen()
 	{
@@ -45,71 +45,77 @@ public class PythonDataTypeGen extends ForEachEntityGenerator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		// logger.error("packageName:" + "ENTITY"+
-		// this.getClass().getPackage().toString().substring(Generator.class.getPackage().toString().length()));
-
-		// apply generator to each entity
-		for (Entity entity : model.getEntities())
+		if (options.generate_tests)
 		{
-			// calculate package from its own package
-			String packageName = entity.getNamespace().toLowerCase()
-					+ this.getClass().getPackage().toString()
-							.substring(Generator.class.getPackage().toString().length());
-			File targetDir = new File(this.getPythonSourcePath(options)
-					+ packageName.replace(".", "/").replace("/python", ""));
-			if (handwritten) targetDir = new File(this.getHandWrittenPath(options)
-					+ packageName.replace(".", "/").replace("/python", ""));
+		}
+		else
+		{
+			Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-			boolean created = targetDir.mkdirs();
-			if (!created && !targetDir.exists())
-			{
-				throw new IOException("could not create " + targetDir);
-			}
+			// logger.error("packageName:" + "ENTITY"+
+			// this.getClass().getPackage().toString().substring(Generator.class.getPackage().toString().length()));
 
-			try
+			// apply generator to each entity
+			for (Entity entity : model.getEntities())
 			{
-				if ((!entity.isAbstract() || this.includeAbstract) && (!this.skipSystem() || !entity.isSystem()))
+				// calculate package from its own package
+				String packageName = entity.getNamespace().toLowerCase()
+						+ this.getClass().getPackage().toString()
+								.substring(Generator.class.getPackage().toString().length());
+				File targetDir = new File(this.getPythonSourcePath(options)
+						+ packageName.replace(".", "/").replace("/python", ""));
+				if (handwritten) targetDir = new File(this.getHandWrittenPath(options)
+						+ packageName.replace(".", "/").replace("/python", ""));
+
+				boolean created = targetDir.mkdirs();
+				if (!created && !targetDir.exists())
 				{
-					File targetFile = new File(targetDir + "/" + GeneratorHelper.firstToUpper(entity.getName())
-							+ getType() + getExtension());
+					throw new IOException("could not create " + targetDir);
+				}
 
-					// logger.error("targetDir: " +targetDir.getAbsolutePath());
-					// logger.error(" GeneratorHelper.firstToUpper(entity.getName()): "
-					// + GeneratorHelper.firstToUpper(entity.getName()));
-					// logger.error("getType() + getExtension(): " +getType() +
-					// getExtension());
-					// logger.error("targetFile: " +
-					// targetFile.getAbsolutePath());
-					if (!handwritten || !targetFile.exists())
+				try
+				{
+					if ((!entity.isAbstract() || this.includeAbstract) && (!this.skipSystem() || !entity.isSystem()))
 					{
-
-						// logger.debug("trying to generated "+targetFile);
-						templateArgs.put("entity", entity);
-						templateArgs.put("model", model);
-						templateArgs.put("db_driver", options.db_driver);
-						templateArgs.put("template", template.getName());
-						templateArgs.put("file", targetDir + "/" + GeneratorHelper.firstToUpper(entity.getName())
+						File targetFile = new File(targetDir + "/" + GeneratorHelper.firstToUpper(entity.getName())
 								+ getType() + getExtension());
-						templateArgs.put("package", packageName);
 
-						OutputStream targetOut = new FileOutputStream(targetFile);
-
-						template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-						targetOut.close();
-
-						// logger.info("generated " +
+						// logger.error("targetDir: " +targetDir.getAbsolutePath());
+						// logger.error(" GeneratorHelper.firstToUpper(entity.getName()): "
+						// + GeneratorHelper.firstToUpper(entity.getName()));
+						// logger.error("getType() + getExtension(): " +getType() +
+						// getExtension());
+						// logger.error("targetFile: " +
 						// targetFile.getAbsolutePath());
-						logger.info("generated " + targetFile);
+						if (!handwritten || !targetFile.exists())
+						{
+
+							// logger.debug("trying to generated "+targetFile);
+							templateArgs.put("entity", entity);
+							templateArgs.put("model", model);
+							templateArgs.put("db_driver", options.db_driver);
+							templateArgs.put("template", template.getName());
+							templateArgs.put("file", targetDir + "/" + GeneratorHelper.firstToUpper(entity.getName())
+									+ getType() + getExtension());
+							templateArgs.put("package", packageName);
+
+							OutputStream targetOut = new FileOutputStream(targetFile);
+
+							template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+							targetOut.close();
+
+							// logger.info("generated " +
+							// targetFile.getAbsolutePath());
+							logger.info("generated " + targetFile);
+						}
 					}
 				}
-			}
-			catch (Exception e)
-			{
-				logger.error("problem generating for " + entity.getName());
-				throw e;
+				catch (Exception e)
+				{
+					logger.error("problem generating for " + entity.getName());
+					throw e;
+				}
 			}
 		}
 	}

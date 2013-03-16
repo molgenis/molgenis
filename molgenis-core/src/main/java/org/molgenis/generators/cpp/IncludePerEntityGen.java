@@ -31,51 +31,58 @@ public class IncludePerEntityGen extends ForEachEntityGenerator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		// apply generator to each entity
-		for (Entity entity : model.getEntities())
+		if (options.generate_tests)
 		{
-			// calculate package from its own package
-			String packageName = entity.getNamespace().toLowerCase()
-					+ this.getClass().getPackage().toString()
-							.substring(Generator.class.getPackage().toString().length());
+		}
+		else
+		{
+			Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-			File targetDir = new File((this.getSourcePath(options).endsWith("/") ? this.getSourcePath(options)
-					: this.getSourcePath(options) + "/")
-					+ packageName.replace(".", "/").replace("/cpp", ""));
-			try
+			// apply generator to each entity
+			for (Entity entity : model.getEntities())
 			{
-				File targetFile = new File(targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
-						+ getExtension());
-				boolean created = targetDir.mkdirs();
-				if (!created && !targetDir.exists())
+				// calculate package from its own package
+				String packageName = entity.getNamespace().toLowerCase()
+						+ this.getClass().getPackage().toString()
+								.substring(Generator.class.getPackage().toString().length());
+
+				File targetDir = new File(
+						(this.getSourcePath(options).endsWith("/") ? this.getSourcePath(options) : this
+								.getSourcePath(options) + "/")
+								+ packageName.replace(".", "/").replace("/cpp", ""));
+				try
 				{
-					throw new IOException("could not create " + targetDir);
+					File targetFile = new File(targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
+							+ getExtension());
+					boolean created = targetDir.mkdirs();
+					if (!created && !targetDir.exists())
+					{
+						throw new IOException("could not create " + targetDir);
+					}
+
+					// logger.debug("trying to generated "+targetFile);
+					templateArgs.put("entity", entity);
+					templateArgs.put("model", model);
+					templateArgs.put("db_driver", options.db_driver);
+					templateArgs.put("template", template.getName());
+					templateArgs.put(
+							"file",
+							targetDir.getCanonicalPath().replace("\\", "/") + "/"
+									+ GeneratorHelper.firstToUpper(entity.getName()) + getType() + getExtension());
+					templateArgs.put("package", packageName);
+
+					OutputStream targetOut = new FileOutputStream(targetFile);
+
+					template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+					targetOut.close();
+					logger.info("generated " + targetFile);
 				}
-
-				// logger.debug("trying to generated "+targetFile);
-				templateArgs.put("entity", entity);
-				templateArgs.put("model", model);
-				templateArgs.put("db_driver", options.db_driver);
-				templateArgs.put("template", template.getName());
-				templateArgs.put(
-						"file",
-						targetDir.getCanonicalPath().replace("\\", "/") + "/"
-								+ GeneratorHelper.firstToUpper(entity.getName()) + getType() + getExtension());
-				templateArgs.put("package", packageName);
-
-				OutputStream targetOut = new FileOutputStream(targetFile);
-
-				template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-				targetOut.close();
-				logger.info("generated " + targetFile);
-			}
-			catch (Exception e)
-			{
-				logger.error("problem generating for " + entity.getName());
-				throw e;
+				catch (Exception e)
+				{
+					logger.error("problem generating for " + entity.getName());
+					throw e;
+				}
 			}
 		}
 	}

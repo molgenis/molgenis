@@ -27,25 +27,31 @@ public class MolgenisServletContextGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate(this.getClass().getSimpleName() + ".ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
+		if (options.generate_tests)
+		{
+		}
+		else
+		{
+			Template template = createTemplate(this.getClass().getSimpleName() + ".ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		File target = new File(this.getWebserverPath(options) + "/META-INF/context.xml");
-		target.getParentFile().mkdirs();
+			File target = new File(this.getWebserverPath(options) + "/META-INF/context.xml");
+			target.getParentFile().mkdirs();
 
-		templateArgs.put("model", model);
-		templateArgs.put("package", model.getName().toLowerCase());
-		templateArgs.put("db_filepath", options.db_filepath);
-		templateArgs.put("db_user", options.db_user);
-		templateArgs.put("db_password", options.db_password);
-		templateArgs.put("db_uri", options.db_uri);
-		templateArgs.put("db_driver", options.db_driver);
-		templateArgs.put("db_jndiname", options.db_jndiname);
+			templateArgs.put("model", model);
+			templateArgs.put("package", model.getName().toLowerCase());
+			templateArgs.put("db_filepath", options.db_filepath);
+			templateArgs.put("db_user", options.db_user);
+			templateArgs.put("db_password", options.db_password);
+			templateArgs.put("db_uri", options.db_uri);
+			templateArgs.put("db_driver", options.db_driver);
+			templateArgs.put("db_jndiname", options.db_jndiname);
 
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
 
-		logger.info("generated " + target);
+			logger.info("generated " + target);
+		}
 	}
 }

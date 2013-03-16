@@ -42,56 +42,61 @@ public class DotDocModuleDependencyGen extends Generator
 
 	public void generate(Model model, MolgenisOptions options, boolean wait) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		File target = new File(this.getDocumentationPath(options) + "/module-dependency-diagram.dot");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
-
-		// count the relationships
-		Map<String, Integer> mapOfRelations = new LinkedHashMap<String, Integer>();
-		for (Entity e : model.getEntities())
+		else
 		{
-			if (e.getModel() != null)
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
+
+			File target = new File(this.getDocumentationPath(options) + "/module-dependency-diagram.dot");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
 			{
-				// interface
-				if (e.hasImplements())
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			// count the relationships
+			Map<String, Integer> mapOfRelations = new LinkedHashMap<String, Integer>();
+			for (Entity e : model.getEntities())
+			{
+				if (e.getModel() != null)
 				{
-					for (Entity i : e.getImplements())
+					// interface
+					if (e.hasImplements())
 					{
-						if (i.getModule() != null)
+						for (Entity i : e.getImplements())
 						{
-							addRule(mapOfRelations, e, i);
+							if (i.getModule() != null)
+							{
+								addRule(mapOfRelations, e, i);
+							}
 						}
 					}
-				}
-				// superclass
-				if (e.hasAncestor())
-				{
-					addRule(mapOfRelations, e, e.getAncestor());
-				}
-				// xrefs/mrefs
-				for (Field f : e.getFields())
-				{
-					if (f.getType() instanceof XrefField || f.getType() instanceof MrefField)
+					// superclass
+					if (e.hasAncestor())
 					{
-						addRule(mapOfRelations, e, f.getXrefEntity());
+						addRule(mapOfRelations, e, e.getAncestor());
 					}
+					// xrefs/mrefs
+					for (Field f : e.getFields())
+					{
+						if (f.getType() instanceof XrefField || f.getType() instanceof MrefField)
+						{
+							addRule(mapOfRelations, e, f.getXrefEntity());
+						}
+					}
+
 				}
-
 			}
+
+			templateArgs.put("rules", mapOfRelations);
+
+			apply(templateArgs, template, target);
+			logger.info("generated " + target);
+			executeDot(target, "png", wait);
 		}
-
-		templateArgs.put("rules", mapOfRelations);
-
-		apply(templateArgs, template, target);
-		logger.info("generated " + target);
-		executeDot(target, "png", wait);
-
 	}
 
 	private void addRule(Map<String, Integer> mapOfRelations, Entity e, Entity i)
