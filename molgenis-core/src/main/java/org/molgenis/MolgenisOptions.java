@@ -243,9 +243,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_cpp", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate CPP. Default: false")
 	public boolean generate_cpp = false;
 
-	@Option(name = "generate_imdb", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate the in memory database classes. Default: true")
-	public boolean generate_imdb = true;
-
 	@Option(name = "generate_model", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_model = true;
 
