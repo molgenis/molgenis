@@ -219,17 +219,14 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_doc", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should documentation be generated. Default: true.")
 	public boolean generate_doc = true;
 
-	@Option(name = "generate_csv", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should CsvReaders be generated. Default: true.")
-	public boolean generate_csv = true;
+	@Option(name = "generate_entityio", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should entity importers and exporters be generated. Default: true.")
+	public boolean generate_entityio = true;
 
 	@Option(name = "generate_Python", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Python-interface be generated. Default: false.")
 	public boolean generate_Python = false;
 
 	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should test code for generated code be generated. Default: false.")
 	public boolean generate_tests = false;
-
-	@Option(name = "generate_ExcelImport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Excel file importing be generated. Default: true.")
-	public boolean generate_ExcelImport = true;
 
 	@Option(name = "generate_gui", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should the GUI service be generated. Default: true.")
 	public boolean generate_gui = true;
@@ -275,12 +272,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_options", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate use molgenis options. Default: true")
 	public boolean generate_options = true;
-
-	@Option(name = "generate_entityimport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate entity importer. Default: true")
-	public boolean generate_entityimport = true;
-
-	@Option(name = "generate_entitiesimport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate entities importer. Default: true")
-	public boolean generate_entitiesimport = true;
 
 	@Option(name = "generate_metadata", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate meta data. Default: true")
 	public boolean generate_metadata = true;
