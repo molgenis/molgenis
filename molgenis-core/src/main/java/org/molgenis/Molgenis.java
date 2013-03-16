@@ -70,7 +70,6 @@ import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
-import org.molgenis.generators.server.MolgenisResourceCopyGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
@@ -246,12 +245,6 @@ public class Molgenis
 		if (options.generate_options)
 		{
 			generators.add(new UsedMolgenisOptionsGen());
-		}
-
-		// COPY resources
-		if (options.copy_resources)
-		{
-			generators.add(new MolgenisResourceCopyGen());
 		}
 
 		// DOCUMENTATION
