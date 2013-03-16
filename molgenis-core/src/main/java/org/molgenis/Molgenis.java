@@ -352,16 +352,13 @@ public class Molgenis
 				generators.add(new FillMetadataTablesGen());
 			}
 
-			if (options.generate_entityimport)
+			if (options.generate_entityio)
 			{
 				generators.add(new EntityImporterGen());
-
-			}
-
-			if (options.generate_entitiesimport)
-			{
 				generators.add(new EntitiesImporterGen());
 				generators.add(new EntitiesValidatorGen());
+				generators.add(new CsvEntityExporterGen());
+				generators.add(new ExcelEntityExporterGen());
 			}
 
 			if (options.generate_metadata)
@@ -392,16 +389,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping Python interface ....");
-		}
-
-		// CSV
-		if (options.generate_csv)
-		{
-			generators.add(new CsvEntityExporterGen());
-		}
-		else
-		{
-			logger.info("Skipping CSV importers ....");
 		}
 
 		// R
@@ -480,16 +467,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping SOAP API ....");
-		}
-
-		// Excel
-		if (options.generate_ExcelImport)
-		{
-			generators.add(new ExcelEntityExporterGen());
-		}
-		else
-		{
-			logger.info("Skipping Excel importer ....");
 		}
 
 		// FIXME use configuration to add the generators
