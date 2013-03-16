@@ -33,58 +33,65 @@ public class MapperDecoratorGen extends ForEachEntityGenerator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		// apply generator to each entity
-		for (Entity entity : model.getEntities())
+		if (options.generate_tests)
 		{
-			if (entity.getDecorator() != null)
+		}
+		else
+		{
+			Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
+
+			// apply generator to each entity
+			for (Entity entity : model.getEntities())
 			{
-				String fullKlazzName = entity.getDecorator();
-
-				String packageName = fullKlazzName;
-				if (fullKlazzName.contains(".")) packageName = fullKlazzName.substring(0,
-						fullKlazzName.lastIndexOf("."));
-
-				String shortKlazzName = fullKlazzName;
-				if (fullKlazzName.contains(".")) shortKlazzName = fullKlazzName.substring(fullKlazzName
-						.lastIndexOf(".") + 1);
-
-				File targetDir = new File(this.getHandWrittenPath(options) + "/" + packageName.replace(".", "/"));
-				boolean created = targetDir.mkdirs();
-				if (!created && !targetDir.exists())
+				if (entity.getDecorator() != null)
 				{
-					throw new IOException("could not create " + targetDir);
-				}
+					String fullKlazzName = entity.getDecorator();
 
-				File targetFile = new File(this.getHandWrittenPath(options) + "/" + fullKlazzName.replace(".", "/")
-						+ ".java");
-				// only generate if the file doesn't exist
-				if (!targetFile.exists())
-				{
-					templateArgs.put("entityClass",
-							entity.getNamespace() + "." + GeneratorHelper.getJavaName(entity.getName()));
-					templateArgs.put("clazzName", shortKlazzName);
-					templateArgs.put("entity", entity);
-					templateArgs.put("model", model);
-					// templateArgs.put("db_driver", options.db_driver);
-					templateArgs.put("template", template.getName());
-					templateArgs.put("file",
-							packageName.replace(".", "/") + "/" + GeneratorHelper.getJavaName(entity.getName())
-									+ getType() + getExtension());
-					templateArgs.put("package", packageName);
-					templateArgs.put("databaseImp", options.mapper_implementation
-							.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
+					String packageName = fullKlazzName;
+					if (fullKlazzName.contains(".")) packageName = fullKlazzName.substring(0,
+							fullKlazzName.lastIndexOf("."));
 
-					OutputStream targetOut = new FileOutputStream(targetFile);
+					String shortKlazzName = fullKlazzName;
+					if (fullKlazzName.contains(".")) shortKlazzName = fullKlazzName.substring(fullKlazzName
+							.lastIndexOf(".") + 1);
 
-					template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-					targetOut.close();
+					File targetDir = new File(this.getHandWrittenPath(options) + "/" + packageName.replace(".", "/"));
+					boolean created = targetDir.mkdirs();
+					if (!created && !targetDir.exists())
+					{
+						throw new IOException("could not create " + targetDir);
+					}
 
-					// logger.info("generated " +
-					// targetFile.getAbsolutePath());
-					logger.info("generated " + targetFile);
+					File targetFile = new File(this.getHandWrittenPath(options) + "/" + fullKlazzName.replace(".", "/")
+							+ ".java");
+					// only generate if the file doesn't exist
+					if (!targetFile.exists())
+					{
+						templateArgs.put("entityClass",
+								entity.getNamespace() + "." + GeneratorHelper.getJavaName(entity.getName()));
+						templateArgs.put("clazzName", shortKlazzName);
+						templateArgs.put("entity", entity);
+						templateArgs.put("model", model);
+						// templateArgs.put("db_driver", options.db_driver);
+						templateArgs.put("template", template.getName());
+						templateArgs.put("file",
+								packageName.replace(".", "/") + "/" + GeneratorHelper.getJavaName(entity.getName())
+										+ getType() + getExtension());
+						templateArgs.put("package", packageName);
+						templateArgs
+								.put("databaseImp",
+										options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
+
+						OutputStream targetOut = new FileOutputStream(targetFile);
+
+						template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+						targetOut.close();
+
+						// logger.info("generated " +
+						// targetFile.getAbsolutePath());
+						logger.info("generated " + targetFile);
+					}
 				}
 			}
 		}

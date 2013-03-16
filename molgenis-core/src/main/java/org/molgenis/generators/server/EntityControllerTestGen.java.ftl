@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.controller.${entity.name}ControllerTest.${entity.name}ControllerConfig;
@@ -67,6 +68,15 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	}
 
 	@Test
+	public void retrieveEntityJson() throws Exception
+	{
+		${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
+		when(${entity.name?uncap_first}Service.read(0)).thenReturn(${entity.name?uncap_first});
+		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0?format=json").accept(MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON))
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+	}
+	
+	@Test
 	public void retrieveEntity_notFound() throws Exception
 	{
 		when(${entity.name?uncap_first}Service.read(1)).thenReturn(null);
@@ -80,6 +90,20 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 	
+	<#list fields as field>
+	<#if !field.system && !field.hidden && field.name != "__Type">
+		 <#if field.type == "xref">
+	@Test
+	public void retrieveEntityXref${field.name?cap_first}() throws Exception
+	{
+		${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
+		${entity.name?uncap_first}.set${field.name?cap_first}(0);
+		when(${entity.name?uncap_first}Service.read(0)).thenReturn(${entity.name?uncap_first});
+		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0/${field.name?uncap_first}")).andExpect(forwardedUrl("/api/v1/${field.xrefEntity.name?lower_case}/0"));
+	}
+		 </#if>
+	</#if>
+	</#list>	
 	@Test
 	public void retrieveEntityCollection_forbidden() throws Exception
 	{

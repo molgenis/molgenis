@@ -27,46 +27,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>generate-sources</id>
-						<phase>generate-sources</phase>
-						<configuration>
-							<tasks>
-								<path id="generate-classpath">
-									<path refid="maven.compile.classpath" />
-									<pathelement path="${basedir}/src/main/resources" />
-								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-									<arg value="molgenis.properties" />
-									<arg value="${project.build.directory}/generated-sources/molgenis" />
-								</java>
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>generate-test-sources</id>
-						<phase>generate-test-sources</phase>
-						<configuration>
-							<tasks>
-								<path id="generate-classpath">
-									<path refid="maven.compile.classpath" />
-									<pathelement path="${basedir}/src/test/resources" />
-								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-									<arg value="molgenis.properties" />
-									<arg value="${project.build.directory}/generated-test-sources/molgenis" />
-								</java>
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<!-- compile XML schemas -->
 			<plugin>
