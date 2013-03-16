@@ -352,15 +352,6 @@ public class Molgenis
 				generators.add(new FillMetadataTablesGen());
 			}
 
-			if (options.generate_entityio)
-			{
-				generators.add(new EntityImporterGen());
-				generators.add(new EntitiesImporterGen());
-				generators.add(new EntitiesValidatorGen());
-				generators.add(new CsvEntityExporterGen());
-				generators.add(new ExcelEntityExporterGen());
-			}
-
 			if (options.generate_metadata)
 			{
 				generators.add(new FillMetadataGen());
@@ -380,6 +371,16 @@ public class Molgenis
 		else
 		{
 			logger.info("SEVERE: Skipping ALL SQL ....");
+		}
+
+		generators.add(new EntityImporterGen());
+
+		if (options.generate_entityio)
+		{
+			generators.add(new EntitiesImporterGen());
+			generators.add(new EntitiesValidatorGen());
+			generators.add(new CsvEntityExporterGen());
+			generators.add(new ExcelEntityExporterGen());
 		}
 
 		if (options.generate_Python)
