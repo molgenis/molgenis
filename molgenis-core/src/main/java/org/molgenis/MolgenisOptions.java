@@ -22,8 +22,7 @@ import org.molgenis.util.cmdline.Option;
 import org.molgenis.util.cmdline.Option.Type;
 
 /**
- * Option to parameterize the {@link Molgenis} and the
- * {@link org.molgenis.framework.server.MolgenisServer}
+ * Option to parameterize the {@link Molgenis} and the {@link org.molgenis.framework.server.MolgenisServer}
  * 
  * @author Morris Swertz
  */
@@ -63,15 +62,13 @@ public class MolgenisOptions implements Serializable
 	private String molgenis_passwd = "";
 
 	/**
-	 * relative paths to the data model XML files. Discussion: is COLLECTION
-	 * good enough here?
+	 * relative paths to the data model XML files. Discussion: is COLLECTION good enough here?
 	 */
 	@Option(name = "model_database", param = Option.Param.COLLECTION, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()")
 	public ArrayList<String> model_database = new ArrayList<String>();
 
 	/**
-	 * relative paths to the data model XML files, objects in these files are
-	 * used only, not generated
+	 * relative paths to the data model XML files, objects in these files are used only, not generated
 	 */
 	@Option(name = "import_model_database", param = Option.Param.COLLECTION, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()")
 	public ArrayList<String> import_model_database = new ArrayList<String>();
@@ -132,8 +129,7 @@ public class MolgenisOptions implements Serializable
 	public String db_uri = "jdbc:mysql://localhost/molgenis?innodb_autoinc_lock_mode=2";
 
 	/**
-	 * Path where file attachments (&lt;field type="file" ... &gt;) should be
-	 * stored.
+	 * Path where file attachments (&lt;field type="file" ... &gt;) should be stored.
 	 */
 	@Option(name = "db_filepath", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Path where the database should store file attachements. Default: 'data'")
 	public String db_filepath = "data";
@@ -229,8 +225,8 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_Python", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Python-interface be generated. Default: false.")
 	public boolean generate_Python = false;
 
-	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should run-time testing be generated. Default: true.")
-	public boolean generate_tests = true;
+	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should test classes for generated classes be generated. Default: false.")
+	public boolean generate_tests = false;
 
 	@Option(name = "generate_ExcelImport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Excel file importing be generated. Default: true.")
 	public boolean generate_ExcelImport = true;
@@ -732,4 +728,8 @@ public class MolgenisOptions implements Serializable
 		this.log4j_properties_uri = log4j_properties_uri;
 	}
 
+	public void setGenerateTests(boolean generate_tests)
+	{
+		this.generate_tests = generate_tests;
+	}
 }

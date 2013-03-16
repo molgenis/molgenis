@@ -111,7 +111,11 @@ public class Molgenis
 			}
 			else if (args.length == 3)
 			{
-				if (args[2].equals("--updatedb"))
+				if (args[2].equals("--generatetests"))
+				{
+					new Molgenis(args[0], args[1]).generateTests();
+				}
+				else if (args[2].equals("--updatedb"))
 				{
 					new Molgenis(args[0], args[1]).updateDb(false);
 				}
@@ -530,6 +534,12 @@ public class Molgenis
 		MolgenisFieldTypes.addType(new TextField());
 		MolgenisFieldTypes.addType(new XrefField());
 		MolgenisFieldTypes.addType(new IntField());
+	}
+
+	public void generateTests() throws Exception
+	{
+		options.setGenerateTests(true);
+		generate();
 	}
 
 	/**
