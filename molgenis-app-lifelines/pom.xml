@@ -47,48 +47,23 @@
 					<schemaDirectory>src/main/resources/schemas/emeasureschemas</schemaDirectory>
 					<schemaDirectory>src/main/resources/schemas/multicacheschemas</schemaDirectory>
 				</configuration>
-			</plugin>			
-			<!-- add generated sources -->
+			</plugin>
+			<!-- add sources created by jaxb -->
+			<!-- add sources/resources created by molgenis generator -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>execution-sources</id>
+						<id>execution-jaxb</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-source</goal>
-							<goal>add-resource</goal>
 						</goals>
 						<configuration>
 							<sources>
 								<source>target/generated-sources/jaxb</source>
-								<source>target/generated-sources/molgenis/java</source>
 							</sources>
-							<resources>
-								<resource>
-									<directory>target/generated-sources/molgenis/sql</directory>
-									<directory>target/generated-sources/molgenis/java</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>execution-test-sources</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-							<goal>add-test-resource</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>target/generated-test-sources/molgenis/java</source>
-							</sources>
-							<resources>
-								<resource>
-									<directory>target/generated-test-sources/molgenis/java</directory>
-								</resource>
-							</resources>
 						</configuration>
 					</execution>
 				</executions>
