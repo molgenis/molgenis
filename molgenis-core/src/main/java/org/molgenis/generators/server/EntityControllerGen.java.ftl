@@ -156,20 +156,21 @@ public class ${entity.name}Controller
 		 <#if field.type == "mref">
 	@RequestMapping(value = "/{id}/${field.name?uncap_first}", method = RequestMethod.GET)
 	@ResponseBody
-	public EntityCollectionResponse<${field.xrefEntity.name}Response> retrieve${entity.name}Mref${field.name?cap_first}(@PathVariable ${type(entity.primaryKey)} id, @Valid EntityCollectionRequest entityCollectionRequest) throws DatabaseException
+	public EntityCollectionResponse<${field.xrefEntity.name}Response> retrieve${entity.name}Mref${field.name?cap_first}(@PathVariable ${type(entity.primaryKey)} id, @Valid EntityCollectionRequest entityCollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
 	{
-		return _retrieve${entity.name}Mref${field.name?cap_first}(id, entityCollectionRequest);
+		return _retrieve${entity.name}Mref${field.name?cap_first}(id, entityCollectionRequest, expandFields);
 	}
 	
 	@RequestMapping(value = "/{id}/${field.name?uncap_first}", method = RequestMethod.GET, params = "format=json", produces = "application/json")
 	@ResponseBody
-	public EntityCollectionResponse<${field.xrefEntity.name}Response> retrieve${entity.name}Mref${field.name?cap_first}Json(@PathVariable ${type(entity.primaryKey)} id, @Valid EntityCollectionRequest entityCollectionRequest) throws DatabaseException
+	public EntityCollectionResponse<${field.xrefEntity.name}Response> retrieve${entity.name}Mref${field.name?cap_first}Json(@PathVariable ${type(entity.primaryKey)} id, @Valid EntityCollectionRequest entityCollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
 	{
-		return _retrieve${entity.name}Mref${field.name?cap_first}(id, entityCollectionRequest);
+		return _retrieve${entity.name}Mref${field.name?cap_first}(id, entityCollectionRequest, expandFields);
 	}
 	
-	public EntityCollectionResponse<${field.xrefEntity.name}Response> _retrieve${entity.name}Mref${field.name?cap_first}(${type(entity.primaryKey)} id, EntityCollectionRequest entityCollectionRequest) throws DatabaseException
+	public EntityCollectionResponse<${field.xrefEntity.name}Response> _retrieve${entity.name}Mref${field.name?cap_first}(${type(entity.primaryKey)} id, EntityCollectionRequest entityCollectionRequest, String... expandFieldsStr) throws DatabaseException
 	{
+		final Set<String> expandFields = expandFieldsStr != null ? new HashSet<String>(Arrays.asList(expandFieldsStr)) : null;
 		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.read(id);
 		if (${entity.name?uncap_first} == null) throw new EntityNotFoundException("${entity.name} " + id.toString() + " not found");
 		java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
@@ -181,7 +182,7 @@ public class ${entity.name}Controller
 					@Nullable
 					public ${field.xrefEntity.name}Response apply(@Nullable ${field.xrefEntity.name} ${field.xrefEntity.name?uncap_first})
 					{
-						return ${field.xrefEntity.name?uncap_first} != null ? new ${field.xrefEntity.name}Response(${field.xrefEntity.name?uncap_first}, null) : null; //FIXME use expandFields
+						return ${field.xrefEntity.name?uncap_first} != null ? new ${field.xrefEntity.name}Response(${field.xrefEntity.name?uncap_first}, expandFields) : null;
 					}
 				})), "/api/v1/${field.xrefEntity.name?lower_case}");
 	}
@@ -255,25 +256,23 @@ public class ${entity.name}Controller
 	<#-- Entity collection GET operations -->
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}Collection(@Valid EntityCollectionRequest entityCollectionRequest)
-			throws DatabaseException
+	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}Collection(@Valid EntityCollectionRequest entityCollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
 	{
-		return _retrieve${entity.name}Collection(entityCollectionRequest);
+		return _retrieve${entity.name}Collection(entityCollectionRequest, expandFields);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, params = "format=json", produces = "application/json")
 	@ResponseBody
-	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}CollectionJson(@Valid EntityCollectionRequest ${entity.name?uncap_first}CollectionRequest)
-			throws DatabaseException
+	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}CollectionJson(@Valid EntityCollectionRequest ${entity.name?uncap_first}CollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
 	{
-		return _retrieve${entity.name}Collection(${entity.name?uncap_first}CollectionRequest);
+		return _retrieve${entity.name}Collection(${entity.name?uncap_first}CollectionRequest, expandFields);
 	}
 
-	private EntityCollectionResponse<${entity.name}Response> _retrieve${entity.name}Collection(EntityCollectionRequest entityCollectionRequest)
-			throws DatabaseException
+	private EntityCollectionResponse<${entity.name}Response> _retrieve${entity.name}Collection(EntityCollectionRequest entityCollectionRequest, String... expandFieldsStr) throws DatabaseException
 	{
 		EntityPager<${entity.name}> ${entity.name?uncap_first}Pager = ${entity.name?uncap_first}Service.readAll(entityCollectionRequest.getStart(),
 				entityCollectionRequest.getNum());
+		final Set<String> expandFields = expandFieldsStr != null ? new HashSet<String>(Arrays.asList(expandFieldsStr)) : null;
 		return new EntityCollectionResponse<${entity.name}Response>(${entity.name?uncap_first}Pager, Lists.newArrayList(Iterables.transform(
 				${entity.name?uncap_first}Pager.getIterable(), new Function<${entity.name}, ${entity.name}Response>()
 				{
@@ -281,7 +280,7 @@ public class ${entity.name}Controller
 					@Nullable
 					public ${entity.name}Response apply(@Nullable ${entity.name} ${entity.name?uncap_first})
 					{
-						return ${entity.name?uncap_first} != null ? new ${entity.name}Response(${entity.name?uncap_first}, null) : null; // FIXME use field expansion
+						return ${entity.name?uncap_first} != null ? new ${entity.name}Response(${entity.name?uncap_first}, expandFields) : null;
 					}
 				})), "/api/v1/${entity.name?lower_case}");
 	}
@@ -355,7 +354,7 @@ public class ${entity.name}Controller
 	</#if>
 	</#list>
 	
-		public ${entity.name}Response(${entity.name} ${entity.name?uncap_first}, Set<String> expandFields)
+		public ${entity.name}Response(${entity.name} ${entity.name?uncap_first}, final Set<String> expandFields)
 		{
 		<#list fields as field>
 		<#if field.equals(entity.primaryKey)>
@@ -366,7 +365,15 @@ public class ${entity.name}Controller
 			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");	
 			<#elseif field.type == "mref">
 			java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
-			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.xrefEntity.name?uncap_first}Collection == null ? null : </#if>null; //FIXME implement
+			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.xrefEntity.name?uncap_first}Collection == null ? null : </#if>Lists.transform(${field.xrefEntity.name?uncap_first}Collection, new Function<${field.xrefEntity.name}, ${field.xrefEntity.name}Response>()
+					{
+						@Override
+						@Nullable
+						public ${field.xrefEntity.name}Response apply(@Nullable ${field.xrefEntity.name} ${field.xrefEntity.name?uncap_first})
+						{
+							return ${field.xrefEntity.name?uncap_first} == null ? null : new ${field.xrefEntity.name}Response(${field.xrefEntity.name?uncap_first}, expandFields);
+						}
+					});
 			else this.${field.name?uncap_first} = <#if field.nillable>${field.xrefEntity.name?uncap_first}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}"); //FIXME compile error	
 			<#else>
 			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}();
