@@ -29,7 +29,7 @@ public class LuceneQueryStringBuilderTest
 	{
 		assertEquals(buildQueryString(Collections.<QueryRule> emptyList()), "*:*");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"))), "test:xxx");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, null))), "test:null");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, null))), "_missing_:test");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", SEARCH, "xxx"))), "test:xxx~0.4");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule(SEARCH, "xxx"))), "xxx~0.4");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", NOT, "xxx"))), "-test:xxx");

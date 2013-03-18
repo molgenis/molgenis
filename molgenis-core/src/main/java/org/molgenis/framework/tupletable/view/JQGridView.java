@@ -416,6 +416,10 @@ public class JQGridView extends HtmlWidget
 				{
 					rules.add(new QueryRule(QueryRule.Operator.OR));
 				}
+				else if (groupOp.equals("AND") && notLast)
+				{
+					rules.add(new QueryRule(QueryRule.Operator.AND));
+				}
 			}
 		}
 		return rules;
@@ -489,12 +493,12 @@ public class JQGridView extends HtmlWidget
 				rule.setOperator(QueryRule.Operator.LIKE);
 				return toNotRule(rule);
 			case cn:
-				rule.setValue("%" + jqGridRule.getData() + "%");
+				// rule.setValue("%" + jqGridRule.getData() + "%");
 				rule.setOperator(QueryRule.Operator.LIKE);
 				return rule;
 			case nc:
 				// NOT
-				rule.setValue("%" + jqGridRule.getData() + "%");
+				// rule.setValue("%" + jqGridRule.getData() + "%");
 				rule.setOperator(QueryRule.Operator.LIKE);
 				return toNotRule(rule);
 			default:

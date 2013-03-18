@@ -1,6 +1,7 @@
 package org.molgenis.omx.dataset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -25,9 +25,14 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.search.Hit;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
+import org.molgenis.search.SearchService;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
+import org.springframework.context.ApplicationContext;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -45,14 +50,17 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	private static Logger logger = Logger.getLogger(DataSetTable.class);
 	private DataSet dataSet;
 	private Database db;
+	private final ApplicationContext ctx;
 	private List<Field> columns;
 
-	public DataSetTable(DataSet set, Database db) throws TableException
+	public DataSetTable(DataSet set, Database db, ApplicationContext ctx) throws TableException
 	{
 		if (set == null) throw new TableException("DataSet cannot be null");
 		this.dataSet = set;
 		if (db == null) throw new TableException("db cannot be null");
 		setDb(db);
+		if (ctx == null) throw new TableException("ctx cannot be null");
+		this.ctx = ctx;
 		setFirstColumnFixed(true);
 	}
 
@@ -101,6 +109,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				if (features != null && !features.isEmpty())
 				{
 					columns = new ArrayList<Field>(features.size());
+
 					for (ObservableFeature feature : features)
 					{
 						Field field = new Field(feature.getIdentifier());
@@ -112,6 +121,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				{
 					columns = Collections.emptyList();
 				}
+
 			}
 		}
 		catch (Exception e)
@@ -175,21 +185,11 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				return new ArrayList<Tuple>();
 			}
 
-			// Limit the nr of rows
-			if (getLimit() > 0)
-			{
-				query.limit(getLimit());
-			}
-
-			if (getOffset() > 0)
-			{
-				query.offset(getOffset());
-			}
-
 			for (ObservationSet os : query.find())
 			{
 
 				WritableTuple tuple = new KeyValueTuple();
+				tuple.set(ObservedValue.OBSERVATIONSET_ID, os.getIdValue());
 
 				Query<ObservedValue> queryObservedValue = getDb().query(ObservedValue.class);
 
@@ -230,10 +230,10 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	{
 		try
 		{
-			Query<ObservationSet> query = createQuery();
-			return query == null ? 0 : query.count();
+			System.out.println(getFilters());
+			return (int) getSearchService().count(dataSet.getName(), getFilters());
 		}
-		catch (DatabaseException e)
+		catch (Exception e)
 		{
 			logger.error("DatabaseException getCount", e);
 			throw new TableException(e);
@@ -311,62 +311,45 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	private Query<ObservationSet> createQuery() throws TableException, DatabaseException
 	{
 
-		Query<ObservationSet> query;
+		List<QueryRule> filters = new ArrayList<QueryRule>(getFilters());
 
-		if (getFilters().isEmpty())
+		// Limit the nr of rows
+		if (getLimit() > 0)
 		{
-			query = getDb().query(ObservationSet.class).eq(ObservationSet.PARTOFDATASET, dataSet.getId());
+			filters.add(new QueryRule(Operator.LIMIT, getLimit()));
 		}
-		else
+
+		if (getOffset() > 0)
 		{
-			// For now only single simple queries are supported
-			List<QueryRule> queryRules = new ArrayList<QueryRule>();
-
-			for (QueryRule filter : getFilters())
-			{
-				if ((filter.getOperator() != Operator.EQUALS) && (filter.getOperator() != Operator.LIKE))
-				{
-					// value is always a String so LESS etc. can't be
-					// supported, NOT queries are not supported yet
-					throw new NotImplementedException("Operator [" + filter.getOperator()
-							+ "] not yet implemented, only EQUALS and LIKE are supported.");
-
-				}
-
-				// Null values come to us as String 'null'
-				if ((filter.getValue() != null) && (filter.getValue() instanceof String)
-						&& ((String) filter.getValue()).equalsIgnoreCase("null"))
-				{
-					filter.setValue(null);
-				}
-
-				queryRules.add(new QueryRule(ObservedValue.FEATURE_IDENTIFIER, Operator.EQUALS, filter.getField()));
-				queryRules.add(new QueryRule(ObservedValue.VALUE, filter.getOperator(), filter.getValue()));
-			}
-
-			List<ObservedValue> observedValues = getDb().find(ObservedValue.class,
-					queryRules.toArray(new QueryRule[queryRules.size()]));
-
-			// No results
-			if (observedValues.isEmpty())
-			{
-				return null;
-			}
-
-			List<Integer> observationSetIds = new ArrayList<Integer>();
-			for (ObservedValue observedValue : observedValues)
-			{
-				if (!observationSetIds.contains(observedValue.getObservationSet_Id()))
-				{
-					observationSetIds.add(observedValue.getObservationSet_Id());
-				}
-			}
-
-			query = getDb().query(ObservationSet.class).eq(ObservationSet.PARTOFDATASET, dataSet.getId())
-					.in(ObservationSet.ID, observationSetIds);
+			filters.add(new QueryRule(Operator.OFFSET, getOffset()));
 		}
+
+		System.out.println(filters);
+		SearchRequest request = new SearchRequest(dataSet.getName(), filters,
+				Arrays.asList(ObservedValue.OBSERVATIONSET_ID));
+		SearchResult searchResult = getSearchService().search(request);
+
+		if (searchResult.getTotalHitCount() == 0)
+		{
+			return null;
+		}
+
+		List<Integer> observationSetIds = new ArrayList<Integer>();
+		for (Hit hit : searchResult)
+		{
+			Integer observationSetId = (Integer) hit.getColumnValueMap().get(ObservedValue.OBSERVATIONSET_ID);
+			observationSetIds.add(observationSetId);
+		}
+
+		Query<ObservationSet> query = getDb().query(ObservationSet.class)
+				.eq(ObservationSet.PARTOFDATASET, dataSet.getId()).in(ObservationSet.ID, observationSetIds);
 
 		return query;
 
+	}
+
+	private SearchService getSearchService()
+	{
+		return ctx.getBean(SearchService.class);
 	}
 }

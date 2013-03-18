@@ -17,6 +17,7 @@ import org.molgenis.elasticsearch.response.ResponseParser;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
@@ -141,6 +142,33 @@ public class ElasticSearchService implements SearchService
 		}
 
 		LOG.info("Indexing done");
+	}
+
+	@Override
+	public void indexTupleTable(String documentName, TupleTable tupleTable)
+	{
+		LOG.info("Going to update index [" + indexName + "]");
+
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+
+		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentName, tupleTable);
+		LOG.info("Request created");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("BulkRequest:" + request);
+		}
+
+		BulkResponse response = request.execute().actionGet();
+		LOG.info("Request done");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("BulkResponse:" + response);
+		}
+
+		if (response.hasFailures())
+		{
+			throw new ElasticSearchException(response.buildFailureMessage());
+		}
 	}
 
 }

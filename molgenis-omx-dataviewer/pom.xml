@@ -20,5 +20,10 @@
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-search</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 </project>

@@ -7,7 +7,9 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.util.Entity;
+import org.molgenis.util.tuple.Tuple;
 
 /**
  * Creates an IndexRequest for indexing entities with ElasticSearch
@@ -60,6 +62,29 @@ public class IndexRequestGenerator
 			{
 				request = client.prepareIndex(indexName, documentName, id + "");
 			}
+
+			request.setSource(doc);
+			bulkRequest.add(request);
+			LOG.info("Added [" + (++count) + "] documents");
+		}
+
+		return bulkRequest;
+	}
+
+	public BulkRequestBuilder buildIndexRequest(String documentName, TupleTable tupleTable)
+	{
+		BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+		int count = 0;
+		for (Tuple tuple : tupleTable)
+		{
+			Map<String, Object> doc = new HashMap<String, Object>();
+			for (String columnName : tuple.getColNames())
+			{
+				doc.put(columnName, tuple.get(columnName));
+			}
+
+			IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
 
 			request.setSource(doc);
 			bulkRequest.add(request);
