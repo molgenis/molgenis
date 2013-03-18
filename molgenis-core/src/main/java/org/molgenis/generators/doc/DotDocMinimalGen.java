@@ -35,38 +35,44 @@ public class DotDocMinimalGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		File target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram-summary.dot");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
-
-		List<Entity> entityList = model.getEntities();
-		// MolgenisLanguage.sortEntitiesByDependency(entityList, model);
-		templateArgs.put("model", model);
-		templateArgs.put("module", model);
-		templateArgs.put("entities", entityList);
-		apply(templateArgs, template, target);
-		logger.info("generated " + target);
-		executeDot(target, "png");
-
-		// repeat for each package
-		for (Module module : model.getModules())
+		else
 		{
-			entityList = module.getEntities();
-			templateArgs.put("model", model);
-			templateArgs.put("module", module);
-			templateArgs.put("entities", entityList);
-			target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram-summary-"
-					+ module.getName() + ".dot");
-			apply(templateArgs, template, target);
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-			executeDot(target, "png");
+			File target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram-summary.dot");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			List<Entity> entityList = model.getEntities();
+			// MolgenisLanguage.sortEntitiesByDependency(entityList, model);
+			templateArgs.put("model", model);
+			templateArgs.put("module", model);
+			templateArgs.put("entities", entityList);
+			apply(templateArgs, template, target);
 			logger.info("generated " + target);
+			executeDot(target, "png");
+
+			// repeat for each package
+			for (Module module : model.getModules())
+			{
+				entityList = module.getEntities();
+				templateArgs.put("model", model);
+				templateArgs.put("module", module);
+				templateArgs.put("entities", entityList);
+				target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram-summary-"
+						+ module.getName() + ".dot");
+				apply(templateArgs, template, target);
+
+				executeDot(target, "png");
+				logger.info("generated " + target);
+			}
 		}
 	}
 

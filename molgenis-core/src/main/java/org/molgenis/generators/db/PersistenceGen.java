@@ -28,23 +28,29 @@ public class PersistenceGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".xml.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		File target = new File(this.getSourcePath(options) + "/META-INF/persistence.xml");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".xml.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		templateArgs.put("options", options);
-		templateArgs.put("model", model);
+			File target = new File(this.getSourcePath(options) + "/META-INF/persistence.xml");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
 
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			templateArgs.put("options", options);
+			templateArgs.put("model", model);
 
-		logger.info("generated " + target);
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
+		}
 	}
 }

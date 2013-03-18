@@ -49,16 +49,6 @@ public class SearchRequestGenerator
 	public SearchRequestBuilder buildSearchRequest(String entityName, SearchType searchType,
 			List<QueryRule> queryRules, List<String> fieldsToReturn)
 	{
-		if (queryRules == null)
-		{
-			throw new IllegalArgumentException("QueryRules is null");
-		}
-
-		if (queryRules.isEmpty())
-		{
-			throw new IllegalArgumentException("QueryRules is empty");
-		}
-
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
@@ -74,17 +64,20 @@ public class SearchRequestGenerator
 		}
 
 		// Add queryrules to generators
-		for (QueryRule queryRule : queryRules)
+		if (queryRules != null)
 		{
-			QueryRulePartGenerator generator = findGeneratorForOperator(queryRule.getOperator());
-
-			if (generator == null)
+			for (QueryRule queryRule : queryRules)
 			{
-				throw new IllegalArgumentException("Operator [" + queryRule.getOperator()
-						+ "] not implemented for elasticsearch");
-			}
+				QueryRulePartGenerator generator = findGeneratorForOperator(queryRule.getOperator());
 
-			generator.addQueryRule(queryRule);
+				if (generator == null)
+				{
+					throw new IllegalArgumentException("Operator [" + queryRule.getOperator()
+							+ "] not implemented for elasticsearch");
+				}
+
+				generator.addQueryRule(queryRule);
+			}
 		}
 
 		// Generate query

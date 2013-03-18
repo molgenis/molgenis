@@ -3,7 +3,6 @@
 <molgenis name="tifn">
 
 <plugin name="tifn_header" type="org.molgenis.tifn.plugins.header.Header" />
-	
 	<menu name="main">
 		<plugin label="Home" name="Home" type="org.molgenis.tifn.plugins.home.Home"/>
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />

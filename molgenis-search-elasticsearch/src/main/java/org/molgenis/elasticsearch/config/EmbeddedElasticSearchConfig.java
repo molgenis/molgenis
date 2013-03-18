@@ -2,7 +2,6 @@ package org.molgenis.elasticsearch.config;
 
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.search.SearchService;
-import org.molgenis.search.SearchServiceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class EmbeddedElasticSearchConfig
 {
 	@Bean(destroyMethod = "close")
-	public SearchServiceFactory searchServiceFactory()
+	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
 	{
 		return new EmbeddedElasticSearchServiceFactory();
 	}
@@ -26,6 +25,6 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return searchServiceFactory().create();
+		return embeddedElasticSearchServiceFactory().create();
 	}
 }

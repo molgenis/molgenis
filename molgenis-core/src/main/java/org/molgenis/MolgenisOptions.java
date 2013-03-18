@@ -22,8 +22,7 @@ import org.molgenis.util.cmdline.Option;
 import org.molgenis.util.cmdline.Option.Type;
 
 /**
- * Option to parameterize the {@link Molgenis} and the
- * {@link org.molgenis.framework.server.MolgenisServer}
+ * Option to parameterize the {@link Molgenis} and the {@link org.molgenis.framework.server.MolgenisServer}
  * 
  * @author Morris Swertz
  */
@@ -63,15 +62,13 @@ public class MolgenisOptions implements Serializable
 	private String molgenis_passwd = "";
 
 	/**
-	 * relative paths to the data model XML files. Discussion: is COLLECTION
-	 * good enough here?
+	 * relative paths to the data model XML files. Discussion: is COLLECTION good enough here?
 	 */
 	@Option(name = "model_database", param = Option.Param.COLLECTION, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()")
 	public ArrayList<String> model_database = new ArrayList<String>();
 
 	/**
-	 * relative paths to the data model XML files, objects in these files are
-	 * used only, not generated
+	 * relative paths to the data model XML files, objects in these files are used only, not generated
 	 */
 	@Option(name = "import_model_database", param = Option.Param.COLLECTION, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()")
 	public ArrayList<String> import_model_database = new ArrayList<String>();
@@ -132,8 +129,7 @@ public class MolgenisOptions implements Serializable
 	public String db_uri = "jdbc:mysql://localhost/molgenis?innodb_autoinc_lock_mode=2";
 
 	/**
-	 * Path where file attachments (&lt;field type="file" ... &gt;) should be
-	 * stored.
+	 * Path where file attachments (&lt;field type="file" ... &gt;) should be stored.
 	 */
 	@Option(name = "db_filepath", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Path where the database should store file attachements. Default: 'data'")
 	public String db_filepath = "data";
@@ -214,7 +210,7 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_R", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should R-interface be generated. Default: true.")
 	public boolean generate_R = true;
 
-	@Option(name = "generate_BOT", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should BOT be generated. Default: true.")
+	@Option(name = "generate_BOT", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should BOT be generated. Default: false.")
 	public boolean generate_BOT = false;
 
 	@Option(name = "render_decorator", param = Option.Param.CLASS, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Applies an custom decoration of the HTML. Default: LinkoutRenderDecorator with linkouts for popular identifier to online databases")
@@ -223,17 +219,14 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_doc", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should documentation be generated. Default: true.")
 	public boolean generate_doc = true;
 
-	@Option(name = "generate_csv", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should CsvReaders be generated. Default: true.")
-	public boolean generate_csv = true;
+	@Option(name = "generate_entityio", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should entity importers and exporters be generated. Default: true.")
+	public boolean generate_entityio = true;
 
 	@Option(name = "generate_Python", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Python-interface be generated. Default: false.")
 	public boolean generate_Python = false;
 
-	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should run-time testing be generated. Default: true.")
-	public boolean generate_tests = true;
-
-	@Option(name = "generate_ExcelImport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Excel file importing be generated. Default: true.")
-	public boolean generate_ExcelImport = true;
+	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should test code for generated code be generated. Default: false.")
+	public boolean generate_tests = false;
 
 	@Option(name = "generate_gui", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should the GUI service be generated. Default: true.")
 	public boolean generate_gui = true;
@@ -247,17 +240,11 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_cpp", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate CPP. Default: false")
 	public boolean generate_cpp = false;
 
-	@Option(name = "generate_imdb", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate the in memory database classes. Default: true")
-	public boolean generate_imdb = true;
-
 	@Option(name = "generate_model", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_model = true;
 
 	@Option(name = "generate_sql", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_sql = true;
-
-	@Option(name = "copy_resources", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Copy resources to generated-res. Default: true")
-	public boolean copy_resources = true;
 
 	@Option(name = "generate_html", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate HTML. Default: true")
 	public boolean generate_html = true;
@@ -285,12 +272,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_options", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate use molgenis options. Default: true")
 	public boolean generate_options = true;
-
-	@Option(name = "generate_entityimport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate entity importer. Default: true")
-	public boolean generate_entityimport = true;
-
-	@Option(name = "generate_entitiesimport", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate entities importer. Default: true")
-	public boolean generate_entitiesimport = true;
 
 	@Option(name = "generate_metadata", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate meta data. Default: true")
 	public boolean generate_metadata = true;
@@ -732,4 +713,8 @@ public class MolgenisOptions implements Serializable
 		this.log4j_properties_uri = log4j_properties_uri;
 	}
 
+	public void setGenerateTests(boolean generate_tests)
+	{
+		this.generate_tests = generate_tests;
+	}
 }

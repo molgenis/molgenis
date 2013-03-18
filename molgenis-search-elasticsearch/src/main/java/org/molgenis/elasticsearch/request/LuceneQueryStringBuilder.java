@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 
 /**
  * Builds a Lucene query from molgenis QueryRules
@@ -58,49 +59,59 @@ public class LuceneQueryStringBuilder
 					sb.append("-");
 				}
 
-				if (queryRule.getField() != null)
+				Object value = getValue(queryRule);
+				if (((value == null) || (value.equals(""))) && (queryRule.getOperator() == Operator.EQUALS))
 				{
-					sb.append(escapeField(queryRule.getField())).append(":");
+					sb.append("_missing_:" + queryRule.getField());
 				}
-
-				switch (queryRule.getOperator())
+				else
 				{
-					case EQUALS:
-					case NOT:
+
+					if (queryRule.getField() != null)
 					{
-						sb.append(getValue(queryRule));
-						break;
+						sb.append(escapeField(queryRule.getField())).append(":");
 					}
 
-					case LIKE:
-						sb.append("*").append(getValue(queryRule)).append("*");
-						break;
+					switch (queryRule.getOperator())
+					{
+						case EQUALS:
+						case NOT:
+						{
+							sb.append(value);
+							break;
+						}
 
-					case LESS:
-						sb.append("{* TO ").append(getValue(queryRule)).append("}");
-						break;
+						case LIKE:
+							sb.append("*").append(value).append("*");
+							break;
 
-					case LESS_EQUAL:
-						sb.append("[* TO ").append(getValue(queryRule)).append("]");
-						break;
+						case LESS:
+							sb.append("{* TO ").append(value).append("}");
+							break;
 
-					case GREATER:
-						sb.append("{").append(getValue(queryRule)).append(" TO *}");
-						break;
+						case LESS_EQUAL:
+							sb.append("[* TO ").append(value).append("]");
+							break;
 
-					case GREATER_EQUAL:
-						sb.append("[").append(getValue(queryRule)).append(" TO *]");
-						break;
+						case GREATER:
+							sb.append("{").append(value).append(" TO *}");
+							break;
 
-					case SEARCH:
-						sb.append(getValue(queryRule)).append("~0.4");// Fuzzy
-																		// (make
-																		// configurable
-																		// ?)
-						break;
+						case GREATER_EQUAL:
+							sb.append("[").append(value).append(" TO *]");
+							break;
 
-					default:
-						throw new IllegalArgumentException("Operator [" + queryRule.getOperator() + "] not supported");
+						case SEARCH:
+							sb.append(value).append("~0.4");// Fuzzy
+															// (make
+															// configurable
+															// ?)
+							break;
+
+						default:
+							throw new IllegalArgumentException("Operator [" + queryRule.getOperator()
+									+ "] not supported");
+					}
 				}
 
 				previousRule = null;
