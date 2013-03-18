@@ -31,34 +31,40 @@ public class TestDatabaseGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + this.getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		List<Entity> entityList = model.getEntities();
-		entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
-																				// effect?
-
-		File target = new File(this.getSourcePath(options) + "/test/TestDatabase.java");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
+			Template template = createTemplate("/" + this.getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
+
+			List<Entity> entityList = model.getEntities();
+			entityList = MolgenisModel.sortEntitiesByDependency(entityList, model); // side
+																					// effect?
+
+			File target = new File(this.getSourcePath(options) + "/test/TestDatabase.java");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			String packageName = "test";
+
+			templateArgs.put("databaseImp",
+					options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
+			templateArgs.put("model", model);
+			templateArgs.put("db_mode", options.db_mode);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("package", packageName);
+			templateArgs.put("options", options);
+
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
 		}
-
-		String packageName = "test";
-
-		templateArgs.put("databaseImp",
-				options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
-		templateArgs.put("model", model);
-		templateArgs.put("db_mode", options.db_mode);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("package", packageName);
-		templateArgs.put("options", options);
-
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
-
-		logger.info("generated " + target);
+		else
+		{
+		}
 	}
 }

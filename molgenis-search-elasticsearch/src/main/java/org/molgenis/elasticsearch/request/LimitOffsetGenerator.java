@@ -48,12 +48,12 @@ public class LimitOffsetGenerator extends AbstractQueryRulePartGenerator
 			{
 				if (queryRule.getValue() == null)
 				{
-					throw new IllegalArgumentException("Missing value for offset queryrule value");
+					throw new IllegalArgumentException("Missing value for limit queryrule value");
 				}
 
 				if (!(queryRule.getValue() instanceof Integer))
 				{
-					throw new IllegalArgumentException("QueryRule value for offset must be of type integer");
+					throw new IllegalArgumentException("QueryRule value for limit must be of type integer");
 				}
 
 				searchRequestBuilder.setSize((Integer) queryRule.getValue());

@@ -36,36 +36,42 @@ public class MenuControllerGen extends Generator
 
 	private void generateForm(Model model, MolgenisOptions options, UISchema schema) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		for (UISchema screen : schema.getChildren())
+		if (options.generate_tests)
 		{
-			if (screen.getClass() == Menu.class)
-			{
-				templateArgs.put("menu", screen);
-				templateArgs.put("model", model);
-				templateArgs.put("package", APP_DIR + ".ui");
+		}
+		else
+		{
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-				File targetDir = new File(this.getSourcePath(options) + APP_DIR + "/ui/");
-				boolean created = targetDir.mkdirs();
-				if (!created && !targetDir.exists())
+			for (UISchema screen : schema.getChildren())
+			{
+				if (screen.getClass() == Menu.class)
 				{
-					throw new IOException("could not create " + targetDir);
+					templateArgs.put("menu", screen);
+					templateArgs.put("model", model);
+					templateArgs.put("package", APP_DIR + ".ui");
+
+					File targetDir = new File(this.getSourcePath(options) + APP_DIR + "/ui/");
+					boolean created = targetDir.mkdirs();
+					if (!created && !targetDir.exists())
+					{
+						throw new IOException("could not create " + targetDir);
+					}
+
+					File targetFile = new File(targetDir + "/" + GeneratorHelper.firstToUpper(screen.getClassName())
+							+ "Menu.java");
+					OutputStream targetOut = new FileOutputStream(targetFile);
+
+					template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+					targetOut.close();
+
+					logger.info("generated " + targetFile);
 				}
 
-				File targetFile = new File(targetDir + "/" + GeneratorHelper.firstToUpper(screen.getClassName())
-						+ "Menu.java");
-				OutputStream targetOut = new FileOutputStream(targetFile);
-
-				template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-				targetOut.close();
-
-				logger.info("generated " + targetFile);
+				// get children
+				generateForm(model, options, screen);
 			}
-
-			// get children
-			generateForm(model, options, screen);
 		}
 	}
 }
