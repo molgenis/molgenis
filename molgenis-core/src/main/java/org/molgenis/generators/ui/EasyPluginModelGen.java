@@ -35,80 +35,87 @@ public class EasyPluginModelGen extends Generator
 
 	private void generateForm(Model model, MolgenisOptions options, UISchema schema) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		for (UISchema screen : schema.getChildren())
+		if (options.generate_tests)
 		{
-			if (screen.getClass() == Plugin.class)
+		}
+		else
+		{
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
+
+			for (UISchema screen : schema.getChildren())
 			{
-
-				Plugin plugin = (Plugin) screen;
-
-				String fullKlazzName = plugin.getPluginType();
-				String packageName = fullKlazzName;
-				if (fullKlazzName.contains(".")) packageName = fullKlazzName.substring(0,
-						fullKlazzName.lastIndexOf("."));
-
-				String shortKlazzName = fullKlazzName;
-				if (fullKlazzName.contains(".")) shortKlazzName = fullKlazzName.substring(fullKlazzName
-						.lastIndexOf(".") + 1);
-
-				File targetFile = new File(this.getHandWrittenPath(options) + "/" + fullKlazzName.replace(".", "/")
-						+ "Model.java");
-
-				File targetFtl = new File(fullKlazzName.replace(".", "/") + ".ftl");
-				// only generate if the file doesn't exist AND is not on
-				// classpath
-				Class<?> c = null;
-				try
+				if (screen.getClass() == Plugin.class)
 				{
-					// check if plugin controller exist, then assume user is
-					// already happy and don't need templates.
-					c = Class.forName(fullKlazzName);
-					// return;
-				}
-				catch (ClassNotFoundException e)
-				{
-					logger.debug("skipped plugin " + plugin.getName() + " as it is on the classpath");
-				}
-				catch (NoClassDefFoundError e)
-				{
-					logger.debug("skipped plugin " + plugin.getName() + " as it is on the classpath");
-				}
-				logger.debug("tested classforname on " + fullKlazzName + ": " + c);
 
-				if (!targetFile.exists() && c == null)
-				{
-					File targetDir = new File(this.getHandWrittenPath(options) + "/" + packageName.replace(".", "/"));
-					boolean created = targetDir.mkdirs();
-					if (!created && !targetDir.exists())
+					Plugin plugin = (Plugin) screen;
+
+					String fullKlazzName = plugin.getPluginType();
+					String packageName = fullKlazzName;
+					if (fullKlazzName.contains(".")) packageName = fullKlazzName.substring(0,
+							fullKlazzName.lastIndexOf("."));
+
+					String shortKlazzName = fullKlazzName;
+					if (fullKlazzName.contains(".")) shortKlazzName = fullKlazzName.substring(fullKlazzName
+							.lastIndexOf(".") + 1);
+
+					File targetFile = new File(this.getHandWrittenPath(options) + "/" + fullKlazzName.replace(".", "/")
+							+ "Model.java");
+
+					File targetFtl = new File(fullKlazzName.replace(".", "/") + ".ftl");
+					// only generate if the file doesn't exist AND is not on
+					// classpath
+					Class<?> c = null;
+					try
 					{
-						throw new IOException("could not create " + targetDir);
+						// check if plugin controller exist, then assume user is
+						// already happy and don't need templates.
+						c = Class.forName(fullKlazzName);
+						// return;
 					}
+					catch (ClassNotFoundException e)
+					{
+						logger.debug("skipped plugin " + plugin.getName() + " as it is on the classpath");
+					}
+					catch (NoClassDefFoundError e)
+					{
+						logger.debug("skipped plugin " + plugin.getName() + " as it is on the classpath");
+					}
+					logger.debug("tested classforname on " + fullKlazzName + ": " + c);
 
-					templateArgs.put("screen", plugin);
-					templateArgs.put("template", template.getName());
-					templateArgs.put("clazzName", shortKlazzName);
-					templateArgs.put("macroName", fullKlazzName.replace(".", "_"));
-					templateArgs.put("templatePath", targetFtl.toString().replace("\\", "/"));
-					templateArgs.put("package", packageName);
+					if (!targetFile.exists() && c == null)
+					{
+						File targetDir = new File(this.getHandWrittenPath(options) + "/"
+								+ packageName.replace(".", "/"));
+						boolean created = targetDir.mkdirs();
+						if (!created && !targetDir.exists())
+						{
+							throw new IOException("could not create " + targetDir);
+						}
 
-					OutputStream targetOut = new FileOutputStream(targetFile);
-					template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-					targetOut.close();
+						templateArgs.put("screen", plugin);
+						templateArgs.put("template", template.getName());
+						templateArgs.put("clazzName", shortKlazzName);
+						templateArgs.put("macroName", fullKlazzName.replace(".", "_"));
+						templateArgs.put("templatePath", targetFtl.toString().replace("\\", "/"));
+						templateArgs.put("package", packageName);
 
-					logger.info("generated "
-							+ targetFile.getAbsolutePath().substring(this.getHandWrittenPath(options).length()));
+						OutputStream targetOut = new FileOutputStream(targetFile);
+						template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+						targetOut.close();
+
+						logger.info("generated "
+								+ targetFile.getAbsolutePath().substring(this.getHandWrittenPath(options).length()));
+					}
+					else
+					{
+						logger.warn("Skipped because exists: " + targetFile);
+					}
 				}
-				else
-				{
-					logger.warn("Skipped because exists: " + targetFile);
-				}
+
+				// get children of this screen and generate those
+				generateForm(model, options, screen);
 			}
-
-			// get children of this screen and generate those
-			generateForm(model, options, screen);
 		}
 	}
 }

@@ -32,28 +32,34 @@ public class SoapApiGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + this.getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		List<Entity> entityList = model.getEntities();
-		List<Method> methodList = model.getMethods();
-
-		File target = new File(this.getSourcePath(options) + APP_DIR + "/servlet/SoapApi.java");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate("/" + this.getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		templateArgs.put("model", model);
-		templateArgs.put("methods", methodList);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("helper", new GeneratorHelper(null));
-		templateArgs.put("package", APP_DIR + ".servlet");
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			List<Entity> entityList = model.getEntities();
+			List<Method> methodList = model.getMethods();
 
-		logger.info("generated " + target);
+			File target = new File(this.getSourcePath(options) + APP_DIR + "/servlet/SoapApi.java");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			templateArgs.put("model", model);
+			templateArgs.put("methods", methodList);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("helper", new GeneratorHelper(null));
+			templateArgs.put("package", APP_DIR + ".servlet");
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
+		}
 	}
 }

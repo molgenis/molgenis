@@ -27,26 +27,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<configuration>
-							<tasks>
-								<path id="generate-classpath">
-									<path refid="maven.compile.classpath" />
-									<pathelement path="${basedir}/src/main/resources" />
-								</path>
-								<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-									<arg value="molgenis.properties" />
-									<arg value="${project.build.directory}/generated-sources/molgenis" />
-								</java>
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<!-- compile XML schemas -->
 			<plugin>
@@ -67,30 +47,23 @@
 					<schemaDirectory>src/main/resources/schemas/emeasureschemas</schemaDirectory>
 					<schemaDirectory>src/main/resources/schemas/multicacheschemas</schemaDirectory>
 				</configuration>
-			</plugin>			
-			<!-- add generated sources -->
+			</plugin>
+			<!-- add sources created by jaxb -->
+			<!-- add sources/resources created by molgenis generator -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>execution-sources</id>
+						<id>execution-jaxb</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-source</goal>
-							<goal>add-resource</goal>
 						</goals>
 						<configuration>
 							<sources>
 								<source>target/generated-sources/jaxb</source>
-								<source>target/generated-sources/molgenis/java</source>
 							</sources>
-							<resources>
-								<resource>
-									<directory>target/generated-sources/molgenis/sql</directory>
-									<directory>target/generated-sources/molgenis/java</directory>
-								</resource>
-							</resources>
 						</configuration>
 					</execution>
 				</executions>
@@ -129,6 +102,11 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-omx-auth</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
