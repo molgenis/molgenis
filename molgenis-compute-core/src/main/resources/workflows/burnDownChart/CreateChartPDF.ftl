@@ -31,10 +31,10 @@ bash -c "echo '\documentclass[a4paper]{article}
 }
 \end{table}
 
-\end{document}' > ${team}Chart.tex"
+\end{document}' > '${team}Chart.tex'"
 
 mkdir -p chart
-pdflatex -output-directory=chart ${team}Chart.tex
-pdflatex -output-directory=chart ${team}Chart.tex
+pdflatex -output-directory=chart '${team}Chart.tex'
+pdflatex -output-directory=chart '${team}Chart.tex'
 
-open chart/${team}Chart.pdf
+open 'chart/${team}Chart.pdf'
