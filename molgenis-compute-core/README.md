@@ -87,6 +87,8 @@ We do not allow 'missing values', so the set of values for P in f1 must be equal
 
 ## To do's
 
+* Make workflow 'template-able'
+* Allow steps without parameters? Currently, in workflow the parameters column may not be empty.
 * Enable transposed parameter files
 * If two rows contain a different value for the 'workflow' parameter, then this means that these rows will be processed by different workflows.
 * If a row contains a list of values for the 'workflow' parameter, then this row will be processed in parallel by each of the workflows.
