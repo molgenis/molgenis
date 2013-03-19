@@ -399,5 +399,6 @@
 		<module>molgenis-compute-core</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
+		<module>molgenis-omx-dataexplorer</module>
 	</modules>
 </project>
