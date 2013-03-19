@@ -39,9 +39,14 @@ public class TaskGenerator
 			// map global to local parameters
 			List<WritableTuple> localParameters = mapGlobalToLocalParameters(globalParameters, step);
 
+			//System.out.println(">> localParameters: \n" + localParameters);
+			WritableTuple wt = localParameters.get(0);
+					
 			// collapse parameter values
 			localParameters = collapseOnTargets(localParameters, step);
 
+			//System.out.println(">> localParameters 'collapseOnTargets': \n" + localParameters);
+			
 			// add the output templates/values + generate step ids
 			localParameters = addOutputValues(step, localParameters);
 
@@ -204,7 +209,7 @@ public class TaskGenerator
 			WritableTuple local = new KeyValueTuple();
 
 			// add previous steps
-			local.set(global);
+			//local.set(global);
 
 			// include row number for later ;-)
 			// local.set(Parameters.ID_COLUMN,

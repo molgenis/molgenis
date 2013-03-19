@@ -14,6 +14,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.log4j.BasicConfigurator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
 import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
@@ -36,12 +37,14 @@ public class ComputeCommandLine
 {
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) throws ParseException, ClassNotFoundException, IOException
-	{
+	{		
+		BasicConfigurator.configure();
+		
 		System.out.println("### MOLGENIS COMPUTE ###");
 		System.out.println("Version: "+ ComputeCommandLine.class.getPackage().getImplementationVersion());
-		Properties properties = new Properties();
-		properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
-		System.out.println("Git hash: " + properties.getProperty("git.commit.id.abbrev"));
+		//Properties properties = new Properties();
+		//properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
+		//System.out.println("Git hash: " + properties.getProperty("git.commit.id.abbrev"));
 		
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
@@ -81,9 +84,9 @@ public class ComputeCommandLine
 		}
 		catch (Exception e)
 		{
-			System.out.println(e.getMessage());
+			System.err.println(e.getMessage());
 
-			System.out.println("");
+			System.err.println("");
 
 			new HelpFormatter().printHelp("compute -p parameters.csv", options);
 		}
@@ -134,8 +137,7 @@ public class ComputeCommandLine
 
 		// parse workflow
 		compute.setWorkflow(WorkflowCsvParser.parse(workflowCsv));
-
-
+		
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
