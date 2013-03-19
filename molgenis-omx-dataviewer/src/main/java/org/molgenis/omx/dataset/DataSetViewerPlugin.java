@@ -29,7 +29,6 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.view.DataSetChooser;
 import org.molgenis.omx.view.DataSetDownloader;
-import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.HandleRequestDelegationException;
 
 import com.google.common.base.Predicate;
@@ -145,7 +144,7 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 					selectedDataSetId = dataSet.getId();
 				}
 
-				DataSetTable table = new DataSetTable(dataSet, db, ApplicationContextProvider.getApplicationContext());
+				DataSetTable table = new DataSetTable(dataSet, db);
 
 				if (selectedObservableFeatures != null)
 				{
@@ -176,7 +175,7 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 				// construct the gridview
 				JQGridSearchOptions searchOptions = new JQGridSearchOptions();
 				searchOptions.setMultipleGroup(false);
-				searchOptions.setMultipleSearch(true);
+				searchOptions.setMultipleSearch(false);
 				searchOptions.setShowQuery(false);
 
 				tupleTable = table;

@@ -6,7 +6,6 @@ import java.util.List;
 import app.DatabaseConfig;
 import java.util.List;
 
-import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
