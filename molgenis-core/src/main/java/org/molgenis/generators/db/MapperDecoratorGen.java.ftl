@@ -19,9 +19,10 @@ import java.util.List;
 import org.molgenis.framework.db.DatabaseException;
 
 import org.molgenis.framework.db.Mapper;
+import org.molgenis.framework.db.MapperDecorator;
 
 
-public class ${clazzName}<E extends ${entityClass}> extends MappingDecorator<E>
+public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 {
 	//Mapper is the generate thing
 	public ${clazzName}(Mapper generatedMapper)
