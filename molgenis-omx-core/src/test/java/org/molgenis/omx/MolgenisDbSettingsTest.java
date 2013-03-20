@@ -29,8 +29,9 @@ public class MolgenisDbSettingsTest
 		db = mock(Database.class);
 		RuntimeProperty property0 = new RuntimeProperty();
 		property0.setValue("value0");
-		when(db.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS, "property0")))
-				.thenReturn(Arrays.asList(property0));
+		when(
+				db.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+						RuntimeProperty.class.getSimpleName() + "_property0"))).thenReturn(Arrays.asList(property0));
 		DatabaseFactory.create(db);
 
 		molgenisDbSettings = new MolgenisDbSettings();

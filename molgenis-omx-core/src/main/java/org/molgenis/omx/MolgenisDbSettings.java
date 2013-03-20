@@ -23,7 +23,8 @@ public class MolgenisDbSettings implements MolgenisSettings
 	@Override
 	public String getProperty(String key, String defaultValue)
 	{
-		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS, key);
+		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+				RuntimeProperty.class.getSimpleName() + '_' + key);
 		List<RuntimeProperty> properties;
 		try
 		{
