@@ -14,11 +14,14 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenMessage;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import app.FillMetadata;
 
@@ -27,14 +30,16 @@ import app.FillMetadata;
  */
 public class Home extends PluginModel<Entity>
 {
-
 	private static final long serialVersionUID = 1L;
 
-	private final HomeModel model = new HomeModel();
+	private static final String DEFAULT_KEY_APP_HOME_HTML = "<p>Welcome to LifeLines!</p>";
+	private static final String KEY_APP_HOME_HTML = "app.home.html";
+
+	private HomeModel homeModel;
 
 	public HomeModel getMyModel()
 	{
-		return model;
+		return homeModel;
 	}
 
 	public Home(String name, ScreenController<?> parent)
@@ -63,8 +68,9 @@ public class Home extends PluginModel<Entity>
 	@Override
 	public void reload(Database db)
 	{
+		homeModel = new HomeModel();
+		homeModel.setHomeHtml(getMolgenisSetting(KEY_APP_HOME_HTML, DEFAULT_KEY_APP_HOME_HTML));
 
-		System.out.println("RELOAD aangeroepen");
 		List<MolgenisUser> listUsers;
 		try
 		{
@@ -98,4 +104,33 @@ public class Home extends PluginModel<Entity>
 		return true;
 	}
 
+	private String getMolgenisSetting(String key, String defaultValue)
+	{
+		try
+		{
+			MolgenisSettings molgenisSettings = ApplicationContextProvider.getApplicationContext().getBean(
+					MolgenisSettings.class);
+			return molgenisSettings.getProperty(key, defaultValue);
+		}
+		catch (NoSuchBeanDefinitionException e)
+		{
+			logger.warn(e);
+			return defaultValue;
+		}
+	}
+
+	public static class HomeModel
+	{
+		private String homeHtml;
+
+		public String getHomeHtml()
+		{
+			return homeHtml;
+		}
+
+		public void setHomeHtml(String homeHtml)
+		{
+			this.homeHtml = homeHtml;
+		}
+	}
 }
