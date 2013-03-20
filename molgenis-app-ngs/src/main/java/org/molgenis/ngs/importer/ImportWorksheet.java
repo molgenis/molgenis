@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.csv.CsvReader;
@@ -25,11 +27,18 @@ import org.molgenis.util.tuple.Tuple;
 
 public class ImportWorksheet
 {
+	private static Logger logger = Logger.getLogger(ImportWorksheet.class);
+
 	public static void main(String[] args) throws Exception
 	{
+		if (args.length != 2)
+		{
+			System.err.println("Usage: <GAF SequencingSampleDetails> <GAF SequencingProjects>");
+			return;
+		}
+
 		// GAFsheet SequencingSampleDetails and GAFsheet SequencingProjects
-		importSequencingSampleDetails(new File("D:/Downloads/MolgenisStuff/GAFSequencingSampleDetails.csv"), new File(
-				"D:/Downloads/MolgenisStuff/GAFSequencingProjects.csv"), true);
+		importSequencingSampleDetails(new File(args[0]), new File(args[1]), true);
 	}
 
 	private static void importSequencingSampleDetails(File csvs, File csvp, boolean debug) throws Exception
@@ -43,7 +52,7 @@ public class ImportWorksheet
 		Map<String, Flowcell> flowcells = new LinkedHashMap<String, Flowcell>();
 		Map<String, Project> projects = new LinkedHashMap<String, Project>();
 		Map<String, Sample> samples = new LinkedHashMap<String, Sample>();
-		Map<String, FlowcellLaneSampleBarcode> flowcellLaneSampleBarcodes = new LinkedHashMap<String, FlowcellLaneSampleBarcode>();
+		Map<String, List<FlowcellLaneSampleBarcode>> flowcellLaneSampleBarcodes = new LinkedHashMap<String, List<FlowcellLaneSampleBarcode>>();
 
 		// Import sheets
 		TupleReader readers = new CsvReader(csvs);
@@ -534,7 +543,14 @@ public class ImportWorksheet
 							flsb.setCapturingKit_CapturingKitName("None");
 						}
 
-						flowcellLaneSampleBarcodes.put(flsb.getSample_InternalId(), flsb);
+						List<FlowcellLaneSampleBarcode> flsbList = flowcellLaneSampleBarcodes.get(flsb
+								.getSample_InternalId());
+						if (flsbList == null)
+						{
+							flsbList = new ArrayList<FlowcellLaneSampleBarcode>();
+							flowcellLaneSampleBarcodes.put(flsb.getSample_InternalId(), flsbList);
+						}
+						flsbList.add(flsb);
 					}
 				}
 			}
@@ -543,41 +559,42 @@ public class ImportWorksheet
 		readerp.close();
 
 		// Show all collected values
-		for (FlowcellLaneSampleBarcode flsb : flowcellLaneSampleBarcodes.values())
+		for (List<FlowcellLaneSampleBarcode> flsbList : flowcellLaneSampleBarcodes.values())
 		{
-			System.out.println(flsb);
+			for (FlowcellLaneSampleBarcode flsb : flsbList)
+				logger.info(flsb);
 		}
 		for (Sample s : samples.values())
 		{
-			System.out.println(s);
+			logger.info(s);
 		}
 		for (Project p : projects.values())
 		{
-			System.out.println(p);
+			logger.info(p);
 		}
 		for (NgsUser u : users.values())
 		{
-			System.out.println(u);
+			logger.info(u);
 		}
 		for (SampleBarcode sb : sampleBarcodes.values())
 		{
-			System.out.println(sb);
+			logger.info(sb);
 		}
 		for (CapturingKit ck : capturingKits.values())
 		{
-			System.out.println(ck);
+			logger.info(ck);
 		}
 		for (PrepKit pk : prepKits.values())
 		{
-			System.out.println(pk);
+			logger.info(pk);
 		}
 		for (Machine m : machines.values())
 		{
-			System.out.println(m);
+			logger.info(m);
 		}
 		for (Flowcell f : flowcells.values())
 		{
-			System.out.println(f);
+			logger.info(f);
 		}
 
 		// Put values in database
@@ -600,46 +617,46 @@ public class ImportWorksheet
 				db.remove(db.find(NgsUser.class));
 			}
 
-			System.out.println("Imported " + db.add(new ArrayList<NgsUser>(users.values())) + " NgsUser(s)");
-			System.out.println("Imported " + db.add(new ArrayList<SampleBarcode>(sampleBarcodes.values()))
+			logger.info("Imported " + db.add(new ArrayList<NgsUser>(users.values())) + " NgsUser(s)");
+			logger.info("Imported " + db.add(new ArrayList<SampleBarcode>(sampleBarcodes.values()))
 					+ " SampleBarcode(s)");
-			System.out.println("Imported " + db.add(new ArrayList<CapturingKit>(capturingKits.values()))
-					+ " CapturingKit(s)");
-			System.out.println("Imported " + db.add(new ArrayList<PrepKit>(prepKits.values())) + " PrepKit(s)");
-			System.out.println("Imported " + db.add(new ArrayList<Machine>(machines.values())) + " Machine(s)");
-			System.out.println("Imported " + db.add(new ArrayList<Flowcell>(flowcells.values())) + " Flowcell(s)");
-			System.out.println("Imported " + db.add(new ArrayList<Project>(projects.values())) + " Project(s)");
-			System.out.println("Imported " + db.add(new ArrayList<Sample>(samples.values())) + " Sample(s)");
-			// System.out.println("Imported "
+			logger.info("Imported " + db.add(new ArrayList<CapturingKit>(capturingKits.values())) + " CapturingKit(s)");
+			logger.info("Imported " + db.add(new ArrayList<PrepKit>(prepKits.values())) + " PrepKit(s)");
+			logger.info("Imported " + db.add(new ArrayList<Machine>(machines.values())) + " Machine(s)");
+			logger.info("Imported " + db.add(new ArrayList<Flowcell>(flowcells.values())) + " Flowcell(s)");
+			logger.info("Imported " + db.add(new ArrayList<Project>(projects.values())) + " Project(s)");
+			logger.info("Imported " + db.add(new ArrayList<Sample>(samples.values())) + " Sample(s)");
+			// logger.info("Imported "
 			// + db.add(new
 			// ArrayList<FlowcellLaneSampleBarcode>(flowcellLaneSampleBarcodes.values()))
 			// + " FlowcellLaneSampleBarcode(s)");
 
 			// Debug
 			boolean crash = false;
-			for (FlowcellLaneSampleBarcode flsb : flowcellLaneSampleBarcodes.values())
+			int sampleRecordCounter = 0;
+			for (List<FlowcellLaneSampleBarcode> flsbList : flowcellLaneSampleBarcodes.values())
 			{
 				try
 				{
-					db.add(flsb);
+					db.add(flsbList);
+					sampleRecordCounter += flsbList.size();
 				}
 				catch (Exception ex)
 				{
-					System.out.println("error:" + ex.toString() + ". Value: " + flsb);
+					logger.error("error:" + ex.toString() + ". Value: " + StringUtils.join(flsbList, ","));
 					crash = true;
 				}
-				// System.out.println(flsb);
+				// logger.info(flsb);
 			}
 			if (!crash)
 			{
-				System.out.println("Imported " + flowcellLaneSampleBarcodes.values().size()
-						+ " FlowcellLaneSampleBarcode(s)");
+				logger.info("Imported " + sampleRecordCounter + " FlowcellLaneSampleBarcode(s)");
 			}
 
 			db.commitTx();
 			db.close();
 
-			System.out.println("Import completed succesfully.");
+			logger.info("Import completed succesfully.");
 		}
 		catch (Exception e)
 		{
