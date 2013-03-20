@@ -1,10 +1,18 @@
 package org.molgenis.omx;
 
+import java.util.List;
+
+import org.molgenis.dataexplorer.config.DataExplorerConfig;
+import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,7 +30,7 @@ import app.DatabaseConfig;
 @EnableWebMvc
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class })
+{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
@@ -37,6 +45,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+	}
+
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
+	{
+		converters.add(new GsonHttpMessageConverter());
 	}
 
 	/**
@@ -74,9 +88,21 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
 		result.setPreferFileSystemAccess(false);
-		result.setTemplateLoaderPath("classpath:/freemarker/");
+		result.setTemplateLoaderPath("classpath:/templates/");
 
 		return result;
+	}
+
+	/**
+	 * Used by system for example indexing. Should be replaced by a system user?
+	 * 
+	 * @return
+	 * @throws DatabaseException
+	 */
+	@Bean
+	public Database unauthorizedDatabase() throws DatabaseException
+	{
+		return new app.JpaDatabase();
 	}
 
 	@Controller
