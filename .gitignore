@@ -3,3 +3,6 @@ target/
 .project
 .classpath
 git.properties
+molgenis-compute-core/src/main/resources/workflows/*/out/
+molgenis-compute-core/test-output
+data/

@@ -32,34 +32,40 @@ public class RdfApiGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate("/" + this.getClass().getSimpleName() + ".n3.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		List<Entity> entityList = model.getEntities();
-		List<Method> methodList = model.getMethods();
-
-		File target = new File(this.getWebserverPath(options) + "/WEB-INF/molgenis-rdf-mapping.n3");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate("/" + this.getClass().getSimpleName() + ".n3.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		templateArgs.put("model", model);
-		templateArgs.put("methods", methodList);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("helper", new GeneratorHelper(null));
-		templateArgs.put("package", APP_DIR + ".servlet");
-		templateArgs.put("db_filepath", options.db_filepath);
-		templateArgs.put("db_user", options.db_user);
-		templateArgs.put("db_password", options.db_password);
-		templateArgs.put("db_uri", options.db_uri);
-		templateArgs.put("db_driver", options.db_driver);
-		templateArgs.put("db_jndiname", options.db_jndiname);
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			List<Entity> entityList = model.getEntities();
+			List<Method> methodList = model.getMethods();
 
-		logger.info("generated " + target);
+			File target = new File(this.getWebserverPath(options) + "/WEB-INF/molgenis-rdf-mapping.n3");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			templateArgs.put("model", model);
+			templateArgs.put("methods", methodList);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("helper", new GeneratorHelper(null));
+			templateArgs.put("package", APP_DIR + ".servlet");
+			templateArgs.put("db_filepath", options.db_filepath);
+			templateArgs.put("db_user", options.db_user);
+			templateArgs.put("db_password", options.db_password);
+			templateArgs.put("db_uri", options.db_uri);
+			templateArgs.put("db_driver", options.db_driver);
+			templateArgs.put("db_jndiname", options.db_jndiname);
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
+		}
 	}
 }

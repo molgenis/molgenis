@@ -8,11 +8,12 @@
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<plugin label="Importer (Dataset)" name="HL7StudyDataSetImporter" type="org.molgenis.lifelines.plugins.HL7StudyDataSetImporterController" />
 		
-        <menu name="admin">
+        <menu name="Admin">
 	        <menu name ="Entities">
 	            <form name="DataSet" entity="DataSet" />
 	            <form name="Protocol" entity="Protocol" />
 	            <form name="Feature" entity="ObservableFeature" />
+	            <form name="RuntimeProperty" entity="RuntimeProperty" />
 	       	</menu>
 	        <menu name="Auth" label="Users and permissions">
 				<menu label="Basic management" name="Management">
