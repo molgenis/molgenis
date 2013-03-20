@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.sampletab;
+package org.molgenis.sampletab;
 
 import java.io.File;
 import java.io.IOException;
@@ -225,10 +225,10 @@ public class SampleTabOmxConverter
 	public static void main(String args[]) throws IOException
 	{
 		new SampleTabOmxConverter("/Users/chaopang/Desktop/sample_data.xlsx", "GCR-ada");
-		if (args.length !=2)
+		if (args.length != 2)
 		{
-		    System.err.println("Usage: <sample_data.xlsx> submission-id ");
-		    return;
+			System.err.println("Usage: <sample_data.xlsx> submission-id ");
+			return;
 		}
 
 	}
