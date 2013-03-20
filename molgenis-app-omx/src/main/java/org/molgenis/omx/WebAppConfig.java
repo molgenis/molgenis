@@ -1,6 +1,5 @@
-package org.molgenis.lifelines;
+package org.molgenis.omx;
 
-import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
