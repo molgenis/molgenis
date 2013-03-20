@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="genomebrowser" label="Genomebrowser">
+	<plugin name="oc_header" type="org.molgenis.genomebrowser.plugins.header.Header" />
+	<menu name="main">
+		<plugin label="Genome Browser" name="GenomeBrowser" type="org.molgenis.omx.genomebrowser.GenomeBrowserPlugin" />
+        <menu name ="Entities">
+            <form name="Probe" entity="Probe" />
+            <form name="Chromosome" entity="Chromosome" />
+        </menu>
+	</menu>
+</molgenis>
