@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="ngs">
+	<plugin name="ngs_header" type="org.molgenis.ngs.plugins.header.Header" />
+	
+	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
+	
+	<menu name="main">
+		
+		<!-- <menu name="Samples">
+			<form name="Samples1" entity="Sample" label="NGS samples" viewtype="list" />
+		</menu> -->
+		
+		<form name="Samples1" entity="Sample" label="NGS samples" viewtype="list" />
+				
+		<form name="Projects" entity="Project" label="NGS projects" viewtype="list">
+			<form name="Samples2" entity="Sample" label="NGS samples" viewtype="list" />
+		</form>
+
+		<!-- <menu name ="FlowcellLaneSampleBarcodes">
+			<form name="LanesAndBarcodes1" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
+		</menu> -->
+		
+		<form name="LanesAndBarcodes1" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
+		
+		<form name="PoolsAndFlowcells" entity="Flowcell">
+			<form name="LanesAndBarcodes2" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
+		</form>
+		
+		<menu name="Settings" >
+			<form name="Users" entity="NgsUser" label="User" />
+			<form name="Flowcells" entity="Flowcell" label="Flowcell" />
+			<form name="SampleBarcodes" entity="SampleBarcode" label="Barcode" />
+			<form name="CapturingKits" entity="CapturingKit" label="Capturing kit" />
+			<form name="PrepKits" entity="PrepKit" label="Prep kit" />
+			<form name="Machines" entity="Machine" label="Machine" />
+		</menu>
+	</menu>
+	
+</molgenis>

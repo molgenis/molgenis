@@ -1,7 +1,4 @@
-package org.molgenis.omx.plugins.header;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.molgenis.ngs.plugins.header;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
