@@ -44,7 +44,7 @@
 			<unique fields="Name"/>
 		</entity>
 		<entity name="RuntimeProperty" implements="Identifiable"  xref_label="Name">
-			<field name="Value" length="127" type="varchar" nillable="false" />
+			<field name="Value" length="524288" type="varchar" nillable="false" />
 			<unique fields="Name" description="Name is unique within its type " />
 		</entity>
 	</module>

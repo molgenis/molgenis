@@ -316,7 +316,7 @@ public class ImportWorksheet
 				}
 				p.setGccAnalysis(gccAnalysis);
 
-				// Get remaining values from projectSheet
+				// TODO: Get remaining values from projectSheet
 				for (Tuple rowp : readerp)
 				{
 					if (rowp.getString("Project").toLowerCase().trim()
@@ -490,7 +490,7 @@ public class ImportWorksheet
 						// FlowcellLaneSampleBarcodeComment
 						if (row.getString("Comments") != null)
 						{
-							flsb.setFlowcellLaneSampleBarcodeComment(row.getString("Comments").replace("'", ""));
+							flsb.setFlowcellLaneSampleBarcodeComment(row.getString("Comments").replace("'", "`"));
 						}
 
 						// Flowcell

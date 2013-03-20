@@ -67,4 +67,10 @@ public class KeyValueTuple extends AbstractTuple implements WritableTuple
 			this.set(col, t.get(col));
 		}
 	}
+	
+	@Override
+	public void remove(String colName)
+	{
+		valueMap.remove(colName);
+	}
 }

@@ -16,12 +16,10 @@ import org.molgenis.model.elements.Model;
 import freemarker.template.Template;
 
 /**
- * This generator applies the template to each entity. It uses defaults for
- * template name, package name and classname: <li>template name is
- * this.getClass() + ".java.ftl" <li>package is {model.name}.{own package name}.
- * For example, org.molgenis.generate.foo.bar will be generated to
- * {model.name}.foo.bar. <li>class name is own class name without traling "Gen".
- * For example: FooBarGen will generate {EntityName}FooBar.java files.
+ * This generator applies the template to each entity. It uses defaults for template name, package name and classname:
+ * <li>template name is this.getClass() + ".java.ftl" <li>package is {model.name}.{own package name}. For example,
+ * org.molgenis.generate.foo.bar will be generated to {model.name}.foo.bar. <li>class name is own class name without
+ * traling "Gen". For example: FooBarGen will generate {EntityName}FooBar.java files.
  * 
  * @author Morris Swertz
  * @since 30-jul-2007
@@ -48,50 +46,56 @@ public abstract class ForEachEntityGenerator extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		// apply generator to each entity
-		for (Entity entity : model.getEntities())
+		if (options.generate_tests)
 		{
-			// calculate package from its own package
-			String packageName = entity.getNamespace().toLowerCase()
-					+ this.getClass().getPackage().toString()
-							.substring(Generator.class.getPackage().toString().length());
-			File targetDir = new File(this.getSourcePath(options) + packageName.replace(".", "/"));
-			if (handwritten) targetDir = new File(this.getHandWrittenPath(options) + packageName.replace(".", "/"));
+		}
+		else
+		{
+			Template template = this.createTemplate(this.getClass().getSimpleName() + getExtension() + ".ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-			if (!entity.isImported() && (!entity.isAbstract() || this.includeAbstract)
-					&& (!this.skipSystem() || !entity.isSystem()))
+			// apply generator to each entity
+			for (Entity entity : model.getEntities())
 			{
-				File targetFile = new File(targetDir + "/" + GeneratorHelper.getJavaName(entity.getName()) + getType()
-						+ getExtension());
-				if (!handwritten || !targetFile.exists())
+				// calculate package from its own package
+				String packageName = entity.getNamespace().toLowerCase()
+						+ this.getClass().getPackage().toString()
+								.substring(Generator.class.getPackage().toString().length());
+				File targetDir = new File(this.getSourcePath(options) + packageName.replace(".", "/"));
+				if (handwritten) targetDir = new File(this.getHandWrittenPath(options) + packageName.replace(".", "/"));
+
+				if (!entity.isImported() && (!entity.isAbstract() || this.includeAbstract)
+						&& (!this.skipSystem() || !entity.isSystem()))
 				{
-					boolean created = targetDir.mkdirs();
-					if (!created && !targetDir.exists())
-					{
-						throw new IOException("could not create " + targetDir);
-					}
-
-					// logger.debug("trying to generated "+targetFile);
-					templateArgs.put("entity", entity);
-					templateArgs.put("model", model);
-					templateArgs.put("db_driver", options.db_driver);
-					templateArgs.put("template", template.getName());
-					templateArgs.put("file", targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
+					File targetFile = new File(targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
 							+ getType() + getExtension());
-					templateArgs.put("package", packageName);
+					if (!handwritten || !targetFile.exists())
+					{
+						boolean created = targetDir.mkdirs();
+						if (!created && !targetDir.exists())
+						{
+							throw new IOException("could not create " + targetDir);
+						}
 
-					templateArgs.put("databaseImp", options.mapper_implementation);
-					templateArgs.put("jpa_use_sequence", options.jpa_use_sequence);
+						// logger.debug("trying to generated "+targetFile);
+						templateArgs.put("entity", entity);
+						templateArgs.put("model", model);
+						templateArgs.put("db_driver", options.db_driver);
+						templateArgs.put("template", template.getName());
+						templateArgs.put("file", targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
+								+ getType() + getExtension());
+						templateArgs.put("package", packageName);
 
-					OutputStream targetOut = new FileOutputStream(targetFile);
+						templateArgs.put("databaseImp", options.mapper_implementation);
+						templateArgs.put("jpa_use_sequence", options.jpa_use_sequence);
 
-					template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-					targetOut.close();
+						OutputStream targetOut = new FileOutputStream(targetFile);
 
-					logger.info("generated " + targetFile);
+						template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+						targetOut.close();
+
+						logger.info("generated " + targetFile);
+					}
 				}
 			}
 		}
@@ -118,8 +122,7 @@ public abstract class ForEachEntityGenerator extends Generator
 	}
 
 	/**
-	 * Whether this generator should generate to the handwritten folder
-	 * insteadof generated folder
+	 * Whether this generator should generate to the handwritten folder insteadof generated folder
 	 */
 	public boolean isHandwritten()
 	{
@@ -127,8 +130,7 @@ public abstract class ForEachEntityGenerator extends Generator
 	}
 
 	/**
-	 * Whether this generator should generate to the handwritten folder
-	 * insteadof generated folder
+	 * Whether this generator should generate to the handwritten folder insteadof generated folder
 	 */
 	public void setHandwritten(boolean handwritten)
 	{
