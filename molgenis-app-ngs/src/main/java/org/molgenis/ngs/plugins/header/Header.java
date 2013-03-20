@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.plugins.header;
+package org.molgenis.ngs.plugins.header;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -14,8 +14,7 @@ public class Header extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = 1L;
 
-	private static final String DEFAULT_KEY_APP_HREF_LOGO = "img/lifelines_letterbox_270x100.png";
-	private static final String DEFAULT_KEY_APP_HREF_CSS = "css/lifelines.css";
+	private static final String DEFAULT_KEY_APP_HREF_LOGO = "img/logo_molgenis.gif";
 	private static final String KEY_APP_HREF_LOGO = "app.href.logo";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
@@ -34,8 +33,9 @@ public class Header extends PluginModel<Entity>
 	@Override
 	public String getCustomHtmlHeaders()
 	{
-		String customCss = getMolgenisSetting(KEY_APP_HREF_CSS, DEFAULT_KEY_APP_HREF_CSS);
-		return "<link rel=\"stylesheet\" style=\"text/css\" type=\"text/css\" href=\"" + customCss + "\">\n";
+		String customCss = getMolgenisSetting(KEY_APP_HREF_CSS);
+		if (customCss == null) return super.getCustomHtmlHeaders();
+		else return "<link rel=\"stylesheet\" style=\"text/css\" type=\"text/css\" href=\"" + customCss + "\">\n";
 	}
 
 	@Override
@@ -66,6 +66,11 @@ public class Header extends PluginModel<Entity>
 	public boolean isVisible()
 	{
 		return true;
+	}
+
+	private String getMolgenisSetting(String key)
+	{
+		return getMolgenisSetting(key, null);
 	}
 
 	private String getMolgenisSetting(String key, String defaultValue)
