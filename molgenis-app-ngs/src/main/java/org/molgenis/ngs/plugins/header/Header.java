@@ -1,29 +1,41 @@
-/* Date:        March 23, 2011
- * Template:	PluginScreenJavaTemplateGen.java.ftl
- * generator:   org.molgenis.generators.ui.PluginScreenJavaTemplateGen 3.3.3
- * 
- * THIS FILE IS A TEMPLATE. PLEASE EDIT :-)
- */
-
 package org.molgenis.ngs.plugins.header;
 
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class Header extends PluginModel<Entity>
 {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -498412981769405874L;
+	private static final String DEFAULT_KEY_APP_HREF_LOGO = "img/logo_molgenis.gif";
+	private static final String KEY_APP_HREF_LOGO = "app.href.logo";
+	private static final String KEY_APP_HREF_CSS = "app.href.css";
+
+	private HeaderModel headerModel;
 
 	public Header(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
+	}
+
+	public HeaderModel getMyModel()
+	{
+		return headerModel;
+	}
+
+	@Override
+	public String getCustomHtmlHeaders()
+	{
+		String customCss = getMolgenisSetting(KEY_APP_HREF_CSS);
+		if (customCss == null) return super.getCustomHtmlHeaders();
+		else return "<link rel=\"stylesheet\" style=\"text/css\" type=\"text/css\" href=\"" + customCss + "\">\n";
 	}
 
 	@Override
@@ -35,62 +47,59 @@ public class Header extends PluginModel<Entity>
 	@Override
 	public String getViewTemplate()
 	{
-		return "templates/org/molgenis/ngs/plugins/header/Header.ftl";
+		return "templates/" + Header.class.getName().replace('.', '/') + ".ftl";
 	}
 
 	@Override
-	public void handleRequest(Database db, MolgenisRequest request)
+	public void handleRequest(Database db, MolgenisRequest request) throws DatabaseException
 	{
-		// replace example below with yours
-		// try
-		// {
-		// //start database transaction
-		// db.beginTx();
-		//
-		// //get the "__action" parameter from the UI
-		// String action = request.getAction();
-		//
-		// if( action.equals("do_add") )
-		// {
-		// Experiment e = new Experiment();
-		// e.set(request);
-		// db.add(e);
-		// }
-		//
-		// //commit all database actions above
-		// db.commitTx();
-		//
-		// } catch(Exception e)
-		// {
-		// db.rollbackTx();
-		// //e.g. show a message in your form
-		// }
 	}
 
 	@Override
 	public void reload(Database db)
 	{
-		// try
-		// {
-		// Database db = this.getDatabase();
-		// Query q = db.query(Experiment.class);
-		// q.like("name", "test");
-		// List<Experiment> recentExperiments = q.find();
-		//
-		// //do something
-		// }
-		// catch(Exception e)
-		// {
-		// //...
-		// }
+		this.headerModel = new HeaderModel();
+		headerModel.setHrefLogo(getMolgenisSetting(KEY_APP_HREF_LOGO, DEFAULT_KEY_APP_HREF_LOGO));
 	}
 
 	@Override
 	public boolean isVisible()
 	{
-		// you can use this to hide this plugin, e.g. based on user rights.
-		// e.g.
-		// if(!this.getLogin().hasEditPermission(myEntity)) return false;
 		return true;
+	}
+
+	private String getMolgenisSetting(String key)
+	{
+		return getMolgenisSetting(key, null);
+	}
+
+	private String getMolgenisSetting(String key, String defaultValue)
+	{
+		try
+		{
+			MolgenisSettings molgenisSettings = ApplicationContextProvider.getApplicationContext().getBean(
+					MolgenisSettings.class);
+			return molgenisSettings.getProperty(key, defaultValue);
+		}
+		catch (NoSuchBeanDefinitionException e)
+		{
+			logger.warn(e);
+			return defaultValue;
+		}
+	}
+
+	public static class HeaderModel
+	{
+		private String hrefLogo;
+
+		public String getHrefLogo()
+		{
+			return hrefLogo;
+		}
+
+		public void setHrefLogo(String hrefLogo)
+		{
+			this.hrefLogo = hrefLogo;
+		}
 	}
 }
