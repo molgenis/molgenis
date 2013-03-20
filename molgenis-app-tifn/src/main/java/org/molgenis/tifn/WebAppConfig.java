@@ -1,5 +1,8 @@
 package org.molgenis.tifn;
 
+import org.molgenis.omx.OmxConfig;
+import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,7 +19,8 @@ import app.DatabaseConfig;
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.molgenis")
-@Import(DatabaseConfig.class)
+@Import(
+{ DatabaseConfig.class, OmxConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
@@ -31,6 +35,17 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+	}
+
+	/**
+	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
+	 * 
+	 * @return
+	 */
+	@Bean
+	public ApplicationContextProvider applicationContextProvider()
+	{
+		return new ApplicationContextProvider();
 	}
 
 	@Controller
