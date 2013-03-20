@@ -387,18 +387,16 @@
 		<module>molgenis-core-ui</module>
 		<module>molgenis-omx-auth</module>
 		<module>molgenis-omx-core</module>
+		<module>molgenis-omx-dataexplorer</module>
 		<module>molgenis-omx-dataviewer</module>
 		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
+		<module>molgenis-app-omx</module>
 		<module>molgenis-app-omicsconnect</module>
-		<module>molgenis-app-tifn</module>
 		<module>molgenis-app-lifelines</module>
-		<module>molgenis-app-cbm</module>
-		<module>molgenis-app-gids</module>
 		<module>molgenis-compute-core</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
-		<module>molgenis-omx-dataexplorer</module>
 	</modules>
 </project>
