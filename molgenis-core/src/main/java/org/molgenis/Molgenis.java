@@ -70,7 +70,6 @@ import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
-import org.molgenis.generators.server.MolgenisResourceCopyGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
@@ -111,7 +110,11 @@ public class Molgenis
 			}
 			else if (args.length == 3)
 			{
-				if (args[2].equals("--updatedb"))
+				if (args[2].equals("--generatetests"))
+				{
+					new Molgenis(args[0], args[1]).generateTests();
+				}
+				else if (args[2].equals("--updatedb"))
 				{
 					new Molgenis(args[0], args[1]).updateDb(false);
 				}
@@ -244,12 +247,6 @@ public class Molgenis
 			generators.add(new UsedMolgenisOptionsGen());
 		}
 
-		// COPY resources
-		if (options.copy_resources)
-		{
-			generators.add(new MolgenisResourceCopyGen());
-		}
-
 		// DOCUMENTATION
 		if (options.generate_doc)
 		{
@@ -355,18 +352,6 @@ public class Molgenis
 				generators.add(new FillMetadataTablesGen());
 			}
 
-			if (options.generate_entityimport)
-			{
-				generators.add(new EntityImporterGen());
-
-			}
-
-			if (options.generate_entitiesimport)
-			{
-				generators.add(new EntitiesImporterGen());
-				generators.add(new EntitiesValidatorGen());
-			}
-
 			if (options.generate_metadata)
 			{
 				generators.add(new FillMetadataGen());
@@ -388,6 +373,16 @@ public class Molgenis
 			logger.info("SEVERE: Skipping ALL SQL ....");
 		}
 
+		generators.add(new EntityImporterGen());
+
+		if (options.generate_entityio)
+		{
+			generators.add(new EntitiesImporterGen());
+			generators.add(new EntitiesValidatorGen());
+			generators.add(new CsvEntityExporterGen());
+			generators.add(new ExcelEntityExporterGen());
+		}
+
 		if (options.generate_Python)
 		{
 			generators.add(new PythonDataTypeGen());
@@ -395,16 +390,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping Python interface ....");
-		}
-
-		// CSV
-		if (options.generate_csv)
-		{
-			generators.add(new CsvEntityExporterGen());
-		}
-		else
-		{
-			logger.info("Skipping CSV importers ....");
 		}
 
 		// R
@@ -485,16 +470,6 @@ public class Molgenis
 			logger.info("Skipping SOAP API ....");
 		}
 
-		// Excel
-		if (options.generate_ExcelImport)
-		{
-			generators.add(new ExcelEntityExporterGen());
-		}
-		else
-		{
-			logger.info("Skipping Excel importer ....");
-		}
-
 		// FIXME use configuration to add the generators
 
 		// clean out generators
@@ -530,6 +505,12 @@ public class Molgenis
 		MolgenisFieldTypes.addType(new TextField());
 		MolgenisFieldTypes.addType(new XrefField());
 		MolgenisFieldTypes.addType(new IntField());
+	}
+
+	public void generateTests() throws Exception
+	{
+		options.setGenerateTests(true);
+		generate();
 	}
 
 	/**

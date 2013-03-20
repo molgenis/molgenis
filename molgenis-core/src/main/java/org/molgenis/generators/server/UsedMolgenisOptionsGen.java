@@ -28,23 +28,29 @@ public class UsedMolgenisOptionsGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate(this.getClass().getSimpleName() + ".ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-		templateArgs.put("package", APP_DIR);
-		templateArgs.put("options", options);
-		templateArgs.put("model", model);
-
-		File target = new File(this.getSourcePath(options) + APP_DIR + "/servlet/UsedMolgenisOptions.java");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate(this.getClass().getSimpleName() + ".ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
+			templateArgs.put("package", APP_DIR);
+			templateArgs.put("options", options);
+			templateArgs.put("model", model);
 
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			File target = new File(this.getSourcePath(options) + APP_DIR + "/servlet/UsedMolgenisOptions.java");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
 
-		logger.info("generated " + target);
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
+		}
 	}
 }

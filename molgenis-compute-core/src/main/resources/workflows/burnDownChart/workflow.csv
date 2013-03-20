@@ -1,0 +1,2 @@
+step,protocol,parameters
+CreateChartPDF,CreateChartPDF.ftl,points=user.points;day=user.day;month=user.month;dayName=user.dayName;team=user.team;sprint=user.sprint

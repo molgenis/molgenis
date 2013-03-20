@@ -1,0 +1,2 @@
+parameters,workflow
+paramFiles/sprintParameters.csv,/Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/workflow.csv

@@ -12,6 +12,7 @@ import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.MolgenisEntity;
+import org.molgenis.omx.core.RuntimeProperty;
 </#if>
 
 import org.molgenis.framework.db.Database;
@@ -67,24 +68,24 @@ public class FillMetadata {
 </#if>
 
 
-		MolgenisUser user1 = new MolgenisUser();
-		user1.setName("admin");
-		user1.setIdentifier("admin");
-		user1.setPassword("md5_21232f297a57a5a743894a0e4a801fc3");
-		user1.setEmail("");
-		user1.setFirstName("admin");
-		user1.setLastName("admin");
-		user1.setActive(true);
-		user1.setSuperuser(true);
+		MolgenisUser userAdmin = new MolgenisUser();
+		userAdmin.setName("admin");
+		userAdmin.setIdentifier("admin");
+		userAdmin.setPassword("md5_21232f297a57a5a743894a0e4a801fc3");
+		userAdmin.setEmail("");
+		userAdmin.setFirstName("admin");
+		userAdmin.setLastName("admin");
+		userAdmin.setActive(true);
+		userAdmin.setSuperuser(true);
 		
-		MolgenisUser user2 = new MolgenisUser();
-		user2.setName("anonymous");
-		user2.setIdentifier("anonymous");
-		user2.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf");
-		user2.setEmail("");
-		user2.setFirstName("anonymous");
-		user2.setLastName("anonymous");
-		user2.setActive(true);
+		MolgenisUser userAnonymous = new MolgenisUser();
+		userAnonymous.setName("anonymous");
+		userAnonymous.setIdentifier("anonymous");
+		userAnonymous.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf");
+		userAnonymous.setEmail("");
+		userAnonymous.setFirstName("anonymous");
+		userAnonymous.setLastName("anonymous");
+		userAnonymous.setActive(true);
 
 		MolgenisGroup group1 = new MolgenisGroup();
 		group1.setName("system");
@@ -94,8 +95,8 @@ public class FillMetadata {
 		group2.setIdentifier("AllUsers");
 
 <#if databaseImpl == 'JPA'>
-        em.persist(user1);
-        em.persist(user2);
+        em.persist(userAdmin);
+        em.persist(userAnonymous);
         em.persist(group1);
         em.persist(group2);
 
@@ -107,8 +108,8 @@ public class FillMetadata {
 <#else>
         db.beginTx();
 		//doesn't work fix:
-		db.add(user1);
-		db.add(user2);
+		db.add(userAdmin);
+		db.add(userAnonymous);
 		db.add(group1);
 		db.add(group2);	
 </#if>
@@ -126,25 +127,25 @@ public class FillMetadata {
 		mrgl1.setGroup_Id(group1.getId());
 		mrgl1.setIdentifier(group1.getIdentifier());
 		mrgl1.setName(group1.getName());
-		mrgl1.setRole(user1.getId());
+		mrgl1.setRole(userAdmin.getId());
 
 		MolgenisRoleGroupLink mrgl2 = new MolgenisRoleGroupLink();
 		mrgl2.setGroup_Id(group2.getId());
 		mrgl2.setIdentifier(group2.getIdentifier());
 		mrgl2.setName(group2.getName());
-		mrgl2.setRole(user1.getId());		
+		mrgl2.setRole(userAdmin.getId());		
 
 		MolgenisRoleGroupLink mrgl3 = new MolgenisRoleGroupLink();
 		mrgl3.setGroup_Id(group1.getId());
 		mrgl3.setIdentifier("mrgl3");
 		mrgl3.setName(group1.getName());
-		mrgl3.setRole(user2.getId());
+		mrgl3.setRole(userAnonymous.getId());
 
 		MolgenisRoleGroupLink mrgl4 = new MolgenisRoleGroupLink();
 		mrgl4.setGroup_Id(group2.getId());
 		mrgl4.setIdentifier("mrgl4");
 		mrgl4.setName(group2.getName());
-		mrgl4.setRole(user2.getId());		
+		mrgl4.setRole(userAnonymous.getId());		
 		
 		db.add(mrgl1);
 		db.add(mrgl2);
@@ -205,17 +206,27 @@ public class FillMetadata {
 		</#if>
 	</#if>
 </#list>
-		{
-			//INSERT INTO MolgenisPermission (role_, entity, permission) SELECT 3, id, 'read' FROM MolgenisEntity WHERE MolgenisEntity.name = 'UserLoginPlugin';
-			MolgenisEntity insertEntities = db.find(MolgenisEntity.class, new QueryRule("name", Operator.EQUALS, loginPluginName)).get(0);		
-			MolgenisPermission mp = new MolgenisPermission();
-			mp.setRole(user2.getId());
-			mp.setName(user2.getName());
-			mp.setIdentifier(user2.getIdentifier());
-			mp.setEntity(insertEntities.getId());
-			mp.setPermission("read");
-			db.add(mp);
-		}
+<#-- permit user 'anonymous' to read a login plugin -->
+		MolgenisEntity loginPluginEntity = db.find(MolgenisEntity.class, new QueryRule("name", Operator.EQUALS, loginPluginName)).get(0);		
+		MolgenisPermission loginPluginPermission = new MolgenisPermission();
+		loginPluginPermission.setRole(userAnonymous.getId());
+		loginPluginPermission.setName(userAnonymous.getName());
+<#-- identifier must be unique -->		
+		loginPluginPermission.setIdentifier(MolgenisEntity.class.getSimpleName() + '_' + userAnonymous.getIdentifier() + '_' + loginPluginName);
+		loginPluginPermission.setEntity(loginPluginEntity.getId());
+		loginPluginPermission.setPermission("read");
+		db.add(loginPluginPermission);
+			
+<#-- permit user 'anonymous' to read RuntimeProperty instances -->
+		MolgenisEntity runtimePropertyEntity = db.find(MolgenisEntity.class, new QueryRule("name", Operator.EQUALS, RuntimeProperty.class.getSimpleName())).get(0);		
+		MolgenisPermission runtimePropertyPermission = new MolgenisPermission();
+		runtimePropertyPermission.setRole(userAnonymous.getId());
+		runtimePropertyPermission.setName(userAnonymous.getName());
+<#-- identifier must be unique -->		
+		runtimePropertyPermission.setIdentifier(MolgenisEntity.class.getSimpleName() + '_' + userAnonymous.getIdentifier() + '_' + RuntimeProperty.class.getSimpleName());
+		runtimePropertyPermission.setEntity(runtimePropertyEntity.getId());
+		runtimePropertyPermission.setPermission("read");
+		db.add(runtimePropertyPermission);
 		
 		db.commitTx();
 		

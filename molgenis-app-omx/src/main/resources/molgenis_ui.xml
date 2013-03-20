@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="omx" label="Molgenis">
+	<plugin name="oc_header" type="org.molgenis.omx.plugins.header.Header" />
+	<menu name="main">
+		<plugin label="Home" name="Home" type="org.molgenis.omx.plugins.home.Home"/>
+		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
+		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
+		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+		<menu name="Converters">
+			<plugin label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverter" />
+		</menu>
+        <menu name="Admin">
+	        <menu name ="Entities">
+	            <form name="DataSet" entity="DataSet" />
+	            <form name="Protocol" entity="Protocol" />
+	            <form name="Feature" entity="ObservableFeature" />
+	            <form name="RuntimeProperty" entity="RuntimeProperty" />
+	       	</menu>
+	        <menu name="Auth" label="Users and permissions">
+				<menu label="Basic management" name="Management">
+					<form name="MolgenisUser" entity="MolgenisUser" />
+					<form name="MolgenisGroup" entity="MolgenisGroup" />
+					<form name="MolgenisRoleGroupLink" entity="MolgenisRoleGroupLink" />
+					<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
+					<form name="MolgenisPermission" entity="MolgenisPermission" />
+				</menu>
+				<plugin label="My permissions" name="PermissionManagementPlugin"
+					type="org.molgenis.omx.auth.service.permissionmanagement.PermissionManagementPlugin" />
+				<plugin label="Upgrade person to user" name="UserToPersonPlugin"
+					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
+				<plugin label="Security tokens" name="TokenManagerPlugin"
+					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
+					
+			</menu>	
+		</menu> <!-- admin panels -->	
+		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
+	</menu>
+</molgenis>

@@ -12,6 +12,6 @@ public class CopyFileWorkflowTest
 	public void test() throws IOException
 	{
 		Compute c = ComputeCommandLine.create("src/main/resources/workflows/copyFile/workflow.csv", new String[]
-		{ "src/main/resources/workflows/copyFile/parameters.csv", "src/main/resources/workflows/copyFile/constants.csv" }, "example-output/copyfile");
+		{ "src/main/resources/workflows/copyFile/parameters.csv", "src/main/resources/workflows/copyFile/constants.csv" }, "target/example-output/copyfile");
 	}
 }

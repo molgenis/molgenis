@@ -40,42 +40,48 @@ public class DotDocGen extends Generator
 
 	public void generate(Model model, MolgenisOptions options, boolean wait) throws Exception
 	{
-		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		File target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram.dot");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
-
-		List<Entity> entityList = model.getEntities();
-		// MolgenisLanguage.sortEntitiesByDependency(entityList, model); // side
-		templateArgs.put("model", model);
-		templateArgs.put("module", model);
-		templateArgs.put("entities", entityList);
-		templateArgs.put("skipinterfaces", true);
-		templateArgs.put("rendersystem", false);
-		apply(templateArgs, template, target);
-		logger.info("generated " + target);
-		executeDot(target, "png", wait);
-
-		// repeat for each package
-		for (Module module : model.getModules())
+		else
 		{
-			entityList = module.getEntities();
-			templateArgs.put("model", model);
-			templateArgs.put("module", module);
-			templateArgs.put("entities", entityList);
-			templateArgs.put("skipinterfaces", false);
-			templateArgs.put("rendersystem", false);
-			target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram-" + module.getName()
-					+ ".dot");
-			apply(templateArgs, template, target);
+			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-			executeDot(target, "png", wait);
+			File target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram.dot");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
+
+			List<Entity> entityList = model.getEntities();
+			// MolgenisLanguage.sortEntitiesByDependency(entityList, model); // side
+			templateArgs.put("model", model);
+			templateArgs.put("module", model);
+			templateArgs.put("entities", entityList);
+			templateArgs.put("skipinterfaces", true);
+			templateArgs.put("rendersystem", false);
+			apply(templateArgs, template, target);
 			logger.info("generated " + target);
+			executeDot(target, "png", wait);
+
+			// repeat for each package
+			for (Module module : model.getModules())
+			{
+				entityList = module.getEntities();
+				templateArgs.put("model", model);
+				templateArgs.put("module", module);
+				templateArgs.put("entities", entityList);
+				templateArgs.put("skipinterfaces", false);
+				templateArgs.put("rendersystem", false);
+				target = new File(this.getDocumentationPath(options) + "/objectmodel-uml-diagram-" + module.getName()
+						+ ".dot");
+				apply(templateArgs, template, target);
+
+				executeDot(target, "png", wait);
+				logger.info("generated " + target);
+			}
 		}
 	}
 
