@@ -1,4 +1,5 @@
 <#macro Home screen>
+<#assign model = screen.myModel>
 <!-- normally you make one big form for the whole plugin-->
 <form method="post" enctype="multipart/form-data" name="${screen.name}" action="">
 	<!--needed in every form: to redirect the request to the right screen-->
@@ -8,10 +9,7 @@
 	<!--need to be set to "true" in order to force a download-->
 	<input type="hidden" name="__show">
 	
-	
-
-	
-<!-- this shows a title and border -->
+<#-- this shows a title and border -->
 	<div class="formscreen">
 		<div class="form_header" id="${screen.getName()}">
 		${screen.label}
@@ -25,25 +23,7 @@
 		<p class="errormessage">${message.text}</p>
 			</#if>
 		</#list>
-		
-<#if screen.myModel?exists>
-	<#assign modelExists = true>
-	<#assign model = screen.myModel>
-<#else>
-	No model. An error has occurred.
-	<#assign modelExists = false>
-</#if>
-
-
-<#if modelExists>
-	
-	<br><br>
-	Welcome to LifeLines!
-	<br><br>
-	
-</#if>
-
-
+		${model.homeHtml}
 	</div>
 </form>
 </#macro>
