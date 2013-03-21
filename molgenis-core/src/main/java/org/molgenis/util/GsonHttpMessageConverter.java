@@ -22,6 +22,8 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -37,6 +39,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 
 /**
+ * Converts objects to json string and vica versa If logging is set to debug it
+ * will print the incoming and outgoing json strings
+ * 
  * @author Roy Clarkson
  * @since 1.0
  */
@@ -44,6 +49,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 {
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 	private static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssz";
+	private static final Logger LOG = Logger.getLogger(GsonHttpMessageConverter.class);
 	private final Gson gson;
 	private Type type = null;
 	private boolean prefixJson = false;
@@ -54,7 +60,15 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 */
 	public GsonHttpMessageConverter()
 	{
-		this(new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).serializeNulls().disableHtmlEscaping().create());
+		super(new MediaType("application", "json", DEFAULT_CHARSET));
+
+		GsonBuilder builder = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).serializeNulls().disableHtmlEscaping();
+		if (LOG.isDebugEnabled())
+		{
+			builder = builder.setPrettyPrinting();
+		}
+
+		gson = builder.create();
 	}
 
 	/**
@@ -117,18 +131,29 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException,
 			HttpMessageNotReadableException
 	{
-
 		Reader json = new InputStreamReader(inputMessage.getBody(), getCharset(inputMessage.getHeaders()));
-
 		try
 		{
 			Type typeOfT = getType();
-			if (typeOfT != null)
+			if (LOG.isDebugEnabled())
 			{
-				return this.gson.fromJson(json, typeOfT);
+				String jsonStr = IOUtils.toString(json);
+				LOG.debug("Json request:\n" + jsonStr);
+
+				if (typeOfT != null)
+				{
+					return this.gson.fromJson(jsonStr, typeOfT);
+				}
+
+				return this.gson.fromJson(jsonStr, clazz);
 			}
 			else
 			{
+				if (typeOfT != null)
+				{
+					return this.gson.fromJson(json, typeOfT);
+				}
+
 				return this.gson.fromJson(json, clazz);
 			}
 		}
@@ -144,6 +169,10 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		{
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
+		finally
+		{
+			IOUtils.closeQuietly(json);
+		}
 	}
 
 	@Override
@@ -156,25 +185,54 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 		try
 		{
-			if (this.prefixJson)
-			{
-				writer.append("{} && ");
-			}
 			Type typeOfSrc = getType();
-			if (typeOfSrc != null)
+
+			if (LOG.isDebugEnabled())
 			{
-				this.gson.toJson(o, typeOfSrc, writer);
+				StringBuilder sb = new StringBuilder();
+				if (this.prefixJson)
+				{
+					sb.append("{} && ");
+				}
+
+				if (typeOfSrc != null)
+				{
+					sb.append(gson.toJson(o, typeOfSrc));
+				}
+				else
+				{
+					sb.append(gson.toJson(o));
+				}
+
+				LOG.debug("Json response:\n" + sb.toString());
+				writer.write(sb.toString());
 			}
 			else
 			{
-				this.gson.toJson(o, writer);
+				if (this.prefixJson)
+				{
+					writer.append("{} && ");
+				}
+
+				if (typeOfSrc != null)
+				{
+					this.gson.toJson(o, typeOfSrc, writer);
+				}
+				else
+				{
+					this.gson.toJson(o, writer);
+				}
 			}
-			writer.close();
 		}
 		catch (JsonIOException ex)
 		{
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
+		finally
+		{
+			IOUtils.closeQuietly(writer);
+		}
+
 	}
 
 	// helpers
