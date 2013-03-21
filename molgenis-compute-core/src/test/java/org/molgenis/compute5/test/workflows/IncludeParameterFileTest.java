@@ -12,6 +12,7 @@ public class IncludeParameterFileTest
 	public void test() throws IOException
 	{
 		Compute c = ComputeCommandLine.create("", new String[]
-		{ "src/main/resources/workflows/example1.csv", "src/main/resources/workflows/includeParams/parameters.csv"}, "target/example-output/includeParameters");
+		{ "src/main/resources/workflows/example1.csv", "src/main/resources/workflows/includeParams/parameters.csv" },
+				"target/example-output/includeParameters");
 	}
 }
