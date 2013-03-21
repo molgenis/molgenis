@@ -54,8 +54,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 */
 	public GsonHttpMessageConverter()
 	{
-		this(new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).serializeNulls().setPrettyPrinting()
-				.disableHtmlEscaping().create());
+		this(new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).serializeNulls().disableHtmlEscaping().create());
 	}
 
 	/**

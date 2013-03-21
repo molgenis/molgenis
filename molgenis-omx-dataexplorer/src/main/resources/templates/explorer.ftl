@@ -13,7 +13,7 @@
 						url: "/search/",
 						data: $('#request').val(),
 						success: function( data ) {
-							$('#response').val(JSON.stringify(data));
+							$('#response').val(JSON.stringify(data, undefined, 2));
 						}
 					});
 				}
