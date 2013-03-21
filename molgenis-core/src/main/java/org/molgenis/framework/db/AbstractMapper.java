@@ -16,7 +16,7 @@ import org.molgenis.util.tuple.Tuple;
 public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 {
 	/** database */
-	private Database database;
+	private final Database database;
 
 	/** batch size */
 	public static final int BATCH_SIZE = 500;
@@ -179,7 +179,7 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 			// commit all batches
 			if (privateTx) getDatabase().commitTx();
 
-			logger.info(updatedRows + " " + this.create().getClass().getSimpleName() + " objects added");
+			logger.debug(updatedRows + " " + this.create().getClass().getSimpleName() + " objects added");
 			return updatedRows;
 		}
 		catch (Exception sqle)

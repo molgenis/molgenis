@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.sampletab;
+package org.molgenis.sampletab;
 
 import java.io.File;
 import java.io.IOException;
