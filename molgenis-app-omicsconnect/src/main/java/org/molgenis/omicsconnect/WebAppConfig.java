@@ -52,7 +52,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@RequestMapping("/")
 	public static class RootController
 	{
-		@RequestMapping(method = RequestMethod.GET)
+		@RequestMapping(method =
+		{ RequestMethod.GET, RequestMethod.POST })
 		public String index()
 		{
 			return "forward:molgenis.do";
