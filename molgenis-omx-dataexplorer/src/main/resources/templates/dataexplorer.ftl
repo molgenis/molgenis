@@ -2,15 +2,15 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="css/jquery-ui-1.9.2.custom.min.css" type="text/css">
-		<link rel="stylesheet" href="css/chosen.css" type="text/css">
-		<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-		<link rel="stylesheet" href="css/dataexplorer.css" type="text/css">
-		<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
-		<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
-		<script type="text/javascript" src="js/chosen.jquery.min.js"></script>
-		<script type="text/javascript" src="js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="js/dataexplorer.js"></script>
+		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/dataexplorer.css" type="text/css">
+		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/dataexplorer.js"></script>
 	</head>
 	<body>
 		<div class="container-fluid">
