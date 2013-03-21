@@ -19,5 +19,10 @@
 			<artifactId>spring-web</artifactId>
 			<version>3.2.1.RELEASE</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>3.2.1.RELEASE</version>
+		</dependency>
     </dependencies>
 </project>

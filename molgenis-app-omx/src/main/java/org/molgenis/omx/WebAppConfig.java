@@ -6,6 +6,7 @@ import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,8 @@ import app.DatabaseConfig;
 @EnableWebMvc
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class })
+{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class,
+		SearchSecurityConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
@@ -105,6 +107,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		return new app.JpaDatabase();
 	}
 
+	/**
+	 * Redirects '/' to the Home plugin
+	 * 
+	 */
 	@Controller
 	@RequestMapping("/")
 	public static class RootController

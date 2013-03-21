@@ -8,6 +8,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -16,13 +17,30 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author erwin
  * 
  */
-public class DataSetsIndexer
+public class DataSetsIndexer implements InitializingBean
 {
-	@Autowired
 	private SearchService searchService;
+	private Database unauthorizedDatabase;
+
+	@Autowired
+	public void setSearchService(SearchService searchService)
+	{
+		this.searchService = searchService;
+	}
 
 	@Resource(name = "unauthorizedDatabase")
-	private Database unauthorizedDatabase;
+	public void setUnauthorizedDatabase(Database unauthorizedDatabase)
+	{
+		this.unauthorizedDatabase = unauthorizedDatabase;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
+		if (unauthorizedDatabase == null) throw new IllegalArgumentException(
+				"Missing bean of type Database with name 'unauthorizedDatabase'");
+	}
 
 	public void index() throws DatabaseException, TableException
 	{
@@ -36,4 +54,5 @@ public class DataSetsIndexer
 	{
 		searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 	}
+
 }

@@ -1,10 +1,12 @@
 package org.molgenis.search;
 
+import static org.molgenis.search.SearchController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
 
-import org.molgenis.framework.db.Database;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -23,13 +25,26 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Scope(SCOPE_REQUEST)
 @Controller
-@RequestMapping("/search")
-public class SearchController
+@RequestMapping(URI)
+public class SearchController implements InitializingBean
 {
-	@Autowired
+	public static final String URI = "/search";
+	private static final Logger logger = Logger.getLogger(SearchController.class);
 	private SearchService searchService;
 
-	@RequestMapping(method = POST, produces = APPLICATION_JSON_VALUE)
+	@Autowired
+	public void setSearchService(SearchService searchService)
+	{
+		this.searchService = searchService;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
+	}
+
+	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<SearchResult> search(@RequestBody
 	SearchRequest request)
@@ -41,7 +56,7 @@ public class SearchController
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error("Exception calling searchservice for request [" + request + "]", e);
 			result = new SearchResult(e.getMessage());
 		}
 
