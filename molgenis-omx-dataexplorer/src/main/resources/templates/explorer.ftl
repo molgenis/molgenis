@@ -10,7 +10,7 @@
 					$.ajax({
 						contentType: "application/json",
 						method: "POST",
-						url: "/search/",
+						url: "/search",
 						data: $('#request').val(),
 						success: function( data ) {
 							$('#response').val(JSON.stringify(data, undefined, 2));
@@ -26,7 +26,7 @@
 		
 		<#if dataset??>
 			<div>
-				<textarea cols=75 rows=10 id="request">{entityName:"${dataset}", queryRules:[{operator:SEARCH, value:"diabetes"}]}</textarea>
+				<textarea cols=75 rows=10 id="request">{documentType:"${dataset}", queryRules:[{operator:SEARCH, value:"diabetes"}]}</textarea>
 				<button onclick="search()">SEARCH</button>
 			</div>
 			<div>
