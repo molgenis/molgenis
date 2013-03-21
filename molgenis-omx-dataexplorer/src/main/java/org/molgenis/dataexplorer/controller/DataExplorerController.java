@@ -58,12 +58,12 @@ public class DataExplorerController
 			model.addAttribute("dataset", dataSets.get(0));
 		}
 
-		return "explorer";
+		return "dataexplorer";
 	}
 
 	/**
-	 * When someone directly accesses /explorer and is not logged in an
-	 * DataAccessException is thrown, redirect him to the home page
+	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
+	 * to the home page
 	 * 
 	 * @return
 	 */
