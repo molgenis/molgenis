@@ -38,7 +38,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is
+	 * not managed by Spring
 	 * 
 	 * @return
 	 */
@@ -52,7 +53,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@RequestMapping("/")
 	public static class RootController
 	{
-		@RequestMapping(method = RequestMethod.GET)
+		@RequestMapping(method =
+		{ RequestMethod.GET, RequestMethod.POST })
 		public String index()
 		{
 			return "forward:molgenis.do";

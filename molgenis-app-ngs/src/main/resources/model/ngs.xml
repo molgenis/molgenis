@@ -18,7 +18,7 @@
 			<field name="ProjectAnalist" type="mref" xref_entity="NgsUser" description="The user which will be responsible for performing the wet-lab activities." nillable="true" label="Analist name" />
 			<!-- <field name="ProjectPlannedStartDate" type="datetime" description="The date a project is expected to start" nillable="true" label="Planned start date" />  -->
 			<field name="ProjectPlannedFinishDate" type="datetime" description="The date a project is expected to be finished" nillable="true" label="Planned finish date" /> <!-- In the GAF-lijst referred to as TargetDateShipment -->
-			<field name="LaneAmount" type="int" description="Number of lanes planned in this project" nillable="true" label="Lane amount" />
+			<field name="LaneAmount" type="decimal" description="Number of lanes planned in this project" nillable="true" label="Lane amount" />
 			<field name="SampleAmount" type="int" description="Number of samples planned in this project" nillable="true" label="Sample amount" />
 			<field name="SeqType" type="enum" enum_options="[SR,PE,Matepair,Unknown]" default="PE" description="The type of sequencing." nillable="true" label="Sequencing type" />
 			<!-- <field name="Multiplexed" type="bool" description="Indication if samples will be multiplexed (e.g. more then one sample will be added on one lane)." label="Multiplex" default="false" /> -->

@@ -26,6 +26,8 @@
 			<form name="LanesAndBarcodes2" entity="FlowcellLaneSampleBarcode" label="NGS FlowcellLaneSampleBarcodes" viewtype="list" />
 		</form>
 		
+		<plugin name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
+		
 		<menu name="Settings" >
 			<form name="Users" entity="NgsUser" label="User" />
 			<form name="Flowcells" entity="Flowcell" label="Flowcell" />
