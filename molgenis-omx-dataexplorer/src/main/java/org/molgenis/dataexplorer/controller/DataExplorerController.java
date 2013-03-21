@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Scope("request")
 @Controller
-@RequestMapping("/explorer")
+@RequestMapping("/plugin/dataexplorer")
 public class DataExplorerController
 {
 	@Autowired
@@ -41,14 +41,7 @@ public class DataExplorerController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws DatabaseException
 	{
-		model.addAttribute("message", "Hey dude");
-		List<DataSet> dataSets = database.find(DataSet.class);
-		if (!dataSets.isEmpty())
-		{
-			model.addAttribute("dataset", dataSets.get(0).getName());
-		}
-
-		return "explorer";
+		return "dataexplorer";
 	}
 
 	@RequestMapping("/index")
