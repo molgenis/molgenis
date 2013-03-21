@@ -2,8 +2,10 @@ package org.molgenis.elasticsearch;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +54,17 @@ public class ElasticSearchServiceTest
 	public void afterClass()
 	{
 		client.close();
+	}
+
+	@Test
+	public void testDocumentTypeExists()
+	{
+		assertFalse(searchService.documentTypeExists("xxx"));
+
+		searchService.updateIndex("beer", Arrays.asList(new TestEntity(1)));
+		waitForIndexUpdate();
+
+		assertTrue(searchService.documentTypeExists("beer"));
 	}
 
 	@Test
@@ -118,7 +131,7 @@ public class ElasticSearchServiceTest
 		assertNotNull(hits);
 		assertEquals(hits.size(), 1);
 		assertEquals(hits.get(0).getId(), "1");
-		assertEquals(hits.get(0).getType(), "fruit");
+		assertEquals(hits.get(0).getDocumentType(), "fruit");
 		assertEquals(hits.get(0).getHref(), "/api/v1/fruit/1");
 
 		Map<String, Object> objectValueMapExpected = new LinkedHashMap<String, Object>();
@@ -139,14 +152,14 @@ public class ElasticSearchServiceTest
 		assertNotNull(hits);
 		assertEquals(hits.size(), 2);
 		assertEquals(hits.get(0).getId(), "3");
-		assertEquals(hits.get(0).getType(), "fruit");
+		assertEquals(hits.get(0).getDocumentType(), "fruit");
 		assertEquals(hits.get(0).getHref(), "/api/v1/fruit/3");
 		objectValueMapExpected = new LinkedHashMap<String, Object>();
 		objectValueMapExpected.put("id", 3);
 		assertEquals(hits.get(0).getColumnValueMap(), objectValueMapExpected);
 		assertEquals(hits.get(1).getId(), "4");
 		assertEquals(hits.get(1).getHref(), "/api/v1/fruit/4");
-		assertEquals(hits.get(1).getType(), "fruit");
+		assertEquals(hits.get(1).getDocumentType(), "fruit");
 		objectValueMapExpected = new LinkedHashMap<String, Object>();
 		objectValueMapExpected.put("id", 4);
 		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
