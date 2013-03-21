@@ -113,7 +113,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		{ RequestMethod.GET, RequestMethod.POST })
 		public String index()
 		{
-			return "forward:molgenis.do";
+			return "redirect:molgenis.do?__target=main&select=Home";
 		}
 	}
 }
