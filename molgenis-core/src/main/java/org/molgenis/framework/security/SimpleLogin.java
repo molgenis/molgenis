@@ -15,6 +15,11 @@ public class SimpleLogin implements Login
 
 	}
 
+	public SimpleLogin(TokenFactory tm)
+	{
+
+	}
+
 	public SimpleLogin(Database db, TokenFactory tm)
 	{
 

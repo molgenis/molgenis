@@ -1,4 +1,4 @@
 #input input
-#output output ${input}
+#output output ${input}AsOutput
 
-blaat
+echo "We use this protocol only to see whether we can pass a param to a next step."

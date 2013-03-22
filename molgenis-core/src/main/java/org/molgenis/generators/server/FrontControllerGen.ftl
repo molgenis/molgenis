@@ -86,7 +86,7 @@ public class FrontController extends MolgenisFrontController
 		this.services = services;
 		
 		// register instances in singletons (simulate autowiring)
-		<#if generate_entitiesimport>
+		<#if generate_entityio>
 		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
 		EntitiesValidatorSingleton.setInstance(new EntitiesValidatorImpl());
 		</#if>

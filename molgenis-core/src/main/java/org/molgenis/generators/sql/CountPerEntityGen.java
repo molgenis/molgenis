@@ -28,22 +28,28 @@ public class CountPerEntityGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		Template template = createTemplate(getClass().getSimpleName() + ".sql.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		File target = new File(this.getSqlPath(options) + "/count_per_entity.sql");
-		boolean created = target.getParentFile().mkdirs();
-		if (!created && !target.getParentFile().exists())
+		if (options.generate_tests)
 		{
-			throw new IOException("could not create " + target.getParentFile());
 		}
+		else
+		{
+			Template template = createTemplate(getClass().getSimpleName() + ".sql.ftl");
+			Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		templateArgs.put("model", model);
-		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+			File target = new File(this.getSqlPath(options) + "/count_per_entity.sql");
+			boolean created = target.getParentFile().mkdirs();
+			if (!created && !target.getParentFile().exists())
+			{
+				throw new IOException("could not create " + target.getParentFile());
+			}
 
-		logger.info("generated " + target);
+			templateArgs.put("model", model);
+			OutputStream targetOut = new FileOutputStream(target);
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+			targetOut.close();
+
+			logger.info("generated " + target);
+		}
 	}
 
 }

@@ -45,6 +45,7 @@ import org.molgenis.generators.R.REntityGen;
 import org.molgenis.generators.R.RMatrixGen;
 import org.molgenis.generators.cpp.CPPCassette;
 import org.molgenis.generators.csv.CsvEntityExporterGen;
+import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
@@ -65,12 +66,11 @@ import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
+import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
-import org.molgenis.generators.server.MolgenisResourceCopyGen;
 import org.molgenis.generators.server.RdfApiGen;
-import org.molgenis.generators.server.RestApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.generators.sql.CountPerEntityGen;
@@ -92,8 +92,7 @@ import org.molgenis.model.elements.Model;
 import org.molgenis.util.cmdline.CmdLineException;
 
 /**
- * MOLGENIS generator. Run this to fire up all the generators. Optionally add
- * {@link org.molgenis.MolgenisOptions}
+ * MOLGENIS generator. Run this to fire up all the generators. Optionally add {@link org.molgenis.MolgenisOptions}
  * 
  * @author Morris Swertz
  */
@@ -111,7 +110,11 @@ public class Molgenis
 			}
 			else if (args.length == 3)
 			{
-				if (args[2].equals("--updatedb"))
+				if (args[2].equals("--generatetests"))
+				{
+					new Molgenis(args[0], args[1]).generateTests();
+				}
+				else if (args[2].equals("--updatedb"))
 				{
 					new Molgenis(args[0], args[1]).updateDb(false);
 				}
@@ -244,12 +247,6 @@ public class Molgenis
 			generators.add(new UsedMolgenisOptionsGen());
 		}
 
-		// COPY resources
-		if (options.copy_resources)
-		{
-			generators.add(new MolgenisResourceCopyGen());
-		}
-
 		// DOCUMENTATION
 		if (options.generate_doc)
 		{
@@ -277,6 +274,7 @@ public class Molgenis
 				{
 					generators.add(new JpaDatabaseGen());
 					generators.add(new JDBCMetaDatabaseGen());
+					generators.add(new DatabaseConfigGen());
 				}
 				generators.add(new DataTypeGen());
 				generators.add(new JpaMapperGen());
@@ -298,12 +296,14 @@ public class Molgenis
 					if (options.mapper_implementation.equals(MapperImplementation.MULTIQUERY))
 					{
 						generators.add(new JDBCDatabaseGen());
+						generators.add(new DatabaseConfigGen());
 						generators.add(new DataTypeGen());
 						generators.add(new MultiqueryMapperGen());
 					}
 					else if (options.mapper_implementation.equals(MapperImplementation.PREPARED_STATEMENT))
 					{
 						generators.add(new JDBCDatabaseGen());
+						generators.add(new DatabaseConfigGen());
 						generators.add(new DataTypeGen());
 						generators.add(new PStatementMapperGen());
 					}
@@ -312,6 +312,7 @@ public class Molgenis
 				{
 					generators.add(new OracleCreateSubclassPerTableGen());
 					generators.add(new JDBCDatabaseGen());
+					generators.add(new DatabaseConfigGen());
 					generators.add(new DataTypeGen());
 					generators.add(new PStatementMapperGen());
 				}
@@ -319,6 +320,7 @@ public class Molgenis
 				{
 					logger.info("HsqlDB generators ....");
 					generators.add(new JDBCDatabaseGen());
+					generators.add(new DatabaseConfigGen());
 					generators.add(new DataTypeGen());
 					generators.add(new HSqlCreateSubclassPerTableGen());
 					generators.add(new PStatementMapperGen());
@@ -350,18 +352,6 @@ public class Molgenis
 				generators.add(new FillMetadataTablesGen());
 			}
 
-			if (options.generate_entityimport)
-			{
-				generators.add(new EntityImporterGen());
-
-			}
-
-			if (options.generate_entitiesimport)
-			{
-				generators.add(new EntitiesImporterGen());
-				generators.add(new EntitiesValidatorGen());
-			}
-
 			if (options.generate_metadata)
 			{
 				generators.add(new FillMetadataGen());
@@ -383,6 +373,16 @@ public class Molgenis
 			logger.info("SEVERE: Skipping ALL SQL ....");
 		}
 
+		generators.add(new EntityImporterGen());
+
+		if (options.generate_entityio)
+		{
+			generators.add(new EntitiesImporterGen());
+			generators.add(new EntitiesValidatorGen());
+			generators.add(new CsvEntityExporterGen());
+			generators.add(new ExcelEntityExporterGen());
+		}
+
 		if (options.generate_Python)
 		{
 			generators.add(new PythonDataTypeGen());
@@ -390,16 +390,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping Python interface ....");
-		}
-
-		// CSV
-		if (options.generate_csv)
-		{
-			generators.add(new CsvEntityExporterGen());
-		}
-		else
-		{
-			logger.info("Skipping CSV importers ....");
 		}
 
 		// R
@@ -464,7 +454,7 @@ public class Molgenis
 
 		if (options.generate_rest)
 		{
-			generators.add(new RestApiGen());
+			generators.add(new EntityRestApiGen());
 		}
 		else
 		{
@@ -478,16 +468,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping SOAP API ....");
-		}
-
-		// Excel
-		if (options.generate_ExcelImport)
-		{
-			generators.add(new ExcelEntityExporterGen());
-		}
-		else
-		{
-			logger.info("Skipping Excel importer ....");
 		}
 
 		// FIXME use configuration to add the generators
@@ -525,6 +505,12 @@ public class Molgenis
 		MolgenisFieldTypes.addType(new TextField());
 		MolgenisFieldTypes.addType(new XrefField());
 		MolgenisFieldTypes.addType(new IntField());
+	}
+
+	public void generateTests() throws Exception
+	{
+		options.setGenerateTests(true);
+		generate();
 	}
 
 	/**
@@ -592,8 +578,7 @@ public class Molgenis
 	 * 
 	 * @param path
 	 *            of directory to delete
-	 * @return if and only if the content of directory (path) is successfully
-	 *         deleted; false otherwise
+	 * @return if and only if the content of directory (path) is successfully deleted; false otherwise
 	 */
 	static public boolean deleteContentOfDirectory(File path)
 	{
