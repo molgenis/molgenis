@@ -270,8 +270,7 @@ public class ${entity.name}Controller
 
 	private EntityCollectionResponse<${entity.name}Response> _retrieve${entity.name}Collection(EntityCollectionRequest entityCollectionRequest, String... expandFieldsStr) throws DatabaseException
 	{
-		EntityPager<${entity.name}> ${entity.name?uncap_first}Pager = ${entity.name?uncap_first}Service.readAll(entityCollectionRequest.getStart(),
-				entityCollectionRequest.getNum());
+		EntityPager<${entity.name}> ${entity.name?uncap_first}Pager = ${entity.name?uncap_first}Service.readAll(entityCollectionRequest.getStart(), entityCollectionRequest.getNum(), entityCollectionRequest.getQ());
 		final Set<String> expandFields = expandFieldsStr != null ? new HashSet<String>(Arrays.asList(expandFieldsStr)) : null;
 		return new EntityCollectionResponse<${entity.name}Response>(${entity.name?uncap_first}Pager, Lists.newArrayList(Iterables.transform(
 				${entity.name?uncap_first}Pager.getIterable(), new Function<${entity.name}, ${entity.name}Response>()

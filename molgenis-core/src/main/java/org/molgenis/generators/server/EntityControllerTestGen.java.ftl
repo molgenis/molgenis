@@ -2,7 +2,10 @@
 <#assign fields=allFields(entity)>
 package org.molgenis.controller;
 
+import java.util.List;
+
 import static org.mockito.Matchers.any;
+import org.mockito.Matchers;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -15,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.molgenis.controller.${entity.name}ControllerTest.${entity.name}ControllerConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
+import org.molgenis.framework.db.QueryRule;
 import ${entity.namespace}.${entity.name};
 import org.molgenis.service.${entity.name}Service;
 <#assign javaImports = ["${entity.name}"]>
@@ -107,7 +111,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void retrieveEntityCollection_forbidden() throws Exception
 	{
-		when(${entity.name?uncap_first}Service.readAll(any(${type(entity.primaryKey)}.class), any(${type(entity.primaryKey)}.class))).thenThrow(new DatabaseAccessException("Access denied"));
+		when(${entity.name?uncap_first}Service.readAll(Matchers.any(${type(entity.primaryKey)}.class), Matchers.any(${type(entity.primaryKey)}.class), Matchers.<List<QueryRule>>any())).thenThrow(new DatabaseAccessException("Access denied"));
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}").accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 	
