@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Scope("request")
 @Controller
-@RequestMapping("/explorer")
+@RequestMapping("/plugin/dataexplorer")
 public class DataExplorerController
 {
 	@Autowired
@@ -43,14 +43,7 @@ public class DataExplorerController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws DatabaseException
 	{
-		model.addAttribute("message", "Hey dude");
-		List<DataSet> dataSets = database.find(DataSet.class);
-		if (!dataSets.isEmpty())
-		{
-			model.addAttribute("dataset", dataSets.get(0).getName());
-		}
-
-		return "explorer";
+		return "dataexplorer";
 	}
 
 	@RequestMapping("/index")
@@ -65,12 +58,12 @@ public class DataExplorerController
 			model.addAttribute("dataset", dataSets.get(0));
 		}
 
-		return "explorer";
+		return "dataexplorer";
 	}
 
 	/**
-	 * When someone directly accesses /explorer and is not logged in an
-	 * DataAccessException is thrown, redirect him to the home page
+	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
+	 * to the home page
 	 * 
 	 * @return
 	 */
