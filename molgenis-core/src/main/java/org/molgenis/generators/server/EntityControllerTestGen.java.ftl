@@ -111,7 +111,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void retrieveEntityCollection_forbidden() throws Exception
 	{
-		when(${entity.name?uncap_first}Service.readAll(Matchers.<${type(entity.primaryKey)}>any(), Matchers.<${type(entity.primaryKey)}>any(), Matchers.<List<QueryRule>>any())).thenThrow(new DatabaseAccessException("Access denied"));
+		when(${entity.name?uncap_first}Service.readAll(Matchers.any(${type(entity.primaryKey)}.class), Matchers.any(${type(entity.primaryKey)}.class), Matchers.<List<QueryRule>>any())).thenThrow(new DatabaseAccessException("Access denied"));
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}").accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 	
