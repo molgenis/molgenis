@@ -8,7 +8,7 @@ import org.molgenis.framework.db.QueryRule;
 
 public class SearchRequest
 {
-	private String entityName;
+	private String documentType;
 	private List<QueryRule> queryRules = new ArrayList<QueryRule>();
 	private List<String> fieldsToReturn = new ArrayList<String>();
 
@@ -16,16 +16,16 @@ public class SearchRequest
 	{
 	}
 
-	public SearchRequest(String entityName, List<QueryRule> queryRules, List<String> fieldsToReturn)
+	public SearchRequest(String documentType, List<QueryRule> queryRules, List<String> fieldsToReturn)
 	{
-		this.entityName = entityName;
+		this.documentType = documentType;
 		this.queryRules = queryRules;
 		this.fieldsToReturn = fieldsToReturn;
 	}
 
-	public String getEntityName()
+	public String getDocumentType()
 	{
-		return entityName;
+		return documentType;
 	}
 
 	public List<QueryRule> getQueryRules()

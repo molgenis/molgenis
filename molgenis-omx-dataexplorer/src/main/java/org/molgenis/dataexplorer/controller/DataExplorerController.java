@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.molgenis.dataexplorer.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.observ.DataSet;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -22,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Scope("request")
 @Controller
-@RequestMapping("/explorer")
+@RequestMapping("/plugin/dataexplorer")
 public class DataExplorerController
 {
 	@Autowired
@@ -41,14 +43,7 @@ public class DataExplorerController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws DatabaseException
 	{
-		model.addAttribute("message", "Hey dude");
-		List<DataSet> dataSets = database.find(DataSet.class);
-		if (!dataSets.isEmpty())
-		{
-			model.addAttribute("dataset", dataSets.get(0).getName());
-		}
-
-		return "explorer";
+		return "dataexplorer";
 	}
 
 	@RequestMapping("/index")
@@ -63,7 +58,18 @@ public class DataExplorerController
 			model.addAttribute("dataset", dataSets.get(0));
 		}
 
-		return "explorer";
+		return "dataexplorer";
 	}
 
+	/**
+	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
+	 * to the home page
+	 * 
+	 * @return
+	 */
+	@ExceptionHandler(DatabaseAccessException.class)
+	public String handleNotAuthenticated()
+	{
+		return "redirect:/";
+	}
 }
