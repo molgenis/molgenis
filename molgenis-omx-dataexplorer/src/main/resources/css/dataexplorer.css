@@ -2,3 +2,8 @@
 	margin-top: 10px;
 	margin-bottom: 20px;
 }
+
+.data-table-container {
+	overflow: auto;
+	white-space: nowrap;
+}

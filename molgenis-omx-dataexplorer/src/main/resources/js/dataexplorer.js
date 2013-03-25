@@ -29,8 +29,14 @@
 		console.log("createFeatureSelection: " + protocol.href);
 		// create feature list
 		var items = [];
+		items.push('<h3>Feature selection</h3>');
+		items.push('<ul>');
 		ns.createFeatureSelectionRec(protocol.href, items);
-		$('#feature-selection').html('<h3>Feature selection</h3><ul>' + items.join('') + '</ul>');
+		items.push('</ul>');
+		$('#feature-selection').html(items.join(''));
+		$('#feature-selection').accordion('destroy').accordion({
+			collapsible : true
+		});
 
 		// select feature
 		$('.feature-select-checkbox').click(function() {
@@ -46,7 +52,7 @@
 		$('.feature-filter-edit').click(function() {
 			var featureUri = $(this).parent().data('href');
 			console.log("select feature: " + featureUri);
-			ns.openEditFeatureFilterDialog(featureUri);
+			ns.openFeatureFilterDialog(featureUri);
 		});
 	};
 
@@ -198,25 +204,123 @@
 		$('#data-table-pager').html(items.join(''));
 	};
 
-	ns.downloadExcel = function(filteredDataset) {
-		console.log("downloadExcel: " + filteredDataset);
-		// TODO need server controller to handle download
-	};
-
-	ns.openEditFeatureFilterDialog = function(featureUri) {
-		console.log("openEditFeatureFilterDialog: " + featureUri);
+	ns.openFeatureFilterDialog = function(featureUri) {
+		console.log("openFeatureFilterDialog: " + featureUri);
 		$.getJSON(featureUri, function(feature) {
 			var items = [];
-			$.each(feature, function(key, val) {
-				items.push('<h3>' + key + '</h3><p>' + val + '</p>');
-			});
-			items.push('<button type="button" class="feature-filter-example">Mock filter update</button>');
-			$('<div class="feature-filter-dialog">').html(items.join('')).dialog({
+			if (feature.description)
+				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
+			items.push('<h3>Value (' + feature.dataType + ')</h3>');
+			var filter = null;
+			switch (feature.dataType) {
+			case "string":
+				var config = featureFilters[featureUri];
+				if (config == null)
+					filter = $('<input type="text" placeholder="filter text">');
+				else
+					filter = $('<input type="text" placeholder="filter text" value="' + config.values[0] + '">');
+				filter.keyup(function() {
+					featureFilters[featureUri] = {
+						name : feature.name,
+						type : feature.dataType,
+						values : [ $(this).val() ]
+					};
+					ns.onFeatureFilterChange();
+				});
+				break;
+			case "date":
+				var config = featureFilters[featureUri];
+				if (config == null)
+					filter = $('<input type="date">');
+				else
+					filter = $('<input type="date" value="' + config.values[0] + '">');
+				filter.change(function() {
+					featureFilters[featureUri] = {
+						name : feature.name,
+						type : feature.dataType,
+						values : [ $(this).val() ]
+					};
+					ns.onFeatureFilterChange();
+				});
+				filter.datepicker();
+				break;
+			case "datetime":
+				var config = featureFilters[featureUri];
+				if (config == null)
+					filter = $('<input type="datetime">');
+				else
+					filter = $('<input type="datetime" value="' + config.values[0] + '">');
+				filter.change(function() {
+					featureFilters[featureUri] = {
+						name : feature.name,
+						type : feature.dataType,
+						values : [ $(this).val() ]
+					};
+					ns.onFeatureFilterChange();
+				});
+				break;
+			case "int":
+				var config = featureFilters[featureUri];
+				if (config == null)
+					filter = $('<input type="number">');
+				else
+					filter = $('<input type="number" value="' + config.values[0] + '">');
+				filter.change(function() {
+					featureFilters[featureUri] = {
+						name : feature.name,
+						type : feature.dataType,
+						values : [ $(this).val() ]
+					};
+					ns.onFeatureFilterChange();
+				});
+				break;
+			case "decimal":
+				var config = featureFilters[featureUri];
+				if (config == null)
+					filter = $('<input type="number" step="any">');
+				else
+					filter = $('<input type="number" step="any" value="' + config.values[0] + '">');
+				filter.change(function() {
+					featureFilters[featureUri] = {
+						name : feature.name,
+						type : feature.dataType,
+						values : [ $(this).val() ]
+					};
+					ns.onFeatureFilterChange();
+				});
+				break;
+			case "bool":
+				var config = featureFilters[featureUri];
+				if (config == null)
+					filter = $('<input type="checkbox">');
+				else
+					filter = $('<input type="checkbox" value="' + config.values[0] + '">');
+				filter.change(function() {
+					featureFilters[featureUri] = {
+						name : feature.name,
+						type : feature.dataType,
+						values : [ $(this).val() ]
+					};
+					ns.onFeatureFilterChange();
+				});
+				break;
+			case "categorical":
+			case "xref":
+			case "nominal":
+			case "ordinal":
+			case "code":
+			case "image":
+			case "file":
+			case "log":
+			case "data":
+			case "exe":
+				console.log("TODO: '" + feature.dataType + "' not supported");
+				break;
+			}
+			$('<div class="feature-filter-dialog">').html(items.join('')).append(filter).dialog({
+				title : feature.name,
 				modal : true,
-				width : 800
-			});
-			$('.feature-filter-example').click(function() {
-				ns.createFeatureFilter(feature, "<featureFilters>");
+				width : 500
 			});
 		});
 	};
@@ -235,14 +339,22 @@
 
 	ns.onFeatureFilterChange = function() {
 		console.log("onFeatureFilterChange");
-		$('#feature-filters-container').empty();
+		var items = [];
+		items.push('<h3>Filters</h3><div>');
 		$.each(featureFilters, function(featureUri, feature) {
-			$('#feature-filters-container').append(
-					'<p>' + feature.name + '<a class="feature-filter-remove" data-href="' + featureUri
-							+ '" href="#"><i class="icon-remove"></i></a></p>');
+			items.push('<p><a class="feature-filter-edit" data-href="' + featureUri + '" href="#">' + feature.name
+					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#"><i class="icon-remove"></i></a></p>');
+		});
+		items.push('</div>');
+		$('.feature-filter-edit').click(function() {
+			ns.openFeatureFilterDialog($(this).data('href'));
 		});
 		$('.feature-filter-remove').click(function() {
 			ns.removeFeatureFilter($(this).data('href'));
+		});
+		$('#feature-filters').html(items.join(''));
+		$('#feature-filters').accordion('destroy').accordion({
+			collapsible : true
 		});
 		ns.updateObservationSetsTable();
 	};

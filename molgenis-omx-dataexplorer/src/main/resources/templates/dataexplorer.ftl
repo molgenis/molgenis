@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
+				$("#feature-filters").accordion({ collapsible: true });
 				window.molgenis.fillDataSetSelect(function() {
 					$("#feature-selection").accordion({ collapsible: true });
 					<#-- select first dataset -->
@@ -51,8 +52,6 @@
 					<div class="row-fluid">
 						<div id="feature-filters">
 							<h3>Filters</h3>
-							<div id="feature-filters-container">
-							</div>
 						</div>
 					</div>
 					<div class="row-fluid">
@@ -61,12 +60,17 @@
 					</div>					
 				</div>
 				<div class="span8">
-					<p id="data-table-header" class="lead text-center"></p>
-					<table id="data-table" class="table table-striped table-condensed">
-					</table>
-					<div id="data-table-pager" class="pagination pagination-small pagination-centered">
+					<div class="row-fluid">
+						<p id="data-table-header" class="lead text-center"></p>
 					</div>
-					<button id="download-button" class="btn btn-small pull-right">Export to Excel</button>
+					<div class="row-fluid data-table-container">
+						<table id="data-table" class="table table-striped table-condensed">
+						</table>
+					</div>
+					<div class="row-fluid">
+						<div id="data-table-pager" class="pagination pagination-small pagination-centered">
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
