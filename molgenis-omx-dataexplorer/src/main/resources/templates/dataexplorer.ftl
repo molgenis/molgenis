@@ -34,20 +34,11 @@
 	<body>
 		<div class="container-fluid">
 			<div class="row-fluid">
-				<div class="span2">
-					<label>Choose a dataset:</label>
-				</div>
-				<div>
-					<select data-placeholder="Choose a Dataset" id="dataset-select">
-					</select>
-				</div>
-			</div>
-			<div class="row-fluid">
-				<div class="span4">
+				<div class="span3">
 					<div class="row-fluid">
-						<form id="observationset-search" class="navbar-search pull-left">
-							<input type="text" class="search-query" placeholder="Search">
-						</form>
+						<label id ="dataset-select-label">Choose a dataset:</label>
+						<select data-placeholder="Choose a Dataset" id="dataset-select">
+						</select>
 					</div>
 					<div class="row-fluid">
 						<div id="feature-filters">
@@ -59,13 +50,16 @@
 						</div>
 					</div>					
 				</div>
-				<div class="span8">
+				<div class="span9">
 					<div class="row-fluid">
-						<p id="data-table-header" class="lead text-center"></p>
+						<input type="search" id="observationset-search" class="search-query input-xxlarge offset3" placeholder="Search data items">
 					</div>
 					<div class="row-fluid data-table-container">
 						<table id="data-table" class="table table-striped table-condensed">
 						</table>
+					</div>
+					<div class="row-fluid data-table-header-container">
+						<span id="data-table-header"></span>
 					</div>
 					<div class="row-fluid">
 						<div id="data-table-pager" class="pagination pagination-small pagination-centered">
