@@ -53,7 +53,7 @@
 		});
 		// filter feature
 		$('.feature-filter-edit').click(function() {
-			var featureUri = $(this).parent().data('href');
+			var featureUri = $(this).data('href');
 			console.log("select feature: " + featureUri);
 			ns.openFeatureFilterDialog(featureUri);
 		});
@@ -91,9 +91,9 @@
 				if (protocol.features) {
 					$.each(protocol.features, function() {
 						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.identifier
-								+ '" checked>' + this.name
-								+ '</label><a class="feature-filter-edit" href="#"><i class="icon-filter"></i></a></li>');
+								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.name
+								+ '" checked>' + this.name + '</label><a class="feature-filter-edit" data-href="' + this.href
+								+ '"href="#"><i class="icon-filter"></i></a></li>');
 					});
 				}
 				items.push('</ul></li>');
@@ -104,6 +104,12 @@
 
 	ns.onDataSetSelectionChange = function(dataSetUri) {
 		console.log("onDataSetSelectionChange: " + dataSetUri);
+
+		// reset
+		featureFilters = {};
+		selectedFeatures = [];
+		searchQuery = null;
+
 		$.ajax({
 			url : dataSetUri + "?expand=protocolUsed",
 			dataType : 'json',
@@ -376,16 +382,18 @@
 					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#"><i class="icon-remove"></i></a></p>');
 		});
 		items.push('</div>');
+		$('#feature-filters').html(items.join(''));
+		$('#feature-filters').accordion('destroy').accordion({
+			collapsible : true
+		});
+
 		$('.feature-filter-edit').click(function() {
 			ns.openFeatureFilterDialog($(this).data('href'));
 		});
 		$('.feature-filter-remove').click(function() {
 			ns.removeFeatureFilter($(this).data('href'));
 		});
-		$('#feature-filters').html(items.join(''));
-		$('#feature-filters').accordion('destroy').accordion({
-			collapsible : true
-		});
+
 		ns.updateObservationSetsTable();
 	};
 
@@ -432,9 +440,8 @@
 	
 	// on document ready
 	$(function() {
-		$("#observationset-search").submit(function(e) {
-			e.preventDefault();
-			ns.searchObservationSets($('#observationset-search input').val());
+		$("#observationset-search").change(function(e) {
+			ns.searchObservationSets($(this).val());
 		});
 	});
 }($, window));
