@@ -1,12 +1,15 @@
 (function($, w) {
 	"use strict";
-
+	
+	var MAX_ROWS = 10;
 	var ns = w.molgenis = w.molgenis || {};
 
 	var featureFilters = {};
 	var selectedFeatures = [];
 	var searchQuery = null;
-
+	var selectedDataSet = null;
+	var offset = 0;
+	
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
 		console.log("getDataSets");
@@ -82,7 +85,7 @@
 				if (protocol.features) {
 					$.each(protocol.features, function() {
 						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.name
+								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.identifier
 								+ '" checked>' + this.name
 								+ '</label><a class="feature-filter-edit" href="#"><i class="icon-filter"></i></a></li>');
 					});
@@ -100,6 +103,7 @@
 			dataType : 'json',
 			async : false,
 			success : function(dataset) {
+				selectedDataSet = dataset;
 				ns.createFeatureSelection(dataset.protocolUsed);
 				ns.onFeatureSelectionChange();
 			}
@@ -127,33 +131,34 @@
 		console.log("query:            " + searchQuery);
 		console.log("selectedFeatures: " + selectedFeatures);
 		console.log("featureFilters:   " + featureFilters);
-
-		var items = [];
-		items.push('<thead>');
-		$.each(selectedFeatures, function(i, val) {
-			items.push('<th>' + this + '</th>');
-		});
-		items.push('</thead>');
-
-		// simulate data
-		var getRandomInt = function(min, max) {
-			return Math.floor(Math.random() * (max - min + 1)) + min;
-		};
-		var maxRowsPerPage = 20;
-		var nrRows = getRandomInt(1, 200);
-
-		items.push('<tbody>');
-		for ( var i = 0; i < Math.min(nrRows, maxRowsPerPage); ++i) {
-			items.push('<tr>');
-			$.each(selectedFeatures, function() {
-				items.push('<td>' + this + '</td>');
+		
+		ns.search(function(searchResponse){
+			var maxRowsPerPage = MAX_ROWS;
+			var nrRows = searchResponse.totalHitCount;
+			
+			var items = [];
+			items.push('<thead>');
+			$.each(selectedFeatures, function(i, val) {
+				items.push('<th>' + this + '</th>');
 			});
-			items.push('</tr>');
-		}
-		items.push('</tbody>');
-		$('#data-table').html(items.join(''));
+			items.push('</thead>');
 
-		ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
+			items.push('<tbody>');
+			for ( var i = 0; i < searchResponse.searchHits.length; ++i) {
+				items.push('<tr>');
+				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
+				
+				$.each(selectedFeatures, function(i, val) {
+					items.push('<td>' + columnValueMap[this] + '</td>');
+				});
+				
+				items.push('</tr>');
+			}
+			items.push('</tbody>');
+			$('#data-table').html(items.join(''));
+			
+			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
+		});
 	};
 
 	ns.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
@@ -247,6 +252,46 @@
 		ns.updateObservationSetsTable();
 	};
 
+	ns.search = function(callback) {
+		ns.callSearchService(ns.createSearchRequest(), callback);
+	};
+	
+	ns.createSearchRequest = function() {
+		var searchRequest = {
+			documentType: selectedDataSet.identifier,
+			queryRules:[{operator:'LIMIT', value:MAX_ROWS}]
+		};
+		
+		if (offset > 0) {
+			searchRequest.queryRules.push({operator:'OFFSET', value:offset});
+		}
+		
+		if (searchQuery) {
+			searchRequest.queryRules.push({operator:'SEARCH', value:searchQuery});
+		}
+		
+		return searchRequest;
+	};
+	
+	ns.callSearchService = function(searchRequest, callback) {
+		var jsonRequest = JSON.stringify(searchRequest);
+		console.log("Call SearchService json=" + jsonRequest);
+		
+		$.ajax({
+			type: "POST",
+			url: '/search',
+			data: jsonRequest,
+			contentType: 'application/json',
+			success: function (searchResponse) {
+				if (searchResponse.errorMessage) {
+					alert(searchResponse.errorMessage);
+				}
+				callback(searchResponse);
+			}
+		});
+
+	};
+	
 	// on document ready
 	$(function() {
 		$("#observationset-search").submit(function(e) {
