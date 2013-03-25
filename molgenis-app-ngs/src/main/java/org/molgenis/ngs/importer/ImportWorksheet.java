@@ -702,18 +702,18 @@ public class ImportWorksheet
 					char[] d = s.trim().toCharArray();
 					if (d.length == 8)
 					{
-						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1] + d[2] + d[3] + "/"
-								+ d[4] + d[5] + "/" + d[6] + d[7]);
+						date = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).parse(d[0] + "" + d[1] + "" + d[2]
+								+ "" + d[3] + "/" + d[4] + "" + d[5] + "/" + d[6] + "" + d[7]);
 					}
 					if (d.length == 6)
 					{
-						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/" + d[2]
-								+ d[3] + "/" + d[4] + d[5]);
+						date = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).parse("20" + d[0] + "" + d[1] + "/"
+								+ d[2] + "" + d[3] + "/" + d[4] + "" + d[5]);
 					}
 					if (d.length == 5)
 					{
-						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/0"
-								+ d[2] + "/" + d[3] + d[4]);
+						date = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).parse("20" + d[0] + "" + d[1] + "/0"
+								+ d[2] + "/" + d[3] + "" + d[4]);
 					}
 				}
 			}
