@@ -8,6 +8,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -16,14 +17,39 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author erwin
  * 
  */
-public class DataSetsIndexer
+public class DataSetsIndexer implements InitializingBean
 {
-	@Autowired
 	private SearchService searchService;
-
-	@Resource(name = "unauthorizedDatabase")
 	private Database unauthorizedDatabase;
 
+	@Autowired
+	public void setSearchService(SearchService searchService)
+	{
+		this.searchService = searchService;
+	}
+
+	@Resource(name = "unauthorizedDatabase")
+	public void setUnauthorizedDatabase(Database unauthorizedDatabase)
+	{
+		this.unauthorizedDatabase = unauthorizedDatabase;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
+		if (unauthorizedDatabase == null) throw new IllegalArgumentException(
+				"Missing bean of type Database with name 'unauthorizedDatabase'");
+
+		indexNew();
+	}
+
+	/**
+	 * Index all datasets
+	 * 
+	 * @throws DatabaseException
+	 * @throws TableException
+	 */
 	public void index() throws DatabaseException, TableException
 	{
 		for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
@@ -32,8 +58,26 @@ public class DataSetsIndexer
 		}
 	}
 
+	/**
+	 * Index all datatsets that are not in the index yet
+	 * 
+	 * @throws DatabaseException
+	 * @throws TableException
+	 */
+	public void indexNew() throws DatabaseException, TableException
+	{
+		for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
+		{
+			if (!searchService.documentTypeExists(dataSet.getName()))
+			{
+				index(dataSet);
+			}
+		}
+	}
+
 	private void index(DataSet dataSet) throws TableException
 	{
 		searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 	}
+
 }

@@ -3,6 +3,7 @@
 package org.molgenis.service;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
@@ -13,6 +14,7 @@ import ${entity.namespace}.${entity.name};
 import org.molgenis.model.elements.Entity;
 import org.molgenis.util.EntityPager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class ${entity.name}Service
 	private static final Logger logger = Logger.getLogger(${entity.name}Service.class);
 
 	@Autowired
+	@Qualifier("database")
 	private Database db;
 
 	public ${entity.name} create(${entity.name} ${entity.name?uncap_first}) throws DatabaseException
@@ -59,12 +62,15 @@ public class ${entity.name}Service
 		return db.find(${entity.name}.class);
 	}
 	
-	public EntityPager<${entity.name}> readAll(int start, int num) throws DatabaseException
+	public EntityPager<${entity.name}> readAll(int start, int num, List<QueryRule> queryRules) throws DatabaseException
 	{
 		logger.debug("retrieving all ${entity.name} instances");
+		if (queryRules == null) queryRules = new ArrayList<QueryRule>();
+		queryRules.add(new QueryRule(Operator.OFFSET, start));
+		queryRules.add(new QueryRule(Operator.LIMIT, num));
 		int count = db.count(${entity.name}.class);
-		List<${entity.name}> ${entity.name?uncap_first}s = db.find(${entity.name}.class, new QueryRule(Operator.OFFSET, start), new QueryRule(Operator.LIMIT, num));
-		return new EntityPager<${entity.name}>(start, num, count, ${entity.name?uncap_first}s);
+		List<${entity.name}> ${entity.name?uncap_first}Collection = db.find(${entity.name}.class, queryRules.toArray(new QueryRule[0]));
+		return new EntityPager<${entity.name}>(start, num, count, ${entity.name?uncap_first}Collection);
 	}
 	
 	public Entity getEntity() throws DatabaseException

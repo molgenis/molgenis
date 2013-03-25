@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
@@ -67,9 +68,9 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public long count(String entityName, List<QueryRule> queryRules)
+	public long count(String documentType, List<QueryRule> queryRules)
 	{
-		SearchRequest request = new SearchRequest(entityName, queryRules, Collections.<String> emptyList());
+		SearchRequest request = new SearchRequest(documentType, queryRules, Collections.<String> emptyList());
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
@@ -79,7 +80,7 @@ public class ElasticSearchService implements SearchService
 	{
 
 		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
-		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(request.getEntityName(), searchType,
+		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(request.getDocumentType(), searchType,
 				request.getQueryRules(), request.getFieldsToReturn());
 		if (LOG.isDebugEnabled())
 		{
@@ -97,15 +98,15 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void updateIndex(String documentName, Iterable<? extends Entity> entities)
+	public void updateIndex(String documentType, Iterable<? extends Entity> entities)
 	{
-		LOG.info("Going to update index [" + indexName + "] for document type [" + documentName + "]");
-		deleteDocumentsByType(documentName);
+		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
+		deleteDocumentsByType(documentType);
 
-		LOG.info("Going to insert documents of type [" + documentName + "]");
+		LOG.info("Going to insert documents of type [" + documentType + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
 
-		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentName, entities);
+		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentType, entities);
 		LOG.info("Request created");
 		if (LOG.isDebugEnabled())
 		{
@@ -154,15 +155,19 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void indexTupleTable(String documentName, TupleTable tupleTable)
+	public void indexTupleTable(String documentType, TupleTable tupleTable)
 	{
-		LOG.info("Going to update index [" + indexName + "] for document type [" + documentName + "]");
-		deleteDocumentsByType(documentName);
+		if (!tupleTable.iterator().hasNext())
+		{
+			return;
+		}
+		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
+		deleteDocumentsByType(documentType);
 
-		LOG.info("Going to insert documents of type [" + documentName + "]");
+		LOG.info("Going to insert documents of type [" + documentType + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
 
-		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentName, tupleTable);
+		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentType, tupleTable);
 		LOG.info("Request created");
 		if (LOG.isDebugEnabled())
 		{
@@ -182,11 +187,18 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
-	private void deleteDocumentsByType(String type)
+	@Override
+	public boolean documentTypeExists(String documentType)
 	{
-		LOG.info("Going to delete all documents of type [" + type + "]");
+		return client.admin().indices().typesExists(new TypesExistsRequest(new String[]
+		{ indexName }, documentType)).actionGet().exists();
+	}
+
+	private void deleteDocumentsByType(String documentType)
+	{
+		LOG.info("Going to delete all documents of type [" + documentType + "]");
 		DeleteByQueryResponse deleteResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
+				.setQuery(new TermQueryBuilder("_type", documentType)).execute().actionGet();
 
 		if (deleteResponse != null)
 		{
@@ -215,4 +227,5 @@ public class ElasticSearchService implements SearchService
 			LOG.info("Index [" + indexName + "] created");
 		}
 	}
+
 }

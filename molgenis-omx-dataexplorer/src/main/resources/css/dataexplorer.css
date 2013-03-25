@@ -1,0 +1,46 @@
+.container-fluid {
+	padding-top: 10px;	
+}
+
+.row-fluid {
+	margin-bottom: 20px;
+}
+
+#dataset-select-label {
+	display: inline;
+	margin-right:10px;
+}
+
+.data-table-container {
+	overflow: auto;
+	white-space: nowrap;
+}
+
+#feature-selection ul {
+    list-style-type: none;    
+}
+
+.icon-filter {
+	margin-left: 10px;
+}
+
+#feature-selection label {
+	display: inline;
+}
+
+#data-table {
+	margin-bottom: 0px;
+}
+
+.data-table-header-container {
+	margin-bottom: 0px;
+}
+
+#data-table-header {
+	font-style:italic;
+	float:right;
+}
+
+.pagination {
+	margin: 0px;
+}
