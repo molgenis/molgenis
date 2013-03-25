@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.node.Node;
 import org.molgenis.elasticsearch.ElasticSearchService;
 
 /**
@@ -24,6 +25,7 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	private static final String CONFIG_FILE_NAME = "elasticsearch.yml";
 	private static final String DEFAULT_INDEX_NAME = "molgenis";
 	private final Client client;
+	private final Node node;
 	private final String indexName;
 
 	public EmbeddedElasticSearchServiceFactory()
@@ -36,7 +38,8 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		this.indexName = indexName;
 
 		Settings settings = ImmutableSettings.settingsBuilder().loadFromClasspath(CONFIG_FILE_NAME).build();
-		client = nodeBuilder().settings(settings).local(true).node().client();
+		node = nodeBuilder().settings(settings).local(true).node();
+		client = node.client();
 
 		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
@@ -49,7 +52,25 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	@Override
 	public void close() throws IOException
 	{
-		client.close();
+
+		try
+		{
+			client.close();
+		}
+		catch (Exception e)
+		{
+			LOG.error("Error closing client", e);
+		}
+
+		try
+		{
+			node.close();
+		}
+		catch (Exception e)
+		{
+			LOG.error("Error closing node", e);
+		}
+
 		LOG.info("Elastic search server stopped");
 	}
 
