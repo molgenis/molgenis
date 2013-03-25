@@ -8,7 +8,7 @@
 	var selectedFeatures = [];
 	var searchQuery = null;
 	var selectedDataSet = null;
-	var offset = 0;
+	var currentPage = 1;
 	
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
@@ -169,7 +169,7 @@
 
 	ns.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
 		console.log("onObservationSetsTableChange");
-		ns.updateObservationSetsTablePager(nrRows, maxRowsPerPage, 1);
+		ns.updateObservationSetsTablePager(nrRows, maxRowsPerPage);
 		ns.updateObservationSetsTableHeader(nrRows);
 	};
 
@@ -178,35 +178,60 @@
 		$('#data-table-header').html(nrRows + ' data items found');
 	};
 
-	ns.updateObservationSetsTablePager = function(nrRows, nrRowsPerPage, currentPage) {
+	ns.updateObservationSetsTablePager = function(nrRows, nrRowsPerPage) {
 		console.log("updateObservationSetsTablePager");
 		$('#data-table-pager').empty();
 		var nrPages = Math.ceil(nrRows / nrRowsPerPage);
 		if (nrPages == 1)
 			return;
 
-		var items = [];
-		items.push('<ul>');
-		if (currentPage == 1)
-			items.push('<li class="disabled"><a href="#">Prev</a></li>');
-		else
-			items.push('<li><a href="#">Prev</a></li>');
+		
+		var pager = $('#data-table-pager');
+		var ul = $('<ul>');
+		pager.append(ul);
+		
+		if (currentPage == 1) {
+			ul.append($('<li class="disabled"><a href="#">Prev</a></li>'));
+		} else {
+			var prev = $('<li><a href="#">Prev</a></li>');
+			prev.click(function(){
+				currentPage--;
+				ns.updateObservationSetsTable();
+			});
+			ul.append(prev);
+		}
+		
 		for ( var i = 1; i <= Math.min(nrPages, 6); ++i) {
-			if (i == currentPage)
-				items.push('<li><a href="#">' + i + '</a></li>');
-			else
-				items.push('<li><a href="#" class="active">' + i + '</a></li>');
+			if (i == currentPage) {
+				ul.append($('<li class="active"><a href="#">' + i + '</a></li>'));
+			} else {
+				var p = $('<li><a href="#">' + i + '</a></li>');
+				p.click((function(pageNr){
+					return function(){
+						currentPage = pageNr;
+						ns.updateObservationSetsTable();
+					};
+				})(i));
+				
+				ul.append(p);
+			}
+			
 			if (nrPages >= 6 && i == 3) {
-				items.push('<li class="disabled"><a href="#">...</a></li>');
-
+				ul.append($('<li class="disabled"><a href="#">...</a></li>'));
 			}
 		}
-		if (currentPage == nrPages)
-			items.push('<li class="disabled"><a href="#">Next</a></li>');
-		else
-			items.push('<li><a href="#">Next</a></li>');
-		items.push('</ul>');
-		$('#data-table-pager').html(items.join(''));
+		if (currentPage == nrPages) {
+			ul.append($('<li class="disabled"><a href="#">Next</a></li>'));
+		} else {
+			var next = $('<li><a href="#">Next</a></li>');
+			next.click(function(){
+				currentPage++;
+				ns.updateObservationSetsTable();
+			});
+			ul.append(next);
+		}
+	
+		pager.append($('</ul>'));
 	};
 
 	ns.openFeatureFilterDialog = function(featureUri) {
@@ -374,7 +399,8 @@
 			queryRules:[{operator:'LIMIT', value:MAX_ROWS}]
 		};
 		
-		if (offset > 0) {
+		if (currentPage > 1) {
+			var offset = (currentPage - 1) * MAX_ROWS;
 			searchRequest.queryRules.push({operator:'OFFSET', value:offset});
 		}
 		
