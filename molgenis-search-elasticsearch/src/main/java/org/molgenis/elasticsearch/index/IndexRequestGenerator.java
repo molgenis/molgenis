@@ -51,6 +51,7 @@ public class IndexRequestGenerator
 			for (String field : entity.getFields())
 			{
 				doc.put(field, entity.get(field));
+
 			}
 
 			IndexRequestBuilder request;
