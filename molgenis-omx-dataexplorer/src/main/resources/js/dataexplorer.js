@@ -29,7 +29,7 @@
 		console.log("createFeatureSelection: " + protocol.href);
 		// create feature list
 		var items = [];
-		items.push('<h3>Feature selection</h3>');
+		items.push('<h3>Data item selection</h3>');
 		items.push('<ul>');
 		ns.createFeatureSelectionRec(protocol.href, items);
 		items.push('</ul>');
@@ -346,7 +346,7 @@
 	ns.onFeatureFilterChange = function() {
 		console.log("onFeatureFilterChange");
 		var items = [];
-		items.push('<h3>Filters</h3><div>');
+		items.push('<h3>Data item filters</h3><div>');
 		$.each(featureFilters, function(featureUri, feature) {
 			items.push('<p><a class="feature-filter-edit" data-href="' + featureUri + '" href="#">' + feature.name
 					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#"><i class="icon-remove"></i></a></p>');
@@ -369,6 +369,7 @@
 
 	// on document ready
 	$(function() {
+		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
 		});
