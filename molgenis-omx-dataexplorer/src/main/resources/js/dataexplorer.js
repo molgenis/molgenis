@@ -56,6 +56,7 @@
 			var featureUri = $(this).data('href');
 			console.log("select feature: " + featureUri);
 			ns.openFeatureFilterDialog(featureUri);
+			return false;
 		});
 	};
 
@@ -91,9 +92,10 @@
 				if (protocol.features) {
 					$.each(protocol.features, function() {
 						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.identifier
+								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" data-name="' + this.name 
+								+ '" data-value="' + this.identifier + '" value="' + this.name 
 								+ '" checked>' + this.name + '</label><a class="feature-filter-edit" data-href="' + this.href
-								+ '"href="#"><i class="icon-filter"></i></a></li>');
+								+ '" href="#"><i class="icon-filter"></i></a></li>');
 					});
 				}
 				items.push('</ul></li>');
@@ -126,7 +128,7 @@
 		selectedFeatures = $('.feature-select-checkbox:checkbox:checked').sort(function(cb1, cb2) {
 			return $(cb1).parents().length - $(cb2).parents().length;
 		}).map(function() {
-			return $(this).val();
+			return {identifier:$(this).attr('data-value'), name:$(this).attr('data-name')};
 		}).get();
 		ns.updateObservationSetsTable();
 	};
@@ -151,7 +153,7 @@
 			var items = [];
 			items.push('<thead>');
 			$.each(selectedFeatures, function(i, val) {
-				items.push('<th>' + this + '</th>');
+				items.push('<th>' + this.name + '</th>');
 			});
 			items.push('</thead>');
 
@@ -161,7 +163,7 @@
 				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
 				
 				$.each(selectedFeatures, function(i, val) {
-					items.push('<td>' + columnValueMap[this] + '</td>');
+					items.push('<td>' + columnValueMap[this.identifier] + '</td>');
 				});
 				
 				items.push('</tr>');
@@ -266,6 +268,7 @@
 				filter.keyup(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -281,6 +284,7 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -297,21 +301,24 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
 					ns.onFeatureFilterChange();
 				});
 				break;
+			case "integer":
 			case "int":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="number">');
+					filter = $('<input type="number" step="any">');
 				else
-					filter = $('<input type="number" value="' + config.values[0] + '">');
+					filter = $('<input type="number" step="any" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -327,6 +334,7 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -342,6 +350,7 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -397,9 +406,11 @@
 
 		$('.feature-filter-edit').click(function() {
 			ns.openFeatureFilterDialog($(this).data('href'));
+			return false;
 		});
 		$('.feature-filter-remove').click(function() {
 			ns.removeFeatureFilter($(this).data('href'));
+			return false;
 		});
 
 		ns.updateObservationSetsTable();
@@ -420,9 +431,20 @@
 			searchRequest.queryRules.push({operator:'OFFSET', value:offset});
 		}
 		
+		var count = 0;
+		
 		if (searchQuery) {
 			searchRequest.queryRules.push({operator:'SEARCH', value:searchQuery});
+			count++;
 		}
+			
+		$.each(featureFilters, function(featureUri, filter) {
+			if (count > 0) {
+				searchRequest.queryRules.push({operator:'AND'});
+			}
+			searchRequest.queryRules.push({field:filter.identifier, operator:'EQUALS', value: filter.values[0]});
+			count++;
+		});
 		
 		return searchRequest;
 	};
