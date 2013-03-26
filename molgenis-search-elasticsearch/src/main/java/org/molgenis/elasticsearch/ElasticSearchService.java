@@ -157,6 +157,10 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void indexTupleTable(String documentType, TupleTable tupleTable)
 	{
+		if (!tupleTable.iterator().hasNext())
+		{
+			return;
+		}
 		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
 		deleteDocumentsByType(documentType);
 
