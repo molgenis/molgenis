@@ -56,7 +56,27 @@ public class ImportWorksheet
 
 		// Import sheets
 		TupleReader readers = new CsvReader(csvs);
-		TupleReader readerp = new CsvReader(csvp);
+		TupleReader readerp = null;
+
+		// First gather users from the projectSheet
+		readerp = new CsvReader(csvp);
+		for (Tuple rowp : readerp)
+		{
+			// ProjectAnalist(s)
+			if (rowp.getString("Analist") != null)
+			{
+				String[] analistParts = rowp.getString("Analist").split("/");
+				for (int i = 0; i < analistParts.length; i++)
+				{
+					NgsUser u = new NgsUser();
+					u.setUserName(analistParts[0].toLowerCase().trim());
+					u.setUserRole("Analist");
+					u.setUserGroup("GAF");
+					users.put(u.getUserName(), u);
+				}
+			}
+		}
+		readerp.close();
 
 		for (Tuple row : readers)
 		{
@@ -280,6 +300,7 @@ public class ImportWorksheet
 				}
 				p.setProjectCustomer_UserName(contactName);
 
+				// SeqType
 				if (row.getString("seqType") != null)
 				{
 					p.setSeqType(row.getString("seqType"));
@@ -326,16 +347,17 @@ public class ImportWorksheet
 				p.setGccAnalysis(gccAnalysis);
 
 				// TODO: Get remaining values from projectSheet
+				readerp = new CsvReader(csvp);
 				for (Tuple rowp : readerp)
 				{
 					if (rowp.getString("Project").toLowerCase().trim()
 							.equals(row.getString("project").toLowerCase().trim()))
 					{
 						// ProjectComment (original sheet contains no header)
-						// if (rowp.getString("") != null)
-						// {
-						// p.setProjectComment(rowp.getString(""));
-						// }
+						if (rowp.getString("Comments") != null)
+						{
+							p.setProjectComment(rowp.getString("Comments"));
+						}
 
 						// ProjectAnalist(s)
 						if (rowp.getString("Analist") != null)
@@ -352,7 +374,7 @@ public class ImportWorksheet
 						// LaneAmount
 						if (rowp.getString("Aantal lanes") != null)
 						{
-							p.setLaneAmount(rowp.getInt("Aantal lanes"));
+							p.setLaneAmount(rowp.getDouble("Aantal lanes"));
 						}
 
 						// SampleAmount
@@ -368,6 +390,7 @@ public class ImportWorksheet
 						}
 					}
 				}
+				readerp.close();
 
 				projects.put(p.getProjectName().toLowerCase().trim(), p);
 			}
@@ -425,7 +448,7 @@ public class ImportWorksheet
 				// PrepKit
 				if (row.getString("prepKit") != null)
 				{
-					if (row.getString("prepKit").toLowerCase().trim().equals("none")
+					if (row.getString("prepKit").trim().equalsIgnoreCase("none")
 							|| row.getString("prepKit").toLowerCase().trim().equals("_"))
 					{
 						s.setPrepKit_PrepKitName("None");
@@ -556,13 +579,14 @@ public class ImportWorksheet
 			}
 		}
 		readers.close();
-		readerp.close();
 
 		// Show all collected values
 		for (List<FlowcellLaneSampleBarcode> flsbList : flowcellLaneSampleBarcodes.values())
 		{
 			for (FlowcellLaneSampleBarcode flsb : flsbList)
+			{
 				logger.info(flsb);
+			}
 		}
 		for (Sample s : samples.values())
 		{
@@ -673,23 +697,23 @@ public class ImportWorksheet
 		{
 			if (s != null)
 			{
-				if (s.toLowerCase().trim().equals("unknown"))
+				if (!s.toLowerCase().trim().equals("unknown"))
 				{
 					char[] d = s.trim().toCharArray();
 					if (d.length == 8)
 					{
-						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse(d[0] + d[1] + d[2] + d[3] + "/"
-								+ d[4] + d[5] + "/" + d[6] + d[7]);
+						date = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).parse(d[0] + "" + d[1] + "" + d[2]
+								+ "" + d[3] + "/" + d[4] + "" + d[5] + "/" + d[6] + "" + d[7]);
 					}
 					if (d.length == 6)
 					{
-						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/" + d[2]
-								+ d[3] + "/" + d[4] + d[5]);
+						date = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).parse("20" + d[0] + "" + d[1] + "/"
+								+ d[2] + "" + d[3] + "/" + d[4] + "" + d[5]);
 					}
 					if (d.length == 5)
 					{
-						date = new SimpleDateFormat("yyyy/mm/dd", Locale.ENGLISH).parse("20" + d[0] + d[1] + "/0"
-								+ d[2] + "/" + d[3] + d[4]);
+						date = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).parse("20" + d[0] + "" + d[1] + "/0"
+								+ d[2] + "/" + d[3] + "" + d[4]);
 					}
 				}
 			}
