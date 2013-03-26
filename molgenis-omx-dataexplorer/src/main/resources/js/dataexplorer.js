@@ -1,7 +1,7 @@
 (function($, w) {
 	"use strict";
 	
-	var MAX_ROWS = 10;
+	var MAX_ROWS = 20;
 	var ns = w.molgenis = w.molgenis || {};
 
 	var featureFilters = {};
@@ -91,7 +91,7 @@
 				if (protocol.features) {
 					$.each(protocol.features, function() {
 						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.name
+								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.identifier
 								+ '" checked>' + this.name + '</label><a class="feature-filter-edit" data-href="' + this.href
 								+ '"href="#"><i class="icon-filter"></i></a></li>');
 					});
@@ -197,42 +197,50 @@
 		pager.append(ul);
 		
 		if (currentPage == 1) {
-			ul.append($('<li class="disabled"><a href="#">Prev</a></li>'));
+			ul.append($('<li class="disabled"><span>&laquo;</span></li>'));
 		} else {
-			var prev = $('<li><a href="#">Prev</a></li>');
-			prev.click(function(){
+			var prev = $('<li><a href="#">&laquo;</a></li>');
+			prev.click(function(e){
 				currentPage--;
 				ns.updateObservationSetsTable();
+				return false;
 			});
 			ul.append(prev);
 		}
 		
-		for ( var i = 1; i <= Math.min(nrPages, 6); ++i) {
+		for ( var i = 1; i <= nrPages; ++i) {
 			if (i == currentPage) {
-				ul.append($('<li class="active"><a href="#">' + i + '</a></li>'));
-			} else {
+				ul.append($('<li class="active"><span>' + i + '</span></li>'));
+				
+			} else if ((i == 1) || (i == nrPages) || 
+					   ((i > currentPage-3) && (i < currentPage+3)) || 
+					   ((i < 7) && (currentPage < 5)) || 
+					   ((i > nrPages-6) && (currentPage > nrPages-4))) {
+				
 				var p = $('<li><a href="#">' + i + '</a></li>');
 				p.click((function(pageNr){
 					return function(){
 						currentPage = pageNr;
 						ns.updateObservationSetsTable();
+						return false;
 					};
 				})(i));
 				
 				ul.append(p);
-			}
-			
-			if (nrPages >= 6 && i == 3) {
-				ul.append($('<li class="disabled"><a href="#">...</a></li>'));
+			} else if ((i == 2) || (i == nrPages-1)) {
+				ul.append($('<li class="disabled"><span>...</span></li>'));
+				
 			}
 		}
+		
 		if (currentPage == nrPages) {
-			ul.append($('<li class="disabled"><a href="#">Next</a></li>'));
+			ul.append($('<li class="disabled"><span>&raquo;</span></li>'));
 		} else {
-			var next = $('<li><a href="#">Next</a></li>');
+			var next = $('<li><a href="#">&raquo;</a></li>');
 			next.click(function(){
 				currentPage++;
 				ns.updateObservationSetsTable();
+				return false;
 			});
 			ul.append(next);
 		}
@@ -403,7 +411,7 @@
 	
 	ns.createSearchRequest = function() {
 		var searchRequest = {
-			documentType: selectedDataSet.identifier,
+			documentType: selectedDataSet.name,
 			queryRules:[{operator:'LIMIT', value:MAX_ROWS}]
 		};
 		

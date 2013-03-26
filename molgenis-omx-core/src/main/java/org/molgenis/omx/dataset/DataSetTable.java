@@ -213,7 +213,6 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 					ObservableFeature feature = v.getFeature();
 					Object value = ValueConverter.fromString(v.getValue(), db, feature);
 
-					System.out.println(feature.getDataType() + ":" + value);
 					tuple.set(feature.getIdentifier(), value);
 				}
 

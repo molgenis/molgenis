@@ -62,7 +62,7 @@
 						<span id="data-table-header"></span>
 					</div>
 					<div class="row-fluid">
-						<div id="data-table-pager" class="pagination pagination-small pagination-centered">
+						<div id="data-table-pager" class="pagination pagination-centered">
 						</div>
 					</div>
 				</div>
