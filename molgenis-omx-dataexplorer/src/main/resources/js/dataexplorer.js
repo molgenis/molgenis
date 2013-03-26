@@ -91,9 +91,10 @@
 				if (protocol.features) {
 					$.each(protocol.features, function() {
 						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" value="' + this.identifier
+								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" data-name="' + this.name 
+								+ '" data-value="' + this.identifier + '" value="' + this.name 
 								+ '" checked>' + this.name + '</label><a class="feature-filter-edit" data-href="' + this.href
-								+ '"href="#"><i class="icon-filter"></i></a></li>');
+								+ '" href="#"><i class="icon-filter"></i></a></li>');
 					});
 				}
 				items.push('</ul></li>');
@@ -126,7 +127,7 @@
 		selectedFeatures = $('.feature-select-checkbox:checkbox:checked').sort(function(cb1, cb2) {
 			return $(cb1).parents().length - $(cb2).parents().length;
 		}).map(function() {
-			return $(this).val();
+			return {identifier:$(this).attr('data-value'), name:$(this).attr('data-name')};
 		}).get();
 		ns.updateObservationSetsTable();
 	};
@@ -151,7 +152,7 @@
 			var items = [];
 			items.push('<thead>');
 			$.each(selectedFeatures, function(i, val) {
-				items.push('<th>' + this + '</th>');
+				items.push('<th>' + this.name + '</th>');
 			});
 			items.push('</thead>');
 
@@ -161,7 +162,7 @@
 				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
 				
 				$.each(selectedFeatures, function(i, val) {
-					items.push('<td>' + columnValueMap[this] + '</td>');
+					items.push('<td>' + columnValueMap[this.identifier] + '</td>');
 				});
 				
 				items.push('</tr>');
