@@ -40,6 +40,7 @@
 						<select data-placeholder="Choose a Dataset" id="dataset-select">
 						</select>
 					</div>
+					<div class="well">
 					<div class="row-fluid">
 						<div id="feature-filters">
 							<h3>Data item filters</h3>
@@ -48,22 +49,23 @@
 					<div class="row-fluid">
 						<div id="feature-selection">
 						</div>
-					</div>					
+					</div>			
+					</div>		
 				</div>
 				<div class="span9">
-					<div class="row-fluid">
-						<input type="search" id="observationset-search" class="search-query input-xxlarge offset3" placeholder="Search data items">
-					</div>
+					<form class="form-search" onsubmit="return false">
+						<div class="input-append">
+							<input type="text" id="observationset-search" class="search-query offset3" placeholder="Search data items">
+							<button type="submit" class="btn">Search</button>
+						</div>
+					</form>
 					<div class="row-fluid data-table-container">
 						<table id="data-table" class="table table-striped table-condensed">
 						</table>
 					</div>
 					<div class="row-fluid data-table-header-container">
 						<span id="data-table-header"></span>
-					</div>
-					<div class="row-fluid">
-						<div id="data-table-pager" class="pagination pagination-centered">
-						</div>
+						<div id="data-table-pager" class="pagination pagination-centered"></div>
 					</div>
 				</div>
 			</div>

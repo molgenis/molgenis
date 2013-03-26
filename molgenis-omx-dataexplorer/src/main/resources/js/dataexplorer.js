@@ -56,6 +56,7 @@
 			var featureUri = $(this).data('href');
 			console.log("select feature: " + featureUri);
 			ns.openFeatureFilterDialog(featureUri);
+			return false;
 		});
 	};
 
@@ -267,6 +268,7 @@
 				filter.keyup(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -282,6 +284,7 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -298,21 +301,24 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
 					ns.onFeatureFilterChange();
 				});
 				break;
+			case "integer":
 			case "int":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="number">');
+					filter = $('<input type="number" step="any">');
 				else
-					filter = $('<input type="number" value="' + config.values[0] + '">');
+					filter = $('<input type="number" step="any" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -328,6 +334,7 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -343,6 +350,7 @@
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
+						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
 					};
@@ -398,9 +406,11 @@
 
 		$('.feature-filter-edit').click(function() {
 			ns.openFeatureFilterDialog($(this).data('href'));
+			return false;
 		});
 		$('.feature-filter-remove').click(function() {
 			ns.removeFeatureFilter($(this).data('href'));
+			return false;
 		});
 
 		ns.updateObservationSetsTable();
@@ -421,9 +431,20 @@
 			searchRequest.queryRules.push({operator:'OFFSET', value:offset});
 		}
 		
+		var count = 0;
+		
 		if (searchQuery) {
 			searchRequest.queryRules.push({operator:'SEARCH', value:searchQuery});
+			count++;
 		}
+			
+		$.each(featureFilters, function(featureUri, filter) {
+			if (count > 0) {
+				searchRequest.queryRules.push({operator:'AND'});
+			}
+			searchRequest.queryRules.push({field:filter.identifier, operator:'EQUALS', value: filter.values[0]});
+			count++;
+		});
 		
 		return searchRequest;
 	};

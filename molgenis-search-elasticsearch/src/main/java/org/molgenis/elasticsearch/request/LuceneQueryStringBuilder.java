@@ -102,10 +102,7 @@ public class LuceneQueryStringBuilder
 							break;
 
 						case SEARCH:
-							sb.append(value).append("~0.4");// Fuzzy
-															// (make
-															// configurable
-															// ?)
+							sb.append(value);
 							break;
 
 						default:

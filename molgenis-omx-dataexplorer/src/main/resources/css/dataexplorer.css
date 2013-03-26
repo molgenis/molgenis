@@ -45,7 +45,33 @@
 	margin: 0px;
 }
 
-#observationset-search {
+.ui-accordion-header {
+	background:none; 
+	background-color: #5B82A4; 
+	color: white;
+}
+
+.table thead th {
+    background-color: #5B82A4; 
+    color: white;
+}
+
+ui-state-active .ui-icon {
+    background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+.ui-state-default .ui-icon {
+    background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+
+.input-append {
 	display: block;
 	margin : 0 auto;
+	width: 100%;
 }
+
+.input-append input { 
+	float:left; 
+	width:400px;
+}
+
