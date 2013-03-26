@@ -1,8 +1,5 @@
 package org.molgenis.omx.plugins.header;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
@@ -17,7 +14,7 @@ public class Header extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = 1L;
 
-	private static final String DEFAULT_KEY_APP_HREF_LOGO = "img/logo_molgenis.gif";
+	private static final String DEFAULT_KEY_APP_HREF_LOGO = "img/logo_molgenis_letterbox.png";
 	private static final String KEY_APP_HREF_LOGO = "app.href.logo";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
