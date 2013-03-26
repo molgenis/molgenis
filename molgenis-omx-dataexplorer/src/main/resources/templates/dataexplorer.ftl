@@ -42,7 +42,7 @@
 					</div>
 					<div class="row-fluid">
 						<div id="feature-filters">
-							<h3>Filters</h3>
+							<h3>Data item filters</h3>
 						</div>
 					</div>
 					<div class="row-fluid">
