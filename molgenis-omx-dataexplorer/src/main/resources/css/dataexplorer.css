@@ -44,3 +44,8 @@
 .pagination {
 	margin: 0px;
 }
+
+#observationset-search {
+	display: block;
+	margin : 0 auto;
+}
