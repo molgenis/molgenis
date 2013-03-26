@@ -38,7 +38,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is
+	 * not managed by Spring
 	 * 
 	 * @return
 	 */
