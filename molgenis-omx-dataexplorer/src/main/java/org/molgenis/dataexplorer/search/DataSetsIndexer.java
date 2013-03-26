@@ -40,13 +40,38 @@ public class DataSetsIndexer implements InitializingBean
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 		if (unauthorizedDatabase == null) throw new IllegalArgumentException(
 				"Missing bean of type Database with name 'unauthorizedDatabase'");
+
+		indexNew();
 	}
 
+	/**
+	 * Index all datasets
+	 * 
+	 * @throws DatabaseException
+	 * @throws TableException
+	 */
 	public void index() throws DatabaseException, TableException
 	{
 		for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 		{
 			index(dataSet);
+		}
+	}
+
+	/**
+	 * Index all datatsets that are not in the index yet
+	 * 
+	 * @throws DatabaseException
+	 * @throws TableException
+	 */
+	public void indexNew() throws DatabaseException, TableException
+	{
+		for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
+		{
+			if (!searchService.documentTypeExists(dataSet.getName()))
+			{
+				index(dataSet);
+			}
 		}
 	}
 

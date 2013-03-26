@@ -1,4 +1,77 @@
+.container-fluid {
+	padding-top: 10px;	
+}
+
 .row-fluid {
-	margin-top: 10px;
 	margin-bottom: 20px;
 }
+
+#dataset-select-label {
+	display: inline;
+	margin-right:10px;
+}
+
+.data-table-container {
+	overflow: auto;
+	white-space: nowrap;
+}
+
+#feature-selection ul {
+    list-style-type: none;    
+}
+
+.icon-filter {
+	margin-left: 10px;
+}
+
+#feature-selection label {
+	display: inline;
+}
+
+#data-table {
+	margin-bottom: 0px;
+}
+
+.data-table-header-container {
+	margin-bottom: 0px;
+}
+
+#data-table-header {
+	font-style:italic;
+	float:right;
+}
+
+.pagination {
+	margin: 0px;
+}
+
+.ui-accordion-header {
+	background:none; 
+	background-color: #5B82A4; 
+	color: white;
+}
+
+.table thead th {
+    background-color: #5B82A4; 
+    color: white;
+}
+
+ui-state-active .ui-icon {
+    background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+.ui-state-default .ui-icon {
+    background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+
+.input-append {
+	display: block;
+	margin : 0 auto;
+	width: 100%;
+}
+
+.input-append input { 
+	float:left; 
+	width:400px;
+}
+
