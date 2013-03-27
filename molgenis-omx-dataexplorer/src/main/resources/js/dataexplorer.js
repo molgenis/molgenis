@@ -1,6 +1,6 @@
 (function($, w) {
 	"use strict";
-	
+
 	var MAX_ROWS = 20;
 	var ns = w.molgenis = w.molgenis || {};
 
@@ -10,7 +10,7 @@
 	var selectedDataSet = null;
 	var currentPage = 1;
 	var sortRule = null;
-	
+
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
 		console.log("getDataSets");
@@ -93,9 +93,9 @@
 				if (protocol.features) {
 					$.each(protocol.features, function() {
 						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" data-name="' + this.name 
-								+ '" data-value="' + this.identifier + '" value="' + this.name 
-								+ '" checked>' + this.name + '</label><a class="feature-filter-edit" data-href="' + this.href
+								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" data-name="'
+								+ this.name + '" data-value="' + this.identifier + '" value="' + this.name + '" checked>' + this.name
+								+ '</label><a class="feature-filter-edit" data-href="' + this.href
 								+ '" href="#"><i class="icon-filter"></i></a></li>');
 					});
 				}
@@ -114,6 +114,7 @@
 		searchQuery = null;
 		sortRule = null;
 		currentPage = 1;
+		$("#observationset-search").val("");
 
 		$.ajax({
 			url : dataSetUri + "?expand=protocolUsed",
@@ -131,17 +132,20 @@
 		selectedFeatures = $('.feature-select-checkbox:checkbox:checked').sort(function(cb1, cb2) {
 			return $(cb1).parents().length - $(cb2).parents().length;
 		}).map(function() {
-			return {identifier:$(this).attr('data-value'), name:$(this).attr('data-name')};
+			return {
+				identifier : $(this).attr('data-value'),
+				name : $(this).attr('data-name')
+			};
 		}).get();
 		ns.updateObservationSetsTable();
 	};
 
 	ns.searchObservationSets = function(query) {
 		console.log("searchObservationSets: " + query);
-		
-		//Reset sorting
+
+		// Reset sorting
 		sortRule = null;
-		
+
 		searchQuery = query;
 		ns.updateObservationSetsTable();
 	};
@@ -152,22 +156,25 @@
 		console.log("query:            " + searchQuery);
 		console.log("selectedFeatures: " + selectedFeatures);
 		console.log("featureFilters:   " + featureFilters);
-		
-		ns.search(function(searchResponse){
+
+		ns.search(function(searchResponse) {
 			var maxRowsPerPage = MAX_ROWS;
 			var nrRows = searchResponse.totalHitCount;
-			
+
 			var items = [];
 			items.push('<thead>');
 			$.each(selectedFeatures, function(i, val) {
 				if (sortRule && sortRule.value == this.identifier) {
 					if (sortRule.operator == 'SORTASC') {
-						items.push('<th>' + this.name + '<span data-value="' + this.identifier + '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+						items.push('<th>' + this.name + '<span data-value="' + this.identifier
+								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 					} else {
-						items.push('<th>' + this.name + '<span data-value="' + this.identifier + '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+						items.push('<th>' + this.name + '<span data-value="' + this.identifier
+								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
 					}
 				} else {
-					items.push('<th>' + this.name + '<span data-value="' + this.identifier + '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+					items.push('<th>' + this.name + '<span data-value="' + this.identifier
+							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 				}
 			});
 			items.push('</thead>');
@@ -176,29 +183,35 @@
 			for ( var i = 0; i < searchResponse.searchHits.length; ++i) {
 				items.push('<tr>');
 				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
-				
+
 				$.each(selectedFeatures, function(i, val) {
 					items.push('<td>' + columnValueMap[this.identifier] + '</td>');
 				});
-				
+
 				items.push('</tr>');
 			}
 			items.push('</tbody>');
 			$('#data-table').html(items.join(''));
-			
-			//Sort click
+
+			// Sort click
 			$('#data-table thead th .ui-icon').click(function() {
 				var featureIdentifier = $(this).data('value');
 				console.log("select sort column: " + featureIdentifier);
 				if (sortRule && sortRule.operator == 'SORTASC') {
-					sortRule = {value:featureIdentifier, operator:'SORTDESC'};
+					sortRule = {
+						value : featureIdentifier,
+						operator : 'SORTDESC'
+					};
 				} else {
-					sortRule = {value:featureIdentifier, operator:'SORTASC'};
+					sortRule = {
+						value : featureIdentifier,
+						operator : 'SORTASC'
+					};
 				}
 				ns.updateObservationSetsTable();
 				return false;
 			});
-			
+
 			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 		});
 	};
@@ -211,70 +224,70 @@
 
 	ns.updateObservationSetsTableHeader = function(nrRows) {
 		console.log("updateObservationSetsTableHeader");
-		$('#data-table-header').html(nrRows + ' data items found');
+		if (nrRows == 1)
+			$('#data-table-header').html(nrRows + ' data items found');
+		else
+			$('#data-table-header').html(nrRows + ' data item found');
 	};
 
 	ns.updateObservationSetsTablePager = function(nrRows, nrRowsPerPage) {
 		console.log("updateObservationSetsTablePager");
 		$('#data-table-pager').empty();
 		var nrPages = Math.ceil(nrRows / nrRowsPerPage);
-		if (nrPages == 1)
+		if (nrPages <= 1)
 			return;
 
-		
 		var pager = $('#data-table-pager');
 		var ul = $('<ul>');
 		pager.append(ul);
-		
+
 		if (currentPage == 1) {
 			ul.append($('<li class="disabled"><span>&laquo;</span></li>'));
 		} else {
 			var prev = $('<li><a href="#">&laquo;</a></li>');
-			prev.click(function(e){
+			prev.click(function(e) {
 				currentPage--;
 				ns.updateObservationSetsTable();
 				return false;
 			});
 			ul.append(prev);
 		}
-		
+
 		for ( var i = 1; i <= nrPages; ++i) {
 			if (i == currentPage) {
 				ul.append($('<li class="active"><span>' + i + '</span></li>'));
-				
-			} else if ((i == 1) || (i == nrPages) || 
-					   ((i > currentPage-3) && (i < currentPage+3)) || 
-					   ((i < 7) && (currentPage < 5)) || 
-					   ((i > nrPages-6) && (currentPage > nrPages-4))) {
-				
+
+			} else if ((i == 1) || (i == nrPages) || ((i > currentPage - 3) && (i < currentPage + 3)) || ((i < 7) && (currentPage < 5))
+					|| ((i > nrPages - 6) && (currentPage > nrPages - 4))) {
+
 				var p = $('<li><a href="#">' + i + '</a></li>');
-				p.click((function(pageNr){
-					return function(){
+				p.click((function(pageNr) {
+					return function() {
 						currentPage = pageNr;
 						ns.updateObservationSetsTable();
 						return false;
 					};
 				})(i));
-				
+
 				ul.append(p);
-			} else if ((i == 2) || (i == nrPages-1)) {
+			} else if ((i == 2) || (i == nrPages - 1)) {
 				ul.append($('<li class="disabled"><span>...</span></li>'));
-				
+
 			}
 		}
-		
+
 		if (currentPage == nrPages) {
 			ul.append($('<li class="disabled"><span>&raquo;</span></li>'));
 		} else {
 			var next = $('<li><a href="#">&raquo;</a></li>');
-			next.click(function(){
+			next.click(function() {
 				currentPage++;
 				ns.updateObservationSetsTable();
 				return false;
 			});
 			ul.append(next);
 		}
-	
+
 		pager.append($('</ul>'));
 	};
 
@@ -402,7 +415,7 @@
 				title : feature.name,
 				modal : true,
 				width : 500,
-				close : function () {
+				close : function() {
 					$(".feature-filter-dialog").dialog("destroy").remove();
 				}
 			});
@@ -450,50 +463,66 @@
 	ns.search = function(callback) {
 		ns.callSearchService(ns.createSearchRequest(), callback);
 	};
-	
+
 	ns.createSearchRequest = function() {
 		var searchRequest = {
-			documentType: selectedDataSet.name,
-			queryRules:[{operator:'LIMIT', value:MAX_ROWS}]
+			documentType : selectedDataSet.name,
+			queryRules : [ {
+				operator : 'LIMIT',
+				value : MAX_ROWS
+			} ]
 		};
-		
+
 		if (currentPage > 1) {
 			var offset = (currentPage - 1) * MAX_ROWS;
-			searchRequest.queryRules.push({operator:'OFFSET', value:offset});
+			searchRequest.queryRules.push({
+				operator : 'OFFSET',
+				value : offset
+			});
 		}
-		
+
 		var count = 0;
-		
+
 		if (searchQuery) {
-			searchRequest.queryRules.push({operator:'SEARCH', value:searchQuery});
+			searchRequest.queryRules.push({
+				operator : 'SEARCH',
+				value : searchQuery
+			});
 			count++;
 		}
-			
+
 		$.each(featureFilters, function(featureUri, filter) {
 			if (count > 0) {
-				searchRequest.queryRules.push({operator:'AND'});
+				searchRequest.queryRules.push({
+					operator : 'AND'
+				});
 			}
-			searchRequest.queryRules.push({field:filter.identifier, operator:'EQUALS', value: filter.values[0]});
+			searchRequest.queryRules.push({
+				field : filter.identifier,
+				operator : 'EQUALS',
+				value : filter.values[0]
+			});
 			count++;
 		});
-		
-		if (sortRule) {;
+
+		if (sortRule) {
+			;
 			searchRequest.queryRules.push(sortRule);
 		}
-		
+
 		return searchRequest;
 	};
-	
+
 	ns.callSearchService = function(searchRequest, callback) {
 		var jsonRequest = JSON.stringify(searchRequest);
 		console.log("Call SearchService json=" + jsonRequest);
-		
+
 		$.ajax({
-			type: "POST",
-			url: '/search',
-			data: jsonRequest,
-			contentType: 'application/json',
-			success: function (searchResponse) {
+			type : "POST",
+			url : '/search',
+			data : jsonRequest,
+			contentType : 'application/json',
+			success : function(searchResponse) {
 				if (searchResponse.errorMessage) {
 					alert(searchResponse.errorMessage);
 				}
@@ -502,7 +531,7 @@
 		});
 
 	};
-	
+
 	// on document ready
 	$(function() {
 		$("#observationset-search").focus();
