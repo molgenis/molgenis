@@ -417,6 +417,40 @@
 				});
 				break;
 			case "categorical":
+				$.ajax({
+					type : 'POST',
+					url : '/api/v1/category?_method=GET',
+					data : JSON.stringify({
+						q : [ {
+							"field" : "observableFeature_Identifier",
+							"operator" : "EQUALS",
+							"value" : feature.identifier
+						} ]
+					}),
+					contentType : 'application/json',
+					async : false,
+					success : function(categories) {
+						filter = [];
+						$.each(categories.items, function() {
+							var input = $('<input type="radio" name="' + feature.identifier + '" value="' + this.name + '">');
+
+							input.change(function() {
+								featureFilters[featureUri] = {
+									name : feature.name,
+									identifier : feature.identifier,
+									type : feature.dataType,
+									values : $('input[name="' + feature.identifier + '"]:checked').map(function() {
+										return $(this).val();
+									})
+								};
+								console.log("filter", featureFilters[featureUri]);
+								ns.onFeatureFilterChange();
+							});
+							filter.push($('<label class="checkbox">').html(' ' + this.name).prepend(input));
+						});
+					}
+				});
+				break;
 			case "xref":
 			case "nominal":
 			case "ordinal":
@@ -510,11 +544,14 @@
 					operator : 'AND'
 				});
 			}
-			searchRequest.queryRules.push({
-				field : filter.identifier,
-				operator : 'EQUALS',
-				value : filter.values[0]
+			$.each(filter.values, function() {
+				searchRequest.queryRules.push({
+					field : filter.identifier,
+					operator : 'EQUALS',
+					value : this
+				});
 			});
+
 			count++;
 		});
 

@@ -44,7 +44,15 @@ public class DataSetImporter
 				if (dataSetEntityNames.contains(tableName))
 				{
 					LOG.info("importing dataset " + tableName + " from file " + file + "...");
-					importSheet(tableReader.getTupleReader(tableName), tableName);
+					TupleReader tupleReader = tableReader.getTupleReader(tableName);
+					try
+					{
+						importSheet(tupleReader, tableName);
+					}
+					finally
+					{
+						tupleReader.close();
+					}
 				}
 			}
 		}
@@ -87,10 +95,10 @@ public class DataSetImporter
 		boolean doTx = !db.inTx();
 		try
 		{
-			if (doTx) db.beginTx();
-
 			for (Tuple row : sheetReader)
 			{
+				if (doTx) db.beginTx();
+
 				ArrayList<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 
 				// create observation set
@@ -111,9 +119,9 @@ public class DataSetImporter
 					obsValueList.add(observedValue);
 				}
 				db.add(obsValueList);
-			}
 
-			if (doTx) db.commitTx();
+				if (doTx) db.commitTx();
+			}
 		}
 		catch (DatabaseException e)
 		{
