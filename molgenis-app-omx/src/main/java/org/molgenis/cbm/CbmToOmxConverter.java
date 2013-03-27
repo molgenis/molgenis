@@ -34,7 +34,8 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
-	private final String outputDir = System.getProperty("java.io.tmpdir");
+	// private final String outputDir = System.getProperty("java.io.tmpdir");
+	private final File outputDir = new File(System.getProperty("java.io.tmpdir"));
 	private final List<String> listFiles = Arrays.asList("dataset.csv", "dataset_collectionprotocols.csv",
 			"dataset_participant_cs.csv", "protocol.csv", "observablefeature.csv");
 
@@ -73,11 +74,11 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				throw new Exception("File does not end with '.xml', other formats are not supported.");
 			}
 			// Create the files needed
-			CsvWriter dataParticipant = new CsvWriter(new File(outputDir + "dataset_participant_cs.csv"));
-			CsvWriter observableFeature = new CsvWriter(new File(outputDir + "observablefeature.csv"));
-			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(outputDir + "dataset_collectionprotocols.csv"));
-			CsvWriter dataSet = new CsvWriter(new File(outputDir + "dataset.csv"));
-			CsvWriter protocol = new CsvWriter(new File(outputDir + "protocol.csv"));
+			CsvWriter dataParticipant = new CsvWriter(new File(outputDir, "dataset_participant_cs.csv"));
+			CsvWriter observableFeature = new CsvWriter(new File(outputDir, "observablefeature.csv"));
+			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(outputDir, "dataset_collectionprotocols.csv"));
+			CsvWriter dataSet = new CsvWriter(new File(outputDir, "dataset.csv"));
+			CsvWriter protocol = new CsvWriter(new File(outputDir, "protocol.csv"));
 
 			try
 			{
@@ -91,6 +92,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				// get uploaded file and do checks
 
 				File currentXsdfile = new File(this.getClass().getResource("/schemas/CBM.xsd").getFile());
+				System.out.println("#### " + this.getClass().getResource("/schemas/CBM.xsd").toString());
 				// if no error, set file, and continue
 				this.setCurrentFile(file);
 				// Here the actual data is going to be imported.
@@ -423,7 +425,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 	}
 
-	public String getOutputDir()
+	public File getOutputDir()
 	{
 		return outputDir;
 	}
