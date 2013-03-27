@@ -15,6 +15,7 @@
 	            <form name="DataSet" entity="DataSet" />
 	            <form name="Protocol" entity="Protocol" />
 	            <form name="Feature" entity="ObservableFeature" />
+	            <form name="Category" entity="Category" />
 	            <form name="RuntimeProperty" entity="RuntimeProperty" />
 	       	</menu>
 	        <menu name="Auth" label="Users and permissions">

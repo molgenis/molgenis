@@ -4,6 +4,7 @@ package org.molgenis.controller;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -15,6 +16,7 @@ import org.molgenis.framework.server.EntityCollectionResponse;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntityNotFoundException;
+import org.molgenis.framework.db.QueryRule;
 import org.molgenis.service.${entity.name}Service;
 <#assign javaImports = ["${entity.name}"]>
 <#list fields as field>
@@ -256,9 +258,9 @@ public class ${entity.name}Controller
 	<#-- Entity collection GET operations -->
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}Collection(@Valid EntityCollectionRequest entityCollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
+	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}Collection(@Valid EntityCollectionRequest ${entity.name?uncap_first}CollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
 	{
-		return _retrieve${entity.name}Collection(entityCollectionRequest, expandFields);
+		return _retrieve${entity.name}Collection(${entity.name?uncap_first}CollectionRequest, expandFields);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, params = "format=json", produces = "application/json")
@@ -268,6 +270,22 @@ public class ${entity.name}Controller
 		return _retrieve${entity.name}Collection(${entity.name?uncap_first}CollectionRequest, expandFields);
 	}
 
+	// Tunnel GET with body through POST
+	@RequestMapping(method = RequestMethod.POST, params = "_method=GET")
+	@ResponseBody
+	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}CollectionPost(@Valid @RequestBody EntityCollectionRequest ${entity.name?uncap_first}CollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
+	{
+		return _retrieve${entity.name}Collection(${entity.name?uncap_first}CollectionRequest, expandFields);
+	}
+
+	// Tunnel GET with body through POST
+	@RequestMapping(method = RequestMethod.POST, params = {"_method=GET", "format=json"}, produces = "application/json")
+	@ResponseBody
+	public EntityCollectionResponse<${entity.name}Response> retrieve${entity.name}CollectionJsonPost(@Valid @RequestBody EntityCollectionRequest ${entity.name?uncap_first}CollectionRequest, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
+	{
+		return _retrieve${entity.name}Collection(${entity.name?uncap_first}CollectionRequest, expandFields);
+	}
+	
 	private EntityCollectionResponse<${entity.name}Response> _retrieve${entity.name}Collection(EntityCollectionRequest entityCollectionRequest, String... expandFieldsStr) throws DatabaseException
 	{
 		EntityPager<${entity.name}> ${entity.name?uncap_first}Pager = ${entity.name?uncap_first}Service.readAll(entityCollectionRequest.getStart(), entityCollectionRequest.getNum(), entityCollectionRequest.getQ());
