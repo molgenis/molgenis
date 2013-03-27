@@ -9,6 +9,7 @@
 	var searchQuery = null;
 	var selectedDataSet = null;
 	var currentPage = 1;
+	var sortRule = null;
 	
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
@@ -111,6 +112,8 @@
 		featureFilters = {};
 		selectedFeatures = [];
 		searchQuery = null;
+		sortRule = null;
+		currentPage = 1;
 
 		$.ajax({
 			url : dataSetUri + "?expand=protocolUsed",
@@ -135,6 +138,10 @@
 
 	ns.searchObservationSets = function(query) {
 		console.log("searchObservationSets: " + query);
+		
+		//Reset sorting
+		sortRule = null;
+		
 		searchQuery = query;
 		ns.updateObservationSetsTable();
 	};
@@ -153,7 +160,15 @@
 			var items = [];
 			items.push('<thead>');
 			$.each(selectedFeatures, function(i, val) {
-				items.push('<th>' + this.name + '</th>');
+				if (sortRule && sortRule.value == this.identifier) {
+					if (sortRule.operator == 'SORTASC') {
+						items.push('<th>' + this.name + '<span data-value="' + this.identifier + '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+					} else {
+						items.push('<th>' + this.name + '<span data-value="' + this.identifier + '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+					}
+				} else {
+					items.push('<th>' + this.name + '<span data-value="' + this.identifier + '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+				}
 			});
 			items.push('</thead>');
 
@@ -170,6 +185,19 @@
 			}
 			items.push('</tbody>');
 			$('#data-table').html(items.join(''));
+			
+			//Sort click
+			$('#data-table thead th .ui-icon').click(function() {
+				var featureIdentifier = $(this).data('value');
+				console.log("select sort column: " + featureIdentifier);
+				if (sortRule && sortRule.operator == 'SORTASC') {
+					sortRule = {value:featureIdentifier, operator:'SORTDESC'};
+				} else {
+					sortRule = {value:featureIdentifier, operator:'SORTASC'};
+				}
+				ns.updateObservationSetsTable();
+				return false;
+			});
 			
 			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 		});
@@ -373,7 +401,10 @@
 			$('<div class="feature-filter-dialog">').html(items.join('')).append(filter).dialog({
 				title : feature.name,
 				modal : true,
-				width : 500
+				width : 500,
+				close : function () {
+					$(".feature-filter-dialog").dialog("destroy").remove();
+				}
 			});
 		});
 	};
@@ -445,6 +476,10 @@
 			searchRequest.queryRules.push({field:filter.identifier, operator:'EQUALS', value: filter.values[0]});
 			count++;
 		});
+		
+		if (sortRule) {;
+			searchRequest.queryRules.push(sortRule);
+		}
 		
 		return searchRequest;
 	};
