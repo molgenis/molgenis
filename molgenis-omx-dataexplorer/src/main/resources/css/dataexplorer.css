@@ -96,3 +96,26 @@ ui-state-active .ui-icon {
 	width:400px;
 }
 
+.feature-filter-dialog {
+	display:none;
+}
+
+.table td.nothing-found {
+	text-align: center;
+	color: #888888;
+}
+
+.feature-filter-remove {
+	margin-left: 4px;	
+}
+
+.feature-filter-remove .ui-icon-closethick {
+	display: inline-block; 
+	background-image: url("images/ui-icons_cd0a0a_256x240.png");
+	vertical-align: middle;
+}
+
+.ui-accordion-content p, 
+.ui-accordion-content li {
+	white-space: nowrap;
+}
