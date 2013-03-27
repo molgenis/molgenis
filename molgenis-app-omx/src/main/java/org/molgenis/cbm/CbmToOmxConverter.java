@@ -91,7 +91,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				// get uploaded file and do checks
 
 				File currentXsdfile = new File(this.getClass().getResource("/schemas/CBM.xsd").getFile());
-				System.out.println("#### " + this.getClass().getResource("/schemas/CBM.xsd").toString());
 				// if no error, set file, and continue
 				this.setCurrentFile(file);
 				// Here the actual data is going to be imported.
@@ -350,7 +349,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			}
 
 			File zipFile = new File(outputDir, "cbm.zip");
-			System.out.println(zipFile);
+
 			File[] sourceFiles =
 			{ new File(outputDir, "dataset.csv"), new File(outputDir, "dataset_collectionprotocols.csv"),
 					new File(outputDir, "dataset_participant_cs.csv"), new File(outputDir, "protocol.csv"),
