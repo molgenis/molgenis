@@ -34,7 +34,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
-	// private final String outputDir = System.getProperty("java.io.tmpdir");
 	private final File outputDir = new File(System.getProperty("java.io.tmpdir"));
 	private final List<String> listFiles = Arrays.asList("dataset.csv", "dataset_collectionprotocols.csv",
 			"dataset_participant_cs.csv", "protocol.csv", "observablefeature.csv");
