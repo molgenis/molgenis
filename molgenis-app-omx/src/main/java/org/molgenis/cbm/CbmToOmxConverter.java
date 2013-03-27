@@ -62,7 +62,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 		if (request.getString("__action").equals("upload"))
 		{
 			// get uploaded file and do checks
-			File file = request.getFile("uploadData");
+			File file = request.getFile("upload");
 
 			if (file == null)
 			{
@@ -346,7 +346,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				IOUtils.closeQuietly(observableFeature);
 			}
 
-			File zipFile = new File(outputDir, "zipfile.zip");
+			File zipFile = new File(outputDir, "cbm.zip");
 			System.out.println(zipFile);
 			File[] sourceFiles =
 			{ new File(outputDir, "dataset.csv"), new File(outputDir, "dataset_collectionprotocols.csv"),
