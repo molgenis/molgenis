@@ -78,6 +78,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(outputDir + "dataset_collectionprotocols.csv"));
 			CsvWriter dataSet = new CsvWriter(new File(outputDir + "dataset.csv"));
 			CsvWriter protocol = new CsvWriter(new File(outputDir + "protocol.csv"));
+
 			try
 			{
 
@@ -88,7 +89,8 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				KeyValueTuple kvtdataParticipant = null;
 				KeyValueTuple kvtprotocol_Collection_Protocol = new KeyValueTuple();
 				// get uploaded file and do checks
-				File currentXsdfile = new File("src/main/resources/schemas/CBM.xsd");
+
+				File currentXsdfile = new File(this.getClass().getResource("/schemas/CBM.xsd").getFile());
 				// if no error, set file, and continue
 				this.setCurrentFile(file);
 				// Here the actual data is going to be imported.
