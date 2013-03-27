@@ -75,7 +75,7 @@ public class DataSetsIndexer implements InitializingBean
 		}
 	}
 
-	private void index(DataSet dataSet) throws TableException
+	public void index(DataSet dataSet) throws TableException
 	{
 		searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 	}
