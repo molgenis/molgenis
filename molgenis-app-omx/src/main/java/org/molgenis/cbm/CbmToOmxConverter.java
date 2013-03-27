@@ -34,7 +34,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
-	private final String outputDir = System.getProperty("java.io.tmpdir");
+	private final File outputDir = new File(System.getProperty("java.io.tmpdir"));
 	private final List<String> listFiles = Arrays.asList("dataset.csv", "dataset_collectionprotocols.csv",
 			"dataset_participant_cs.csv", "protocol.csv", "observablefeature.csv");
 
@@ -62,7 +62,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 		if (request.getString("__action").equals("upload"))
 		{
 			// get uploaded file and do checks
-			File file = request.getFile("uploadData");
+			File file = request.getFile("upload");
 
 			if (file == null)
 			{
@@ -73,11 +73,12 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				throw new Exception("File does not end with '.xml', other formats are not supported.");
 			}
 			// Create the files needed
-			CsvWriter dataParticipant = new CsvWriter(new File(outputDir + "dataset_participant_cs.csv"));
-			CsvWriter observableFeature = new CsvWriter(new File(outputDir + "observablefeature.csv"));
-			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(outputDir + "dataset_collectionprotocols.csv"));
-			CsvWriter dataSet = new CsvWriter(new File(outputDir + "dataset.csv"));
-			CsvWriter protocol = new CsvWriter(new File(outputDir + "protocol.csv"));
+			CsvWriter dataParticipant = new CsvWriter(new File(outputDir, "dataset_participant_cs.csv"));
+			CsvWriter observableFeature = new CsvWriter(new File(outputDir, "observablefeature.csv"));
+			CsvWriter dataSetCollectionProtocol = new CsvWriter(new File(outputDir, "dataset_collectionprotocols.csv"));
+			CsvWriter dataSet = new CsvWriter(new File(outputDir, "dataset.csv"));
+			CsvWriter protocol = new CsvWriter(new File(outputDir, "protocol.csv"));
+
 			try
 			{
 
@@ -88,7 +89,8 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				KeyValueTuple kvtdataParticipant = null;
 				KeyValueTuple kvtprotocol_Collection_Protocol = new KeyValueTuple();
 				// get uploaded file and do checks
-				File currentXsdfile = new File("src/main/resources/schemas/CBM.xsd");
+
+				File currentXsdfile = new File(this.getClass().getResource("/schemas/CBM.xsd").getFile());
 				// if no error, set file, and continue
 				this.setCurrentFile(file);
 				// Here the actual data is going to be imported.
@@ -346,8 +348,8 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				IOUtils.closeQuietly(observableFeature);
 			}
 
-			File zipFile = new File(outputDir, "zipfile.zip");
-			System.out.println(zipFile);
+			File zipFile = new File(outputDir, "cbm.zip");
+
 			File[] sourceFiles =
 			{ new File(outputDir, "dataset.csv"), new File(outputDir, "dataset_collectionprotocols.csv"),
 					new File(outputDir, "dataset_participant_cs.csv"), new File(outputDir, "protocol.csv"),
@@ -421,7 +423,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 	}
 
-	public String getOutputDir()
+	public File getOutputDir()
 	{
 		return outputDir;
 	}

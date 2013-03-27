@@ -32,8 +32,10 @@
 					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
 				<plugin label="Security tokens" name="TokenManagerPlugin"
 					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
-					
 			</menu>	
+			
+			<plugin label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
+			
 		</menu> <!-- admin panels -->	
 		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
 	</menu>
