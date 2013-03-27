@@ -32,6 +32,27 @@
 	margin-bottom: 0px;
 }
 
+#data-table thead th .ui-icon {
+	display: inline-block; 
+	cursor: pointer;
+    *cursor: hand;	
+}
+
+#data-table thead th .updown {
+	vertical-align: middle;
+	background-image: url("images/ui-icons_454545_256x240.png");
+}
+	
+#data-table thead th .up {
+	vertical-align: top;
+	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+#data-table thead th .down {
+	vertical-align: bottom;
+	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
 .data-table-header-container {
 	margin-bottom: 0px;
 }
