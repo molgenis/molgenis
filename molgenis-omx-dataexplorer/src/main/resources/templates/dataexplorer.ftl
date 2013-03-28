@@ -70,5 +70,7 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="feature-filter-dialog"></div>
 	</body>
 </html>

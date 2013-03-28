@@ -110,6 +110,7 @@
 
 		// reset
 		featureFilters = {};
+		$('#feature-filters p').remove();
 		selectedFeatures = [];
 		searchQuery = null;
 		sortRule = null;
@@ -143,8 +144,11 @@
 	ns.searchObservationSets = function(query) {
 		console.log("searchObservationSets: " + query);
 
-		// Reset sorting
+		// Reset
+		featureFilters = {};
+		$('#feature-filters p').remove();
 		sortRule = null;
+		currentPage = 1;
 
 		searchQuery = query;
 		ns.updateObservationSetsTable();
@@ -180,12 +184,22 @@
 			items.push('</thead>');
 
 			items.push('<tbody>');
+			
+			if (nrRows == 0) {
+				items.push('<tr><td class="nothing-found" colspan="' + selectedFeatures.length + '">Nothing found</td></tr>');
+			}
+			
 			for ( var i = 0; i < searchResponse.searchHits.length; ++i) {
 				items.push('<tr>');
 				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
 
 				$.each(selectedFeatures, function(i, val) {
-					items.push('<td>' + columnValueMap[this.identifier] + '</td>');
+					var value = columnValueMap[this.identifier];
+					if (value) {
+						items.push('<td>' + value + '</td>');
+					} else {
+						items.push('<td></td>');
+					}
 				});
 
 				items.push('</tr>');
@@ -195,6 +209,10 @@
 
 			// Sort click
 			$('#data-table thead th .ui-icon').click(function() {
+				if (nrRows == 0) {
+					return;
+				}
+				
 				var featureIdentifier = $(this).data('value');
 				console.log("select sort column: " + featureIdentifier);
 				if (sortRule && sortRule.operator == 'SORTASC') {
@@ -303,9 +321,9 @@
 			case "string":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="text" placeholder="filter text">');
+					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
 				else
-					filter = $('<input type="text" placeholder="filter text" value="' + config.values[0] + '">');
+					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.keyup(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
@@ -319,9 +337,9 @@
 			case "date":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="date">');
+					filter = $('<input type="date" autofocus="autofocus">');
 				else
-					filter = $('<input type="date" value="' + config.values[0] + '">');
+					filter = $('<input type="date" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
@@ -336,9 +354,9 @@
 			case "datetime":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="datetime">');
+					filter = $('<input type="datetime" autofocus="autofocus">');
 				else
-					filter = $('<input type="datetime" value="' + config.values[0] + '">');
+					filter = $('<input type="datetime" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
@@ -353,9 +371,9 @@
 			case "int":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="number" step="any">');
+					filter = $('<input type="number" autofocus="autofocus" step="any">');
 				else
-					filter = $('<input type="number" step="any" value="' + config.values[0] + '">');
+					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
@@ -369,9 +387,9 @@
 			case "decimal":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="number" step="any">');
+					filter = $('<input type="number" autofocus="autofocus" step="any">');
 				else
-					filter = $('<input type="number" step="any" value="' + config.values[0] + '">');
+					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
@@ -385,9 +403,9 @@
 			case "bool":
 				var config = featureFilters[featureUri];
 				if (config == null)
-					filter = $('<input type="checkbox">');
+					filter = $('<input type="checkbox" autofocus="autofocus">');
 				else
-					filter = $('<input type="checkbox" value="' + config.values[0] + '">');
+					filter = $('<input type="checkbox" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
 					featureFilters[featureUri] = {
 						name : feature.name,
@@ -445,14 +463,9 @@
 				console.log("TODO: '" + feature.dataType + "' not supported");
 				break;
 			}
-			$('<div class="feature-filter-dialog">').html(items.join('')).append(filter).dialog({
-				title : feature.name,
-				modal : true,
-				width : 500,
-				close : function() {
-					$(".feature-filter-dialog").dialog("destroy").remove();
-				}
-			});
+			$('.feature-filter-dialog').html(items.join('')).append(filter);
+			$('.feature-filter-dialog').dialog('option', 'title', feature.name);
+			$('.feature-filter-dialog').dialog('open');
 		});
 	};
 
@@ -474,7 +487,7 @@
 		items.push('<h3>Data item filters</h3><div>');
 		$.each(featureFilters, function(featureUri, feature) {
 			items.push('<p><a class="feature-filter-edit" data-href="' + featureUri + '" href="#">' + feature.name
-					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#"><i class="icon-remove"></i></a></p>');
+					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#" title="Remove ' + feature.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
@@ -543,10 +556,14 @@
 		});
 
 		if (sortRule) {
-			;
 			searchRequest.queryRules.push(sortRule);
 		}
 
+		searchRequest.fieldsToReturn = [];
+		$.each(selectedFeatures, function() {
+			searchRequest.fieldsToReturn.push(this.identifier);
+		});
+		
 		return searchRequest;
 	};
 
@@ -574,6 +591,12 @@
 		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
+		});
+		
+		$('.feature-filter-dialog').dialog({
+			modal : true,
+			width : 500,
+			autoOpen: false
 		});
 	});
 }($, window));
