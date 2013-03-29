@@ -4,6 +4,8 @@
 	var MAX_ROWS = 20;
 	var ns = w.molgenis = w.molgenis || {};
 
+	var resourceCache = {};
+
 	var featureFilters = {};
 	var selectedFeatures = [];
 	var searchQuery = null;
@@ -13,11 +15,10 @@
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		console.log("getDataSets");
-		$.getJSON('/api/v1/dataset', function(data) {
-			console.log(data);
+		ns.getAsync('/api/v1/dataset', function(datasets) {
 			var items = [];
-			$.each(data.items, function(key, val) {
+			// TODO deal with multiple entity pages
+			$.each(datasets.items, function(key, val) {
 				items.push('<option value="' + val.href + '">' + val.name + '</option>');
 			});
 			$('#dataset-select').html(items.join(''));
@@ -28,86 +29,134 @@
 		});
 	};
 
-	// create protocol-feature tree
-	ns.createFeatureSelection = function(protocol) {
-		console.log("createFeatureSelection: " + protocol.href);
-		// create feature list
-		var items = [];
-		items.push('<h3>Data item selection</h3>');
-		items.push('<ul>');
-		ns.createFeatureSelectionRec(protocol.href, items);
-		items.push('</ul>');
-		$('#feature-selection').html(items.join(''));
-		$('#feature-selection').accordion('destroy').accordion({
-			collapsible : true
-		});
-
-		// select feature
-		$('.feature-select-checkbox').click(function() {
-			ns.onFeatureSelectionChange();
-		});
-		// select protocol
-		$('.protocol-select-checkbox').change(function() {
-			var checked = typeof $(this).attr('checked') != 'undefined';
-			$(this).parentsUntil('ul').find(':checkbox').not(this).attr('checked', checked);
-			ns.onFeatureSelectionChange();
-		});
-		// filter feature
-		$('.feature-filter-edit').click(function() {
-			var featureUri = $(this).data('href');
-			console.log("select feature: " + featureUri);
-			ns.openFeatureFilterDialog(featureUri);
-			return false;
-		});
+	ns.get = function(resourceUri) {
+		var cachedResource = resourceCache[resourceUri];
+		if (cachedResource) {
+			console.log('retrieved ' + resourceUri + ' from cache', cachedResource);
+		} else {
+			$.ajax({
+				url : resourceUri,
+				async : false,
+				success : function(resource) {
+					console.log('retrieved ' + resourceUri + ' from server', resource);
+					resourceCache[resourceUri] = resource;
+					cachedResource = resource;
+				}
+			});
+		}
+		return cachedResource;
 	};
 
-	// recursively create protocol-feature tree
-	ns.createFeatureSelectionRec = function(protocolUri, items) {
-		console.log("createFeatureSelectionRec: " + protocolUri);
-		$.ajax({
-			url : protocolUri + '?expand=features',
-			dataType : 'json',
-			async : false,
-			success : function(protocol) {
-				console.log("protocol: " + protocol.name);
-				items.push('<li data="key: \'' + protocol.href + '\', title:\'' + protocol.name
-						+ '\'"><label class="checkbox"><input type="checkbox" class="protocol-select-checkbox" value="' + protocol.name
-						+ '" checked>' + protocol.name + '</label>');
-				items.push('<ul>');
-				if (protocol.subprotocols) {
-					console.log("protocol.subprotocols.href: " + protocol.subprotocols.href);
-					$.ajax({
-						url : protocol.subprotocols.href,
-						dataType : 'json',
-						async : false,
-						success : function(subprotocols) {
-							console.log("subprotocols.href: " + subprotocols.href);
-							if (subprotocols.items && subprotocols.items.length > 0) {
-								$.each(subprotocols.items, function() {
-									ns.createFeatureSelectionRec(this.href, items);
-								});
-							}
-						}
-					});
-				}
-				if (protocol.features) {
-					$.each(protocol.features, function() {
-						items.push('<li data-href="' + this.href + '" data="key: \'' + this.href + '\', title:\'' + this.name
-								+ '\'"><label class="checkbox"><input type="checkbox" class="feature-select-checkbox" data-name="'
-								+ this.name + '" data-value="' + this.identifier + '" value="' + this.name + '" checked>' + this.name
-								+ '</label><a class="feature-filter-edit" data-href="' + this.href
-								+ '" href="#"><i class="icon-filter"></i></a></li>');
-					});
-				}
-				items.push('</ul></li>');
+	ns.getAsync = function(resourceUri, callback) {
+		var cachedResource = resourceCache[resourceUri];
+		if (cachedResource) {
+			console.log('retrieved ' + resourceUri + ' from cache', cachedResource);
+			callback(cachedResource);
+		} else {
+			$.getJSON(resourceUri, function(resource) {
+				console.log('retrieved ' + resourceUri + ' from server', resource);
+				resourceCache[resourceUri] = resource;
+				callback(resource);
+			});
+		}
+	};
+
+	ns.createFeatureSelection = function(protocol) {
+		function createChildren(protocolUri, featureOpts, protocolOpts) {
+			var protocol = ns.get(protocolUri + '?expand=features,subprotocols');
+
+			var children = [];
+			if (protocol.subprotocols) {
+				// TODO deal with multiple entity pages
+				$.each(protocol.subprotocols.items, function() {
+					children.push($.extend({
+						key : this.href,
+						title : this.name,
+						tooltip : this.description,
+						isFolder : true,
+						isLazy : protocolOpts.expand != true,
+						children : protocolOpts.expand ? createChildren(this.href, featureOpts, protocolOpts) : null
+					}, protocolOpts));
+				});
+			}
+			if (protocol.features) {
+				// TODO deal with multiple entity pages
+				$.each(protocol.features.items, function() {
+					children.push($.extend({
+						key : this.href,
+						title : this.name,
+						tooltip : this.description,
+						icon : "../../img/filter-bw.png",
+					}, featureOpts));
+				});
+			}
+			return children;
+		}
+
+		function onNodeSelectionChange(selectedNodes) {
+			var sortedNodes = selectedNodes.sort(function(node1, node2) {
+				return node1.getLevel() - node2.getLevel();
+			});
+			var sortedFeatures = $.map(sortedNodes, function(node) {
+				return node.data.isFolder ? null : node.data.key;
+			});
+			ns.onFeatureSelectionChange(sortedFeatures);
+		}
+
+		var container = $('#feature-selection');
+		if (container.children('ul').length > 0) {
+			container.dynatree('destroy');
+		}
+		container.empty();
+		if (typeof protocol === 'undefined') {
+			container.append("<p>No features available</p>");
+			return;
+		}
+
+		// render tree and open first branch
+		container.dynatree({
+			checkbox : true,
+			selectMode : 3,
+			minExpandLevel : 2,
+			debugLevel : 0,
+			children : [ {
+				key : protocol.href,
+				title : protocol.name,
+				icon : false,
+				isFolder : true,
+				isLazy : true,
+				children : createChildren(protocol.href, {
+					select : true
+				}, {})
+			} ],
+			onLazyRead : function(node) {
+				// workaround for dynatree lazy parent node select bug
+				var opts = node.isSelected() ? {
+					expand : true,
+					select : true
+				} : {};
+				var children = createChildren(node.data.key, opts, opts);
+				node.setLazyNodeStatus(DTNodeStatus_Ok);
+				node.addChild(children);
+			},
+			onClick : function(node, event) {
+				if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
+					ns.openFeatureFilterDialog(node.data.key);
+			},
+			onSelect : function(select, node) {
+				// workaround for dynatree lazy parent node select bug
+				if (select && node.childList == undefined)
+					node.toggleExpand();
+				onNodeSelectionChange(this.getSelectedNodes());
+			},
+			onPostInit : function() {
+				$("#feature-selection-container").accordion();
+				onNodeSelectionChange(this.getSelectedNodes());
 			}
 		});
-
 	};
 
 	ns.onDataSetSelectionChange = function(dataSetUri) {
-		console.log("onDataSetSelectionChange: " + dataSetUri);
-
 		// reset
 		featureFilters = {};
 		$('#feature-filters p').remove();
@@ -117,27 +166,14 @@
 		currentPage = 1;
 		$("#observationset-search").val("");
 
-		$.ajax({
-			url : dataSetUri + "?expand=protocolUsed",
-			dataType : 'json',
-			async : false,
-			success : function(dataset) {
-				selectedDataSet = dataset;
-				ns.createFeatureSelection(dataset.protocolUsed);
-				ns.onFeatureSelectionChange();
-			}
+		ns.getAsync(dataSetUri + '?expand=protocolUsed', function(dataset) {
+			selectedDataSet = dataset;
+			ns.createFeatureSelection(dataset.protocolUsed);
 		});
 	};
 
-	ns.onFeatureSelectionChange = function() {
-		selectedFeatures = $('.feature-select-checkbox:checkbox:checked').sort(function(cb1, cb2) {
-			return $(cb1).parents().length - $(cb2).parents().length;
-		}).map(function() {
-			return {
-				identifier : $(this).attr('data-value'),
-				name : $(this).attr('data-name')
-			};
-		}).get();
+	ns.onFeatureSelectionChange = function(featureUris) {
+		selectedFeatures = featureUris;
 		ns.updateObservationSetsTable();
 	};
 
@@ -155,12 +191,6 @@
 	};
 
 	ns.updateObservationSetsTable = function() {
-		console.log("updateObservationSetsTable");
-
-		console.log("query:            " + searchQuery);
-		console.log("selectedFeatures: " + selectedFeatures);
-		console.log("featureFilters:   " + featureFilters);
-
 		ns.search(function(searchResponse) {
 			var maxRowsPerPage = MAX_ROWS;
 			var nrRows = searchResponse.totalHitCount;
@@ -168,33 +198,35 @@
 			var items = [];
 			items.push('<thead>');
 			$.each(selectedFeatures, function(i, val) {
-				if (sortRule && sortRule.value == this.identifier) {
+				var feature = ns.get(this);
+				if (sortRule && sortRule.value == feature.identifier) {
 					if (sortRule.operator == 'SORTASC') {
-						items.push('<th>' + this.name + '<span data-value="' + this.identifier
+						items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
 								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 					} else {
-						items.push('<th>' + this.name + '<span data-value="' + this.identifier
+						items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
 								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
 					}
 				} else {
-					items.push('<th>' + this.name + '<span data-value="' + this.identifier
+					items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
 							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 				}
 			});
 			items.push('</thead>');
 
 			items.push('<tbody>');
-			
+
 			if (nrRows == 0) {
 				items.push('<tr><td class="nothing-found" colspan="' + selectedFeatures.length + '">Nothing found</td></tr>');
 			}
-			
+
 			for ( var i = 0; i < searchResponse.searchHits.length; ++i) {
 				items.push('<tr>');
 				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
 
 				$.each(selectedFeatures, function(i, val) {
-					var value = columnValueMap[this.identifier];
+					var feature = ns.get(this);
+					var value = columnValueMap[feature.identifier];
 					if (value) {
 						items.push('<td>' + value + '</td>');
 					} else {
@@ -212,7 +244,7 @@
 				if (nrRows == 0) {
 					return;
 				}
-				
+
 				var featureIdentifier = $(this).data('value');
 				console.log("select sort column: " + featureIdentifier);
 				if (sortRule && sortRule.operator == 'SORTASC') {
@@ -325,13 +357,12 @@
 				else
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.keyup(function() {
-					featureFilters[featureUri] = {
+					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
-					};
-					ns.onFeatureFilterChange();
+					});
 				});
 				break;
 			case "date":
@@ -341,13 +372,12 @@
 				else
 					filter = $('<input type="date" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
-					featureFilters[featureUri] = {
+					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
-					};
-					ns.onFeatureFilterChange();
+					});
 				});
 				filter.datepicker();
 				break;
@@ -358,13 +388,12 @@
 				else
 					filter = $('<input type="datetime" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
-					featureFilters[featureUri] = {
+					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
-					};
-					ns.onFeatureFilterChange();
+					});
 				});
 				break;
 			case "integer":
@@ -375,13 +404,12 @@
 				else
 					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 				filter.change(function() {
-					featureFilters[featureUri] = {
+					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
-					};
-					ns.onFeatureFilterChange();
+					});
 				});
 				break;
 			case "decimal":
@@ -391,13 +419,12 @@
 				else
 					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 				filter.change(function() {
-					featureFilters[featureUri] = {
+					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
-					};
-					ns.onFeatureFilterChange();
+					});
 				});
 				break;
 			case "bool":
@@ -407,13 +434,12 @@
 				else
 					filter = $('<input type="checkbox" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
-					featureFilters[featureUri] = {
+					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
 						values : [ $(this).val() ]
-					};
-					ns.onFeatureFilterChange();
+					});
 				});
 				break;
 			case "categorical":
@@ -435,16 +461,14 @@
 							var input = $('<input type="radio" name="' + feature.identifier + '" value="' + this.name + '">');
 
 							input.change(function() {
-								featureFilters[featureUri] = {
+								ns.updateFeatureFilter(featureUri, {
 									name : feature.name,
 									identifier : feature.identifier,
 									type : feature.dataType,
 									values : $('input[name="' + feature.identifier + '"]:checked').map(function() {
 										return $(this).val();
 									})
-								};
-								console.log("filter", featureFilters[featureUri]);
-								ns.onFeatureFilterChange();
+								});
 							});
 							filter.push($('<label class="checkbox">').html(' ' + this.name).prepend(input));
 						});
@@ -469,28 +493,30 @@
 		});
 	};
 
-	ns.createFeatureFilter = function(feature, featureFilter) {
-		console.log("createFeatureFilter: " + feature.href);
-		featureFilters[feature.href] = feature;
+	ns.updateFeatureFilter = function(featureUri, featureFilter) {
+		featureFilters[featureUri] = featureFilter;
 		ns.onFeatureFilterChange();
 	};
 
 	ns.removeFeatureFilter = function(featureUri) {
-		console.log("removeFeatureFilter: " + featureUri);
 		delete featureFilters[featureUri];
 		ns.onFeatureFilterChange();
 	};
 
-	ns.onFeatureFilterChange = function() {
-		console.log("onFeatureFilterChange");
+	ns.onFeatureFilterChange = function(featureFilters) {
+		ns.createFeatureFilterList(featureFilters);
+		ns.updateObservationSetsTable();
+	};
+
+	ns.createFeatureFilterList = function(featureFilters) {
 		var items = [];
-		items.push('<h3>Data item filters</h3><div>');
 		$.each(featureFilters, function(featureUri, feature) {
 			items.push('<p><a class="feature-filter-edit" data-href="' + featureUri + '" href="#">' + feature.name
-					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#" title="Remove ' + feature.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
+					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#" title="Remove ' + feature.name
+					+ ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
 		items.push('</div>');
-		$('#feature-filters').html(items.join(''));
+		$('#feature-filters-container').html(items.join(''));
 		$('#feature-filters').accordion('destroy').accordion({
 			collapsible : true
 		});
@@ -503,8 +529,6 @@
 			ns.removeFeatureFilter($(this).data('href'));
 			return false;
 		});
-
-		ns.updateObservationSetsTable();
 	};
 
 	ns.search = function(callback) {
@@ -561,9 +585,10 @@
 
 		searchRequest.fieldsToReturn = [];
 		$.each(selectedFeatures, function() {
-			searchRequest.fieldsToReturn.push(this.identifier);
+			var feature = ns.get(this);
+			searchRequest.fieldsToReturn.push(feature.identifier);
 		});
-		
+
 		return searchRequest;
 	};
 
@@ -592,11 +617,11 @@
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
 		});
-		
+
 		$('.feature-filter-dialog').dialog({
 			modal : true,
 			width : 500,
-			autoOpen: false
+			autoOpen : false
 		});
 	});
 }($, window));

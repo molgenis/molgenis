@@ -119,3 +119,9 @@ ui-state-active .ui-icon {
 .ui-accordion-content li {
 	white-space: nowrap;
 }
+
+#feature-selection ul.dynatree-container {
+	padding: 0px;
+	border-style: none;
+}
+	
