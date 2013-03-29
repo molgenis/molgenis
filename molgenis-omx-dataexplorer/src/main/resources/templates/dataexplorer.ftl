@@ -16,17 +16,14 @@
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
-				$("#feature-filters").accordion({ collapsible: true });
+				$("#feature-filters-container").accordion({ collapsible: true });
 				window.molgenis.fillDataSetSelect(function() {
-					$("#feature-selection").accordion({ collapsible: true });
 					<#-- select first dataset -->
 					$('#dataset-select option:first').val();
 					<#-- fire event handler -->
 					$('#dataset-select').change();
 					<#-- use chosen plugin for dataset select -->
 					$('#dataset-select').chosen();
-					<#-- use dynatree plugin for feature selection -->
-					//$("#feature-selection").dynatree({checkbox: true});
 				});
 			});
 		</script>
@@ -42,12 +39,15 @@
 					</div>
 					<div class="well">
 					<div class="row-fluid">
-						<div id="feature-filters">
+						<div id="feature-filters-container">
 							<h3>Data item filters</h3>
+							<div id="feature-filters"></div>
 						</div>
 					</div>
 					<div class="row-fluid">
-						<div id="feature-selection">
+						<div id="feature-selection-container">
+							<h3>Data item selection</h3>
+							<div id="feature-selection"></div>		
 						</div>
 					</div>			
 					</div>		
@@ -60,8 +60,7 @@
 						</div>
 					</form>
 					<div class="row-fluid data-table-container">
-						<table id="data-table" class="table table-striped table-condensed">
-						</table>
+						<table id="data-table" class="table table-striped table-condensed"></table>
 					</div>
 					<div class="row-fluid data-table-header-container">
 						<span id="data-table-header"></span>
