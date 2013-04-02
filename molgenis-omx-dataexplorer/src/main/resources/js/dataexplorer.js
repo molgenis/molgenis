@@ -468,7 +468,7 @@
 					success : function(categories) {
 						filter = [];
 						$.each(categories.items, function() {
-							var input = $('<input type="radio" name="' + feature.identifier + '" value="' + this.name + '">');
+							var input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
 
 							input.change(function() {
 								ns.updateFeatureFilter(featureUri, {
@@ -578,12 +578,19 @@
 					operator : 'AND'
 				});
 			}
-			$.each(filter.values, function() {
+		
+			$.each(filter.values, function(index, value) {
+				if (index > 0) {
+					searchRequest.queryRules.push({
+						operator : 'OR'
+					});
+				}
 				searchRequest.queryRules.push({
 					field : filter.identifier,
 					operator : 'EQUALS',
-					value : this
+					value : value
 				});
+				
 			});
 
 			count++;

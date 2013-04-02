@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.molgenis.dataexplorer.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
@@ -77,6 +76,12 @@ public class DataSetsIndexerPlugin extends PluginModel<Entity>
 			return;
 		}
 
+		if (getDataSetsIndexer().isIndexingRunning())
+		{
+			setMessages(new ScreenMessage("Indexer is already running. Please wait until finished.", false));
+			return;
+		}
+
 		// Convert the strings to integer
 		List<Integer> ids = new ArrayList<Integer>();
 		for (String dataSetId : dataSetIds)
@@ -87,16 +92,19 @@ public class DataSetsIndexerPlugin extends PluginModel<Entity>
 			}
 		}
 
-		// Get the DataSetsIndexer bean from the spring context
-		DataSetsIndexer indexer = ApplicationContextProvider.getApplicationContext().getBean(DataSetsIndexer.class);
-
 		// Get the selected datasets from the databse and index them
-		Query<DataSet> q = db.query(DataSet.class).in("id", ids);
-		for (DataSet dataSet : q.find())
-		{
-			indexer.index(dataSet);
-		}
+		List<DataSet> dataSets = db.query(DataSet.class).in("id", ids).find();
+		getDataSetsIndexer().index(dataSets);
 
-		setMessages(new ScreenMessage("Indexing done", true));
+		setMessages(new ScreenMessage("Indexing started", true));
+	}
+
+	/*
+	 * Get the DataSetsIndexer bean from the spring context
+	 */
+	private DataSetsIndexer getDataSetsIndexer()
+	{
+		return ApplicationContextProvider.getApplicationContext().getBean(DataSetsIndexer.class);
+
 	}
 }
