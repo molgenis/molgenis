@@ -124,4 +124,7 @@ ui-state-active .ui-icon {
 	padding: 0px;
 	border-style: none;
 }
-	
+
+.ui-widget { 
+	font-family: inherit;
+}
