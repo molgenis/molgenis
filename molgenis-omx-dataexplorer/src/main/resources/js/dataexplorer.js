@@ -495,12 +495,12 @@
 
 	ns.updateFeatureFilter = function(featureUri, featureFilter) {
 		featureFilters[featureUri] = featureFilter;
-		ns.onFeatureFilterChange();
+		ns.onFeatureFilterChange(featureFilters);
 	};
 
 	ns.removeFeatureFilter = function(featureUri) {
 		delete featureFilters[featureUri];
-		ns.onFeatureFilterChange();
+		ns.onFeatureFilterChange(featureFilters);
 	};
 
 	ns.onFeatureFilterChange = function(featureFilters) {
@@ -516,8 +516,8 @@
 					+ ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
 		items.push('</div>');
-		$('#feature-filters-container').html(items.join(''));
-		$('#feature-filters').accordion('destroy').accordion({
+		$('#feature-filters').html(items.join(''));
+		$('#feature-filters-container').accordion('destroy').accordion({
 			collapsible : true
 		});
 
