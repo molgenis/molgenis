@@ -23,6 +23,7 @@ import org.molgenis.elasticsearch.response.ResponseParser;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -157,10 +158,18 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void indexTupleTable(String documentType, TupleTable tupleTable)
 	{
-		if (!tupleTable.iterator().hasNext())
+		try
 		{
-			return;
+			if (tupleTable.getCount() == 0)
+			{
+				return;
+			}
 		}
+		catch (TableException e)
+		{
+			throw new RuntimeException(e);
+		}
+
 		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
 		deleteDocumentsByType(documentType);
 

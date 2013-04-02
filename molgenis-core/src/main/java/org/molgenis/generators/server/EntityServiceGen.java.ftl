@@ -68,7 +68,7 @@ public class ${entity.name}Service
 		if (queryRules == null) queryRules = new ArrayList<QueryRule>();
 		queryRules.add(new QueryRule(Operator.OFFSET, start));
 		queryRules.add(new QueryRule(Operator.LIMIT, num));
-		int count = db.count(${entity.name}.class);
+		int count = db.count(${entity.name}.class, queryRules.toArray(new QueryRule[0]));
 		List<${entity.name}> ${entity.name?uncap_first}Collection = db.find(${entity.name}.class, queryRules.toArray(new QueryRule[0]));
 		return new EntityPager<${entity.name}>(start, num, count, ${entity.name?uncap_first}Collection);
 	}

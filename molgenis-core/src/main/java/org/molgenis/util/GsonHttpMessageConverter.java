@@ -62,7 +62,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	{
 		super(new MediaType("application", "json", DEFAULT_CHARSET));
 
-		GsonBuilder builder = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).serializeNulls().disableHtmlEscaping();
+		GsonBuilder builder = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).disableHtmlEscaping();
 		if (LOG.isDebugEnabled())
 		{
 			builder = builder.setPrettyPrinting();
