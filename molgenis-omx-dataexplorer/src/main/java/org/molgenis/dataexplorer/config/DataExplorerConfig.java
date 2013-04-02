@@ -1,10 +1,13 @@
 package org.molgenis.dataexplorer.config;
 
+import org.molgenis.dataexplorer.search.AsyncDataSetsIndexer;
 import org.molgenis.dataexplorer.search.DataSetsIndexer;
+import org.molgenis.dataexplorer.search.StartUpIndexer;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -14,17 +17,40 @@ import org.springframework.scheduling.annotation.Scheduled;
  * @author erwin
  * 
  */
-@EnableScheduling
 @Configuration
+@EnableScheduling
+@EnableAsync
 public class DataExplorerConfig
 {
+	/**
+	 * Get a reference to a DataSetsIndexer.
+	 * 
+	 * @return AsyncDataSetsIndexer
+	 */
 	@Bean
 	public DataSetsIndexer dataSetsIndexer()
 	{
-		return new DataSetsIndexer();
+		return new AsyncDataSetsIndexer();
 	}
 
-	// Index datasets at 4 am every night
+	/**
+	 * Indexes not yet indexed DataSets at application startup, does not reindex
+	 * already indexed DataSets (even not when there are chenges)
+	 * 
+	 * @return
+	 */
+	@Bean
+	public StartUpIndexer startUpIndexer()
+	{
+		return new StartUpIndexer();
+	}
+
+	/**
+	 * Indexes datasets at 4 am every night
+	 * 
+	 * @throws DatabaseException
+	 * @throws TableException
+	 */
 	@Scheduled(cron = "0 0 4 * * ?")
 	public void indexDataSets() throws DatabaseException, TableException
 	{

@@ -111,6 +111,15 @@
 # Note, that for development on a local machine, with small indices, it usually
 # makes sense to "disable" the distributed features:
 #
+
+index:
+	analysis:
+    	analyzer: 
+    		default:
+    			type: custom
+    			filter: [lowercase]
+    			tokenizer: whitespace
+
 index.number_of_shards: 1
 index.number_of_replicas: 0
 
