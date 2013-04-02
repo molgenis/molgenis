@@ -167,14 +167,14 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 				KeyValueTuple protocolFeat_kvt = new KeyValueTuple();
 				protocolFeat_kvt.set("identifier", "cbm_protocol");
 				protocolFeat_kvt.set("name", "cbm_protocol");
-				protocolFeat_kvt.set("subprotocols_identifier", "collection_prot, participant_prot");
+				protocolFeat_kvt.set("subprotocols_identifier", "collection_prot,participant_prot");
 				protocol.write(protocolFeat_kvt);
 
 				// create protocol collectionProtocols , containing a list of
 				// features (allFeat) and the subprotocol is pcs
 				protocolFeat_kvt = new KeyValueTuple();
 				protocolFeat_kvt.set("identifier", "collection_prot");
-				protocolFeat_kvt.set("name", "col_protocol");
+				protocolFeat_kvt.set("name", "collection_prot");
 				protocolFeat_kvt.set("features_identifier", collectionFeatures);
 				protocol.write(protocolFeat_kvt);
 				// create protocol collectionProtocols , containing a list of
