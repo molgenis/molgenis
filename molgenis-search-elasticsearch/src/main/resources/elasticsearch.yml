@@ -116,8 +116,9 @@ index:
 	analysis:
     	analyzer: 
     		default:
-    			type: simple
-    			tokenizer: lowercase
+    			type: custom
+    			filter: [lowercase]
+    			tokenizer: whitespace
 
 index.number_of_shards: 1
 index.number_of_replicas: 0
