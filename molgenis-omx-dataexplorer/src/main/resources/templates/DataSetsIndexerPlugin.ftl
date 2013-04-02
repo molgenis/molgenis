@@ -56,7 +56,6 @@
 		
 		$('#datasets-form').submit(function() {
 			$('input[type=submit]').hide();
-			$('#spinner').modal('show');
 			return true;	
 		});
 	</script>
