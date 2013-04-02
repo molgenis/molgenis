@@ -93,6 +93,16 @@
 			return children;
 		}
 
+		function expandNodeRec(node) {
+			if (node.childList == undefined) {
+				node.toggleExpand();
+			} else {
+				$.each(node.childList, function() {
+					expandNodeRec(this);
+				});
+			}
+		}
+
 		function onNodeSelectionChange(selectedNodes) {
 			var sortedNodes = selectedNodes.sort(function(node1, node2) {
 				return node1.getLevel() - node2.getLevel();
@@ -145,8 +155,8 @@
 			},
 			onSelect : function(select, node) {
 				// workaround for dynatree lazy parent node select bug
-				if (select && node.childList == undefined)
-					node.toggleExpand();
+				if (select)
+					expandNodeRec(node);
 				onNodeSelectionChange(this.getSelectedNodes());
 			},
 			onPostInit : function() {
@@ -465,9 +475,9 @@
 									name : feature.name,
 									identifier : feature.identifier,
 									type : feature.dataType,
-									values : $('input[name="' + feature.identifier + '"]:checked').map(function() {
+									values : $.makeArray($('input[name="' + feature.identifier + '"]:checked').map(function() {
 										return $(this).val();
-									})
+									}))
 								});
 							});
 							filter.push($('<label class="checkbox">').html(' ' + this.name).prepend(input));
@@ -511,9 +521,9 @@
 	ns.createFeatureFilterList = function(featureFilters) {
 		var items = [];
 		$.each(featureFilters, function(featureUri, feature) {
-			items.push('<p><a class="feature-filter-edit" data-href="' + featureUri + '" href="#">' + feature.name
-					+ '</a><a class="feature-filter-remove" data-href="' + featureUri + '" href="#" title="Remove ' + feature.name
-					+ ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
+			items.push('<p><a class="feature-filter-edit" data-href="' + featureUri + '" href="#">' + feature.name + ' ('
+					+ feature.values.join(',') + ')</a><a class="feature-filter-remove" data-href="' + featureUri
+					+ '" href="#" title="Remove ' + feature.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
