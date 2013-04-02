@@ -26,9 +26,7 @@ public class StartUpIndexer implements ApplicationListener<ApplicationContextEve
 		{
 			try
 			{
-				System.out.println("XXXXXXXXX1");
 				dataSetsIndexer.indexNew();
-				System.out.println("XXXXXXXXX2");
 			}
 			catch (DatabaseException e)
 			{
