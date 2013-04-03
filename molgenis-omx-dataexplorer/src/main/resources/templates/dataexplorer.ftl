@@ -38,18 +38,18 @@
 						</select>
 					</div>
 					<div class="well">
-					<div class="row-fluid">
-						<div id="feature-filters-container">
-							<h3>Data item filters</h3>
-							<div id="feature-filters"></div>
+						<div class="row-fluid">
+							<div id="feature-filters-container">
+								<h3>Data item filters</h3>
+								<div id="feature-filters"></div>
+							</div>
 						</div>
-					</div>
-					<div class="row-fluid">
-						<div id="feature-selection-container">
-							<h3>Data item selection</h3>
-							<div id="feature-selection"></div>		
-						</div>
-					</div>			
+						<div class="row-fluid">
+							<div id="feature-selection-container">
+								<h3>Data item selection</h3>
+								<div id="feature-selection"></div>		
+							</div>
+						</div>			
 					</div>		
 				</div>
 				<div class="span9">
