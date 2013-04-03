@@ -184,7 +184,7 @@
 
 		function onNodeSelectionChange(selectedNodes) {
 			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				return node1.getLevel() - node2.getLevel();
+				return node1.getLevel() - node2.getLevel() <= 0 ? -1 : 1;
 			});
 			var sortedFeatures = $.map(sortedNodes, function(node) {
 				return node.data.isFolder ? null : node.data.key;
@@ -489,39 +489,39 @@
 			case "int":
 			case "decimal":
 				var config = featureFilters[featureUri];
-				
+
 				var fromFilter;
 				if (config == null)
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
 				else
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-				
+
 				fromFilter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $('#from').val(), $('#to').val()],
-						range: true
+						values : [ $('#from').val(), $('#to').val() ],
+						range : true
 					});
 				});
-				
+
 				var toFilter;
 				if (config == null)
 					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');
 				else
 					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');
-				
+
 				toFilter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $('#from').val(), $('#to').val()],
-						range: true
+						values : [ $('#from').val(), $('#to').val() ],
+						range : true
 					});
 				});
-				
+
 				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				break;
 			case "bool":
@@ -667,7 +667,7 @@
 			}
 			$.each(filter.values, function(index, value) {
 				if (filter.range) {
-					//Range filter
+					// Range filter
 					var rangeAnd = false;
 					if ((index == 0) && (value != '')) {
 						searchRequest.queryRules.push({
@@ -689,7 +689,7 @@
 							value : value
 						});
 					}
-					
+
 				} else {
 					if (index > 0) {
 						searchRequest.queryRules.push({
