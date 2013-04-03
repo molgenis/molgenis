@@ -80,7 +80,34 @@
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands) {
 		return expands ? resourceUri + '?expand=' + expands.join(',') : resourceUri;
 	};
-}($, window));
+}($, window.top));
+
+(function($, w) {
+	"use strict";
+
+	var molgenis = w.molgenis = w.molgenis || {};
+
+	molgenis.SearchClient = function SearchClient() {
+	};
+
+	molgenis.SearchClient.prototype.search = function(searchRequest, callback) {
+		var jsonRequest = JSON.stringify(searchRequest);
+		console.log("Call SearchService json=" + jsonRequest);
+
+		$.ajax({
+			type : "POST",
+			url : '/search',
+			data : jsonRequest,
+			contentType : 'application/json',
+			success : function(searchResponse) {
+				if (searchResponse.errorMessage) {
+					alert(searchResponse.errorMessage);
+				}
+				callback(searchResponse);
+			}
+		});
+	};
+}($, window.top));
 
 (function($, w) {
 	"use strict";
@@ -95,6 +122,7 @@
 	var currentPage = 1;
 	var sortRule = null;
 	var restApi = new ns.RestClient();
+	var searchApi = new ns.SearchClient();
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
@@ -179,7 +207,7 @@
 			container.dynatree({
 				checkbox : true,
 				selectMode : 3,
-				minExpandLevel : 3,
+				minExpandLevel : 2,
 				debugLevel : 0,
 				children : [ {
 					key : protocol.href,
@@ -336,9 +364,9 @@
 	ns.updateObservationSetsTableHeader = function(nrRows) {
 		console.log("updateObservationSetsTableHeader");
 		if (nrRows == 1)
-			$('#data-table-header').html(nrRows + ' data items found');
-		else
 			$('#data-table-header').html(nrRows + ' data item found');
+		else
+			$('#data-table-header').html(nrRows + ' data items found');
 	};
 
 	ns.updateObservationSetsTablePager = function(nrRows, nrRowsPerPage) {
@@ -417,7 +445,7 @@
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
 				else
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.keyup(function() {
+				filter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
@@ -601,7 +629,7 @@
 	};
 
 	ns.search = function(callback) {
-		ns.callSearchService(ns.createSearchRequest(), callback);
+		searchApi.search(ns.createSearchRequest(), callback);
 	};
 
 	ns.createSearchRequest = function() {
@@ -693,25 +721,6 @@
 		return searchRequest;
 	};
 
-	ns.callSearchService = function(searchRequest, callback) {
-		var jsonRequest = JSON.stringify(searchRequest);
-		console.log("Call SearchService json=" + jsonRequest);
-
-		$.ajax({
-			type : "POST",
-			url : '/search',
-			data : jsonRequest,
-			contentType : 'application/json',
-			success : function(searchResponse) {
-				if (searchResponse.errorMessage) {
-					alert(searchResponse.errorMessage);
-				}
-				callback(searchResponse);
-			}
-		});
-
-	};
-
 	// on document ready
 	$(function() {
 		$("#observationset-search").focus();
@@ -725,4 +734,4 @@
 			autoOpen : false
 		});
 	});
-}($, window));
+}($, window.top));
