@@ -410,9 +410,10 @@
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
 			items.push('<h3>Value (' + feature.dataType + ')</h3>');
 			var filter = null;
+			var config = featureFilters[featureUri];
+			
 			switch (feature.dataType) {
 			case "string":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
 				else
@@ -427,7 +428,6 @@
 				});
 				break;
 			case "date":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="date" autofocus="autofocus">');
 				else
@@ -443,7 +443,6 @@
 				filter.datepicker();
 				break;
 			case "datetime":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="datetime" autofocus="autofocus">');
 				else
@@ -460,8 +459,6 @@
 			case "integer":
 			case "int":
 			case "decimal":
-				var config = featureFilters[featureUri];
-				
 				var fromFilter;
 				if (config == null)
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
@@ -497,7 +494,6 @@
 				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				break;
 			case "bool":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="checkbox" autofocus="autofocus">');
 				else
@@ -527,8 +523,14 @@
 					success : function(categories) {
 						filter = [];
 						$.each(categories.items, function() {
-							var input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
-
+							var input;
+							if (config && ($.inArray(this.name, config.values) > -1)) {
+								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '" checked>');
+							} else {
+								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
+							}
+			
+							
 							input.change(function() {
 								ns.updateFeatureFilter(featureUri, {
 									name : feature.name,
