@@ -409,18 +409,40 @@
 			case "integer":
 			case "int":
 				var config = featureFilters[featureUri];
+				
+				var fromFilter;
 				if (config == null)
-					filter = $('<input type="number" autofocus="autofocus" step="any">');
+					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
 				else
-					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-				filter.change(function() {
+					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
+				
+				fromFilter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						values : [ $('#from').val(), $('#to').val()],
+						range: true
 					});
 				});
+				
+				var toFilter;
+				if (config == null)
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');
+				else
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');
+				
+				toFilter.change(function() {
+					ns.updateFeatureFilter(featureUri, {
+						name : feature.name,
+						identifier : feature.identifier,
+						type : feature.dataType,
+						values : [ $('#from').val(), $('#to').val()],
+						range: true
+					});
+				});
+				
+				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				break;
 			case "decimal":
 				var config = featureFilters[featureUri];
