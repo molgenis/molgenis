@@ -1,10 +1,92 @@
 (function($, w) {
 	"use strict";
 
+	var molgenis = w.molgenis = w.molgenis || {};
+
+	molgenis.RestClient = function RestClient(cache) {
+		this.cache = cache === false ? null : [];
+	};
+
+	molgenis.RestClient.prototype.get = function(resourceUri, expands) {
+		var apiUri = this._toApiUri(resourceUri, expands);
+		var cachedResource = this.cache && this.cache[apiUri];
+		if (cachedResource) {
+			console.log('retrieved ' + apiUri + ' from cache', cachedResource);
+		} else {
+			var _this = this;
+			$.ajax({
+				dataType : 'json',
+				url : apiUri,
+				async : false,
+				success : function(resource) {
+					console.log('retrieved ' + apiUri + ' from server', resource);
+					_this._cachePut(resourceUri, resource, expands);
+					cachedResource = resource;
+				}
+			});
+		}
+		return cachedResource;
+	};
+
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, expands, callback) {
+		var apiUri = this._toApiUri(resourceUri, expands);
+		var cachedResource = this._cacheGet[apiUri];
+		if (cachedResource) {
+			console.log('retrieved ' + apiUri + ' from cache', cachedResource);
+			callback(cachedResource);
+		} else {
+			var _this = this;
+			$.ajax({
+				dataType : 'json',
+				url : apiUri,
+				async : true,
+				success : function(resource) {
+					console.log('retrieved ' + apiUri + ' from server', resource);
+					_this._cachePut(resourceUri, resource, expands);
+					callback(resource);
+				}
+			});
+		}
+	};
+
+	molgenis.RestClient.prototype._cacheGet = function(resourceUri) {
+		return this.cache !== null ? this.cache[resourceUri] : null;
+	};
+
+	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource, expands) {
+		var apiUri = this._toApiUri(resourceUri, expands);
+		this.cache[apiUri] = resource;
+		if (resource.items) {
+			for ( var i = 0; i < resource.items.length; i++) {
+				var nestedResource = resource.items[i];
+				this.cache[nestedResource.href] = nestedResource;
+			}
+		}
+		if (expands) {
+			this.cache[resourceUri] = resource;
+			for ( var i = 0; i < expands.length; i++) {
+				var expand = resource[expands[i]];
+				this.cache[expand.href] = expand;
+				if (expand.items) {
+					for ( var j = 0; j < expand.items.length; j++) {
+						var expandedResource = expand.items[j];
+						this.cache[expandedResource.href] = expandedResource;
+					}
+				}
+			}
+		}
+	};
+
+	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands) {
+		return expands ? resourceUri + '?expand=' + expands.join(',') : resourceUri;
+	};
+}($, window));
+
+(function($, w) {
+	"use strict";
+
 	var MAX_ROWS = 20;
 	var ns = w.molgenis = w.molgenis || {};
-
-	var resourceCache = {};
 
 	var featureFilters = {};
 	var selectedFeatures = [];
@@ -12,10 +94,11 @@
 	var selectedDataSet = null;
 	var currentPage = 1;
 	var sortRule = null;
+	var restApi = new ns.RestClient();
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		ns.getAsync('/api/v1/dataset', function(datasets) {
+		restApi.getAsync('/api/v1/dataset', null, function(datasets) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(datasets.items, function(key, val) {
@@ -29,41 +112,9 @@
 		});
 	};
 
-	ns.get = function(resourceUri) {
-		var cachedResource = resourceCache[resourceUri];
-		if (cachedResource) {
-			console.log('retrieved ' + resourceUri + ' from cache', cachedResource);
-		} else {
-			$.ajax({
-				url : resourceUri,
-				async : false,
-				success : function(resource) {
-					console.log('retrieved ' + resourceUri + ' from server', resource);
-					resourceCache[resourceUri] = resource;
-					cachedResource = resource;
-				}
-			});
-		}
-		return cachedResource;
-	};
-
-	ns.getAsync = function(resourceUri, callback) {
-		var cachedResource = resourceCache[resourceUri];
-		if (cachedResource) {
-			console.log('retrieved ' + resourceUri + ' from cache', cachedResource);
-			callback(cachedResource);
-		} else {
-			$.getJSON(resourceUri, function(resource) {
-				console.log('retrieved ' + resourceUri + ' from server', resource);
-				resourceCache[resourceUri] = resource;
-				callback(resource);
-			});
-		}
-	};
-
-	ns.createFeatureSelection = function(protocol) {
+	ns.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
-			var protocol = ns.get(protocolUri + '?expand=features,subprotocols');
+			var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
 
 			var children = [];
 			if (protocol.subprotocols) {
@@ -113,56 +164,58 @@
 			ns.onFeatureSelectionChange(sortedFeatures);
 		}
 
-		var container = $('#feature-selection');
-		if (container.children('ul').length > 0) {
-			container.dynatree('destroy');
-		}
-		container.empty();
-		if (typeof protocol === 'undefined') {
-			container.append("<p>No features available</p>");
-			return;
-		}
-
-		// render tree and open first branch
-		container.dynatree({
-			checkbox : true,
-			selectMode : 3,
-			minExpandLevel : 2,
-			debugLevel : 0,
-			children : [ {
-				key : protocol.href,
-				title : protocol.name,
-				icon : false,
-				isFolder : true,
-				isLazy : true,
-				children : createChildren(protocol.href, {
-					select : true
-				}, {})
-			} ],
-			onLazyRead : function(node) {
-				// workaround for dynatree lazy parent node select bug
-				var opts = node.isSelected() ? {
-					expand : true,
-					select : true
-				} : {};
-				var children = createChildren(node.data.key, opts, opts);
-				node.setLazyNodeStatus(DTNodeStatus_Ok);
-				node.addChild(children);
-			},
-			onClick : function(node, event) {
-				if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
-					ns.openFeatureFilterDialog(node.data.key);
-			},
-			onSelect : function(select, node) {
-				// workaround for dynatree lazy parent node select bug
-				if (select)
-					expandNodeRec(node);
-				onNodeSelectionChange(this.getSelectedNodes());
-			},
-			onPostInit : function() {
-				$("#feature-selection-container").accordion();
-				onNodeSelectionChange(this.getSelectedNodes());
+		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], function(protocol) {
+			var container = $('#feature-selection');
+			if (container.children('ul').length > 0) {
+				container.dynatree('destroy');
 			}
+			container.empty();
+			if (typeof protocol === 'undefined') {
+				container.append("<p>No features available</p>");
+				return;
+			}
+
+			// render tree and open first branch
+			container.dynatree({
+				checkbox : true,
+				selectMode : 3,
+				minExpandLevel : 3,
+				debugLevel : 0,
+				children : [ {
+					key : protocol.href,
+					title : protocol.name,
+					icon : false,
+					isFolder : true,
+					isLazy : true,
+					children : createChildren(protocol.href, {
+						select : true
+					}, {})
+				} ],
+				onLazyRead : function(node) {
+					// workaround for dynatree lazy parent node select bug
+					var opts = node.isSelected() ? {
+						expand : true,
+						select : true
+					} : {};
+					var children = createChildren(node.data.key, opts, opts);
+					node.setLazyNodeStatus(DTNodeStatus_Ok);
+					node.addChild(children);
+				},
+				onClick : function(node, event) {
+					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
+						ns.openFeatureFilterDialog(node.data.key);
+				},
+				onSelect : function(select, node) {
+					// workaround for dynatree lazy parent node select bug
+					if (select)
+						expandNodeRec(node);
+					onNodeSelectionChange(this.getSelectedNodes());
+				},
+				onPostInit : function() {
+					$("#feature-selection-container").accordion();
+					onNodeSelectionChange(this.getSelectedNodes());
+				}
+			});
 		});
 	};
 
@@ -176,9 +229,9 @@
 		currentPage = 1;
 		$("#observationset-search").val("");
 
-		ns.getAsync(dataSetUri + '?expand=protocolUsed', function(dataset) {
-			selectedDataSet = dataset;
-			ns.createFeatureSelection(dataset.protocolUsed);
+		restApi.getAsync(dataSetUri, null, function(dataSet) {
+			selectedDataSet = dataSet;
+			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
 	};
 
@@ -191,8 +244,6 @@
 		console.log("searchObservationSets: " + query);
 
 		// Reset
-		featureFilters = {};
-		$('#feature-filters p').remove();
 		sortRule = null;
 		currentPage = 1;
 
@@ -208,7 +259,7 @@
 			var items = [];
 			items.push('<thead>');
 			$.each(selectedFeatures, function(i, val) {
-				var feature = ns.get(this);
+				var feature = restApi.get(this);
 				if (sortRule && sortRule.value == feature.identifier) {
 					if (sortRule.operator == 'SORTASC') {
 						items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
@@ -235,7 +286,7 @@
 				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
 
 				$.each(selectedFeatures, function(i, val) {
-					var feature = ns.get(this);
+					var feature = restApi.get(this);
 					var value = columnValueMap[feature.identifier];
 					if (value) {
 						items.push('<td>' + value + '</td>');
@@ -353,7 +404,7 @@
 
 	ns.openFeatureFilterDialog = function(featureUri) {
 		console.log("openFeatureFilterDialog: " + featureUri);
-		$.getJSON(featureUri, function(feature) {
+		restApi.getAsync(featureUri, null, function(feature) {
 			var items = [];
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
@@ -578,7 +629,6 @@
 					operator : 'AND'
 				});
 			}
-		
 			$.each(filter.values, function(index, value) {
 				if (index > 0) {
 					searchRequest.queryRules.push({
@@ -590,7 +640,7 @@
 					operator : 'EQUALS',
 					value : value
 				});
-				
+
 			});
 
 			count++;
@@ -602,7 +652,7 @@
 
 		searchRequest.fieldsToReturn = [];
 		$.each(selectedFeatures, function() {
-			var feature = ns.get(this);
+			var feature = restApi.get(this);
 			searchRequest.fieldsToReturn.push(feature.identifier);
 		});
 
