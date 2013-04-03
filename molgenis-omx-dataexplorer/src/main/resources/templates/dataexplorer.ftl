@@ -17,7 +17,7 @@
 		<script type="text/javascript">
 			$(function() {
 				$("#feature-filters-container").accordion({ collapsible: true });
-				window.molgenis.fillDataSetSelect(function() {
+				window.top.molgenis.fillDataSetSelect(function() {
 					<#-- select first dataset -->
 					$('#dataset-select option:first').val();
 					<#-- fire event handler -->
