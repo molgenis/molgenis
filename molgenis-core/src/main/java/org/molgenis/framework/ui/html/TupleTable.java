@@ -41,8 +41,7 @@ public class TupleTable extends HtmlWidget
 		strBuilder.append("</tbody></table><script>$('#");
 		strBuilder.append(getName());
 		strBuilder
-				.append("').dataTable({'bJQueryUI': true,'sPaginationType': 'full_numbers','sScrollX': '100%','bScrollCollapse': true});</script></div>");
-
+				.append("').dataTable({'sDom': 'T<\"clear\">lfrtip','bJQueryUI': true,'sPaginationType': 'full_numbers','sScrollX': '100%','bScrollCollapse': true, 'oTableTools': {'sSwfPath': 'js/copy_csv_xls_pdf.swf'}});</script></div>");
 		return strBuilder.toString();
 	}
 }
