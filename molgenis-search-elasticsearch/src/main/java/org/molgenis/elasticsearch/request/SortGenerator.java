@@ -37,13 +37,16 @@ public class SortGenerator extends AbstractQueryRulePartGenerator
 						"Missing value for Sorting, for sorting QueryRule.value should be set to the fieldname where to sort on");
 			}
 
+			// Use the sort mapping for sorting
+			String sortField = queryRule.getValue().toString() + ".sort";
+
 			if (queryRule.getOperator() == Operator.SORTASC)
 			{
-				searchRequestBuilder.addSort(queryRule.getValue().toString(), SortOrder.ASC);
+				searchRequestBuilder.addSort(sortField, SortOrder.ASC);
 			}
 			else if (queryRule.getOperator() == Operator.SORTDESC)
 			{
-				searchRequestBuilder.addSort(queryRule.getValue().toString(), SortOrder.DESC);
+				searchRequestBuilder.addSort(sortField, SortOrder.DESC);
 			}
 		}
 	}
