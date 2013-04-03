@@ -459,34 +459,42 @@
 				break;
 			case "integer":
 			case "int":
-				var config = featureFilters[featureUri];
-				if (config == null)
-					filter = $('<input type="number" autofocus="autofocus" step="any">');
-				else
-					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-				filter.change(function() {
-					ns.updateFeatureFilter(featureUri, {
-						name : feature.name,
-						identifier : feature.identifier,
-						type : feature.dataType,
-						values : [ $(this).val() ]
-					});
-				});
-				break;
 			case "decimal":
 				var config = featureFilters[featureUri];
+				
+				var fromFilter;
 				if (config == null)
-					filter = $('<input type="number" autofocus="autofocus" step="any">');
+					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
 				else
-					filter = $('<input type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-				filter.change(function() {
+					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
+				
+				fromFilter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						values : [ $('#from').val(), $('#to').val()],
+						range: true
 					});
 				});
+				
+				var toFilter;
+				if (config == null)
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');
+				else
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');
+				
+				toFilter.change(function() {
+					ns.updateFeatureFilter(featureUri, {
+						name : feature.name,
+						identifier : feature.identifier,
+						type : feature.dataType,
+						values : [ $('#from').val(), $('#to').val()],
+						range: true
+					});
+				});
+				
+				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				break;
 			case "bool":
 				var config = featureFilters[featureUri];
@@ -630,16 +638,42 @@
 				});
 			}
 			$.each(filter.values, function(index, value) {
-				if (index > 0) {
+				if (filter.range) {
+					//Range filter
+					var rangeAnd = false;
+					if ((index == 0) && (value != '')) {
+						searchRequest.queryRules.push({
+							field : filter.identifier,
+							operator : 'GREATER_EQUAL',
+							value : value
+						});
+						rangeAnd = true;
+					}
+					if (rangeAnd) {
+						searchRequest.queryRules.push({
+							operator : 'AND'
+						});
+					}
+					if ((index == 1) && (value != '')) {
+						searchRequest.queryRules.push({
+							field : filter.identifier,
+							operator : 'LESS_EQUAL',
+							value : value
+						});
+					}
+					
+				} else {
+					if (index > 0) {
+						searchRequest.queryRules.push({
+							operator : 'OR'
+						});
+					}
 					searchRequest.queryRules.push({
-						operator : 'OR'
+						field : filter.identifier,
+						operator : 'EQUALS',
+						value : value
 					});
 				}
-				searchRequest.queryRules.push({
-					field : filter.identifier,
-					operator : 'EQUALS',
-					value : value
-				});
 
 			});
 
