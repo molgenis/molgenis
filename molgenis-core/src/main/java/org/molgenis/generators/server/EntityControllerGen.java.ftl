@@ -143,11 +143,12 @@ public class ${entity.name}Controller
 		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.read(id);
 		if (${entity.name?uncap_first} == null) throw new EntityNotFoundException("${entity.name} " + id.toString() + " not found");
 		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${field.name?cap_first}_${field.xrefEntity.primaryKey.name?cap_first}();
-		String forwardUri = "forward:/api/v1/${field.xrefEntity.name?lower_case}/" + ${field.xrefEntity.name?uncap_first}Id.toString();
+		<#-- 'forward:' prefix does not work with URL query parameters -->
+		String redirectUri = "redirect:/api/v1/${field.xrefEntity.name?lower_case}/" + ${field.xrefEntity.name?uncap_first}Id.toString();
 		StringBuilder qsBuilder = new StringBuilder();
 		if(format != null) qsBuilder.append(qsBuilder.length() == 0 ? '?' : '&').append("format=").append(format);
 		if(expandFieldsStr != null) qsBuilder.append(qsBuilder.length() == 0 ? '?' : '&').append("expand=").append(Joiner.on(',').join(expandFieldsStr));
-		return qsBuilder.length() == 0 ? forwardUri : forwardUri + qsBuilder.toString();
+		return qsBuilder.length() == 0 ? redirectUri : redirectUri + qsBuilder.toString();
 	}
 	
 		</#if>

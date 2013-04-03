@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.controller.${entity.name}ControllerTest.${entity.name}ControllerConfig;
@@ -103,7 +103,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 		${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
 		${entity.name?uncap_first}.set${field.name?cap_first}(0);
 		when(${entity.name?uncap_first}Service.read(0)).thenReturn(${entity.name?uncap_first});
-		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0/${field.name?uncap_first}")).andExpect(forwardedUrl("/api/v1/${field.xrefEntity.name?lower_case}/0"));
+		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0/${field.name?uncap_first}")).andExpect(redirectedUrl("/api/v1/${field.xrefEntity.name?lower_case}/0"));
 	}
 		 </#if>
 	</#if>
