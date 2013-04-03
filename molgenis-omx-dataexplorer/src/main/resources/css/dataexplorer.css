@@ -115,6 +115,10 @@ ui-state-active .ui-icon {
 	vertical-align: middle;
 }
 
+#feature-selection {
+	height: 400px;
+}
+
 .ui-accordion-content p, 
 .ui-accordion-content li {
 	white-space: nowrap;
@@ -124,4 +128,20 @@ ui-state-active .ui-icon {
 	padding: 0px;
 	border-style: none;
 }
-	
+
+.ui-widget { 
+	font-family: inherit;
+}
+
+input[type=number] {
+	width: 60px;
+}
+
+#from {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#to {
+	margin-left: 10px;
+}

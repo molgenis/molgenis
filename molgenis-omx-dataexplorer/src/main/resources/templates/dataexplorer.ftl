@@ -17,7 +17,7 @@
 		<script type="text/javascript">
 			$(function() {
 				$("#feature-filters-container").accordion({ collapsible: true });
-				window.molgenis.fillDataSetSelect(function() {
+				window.top.molgenis.fillDataSetSelect(function() {
 					<#-- select first dataset -->
 					$('#dataset-select option:first').val();
 					<#-- fire event handler -->
@@ -38,18 +38,18 @@
 						</select>
 					</div>
 					<div class="well">
-					<div class="row-fluid">
-						<div id="feature-filters-container">
-							<h3>Data item filters</h3>
-							<div id="feature-filters"></div>
+						<div class="row-fluid">
+							<div id="feature-filters-container">
+								<h3>Data item filters</h3>
+								<div id="feature-filters"></div>
+							</div>
 						</div>
-					</div>
-					<div class="row-fluid">
-						<div id="feature-selection-container">
-							<h3>Data item selection</h3>
-							<div id="feature-selection"></div>		
-						</div>
-					</div>			
+						<div class="row-fluid">
+							<div id="feature-selection-container">
+								<h3>Data item selection</h3>
+								<div id="feature-selection"></div>		
+							</div>
+						</div>			
 					</div>		
 				</div>
 				<div class="span9">

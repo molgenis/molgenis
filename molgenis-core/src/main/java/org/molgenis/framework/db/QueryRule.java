@@ -351,7 +351,7 @@ public class QueryRule
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		if (this.getOperator().equals(Operator.NESTED))
+		if ((getOperator() != null) && getOperator().equals(Operator.NESTED))
 		{
 			strBuilder.append('(');
 
