@@ -26,7 +26,7 @@ public class DataSetImporter
 {
 	private static final Logger LOG = Logger.getLogger(DataSetImporter.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
-	private Database db;
+	private final Database db;
 
 	public DataSetImporter(Database db)
 	{
@@ -92,12 +92,13 @@ public class DataSetImporter
 			featureMap.put(observableFeatureIdentifier, observableFeature);
 		}
 
-		boolean doTx = !db.inTx();
+		int rownr = 0;
+		int transactionRows = Math.max(1, 5000 / featureMap.size());
 		try
 		{
 			for (Tuple row : sheetReader)
 			{
-				if (doTx) db.beginTx();
+				if (rownr % transactionRows == 0) db.beginTx();
 
 				ArrayList<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 
@@ -120,17 +121,18 @@ public class DataSetImporter
 				}
 				db.add(obsValueList);
 
-				if (doTx) db.commitTx();
+				if (++rownr % transactionRows == 0) db.commitTx();
 			}
+			if (rownr % transactionRows != 0) db.commitTx();
 		}
 		catch (DatabaseException e)
 		{
-			if (doTx) db.rollbackTx();
+			db.rollbackTx();
 			throw e;
 		}
 		catch (Exception e)
 		{
-			if (doTx) db.rollbackTx();
+			db.rollbackTx();
 			throw new IOException(e);
 		}
 	}

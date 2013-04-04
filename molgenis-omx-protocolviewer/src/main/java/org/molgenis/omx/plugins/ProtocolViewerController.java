@@ -580,7 +580,12 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		{
 			this.id = feature.getId();
 			this.name = feature.getName();
-			this.i18nDescription = new Gson().fromJson(feature.getDescription(), new TypeToken<Map<String, String>>()
+			String description = feature.getDescription();
+			if (description != null && (!description.startsWith("{") || !description.endsWith("}")))
+			{
+				description = " {\"en\":\"" + description + "\"}";
+			}
+			this.i18nDescription = new Gson().fromJson(description, new TypeToken<Map<String, String>>()
 			{
 			}.getType());
 			this.dataType = feature.getDataType();
