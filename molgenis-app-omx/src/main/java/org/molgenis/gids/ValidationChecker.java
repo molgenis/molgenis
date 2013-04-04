@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.io.excel.ExcelReader;
@@ -21,73 +21,136 @@ public class ValidationChecker
 	 */
 	public static void main(String[] args) throws IOException
 	{
+		HashMap<String, String> hashCheckedValues = new HashMap<String, String>();
 
-		ExcelReader excelReaderFile1 = new ExcelReader(new File(args[0]));
+		// Make Object Reference
+		Validation_ReferenceFile ref = new Validation_ReferenceFile();
+		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(args[0]));
+		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
+		ref.bla(excelSheetReaderReferenceFile);
 
-		ExcelSheetReader excelSheetReaderFile1 = excelReaderFile1.getSheet(1);
+		// Make Object FileToCompare
+		Validation_CompareFile com = new Validation_CompareFile();
+		ExcelReader excelReaderFileToCompare = new ExcelReader(new File(args[1]));
+		ExcelSheetReader excelSheetReaderFileToCompare = excelReaderFileToCompare.getSheet(0);
+		com.bla(excelSheetReaderFileToCompare);
+		boolean noUniqueColums = false;
+		// Make list for shared headers
 
-		ExcelReader excelReaderFile2 = new ExcelReader(new File(args[1]));
-
-		ExcelSheetReader excelSheetReaderFile2 = excelReaderFile2.getSheet(0);
-
-		Iterator<String> iterable = excelSheetReaderFile2.colNamesIterator();
-		List<String> listOfHeaders = new ArrayList<String>();
-		while (iterable.hasNext())
+		List<String> listOfSharedHeaders = new ArrayList<String>();
+		// Compare the headers of Reference file with fileToCompare
+		// Add Reference headers to the listOfSharedHeaders
+		for (String o : ref.listOfHeadersReferenceFile)
 		{
-			String header = iterable.next();
-			listOfHeaders.add(header);
-
+			listOfSharedHeaders.add(o);
+			if (!com.getListOfHeadersFileToCompare().contains(o))
+			{
+				System.out.println("Unique columns in reference file: " + o);
+				noUniqueColums = true;
+			}
 		}
-		Iterator<String> iterableJ = excelSheetReaderFile1.colNamesIterator();
-		List<String> listOfHeadersJules = new ArrayList<String>();
-		while (iterableJ.hasNext())
+
+		// Compare the headers of fileToCompare file with Reference
+		// Add Reference headers to the listOfSharedHeaders
+		for (String o : com.listOfHeadersFileToCompare)
 		{
-
-			String header = iterable.next();
-			listOfHeaders.add(header);
-
+			if (!listOfSharedHeaders.contains(o))
+			{
+				listOfSharedHeaders.add(o);
+			}
+			if (!ref.getListOfHeadersReferenceFile().contains(o))
+			{
+				System.out.println("Unique columns in filetocompare file: " + o);
+				noUniqueColums = true;
+			}
 		}
 
-		System.out.println("Sample ID\tFeature\tJules\tGIDS");
+		if (noUniqueColums == false)
+		{
+			System.out.println("###There are no added/deleted columns\n");
+		}
+
+		// print the header
+		System.out.println("###Comparing the values ");
+		System.out.println("Sample ID\tFeature\tReference\tFileToCompare");
+
 		try
 		{
-
-			HashMap<String, Tuple> hashJules = new HashMap<String, Tuple>();
-			for (Tuple t : excelSheetReaderFile1)
+			for (Entry<String, Tuple> entry : ref.hashReference.entrySet())
 			{
-				hashJules.put(t.getString("id_sample"), t);
+				if (com.hashFileToCompare.get(entry.getValue().getString("id_sample")) != null)
+				{
+					compareRows(com.hashFileToCompare.get(entry.getValue().getString("id_sample")), entry.getValue(),
+							listOfSharedHeaders, hashCheckedValues);
+				}
+
 			}
 
-			for (Tuple tuple : excelSheetReaderFile2)
+			for (Entry<String, Tuple> entry : com.hashFileToCompare.entrySet())
 			{
-
-				if (hashJules.get(tuple.getString("id_sample")) != null)
+				if (ref.hashReference.get(entry.getValue().getString("id_sample")) != null)
 				{
-					compareRows(hashJules.get(tuple.getString("id_sample")), tuple, listOfHeaders);
+					compareRows(entry.getValue(), ref.hashReference.get(entry.getValue().getString("id_sample")),
+							listOfSharedHeaders, hashCheckedValues);
+				}
+
+			}
+
+			System.out.println("\n###Unique samples in Reference file");
+			for (Entry<String, Tuple> entry : ref.hashReference.entrySet())
+			{
+				if (!com.hashFileToCompare.containsKey(entry.getKey()))
+				{
+					System.out.println(entry.getKey());
+					// listOfUniqueSampleIdsReference.add(entry.getKey());
+				}
+			}
+			System.out.println("\n###Unique samples in fileToCompare ");
+			for (Entry<String, Tuple> entry : com.hashFileToCompare.entrySet())
+			{
+				if (!ref.hashReference.containsKey(entry.getKey()))
+				{
+					System.out.println(entry.getKey());
+					// listOfUniqueSampleIdsFilesToCompare.add(entry.getKey());
 				}
 			}
 
 		}
 		finally
 		{
-			IOUtils.closeQuietly(excelReaderFile2);
-			IOUtils.closeQuietly(excelReaderFile1);
+			IOUtils.closeQuietly(excelReaderFileToCompare);
+			IOUtils.closeQuietly(excelReaderReferenceFile);
 		}
 	}
 
-	public static void compareRows(Tuple jules, Tuple gids, List<String> listOfHeaders)
+	public static void compareRows(Tuple firstTuple, Tuple secondTuple, List<String> listOfHeaders,
+			HashMap<String, String> hashCheckedValues)
 	{
 		for (String e : listOfHeaders)
 		{
-			if (jules.getString(e) != null)
+			if (firstTuple.getString(e) != null)
 			{
-				if (!jules.getString(e).equals(gids.getString(e)))
+				if (secondTuple.getString(e) != null)
 				{
-					System.out.println(jules.getString("id_sample") + "\t" + e + "\t" + jules.getString(e) + "\t"
-							+ (gids.getString(e) == null ? "\tADDED" : gids.getString(e)));
+					if (!firstTuple.getString(e).equals(secondTuple.getString(e)))
+					{
+						if (!hashCheckedValues.containsKey(e) && !hashCheckedValues.containsValue(secondTuple))
+						{
+							hashCheckedValues.put(e, secondTuple.getString(e));
+							System.out
+									.println(firstTuple.getString("id_sample")
+											+ "\t"
+											+ e
+											+ "\t"
+											+ firstTuple.getString(e)
+											+ "\t"
+											+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "Reference") : secondTuple
+													.getString(e)));
+						}
+					}
 				}
-
 			}
 		}
+
 	}
 }
