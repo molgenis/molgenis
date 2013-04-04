@@ -8,7 +8,7 @@
 		<plugin label="Home" name="Home" type="org.molgenis.ngs.plugins.home.Home"/>
 		
 		<form name="Projects" entity="Project" label="Projects" viewtype="list">
-			<form name="Samples2" entity="Sample" label="Samples" viewtype="list" />
+			<form name="Samples1" entity="Sample" label="Samples" viewtype="list" />
 		</form>
 
 		<form name="FlowcellsAndRuns" entity="Flowcell">
@@ -22,11 +22,14 @@
 			<form name="Flowcells" entity="Flowcell" label="Flowcell" />
 			<form name="SampleBarcodes" entity="SampleBarcode" label="Barcode" />
 			<form name="CapturingKits" entity="CapturingKit" label="Capturing kit" />
-			<form name="PrepKits" entity="PrepKit" label="Prep kit" />
-			<form name="Machines" entity="Machine" label="Machine" />
-			<form name="Samples1" entity="Sample" label="Samples" viewtype="list" />
+			<form name="PrepKits" entity="PrepKit" label="Preperation kit" />
+			<form name="Sequencers" entity="Machine" label="Sequencer" />
+			<form name="Samples2" entity="Sample" label="Samples" viewtype="list" />
 		</menu>
 		
+		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
+		
+		<!-- To be added in the future 
 		<menu name="Admin">
 	        <menu name ="Entities">
 	            <form name="DataSet" entity="DataSet" />
@@ -35,6 +38,7 @@
 	            <form name="Category" entity="Category" />
 	            <form name="RuntimeProperty" entity="RuntimeProperty" />
 	       	</menu>
+	       	
 	        <menu name="Auth" label="Users and permissions">
 				<menu label="Basic management" name="Management">
 					<form name="MolgenisUser" entity="MolgenisUser" />
@@ -50,9 +54,9 @@
 				<plugin label="Security tokens" name="TokenManagerPlugin"
 					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
 			</menu>	
-					
-		</menu> <!-- admin panels -->
-		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
+		</menu> 
+		-->
+		
 	</menu>
 	
 </molgenis>

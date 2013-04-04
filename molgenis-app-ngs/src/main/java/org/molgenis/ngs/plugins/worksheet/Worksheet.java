@@ -1,26 +1,13 @@
 package org.molgenis.ngs.plugins.worksheet;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.framework.tupletable.DatabaseTupleTable;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.view.renderers.ExcelExporter;
-import org.molgenis.framework.ui.EasyPluginController;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenView;
-import org.molgenis.omx.dataset.DataSetViewerPlugin;
-//import org.molgenis.framework.ui.html.TupleTable;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
 import app.JpaDatabase;
