@@ -494,11 +494,14 @@
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 
 				fromFilter.change(function() {
+					//If 'from' changed set 'to' at the same value
+					var value = $('#from').val();
+					$('#to').val(value);
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $('#from').val(), $('#to').val() ],
+						values : [value, value],
 						range : true
 					});
 				});
