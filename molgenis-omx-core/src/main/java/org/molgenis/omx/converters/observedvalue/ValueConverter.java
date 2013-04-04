@@ -7,7 +7,8 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.omx.observ.ObservableFeature;
 
 /**
- * Converts the value of an ObservedValue from string to a java type according to the datatype of the ObservableFeature
+ * Converts the value of an ObservedValue from string to a java type according
+ * to the datatype of the ObservableFeature
  * 
  * @author erwin
  * 
@@ -19,7 +20,7 @@ public class ValueConverter
 	{
 		// support all feature data types as stated in the data model:
 		// [xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe]
-		converters.put("xref", new StringToStringConverter());
+		converters.put("xref", new StringToXrefLabelConverter());
 		converters.put("string", new StringToStringConverter());
 		converters.put("categorical", new StringToCategoricalConverter());
 		converters.put("nominal", new StringToStringConverter());

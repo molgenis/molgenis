@@ -441,6 +441,7 @@
 			var config = featureFilters[featureUri];
 			
 			switch (feature.dataType) {
+			case "xref":
 			case "string":
 				if (config == null)
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
@@ -577,7 +578,6 @@
 					}
 				});
 				break;
-			case "xref":
 			case "nominal":
 			case "ordinal":
 			case "code":
