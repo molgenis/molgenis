@@ -4,6 +4,11 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+/**
+ * @depricated
+ * 
+ *             This class is depricated, please use DatabaseUtil.getDatabase().
+ */
 public class DatabaseFactory
 {
 	private static Logger logger = Logger.getLogger(DatabaseFactory.class);
