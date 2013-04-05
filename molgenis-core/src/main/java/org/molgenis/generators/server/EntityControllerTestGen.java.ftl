@@ -32,6 +32,7 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 	</#if>
 </#if>
 </#list>
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +60,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@BeforeMethod
 	public void setUp()
 	{
-		mockMvc = MockMvcBuilders.standaloneSetup(${entity.name?uncap_first}Controller).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(${entity.name?uncap_first}Controller).setMessageConverters(new GsonHttpMessageConverter()).build();
 	}
 
 	@Test
