@@ -523,8 +523,9 @@
 				console.log("TODO: '" + feature.dataType + "' not supported");
 				break;
 			}
+			
 			$('.feature-filter-dialog').html(items.join('')).append(filter);
-			$('.feature-filter-dialog').dialog('option', 'title', feature.name);
+			$('.feature-filter-dialog').dialog({ title: feature.name, dialogClass: 'ui-dialog-shadow' });
 			$('.feature-filter-dialog').dialog('open');
 		});
 	};
