@@ -143,3 +143,24 @@ input[type=number] {
 #to {
 	margin-left: 10px;
 }
+
+.ui-widget-header {
+    background: #5B82A4;
+    border: 1px solid #AAAAAA;
+    color: white;
+}
+
+.ui-widget-header .ui-icon {
+    background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+.ui-dialog-shadow { 
+	box-shadow: 10px 10px 5px #888;
+}
+
+.feature-filter-dialog p {
+	margin-bottom: 20px;'
+}
+.feature-filter-dialog h3 {
+	border-bottom: 1px solid #AAAAAA;
+}
