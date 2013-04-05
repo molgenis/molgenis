@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.DatabaseFactory;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
+import org.molgenis.util.DatabaseUtil;
 
 public class MolgenisDbSettings implements MolgenisSettings
 {
@@ -28,7 +28,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		List<RuntimeProperty> properties;
 		try
 		{
-			properties = DatabaseFactory.get().find(RuntimeProperty.class, propertyRule);
+			properties = DatabaseUtil.getDatabase().find(RuntimeProperty.class, propertyRule);
 		}
 		catch (DatabaseException e)
 		{
@@ -54,7 +54,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		property.setValue(value);
 		try
 		{
-			DatabaseFactory.get().add(property);
+			DatabaseUtil.getDatabase().add(property);
 		}
 		catch (DatabaseException e)
 		{
