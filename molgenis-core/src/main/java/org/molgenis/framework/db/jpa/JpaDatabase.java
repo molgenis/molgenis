@@ -244,19 +244,6 @@ public class JpaDatabase extends AbstractDatabase
 		return persistenceUnitName;
 	}
 
-	// public void index()
-	// {
-	// try
-	// {
-	// FullTextEntityManager ftem = Search.getFullTextEntityManager(this.em);
-	// ftem.createIndexer().startAndWait();
-	// }
-	// catch (InterruptedException e)
-	// {
-	// e.printStackTrace();
-	// }
-	// }
-
 	public List<Tuple> sql(String sql, String... columnNames)
 	{
 		javax.persistence.Query q = this.em.createNativeQuery(sql);
@@ -283,15 +270,4 @@ public class JpaDatabase extends AbstractDatabase
 		}
 		return result;
 	}
-
-	// public <E extends Entity> List<E> search(Class<E> entityClass, String fieldList, String searchString)
-	// {
-	// FullTextEntityManager ftem = Search.getFullTextEntityManager(this.em);
-	// QueryBuilder qb = ftem.getSearchFactory().buildQueryBuilder().forEntity(entityClass).get();
-	// org.apache.lucene.search.Query query = qb.keyword().onFields(fieldList).matching(searchString).createQuery();
-	// javax.persistence.Query persistenceQuery = ftem.createFullTextQuery(query, entityClass);
-	// @SuppressWarnings("unchecked")
-	// List<E> result = persistenceQuery.getResultList();
-	// return result;
-	// }
 }
