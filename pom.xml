@@ -224,6 +224,13 @@
     						</baseResource>          
       					</webAppConfig> 
 					</configuration>
+					<dependencies>
+						<dependency>
+				            <groupId>mysql</groupId>
+				            <artifactId>mysql-connector-java</artifactId>
+				            <version>5.1.24</version>
+				        </dependency>
+			        </dependencies>
 				</plugin>
 				<!-- Eclipse m2e mappings -->
 				<plugin>
@@ -380,6 +387,12 @@
 			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.24</version>
+            <scope>provided</scope>
+        </dependency>
 	</dependencies>
 
 	<modules>
