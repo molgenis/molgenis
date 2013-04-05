@@ -13,6 +13,7 @@
 		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="/js/dataexplorer.js"></script>
+		<script type="text/javascript" src="${resultsTableJavascriptFile}"></script>
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
