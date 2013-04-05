@@ -56,8 +56,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is
-	 * not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
 	 * 
 	 * @return
 	 */
@@ -65,11 +64,11 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public ApplicationContextProvider applicationContextProvider()
 	{
 		return new ApplicationContextProvider();
+
 	}
 
 	/**
-	 * Enable spring freemarker viewresolver. All freemarker template names
-	 * should end with '.ftl'
+	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
 	public ViewResolver viewRespolver()
@@ -82,8 +81,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Configure freemarker. All freemarker templates should be on the classpath
-	 * in a package called 'freemarker'
+	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer()
@@ -101,7 +99,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	 * @return
 	 * @throws DatabaseException
 	 */
-	@Bean
+	@Bean(destroyMethod = "close")
 	public Database unauthorizedDatabase() throws DatabaseException
 	{
 		return new app.JpaDatabase();
