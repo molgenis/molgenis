@@ -211,7 +211,7 @@
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<version>8.1.8.v20121106</version>
+					<version>8.1.10.v20130312</version>
 					<configuration>
 						<scanIntervalSeconds>3</scanIntervalSeconds>
 						<stopPort>9999</stopPort>
