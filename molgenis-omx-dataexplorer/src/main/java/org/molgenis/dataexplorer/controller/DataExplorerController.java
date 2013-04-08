@@ -19,9 +19,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Controller class for the data explorer.
  * 
  * The implementation javascript file for the resultstable is defined in a
- * MolgenisSettings property named 'dataexplorer.resultstable.js' posible values
- * are '/js/SingleObservationSetTable.js' or '/js/MultiObservationSetTable.js'
- * with '/js/MultiObservationSetTable.js' as the default
+ * MolgenisSettings property named 'dataexplorer.resultstable.js' possible
+ * values are '/js/SingleObservationSetTable.js' or
+ * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as
+ * the default
  * 
  * @author erwin
  * 

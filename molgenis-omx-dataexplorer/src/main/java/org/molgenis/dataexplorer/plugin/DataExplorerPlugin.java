@@ -1,11 +1,9 @@
 package org.molgenis.dataexplorer.plugin;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.ui.PluginModel;
+import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.util.Entity;
 
-public class DataExplorerPlugin extends PluginModel<Entity>
+public class DataExplorerPlugin extends IframePlugin
 {
 	private static final long serialVersionUID = 1L;
 
@@ -15,20 +13,9 @@ public class DataExplorerPlugin extends PluginModel<Entity>
 	}
 
 	@Override
-	public String getViewTemplate()
+	public String getIframeSrc()
 	{
-		return "templates/" + DataExplorerPlugin.class.getSimpleName().replace('.', '/') + ".ftl";
-	}
-
-	@Override
-	public String getViewName()
-	{
-		return DataExplorerPlugin.class.getSimpleName();
-	}
-
-	@Override
-	public void reload(Database db)
-	{
+		return "/plugin/dataexplorer";
 	}
 
 }
