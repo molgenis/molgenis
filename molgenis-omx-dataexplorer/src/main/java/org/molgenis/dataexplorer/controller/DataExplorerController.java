@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 
-import org.molgenis.dataexplorer.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
@@ -33,9 +32,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class DataExplorerController
 {
 	public static final String URI = "/plugin/dataexplorer";
-
-	@Autowired
-	private DataSetsIndexer dataSetsIndexer;
 
 	@Autowired
 	private Database database;
