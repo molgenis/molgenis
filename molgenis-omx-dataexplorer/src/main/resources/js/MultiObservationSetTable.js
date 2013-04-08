@@ -2,7 +2,8 @@
 	"use strict";
 
 	var molgenis = w.molgenis = w.molgenis || {};
-
+	var sortRule = null;
+	
 	molgenis.ResultsTable = function ResultsTable () {
 	};
 
@@ -11,11 +12,11 @@
 	};
 	
 	molgenis.ResultsTable.prototype.getSortRule = function() {
-		return this.sortRule;
+		return sortRule;
 	};
 	
 	molgenis.ResultsTable.prototype.resetSortRule = function() {
-		this.sortRule = null;
+		sortRule = null;
 	};
 	
 	molgenis.ResultsTable.prototype.build = function(searchResponse, selectedFeatures, restApi) {
@@ -25,7 +26,7 @@
 		items.push('<thead>');
 		$.each(selectedFeatures, function(i, val) {
 			var feature = restApi.get(this);
-			if (this.sortRule && this.sortRule.value == feature.identifier) {
+			if (sortRule && sortRule.value == feature.identifier) {
 				if (sortRule.operator == 'SORTASC') {
 					items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
 							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
@@ -74,16 +75,17 @@
 			var featureIdentifier = $(this).data('value');
 			console.log("select sort column: " + featureIdentifier);
 			if (sortRule && sortRule.operator == 'SORTASC') {
-				this.sortRule = {
+				sortRule = {
 					value : featureIdentifier,
 					operator : 'SORTDESC'
 				};
 			} else {
-				this.sortRule = {
+				sortRule = {
 					value : featureIdentifier,
 					operator : 'SORTASC'
 				};
 			}
+			
 			molgenis.updateObservationSetsTable();
 			return false;
 		});
