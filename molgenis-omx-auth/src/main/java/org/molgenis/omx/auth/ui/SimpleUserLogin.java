@@ -54,6 +54,16 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 		return new FreemarkerView("templates/org/molgenis/omx/auth/ui/UserLogin.ftl", getModel());
 	}
 
+	@Override
+	public String getCustomHtmlHeaders()
+	{
+		StringBuilder s = new StringBuilder();
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.autogrowinput.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.bt.min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.validate.min.js\"></script>");
+		return s.toString();
+	}
+
 	public void Login(Database db, MolgenisRequest request) throws Exception
 	{
 		this.getModel().setAction("Login");
