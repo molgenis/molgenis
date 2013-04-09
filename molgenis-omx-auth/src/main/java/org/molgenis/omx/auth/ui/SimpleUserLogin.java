@@ -370,9 +370,10 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			DatabaseException
 	{
 		MolgenisUser user = new MolgenisUser();
-
 		if (!StringUtils.equals(request.getString("password"), request.getString("password2"))) throw new MolgenisUserException(
 				"Passwords do not match.");
+
+		user.setIdentifier(MolgenisUser.class.getSimpleName() + '_' + request.getString("username"));
 
 		user.setName(request.getString("username"));
 		user.setPassword(request.getString("password"));
