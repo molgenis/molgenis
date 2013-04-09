@@ -13,6 +13,7 @@
 		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="/js/dataexplorer.js"></script>
+		<script type="text/javascript" src="${resultsTableJavascriptFile}"></script>
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
@@ -32,12 +33,15 @@
 		<div class="container-fluid">
 			<div class="row-fluid">
 				<div class="span3">
-					<div class="row-fluid">
-						<label id ="dataset-select-label">Choose a dataset:</label>
-						<select data-placeholder="Choose a Dataset" id="dataset-select">
-						</select>
-					</div>
 					<div class="well">
+						<div class="row-fluid">
+							<form class="form-search" onsubmit="return false">
+								<div class="input-append">
+									<input type="text" id="observationset-search" class="search-query" placeholder="Search data items">
+									<button type="submit" class="btn"><i class="icon-large icon-search"></i></button>
+								</div>
+							</form>
+						</div>
 						<div class="row-fluid">
 							<div id="feature-filters-container">
 								<h3>Data item filters</h3>
@@ -53,12 +57,11 @@
 					</div>		
 				</div>
 				<div class="span9">
-					<form class="form-search" onsubmit="return false">
-						<div class="input-append">
-							<input type="text" id="observationset-search" class="search-query offset3" placeholder="Search data items">
-							<button type="submit" class="btn">Search</button>
-						</div>
-					</form>
+					<div id="dataset-select-container" class="pull-right">
+						<label id ="dataset-select-label">Choose a dataset:</label>
+						<select data-placeholder="Choose a Dataset" id="dataset-select">
+						</select>
+					</div>
 					<div class="row-fluid data-table-container">
 						<table id="data-table" class="table table-striped table-condensed"></table>
 					</div>

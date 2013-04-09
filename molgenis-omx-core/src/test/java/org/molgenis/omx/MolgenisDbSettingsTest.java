@@ -10,11 +10,11 @@ import java.util.Arrays;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.DatabaseFactory;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.testng.annotations.AfterMethod;
+import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.ApplicationContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,15 +32,12 @@ public class MolgenisDbSettingsTest
 		when(
 				db.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
 						RuntimeProperty.class.getSimpleName() + "_property0"))).thenReturn(Arrays.asList(property0));
-		DatabaseFactory.create(db);
+
+		ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getBean("database", Database.class)).thenReturn(db);
+		new ApplicationContextProvider().setApplicationContext(ctx);
 
 		molgenisDbSettings = new MolgenisDbSettings();
-	}
-
-	@AfterMethod
-	public void tearDown()
-	{
-		DatabaseFactory.destroy();
 	}
 
 	@Test

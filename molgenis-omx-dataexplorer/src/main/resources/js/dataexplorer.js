@@ -112,15 +112,14 @@
 (function($, w) {
 	"use strict";
 
-	var MAX_ROWS = 20;
 	var ns = w.molgenis = w.molgenis || {};
-
+	
+	var resultsTable = null;
 	var featureFilters = {};
 	var selectedFeatures = [];
 	var searchQuery = null;
 	var selectedDataSet = null;
 	var currentPage = 1;
-	var sortRule = null;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 
@@ -240,7 +239,7 @@
 					onNodeSelectionChange(this.getSelectedNodes());
 				},
 				onPostInit : function() {
-					$("#feature-selection-container").accordion();
+					$("#feature-selection-container").accordion({ collapsible: true });
 					onNodeSelectionChange(this.getSelectedNodes());
 				}
 			});
@@ -253,7 +252,7 @@
 		$('#feature-filters p').remove();
 		selectedFeatures = [];
 		searchQuery = null;
-		sortRule = null;
+		resultsTable.resetSortRule();
 		currentPage = 1;
 		$("#observationset-search").val("");
 
@@ -272,7 +271,7 @@
 		console.log("searchObservationSets: " + query);
 
 		// Reset
-		sortRule = null;
+		resultsTable.resetSortRule();
 		currentPage = 1;
 
 		searchQuery = query;
@@ -281,76 +280,11 @@
 
 	ns.updateObservationSetsTable = function() {
 		ns.search(function(searchResponse) {
-			var maxRowsPerPage = MAX_ROWS;
+			var maxRowsPerPage = resultsTable.getMaxRows();
 			var nrRows = searchResponse.totalHitCount;
-
-			var items = [];
-			items.push('<thead>');
-			$.each(selectedFeatures, function(i, val) {
-				var feature = restApi.get(this);
-				if (sortRule && sortRule.value == feature.identifier) {
-					if (sortRule.operator == 'SORTASC') {
-						items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
-								+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
-					} else {
-						items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
-								+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
-					}
-				} else {
-					items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
-							+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
-				}
-			});
-			items.push('</thead>');
-
-			items.push('<tbody>');
-
-			if (nrRows == 0) {
-				items.push('<tr><td class="nothing-found" colspan="' + selectedFeatures.length + '">Nothing found</td></tr>');
-			}
-
-			for ( var i = 0; i < searchResponse.searchHits.length; ++i) {
-				items.push('<tr>');
-				var columnValueMap = searchResponse.searchHits[i].columnValueMap;
-
-				$.each(selectedFeatures, function(i, val) {
-					var feature = restApi.get(this);
-					var value = columnValueMap[feature.identifier];
-					if (value) {
-						items.push('<td>' + value + '</td>');
-					} else {
-						items.push('<td></td>');
-					}
-				});
-
-				items.push('</tr>');
-			}
-			items.push('</tbody>');
-			$('#data-table').html(items.join(''));
-
-			// Sort click
-			$('#data-table thead th .ui-icon').click(function() {
-				if (nrRows == 0) {
-					return;
-				}
-
-				var featureIdentifier = $(this).data('value');
-				console.log("select sort column: " + featureIdentifier);
-				if (sortRule && sortRule.operator == 'SORTASC') {
-					sortRule = {
-						value : featureIdentifier,
-						operator : 'SORTDESC'
-					};
-				} else {
-					sortRule = {
-						value : featureIdentifier,
-						operator : 'SORTASC'
-					};
-				}
-				ns.updateObservationSetsTable();
-				return false;
-			});
-
+			
+			resultsTable.build(searchResponse, selectedFeatures, restApi);
+			
 			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 		});
 	};
@@ -438,9 +372,11 @@
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
 			items.push('<h3>Value (' + feature.dataType + ')</h3>');
 			var filter = null;
+			var config = featureFilters[featureUri];
+			
 			switch (feature.dataType) {
+			case "xref":
 			case "string":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
 				else
@@ -455,7 +391,6 @@
 				});
 				break;
 			case "date":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="date" autofocus="autofocus">');
 				else
@@ -471,7 +406,6 @@
 				filter.datepicker();
 				break;
 			case "datetime":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="datetime" autofocus="autofocus">');
 				else
@@ -488,8 +422,6 @@
 			case "integer":
 			case "int":
 			case "decimal":
-				var config = featureFilters[featureUri];
-
 				var fromFilter;
 				if (config == null)
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
@@ -497,11 +429,14 @@
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 
 				fromFilter.change(function() {
+					//If 'from' changed set 'to' at the same value
+					var value = $('#from').val();
+					$('#to').val(value);
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $('#from').val(), $('#to').val() ],
+						values : [value, value],
 						range : true
 					});
 				});
@@ -525,7 +460,6 @@
 				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				break;
 			case "bool":
-				var config = featureFilters[featureUri];
 				if (config == null)
 					filter = $('<input type="checkbox" autofocus="autofocus">');
 				else
@@ -555,8 +489,14 @@
 					success : function(categories) {
 						filter = [];
 						$.each(categories.items, function() {
-							var input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
-
+							var input;
+							if (config && ($.inArray(this.name, config.values) > -1)) {
+								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '" checked>');
+							} else {
+								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
+							}
+			
+							
 							input.change(function() {
 								ns.updateFeatureFilter(featureUri, {
 									name : feature.name,
@@ -572,7 +512,6 @@
 					}
 				});
 				break;
-			case "xref":
 			case "nominal":
 			case "ordinal":
 			case "code":
@@ -584,8 +523,9 @@
 				console.log("TODO: '" + feature.dataType + "' not supported");
 				break;
 			}
+			
 			$('.feature-filter-dialog').html(items.join('')).append(filter);
-			$('.feature-filter-dialog').dialog('option', 'title', feature.name);
+			$('.feature-filter-dialog').dialog({ title: feature.name, dialogClass: 'ui-dialog-shadow' });
 			$('.feature-filter-dialog').dialog('open');
 		});
 	};
@@ -637,12 +577,12 @@
 			documentType : selectedDataSet.name,
 			queryRules : [ {
 				operator : 'LIMIT',
-				value : MAX_ROWS
+				value : resultsTable.getMaxRows()
 			} ]
 		};
 
 		if (currentPage > 1) {
-			var offset = (currentPage - 1) * MAX_ROWS;
+			var offset = (currentPage - 1) * resultsTable.getMaxRows();
 			searchRequest.queryRules.push({
 				operator : 'OFFSET',
 				value : offset
@@ -708,6 +648,7 @@
 			count++;
 		});
 
+		var sortRule = resultsTable.getSortRule();
 		if (sortRule) {
 			searchRequest.queryRules.push(sortRule);
 		}
@@ -723,6 +664,8 @@
 
 	// on document ready
 	$(function() {
+		resultsTable = new ns.ResultsTable();
+		
 		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());

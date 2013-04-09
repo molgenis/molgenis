@@ -8,6 +8,7 @@ import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
@@ -16,12 +17,12 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
+import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
@@ -101,6 +102,11 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void updateIndex(String documentType, Iterable<? extends Entity> entities)
 	{
+		if (!entities.iterator().hasNext())
+		{
+			return;
+		}
+
 		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
 		deleteDocumentsByType(documentType);
 
@@ -129,33 +135,6 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void indexDatabase(Database db) throws DatabaseException
-	{
-		LOG.info("Start indexing database");
-
-		try
-		{
-			for (Class<? extends Entity> clazz : db.getEntityClasses())
-			{
-				String simpleName = clazz.getSimpleName();
-				List<? extends Entity> entities = db.find(clazz);
-				if ((entities != null) && !entities.isEmpty())
-				{
-					LOG.info("Indexing [" + simpleName + "]. Count=" + entities.size());
-
-					updateIndex(simpleName, db.find(clazz));
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		LOG.info("Indexing done");
-	}
-
-	@Override
 	public void indexTupleTable(String documentType, TupleTable tupleTable)
 	{
 		try
@@ -169,6 +148,9 @@ public class ElasticSearchService implements SearchService
 		{
 			throw new RuntimeException(e);
 		}
+
+		LOG.info("Going to create mapping for documentType [" + documentType + "]");
+		createMappings(documentType, tupleTable);
 
 		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
 		deleteDocumentsByType(documentType);
@@ -237,4 +219,30 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
+	private void createMappings(String documentType, TupleTable tupleTable)
+	{
+		XContentBuilder jsonBuilder;
+		try
+		{
+			jsonBuilder = MappingsBuilder.buildMapping(documentType, tupleTable.iterator().next());
+		}
+		catch (Exception e)
+		{
+			String msg = "Exception creating mapping for documentType [" + documentType + "]";
+			LOG.error(msg, e);
+			throw new ElasticSearchException(msg, e);
+		}
+
+		LOG.info("Going to create mapping [" + jsonBuilder + "]");
+
+		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName).setType(documentType)
+				.setSource(jsonBuilder).execute().actionGet();
+
+		if (!response.acknowledged())
+		{
+			throw new ElasticSearchException("Creation of mapping for documentType [" + documentType
+					+ "] failed. Response=" + response);
+		}
+		LOG.info("Mapping for documentType [" + documentType + "] created");
+	}
 }
