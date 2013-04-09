@@ -8,6 +8,13 @@
 	<artifactId>molgenis-omx-auth</artifactId>
 	<packaging>jar</packaging>
 
+	<repositories>
+	  <repository>
+	    <id>enonic</id>
+	    <url>http://repo.enonic.com/maven</url>
+	  </repository>
+	</repositories>
+
 	<build>
         <plugins>
         	<!-- execute molgenis generator -->
@@ -38,14 +45,19 @@
 	
 	<dependencies>
 		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-omx-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>nl.captcha</groupId>
+			<artifactId>simplecaptcha</artifactId>
+			<version>1.2.1</version>
 		</dependency>
 	</dependencies>
 </project>
