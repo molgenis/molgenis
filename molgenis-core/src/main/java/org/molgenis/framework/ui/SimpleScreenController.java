@@ -18,13 +18,11 @@ import java.io.Serializable;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.ui.html.HtmlInputException;
-import org.molgenis.util.EmailService;
 import org.molgenis.util.FileLink;
 import org.molgenis.util.SimpleTree;
 
 /**
- * Base-class for a screen displaying information from the invengine system to
- * the user.
+ * Base-class for a screen displaying information from the invengine system to the user.
  */
 public abstract class SimpleScreenController<MODEL extends ScreenModel> extends SimpleTree<ScreenController<?>>
 		implements ScreenController<MODEL>, Serializable
@@ -45,9 +43,8 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 	}
 
 	/**
-	 * This method (re)loads the view, making persistant data actual again. This
-	 * method needs to be called when the screen operates on, for instance, a
-	 * recordset.
+	 * This method (re)loads the view, making persistant data actual again. This method needs to be called when the
+	 * screen operates on, for instance, a recordset.
 	 * 
 	 * @throws Exception
 	 */
@@ -55,9 +52,8 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 	public abstract void reload(Database db) throws Exception;
 
 	/**
-	 * This method calls the reset-function this instance and all the children
-	 * of this instance. After this call the screens attached to this screen
-	 * should be in a pre-defined valid state.
+	 * This method calls the reset-function this instance and all the children of this instance. After this call the
+	 * screens attached to this screen should be in a pre-defined valid state.
 	 */
 	public void doResetChildren()
 	{
@@ -65,12 +61,6 @@ public abstract class SimpleScreenController<MODEL extends ScreenModel> extends 
 		{
 			subform.getModel().reset();
 		}
-	}
-
-	@Override
-	public EmailService getEmailService()
-	{
-		return ((ApplicationController) this.getRoot()).getEmailService();
 	}
 
 	@Override
