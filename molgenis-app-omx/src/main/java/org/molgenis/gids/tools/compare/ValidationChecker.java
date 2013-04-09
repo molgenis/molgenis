@@ -29,13 +29,13 @@ public class ValidationChecker
 		HashMap<String, String> hashCheckedValues = new HashMap<String, String>();
 
 		// Make Object Reference
-		Validation_ReferenceFile ref = new Validation_ReferenceFile();
+		ValidationFile ref = new ValidationFile();
 		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(args[0]));
 		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
 		ref.bla(excelSheetReaderReferenceFile);
 
 		// Make Object FileToCompare
-		Validation_CompareFile com = new Validation_CompareFile();
+		ValidationFile com = new ValidationFile();
 		ExcelReader excelReaderFileToCompare = new ExcelReader(new File(args[1]));
 		ExcelSheetReader excelSheetReaderFileToCompare = excelReaderFileToCompare.getSheet(0);
 		com.bla(excelSheetReaderFileToCompare);
@@ -45,10 +45,10 @@ public class ValidationChecker
 		List<String> listOfSharedHeaders = new ArrayList<String>();
 		// Compare the headers of Reference file with fileToCompare
 		// Add Reference headers to the listOfSharedHeaders
-		for (String o : ref.listOfHeadersReferenceFile)
+		for (String o : ref.getListOfHeaders())
 		{
 			listOfSharedHeaders.add(o);
-			if (!com.getListOfHeadersFileToCompare().contains(o))
+			if (!com.getListOfHeaders().contains(o))
 			{
 				System.out.println("Unique columns in reference file: " + o);
 				noUniqueColums = true;
@@ -57,13 +57,13 @@ public class ValidationChecker
 
 		// Compare the headers of fileToCompare file with Reference
 		// Add Reference headers to the listOfSharedHeaders
-		for (String o : com.listOfHeadersFileToCompare)
+		for (String o : com.getListOfHeaders())
 		{
 			if (!listOfSharedHeaders.contains(o))
 			{
 				listOfSharedHeaders.add(o);
 			}
-			if (!ref.getListOfHeadersReferenceFile().contains(o))
+			if (!ref.getListOfHeaders().contains(o))
 			{
 				System.out.println("Unique columns in filetocompare file: " + o);
 				noUniqueColums = true;
@@ -81,39 +81,39 @@ public class ValidationChecker
 
 		try
 		{
-			for (Entry<String, Tuple> entry : ref.hashReference.entrySet())
+			for (Entry<String, Tuple> entry : ref.getHash().entrySet())
 			{
-				if (com.hashFileToCompare.get(entry.getValue().getString("id_sample")) != null)
+				if (com.getHash().get(entry.getValue().getString("id_sample")) != null)
 				{
-					compareRows(com.hashFileToCompare.get(entry.getValue().getString("id_sample")), entry.getValue(),
+					compareRows(com.getHash().get(entry.getValue().getString("id_sample")), entry.getValue(),
 							listOfSharedHeaders, hashCheckedValues);
 				}
 
 			}
 
-			for (Entry<String, Tuple> entry : com.hashFileToCompare.entrySet())
+			for (Entry<String, Tuple> entry : com.getHash().entrySet())
 			{
-				if (ref.hashReference.get(entry.getValue().getString("id_sample")) != null)
+				if (ref.getHash().get(entry.getValue().getString("id_sample")) != null)
 				{
-					compareRows(entry.getValue(), ref.hashReference.get(entry.getValue().getString("id_sample")),
+					compareRows(entry.getValue(), ref.getHash().get(entry.getValue().getString("id_sample")),
 							listOfSharedHeaders, hashCheckedValues);
 				}
 
 			}
 
 			System.out.println("\n###Unique samples in Reference file");
-			for (Entry<String, Tuple> entry : ref.hashReference.entrySet())
+			for (Entry<String, Tuple> entry : ref.getHash().entrySet())
 			{
-				if (!com.hashFileToCompare.containsKey(entry.getKey()))
+				if (!com.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
 					// listOfUniqueSampleIdsReference.add(entry.getKey());
 				}
 			}
 			System.out.println("\n###Unique samples in fileToCompare ");
-			for (Entry<String, Tuple> entry : com.hashFileToCompare.entrySet())
+			for (Entry<String, Tuple> entry : com.getHash().entrySet())
 			{
-				if (!ref.hashReference.containsKey(entry.getKey()))
+				if (!ref.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
 					// listOfUniqueSampleIdsFilesToCompare.add(entry.getKey());
