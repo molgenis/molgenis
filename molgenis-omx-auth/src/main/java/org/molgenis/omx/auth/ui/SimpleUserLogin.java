@@ -33,7 +33,10 @@ import org.molgenis.omx.auth.ui.form.ForgotForm;
 import org.molgenis.omx.auth.ui.form.UserAreaForm;
 import org.molgenis.omx.auth.vo.MolgenisUserSearchCriteriaVO;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.util.WebAppUtil;
 import org.molgenis.util.tuple.HttpServletRequestTuple;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
 
 /**
  * Login box
@@ -151,15 +154,28 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			emailContents += "In order to activate the user visit the following URL:\n";
 			emailContents += activationURL + "\n\n";
 
-			// assuming: 'encoded' p.w. (setting deObf = true)
-			this.getEmailService().email("User registration for " + this.getRoot().getLabel(), emailContents,
-					admin.getEmail(), true);
-
-			this.getModel()
-					.getMessages()
-					.add(new ScreenMessage(
-							"Thank you for registering. Your request has been sent to the adminstrator for approval.",
-							true));
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(admin.getEmail());
+			mailMessage.setSubject("User registration for " + this.getRoot().getLabel());
+			mailMessage.setText(emailContents);
+			try
+			{
+				WebAppUtil.getMailSender().send(mailMessage);
+				this.getModel()
+						.getMessages()
+						.add(new ScreenMessage(
+								"Thank you for registering. Your request has been sent to the adminstrator for approval.",
+								true));
+			}
+			catch (MailException ex)
+			{
+				logger.warn(ex);
+				this.getModel()
+						.getMessages()
+						.add(new ScreenMessage(
+								"Registration failed: An error occurred while e-mailing your request to the administrator.",
+								false));
+			}
 
 			// restore login
 			db.setLogin(saveLogin);
@@ -205,7 +221,12 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			String emailContents = "Dear " + user.getFirstName() + " " + user.getLastName() + ",\n\n";
 			emailContents += "your registration request for " + this.getRoot().getLabel() + " was approved.\n";
 			emailContents += "Your account is now active.\n";
-			this.getEmailService().email("Your registration request", emailContents, user.getEmail(), true);
+
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(user.getEmail());
+			mailMessage.setSubject("Your registration request");
+			mailMessage.setText(emailContents);
+			WebAppUtil.getMailSender().send(mailMessage);
 
 			// restore login
 			db.setLogin(saveLogin);
@@ -265,10 +286,20 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			// TODO: make this mandatory (password that was sent is valid only
 			// once)
 
-			// assuming: 'encoded' p.w. (setting deObf = true)
-			this.getEmailService().email("Your new password request", emailContents, user.getEmail(), true);
-
-			this.getModel().getMessages().add(new ScreenMessage("Sending new password successful", true));
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(user.getEmail());
+			mailMessage.setSubject("Your new password request");
+			mailMessage.setText(emailContents);
+			try
+			{
+				WebAppUtil.getMailSender().send(mailMessage);
+				this.getModel().getMessages().add(new ScreenMessage("Sending new password successful", true));
+			}
+			catch (MailException e)
+			{
+				logger.warn(e);
+				this.getModel().getMessages().add(new ScreenMessage("Error requesting new password", false));
+			}
 
 			// restore login
 			db.setLogin(saveLogin);
