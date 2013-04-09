@@ -1,4 +1,4 @@
-package org.molgenis.gids;
+package org.molgenis.gids.tools.compare;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +9,10 @@ import java.util.List;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.util.tuple.Tuple;
 
+/**
+ * This class is used to read the 1st file (the reference file). The data will
+ * be put in a hashmap
+ */
 public class Validation_ReferenceFile
 {
 

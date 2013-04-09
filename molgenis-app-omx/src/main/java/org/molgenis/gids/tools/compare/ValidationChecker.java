@@ -1,4 +1,4 @@
-package org.molgenis.gids;
+package org.molgenis.gids.tools.compare;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +11,11 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.util.tuple.Tuple;
+
+/**
+ * This script is created to compare 2 excelfiles. The files are given via the
+ * arguments
+ */
 
 public class ValidationChecker
 {
