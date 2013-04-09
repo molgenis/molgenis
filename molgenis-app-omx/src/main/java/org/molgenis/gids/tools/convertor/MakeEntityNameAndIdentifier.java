@@ -1,4 +1,4 @@
-package org.molgenis.gids;
+package org.molgenis.gids.tools.convertor;
 
 public class MakeEntityNameAndIdentifier
 {
