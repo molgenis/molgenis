@@ -37,12 +37,15 @@ public class DataSetTableTest
 		ObservableFeature f10 = mock(ObservableFeature.class);
 		when(f10.getIdentifier()).thenReturn("10");
 		when(f10.getName()).thenReturn("name10");
+		when(f10.getDataType()).thenReturn("string");
 		ObservableFeature f11 = mock(ObservableFeature.class);
 		when(f11.getIdentifier()).thenReturn("11");
 		when(f11.getName()).thenReturn("name11");
+		when(f11.getDataType()).thenReturn("string");
 		ObservableFeature f12 = mock(ObservableFeature.class);
 		when(f12.getIdentifier()).thenReturn("12");
 		when(f12.getName()).thenReturn("name12");
+		when(f12.getDataType()).thenReturn("string");
 
 		Database db = mock(Database.class);
 		when(db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, 1))).thenReturn(
