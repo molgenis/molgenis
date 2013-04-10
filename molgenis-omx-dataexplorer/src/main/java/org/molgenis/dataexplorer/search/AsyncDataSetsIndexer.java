@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
@@ -23,6 +24,7 @@ import org.springframework.scheduling.annotation.Async;
  */
 public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 {
+	private static final Logger LOG = Logger.getLogger(AsyncDataSetsIndexer.class);
 	private SearchService searchService;
 	private Database unauthorizedDatabase;
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
@@ -61,7 +63,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	 */
 	@Override
 	@Async
-	public void index() throws DatabaseException, TableException
+	public void index()
 	{
 		runningIndexProcesses.incrementAndGet();
 		try
@@ -70,6 +72,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 			}
+		}
+		catch (Exception e)
+		{
+			LOG.error("Exception index()", e);
 		}
 		finally
 		{
@@ -85,7 +91,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	 */
 	@Override
 	@Async
-	public void indexNew() throws DatabaseException, TableException
+	public void indexNew()
 	{
 		runningIndexProcesses.incrementAndGet();
 		try
@@ -98,6 +104,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				}
 			}
 		}
+		catch (Exception e)
+		{
+			LOG.error("Exception index()", e);
+		}
 		finally
 		{
 			runningIndexProcesses.decrementAndGet();
@@ -106,7 +116,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 	@Override
 	@Async
-	public void index(List<DataSet> dataSets) throws TableException
+	public void index(List<DataSet> dataSets)
 	{
 		runningIndexProcesses.incrementAndGet();
 		try
@@ -115,6 +125,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 			}
+		}
+		catch (Exception e)
+		{
+			LOG.error("Exception index()", e);
 		}
 		finally
 		{
