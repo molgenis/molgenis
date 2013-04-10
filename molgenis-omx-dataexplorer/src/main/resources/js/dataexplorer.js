@@ -113,7 +113,7 @@
 	"use strict";
 
 	var ns = w.molgenis = w.molgenis || {};
-	
+
 	var resultsTable = null;
 	var featureFilters = {};
 	var selectedFeatures = [];
@@ -182,8 +182,25 @@
 		}
 
 		function onNodeSelectionChange(selectedNodes) {
+			function getSiblingPos(node) {
+				var pos = 0;
+				do {
+					node = node.getPrevSibling();
+					if (node == null)
+						break;
+					else
+						++pos;
+				} while (true);
+				return pos;
+			}
 			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				return node1.getLevel() - node2.getLevel() <= 0 ? -1 : 1;
+				var diff = node1.getLevel() - node2.getLevel();
+				if (diff == 0) {
+					diff = getSiblingPos(node1.getParent()) - getSiblingPos(node2.getParent());
+					if (diff == 0)
+						diff = getSiblingPos(node1) - getSiblingPos(node2);
+				}
+				return diff <= 0 ? -1 : 1;
 			});
 			var sortedFeatures = $.map(sortedNodes, function(node) {
 				return node.data.isFolder ? null : node.data.key;
@@ -239,7 +256,9 @@
 					onNodeSelectionChange(this.getSelectedNodes());
 				},
 				onPostInit : function() {
-					$("#feature-selection-container").accordion({ collapsible: true });
+					$("#feature-selection-container").accordion({
+						collapsible : true
+					});
 					onNodeSelectionChange(this.getSelectedNodes());
 				}
 			});
@@ -282,9 +301,9 @@
 		ns.search(function(searchResponse) {
 			var maxRowsPerPage = resultsTable.getMaxRows();
 			var nrRows = searchResponse.totalHitCount;
-			
+
 			resultsTable.build(searchResponse, selectedFeatures, restApi);
-			
+
 			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 		});
 	};
@@ -373,7 +392,7 @@
 			items.push('<h3>Value (' + feature.dataType + ')</h3>');
 			var filter = null;
 			var config = featureFilters[featureUri];
-			
+
 			switch (feature.dataType) {
 			case "xref":
 			case "string":
@@ -429,14 +448,14 @@
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
 
 				fromFilter.change(function() {
-					//If 'from' changed set 'to' at the same value
+					// If 'from' changed set 'to' at the same value
 					var value = $('#from').val();
 					$('#to').val(value);
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [value, value],
+						values : [ value, value ],
 						range : true
 					});
 				});
@@ -495,8 +514,7 @@
 							} else {
 								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
 							}
-			
-							
+
 							input.change(function() {
 								ns.updateFeatureFilter(featureUri, {
 									name : feature.name,
@@ -523,9 +541,12 @@
 				console.log("TODO: '" + feature.dataType + "' not supported");
 				break;
 			}
-			
+
 			$('.feature-filter-dialog').html(items.join('')).append(filter);
-			$('.feature-filter-dialog').dialog({ title: feature.name, dialogClass: 'ui-dialog-shadow' });
+			$('.feature-filter-dialog').dialog({
+				title : feature.name,
+				dialogClass : 'ui-dialog-shadow'
+			});
 			$('.feature-filter-dialog').dialog('open');
 		});
 	};
@@ -665,7 +686,7 @@
 	// on document ready
 	$(function() {
 		resultsTable = new ns.ResultsTable();
-		
+
 		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
