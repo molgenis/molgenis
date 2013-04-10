@@ -65,8 +65,6 @@ public class Home extends PluginModel<Entity>
 		try
 		{
 			listUsers = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS, "admin"));
-
-			System.out.println("listUsers: " + listUsers.size());
 			if (listUsers.isEmpty())
 			{
 

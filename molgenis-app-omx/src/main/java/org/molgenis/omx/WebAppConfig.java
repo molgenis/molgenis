@@ -1,6 +1,7 @@
 package org.molgenis.omx;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
@@ -9,11 +10,17 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,6 +60,52 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		converters.add(new GsonHttpMessageConverter());
+	}
+
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer properties()
+	{
+		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
+		Resource[] resources = new FileSystemResource[]
+		{ new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties") };
+		pspc.setLocations(resources);
+		pspc.setIgnoreUnresolvablePlaceholders(true);
+		pspc.setIgnoreResourceNotFound(true);
+		return pspc;
+	}
+
+	@Value("${mail.host:smtp.gmail.com}")
+	private String mailHost;
+	@Value("${mail.port:587}")
+	private Integer mailPort;
+	@Value("${mail.protocol:smtp}")
+	private String mailProtocol;
+	@Value("${mail.username}")
+	private String mailUsername; // specify in molgenis-server.properties
+	@Value("${mail.password}")
+	private String mailPassword; // specify in molgenis-server.properties
+	@Value("${mail.java.auth:true}")
+	private String mailJavaAuth;
+	@Value("${mail.java.starttls.enable:true}")
+	private String mailJavaStartTlsEnable;
+	@Value("${mail.java.quitwait:false}")
+	private String mailJavaQuitWait;
+
+	@Bean
+	public MailSender mailSender()
+	{
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		mailSender.setHost(mailHost);
+		mailSender.setPort(Integer.valueOf(mailPort));
+		mailSender.setProtocol(mailProtocol);
+		mailSender.setUsername(mailUsername); // specify in molgenis-server.properties
+		mailSender.setPassword(mailPassword); // specify in molgenis-server.properties
+		Properties javaMailProperties = new Properties();
+		javaMailProperties.setProperty("mail.smtp.auth", mailJavaAuth);
+		javaMailProperties.setProperty("mail.smtp.starttls.enable", mailJavaStartTlsEnable);
+		javaMailProperties.setProperty("mail.smtp.quitwait", mailJavaQuitWait);
+		mailSender.setJavaMailProperties(javaMailProperties);
+		return mailSender;
 	}
 
 	/**
