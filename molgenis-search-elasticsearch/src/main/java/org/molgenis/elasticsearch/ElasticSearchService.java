@@ -1,5 +1,6 @@
 package org.molgenis.elasticsearch;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -224,7 +225,7 @@ public class ElasticSearchService implements SearchService
 		XContentBuilder jsonBuilder;
 		try
 		{
-			jsonBuilder = MappingsBuilder.buildMapping(documentType, tupleTable.iterator().next());
+			jsonBuilder = MappingsBuilder.buildMapping(documentType, tupleTable);
 		}
 		catch (Exception e)
 		{
@@ -233,7 +234,15 @@ public class ElasticSearchService implements SearchService
 			throw new ElasticSearchException(msg, e);
 		}
 
-		LOG.info("Going to create mapping [" + jsonBuilder + "]");
+		try
+		{
+			LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName).setType(documentType)
 				.setSource(jsonBuilder).execute().actionGet();
