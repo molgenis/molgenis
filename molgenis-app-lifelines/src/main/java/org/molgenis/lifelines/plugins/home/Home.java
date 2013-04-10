@@ -109,7 +109,7 @@ public class Home extends PluginModel<Entity>
 
 	private void fillMetaData(Database db) throws Exception
 	{
-		FillMetadata.fillMetadata(db, false, "SimpleUserLoginPlugin");
+		FillMetadata.fillMetadata(db, false);
 
 		List<MolgenisUser> users = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.IDENTIFIER, Operator.EQUALS,
 				"anonymous"));

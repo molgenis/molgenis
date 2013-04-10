@@ -70,7 +70,7 @@ public class Home extends PluginModel<Entity>
 			if (listUsers.isEmpty())
 			{
 
-				FillMetadata.fillMetadata(db, false, "SimpleUserLoginPlugin");
+				FillMetadata.fillMetadata(db, false);
 				this.setMessages(new ScreenMessage("User setup complete!", true));
 			}
 
