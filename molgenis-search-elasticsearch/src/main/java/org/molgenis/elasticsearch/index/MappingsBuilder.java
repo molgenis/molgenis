@@ -54,7 +54,7 @@ public class MappingsBuilder
 	{
 		if (value == null)
 		{
-			return "null";
+			return "string";
 		}
 
 		if (value instanceof Integer)
