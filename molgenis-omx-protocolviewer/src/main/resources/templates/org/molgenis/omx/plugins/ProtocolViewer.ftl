@@ -64,7 +64,9 @@
 							</div>
 							<div id="download-controls">
 								<button class="btn" id="download-xls-button">Download as Excel</button>
-								<button class="btn" id="view-features-button">View</button>
+								<#if (model.getShowViewButton() == "true")>
+									<button class="btn" id="view-features-button">View</button>
+								</#if>
 							</div>
 		  				</div>
 	  				</div>

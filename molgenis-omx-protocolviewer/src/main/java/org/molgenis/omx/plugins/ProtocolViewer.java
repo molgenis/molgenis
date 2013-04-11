@@ -14,6 +14,8 @@ public class ProtocolViewer implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	private List<JSDataSet> dataSets;
+	
+	private String ShowViewButton;
 
 	public List<JSDataSet> getDataSets()
 	{
@@ -24,4 +26,14 @@ public class ProtocolViewer implements Serializable
 	{
 		this.dataSets = dataSets;
 	}
+	
+	public String getShowViewButton() {
+		return 	this.ShowViewButton;
+	}
+	
+	public void setShowViewButton(String ShowViewButton) {
+		this.ShowViewButton = ShowViewButton;
+	}
+
+
 }
