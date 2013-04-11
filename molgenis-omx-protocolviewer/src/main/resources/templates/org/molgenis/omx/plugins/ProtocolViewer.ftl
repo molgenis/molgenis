@@ -136,7 +136,7 @@
  					
  					$('#save-selection-button').click(function(e) {
  						e.preventDefault();
- 						//TODO implement save selection action
+ 						alert('TODO implement save selection action');
  					});
  					
  					// on ready
