@@ -20,6 +20,31 @@
 		<p class="errormessage">${message.text}</p>
 		</#if>
 	</#list>
+	<#if !model.authenticated>
+		<div class="alert">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+	  		<strong>Warning!</strong> You need to <a data-toggle="modal" href="/login" data-target="#login-modal">login</a> to save your variable selection
+		</div>
+		<div id="login-modal" class="modal hide">
+		  <div class="modal-header">
+		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		    <h3>Login</h3>
+		  </div>
+		  <div class="modal-body"></div>
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				var modal = $('#login-modal');
+				modal.on('hide', function (event) {
+					var authenticated = modal.data('modal').options.authenticated;
+					if(authenticated) {
+						$('.alert').alert('close');
+						$('#save-selection-button').removeAttr('disabled');
+					}
+				}); 
+			});
+		</script>
+	</#if>
 		<div class="screenbody" id="container-plugin">
 			<div class="screenpadding">
 			<#if (model.dataSets?size == 0)>
@@ -65,6 +90,7 @@
 							<div id="download-controls">
 								<button class="btn" id="download-xls-button">Download as Excel</button>
 								<button class="btn" id="view-features-button">View</button>
+								<button class="btn" id="save-selection-button"<#if !model.authenticated> disabled</#if>>Save selection</button>
 							</div>
 		  				</div>
 	  				</div>
@@ -106,6 +132,11 @@
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
  						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + molgenis.getSelectedVariables().join();
+ 					});
+ 					
+ 					$('#save-selection-button').click(function(e) {
+ 						e.preventDefault();
+ 						alert('TODO implement save selection action');
  					});
  					
  					// on ready
