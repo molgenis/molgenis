@@ -15,6 +15,8 @@ public class ProtocolViewer implements Serializable
 
 	private List<JSDataSet> dataSets;
 
+	private boolean authenticated;
+
 	public List<JSDataSet> getDataSets()
 	{
 		return dataSets != null ? dataSets : Collections.<JSDataSet> emptyList();
@@ -23,5 +25,15 @@ public class ProtocolViewer implements Serializable
 	public void setDataSets(List<JSDataSet> dataSets)
 	{
 		this.dataSets = dataSets;
+	}
+
+	public boolean isAuthenticated()
+	{
+		return authenticated;
+	}
+
+	public void setAuthenticated(boolean authenticated)
+	{
+		this.authenticated = authenticated;
 	}
 }
