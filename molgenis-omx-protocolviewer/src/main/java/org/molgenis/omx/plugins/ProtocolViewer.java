@@ -17,6 +17,8 @@ public class ProtocolViewer implements Serializable
 	
 	private String ShowViewButton;
 
+	private boolean authenticated;
+
 	public List<JSDataSet> getDataSets()
 	{
 		return dataSets != null ? dataSets : Collections.<JSDataSet> emptyList();
@@ -26,6 +28,7 @@ public class ProtocolViewer implements Serializable
 	{
 		this.dataSets = dataSets;
 	}
+
 	
 	public String getShowViewButton() {
 		return 	this.ShowViewButton;
@@ -35,5 +38,15 @@ public class ProtocolViewer implements Serializable
 		this.ShowViewButton = ShowViewButton;
 	}
 
+
+	public boolean isAuthenticated()
+	{
+		return authenticated;
+	}
+
+	public void setAuthenticated(boolean authenticated)
+	{
+		this.authenticated = authenticated;
+	}
 
 }

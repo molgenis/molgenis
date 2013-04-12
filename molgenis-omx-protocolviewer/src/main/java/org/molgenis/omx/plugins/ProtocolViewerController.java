@@ -183,12 +183,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	/**
-	 * This function is to search user-typed query in all the features. The
-	 * searching starts from the top-protocol (the one that is used to define
-	 * the dataset), it recursively calls itself until reaching the features. If
-	 * the query is found in some features, their corresponding protocols will
-	 * be informed that the features have been matched. Those protocols which
-	 * have successful "hits" are sent back to client side for display.
+	 * This function is to search user-typed query in all the features. The searching starts from the top-protocol (the
+	 * one that is used to define the dataset), it recursively calls itself until reaching the features. If the query is
+	 * found in some features, their corresponding protocols will be informed that the features have been matched. Those
+	 * protocols which have successful "hits" are sent back to client side for display.
 	 * 
 	 * @param db
 	 * @param topProtocol
@@ -346,9 +344,8 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	}
 
 	/*
-	 * Find the name of the DataSetViewer for user in a url. For now if there
-	 * are multiple DataSetViewers it returns the first Returns null if not
-	 * found
+	 * Find the name of the DataSetViewer for user in a url. For now if there are multiple DataSetViewers it returns the
+	 * first Returns null if not found
 	 */
 	private String getDataSetViewerName()
 	{
@@ -381,6 +378,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 		// create new model
 		this.protocolViewer = new ProtocolViewer();
+		this.protocolViewer.setAuthenticated(db.getLogin() != null ? db.getLogin().isAuthenticated() : false);
 		List<JSDataSet> jsDataSets;
 		if (dataSets != null && !dataSets.isEmpty())
 		{
