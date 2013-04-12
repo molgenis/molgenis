@@ -92,8 +92,11 @@
 								<#if (model.getShowViewButton() == "true")>
 									<button class="btn" id="view-features-button">View</button>
 								</#if>
+								<#if (model.getSaveSelectionButton() == "true")>
 
 								<button class="btn" id="save-selection-button"<#if !model.authenticated> disabled</#if>>Save selection</button>
+								
+								</#if>
 							</div>
 		  				</div>
 	  				</div>

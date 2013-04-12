@@ -49,7 +49,8 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	private static final long serialVersionUID = -6143910771849972946L;
 	private static final String KEY_SHOW_VIEW_BUTTON = "app.href.viewbutton";
 	private static final String DEFAULT_KEY_SHOW_VIEW_BUTTON = "true";
-	
+	private static final String KEY_SHOW_SAVE_SELECTION_BUTTON = "app.href.saveSelectionButton";
+	private static final String DEFAULT_KEY_SAVE_SELECTION_BUTTON = "true";
 
 	/** Protocol viewer model */
 	private ProtocolViewer protocolViewer;
@@ -392,12 +393,9 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			jsDataSets = Collections.emptyList();
 		}
 		this.protocolViewer.setDataSets(jsDataSets);
-		
-		this.protocolViewer.setShowViewButton("true");
-
 
 		this.protocolViewer.setShowViewButton(getMolgenisSetting(KEY_SHOW_VIEW_BUTTON, DEFAULT_KEY_SHOW_VIEW_BUTTON));
-
+		this.protocolViewer.setSaveSelectionButton(getMolgenisSetting(KEY_SHOW_SAVE_SELECTION_BUTTON, DEFAULT_KEY_SAVE_SELECTION_BUTTON));
 	}
 
 	private List<Category> findCategories(Database db, ObservableFeature feature) throws DatabaseException
