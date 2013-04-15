@@ -15,9 +15,9 @@ public class ProtocolViewer implements Serializable
 
 	private List<JSDataSet> dataSets;
 	
-	private String ShowViewButton;
+	private boolean showViewButton;
 	
-	private String SaveSelectionButton;
+	private boolean saveSelectionButton;
 
 	private boolean authenticated;
 
@@ -32,20 +32,20 @@ public class ProtocolViewer implements Serializable
 	}
 
 	
-	public String getShowViewButton() {
-		return 	this.ShowViewButton;
+	public boolean getShowViewButton() {
+		return 	this.showViewButton;
 	}
 	
-	public void setShowViewButton(String ShowViewButton) {
-		this.ShowViewButton = ShowViewButton;
+	public void setShowViewButton(boolean showViewButton) {
+		this.showViewButton = showViewButton;
 	}
 	
-	public String getSaveSelectionButton() {
-		return 	this.SaveSelectionButton;
+	public boolean getSaveSelectionButton() {
+		return 	this.saveSelectionButton;
 	}
 	
-	public void setSaveSelectionButton(String SaveSelectionButton) {
-		this.SaveSelectionButton = SaveSelectionButton;
+	public void setSaveSelectionButton(boolean saveSelectionButton) {
+		this.saveSelectionButton = saveSelectionButton;
 	}
 
 
