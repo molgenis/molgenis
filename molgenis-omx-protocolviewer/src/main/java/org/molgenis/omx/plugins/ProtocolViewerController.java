@@ -47,9 +47,9 @@ import com.google.gson.reflect.TypeToken;
 public class ProtocolViewerController extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = -6143910771849972946L;
-	private static final String KEY_SHOW_VIEW_BUTTON = "app.href.viewbutton";
+	private static final String KEY_SHOW_VIEW_BUTTON = "plugin.catalogue.showviewbutton";
 	private static final String DEFAULT_KEY_SHOW_VIEW_BUTTON = "true";
-	private static final String KEY_SHOW_SAVE_SELECTION_BUTTON = "app.href.saveSelectionButton";
+	private static final String KEY_SHOW_SAVE_SELECTION_BUTTON = "plugin.catalogue.showsavebutton";
 	private static final String DEFAULT_KEY_SAVE_SELECTION_BUTTON = "true";
 
 	/** Protocol viewer model */
