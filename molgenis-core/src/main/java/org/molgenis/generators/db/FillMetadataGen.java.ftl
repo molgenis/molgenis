@@ -44,17 +44,17 @@ public class FillMetadata {
 		fillMetadata(db, useLogin, "UserLoginPlugin");
 	}
 	
-	public static void fillMetadata(Database db, boolean useLogin, String loginPluginName) throws Exception {
-        System.out.println("fillMetadata start");
+	private static void fillMetadata(Database db, boolean useLogin, String loginPluginName) throws Exception {
+        logger.debug("fillMetadata start");
 
 		Login login = db.getLogin();
         if(useLogin)
         {
             if(login == null) {
-                System.out.println("login == null --> no meta data added");           
+                logger.debug("login == null --> no meta data added");           
                 return;
             } else if (login instanceof SimpleLogin) {
-            	System.out.println("login instanceof SimpleLogin --> no meta data added");
+            	logger.debug("login instanceof SimpleLogin --> no meta data added");
             	return;
             }
         } else {

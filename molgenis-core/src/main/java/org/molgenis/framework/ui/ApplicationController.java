@@ -17,16 +17,14 @@ import org.molgenis.framework.ui.html.FreemarkerInput;
 import org.molgenis.framework.ui.html.HtmlSettings;
 import org.molgenis.framework.ui.html.RichtextInput;
 import org.molgenis.framework.ui.html.render.RenderDecorator;
-import org.molgenis.util.EmailService;
 import org.molgenis.util.FileLink;
 import org.molgenis.util.HandleRequestDelegationException;
 
 /**
  * The root screen for any MOLGENIS application.
  * <p>
- * The UserInterface manages a Tree of ScreenControllers. A UserInterface is
- * backed by exactly one database (for persistent data) and one Login object
- * (taking care of authentication/authorization).
+ * The UserInterface manages a Tree of ScreenControllers. A UserInterface is backed by exactly one database (for
+ * persistent data) and one Login object (taking care of authentication/authorization).
  */
 public class ApplicationController extends SimpleScreenController<ApplicationModel>
 {
@@ -37,8 +35,6 @@ public class ApplicationController extends SimpleScreenController<ApplicationMod
 	private static final Logger logger = Logger.getLogger(ApplicationController.class);
 	/** The login * */
 	private Login login;
-	/** The email service used */
-	private EmailService emailService;
 	/** Galaxy url */
 	private String galaxyUrl;
 	/** Molgenis options from generted */
@@ -102,13 +98,6 @@ public class ApplicationController extends SimpleScreenController<ApplicationMod
 				.newInstance();
 	}
 
-	public ApplicationController(MolgenisOptions options, Login login, EmailService email)
-	{
-		this(options, login);
-		this.setLogin(login);
-		this.setEmailService(email);
-	}
-
 	/**
 	 * Retrieve the current login
 	 * 
@@ -156,8 +145,7 @@ public class ApplicationController extends SimpleScreenController<ApplicationMod
 	}
 
 	/**
-	 * Convenience method that delegates an event to the controller of the
-	 * targetted screen.
+	 * Convenience method that delegates an event to the controller of the targetted screen.
 	 * 
 	 * @param db
 	 *            reference to the database
@@ -247,21 +235,9 @@ public class ApplicationController extends SimpleScreenController<ApplicationMod
 		{
 			if (!target.equals(this)) return target.handleRequest(db, request, null);
 		}
-		else
-			logger.debug("handleRequest(" + request + "): no request needs to be handled");
+		else logger.debug("handleRequest(" + request + "): no request needs to be handled");
 
 		return Show.SHOW_MAIN;
-	}
-
-	@Override
-	public EmailService getEmailService()
-	{
-		return emailService;
-	}
-
-	public void setEmailService(EmailService emailService)
-	{
-		this.emailService = emailService;
 	}
 
 	public void clearAllMessages()
@@ -333,11 +309,9 @@ public class ApplicationController extends SimpleScreenController<ApplicationMod
 	}
 
 	/**
-	 * Store values in a map, much like session attributes. The reaason to do
-	 * this is because session variables are not always reachable inside plugin
-	 * functions, and if they are, it is complex and convoluted because this
-	 * applicationcontroller itself is already stored as a session attribute!
-	 * (see: MolgenisGuiService.java)
+	 * Store values in a map, much like session attributes. The reaason to do this is because session variables are not
+	 * always reachable inside plugin functions, and if they are, it is complex and convoluted because this
+	 * applicationcontroller itself is already stored as a session attribute! (see: MolgenisGuiService.java)
 	 */
 	public Map<String, Object> sessionVariables = new HashMap<String, Object>();
 

@@ -20,8 +20,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.services.MolgenisGuiService;
 import org.molgenis.framework.ui.ApplicationController;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.EmailService;
-import org.molgenis.util.SimpleEmailService;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 public class GuiService extends MolgenisGuiService implements MolgenisService
@@ -68,16 +66,6 @@ public class GuiService extends MolgenisGuiService implements MolgenisService
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		<#if mail_smtp_user != '' && mail_smtp_au != ''>
-		EmailService service = new SimpleEmailService();
-		service.setSmtpFromAddress("${mail_smtp_from}");	
-		service.setSmtpProtocol("${mail_smtp_protocol}");
-		service.setSmtpHostname("${mail_smtp_hostname}");
-		service.setSmtpPort(${mail_smtp_port});
-		service.setSmtpUser("${mail_smtp_user}");
-		service.setSmtpAu("${mail_smtp_au}");	
-		app.setEmailService(service);</#if>
 		
 		<#list model.userinterface.children as subscreen>
 			<#assign screentype = Name(subscreen.getType().toString()?lower_case) />

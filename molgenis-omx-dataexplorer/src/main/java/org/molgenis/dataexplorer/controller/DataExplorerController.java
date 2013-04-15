@@ -1,13 +1,11 @@
 package org.molgenis.dataexplorer.controller;
 
-import java.util.List;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 
-import org.molgenis.dataexplorer.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.omx.observ.DataSet;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -17,21 +15,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * Controller class for the data explorer
+ * Controller class for the data explorer.
+ * 
+ * The implementation javascript file for the resultstable is defined in a
+ * MolgenisSettings property named 'dataexplorer.resultstable.js' possible
+ * values are '/js/SingleObservationSetTable.js' or
+ * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as
+ * the default
  * 
  * @author erwin
  * 
  */
 @Scope("request")
 @Controller
-@RequestMapping("/plugin/dataexplorer")
+@RequestMapping(URI)
 public class DataExplorerController
 {
-	@Autowired
-	private DataSetsIndexer dataSetsIndexer;
+	public static final String URI = "/plugin/dataexplorer";
 
 	@Autowired
 	private Database database;
+
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 
 	/**
 	 * Show the explorer page
@@ -41,29 +47,20 @@ public class DataExplorerController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws DatabaseException
+	public String init(Model model) throws Exception
 	{
-		return "dataexplorer";
-	}
 
-	@RequestMapping("/index")
-	public String indexDataSets(Model model) throws DatabaseException, TableException
-	{
-		dataSetsIndexer.index();
+		String resultsTableJavascriptFile = molgenisSettings.getProperty("dataexplorer.resultstable.js",
+				"/js/MultiObservationSetTable.js");
 
-		model.addAttribute("message", "Indexing done");
-		List<DataSet> dataSets = database.find(DataSet.class);
-		if (!dataSets.isEmpty())
-		{
-			model.addAttribute("dataset", dataSets.get(0));
-		}
+		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
 
 		return "dataexplorer";
 	}
 
 	/**
-	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
-	 * to the home page
+	 * When someone directly accesses /dataexplorer and is not logged in an
+	 * DataAccessException is thrown, redirect him to the home page
 	 * 
 	 * @return
 	 */

@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.controller.${entity.name}ControllerTest.${entity.name}ControllerConfig;
@@ -32,6 +32,7 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 	</#if>
 </#if>
 </#list>
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +60,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@BeforeMethod
 	public void setUp()
 	{
-		mockMvc = MockMvcBuilders.standaloneSetup(${entity.name?uncap_first}Controller).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(${entity.name?uncap_first}Controller).setMessageConverters(new GsonHttpMessageConverter()).build();
 	}
 
 	@Test
@@ -103,7 +104,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 		${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
 		${entity.name?uncap_first}.set${field.name?cap_first}(0);
 		when(${entity.name?uncap_first}Service.read(0)).thenReturn(${entity.name?uncap_first});
-		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0/${field.name?uncap_first}")).andExpect(forwardedUrl("/api/v1/${field.xrefEntity.name?lower_case}/0"));
+		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0/${field.name?uncap_first}")).andExpect(redirectedUrl("/api/v1/${field.xrefEntity.name?lower_case}/0"));
 	}
 		 </#if>
 	</#if>
@@ -111,7 +112,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void retrieveEntityCollection_forbidden() throws Exception
 	{
-		when(${entity.name?uncap_first}Service.readAll(Matchers.<${type(entity.primaryKey)}>any(), Matchers.<${type(entity.primaryKey)}>any(), Matchers.<List<QueryRule>>any())).thenThrow(new DatabaseAccessException("Access denied"));
+		when(${entity.name?uncap_first}Service.readAll(Matchers.any(${type(entity.primaryKey)}.class), Matchers.any(${type(entity.primaryKey)}.class), Matchers.<List<QueryRule>>any())).thenThrow(new DatabaseAccessException("Access denied"));
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}").accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 	

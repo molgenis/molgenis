@@ -33,6 +33,6 @@
 					
 			</menu>	
 		</menu> <!-- admin panels -->	
-		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
+		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Login" />
 	</menu>
 </molgenis>

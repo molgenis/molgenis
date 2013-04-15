@@ -20,7 +20,6 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.ScreenModel.Show;
 import org.molgenis.framework.ui.html.HtmlInputException;
-import org.molgenis.util.EmailService;
 import org.molgenis.util.FileLink;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.Tree;
@@ -29,24 +28,21 @@ import org.molgenis.util.Tree;
  * A controller changes the state of a ScreenModel.
  * 
  * <p>
- * The State and Transitions of Screens are seperated between Screen that
- * contains state of the screen, and ScreenController that implements
- * transitions. This separation prevends side-effects when generating the HTML
- * (see templates). It also eases understanding as Screen is reduced to a simple
- * Bean (that can be hold in a Session) and the Controllers that manipulate it.
+ * The State and Transitions of Screens are seperated between Screen that contains state of the screen, and
+ * ScreenController that implements transitions. This separation prevends side-effects when generating the HTML (see
+ * templates). It also eases understanding as Screen is reduced to a simple Bean (that can be hold in a Session) and the
+ * Controllers that manipulate it.
  */
 public interface ScreenController<MODEL extends ScreenModel> extends Serializable, Tree<ScreenController<?>>
 {
 	/**
 	 * Refresh/reload the model.
 	 * <p>
-	 * reload() needs to be called when the screen works on external
-	 * data/processes. For example:
+	 * reload() needs to be called when the screen works on external data/processes. For example:
 	 * <ul>
-	 * <li>a screen that works on a persistent database needs to requery the
-	 * data on disk in order to show the most recent data.
-	 * <li>a screen that monitors a long running process needs to retrieve the
-	 * most recent progress information
+	 * <li>a screen that works on a persistent database needs to requery the data on disk in order to show the most
+	 * recent data.
+	 * <li>a screen that monitors a long running process needs to retrieve the most recent progress information
 	 * <li>Etc.
 	 * </ul>
 	 * 
@@ -62,8 +58,7 @@ public interface ScreenController<MODEL extends ScreenModel> extends Serializabl
 	 * @param db
 	 * @param request
 	 * @param out
-	 *            additional parameter that allows you to write downloadable
-	 *            output
+	 *            additional parameter that allows you to write downloadable output
 	 * @return
 	 * @throws Exception
 	 * @throws HandleRequestDelegationException
@@ -84,15 +79,8 @@ public interface ScreenController<MODEL extends ScreenModel> extends Serializabl
 	public ScreenView getView();
 
 	/**
-	 * Get access to the emailservice.
-	 * 
-	 * @return email service
-	 */
-	public EmailService getEmailService();
-
-	/**
-	 * Get an instance of the database. Big warning: please destory the
-	 * instances to limit chances of unclosed database connections
+	 * Get an instance of the database. Big warning: please destory the instances to limit chances of unclosed database
+	 * connections
 	 */
 	public Database getDatabase();
 

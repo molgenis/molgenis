@@ -2,6 +2,7 @@ package org.molgenis.framework.db.jpa;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,22 +11,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.Search;
-import org.hibernate.search.query.dsl.QueryBuilder;
 import org.molgenis.framework.db.AbstractDatabase;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.ExampleData;
 import org.molgenis.model.elements.Model;
-import org.molgenis.util.Entity;
+import org.molgenis.util.tuple.KeyValueTuple;
+import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.tuple.WritableTuple;
 
 /**
- * Java Persistence API (JPA) implementation of Database to query relational
- * databases.
+ * Java Persistence API (JPA) implementation of Database to query relational databases.
  * <p>
- * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be
- * added for each {@link org.molgenis.framework.util.Entity} E that can be
- * queried. These mappers take care of the interaction with a database.
+ * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be added for each
+ * {@link org.molgenis.framework.util.Entity} E that can be queried. These mappers take care of the interaction with a
+ * database.
  * 
  * @author Morris Swertz
  * @author Joris Lops
@@ -245,27 +244,30 @@ public class JpaDatabase extends AbstractDatabase
 		return persistenceUnitName;
 	}
 
-	public void index()
+	public List<Tuple> sql(String sql, String... columnNames)
 	{
-		try
-		{
-			FullTextEntityManager ftem = Search.getFullTextEntityManager(this.em);
-			ftem.createIndexer().startAndWait();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-	}
+		javax.persistence.Query q = this.em.createNativeQuery(sql);
 
-	public <E extends Entity> List<E> search(Class<E> entityClass, String fieldList, String searchString)
-	{
-		FullTextEntityManager ftem = Search.getFullTextEntityManager(this.em);
-		QueryBuilder qb = ftem.getSearchFactory().buildQueryBuilder().forEntity(entityClass).get();
-		org.apache.lucene.search.Query query = qb.keyword().onFields(fieldList).matching(searchString).createQuery();
-		javax.persistence.Query persistenceQuery = ftem.createFullTextQuery(query, entityClass);
-		@SuppressWarnings("unchecked")
-		List<E> result = persistenceQuery.getResultList();
+		List<Tuple> result = new ArrayList<Tuple>();
+
+		for (Object o : q.getResultList())
+		{
+			WritableTuple row = new KeyValueTuple();
+
+			if (columnNames.length == 1)
+			{
+				row.set(columnNames[0], o);
+			}
+			else
+			{
+				Object[] arr = (Object[]) o;
+				for (int i = 0; i < columnNames.length; i++)
+				{
+					row.set(columnNames[i], arr[i]);
+				}
+			}
+			result.add(row);
+		}
 		return result;
 	}
 }

@@ -26,7 +26,7 @@ public class DataSetImporter
 {
 	private static final Logger LOG = Logger.getLogger(DataSetImporter.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
-	private Database db;
+	private final Database db;
 
 	public DataSetImporter(Database db)
 	{
@@ -44,7 +44,15 @@ public class DataSetImporter
 				if (dataSetEntityNames.contains(tableName))
 				{
 					LOG.info("importing dataset " + tableName + " from file " + file + "...");
-					importSheet(tableReader.getTupleReader(tableName), tableName);
+					TupleReader tupleReader = tableReader.getTupleReader(tableName);
+					try
+					{
+						importSheet(tupleReader, tableName);
+					}
+					finally
+					{
+						tupleReader.close();
+					}
 				}
 			}
 		}
@@ -84,13 +92,14 @@ public class DataSetImporter
 			featureMap.put(observableFeatureIdentifier, observableFeature);
 		}
 
-		boolean doTx = !db.inTx();
+		int rownr = 0;
+		int transactionRows = Math.max(1, 5000 / featureMap.size());
 		try
 		{
-			if (doTx) db.beginTx();
-
 			for (Tuple row : sheetReader)
 			{
+				if (rownr % transactionRows == 0) db.beginTx();
+
 				ArrayList<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 
 				// create observation set
@@ -111,18 +120,19 @@ public class DataSetImporter
 					obsValueList.add(observedValue);
 				}
 				db.add(obsValueList);
-			}
 
-			if (doTx) db.commitTx();
+				if (++rownr % transactionRows == 0) db.commitTx();
+			}
+			if (rownr % transactionRows != 0) db.commitTx();
 		}
 		catch (DatabaseException e)
 		{
-			if (doTx) db.rollbackTx();
+			db.rollbackTx();
 			throw e;
 		}
 		catch (Exception e)
 		{
-			if (doTx) db.rollbackTx();
+			db.rollbackTx();
 			throw new IOException(e);
 		}
 	}

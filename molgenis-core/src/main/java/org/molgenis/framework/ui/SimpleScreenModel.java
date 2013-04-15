@@ -28,8 +28,7 @@ import org.molgenis.framework.ui.commands.ScreenCommand;
 import org.molgenis.framework.ui.html.HtmlInputException;
 
 /**
- * Base-class for a screen displaying information from the invengine system to
- * the user.
+ * Base-class for a screen displaying information from the invengine system to the user.
  */
 public abstract class SimpleScreenModel implements ScreenModel, Serializable
 {
@@ -38,13 +37,11 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 	/** Logger */
 	protected static final Logger logger = Logger.getLogger(SimpleScreenModel.class);
 	/**
-	 * constant parameter name for screen target controller (to be used when
-	 * rendering actions)
+	 * constant parameter name for screen target controller (to be used when rendering actions)
 	 */
 	public static final String INPUT_TARGET = "__target";
 	/**
-	 * contant parameter name for screen target action (to be used when
-	 * rendering actions)
+	 * contant parameter name for screen target action (to be used when rendering actions)
 	 */
 	public static final String INPUT_ACTION = "__action";
 	/** Label that is typically rendered on top of the screen view */
@@ -52,9 +49,8 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 	/** The controller that handles requests on this screen */
 	private ScreenController<?> controller;
 	/**
-	 * Menu is a two-dimensional map: first dimension is menu's, second is the
-	 * menuitems. Submenu's are not yet supported. Option: make this a class
-	 * structure with special "submenu" commands to allow submenu's.
+	 * Menu is a two-dimensional map: first dimension is menu's, second is the menuitems. Submenu's are not yet
+	 * supported. Option: make this a class structure with special "submenu" commands to allow submenu's.
 	 */
 	private Map<String, CommandMenu> menubar = new LinkedHashMap<String, CommandMenu>();
 	/** messages to show to the user */
@@ -64,8 +60,7 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 
 	/**
 	 * @param name
-	 *            The name of this screen (needs to be unique in the
-	 *            tree-container).
+	 *            The name of this screen (needs to be unique in the tree-container).
 	 * @param parent
 	 *            The parent of this screen.
 	 */
@@ -102,22 +97,6 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 		return this.getController().getName();
 	}
 
-	// public UserInterface<?> getRootScreen()
-	// {
-	// return (UserInterface<?>) this.getRoot();
-	// }
-
-	// @Override
-	// public EmailService getEmailService()
-	// {
-	// return ((UserInterface<?>) this.getRoot()).getEmailService();
-	// }
-	//
-	// public FileLink getTempFile() throws IOException
-	// {
-	// return getRootScreen().getTempFile();
-	// }
-
 	/**
 	 * Set the pretty label to show on screen.
 	 */
@@ -137,9 +116,8 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 	}
 
 	/**
-	 * The controller for this screen. The controller holds all the manipulation
-	 * methods of the screen. (while the ScreenModel intself only contains
-	 * state).
+	 * The controller for this screen. The controller holds all the manipulation methods of the screen. (while the
+	 * ScreenModel intself only contains state).
 	 */
 	@Override
 	public ScreenController<? extends ScreenModel> getController()
@@ -208,8 +186,8 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 	// }
 
 	/**
-	 * COMMANDS for on the menu bar. Each command is also a controller and will
-	 * be added to the appropriate controller target.*
+	 * COMMANDS for on the menu bar. Each command is also a controller and will be added to the appropriate controller
+	 * target.*
 	 */
 	public void addCommand(ScreenCommand command)
 	{

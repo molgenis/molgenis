@@ -2,8 +2,6 @@ package org.molgenis.search;
 
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.util.Entity;
@@ -23,14 +21,6 @@ public interface SearchService
 	 * @return
 	 */
 	boolean documentTypeExists(String documentType);
-
-	/**
-	 * Index all entities of a database
-	 * 
-	 * @param db
-	 * @throws DatabaseException
-	 */
-	void indexDatabase(Database db) throws DatabaseException;
 
 	/**
 	 * Insert or update entities in the index of a documentType

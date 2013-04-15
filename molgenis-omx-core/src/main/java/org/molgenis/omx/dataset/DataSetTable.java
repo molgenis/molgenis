@@ -20,6 +20,8 @@ import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
+import org.molgenis.omx.converters.observablefeature.DataTypeConverter;
+import org.molgenis.omx.converters.observedvalue.ValueConverter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -105,6 +107,8 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 					{
 						Field field = new Field(feature.getIdentifier());
 						field.setLabel(feature.getName());
+						field.setType(DataTypeConverter.getMolgenisFieldType(feature.getDataType()));
+						field.setName(feature.getIdentifier());
 						columns.add(field);
 					}
 				}
@@ -208,7 +212,10 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				for (ObservedValue v : queryObservedValue.eq(ObservedValue.OBSERVATIONSET, os.getId())
 						.in(ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames)).find())
 				{
-					tuple.set(v.getFeature_Identifier(), v.getValue());
+					ObservableFeature feature = v.getFeature();
+					Object value = ValueConverter.fromString(v.getValue(), db, feature);
+
+					tuple.set(feature.getIdentifier(), value);
 				}
 
 				result.add(tuple);
