@@ -26,8 +26,10 @@ import org.molgenis.service.${entity.name}Service;
 <#if !field.system && !field.hidden && field.name != "__Type">
 	<#if field.type == "xref" || field.type == "mref">
 		<#if !javaImports?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
 import org.molgenis.service.${field.xrefEntity.name}Service;
-			<#assign javaImports = javaImports + ["${field.xrefEntity.name}"]>
+				<#assign javaImports = javaImports + ["${field.xrefEntity.name}"]>
+			</#if>
 		</#if>
 	</#if>
 </#if>
@@ -178,12 +180,14 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 <#if !field.system && !field.hidden && field.name != "__Type">
 	<#if field.type == "xref" || field.type == "mref">
 		<#if !javaImports?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
 		@Bean
 		public ${field.xrefEntity.name}Service ${field.xrefEntity.name?uncap_first}Service()
 		{
 			return mock(${field.xrefEntity.name}Service.class);
 		}
-			<#assign javaImports = javaImports + ["${field.xrefEntity.name}"]>
+				<#assign javaImports = javaImports + ["${field.xrefEntity.name}"]>
+			</#if>
 		</#if>
 		
 	</#if>
