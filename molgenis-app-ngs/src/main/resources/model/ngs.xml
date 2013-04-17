@@ -81,18 +81,13 @@
 			<field name="RunDate" type="datetime" description="The date the flowcell was run on the machine." nillable="true" label="Run date" /> <!-- sequencingStartDate -->
 		</entity>
 		
-		<entity name="SampleBarcode" implements="Autoid" xref_label="BarcodeType,SampleBarcodeName">
+		<entity name="SampleBarcode" implements="Autoid" xref_label="SampleBarcodeName">
+		<!-- <entity name="SampleBarcode" implements="Autoid" xref_label="BarcodeType,SampleBarcodeName"> Note: does not work, but I want it to work -->
 			<field name="SampleBarcodeName" type="string" unique="true" description="The nucleotide sequence which forms the barcode" label="Barcode" />
 			<field name="BarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" />
 			<unique fields="BarcodeType,SampleBarcodeName" description="The combination BarcodeType and SampleBarcodeName is unique." />
 		</entity>
 				
-		<!-- <entity name="SampleBarcode" implements="Autoid" xref_label="BarcodeType,SampleBarcodeName">
-			<field name="SampleBarcodeName" type="string" unique="true" description="The nucleotide sequence which forms the barcode" label="Barcode" />
-			<field name="BarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" />
-			<unique fields="BarcodeType,SampleBarcodeName" description="The combination BarcodeType and SampleBarcodeName is unique." />
-		</entity> -->
-		
 		<entity name="CapturingKit" implements="Autoid" xref_label="CapturingKitName">
 			<field name="CapturingKitName" type="string" unique="true" description="The name of a capturing kit" label="Capturing kit" />
 		</entity>
