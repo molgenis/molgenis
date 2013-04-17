@@ -94,7 +94,9 @@ public class PilotService implements MolgenisService
 			LogFileParser logfile = new LogFileParser(logFileContent);
 			String taskID = logfile.getTaskID();
 			List<String> logBlocks = logfile.getLogBlocks();
-			String results = StringUtils.join(logBlocks, "\n\n");
+
+			logBlocks.add(0, "Task: " + taskID);
+			String runLog = StringUtils.join(logBlocks, "\n");
 
 			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class).eq(ComputeTask.NAME, taskID)
 					.find();
@@ -113,7 +115,7 @@ public class PilotService implements MolgenisService
 				if (task.getStatusCode().equalsIgnoreCase("running"))
 				{
 					task.setStatusCode("done");
-					task.setRunLog(results);
+					task.setRunLog(runLog);
 				}
 				else
 				{
@@ -126,7 +128,7 @@ public class PilotService implements MolgenisService
 				if (task.getStatusCode().equalsIgnoreCase("running"))
 				{
 					LOG.info(">>> pulse from " + taskID);
-					task.setRunLog(results);
+					task.setRunLog(runLog);
 				}
 			}
 			else if ("nopulse".equals(request.getString("status")))
@@ -134,7 +136,7 @@ public class PilotService implements MolgenisService
 				if (task.getStatusCode().equalsIgnoreCase("running"))
 				{
 					LOG.info(">>> no pulse from " + taskID);
-					task.setRunLog(results);
+					task.setRunLog(runLog);
 					task.setStatusCode("failed");
 				}
 				else if (task != null && task.getStatusCode().equalsIgnoreCase("done"))
