@@ -6,9 +6,14 @@ package org.molgenis.compute.db.executor;
  */
 public interface ComputeExecutor
 {
+	void executeTasks(String backend, String backendType);
 
-    void executeTasks(String backend, String backendType);
-    void startHost(String name);
-    void startHostWithCredentials(String host, String user, String password, int port);
+	void setExecutionHost(ExecutionHost host);
 
+	/**
+	 * The command to execute on the host
+	 * 
+	 * @param command
+	 */
+	public void setCommand(String command);
 }
