@@ -7,6 +7,17 @@ import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.omx.ngs.Flowcell;
 
+/**
+ * Generic decorator for NGS Flowcell values. Used to alert the user when values
+ * do not meet certain criteria.
+ * 
+ * @version 1.0.0.0
+ * 
+ * @author Marcel Burger
+ * 
+ * @param <E>
+ */
+
 public class FlowcellDecorator<E extends Flowcell> extends MapperDecorator<E>
 {
 

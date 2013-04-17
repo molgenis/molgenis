@@ -100,12 +100,6 @@ public class Worksheet extends PluginModel<Entity>
 		}
 	}
 
-	@Override
-	public boolean isVisible()
-	{
-		return true;
-	}
-
 	public WorksheetModel getMyModel()
 	{
 		return new WorksheetModel(this.currentRows);

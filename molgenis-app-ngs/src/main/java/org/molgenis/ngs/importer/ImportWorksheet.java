@@ -66,8 +66,7 @@ public class ImportWorksheet
 				// SequencingProjects
 				importSequencingSampleDetails(new File(args[0]), new File(args[1]), debug);
 				// In case a new dataset contains different or new names show
-				// the
-				// original names and the missing names.
+				// the original names and the missing names.
 				showOriginalUserNames(originalUserNames, userNamesNotDetected, debug);
 			}
 		}

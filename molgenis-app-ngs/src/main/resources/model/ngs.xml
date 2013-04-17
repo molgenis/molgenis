@@ -72,19 +72,26 @@
 			<field name="QcDryDate" type="datetime" nillable="true" description="The date the QcWetUser selected the QcWetMet value" label="QC dry-lab date" /> <!-- GCC_QC_Date -->
 			<unique fields="Flowcell,Lane,Sample" description="The combination Flowcell, Lane and Sample is unique." />
 		</entity>
-		 
-		<entity name="Flowcell" implements="Autoid" xref_label="FlowcellName" decorator="org.molgenis.ngs.decorators.FlowcellDecorator">
+		
+		<!-- <entity name="Flowcell" implements="Autoid" xref_label="FlowcellName" decorator="org.molgenis.ngs.decorators.FlowcellDecorator"> -->
+		<entity name="Flowcell" implements="Autoid" xref_label="FlowcellName">
 			<field name="FlowcellName" type="string" unique="true" description="The unique name of a flowcell" label="Flowcell name" />
 			<field name="Machine" type="xref" xref_entity="Machine" description="The machine used for sequencing" nillable="true" label="Sequencer" />
 			<field name="Run" type="string" description="The run number always use 4 digits (with leading 0's)" nillable="true"  />
 			<field name="RunDate" type="datetime" description="The date the flowcell was run on the machine." nillable="true" label="Run date" /> <!-- sequencingStartDate -->
 		</entity>
-				
+		
 		<entity name="SampleBarcode" implements="Autoid" xref_label="BarcodeType,SampleBarcodeName">
 			<field name="SampleBarcodeName" type="string" unique="true" description="The nucleotide sequence which forms the barcode" label="Barcode" />
 			<field name="BarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" />
 			<unique fields="BarcodeType,SampleBarcodeName" description="The combination BarcodeType and SampleBarcodeName is unique." />
 		</entity>
+				
+		<!-- <entity name="SampleBarcode" implements="Autoid" xref_label="BarcodeType,SampleBarcodeName">
+			<field name="SampleBarcodeName" type="string" unique="true" description="The nucleotide sequence which forms the barcode" label="Barcode" />
+			<field name="BarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" />
+			<unique fields="BarcodeType,SampleBarcodeName" description="The combination BarcodeType and SampleBarcodeName is unique." />
+		</entity> -->
 		
 		<entity name="CapturingKit" implements="Autoid" xref_label="CapturingKitName">
 			<field name="CapturingKitName" type="string" unique="true" description="The name of a capturing kit" label="Capturing kit" />
