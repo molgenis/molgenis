@@ -8,7 +8,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.util.DatabaseUtil;
+import org.molgenis.util.WebAppUtil;
 
 public class MolgenisDbSettings implements MolgenisSettings
 {
@@ -28,7 +28,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		List<RuntimeProperty> properties;
 		try
 		{
-			properties = DatabaseUtil.getDatabase().find(RuntimeProperty.class, propertyRule);
+			properties = WebAppUtil.getDatabase().find(RuntimeProperty.class, propertyRule);
 		}
 		catch (DatabaseException e)
 		{
@@ -54,7 +54,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		property.setValue(value);
 		try
 		{
-			DatabaseUtil.getDatabase().add(property);
+			WebAppUtil.getDatabase().add(property);
 		}
 		catch (DatabaseException e)
 		{
