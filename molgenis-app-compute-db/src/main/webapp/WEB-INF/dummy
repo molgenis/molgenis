@@ -1,0 +1,1 @@
+Needed because jetty plugin needs a webapp dir to run and git needs a file to check in a dir
