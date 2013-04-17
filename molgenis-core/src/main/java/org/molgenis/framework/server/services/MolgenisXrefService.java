@@ -164,7 +164,7 @@ public class MolgenisXrefService implements MolgenisService
 		for (final Entry<String, String> entry : values.entrySet())
 		{
 			keyValuePairs.add(String.format(JSON_KEY_VALUE, StringEscapeUtils.escapeJavaScript(entry.getKey()),
-					StringEscapeUtils.escapeJavaScript(entry.getValue())));
+					StringEscapeUtils.escapeJavaScript(entry.getValue()).replaceAll("\\\\'", "\\'")));
 		}
 		final String json = String.format("[%s]", StringUtils.join(keyValuePairs, ","));
 		return json;

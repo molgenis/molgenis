@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCTYPE molgenis PUBLIC "MOLGENIS 1.0" "http://molgenis.sourceforge.net/dtd/molgenis_v_1_0.dtd" -->
+<!--<molgenis name="molgenis_apps" label="Compute Testing"> -->
+<molgenis name="compute" label="Compute Testing">
+	<plugin name="MolgenisHeader" type="org.molgenis.compute.db.ui.ComputeHeader" />
+	<menu name="mainmenu" position="left" startswith="WelcomeScreen">
+		<menu name="Compute">
+			<form name="Workflow" entity="Workflow" viewtype="record">
+				<menu name="ComputeWorkflowsMenu">
+					<form name="WorkflowElement" entity="WorkflowElement"
+						viewtype="record" />
+				</menu>
+			</form>
+            <form name="ComputeProtocols" entity="ComputeProtocol" viewtype="list" />
+            <form name="ComputeParameters" entity="ComputeParameter" viewtype="list" />
+            <form name="ComputeParameterDefaults" entity="ComputeParameterDefaultValue" viewtype="list" />
+			<form name="ComputeTasks" entity="ComputeTask">
+				<form name="TaskHistory" entity="ComputeHistory" />
+			</form>
+            <form name="ComputeServers" entity="ComputeServer" viewtype="record" />
+			<form name="ComputeHosts" entity="ComputeHost">
+				<form name="Workers" entity="ComputeWorker">
+					<form name="WorkerHistory" entity="ComputeHistory" />
+				</form>
+			</form>
+		</menu>
+	</menu>
+</molgenis>
