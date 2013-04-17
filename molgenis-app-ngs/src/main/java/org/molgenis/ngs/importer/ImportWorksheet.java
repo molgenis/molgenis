@@ -29,28 +29,51 @@ public class ImportWorksheet
 	private static Logger logger = Logger.getLogger(ImportWorksheet.class);
 	private static File ngsUserFile = null;
 	private static List<String> originalUserNames = new ArrayList<String>();
+	private static List<String> userNamesNotDetected = new ArrayList<String>();
 
 	public static void main(String[] args) throws Exception
 	{
-		if (args.length != 3)
+		boolean debug = false;
+
+		if (args.length != 4)
 		{
-			System.err.println("Usage: <GAF SequencingSampleDetails> <GAF SequencingProjects> <GAF NgsUsers>");
+			System.err
+					.println("Usage: <GAF SequencingSampleDetails csv file> <GAF SequencingProjects csv file> <GAF NgsUsers csv file> <Empty database? (yes/no)>");
 			return;
 		}
 
-		boolean debug = true;
+		if ((args.length == 4))
+		{
+			// Debug
+			args[3] = "yes";
 
-		// GAFsheet NgsUsers fixed names
-		ngsUserFile = new File(args[2]);
+			if (args[3] != "yes" && args[3] != "no")
+			{
+				System.err.println("Use yes or no");
+				return;
+			}
+			else
+			{
+				if (args[3].equalsIgnoreCase("yes"))
+				{
+					debug = true;
+				}
 
-		// GAFsheet SequencingSampleDetails and GAFsheet SequencingProjects
-		importSequencingSampleDetails(new File(args[0]), new File(args[1]), debug);
-		// In case a new dataset contains different or new names show the
-		// original names
-		showOriginalUserNames(originalUserNames, debug);
+				// GAFsheet NgsUsers fixed names
+				ngsUserFile = new File(args[2]);
+
+				// GAFsheet SequencingSampleDetails and GAFsheet
+				// SequencingProjects
+				importSequencingSampleDetails(new File(args[0]), new File(args[1]), debug);
+				// In case a new dataset contains different or new names show
+				// the
+				// original names and the missing names.
+				showOriginalUserNames(originalUserNames, userNamesNotDetected, debug);
+			}
+		}
 	}
 
-	private static void showOriginalUserNames(List<String> originalNames, boolean debug)
+	private static void showOriginalUserNames(List<String> originalNames, List<String> notDetected, boolean debug)
 	{
 		try
 		{
@@ -64,6 +87,16 @@ public class ImportWorksheet
 				for (String o : on.values())
 				{
 					logger.info(o);
+				}
+
+				Map<String, String> nd = new LinkedHashMap<String, String>();
+				for (String s : notDetected)
+				{
+					nd.put(s, s);
+				}
+				for (String d : nd.values())
+				{
+					logger.info("Not registerd user yet:\t" + d);
 				}
 			}
 		}
@@ -292,7 +325,7 @@ public class ImportWorksheet
 					// Run
 					if (row.getString("run") != null)
 					{
-						f.setRun(row.getString("run"));
+						f.setRun(getFixedRunValue(row.getString("run")));
 					}
 
 					// RunDate
@@ -789,16 +822,19 @@ public class ImportWorksheet
 
 		try
 		{
+			boolean detected = false;
 			readeru = new CsvReader(csvu);
 
 			// Assign fixed name, email, role and group
 			for (Tuple rowu : readeru)
 			{
+				originalUserNames.add(userName);
+
 				if (!rowu.isNull("Current UserName:"))
 				{
 					if (rowu.getString("Current UserName:").equalsIgnoreCase(userName))
 					{
-						originalUserNames.add(userName);
+						detected = true;
 
 						if (!rowu.isNull("Real UserName:"))
 						{
@@ -821,6 +857,10 @@ public class ImportWorksheet
 						}
 					}
 				}
+			}
+			if (!detected)
+			{
+				userNamesNotDetected.add(userName);
 			}
 		}
 		finally
@@ -868,4 +908,25 @@ public class ImportWorksheet
 
 		return fixedNgsUserName;
 	}
+
+	private static String getFixedRunValue(String runValue) throws Exception
+	{
+		String fixedRunValue = runValue;
+
+		try
+		{
+			while (fixedRunValue.toCharArray().length < 4)
+			{
+				String fixedRunValueTmp = "0" + fixedRunValue;
+				fixedRunValue = fixedRunValueTmp;
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return fixedRunValue;
+	}
+
 }
