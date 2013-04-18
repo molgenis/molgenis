@@ -36,6 +36,12 @@ public class ComputeHeader extends PluginModel<Entity>
 	}
 
 	@Override
+	public String getCustomHtmlHeaders()
+	{
+		return "<link rel=\"stylesheet\" href=\"css/compute.css\" type=\"text/css\">";
+	}
+
+	@Override
 	public void handleRequest(Database db, MolgenisRequest request)
 	{
 		//
@@ -47,9 +53,4 @@ public class ComputeHeader extends PluginModel<Entity>
 		//
 	}
 
-	@Override
-	public boolean isVisible()
-	{
-		return true;
-	}
 }
