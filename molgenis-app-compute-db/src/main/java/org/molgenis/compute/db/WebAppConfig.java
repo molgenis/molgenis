@@ -1,11 +1,16 @@
 package org.molgenis.compute.db;
 
-import org.molgenis.omx.OmxConfig;
+import java.util.List;
+
+import org.molgenis.compute.db.util.ComputeMolgenisSettings;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,8 +24,7 @@ import app.DatabaseConfig;
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.molgenis")
-@Import(
-{ DatabaseConfig.class, OmxConfig.class })
+@Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
@@ -35,6 +39,13 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+	}
+
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
+	{
+		converters.add(new GsonHttpMessageConverter());
 	}
 
 	/**
@@ -47,6 +58,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public ApplicationContextProvider applicationContextProvider()
 	{
 		return new ApplicationContextProvider();
+	}
+
+	@Bean
+	public MolgenisSettings molgenisSettings()
+	{
+		return new ComputeMolgenisSettings();
 	}
 
 	@Controller
