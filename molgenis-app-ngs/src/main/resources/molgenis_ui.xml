@@ -19,7 +19,7 @@
 		
 		<menu name="Settings" >
 			<form name="Users" entity="NgsUser" label="User" />
-			<form name="Flowcells" entity="Flowcell" label="Flowcell" />
+			<form name="Flowcells" entity="Flowcell" label="Flowcell"/>
 			<form name="SampleBarcodes" entity="SampleBarcode" label="Barcode" />
 			<form name="CapturingKits" entity="CapturingKit" label="Capturing kit" />
 			<form name="PrepKits" entity="PrepKit" label="Preperation kit" />
