@@ -1,10 +1,12 @@
 package org.molgenis.omx.filter.decorators;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.framework.db.Database;
@@ -55,6 +57,9 @@ public class DataSetFilterDecoratorTestUser
 		userService = mock(MolgenisUserService.class);
 
 		when(mapper.getDatabase()).thenReturn(database);
+		when(mapper.add(any(List.class))).thenReturn(2);
+		when(mapper.create()).thenReturn(new DataSetFilter());
+		when(mapper.createList(2)).thenReturn(Arrays.asList(new DataSetFilter(), new DataSetFilter()));
 		when(mapper.findByExample(ownFilter)).thenReturn(allEntities);
 		when(mapper.findById(123)).thenReturn(ownFilter);
 		when(mapper.findById(456)).thenReturn(otherFilter);
@@ -75,6 +80,32 @@ public class DataSetFilterDecoratorTestUser
 		otherEntities.add(otherFilter);
 		allEntities.add(ownFilter);
 		allEntities.add(otherFilter);
+	}
+
+	@Test
+	public void add() throws DatabaseException
+	{
+		DataSetFilter dataSetFilter1 = new DataSetFilter();
+		DataSetFilter dataSetFilter2 = new DataSetFilter();
+		Assert.assertEquals(decorator.add(Arrays.asList(dataSetFilter1, dataSetFilter2)), 2);
+		Assert.assertEquals(dataSetFilter1.getUserId_Id(), Integer.valueOf(1));
+		Assert.assertEquals(dataSetFilter2.getUserId_Id(), Integer.valueOf(1));
+	}
+
+	@Test
+	public void create() throws DatabaseException
+	{
+		DataSetFilter dataSetFilter = decorator.create();
+		Assert.assertEquals(dataSetFilter.getUserId_Id(), Integer.valueOf(1));
+	}
+
+	@Test
+	public void createList() throws DatabaseException
+	{
+		List<DataSetFilter> dataSetFilters = decorator.createList(2);
+		Assert.assertEquals(dataSetFilters.size(), 2);
+		Assert.assertEquals(dataSetFilters.get(0).getUserId_Id(), Integer.valueOf(1));
+		Assert.assertEquals(dataSetFilters.get(1).getUserId_Id(), Integer.valueOf(1));
 	}
 
 	@Test

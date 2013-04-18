@@ -16,9 +16,8 @@ import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.filter.DataSetFilter;
 
 /**
- * decorator for DataSetFilter, Checks for every read, update and delete
- * operation if the user requesting the operation matches the user owning the
- * DataSetFilter on which the operation is requested
+ * decorator for DataSetFilter, Checks for every read, update and delete operation if the user requesting the operation
+ * matches the user owning the DataSetFilter on which the operation is requested
  */
 public class DataSetFilterDecorator<E extends DataSetFilter> extends MapperDecorator<E>
 {
@@ -28,6 +27,52 @@ public class DataSetFilterDecorator<E extends DataSetFilter> extends MapperDecor
 	public DataSetFilterDecorator(Mapper<E> generatedMapper)
 	{
 		super(generatedMapper);
+	}
+
+	@Override
+	public int add(List<E> entities) throws DatabaseException
+	{
+		for (E entity : entities)
+			entity.setUserId(getCurrentUser());
+		return super.add(entities);
+	}
+
+	@Override
+	public E create()
+	{
+		E dataSetFilter = super.create();
+		if (dataSetFilter != null)
+		{
+			// TODO remove try/catch when Mapper.java create() throws DatabaseException
+			try
+			{
+				dataSetFilter.setUserId(getCurrentUser());
+			}
+			catch (DatabaseException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		return dataSetFilter;
+	}
+
+	@Override
+	public List<E> createList(int i)
+	{
+		List<E> dataSetFilters = super.createList(i);
+		if (dataSetFilters != null)
+		{
+			try
+			{
+				for (E dataSetFilter : dataSetFilters)
+					dataSetFilter.setUserId(getCurrentUser());
+			}
+			catch (DatabaseException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		return dataSetFilters;
 	}
 
 	@Override
