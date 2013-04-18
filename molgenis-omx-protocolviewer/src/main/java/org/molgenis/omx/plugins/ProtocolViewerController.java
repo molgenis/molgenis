@@ -22,6 +22,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.io.TupleWriter;
@@ -32,8 +33,10 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.KeyValueTuple;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,6 +47,11 @@ import com.google.gson.reflect.TypeToken;
 public class ProtocolViewerController extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = -6143910771849972946L;
+	private static final String KEY_SHOW_VIEW_BUTTON = "plugin.catalogue.showviewbutton";
+	private static final boolean DEFAULT_KEY_SHOW_VIEW_BUTTON = true;
+	private static final String KEY_SHOW_SAVE_SELECTION_BUTTON = "plugin.catalogue.showsavebutton";
+	private static final boolean DEFAULT_KEY_SAVE_SELECTION_BUTTON = true;
+
 	/** Protocol viewer model */
 	private ProtocolViewer protocolViewer;
 
@@ -81,9 +89,26 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		return s.toString();
 	}
 
+	private boolean getMolgenisSettingFlag(String key, boolean defaultValue)
+	{
+		try
+		{
+			MolgenisSettings molgenisSettings = ApplicationContextProvider.getApplicationContext().getBean(
+					MolgenisSettings.class);
+			String property = molgenisSettings.getProperty(key, Boolean.toString(defaultValue));
+			return Boolean.valueOf(property);
+		}
+		catch (NoSuchBeanDefinitionException e)
+		{
+			logger.warn(e);
+			return defaultValue;
+		}
+	}
+
 	@Override
 	public Show handleRequest(Database db, MolgenisRequest request, OutputStream out) throws Exception
 	{
+
 		if (out == null)
 		{
 			this.handleRequest(db, request);
@@ -343,6 +368,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	public void reload(Database db)
 	{
 		List<DataSet> dataSets;
+
 		try
 		{
 			dataSets = db.query(DataSet.class).find();
@@ -368,6 +394,11 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			jsDataSets = Collections.emptyList();
 		}
 		this.protocolViewer.setDataSets(jsDataSets);
+
+		this.protocolViewer
+				.setShowViewButton(getMolgenisSettingFlag(KEY_SHOW_VIEW_BUTTON, DEFAULT_KEY_SHOW_VIEW_BUTTON));
+		this.protocolViewer.setSaveSelectionButton(getMolgenisSettingFlag(KEY_SHOW_SAVE_SELECTION_BUTTON,
+				DEFAULT_KEY_SAVE_SELECTION_BUTTON));
 	}
 
 	private List<Category> findCategories(Database db, ObservableFeature feature) throws DatabaseException
