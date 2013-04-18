@@ -1,7 +1,10 @@
 	public java.util.List<${entity.namespace}.${JavaName(entity)}> createList(int size)
 	{
 <#if !entity.abstract>
-		return new java.util.ArrayList<${entity.namespace}.${JavaName(entity)}>(size); 
+		java.util.ArrayList<${entity.namespace}.${JavaName(entity)}> entities = new java.util.ArrayList<${entity.namespace}.${JavaName(entity)}>(size);
+		for(int i = 0; i < size; ++i)
+			entities.add(new ${entity.namespace}.${JavaName(entity)}()); 
+		return entities; 
 <#else>
 		return null;
 </#if>
