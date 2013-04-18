@@ -24,10 +24,12 @@ import org.molgenis.service.${entity.name}Service;
 <#if !field.system && !field.hidden && field.name != "__Type">
 	<#if field.type == "xref" || field.type == "mref">
 		<#if !javaImports?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
 import ${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)};
 import org.molgenis.controller.${JavaName(field.xrefEntity)}Controller.${JavaName(field.xrefEntity)}Response;
 import org.molgenis.service.${field.xrefEntity.name}Service;
-			<#assign javaImports = javaImports + ["${field.xrefEntity.name}"]>
+				<#assign javaImports = javaImports + ["${field.xrefEntity.name}"]>
+			</#if>
 		</#if>
 	</#if>
 </#if>
@@ -67,10 +69,12 @@ public class ${entity.name}Controller
 <#if !field.system && !field.hidden && field.name != "__Type">
 	<#if field.type == "xref" || field.type == "mref">
 		<#if !javaFields?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
 	@Autowired
 	private ${field.xrefEntity.name}Service ${field.xrefEntity.name?uncap_first}Service;
-	
-			<#assign javaFields = javaFields + ["${field.xrefEntity.name}"]>
+		
+				<#assign javaFields = javaFields + ["${field.xrefEntity.name}"]>
+			</#if>
 		</#if>
 	</#if>
 </#if>
@@ -395,12 +399,16 @@ public class ${entity.name}Controller
 			this.href = "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${field.name?cap_first}();
 		<#elseif !field.system && !field.hidden && field.name != "__Type">
 			<#if field.type == "xref">
-			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${field.name?cap_first}(), null);
-			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");	
+				<#if field.xrefField??>
+				this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}_${field.xrefField.name?cap_first}();
+				<#else>
+				if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${field.name?cap_first}(), null);
+				else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
+				</#if>	
 			<#elseif field.type == "mref">
-			java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
-			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.xrefEntity.name?uncap_first}Collection == null ? null : </#if>_retrieve${entity.name}Mref${field.name?cap_first}(${entity.name?uncap_first}, new EntityCollectionRequest());
-			else this.${field.name?uncap_first} = <#if field.nillable>${field.xrefEntity.name?uncap_first}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}"); //FIXME compile error
+			java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
+			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>_retrieve${entity.name}Mref${field.name?cap_first}(${entity.name?uncap_first}, new EntityCollectionRequest());
+			else this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
 			<#else>
 			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}();
 			</#if>
