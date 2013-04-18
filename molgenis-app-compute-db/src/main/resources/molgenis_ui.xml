@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- DOCTYPE molgenis PUBLIC "MOLGENIS 1.0" "http://molgenis.sourceforge.net/dtd/molgenis_v_1_0.dtd" -->
-<!--<molgenis name="molgenis_apps" label="Compute Testing"> -->
 <molgenis name="compute" label="Compute Testing">
 	<plugin name="MolgenisHeader" type="org.molgenis.compute.db.ui.ComputeHeader" />
 	<menu name="mainmenu" position="left" startswith="WelcomeScreen">
@@ -17,8 +15,7 @@
 			<form name="ComputeTasks" entity="ComputeTask">
 				<form name="TaskHistory" entity="ComputeHistory" />
 			</form>
-            <form name="ComputeServers" entity="ComputeServer" viewtype="record" />
-			<form name="ComputeHosts" entity="ComputeHost">
+            <form name="ComputeHosts" entity="ComputeHost">
 				<form name="Workers" entity="ComputeWorker">
 					<form name="WorkerHistory" entity="ComputeHistory" />
 				</form>
