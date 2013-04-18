@@ -87,5 +87,12 @@ public interface Mapper<E extends Entity>
 	int executeRemove(List<? extends E> entities) throws DatabaseException;
 
 	// TODO add "throws DatabaseException" to method signature
+	/**
+	 * Return EMPTY list of given allocated size
+	 * 
+	 * @param i
+	 *            initial capacity of returned EMPTY list
+	 * @return an EMPTY list with initial capacity given by size
+	 */
 	public List<E> createList(int i);
 }
