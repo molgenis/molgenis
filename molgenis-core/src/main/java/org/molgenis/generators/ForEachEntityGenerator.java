@@ -46,7 +46,14 @@ public abstract class ForEachEntityGenerator extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
-		generate(model, options, false);
+		if (options.generate_tests)
+		{
+			// noop, override method in child class to generate tests
+		}
+		else
+		{
+			generate(model, options, false);
+		}
 	}
 
 	protected void generate(Model model, MolgenisOptions options, boolean generateTests) throws Exception
