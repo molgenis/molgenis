@@ -329,9 +329,15 @@ public class ${entity.name}Controller
 	<#list fields as field>
 	<#if !field.system && !field.hidden && field.name != "__Type">
 		<#if field.type == "xref">
+			<#-- security: do not expose system fields/entities -->
+			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		private ${type(field.xrefEntity.primaryKey)} ${field.name?uncap_first};
+			</#if>
 		<#elseif field.type == "mref">
+			<#-- security: do not expose system fields/entities -->
+			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		private java.util.List<${type(field.xrefEntity.primaryKey)}> ${field.name?uncap_first};
+			</#if>
 		<#else>
 		private ${type(field)} ${field.name?uncap_first};
 		</#if>
@@ -344,7 +350,10 @@ public class ${entity.name}Controller
 		<#list fields as field>
 		<#if !field.system && !field.hidden && field.name != "__Type">
 			<#if field.type == "xref" || field.type == "mref">
+				<#-- security: do not expose system fields/entities -->
+				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 			${entity.name?uncap_first}.set${field.name?cap_first}_${field.xrefEntity.primaryKey.name?cap_first}(${field.name?uncap_first});
+				</#if>
 			<#else>
 			${entity.name?uncap_first}.set${field.name?cap_first}(${field.name?uncap_first});
 			</#if>
@@ -356,15 +365,21 @@ public class ${entity.name}Controller
 	<#list fields as field>
 	<#if !field.system && !field.hidden && field.name != "__Type">
 		<#if field.type == "xref">
+			<#-- security: do not expose system fields/entities -->
+			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		public void set${field.name?cap_first}(${type(field.xrefEntity.primaryKey)} ${field.name?uncap_first})
 		{
 			this.${field.name?uncap_first} = ${field.name?uncap_first};
 		}
+			</#if>
 		<#elseif field.type == "mref">
+			<#-- security: do not expose system fields/entities -->
+			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		public void set${field.name?cap_first}(java.util.List<${type(field.xrefEntity.primaryKey)}> ${field.name?uncap_first})
 		{
 			this.${field.name?uncap_first} = ${field.name?uncap_first};
 		}
+			</#if>
 		<#else>
 		public void set${field.name?cap_first}(${type(field)} ${field.name?uncap_first})
 		{
@@ -384,8 +399,11 @@ public class ${entity.name}Controller
 		private final String href;
 	<#elseif !field.system && !field.hidden && field.name != "__Type">
 		<#if field.type == "xref" || field.type == "mref">
-		<#-- java field type depends on field expansion -->
+			<#-- security: do not expose system fields/entities -->
+			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
+				<#-- java field type depends on field expansion -->
 		private final Object ${field.name?uncap_first};
+			</#if>
 		<#else>
 		private final ${type(field)} ${field.name?uncap_first};
 		</#if>
@@ -399,16 +417,18 @@ public class ${entity.name}Controller
 			this.href = "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${field.name?cap_first}();
 		<#elseif !field.system && !field.hidden && field.name != "__Type">
 			<#if field.type == "xref">
-				<#if field.xrefField??>
-				this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}_${field.xrefField.name?cap_first}();
-				<#else>
-				if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${field.name?cap_first}(), null);
-				else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
-				</#if>	
+				<#-- security: do not expose system fields/entities -->
+				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
+			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${field.name?cap_first}(), null);
+			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
+				</#if>
 			<#elseif field.type == "mref">
+				<#-- security: do not expose system fields/entities -->
+				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 			java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
 			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>_retrieve${entity.name}Mref${field.name?cap_first}(${entity.name?uncap_first}, new EntityCollectionRequest());
 			else this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
+				</#if>
 			<#else>
 			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}();
 			</#if>
@@ -424,10 +444,13 @@ public class ${entity.name}Controller
 		}
 	<#elseif !field.system && !field.hidden && field.name != "__Type">
 		<#if field.type == "xref" || field.type == "mref">
+			<#-- security: do not expose system fields/entities -->
+			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		public Object get${field.name?cap_first}()
 		{
 			return ${field.name?uncap_first};
 		}
+			</#if>
 		<#else>
 		public ${type(field)} get${field.name?cap_first}()
 		{
