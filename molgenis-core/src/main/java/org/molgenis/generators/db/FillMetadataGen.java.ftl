@@ -44,7 +44,7 @@ public class FillMetadata {
 		fillMetadata(db, useLogin, "UserLoginPlugin");
 	}
 	
-	private static void fillMetadata(Database db, boolean useLogin, String loginPluginName) throws Exception {
+	public static void fillMetadata(Database db, boolean useLogin, String loginPluginName) throws Exception {
         logger.debug("fillMetadata start");
 
 		Login login = db.getLogin();
