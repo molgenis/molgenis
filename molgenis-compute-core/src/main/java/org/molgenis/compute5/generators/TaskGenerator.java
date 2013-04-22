@@ -141,7 +141,7 @@ public class TaskGenerator
 
 				parameterHeader = parameterHeader
 						+ "\n#\n##\n### Validate that each 'value' parameter has only identical values in its list\n"
-						+ "### We do to protect you against parameter values that might not be correctly set at runtime.\n"
+						+ "### We do that to protect you against parameter values that might not be correctly set at runtime.\n"
 						+ "##\n#\n";
 				for (Input input : step.getProtocol().getInputs())
 				{
@@ -152,7 +152,7 @@ public class TaskGenerator
 
 						parameterHeader += "if [[ ! $(IFS=$'\\n' sort -u <<< \"${"
 								+ p
-								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"\" >&2; exit 1; fi\n";
+								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"Error in Step '" + step.getName() + "': input parameter '" + p + "' is an array with different values.\" >&2; exit 1; fi\n";
 					}
 				}
 
