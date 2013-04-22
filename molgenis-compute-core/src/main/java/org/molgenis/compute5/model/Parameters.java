@@ -13,7 +13,7 @@ public class Parameters
 	public static final String STEP_PARAM_SEP = "_";
 	public static final String USER_PREFIX = "user" + STEP_PARAM_SEP;
 	public final static String ID_COLUMN = USER_PREFIX + Task.TASKID_COLUMN;
-	public static final Object WORKFLOW_COLUMN_INITIAL = "workflow";
+	public static final String WORKFLOW_COLUMN_INITIAL = "workflow";
 	public final static String WORKFLOW_COLUMN = USER_PREFIX + "workflow";
 	public final static String WORKDIR_COLUMN = USER_PREFIX + Task.WORKDIR_COLUMN;
 	public static final String PARAMETER_COLUMN = "parameters";

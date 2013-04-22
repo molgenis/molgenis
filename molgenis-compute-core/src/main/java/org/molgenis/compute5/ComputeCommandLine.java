@@ -38,15 +38,16 @@ public class ComputeCommandLine
 {
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) throws ParseException, ClassNotFoundException, IOException
-	{		
+	{
 		BasicConfigurator.configure();
-		
+
 		System.out.println("### MOLGENIS COMPUTE ###");
-		System.out.println("Version: "+ ComputeCommandLine.class.getPackage().getImplementationVersion());
-		//Properties properties = new Properties();
-		//properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
-		//System.out.println("Git hash: " + properties.getProperty("git.commit.id.abbrev"));
-		
+		System.out.println("Version: " + ComputeCommandLine.class.getPackage().getImplementationVersion());
+		// Properties properties = new Properties();
+		// properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
+		// System.out.println("Git hash: " +
+		// properties.getProperty("git.commit.id.abbrev"));
+
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
 
@@ -56,7 +57,7 @@ public class ComputeCommandLine
 				.withDescription("path to parameter.csv file(s)").create("p");
 		Option w = OptionBuilder.withArgName("steps.csv").hasArg().withLongOpt("workflow")
 				.withDescription("path to workflow.csv.").create("w");
-		Option d = OptionBuilder.withArgName("workdir").hasArg().withLongOpt("workdir")
+		Option d = OptionBuilder.withArgName(Task.WORKDIR_COLUMN).hasArg().withLongOpt(Task.WORKDIR_COLUMN)
 				.withDescription("path to directory this generates to. Default: currentdir").create("d");
 		options.addOption(w);
 		options.addOption(p);
@@ -96,10 +97,11 @@ public class ComputeCommandLine
 	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir) throws IOException
 	{
 		List<File> parameterFiles = new ArrayList<File>();
-		for(String f: parametersCsv) parameterFiles.add(new File(f));
+		for (String f : parametersCsv)
+			parameterFiles.add(new File(f));
 		Compute compute = new Compute();
 		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
-		
+
 		// use workflow or workingdir from parameters?
 		if (0 < compute.getParameters().getValues().size())
 		{
@@ -112,7 +114,8 @@ public class ComputeCommandLine
 				workDir = compute.getParameters().getValues().get(0).getString(Parameters.WORKDIR_COLUMN);
 			}
 		}
-		if("".equals(workflowCsv)) throw new IOException("no workflow provided");
+
+		if ("".equals(workflowCsv)) throw new IOException("no workflow provided");
 
 		// set constants
 		for (WritableTuple t : compute.getParameters().getValues())
@@ -120,10 +123,9 @@ public class ComputeCommandLine
 			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
 			t.set(Parameters.WORKDIR_COLUMN, new File(workDir).getAbsolutePath());
 		}
-		
+
 		System.out.println("Using workflow:   " + new File(workflowCsv).getAbsolutePath());
-		System.out.println("Using parameters: "
-				+ parameterFiles);
+		System.out.println("Using parameters: " + parameterFiles);
 		System.out.println("Using outputDir:   " + new File(workDir).getAbsolutePath());
 
 		System.out.println(""); // newline
@@ -132,16 +134,17 @@ public class ComputeCommandLine
 		File dir = new File(workDir);
 		workDir = dir.getCanonicalPath();
 		dir.mkdirs();
-		
+
 		// document inputs
 		new DocTotalParametersCsvGenerator().generate(new File(workDir + "/doc/inputs.csv"), compute.getParameters());
 
 		// parse workflow
 		compute.setWorkflow(WorkflowCsvParser.parse(workflowCsv));
-		
-		// create environment.txt with user parameters that are used in at least one of the steps
+
+		// create environment.txt with user parameters that are used in at least
+		// one of the steps
 		new EnvironmentGenerator().generate(compute, workDir);
-		
+
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
@@ -153,7 +156,7 @@ public class ComputeCommandLine
 		{
 			File f = new File(workDir + "/outputs/" + t.getName());
 			f.mkdirs();
-			System.out.println("Generated "+f.getAbsolutePath());
+			System.out.println("Generated " + f.getAbsolutePath());
 		}
 
 		// generate documentation
