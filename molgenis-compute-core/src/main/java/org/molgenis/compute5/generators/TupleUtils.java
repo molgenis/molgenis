@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.compute5.model.Parameters;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
@@ -139,17 +140,18 @@ public class TupleUtils
 	}
 
 	@SuppressWarnings("unchecked")
-	/** Convert a tuple into a map. Columns with a '.' in them will be nested submaps. */
+	/** Convert a tuple into a map. Columns with a '_' in them will be nested submaps. */
 	public static Map<String, Object> toMap(Tuple t)
 	{
 		// TODO: can we not make Tuple extend Map???
 		Map<String, Object> result = new LinkedHashMap<String, Object>();
 		for (String key : t.getColNames())
 		{
-			if (key.contains("."))
+			if (key.contains(Parameters.STEP_PARAM_SEP))
 			{
-				// nested maps using '.'!
-				String[] els = key.split("\\.");
+				// nested maps using '_'!
+				// FIXME: Gaat dit goed?
+				String[] els = key.split("\\" + Parameters.STEP_PARAM_SEP);
 
 				Map<String, Object> map = result;
 				for (String el : els)
