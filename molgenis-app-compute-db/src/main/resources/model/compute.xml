@@ -65,7 +65,8 @@
 		<entity name="ComputeTask" implements="Identifiable" xref_label="Name">
 			<description>A protocolApplication that reports the application of running a ComputeProtocol.</description>
 			<field name="ComputeScript" type="text" description="The actual command to be sent to the cluster, is a filled in version of the one define in the ComputeProtocol" />
-			<field name="RunLog" type="text" description="Log of the task execution" nillable="true" />
+            <field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />
+            <field name="RunLog" type="text" description="Log of the task execution" nillable="true" />
             <field name="BackEndName" type="text" description="Name of the backend, where ComputeTask should be executed" nillable="false" />
             <field name="WorkflowElement" nillable="true" type="xref" xref_entity="WorkflowElement" description="Reference to the workflow element that generated this script." />
 			<field name="Interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />

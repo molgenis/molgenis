@@ -1,11 +1,11 @@
 package org.molgenis.compute.db.pilot;
 
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.List;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class LogFileParserTest
 {
@@ -25,7 +25,7 @@ public class LogFileParserTest
 	{
 		List<String> logBlocks = logFileParser.getLogBlocks();
 		assertEquals(logBlocks.size(), 2);
-		assertEquals(logBlocks.get(0), "xxx");
+		assertEquals(logBlocks.get(0), "xxex");
 		assertEquals(logBlocks.get(1), "qqq");
 	}
 
