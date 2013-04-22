@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,6 +18,7 @@ import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
 import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
 import org.molgenis.compute5.generators.EnvironmentGenerator;
+import org.molgenis.compute5.generators.MolgenisFunctionFileGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.compute5.generators.local.LocalBackend;
 import org.molgenis.compute5.model.Compute;
@@ -53,7 +53,7 @@ public class ComputeCommandLine
 
 		// setup commandline options
 		Options options = new Options();
-		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs().withLongOpt("parameters")
+		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs().withLongOpt(Parameters.PARAMETER_MAPPING)
 				.withDescription("path to parameter.csv file(s)").create("p");
 		Option w = OptionBuilder.withArgName("steps.csv").hasArg().withLongOpt("workflow")
 				.withDescription("path to workflow.csv.").create("w");
@@ -144,13 +144,16 @@ public class ComputeCommandLine
 		// create environment.txt with user parameters that are used in at least
 		// one of the steps
 		new EnvironmentGenerator().generate(compute, workDir);
-
+		
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
 		// write the task for the backend
 		new LocalBackend().generate(compute.getTasks(), dir);
 
+		// create Error File in which framework and users can store error (code: message).
+		new MolgenisFunctionFileGenerator().generate(compute, workDir);
+		
 		// generate outputs folders per task
 		for (Task t : compute.getTasks())
 		{

@@ -8,3 +8,5 @@ for i in ${!glucose[*]}; do
 		else risk[$i]="no";
 	fi;
 done
+
+saveError $sample "Dit is een sample"

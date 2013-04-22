@@ -108,10 +108,12 @@ public class TaskGenerator
 				// remember parameter values
 				task.setParameters(map);
 
-				// prepend header that sources the task's parameters from
-				// environment.txt
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
-				parameterHeader = parameterHeader + "\n#\n##\n### Map parameters to environment\n##\n#\n";
+				//  prepend header that loads Molgenis_Functions.sh
+				String parameterHeader = "\n#\n##\n### Load Molgenis functions for e.g. error handling\n##\n#\nsource " + Parameters.MOLGENIS_FUNCTION_FILE + "\n\n";
+				
+				// now source the task's parameters from environment.txt
+				parameterHeader += "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
+				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced
 				// environment
