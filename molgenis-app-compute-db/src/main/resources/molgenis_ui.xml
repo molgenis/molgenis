@@ -14,6 +14,7 @@
 			<form name="ComputeTasks" label="Tasks" entity="ComputeTask"/>
             <form name="ComputeHosts" label="Hosts" entity="ComputeHost" />
 			<plugin name="PilotPlugin" label="Start/stop pilots" type="org.molgenis.compute.db.plugin.PilotPlugin"/>
+			<plugin name="TaskSummaryPlugin" label="Task Summary" type="org.molgenis.compute.db.plugin.TaskStatusPlugin"/>
 		</menu>
 	</menu>
 </molgenis>
