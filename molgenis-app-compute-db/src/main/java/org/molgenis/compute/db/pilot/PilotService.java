@@ -50,7 +50,7 @@ public class PilotService implements MolgenisService
 			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
 
 			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class)
-					.equals(ComputeTask.STATUSCODE, "ready").equals(ComputeTask.BACKENDNAME, backend).find();
+					.equals(ComputeTask.STATUSCODE, "ready").equals(ComputeTask.COMPUTEHOST_NAME, backend).find();
 
 			if (tasks.size() > 0)
 			{
