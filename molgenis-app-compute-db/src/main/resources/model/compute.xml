@@ -60,13 +60,16 @@
 	<module name="compute.runtime">
 		<entity name="ComputeTask" implements="Nameable" xref_label="name">
 			<description>A protocolApplication that reports the application of running a ComputeProtocol.</description>
+
 			<field name="computeScript" type="text" description="The actual command to be sent to the cluster, is a filled in version of the one define in the ComputeProtocol" />
+   			<field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />   
 			<field name="runLog" type="text" description="Log of the task execution" nillable="true" />
             <field name="computeHost" type="xref" xref_entity="ComputeHost" description="Host where ComputeTask should be executed" nillable="false" />
             <field name="computeStep" nillable="true" type="xref" xref_entity="ComputeStep" description="Reference to the workflow step that generated this script." />
 			<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
+
 				description="Last known status of this task. See compute history for details. NB 'ready' means ready for running (cf. 'done')." />
 			<unique fields="name" />
 		</entity>

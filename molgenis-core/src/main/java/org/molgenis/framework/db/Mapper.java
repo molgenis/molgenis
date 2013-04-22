@@ -9,8 +9,8 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.util.Entity;
 
 /**
- * Interface for the Molgenis mappers. Mappers are an intermediate between
- * Molgenis and the database and provide many useful helper methods.
+ * Interface for the Molgenis mappers. Mappers are an intermediate between Molgenis and the database and provide many
+ * useful helper methods.
  */
 public interface Mapper<E extends Entity>
 {
@@ -21,6 +21,7 @@ public interface Mapper<E extends Entity>
 	 */
 	public Database getDatabase();
 
+	// TODO add "throws DatabaseException" to method signature
 	public E create();
 
 	/** Implementation of {@link Database#count(Class, QueryRule...)} */
@@ -85,5 +86,13 @@ public interface Mapper<E extends Entity>
 
 	int executeRemove(List<? extends E> entities) throws DatabaseException;
 
+	// TODO add "throws DatabaseException" to method signature
+	/**
+	 * Return EMPTY list of given allocated size
+	 * 
+	 * @param i
+	 *            initial capacity of returned EMPTY list
+	 * @return an EMPTY list with initial capacity given by size
+	 */
 	public List<E> createList(int i);
 }

@@ -1,7 +1,13 @@
+	/**
+	 * Return EMPTY list of given allocated size
+	 *
+	 * @param i initial capacity of returned EMPTY list
+	 * @return an EMPTY list with initial capacity given by size
+	 */
 	public java.util.List<${entity.namespace}.${JavaName(entity)}> createList(int size)
 	{
 <#if !entity.abstract>
-		return new java.util.ArrayList<${entity.namespace}.${JavaName(entity)}>(size); 
+		return new java.util.ArrayList<${entity.namespace}.${JavaName(entity)}>(size);
 <#else>
 		return null;
 </#if>
