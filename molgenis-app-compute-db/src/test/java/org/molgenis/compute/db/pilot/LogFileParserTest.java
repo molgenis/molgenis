@@ -25,7 +25,7 @@ public class LogFileParserTest
 	{
 		List<String> logBlocks = logFileParser.getLogBlocks();
 		assertEquals(logBlocks.size(), 2);
-		assertEquals(logBlocks.get(0), "xxex");
+		assertEquals(logBlocks.get(0), "xxx");
 		assertEquals(logBlocks.get(1), "qqq");
 	}
 
