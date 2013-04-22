@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.molgenis.model.elements.Parameter;
+
 import com.google.gson.Gson;
 
 /**
@@ -62,9 +64,9 @@ public class Step
 		this.previousSteps.clear();
 		for (String parameter : getParameters().values())
 		{
-			if (!parameter.startsWith("user."))
+			if (!parameter.startsWith(Parameters.USER_PREFIX))
 			{
-				previousSteps.add(parameter.substring(0, parameter.indexOf(".")));
+				previousSteps.add(parameter.substring(0, parameter.indexOf(Parameters.STEP_PARAM_SEP)));
 			}
 		}
 	}

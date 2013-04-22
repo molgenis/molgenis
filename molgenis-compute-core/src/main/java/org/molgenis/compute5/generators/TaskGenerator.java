@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,9 @@ public class TaskGenerator
 			// add the output templates/values + generate step ids
 			localParameters = addOutputValues(step, localParameters);
 
-			// add step ids
+			// add step ids as
+			// (i) taskId = name_id
+			// (ii) taskIndex = id
 			localParameters = addStepIds(localParameters, step);
 
 			// generate the tasks from template, add step id
@@ -74,8 +77,9 @@ public class TaskGenerator
 	{
 		List<Task> tasks = new ArrayList<Task>();
 
-		Configuration conf = new Configuration();
-		Template template = new Template(step.getName(), new StringReader(step.getProtocol().getTemplate()), conf);
+		// No freemarker anymore:
+		//Configuration conf = new Configuration();
+		//Template template = new Template(step.getName(), new StringReader(step.getProtocol().getTemplate()), conf);
 		StringWriter out;
 
 		for (WritableTuple target : localParameters)
@@ -85,9 +89,10 @@ public class TaskGenerator
 			// add data dependencies
 			for (String previousStep : step.getPreviousSteps())
 			{
-				if (!target.isNull(previousStep + "." + Task.TASKID_COLUMN))
+				if (!target.isNull(previousStep + Parameters.STEP_PARAM_SEP + Task.TASKID_COLUMN))
 				{
-					task.getPreviousTasks().addAll(target.getList(previousStep + "." + Task.TASKID_COLUMN));
+					task.getPreviousTasks().addAll(
+							target.getList(previousStep + Parameters.STEP_PARAM_SEP + Task.TASKID_COLUMN));
 				}
 			}
 
@@ -96,16 +101,139 @@ public class TaskGenerator
 			{
 				out = new StringWriter();
 				Map<String, Object> map = TupleUtils.toMap(target);
-				template.process(map, out);
 
-				// remember paramter values
+				// ATTENTION: We don't use freemarker anymore!
+				// template.process(map, out);
+
+				// remember parameter values
 				task.setParameters(map);
 
-				task.setScript(out.toString());
+				// prepend header that sources the task's parameters from
+				// environment.txt
+				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
+				parameterHeader = parameterHeader + "\n#\n##\n### Map parameters to environment\n##\n#\n";
+
+				// now couple input parameters to parameters in sourced
+				// environment
+				for (Input input : step.getProtocol().getInputs())
+				{
+					String p = input.getName();
+					// TODO IF target...() returns a list then (CHECK!) all
+					// members are equal and return a member!
+					// parameterHeader += p + "=${" +
+					// step.getParameters().get(p) + "["
+					// + target.getString(Task.TASKID_INDEX_COLUMN) + "]}\n";
+
+					List<String> rowIndex = target.getList(Parameters.ID_COLUMN);
+					for (int i = 0; i < rowIndex.size(); i++)
+					{
+						Object rowIndexObject = rowIndex.get(i);
+						String rowIndexString = (String) rowIndexObject.toString();
+//						System.out.println(">> " + rowIndexString);
+						parameterHeader += p + "[" + i + "]=${" + step.getParameters().get(p) + "[" + rowIndexString
+								+ "]}\n";
+					}
+					// parameterHeader += p + "=${" +
+					// step.getParameters().get(p) +
+					// target.getList(Parameters.ID_COLUMN) + "}\n";
+
+				}
+
+				parameterHeader = parameterHeader
+						+ "\n#\n##\n### Validate that each 'value' parameter has only identical values in its list\n"
+						+ "### We do to protect you against parameter values that might not be correctly set at runtime.\n"
+						+ "##\n#\n";
+				for (Input input : step.getProtocol().getInputs())
+				{
+					boolean isList = Parameters.LIST.equals(input.getType());
+					if (!isList)
+					{
+						String p = input.getName();
+
+						parameterHeader += "if [[ ! $(IFS=$'\\n' sort -u <<< \"${"
+								+ p
+								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"\" >&2; exit 1; fi\n";
+					}
+				}
+
+				parameterHeader += "\n# Start of your protocol template\n";
+
+				String script = step.getProtocol().getTemplate();// out.toString();
+				script = parameterHeader + script;
+
+				// append footer that appends the task's parameters to
+				// environment.txt
+
+				script = script + "\n# End of your protocol template\n";
+				script = script + "\n#\n##\n### Update '" + Parameters.ENVIRONMENT
+						+ "' with the output vars of this step\n##\n#";
+				script = appendToEnv(script, "#");
+				script = appendToEnv(script, "## " + task.getName());
+				script = appendToEnv(script, "#");
+				script += "\n";
+
+				Iterator<String> itParam = map.keySet().iterator();
+				while (itParam.hasNext())
+				{
+					String p = itParam.next();
+
+					// add to environment only if this is an output
+					// iterate through outputs to check that
+					Iterator<Output> itOutput = step.getProtocol().getOutputs().iterator();
+					while (itOutput.hasNext())
+					{
+						Output o = itOutput.next();
+						if (o.getName().equals(p))
+						{
+							// we've found a match
+
+							// if ($p is set) write "p=$p" to env.txt
+							// else write "p=o.getValue()"
+
+							// If parameter not set then ERROR
+							String line = "if [[ -z \"$" + p + "\" ]]; then echo \"In step '" + step.getName()
+									+ "', parameter '" + p + "' has no value! Please assign a value to parameter '" + p
+									+ "'." + "\" >&2; exit 1; fi\n";
+
+							// Else set parameters at right indexes.
+							// Explanation: if param file is collapsed in this
+							// template, then we should not output a single
+							// value but a list of values because next step may
+							// be run in uncollapsed fashion
+
+							List<String> rowIndex = target.getList(Parameters.ID_COLUMN);
+							for (int i = 0; i < rowIndex.size(); i++)
+							{
+								Object rowIndexObject = rowIndex.get(i);
+								String rowIndexString = (String) rowIndexObject.toString();
+								//System.out.println(">> " + rowIndexString);
+								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP + p + "[" + rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + Parameters.ENVIRONMENT + "\n";
+							}
+
+							// // // taking into account that output parameter
+							// can be set in header of protocol: #output p 1
+							// String line = "if [[ -z \"$" + p +
+							// "\"]]; then echo \"" + lefthand + "=" +
+							// o.getValue()
+							// + "\" >> " + Parameters.ENVIRONMENT + ";";
+							// line += " else echo \"" + lefthand + "=$" + p +
+							// "\" >> " + Parameters.ENVIRONMENT + ";";
+
+							script += line;
+						}
+					}
+				}
+				script = appendToEnv(script, ""); // empty line
+
+				script += "\n";
+
+				task.setScript(script);
+
 			}
 			catch (Exception e)
 			{
-				String params = guessParametersNeeded(step.getProtocol().getTemplate());
+				// String params =
+				// guessParametersNeeded(step.getProtocol().getTemplate());
 				throw new IOException("Generation of protocol '" + step.getProtocol().getName() + "' failed: "
 						+ e.getMessage() + ".\nParameters used: " + target);
 			}
@@ -113,6 +241,13 @@ public class TaskGenerator
 			tasks.add(task);
 		}
 		return tasks;
+	}
+
+	private static String appendToEnv(String script, String string)
+	{
+		String appendString = "echo \"" + string + "\" >> " + Parameters.ENVIRONMENT;
+
+		return script + "\n" + appendString;
 	}
 
 	private static String guessParametersNeeded(String ftl)
@@ -134,11 +269,12 @@ public class TaskGenerator
 
 	private static List<WritableTuple> addStepIds(List<WritableTuple> localParameters, Step step)
 	{
-		int stepId = 1;
+		int stepId = 0;
 		for (WritableTuple target : localParameters)
 		{
-			String name = step.getName() + "_" + stepId++;
+			String name = step.getName() + "_" + stepId;
 			target.set(Task.TASKID_COLUMN, name);
+			target.set(Task.TASKID_INDEX_COLUMN, stepId++);
 		}
 		return localParameters;
 	}
@@ -152,40 +288,41 @@ public class TaskGenerator
 
 			for (String localName : local.getColNames())
 			{
-				if (!localName.contains("."))
+				if (!localName.contains(Parameters.STEP_PARAM_SEP))
 				{
-					globalParameters.get(i).set(step.getName() + "." + localName, local.get(localName));
+					globalParameters.get(i).set(step.getName() + Parameters.STEP_PARAM_SEP + localName,
+							local.get(localName));
 				}
 			}
 		}
 	}
 
 	private static List<WritableTuple> addOutputValues(Step step, List<WritableTuple> localParameters)
-			throws IOException
 	{
-		try
+		// try
+		// {
+		for (WritableTuple target : localParameters)
 		{
-			for (WritableTuple target : localParameters)
+			// add protocol parameters
+			// FIXME complete with mem, etc
+			target.set("cores", step.getProtocol().getCores());
+
+			for (Output o : step.getProtocol().getOutputs())
 			{
-				// add protocol parameters
-				// FIXME complete with mem, etc
-				target.set("cores", step.getProtocol().getCores());
-
-				for (Output o : step.getProtocol().getOutputs())
-				{
-					target.set(o.getName(), o.getValue());
-				}
+				target.set(o.getName(), o.getValue());
 			}
-
-			// solve the output templates (if any)
-			TupleUtils.solve(localParameters);
-
-			return localParameters;
 		}
-		catch (IOException e)
-		{
-			throw new IOException("Solving of outputs for step '" + step.getName() + "' failed: " + e.getMessage());
-		}
+
+		// DON'T solve the output templates (if any)
+		// TupleUtils.solve(localParameters);
+
+		return localParameters;
+		// }
+		// catch (IOException e)
+		// {
+		// throw new IOException("Solving of outputs for step '" +
+		// step.getName() + "' failed: " + e.getMessage());
+		// }
 	}
 
 	private static List<WritableTuple> collapseOnTargets(List<WritableTuple> localParameters, Step step)
@@ -195,9 +332,27 @@ public class TaskGenerator
 
 		for (Input i : step.getProtocol().getInputs())
 		{
-			if (!"list".equals(i.getType())) targets.add(i.getName());
+			String origin = step.getParameters().get(i.getName());
+			boolean initialized = origin.startsWith(Parameters.USER_PREFIX);
+
+			boolean isList = Parameters.LIST.equals(i.getType());
+
+			if (!isList && initialized) targets.add(i.getName());
 		}
-		return TupleUtils.collapse(localParameters, targets);
+
+		// System.out.println(">> targets   >> " + targets);
+		// System.out.println(">> original  >> " + localParameters);
+		// System.out.println(">> collapsed >> " +
+		// TupleUtils.collapse(localParameters, targets));
+
+		if (0 == targets.size()) // no values from user_*, so do not collapse
+		{
+			return localParameters;
+		}
+		else
+		{
+			return TupleUtils.collapse(localParameters, targets);
+		}
 	}
 
 	private static List<WritableTuple> mapGlobalToLocalParameters(List<WritableTuple> globalParameters, Step step)

@@ -18,6 +18,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
 import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
+import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.compute5.generators.local.LocalBackend;
 import org.molgenis.compute5.model.Compute;
@@ -100,7 +101,7 @@ public class ComputeCommandLine
 		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
 		
 		// use workflow or workingdir from parameters?
-		if (compute.getParameters().getValues().size() > 0)
+		if (0 < compute.getParameters().getValues().size())
 		{
 			if (!compute.getParameters().getValues().get(0).isNull(Parameters.WORKFLOW_COLUMN))
 			{
@@ -137,6 +138,9 @@ public class ComputeCommandLine
 
 		// parse workflow
 		compute.setWorkflow(WorkflowCsvParser.parse(workflowCsv));
+		
+		// create environment.txt with user parameters that are used in at least one of the steps
+		new EnvironmentGenerator().generate(compute, workDir);
 		
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
