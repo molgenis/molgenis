@@ -10,7 +10,7 @@ public class Protocol
 {
 	// reserved parameter names, used form system purposes
 	public static List<String> reservedNames = Arrays.asList(new String[]
-	{ "cores" });
+	{ "cores", Parameters.NOTAVAILABLE });
 
 	// unique name of the protocol
 	String name;
@@ -21,7 +21,7 @@ public class Protocol
 	// number of cores that this protocol needs
 	int cores = 4;
 
-	// list of inputs it expects from user.* or previousStep.*
+	// list of inputs it expects from user_* or previousStep_*
 	Set<Input> inputs = new HashSet<Input>();
 
 	// outputs that this protocol produces
