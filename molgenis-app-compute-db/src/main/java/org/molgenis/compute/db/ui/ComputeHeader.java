@@ -32,7 +32,7 @@ public class ComputeHeader extends PluginModel<Entity>
 	@Override
 	public String getViewTemplate()
 	{
-		return "ComputeHeader.ftl";
+		return "templates/ComputeHeader.ftl";
 	}
 
 	@Override

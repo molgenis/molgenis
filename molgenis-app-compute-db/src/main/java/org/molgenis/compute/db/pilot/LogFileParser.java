@@ -3,6 +3,13 @@ package org.molgenis.compute.db.pilot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parses the raw logfile and extracts logininfo blocks and taskid from it.
+ * 
+ * 
+ * @author erwin
+ * 
+ */
 public class LogFileParser
 {
 	private static String LOG_INFO_START = "#LogInfo";
