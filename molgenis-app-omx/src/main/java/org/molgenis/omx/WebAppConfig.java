@@ -7,10 +7,10 @@ import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.beans.ShoppingCart;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -164,14 +164,14 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		return new StandardServletMultipartResolver();
 	}
-	
+
 	@Bean
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
 	public ShoppingCart shoppingCart()
 	{
 		return new ShoppingCart();
 	}
-	
+
 	/**
 	 * Redirects '/' to the Home plugin
 	 * 
