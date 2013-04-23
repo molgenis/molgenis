@@ -43,10 +43,6 @@ public class ComputeCommandLine
 
 		System.out.println("### MOLGENIS COMPUTE ###");
 		System.out.println("Version: " + ComputeCommandLine.class.getPackage().getImplementationVersion());
-		// Properties properties = new Properties();
-		// properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
-		// System.out.println("Git hash: " +
-		// properties.getProperty("git.commit.id.abbrev"));
 
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
@@ -169,5 +165,17 @@ public class ComputeCommandLine
 
 		System.out.println("Generation complete");
 		return compute;
+	}
+	
+	/**
+	 * Return Compute object, given one single parametersCsv
+	 * @param parametersCsv
+	 * @return
+	 * @throws IOException
+	 */
+	public static Compute create(String parametersCsv) throws IOException
+	{
+		Compute c = ComputeCommandLine.create("", new String[]{parametersCsv}, "");
+		return c;
 	}
 }
