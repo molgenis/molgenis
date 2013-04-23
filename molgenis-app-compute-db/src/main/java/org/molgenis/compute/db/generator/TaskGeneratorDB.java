@@ -11,8 +11,13 @@ import java.io.File;
  */
 public class TaskGeneratorDB
 {
-    public void generateTasks(File parameters, String backend)
+    public void generateTasks(File parameters)
     {
 
+    }
+
+    public static void main(String[] args)
+    {
+        new TaskGeneratorDB().generateTasks(new File("/Users/georgebyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/demoNBIC/parameters.csv"));
     }
 }
