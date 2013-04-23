@@ -13,8 +13,7 @@
             <form name="ComputeParameterDefaults" label="Parameter deafults" entity="ComputeParameterDefaultValue" viewtype="list" />
 			<form name="ComputeTasks" label="Tasks" entity="ComputeTask"/>
             <form name="ComputeHosts" label="Hosts" entity="ComputeHost" />
-			<plugin name="PilotPlugin" label="Start/stop pilots" type="org.molgenis.compute.db.plugin.PilotPlugin"/>
-			<plugin name="TaskSummaryPlugin" label="Task Summary" type="org.molgenis.compute.db.plugin.TaskStatusPlugin"/>
+			<plugin name="PilotDashboardPlugin" label="Pilot dashboard" type="org.molgenis.compute.db.plugin.PilotDashboardPlugin"/>
 		</menu>
 	</menu>
 </molgenis>
