@@ -27,6 +27,12 @@ public class PilotService implements MolgenisService
 {
 	private static final Logger LOG = Logger.getLogger(PilotService.class);
 
+    public static final String TASK_GENERATED = "generated";
+    public static final String TASK_READY = "ready";
+    public static final String TASK_RUNNING = "running";
+    public static final String TASK_FAILED = "failed";
+    public static final String TASK_DONE = "done";
+
 	public PilotService(MolgenisContext mc)
 	{
 	}
@@ -50,7 +56,7 @@ public class PilotService implements MolgenisService
 			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
 
 			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class)
-					.equals(ComputeTask.STATUSCODE, "ready").equals(ComputeTask.COMPUTEHOST_NAME, backend).find();
+					.equals(ComputeTask.STATUSCODE, TASK_READY).equals(ComputeTask.COMPUTEHOST_NAME, backend).find();
 
 			if (tasks.size() > 0)
 			{
@@ -71,7 +77,7 @@ public class PilotService implements MolgenisService
 					LOG.info("Script for task [" + taskName + "] :\n" + taskScript);
 
 					// change status to running
-					task.setStatusCode("running");
+					task.setStatusCode(TASK_RUNNING);
 					WebAppUtil.getDatabase().update(task);
 
 					// send response
@@ -112,9 +118,9 @@ public class PilotService implements MolgenisService
 			if ("done".equals(request.getString("status")))
 			{
 				LOG.info(">>> task [" + taskID + "] is finished");
-				if (task.getStatusCode().equalsIgnoreCase("running"))
+				if (task.getStatusCode().equalsIgnoreCase(TASK_RUNNING))
 				{
-					task.setStatusCode("done");
+					task.setStatusCode(TASK_DONE);
 					task.setRunLog(logFileContent);
                     task.setRunInfo(runInfo);
 				}
@@ -126,7 +132,7 @@ public class PilotService implements MolgenisService
 			}
 			else if ("pulse".equals(request.getString("status")))
 			{
-				if (task.getStatusCode().equalsIgnoreCase("running"))
+				if (task.getStatusCode().equalsIgnoreCase(TASK_RUNNING))
 				{
 					LOG.info(">>> pulse from " + taskID);
 					task.setRunLog(logFileContent);
@@ -135,14 +141,14 @@ public class PilotService implements MolgenisService
 			}
 			else if ("nopulse".equals(request.getString("status")))
 			{
-				if (task.getStatusCode().equalsIgnoreCase("running"))
+				if (task.getStatusCode().equalsIgnoreCase(TASK_RUNNING))
 				{
 					LOG.info(">>> no pulse from " + taskID);
 					task.setRunLog(logFileContent);
                     task.setRunInfo(runInfo);
 					task.setStatusCode("failed");
 				}
-				else if (task != null && task.getStatusCode().equalsIgnoreCase("done"))
+				else if (task != null && task.getStatusCode().equalsIgnoreCase(TASK_DONE))
 				{
 					LOG.info("double check: job is finished & no pulse from it");
 				}
