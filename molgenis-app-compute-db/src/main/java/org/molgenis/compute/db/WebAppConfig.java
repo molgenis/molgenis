@@ -2,9 +2,7 @@ package org.molgenis.compute.db;
 
 import java.util.List;
 
-import org.molgenis.compute.db.executor.ComputeExecutor;
-import org.molgenis.compute.db.executor.ComputeExecutorPilotDB;
-import org.molgenis.compute.db.executor.ComputeExecutorTask;
+import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.compute.db.util.ComputeMolgenisSettings;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -15,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -37,22 +36,16 @@ import app.DatabaseConfig;
 @Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
-	@Bean(destroyMethod = "close")
+	@Scope("prototype")
 	public Database unathorizedDatabase() throws DatabaseException
 	{
 		return new app.JpaDatabase();
 	}
 
 	@Bean
-	public ComputeExecutorTask computeExecutorTask() throws DatabaseException
+	public Scheduler scheduler()
 	{
-		return new ComputeExecutorTask(computeExecutor(), taskScheduler());
-	}
-
-	@Bean
-	public ComputeExecutor computeExecutor() throws DatabaseException
-	{
-		return new ComputeExecutorPilotDB(unathorizedDatabase());
+		return new Scheduler(taskScheduler());
 	}
 
 	@Bean(destroyMethod = "shutdown")

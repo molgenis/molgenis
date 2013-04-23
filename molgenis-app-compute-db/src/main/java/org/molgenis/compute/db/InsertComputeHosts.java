@@ -30,6 +30,10 @@ public class InsertComputeHosts
 			insert(db, "grid", "GRID", "grid", "test", 10000,
 					"glite-wms-job-submit  -d $USER -o pilot-one $HOME/maverick/maverick.jdl");
 		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		finally
 		{
 			db.close();
