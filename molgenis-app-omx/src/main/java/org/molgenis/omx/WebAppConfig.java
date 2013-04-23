@@ -7,6 +7,7 @@ import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.beans.ShoppingCart;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -15,17 +16,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -43,12 +49,6 @@ import app.DatabaseConfig;
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
-	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer)
-	{
-		configurer.enable("front-controller");
-	}
-
-	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
@@ -60,6 +60,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		converters.add(new GsonHttpMessageConverter());
+		converters.add(new BufferedImageHttpMessageConverter());
 	}
 
 	@Bean
@@ -92,7 +93,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	private String mailJavaQuitWait;
 
 	@Bean
-	public MailSender mailSender()
+	public JavaMailSender mailSender()
 	{
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(mailHost);
@@ -158,6 +159,19 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		return new app.JpaDatabase();
 	}
 
+	@Bean
+	public MultipartResolver multipartResolver()
+	{
+		return new StandardServletMultipartResolver();
+	}
+	
+	@Bean
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
+	public ShoppingCart shoppingCart()
+	{
+		return new ShoppingCart();
+	}
+	
 	/**
 	 * Redirects '/' to the Home plugin
 	 * 
