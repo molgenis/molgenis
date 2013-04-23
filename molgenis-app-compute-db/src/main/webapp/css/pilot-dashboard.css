@@ -1,0 +1,17 @@
+.host-name {
+	font-size: 30px;
+	font-weight:bold;
+	margin-right: 20px;
+}
+
+.dashboard {
+	margin-top: 20px;
+}
+
+.well {
+	margin-top: 10px;
+}
+
+.alert {
+	margin-top: 10px;
+}

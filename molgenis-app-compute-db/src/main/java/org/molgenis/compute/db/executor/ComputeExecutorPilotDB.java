@@ -3,13 +3,15 @@ package org.molgenis.compute.db.executor;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.sysexecutor.SysCommandExecutor;
+import org.molgenis.compute.runtime.ComputeHost;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.util.ApplicationContextProvider;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -17,125 +19,102 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ComputeExecutorPilotDB implements ComputeExecutor
 {
-	public static final String BACK_END_GRID = "grid";
-	public static final String BACK_END_CLUSTER = "cluster";
-	public static final String BACK_END_LOCALHOST = "localhost";
-	private static final String DEFAULT_CLUSTER_COMMAND = "qsub /target/gpfs2/gcc/tools/scripts/maverick.sh";
-	private static final String DEFAULT_GRID_COMMAND = "glite-wms-job-submit  -d $USER -o pilot-one $HOME/maverick/maverick.jdl";
-	private static final String DEFAULT_LOCALHOST_COMMAND = "sh maverick.sh";
+	private static final int SSH_PORT = 22;
 	private static final Logger LOG = Logger.getLogger(ComputeExecutorPilotDB.class);
 
-	private ExecutionHost host = null;
-	private final Database database;
-	private String command;
-
-	@Autowired
-	public ComputeExecutorPilotDB(Database database)
-	{
-		this.database = database;
-	}
-
 	@Override
-	public void setExecutionHost(ExecutionHost host)
+	public void executeTasks(ComputeHost computeHost, String password)
 	{
-		this.host = host;
-	}
+		if (computeHost == null) throw new IllegalArgumentException("ComputeHost is null");
 
-	@Override
-	public void setCommand(String command)
-	{
-		this.command = command;
-	}
+		Database database = ApplicationContextProvider.getApplicationContext().getBean("unathorizedDatabase",
+				Database.class);
 
-	// actual start pilots here
-	@Override
-	public void executeTasks(String backend, String backendType)
-	{
-		// evaluate if we have tasks ready to run on a specific back-end
-		int readyToSubmitSize = 0;
-
+		ExecutionHost executionHost = null;
 		try
 		{
-			// Clear cache
-			database.getEntityManager().clear();
-
 			List<ComputeTask> generatedTasks = database.query(ComputeTask.class)
-					.equals(ComputeTask.STATUSCODE, "generated").equals(ComputeTask.BACKENDNAME, backend).find();
+					.equals(ComputeTask.STATUSCODE, "generated").equals(ComputeTask.COMPUTEHOST, computeHost.getId())
+					.find();
+
 			LOG.info("Nr of tasks with status [generated]: [" + generatedTasks.size() + "]");
 
-			readyToSubmitSize = evaluateTasks(generatedTasks);
+			evaluateTasks(database, generatedTasks);
 
 			List<ComputeTask> readyTasks = database.query(ComputeTask.class).equals(ComputeTask.STATUSCODE, "ready")
-					.equals(ComputeTask.BACKENDNAME, backend).find();
+					.equals(ComputeTask.COMPUTEHOST, computeHost.getId()).find();
 
 			for (ComputeTask task : readyTasks)
 			{
 				LOG.info("Task ready: [" + task.getName() + "]");
 			}
 
-			readyToSubmitSize = readyTasks.size();
+			for (int i = 0; i < readyTasks.size(); i++)
+			{
+				if (computeHost.getHostType().equalsIgnoreCase("localhost"))
+				{
+					submitPilotLocalhost(computeHost.getCommand());
+				}
+				else
+				{
+					LOG.info("Executing command [" + computeHost.getCommand() + "] on host ["
+							+ computeHost.getHostName() + "]");
+
+					if (executionHost == null)
+					{
+						executionHost = new ExecutionHost(computeHost.getHostName(), computeHost.getUserName(),
+								password, SSH_PORT);
+					}
+
+					executionHost.submitPilot(computeHost.getCommand());
+				}
+
+				// sleep, because we have a strange behavior in pilot service
+				try
+				{
+					Thread.sleep(2000);
+				}
+				catch (InterruptedException e)
+				{
+					LOG.error("Interrupted exception while sleeping", e);
+				}
+			}
+
 		}
 		catch (DatabaseException e)
 		{
-			LOG.error("DatabaseException gettings ready tasks from database", e);
-			throw new ComputeDbException(e);
+			LOG.error("DatabaseException executing tasks", e);
+			throw new ComputeDbException("DatabaseException executing tasks", e);
 		}
-
-		LOG.info("Nr of tasks ready for execution = " + readyToSubmitSize);
-
-		// start as many pilots as we have tasks ready to run
-		for (int i = 0; i < readyToSubmitSize; i++)
+		catch (IOException e)
 		{
-			try
-			{
-				if (backendType.equalsIgnoreCase(BACK_END_GRID))
-				{
-					String command = this.command == null ? DEFAULT_GRID_COMMAND : this.command;
-					host.submitPilot(command);
-				}
-				else if (backendType.equalsIgnoreCase(BACK_END_CLUSTER))
-				{
-					String command = this.command == null ? DEFAULT_CLUSTER_COMMAND : this.command;
-					host.submitPilot(command);
-				}
-				else if (backendType.equalsIgnoreCase(BACK_END_LOCALHOST))
-				{
-					submitPilotLocalhost();
-				}
-			}
-			catch (IOException e)
-			{
-				LOG.error("Error submit pilot", e);
-				throw new ComputeDbException(e);
-			}
-
-			// sleep, because we have a strange behavior in pilot service
-			try
-			{
-				Thread.sleep(2000);
-			}
-			catch (InterruptedException e)
-			{
-				LOG.error("Interrupted exception while sleeping", e);
-			}
+			LOG.error("IOException executing tasks", e);
+			throw new ComputeDbException("DatabaseException executing tasks", e);
 		}
+		finally
+		{
+			if (executionHost != null)
+			{
+				executionHost.close();
+			}
 
+			IOUtils.closeQuietly(database);
+		}
 	}
 
-	private void submitPilotLocalhost() throws IOException
+	private void submitPilotLocalhost(String command)
 	{
-		SysCommandExecutor localExecutor = new SysCommandExecutor();
-
-		String command = this.command == null ? DEFAULT_LOCALHOST_COMMAND : this.command;
 		LOG.info("Execution command [" + command + "] ...");
 
+		SysCommandExecutor localExecutor = new SysCommandExecutor();
 		try
 		{
 			localExecutor.runCommand(command);
 		}
 		catch (Exception e)
 		{
-			LOG.error("Exception executing command", e);
+			LOG.error("Exception executing command [" + command + "] on localhost", e);
+			throw new ComputeDbException("Exception executing command [" + command + "] on localhost", e);
 		}
 
 		String cmdError = localExecutor.getCommandError();
@@ -145,9 +124,8 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 		LOG.info("Command output:\n" + cmdOutput);
 	}
 
-	private int evaluateTasks(List<ComputeTask> generatedTasks) throws DatabaseException
+	private void evaluateTasks(Database database, List<ComputeTask> generatedTasks) throws DatabaseException
 	{
-		int count = 0;
 		for (ComputeTask task : generatedTasks)
 		{
 			boolean isReady = true;
@@ -166,6 +144,6 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 			}
 		}
 
-		return count;
 	}
+
 }

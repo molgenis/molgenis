@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.molgenis.compute5.model.Input;
 import org.molgenis.compute5.model.Output;
+import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Protocol;
 
 /**
@@ -47,8 +48,7 @@ public class ProtocolFtlParser
 			}
 
 			// start reading
-			 BufferedReader reader = new BufferedReader(new
-			 FileReader(templateFile));
+			BufferedReader reader = new BufferedReader(new FileReader(templateFile));
 			Protocol p = new Protocol(protocolFile);
 
 			// Then read the non-# as template
@@ -68,7 +68,7 @@ public class ProtocolFtlParser
 					List<String> els = new ArrayList<String>();
 					Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
 					while (m.find())
-					    els.add(m.group(1));
+						els.add(m.group(1));
 
 					if (els.size() > 0)
 					{
@@ -88,7 +88,7 @@ public class ProtocolFtlParser
 						}
 
 						// input
-						else if (els.get(0).equals("input") || els.get(0).equals("string") || els.get(0).equals("list"))
+						else if (els.get(0).equals(Parameters.INPUT) || els.get(0).equals(Parameters.STRING) || els.get(0).equals(Parameters.LIST))
 						{
 							// assume name column
 							if (els.size() < 2) throw new IOException("param requires 'name', e.g. '#string input1'");
@@ -114,16 +114,20 @@ public class ProtocolFtlParser
 							// TODO
 						}
 
-						// output
+						// output, syntax = "#output outputVarName description"
 						else if (els.get(0).equals("output"))
 						{
-							if (els.size() < 2) throw new IOException("output requires 'name', e.g. '#output output1'");
-							if (els.size() < 3) throw new IOException(
-									"output requires 'output', e.g. '#output output1 ${input1}'");
+							if (els.size() < 2) throw new IOException(
+									"output requires 'name', e.g. '#output myOutputVariable'");
+							if (3 < els.size()) throw new IOException(
+									"Output cannot have more than 3 arguments.\nSyntax is: #output outputVarName \"description\", where description is optional.");
 
 							Output o = new Output(els.get(1));
-							o.setValue(els.get(2));
-							
+							// o.setValue(els.get(2));
+							// The value of the output parameter may not be set in the header
+							// This must be done in the template, instead!
+							o.setValue(Parameters.NOTAVAILABLE);
+
 							// description is everything else
 							String inputDescription = "";
 							for (int i = 2; i < els.size(); i++)

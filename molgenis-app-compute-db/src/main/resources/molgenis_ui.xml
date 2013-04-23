@@ -3,23 +3,17 @@
 	<plugin name="MolgenisHeader" type="org.molgenis.compute.db.ui.ComputeHeader" />
 	<menu name="mainmenu" position="left" startswith="WelcomeScreen">
 		<menu name="Compute">
-			<form name="Workflow" entity="Workflow" viewtype="record">
-				<menu name="ComputeWorkflowsMenu">
-					<form name="WorkflowElement" entity="WorkflowElement"
-						viewtype="record" />
+			<form name="ComputeWorkflow" label="Workflow" entity="ComputeWorkflow" viewtype="record">
+				<menu name="ComputeStepMenu" label="Workflow Steps">
+					<form name="ComputeStep" label="Workflow step" entity="ComputeStep" viewtype="record" />
 				</menu>
 			</form>
-            <form name="ComputeProtocols" entity="ComputeProtocol" viewtype="list" />
-            <form name="ComputeParameters" entity="ComputeParameter" viewtype="list" />
-            <form name="ComputeParameterDefaults" entity="ComputeParameterDefaultValue" viewtype="list" />
-			<form name="ComputeTasks" entity="ComputeTask">
-				<form name="TaskHistory" entity="ComputeHistory" />
-			</form>
-            <form name="ComputeHosts" entity="ComputeHost">
-				<form name="Workers" entity="ComputeWorker">
-					<form name="WorkerHistory" entity="ComputeHistory" />
-				</form>
-			</form>
+            <form name="ComputeProtocols" label="Protocols" entity="ComputeProtocol" viewtype="list" />
+            <form name="ComputeParameters" label="Parameters" entity="ComputeParameter" viewtype="list" />
+            <form name="ComputeParameterDefaults" label="Parameter deafults" entity="ComputeParameterDefaultValue" viewtype="list" />
+			<form name="ComputeTasks" label="Tasks" entity="ComputeTask"/>
+            <form name="ComputeHosts" label="Hosts" entity="ComputeHost" />
+			<plugin name="PilotDashboardPlugin" label="Pilot dashboard" type="org.molgenis.compute.db.plugin.PilotDashboardPlugin"/>
 		</menu>
 	</menu>
 </molgenis>

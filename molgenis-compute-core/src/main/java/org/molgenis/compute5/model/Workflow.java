@@ -18,7 +18,7 @@ public class Workflow
 		{
 			for (String value : s.parameters.values())
 			{
-				if (value.startsWith("user."))
+				if (value.startsWith(Parameters.USER_PREFIX))
 				{
 					result.add(value);
 				}

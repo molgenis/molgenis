@@ -1,32 +1,50 @@
 package org.molgenis.compute.db.commandline;
 
-import org.molgenis.compute.db.executor.ComputeExecutor;
-import org.molgenis.compute.db.executor.ComputeExecutorPilotDB;
+import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-@EnableScheduling
-@EnableAsync
+/**
+ * String config form the commandline apps
+ * 
+ * @author erwin
+ * 
+ */
 @Configuration
-@ComponentScan("org.molgenis.compute.db.commandline")
 public class AppConfig
 {
-
-	@Bean(destroyMethod = "close")
+	@Scope("prototype")
+	@Bean
 	public Database unathorizedDatabase() throws DatabaseException
 	{
 		return new app.JpaDatabase();
 	}
 
 	@Bean
-	public ComputeExecutor computeExecutor() throws DatabaseException
+	public ApplicationContextProvider applicationContextProvider()
 	{
-		return new ComputeExecutorPilotDB(unathorizedDatabase());
+		return new ApplicationContextProvider();
+	}
+
+	@Bean
+	public Scheduler scheduler()
+	{
+		return new Scheduler(taskScheduler());
+	}
+
+	@Bean(destroyMethod = "shutdown")
+	public TaskScheduler taskScheduler()
+	{
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(2);
+
+		return scheduler;
 	}
 
 }
