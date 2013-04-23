@@ -108,10 +108,12 @@ public class TaskGenerator
 				// remember parameter values
 				task.setParameters(map);
 
-				// prepend header that sources the task's parameters from
-				// environment.txt
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
-				parameterHeader = parameterHeader + "\n#\n##\n### Map parameters to environment\n##\n#\n";
+				//  prepend header that loads Molgenis_Functions.sh
+				String parameterHeader = "\n#\n##\n### Load Molgenis functions for e.g. error handling\n##\n#\nsource " + Parameters.MOLGENIS_FUNCTION_FILE + "\n\n";
+				
+				// now source the task's parameters from environment.txt
+				parameterHeader += "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
+				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced
 				// environment
@@ -141,7 +143,7 @@ public class TaskGenerator
 
 				parameterHeader = parameterHeader
 						+ "\n#\n##\n### Validate that each 'value' parameter has only identical values in its list\n"
-						+ "### We do to protect you against parameter values that might not be correctly set at runtime.\n"
+						+ "### We do that to protect you against parameter values that might not be correctly set at runtime.\n"
 						+ "##\n#\n";
 				for (Input input : step.getProtocol().getInputs())
 				{
@@ -152,7 +154,7 @@ public class TaskGenerator
 
 						parameterHeader += "if [[ ! $(IFS=$'\\n' sort -u <<< \"${"
 								+ p
-								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"\" >&2; exit 1; fi\n";
+								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"Error in Step '" + step.getName() + "': input parameter '" + p + "' is an array with different values.\" >&2; exit 1; fi\n";
 					}
 				}
 
