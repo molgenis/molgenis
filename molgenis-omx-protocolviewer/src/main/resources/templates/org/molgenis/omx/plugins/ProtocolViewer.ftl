@@ -97,6 +97,8 @@
 								<button class="btn" id="save-selection-button"<#if !model.authenticated> disabled</#if>>Save selection</button>
 								
 								</#if>
+								<button class="btn" id="request-data-button"<#if !model.authenticated> disabled</#if>>Request Data</button>
+								
 							</div>
 		  				</div>
 	  				</div>
