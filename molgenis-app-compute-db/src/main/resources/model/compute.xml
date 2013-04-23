@@ -12,7 +12,8 @@
 		</entity>	
 	</module>
 	<module name="compute.design">
-		<entity name="ComputeProtocol" implements="Nameable" xref_label="name">
+		<!--
+        <entity name="ComputeProtocol" implements="Nameable" xref_label="name">
 			<description>
 				Executable definitions of computational 'protocols' of
 				analysis. For
@@ -25,18 +26,22 @@
 			<field name="description" type="text" />
 			<unique fields="name" />
 		</entity>
+		-->
+        <!--
 		<entity name="ComputeParameter" implements="Nameable" xref_label="type,name">
 			<description>Parameter are the inputs or outputs into an
 				ComputeProtocol.
 			</description>
 			<field name="dataType" type="enum" nillable="true" enum_options="[string,int,date,datetime,text,list]" />
-            <!-- The default value should stay here as well for using in the command-line version -->
+            < The default value should stay here as well for using in the command-line version >
 			<field name="defaultValue" type="text" nillable="true" description="the value of the parameter for ComputeProtocols." />
 			<field name="type" type="enum" enum_options="[in,out]" />
 			<field name="description" type="text" nillable="true" />
 			<field name="value" type="text" nillable="true" description="Only used fot output" />
 			<unique fields="type,name" />
 		</entity>
+        -->
+        <!--
 		<entity name="ComputeWorkflow" implements="Nameable" xref_label="name">
 			<description>A workflow is a plan to execute a series of subprotocols
 				in a particular order. Each workflow elements is another protocol as
@@ -46,6 +51,8 @@
 			</description>
 			<unique fields="name" />
 		</entity>
+		-->
+        <!--
 		<entity name="ComputeStep" implements="Nameable" xref_label="name">
 			<description>Elements of a workflow are references to protocols. The
 				whole workflow is a directed graph with each element pointing to the
@@ -56,6 +63,9 @@
 			<field name="previousSteps" type="mref" xref_entity="ComputeStep" nillable="true" description="Previous steps that need to be done before this protocol can be executed." />
 			<unique fields="name" />
 		</entity>
+		-->
+        <!--<field name="computeParameter" type="xref" xref_entity="ComputeParameter" xref_label="name" description="ComputeParameter, to which the default value belongs" />-->
+
 	</module>
 	<module name="compute.runtime">
 		<entity name="ComputeTask" implements="Nameable" xref_label="name">
@@ -65,7 +75,7 @@
    			<field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />   
 			<field name="runLog" type="text" description="Log of the task execution" nillable="true" />
             <field name="computeHost" type="xref" xref_entity="ComputeHost" description="Host where ComputeTask should be executed" nillable="false" />
-            <field name="computeStep" nillable="true" type="xref" xref_entity="ComputeStep" description="Reference to the workflow step that generated this script." />
+            <!--field name="computeStep" nillable="true" type="xref" xref_entity="ComputeStep" description="Reference to the workflow step that generated this script." /-->
 			<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
@@ -73,12 +83,12 @@
 				description="Last known status of this task. See compute history for details. NB 'ready' means ready for running (cf. 'done')." />
 			<unique fields="name" />
 		</entity>
-		<entity name="ComputeParameterDefaultValue" implements="Nameable">
-			<description>DefaultValue allows multiple default values for ComputeParameters in different Workflows
+		<entity name="ComputeParameterValue" implements="Nameable">
+			<description>Related to ComputeTask values
 			</description>
-            <field name="computeParameter" type="xref" xref_entity="ComputeParameter" xref_label="name" description="ComputeParameter, to which the default value belongs" />
-            <field name="computeWorkflow" type="xref" xref_entity="ComputeWorkflow" xref_label="name" description="Workflow, to which the default value belongs" />
-            <field name="defaultValue" type="text" nillable="false" description="the value of the parameter" />
+            <field name="computeParameter" type="text" nillable="false" description="the parameter name" />
+            <field name="computeTask" type="xref" xref_entity="ComputeTask" xref_label="name" description="ComputeTask, to which the value belongs" />
+            <field name="value" type="text" nillable="false" description="the value of the parameter" />
 		</entity>
         <entity name="ComputeHost" implements="Nameable" xref_label="name">
       		<description>Declaration of a compute resource, including username</description>
