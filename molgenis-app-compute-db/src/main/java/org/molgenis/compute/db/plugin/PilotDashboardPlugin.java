@@ -3,11 +3,11 @@ package org.molgenis.compute.db.plugin;
 import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;
 
-public class PilotPlugin extends IframePlugin
+public class PilotDashboardPlugin extends IframePlugin
 {
 	private static final long serialVersionUID = 1L;
 
-	public PilotPlugin(String name, ScreenController<?> parent)
+	public PilotDashboardPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}
@@ -15,7 +15,7 @@ public class PilotPlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return "/plugin/pilot";
+		return "/plugin/dashboard";
 	}
 
 }
