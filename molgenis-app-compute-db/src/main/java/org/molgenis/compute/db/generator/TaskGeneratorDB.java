@@ -96,6 +96,7 @@ public class TaskGeneratorDB
                         computeTask.setPrevSteps(previousTasks);
 
                     db.add(computeTask);
+                    tasksSize++;
 
 
                     tasksSize++;
