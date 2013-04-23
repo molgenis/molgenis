@@ -35,6 +35,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import app.FillMetadata;
 import app.ui.DataSetViewerPluginPlugin;
 import app.ui.ProtocolViewerPlugin;
+import app.ui.SimpleUserLoginPlugin;
 
 /**
  * Shows table of experiment information for WormQTL
@@ -109,7 +110,7 @@ public class Home extends PluginModel<Entity>
 
 	private void fillMetaData(Database db) throws Exception
 	{
-		FillMetadata.fillMetadata(db, false);
+		FillMetadata.fillMetadata(db, false, SimpleUserLoginPlugin.class.getSimpleName());
 
 		List<MolgenisUser> users = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.IDENTIFIER, Operator.EQUALS,
 				"anonymous"));

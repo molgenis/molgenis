@@ -67,6 +67,7 @@ import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
+import org.molgenis.generators.server.EntityServiceGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
@@ -277,6 +278,7 @@ public class Molgenis
 					generators.add(new DatabaseConfigGen());
 				}
 				generators.add(new DataTypeGen());
+				generators.add(new EntityServiceGen());
 				generators.add(new JpaMapperGen());
 
 				if (options.generate_persistence)
@@ -298,6 +300,7 @@ public class Molgenis
 						generators.add(new JDBCDatabaseGen());
 						generators.add(new DatabaseConfigGen());
 						generators.add(new DataTypeGen());
+						generators.add(new EntityServiceGen());
 						generators.add(new MultiqueryMapperGen());
 					}
 					else if (options.mapper_implementation.equals(MapperImplementation.PREPARED_STATEMENT))
@@ -305,6 +308,7 @@ public class Molgenis
 						generators.add(new JDBCDatabaseGen());
 						generators.add(new DatabaseConfigGen());
 						generators.add(new DataTypeGen());
+						generators.add(new EntityServiceGen());
 						generators.add(new PStatementMapperGen());
 					}
 				} // hsqldb.org
@@ -314,6 +318,7 @@ public class Molgenis
 					generators.add(new JDBCDatabaseGen());
 					generators.add(new DatabaseConfigGen());
 					generators.add(new DataTypeGen());
+					generators.add(new EntityServiceGen());
 					generators.add(new PStatementMapperGen());
 				}
 				else if (options.db_driver.equals("org.hsqldb.jdbcDriver"))
@@ -322,6 +327,7 @@ public class Molgenis
 					generators.add(new JDBCDatabaseGen());
 					generators.add(new DatabaseConfigGen());
 					generators.add(new DataTypeGen());
+					generators.add(new EntityServiceGen());
 					generators.add(new HSqlCreateSubclassPerTableGen());
 					generators.add(new PStatementMapperGen());
 				} // postgresql

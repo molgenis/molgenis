@@ -13,32 +13,44 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.util.ApplicationContextProvider;
-import org.springframework.context.ApplicationContext;
-import org.testng.annotations.BeforeMethod;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-public class MolgenisDbSettingsTest
+@ContextConfiguration
+public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 {
-	private Database db;
-	private MolgenisDbSettings molgenisDbSettings;
-
-	@BeforeMethod
-	public void setUp() throws Exception
+	@Configuration
+	static class Config
 	{
-		db = mock(Database.class);
-		RuntimeProperty property0 = new RuntimeProperty();
-		property0.setValue("value0");
-		when(
-				db.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-						RuntimeProperty.class.getSimpleName() + "_property0"))).thenReturn(Arrays.asList(property0));
+		@Bean
+		public MolgenisDbSettings molgenisDbSettings()
+		{
+			return new MolgenisDbSettings();
+		}
 
-		ApplicationContext ctx = mock(ApplicationContext.class);
-		when(ctx.getBean("database", Database.class)).thenReturn(db);
-		new ApplicationContextProvider().setApplicationContext(ctx);
-
-		molgenisDbSettings = new MolgenisDbSettings();
+		@Bean
+		public Database unauthorizedDatabase() throws DatabaseException
+		{
+			Database database = mock(Database.class);
+			RuntimeProperty property0 = new RuntimeProperty();
+			property0.setValue("value0");
+			when(
+					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+							RuntimeProperty.class.getSimpleName() + "_property0")))
+					.thenReturn(Arrays.asList(property0));
+			return database;
+		}
 	}
+
+	@Autowired
+	private Database database;
+
+	@Autowired
+	private MolgenisDbSettings molgenisDbSettings;
 
 	@Test
 	public void getPropertyString()
@@ -73,6 +85,6 @@ public class MolgenisDbSettingsTest
 		property0.setIdentifier(RuntimeProperty.class.getSimpleName() + "_property0");
 		property0.setName("property0");
 		property0.setValue("value0-updated");
-		verify(db).add(property0);
+		verify(database).add(property0);
 	}
 }
