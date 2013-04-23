@@ -1,5 +1,6 @@
 package org.molgenis.lifelines;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
@@ -29,8 +30,10 @@ public class WebAppInitializer implements WebApplicationInitializer
 		}
 		else
 		{
+			final int maxSize = 32 * 1024 * 1024 * 1024;
 			dispatcherServlet.setLoadOnStartup(1);
 			dispatcherServlet.addMapping("/");
+			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 		}
 
 		// molgenis
@@ -42,6 +45,10 @@ public class WebAppInitializer implements WebApplicationInitializer
 		else
 		{
 			frontControllerServlet.setLoadOnStartup(2);
+			frontControllerServlet.addMapping("/molgenis.do");
+			frontControllerServlet.addMapping("/xref"); // org.molgenis.framework.server.services.MolgenisXrefService
+			frontControllerServlet.addMapping("/captchaImg"); // org.molgenis.auth.service.MolgenisCaptchaService
+			frontControllerServlet.addMapping("/tmpfile"); // org.molgenis.framework.server.services.MolgenisTmpFileService
 		}
 	}
 }

@@ -44,7 +44,7 @@ public class FillMetadata {
 		fillMetadata(db, useLogin, "UserLoginPlugin");
 	}
 	
-	private static void fillMetadata(Database db, boolean useLogin, String loginPluginName) throws Exception {
+	public static void fillMetadata(Database db, boolean useLogin, String loginPluginName) throws Exception {
         logger.debug("fillMetadata start");
 
 		Login login = db.getLogin();
@@ -72,7 +72,7 @@ public class FillMetadata {
 		userAdmin.setName("admin");
 		userAdmin.setIdentifier("admin");
 		userAdmin.setPassword("md5_21232f297a57a5a743894a0e4a801fc3");
-		userAdmin.setEmail("");
+		userAdmin.setEmail("molgenis@gmail.com");
 		userAdmin.setFirstName("admin");
 		userAdmin.setLastName("admin");
 		userAdmin.setActive(true);
@@ -82,7 +82,7 @@ public class FillMetadata {
 		userAnonymous.setName("anonymous");
 		userAnonymous.setIdentifier("anonymous");
 		userAnonymous.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf");
-		userAnonymous.setEmail("");
+		userAnonymous.setEmail("molgenis@gmail.com");
 		userAnonymous.setFirstName("anonymous");
 		userAnonymous.setLastName("anonymous");
 		userAnonymous.setActive(true);
