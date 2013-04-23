@@ -86,6 +86,7 @@ public class PilotDashboardController
 	String hostName, @RequestParam("parametersFile")
 	String parametersFile, Model model) throws IOException, DatabaseException
 	{
+
 		if (StringUtils.isEmpty(parametersFile))
 		{
 			model.addAttribute("error", "Please specify a parameters file");
@@ -102,6 +103,9 @@ public class PilotDashboardController
 				model.addAttribute("error", e.getMessage());
 			}
 		}
+
+
+		this.taskGeneratorDB.generateTasks(parametersFile, hostName);
 
 		return init(model);
 	}
