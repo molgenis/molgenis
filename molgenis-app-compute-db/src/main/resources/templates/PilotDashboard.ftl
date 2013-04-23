@@ -62,11 +62,12 @@
 				<#list hosts as host>
 					updateHostStatus(${host.id});
 				</#list>
+				setTimeout(function(){updateStatus()}, 5000);
 			}
 			
 			// on document ready
 			$(function() {
-				setInterval(function(){updateStatus()}, 5000);
+				updateStatus();
 			});
 		</script>
 	</head>
@@ -75,6 +76,10 @@
 			<#if error??>
 				<div class="alert alert-error">${error}</div>
 			</#if>
+			
+			<#if message??>
+				<div class="alert alert-success">${message}</div>
+			</#if>			
 							
 			<#list hosts as host>
 				<div class="well">
@@ -116,7 +121,22 @@
   									</div>
   								</form>
   							</#if>
-  						
+  							
+  							<form action="/plugin/dashboard/generate" class="form-horizontal" method="post">
+  								<input type="hidden" name="hostName" value="${host.name}" />
+  								<div class="control-group">
+    								<label class="control-label" for="inputParametersFile">Parameters file</label>
+    								<div class="controls">
+      									<input type="text" name="parametersFile" id="inputParametersFile" placeholder="File path">
+    								</div>
+  								</div>
+  								<div class="control-group">
+    								<div class="controls">
+      									<button type="submit" class="btn">Generate</button>
+    								</div>
+  								</div>
+  							</form>
+  							
 						</div>
     					<div class="span6">
     						<table id="${host.id}" class="table">
