@@ -45,27 +45,7 @@ public class TaskGeneratorDB
         List<Task> tasks = compute.getTasks();
 
         //convert here
-        List<ComputeTask> computeTasks = convertTasks(tasks, backendName);
-
-        try
-        {
-            for (ComputeTask task : computeTasks)
-            {
-                WebAppUtil.getDatabase().add(task);
-                LOG.info("Task [" + task.getName() + "] is added\n");
-            }
-        }
-        catch (DatabaseException e)
-        {
-            e.printStackTrace();
-        }
-        LOG.info("Total: " + computeTasks.size() + " is added to database\n");
-
-    }
-
-    private List<ComputeTask> convertTasks(List<Task> tasks, String backendName)
-    {
-        List<ComputeTask> computeTasks = new ArrayList<ComputeTask>();
+        int tasksSize = 0;
 
         try
         {
@@ -106,20 +86,27 @@ public class TaskGeneratorDB
                     }
                     computeTask.setPrevSteps(previousTasks);
 
+                    WebAppUtil.getDatabase().add(computeTask);
+                    tasksSize++;
+                    LOG.info("Task [" + computeTask.getName() + "] is added\n");
 
-                }
+                    //add parameter values to DB
+                 }
+
+
+
             }
             else
                 LOG.error("No Backend  " + backendName + " is found");
 
+
         }
         catch (DatabaseException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
+        LOG.info("Total: " + tasksSize + " is added to database\n");
 
-
-        return computeTasks;
     }
 
     public static void main(String[] args)
