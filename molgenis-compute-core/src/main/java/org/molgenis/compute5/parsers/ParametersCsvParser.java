@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.molgenis.compute5.generators.TupleUtils;
 import org.molgenis.compute5.model.Parameters;
+import org.molgenis.compute5.model.Task;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
@@ -120,8 +121,11 @@ public class ParametersCsvParser
 
 			// If path to workflow is relative then prepend its parent's path
 			// (f).
-			tupleLst = updateWorkflowPath(tupleLst, f);
+			tupleLst = updatePath(tupleLst, Parameters.WORKFLOW_COLUMN_INITIAL, f);
 
+			// same for output path
+			tupleLst = updatePath(tupleLst, Task.WORKDIR_COLUMN, f);
+			
 			// get other param files we have to parse, and validate that all
 			// values in 'parameters' column equal. If file path is relative
 			// then prepend its parent's path (f)
@@ -408,12 +412,12 @@ public class ParametersCsvParser
 	}
 
 	/**
-	 * If path to workflow file relative, then prepend parent's path (f)
+	 * If path to 'column' (eg workflow) file relative, then prepend parent's path (f)
 	 * 
 	 * @param tupleLst
 	 * @return
 	 */
-	private static List<Tuple> updateWorkflowPath(List<Tuple> tupleLst, File f)
+	private static List<Tuple> updatePath(List<Tuple> tupleLst, String column, File f)
 	{
 		List<Tuple> tupleLstUpdated = new ArrayList<Tuple>();
 
@@ -423,7 +427,7 @@ public class ParametersCsvParser
 
 			for (String colName : t.getColNames())
 			{
-				if (colName.equals(Parameters.WORKFLOW_COLUMN_INITIAL))
+				if (colName.equals(column))
 				{
 					List<String> wfLst = new ArrayList<String>();
 					// iterate through list and add absolute paths to
