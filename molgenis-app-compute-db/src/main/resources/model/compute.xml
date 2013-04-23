@@ -86,7 +86,6 @@
 		<entity name="ComputeParameterValue" implements="Nameable">
 			<description>Related to ComputeTask values
 			</description>
-            <field name="computeParameter" type="text" nillable="false" description="the parameter name" />
             <field name="computeTask" type="xref" xref_entity="ComputeTask" xref_label="name" description="ComputeTask, to which the value belongs" />
             <field name="value" type="text" nillable="false" description="the value of the parameter" />
 		</entity>
