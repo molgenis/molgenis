@@ -6,8 +6,8 @@ import javax.mail.MessagingException;
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.beans.ShoppingCart;
 import org.molgenis.omx.service.OrderStudyDataService;
+import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
