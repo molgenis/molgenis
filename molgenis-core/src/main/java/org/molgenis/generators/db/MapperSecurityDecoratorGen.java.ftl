@@ -215,18 +215,10 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 			return rules;
 
 		MolgenisUserService service = MolgenisUserService.getInstance(this.getDatabase());
-		MolgenisUser user           = service.findById(this.getDatabase().getLogin().getUserId());
+		MolgenisUser user = service.findById(this.getDatabase().getLogin().getUserId());
 		
-		List<Integer> roleIdList;
-		try
-		{
-			roleIdList              = service.findGroupIds(user);
-		}
-		catch (ParseException e)
-		{
-			return rules;
-		}
-
+		List<Integer> roleIdList = service.findGroupIds(user);
+		
 		List<QueryRule> rulesList = new ArrayList<QueryRule>();
 		Collections.addAll(rulesList, rules);
 		if (permission.equals(${entityClass}.CANREAD))
