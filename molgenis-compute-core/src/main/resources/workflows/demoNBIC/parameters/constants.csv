@@ -1,2 +1,2 @@
-disease,workflow
-diabetes,workflow.csv
+disease,workflow,workdir
+diabetes,workflow.csv,../out
