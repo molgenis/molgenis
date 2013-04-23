@@ -3,6 +3,7 @@ package org.molgenis.compute.db;
 import java.util.List;
 
 import org.molgenis.compute.db.executor.Scheduler;
+import org.molgenis.compute.db.generator.TaskGeneratorDB;
 import org.molgenis.compute.db.util.ComputeMolgenisSettings;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -46,6 +47,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public Scheduler scheduler()
 	{
 		return new Scheduler(taskScheduler());
+	}
+
+	@Bean
+	public TaskGeneratorDB taskGeneratorDB()
+	{
+		return new TaskGeneratorDB();
 	}
 
 	@Bean(destroyMethod = "shutdown")
