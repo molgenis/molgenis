@@ -1,7 +1,7 @@
 package org.molgenis.compute.db.commandline;
 
 import org.apache.log4j.Logger;
-import org.molgenis.compute.db.executor.ComputeExecutorTask;
+import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.compute.runtime.ComputeHost;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -30,7 +30,7 @@ public class RunPilotsOnLocalhost
 
 		@SuppressWarnings("resource")
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-		ComputeHost computeHost = ComputeHost.findByName(ctx.getBean(Database.class), hostName);
+		ComputeHost computeHost = ComputeHost.findByName(ctx.getBean("unathorizedDatabase", Database.class), hostName);
 		if (computeHost == null)
 		{
 			System.out.println("Unknown ComputeHost name [" + hostName
@@ -38,7 +38,7 @@ public class RunPilotsOnLocalhost
 			System.exit(1);
 		}
 
-		ComputeExecutorTask task = ctx.getBean(ComputeExecutorTask.class);
-		task.start(computeHost);
+		Scheduler scheduler = ctx.getBean(Scheduler.class);
+		scheduler.schedule(computeHost, null);
 	}
 }
