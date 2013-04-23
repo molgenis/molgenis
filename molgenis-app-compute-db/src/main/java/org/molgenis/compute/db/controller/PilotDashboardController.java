@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.executor.Scheduler;
+import org.molgenis.compute.db.generator.TaskGeneratorDB;
 import org.molgenis.compute.runtime.ComputeHost;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -31,12 +32,14 @@ public class PilotDashboardController
 	private static final String VIEW_NAME = "PilotDashboard";
 	private final Scheduler scheduler;
 	private final Database database;
+	private final TaskGeneratorDB taskGeneratorDB;
 
 	@Autowired
-	public PilotDashboardController(Database database, Scheduler scheduler)
+	public PilotDashboardController(Database database, Scheduler scheduler, TaskGeneratorDB taskGeneratorDB)
 	{
 		this.scheduler = scheduler;
 		this.database = database;
+		this.taskGeneratorDB = taskGeneratorDB;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -74,6 +77,15 @@ public class PilotDashboardController
 
 		}
 
+		return init(model);
+	}
+
+	@RequestMapping("/generate")
+	public String generate(@RequestParam("hostName")
+	String hostName, @RequestParam("parametersFile")
+	String parametersFile, Model model) throws IOException, DatabaseException
+	{
+		this.taskGeneratorDB.generateTasks(parametersFile, hostName);
 		return init(model);
 	}
 
