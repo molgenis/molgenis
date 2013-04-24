@@ -102,9 +102,9 @@ public class TaskGenerator
 				out = new StringWriter();
 				Map<String, Object> map = TupleUtils.toMap(target);
 
-				// ATTENTION: We don't use freemarker anymore!
-				// template.process(map, out);
-
+				// add parameters for resource management:
+//				map.put(Parameters.WALLTIME, step.getProtocol().getWalltime());
+				
 				// remember parameter values
 				task.setParameters(map);
 
@@ -305,10 +305,14 @@ public class TaskGenerator
 		// {
 		for (WritableTuple target : localParameters)
 		{
+			// add parameters for resource management:
+			target.set(Parameters.QUEUE, step.getProtocol().getQueue());
+			target.set(Parameters.NODES, step.getProtocol().getNodes());
+			target.set(Parameters.PPN, step.getProtocol().getPpn());
+			target.set(Parameters.WALLTIME, step.getProtocol().getWalltime());
+			target.set(Parameters.MEMORY, step.getProtocol().getMemory());
+			
 			// add protocol parameters
-			// FIXME complete with mem, etc
-			target.set("cores", step.getProtocol().getCores());
-
 			for (Output o : step.getProtocol().getOutputs())
 			{
 				target.set(o.getName(), o.getValue());

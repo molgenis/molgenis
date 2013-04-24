@@ -33,7 +33,7 @@ public class WorkflowCsvParser
 						+ row);
 
 				Step s = new Step(row.getString(Parameters.STEP));
-				s.setProtocol(ProtocolFtlParser.parse(new File(workflowFile).getParentFile(), row.getString(Parameters.PROTOCOL)));
+				s.setProtocol(ProtocolParser.parse(new File(workflowFile).getParentFile(), row.getString(Parameters.PROTOCOL)));
 				s.setParameters(WorkflowCsvParser.parseParameters(row.getString(Parameters.PARAMETER_MAPPING)));
 
 				wf.getSteps().add(s);

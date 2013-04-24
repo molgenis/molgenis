@@ -21,6 +21,7 @@ import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.generators.MolgenisFunctionFileGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.compute5.generators.local.LocalBackend;
+import org.molgenis.compute5.generators.pbs.PbsBackend;
 import org.molgenis.compute5.model.Compute;
 import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Task;
@@ -49,8 +50,8 @@ public class ComputeCommandLine
 
 		// setup commandline options
 		Options options = new Options();
-		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs().withLongOpt(Parameters.PARAMETER_MAPPING)
-				.withDescription("path to parameter.csv file(s)").create("p");
+		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs()
+				.withLongOpt(Parameters.PARAMETER_MAPPING).withDescription("path to parameter.csv file(s)").create("p");
 		Option w = OptionBuilder.withArgName("steps.csv").hasArg().withLongOpt("workflow")
 				.withDescription("path to workflow.csv.").create("w");
 		Option d = OptionBuilder.withArgName(Task.WORKDIR_COLUMN).hasArg().withLongOpt(Task.WORKDIR_COLUMN)
@@ -140,16 +141,26 @@ public class ComputeCommandLine
 		// create environment.txt with user parameters that are used in at least
 		// one of the steps
 		new EnvironmentGenerator().generate(compute, workDir);
-		
+
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
 		// write the task for the backend
-		new LocalBackend().generate(compute.getTasks(), dir);
+		// TODO: use 'scheduler' from parameters to decide which backend
+		String scheduler = (String) compute.getParameters().getValues().get(0).get(Parameters.SCHEDULER_COLUMN);
+		if (Parameters.PBS.equals(scheduler))
+		{
+			new PbsBackend().generate(compute.getTasks(), dir);
+		}
+		else
+		{
+			new LocalBackend().generate(compute.getTasks(), dir);
+		}
 
-		// create Error File in which framework and users can store error (code: message).
+		// create Error File in which framework and users can store error (code:
+		// message).
 		new MolgenisFunctionFileGenerator().generate(compute, workDir);
-		
+
 		// generate outputs folders per task
 		for (Task t : compute.getTasks())
 		{
@@ -166,16 +177,18 @@ public class ComputeCommandLine
 		System.out.println("Generation complete");
 		return compute;
 	}
-	
+
 	/**
 	 * Return Compute object, given one single parametersCsv
+	 * 
 	 * @param parametersCsv
 	 * @return
 	 * @throws IOException
 	 */
 	public static Compute create(String parametersCsv) throws IOException
 	{
-		Compute c = ComputeCommandLine.create("", new String[]{parametersCsv}, "");
+		Compute c = ComputeCommandLine.create("", new String[]
+		{ parametersCsv }, "");
 		return c;
 	}
 }
