@@ -38,8 +38,7 @@ public class TaskGeneratorDB
 		{
 			System.out.println(new File(".").getCanonicalPath());
 
-			compute = ComputeCommandLine.create(null, new String[]
-			{ file }, new File(".").getCanonicalPath());
+			compute = ComputeCommandLine.create(file);
 		}
 		catch (IOException e)
 		{
