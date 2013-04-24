@@ -99,6 +99,8 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 		if (tupleTable instanceof DatabaseTupleTable) ((DatabaseTupleTable) tupleTable).setDb(db);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
+		EasyPluginController.HTML_WAS_ALREADY_SERVED = true;
+
 		HttpServletResponse response = request.getResponse();
 		response.setContentType("application/ms-excel");
 		response.addHeader("Content-Disposition",
