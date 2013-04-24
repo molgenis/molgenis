@@ -1,0 +1,4 @@
+step,protocol,parameters
+stepA,stepA.sh,"experiment=user_experiment;sample=user_sample;constant=user_constant"
+stepB,stepB.sh,"experiment=stepA_expPrinted;nSamples=stepA_nSamples;constant=user_constant"
+stepC,stepC.sh,sample=user_sample;sampleCopy=stepA_sampleCopy

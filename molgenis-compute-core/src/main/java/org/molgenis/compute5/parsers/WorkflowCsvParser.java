@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Step;
 import org.molgenis.compute5.model.Workflow;
 import org.molgenis.io.csv.CsvReader;
@@ -26,14 +27,14 @@ public class WorkflowCsvParser
 			for (Tuple row : reader)
 			{
 				// check value
-				if (row.isNull("step")) throw new IOException("required column 'step' is missing in row " + row);
-				if (row.isNull("protocol")) throw new IOException("required column 'protocol' is missing in row " + row);
-				if (row.isNull("parameters")) throw new IOException("required column 'parameters' is missing in row "
+				if (row.isNull(Parameters.STEP)) throw new IOException("required column '" + Parameters.STEP + "' is missing in row " + row);
+				if (row.isNull(Parameters.PROTOCOL)) throw new IOException("required column '" + Parameters.PROTOCOL + "' is missing in row " + row);
+				if (row.isNull(Parameters.PARAMETER_MAPPING)) throw new IOException("required column '" + Parameters.PARAMETER_MAPPING + "' is missing in row "
 						+ row);
 
-				Step s = new Step(row.getString("step"));
-				s.setProtocol(ProtocolFtlParser.parse(new File(workflowFile).getParentFile(), row.getString("protocol")));
-				s.setParameters(WorkflowCsvParser.parseParameters(row.getString("parameters")));
+				Step s = new Step(row.getString(Parameters.STEP));
+				s.setProtocol(ProtocolParser.parse(new File(workflowFile).getParentFile(), row.getString(Parameters.PROTOCOL)));
+				s.setParameters(WorkflowCsvParser.parseParameters(row.getString(Parameters.PARAMETER_MAPPING)));
 
 				wf.getSteps().add(s);
 			}
@@ -43,7 +44,7 @@ public class WorkflowCsvParser
 		catch (IOException e)
 		{
 			throw new IOException("Parsing of workflow failed: " + e.getMessage()
-					+ ".\nThe workflow csv requires columns step,protocol,parameters.");
+					+ ".\nThe workflow csv requires columns " + Parameters.STEP + "," + Parameters.PROTOCOL + "," + Parameters.PARAMETER_MAPPING + ".");
 		}
 	}
 

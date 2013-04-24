@@ -51,7 +51,7 @@ public class BackendGenerator
 			String inputLine;
 
 			while ((inputLine = stream.readLine()) != null)
-				result.append(inputLine);
+				result.append(inputLine + "\n");
 		}
 		finally
 		{
@@ -74,7 +74,7 @@ public class BackendGenerator
 		{
 			File outFile = new File(targetDir.getAbsolutePath() + "/submit.sh");
 			Writer out = new BufferedWriter(new FileWriter(outFile));
-			
+
 			for(Task t: tasks)
 			{
 				out.write("sh "+t.getName()+".sh\n");

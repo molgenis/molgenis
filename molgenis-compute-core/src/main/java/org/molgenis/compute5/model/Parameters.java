@@ -10,11 +10,38 @@ import org.molgenis.util.tuple.WritableTuple;
 public class Parameters
 {
 	//unique column used to distinguish the parameter rows provided
-	public final static String ID_COLUMN = "user."+Task.TASKID_COLUMN;
-	public static final Object WORKFLOW_COLUMN_INITIAL = "workflow";
-	public final static String WORKFLOW_COLUMN = "user.workflow";
-	public final static String WORKDIR_COLUMN = "user."+Task.WORKDIR_COLUMN;
-	public static final String PARAMETER_COLUMN = "parameters"; // why no prefix 'user.'?
+	
+	// SOME OF THESE CONSTANTS SHOULD BE PLACED ELSEWHERE!
+	
+	public static final String STEP = "step";
+	public static final String PROTOCOL = "script";
+	public static final String PARAMETER_MAPPING = "parameterMapping";
+	public static final String USER = "user"; // TODO: replace all "user" strings with this constant
+	public static final String STEP_PARAM_SEP = "_";
+	public static final String USER_PREFIX = USER + STEP_PARAM_SEP;
+	public final static String ID_COLUMN = USER_PREFIX + Task.TASKID_COLUMN;
+	public static final String WORKFLOW_COLUMN_INITIAL = "workflow";
+	public final static String WORKFLOW_COLUMN = USER_PREFIX + "workflow";
+	public final static String WORKDIR_COLUMN = USER_PREFIX + Task.WORKDIR_COLUMN;
+	public static final String PARAMETER_COLUMN = "parameters";
+	public static final String MOLGENIS_FUNCTION_FILE = "MolgenisFunctions.sh"; // file with MC framework functions
+	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
+	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;
+	public static String ERROR_FILE_DEFAULT = "error.log"; // can be changed by user parameter
+	public static String ENVIRONMENT = "environment.txt";
+	public static String ENVIRONMENT_FULLPATH = null; // to be set
+	public static String NOTAVAILABLE = "_NA";
+	public static String LIST = "list";
+	public static String STRING = "string";
+	public static String INPUT = "input";
+	public static final String WALLTIME = "walltime";
+	public static final String QUEUE = "queue";
+	public static final String NODES = "nodes";
+	public static final String PPN = "ppn";
+	public static final String MEMORY = "mem";
+	public static final String SCHEDULER = "scheduler";
+	public static final String SCHEDULER_COLUMN = USER_PREFIX + SCHEDULER;
+	public static final String PBS = "pbs";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();

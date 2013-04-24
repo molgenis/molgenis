@@ -160,3 +160,7 @@ td {
 	width: 32px;
 	margin:10px auto;
 }
+
+.form-horizontal .control-group {
+	margin-bottom: 0px !important;
+}

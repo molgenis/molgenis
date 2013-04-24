@@ -1,0 +1,2 @@
+disease,workflow,workdir,errorlog,scheduler
+diabetes,workflow.csv,../out,myerror.log,pbs

@@ -1,4 +1,4 @@
-step,protocol,parameters
-stop0,step0.ftl,dummy=user.input
-step1,step1.ftl,input=user.input
-step2,step2.ftl,input=step0.output
+step,protocol,parameter
+step0,step0.ftl,dummy=user_input
+step1,step1.ftl,input=user_input
+step2,step2.ftl,input=step0_output

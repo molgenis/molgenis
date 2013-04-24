@@ -86,6 +86,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		s.append("<script type=\"text/javascript\" src=\"js/protocolviewer.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.dynatree.min.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.fileDownload-min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.validate.min.js\"></script>");
 		return s.toString();
 	}
 
