@@ -64,6 +64,7 @@
 	    	e.preventDefault();
 	    	e.stopPropagation();
 	    	if(form.valid()) {
+	    		$('.text-error', form).remove();
 		        $.ajax({
 		            type: 'POST',
 		            url:  '/account/login',
