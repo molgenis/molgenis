@@ -11,15 +11,8 @@
 		<script type="text/javascript">
 			function updateHostStatus(hostId) {
 				$.ajax({
-					type : 'POST',
-					url : '/api/v1/computetask?_method=GET',
-					data : JSON.stringify({
-						q : [ {
-							"field" : "computeHost",
-							"operator" : "EQUALS",
-							"value" : hostId
-						} ]
-					}),
+					type : 'GET',
+					url : '/plugin/dashboard/status?hostId=' + hostId,
 					contentType : 'application/json',
 					async : true,
 					success : function(response) {
@@ -31,33 +24,13 @@
 			}
 			
 			function updateHostStatusTable(hostId, response) {
-				var generated = 0;
-				var ready = 0;
-				var running = 0;
-				var failed = 0;
-				var done = 0;
-					
-				$.each(response.items, function(key, val) {	
-					if (val.statusCode == 'generated') {
-						generated++;
-					} else if (val.statusCode == 'ready') {
-						ready++;
-					} else if (val.statusCode == 'running') {
-						running++;
-					} else if (val.statusCode == 'failed') {
-						failed++;
-					} else if (val.statusCode == 'done') {
-						done++;
-					} 
-				});
+				$('#' + hostId + ' td.generated').html(response.generated);
+				$('#' + hostId + ' td.ready').html(response.ready);
+				$('#' + hostId + ' td.running').html(response.running);
+				$('#' + hostId + ' td.failed').html(response.failed);
+				$('#' + hostId + ' td.done').html(response.done);
 				
-				$('#' + hostId + ' td.generated').html(generated);
-				$('#' + hostId + ' td.ready').html(ready);
-				$('#' + hostId + ' td.running').html(running);
-				$('#' + hostId + ' td.failed').html(failed);
-				$('#' + hostId + ' td.done').html(done);
-				
-				if (failed > 0) {
+				if (response.failed > 0) {
 					$('#renerateFailedTasksForm_' + hostId).show();
 				} else {
 					$('#renerateFailedTasksForm_' + hostId).hide();
