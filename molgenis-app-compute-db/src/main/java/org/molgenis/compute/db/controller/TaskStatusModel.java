@@ -5,10 +5,10 @@ public class TaskStatusModel
 	private final int generated;
 	private final int ready;
 	private final int running;
-	private final int done;
 	private final int failed;
+	private final int done;
 
-	public TaskStatusModel(int generated, int ready, int running, int done, int failed)
+	public TaskStatusModel(int generated, int ready, int running, int failed, int done)
 	{
 		this.generated = generated;
 		this.ready = ready;
