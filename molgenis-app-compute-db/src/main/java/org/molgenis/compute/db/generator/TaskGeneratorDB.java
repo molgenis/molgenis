@@ -1,6 +1,5 @@
 package org.molgenis.compute.db.generator;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +35,6 @@ public class TaskGeneratorDB
 		// generate here
 		try
 		{
-			System.out.println(new File(".").getCanonicalPath());
-
 			compute = ComputeCommandLine.create(file);
 		}
 		catch (IOException e)
