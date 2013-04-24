@@ -1,5 +1,7 @@
 package org.molgenis.compute.db.controller;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +17,15 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Start and stop pilots, show status
@@ -91,6 +96,25 @@ public class PilotDashboardController
 		}
 
 		return init(model);
+	}
+
+	@RequestMapping("/regenerate")
+	public String regenerateFailedTasks(@RequestParam("hostName")
+	String hostName, Model model) throws IOException, DatabaseException
+	{
+		System.out.println("Resubmit for " + hostName);
+		model.addAttribute("message", "Failed tasks regenerated for " + hostName);
+		return init(model);
+	}
+
+	@RequestMapping(value = "/status", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<TaskStatusModel> status(@RequestParam("hostName")
+	String hostName)
+	{
+		TaskStatusModel taskStatusModel = new TaskStatusModel(1, 2, 3, 4, 5);
+
+		return new ResponseEntity<TaskStatusModel>(taskStatusModel, HttpStatus.OK);
 	}
 
 	@ExceptionHandler(ComputeDbException.class)

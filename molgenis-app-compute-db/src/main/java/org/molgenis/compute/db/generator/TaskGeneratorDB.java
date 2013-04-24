@@ -77,6 +77,7 @@ public class TaskGeneratorDB
 
 				// find previous tasks in db
 				Set<String> prevTaskNames = task.getPreviousTasks();
+
 				List<ComputeTask> previousTasks = new ArrayList<ComputeTask>();
 				for (String prevTaskName : prevTaskNames)
 				{
