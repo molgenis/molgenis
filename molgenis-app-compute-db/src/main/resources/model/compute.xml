@@ -79,10 +79,18 @@
 			<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
-
 				description="Last known status of this task. See compute history for details. NB 'ready' means ready for running (cf. 'done')." />
 			<unique fields="name" />
 		</entity>
+        <entity name="ComputeTaskHistory" implements="Nameable" xref_label="ComputeTask">
+      			<description>Keep track of the compute history of a task, including resubmissions.
+      			</description>
+      			<field name="ComputeTask" type="xref" xref_entity="ComputeTask" description="the task for which the history was collected" />
+      			<field name="StatusTime" type="datetime" auto="true" description="time of state change" />
+      			<field name="runLog" nillable="true" type="text" description="field to show the content of the error file (only applicable on fail/done of a task)" />
+                <field name="StatusCode" nillable="false" type="enum" enum_options="[running,failed,done]" default="failed" description="current status of this task." />
+                <unique fields="ComputeTask,StatusTime" />
+      	</entity>
 		<entity name="ComputeParameterValue" implements="Nameable">
 			<description>Related to ComputeTask values
 			</description>

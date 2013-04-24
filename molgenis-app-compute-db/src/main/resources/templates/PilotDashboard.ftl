@@ -103,7 +103,7 @@
   							</form>
   							<form id="renerateFailedTasksForm_${host.id}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">
   								<input type="hidden" name="hostName" value="${host.name}" />
-  								<button type="submit" class="btn">Regenerate failed jobs</button>	
+  								<button type="submit" class="btn">Resubmit failed jobs</button>
   							</form>
 						</div>
     					<div class="span6 status">
