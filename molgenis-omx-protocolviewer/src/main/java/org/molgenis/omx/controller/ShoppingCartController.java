@@ -70,7 +70,7 @@ public class ShoppingCartController
 			@Nullable
 			public Integer apply(@Nullable FeatureRequest featureRequest)
 			{
-				return featureRequest.getFeature();
+				return featureRequest != null ? featureRequest.getFeature() : null;
 			}
 		}));
 	}
@@ -93,7 +93,7 @@ public class ShoppingCartController
 					@Nullable
 					public Integer apply(@Nullable FeatureRequest featureRequest)
 					{
-						return featureRequest.getFeature();
+						return featureRequest != null ? featureRequest.getFeature() : null;
 					}
 				}));
 	}
@@ -109,7 +109,7 @@ public class ShoppingCartController
 					@Nullable
 					public Integer apply(@Nullable FeatureRequest featureRequest)
 					{
-						return featureRequest.getFeature();
+						return featureRequest != null ? featureRequest.getFeature() : null;
 					}
 				}));
 	}
