@@ -113,7 +113,7 @@
   							<form action="/plugin/dashboard/generate" class="form-inline" method="post">
   								<input type="hidden" name="hostName" value="${host.name}" />
   								<input type="text" name="parametersFile" id="inputParametersFile" placeholder="Parameters file path">
-    							<button type="submit" class="btn">Generate</button>	
+    							<button type="submit" class="btn">Generate jobs</button>	
   							</form>
 						</div>
     					<div class="span6 status">
