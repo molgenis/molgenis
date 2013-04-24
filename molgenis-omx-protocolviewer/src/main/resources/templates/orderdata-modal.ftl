@@ -21,7 +21,9 @@
 	  </div>
 	</form>
   </div>
-  <table id="orderdata-selection-table" class="table table-striped table-condensed"></table>
+  <div id="orderdata-selection-table-container">
+  	<table id="orderdata-selection-table" class="table table-striped table-condensed"></table>
+  </div>
   <div class="modal-footer">
     <a href="#" id="orderdata-btn-close" class="btn" aria-hidden="true">Cancel</a>
     <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Order</a>
@@ -40,18 +42,42 @@
 				type : 'GET',
 				url : '/cart',
 				success : function(cart) {
-					
-					var items = [];
-					items.push('<thead><th>Name</th><th>Description<th></thead>');
-					items.push('<tbody>');
-					$.each(cart.features, function(i, feature) {
-						items.push('<tr>');
-						items.push('<td>' + feature.name + '</td>');
-						items.push('<td>' + JSON.parse(feature.description).en + '</td>'); // TODO not safe
-						items.push('</tr>');	
-					});
-					items.push('</tbody>');
-					$('#orderdata-selection-table').html(items.join(''));
+					var container = $('#orderdata-selection-table-container');
+					if(cart.features.length == 0) {
+						submitBtn.addClass('disabled');
+						container.append('<p>no variables selected</p>');
+					} else {
+						submitBtn.removeClass('disabled');
+						var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed"></table>');
+						table.append($('<thead><th>Name</th><th>Description</th><th>Remove</th></thead>'));
+						var body = $('<tbody>');
+						$.each(cart.features, function(i, feature) {
+							var row = $('<tr>');
+							row.append('<td>' + feature.name + '</td>');
+							row.append('<td>' + JSON.parse(feature.description).en + '</td>'); // TODO not safe
+							
+							var deleteCol = $('<td>');
+							var deleteBtn = $('<i class="icon-remove"></i>');
+							deleteBtn.click(function() {
+								$.ajax({
+									type : 'POST',
+									url : '/cart/remove',
+									data: JSON.stringify({
+										features : [{feature: feature.id}]
+									}),
+									contentType: 'application/json',
+									success : function() {
+										row.remove();
+									}
+								});	
+							});
+							deleteBtn.appendTo(deleteCol);
+							
+							row.append(deleteCol);
+							body.append(row);
+						});
+						table.append(body).appendTo(container);
+					}
 				}
 			});
   		});
@@ -112,5 +138,9 @@
 				form.submit();
 	    	}
 		});
+		
+		<#-- CSS -->
+		$('#orderdata-selection-table-container').css('max-height', '300px'); //TODO move to css?
+		$('#orderdata-selection-table-container').css('overflow','auto');
 	});
 </script>

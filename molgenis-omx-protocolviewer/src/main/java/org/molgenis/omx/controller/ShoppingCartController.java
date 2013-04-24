@@ -60,7 +60,7 @@ public class ShoppingCartController
 		}));
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void addToCart(@Valid @RequestBody FeaturesRequest featuresRequest)
 	{
@@ -73,6 +73,29 @@ public class ShoppingCartController
 				return featureRequest.getFeature();
 			}
 		}));
+	}
+
+	@RequestMapping(value = "/empty", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void emptyCart()
+	{
+		shoppingCart.emptyCart();
+	}
+
+	@RequestMapping(value = "/remove", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void removeFromCart(@Valid @RequestBody FeaturesRequest featuresRequest)
+	{
+		shoppingCart.removeFromCart(Lists.transform(featuresRequest.getFeatures(),
+				new Function<FeatureRequest, Integer>()
+				{
+					@Override
+					@Nullable
+					public Integer apply(@Nullable FeatureRequest featureRequest)
+					{
+						return featureRequest.getFeature();
+					}
+				}));
 	}
 
 	@RequestMapping(value = "/replace", method = RequestMethod.POST)
