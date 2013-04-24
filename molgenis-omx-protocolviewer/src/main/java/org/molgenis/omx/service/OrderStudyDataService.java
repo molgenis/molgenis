@@ -1,8 +1,10 @@
 package org.molgenis.omx.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,31 +57,19 @@ public class OrderStudyDataService
 				Operator.IN, featureIds));
 		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, login.getUserId());
 
+		File file = storeRequestForm(requestForm);
+
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
 		studyDataRequest.setName(studyName);
 		studyDataRequest.setFeatures(features);
 		studyDataRequest.setMolgenisUser(molgenisUser);
+		studyDataRequest.setRequestDate(new Date());
 		studyDataRequest.setRequestStatus("pending");
+		studyDataRequest.setRequestForm(file.getPath());
 
 		logger.debug("create study data request: " + studyName);
 		database.add(studyDataRequest);
-
-		// TODO put file (meta-)data in database
-		// note: use requestForm.getHeader("content-disposition") to get file name)
-		File file = new File(System.getProperty("user.home") + "/" + requestForm.getName());
-		FileOutputStream fos = new FileOutputStream(file);
-		try
-		{
-			IOUtils.copy(requestForm.getInputStream(), fos);
-		}
-		finally
-		{
-			fos.close();
-		}
-
-		for (String header : requestForm.getHeaderNames())
-			logger.info(header + " - " + requestForm.getHeader(header));
 
 		// send order confirmation to user
 		MimeMessage message = mailSender.createMimeMessage();
@@ -90,6 +80,23 @@ public class OrderStudyDataService
 		helper.addAttachment(getAppName() + "-request_" + System.currentTimeMillis() + ".doc", new FileSystemResource(
 				file));
 		mailSender.send(message);
+	}
+
+	private File storeRequestForm(Part requestForm) throws FileNotFoundException, IOException
+	{
+		// TODO put file (meta-)data in database
+		// note: use requestForm.getHeader("content-disposition") to get file name)
+		File file = new File(System.getProperty("user.home") + "/requestform-" + System.currentTimeMillis() + ".doc");
+		FileOutputStream fos = new FileOutputStream(file);
+		try
+		{
+			IOUtils.copy(requestForm.getInputStream(), fos);
+		}
+		finally
+		{
+			fos.close();
+		}
+		return file;
 	}
 
 	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest)

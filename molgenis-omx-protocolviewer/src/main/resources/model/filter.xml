@@ -6,9 +6,10 @@
 		</description>
 		
 		<entity name="StudyDataRequest" implements="Identifiable">
-			<field name="RequestForm" type="file" nillable="true" />
+			<field name="RequestForm" type="string" description="request form filename"/>
 			<field name="Features" type="mref" xref_entity="ObservableFeature" />
 			<field name="MolgenisUser" type="xref" xref_entity="MolgenisUser" />
+			<field name="RequestDate" type="datetime" description="request date"/>
 			<field name="RequestStatus" type="enum" enum_options="[pending,accepted,rejected]" />
 		</entity>
 		

@@ -40,6 +40,7 @@ public class OrderStudyDataController
 			MessagingException
 	{
 		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart());
+		shoppingCart.emptyCart();
 	}
 
 	// TODO default exception handler?
