@@ -309,12 +309,14 @@
 		var container = $('#feature-selection').empty();
 		if (tree === null) {
 			container.append("<p>No variables selected</p>");
+			updateShoppingCart(null);
 			return;
 		}
 
 		var nodes = tree.getSelectedNodes();
 		if (nodes === null || nodes.length === 0) {
 			container.append("<p>No variables selected</p>");
+			updateShoppingCart(null);
 			return;
 		}
 
@@ -349,16 +351,24 @@
 				features.push({feature: node.data.key});
 			}
 		});
-		$.ajax({
-			type : 'POST',
-			url : '/cart/replace',
-			data : JSON.stringify({
-				'features' : features
-				}),
-			contentType : 'application/json'
-		});
+		updateShoppingCart(features);
 	}
 
+	function updateShoppingCart(features) {
+		if (features === null) {
+			$.post('/cart/empty');
+		} else {
+			$.ajax({
+				type : 'POST',
+				url : '/cart/replace',
+				data : JSON.stringify({
+					'features' : features
+					}),
+				contentType : 'application/json'
+			});
+		}
+	}
+	
 	function getBottomNodes(node, hits) {
 		if (node.subProtocols && node.subProtocols.length > 0) {
 			$.each(node.subProtocols, function(i, subNode) {
