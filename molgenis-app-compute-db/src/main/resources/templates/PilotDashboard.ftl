@@ -80,87 +80,67 @@
 			<#if message??>
 				<div class="alert alert-success">${message}</div>
 			</#if>			
-							
+		
+			<#if hosts?size == 0>
+				<h4>No hosts found. Please add a host on the 'Hosts' tab</h4>
+			</#if>
+								
 			<#list hosts as host>
 				<div class="well">
 					<div class="row-fluid">
-						<div class="span12">
-							<span class="host-name">${host.name}</span>
-							Status:
+						<div class="span6">
+							<div class="host-header">
+								<span class="host-name">${host.name}</span>
 								<#if host.running>
   									<span class="text-success">Running</span>
   								<#else>
   									<span class="text-error">Not running</span>
   								</#if>
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="span6 dashboard">
+  							</div>	
 							<#if host.running>
-  								<form action="/plugin/dashboard/stop" class="form-horizontal" method="post">		
+  								<form action="/plugin/dashboard/stop" class="form-inline" method="post">		
   									<input type="hidden" name="id" value="${host.id}" />
-  									<div class="control-group">
-    									<div class="controls">
-      										<button type="submit" class="btn">Stop</button>
-    									</div>
-  									</div>
+  									<button type="submit" class="btn">Stop</button>	
   								</form>
   							<#else>
-  								<form action="/plugin/dashboard/start" class="form-horizontal" method="post">
+  								<form action="/plugin/dashboard/start" class="form-inline" method="post">
   									<input type="hidden" name="id" value="${host.id}" />
-  									<div class="control-group">
-    									<label class="control-label" for="inputPassword">Password</label>
-    									<div class="controls">
-      										<input type="password" name="password" id="inputPassword" placeholder="Password">
-    									</div>
-  									</div>
-  									<div class="control-group">
-    									<div class="controls">
-      										<button type="submit" class="btn">Start</button>
-    									</div>
-  									</div>
-  								</form>
+  									<input type="password" name="password" id="inputPassword" placeholder="Password"  />
+    								<button type="submit" class="btn">Start</button>
+    							</form>		
   							</#if>
   							
-  							<form action="/plugin/dashboard/generate" class="form-horizontal" method="post">
+  							<form action="/plugin/dashboard/generate" class="form-inline" method="post">
   								<input type="hidden" name="hostName" value="${host.name}" />
-  								<div class="control-group">
-    								<label class="control-label" for="inputParametersFile">Parameters file</label>
-    								<div class="controls">
-      									<input type="text" name="parametersFile" id="inputParametersFile" placeholder="File path">
-    								</div>
-  								</div>
-  								<div class="control-group">
-    								<div class="controls">
-      									<button type="submit" class="btn">Generate</button>
-    								</div>
-  								</div>
+  								<input type="text" name="parametersFile" id="inputParametersFile" placeholder="Parameters file path">
+    							<button type="submit" class="btn">Generate jobs</button>	
   							</form>
-  							
 						</div>
-    					<div class="span6">
-    						<table id="${host.id}" class="table">
-    							<tr>
-    								<td>Jobs generated</td>
-    								<td class="generated"></td>
-    							</tr>
-    							<tr>
-    								<td>Jobs ready</td>
-    								<td class="ready"></td>
-    							</tr>
-    							<tr>
-    								<td>Jobs running</td>
-    								<td class="running"></td>
-    							</tr>
-    							<tr>
-    								<td>Jobs failed</td>
-    								<td class="failed"></td>
-    							</tr>
-    							<tr>
-    								<td>Jobs done</td>
-    								<td class="done"></td>
-    							</tr>
-    						</table>
+    					<div class="span6 status">
+    						<div class="status-table">
+    							<table id="${host.id}" class="table table-condensed table-hover">
+    								<tr>
+    									<td>Jobs generated</td>
+    									<td class="generated"></td>
+    								</tr>
+    								<tr>
+    									<td>Jobs ready</td>
+    									<td class="ready"></td>
+    								</tr>
+    								<tr>
+    									<td>Jobs running</td>
+    									<td class="running"></td>
+    								</tr>
+    								<tr>
+    									<td>Jobs failed</td>
+    									<td class="failed"></td>
+    								</tr>
+    								<tr>
+    									<td>Jobs done</td>
+    									<td class="done"></td>
+    								</tr>
+    							</table>
+    						</div>
     					</div>
     				</div>
     			</div>

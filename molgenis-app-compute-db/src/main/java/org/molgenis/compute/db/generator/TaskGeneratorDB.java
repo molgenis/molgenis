@@ -1,5 +1,12 @@
 package org.molgenis.compute.db.generator;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.pilot.PilotService;
@@ -13,141 +20,137 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.ApplicationContextProvider;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 23/04/2013 Time: 08:47
  * To change this template use File | Settings | File Templates.
  */
 public class TaskGeneratorDB
 {
-    private static final Logger LOG = Logger.getLogger(TaskGeneratorDB.class);
-    public static final String BACKEND = "backend";
+	private static final Logger LOG = Logger.getLogger(TaskGeneratorDB.class);
+	public static final String BACKEND = "backend";
 
+	public void generateTasks(String file, String backendName)
+	{
+		Compute compute = null;
+		// generate here
+		try
+		{
+			compute = ComputeCommandLine.create(file);
+		}
+		catch (IOException e)
+		{
+			throw new ComputeDbException(e.getMessage());
 
-    public void generateTasks(String file, String backendName)
-    {
-        Compute compute = null;
-        //generate here
-        try
-        {
-            compute = ComputeCommandLine.create(file);
-        }
-        catch (IOException e)
-        {
-            throw new ComputeDbException(e.getMessage());
+		}
 
+		List<Task> tasks = compute.getTasks();
 
-        }
+		LOG.info("Generating task for [" + backendName + "] with parametersfile [" + file + "]");
 
-        List<Task> tasks = compute.getTasks();
+		int tasksSize = 0;
 
-        LOG.info("Generating task for [" + backendName + "] with parametersfile [" + file + "]");
+		Database db = ApplicationContextProvider.getApplicationContext().getBean("unathorizedDatabase", Database.class);
 
-        int tasksSize = 0;
+		try
+		{
+			db.beginTx();
 
-        Database db = ApplicationContextProvider.getApplicationContext().getBean("unathorizedDatabase", Database.class);
+			List<ComputeHost> computeHosts = db.query(ComputeHost.class).equals(ComputeHost.NAME, backendName).find();
 
-        try
-        {
-            db.beginTx();
+			if (computeHosts.size() > 0)
+			{
+				ComputeHost computeHost = computeHosts.get(0);
 
-            List<ComputeHost> computeHosts = db.query(ComputeHost.class)
-                                .equals(ComputeHost.NAME, backendName).find();
+				for (Task task : tasks)
+				{
+					String name = task.getName();
+					String script = task.getScript();
 
-            if(computeHosts.size() > 0)
-            {
-                ComputeHost computeHost = computeHosts.get(0);
+					ComputeTask computeTask = new ComputeTask();
+					computeTask.setName(name);
+					computeTask.setComputeScript(script);
+					computeTask.setComputeHost(computeHost);
+					computeTask.setStatusCode(PilotService.TASK_GENERATED);
+					computeTask.setInterpreter("bash");
 
-                for(Task task : tasks)
-                {
-                    String name = task.getName();
-                    String script = task.getScript();
+					// find previous tasks in db
+					Set<String> prevTaskNames = task.getPreviousTasks();
+					List<ComputeTask> previousTasks = new ArrayList<ComputeTask>();
+					for (String prevTaskName : prevTaskNames)
+					{
+						List<ComputeTask> prevTasks = db.query(ComputeTask.class)
+								.equals(ComputeTask.NAME, prevTaskName).find();
 
-                    ComputeTask computeTask = new ComputeTask();
-                    computeTask.setName(name);
-                    computeTask.setComputeScript(script);
-                    computeTask.setComputeHost(computeHost);
-                    computeTask.setStatusCode(PilotService.TASK_GENERATED);
-                    computeTask.setInterpreter("bash");
+						if (prevTasks.size() > 0)
+						{
+							ComputeTask prevTask = prevTasks.get(0);
+							previousTasks.add(prevTask);
+						}
+						else throw new ComputeDbException("No ComputeTask  " + prevTaskName
+								+ " is found, when searching for previous task for " + name);
 
-                    //find previous tasks in db
-                    Set<String> prevTaskNames = task.getPreviousTasks();
-                    List<ComputeTask> previousTasks = new ArrayList<ComputeTask>();
-                    for(String prevTaskName : prevTaskNames)
-                    {
-                        List<ComputeTask> prevTasks = db.query(ComputeTask.class)
-                                                        .equals(ComputeTask.NAME, prevTaskName).find();
+					}
 
-                        if(prevTasks.size() > 0)
-                        {
-                            ComputeTask prevTask = prevTasks.get(0);
-                            previousTasks.add(prevTask);
-                        }
-                        else
-                            throw new ComputeDbException("No ComputeTask  " + prevTaskName + " is found, when searching for previous task for " + name);
+					if (previousTasks.size() > 0) computeTask.setPrevSteps(previousTasks);
 
-                    }
+					db.add(computeTask);
+					tasksSize++;
 
-                    if(previousTasks.size() > 0)
-                        computeTask.setPrevSteps(previousTasks);
+					tasksSize++;
+					LOG.info("Task [" + computeTask.getName() + "] is added\n");
 
-                    db.add(computeTask);
-                    tasksSize++;
+					// add parameter values to DB
+					Map<String, Object> tastParameters = task.getParameters();
 
+					for (Map.Entry<String, Object> entry : tastParameters.entrySet())
+					{
+						String parameterName = entry.getKey();
+						String parameterValue = entry.getValue().toString();
 
-                    tasksSize++;
-                    LOG.info("Task [" + computeTask.getName() + "] is added\n");
+						ComputeParameterValue computeParameterValue = new ComputeParameterValue();
+						computeParameterValue.setName(parameterName);
+						computeParameterValue.setValue(parameterValue);
 
-                    //add parameter values to DB
-                    Map<String, Object> tastParameters = task.getParameters();
+						ComputeTask taskInDB = db.query(ComputeTask.class)
+								.equals(ComputeTask.NAME, computeTask.getName()).find().get(0);
 
-                    for (Map.Entry<String, Object> entry : tastParameters.entrySet())
-                    {
-                        String parameterName = entry.getKey();
-                        String parameterValue = entry.getValue().toString();
+						computeParameterValue.setComputeTask(taskInDB);
 
-                        ComputeParameterValue computeParameterValue = new ComputeParameterValue();
-                        computeParameterValue.setName(parameterName);
-                        computeParameterValue.setValue(parameterValue);
+						db.add(computeParameterValue);
+					}
+				}
 
-                        ComputeTask taskInDB = db.query(ComputeTask.class)
-                                                        .equals(ComputeTask.NAME, computeTask.getName()).find().get(0);
+				LOG.info("Total: " + tasksSize + " is added to database\n");
+			}
+			else throw new ComputeDbException("ComputeHost does not exist");
 
-                        computeParameterValue.setComputeTask(taskInDB);
+			db.commitTx();
+		}
+		catch (Exception e)
+		{
+			try
+			{
+				db.rollbackTx();
+			}
+			catch (DatabaseException e1)
+			{
+				e1.printStackTrace();
+			}
+			throw new ComputeDbException(e.getMessage());
+		}
+		finally
+		{
+			IOUtils.closeQuietly(db);
+		}
 
-                        db.add(computeParameterValue);
-                    }
-                 }
-            }
-            else
-                throw new ComputeDbException("ComputeHost does not exist");
+	}
 
-            db.commitTx();
-        }
-        catch (Exception e)
-        {
-            try
-            {
-                db.rollbackTx();
-            }
-            catch (DatabaseException e1)
-            {
-                e1.printStackTrace();
-            }
-            throw new ComputeDbException(e.getMessage());
-        }
-        LOG.info("Total: " + tasksSize + " is added to database\n");
-
-    }
-
-    public static void main(String[] args)
-    {
-        new TaskGeneratorDB().generateTasks("/Users/georgebyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/demoNBIC2/parameters.csv", "grid");
-    }
-
+	public static void main(String[] args) throws IOException
+	{
+		new TaskGeneratorDB()
+				.generateTasks(
+						"/Users/georgebyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/demoNBIC2/parameters.csv",
+						"grid");
+	}
 
 }
