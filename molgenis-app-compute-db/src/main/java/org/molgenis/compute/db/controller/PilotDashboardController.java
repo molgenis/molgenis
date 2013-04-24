@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.executor.Scheduler;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,16 +49,7 @@ public class PilotDashboardController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws DatabaseException
 	{
-		List<HostModel> hostModels = new ArrayList<HostModel>();
-		for (ComputeHost computeHost : ComputeHost.find(database))
-		{
-			HostModel hostModel = new HostModel(computeHost.getId(), computeHost.getName(),
-					scheduler.isRunning(computeHost.getId()));
-			hostModels.add(hostModel);
-		}
-
-		model.addAttribute("hosts", hostModels);
-
+		model.addAttribute("hosts", getHostModels());
 		return VIEW_NAME;
 	}
 
@@ -67,17 +61,17 @@ public class PilotDashboardController
 		ComputeHost host = ComputeHost.findById(database, id);
 		if (host != null)
 		{
-			try
-			{
-				scheduler.schedule(host, password);
-			}
-			catch (ComputeDbException e)
-			{
-				model.addAttribute("error", e.getMessage());
-			}
-
+			scheduler.schedule(host, password);
 		}
 
+		return init(model);
+	}
+
+	@RequestMapping("/stop")
+	public String stop(@RequestParam("id")
+	Integer id, Model model) throws DatabaseException
+	{
+		scheduler.unschedule(id);
 		return init(model);
 	}
 
@@ -86,44 +80,38 @@ public class PilotDashboardController
 	String hostName, @RequestParam("parametersFile")
 	String parametersFile, Model model) throws IOException, DatabaseException
 	{
-
 		if (StringUtils.isEmpty(parametersFile))
 		{
 			model.addAttribute("error", "Please specify a parameters file");
 		}
 		else
 		{
-			try
-			{
-				taskGeneratorDB.generateTasks(parametersFile, hostName);
-				model.addAttribute("message", "Tasks generated for " + hostName);
-			}
-			catch (ComputeDbException e)
-			{
-				model.addAttribute("error", e.getMessage());
-			}
+			taskGeneratorDB.generateTasks(parametersFile, hostName);
+			model.addAttribute("message", "Tasks generated for " + hostName);
 		}
-
-
-		this.taskGeneratorDB.generateTasks(parametersFile, hostName);
 
 		return init(model);
 	}
 
-	@RequestMapping("/stop")
-	public String stop(@RequestParam("id")
-	Integer id, String password, Model model) throws DatabaseException
+	@ExceptionHandler(ComputeDbException.class)
+	public String showComputeDbException(ComputeDbException e, HttpServletRequest request) throws DatabaseException
 	{
-		try
-		{
-			scheduler.unschedule(id);
-		}
-		catch (ComputeDbException e)
-		{
-			model.addAttribute("error", e.getMessage());
-		}
+		request.setAttribute("hosts", getHostModels());
+		request.setAttribute("error", e.getMessage());
 
-		return init(model);
+		return VIEW_NAME;
 	}
 
+	private List<HostModel> getHostModels() throws DatabaseException
+	{
+		List<HostModel> hostModels = new ArrayList<HostModel>();
+		for (ComputeHost computeHost : ComputeHost.find(database))
+		{
+			HostModel hostModel = new HostModel(computeHost.getId(), computeHost.getName(),
+					scheduler.isRunning(computeHost.getId()));
+			hostModels.add(hostModel);
+		}
+
+		return hostModels;
+	}
 }

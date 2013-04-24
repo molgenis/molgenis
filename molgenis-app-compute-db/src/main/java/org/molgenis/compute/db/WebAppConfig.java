@@ -33,10 +33,12 @@ import app.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan("org.molgenis")
+@ComponentScan(
+{ "org.molgenis.service", "org.molgenis.controller", "org.molgenis.compute.db.controller" })
 @Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
+	@Bean
 	@Scope("prototype")
 	public Database unathorizedDatabase() throws DatabaseException
 	{
@@ -59,7 +61,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public TaskScheduler taskScheduler()
 	{
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-		scheduler.setPoolSize(2);
+		scheduler.setPoolSize(10);
 
 		return scheduler;
 	}

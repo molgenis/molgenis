@@ -4,8 +4,16 @@
 	margin-right: 20px;
 }
 
-.dashboard {
-	margin-top: 20px;
+.host-header {
+	margin-bottom: 60px;	
+}
+
+.status-table {
+	padding: 10px;
+	background-color: white;
+	border: 1px solid #DDDDDD;
+	border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
 }
 
 .well {
