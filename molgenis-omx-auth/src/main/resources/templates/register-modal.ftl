@@ -5,7 +5,7 @@
     <h3>Register</h3>
   </div>
   <div class="modal-body">
-  	<#-- login form -->
+  	<#-- register form -->
 	<form id="register-form" class="form-horizontal">
 	  <div class="control-group">
 	    <label class="control-label" for="reg-username">Username *</label>
