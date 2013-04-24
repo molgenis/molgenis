@@ -1,11 +1,5 @@
 package org.molgenis.compute.db.generator;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
@@ -19,6 +13,12 @@ import org.molgenis.compute5.model.Task;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.ApplicationContextProvider;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 23/04/2013 Time: 08:47
