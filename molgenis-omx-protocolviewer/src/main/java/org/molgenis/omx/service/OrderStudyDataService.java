@@ -53,8 +53,15 @@ public class OrderStudyDataService
 	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds) throws DatabaseException,
 			MessagingException, IOException
 	{
+		if (studyName == null) throw new IllegalArgumentException("study name is null");
+		if (requestForm == null) throw new IllegalArgumentException("request form is null");
+		if (featureIds == null || featureIds.isEmpty()) throw new IllegalArgumentException(
+				"feature list is null or empty");
+
 		List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
 				Operator.IN, featureIds));
+		if (features == null || features.isEmpty()) throw new DatabaseException("requested features do not exist");
+
 		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, login.getUserId());
 
 		File file = storeRequestForm(requestForm);
