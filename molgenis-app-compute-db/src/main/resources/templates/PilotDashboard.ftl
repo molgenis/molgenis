@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/pilot-dashboard.css" type="text/css">
 		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		
 		<script type="text/javascript">
 			function updateHostStatus(hostId) {
@@ -55,6 +56,12 @@
 				$('#' + hostId + ' td.running').html(running);
 				$('#' + hostId + ' td.failed').html(failed);
 				$('#' + hostId + ' td.done').html(done);
+				
+				if (failed > 0) {
+					$('#renerateFailedTasksForm_' + hostId).show();
+				} else {
+					$('#renerateFailedTasksForm_' + hostId).hide();
+				}
 			}
 			
 			function updateStatus() {
@@ -74,11 +81,17 @@
 	<body>
 		<div class="container-fluid">
 			<#if error??>
-				<div class="alert alert-error">${error}</div>
+				<div class="alert alert-error">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					${error}
+				</div>
 			</#if>
 			
 			<#if message??>
-				<div class="alert alert-success">${message}</div>
+				<div class="alert alert-success">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					${message}
+				</div>
 			</#if>			
 		
 			<#if hosts?size == 0>
@@ -114,6 +127,10 @@
   								<input type="hidden" name="hostName" value="${host.name}" />
   								<input type="text" name="parametersFile" id="inputParametersFile" placeholder="Parameters file path">
     							<button type="submit" class="btn">Generate jobs</button>	
+  							</form>
+  							<form id="renerateFailedTasksForm_${host.id}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">
+  								<input type="hidden" name="hostName" value="${host.name}" />
+  								<button type="submit" class="btn">Regenerate failed jobs</button>	
   							</form>
 						</div>
     					<div class="span6 status">
