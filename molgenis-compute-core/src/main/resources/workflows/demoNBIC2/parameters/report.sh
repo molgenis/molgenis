@@ -1,3 +1,4 @@
+#MOLGENIS walltime=00:05:00 
 #input dis
 #list sample
 #list glucose
