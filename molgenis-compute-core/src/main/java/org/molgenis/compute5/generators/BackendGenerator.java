@@ -51,7 +51,7 @@ public class BackendGenerator
 			String inputLine;
 
 			while ((inputLine = stream.readLine()) != null)
-				result.append(inputLine);
+				result.append(inputLine + "\n");
 		}
 		finally
 		{

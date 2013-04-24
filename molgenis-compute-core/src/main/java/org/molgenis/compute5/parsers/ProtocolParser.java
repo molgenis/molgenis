@@ -23,7 +23,7 @@ import org.molgenis.compute5.model.Protocol;
  * DESCRIPTION
  */
 // FIXME: add parsing for cores, mem, etc
-public class ProtocolFtlParser
+public class ProtocolParser
 {
 
 	/**
@@ -60,6 +60,8 @@ public class ProtocolFtlParser
 			String template = "";
 			while ((line = reader.readLine()) != null)
 			{
+				// Always add line to protocol
+				template += line + "\n";
 
 				if (line.startsWith("#"))
 				{
@@ -74,7 +76,24 @@ public class ProtocolFtlParser
 					{
 						if (els.get(0).equals("MOLGENIS"))
 						{
-							// todo
+							for (int i = 1; i < els.size(); i++)
+							{
+								if (els.get(i).startsWith(Parameters.QUEUE)) p.setQueue(els.get(i).substring(
+										Parameters.QUEUE.length() + 1));
+								
+								if (els.get(i).startsWith(Parameters.WALLTIME)) p.setWalltime(els.get(i).substring(
+										Parameters.WALLTIME.length() + 1));
+								
+								if (els.get(i).startsWith(Parameters.NODES)) p.setNodes(els.get(i).substring(
+										Parameters.NODES.length() + 1));
+								
+								if (els.get(i).startsWith(Parameters.PPN)) p.setPpn(els.get(i).substring(
+										Parameters.PPN.length() + 1));
+								
+								if (els.get(i).startsWith(Parameters.MEMORY)) p.setMemory(els.get(i).substring(
+										Parameters.MEMORY.length() + 1));
+								
+							}
 						}
 						// description?
 						else if (els.get(0).equals("description") && els.size() > 1)
@@ -88,7 +107,8 @@ public class ProtocolFtlParser
 						}
 
 						// input
-						else if (els.get(0).equals(Parameters.INPUT) || els.get(0).equals(Parameters.STRING) || els.get(0).equals(Parameters.LIST))
+						else if (els.get(0).equals(Parameters.INPUT) || els.get(0).equals(Parameters.STRING)
+								|| els.get(0).equals(Parameters.LIST))
 						{
 							// assume name column
 							if (els.size() < 2) throw new IOException("param requires 'name', e.g. '#string input1'");
@@ -108,12 +128,6 @@ public class ProtocolFtlParser
 							p.getInputs().add(input);
 						}
 
-						// MOLGENIS
-						else if (els.get(0).equals("MOLGENIS"))
-						{
-							// TODO
-						}
-
 						// output, syntax = "#output outputVarName description"
 						else if (els.get(0).equals("output"))
 						{
@@ -124,7 +138,8 @@ public class ProtocolFtlParser
 
 							Output o = new Output(els.get(1));
 							// o.setValue(els.get(2));
-							// The value of the output parameter may not be set in the header
+							// The value of the output parameter may not be set
+							// in the header
 							// This must be done in the template, instead!
 							o.setValue(Parameters.NOTAVAILABLE);
 
@@ -138,22 +153,8 @@ public class ProtocolFtlParser
 
 							p.getOutputs().add(o);
 						}
-
-						// otherwise we don't understand
-						else
-						{
-							template += line + "\n";
-						}
-
 					}
 				}
-
-				// otherwise just add to template
-				else
-				{
-					template += line + "\n";
-				}
-
 			}
 			p.setDescription(description);
 			p.setTemplate(template);
