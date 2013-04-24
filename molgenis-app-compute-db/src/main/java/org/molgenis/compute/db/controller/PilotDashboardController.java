@@ -12,7 +12,9 @@ import org.apache.commons.lang.StringUtils;
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.compute.db.generator.TaskGeneratorDB;
+import org.molgenis.compute.db.pilot.PilotService;
 import org.molgenis.compute.runtime.ComputeHost;
+import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,12 +111,23 @@ public class PilotDashboardController
 
 	@RequestMapping(value = "/status", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ResponseEntity<TaskStatusModel> status(@RequestParam("hostName")
-	String hostName)
+	public ResponseEntity<TaskStatusModel> status(@RequestParam("hostId")
+	Integer hostId) throws DatabaseException
 	{
-		TaskStatusModel taskStatusModel = new TaskStatusModel(1, 2, 3, 4, 5);
+		int generated = getTaskStatusCount(hostId, PilotService.TASK_GENERATED);
+		int ready = getTaskStatusCount(hostId, PilotService.TASK_READY);
+		int running = getTaskStatusCount(hostId, PilotService.TASK_RUNNING);
+		int failed = getTaskStatusCount(hostId, PilotService.TASK_FAILED);
+		int done = getTaskStatusCount(hostId, PilotService.TASK_DONE);
 
+		TaskStatusModel taskStatusModel = new TaskStatusModel(generated, ready, running, failed, done);
 		return new ResponseEntity<TaskStatusModel>(taskStatusModel, HttpStatus.OK);
+	}
+
+	private int getTaskStatusCount(Integer hostId, String status) throws DatabaseException
+	{
+		return database.query(ComputeTask.class).eq(ComputeTask.COMPUTEHOST, hostId).and()
+				.eq(ComputeTask.STATUSCODE, status).count();
 	}
 
 	@ExceptionHandler(ComputeDbException.class)
