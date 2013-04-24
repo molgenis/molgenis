@@ -7,10 +7,11 @@ import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.beans.ShoppingCart;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,7 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,6 +43,7 @@ import app.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
+@EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
 { DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class,
@@ -95,7 +97,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public JavaMailSender mailSender()
 	{
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
 		mailSender.setHost(mailHost);
 		mailSender.setPort(Integer.valueOf(mailPort));
 		mailSender.setProtocol(mailProtocol);
@@ -164,14 +166,14 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		return new StandardServletMultipartResolver();
 	}
-	
+
 	@Bean
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
 	public ShoppingCart shoppingCart()
 	{
 		return new ShoppingCart();
 	}
-	
+
 	/**
 	 * Redirects '/' to the Home plugin
 	 * 

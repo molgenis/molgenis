@@ -68,7 +68,6 @@ public class AccountService
 		}
 
 		// create user
-		molgenisUser.setPassword(UUID.randomUUID().toString());
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
 		database.add(molgenisUser);
@@ -116,6 +115,7 @@ public class AccountService
 		mailMessage.setTo(molgenisUser.getEmail());
 		mailMessage.setSubject("Your new password request");
 		mailMessage.setText(createPasswordResettedEmailText(newPassword));
+		mailSender.send(mailMessage);
 	}
 
 	private ActivationMode getActivationMode()
