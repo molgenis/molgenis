@@ -1,6 +1,7 @@
 package org.molgenis.omx.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
@@ -23,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @Scope(WebApplicationContext.SCOPE_REQUEST)
@@ -174,13 +177,20 @@ public class ShoppingCartController
 	{
 		private Integer id;
 		private String name;
-		private String description;
+		private Map<String, String> i18nDescription;
 
 		public FeatureResponse(ObservableFeature feature)
 		{
 			this.id = feature.getId();
 			this.name = feature.getName();
-			this.description = feature.getDescription();
+			String description = feature.getDescription();
+			if (description != null && (!description.startsWith("{") || !description.endsWith("}")))
+			{
+				description = " {\"en\":\"" + description + "\"}";
+			}
+			this.i18nDescription = new Gson().fromJson(description, new TypeToken<Map<String, String>>()
+			{
+			}.getType());
 		}
 
 		@SuppressWarnings("unused")
@@ -208,15 +218,15 @@ public class ShoppingCartController
 		}
 
 		@SuppressWarnings("unused")
-		public String getDescription()
+		public Map<String, String> getI18nDescription()
 		{
-			return description;
+			return i18nDescription;
 		}
 
 		@SuppressWarnings("unused")
-		public void setDescription(String description)
+		public void setI18nDescription(Map<String, String> i18nDescription)
 		{
-			this.description = description;
+			this.i18nDescription = i18nDescription;
 		}
 	}
 }

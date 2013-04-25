@@ -70,7 +70,7 @@
 		            url:  '/account/login',
 		            data: form.serialize(),
 		            success: function () {
-		            	$(document).trigger('molgenis-login');
+		            	$(document).trigger('molgenis-login', 'Welcome to MOLGENIS!');
 	            		modal.modal('hide');
 		            },
 		            error: function() {
