@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -87,6 +88,12 @@ public class OrderStudyDataService
 		helper.addAttachment(getAppName() + "-request_" + System.currentTimeMillis() + ".doc", new FileSystemResource(
 				file));
 		mailSender.send(message);
+	}
+
+	public List<StudyDataRequest> getOrders() throws DatabaseException
+	{
+		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class);
+		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 
 	private File storeRequestForm(Part requestForm) throws FileNotFoundException, IOException
