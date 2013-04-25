@@ -1,0 +1,29 @@
+.host-name {
+	font-size: 30px;
+	font-weight:bold;
+	margin-right: 20px;
+}
+
+.host-header {
+	margin-bottom: 60px;	
+}
+
+.status-table {
+	padding: 10px;
+	background-color: white;
+	border: 1px solid #DDDDDD;
+	border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+}
+
+.well {
+	margin-top: 10px;
+}
+
+.alert {
+	margin-top: 10px;
+}
+
+#renerateFailedTasksForm {
+	display: none;
+}

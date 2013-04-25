@@ -19,7 +19,6 @@ package org.molgenis.framework.db;
 import java.io.Closeable;
 import java.io.File;
 import java.sql.Connection;
-import java.text.ParseException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -32,12 +31,10 @@ import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
 
 /**
- * Interface to manage and search persistent data Entity objects. It wraps basic
- * functionality such as find, count, add, update and delete. It also has batch
- * functions to add data in vast amount, especially added to support large scale
- * data storage such as needed in life sciences. Furthermore, it has transaction
- * capabilities, i.e., to add, update, and remove many entities as if it was one
- * operation (ensuring all actions are complete succesfully or if it fails
+ * Interface to manage and search persistent data Entity objects. It wraps basic functionality such as find, count, add,
+ * update and delete. It also has batch functions to add data in vast amount, especially added to support large scale
+ * data storage such as needed in life sciences. Furthermore, it has transaction capabilities, i.e., to add, update, and
+ * remove many entities as if it was one operation (ensuring all actions are complete succesfully or if it fails
  * halfway, it gets undone).
  */
 public interface Database extends Closeable
@@ -81,18 +78,15 @@ public interface Database extends Closeable
 	/**
 	 * Begin transaction.
 	 * <p>
-	 * All additions, updates and removals will be temporary until commitTx is
-	 * called. This ensures that all updates are processed as one action, or
-	 * that all changes are rolled back, thus ensuring consistent database
-	 * state.
+	 * All additions, updates and removals will be temporary until commitTx is called. This ensures that all updates are
+	 * processed as one action, or that all changes are rolled back, thus ensuring consistent database state.
 	 * 
 	 * @throws DatabaseException
 	 */
 	public void beginTx() throws DatabaseException;
 
 	/**
-	 * Check whether the database is currently in a transaction. Returns true if
-	 * beginTx() was called before.
+	 * Check whether the database is currently in a transaction. Returns true if beginTx() was called before.
 	 * 
 	 * @return true if in transaction
 	 */
@@ -101,9 +95,8 @@ public interface Database extends Closeable
 	/**
 	 * Commit transaction.
 	 * <p>
-	 * Make all additions, updates and removals that have been done since
-	 * beginTx permanent in the database. This may fail if another user has made
-	 * conflicting changes since your transaction was started.
+	 * Make all additions, updates and removals that have been done since beginTx permanent in the database. This may
+	 * fail if another user has made conflicting changes since your transaction was started.
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -112,18 +105,16 @@ public interface Database extends Closeable
 	/**
 	 * Rollback transaction.
 	 * <p>
-	 * All additions, updates and removals that have been executed since beginTx
-	 * are made undone. Requires beginTx to be called first otherwise an
-	 * Exception is thrown.
+	 * All additions, updates and removals that have been executed since beginTx are made undone. Requires beginTx to be
+	 * called first otherwise an Exception is thrown.
 	 * 
 	 * @throws DatabaseException
 	 */
 	public void rollbackTx() throws DatabaseException;
 
 	/**
-	 * Count the entities of type entityClass. Optionally, additional filtering
-	 * rules can be set. The rules are passed via a variable parameter-list,
-	 * which can handle [0 .. n] parameters.
+	 * Count the entities of type entityClass. Optionally, additional filtering rules can be set. The rules are passed
+	 * via a variable parameter-list, which can handle [0 .. n] parameters.
 	 * 
 	 * @param entityClass
 	 *            to query
@@ -134,8 +125,7 @@ public interface Database extends Closeable
 	public <E extends Entity> int count(Class<E> entityClass, QueryRule... rules) throws DatabaseException;
 
 	/**
-	 * Find all entities of type entityClass and return them as list. Optionally
-	 * filtering rules can be provided.
+	 * Find all entities of type entityClass and return them as list. Optionally filtering rules can be provided.
 	 * 
 	 * @param <E>
 	 *            type of entity to be retrieved
@@ -144,8 +134,6 @@ public interface Database extends Closeable
 	 * @param rules
 	 *            to filter or otherwise change result
 	 * @return List of entity objects.
-	 * @throws ParseException
-	 *             as result of incompatible QueryRules
 	 */
 	public <E extends Entity> List<E> find(Class<E> klazz, QueryRule... rules) throws DatabaseException;
 
@@ -179,14 +167,12 @@ public interface Database extends Closeable
 			QueryRule... rules) throws DatabaseException;
 
 	/**
-	 * Find all entity objects matching the not-null properties of one example
-	 * object.
+	 * Find all entity objects matching the not-null properties of one example object.
 	 * 
 	 * @param <E>
 	 *            type of entity
 	 * @param example
-	 *            object which not-null properties will be used as QueryRules
-	 *            for search
+	 *            object which not-null properties will be used as QueryRules for search
 	 * @return list of entities that match the example
 	 * @throws DatabaseException
 	 */
@@ -213,8 +199,7 @@ public interface Database extends Closeable
 	 *            type of entity
 	 * @param entityClass
 	 *            class of entity
-	 * @return query object for this entityClass. Optionally one can add
-	 *         additional filtering rules on this Query.
+	 * @return query object for this entityClass. Optionally one can add additional filtering rules on this Query.
 	 */
 	public <E extends Entity> Query<E> query(Class<E> entityClass);
 
@@ -227,8 +212,7 @@ public interface Database extends Closeable
 	 *            type of entity
 	 * @param entityClass
 	 *            class of entity
-	 * @return query object for this entityClass. Optionally one can add
-	 *         additional filtering rules on this Query.
+	 * @return query object for this entityClass. Optionally one can add additional filtering rules on this Query.
 	 */
 	public <E extends Entity> Query<E> queryByExample(E entity);
 
@@ -255,9 +239,8 @@ public interface Database extends Closeable
 	public <E extends Entity> int add(List<E> entities) throws DatabaseException;
 
 	/**
-	 * Add a list of entity objects to the database by parsing them from a csv
-	 * file. Optionally the inserted records can be written back to another csv
-	 * file, for example to extract auto-generated keys.
+	 * Add a list of entity objects to the database by parsing them from a csv file. Optionally the inserted records can
+	 * be written back to another csv file, for example to extract auto-generated keys.
 	 * 
 	 * @param <E>
 	 * @param klazz
@@ -270,9 +253,8 @@ public interface Database extends Closeable
 	public <E extends Entity> int add(Class<E> klazz, TupleReader reader, TupleWriter writer) throws DatabaseException;
 
 	/**
-	 * Add a list of entity objects to the database by parsing them from a csv
-	 * file. Optionally the inserted records can be written back to another csv
-	 * file, for example to extract auto-generated keys.
+	 * Add a list of entity objects to the database by parsing them from a csv file. Optionally the inserted records can
+	 * be written back to another csv file, for example to extract auto-generated keys.
 	 * 
 	 * @param <E>
 	 * @param klazz
@@ -283,15 +265,13 @@ public interface Database extends Closeable
 	public <E extends Entity> int add(Class<E> klazz, TupleReader reader) throws DatabaseException;
 
 	/**
-	 * Update one entity object in the database. In JPA the entity will be
-	 * automatically merged if not attached to EntityManager, and the xref/mref
-	 * proxies set based on xref_ids.
+	 * Update one entity object in the database. In JPA the entity will be automatically merged if not attached to
+	 * EntityManager, and the xref/mref proxies set based on xref_ids.
 	 * 
 	 * @TODO <p>
-	 *       Note: each entity has a "primary key" that cannot be updated. If
-	 *       you want to change a primary key, you have to remove the previous,
-	 *       and add the new record. Otherwise this will result in a
-	 *       DatabaseException or unexpected behaviour.
+	 *       Note: each entity has a "primary key" that cannot be updated. If you want to change a primary key, you have
+	 *       to remove the previous, and add the new record. Otherwise this will result in a DatabaseException or
+	 *       unexpected behaviour.
 	 * 
 	 * @param <E>
 	 *            type of entity
@@ -301,9 +281,8 @@ public interface Database extends Closeable
 	public <E extends Entity> int update(E entity) throws DatabaseException;
 
 	/**
-	 * Update a list of entity objects in batch from the database. In JPA the
-	 * entity will be automatically merged if not attached to EntityManager, and
-	 * the xref/mref proxies set based on xref_ids.
+	 * Update a list of entity objects in batch from the database. In JPA the entity will be automatically merged if not
+	 * attached to EntityManager, and the xref/mref proxies set based on xref_ids.
 	 * 
 	 * @param <E>
 	 *            type of entity
@@ -313,8 +292,7 @@ public interface Database extends Closeable
 	public <E extends Entity> int update(List<E> entities) throws DatabaseException;
 
 	/**
-	 * Update a list of entity objects in the database by reading the new values
-	 * from a csv file.
+	 * Update a list of entity objects in the database by reading the new values from a csv file.
 	 * 
 	 * @param <E>
 	 *            type of entity
@@ -328,8 +306,7 @@ public interface Database extends Closeable
 	public <E extends Entity> int update(Class<E> klazz, TupleReader reader) throws DatabaseException;
 
 	/**
-	 * Remove one particular entity from the database (and remove from
-	 * EntityManager cache).
+	 * Remove one particular entity from the database (and remove from EntityManager cache).
 	 * 
 	 * @param <E>
 	 *            type of entity
@@ -339,8 +316,7 @@ public interface Database extends Closeable
 	public <E extends Entity> int remove(E entity) throws DatabaseException;
 
 	/**
-	 * Remove a list of entity objects in batch from the database (and remove
-	 * from EntityManager cache).
+	 * Remove a list of entity objects in batch from the database (and remove from EntityManager cache).
 	 * 
 	 * @param <E>
 	 *            type of entity
@@ -350,8 +326,7 @@ public interface Database extends Closeable
 	public <E extends Entity> int remove(List<E> entities) throws DatabaseException;
 
 	/**
-	 * Remove a list of entity objects from the database by parsing the
-	 * to-be-removed data from a csv file.
+	 * Remove a list of entity objects from the database by parsing the to-be-removed data from a csv file.
 	 * 
 	 * @param <E>
 	 *            type of entity
@@ -382,8 +357,7 @@ public interface Database extends Closeable
 		/** update records, ignore missing records */
 		UPDATE_IGNORE_MISSING,
 		/**
-		 * remove records in the list from database; throw an exception of
-		 * records are missing in the database
+		 * remove records in the list from database; throw an exception of records are missing in the database
 		 */
 		REMOVE,
 		/** remove records in the list from database; ignore missing records */
@@ -391,9 +365,8 @@ public interface Database extends Closeable
 	};
 
 	/**
-	 * Flexible update function that selectively updates the database using
-	 * (composite) key fields of your choice and by mixing adds, updates and/or
-	 * removes.
+	 * Flexible update function that selectively updates the database using (composite) key fields of your choice and by
+	 * mixing adds, updates and/or removes.
 	 * 
 	 * @see DatabaseAction
 	 * @param entities
@@ -401,16 +374,14 @@ public interface Database extends Closeable
 	 * @param dbAction
 	 *            the action to use. For example: ADD_UPDATE_EXISTING
 	 * @param keyName
-	 *            key field name, or list of composite key fields, you want to
-	 *            use. For example: experiment, name
+	 *            key field name, or list of composite key fields, you want to use. For example: experiment, name
 	 */
 	public <E extends Entity> int update(List<E> entities, DatabaseAction dbAction, String... keyName)
 			throws DatabaseException;
 
 	/**
-	 * Get the path to the file directory that this database uses to store file
-	 * attachments. In a MOLGENIS model these fields are specified as &lt;field
-	 * type="file" ... &gt;
+	 * Get the path to the file directory that this database uses to store file attachments. In a MOLGENIS model these
+	 * fields are specified as &lt;field type="file" ... &gt;
 	 * 
 	 * @throws Exception
 	 */
@@ -431,8 +402,8 @@ public interface Database extends Closeable
 	public List<String> getEntityNames();
 
 	/**
-	 * Read data elements from a csv file and convert them into a list of entity
-	 * objects. Optionally limit the number of elements to read.
+	 * Read data elements from a csv file and convert them into a list of entity objects. Optionally limit the number of
+	 * elements to read.
 	 * 
 	 * @param <E>
 	 * @param klazz
@@ -447,8 +418,7 @@ public interface Database extends Closeable
 			throws DatabaseException;
 
 	/**
-	 * Return the security strategy object that takes care of authorization in
-	 * this Database.
+	 * Return the security strategy object that takes care of authorization in this Database.
 	 * 
 	 * Deprecated, use getLogin() instead
 	 */
@@ -462,9 +432,8 @@ public interface Database extends Closeable
 	public void setLogin(Login login);
 
 	/**
-	 * Retrieve the full class object for an entity name. For example:
-	 * "Experiment" may produce a "my.package.Experiment" class. This works
-	 * because MOLGENIS requires unique Class names (ignoring package names).
+	 * Retrieve the full class object for an entity name. For example: "Experiment" may produce a
+	 * "my.package.Experiment" class. This works because MOLGENIS requires unique Class names (ignoring package names).
 	 * 
 	 * @param simpleName
 	 *            of a class without packages.
@@ -473,8 +442,7 @@ public interface Database extends Closeable
 	public Class<? extends Entity> getClassForName(String simpleName);
 
 	/**
-	 * Get the entityManager, if JPA isn't supported a UnsupportedOperations
-	 * exceptions is thrown.
+	 * Get the entityManager, if JPA isn't supported a UnsupportedOperations exceptions is thrown.
 	 * 
 	 * Deprecated: Database should become entityManager itself ;-)
 	 * 
@@ -511,24 +479,21 @@ public interface Database extends Closeable
 	public <E extends Entity> Mapper<E> getMapperFor(Class<E> klazz) throws DatabaseException;
 
 	/**
-	 * Generic search of database based on a search string. Searches string and
-	 * text fields using 'LIKE'. Can be very expensive.
+	 * Generic search of database based on a search string. Searches string and text fields using 'LIKE'. Can be very
+	 * expensive.
 	 */
 	public <E extends Entity> List<E> search(Class<E> entityClass, String searchString) throws DatabaseException;
 
 	/**
-	 * Convert superclass entities into their proper subclass types, to get the
-	 * the subclass specific fields. Requires the original superclass to compare
-	 * against: if the entity class is the same, no requery is needed. If the
-	 * entity is not a subclass, requerying is meaningless.
+	 * Convert superclass entities into their proper subclass types, to get the the subclass specific fields. Requires
+	 * the original superclass to compare against: if the entity class is the same, no requery is needed. If the entity
+	 * is not a subclass, requerying is meaningless.
 	 * 
 	 * @param superClass
-	 *            the original superclass that was queried and now needs
-	 *            refining
+	 *            the original superclass that was queried and now needs refining
 	 * @param entities
-	 *            the list of entities that may contain subclasses of the
-	 *            original superclass and are now requeried in their proper type
-	 *            to get all of the subclass fields
+	 *            the list of entities that may contain subclasses of the original superclass and are now requeried in
+	 *            their proper type to get all of the subclass fields
 	 * @return the list of resulting refined entities
 	 * @throws DatabaseException
 	 */

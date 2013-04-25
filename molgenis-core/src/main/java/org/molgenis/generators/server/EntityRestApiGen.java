@@ -34,42 +34,7 @@ public class EntityRestApiGen extends Generator
 		}
 		else
 		{
-			generateServices(model, options);
 			generateControllers(model, options);
-		}
-	}
-
-	private void generateServices(Model model, MolgenisOptions options) throws Exception
-	{
-		Template template = createTemplate("/EntityServiceGen.java.ftl");
-		Map<String, Object> templateArgs = createTemplateArguments(options);
-
-		for (Entity entity : model.getEntities())
-		{
-			// skip abstract and system entities
-			if (entity.isAbstract() || entity.isSystem()) continue;
-			templateArgs.put("entity", entity);
-
-			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()
-					+ "Service.java");
-			boolean created = generatedFile.getParentFile().mkdirs();
-			if (!created && !generatedFile.getParentFile().exists())
-			{
-				throw new IOException("could not create " + generatedFile.getParentFile());
-			}
-
-			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(generatedFile),
-					Charset.forName("UTF-8"));
-			try
-			{
-				template.process(templateArgs, writer);
-			}
-			finally
-			{
-				writer.close();
-			}
-
-			logger.info("generated " + generatedFile);
 		}
 	}
 

@@ -1,10 +1,10 @@
 package org.molgenis.compute.db;
 
-import java.io.IOException;
-
 import org.molgenis.compute.runtime.ComputeHost;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+
+import java.io.IOException;
 
 public class InsertComputeHosts
 {
@@ -26,9 +26,13 @@ public class InsertComputeHosts
 		Database db = new app.JpaDatabase();
 		try
 		{
-			insert(db, "localhost", "LOCALHOST", "localhost", null, 5000, "sh maverick.sh");
+			insert(db, "localhost", "LOCALHOST", "localhost", null, 5000, "sh /Users/georgebyelas/maverick/maverick.sh");
 			insert(db, "grid", "GRID", "grid", "test", 10000,
 					"glite-wms-job-submit  -d $USER -o pilot-one $HOME/maverick/maverick.jdl");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 		finally
 		{

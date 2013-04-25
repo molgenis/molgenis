@@ -5,7 +5,7 @@
 		<plugin label="Home" name="Home" type="org.molgenis.lifelines.plugins.home.Home"/>
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+ 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<plugin label="Importer (Dataset)" name="HL7StudyDataSetImporter" type="org.molgenis.lifelines.plugins.HL7StudyDataSetImporterController" />
 		
         <menu name="Admin">

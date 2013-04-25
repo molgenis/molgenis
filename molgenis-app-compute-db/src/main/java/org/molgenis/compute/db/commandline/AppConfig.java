@@ -1,13 +1,12 @@
 package org.molgenis.compute.db.commandline;
 
-import org.molgenis.compute.db.executor.ComputeExecutor;
-import org.molgenis.compute.db.executor.ComputeExecutorPilotDB;
-import org.molgenis.compute.db.executor.ComputeExecutorTask;
-import org.molgenis.compute.db.importer.WorkflowImporter;
+import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -20,28 +19,23 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @Configuration
 public class AppConfig
 {
-	@Bean(destroyMethod = "close")
+	@Scope("prototype")
+	@Bean
 	public Database unathorizedDatabase() throws DatabaseException
 	{
 		return new app.JpaDatabase();
 	}
 
 	@Bean
-	public ComputeExecutorTask computeExecutorTask() throws DatabaseException
+	public ApplicationContextProvider applicationContextProvider()
 	{
-		return new ComputeExecutorTask(computeExecutor(), taskScheduler());
+		return new ApplicationContextProvider();
 	}
 
 	@Bean
-	public ComputeExecutor computeExecutor() throws DatabaseException
+	public Scheduler scheduler()
 	{
-		return new ComputeExecutorPilotDB(unathorizedDatabase());
-	}
-
-	@Bean
-	public WorkflowImporter workflowImporter() throws DatabaseException
-	{
-		return new WorkflowImporter(unathorizedDatabase());
+		return new Scheduler(taskScheduler());
 	}
 
 	@Bean(destroyMethod = "shutdown")

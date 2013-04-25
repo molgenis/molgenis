@@ -1,12 +1,8 @@
 <#include "GeneratorHelper.ftl">
 package ${package};
 
-import java.util.List;
-
 import org.mockito.Mockito;
 import org.molgenis.framework.db.Database;
-import ${entity.namespace}.${JavaName(entity)};
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 

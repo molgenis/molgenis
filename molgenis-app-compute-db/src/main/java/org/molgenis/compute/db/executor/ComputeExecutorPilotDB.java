@@ -3,6 +3,7 @@ package org.molgenis.compute.db.executor;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.sysexecutor.SysCommandExecutor;
@@ -10,7 +11,7 @@ import org.molgenis.compute.runtime.ComputeHost;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.util.ApplicationContextProvider;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -20,21 +21,14 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 {
 	private static final int SSH_PORT = 22;
 	private static final Logger LOG = Logger.getLogger(ComputeExecutorPilotDB.class);
-	private final Database database;
-
-	@Autowired
-	public ComputeExecutorPilotDB(Database database)
-	{
-		this.database = database;
-	}
 
 	@Override
 	public void executeTasks(ComputeHost computeHost, String password)
 	{
 		if (computeHost == null) throw new IllegalArgumentException("ComputeHost is null");
 
-		// Clear cache
-		database.getEntityManager().clear();
+		Database database = ApplicationContextProvider.getApplicationContext().getBean("unathorizedDatabase",
+				Database.class);
 
 		ExecutionHost executionHost = null;
 		try
@@ -45,7 +39,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 
 			LOG.info("Nr of tasks with status [generated]: [" + generatedTasks.size() + "]");
 
-			evaluateTasks(generatedTasks);
+			evaluateTasks(database, generatedTasks);
 
 			List<ComputeTask> readyTasks = database.query(ComputeTask.class).equals(ComputeTask.STATUSCODE, "ready")
 					.equals(ComputeTask.COMPUTEHOST, computeHost.getId()).find();
@@ -103,6 +97,8 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 			{
 				executionHost.close();
 			}
+
+			IOUtils.closeQuietly(database);
 		}
 	}
 
@@ -128,7 +124,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 		LOG.info("Command output:\n" + cmdOutput);
 	}
 
-	private void evaluateTasks(List<ComputeTask> generatedTasks) throws DatabaseException
+	private void evaluateTasks(Database database, List<ComputeTask> generatedTasks) throws DatabaseException
 	{
 		for (ComputeTask task : generatedTasks)
 		{
