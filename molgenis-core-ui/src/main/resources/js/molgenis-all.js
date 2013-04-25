@@ -3,13 +3,15 @@ $(function() {
 	$(document).on('click', 'a.modal-href', function(e) {
 		e.preventDefault();
 		e.stopPropagation();
-		var container = $('#' + $(this).data('target')); 
-		if(container.is(':empty')) {
-			container.load($(this).attr('href'), function() {
+		if(!$(this).hasClass('disabled')) {
+			var container = $('#' + $(this).data('target')); 
+			if(container.is(':empty')) {
+				container.load($(this).attr('href'), function() {
+					$('.modal:first', container).modal('show');
+				});
+			} else {
 				$('.modal:first', container).modal('show');
-			});
-		} else {
-			$('.modal:first', container).modal('show');
+			}
 		}
 	});
 });

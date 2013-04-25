@@ -52,7 +52,7 @@ public class AccountController
 	private Database unauthorizedDatabase;
 
 	@Autowired
-	private AccountService authenticationService;
+	private AccountService accountService;
 
 	@Autowired
 	private CaptchaService captchaService;
@@ -114,13 +114,13 @@ public class AccountController
 		MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
 		URI activationUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/account/activate").build()
 				.toUri();
-		authenticationService.createUser(molgenisUser, activationUri);
+		accountService.createUser(molgenisUser, activationUri);
 	}
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
 	public String activateUser(@Valid @NotNull @PathVariable String activationCode) throws DatabaseException
 	{
-		authenticationService.activateUser(activationCode);
+		accountService.activateUser(activationCode);
 		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 	}
 
@@ -132,7 +132,7 @@ public class AccountController
 	{
 		List<MolgenisUser> molgenisUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME,
 				Operator.EQUALS, passwordResetRequest.getUsername()));
-		if (molgenisUsers != null && !molgenisUsers.isEmpty()) authenticationService
+		if (molgenisUsers != null && !molgenisUsers.isEmpty()) accountService
 				.resetPassword(molgenisUsers.get(0));
 	}
 

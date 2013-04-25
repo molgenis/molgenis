@@ -55,7 +55,7 @@ public class RegisterRequest
 
 	public String getConfirmPassword()
 	{
-		return password;
+		return confirmPassword;
 	}
 
 	public void setConfirmPassword(String confirmPassword)

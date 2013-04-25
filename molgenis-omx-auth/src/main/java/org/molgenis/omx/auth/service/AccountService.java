@@ -4,8 +4,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.ServletContext;
-
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -39,9 +37,6 @@ public class AccountService
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	private ServletContext servletContext;
 
 	@Autowired
 	private JavaMailSender mailSender;
@@ -84,6 +79,12 @@ public class AccountService
 		logger.debug("send activation email for user " + molgenisUser.getName() + " to " + activationEmailAddress);
 	}
 
+	/**
+	 * Activate a registered user
+	 * 
+	 * @param activationCode
+	 * @throws DatabaseException
+	 */
 	public void activateUser(String activationCode) throws DatabaseException
 	{
 		List<MolgenisUser> molgenisUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.ACTIVE,
