@@ -22,6 +22,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,10 +80,11 @@ public class OrderStudyDataService
 		logger.debug("create study data request: " + studyName);
 		database.add(studyDataRequest);
 
-		// send order confirmation to user
+		// send order confirmation to user and admin
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
+		helper.setBcc(MolgenisUserService.getInstance(database).findAdminEmail());
 		helper.setSubject("Order confirmation from " + getAppName());
 		helper.setText(createOrderConfirmationEmailText(studyDataRequest));
 		helper.addAttachment(getAppName() + "-request_" + System.currentTimeMillis() + ".doc", new FileSystemResource(
