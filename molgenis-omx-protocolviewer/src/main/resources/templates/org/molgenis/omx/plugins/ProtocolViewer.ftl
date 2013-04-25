@@ -75,7 +75,7 @@
 								<button class="btn" id="view-features-button">View</button>
 							</#if>
 								<div id="orderdata-modal-container"></div>
-								<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-href">Order</a>
+								<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-btn">Order</a>
 							</div>
 		  				</div>
 	  				</div>
