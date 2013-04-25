@@ -1,19 +1,26 @@
 package org.molgenis.omx.auth.controller;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import java.util.Collections;
+
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -61,9 +68,28 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		when(login.login(database, "admin", "adminpw")).thenReturn(true);
 		when(database.getLogin()).thenReturn(login);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
+		reset(accountService); // mocks in the config class are not resetted after each test
+	}
 
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.DEBUG);
+	@Test
+	public void getLoginForm() throws Exception
+	{
+		this.mockMvc.perform(get("/account/login")).andExpect(status().isOk()).andExpect(view().name("login-modal"));
+	}
+
+	@Test
+	public void getPasswordResetForm() throws Exception
+	{
+		this.mockMvc.perform(get("/account/password/reset")).andExpect(status().isOk())
+				.andExpect(view().name("resetpassword-modal"));
+	}
+
+	@Test
+	public void getRegisterForm() throws Exception
+	{
+		this.mockMvc.perform(get("/account/register")).andExpect(status().isOk())
+				.andExpect(view().name("register-modal"))
+				.andExpect(model().attributeExists("institutes", "personroles", "countries"));
 	}
 
 	@Test
@@ -120,7 +146,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	{
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
-						.param("passwordRepeat", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
+						.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
 						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
 	}
@@ -133,6 +159,24 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
 						.param("lastname", "min").param("firstname", "ad").param("captcha", "invalidCaptcha")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void resetPassword() throws Exception
+	{
+		this.mockMvc.perform(
+				post("/account/password/reset").param("username", "admin").contentType(
+						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
+		verify(accountService).resetPassword(any(MolgenisUser.class));
+	}
+
+	@Test
+	public void resetPassword_invalidUser() throws Exception
+	{
+		this.mockMvc.perform(
+				post("/account/password/reset").param("username", "invalidUser").contentType(
+						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
+		verifyZeroInteractions(accountService);
 	}
 
 	// @Test
@@ -173,9 +217,13 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database database()
+		public Database database() throws DatabaseException
 		{
-			return mock(Database.class);
+			Database database = mock(Database.class);
+			MolgenisUser molgenisUser = mock(MolgenisUser.class);
+			when(database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS, "admin")))
+					.thenReturn(Collections.<MolgenisUser> singletonList(molgenisUser));
+			return database;
 		}
 
 		@Bean
