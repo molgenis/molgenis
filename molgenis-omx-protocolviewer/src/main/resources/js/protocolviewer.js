@@ -424,7 +424,7 @@
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 			$('#orderdata-href-btn').removeClass('disabled');
 			$('#ordersview-href-btn').removeClass('disabled');
-			updateShoppingCart(getSelectedVariables()); // session changed, update shoppingcart for already selected items
+			updateShoppingCart(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			ns.selectDataSet(ns.getSelectedDataSet()); // reset catalogue
