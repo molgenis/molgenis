@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -98,6 +101,16 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		public MolgenisSettings molgenisSettings()
 		{
 			return mock(MolgenisSettings.class);
+		}
+
+		@Bean
+		public FileStore fileStore() throws IOException
+		{
+			File requestForm = mock(File.class);
+			when(requestForm.getPath()).thenReturn("requestform.doc");
+			FileStore fileStore = mock(FileStore.class);
+			when(fileStore.store(any(InputStream.class), any(String.class))).thenReturn(requestForm);
+			return fileStore;
 		}
 
 		@Bean
