@@ -28,11 +28,6 @@
 		});
 		return features;
 	};
-
-	ns.setSelectedVariables = function(featureUris) {
-		// TODO 1) clear tree 2) select features (keep in mind that this is a lazy tree!)
-		alert("set selected variables in tree: " + featureUris.join());		 
-	};
 	
 	ns.clearSearch = function() {
 		var root = $("#dataset-browser").dynatree("getRoot");
@@ -424,10 +419,16 @@
 
 	// on document ready
 	$(function() {  		
-		$(document).on('molgenis-login', function() {
+		$(document).on('molgenis-login', function(e, msg) {
 			$('.alert').alert('close');
+			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 			$('#orderdata-href-btn').removeClass('disabled');
 			$('#ordersview-href-btn').removeClass('disabled');
+		});
+		$(document).on('molgenis-order-placed', function(e, msg) {
+			ns.selectDataSet(ns.getSelectedDataSet()); // reset catalogue
+			$('#dataset-browser').dynatree('getRoot').select(false);
+			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
 	});
 }($, window.top));
