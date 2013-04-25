@@ -426,7 +426,8 @@
 	$(function() {  		
 		$(document).on('molgenis-login', function() {
 			$('.alert').alert('close');
-			$('#orderdata-btn').removeClass('disabled');
+			$('#orderdata-href-btn').removeClass('disabled');
+			$('#ordersview-href-btn').removeClass('disabled');
 		});
 	});
 }($, window.top));
