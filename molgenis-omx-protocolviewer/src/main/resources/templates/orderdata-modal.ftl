@@ -5,7 +5,7 @@
     <h3>SHOPPING CART</h3>
   </div>
   <div class="modal-body">
-  	<#-- login form -->
+  	<#-- order data form -->
 	<form id="orderdata-form" class="form-horizontal" enctype="multipart/form-data">
 	  <div class="control-group">
 	    <label class="control-label" for="orderdata-name">Project title *</label>
@@ -54,7 +54,7 @@
 						$.each(cart.features, function(i, feature) {
 							var row = $('<tr>');
 							row.append('<td>' + feature.name + '</td>');
-							row.append('<td>' + JSON.parse(feature.description).en + '</td>'); // TODO not safe
+							row.append('<td>' + feature.i18nDescription.en + '</td>');
 							
 							var deleteCol = $('<td>');
 							var deleteBtn = $('<i class="icon-remove"></i>');
@@ -86,7 +86,7 @@
   		});
   		modal.on('hide', function () {
 	  		form[0].reset();
-	  		$('#orderdata-selection-table').empty();
+	  		$('#orderdata-selection-table-container').empty();
 	  		
   		});
   		$('.close', modal).click(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
@@ -117,8 +117,8 @@
 				  contentType: false,
 				  processData: false,
 				  success: function () {
-					alert("ok");
-					modal.modal('hide'); // TODO display success message
+				  	$(document).trigger('molgenis-order-placed', 'Your order has been placed');
+					modal.modal('hide');
 				  },
 		          error: function() {
 		          	alert("error"); // TODO display error message
