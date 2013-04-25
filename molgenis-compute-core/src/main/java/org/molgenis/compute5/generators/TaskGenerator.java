@@ -101,18 +101,12 @@ public class TaskGenerator
 			{
 				out = new StringWriter();
 				Map<String, Object> map = TupleUtils.toMap(target);
-
-				// add parameters for resource management:
-//				map.put(Parameters.WALLTIME, step.getProtocol().getWalltime());
 				
 				// remember parameter values
 				task.setParameters(map);
 
-				//  prepend header that loads Molgenis_Functions.sh
-				String parameterHeader = "\n#\n##\n### Load Molgenis functions for e.g. error handling\n##\n#\nsource " + Parameters.MOLGENIS_FUNCTION_FILE + "\n\n";
-				
 				// now source the task's parameters from environment.txt
-				parameterHeader += "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
+				 String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
 				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced
@@ -120,11 +114,6 @@ public class TaskGenerator
 				for (Input input : step.getProtocol().getInputs())
 				{
 					String p = input.getName();
-					// TODO IF target...() returns a list then (CHECK!) all
-					// members are equal and return a member!
-					// parameterHeader += p + "=${" +
-					// step.getParameters().get(p) + "["
-					// + target.getString(Task.TASKID_INDEX_COLUMN) + "]}\n";
 
 					List<String> rowIndex = target.getList(Parameters.ID_COLUMN);
 					for (int i = 0; i < rowIndex.size(); i++)
@@ -189,9 +178,6 @@ public class TaskGenerator
 						{
 							// we've found a match
 
-							// if ($p is set) write "p=$p" to env.txt
-							// else write "p=o.getValue()"
-
 							// If parameter not set then ERROR
 							String line = "if [[ -z \"$" + p + "\" ]]; then echo \"In step '" + step.getName()
 									+ "', parameter '" + p + "' has no value! Please assign a value to parameter '" + p
@@ -211,15 +197,6 @@ public class TaskGenerator
 								//System.out.println(">> " + rowIndexString);
 								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP + p + "[" + rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + Parameters.ENVIRONMENT + "\n";
 							}
-
-							// // // taking into account that output parameter
-							// can be set in header of protocol: #output p 1
-							// String line = "if [[ -z \"$" + p +
-							// "\"]]; then echo \"" + lefthand + "=" +
-							// o.getValue()
-							// + "\" >> " + Parameters.ENVIRONMENT + ";";
-							// line += " else echo \"" + lefthand + "=$" + p +
-							// "\" >> " + Parameters.ENVIRONMENT + ";";
 
 							script += line;
 						}

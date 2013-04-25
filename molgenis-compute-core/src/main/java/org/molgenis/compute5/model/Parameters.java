@@ -24,7 +24,6 @@ public class Parameters
 	public final static String WORKFLOW_COLUMN = USER_PREFIX + "workflow";
 	public final static String WORKDIR_COLUMN = USER_PREFIX + Task.WORKDIR_COLUMN;
 	public static final String PARAMETER_COLUMN = "parameters";
-	public static final String MOLGENIS_FUNCTION_FILE = "MolgenisFunctions.sh"; // file with MC framework functions
 	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
 	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;
 	public static String ERROR_FILE_DEFAULT = "error.log"; // can be changed by user parameter
