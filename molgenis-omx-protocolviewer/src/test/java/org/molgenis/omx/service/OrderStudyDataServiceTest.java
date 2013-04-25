@@ -4,11 +4,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -66,6 +68,11 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(molgenisUser.getEmail()).thenReturn("test@molgenis.org");
 			when(database.findById(MolgenisUser.class, 1)).thenReturn(molgenisUser);
+			StudyDataRequest request0 = mock(StudyDataRequest.class);
+			when(request0.getId()).thenReturn(0);
+			StudyDataRequest request1 = mock(StudyDataRequest.class);
+			when(request1.getId()).thenReturn(1);
+			when(database.find(StudyDataRequest.class)).thenReturn(Arrays.asList(request0, request1));
 			return database;
 		}
 
@@ -146,5 +153,14 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 	{
 		orderStudyDataService.orderStudyData("study #1", mock(Part.class),
 				Arrays.asList(Integer.valueOf(-2), Integer.valueOf(-1)));
+	}
+
+	@Test
+	public void getOrders() throws DatabaseException
+	{
+		List<StudyDataRequest> orders = orderStudyDataService.getOrders();
+		assertEquals(orders.size(), 2);
+		assertEquals(orders.get(0).getId(), Integer.valueOf(0));
+		assertEquals(orders.get(1).getId(), Integer.valueOf(1));
 	}
 }

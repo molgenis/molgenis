@@ -3,14 +3,18 @@ package org.molgenis.omx.controller;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.service.OrderStudyDataService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -53,6 +57,24 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc.perform(get("/plugin/order")).andExpect(status().isOk()).andExpect(view().name("orderdata-modal"));
 	}
 
+	@Test
+	public void getOrdersForm() throws Exception
+	{
+		this.mockMvc.perform(get("/plugin/orders/view")).andExpect(status().isOk())
+				.andExpect(view().name("orderlist-modal"));
+	}
+
+	@Test
+	public void getOrders() throws Exception
+	{
+		this.mockMvc
+				.perform(get("/plugin/orders"))
+				.andExpect(status().isOk())
+				.andExpect(
+						content()
+								.string("{\"orders\":[{\"id\":0,\"name\":\"request #0\",\"orderDate\":\"2012-10-12\",\"orderStatus\":\"pending\"},{\"id\":1,\"name\":\"request #1\",\"orderDate\":\"2013-02-04\",\"orderStatus\":\"rejected\"}]}"));
+	}
+
 	// TODO how to test multipart/form-data using fileUpload() and post()?
 	// @Test
 	// public void orderData() throws Exception
@@ -70,9 +92,20 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		}
 
 		@Bean
-		public OrderStudyDataService orderStudyDataService()
+		public OrderStudyDataService orderStudyDataService() throws DatabaseException
 		{
+			StudyDataRequest request0 = mock(StudyDataRequest.class);
+			when(request0.getId()).thenReturn(0);
+			when(request0.getRequestDate()).thenReturn(new Date(1350000000000l));
+			when(request0.getRequestStatus()).thenReturn("pending");
+			when(request0.getName()).thenReturn("request #0");
+			StudyDataRequest request1 = mock(StudyDataRequest.class);
+			when(request1.getId()).thenReturn(1);
+			when(request1.getRequestDate()).thenReturn(new Date(1360000000000l));
+			when(request1.getRequestStatus()).thenReturn("rejected");
+			when(request1.getName()).thenReturn("request #1");
 			OrderStudyDataService orderStudyDataService = mock(OrderStudyDataService.class);
+			when(orderStudyDataService.getOrders()).thenReturn(Arrays.asList(request0, request1));
 			return orderStudyDataService;
 		}
 
