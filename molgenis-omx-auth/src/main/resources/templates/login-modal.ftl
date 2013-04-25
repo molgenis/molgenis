@@ -45,7 +45,8 @@
   		});
   		modal.on('hide', function () {
 	  		form[0].reset();
-	  		$('.text-error').remove();
+	  		$('.text-error', modal).remove();
+	  		$('.alert', modal).remove();
   		});
   		$('.close', modal).click(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
 	  		e.preventDefault();
@@ -90,6 +91,14 @@
 			    e.stopPropagation();
 				form.submit();
 	    	}
+		});
+		
+		<#-- submodal events -->
+		$(document).on('molgenis-registered', function(e, msg) {
+			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+		});
+		$(document).on('molgenis-passwordresetted', function(e, msg) {
+			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
     });
 </script>
