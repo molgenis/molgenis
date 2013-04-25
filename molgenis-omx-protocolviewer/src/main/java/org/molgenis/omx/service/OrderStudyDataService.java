@@ -1,8 +1,6 @@
 package org.molgenis.omx.service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -13,7 +11,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -25,6 +22,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -52,6 +50,9 @@ public class OrderStudyDataService
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+	@Autowired
+	private FileStore fileStore;
+
 	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds) throws DatabaseException,
 			MessagingException, IOException
 	{
@@ -66,7 +67,8 @@ public class OrderStudyDataService
 
 		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, login.getUserId());
 
-		File file = storeRequestForm(requestForm);
+		String fileName = getAppName() + "-request_" + System.currentTimeMillis() + ".doc";
+		File file = fileStore.store(requestForm.getInputStream(), fileName);
 
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
@@ -96,23 +98,6 @@ public class OrderStudyDataService
 	{
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class);
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
-	}
-
-	private File storeRequestForm(Part requestForm) throws FileNotFoundException, IOException
-	{
-		// TODO put file (meta-)data in database
-		// note: use requestForm.getHeader("content-disposition") to get file name)
-		File file = new File(System.getProperty("user.home") + "/requestform-" + System.currentTimeMillis() + ".doc");
-		FileOutputStream fos = new FileOutputStream(file);
-		try
-		{
-			IOUtils.copy(requestForm.getInputStream(), fos);
-		}
-		finally
-		{
-			fos.close();
-		}
-		return file;
 	}
 
 	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest)
