@@ -18,6 +18,7 @@ import javax.servlet.http.Part;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
@@ -68,6 +69,15 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(molgenisUser.getEmail()).thenReturn("test@molgenis.org");
 			when(database.findById(MolgenisUser.class, 1)).thenReturn(molgenisUser);
+
+			MolgenisUser adminUser = when(mock(MolgenisUser.class).getEmail()).thenReturn("admin@molgenis.org")
+					.getMock();
+			@SuppressWarnings("unchecked")
+			Query<MolgenisUser> query = mock(Query.class);
+			when(database.query(MolgenisUser.class)).thenReturn(query);
+			when(query.equals(MolgenisUser.SUPERUSER, true)).thenReturn(query);
+			when(query.find()).thenReturn(Collections.singletonList(adminUser));
+
 			StudyDataRequest request0 = mock(StudyDataRequest.class);
 			when(request0.getId()).thenReturn(0);
 			StudyDataRequest request1 = mock(StudyDataRequest.class);
