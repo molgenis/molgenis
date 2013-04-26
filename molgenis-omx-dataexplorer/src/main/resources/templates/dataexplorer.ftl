@@ -57,10 +57,12 @@
 					</div>		
 				</div>
 				<div class="span9">
-					<div id="dataset-select-container" class="pull-right">
-						<label for="dataset-select">Choose a dataset:</label>
-						<select data-placeholder="Choose a Dataset" id="dataset-select">
-						</select>
+					<div id="dataset-select-container" class="control-group form-horizontal pull-right">
+						<div class="controls">
+							<label class="control-label" for="dataset-select">Choose a dataset:</label>
+							<select data-placeholder="Choose a Dataset" id="dataset-select">
+							</select>
+						</div>
 					</div>
 					<div class="row-fluid data-table-container">
 						<table id="data-table" class="table table-striped table-condensed"></table>
