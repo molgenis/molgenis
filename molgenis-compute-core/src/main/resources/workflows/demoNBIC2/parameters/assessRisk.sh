@@ -9,4 +9,3 @@ for i in ${!glucose[*]}; do
 	fi;
 done
 
-saveError $sample "Dit is een sample"
