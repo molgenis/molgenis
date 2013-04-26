@@ -316,7 +316,7 @@
 		}
 
 		var table = $('<table class="table table-striped table-condensed table-hover" />');
-		$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Delete</th>').appendTo(table);
+		$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Remove</th>').appendTo(table);
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
 				var protocol_name = node.parent.data.title;
@@ -332,7 +332,7 @@
 					tree.getNodeByKey(node.data.key).select(false);
 					return false;
 				}, this));
-				$('<td />').append(deleteButton).appendTo(row);
+				$('<td class="center" />').append(deleteButton).appendTo(row);
 
 				row.appendTo(table);
 			}
@@ -418,7 +418,7 @@
 	}
 
 	// on document ready
-	$(function() {  		
+	$(function() {
 		$(document).on('molgenis-login', function(e, msg) {
 			$('.alert').alert('close');
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));

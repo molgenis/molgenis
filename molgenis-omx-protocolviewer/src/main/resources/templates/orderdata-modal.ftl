@@ -2,7 +2,7 @@
 <div id="orderdata-modal" class="modal hide" tabindex="-1">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="#orderdata-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    <h3>SHOPPING CART</h3>
+    <h3>Order Study Data</h3>
   </div>
   <div class="modal-body">
   	<#-- order data form -->
@@ -48,15 +48,15 @@
 						container.append('<p>no variables selected</p>');
 					} else {
 						submitBtn.removeClass('disabled');
-						var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed"></table>');
-						table.append($('<thead><th>Name</th><th>Description</th><th>Remove</th></thead>'));
+						var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
+						table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
 						var body = $('<tbody>');
 						$.each(cart.features, function(i, feature) {
 							var row = $('<tr>');
 							row.append('<td>' + feature.name + '</td>');
 							row.append('<td>' + feature.i18nDescription.en + '</td>');
 							
-							var deleteCol = $('<td>');
+							var deleteCol = $('<td class="center">');
 							var deleteBtn = $('<i class="icon-remove"></i>');
 							deleteBtn.click(function() {
 								$.ajax({
@@ -138,9 +138,5 @@
 				form.submit();
 	    	}
 		});
-		
-		<#-- CSS -->
-		$('#orderdata-selection-table-container').css('max-height', '300px'); //TODO move to css?
-		$('#orderdata-selection-table-container').css('overflow','auto');
 	});
 </script>
