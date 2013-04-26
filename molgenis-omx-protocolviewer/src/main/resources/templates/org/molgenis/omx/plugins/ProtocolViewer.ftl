@@ -67,7 +67,7 @@
 							</div>
 		  				</div>
 		  				<div class="row-fluid grid" id="feature-shopping-controls">
-		  					<div class="span3 offset6">
+		  					<div class="span9">
 			  					<div class="btn-group pull-left">			
 							<#if model.enableViewAction>
 									<button class="btn" id="view-features-button">View</button>
