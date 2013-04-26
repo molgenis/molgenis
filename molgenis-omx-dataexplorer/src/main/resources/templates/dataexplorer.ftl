@@ -58,7 +58,7 @@
 				</div>
 				<div class="span9">
 					<div id="dataset-select-container" class="pull-right">
-						<label id ="dataset-select-label">Choose a dataset:</label>
+						<label for="dataset-select">Choose a dataset:</label>
 						<select data-placeholder="Choose a Dataset" id="dataset-select">
 						</select>
 					</div>

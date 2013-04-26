@@ -11,12 +11,6 @@
 	margin-bottom: 8px;
 }
 
-#dataset-select-label {
-	display: inline;
-	margin-right:10px;
-	font-size: 15.4px;
-}
-
 .data-table-container {
 	overflow: auto;
 	white-space: nowrap;
