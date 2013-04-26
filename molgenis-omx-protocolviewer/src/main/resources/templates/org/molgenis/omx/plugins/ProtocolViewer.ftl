@@ -74,10 +74,12 @@
 							<#if model.showViewButton>
 								<button class="btn" id="view-features-button">View</button>
 							</#if>
+							<#if model.showOrderButton>
 								<div id="orderdata-modal-container"></div>
 								<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
 								<div id="ordersview-modal-container"></div>
 								<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+							</#if>
 							</div>
 		  				</div>
 	  				</div>
