@@ -33,6 +33,7 @@
   		});
   		modal.on('hide', function () {
 	  		form[0].reset();
+	  		$('.alert', modal).remove();
   		});
   		$('.close', modal).click(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
 	  		e.preventDefault();
@@ -59,10 +60,11 @@
 		            url:  '/account/password/reset',
 		            data: form.serialize(),
 		            success: function () {
-		        		modal.modal('hide'); // TODO display success message
+		            	$(document).trigger('molgenis-passwordresetted', 'Password resetted, an email has been send to you');
+		        		modal.modal('hide');
 		            },
 		            error: function() {
-		            	alert("error"); // TODO display error message
+		            	$('.modal-header', modal).after($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Unknown error occurred</div>'));
 		            }
 		        });
 		    }

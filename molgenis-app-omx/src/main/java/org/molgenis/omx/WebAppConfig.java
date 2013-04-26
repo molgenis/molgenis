@@ -10,6 +10,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
@@ -109,6 +110,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		javaMailProperties.setProperty("mail.smtp.quitwait", mailJavaQuitWait);
 		mailSender.setJavaMailProperties(javaMailProperties);
 		return mailSender;
+	}
+
+	@Bean
+	public FileStore fileStore()
+	{
+		return new FileStore(System.getProperty("user.home"));
 	}
 
 	/**

@@ -16,6 +16,7 @@ import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.service.OrderStudyDataService;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.ShoppingCart;
@@ -131,6 +132,12 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
+		}
+
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
 		}
 
 		@Bean
