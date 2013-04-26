@@ -46,11 +46,14 @@ import com.google.gson.reflect.TypeToken;
  */
 public class ProtocolViewerController extends PluginModel<Entity>
 {
-	private static final long serialVersionUID = -6143910771849972946L;
-	private static final String KEY_SHOW_VIEW_BUTTON = "plugin.catalogue.showviewbutton";
-	private static final boolean DEFAULT_KEY_SHOW_VIEW_BUTTON = true;
-	private static final String KEY_SHOW_SAVE_SELECTION_BUTTON = "plugin.catalogue.showorderbutton";
-	private static final boolean DEFAULT_KEY_SAVE_SELECTION_BUTTON = true;
+	private static final long serialVersionUID = 1L;
+
+	private static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
+	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
+	private static final String KEY_ACTION_VIEW = "plugin.catalogue.action.view";
+	private static final boolean DEFAULT_KEY_ACTION_VIEW = true;
+	private static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
+	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
 
 	/** Protocol viewer model */
 	private ProtocolViewer protocolViewer;
@@ -83,10 +86,12 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		StringBuilder s = new StringBuilder();
 		s.append("<link rel=\"stylesheet\" href=\"css/protocolviewer.css\" type=\"text/css\">");
 		s.append("<link rel=\"stylesheet\" href=\"css/ui.dynatree.css\" type=\"text/css\">");
+		s.append("<link rel=\"stylesheet\" href=\"css/chosen.css\" type=\"text/css\">");
 		s.append("<script type=\"text/javascript\" src=\"js/protocolviewer.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.dynatree.min.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.fileDownload-min.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.validate.min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/chosen.jquery.min.js\"></script>");
 		return s.toString();
 	}
 
@@ -396,10 +401,10 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		}
 		this.protocolViewer.setDataSets(jsDataSets);
 
-		this.protocolViewer
-				.setShowViewButton(getMolgenisSettingFlag(KEY_SHOW_VIEW_BUTTON, DEFAULT_KEY_SHOW_VIEW_BUTTON));
-		this.protocolViewer.setShowOrderButton(getMolgenisSettingFlag(KEY_SHOW_SAVE_SELECTION_BUTTON,
-				DEFAULT_KEY_SAVE_SELECTION_BUTTON));
+		this.protocolViewer.setEnableDownloadAction(getMolgenisSettingFlag(KEY_ACTION_DOWNLOAD,
+				DEFAULT_KEY_ACTION_DOWNLOAD));
+		this.protocolViewer.setEnableViewAction(getMolgenisSettingFlag(KEY_ACTION_VIEW, DEFAULT_KEY_ACTION_VIEW));
+		this.protocolViewer.setEnableOrderAction(getMolgenisSettingFlag(KEY_ACTION_ORDER, DEFAULT_KEY_ACTION_ORDER));
 	}
 
 	private List<Category> findCategories(Database db, ObservableFeature feature) throws DatabaseException

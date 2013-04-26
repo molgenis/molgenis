@@ -15,9 +15,11 @@ public class ProtocolViewer implements Serializable
 
 	private List<JSDataSet> dataSets;
 
-	private boolean showViewButton;
+	private boolean enableDownloadAction;
 
-	private boolean showOrderButton;
+	private boolean enableViewAction;
+
+	private boolean enableOrderAction;
 
 	private boolean authenticated;
 
@@ -31,24 +33,34 @@ public class ProtocolViewer implements Serializable
 		this.dataSets = dataSets;
 	}
 
-	public boolean getShowViewButton()
+	public boolean isEnableDownloadAction()
 	{
-		return this.showViewButton;
+		return enableDownloadAction;
 	}
 
-	public void setShowViewButton(boolean showViewButton)
+	public void setEnableDownloadAction(boolean enableDownloadAction)
 	{
-		this.showViewButton = showViewButton;
+		this.enableDownloadAction = enableDownloadAction;
 	}
 
-	public boolean getShowOrderButton()
+	public boolean isEnableViewAction()
 	{
-		return this.showOrderButton;
+		return enableViewAction;
 	}
 
-	public void setShowOrderButton(boolean showOrderButton)
+	public void setEnableViewAction(boolean enableViewAction)
 	{
-		this.showOrderButton = showOrderButton;
+		this.enableViewAction = enableViewAction;
+	}
+
+	public boolean isEnableOrderAction()
+	{
+		return enableOrderAction;
+	}
+
+	public void setEnableOrderAction(boolean enableOrderAction)
+	{
+		this.enableOrderAction = enableOrderAction;
 	}
 
 	public boolean isAuthenticated()
