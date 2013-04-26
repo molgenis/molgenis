@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,24 +71,28 @@ public class BackendGenerator
 		Template submit = new Template("submit", new StringReader(this.getSubmitTemplate()), conf);
 
 		// generate the submit script
-//		try
+		try
 		{
 			File outFile = new File(targetDir.getAbsolutePath() + "/submit.sh");
 			Writer out = new BufferedWriter(new FileWriter(outFile));
 
-			for(Task t: tasks)
-			{
-				out.write("sh "+t.getName()+".sh\n");
-			}
+			Map<String, Object> taskMap = new HashMap<String, Object>();
+			taskMap.put("tasks", tasks);
+			
+			submit.process(taskMap, out);
+//			for(Task t: tasks)
+//			{
+//				out.write("sh "+t.getName()+".sh\n");
+//			}
 			
 			out.close();
 			
 			System.out.println("Generated " + outFile);
 		}
-//		catch (TemplateException e)
-//		{
-//			throw new IOException("Backend generation failed for " + this.getClass().getSimpleName());
-//		}
+		catch (TemplateException e)
+		{
+			throw new IOException("Backend generation failed for " + this.getClass().getSimpleName());
+		}
 
 		// generate the tasks scripts
 		for (Task task : tasks)

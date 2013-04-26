@@ -18,7 +18,6 @@ import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
 import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
 import org.molgenis.compute5.generators.EnvironmentGenerator;
-import org.molgenis.compute5.generators.MolgenisFunctionFileGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.compute5.generators.local.LocalBackend;
 import org.molgenis.compute5.generators.pbs.PbsBackend;
@@ -156,10 +155,6 @@ public class ComputeCommandLine
 		{
 			new LocalBackend().generate(compute.getTasks(), dir);
 		}
-
-		// create Error File in which framework and users can store error (code:
-		// message).
-		new MolgenisFunctionFileGenerator().generate(compute, workDir);
 
 		// generate outputs folders per task
 		for (Task t : compute.getTasks())
