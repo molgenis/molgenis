@@ -42,4 +42,13 @@ public class Workflow
 	{
 		this.steps = steps;
 	}
+
+	public Step getStep(String previousStepName)
+	{
+		for (Step step : this.steps)
+		{
+			if (previousStepName.equals(step.getName())) return step;
+		}
+		return null;
+	}
 }

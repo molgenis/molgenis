@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,7 +31,6 @@ public class TaskGenerator
 {
 	public static List<Task> generate(Workflow workflow, Parameters parameters) throws IOException
 	{
-
 		List<Task> result = new ArrayList<Task>();
 
 		final List<WritableTuple> globalParameters = parameters.getValues();
@@ -39,9 +39,6 @@ public class TaskGenerator
 
 			// map global to local parameters
 			List<WritableTuple> localParameters = mapGlobalToLocalParameters(globalParameters, step);
-
-			// System.out.println(">> localParameters: \n" + localParameters);
-			WritableTuple wt = localParameters.get(0);
 
 			// collapse parameter values
 			localParameters = collapseOnTargets(localParameters, step);
@@ -58,7 +55,7 @@ public class TaskGenerator
 			localParameters = addStepIds(localParameters, step);
 
 			// generate the tasks from template, add step id
-			result.addAll(generateTasks(step, localParameters));
+			result.addAll(generateTasks(step, localParameters, workflow));
 
 			// uncollapse
 			localParameters = TupleUtils.uncollapse(localParameters, Parameters.ID_COLUMN);
@@ -72,41 +69,47 @@ public class TaskGenerator
 
 	}
 
-	private static Collection<? extends Task> generateTasks(Step step, List<WritableTuple> localParameters)
-			throws IOException
+	private static Collection<? extends Task> generateTasks(Step step, List<WritableTuple> localParameters,
+			Workflow workflow) throws IOException
 	{
 		List<Task> tasks = new ArrayList<Task>();
-
-		// No freemarker anymore:
-		//Configuration conf = new Configuration();
-		//Template template = new Template(step.getName(), new StringReader(step.getProtocol().getTemplate()), conf);
-		StringWriter out;
 
 		for (WritableTuple target : localParameters)
 		{
 			Task task = new Task(target.getString(Task.TASKID_COLUMN));
 
-			// add data dependencies
-			for (String previousStep : step.getPreviousSteps())
+			// for this step: store which target-ids go into which job
+			for (Integer id : target.getIntList(Parameters.ID_COLUMN))
 			{
-				if (!target.isNull(previousStep + Parameters.STEP_PARAM_SEP + Task.TASKID_COLUMN))
+				step.setJobName(id, task.getName());
+			}
+
+			// for this task: add task dependencies
+			for (String previousStepName : step.getPreviousSteps())
+			{
+				Step prevStep = workflow.getStep(previousStepName);
+				for (Integer id : target.getIntList(Parameters.ID_COLUMN))
 				{
-					task.getPreviousTasks().addAll(
-							target.getList(previousStep + Parameters.STEP_PARAM_SEP + Task.TASKID_COLUMN));
+					task.getPreviousTasks().add(prevStep.getJobName(id));
 				}
+
+				// String col = Parameters.PREVIOUS_COLUMN;
+				// if (!target.isNull(col))
+				// {
+				// task.getPreviousTasks().addAll(target.getList(Parameters.PREVIOUS_COLUMN));
+				// }
 			}
 
 			// generate script from template
 			try
 			{
-				out = new StringWriter();
 				Map<String, Object> map = TupleUtils.toMap(target);
-				
+
 				// remember parameter values
 				task.setParameters(map);
 
 				// now source the task's parameters from environment.txt
-				 String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
+				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
 				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced
@@ -120,7 +123,7 @@ public class TaskGenerator
 					{
 						Object rowIndexObject = rowIndex.get(i);
 						String rowIndexString = (String) rowIndexObject.toString();
-//						System.out.println(">> " + rowIndexString);
+						// System.out.println(">> " + rowIndexString);
 						parameterHeader += p + "[" + i + "]=${" + step.getParameters().get(p) + "[" + rowIndexString
 								+ "]}\n";
 					}
@@ -143,7 +146,13 @@ public class TaskGenerator
 
 						parameterHeader += "if [[ ! $(IFS=$'\\n' sort -u <<< \"${"
 								+ p
-								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"Error in Step '" + step.getName() + "': input parameter '" + p + "' is an array with different values.\" >&2; exit 1; fi\n";
+								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"Error in Step '"
+								+ step.getName()
+								+ "': input parameter '"
+								+ p
+								+ "' is an array with different values. Maybe '"
+								+ p
+								+ "' is a runtime parameter with 'more variable' values than what was folded on generation-time?\" >&2; exit 1; fi\n";
 					}
 				}
 
@@ -194,8 +203,10 @@ public class TaskGenerator
 							{
 								Object rowIndexObject = rowIndex.get(i);
 								String rowIndexString = (String) rowIndexObject.toString();
-								//System.out.println(">> " + rowIndexString);
-								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP + p + "[" + rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + Parameters.ENVIRONMENT + "\n";
+								// System.out.println(">> " + rowIndexString);
+								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP + p + "["
+										+ rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + Parameters.ENVIRONMENT
+										+ "\n";
 							}
 
 							script += line;
@@ -248,6 +259,38 @@ public class TaskGenerator
 
 	private static List<WritableTuple> addStepIds(List<WritableTuple> localParameters, Step step)
 	{
+		// // determine list length so that we can replicate thisTaskId that
+		// number of times
+		// Integer nCollapsedTargets = 0;
+		// if (0 < localParameters.size())
+		// {
+		// nCollapsedTargets =
+		// localParameters.get(0).getList(Parameters.ID_COLUMN).size();
+		// }
+
+		// int stepId = 0;
+		// for (WritableTuple target : localParameters)
+		// {
+		// // String thisTaskId = step.getName() + Parameters.STEP_PARAM_SEP +
+		// stepId;
+		// // List<String> prevTaskIds =
+		// target.getList(Parameters.PREVIOUS_COLUMN);
+		// // List<String> allTaskIds = new ArrayList<String>();
+		// // if (null != prevTaskIds)
+		// // {
+		// // allTaskIds = prevTaskIds;
+		// // }
+		// // allTaskIds.add(thisTaskId);
+		// // target.set(Parameters.PREVIOUS_COLUMN, allTaskIds); // for
+		// previous
+		// // // steps
+		//
+		// String name = step.getName() + Parameters.PREVIOUS_COLUMN + stepId;
+		// target.set(Task.TASKID_COLUMN, name);
+		// target.set(Task.TASKID_INDEX_COLUMN, stepId++);
+		// }
+		// return localParameters;
+
 		int stepId = 0;
 		for (WritableTuple target : localParameters)
 		{
@@ -272,6 +315,11 @@ public class TaskGenerator
 					globalParameters.get(i).set(step.getName() + Parameters.STEP_PARAM_SEP + localName,
 							local.get(localName));
 				}
+				// else if (localName.equals(Parameters.PREVIOUS_COLUMN))
+				// {
+				// // handle previous step
+				// globalParameters.get(i).set(localName, local.get(localName));
+				// }
 			}
 		}
 	}
@@ -288,7 +336,7 @@ public class TaskGenerator
 			target.set(Parameters.PPN, step.getProtocol().getPpn());
 			target.set(Parameters.WALLTIME, step.getProtocol().getWalltime());
 			target.set(Parameters.MEMORY, step.getProtocol().getMemory());
-			
+
 			// add protocol parameters
 			for (Output o : step.getProtocol().getOutputs())
 			{
@@ -296,16 +344,7 @@ public class TaskGenerator
 			}
 		}
 
-		// DON'T solve the output templates (if any)
-		// TupleUtils.solve(localParameters);
-
 		return localParameters;
-		// }
-		// catch (IOException e)
-		// {
-		// throw new IOException("Solving of outputs for step '" +
-		// step.getName() + "' failed: " + e.getMessage());
-		// }
 	}
 
 	private static List<WritableTuple> collapseOnTargets(List<WritableTuple> localParameters, Step step)
@@ -380,6 +419,17 @@ public class TaskGenerator
 				// set
 				local.set(localName, global.get(globalName));
 			}
+
+			// // set previous step info
+			// for (String col : global.getColNames())
+			// {
+			// System.out.println(">> In mapGlobalToLocalParams >> " + col);
+			// if (Parameters.PREVIOUS_COLUMN.equals(col))
+			// {
+			// // found info in which jobs this target was part of
+			// local.set(col, global.getString(col));
+			// }
+			// }
 
 			localParameters.add(local);
 		}
