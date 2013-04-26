@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +20,7 @@ import javax.servlet.http.Part;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
@@ -25,6 +28,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,6 +72,15 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(molgenisUser.getEmail()).thenReturn("test@molgenis.org");
 			when(database.findById(MolgenisUser.class, 1)).thenReturn(molgenisUser);
+
+			MolgenisUser adminUser = when(mock(MolgenisUser.class).getEmail()).thenReturn("admin@molgenis.org")
+					.getMock();
+			@SuppressWarnings("unchecked")
+			Query<MolgenisUser> query = mock(Query.class);
+			when(database.query(MolgenisUser.class)).thenReturn(query);
+			when(query.equals(MolgenisUser.SUPERUSER, true)).thenReturn(query);
+			when(query.find()).thenReturn(Collections.singletonList(adminUser));
+
 			StudyDataRequest request0 = mock(StudyDataRequest.class);
 			when(request0.getId()).thenReturn(0);
 			StudyDataRequest request1 = mock(StudyDataRequest.class);
@@ -88,6 +101,16 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		public MolgenisSettings molgenisSettings()
 		{
 			return mock(MolgenisSettings.class);
+		}
+
+		@Bean
+		public FileStore fileStore() throws IOException
+		{
+			File requestForm = mock(File.class);
+			when(requestForm.getPath()).thenReturn("requestform.doc");
+			FileStore fileStore = mock(FileStore.class);
+			when(fileStore.store(any(InputStream.class), any(String.class))).thenReturn(requestForm);
+			return fileStore;
 		}
 
 		@Bean

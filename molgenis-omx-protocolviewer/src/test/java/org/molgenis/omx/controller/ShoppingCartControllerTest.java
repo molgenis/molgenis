@@ -57,7 +57,7 @@ public class ShoppingCartControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"features\":[{\"id\":0,\"name\":\"feature #0\",\"description\":\"feature #0 description\"},{\"id\":1,\"name\":\"feature #1\",\"description\":\"feature #1 description\"}]}"));
+								.string("{\"features\":[{\"id\":0,\"name\":\"feature #0\",\"i18nDescription\":{\"en\":\"feature #0 description\"}},{\"id\":1,\"name\":\"feature #1\",\"i18nDescription\":{\"en\":\"feature #1 description\"}}]}"));
 	}
 
 	@Test

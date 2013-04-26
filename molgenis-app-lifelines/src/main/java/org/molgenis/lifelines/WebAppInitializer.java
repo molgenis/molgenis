@@ -14,7 +14,7 @@ import app.servlet.FrontController;
 
 public class WebAppInitializer implements WebApplicationInitializer
 {
-	private static Logger logger = Logger.getLogger(WebAppInitializer.class);
+	private static final Logger logger = Logger.getLogger(WebAppInitializer.class);
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException
@@ -30,7 +30,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 		}
 		else
 		{
-			final int maxSize = 32 * 1024 * 1024 * 1024;
+			final int maxSize = 32 * 1024 * 1024;
 			dispatcherServlet.setLoadOnStartup(1);
 			dispatcherServlet.addMapping("/");
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
