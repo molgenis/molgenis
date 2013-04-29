@@ -61,9 +61,10 @@ Below commandline options and file types are explained.
 Below options, --full_name or -short. These can be combined.
 
 	#actions
-	--create -c [path]			creates empty workflow in current folder or in [path]	--generate -g				generates tasks. Default: '-w workflow.csv -p parameters.csv'
-	--submit -s					submits last generated task to last used backend (see --backend)
-	--monitor -m				monitor currently running jobs.
+	--create -c [path]		creates empty workflow in current folder or in [path]	
+	--generate -g			generates tasks. Default: '-w workflow.csv -p parameters.csv'
+	--submit -s			submits last generated task to last used backend (see --backend)
+	--monitor -m			monitor currently running jobs.
 	
 	#workflow
 	--workflow -w [path]		translates to --workflow_file [path]/workflow.csv and
@@ -71,19 +72,19 @@ Below options, --full_name or -short. These can be combined.
 	--workflow -w [path.csv]	translates to --workflow_file [path].csv and
 								--workflow_defaults [path].defaults.csv
 	--workflow_file -wf [path]	points to workflow file
-	--workflow_defauts -wd [path] points to workflow defaults file
+	--workflow_defauts -wd [path] 	points to workflow defaults file
 
 	#backend
-	--backend -b [name]			sets the backend, either 'local', 'pbs', 'pilot', 'custom'
-	--host -h					sets the host, defaults to localhost
+	--backend -b [name]		sets the backend, either 'local', 'pbs', 'pilot', 'custom'
+	--host -h			sets the host, defaults to localhost
 
 	#parameters
 	--parameters -p	[path]		points to parameters file type [path].csv. 
-								This parameter can be repeated. Then parameters will be merged.
+					This parameter can be repeated. Then parameters will be merged.
 	--parameters -p [path.csv]	identical to -p [path]
 	
 	#jobs folder
-	--jobs -j [path]			indicate the output folder for the generated tasks + submit scripts. 								Default: ./tasks
+	--jobs -j [path]		indicate the output folder for the generated tasks + submit scripts. 								Default: ./tasks
 
 ## Workflow
 
