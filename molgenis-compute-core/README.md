@@ -1,210 +1,408 @@
 # MOLGENIS Compute 5.x Documentation
-Download compute as binary zip from http://www.molgenis.org/wiki/ComputeStart
 
-	wget http://www.molgenis.org/releases/compute/compute_5.x.x.zip
+Licence: LGPLv3. http://www.molgenis.org
 
-## Basic concepts
+## Overview
 
-MOLGENIS compute is a lightweight tool to create pipelines of analysis steps (in shell script) and execute in parallel on local servers, clusters and grids (tested on Linux and Mac). 
-
-Compute in three steps:
+Born from bioinformatics, MOLGENIS compute is a lightweight shell script framework to generate big data workflows that can run parallel on clusters and grids:
  
-1. Design a workflow (-w) of steps, each step pointing to a 'protocol' bash script
-2. Create parameters (-p) to apply the workflow to
-3. Generate tasks and submit for execution on cluster/grid backend (b)
+1. Design a workflow.csv with each step as a shell script 'protocol'
+2. Generate jobs by iterating over parameters.csv and run on compute backend
+3. (Optional) use standardized file and tool management for portable workflows
 
-Typical command:
+Typical command to generate and run jobs:
 
-	molgenis -w myworkflow -p myparameters.csv
+	molgenis -w workflow -p parameters.csv [-p moreparameters.csv]
 
-Explanation:
+* workflow = path to directory with workflow.csv or a workflow.csv file
+* parameters.csv = file containing parameter values
 
-	# myworkflow = directory with workflow or a workflow.csv file
-	# myparameters = csv file containing parameter values per column
+If you don't like to use defaults, above translates to:
 
-If you don't want to use defaults, above translates to:
-
-	molgenis	--generate --submit
-				--workflow_file myworkflow/workflow.csv \
-				--workflow_defaults myworkflow/workflow.defaults.csv \
-				--parameters myparameters.cvs \
-				--jobdir jobs
+	molgenis	--generate --run
+				--workflow workflow/workflow.csv \
+				--defaults workflow/workflow.defaults.csv \
+				--parameters parameters.csv \
+				--jobdir jobs \
 				--backend pbs
 
-Which is equal to shorthand notation:
-
-	molgenis	-g -s
-				-wf myworkflow/workflow.csv \
-				-wd myworkflow/workflow.defaults.csv \
-				-p myparameters.cvs \
-				-j jobs
-				-b pbs
-
-You can also do this stepwise
+Alternatively can configure molgenis compute stepwise:
 	
-	#set default backend
-	molgenis -b pbs
+	molgenis --workflow myworkflow
+	molgenis --generate --parameters myparameters.csv
+	molgenis --backend pbs
+	molgenis --run
+
+Download MOLGENIS compute as binary zip, see http://www.molgenis.org/wiki/ComputeStart for latest:
+
+	wget http://www.molgenis.org/releases/compute/molgenis-compute-5.x.x.zip
+	unzip molgenis-compute-5.x.x.zip
+	export PATH=$PATH:molgenis-compute-5.x.x
+
+## 1. Design a workflow
+
+A typical workflow directory looks as follows:
+
+	/protocols				#folder with bash script 'protocols'
+	/protocols/step1.sh		#example of a protocol shell script
+	/protocols/step2.sh		#example of a protocol shell script
+	workflow.csv			#file listing steps and parameter flow
+	workflow.defaults.csv	#default parameters (optional)
+
+Create a new workflow directory using:
 	
-	#set default workflow
-	molgenis -w myworkflow
+	molgenis --create myworkflow
+	cd myworkflow
 
-	#generate jobs
-	molgenis -g -p myparameters.csv
+Download example workflows:
 
-	#submit jobs
-	molgenis -s
-
-Below commandline options and file types are explained.
-
-## Commandline options
-
-Below options, --full_name or -short. These can be combined.
-
-	#actions
-	--create -c [path]		creates empty workflow in current folder or in [path]	
-	--generate -g			generates tasks. Default: '-w workflow.csv -p parameters.csv'
-	--submit -s			submits last generated task to last used backend (see --backend)
-	--monitor -m			monitor currently running jobs.
-	
-	#workflow
-	--workflow -w [path]		translates to --workflow_file [path]/workflow.csv and
-								--workflow_defaults [path]/workflow.defaults.csv
-	--workflow -w [path.csv]	translates to --workflow_file [path].csv and
-								--workflow_defaults [path].defaults.csv
-	--workflow_file -wf [path]	points to workflow file
-	--workflow_defauts -wd [path] 	points to workflow defaults file
-
-	#backend
-	--backend -b [name]		sets the backend, either 'local', 'pbs', 'pilot', 'custom'
-	--host -h			sets the host, defaults to localhost
-
-	#parameters
-	--parameters -p	[path]		points to parameters file type [path].csv. 
-					This parameter can be repeated. Then parameters will be merged.
-	--parameters -p [path.csv]	identical to -p [path]
-	
-	#jobs folder
-	--jobs -j [path]		indicate the output folder for the generated tasks + submit scripts. 								Default: ./tasks
-
-## Workflow
-
-A typical workflow directory looks as follows
-
-	/protocols
-	workflow.csv
-	workflow.default.csv
+	http://www.github.com/molgenis/molgenis-compute-workflows
 
 ### workflow.csv
-Describes the steps of the workflows, and their parameter dependencies.
+Describes workflow steps and how they depend on each other via parameter input=source links.
 
-Example:
+Example workflow.csv (whitespaces will be trimmed):
 
-	step,	protocol,	parameters
-	step1,	step1.sh,	sample=p.sample
-	step2,	step2.sh,	in=step1.output
-
-Explanation
-
-* step = unique name of the step within the workflow.
-* protocol = path to a protocol. Looks in folder of workflow.csv or workflow.csv/../protocols
-* parameters = mapping of either USER.param or [step].output to inputs of scripts. E.g. step1.sh has input 'sample' that is set from the column 'sample' in parameters.csv; step2.sh has input 'in' that takes the output of step1. 
-	
-### protocols 
-Each step is described as a protocol, which is a special bash script
-
-Example:
-
-	#MOLGENIS mem=2G cores=2 walltime=10:00:00
-	#string group "a party"
-	#string organizer "the individual organizing"
-	#list guests "list of strings, each string a guest"
-	#output invDate "invitation date"
-
-	echo "Dear ${organizer},"
-	echo "Please organize activities for the party '${group}' group."
-	echo "List of your guests:"
-	for g in guests
-	do
-		echo "* ${g}"
-	done
-	invDate = date + "%m-%d-%y"
-
-Possible headers:
-* #MOLGENIS [mem=nG] [cores=n] [walltime=dd:hh:min] -- resources needed by this script in terms of memory, cores and runtime
-* #string name [description] -- input of type string; this script will run on each unique combination of group/organizer
-* #list name [description] -- input of type list; guests will be grouped into a list based on group/organizer
-* #ouput name [description] -- output to be used in next step.
-
-### workflow.defaults.csv
-(Optional) Decribes default values for the parameters.
-
-## Generate and submit
-
-### parameters.csv
-Comma seperated file describing parameter values in each column.
-
-Example:
-
-	guest,		party,		organizer
-	morris,		beer,		martijn
-	pieter,		gataca,		pieter
-	martijn,	beer,		martijn
-	freerk,		gataca,		pieter
+	step,  protocol, parameters
+	step1, step1.sh, in=user.sample;in2=user.project
+	step2, step2.sh, in=step1.output
 
 Explanation:
+
+* step = unique name of the step within the workflow (a-zA-Z0-9)
+* protocol = path to a protocol script. Looks in workflow.csv/. and workflow.csv/protocols
+* parameters = mapping of input parameters from either previous step or parameters.csv, E.g.
+  * step1.sh has input 'in' that is set from column 'sample' in parameters.csv 
+  * step2.sh has input 'in' that takes the output of step1
+
+(__FUTURE WORK!__) You can include other workflows as sub-workflow. Then you need to map the user variables (user.*) from parameters.csv to the workflow step (white spaces will be trimmed):
+
+	step,  protocol,              parameters
+	step1, ../other/workflow.csv, project=user.project;sample=user.sample
+	step2, step2.sh,              in=step1.output
+	
+### protocols 
+Each step is described as a 'protocol' shell script. Its header describes: 
+
+* (optional) resource needs via #MOLGENIS [mem=nG] [cores=n] [walltime=dd:hh:min]
+* input #string which unique values will be used to iterate over
+* input #list which will __*not*__ be used to iterate over
+* result #output which will be exposed to next steps
+
+MOLGENIS will generate a compute job for each unique combinations of #string inputs provided in parameters.csv. See 'parameters.csv' for examples.
+
+Example 'step1.sh':
+
+	#MOLGENIS mem=2G cores=2 walltime=10:00:00
+	#string in "some input"
+	#string in2 "another input"
+	#list in3 "list of values, each string a guest"
+	#output out1 "some string that can be used in next steps"
+
+	echo "started with inputs in=${in},in2=${in2}"
+	echo "items in list in3:
+	for i in in3
+	do
+		echo "* ${i}"
+	done
+	out1 = date + "%m-%d-%y"
+
+Optionally, you can use standardized file management and tool management functions to make your protocols portable across local, cluster and grid. See 'Advanced features'.
+
+### workflow.defaults.csv
+(Optional) Provide default values for the 'user.*' parameters. The format is equal to parameters.csv, described below.
+
+Example workflow.defaults.csv (white space will be trimmed):
+
+	tempdir, plink,
+	/tmp,    /tools/plink18	
+
+## 2. Run an analysis
+A typical analysis directory while running looks as follows:
+
+	parameters.csv		#contains the values for the analysis scripts
+	/jobs				#directory where molgenis generates job scripts
+	/jobs/.molgenis		#file molgenis creates to keep track of runtime values
+
+Commands:
+
+	#generate jobs in 'jobs' folder and run
+	molgenis -w path/workflow -p parameters.csv [-p moreparameters.csv]
+
+	#generate without running (so you can inspect generated scripts)
+	molgenis --generate -w path/workflow -p parameters.csv [-p moreparameters.csv]
+
+	#run generated jobs
+	molgenis --run
+
+	#use non-default jobs directory
+	molgenis -w path/workflow -p parameters.csv -j jobs2
+
+### parameters.csv
+Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9) and parameter values in each rown (use quotes to escape ',', e.g. "a,b"). 
 
 Each value is one of the following:
 
-* a string (may contain Freemarker templates) or number
+* a string
+* a template, e.g. ${p}, to create derived parameters
 * a series i..j (where i and j are two integers), meaning from i to j including i and j
-* a series of comma-separated numbers or strings (may contain Freemarker templates) "v1, v2" surrounded with quotes
+* a list of ';' separated values (may contain templates)
 
-## Advanced features
+You can combine multiple parameter files: the values will be 'natural joined' based on overlapping columns. 
 
-### Multiple parameter files
+Example with two parameter files:
 
-### Iteration strategies or 'folding'
+	molgenis -w path/to/workflow -p f1.csv -p f2.csv
 
-### Runtime parameter value passing
+Example f1.csv (white space will be trimmed):
 
-### Including parameters and workflows via parameters.csv
+	p0,  p2
+	x,   1
+	y,   2
 
-### Custom backend
-You can use a custom backend using option '''-b custom'''
-To success you need to edit the following generator files
+Example f2.csv (white space will be trimmed):
 
-molgenis/custom.header.ftl
-molgenis/custom.footer.ftl
-molgenis/custom.submit.ftl
+	p1,  p2,    p3,  	p4
+	v1,  1..2,  a;b,	file${p2}
 
-We are happy to add your custom backend as standard option to next version of compute :-)
+At runtime, after first expanding f1 and f2, and then merging, the parameters used are:
 
-## For developers
+	p0,  p1,  p2,   p3,	  p4
+	x,   v1,  1,    a,	  file1	
+	x,   v1,  1,    b,    file1
+	y,   v1,  2,    a,	  file2
+	y,   v1,  2,    b,    file2
 
-To get and code the compute source code:
+N.B. 'workflow', 'parameters', 'protocols', 'jobs', 'backend' and 'host' are reserved words that cannot be used as parameter name. These are used to pass all commandline parameters to parameters.csv before generation is started (allow reference in the protocols). This can also be used as alternative configuration method:
 
-Checkout 'molgenis' and 'molgenis_compute5'
+Example 'molgenis -p all_in_one_parameters.csv':
+
+	workflow,              parameters,    protocols,          jobs, backend, host
+	workflow/workflow.csv, f1.csv;f2.csv, workflow/protocols, jobs, grid,    localhost
+
+### Generate and run jobs
+Analysis jobs will be generated for each unique combination of '#string' inputs (see 'protocols').
+
+Command:
+
+	molgenis -w path/to/myworkflow -p parameters.csv [-b backend]
+
+Examples on the number of jobs generated are shown below, based on on parameters.csv above:
+
+Example step1.sh:
+
+	#string p0
+	#list p2
+	will produce two jobs for p0='x' and p0='y'
+	will have p2=[1,2] in both jobs
+
+Example step2.sh:
+
+	#string p1
+	#list p2
+	will produce one job for p1='v1'
+	will have p2=[1,1,2,2]
+	
+Example step3.sh: 
+
+	#string p2
+	#string p3
+	#list p2
+	will produce four jobs for p2,p3='1,a', p2,p3='1,b', p2,p3='2,a', p2,p3='2,b'
+	will have p2=[1], p2=[1], p2=[2] and p2=[2] in the respective jobs
+
+### Backends
+
+MOLGENIS compute currently supports four backends:
+
+	-b local    #will simply execute sequentially on the commandline
+	-b pbs      #will use 'qsub' to submit jobs to pbs cluster job scheduler (default)
+	-b grid     #will use a 'pilot job database' to submit jobs for the grid
+	-b custom   #will use the templates in the 'custom' folder in molgenis compute distro
+
+NB: grid schedulers are notoriously unreliable. Therefore we implemented a best practice 'pilot job' database with help of http://www.ebiogrid.nl. In this system:
+
+* the real jobs are submitted to a molgenis database (runs in background)
+* seperately, 'pilot jobs' are submitted to the grid
+* each pilot job retrieves and runs real jobs (until it times-out)
+
+Command:
+	
+	#run jobs by putting them in pilot database (returns a key)
+	molgenis -w workflow -p parameters.csv -b grid
+	> key=1w1e3eewer3wrw3r
+
+	#submit pilot jobs to the grid
+	molgenis --pilot 20 user@grid.ui 
+
+	#submit pilot jobs to the grid using another host and key
+	molgenis --pilot 20 user@grid.ui -h myhost.com -key 1w1e3eewer3wrw3r
+
+You can run the pilot job database on another server as follows
+
+	#on other server, start pilot database (will be run in background)
+	molgenis --backend grid
+
+	#on the computer you want to run from, set --host to other server
+	molgenis --host otherserver.com
+	molgenis -b grid -w path/workflow -p parameters.csv
+
+### Monitoring
+
+You can monitor running jobs via:
+
+	molgenis 
+	
+Example result:
+
+	running 7 jobs (1 running, 6 queued, 0 completed, 0 errors)
+	workflow:   path/to/workflow
+	parameters: path/to/parameters.csv
+	            path/to/moreparameters.csv
+	backend:    grid
+	jobdir:		path/to/jobs
+	host:		localhost (see http://localhost:8080/pilots for web view)
+	
+	
+	job			host-id		status	time
+	step1_x		1			R		00:00:10
+	step1_y		2			Q		-
+	step2_v1	3			Q		-
+	step3_1_a	4			Q		-
+	step3_1_b	5			Q		-
+	step3_2_a	6			Q		-
+	step3_2_b	7			Q		-
+
+Example result if no jobs are running, but some parameters are set:
+
+	No jobs running. You can run generated jobs via molgenis --run
+
+	workflow: 	path/to/previously/set/workflow
+	parameters: path/to/previously/set/parameters
+	backend: 	pbs
+	jobdir:		path/to/jobs
+	host:		localhost
+
+You can inspect error logs via
+
+	molgenis --log | more	#all logs
+
+	molgenis --log step1_x  #individual log
+
+You can inspect runtime parameters via
+
+	more jobs/.molgenis #do not edit while running!
+
+TODO: how to restart analyses.
+
+## Making your workflows portable
+
+We have introduced standard procedures to make workflows portable between machines, and between local, cluster and grid.
+
+### Standard file management
+You can use the following methods to standardize file management. (TODO: describe how to customize the behavior of getFile and putFile to work with local or remote file servers)
+
+	getFile $myfile 		#retrieve file $myfile
+	putFile $myfile 		#store file $myfile
+
+### Standard tool management
+
+In addition we recommend use of the 'module' system to standardize tool installation and management. See [ref].
+
+	module load $mytool 	#load $mytool before use
+	$mytool					#execute $mytool
+
+See [WHERE?] for pre-configured modules to use.
+
+### Standard error logging
+Finally we also provide standard error logging methods which MOLGENIS will pick-up in monitoring:
+
+	#put patricks examples here
+
+## Commandline reference
+
+Below options, --full_name or -short. Options can be combined:
+	
+	MOLGENIS compute 5.x
+
+	Born from bioinformatics, MOLGENIS compute is a lightweight shell script framework to 
+	generate big data workflows that can run parallel on clusters and grids:Generate and run 
+	analysis using:
+
+	molgenis -w path/workflow -p parameters.csv
+
+	Below listing of options, --full_name and -short:
+
+	#help						
+	--help						prints this message
+
+	#defaults
+	molgenis -w path -p path	--generate --run 
+	molgenis -p path			--generate --run if -w has been set before
+	molgenis					--monitor
+
+	#actions
+	--generate -g				generates jobs
+	--run -r					runs last generated jobs on last used backend
+	--monitor -m				monitor currently running jobs.
+	--create -c [path]			creates empty workflow in current folder, or in [path]
+	--stop -s					stops running jobs; stops grid pilot database server
+	
+	#workflow
+	--workflow -w path			Loads workflow from path/workflow.csv and
+								--defaults path/workflow.defaults.csv
+	--workflow -w path.csv		Loads workflow from path.csv and
+								--defaults path.defaults.csv
+	#parameters
+	--parameters -p	path		Loads parameters from path.csv. 
+								This option can be repeated to combine parameter files
+	--parameters -p path.csv	identical to -p path
+
+	#backend
+	--backend -b name			sets the backend, either 'local', 'pbs', 'pilot', 'custom'
+	--host -h host				sets the host for pilot database for grid (default: localhost)
+	--pilot	N user@grid.ui		ssh to grid UI and submit pilot N jobs (e.g. N=20)
+	--key key					use key for pilot jobs
+
+	#jobs folder
+	--jobdir -j path			sets the directory where the generated scripts should be 
+								stored, as well as runtime logs. Default: ./jobs
+
+	#seldomly used options						
+	--defaults -d path 			Loads workflow defaults file
+	--protocols path			Adds a directory to load protocol scripts from.
+								Default: '[workflow]/protocols' and '[workflow]/.' and '.'
+								This parameter can be repeated.
+
+
+## Appendix: For developers
+
+To get the compute source code:
+
+Checkout 'molgenis'
 
 	git clone https://www.github.com/molgenis/molgenis.git
 	
-Import into Eclipse 
-
-	File -> Import ... -> Existing projects into workspace
+Follow instructions in molgenis/README.md to compile code
 	
-Inside Eclipse create a run configuration for ComputeCommandline with arguments 
+To run compute in Eclipse, create a run configuration for ComputeCommandline with arguments 
 
 	right click molgenis/molgenis-compute-core/
 
 Example 1: split merge
 
-	-w src/main/resources/workflows/splitmerge/workflow.csv -p src/main/resources/workflows/splitmerge/parameters.csv -d src/main/resources/workflows/splitmerge/out
+	-w src/main/resources/workflows/splitmerge/workflow.csv 
+	-p src/main/resources/workflows/splitmerge/parameters.csv 
+	-j src/main/resources/workflows/splitmerge/out
 
 Example 2: generate a burn down chart
 
 	-p src/main/resources/workflows/burnDownChart/parameters.csv
-	-d /Users/mdijkstra/Documents/work/gitmaven/molgenis/molgenis-compute-core/src/main/resources/workflows/burnDownChart/out
+	-j src/main/resources/workflows/burnDownChart/out
 
+## Acknowledgements
 
+We thank Martijn Dijkstra, George Byelas, Freerk van Dijk, Patrick Deelen, Alexandros Kanterakis and Morris Swertz for conceiving MOLGENIS compute. We thank (members of) BBMRI-NL Rainbow Project 2, Genome of the Netherlands, eBioGrid, Target, LifeLines, CTMM and members of the Genomics Coordination Center @ University Medical Center Groningen, The Netherlands for contributions and sponsoring of the development. This software is available under LGPLv3. Contact m.a.swertz AT rug.nl for questions and collaborations.
 
 	
 
