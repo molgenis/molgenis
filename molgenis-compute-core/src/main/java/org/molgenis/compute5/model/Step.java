@@ -1,5 +1,6 @@
 package org.molgenis.compute5.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,6 +25,20 @@ public class Step
 	// map of previous steps, i.e. where inputs depend on values from previous
 	// steps.
 	Set<String> previousSteps = new HashSet<String>();
+	
+	// map taskId -> jobName
+	Map<Integer, String> idJobMap = new HashMap<Integer, String>();
+	
+	public String getJobName(Integer id)
+	{
+		return this.idJobMap.get(id);
+	}
+	
+	public void setJobName(Integer id, String name)
+	{
+		this.idJobMap.put(id, name);
+	}
+	
 
 	// reference to the protocol that should be applied on this step
 	Protocol protocol;
