@@ -1,5 +1,5 @@
 DIR="$( cd "$( dirname "<#noparse>${BASH_SOURCE[0]}</#noparse>" )" && pwd )"
-touch $DIR/compute.started
+touch $DIR/molgenis.submit.started
 
 <#foreach t in tasks>
 #${t.name}

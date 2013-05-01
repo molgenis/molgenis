@@ -32,29 +32,25 @@
 			<#if (model.dataSets?size == 0)>
 				<span>No available catalogs</span>
 			<#else>
-				<div class="row-fluid grid" id="dataset-selection">
-					<div class="span2">
-						<label>Choose a dataset:</label>
+				<div class="row-fluid grid">
+					<div id="dataset-select-container" class="control-group form-horizontal pull-right">
+						<label class="control-label" for="dataset-select">Choose a dataset:</label>
+						<div class="controls">
+							<select data-placeholder="Choose a Dataset" id="dataset-select">
+						<#list model.dataSets as dataset>
+								<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
+						</#list>
+							</select>
+						</div>
 					</div>
-					<div class="btn-group btn-datasets" data-toggle="buttons-radio">
-					<#list model.dataSets as dataSet>
-						<button class="btn" id="dataset${dataSet.id?c}">${dataSet.name}</button>
-					</#list>
-					</div>
-					<#-- store dataset ids with dataset input elements -->
-					<script type="text/javascript">
-						var ids = [<#list model.dataSets as dataset>${dataset.id?c}<#if (dataset_has_next)>, </#if></#list>];
-	 					for(i in ids)
-	 						$('#dataset' + ids[i]).data('id', ids[i]);
-					</script>
-				</div>	
+				</div>
 				<div class="row-fluid grid">
 					<div class="span4">
 						<p class="box-title">Browse variables</p>
 						<div class="input-append">
 							<input id="search-text" type="text" title="Enter your search term">
-							<button class="btn" type="button" id="search-button">Search</button>
-							<button class="btn" type="button" id="search-clear-button">Clear</button>
+							<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+							<button class="btn" type="button" id="search-clear-button"><i class="icon-large icon-remove"></i></button>
 						</div>
 						<div id="dataset-browser">
 						</div>
@@ -85,21 +81,40 @@
 
 							<#if model.showViewButton>
 								<button class="btn" id="view-features-button">View</button>
+		  				</div>
+		  				<div class="row-fluid grid" id="feature-shopping-controls">
+		  					<div class="span9">
+			  					<div class="btn-group pull-left">			
+							<#if model.enableViewAction>
+									<button class="btn" id="view-features-button">View</button>
 							</#if>
+							<#if model.enableDownloadAction>
+									<button class="btn" id="download-xls-button">Download</button>
+							</#if>
+								</div>
+		  					</div>
+							<div class="span3">
+							<#if model.enableOrderAction>
 								<div id="orderdata-modal-container"></div>
+<<<<<<< HEAD
 
 								<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
+=======
+>>>>>>> e0dd795638a3301e96a42fa304393e75f44ac1fc
 								<div id="ordersview-modal-container"></div>
-								<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+								<div class="btn-group pull-right">
+									<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+									<a class="modal-href btn btn-primary<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
+								</div>
+							</#if>
 							</div>
-		  				</div>
+						</div>
 	  				</div>
 				</div>
  				<script type="text/javascript">
  					<#-- create event handlers -->
- 					$('.btn-datasets button').click(function(e) {
- 						e.preventDefault();
- 						molgenis.selectDataSet($(this).data('id'));
+ 					$('#dataset-select').change(function() {
+ 						molgenis.selectDataSet($(this).val());
 					});
  					
  					$("#search-text").keyup(function(e){
@@ -153,11 +168,11 @@
 						
 					<#if (model.dataSets?size == 1)>
 						<#-- hide dataset selection -->
-						$('#dataset-selection').hide();
+						$('#dataset-select-container').hide();
 					</#if>
 					<#if (model.dataSets?size > 0)>
 						<#-- select first dataset -->
-						$('.btn-datasets button').first().click();
+						$('#dataset-select').chosen().change();
 					</#if>
 					});
  				</script>

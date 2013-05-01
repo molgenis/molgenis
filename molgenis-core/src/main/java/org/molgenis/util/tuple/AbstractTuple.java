@@ -2,6 +2,8 @@ package org.molgenis.util.tuple;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.util.ListEscapeUtils;
@@ -179,6 +181,29 @@ public abstract class AbstractTuple implements Tuple
 		else if (obj instanceof List<?>) return (List<String>) obj;
 		else if (obj instanceof String) return ListEscapeUtils.toList((String) obj);
 		else return ListEscapeUtils.toList(obj.toString());
+	}
+
+	// TODO: Improve code of getIntList (maybe merge with getList above?)
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Integer> getIntList(String colName)
+	{
+
+		Object obj = get(colName);
+		if (obj == null) return null;
+		else if (obj instanceof List<?>)
+		{
+			// it seems we need explicit cast to Int sometimes
+			ArrayList<Integer> intList = new ArrayList<Integer>();
+			for (Object o : (List<?>) obj)
+			{
+				if (o instanceof Integer) intList.add((Integer) o);
+				else if (o instanceof String) intList.add(Integer.parseInt((String) o));
+			}
+			return intList;
+		}
+		else if (obj instanceof Integer) return new ArrayList<Integer>(Arrays.asList((Integer) obj));
+		else return null;
 	}
 
 	@SuppressWarnings("unchecked")
