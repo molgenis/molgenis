@@ -1,5 +1,6 @@
 package org.molgenis.gids.tools.compare;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,21 +25,25 @@ public class ValidationChecker
 	 * @param args
 	 * @throws IOException
 	 */
-	public static void main(String[] args) throws IOException
+	public BufferedWriter logger = null;
+	private final static String IDENTIFIER = "individual";
+
+	public void check(String file1, String file2, BufferedWriter logger) throws IOException
 	{
+		this.logger = logger;
 		HashMap<String, String> hashCheckedValues = new HashMap<String, String>();
 
 		// Make Object Reference
 		ValidationFile ref = new ValidationFile();
-		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(args[0]));
+		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(file1));
 		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
-		ref.bla(excelSheetReaderReferenceFile);
+		ref.bla(excelSheetReaderReferenceFile, IDENTIFIER);
 
 		// Make Object FileToCompare
 		ValidationFile com = new ValidationFile();
-		ExcelReader excelReaderFileToCompare = new ExcelReader(new File(args[1]));
+		ExcelReader excelReaderFileToCompare = new ExcelReader(new File(file2));
 		ExcelSheetReader excelSheetReaderFileToCompare = excelReaderFileToCompare.getSheet(0);
-		com.bla(excelSheetReaderFileToCompare);
+		com.bla(excelSheetReaderFileToCompare, IDENTIFIER);
 		boolean noUniqueColums = false;
 		// Make list for shared headers
 
@@ -83,20 +88,20 @@ public class ValidationChecker
 		{
 			for (Entry<String, Tuple> entry : ref.getHash().entrySet())
 			{
-				if (com.getHash().get(entry.getValue().getString("id_sample")) != null)
+				if (com.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
 				{
-					compareRows(com.getHash().get(entry.getValue().getString("id_sample")), entry.getValue(),
-							listOfSharedHeaders, hashCheckedValues);
+					compareRows(com.getHash().get(entry.getValue().getString(IDENTIFIER)), entry.getValue(),
+							listOfSharedHeaders, hashCheckedValues, logger);
 				}
 
 			}
 
 			for (Entry<String, Tuple> entry : com.getHash().entrySet())
 			{
-				if (ref.getHash().get(entry.getValue().getString("id_sample")) != null)
+				if (ref.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
 				{
-					compareRows(entry.getValue(), ref.getHash().get(entry.getValue().getString("id_sample")),
-							listOfSharedHeaders, hashCheckedValues);
+					compareRows(entry.getValue(), ref.getHash().get(entry.getValue().getString(IDENTIFIER)),
+							listOfSharedHeaders, hashCheckedValues, logger);
 				}
 
 			}
@@ -129,8 +134,9 @@ public class ValidationChecker
 	}
 
 	public static void compareRows(Tuple firstTuple, Tuple secondTuple, List<String> listOfHeaders,
-			HashMap<String, String> hashCheckedValues)
+			HashMap<String, String> hashCheckedValues, BufferedWriter logger) throws IOException
 	{
+
 		for (String e : listOfHeaders)
 		{
 			if (firstTuple.getString(e) != null)
@@ -141,9 +147,10 @@ public class ValidationChecker
 					{
 						if (!hashCheckedValues.containsKey(e) && !hashCheckedValues.containsValue(secondTuple))
 						{
+
 							hashCheckedValues.put(e, secondTuple.getString(e));
 							System.out
-									.println(firstTuple.getString("id_sample")
+									.println(firstTuple.getString(IDENTIFIER)
 											+ "\t"
 											+ e
 											+ "\t"
@@ -152,7 +159,9 @@ public class ValidationChecker
 											+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "Reference") : secondTuple
 													.getString(e)));
 						}
+
 					}
+					logger.append(e + "\t" + firstTuple.getString(e) + "\t" + secondTuple.getString(e) + "\n");
 				}
 			}
 		}

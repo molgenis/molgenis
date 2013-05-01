@@ -29,16 +29,13 @@ public class SampleConverter
 {
 
 	private final Set<String> listOfDoubleSamples = new HashSet<String>();
-	private int counter = 0;
-	// private Map<String, String> observationTargetMap = new HashMap<String,
-	// String>();
-
 	private static String OUTPUTDIR = null;
 	private static String PROJECT = null;
+	private static String IDENTIFIER = "id_sample";
 	private List<String> featureColNames = null;
-	MakeEntityNameAndIdentifier mkObsTarget = null;
+	MakeEntityNameAndIdentifier mkObsProtocol = null;
 	MakeEntityNameAndIdentifier mkObsFeature = null;
-	List<MakeEntityNameAndIdentifier> mkObsTargetlist = new ArrayList<MakeEntityNameAndIdentifier>();
+	List<MakeEntityNameAndIdentifier> mkObsProtocollist = new ArrayList<MakeEntityNameAndIdentifier>();
 	List<MakeEntityNameAndIdentifier> mkObsFeaturelist = new ArrayList<MakeEntityNameAndIdentifier>();
 
 	public void convert(InputStream in, OutputStream out, String outputdir, String projectName) throws IOException
@@ -52,23 +49,26 @@ public class SampleConverter
 		csvWriter.addCellProcessor(new LowerCaseProcessor(true, false));
 		ArrayList<String> listOfEntity = new ArrayList<String>();
 		listOfEntity.add("dataset");
-		listOfEntity.add("observationtarget");
+		listOfEntity.add("protocol");
 		listOfEntity.add("observableFeature");
 		listOfEntity.add("dataset_" + PROJECT.toLowerCase().trim());
 
-		mkmetadataExcelFile(listOfEntity);
-
 		try
 		{
-			// write data
 			for (TupleReader sheetReader : excelReader)
 			{
 				featureColNames = new ArrayList<String>();
 				for (Iterator<String> it = sheetReader.colNamesIterator(); it.hasNext();)
 				{
 					String colName = it.next();
-					if (colName.equals("id_sample")) featureColNames.add(0, colName);
-					else featureColNames.add(colName);
+					if (colName.equals(IDENTIFIER))
+					{
+						featureColNames.add(0, colName);
+					}
+					else
+					{
+						featureColNames.add(colName);
+					}
 				}
 
 				csvWriter.writeColNames(featureColNames);
@@ -76,9 +76,9 @@ public class SampleConverter
 				{
 					Tuple row = it.next();
 					// If the sample name exists
-					if (row.getString("id_sample") != null && !row.getString("id_sample").isEmpty())
+					if (row.getString(IDENTIFIER) != null && !row.getString(IDENTIFIER).isEmpty())
 					{
-						String sampleId = row.getString("id_sample");
+						String sampleId = row.getString(IDENTIFIER);
 						if (checkIfDouble(sampleId))
 						{
 							System.out.println("Double entry: " + sampleId + " has been removed");
@@ -86,10 +86,6 @@ public class SampleConverter
 						}
 						else
 						{
-							// Get the targets for metadatafile
-							mkObsTarget = new MakeEntityNameAndIdentifier(sampleId, sampleId);
-							mkObsTargetlist.add(mkObsTarget);
-							// Write the real data
 							csvWriter.write(row);
 						}
 					}
@@ -98,7 +94,7 @@ public class SampleConverter
 						WritableTuple tup = new KeyValueTuple();
 						for (String featureColName : featureColNames)
 						{
-							if (featureColName.equals("id_sample"))
+							if (featureColName.equals(IDENTIFIER))
 							{
 								// Make a identifier for this sample
 								tup.set(featureColName, emptySample());
@@ -109,23 +105,16 @@ public class SampleConverter
 							}
 
 						}
-						// The identifier and sample are now set for this former
-						// empty sample name
 						csvWriter.write(tup);
 					}
 				}
 			}
-			// Fill a list with all the ObservableFeatures in the file
+			makeProtocolList(featureColNames);
 			if (featureColNames != null)
 			{
 				makeFeaturesList();
 			}
-
-			// Write the metadata to a file for the features
-			mkMetadataFileObservableFeature();
-			// Write the metadata to a file for the targets
-			mkMetadataFileObservationTarget();
-
+			mkmetadataExcelFile(listOfEntity);
 		}
 		finally
 		{
@@ -162,58 +151,71 @@ public class SampleConverter
 
 	public String emptySample()
 	{
-		String sample = "Dummy_2012_" + PROJECT + "_" + (++counter);
-		mkObsTarget = new MakeEntityNameAndIdentifier("unknown", sample);
-		mkObsTargetlist.add(mkObsTarget);
+		String sample = "unknown";
 		return sample;
 	}
 
-	public void mkMetadataFileObservationTarget() throws IOException
+	private void makeProtocolList(List<String> listOfFeatures)
 	{
-
-		OutputStream osMD = new FileOutputStream(OUTPUTDIR + PROJECT + "_MetaDataObservationTarget.csv");
-
-		TupleWriter csvWriterMD = new CsvWriter(new OutputStreamWriter(osMD, Charset.forName("UTF-8")));
-		csvWriterMD.addCellProcessor(new LowerCaseProcessor(true, false));
-		csvWriterMD.writeColNames(Arrays.asList("identifier", " name"));
-
-		for (MakeEntityNameAndIdentifier i : mkObsTargetlist)
+		String prot = "protocol_" + PROJECT;
+		StringBuilder build = new StringBuilder();
+		for (String e : listOfFeatures)
 		{
-			WritableTuple kvt = new KeyValueTuple();
-			kvt.set("identifier", i.getIdentifier());
-			kvt.set("name", i.getName());
-			csvWriterMD.write(kvt);
+			build.append(e + ",");
 		}
-		csvWriterMD.close();
+		String features = build.substring(0, build.length() - 1);
 
+		mkObsProtocol = new MakeEntityNameAndIdentifier(prot, prot, features);
+		mkObsProtocollist.add(mkObsProtocol);
 	}
 
 	private void makeFeaturesList()
 	{
 		for (String featureColName : featureColNames)
 		{
-			mkObsFeature = new MakeEntityNameAndIdentifier(featureColName, featureColName);
+			mkObsFeature = new MakeEntityNameAndIdentifier(featureColName, featureColName, null);
 			mkObsFeaturelist.add(mkObsFeature);
 		}
-
 	}
 
-	public void mkMetadataFileObservableFeature() throws IOException
+	public void mkMetadataFileProtocol(ExcelWriter excelWriterMD, String sheetName) throws IOException
 	{
+		TupleWriter esw = excelWriterMD.createTupleWriter("protocol");
+		esw.writeColNames(Arrays.asList("identifier", "name", "features_identifier"));
 
-		OutputStream osMD = new FileOutputStream(OUTPUTDIR + PROJECT + "_MetaDataObservableFeature.csv");
+		for (MakeEntityNameAndIdentifier i : mkObsProtocollist)
+		{
+			WritableTuple kvt = new KeyValueTuple();
+			kvt.set("identifier", i.getIdentifier());
+			kvt.set("name", i.getName());
+			kvt.set("features_identifier", i.getFeatures_Identifier());
+			esw.write(kvt);
+		}
+	}
 
-		TupleWriter csvWriterMD = new CsvWriter(new OutputStreamWriter(osMD, Charset.forName("UTF-8")));
-		csvWriterMD.addCellProcessor(new LowerCaseProcessor(true, false));
-		csvWriterMD.writeColNames(Arrays.asList("identifier", "name"));
+	public void mkMetadataFileObservableFeature(ExcelWriter excelWriterMD, String sheetName) throws IOException
+	{
+		TupleWriter esw = excelWriterMD.createTupleWriter("observableFeature");
+		esw.writeColNames(Arrays.asList("identifier", "name"));
+
 		for (MakeEntityNameAndIdentifier m : mkObsFeaturelist)
 		{
 			WritableTuple kvt = new KeyValueTuple();
 			kvt.set("identifier", m.getIdentifier());
 			kvt.set("name", m.getName());
-			csvWriterMD.write(kvt);
+			esw.write(kvt);
 		}
-		csvWriterMD.close();
+	}
+
+	public void mkMetadataFileDataSet(ExcelWriter excelWriterMD, String sheetName) throws IOException
+	{
+		TupleWriter esw = excelWriterMD.createTupleWriter(sheetName);
+		esw.writeColNames(Arrays.asList("identifier", "name", "protocolused_identifier"));
+		WritableTuple kvt = new KeyValueTuple();
+		kvt.set("protocolused_identifier", "protocol_" + PROJECT);
+		kvt.set("identifier", PROJECT.toLowerCase());
+		kvt.set("name", PROJECT.toLowerCase());
+		esw.write(kvt);
 	}
 
 	public void mkmetadataExcelFile(ArrayList<String> listOfEntity) throws IOException
@@ -228,13 +230,18 @@ public class SampleConverter
 		{
 			if (sheetName.equals("dataset"))
 			{
-				TupleWriter esw = excelWriterMD.createTupleWriter("dataset");
-				esw.writeColNames(Arrays.asList("identifier", "name", "protocolused_identifier"));
-				WritableTuple kvt = new KeyValueTuple();
-				kvt.set("protocolused_identifier", "");
-				kvt.set("identifier", PROJECT.toLowerCase());
-				kvt.set("name", PROJECT.toLowerCase());
-				esw.write(kvt);
+				mkMetadataFileDataSet(excelWriterMD, sheetName);
+			}
+			else if (sheetName.equals("protocol"))
+			{
+
+				mkMetadataFileProtocol(excelWriterMD, sheetName);
+
+			}
+			else if (sheetName.equals("observableFeature"))
+			{
+
+				mkMetadataFileObservableFeature(excelWriterMD, sheetName);
 			}
 			else
 			{
