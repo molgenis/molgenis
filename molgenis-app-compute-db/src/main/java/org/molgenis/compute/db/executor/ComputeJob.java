@@ -1,24 +1,26 @@
 package org.molgenis.compute.db.executor;
 
-import org.molgenis.compute.runtime.ComputeHost;
+import org.molgenis.compute.runtime.ComputeRun;
 
 public class ComputeJob implements Runnable
 {
 	private final ComputeExecutor executor;
-	private final ComputeHost computeHost;
+	private final ComputeRun computeRun;
+	private final String username;
 	private final String password;
 
-	public ComputeJob(ComputeExecutor executor, ComputeHost computeHost, String password)
+	public ComputeJob(ComputeExecutor executor, ComputeRun computeRun, String username, String password)
 	{
 		this.executor = executor;
-		this.computeHost = computeHost;
+		this.computeRun = computeRun;
+		this.username = username;
 		this.password = password;
 	}
 
 	@Override
 	public void run()
 	{
-		executor.executeTasks(computeHost, password);
+		executor.executeTasks(computeRun, username, password);
 	}
 
 }

@@ -1,22 +1,16 @@
 package org.molgenis.compute.db.controller;
 
-public class HostModel
+public class RunModel
 {
-	private final Integer id;
 	private final String name;
 	private final boolean running;
+	private final String backendUrl;
 
-	public HostModel(Integer id, String name, boolean running)
+	public RunModel(String name, boolean running, String backendUrl)
 	{
-		this.id = id;
 		this.name = name;
-
 		this.running = running;
-	}
-
-	public Integer getId()
-	{
-		return id;
+		this.backendUrl = backendUrl;
 	}
 
 	public String getName()
@@ -27,6 +21,11 @@ public class HostModel
 	public boolean isRunning()
 	{
 		return running;
+	}
+
+	public String getBackendUrl()
+	{
+		return backendUrl;
 	}
 
 }
