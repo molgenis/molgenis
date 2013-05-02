@@ -1,6 +1,6 @@
 package org.molgenis.compute.db.executor;
 
-import org.molgenis.compute.runtime.ComputeHost;
+import org.molgenis.compute.runtime.ComputeRun;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:21
@@ -9,10 +9,11 @@ import org.molgenis.compute.runtime.ComputeHost;
 public interface ComputeExecutor
 {
 	/**
-	 * Execute tasks for a ComputeHost
+	 * Execute tasks for a ComputeRun
 	 * 
-	 * @param computeHost
+	 * @param computeRun
+	 * @param username
 	 * @param password
 	 */
-	void executeTasks(ComputeHost computeHost, String password);
+	void executeTasks(ComputeRun computeRun, String username, String password);
 }

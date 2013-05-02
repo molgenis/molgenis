@@ -6,12 +6,12 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
+import org.molgenis.compute.db.WebAppConfig;
 import org.molgenis.compute.db.sysexecutor.SysCommandExecutor;
-import org.molgenis.compute.runtime.ComputeHost;
+import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.util.ApplicationContextProvider;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -23,26 +23,26 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 	private static final Logger LOG = Logger.getLogger(ComputeExecutorPilotDB.class);
 
 	@Override
-	public void executeTasks(ComputeHost computeHost, String password)
+	public void executeTasks(ComputeRun computeRun, String username, String password)
 	{
-		if (computeHost == null) throw new IllegalArgumentException("ComputeHost is null");
+		if (computeRun == null) throw new IllegalArgumentException("ComputRun is null");
 
-		Database database = ApplicationContextProvider.getApplicationContext().getBean("unathorizedDatabase",
-				Database.class);
+		Database database = null;
 
 		ExecutionHost executionHost = null;
 		try
 		{
+			database = WebAppConfig.unathorizedDatabase();
+
 			List<ComputeTask> generatedTasks = database.query(ComputeTask.class)
-					.equals(ComputeTask.STATUSCODE, "generated").equals(ComputeTask.COMPUTEHOST, computeHost.getId())
-					.find();
+					.equals(ComputeTask.STATUSCODE, "generated").equals(ComputeTask.COMPUTERUN, computeRun).find();
 
 			LOG.info("Nr of tasks with status [generated]: [" + generatedTasks.size() + "]");
 
 			evaluateTasks(database, generatedTasks);
 
 			List<ComputeTask> readyTasks = database.query(ComputeTask.class).equals(ComputeTask.STATUSCODE, "ready")
-					.equals(ComputeTask.COMPUTEHOST, computeHost.getId()).find();
+					.equals(ComputeTask.COMPUTERUN, computeRun).find();
 
 			for (ComputeTask task : readyTasks)
 			{
@@ -51,22 +51,21 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 
 			for (int i = 0; i < readyTasks.size(); i++)
 			{
-				if (computeHost.getHostType().equalsIgnoreCase("localhost"))
+				if (computeRun.getHostType().equalsIgnoreCase("localhost"))
 				{
-					submitPilotLocalhost(computeHost.getCommand());
+					submitPilotLocalhost(computeRun.getCommand());
 				}
 				else
 				{
-					LOG.info("Executing command [" + computeHost.getCommand() + "] on host ["
-							+ computeHost.getHostName() + "]");
+					LOG.info("Executing command [" + computeRun.getCommand() + "] on backend ["
+							+ computeRun.getBackendUrl() + "]");
 
 					if (executionHost == null)
 					{
-						executionHost = new ExecutionHost(computeHost.getHostName(), computeHost.getUserName(),
-								password, SSH_PORT);
+						executionHost = new ExecutionHost(computeRun.getBackendUrl(), username, password, SSH_PORT);
 					}
 
-					executionHost.submitPilot(computeHost.getCommand());
+					executionHost.submitPilot(computeRun.getCommand());
 				}
 
 				// sleep, because we have a strange behavior in pilot service

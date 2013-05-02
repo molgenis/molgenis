@@ -24,7 +24,7 @@
                     <form name="ComputeJobHistory" entity="ComputeTaskHistory" viewtype="list"/>
                 </menu>
             </form>
-            <form name="ComputeHosts" label="Hosts" entity="ComputeHost"/>
+            <form name="ComputeRuns" label="Runs" entity="ComputeRun"/>
         </menu>
     </menu>
 </molgenis>

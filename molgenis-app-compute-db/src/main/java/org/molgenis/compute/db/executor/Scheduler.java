@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 import org.molgenis.compute.db.ComputeDbException;
-import org.molgenis.compute.runtime.ComputeHost;
+import org.molgenis.compute.runtime.ComputeRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -26,32 +26,32 @@ public class Scheduler
 		this.taskScheduler = taskScheduler;
 	}
 
-	public synchronized void schedule(ComputeHost host, String password)
+	public synchronized void schedule(ComputeRun run, String username, String password)
 	{
-		if (scheduledJobs.containsKey(host.getId()))
+		if (scheduledJobs.containsKey(run.getId()))
 		{
-			throw new ComputeDbException("Host " + host.getName() + " already running");
+			throw new ComputeDbException("Run " + run.getName() + " already running");
 		}
 
-		ComputeJob job = new ComputeJob(new ComputeExecutorPilotDB(), host, password);
-		ScheduledFuture<?> future = taskScheduler.scheduleWithFixedDelay(job, host.getPollDelay());
-		scheduledJobs.put(host.getId(), future);
+		ComputeJob job = new ComputeJob(new ComputeExecutorPilotDB(), run, username, password);
+		ScheduledFuture<?> future = taskScheduler.scheduleWithFixedDelay(job, run.getPollDelay());
+		scheduledJobs.put(run.getId(), future);
 	}
 
-	public synchronized boolean isRunning(Integer computeHostId)
+	public synchronized boolean isRunning(Integer computeRunId)
 	{
-		return scheduledJobs.containsKey(computeHostId);
+		return scheduledJobs.containsKey(computeRunId);
 	}
 
-	public synchronized void unschedule(Integer computeHostId)
+	public synchronized void unschedule(Integer computeRunId)
 	{
-		if (!isRunning(computeHostId))
+		if (!isRunning(computeRunId))
 		{
 			throw new ComputeDbException("Not running");
 		}
 
-		ScheduledFuture<?> future = scheduledJobs.get(computeHostId);
+		ScheduledFuture<?> future = scheduledJobs.get(computeRunId);
 		future.cancel(false);
-		scheduledJobs.remove(computeHostId);
+		scheduledJobs.remove(computeRunId);
 	}
 }
