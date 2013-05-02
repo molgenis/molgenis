@@ -3,7 +3,6 @@ package org.molgenis.compute.db;
 import java.util.List;
 
 import org.molgenis.compute.db.executor.Scheduler;
-import org.molgenis.compute.db.generator.TaskGeneratorDB;
 import org.molgenis.compute.db.util.ComputeMolgenisSettings;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -34,13 +32,12 @@ import app.DatabaseConfig;
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-{ "org.molgenis.service", "org.molgenis.controller", "org.molgenis.compute.db.controller" })
+{ "org.molgenis.service", "org.molgenis.controller", "org.molgenis.compute.db.controller",
+		"org.molgenis.compute.db.service" })
 @Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
-	@Bean
-	@Scope("prototype")
-	public Database unathorizedDatabase() throws DatabaseException
+	public static Database unathorizedDatabase() throws DatabaseException
 	{
 		return new app.JpaDatabase();
 	}
@@ -49,12 +46,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public Scheduler scheduler()
 	{
 		return new Scheduler(taskScheduler());
-	}
-
-	@Bean
-	public TaskGeneratorDB taskGeneratorDB()
-	{
-		return new TaskGeneratorDB();
 	}
 
 	@Bean(destroyMethod = "shutdown")

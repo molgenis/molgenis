@@ -1,9 +1,15 @@
 package org.molgenis.compute.db.pilot;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisContext;
@@ -11,11 +17,6 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.util.WebAppUtil;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date:
@@ -27,11 +28,11 @@ public class PilotService implements MolgenisService
 {
 	private static final Logger LOG = Logger.getLogger(PilotService.class);
 
-    public static final String TASK_GENERATED = "generated";
-    public static final String TASK_READY = "ready";
-    public static final String TASK_RUNNING = "running";
-    public static final String TASK_FAILED = "failed";
-    public static final String TASK_DONE = "done";
+	public static final String TASK_GENERATED = "generated";
+	public static final String TASK_READY = "ready";
+	public static final String TASK_RUNNING = "running";
+	public static final String TASK_FAILED = "failed";
+	public static final String TASK_DONE = "done";
 
 	public PilotService(MolgenisContext mc)
 	{
@@ -47,51 +48,43 @@ public class PilotService implements MolgenisService
 		if ("started".equals(request.getString("status")))
 		{
 			String backend = request.getString("backend");
-			LOG.info(">>> looking for a task to execute at " + backend);
 
-			// curl call back statement in the end of the analysis script
-			// pulse calls are present in the pilot job, final call back in
-			// actual analysis script
+			LOG.info("Looking for task to execute for host [" + backend + "]");
 
+			List<ComputeTask> tasks = findRunTasksReady(backend);
+
+			if (tasks.isEmpty())
+			{
+				LOG.info("No tasks to start for host [" + backend + "]");
+				return;
+			}
+
+			ComputeTask task = tasks.get(0);
+
+			// we add task id to the run listing to identify task when
+			// it is done
 			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
 
-			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class)
-					.equals(ComputeTask.STATUSCODE, TASK_READY).equals(ComputeTask.COMPUTEHOST_NAME, backend).find();
+			String taskScript = String.format(
+					"echo TASKID:%s\n%s\ncp log.log done.log\ncurl -F status=done -F log_file=@done.log %s\n",
+					task.getName(), task.getComputeScript().replaceAll("\r", ""), pilotServiceUrl);
 
-			if (tasks.size() > 0)
+			LOG.info("Script for task [" + task.getName() + "] :\n" + taskScript);
+
+			// change status to running
+			task.setStatusCode(PilotService.TASK_RUNNING);
+			WebAppUtil.getDatabase().update(task);
+
+			// send response
+			PrintWriter pw = response.getResponse().getWriter();
+			try
 			{
-				ComputeTask task = tasks.get(0);
-
-				if (task != null)
-				{
-					String taskName = task.getName();
-					String taskScript = task.getComputeScript();
-					taskScript = taskScript.replaceAll("\r", "");
-
-					// we add task id to the run listing to identify task when
-					// it is done
-					String curlDone = "\ncp log.log done.log\ncurl -F status=done -F log_file=@done.log "
-							+ pilotServiceUrl + "\n";
-
-					taskScript = "echo TASKID:" + taskName + "\n" + taskScript + curlDone;
-					LOG.info("Script for task [" + taskName + "] :\n" + taskScript);
-
-					// change status to running
-					task.setStatusCode(TASK_RUNNING);
-					WebAppUtil.getDatabase().update(task);
-
-					// send response
-					PrintWriter pw = response.getResponse().getWriter();
-					try
-					{
-						pw.write(taskScript);
-						pw.flush();
-					}
-					finally
-					{
-						IOUtils.closeQuietly(pw);
-					}
-				}
+				pw.write(taskScript);
+				pw.flush();
+			}
+			finally
+			{
+				IOUtils.closeQuietly(pw);
 			}
 		}
 		else
@@ -122,7 +115,7 @@ public class PilotService implements MolgenisService
 				{
 					task.setStatusCode(TASK_DONE);
 					task.setRunLog(logFileContent);
-                    task.setRunInfo(runInfo);
+					task.setRunInfo(runInfo);
 				}
 				else
 				{
@@ -136,7 +129,7 @@ public class PilotService implements MolgenisService
 				{
 					LOG.info(">>> pulse from " + taskID);
 					task.setRunLog(logFileContent);
-                    task.setRunInfo(runInfo);
+					task.setRunInfo(runInfo);
 				}
 			}
 			else if ("nopulse".equals(request.getString("status")))
@@ -145,7 +138,7 @@ public class PilotService implements MolgenisService
 				{
 					LOG.info(">>> no pulse from " + taskID);
 					task.setRunLog(logFileContent);
-                    task.setRunInfo(runInfo);
+					task.setRunInfo(runInfo);
 					task.setStatusCode("failed");
 				}
 				else if (task != null && task.getStatusCode().equalsIgnoreCase(TASK_DONE))
@@ -156,5 +149,14 @@ public class PilotService implements MolgenisService
 
 			WebAppUtil.getDatabase().update(task);
 		}
+	}
+
+	private List<ComputeTask> findRunTasksReady(String backendUrl) throws DatabaseException
+	{
+		List<ComputeRun> runs = WebAppUtil.getDatabase().query(ComputeRun.class)
+				.equals(ComputeRun.BACKENDURL, backendUrl).find();
+
+		return WebAppUtil.getDatabase().query(ComputeTask.class)
+				.equals(ComputeTask.STATUSCODE, PilotService.TASK_READY).in(ComputeTask.COMPUTERUN, runs).find();
 	}
 }

@@ -11,85 +11,28 @@
 			<field name="name" type="string" description="Unique name" />
 		</entity>	
 	</module>
-	<module name="compute.design">
-		<!--
-        <entity name="ComputeProtocol" implements="Nameable" xref_label="name">
-			<description>
-				Executable definitions of computational 'protocols' of
-				analysis. For
-				example: bwa-align. Therefore the Protocol class is
-				extended:
-			</description>
-			<field name="template" type="text" description="Commandline or (template of) an script, e.g. in bash, R.." />
-			<field name="parameters" type="mref" xref_entity="ComputeParameter" nillable="true" />
-			<field name="cores" type="int" default="1" description="# required cores" />
-			<field name="description" type="text" />
-			<unique fields="name" />
-		</entity>
-		-->
-        <!--
-		<entity name="ComputeParameter" implements="Nameable" xref_label="type,name">
-			<description>Parameter are the inputs or outputs into an
-				ComputeProtocol.
-			</description>
-			<field name="dataType" type="enum" nillable="true" enum_options="[string,int,date,datetime,text,list]" />
-            < The default value should stay here as well for using in the command-line version >
-			<field name="defaultValue" type="text" nillable="true" description="the value of the parameter for ComputeProtocols." />
-			<field name="type" type="enum" enum_options="[in,out]" />
-			<field name="description" type="text" nillable="true" />
-			<field name="value" type="text" nillable="true" description="Only used fot output" />
-			<unique fields="type,name" />
-		</entity>
-        -->
-        <!--
-		<entity name="ComputeWorkflow" implements="Nameable" xref_label="name">
-			<description>A workflow is a plan to execute a series of subprotocols
-				in a particular order. Each workflow elements is another protocol as
-				refered to via WorkflowElement. Because Workflow extends
-				Protocol,
-				workflows can be nested just as any other protocol.
-			</description>
-			<unique fields="name" />
-		</entity>
-		-->
-        <!--
-		<entity name="ComputeStep" implements="Nameable" xref_label="name">
-			<description>Elements of a workflow are references to protocols. The
-				whole workflow is a directed graph with each element pointing to the
-				previousSteps that the current workflow element depends on.
-			</description>
-			<field name="computeWorkflow" type="xref" xref_entity="ComputeWorkflow" xref_label="name" description="Workflow this element is part of" />
-			<field name="computeProtocol" type="xref" xref_entity="ComputeProtocol" description="Protocol to be used at this workflow step" />
-			<field name="previousSteps" type="mref" xref_entity="ComputeStep" nillable="true" description="Previous steps that need to be done before this protocol can be executed." />
-			<unique fields="name" />
-		</entity>
-		-->
-        <!--<field name="computeParameter" type="xref" xref_entity="ComputeParameter" xref_label="name" description="ComputeParameter, to which the default value belongs" />-->
-
-	</module>
 	<module name="compute.runtime">
 		<entity name="ComputeTask" implements="Nameable" xref_label="name">
 			<description>A protocolApplication that reports the application of running a ComputeProtocol.</description>
-
+			<field name="computeRun" type="xref" xref_entity="ComputeRun" description="The run this task is part of" nillable="false" />
 			<field name="computeScript" type="text" description="The actual command to be sent to the cluster, is a filled in version of the one define in the ComputeProtocol" />
    			<field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />   
 			<field name="runLog" type="text" description="Log of the task execution" nillable="true" />
-            <field name="computeHost" type="xref" xref_entity="ComputeHost" description="Host where ComputeTask should be executed" nillable="false" />
             <!--field name="computeStep" nillable="true" type="xref" xref_entity="ComputeStep" description="Reference to the workflow step that generated this script." /-->
 			<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
 				description="Last known status of this task. See compute history for details. NB 'ready' means ready for running (cf. 'done')." />
-			<unique fields="name" />
+			<unique fields="name,computeRun" />
 		</entity>
-        <entity name="ComputeTaskHistory" implements="Nameable" xref_label="ComputeTask">
-      			<description>Keep track of the compute history of a task, including resubmissions.
-      			</description>
-      			<field name="ComputeTask" type="xref" xref_entity="ComputeTask" description="the task for which the history was collected" />
-      			<field name="StatusTime" type="datetime" auto="true" description="time of state change" />
-      			<field name="runLog" nillable="true" type="text" description="field to show the content of the error file (only applicable on fail/done of a task)" />
-                <field name="StatusCode" nillable="false" type="enum" enum_options="[running,failed,done]" default="failed" description="current status of this task." />
-                <unique fields="ComputeTask,StatusTime" />
+        <entity name="ComputeTaskHistory" implements="Autoid" xref_label="ComputeTask">
+      		<description>Keep track of the compute history of a task, including resubmissions.
+      		</description>
+      		<field name="ComputeTask" type="xref" xref_entity="ComputeTask" description="the task for which the history was collected" />
+      		<field name="StatusTime" type="datetime" auto="true" description="time of state change" />
+      		<field name="runLog" nillable="true" type="text" description="field to show the content of the error file (only applicable on fail/done of a task)" />
+            <field name="StatusCode" nillable="false" type="enum" enum_options="[running,failed,done]" default="failed" description="current status of this task." />
+            <unique fields="ComputeTask,StatusTime" />
       	</entity>
 		<entity name="ComputeParameterValue" implements="Nameable">
 			<description>Related to ComputeTask values
@@ -97,10 +40,10 @@
             <field name="computeTask" type="xref" xref_entity="ComputeTask" xref_label="name" description="ComputeTask, to which the value belongs" />
             <field name="value" type="text" nillable="false" description="the value of the parameter" />
 		</entity>
-        <entity name="ComputeHost" implements="Nameable" xref_label="name">
-      		<description>Declaration of a compute resource, including username</description>
-      		<field name="hostName" nillable="false" label="Hostname" description="ssh host of the headnode of this grid, cluster or standalone worker." />
-      		<field name="userName" nillable="true" label= "Username" description="Ssh username" />
+      	<entity name="ComputeRun" implements="Nameable" xref_label="name">
+      		<description>A set of computetasks to run</description>
+      		<field name="creationTime" type="datetime" auto="true" description="time of creation" />
+      		<field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
       		<field name="hostType" type="enum" nillable="false" label="Host type" enum_options="[CLUSTER,GRID,LOCALHOST]" description="type of the host" />
       		<field name="command" nillable="false" description="Command to be executed" />
       		<field name="pollDelay" type="long" nillable="false" label="Poll delay" description="Delay between two database ComputeTask polls" />
