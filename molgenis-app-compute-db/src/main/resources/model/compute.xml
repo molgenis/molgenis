@@ -40,7 +40,7 @@
             <field name="computeTask" type="xref" xref_entity="ComputeTask" xref_label="name" description="ComputeTask, to which the value belongs" />
             <field name="value" type="text" nillable="false" description="the value of the parameter" />
 		</entity>
-      	<entity name="ComputeRun" implements="Nameable" xref_label="name">
+      	<entity name="ComputeRun" implements="Nameable" xref_label="name" decorator="org.molgenis.compute.db.decorators.ComputeRunDecorator">
       		<description>A set of computetasks to run</description>
       		<field name="creationTime" type="datetime" auto="true" description="time of creation" />
       		<field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
