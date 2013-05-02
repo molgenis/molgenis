@@ -26,7 +26,7 @@ If you don't like to use defaults, above translates to:
 				--jobdir jobs \
 				--backend pbs
 
-Alternatively can configure molgenis compute stepwise:
+Alternatively you can configure molgenis compute stepwise:
 	
 	molgenis --workflow myworkflow
 	molgenis --generate --parameters myparameters.csv
@@ -85,11 +85,11 @@ Explanation:
 Each step is described as a 'protocol' shell script. Its header describes: 
 
 * (optional) resource needs via #MOLGENIS [mem=nG] [cores=n] [walltime=dd:hh:min]
-* input #string which unique values will be used to iterate over
+* input #string with unique values will be used to iterate over
 * input #list which will __*not*__ be used to iterate over
 * result #output which will be exposed to next steps
 
-MOLGENIS will generate a compute job for each unique combinations of #string inputs provided in parameters.csv. See 'parameters.csv' for examples.
+MOLGENIS will generate a compute job for each unique combination of #string inputs provided in parameters.csv. See 'parameters.csv' for examples.
 
 Example 'step1.sh':
 
@@ -105,7 +105,7 @@ Example 'step1.sh':
 	do
 		echo "* ${i}"
 	done
-	out1 = date + "%m-%d-%y"
+	out1 = date "+%m-%d-%Y"
 
 Optionally, you can use standardized file management and tool management functions to make your protocols portable across local, cluster and grid. See 'Advanced features'.
 
@@ -129,7 +129,7 @@ Commands:
 	#generate jobs in 'jobs' folder and run
 	molgenis -w path/workflow -p parameters.csv [-p moreparameters.csv]
 
-	#generate without running (so you can inspect generated scripts)
+	#generate without running (so you can first inspect generated scripts)
 	molgenis --generate -w path/workflow -p parameters.csv [-p moreparameters.csv]
 
 	#run generated jobs
@@ -139,7 +139,7 @@ Commands:
 	molgenis -w path/workflow -p parameters.csv -j jobs2
 
 ### parameters.csv
-Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9) and parameter values in each rown (use quotes to escape ',', e.g. "a,b"). 
+Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9) and parameter values in each rown (use quotes to escape commas, e.g. "a,b"). 
 
 Each value is one of the following:
 
@@ -173,7 +173,7 @@ At runtime, after first expanding f1 and f2, and then merging, the parameters us
 	y,   v1,  2,    a,	  file2
 	y,   v1,  2,    b,    file2
 
-N.B. 'workflow', 'parameters', 'protocols', 'jobs', 'backend' and 'host' are reserved words that cannot be used as parameter name. These are used to pass all commandline parameters to parameters.csv before generation is started (allow reference in the protocols). This can also be used as alternative configuration method:
+N.B. 'workflow', 'parameters', 'protocols', 'jobs', 'backend' and 'host' are reserved words that are used to pass all commandline parameters to parameters.csv before generation is started (allow reference in the protocols). This can also be used as alternative configuration method:
 
 Example 'molgenis -p all_in_one_parameters.csv':
 
@@ -193,14 +193,14 @@ Example step1.sh:
 
 	#string p0
 	#list p2
-	will produce two jobs for p0='x' and p0='y'
-	will have p2=[1,2] in both jobs
+	will produce four jobs in total: two jobs for p0='x' and two jobs for p0='y'
+	will have p2=[1,1] for p2=[1,1] for p0='x' en p2=[2,2] for p0='y'
 
 Example step2.sh:
 
 	#string p1
 	#list p2
-	will produce one job for p1='v1'
+	will produce one job in total where p1='v1'
 	will have p2=[1,1,2,2]
 	
 Example step3.sh: 
@@ -326,9 +326,9 @@ Below options, --full_name or -short. Options can be combined:
 	MOLGENIS compute 5.x
 
 	Born from bioinformatics, MOLGENIS compute is a lightweight shell script framework to 
-	generate big data workflows that can run parallel on clusters and grids:Generate and run 
-	analysis using:
-
+	generate big data workflows that can run parallel on clusters and grids.
+	
+	#Generate and run analysis using:
 	molgenis -w path/workflow -p parameters.csv
 
 	Below listing of options, --full_name and -short:
