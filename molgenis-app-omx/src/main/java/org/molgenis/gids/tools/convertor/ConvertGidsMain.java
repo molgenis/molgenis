@@ -11,7 +11,7 @@ public class ConvertGidsMain
 {
 	private static final String DIRECTORY = "/Users/Roan/Work/NewGIDS/Export GIDS/Cohorts/";
 	private final static String OUTPUTDIR = DIRECTORY + "Converted/";
-	private final static String PROJECTNAME = "SLE";
+	private final static String PROJECTNAME = "Bloodbank";
 
 	public static void main(String[] args) throws IOException
 	{
