@@ -43,11 +43,15 @@
       	<entity name="ComputeRun" implements="Nameable" xref_label="name" decorator="org.molgenis.compute.db.decorators.ComputeRunDecorator">
       		<description>A set of computetasks to run</description>
       		<field name="creationTime" type="datetime" auto="true" description="time of creation" />
-      		<field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
-      		<field name="hostType" type="enum" nillable="false" label="Host type" enum_options="[CLUSTER,GRID,LOCALHOST]" description="type of the host" />
-      		<field name="command" nillable="false" description="Command to be executed" />
-      		<field name="pollDelay" type="long" nillable="false" label="Poll delay" description="Delay between two database ComputeTask polls" />
+      		<field name="computeBackend" type="xref" xref_entity="ComputeBackend" nillable="false" description="Backend where run will be executed" />
+            <field name="pollDelay" type="long" nillable="false" label="Poll delay" description="Delay between two database ComputeTask polls" />
       		<unique fields="name" />
       	</entity>
+        <entity name="ComputeBackend" implements="Nameable" xref_label="name">
+            <field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
+      		<field name="hostType" type="enum" nillable="false" label="Host type" enum_options="[CLUSTER,GRID,LOCALHOST]" description="type of the host" />
+      		<field name="command" nillable="false" description="Command to be executed" />
+            <unique fields="name" />
+        </entity>
 	</module>
 </molgenis>

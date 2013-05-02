@@ -1,8 +1,5 @@
 package org.molgenis.compute.db.executor;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
@@ -12,6 +9,9 @@ import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -51,21 +51,21 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 
 			for (int i = 0; i < readyTasks.size(); i++)
 			{
-				if (computeRun.getHostType().equalsIgnoreCase("localhost"))
+				if (computeRun.getComputeBackend().getHostType().equalsIgnoreCase("localhost"))
 				{
-					submitPilotLocalhost(computeRun.getCommand());
+					submitPilotLocalhost(computeRun.getComputeBackend().getCommand());
 				}
 				else
 				{
-					LOG.info("Executing command [" + computeRun.getCommand() + "] on backend ["
-							+ computeRun.getBackendUrl() + "]");
+					LOG.info("Executing command [" + computeRun.getComputeBackend().getCommand() + "] on backend ["
+							+ computeRun.getComputeBackend().getBackendUrl() + "]");
 
 					if (executionHost == null)
 					{
-						executionHost = new ExecutionHost(computeRun.getBackendUrl(), username, password, SSH_PORT);
+						executionHost = new ExecutionHost(computeRun.getComputeBackend().getBackendUrl(), username, password, SSH_PORT);
 					}
 
-					executionHost.submitPilot(computeRun.getCommand());
+					executionHost.submitPilot(computeRun.getComputeBackend().getCommand());
 				}
 
 				// sleep, because we have a strange behavior in pilot service

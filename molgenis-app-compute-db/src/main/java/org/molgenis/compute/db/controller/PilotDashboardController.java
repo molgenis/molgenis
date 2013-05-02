@@ -1,13 +1,5 @@
 package org.molgenis.compute.db.controller;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.model.RunStatus;
 import org.molgenis.compute.db.service.RunService;
@@ -20,11 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * Start and stop pilots, show status
@@ -118,7 +113,7 @@ public class PilotDashboardController
 		List<RunModel> runModels = new ArrayList<RunModel>();
 		for (ComputeRun run : ComputeRun.find(database))
 		{
-			runModels.add(new RunModel(run.getName(),  runService.isRunning(run.getName()), run.getBackendUrl()));
+			runModels.add(new RunModel(run.getName(),  runService.isRunning(run.getName()), run.getComputeBackend().getBackendUrl()));
 		}
 
 		return runModels;
