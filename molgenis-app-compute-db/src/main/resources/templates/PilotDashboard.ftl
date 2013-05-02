@@ -98,7 +98,7 @@
   							
   							<form action="/plugin/dashboard/generate" class="form-inline" method="post">
   								<input type="hidden" name="hostName" value="${host.name}" />
-  								<input type="text" name="parametersFile" id="inputParametersFile" placeholder="Parameters file path">
+  								<input type="text" name="parametersFile" id="inputParametersFile" placeholder="Parameters set">
     							<button type="submit" class="btn">Generate jobs</button>	
   							</form>
   							<form id="renerateFailedTasksForm_${host.id}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">

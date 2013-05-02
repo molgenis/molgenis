@@ -15,10 +15,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.ApplicationContextProvider;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 23/04/2013 Time: 08:47
@@ -31,6 +28,7 @@ public class TaskGeneratorDB
 
 	public void generateTasks(String file, String backendName)
 	{
+
 		Compute compute = null;
 		// generate here
 		try
