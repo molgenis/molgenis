@@ -97,7 +97,7 @@
     							</form>		
   							</#if>
   							<#--
-  							<form id="renerateFailedTasksForm_${run.name}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">
+  							<form id="regerateFailedTasksForm_${run.name}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">
   								<input type="hidden" name="run" value="${run.name}" />
   								<button type="submit" class="btn">Resubmit failed jobs</button>
   							</form>

@@ -1,10 +1,5 @@
 package org.molgenis.compute.db.pilot;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +12,11 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.util.WebAppUtil;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date:
@@ -151,10 +151,11 @@ public class PilotService implements MolgenisService
 		}
 	}
 
-	private List<ComputeTask> findRunTasksReady(String backendUrl) throws DatabaseException
+	private List<ComputeTask> findRunTasksReady(String backendName) throws DatabaseException
 	{
-		List<ComputeRun> runs = WebAppUtil.getDatabase().query(ComputeRun.class)
-				.equals(ComputeRun.BACKENDURL, backendUrl).find();
+
+        List<ComputeRun> runs = WebAppUtil.getDatabase().query(ComputeRun.class).
+                equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
 
 		return WebAppUtil.getDatabase().query(ComputeTask.class)
 				.equals(ComputeTask.STATUSCODE, PilotService.TASK_READY).in(ComputeTask.COMPUTERUN, runs).find();
