@@ -31,9 +31,9 @@
 				$('#' + run + ' td.done').html(response.done);
 				
 				if (response.failed > 0) {
-					$('#renerateFailedTasksForm_' + run).show();
+					$('#resubmitFailedTasksForm_' + run).show();
 				} else {
-					$('#renerateFailedTasksForm_' + run).hide();
+					$('#resubmitFailedTasksForm_' + run).hide();
 				}
 			}
 			
@@ -96,12 +96,12 @@
     								<button type="submit" class="btn">Start</button>
     							</form>		
   							</#if>
-  							<#--
-  							<form id="regerateFailedTasksForm_${run.name}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">
+  							
+  							<form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/resubmit" class="form-inline" method="post">
   								<input type="hidden" name="run" value="${run.name}" />
   								<button type="submit" class="btn">Resubmit failed jobs</button>
   							</form>
-  							-->
+  							
 						</div>
     					<div class="span6 status">
     						<div class="status-table">

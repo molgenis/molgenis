@@ -3,6 +3,7 @@ package org.molgenis.compute.db.decorators;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
@@ -35,7 +36,12 @@ public class ComputeRunDecorator extends MapperDecorator<ComputeRun>
 		{
 			if (StringUtils.isEmpty(run.getName()) || !StringUtils.isAlphanumeric(run.getName()))
 			{
-				throw new DatabaseException("Illegal run name [" + run.getName() + "] should be non empty alphnumeric");
+				throw new ComputeDbException("Illegal run name [" + run.getName() + "] should be non empty alphnumeric");
+			}
+
+			if ((run.getPollDelay() != null) && (run.getPollDelay() < 2000))
+			{
+				throw new ComputeDbException("Illegal pollDelay value. Should be bigger than 2000ms");
 			}
 		}
 
