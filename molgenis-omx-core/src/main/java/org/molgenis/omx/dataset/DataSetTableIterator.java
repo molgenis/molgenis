@@ -101,7 +101,6 @@ public class DataSetTableIterator implements Iterator<Tuple>
 
 		long later = System.currentTimeMillis();
 
-		System.out.println("deze rij duurde dus " + (later - now) + " mieliesekonduh");
 		return tuple;
 	}
 
