@@ -16,6 +16,75 @@ import org.molgenis.util.tuple.WritableTuple;
 
 public class EnvironmentGenerator
 {
+	/**
+	 * Returns initial environment with all user params that are used somewhere in this workflow
+	 * @param compute
+	 * @return
+	 */
+	public String getEnvironment(Compute compute)
+	{
+		// put header 'adding user params' in environment
+		String output = "#\n## User parameters\n#\n";
+
+		// user parameters that we want to put in environment
+		HashSet<String> userInputParamSet = new HashSet<String>();
+
+		// first collect all user parameters that are used in this workflow
+		Iterator<Step> itStep = compute.getWorkflow().getSteps().iterator();
+		while (itStep.hasNext())
+		{
+			Map<String, String> pmap = itStep.next().getParameters();
+			
+			Iterator<String> itValue = pmap.values().iterator();
+			while (itValue.hasNext())
+			{
+				String value = itValue.next();
+				
+				// if value matches 'user_*' then add * to environment
+				Integer prefLength = Parameters.USER_PREFIX.length();
+				if (value.substring(0, prefLength).equals(Parameters.USER_PREFIX))
+				{
+					userInputParamSet.add(value);
+				}
+			}
+		}
+		
+		// for each userParam, also get its value, and put them into environment
+		
+		// get all parameters from parameters.csv
+
+		Iterator<String> itInputParam = userInputParamSet.iterator();
+		while (itInputParam.hasNext())
+		{
+			String p = itInputParam.next(); // user param that is bound to an input param				
+			for (WritableTuple wt : compute.getParameters().getValues())
+			{
+				// retrieve index and value for that index
+				Integer index = null;
+				String value = null;
+				for (String col : wt.getColNames())
+				{
+					if (col.equals(p)) value = wt.getString(col);
+					if (col.equals(Parameters.USER_PREFIX + Task.TASKID_COLUMN)) index = wt.getInt(col);
+				}
+				
+				String assignment = p + "[" + index + "]=" + value + "\n";
+				if (index == null || value == null) try
+				{
+					throw new Exception("Cannot add the following assignment to " + Parameters.ENVIRONMENT_FULLPATH + ":\n" + assignment);
+				}
+				catch (Exception e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+				output += p + "[" + index + "]=" + value + "\n";
+			}
+		}
+		
+		return output;
+	}
+	
 	public void generate(Compute compute, String workDir)
 	{
 		Parameters.ENVIRONMENT_FULLPATH = workDir + File.separator + Parameters.ENVIRONMENT;
@@ -28,63 +97,9 @@ public class EnvironmentGenerator
 			// create new environment file
 			env.createNewFile();
 
-			// put header 'adding user params' in environment file
 			BufferedWriter output = new BufferedWriter(new FileWriter(env, true));
-			output.write("#\n## User parameters\n#\n");
-
-			// user parameters that we want to put in environment
-			HashSet<String> userInputParamSet = new HashSet<String>();
-
-			// first collect all user parameters that are used in this workflow
-			Iterator<Step> itStep = compute.getWorkflow().getSteps().iterator();
-			while (itStep.hasNext())
-			{
-				Map<String, String> pmap = itStep.next().getParameters();
-				
-				Iterator<String> itValue = pmap.values().iterator();
-				while (itValue.hasNext())
-				{
-					String value = itValue.next();
-					
-					// if value matches 'user_*' then add * to environment
-					Integer prefLength = Parameters.USER_PREFIX.length();
-					if (value.substring(0, prefLength).equals(Parameters.USER_PREFIX))
-					{
-						userInputParamSet.add(value);
-					}
-				}
-			}
-			
-			// for each userParam, also get its value, and put them into environment
-			
-			// get all parameters from parameters.csv
-
-			Iterator<String> itInputParam = userInputParamSet.iterator();
-			while (itInputParam.hasNext())
-			{
-				String p = itInputParam.next(); // user param that is bound to an input param				
-				for (WritableTuple wt : compute.getParameters().getValues())
-				{
-					// retrieve index and value for that index
-					Integer index = null;
-					String value = null;
-					for (String col : wt.getColNames())
-					{
-						if (col.equals(p)) value = wt.getString(col);
-						if (col.equals(Parameters.USER_PREFIX + Task.TASKID_COLUMN)) index = wt.getInt(col);
-					}
-					
-					String assignment = p + "[" + index + "]=" + value + "\n";
-					if (index == null || value == null) throw new Exception("Cannot add the following assignment to " + Parameters.ENVIRONMENT_FULLPATH + ":\n" + assignment); 
-					output.write(p + "[" + index + "]=" + value + "\n");
-				}
-			}
-			
+			output.write(this.getEnvironment(compute));
 			output.close();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
 		}
 		catch (Exception e)
 		{
