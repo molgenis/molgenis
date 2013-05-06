@@ -2,10 +2,13 @@ package org.molgenis.util.tuple;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.molgenis.util.AbstractEntity;
 import org.molgenis.util.ListEscapeUtils;
 
 /**
@@ -15,6 +18,7 @@ import org.molgenis.util.ListEscapeUtils;
 public abstract class AbstractTuple implements Tuple
 {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(AbstractTuple.class);
 
 	@Override
 	public boolean hasColNames()
@@ -137,18 +141,37 @@ public abstract class AbstractTuple implements Tuple
 	public Date getDate(String colName)
 	{
 		Object obj = get(colName);
-		if (obj == null) return null;
-		else if (obj instanceof Date) return (Date) obj;
-		else return Date.valueOf(obj.toString());
+		return objToDate(obj);
 	}
 
 	@Override
 	public Date getDate(int col)
 	{
 		Object obj = get(col);
+		return objToDate(obj);
+	}
+
+	private Date objToDate(Object obj)
+	{
+		Date result = null;
 		if (obj == null) return null;
 		else if (obj instanceof Date) return (Date) obj;
-		else return Date.valueOf(obj.toString());
+		else try
+		{
+			try
+			{
+				result = Date.valueOf(obj.toString());
+			}
+			catch (IllegalArgumentException e)
+			{
+				result = AbstractEntity.string2date(obj.toString());
+			}
+		}
+		catch (ParseException e)
+		{
+			logger.warn("unable to parse input tot SQL Date: " + obj.toString());
+		}
+		return result;
 	}
 
 	@Override
