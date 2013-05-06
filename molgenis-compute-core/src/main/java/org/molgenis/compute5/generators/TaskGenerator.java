@@ -109,7 +109,7 @@ public class TaskGenerator
 				task.setParameters(map);
 
 				// now source the task's parameters from environment.txt
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource environment.txt\n\n";
+				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource " + Parameters.ENVIRONMENT + "\n\n";
 				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced

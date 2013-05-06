@@ -29,7 +29,7 @@ public class Parameters
 	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
 	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;
 	public static String ERROR_FILE_DEFAULT = "error.log"; // can be changed by user parameter
-	public static String ENVIRONMENT = "environment.txt";
+	public static String ENVIRONMENT = "user.env";
 	public static String ENVIRONMENT_FULLPATH = null; // to be set
 	public static String NOTAVAILABLE = "_NA";
 	public static String LIST = "list";
