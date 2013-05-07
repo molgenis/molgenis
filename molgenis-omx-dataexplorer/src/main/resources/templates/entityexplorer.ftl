@@ -16,16 +16,21 @@
 			<div class="well">
 				<div class="row-fluid">
 					<div class="span3">
-						<select id="entity-select">
-					      	<option value="" disabled selected>Please Select</option>
+						<label class="control-label" for="entity-select">Entity class:</label>
+						<div class="controls">
+							<select data-placeholder="Please Select" id="entity-select">
 						<#list entities as entity>
 							<option value="${entity?lower_case}">${entity}</option>
 						</#list>
-				      	</select>
+				      		</select>
+						</div>
 			      	</div>
 			      	<div class="span3">
-						<select id="entity-instance-select">
-				      	</select>
+				      	<label class="control-label" for="entity-instance-select">Entity instance:</label>
+						<div class="controls">
+							<select data-placeholder="Please Select" id="entity-instance-select">
+					      	</select>
+					    </div>
 			      	</div>
 				</div>
 			</div>
@@ -34,8 +39,8 @@
 				</table>
 			</div>
 			<div class="row-fluid">
-				<ul id="entity-search-results">
-				</ul>
+				<div id="entity-search-results">
+				</div>
 			</div>
 		</div>
 	</body>

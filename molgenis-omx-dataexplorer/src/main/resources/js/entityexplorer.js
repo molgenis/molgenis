@@ -17,6 +17,9 @@
 			$('#entity-instance-select').change(function() {
 				ns.onEntitySelectionChange($(this).val());
 			});
+
+			// select first option
+			$('#entity-instance-select').val($("#entity-instance-select option:first").val());
 			$('#entity-instance-select').change();
 		});
 	};
@@ -29,12 +32,16 @@
 	};
 
 	ns.updateEntityTable = function(entity) {
+		var name = typeof entity.name !== 'undefined' ? entity.name : 'N/A';
+		var identifier = typeof entity.identifier !== 'undefined' ? entity.identifier : 'N/A';
+		var description = typeof entity.description !== 'undefined' ? entity.description : 'N/A';
+
 		var items = [];
 		items.push('<thead><tr><th colspan="2">Entity details</th></tr></thead>');
 		items.push('<tbody>');
-		items.push('<tr><td>Name</td><td>' + entity.name + '</td></tr>');
-		items.push('<tr><td>Identifier</td><td>' + entity.identifier + '</td></tr>');
-		items.push('<tr><td>Description</td><td>' + entity.description + '</td></tr>');
+		items.push('<tr><td>Name</td><td>' + name + '</td></tr>');
+		items.push('<tr><td>Identifier</td><td>' + identifier + '</td></tr>');
+		items.push('<tr><td>Description</td><td>' + description + '</td></tr>');
 		items.push('</tbody>');
 		$('#entity-table').html(items.join(''));
 	};
@@ -42,16 +49,21 @@
 	ns.updateEntitySearchResults = function(entity) {
 		searchApi.search(ns.createSearchRequest(entity), function(searchResponse) {
 			var items = [];
-			$.each(searchResponse.searchHits, function(key, val) {
-				items.push('<li>' + JSON.stringify(val) + '</li>');
-			});
+			if (searchResponse.totalHitCount == 0) {
+				items.push('<h3>No search results</h3>');
+			} else {
+				items.push('<ul>');
+				$.each(searchResponse.searchHits, function(key, val) {
+					items.push('<li>' + JSON.stringify(val) + '</li>');
+				});
+				items.push('</ul>');
+			}
 			$('#entity-search-results').html(items.join(''));
 		});
 	};
 
 	ns.createSearchRequest = function(entity) {
 		var searchRequest = {
-			// documentType : selectedDataSet.name,
 			queryRules : [ {
 				operator : 'EQUALS',
 				value : entity.identifier
