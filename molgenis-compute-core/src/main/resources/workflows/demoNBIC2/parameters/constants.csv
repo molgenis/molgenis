@@ -1,2 +1,2 @@
-disease,workflow,workdir,errorlog,backend
-diabetes,workflow.csv,../out,myerror.log,pbs
+disease,workflow,workdir,errorlog
+diabetes,workflow.csv,../out,myerror.log

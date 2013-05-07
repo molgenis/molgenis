@@ -121,10 +121,10 @@ public class ParametersCsvParser
 
 			// If path to workflow is relative then prepend its parent's path
 			// (f).
-			tupleLst = updatePath(tupleLst, Parameters.WORKFLOW_COLUMN_INITIAL, f);
+			tupleLst = updatePath(tupleLst, Parameters.WORKFLOW, f);
 
 			// same for output path
-			tupleLst = updatePath(tupleLst, Task.WORKDIR_COLUMN, f);
+			tupleLst = updatePath(tupleLst, Parameters.WORKDIR_COLUMN, f);
 			
 			// get other param files we have to parse, and validate that all
 			// values in 'parameters' column equal. If file path is relative
