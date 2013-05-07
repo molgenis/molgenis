@@ -1,0 +1,16 @@
+.container-fluid {
+	padding-top: 10px;	
+}
+
+#entity-select {
+	margin-bottom: 10px;
+}
+
+#entity-instance-select {
+	margin-bottom: 10px;
+}
+
+.table thead th {
+	background-color: #5B82A4;
+	color: white;
+}
