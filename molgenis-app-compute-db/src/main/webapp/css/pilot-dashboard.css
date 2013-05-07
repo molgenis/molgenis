@@ -1,29 +1,43 @@
 .host-name {
-	font-size: 30px;
+	font-size: 20px;
 	font-weight:bold;
 	margin-right: 20px;
 }
 
+
 .host-header {
-	margin-bottom: 60px;	
+	margin-bottom: 18px;	
+}
+
+.creation-time {
+	font-size: 12px;
+}
+
+form {
+	margin: 0px;	
 }
 
 .status-table {
-	padding: 10px;
 	background-color: white;
 	border: 1px solid #DDDDDD;
 	border-radius: 4px 4px 4px 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
 }
 
+.status-table table {
+	margin-bottom: 0px;
+	font-size: 14px;
+}
+
 .well {
-	margin-top: 10px;
+	margin-top: 8px;
+	margin-bottom: 8px;
 }
 
 .alert {
 	margin-top: 10px;
 }
 
-#renerateFailedTasksForm {
-	display: none;
+.resubmit-btn {
+	margin-top: 8px;
 }

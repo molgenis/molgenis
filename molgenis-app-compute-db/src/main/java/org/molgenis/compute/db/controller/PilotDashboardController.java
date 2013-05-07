@@ -9,11 +9,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.compute.db.ComputeDbException;
-import org.molgenis.compute.db.model.RunStatus;
 import org.molgenis.compute.db.service.RunService;
 import org.molgenis.compute.runtime.ComputeRun;
+import org.molgenis.compute5.db.api.RunStatus;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -72,12 +73,20 @@ public class PilotDashboardController
 		return init(model);
 	}
 
+	@RequestMapping("/close")
+	public String close(@RequestParam("run")
+	String runName, Model model) throws DatabaseException
+	{
+		runService.removeFromDashboard(runName);
+		return init(model);
+	}
+
 	@RequestMapping("/resubmit")
 	public String resubmitFailedTasks(@RequestParam("run")
 	String runName, Model model) throws DatabaseException
 	{
-		runService.resubmitFailedTasks(runName);
-		model.addAttribute("message", "Resubmitted failed tasks for '" + runName + "'");
+		int count = runService.resubmitFailedTasks(runName);
+		model.addAttribute("message", "Resubmitted " + count + " failed tasks for '" + runName + "'");
 		return init(model);
 	}
 
@@ -102,10 +111,13 @@ public class PilotDashboardController
 	private List<RunModel> getRunModels() throws DatabaseException
 	{
 		List<RunModel> runModels = new ArrayList<RunModel>();
-		for (ComputeRun run : ComputeRun.find(database))
+
+		Query<ComputeRun> runs = database.query(ComputeRun.class).eq(ComputeRun.SHOWINDASHBOARD, true)
+				.sortDESC("creationTime");
+		for (ComputeRun run : runs.find())
 		{
 			runModels.add(new RunModel(run.getName(), runService.isRunning(run.getName()), run.getComputeBackend()
-					.getBackendUrl()));
+					.getBackendUrl(), run.getCreationTime()));
 		}
 
 		return runModels;

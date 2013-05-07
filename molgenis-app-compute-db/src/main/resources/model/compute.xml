@@ -12,14 +12,13 @@
 		</entity>	
 	</module>
 	<module name="compute.runtime">
-		<entity name="ComputeTask" implements="Nameable" xref_label="name">
+		<entity name="ComputeTask" implements="Nameable" xref_label="name" decorator="org.molgenis.compute.db.decorators.ComputeTaskDecorator">
 			<description>A protocolApplication that reports the application of running a ComputeProtocol.</description>
 			<field name="computeRun" type="xref" xref_entity="ComputeRun" description="The run this task is part of" nillable="false" />
 			<field name="computeScript" type="text" description="The actual command to be sent to the cluster, is a filled in version of the one define in the ComputeProtocol" />
    			<field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />   
 			<field name="runLog" type="text" description="Log of the task execution" nillable="true" />
-            <!--field name="computeStep" nillable="true" type="xref" xref_entity="ComputeStep" description="Reference to the workflow step that generated this script." /-->
-			<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
+         	<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
 				description="Last known status of this task. See compute history for details. NB 'ready' means ready for running (cf. 'done')." />
@@ -28,29 +27,31 @@
         <entity name="ComputeTaskHistory" implements="Autoid" xref_label="ComputeTask">
       		<description>Keep track of the compute history of a task, including resubmissions.
       		</description>
-      		<field name="ComputeTask" type="xref" xref_entity="ComputeTask" description="the task for which the history was collected" />
-      		<field name="StatusTime" type="datetime" auto="true" description="time of state change" />
+      		<field name="computeTask" type="xref" xref_entity="ComputeTask" description="the task for which the history was collected" />
+      		<field name="statusTime" type="datetime" auto="true" description="time of state change" />
       		<field name="runLog" nillable="true" type="text" description="field to show the content of the error file (only applicable on fail/done of a task)" />
-            <field name="StatusCode" nillable="false" type="enum" enum_options="[running,failed,done]" default="failed" description="current status of this task." />
-            <unique fields="ComputeTask,StatusTime" />
+            <field name="statusCode" nillable="true" type="enum" enum_options="[generated,ready,running,failed,done]"  description="current status of this task." />
+            <field name="newStatusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]"  description="current status of this task." />
       	</entity>
 		<entity name="ComputeParameterValue" implements="Nameable">
 			<description>Related to ComputeTask values
 			</description>
-            <field name="computeTask" type="xref" xref_entity="ComputeTask" xref_label="name" description="ComputeTask, to which the value belongs" />
-            <field name="value" type="text" nillable="false" description="the value of the parameter" />
+            <field name="computeTask" type="xref" label="Task" xref_entity="ComputeTask" xref_label="name" description="ComputeTask, to which the value belongs" />
+            <field name="value" type="text" label="Value" nillable="false" description="the value of the parameter" />
 		</entity>
       	<entity name="ComputeRun" implements="Nameable" xref_label="name" decorator="org.molgenis.compute.db.decorators.ComputeRunDecorator">
       		<description>A set of computetasks to run</description>
-      		<field name="creationTime" type="datetime" auto="true" description="time of creation" />
-      		<field name="computeBackend" type="xref" xref_entity="ComputeBackend" nillable="false" description="Backend where run will be executed" />
+      		<field name="creationTime" label="Creationtime" type="datetime" auto="true" description="time of creation" />
+      		<field name="showInDashboard" type="boolean" label="Show in dashboard" default="true" description="Show this run in the dashboard" />
+      		<field name="computeBackend" type="xref" label="Backend" xref_entity="ComputeBackend" nillable="false" description="Backend where run will be executed" />
+            <field name="environment" type="text" label="Environment" nillable="true" description="Environment vars for all steps" />
             <field name="pollDelay" type="long" nillable="false" label="Poll delay" description="Delay between two database ComputeTask polls" />
       		<unique fields="name" />
       	</entity>
         <entity name="ComputeBackend" implements="Nameable" xref_label="name">
             <field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
       		<field name="hostType" type="enum" nillable="false" label="Host type" enum_options="[CLUSTER,GRID,LOCALHOST]" description="type of the host" />
-      		<field name="command" nillable="false" description="Command to be executed" />
+      		<field name="command" nillable="false" label="Command" description="Command to be executed" />
             <unique fields="name" />
         </entity>
 	</module>

@@ -66,10 +66,15 @@ public class PilotService implements MolgenisService
 			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
 			String computeScript = task.getComputeScript().replaceAll("\r", "");
 			String runName = task.getComputeRun().getName();
+			String environment = task.getComputeRun().getEnvironment();
+
+			// TODO
+			// echo \"%s\" > environment.txt
+			// -F environment_file=@environment.txt
 
 			String taskScript = String
 					.format("echo TASKNAME:%s\necho RUNNAME:%s\n%s\ncp log.log done.log\ncurl -F status=done -F log_file=@done.log %s\n",
-							task.getName(), runName, computeScript, pilotServiceUrl);
+							environment, task.getName(), runName, computeScript, pilotServiceUrl);
 
 			LOG.info("Script for task [" + task.getName() + "] of run [ " + runName + "]:\n" + taskScript);
 
@@ -96,9 +101,6 @@ public class PilotService implements MolgenisService
 			String taskName = logfile.getTaskName();
 			String runName = logfile.getRunName();
 			List<String> logBlocks = logfile.getLogBlocks();
-
-			logBlocks.add(0, "Task: " + taskName);
-			logBlocks.add(0, "RUN: " + runName);
 			String runInfo = StringUtils.join(logBlocks, "\n");
 
 			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class).eq(ComputeTask.NAME, taskName)

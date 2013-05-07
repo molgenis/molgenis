@@ -1,20 +1,18 @@
 package org.molgenis.compute.db.service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
 import org.molgenis.compute.db.executor.Scheduler;
-import org.molgenis.compute.db.model.RunStatus;
 import org.molgenis.compute.db.pilot.PilotService;
 import org.molgenis.compute.runtime.ComputeBackend;
 import org.molgenis.compute.runtime.ComputeParameterValue;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
-import org.molgenis.compute.runtime.ComputeTaskHistory;
+import org.molgenis.compute5.db.api.RunStatus;
 import org.molgenis.compute5.model.Task;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -22,6 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+/**
+ * ComputeRun service facade
+ * 
+ * @author erwin
+ * 
+ */
 @Scope("request")
 @Component
 public class RunService
@@ -38,7 +42,17 @@ public class RunService
 		this.scheduler = scheduler;
 	}
 
-	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks)
+	/**
+	 * Create a new ComputeRun
+	 * 
+	 * @param name
+	 * @param backendName
+	 * @param pollDelay
+	 * @param tasks
+	 * @param environment
+	 * @return the new ComputeRun
+	 */
+	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String environment)
 	{
 		try
 		{
@@ -50,7 +64,7 @@ public class RunService
 
 			if (ComputeRun.findByName(database, name) != null)
 			{
-				throw new ComputeDbException("Run with name [" + backendName + "] already exists");
+				throw new ComputeDbException("Run with name [" + name + "] already exists");
 			}
 
 			database.beginTx();
@@ -59,6 +73,7 @@ public class RunService
 			run.setComputeBackend(backend);
 			run.setName(name);
 			run.setPollDelay(pollDelay == null ? DEFAULT_POLL_DELAY : pollDelay);
+			run.setEnvironment(environment);
 			database.add(run);
 
 			// Add tasks to db
@@ -154,6 +169,13 @@ public class RunService
 
 	}
 
+	/**
+	 * Start pilots
+	 * 
+	 * @param runName
+	 * @param username
+	 * @param password
+	 */
 	public void start(String runName, String username, String password)
 	{
 		try
@@ -174,6 +196,11 @@ public class RunService
 		}
 	}
 
+	/**
+	 * Stop database olling
+	 * 
+	 * @param runName
+	 */
 	public void stop(String runName)
 	{
 		try
@@ -194,6 +221,12 @@ public class RunService
 		}
 	}
 
+	/**
+	 * Check is a run is currently running
+	 * 
+	 * @param runName
+	 * @return
+	 */
 	public boolean isRunning(String runName)
 	{
 		try
@@ -214,6 +247,12 @@ public class RunService
 		}
 	}
 
+	/**
+	 * Get the status of all tasks of a run
+	 * 
+	 * @param runName
+	 * @return
+	 */
 	public RunStatus getStatus(String runName)
 	{
 		try
@@ -240,39 +279,40 @@ public class RunService
 		}
 	}
 
-	public void resubmitFailedTasks(String runName)
+	/**
+	 * Resubmit all failed tasks of a run
+	 * 
+	 * @param runName
+	 * @return the number of resubmitted failed tasks
+	 */
+	public int resubmitFailedTasks(String runName)
 	{
 		LOG.info("Resubmit failed tasks for run [" + runName + "]");
 		try
 		{
-			List<ComputeTask> failedTasks = database.query(ComputeTask.class)
+			List<ComputeTask> tasks = database.query(ComputeTask.class)
 					.equals(ComputeTask.STATUSCODE, PilotService.TASK_FAILED).and()
 					.equals(ComputeTask.COMPUTERUN_NAME, runName).find();
 
-			if (failedTasks.isEmpty())
+			if (tasks.isEmpty())
 			{
-				return;
+				return 0;
 			}
 
-			database.beginTx();
-
-			for (ComputeTask task : failedTasks)
+			for (ComputeTask task : tasks)
 			{
-				ComputeTaskHistory history = new ComputeTaskHistory();
-				history.setComputeTask(task);
-				history.setRunLog(task.getRunLog());
-				history.setStatusTime(new Date());
-				history.setStatusCode(task.getStatusCode());
-				database.add(history);
-
 				// mark job as generated
+				// entry to history is added by ComputeTaskDecorator
 				task.setStatusCode("generated");
-				task.setRunLog("");
+				task.setRunLog(null);
+				task.setRunInfo(null);
 
-				LOG.info("Task [" + task.getName() + "] changes from failed to generated");
+				LOG.info("Task [" + task.getName() + "] changed from failed to generated");
 			}
 
-			database.commitTx();
+			database.update(tasks);
+
+			return tasks.size();
 		}
 		catch (DatabaseException e)
 		{
@@ -289,7 +329,32 @@ public class RunService
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}
+	}
 
+	/**
+	 * Remove a run from the dashboard (not from the database)
+	 * 
+	 * @param runName
+	 */
+	public void removeFromDashboard(String runName)
+	{
+		try
+		{
+			ComputeRun run = ComputeRun.findByName(database, runName);
+			if (run == null)
+			{
+				throw new ComputeDbException("Unknown run name [" + runName + "]");
+			}
+
+			run.setShowInDashboard(false);
+			database.update(run);
+		}
+		catch (DatabaseException e)
+		{
+			String msg = "DatabaseException removing  [" + runName + "] from dashboard";
+			LOG.error(msg, e);
+			throw new ComputeDbException(msg, e);
+		}
 	}
 
 	private int getTaskStatusCount(Integer runId, String status) throws DatabaseException
