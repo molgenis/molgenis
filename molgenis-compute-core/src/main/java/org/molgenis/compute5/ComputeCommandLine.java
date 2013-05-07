@@ -161,7 +161,6 @@ public class ComputeCommandLine
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
 		// write the task for the backend
-		// TODO: use 'scheduler' from parameters to decide which backend
 		if (Parameters.BACKEND_PBS.equals(backend))
 		{
 			new PbsBackend().generate(compute.getTasks(), dir);
