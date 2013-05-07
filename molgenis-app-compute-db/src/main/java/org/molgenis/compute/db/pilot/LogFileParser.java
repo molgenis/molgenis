@@ -23,17 +23,14 @@ public class LogFileParser
 		this.logFileContents = logFileContents;
 	}
 
-	public String getTaskID()
+	public String getTaskName()
 	{
-		int idPos = logFileContents.indexOf("TASKID:");
-		int endPos = logFileContents.indexOf("\n");
+		return getValue("TASKNAME:");
+	}
 
-		if ((idPos < 0) || (endPos < 0))
-		{
-			return null;
-		}
-
-		return logFileContents.substring(idPos + 7, endPos).trim();
+	public String getRunName()
+	{
+		return getValue("RUNNAME:");
 	}
 
 	public List<String> getLogBlocks()
@@ -53,5 +50,19 @@ public class LogFileParser
 		}
 
 		return logBlocks;
+	}
+
+	private String getValue(String prefix)
+	{
+
+		int idPos = logFileContents.indexOf(prefix);
+		int endPos = logFileContents.indexOf("\n", idPos);
+
+		if ((idPos < 0) || (endPos < 0))
+		{
+			return null;
+		}
+
+		return logFileContents.substring(idPos + prefix.length(), endPos).trim();
 	}
 }

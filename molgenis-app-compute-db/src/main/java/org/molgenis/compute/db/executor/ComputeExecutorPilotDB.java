@@ -1,5 +1,8 @@
 package org.molgenis.compute.db.executor;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
@@ -9,9 +12,6 @@ import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -62,7 +62,8 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 
 					if (executionHost == null)
 					{
-						executionHost = new ExecutionHost(computeRun.getComputeBackend().getBackendUrl(), username, password, SSH_PORT);
+						executionHost = new ExecutionHost(computeRun.getComputeBackend().getBackendUrl(), username,
+								password, SSH_PORT);
 					}
 
 					executionHost.submitPilot(computeRun.getComputeBackend().getCommand());
@@ -125,6 +126,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 
 	private void evaluateTasks(Database database, List<ComputeTask> generatedTasks) throws DatabaseException
 	{
+
 		for (ComputeTask task : generatedTasks)
 		{
 			boolean isReady = true;
