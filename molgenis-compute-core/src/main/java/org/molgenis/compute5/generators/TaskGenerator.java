@@ -59,7 +59,6 @@ public class TaskGenerator
 
 			// uncollapse
 			localParameters = TupleUtils.uncollapse(localParameters, Parameters.ID_COLUMN);
-
 			// add local input/output parameters to the global parameters
 			addLocalToGlobalParameters(step, globalParameters, localParameters);
 
@@ -78,29 +77,6 @@ public class TaskGenerator
 		{
 			Task task = new Task(target.getString(Task.TASKID_COLUMN));
 
-			// for this step: store which target-ids go into which job
-			for (Integer id : target.getIntList(Parameters.ID_COLUMN))
-			{
-				step.setJobName(id, task.getName());
-			}
-
-			// for this task: add task dependencies
-			for (String previousStepName : step.getPreviousSteps())
-			{
-				Step prevStep = workflow.getStep(previousStepName);
-				for (Integer id : target.getIntList(Parameters.ID_COLUMN))
-				{
-					task.getPreviousTasks().add(prevStep.getJobName(id));
-				}
-
-				// String col = Parameters.PREVIOUS_COLUMN;
-				// if (!target.isNull(col))
-				// {
-				// task.getPreviousTasks().addAll(target.getList(Parameters.PREVIOUS_COLUMN));
-				// }
-			}
-
-			// generate script from template
 			try
 			{
 				Map<String, Object> map = TupleUtils.toMap(target);
@@ -108,8 +84,35 @@ public class TaskGenerator
 				// remember parameter values
 				task.setParameters(map);
 
-				// now source the task's parameters from environment.txt
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\nsource " + Parameters.ENVIRONMENT + "\n\n";
+				// for this step: store which target-ids go into which job
+				for (Integer id : target.getIntList(Parameters.ID_COLUMN))
+				{
+					step.setJobName(id, task.getName());
+				}
+
+				// now source the task's parameters from each prevStep.env on
+				// which this task depends
+				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\n\nsource " + Parameters.ENVIRONMENT + "\n\n";
+
+				for (String previousStepName : step.getPreviousSteps())
+				{ // we have jobs on which we depend in this prev step
+					Step prevStep = workflow.getStep(previousStepName);
+					for (Integer id : target.getIntList(Parameters.ID_COLUMN))
+					{
+						String prevJobName = prevStep.getJobName(id);
+						
+						// prevent duplicate work
+						if (!task.getPreviousTasks().contains(prevJobName))
+						{
+							// for this task: add task dependencies
+							task.getPreviousTasks().add(prevJobName);
+
+							// source its environment
+							parameterHeader += "source " + prevJobName + Parameters.ENVIRONMENT_EXTENSION + "\n";
+						}
+					}
+				}
+
 				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced
@@ -123,13 +126,10 @@ public class TaskGenerator
 					{
 						Object rowIndexObject = rowIndex.get(i);
 						String rowIndexString = (String) rowIndexObject.toString();
-						// System.out.println(">> " + rowIndexString);
+
 						parameterHeader += p + "[" + i + "]=${" + step.getParameters().get(p) + "[" + rowIndexString
 								+ "]}\n";
 					}
-					// parameterHeader += p + "=${" +
-					// step.getParameters().get(p) +
-					// target.getList(Parameters.ID_COLUMN) + "}\n";
 
 				}
 
@@ -158,18 +158,15 @@ public class TaskGenerator
 
 				parameterHeader += "\n# Start of your protocol template\n";
 
-				String script = step.getProtocol().getTemplate();// out.toString();
+				String script = step.getProtocol().getTemplate();
 				script = parameterHeader + script;
 
 				// append footer that appends the task's parameters to
-				// environment.txt
-
+				// environment of this task
+				String myEnvironmentFile = task.getName() + Parameters.ENVIRONMENT_EXTENSION;
 				script = script + "\n# End of your protocol template\n";
-				script = script + "\n#\n##\n### Update '" + Parameters.ENVIRONMENT
+				script = script + "\n#\n##\n### Save output in environment file: '" + myEnvironmentFile
 						+ "' with the output vars of this step\n##\n#";
-				script = appendToEnv(script, "#");
-				script = appendToEnv(script, "## " + task.getName());
-				script = appendToEnv(script, "#");
 				script += "\n";
 
 				Iterator<String> itParam = map.keySet().iterator();
@@ -205,15 +202,15 @@ public class TaskGenerator
 								String rowIndexString = (String) rowIndexObject.toString();
 								// System.out.println(">> " + rowIndexString);
 								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP + p + "["
-										+ rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + Parameters.ENVIRONMENT
-										+ "\n";
+										+ rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + myEnvironmentFile + "\n";
 							}
 
 							script += line;
 						}
 					}
 				}
-				script = appendToEnv(script, ""); // empty line
+				script = appendToEnv(script, "", myEnvironmentFile); // empty
+																		// line
 
 				script += "\n";
 
@@ -233,9 +230,9 @@ public class TaskGenerator
 		return tasks;
 	}
 
-	private static String appendToEnv(String script, String string)
+	private static String appendToEnv(String script, String string, String thisFile)
 	{
-		String appendString = "echo \"" + string + "\" >> " + Parameters.ENVIRONMENT;
+		String appendString = "echo \"" + string + "\" >> " + thisFile;
 
 		return script + "\n" + appendString;
 	}
