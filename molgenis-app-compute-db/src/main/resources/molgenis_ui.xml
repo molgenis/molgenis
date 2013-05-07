@@ -1,30 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="compute" label="Compute Testing">
     <plugin name="MolgenisHeader" type="org.molgenis.compute.db.ui.ComputeHeader"/>
-    <menu name="mainmenu" position="left" startswith="WelcomeScreen">
+    <menu name="mainmenu" position="left" startswith="PilotDashboardPlugin">
         <menu name="Compute">
-            <!--
-               <form name="ComputeWorkflow" label="Workflow" entity="ComputeWorkflow" viewtype="record">
-                   <menu name="ComputeStepMenu" label="Workflow Steps">
-                       <form name="ComputeStep" label="Workflow step" entity="ComputeStep" viewtype="record" />
-                   </menu>
-               </form>
-               <form name="ComputeProtocols" label="Protocols" entity="ComputeProtocol" viewtype="list" />
-               <form name="ComputeParameters" label="Parameters" entity="ComputeParameter" viewtype="list" />
-               <form name="ComputeParameterDefaults" label="Parameter deafults" entity="ComputeParameterDefaultValue" viewtype="list" />
-               -->
             <plugin name="PilotDashboardPlugin" label="Pilot dashboard"
                     type="org.molgenis.compute.db.plugin.PilotDashboardPlugin"/>
-            <form name="ComputeTasks" label="Tasks" entity="ComputeTask">
-                <menu name="ComputeTaskMenu" label="Compute Task Parameter Values">
-                    <form name="ComputeTaskValues" label="Parameter Value" entity="ComputeParameterValue"
-                          viewtype="list"/>
-                </menu>
-                <menu name="ComputeJobDetails" lable="Compute Run History">
-                    <form name="ComputeJobHistory" entity="ComputeTaskHistory" viewtype="list"/>
-                </menu>
+            
+            <form name="ComputeRuns" label="Runs" entity="ComputeRun" viewtype="list">
+            	<form name="ComputeTasks" label="Tasks" entity="ComputeTask" viewtype="list">
+            		<menu name="ComputeTaskValueMenu" label="Parameters">
+            			<form name="ComputeTaskValues" label="Parameters" entity="ComputeParameterValue" viewtype="list"/>
+                		<form name="ComputeTaskHistory" label="History" entity="ComputeTaskHistory" viewtype="list"/>
+                	</menu>
+                </form>
             </form>
-            <form name="ComputeHosts" label="Hosts" entity="ComputeHost"/>
+            
+            <form name="ComputeBackends" label="Backends" entity="ComputeBackend"/>
         </menu>
     </menu>
 </molgenis>

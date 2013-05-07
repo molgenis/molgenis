@@ -29,7 +29,8 @@ public class Parameters
 	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
 	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;
 	public static String ERROR_FILE_DEFAULT = "error.log"; // can be changed by user parameter
-	public static String ENVIRONMENT = "environment.txt";
+	public static String ENVIRONMENT_EXTENSION = ".env";
+	public static String ENVIRONMENT = "user" + ENVIRONMENT_EXTENSION;
 	public static String ENVIRONMENT_FULLPATH = null; // to be set
 	public static String NOTAVAILABLE = "_NA";
 	public static String LIST = "list";
@@ -40,9 +41,11 @@ public class Parameters
 	public static final String NODES = "nodes";
 	public static final String PPN = "ppn";
 	public static final String MEMORY = "mem";
-	public static final String SCHEDULER = "scheduler";
-	public static final String SCHEDULER_COLUMN = USER_PREFIX + SCHEDULER;
-	public static final String PBS = "pbs";
+	public static final String BACKEND = "backend";
+	public static final String BACKEND_COLUMN = USER_PREFIX + BACKEND;
+	public static final String BACKEND_LOCAL = "local";
+	public static final String BACKEND_PBS = "pbs";
+	public static final String BACKEND_DEFAULT = BACKEND_LOCAL;
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();

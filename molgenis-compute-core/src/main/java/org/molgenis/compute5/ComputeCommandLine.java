@@ -55,9 +55,12 @@ public class ComputeCommandLine
 				.withDescription("path to workflow.csv.").create("w");
 		Option d = OptionBuilder.withArgName(Task.WORKDIR_COLUMN).hasArg().withLongOpt(Task.WORKDIR_COLUMN)
 				.withDescription("path to directory this generates to. Default: currentdir").create("d");
+		Option b = OptionBuilder.withArgName(Task.WORKDIR_COLUMN).hasArg().withLongOpt(Task.WORKDIR_COLUMN)
+				.withDescription("backend for which you generate. Default: local").create("b");
 		options.addOption(w);
 		options.addOption(p);
 		options.addOption(d);
+		options.addOption(b);
 
 		// parse options
 		try
@@ -76,9 +79,14 @@ public class ComputeCommandLine
 			{
 				workDir = cmd.getOptionValue("d");
 			}
-
+			String backend = "";
+			if (null != cmd.getOptionValue("b"))
+			{
+				backend = cmd.getOptionValue("b");
+			}
+			
 			// output scripts + docs
-			create(workflowCsv, parametersCsv, workDir);
+			create(workflowCsv, parametersCsv, workDir, backend);
 		}
 		catch (Exception e)
 		{
@@ -90,7 +98,7 @@ public class ComputeCommandLine
 		}
 	}
 
-	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir) throws IOException
+	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir, String backend) throws IOException, Exception
 	{
 		List<File> parameterFiles = new ArrayList<File>();
 		for (String f : parametersCsv)
@@ -101,17 +109,24 @@ public class ComputeCommandLine
 		// use workflow or workingdir from parameters?
 		if (0 < compute.getParameters().getValues().size())
 		{
-			if (!compute.getParameters().getValues().get(0).isNull(Parameters.WORKFLOW_COLUMN))
+			if (isNotSet(workflowCsv) && !compute.getParameters().getValues().get(0).isNull(Parameters.WORKFLOW_COLUMN))
 			{
 				workflowCsv = compute.getParameters().getValues().get(0).getString(Parameters.WORKFLOW_COLUMN);
 			}
-			if (!compute.getParameters().getValues().get(0).isNull(Parameters.WORKDIR_COLUMN))
+			if (isNotSet(workDir) && !compute.getParameters().getValues().get(0).isNull(Parameters.WORKDIR_COLUMN))
 			{
 				workDir = compute.getParameters().getValues().get(0).getString(Parameters.WORKDIR_COLUMN);
+			}
+			if (isNotSet(backend) && !compute.getParameters().getValues().get(0).isNull(Parameters.BACKEND_COLUMN))
+			{
+				backend = compute.getParameters().getValues().get(0).getString(Parameters.BACKEND_COLUMN);
 			}
 		}
 
 		if ("".equals(workflowCsv)) throw new IOException("no workflow provided");
+		
+		// if not set, set default backend
+		if (isNotSet(backend)) backend = Parameters.BACKEND_DEFAULT;
 
 		// set constants
 		for (WritableTuple t : compute.getParameters().getValues())
@@ -122,8 +137,9 @@ public class ComputeCommandLine
 
 		System.out.println("Using workflow:   " + new File(workflowCsv).getAbsolutePath());
 		System.out.println("Using parameters: " + parameterFiles);
-		System.out.println("Using outputDir:   " + new File(workDir).getAbsolutePath());
-
+		System.out.println("Using outputDir:  " + new File(workDir).getAbsolutePath());
+		System.out.println("Using backend:    " + backend);
+		
 		System.out.println(""); // newline
 
 		// create outputdir
@@ -145,16 +161,14 @@ public class ComputeCommandLine
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
 		// write the task for the backend
-		// TODO: use 'scheduler' from parameters to decide which backend
-		String scheduler = (String) compute.getParameters().getValues().get(0).get(Parameters.SCHEDULER_COLUMN);
-		if (Parameters.PBS.equals(scheduler))
+		if (Parameters.BACKEND_PBS.equals(backend))
 		{
 			new PbsBackend().generate(compute.getTasks(), dir);
 		}
-		else
+		else if (Parameters.BACKEND_LOCAL.equals(backend))
 		{
 			new LocalBackend().generate(compute.getTasks(), dir);
-		}
+		} else throw new Exception("Unknown backend: " + backend);
 
 		// generate outputs folders per task
 		for (Task t : compute.getTasks())
@@ -173,6 +187,11 @@ public class ComputeCommandLine
 		return compute;
 	}
 
+	private static boolean isNotSet(String workflowCsv)
+	{
+		return null == workflowCsv || "".equals(workflowCsv);
+	}
+
 	/**
 	 * Return Compute object, given one single parametersCsv
 	 * 
@@ -180,10 +199,10 @@ public class ComputeCommandLine
 	 * @return
 	 * @throws IOException
 	 */
-	public static Compute create(String parametersCsv) throws IOException
+	public static Compute create(String parametersCsv) throws IOException, Exception
 	{
 		Compute c = ComputeCommandLine.create("", new String[]
-		{ parametersCsv }, "");
+		{ parametersCsv }, "", "");
 		return c;
 	}
 }

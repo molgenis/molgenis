@@ -1,11 +1,13 @@
 package ${package};
 
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 <#if databaseImp = 'jdbc'>
 import org.apache.commons.dbcp.BasicDataSource;
 </#if>
@@ -14,8 +16,8 @@ import org.apache.commons.dbcp.BasicDataSource;
 public class DatabaseConfig
 {
 	@Bean(destroyMethod = "close")
-	@Scope("request")
-	public Database database() throws Exception
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "request")
+	public Database database() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
 		Database db = new ${package}.JpaDatabase();
@@ -23,6 +25,18 @@ public class DatabaseConfig
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
 		db.setLogin(login());
+		return db;
+	}
+
+	@Bean(destroyMethod = "close")
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "prototype")
+	public Database unauthorizedDatabase() throws DatabaseException
+	{
+	<#if databaseImp = 'jpa'>
+		Database db = new ${package}.JpaDatabase();
+	<#elseif databaseImp = 'jdbc'>
+		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
+	</#if>
 		return db;
 	}
 	
@@ -48,7 +62,7 @@ public class DatabaseConfig
 </#if>
 	@Bean
 	@Scope("session")
-	public Login login() throws Exception
+	public Login login()
 	{
 		return new ${auth_loginclass}(tokenFactory());
 	}

@@ -1,15 +1,15 @@
 package org.molgenis.compute.db.pilot;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class LogFileParserTest
 {
-	private static final String LOGFILE_CONTENT = "TASKID:imputation_run01_6131292775895701\n"
+	private static final String LOGFILE_CONTENT = "TASKNAME:imputation_run01_6131292775895701\nRUNNAME:runnetje\n"
 			+ "Tue Apr 16 14:29:02 CEST 2013\n\n#LogInfo\nxxx\n#EndLogInfo\nkhdsdhskj#LogInfoqqq#EndLogInfo";
 
 	private LogFileParser logFileParser;
@@ -30,8 +30,14 @@ public class LogFileParserTest
 	}
 
 	@Test
-	public void getTaskID()
+	public void getTaskName()
 	{
-		assertEquals(logFileParser.getTaskID(), "imputation_run01_6131292775895701");
+		assertEquals(logFileParser.getTaskName(), "imputation_run01_6131292775895701");
+	}
+
+	@Test
+	public void getRunName()
+	{
+		assertEquals(logFileParser.getRunName(), "runnetje");
 	}
 }

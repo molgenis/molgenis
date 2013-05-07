@@ -9,38 +9,38 @@
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		
 		<script type="text/javascript">
-			function updateHostStatus(hostId) {
+			function updateRunStatus(run) {
 				$.ajax({
 					type : 'GET',
-					url : '/plugin/dashboard/status?hostId=' + hostId,
+					url : '/plugin/dashboard/status?run=' + run,
 					contentType : 'application/json',
 					async : true,
 					success : function(response) {
 						console.log(JSON.stringify(response));
-						updateHostStatusTable(hostId, response);
+						updateHostStatusTable(run, response);
 					}
 					
 				});
 			}
 			
-			function updateHostStatusTable(hostId, response) {
-				$('#' + hostId + ' td.generated').html(response.generated);
-				$('#' + hostId + ' td.ready').html(response.ready);
-				$('#' + hostId + ' td.running').html(response.running);
-				$('#' + hostId + ' td.failed').html(response.failed);
-				$('#' + hostId + ' td.done').html(response.done);
+			function updateHostStatusTable(run, response) {
+				$('#' + run + ' td.generated').html(response.generated);
+				$('#' + run + ' td.ready').html(response.ready);
+				$('#' + run + ' td.running').html(response.running);
+				$('#' + run + ' td.failed').html(response.failed);
+				$('#' + run + ' td.done').html(response.done);
 				
 				if (response.failed > 0) {
-					$('#renerateFailedTasksForm_' + hostId).show();
+					$('#resubmitFailedTasksForm_' + run).show();
 				} else {
-					$('#renerateFailedTasksForm_' + hostId).hide();
+					$('#resubmitFailedTasksForm_' + run).hide();
 				}
 			}
 			
 			function updateStatus() {
 				console.log('updateStatus');
-				<#list hosts as host>
-					updateHostStatus(${host.id});
+				<#list runs as run>
+					updateRunStatus('${run.name}');
 				</#list>
 				setTimeout(function(){updateStatus()}, 5000);
 			}
@@ -67,70 +67,70 @@
 				</div>
 			</#if>			
 		
-			<#if hosts?size == 0>
-				<h4>No hosts found. Please add a host on the 'Hosts' tab</h4>
+			<#if runs?size == 0>
+				<h4>No Runs found.</h4>
 			</#if>
 								
-			<#list hosts as host>
-				<div class="well">
+			<#list runs as run>
+				<div class="well well-small">
 					<div class="row-fluid">
 						<div class="span6">
 							<div class="host-header">
-								<span class="host-name">${host.name}</span>
-								<#if host.running>
-  									<span class="text-success">Running</span>
+								<span class="host-name">${run.name}@${run.backendUrl}</span>
+								<span class="creation-time">(${run.creationTime})</span>
+								<#if run.running>
+  									<div class="text-success">Running</div>
   								<#else>
-  									<span class="text-error">Not running</span>
+  									<div class="text-error">Not running</div>
   								</#if>
+  								
   							</div>	
-							<#if host.running>
+							<#if run.running>
   								<form action="/plugin/dashboard/stop" class="form-inline" method="post">		
-  									<input type="hidden" name="id" value="${host.id}" />
+  									<input type="hidden" name="run" value="${run.name}" />
   									<button type="submit" class="btn">Stop</button>	
   								</form>
   							<#else>
   								<form action="/plugin/dashboard/start" class="form-inline" method="post">
-  									<input type="hidden" name="id" value="${host.id}" />
+  									<input type="hidden" name="run" value="${run.name}" />
+  									<input type="text" name="username" id="inputUsername" placeholder="Username"  />
   									<input type="password" name="password" id="inputPassword" placeholder="Password"  />
     								<button type="submit" class="btn">Start</button>
     							</form>		
   							</#if>
   							
-  							<form action="/plugin/dashboard/generate" class="form-inline" method="post">
-  								<input type="hidden" name="hostName" value="${host.name}" />
-  								<input type="text" name="parametersFile" id="inputParametersFile" placeholder="Parameters file path">
-    							<button type="submit" class="btn">Generate jobs</button>	
+  							<form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/resubmit" class="form-inline" method="post">
+  								<input type="hidden" name="run" value="${run.name}" />
+  								<button type="submit" class="btn resubmit-btn">Resubmit failed jobs</button>
   							</form>
-  							<form id="renerateFailedTasksForm_${host.id}" action="/plugin/dashboard/regenerate" class="form-inline" method="post">
-  								<input type="hidden" name="hostName" value="${host.name}" />
-  								<button type="submit" class="btn">Resubmit failed jobs</button>
-  							</form>
+  							
 						</div>
-    					<div class="span6 status">
+    					<div class="span5 status">
     						<div class="status-table">
-    							<table id="${host.id}" class="table table-condensed table-hover">
+    							<table id="${run.name}" class="table table-condensed table-hover">
     								<tr>
     									<td>Jobs generated</td>
     									<td class="generated"></td>
+    									<td class="text-success">Jobs done</td>
+    									<td class="done text-success"></td>
     								</tr>
     								<tr>
-    									<td>Jobs ready</td>
-    									<td class="ready"></td>
+    									<td class="text-info">Jobs ready</td>
+    									<td class="ready text-info"></td>
+    									<td class="text-error">Jobs failed</td>
+    									<td class="failed text-error"></td>
     								</tr>
     								<tr>
-    									<td>Jobs running</td>
-    									<td class="running"></td>
-    								</tr>
-    								<tr>
-    									<td>Jobs failed</td>
-    									<td class="failed"></td>
-    								</tr>
-    								<tr>
-    									<td>Jobs done</td>
-    									<td class="done"></td>
+    									<td class="text-warning">Jobs running</td>
+    									<td class="running text-warning"></td>
+    									<td></td>
+    									<td></td>
     								</tr>
     							</table>
     						</div>
+    					</div>
+    					<div class="span1">
+    						<a href="/plugin/dashboard/close?run=${run.name}" title="Remove from dashboard" class="close" >&times;</a>
     					</div>
     				</div>
     			</div>

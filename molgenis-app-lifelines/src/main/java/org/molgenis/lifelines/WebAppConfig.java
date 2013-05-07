@@ -154,18 +154,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		return result;
 	}
 
-	/**
-	 * Used by system for example indexing. Should be replaced by a system user?
-	 * 
-	 * @return
-	 * @throws DatabaseException
-	 */
-	@Bean(destroyMethod = "close")
-	public Database unauthorizedDatabase() throws DatabaseException
-	{
-		return new app.JpaDatabase();
-	}
-
 	@Bean
 	public MultipartResolver multipartResolver()
 	{

@@ -19,7 +19,7 @@ public class ValidationFile
 	private final List<String> listOfHeaders = new ArrayList<String>();
 	private final HashMap<String, Tuple> hash = new HashMap<String, Tuple>();
 
-	public void bla(ExcelSheetReader excelSheetReader) throws IOException
+	public void bla(ExcelSheetReader excelSheetReader, String identifier) throws IOException
 
 	{
 		Iterator<String> iterableFileToCompare = excelSheetReader.colNamesIterator();
@@ -32,7 +32,7 @@ public class ValidationFile
 
 		for (Tuple t : excelSheetReader)
 		{
-			hash.put(t.getString("id_sample"), t);
+			hash.put(t.getString(identifier), t);
 		}
 	}
 
