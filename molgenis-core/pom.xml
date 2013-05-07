@@ -42,6 +42,11 @@
             <artifactId>hibernate-c3p0</artifactId>
             <version>4.1.12.Final</version>
         </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
         <!-- Commons Utils -->
         <dependency>
             <groupId>commons-lang</groupId>

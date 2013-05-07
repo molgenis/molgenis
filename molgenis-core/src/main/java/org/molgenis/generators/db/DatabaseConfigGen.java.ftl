@@ -15,6 +15,14 @@ import org.apache.commons.dbcp.BasicDataSource;
 @Configuration
 public class DatabaseConfig
 {
+	/**
+	<#if databaseImp = 'jpa'>
+	 * Entitymanager-per-HTTP-request pattern in a multi-user client/server application authenticated for current user
+	</#if>
+	 * 
+	 * @return
+	 * @throws DatabaseException
+	 */
 	@Bean(destroyMethod = "close")
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "request")
 	public Database database() throws DatabaseException
@@ -28,9 +36,37 @@ public class DatabaseConfig
 		return db;
 	}
 
+	/**
+	<#if databaseImp = 'jpa'>
+	 * Entitymanager-per-HTTP-request pattern in a multi-user client/server application authenticated for system user
+	</#if>
+	 * 
+	 * @return
+	 * @throws DatabaseException
+	 */
 	@Bean(destroyMethod = "close")
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "prototype")
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "request")
 	public Database unauthorizedDatabase() throws DatabaseException
+	{
+	<#if databaseImp = 'jpa'>
+		Database db = new ${package}.JpaDatabase();
+	<#elseif databaseImp = 'jdbc'>
+		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
+	</#if>
+		return db;
+	}
+	
+	/**
+	<#if databaseImp = 'jpa'>
+	 * Entitymanager-per-bean-request pattern in a standalone application
+	</#if>
+	 * Important: User is responsible for closing the Database instance
+	 * 
+	 * @return
+	 * @throws DatabaseException
+	 */
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "prototype")
+	public Database unauthorizedPrototypeDatabase() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
 		Database db = new ${package}.JpaDatabase();
