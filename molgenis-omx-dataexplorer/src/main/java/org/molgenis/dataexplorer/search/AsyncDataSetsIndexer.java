@@ -3,8 +3,6 @@ package org.molgenis.dataexplorer.search;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Resource;
-
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -12,6 +10,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
+import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -25,8 +24,8 @@ import org.springframework.scheduling.annotation.Async;
 public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 {
 	private static final Logger LOG = Logger.getLogger(AsyncDataSetsIndexer.class);
+
 	private SearchService searchService;
-	private Database unauthorizedDatabase;
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
 	@Autowired
@@ -35,18 +34,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		this.searchService = searchService;
 	}
 
-	@Resource(name = "unauthorizedDatabase")
-	public void setUnauthorizedDatabase(Database unauthorizedDatabase)
-	{
-		this.unauthorizedDatabase = unauthorizedDatabase;
-	}
-
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
-		if (unauthorizedDatabase == null) throw new IllegalArgumentException(
-				"Missing bean of type Database with name 'unauthorizedDatabase'");
 	}
 
 	@Override
@@ -66,6 +57,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	public void index()
 	{
 		runningIndexProcesses.incrementAndGet();
+		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
@@ -79,6 +71,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 		finally
 		{
+			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 			runningIndexProcesses.decrementAndGet();
 		}
 	}
@@ -94,6 +87,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	public void indexNew()
 	{
 		runningIndexProcesses.incrementAndGet();
+		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
@@ -110,6 +104,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 		finally
 		{
+			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 			runningIndexProcesses.decrementAndGet();
 		}
 	}
@@ -119,6 +114,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	public void index(List<DataSet> dataSets)
 	{
 		runningIndexProcesses.incrementAndGet();
+		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
 			for (DataSet dataSet : dataSets)
@@ -132,8 +128,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 		finally
 		{
+			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 			runningIndexProcesses.decrementAndGet();
 		}
 	}
-
 }
