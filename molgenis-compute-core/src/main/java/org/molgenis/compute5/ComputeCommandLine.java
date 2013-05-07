@@ -1,9 +1,12 @@
 package org.molgenis.compute5;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -49,13 +52,13 @@ public class ComputeCommandLine
 
 		// setup commandline options
 		Options options = new Options();
-		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs()
-				.withLongOpt("parameters").withDescription("Path to parameter.csv file(s). Default: parameters.csv").create("p");
+		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs().withLongOpt("parameters")
+				.withDescription("Path to parameter.csv file(s). Default: parameters.csv").create("p");
 		Option w = OptionBuilder.withArgName("workflow.csv").hasArg().withLongOpt(Parameters.WORKFLOW)
 				.withDescription("Path to your workflow file. Default: workflow.csv.").create("w");
 		Option d = OptionBuilder.withArgName(".").hasArg().withLongOpt(Parameters.WORKDIR)
 				.withDescription("Path to directory this generates to. Default: <current dir>.").create("d");
-		Option b = OptionBuilder.withArgName("local").hasArg().withLongOpt(Parameters.BACKEND)
+		Option b = OptionBuilder.withArgName(Parameters.BACKEND_DEFAULT).hasArg().withLongOpt(Parameters.BACKEND)
 				.withDescription("Backend for which you generate. Default: local.").create("b");
 		Option runId = OptionBuilder.withArgName(Parameters.RUNID_DEFAULT).hasArg().withLongOpt(Parameters.RUNID)
 				.withDescription("Id of the task set which you generate. Default: set01.").create("rid");
@@ -92,8 +95,31 @@ public class ComputeCommandLine
 			{
 				runID = cmd.getOptionValue("runid");
 			}
-			
-			
+
+			// if not exists, create .properties
+			Properties prop = new Properties();
+
+			// As a first onset using properties-file
+			// if backend is set, then put in properties
+			String propFileString = workDir + File.separator + Parameters.PROPERTIES;
+			if ("".equals(backend))
+			{
+				File propFile = new File(propFileString);
+				if (!propFile.exists())
+				{
+					propFile.createNewFile();
+					backend = Parameters.BACKEND_DEFAULT;
+				}
+				else
+				{
+					prop.load(new FileInputStream(propFileString));
+					backend = prop.getProperty(Parameters.BACKEND);
+				}
+			}
+
+			prop.setProperty(Parameters.BACKEND, backend);
+			prop.store(new FileOutputStream(propFileString), "This file contains your molgenis-compute properties");
+
 			// output scripts + docs
 			create(workflowCsv, parametersCsv, workDir, backend, runID);
 		}
@@ -107,7 +133,8 @@ public class ComputeCommandLine
 		}
 	}
 
-	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir, String backend, String runID) throws IOException, Exception
+	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir, String backend,
+			String runID) throws IOException, Exception
 	{
 		List<File> parameterFiles = new ArrayList<File>();
 		for (String f : parametersCsv)
@@ -137,10 +164,10 @@ public class ComputeCommandLine
 		}
 
 		if ("".equals(workflowCsv)) throw new IOException("no workflow provided");
-		
+
 		// if not set, set default backend
 		if (isNotSet(backend)) backend = Parameters.BACKEND_DEFAULT;
-		
+
 		// if not set, set default run id
 		if (isNotSet(runID)) runID = Parameters.RUNID_DEFAULT;
 
@@ -156,7 +183,7 @@ public class ComputeCommandLine
 		System.out.println("Using outputDir:  " + new File(workDir).getAbsolutePath());
 		System.out.println("Using backend:    " + backend);
 		System.out.println("Using runID:    " + runID);
-		
+
 		System.out.println(""); // newline
 
 		// create outputdir
@@ -185,7 +212,8 @@ public class ComputeCommandLine
 		else if (Parameters.BACKEND_LOCAL.equals(backend))
 		{
 			new LocalBackend().generate(compute.getTasks(), dir);
-		} else throw new Exception("Unknown backend: " + backend);
+		}
+		else throw new Exception("Unknown backend: " + backend);
 
 		// generate outputs folders per task
 		for (Task t : compute.getTasks())

@@ -50,6 +50,7 @@ public class Parameters
 	public static final String RUNID = "runid";
 	public static final String RUNID_COLUMN = USER_PREFIX + RUNID;
 	public static final String RUNID_DEFAULT = "set01";
+	public static final String PROPERTIES = "molgenis.properties";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
