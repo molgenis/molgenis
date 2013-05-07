@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.molgenis.io.excel.ExcelSheetReader;
@@ -17,7 +18,7 @@ public class ValidationFile
 
 {
 	private final List<String> listOfHeaders = new ArrayList<String>();
-	private final HashMap<String, Tuple> hash = new HashMap<String, Tuple>();
+	private final LinkedHashMap<String, Tuple> hash = new LinkedHashMap<String, Tuple>();
 
 	public void bla(ExcelSheetReader excelSheetReader, String identifier) throws IOException
 

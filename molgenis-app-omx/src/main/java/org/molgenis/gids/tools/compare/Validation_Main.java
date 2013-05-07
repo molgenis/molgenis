@@ -16,6 +16,7 @@ public class Validation_Main
 		try
 		{
 			BufferedWriter logger = new BufferedWriter(new FileWriter("/Users/Roan/logger.txt"));
+			logger.write("file1: " + args[0] + "\nfile2: " + args[1]);
 			vc.check(args[0], args[1], logger);
 			logger.close();
 		}
@@ -26,5 +27,4 @@ public class Validation_Main
 		}
 
 	}
-
 }
