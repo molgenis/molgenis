@@ -1,4 +1,6 @@
-package org.molgenis.compute.db.model;
+package org.molgenis.compute5.db.api;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class RunStatus
 {
@@ -40,6 +42,12 @@ public class RunStatus
 	public int getFailed()
 	{
 		return failed;
+	}
+
+	@Override
+	public String toString()
+	{
+		return ToStringBuilder.reflectionToString(this);
 	}
 
 }
