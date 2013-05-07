@@ -40,9 +40,11 @@ public class Parameters
 	public static final String NODES = "nodes";
 	public static final String PPN = "ppn";
 	public static final String MEMORY = "mem";
-	public static final String SCHEDULER = "scheduler";
-	public static final String SCHEDULER_COLUMN = USER_PREFIX + SCHEDULER;
-	public static final String PBS = "pbs";
+	public static final String BACKEND = "backend";
+	public static final String BACKEND_COLUMN = USER_PREFIX + BACKEND;
+	public static final String BACKEND_LOCAL = "local";
+	public static final String BACKEND_PBS = "pbs";
+	public static final String BACKEND_DEFAULT = BACKEND_LOCAL;
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
