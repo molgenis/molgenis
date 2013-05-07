@@ -1,5 +1,6 @@
 package org.molgenis.compute.db.pilot;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
@@ -66,15 +67,35 @@ public class PilotService implements MolgenisService
 			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
 			String computeScript = task.getComputeScript().replaceAll("\r", "");
 			String runName = task.getComputeRun().getName();
-			String environment = task.getComputeRun().getEnvironment();
+			String userEnvironment = task.getComputeRun().getUserEnvironment() == null ? "" : task.getComputeRun()
+					.getUserEnvironment();
 
-			// TODO
-			// echo \"%s\" > environment.txt
-			// -F environment_file=@environment.txt
+			// TODO escape quotes ??
+			StringBuilder sb = new StringBuilder();
+			sb.append("echo TASKNAME:").append(task.getName()).append("\n");
+			sb.append("echo RUNNAME:").append(runName).append("\n");
+			sb.append("echo \"").append(userEnvironment).append("\" > user.env\n");
 
-			String taskScript = String
-					.format("echo TASKNAME:%s\necho RUNNAME:%s\n%s\ncp log.log done.log\ncurl -F status=done -F log_file=@done.log %s\n",
-							environment, task.getName(), runName, computeScript, pilotServiceUrl);
+			for (ComputeTask prev : task.getPrevSteps())
+			{
+				sb.append("echo \"").append(prev.getOutputEnvironment()).append("\" > ").append(prev.getName())
+						.append(".env\n");
+			}
+
+			sb.append(computeScript).append("\n");
+			sb.append("cp log.log done.log\n");
+
+			// Upload log_file and if present the output env file
+			sb.append("if [ -f ").append(task.getName()).append(".env ]; then\n");
+			sb.append("curl -F status=done -F log_file=@done.log ");
+			sb.append("-F output_file=@").append(task.getName()).append(".env ");
+			sb.append(pilotServiceUrl);
+			sb.append("\nelse\n");
+			sb.append("curl -F status=done -F log_file=@done.log ");
+			sb.append(pilotServiceUrl);
+			sb.append("\nfi\n");
+
+			String taskScript = sb.toString();
 
 			LOG.info("Script for task [" + task.getName() + "] of run [ " + runName + "]:\n" + taskScript);
 
@@ -122,6 +143,12 @@ public class PilotService implements MolgenisService
 					task.setStatusCode(TASK_DONE);
 					task.setRunLog(logFileContent);
 					task.setRunInfo(runInfo);
+
+					File output = request.getFile("output_file");
+					if (output != null)
+					{
+						task.setOutputEnvironment(FileUtils.readFileToString(output));
+					}
 				}
 				else
 				{
