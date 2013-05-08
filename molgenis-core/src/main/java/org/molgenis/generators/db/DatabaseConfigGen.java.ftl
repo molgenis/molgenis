@@ -68,6 +68,7 @@ public class DatabaseConfig
 	 * @return
 	 * @throws DatabaseException
 	 */
+	@Bean
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "prototype")
 	public Database unauthorizedPrototypeDatabase() throws DatabaseException
 	{
