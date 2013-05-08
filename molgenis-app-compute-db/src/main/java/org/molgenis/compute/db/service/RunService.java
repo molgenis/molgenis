@@ -114,6 +114,7 @@ public class RunService
 				{
 					computeTask.setPrevSteps(prevTasks);
 				}
+				database.update(computeTask);
 
 				if (LOG.isDebugEnabled())
 				{

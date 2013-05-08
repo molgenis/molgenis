@@ -1,7 +1,6 @@
 package org.molgenis.compute.db.generator;
 
 import org.apache.log4j.Logger;
-import org.molgenis.compute.db.WebAppConfig;
 import org.molgenis.compute.db.service.RunService;
 import org.molgenis.compute.runtime.ComputeBackend;
 import org.molgenis.compute5.ComputeCommandLine;
@@ -9,6 +8,7 @@ import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.model.Compute;
 import org.molgenis.framework.db.Database;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.WebAppUtil;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import app.DatabaseConfig;
@@ -29,20 +29,20 @@ public class TaskGeneratorDB
 		new AnnotationConfigApplicationContext(DatabaseConfig.class, ApplicationContextProvider.class);
 
 		Compute compute = ComputeCommandLine.create(parametersFile);
-		Database database = WebAppConfig.unathorizedDatabase();
-
-		if (backendName.equalsIgnoreCase("localhost") && (ComputeBackend.findByName(database, "localhost") == null))
-		{
-			ComputeBackend backend = new ComputeBackend();
-			backend.setName("localhost");
-			backend.setBackendUrl("localhost");
-			backend.setHostType("LOCALHOST");
-			backend.setCommand("sh maverick.sh");
-			database.add(backend);
-		}
+		Database database = WebAppUtil.getUnauthorizedPrototypeDatabase();
 
 		try
 		{
+			if (backendName.equalsIgnoreCase("localhost") && (ComputeBackend.findByName(database, "localhost") == null))
+			{
+				ComputeBackend backend = new ComputeBackend();
+				backend.setName("localhost");
+				backend.setBackendUrl("localhost");
+				backend.setHostType("LOCALHOST");
+				backend.setCommand("sh maverick.sh");
+				database.add(backend);
+			}
+
 			RunService service = new RunService(database, null);
 
 			String userEnvironment = new EnvironmentGenerator().getEnvironment(compute);

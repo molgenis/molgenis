@@ -37,7 +37,6 @@ public class ScriptBuilderTest
 				+ "else\n" + "curl -s -S -F status=done -F log_file=@done.log http://localhost/api/pilot\n" + "fi\n"
 				+ "rm user.env\n" + "rm task2.env\n" + "rm task1.env\n";
 
-		System.out.println(builder.build());
 		assertEquals(builder.build(), expected);
 
 	}
