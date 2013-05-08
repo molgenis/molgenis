@@ -1,5 +1,8 @@
 package ${package};
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
@@ -74,6 +77,12 @@ public class DatabaseConfig
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
 		return db;
+	}
+	
+	@Bean(destroyMethod = "close")
+	public EntityManagerFactory entityManagerFactory()
+	{
+		return Persistence.createEntityManagerFactory("molgenis");
 	}
 	
 <#if databaseImp = 'jdbc'>
