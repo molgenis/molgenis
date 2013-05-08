@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
@@ -23,6 +24,7 @@ import org.molgenis.MolgenisOptions;
 import org.molgenis.framework.db.AbstractDatabase;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.ExampleData;
+import org.molgenis.util.tuple.Tuple;
 
 /**
  * JDBC implementation of Database to query relational databases.
@@ -469,5 +471,11 @@ public class JDBCDatabase extends AbstractDatabase
 				logger.error(e);
 			}
 		}
+	}
+
+	@Override
+	public List<Tuple> sql2(String sql, String... columnNames)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

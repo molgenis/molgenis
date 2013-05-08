@@ -45,7 +45,7 @@ public class ImportWorksheet
 		if ((args.length == 4))
 		{
 			// Debug in eclipse
-			// args[3] = "yes";
+			args[3] = "yes";
 
 			if (args[3] != "yes" && args[3] != "no")
 			{

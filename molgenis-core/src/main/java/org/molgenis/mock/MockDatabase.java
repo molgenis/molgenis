@@ -360,4 +360,11 @@ public class MockDatabase implements Database
 	{
 		return null;
 	}
+
+	@Override
+	public List<Tuple> sql2(String sql, String... columnNames)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

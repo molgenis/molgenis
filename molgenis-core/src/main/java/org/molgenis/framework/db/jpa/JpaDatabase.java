@@ -20,11 +20,12 @@ import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
 
 /**
- * Java Persistence API (JPA) implementation of Database to query relational databases.
+ * Java Persistence API (JPA) implementation of Database to query relational
+ * databases.
  * <p>
- * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be added for each
- * {@link org.molgenis.framework.util.Entity} E that can be queried. These mappers take care of the interaction with a
- * database.
+ * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be
+ * added for each {@link org.molgenis.framework.util.Entity} E that can be
+ * queried. These mappers take care of the interaction with a database.
  * 
  * @author Morris Swertz
  * @author Joris Lops
@@ -244,7 +245,8 @@ public class JpaDatabase extends AbstractDatabase
 		return persistenceUnitName;
 	}
 
-	public List<Tuple> sql(String sql, String... columnNames)
+	@Override
+	public List<Tuple> sql2(String sql, String... columnNames)
 	{
 		javax.persistence.Query q = this.em.createNativeQuery(sql);
 
