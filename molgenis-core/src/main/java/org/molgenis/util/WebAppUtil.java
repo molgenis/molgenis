@@ -1,8 +1,12 @@
 package org.molgenis.util;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.mail.javamail.JavaMailSender;
 
 /**
@@ -15,21 +19,46 @@ public class WebAppUtil
 {
 	public static Database getDatabase()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean("database", Database.class);
+		return getApplicationContext().getBean("database", Database.class);
+	}
+
+	public static Database getUnauthorizedDatabase()
+	{
+		return getApplicationContext().getBean("unauthorizedDatabase", Database.class);
+	}
+
+	public static Database getUnauthorizedPrototypeDatabase()
+	{
+		return getApplicationContext().getBean("unauthorizedPrototypeDatabase", Database.class);
+	}
+
+	public static EntityManagerFactory getEntityManagerFactory()
+	{
+		return getApplicationContext().getBean("entityManagerFactory", EntityManagerFactory.class);
 	}
 
 	public static Login getLogin()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean("login", Login.class);
+		return getApplicationContext().getBean("login", Login.class);
 	}
 
 	public static JavaMailSender getMailSender()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean("mailSender", JavaMailSender.class);
+		return getApplicationContext().getBean("mailSender", JavaMailSender.class);
 	}
 
 	public static MolgenisSettings getMolgenisSettings()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean("molgenisSettings", MolgenisSettings.class);
+		return getApplicationContext().getBean("molgenisSettings", MolgenisSettings.class);
+	}
+
+	private static ApplicationContext getApplicationContext()
+	{
+		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+		if (applicationContext == null)
+		{
+			throw new RuntimeException(new ApplicationContextException("missing required application context"));
+		}
+		return applicationContext;
 	}
 }
