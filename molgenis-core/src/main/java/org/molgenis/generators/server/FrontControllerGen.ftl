@@ -95,14 +95,13 @@ public class FrontController extends MolgenisFrontController
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response)
 	{
+	<#if databaseImp = 'jpa'>
+			super.service(request, response);
+	<#else>
 		try
 		{
-		<#if databaseImp = 'jpa'>
-			DatabaseFactory.create(new ${package}.JpaDatabase());
-		<#else>
 			Connection conn = context.getDataSource().getConnection();
 			DatabaseFactory.create(new ${package}.JDBCDatabase(conn));
-		</#if>
 			
 			Login login = (Login) request.getSession().getAttribute("login");
 			if (login == null)
@@ -127,6 +126,7 @@ public class FrontController extends MolgenisFrontController
 		{
 			DatabaseFactory.destroy();
 		}
+	</#if>
 	}
 	
 	@Override
