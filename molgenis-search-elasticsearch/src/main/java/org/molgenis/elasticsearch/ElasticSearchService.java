@@ -240,8 +240,7 @@ public class ElasticSearchService implements SearchService
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error(e);
 		}
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName).setType(documentType)
