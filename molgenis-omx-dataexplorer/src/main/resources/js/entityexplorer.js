@@ -65,6 +65,7 @@
 	ns.createSearchRequest = function(entity) {
 		var searchRequest = {
 			queryRules : [ {
+				field : '_xrefvalue',
 				operator : 'EQUALS',
 				value : entity.identifier
 			} ]
