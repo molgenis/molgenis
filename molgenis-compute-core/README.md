@@ -23,7 +23,7 @@ If you don't like to use defaults, above translates to:
 				--workflow workflow/workflow.csv \
 				--defaults workflow/defaults.csv \
 				--parameters parameters.csv \
-				--jobdir ./jobs \
+				--rundir ./run \
 				--backend pbs \
 				--database none
 
@@ -146,8 +146,8 @@ Example defaults.csv (white space will be trimmed):
 A typical analysis directory while running looks as follows:
 
 	parameters.csv		#contains the values for the analysis scripts
-	jobs/				#directory where molgenis generates job scripts
-	jobs/.molgenis		#file molgenis creates to keep track of settings
+	run/				#directory where molgenis generates job scripts
+	run/.molgenis		#file molgenis creates to keep track of settings
 	analysis.sh			#(optional) saved version of your analysis commands
 
 Example commands in your 'analysis.sh':
@@ -300,7 +300,7 @@ Example result:
 	parameters: path/to/parameters.csv
 	            path/to/moreparameters.csv
 	backend:    grid
-	jobdir:		path/to/jobs
+	rundir:		path/to/jobs
 	database:	localhost (see http://localhost:8080/pilots for web view)
 	jobid:		a3f4tg3de2
 		
@@ -328,12 +328,12 @@ Example result if no jobs are running, but some parameters are set:
 	workflow: 	path/to/previously/set/workflow
 	parameters: path/to/previously/set/parameters
 	backend: 	pbs
-	jobdir:		path/to/jobs
+	rundir:		path/to/jobs
 	host:		localhost
 
 ### Inspecting completed jobs
 
-All logs are stored in jobdir/[stepname].[out|err|fail|finished]
+All logs are stored in rundir/[stepname].[out|err|fail|finished]
 
 You can inspect the log files for your completed/failed jobs via
 
@@ -345,7 +345,7 @@ You can inspect the log files for your completed/failed jobs via
 
 You can inspect runtime parameters via
 
-	more jobs/.molgenis #do not edit while running!
+	more run/.molgenis #do not edit while running!
 
 (__FUTURE WORK!__) : how to restart analyses.
 
@@ -398,12 +398,12 @@ Below options, --full_name or -short. Options can be combined:
 
 	#actions
 	--generate -g				generate jobs
-	--run -r					runs jobs from current job directory on current backend.
+	--run -r					runs jobs from current run directory on current backend.
 								When using --database this will return a 'id' for --pilot.
 	--stop -s [step]			stops running jobs. Optionally add step to stop only one job 
 								(and dependent jobs).
 	--list -l					list jobs, generated, queued, running, completed, failed
-	--clean	-c					--stop + cleans the job folder from scripts + logs. 
+	--clean	-c					--stop + cleans the run folder from scripts + logs. 
 								In case of database the jobs are removed there as well
 
 	#workflow
@@ -426,7 +426,7 @@ Below options, --full_name or -short. Options can be combined:
 								When 'localhost' molgenis will start database in background.
 	--pilot	N user@grid.ui 		ssh to grid UI and submit pilot N jobs (e.g. N=20) using 
 								credentials user@grid.ui. Optionally you can use '--id'.
-	--id -i						Configure jobid (optional using --pilot)
+	--runid 					Configure runid (optional using --pilot)
 	--database-start -dbs		start job database on localhost
 	--database-end	-dbe		end job database on localhost
 
@@ -437,8 +437,8 @@ Below options, --full_name or -short. Options can be combined:
 	--log -l [step]				view all logs combined. Optionally only for particular step.
 
 	#jobs folder
-	--jobdir -j path			sets the directory where the generated scripts should be 
-								stored, as well as runtime logs. Default: ./jobs
+	--rundir -r path			sets the directory where the generated scripts should be 
+								stored, as well as runtime logs. Default: ./run
 
 	#seldomly used options						
 	--defaults path 			Loads workflow defaults parameter file. Default: defaults.csv.
