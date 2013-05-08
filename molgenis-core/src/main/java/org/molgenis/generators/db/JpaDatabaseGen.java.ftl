@@ -2,10 +2,12 @@
 
 package app;
 
+import org.molgenis.util.WebAppUtil;
+
 public class JpaDatabase extends org.molgenis.framework.db.jpa.JpaDatabase
 {
  	public JpaDatabase() throws org.molgenis.framework.db.DatabaseException {
-        super(EMFactory.createEntityManager(), new JDBCMetaDatabase());
+        super(WebAppUtil.getEntityManagerFactory().createEntityManager(), new JDBCMetaDatabase());
         initMappers();
     }
     

@@ -7,6 +7,7 @@ import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -50,5 +51,8 @@ public class WebAppInitializer implements WebApplicationInitializer
 			frontControllerServlet.addMapping("/captchaImg"); // org.molgenis.auth.service.MolgenisCaptchaService
 			frontControllerServlet.addMapping("/tmpfile"); // org.molgenis.framework.server.services.MolgenisTmpFileService
 		}
+
+		// enable use of request scoped beans in FrontController
+		servletContext.addListener(new RequestContextListener());
 	}
 }
