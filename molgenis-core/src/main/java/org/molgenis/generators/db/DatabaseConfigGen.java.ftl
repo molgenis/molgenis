@@ -31,7 +31,7 @@ public class DatabaseConfig
 	public Database database() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
-		Database db = new ${package}.JpaDatabase();
+		Database db = new ${package}.JpaDatabase(entityManagerFactory());
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
@@ -52,7 +52,7 @@ public class DatabaseConfig
 	public Database unauthorizedDatabase() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
-		Database db = new ${package}.JpaDatabase();
+		Database db = new ${package}.JpaDatabase(entityManagerFactory());
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
@@ -69,11 +69,11 @@ public class DatabaseConfig
 	 * @throws DatabaseException
 	 */
 	@Bean
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "prototype")
+	@Scope("prototype")
 	public Database unauthorizedPrototypeDatabase() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
-		Database db = new ${package}.JpaDatabase();
+		Database db = new ${package}.JpaDatabase(entityManagerFactory());
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>

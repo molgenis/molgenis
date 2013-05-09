@@ -22,6 +22,7 @@ import org.molgenis.omx.ngs.PrepKit;
 import org.molgenis.omx.ngs.Project;
 import org.molgenis.omx.ngs.Sample;
 import org.molgenis.omx.ngs.SampleBarcode;
+import org.molgenis.util.WebAppUtil;
 import org.molgenis.util.tuple.Tuple;
 
 public class ImportWorksheet
@@ -712,7 +713,7 @@ public class ImportWorksheet
 		logger.info("Collected:\t" + users.size() + " NgsUser(s)");
 
 		// Put values in database
-		Database db = new app.JpaDatabase();
+		Database db = new app.JpaDatabase(WebAppUtil.getEntityManagerFactory());
 		try
 		{
 			db.beginTx();

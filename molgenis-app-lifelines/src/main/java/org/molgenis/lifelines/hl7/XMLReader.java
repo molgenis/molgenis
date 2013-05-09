@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Persistence;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -60,7 +61,7 @@ public class XMLReader
 		{
 
 			// Get a fresh new database object
-			this.db = new JpaDatabase();
+			this.db = new JpaDatabase(Persistence.createEntityManagerFactory("molgenis"));
 
 			// Begin transaction if anything goes wrong, can always roll back
 			// and the database won`t be screwed up
@@ -110,8 +111,7 @@ public class XMLReader
 	}
 
 	/**
-	 * This method is to create the Protocol and its corresponding
-	 * ObservableFeatures and add them to the db.
+	 * This method is to create the Protocol and its corresponding ObservableFeatures and add them to the db.
 	 * 
 	 * @param protocolName
 	 * @param measurementNode
@@ -195,8 +195,8 @@ public class XMLReader
 	}
 
 	/**
-	 * This method is to get the specified entities inside the current node. We
-	 * can specify how many levels down we want to go to.
+	 * This method is to get the specified entities inside the current node. We can specify how many levels down we want
+	 * to go to.
 	 * 
 	 * @param currentEntity
 	 * @param subNodeName
@@ -237,8 +237,8 @@ public class XMLReader
 	}
 
 	/**
-	 * This method is to get the specified attribute from the specified
-	 * entities. We can specify how many levels down we want to go to.
+	 * This method is to get the specified attribute from the specified entities. We can specify how many levels down we
+	 * want to go to.
 	 * 
 	 * @param currentEntity
 	 * @param subNodeName
