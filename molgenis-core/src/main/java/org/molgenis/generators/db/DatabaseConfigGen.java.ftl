@@ -5,6 +5,7 @@ import javax.persistence.Persistence;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +32,7 @@ public class DatabaseConfig
 	public Database database() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
-		Database db = new ${package}.JpaDatabase();
+		Database db = new ${package}.JpaDatabase(entityManagerFactory());
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
@@ -52,7 +53,7 @@ public class DatabaseConfig
 	public Database unauthorizedDatabase() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
-		Database db = new ${package}.JpaDatabase();
+		Database db = new ${package}.JpaDatabase(entityManagerFactory());
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
@@ -69,11 +70,11 @@ public class DatabaseConfig
 	 * @throws DatabaseException
 	 */
 	@Bean
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "prototype")
+	@Scope("prototype")
 	public Database unauthorizedPrototypeDatabase() throws DatabaseException
 	{
 	<#if databaseImp = 'jpa'>
-		Database db = new ${package}.JpaDatabase();
+		Database db = new ${package}.JpaDatabase(entityManagerFactory());
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
 	</#if>
@@ -83,7 +84,7 @@ public class DatabaseConfig
 	@Bean(destroyMethod = "close")
 	public EntityManagerFactory entityManagerFactory()
 	{
-		return Persistence.createEntityManagerFactory("molgenis");
+		return Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME);
 	}
 	
 <#if databaseImp = 'jdbc'>
