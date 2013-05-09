@@ -3,8 +3,6 @@ package org.molgenis.lifelines;
 import java.util.List;
 import java.util.Properties;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
@@ -54,6 +52,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
 	}
 
 	@Override
