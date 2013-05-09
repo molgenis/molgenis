@@ -163,7 +163,7 @@ public class HL7StudyDataSetImporter
 		try
 		{
 			HL7StudyDataSetImporter importer = new HL7StudyDataSetImporter(new JpaDatabase(
-					Persistence.createEntityManagerFactory("molgenis")));
+					Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME)));
 			importer.importData(xmlStream);
 		}
 		finally

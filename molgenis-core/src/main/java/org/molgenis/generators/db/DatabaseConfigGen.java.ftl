@@ -5,6 +5,7 @@ import javax.persistence.Persistence;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
 import org.springframework.context.annotation.Bean;
@@ -83,7 +84,7 @@ public class DatabaseConfig
 	@Bean(destroyMethod = "close")
 	public EntityManagerFactory entityManagerFactory()
 	{
-		return Persistence.createEntityManagerFactory("molgenis");
+		return Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME);
 	}
 	
 <#if databaseImp = 'jdbc'>

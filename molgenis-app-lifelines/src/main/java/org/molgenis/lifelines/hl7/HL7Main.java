@@ -18,7 +18,7 @@ public class HL7Main
 		String file2 = args[1];
 		HL7Data ll = new HL7LLData(file1, file2);
 
-		Database db = new JpaDatabase(Persistence.createEntityManagerFactory("molgenis"));
+		Database db = new JpaDatabase(Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME));
 
 		HL7OmicsConnectImporter importer = new HL7OmicsConnectImporter();
 

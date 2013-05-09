@@ -61,7 +61,7 @@ public class XMLReader
 		{
 
 			// Get a fresh new database object
-			this.db = new JpaDatabase(Persistence.createEntityManagerFactory("molgenis"));
+			this.db = new JpaDatabase(Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME));
 
 			// Begin transaction if anything goes wrong, can always roll back
 			// and the database won`t be screwed up
