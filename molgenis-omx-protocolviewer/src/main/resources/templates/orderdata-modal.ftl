@@ -20,9 +20,9 @@
 	    </div>
 	  </div>
 	</form>
-  </div>
-  <div id="orderdata-selection-table-container">
-  	<table id="orderdata-selection-table" class="table table-striped table-condensed"></table>
+	<div id="orderdata-selection-table-container">
+  		<table id="orderdata-selection-table" class="table table-striped table-condensed"></table>
+  	</div>
   </div>
   <div class="modal-footer">
     <a href="#" id="orderdata-btn-close" class="btn" aria-hidden="true">Cancel</a>
