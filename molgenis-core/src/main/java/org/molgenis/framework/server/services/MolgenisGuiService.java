@@ -51,8 +51,7 @@ public abstract class MolgenisGuiService
 	/**
 	 * Handle use of molgenis GUI
 	 * 
-	 * TODO: this method is horrible and should be properly refactored,
-	 * documented and tested!
+	 * TODO: this method is horrible and should be properly refactored, documented and tested!
 	 * 
 	 * @param request
 	 * @param response
@@ -232,7 +231,7 @@ public abstract class MolgenisGuiService
 				session.setAttribute("application", appController);
 
 				// prepare the response
-				response.getResponse().setContentType("text/html");
+				response.getResponse().setContentType("text/html;charset=UTF-8");
 				// response.setBufferSize(10000);
 				PrintWriter writer = response.getResponse().getWriter();
 
