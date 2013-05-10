@@ -145,9 +145,6 @@
 					onNodeSelectionChange(this.getSelectedNodes());
 				},
 				onPostInit : function() {
-					$("#feature-selection-container").accordion({
-						collapsible : true
-					});
 					onNodeSelectionChange(this.getSelectedNodes());
 				}
 			});
@@ -464,9 +461,6 @@
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
-		$('#feature-filters-container').accordion('destroy').accordion({
-			collapsible : true
-		});
 
 		$('.feature-filter-edit').click(function() {
 			ns.openFeatureFilterDialog($(this).data('href'));

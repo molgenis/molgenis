@@ -196,11 +196,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 
 	public void edit(${entity.namespace}.${JavaName(entity)} ${name(entity)}) throws org.molgenis.framework.db.DatabaseException {
 		try {
-
-			//Fixme: getReference??
-			${entity.namespace}.${JavaName(entity)} persistent${JavaName(entity)} = getEntityManager().find(${entity.namespace}.${JavaName(entity)}.class, ${name(entity)}.getIdValue());
-
-
 <#foreach field in entity.getAllFields()>
 	<#assign type_label = field.getType().toString()>
 
@@ -210,7 +205,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 
 			//${numRef}
 		<#if type_label == "xref">
-			${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())} ${fieldName}Old = persistent${JavaName(entity)}.get${JavaName(field)}();
 			${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())} ${fieldName}New = ${name(entity)}.get${JavaName(field)}();
 
 			if (${fieldName}New != null) {

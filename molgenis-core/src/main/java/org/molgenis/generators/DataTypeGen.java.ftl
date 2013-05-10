@@ -203,7 +203,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
        	<#else>
 			<#if isPrimaryKey(field,entity)>
 				<#if !entity.hasAncestor()>
-    @javax.persistence.Column(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)
+    @javax.persistence.Column(name="${SqlName(field)}"<#if field.type == "string">, length=${field.length?c}</#if><#if !field.nillable>, nullable=false</#if>)
 	@javax.xml.bind.annotation.XmlElement(name="${name(field)}")
 				</#if>
 			<#else>
@@ -212,9 +212,9 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	@javax.persistence.Column(name="${SqlName(field)}", length=16777216<#if !field.nillable>, nullable=false</#if>)
 				<#else>
         <#if SqlName(field) == '__Type'>
-	@javax.persistence.Column(name="DType"<#if !field.nillable>, nullable=false</#if>)            
+	@javax.persistence.Column(name="DType"<#if field.type == "string">, length=${field.length?c}</#if><#if !field.nillable>, nullable=false</#if>)            
         <#else>
-	@javax.persistence.Column(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)
+	@javax.persistence.Column(name="${SqlName(field)}"<#if field.type == "string">, length=${field.length?c}</#if><#if !field.nillable>, nullable=false</#if>)
         </#if>
 	@javax.xml.bind.annotation.XmlElement(name="${name(field)}")
 				</#if>
