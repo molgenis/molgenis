@@ -68,6 +68,7 @@
 									contentType: 'application/json',
 									success : function() {
 										row.remove();
+										$(document).trigger('molgenis-order-modified');
 									}
 								});	
 							});
