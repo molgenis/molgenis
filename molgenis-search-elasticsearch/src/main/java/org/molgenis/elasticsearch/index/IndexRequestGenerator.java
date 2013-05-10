@@ -1,13 +1,20 @@
 package org.molgenis.elasticsearch.index;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
+import org.molgenis.model.elements.Field;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
 
@@ -76,6 +83,20 @@ public class IndexRequestGenerator
 	{
 		BulkRequestBuilder bulkRequest = client.prepareBulk();
 
+		Set<String> xrefColumns = new HashSet<String>();
+		try
+		{
+			for (Field field : tupleTable.getColumns())
+			{
+				boolean isXref = field.getType().getEnumType().equals(FieldTypeEnum.XREF);
+				if (isXref) xrefColumns.add(field.getName());
+			}
+		}
+		catch (TableException e)
+		{
+			throw new RuntimeException(e);
+		}
+
 		int count = 0;
 		for (Tuple tuple : tupleTable)
 		{
@@ -84,6 +105,14 @@ public class IndexRequestGenerator
 			{
 				doc.put(columnName, tuple.get(columnName));
 			}
+
+			List<Object> xrefValues = new ArrayList<Object>();
+			for (String columnName : tuple.getColNames())
+			{
+				if (xrefColumns.contains(columnName)) xrefValues.add(tuple.get(columnName));
+
+			}
+			doc.put("_xrefvalue", xrefValues);
 
 			IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
 
