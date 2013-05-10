@@ -3,7 +3,6 @@
 	<head>
 		<title>Data explorer plugin</title>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/dataexplorer.css" type="text/css">
@@ -17,7 +16,6 @@
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
-				$("#feature-filters-container").accordion({ collapsible: true });
 				window.top.molgenis.fillDataSetSelect(function() {
 					<#-- select first dataset -->
 					$('#dataset-select option:first').val();
@@ -43,15 +41,27 @@
 							</form>
 						</div>
 						<div class="row-fluid">
-							<div id="feature-filters-container">
-								<h3>Data item filters</h3>
-								<div id="feature-filters"></div>
+							<div class="accordion" id="feature-filters-container">
+								<div class="accordion-group">
+								    <div class="accordion-heading">
+										<a class="accordion-toggle" data-toggle="collapse" data-parent="#feature-filters-container" href="#feature-filters">Data item filters</a>
+									</div>
+									<div class="accordion-body collapse in">
+										<div class="accordion-inner" id="feature-filters"></div>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div class="row-fluid">
-							<div id="feature-selection-container">
-								<h3>Data item selection</h3>
-								<div id="feature-selection"></div>		
+							<div class="accordion" id="feature-selection-container">
+								<div class="accordion-group">
+								    <div class="accordion-heading">
+										<a class="accordion-toggle" data-toggle="collapse" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
+									</div>
+									<div class="accordion-body collapse in">
+										<div class="accordion-inner" id="feature-selection"></div>
+									</div>
+								</div>
 							</div>
 						</div>			
 					</div>		

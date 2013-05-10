@@ -1,5 +1,11 @@
 .container-fluid {
-	padding-top: 10px;	
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-right: 10px;	
+}
+
+.well {
+	padding: 10px;
 }
 
 .row-fluid {
@@ -91,6 +97,18 @@ ui-state-active .ui-icon {
 
 .form-search {
 	margin-bottom: 0px;
+}
+
+.accordion-group {
+	background-color: #5B82A4;
+}
+
+.accordion-toggle {
+	color: white;	
+}
+
+.accordion-body {
+	background-color: white;
 }
 
 .feature-filter-dialog {
