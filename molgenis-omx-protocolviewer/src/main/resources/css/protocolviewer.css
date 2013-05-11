@@ -54,15 +54,16 @@ i:hover {
 	cursor: pointer;
 }
 
-#orderdata-selection-table {
-	padding: 0px 15px;
-}
-
 #orderdata-selection-table td.center {
 	text-align: center;
 }
 
 #orderdata-selection-table-container {
+	max-height: 300px;
+	overflow: auto;
+}
+
+#orderdata-list-container {
 	max-height: 300px;
 	overflow: auto;
 }
