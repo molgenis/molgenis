@@ -557,8 +557,9 @@ public class DatabaseLogin implements Login, Serializable
 				if (result == null)
 				{
 					Integer adminId = db
-							.find(MolgenisRole.class, new QueryRule(MolgenisRole.NAME, Operator.EQUALS, "admin"))
-							.get(0).getId();
+							.find(MolgenisRole.class,
+									new QueryRule(MolgenisRole.NAME, Operator.EQUALS, Login.USER_ADMIN_NAME)).get(0)
+							.getId();
 					Object arglist[] = new Object[1];
 					arglist[0] = adminId;
 
