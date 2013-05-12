@@ -29,7 +29,7 @@ public class PedFileDriver implements PlinkFileParser, Iterable<PedEntry>
 {
 	private BufferedReader reader;
 	private final File file;
-	private final char separator;
+	private final String separators;
 	private long nrElements;
 
 	/**
@@ -40,14 +40,18 @@ public class PedFileDriver implements PlinkFileParser, Iterable<PedEntry>
 	 */
 	public PedFileDriver(File pedFile)
 	{
-		this(pedFile, DEFAULT_FIELD_SEPARATOR);
+		this(pedFile, DEFAULT_READ_FIELD_SEPARATORS);
 	}
 
 	public PedFileDriver(File pedFile, char separator)
 	{
+		this(pedFile, String.valueOf(separator));
+	}
+	
+	public PedFileDriver(File pedFile, String separators){
 		if (pedFile == null) throw new IllegalArgumentException("file is null");
 		this.file = pedFile;
-		this.separator = separator;
+		this.separators = separators;
 		this.nrElements = -1l;
 	}
 
@@ -107,7 +111,7 @@ public class PedFileDriver implements PlinkFileParser, Iterable<PedEntry>
 
 	private PedEntry parseEntry(String line) throws IOException
 	{
-		final StringTokenizer strTokenizer = new StringTokenizer(line, separator + "");
+		final StringTokenizer strTokenizer = new StringTokenizer(line, separators);
 		try
 		{
 			String family = strTokenizer.nextToken();

@@ -25,7 +25,7 @@ public class FamFileDriver implements PlinkFileParser
 {
 	private BufferedReader reader;
 	private File file;
-	private char separator;
+	private String separators;
 	private long nrElements;
 
 	/**
@@ -36,16 +36,22 @@ public class FamFileDriver implements PlinkFileParser
 	 */
 	public FamFileDriver(File famFile)
 	{
-		this(famFile, DEFAULT_FIELD_SEPARATOR);
+		this(famFile, DEFAULT_READ_FIELD_SEPARATORS);
 	}
 
 	public FamFileDriver(File famFile, char separator)
 	{
+		this(famFile, String.valueOf(separator));
+	}
+	
+	public FamFileDriver(File famFile, String separators)
+	{
 		if (famFile == null) throw new IllegalArgumentException("file is null");
 		this.file = famFile;
-		this.separator = separator;
+		this.separators = separators;
 		this.nrElements = -1l;
 	}
+
 
 	/**
 	 * Get all FAM file entries
@@ -89,7 +95,7 @@ public class FamFileDriver implements PlinkFileParser
 
 	private FamEntry parseEntry(String line) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, this.separator + "");
+		StringTokenizer strTokenizer = new StringTokenizer(line, this.separators);
 		try
 		{
 			String family = strTokenizer.nextToken();
