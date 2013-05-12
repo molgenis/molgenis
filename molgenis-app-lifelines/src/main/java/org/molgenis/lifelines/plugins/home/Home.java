@@ -9,6 +9,7 @@ package org.molgenis.lifelines.plugins.home;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -20,7 +21,9 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenMessage;
+import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisPermission;
+import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.MolgenisEntity;
 import org.molgenis.omx.observ.Category;
@@ -34,7 +37,6 @@ import org.molgenis.util.Entity;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import app.FillMetadata;
-import app.ui.DataSetViewerPluginPlugin;
 import app.ui.ProtocolViewerPlugin;
 import app.ui.SimpleUserLoginPlugin;
 
@@ -113,16 +115,24 @@ public class Home extends PluginModel<Entity>
 	{
 		FillMetadata.fillMetadata(db, false, SimpleUserLoginPlugin.class.getSimpleName());
 
-		List<MolgenisUser> users = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.IDENTIFIER, Operator.EQUALS,
+		List<MolgenisUser> users = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
 				Login.USER_ANONYMOUS_NAME));
 		if (users != null && !users.isEmpty())
 		{
 			MolgenisUser userAnonymous = users.get(0);
+			List<MolgenisGroup> molgenisGroups = db.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
+					Operator.EQUALS, Login.GROUP_USERS_NAME));
+			if (molgenisGroups == null || molgenisGroups.isEmpty()) throw new DatabaseException(
+					"missing required MolgenisGroup with name '" + Login.GROUP_USERS_NAME + "'");
+			MolgenisGroup allUsersGroup = molgenisGroups.get(0);
+
+			List<MolgenisRole> molgenisRoles = new ArrayList<MolgenisRole>();
+			molgenisRoles.add(userAnonymous);
+			molgenisRoles.add(allUsersGroup);
 
 			List<Class<?>> visibleClasses = new ArrayList<Class<?>>();
 			visibleClasses.add(ProtocolViewerPlugin.class);
-			visibleClasses.add(DataSetViewerPluginPlugin.class);
-			// add entity dependencies for plugins
+			// add entity dependencies for protocol viewer plugin
 			visibleClasses.add(DataSet.class);
 			visibleClasses.add(Protocol.class);
 			visibleClasses.add(ObservationSet.class);
@@ -133,16 +143,18 @@ public class Home extends PluginModel<Entity>
 			for (Class<?> entityClass : visibleClasses)
 			{
 				MolgenisEntity molgenisEntity = db.find(MolgenisEntity.class,
-						new QueryRule("className", Operator.EQUALS, entityClass.getName())).get(0);
+						new QueryRule(MolgenisEntity.CLASSNAME, Operator.EQUALS, entityClass.getName())).get(0);
 
-				MolgenisPermission runtimePropertyPermission = new MolgenisPermission();
-				runtimePropertyPermission.setRole(userAnonymous.getId());
-				runtimePropertyPermission.setName(userAnonymous.getName());
-				runtimePropertyPermission.setIdentifier(MolgenisPermission.class.getSimpleName() + '_'
-						+ userAnonymous.getIdentifier() + '_' + entityClass.getSimpleName());
-				runtimePropertyPermission.setEntity(molgenisEntity.getId());
-				runtimePropertyPermission.setPermission("read");
-				db.add(runtimePropertyPermission);
+				for (MolgenisRole molgenisRole : molgenisRoles)
+				{
+					MolgenisPermission entityPermission = new MolgenisPermission();
+					entityPermission.setName(entityClass.getSimpleName() + '_' + molgenisRole.getName());
+					entityPermission.setIdentifier(UUID.randomUUID().toString());
+					entityPermission.setRole(molgenisRole);
+					entityPermission.setEntity(molgenisEntity);
+					entityPermission.setPermission("read");
+					db.add(entityPermission);
+				}
 			}
 		}
 	}
