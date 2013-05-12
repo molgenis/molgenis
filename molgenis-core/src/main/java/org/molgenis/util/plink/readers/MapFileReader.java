@@ -1,7 +1,7 @@
 package org.molgenis.util.plink.readers;
 
+import org.molgenis.util.plink.PlinkFileParser;
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,12 +11,17 @@ import java.util.Iterator;
 import org.molgenis.util.plink.datatypes.MapEntry;
 import org.molgenis.util.plink.drivers.MapFileDriver;
 
-public class MapFileReader implements Closeable, Iterable<MapEntry>
+public class MapFileReader implements PlinkFileParser, Iterable<MapEntry>
 {
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	private final BufferedReader reader;
 	private final String separators;
 
+	public MapFileReader(InputStream in)
+	{
+		this(in, DEFAULT_READ_FIELD_SEPARATORS);
+	}
+	
 	public MapFileReader(InputStream in, char separator)
 	{
 		this(in, String.valueOf(separator));
