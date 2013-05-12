@@ -9,10 +9,12 @@ import javax.mail.MessagingException;
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.security.Login;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.service.OrderStudyDataService;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,15 +23,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Controller
+@Scope(WebApplicationContext.SCOPE_SESSION)
 @RequestMapping("/plugin")
 public class OrderStudyDataController
 {
+	@Autowired
+	private Login login;
+
 	@Autowired
 	private OrderStudyDataService orderStudyDataService;
 
@@ -48,7 +55,7 @@ public class OrderStudyDataController
 	public void orderData(@RequestParam String name, @RequestParam Part file) throws DatabaseException, IOException,
 			MessagingException
 	{
-		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart());
+		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart(), login.getUserId());
 		shoppingCart.emptyCart();
 	}
 
@@ -56,8 +63,8 @@ public class OrderStudyDataController
 	@ResponseBody
 	public OrdersResponse getOrders() throws DatabaseException
 	{
-		Iterable<OrderResponse> ordersIterable = Iterables.transform(orderStudyDataService.getOrders(),
-				new Function<StudyDataRequest, OrderResponse>()
+		Iterable<OrderResponse> ordersIterable = Iterables.transform(
+				orderStudyDataService.getOrders(login.getUserId()), new Function<StudyDataRequest, OrderResponse>()
 				{
 					@Override
 					@Nullable

@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.molgenis.framework.security.Login;
 import org.molgenis.util.SimpleTree;
 
 /**
- * Definition of the base-class for objects in the user interface schema. This
- * class inherits from the tree, so it can hold multiple children and have
- * convenient search-methods. Objects that need to be placed in this container
- * need to inherit from it.
+ * Definition of the base-class for objects in the user interface schema. This class inherits from the tree, so it can
+ * hold multiple children and have convenient search-methods. Objects that need to be placed in this container need to
+ * inherit from it.
  * 
  * @author RA Scheltema
  * @version 1.0.0
@@ -41,8 +41,7 @@ public class UISchema extends SimpleTree<UISchema>
 
 	// constructor(s)
 	/**
-	 * The standard constructor, which links the object in the tree (with the
-	 * parent parameter).
+	 * The standard constructor, which links the object in the tree (with the parent parameter).
 	 * 
 	 * @param name
 	 *            The name of the element.
@@ -51,52 +50,20 @@ public class UISchema extends SimpleTree<UISchema>
 	 */
 	public UISchema(String name, UISchema parent)
 	{
-		// super(buildName(name, parent), parent);
 		super(name, parent);
 	}
 
-	// naming methods
-	/**
-	 * 
-	 */
 	public String getPathName()
 	{
 		String path = getPackageName() + "/";
 		return path.replace('.', '/');
 	}
 
-	/**
-	 * 
-	 */
 	public String getPackageName()
 	{
 		return "";
-		// String name = getName();
-		//
-		// // hack to get rid of the tree-root
-		// int start = name.indexOf('.');
-		// int finish = name.lastIndexOf('.');
-		//
-		// if (start != -1 && finish != -1)
-		// {
-		// if (start == finish)
-		// return "";// name.substring(start+1);
-		// else
-		// return name.substring(start + 1, finish);
-		// }
-		// else if (start != -1)
-		// {
-		// return name.substring(start + 1);
-		// }
-		// else
-		// {
-		// return name.substring(0, finish);
-		// }
 	}
 
-	/**
-	 * 
-	 */
 	public String getClassName()
 	{
 		String name = getName();
@@ -112,39 +79,16 @@ public class UISchema extends SimpleTree<UISchema>
 		}
 	}
 
-	/**
-	 * 
-	 */
 	public String getCanonicalClassName()
 	{
 		return this.getClassName().substring(0, 1).toUpperCase();
-		// + this.getClassName().substring(1);
-		// String class_name = this.getClassName().substring(0,1).toUpperCase()
-		// + this.getClassName().substring(1);
-		// String package_name = this.getPackageName();
-		//
-		// if (package_name.equals(""))
-		// {
-		// return class_name;
-		// }
-		// else
-		// {
-		// return package_name + "." + class_name;
-		// }
 	}
 
-	/**
-	 * 
-	 */
 	public String getVelocityName()
 	{
 		return getName().replace('.', '_');
 	}
 
-	// access methods
-	/**
-	 * 
-	 */
 	public List<UISchema> getCompleteSchema()
 	{
 		Vector<UISchema> results = new Vector<UISchema>();
@@ -159,9 +103,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return results;
 	}
 
-	/**
-	 * 
-	 */
 	public List<Menu> getMenus()
 	{
 		Vector<Menu> menus = new Vector<Menu>();
@@ -184,9 +125,11 @@ public class UISchema extends SimpleTree<UISchema>
 		// FIXME: are these hardcoded excludes OK ?
 		for (UISchema schema : getAllChildren())
 		{
-			if (schema.getGroup() != null && !res.contains(schema.getGroup()) && !schema.getGroup().equals("admin")
-					&& !schema.getGroup().equals("anonymous") && !schema.getGroup().equals("AllUsers")
-					&& !schema.getGroup().equals("system"))
+			if (schema.getGroup() != null && !res.contains(schema.getGroup())
+					&& !schema.getGroup().equals(Login.USER_ADMIN_NAME)
+					&& !schema.getGroup().equals(Login.USER_ANONYMOUS_NAME)
+					&& !schema.getGroup().equals(Login.GROUP_USERS_NAME)
+					&& !schema.getGroup().equals(Login.GROUP_SYSTEM_NAME))
 			{
 				res.add(schema.getGroup());
 			}
@@ -198,8 +141,10 @@ public class UISchema extends SimpleTree<UISchema>
 		for (UISchema schema : getAllChildren())
 		{
 			if (schema.getGroupRead() != null && !res.contains(schema.getGroupRead())
-					&& !schema.getGroupRead().equals("admin") && !schema.getGroupRead().equals("anonymous")
-					&& !schema.getGroupRead().equals("AllUsers") && !schema.getGroupRead().equals("system"))
+					&& !schema.getGroupRead().equals(Login.USER_ADMIN_NAME)
+					&& !schema.getGroupRead().equals(Login.USER_ANONYMOUS_NAME)
+					&& !schema.getGroupRead().equals(Login.GROUP_USERS_NAME)
+					&& !schema.getGroupRead().equals(Login.GROUP_SYSTEM_NAME))
 			{
 				res.add(schema.getGroupRead());
 			}
@@ -223,9 +168,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return forms;
 	}
 
-	/**
-	 * 
-	 */
 	public List<Form> getForms()
 	{
 		Vector<Form> forms = new Vector<Form>();
@@ -240,9 +182,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return forms;
 	}
 
-	/**
-	 * 
-	 */
 	public Vector<Tree> getTrees()
 	{
 		Vector<Tree> trees = new Vector<Tree>();
@@ -258,9 +197,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return trees;
 	}
 
-	/**
-	 * 
-	 */
 	public Vector<Plugin> getPlugins()
 	{
 		Vector<Plugin> plugins = new Vector<Plugin>();
@@ -276,16 +212,11 @@ public class UISchema extends SimpleTree<UISchema>
 		return plugins;
 	}
 
-	//
-	/** */
 	enum Type
 	{
 		UNKNOWN, FORM, TREE, MENU, PLUGIN
 	};
 
-	/**
-	 * 
-	 */
 	public Type getType()
 	{
 		return Type.UNKNOWN;
@@ -300,8 +231,6 @@ public class UISchema extends SimpleTree<UISchema>
 	{
 		this.label = label;
 	}
-
-	// private methode
 
 	public String getNamespace()
 	{
@@ -332,9 +261,4 @@ public class UISchema extends SimpleTree<UISchema>
 	{
 		this.groupRead = groupRead;
 	}
-
-	// public String getNearestParentRole(){
-	// TODO role inheritance?
-	// }
-
 }
