@@ -16,7 +16,6 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
@@ -42,9 +41,6 @@ public class OrderStudyDataService
 	private Database database;
 
 	@Autowired
-	private Login login;
-
-	@Autowired
 	private JavaMailSender mailSender;
 
 	@Autowired
@@ -53,8 +49,8 @@ public class OrderStudyDataService
 	@Autowired
 	private FileStore fileStore;
 
-	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds) throws DatabaseException,
-			MessagingException, IOException
+	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds, Integer userId)
+			throws DatabaseException, MessagingException, IOException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
 		if (requestForm == null) throw new IllegalArgumentException("request form is null");
@@ -65,7 +61,7 @@ public class OrderStudyDataService
 				Operator.IN, featureIds));
 		if (features == null || features.isEmpty()) throw new DatabaseException("requested features do not exist");
 
-		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, login.getUserId());
+		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, userId);
 
 		String fileName = getAppName() + "-request_" + System.currentTimeMillis() + ".doc";
 		File file = fileStore.store(requestForm.getInputStream(), fileName);
@@ -97,6 +93,13 @@ public class OrderStudyDataService
 	public List<StudyDataRequest> getOrders() throws DatabaseException
 	{
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class);
+		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
+	}
+
+	public List<StudyDataRequest> getOrders(Integer userId) throws DatabaseException
+	{
+		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class, new QueryRule(
+				StudyDataRequest.MOLGENISUSER, Operator.EQUALS, userId));
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 
