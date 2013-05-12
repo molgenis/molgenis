@@ -24,6 +24,8 @@ import org.molgenis.util.plink.datatypes.PedEntry;
  * data values. This makes parsing hard. Question: can all Plink files have
  * this? or just PED? See:
  * http://pngu.mgh.harvard.edu/~purcell/plink/data.shtml#ped
+ * 
+ * Answer by Patrick: This (should) never really happens. Only if you copy paste from the website where they use spaces to make it look nice.
  */
 public class PedFileDriver implements PlinkFileParser, Iterable<PedEntry>
 {
