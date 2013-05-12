@@ -91,9 +91,9 @@ public class MapFileDriver implements PlinkFileParser
 		return entryList;
 	}
 
-	public static MapEntry parseEntry(String line, String separator) throws IOException
+	public static MapEntry parseEntry(String line, String separators) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, separator);
+		StringTokenizer strTokenizer = new StringTokenizer(line, separators);
 		try
 		{
 			String chromosome = strTokenizer.nextToken();

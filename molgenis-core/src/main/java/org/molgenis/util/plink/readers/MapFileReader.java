@@ -15,12 +15,17 @@ public class MapFileReader implements Closeable, Iterable<MapEntry>
 {
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	private final BufferedReader reader;
-	private final char separator;
+	private final String separators;
 
 	public MapFileReader(InputStream in, char separator)
 	{
+		this(in, String.valueOf(separator));
+	}
+	
+	public MapFileReader(InputStream in, String separators)
+	{
 		reader = new BufferedReader(new InputStreamReader(in, CHARSET_UTF8));
-		this.separator = separator;
+		this.separators = separators;
 	}
 
 	@Override
@@ -63,7 +68,7 @@ public class MapFileReader implements Closeable, Iterable<MapEntry>
 			MapEntry entry;
 			try
 			{
-				entry = MapFileDriver.parseEntry(line, separator + "");
+				entry = MapFileDriver.parseEntry(line, separators);
 				line = reader.readLine();
 			}
 			catch (IOException e)
