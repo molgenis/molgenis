@@ -14,6 +14,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
@@ -113,7 +114,7 @@ public class Home extends PluginModel<Entity>
 		FillMetadata.fillMetadata(db, false, SimpleUserLoginPlugin.class.getSimpleName());
 
 		List<MolgenisUser> users = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.IDENTIFIER, Operator.EQUALS,
-				"anonymous"));
+				Login.USER_ANONYMOUS_NAME));
 		if (users != null && !users.isEmpty())
 		{
 			MolgenisUser userAnonymous = users.get(0);

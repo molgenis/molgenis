@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.molgenis.framework.security.Login;
 import org.molgenis.util.SimpleTree;
 
 /**
- * Definition of the base-class for objects in the user interface schema. This
- * class inherits from the tree, so it can hold multiple children and have
- * convenient search-methods. Objects that need to be placed in this container
- * need to inherit from it.
+ * Definition of the base-class for objects in the user interface schema. This class inherits from the tree, so it can
+ * hold multiple children and have convenient search-methods. Objects that need to be placed in this container need to
+ * inherit from it.
  * 
  * @author RA Scheltema
  * @version 1.0.0
@@ -41,8 +41,7 @@ public class UISchema extends SimpleTree<UISchema>
 
 	// constructor(s)
 	/**
-	 * The standard constructor, which links the object in the tree (with the
-	 * parent parameter).
+	 * The standard constructor, which links the object in the tree (with the parent parameter).
 	 * 
 	 * @param name
 	 *            The name of the element.
@@ -185,7 +184,7 @@ public class UISchema extends SimpleTree<UISchema>
 		for (UISchema schema : getAllChildren())
 		{
 			if (schema.getGroup() != null && !res.contains(schema.getGroup()) && !schema.getGroup().equals("admin")
-					&& !schema.getGroup().equals("anonymous") && !schema.getGroup().equals("AllUsers")
+					&& !schema.getGroup().equals(Login.USER_ANONYMOUS_NAME) && !schema.getGroup().equals("AllUsers")
 					&& !schema.getGroup().equals("system"))
 			{
 				res.add(schema.getGroup());
@@ -198,7 +197,8 @@ public class UISchema extends SimpleTree<UISchema>
 		for (UISchema schema : getAllChildren())
 		{
 			if (schema.getGroupRead() != null && !res.contains(schema.getGroupRead())
-					&& !schema.getGroupRead().equals("admin") && !schema.getGroupRead().equals("anonymous")
+					&& !schema.getGroupRead().equals("admin")
+					&& !schema.getGroupRead().equals(Login.USER_ANONYMOUS_NAME)
 					&& !schema.getGroupRead().equals("AllUsers") && !schema.getGroupRead().equals("system"))
 			{
 				res.add(schema.getGroupRead());

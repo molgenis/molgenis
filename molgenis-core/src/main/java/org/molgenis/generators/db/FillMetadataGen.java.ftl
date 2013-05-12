@@ -79,12 +79,12 @@ public class FillMetadata {
 		userAdmin.setSuperuser(true);
 		
 		MolgenisUser userAnonymous = new MolgenisUser();
-		userAnonymous.setName("anonymous");
-		userAnonymous.setIdentifier("anonymous");
+		userAnonymous.setName(Login.USER_ANONYMOUS_NAME);
+		userAnonymous.setIdentifier(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf");
-		userAnonymous.setEmail("molgenis@gmail.com");
-		userAnonymous.setFirstName("anonymous");
-		userAnonymous.setLastName("anonymous");
+		userAnonymous.setEmail(Login.USER_ANONYMOUS_NAME);
+		userAnonymous.setFirstName(Login.USER_ANONYMOUS_NAME);
+		userAnonymous.setLastName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setActive(true);
 
 		MolgenisGroup group1 = new MolgenisGroup();

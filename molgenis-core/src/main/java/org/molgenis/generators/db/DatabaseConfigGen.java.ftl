@@ -33,10 +33,24 @@ public class DatabaseConfig
 	{
 	<#if databaseImp = 'jpa'>
 		Database db = new ${package}.JpaDatabase(entityManagerFactory());
+		Login login = login();
+		// login with anonymous user if not logged in
+		if (login.getUserName() == null)
+		{
+			try
+			{
+				login.login(db, Login.USER_ANONYMOUS_NAME, Login.USER_ANONYMOUS_PASSWORD);
+			}
+			catch (Exception e)
+			{
+				throw new DatabaseException(e);
+			}
+		}
+		db.setLogin(login);
 	<#elseif databaseImp = 'jdbc'>
 		Database db = new ${package}.JDBCDatabase(dataSource().getConnection());
-	</#if>
 		db.setLogin(login());
+	</#if>
 		return db;
 	}
 
