@@ -3,6 +3,7 @@ package org.molgenis.omx.auth.service;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,6 +14,7 @@ import static org.testng.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.List;
 
 import javax.mail.internet.MimeMessage;
 
@@ -21,8 +23,12 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -93,7 +99,10 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 						new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(
 								MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "456"))).thenReturn(
 				Collections.<MolgenisUser> emptyList());
-
+		MolgenisGroup molgenisGroup = mock(MolgenisGroup.class);
+		when(
+				unauthorizedDatabase.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME, Operator.EQUALS,
+						Login.GROUP_USERS_NAME))).thenReturn(Collections.singletonList(molgenisGroup));
 		reset(javaMailSender);
 		MimeMessage mimeMessage = mock(MimeMessage.class);
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
@@ -137,9 +146,12 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		MolgenisUser molgenisUser = new MolgenisUser();
 		molgenisUser.setEmail("user@molgenis.org");
 		accountService.createUser(molgenisUser, new URI("http://molgenis.org/activate"));
-		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(unauthorizedDatabase).add(argument.capture());
-		assertFalse(argument.getValue().getActive());
+		ArgumentCaptor<Entity> argumentCaptor = ArgumentCaptor.forClass(Entity.class);
+		verify(unauthorizedDatabase, times(2)).add(argumentCaptor.capture());
+		List<Entity> allValues = argumentCaptor.getAllValues();
+		assertTrue(allValues.get(0) instanceof MolgenisUser);
+		assertFalse(((MolgenisUser) allValues.get(0)).getActive());
+		assertTrue(allValues.get(1) instanceof MolgenisRoleGroupLink);
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
 	}

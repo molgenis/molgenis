@@ -8,24 +8,34 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
-import org.molgenis.util.HandleRequestDelegationException;
 
 /**
- * Simple authentication and authorization interface that enables MOLGENIS
- * developers to enhance their applications with authentication and
- * authorization.
+ * Simple authentication and authorization interface that enables MOLGENIS developers to enhance their applications with
+ * authentication and authorization.
  * <ul>
  * <li>Login/logout (authorization)
- * <li>Entity level security (hasReadPermission(class),
- * hasWritePermission(class))
- * <li>Instance level security (rowLevelSecurityFilter,
- * hasWritePermission(object))
+ * <li>Entity level security (hasReadPermission(class), hasWritePermission(class))
+ * <li>Instance level security (rowLevelSecurityFilter, hasWritePermission(object))
  * </ul>
- * Developers can implement this interface to realize a variety of security
- * schemes.
+ * Developers can implement this interface to realize a variety of security schemes.
  */
 public interface Login
 {
+	/** Administrator user name */
+	public static final String USER_ADMIN_NAME = "admin";
+
+	/** Anonymous guest user name */
+	public static final String USER_ANONYMOUS_NAME = "anonymous";
+
+	/** Anonymous guest user password */
+	public static final String USER_ANONYMOUS_PASSWORD = "anonymous";
+
+	/** Administration users group */
+	public static final String GROUP_SYSTEM_NAME = "system";
+
+	/** Normal users group */
+	public static final String GROUP_USERS_NAME = "AllUsers";
+
 	/**
 	 * Authenticate the user
 	 * 
@@ -37,9 +47,8 @@ public interface Login
 	 *            of user
 	 * @return true if succesfully authenticated
 	 * @throws Exception
-	 *             ,RedirectedException
 	 */
-	public boolean login(Database db, String name, String password) throws Exception, HandleRequestDelegationException;
+	public boolean login(Database db, String name, String password) throws Exception;
 
 	/**
 	 * Un-authenticate the user. Now the user will be perceived as 'guest'.
@@ -56,8 +65,7 @@ public interface Login
 	public void reload(Database db) throws DatabaseException, ParseException, Exception;
 
 	/**
-	 * Indicates whether the current user has been authenticated. Otherwise the
-	 * user is treated as anonymous guest.
+	 * Indicates whether the current user has been authenticated. Otherwise the user is treated as anonymous guest.
 	 * 
 	 * @return true if authtenticated
 	 */
@@ -78,17 +86,15 @@ public interface Login
 	public Integer getUserId();
 
 	/**
-	 * Indicate if login is required. If true then the user will not be able to
-	 * access MOLGENIS unless authenticated. If false then the user will always
-	 * be able to login, but with 'guest' level user rights.
+	 * Indicate if login is required. If true then the user will not be able to access MOLGENIS unless authenticated. If
+	 * false then the user will always be able to login, but with 'guest' level user rights.
 	 * 
 	 * @return login required
 	 */
 	public boolean isLoginRequired();
 
 	/**
-	 * Indicates whether the user has permissions to read data from this class
-	 * of entities (aka 'entity level security')
+	 * Indicates whether the user has permissions to read data from this class of entities (aka 'entity level security')
 	 * 
 	 * @return readpermission
 	 * @throws DatabaseException
@@ -97,8 +103,7 @@ public interface Login
 	public boolean canRead(Class<? extends Entity> entityClass) throws DatabaseException;
 
 	/**
-	 * Indicates whether the user has permissions to read data from this class
-	 * of entities (aka 'entity level security')
+	 * Indicates whether the user has permissions to read data from this class of entities (aka 'entity level security')
 	 * 
 	 * @return readpermission
 	 * @throws DatabaseException
@@ -107,8 +112,7 @@ public interface Login
 	public boolean canRead(Entity entity) throws DatabaseException;
 
 	/**
-	 * Indicates whether the user has permissions to read data from this
-	 * implementation of ScreenModel
+	 * Indicates whether the user has permissions to read data from this implementation of ScreenModel
 	 * 
 	 * @param screen
 	 * @return read permission
@@ -117,8 +121,7 @@ public interface Login
 	public boolean canRead(ScreenController<?> screen) throws DatabaseException;
 
 	/**
-	 * Indicates whether the user has permissions to read data from this
-	 * implementation of ScreenModel
+	 * Indicates whether the user has permissions to read data from this implementation of ScreenModel
 	 * 
 	 * @param screen
 	 * @return read permission
@@ -127,8 +130,8 @@ public interface Login
 	// public boolean canRead(ScreenModel model) throws DatabaseException;
 
 	/**
-	 * Indicates whether the user has permissions to add, update, delete data
-	 * for this entity class (aka 'entity level security')
+	 * Indicates whether the user has permissions to add, update, delete data for this entity class (aka 'entity level
+	 * security')
 	 * 
 	 * @return editpermission
 	 * @throws DatabaseException
@@ -136,8 +139,7 @@ public interface Login
 	public boolean canWrite(Class<? extends Entity> entityClass) throws DatabaseException;
 
 	/**
-	 * Indicates whether the user has permissions to add, update, delete this
-	 * particular entity instance*
+	 * Indicates whether the user has permissions to add, update, delete this particular entity instance*
 	 * 
 	 * @return editpermission
 	 * @throws DatabaseException
@@ -145,8 +147,7 @@ public interface Login
 	public boolean canWrite(Entity entity) throws DatabaseException;
 
 	/**
-	 * Creates a filter which can be used by find/count to only retrieve those
-	 * records the user/group is allowed to view
+	 * Creates a filter which can be used by find/count to only retrieve those records the user/group is allowed to view
 	 */
 	public QueryRule getRowlevelSecurityFilters(Class<? extends Entity> klazz);
 
