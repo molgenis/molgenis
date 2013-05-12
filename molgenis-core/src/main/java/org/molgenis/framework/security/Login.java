@@ -21,11 +21,20 @@ import org.molgenis.util.Entity;
  */
 public interface Login
 {
+	/** Administrator user name */
+	public static final String USER_ADMIN_NAME = "admin";
+
 	/** Anonymous guest user name */
 	public static final String USER_ANONYMOUS_NAME = "anonymous";
 
 	/** Anonymous guest user password */
 	public static final String USER_ANONYMOUS_PASSWORD = "anonymous";
+
+	/** Administration users group */
+	public static final String GROUP_SYSTEM_NAME = "system";
+
+	/** Normal users group */
+	public static final String GROUP_USERS_NAME = "AllUsers";
 
 	/**
 	 * Authenticate the user
