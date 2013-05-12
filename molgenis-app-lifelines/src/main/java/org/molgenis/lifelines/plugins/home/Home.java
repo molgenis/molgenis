@@ -26,6 +26,7 @@ import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.MolgenisEntity;
+import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -156,6 +157,18 @@ public class Home extends PluginModel<Entity>
 					db.add(entityPermission);
 				}
 			}
+
+			Class<?> studyDataRequestClass = StudyDataRequest.class;
+			MolgenisEntity studyDataRequestEntity = db.find(MolgenisEntity.class,
+					new QueryRule(MolgenisEntity.CLASSNAME, Operator.EQUALS, studyDataRequestClass.getName())).get(0);
+
+			MolgenisPermission entityPermission = new MolgenisPermission();
+			entityPermission.setName(studyDataRequestClass.getSimpleName() + '_' + allUsersGroup.getName());
+			entityPermission.setIdentifier(UUID.randomUUID().toString());
+			entityPermission.setRole(allUsersGroup);
+			entityPermission.setEntity(studyDataRequestEntity);
+			entityPermission.setPermission("own");
+			db.add(entityPermission);
 		}
 	}
 
