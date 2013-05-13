@@ -46,15 +46,8 @@ public class EnvironmentController
 		if (run != null)
 		{
 			PrintWriter pw = response.getWriter();
-			try
-			{
-				pw.write(run.getUserEnvironment());
-				pw.flush();
-			}
-			finally
-			{
-				IOUtils.closeQuietly(pw);
-			}
+			pw.write(run.getUserEnvironment());
+			pw.flush();
 		}
 	}
 
