@@ -7,39 +7,14 @@
 
 package org.molgenis.lifelines.plugins.home;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.framework.ui.ScreenMessage;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisPermission;
-import org.molgenis.omx.auth.MolgenisRole;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.core.MolgenisEntity;
-import org.molgenis.omx.filter.StudyDataRequest;
-import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.ObservationSet;
-import org.molgenis.omx.observ.ObservedValue;
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-
-import app.FillMetadata;
-import app.ui.ProtocolViewerPlugin;
-import app.ui.SimpleUserLoginPlugin;
 
 /**
  * Shows table of experiment information for WormQTL
@@ -86,90 +61,6 @@ public class Home extends PluginModel<Entity>
 	{
 		homeModel = new HomeModel();
 		homeModel.setHomeHtml(getMolgenisSetting(KEY_APP_HOME_HTML, DEFAULT_KEY_APP_HOME_HTML));
-
-		List<MolgenisUser> listUsers;
-		try
-		{
-			listUsers = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS, "admin"));
-
-			if (listUsers.isEmpty())
-			{
-				fillMetaData(db);
-				this.setMessages(new ScreenMessage("User setup complete!", true));
-			}
-
-		}
-		catch (DatabaseException e)
-		{
-			this.setMessages(new ScreenMessage("Database error: " + e.getMessage(), false));
-			e.printStackTrace();
-		}
-		catch (Exception e)
-		{
-			this.setMessages(new ScreenMessage("error: " + e.getMessage(), false));
-			e.printStackTrace();
-		}
-
-	}
-
-	private void fillMetaData(Database db) throws Exception
-	{
-		FillMetadata.fillMetadata(db, false, SimpleUserLoginPlugin.class.getSimpleName());
-
-		List<MolgenisUser> users = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
-				Login.USER_ANONYMOUS_NAME));
-		if (users != null && !users.isEmpty())
-		{
-			MolgenisUser userAnonymous = users.get(0);
-			List<MolgenisGroup> molgenisGroups = db.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
-					Operator.EQUALS, Login.GROUP_USERS_NAME));
-			if (molgenisGroups == null || molgenisGroups.isEmpty()) throw new DatabaseException(
-					"missing required MolgenisGroup with name '" + Login.GROUP_USERS_NAME + "'");
-			MolgenisGroup allUsersGroup = molgenisGroups.get(0);
-
-			List<MolgenisRole> molgenisRoles = new ArrayList<MolgenisRole>();
-			molgenisRoles.add(userAnonymous);
-			molgenisRoles.add(allUsersGroup);
-
-			List<Class<?>> visibleClasses = new ArrayList<Class<?>>();
-			visibleClasses.add(ProtocolViewerPlugin.class);
-			// add entity dependencies for protocol viewer plugin
-			visibleClasses.add(DataSet.class);
-			visibleClasses.add(Protocol.class);
-			visibleClasses.add(ObservationSet.class);
-			visibleClasses.add(ObservableFeature.class);
-			visibleClasses.add(Category.class);
-			visibleClasses.add(ObservedValue.class);
-
-			for (Class<?> entityClass : visibleClasses)
-			{
-				MolgenisEntity molgenisEntity = db.find(MolgenisEntity.class,
-						new QueryRule(MolgenisEntity.CLASSNAME, Operator.EQUALS, entityClass.getName())).get(0);
-
-				for (MolgenisRole molgenisRole : molgenisRoles)
-				{
-					MolgenisPermission entityPermission = new MolgenisPermission();
-					entityPermission.setName(entityClass.getSimpleName() + '_' + molgenisRole.getName());
-					entityPermission.setIdentifier(UUID.randomUUID().toString());
-					entityPermission.setRole(molgenisRole);
-					entityPermission.setEntity(molgenisEntity);
-					entityPermission.setPermission("read");
-					db.add(entityPermission);
-				}
-			}
-
-			Class<?> studyDataRequestClass = StudyDataRequest.class;
-			MolgenisEntity studyDataRequestEntity = db.find(MolgenisEntity.class,
-					new QueryRule(MolgenisEntity.CLASSNAME, Operator.EQUALS, studyDataRequestClass.getName())).get(0);
-
-			MolgenisPermission entityPermission = new MolgenisPermission();
-			entityPermission.setName(studyDataRequestClass.getSimpleName() + '_' + allUsersGroup.getName());
-			entityPermission.setIdentifier(UUID.randomUUID().toString());
-			entityPermission.setRole(allUsersGroup);
-			entityPermission.setEntity(studyDataRequestEntity);
-			entityPermission.setPermission("own");
-			db.add(entityPermission);
-		}
 	}
 
 	@Override
