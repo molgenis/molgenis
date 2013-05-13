@@ -144,6 +144,12 @@ public class PilotService implements MolgenisService
 					task.setRunLog(logFileContent);
 					task.setRunInfo(runInfo);
 					task.setStatusCode("failed");
+
+					File failedLog = request.getFile("failed_log_file");
+					if (failedLog != null)
+					{
+						task.setFailedLog(FileUtils.readFileToString(failedLog));
+					}
 				}
 				else if (task != null && task.getStatusCode().equalsIgnoreCase(TASK_DONE))
 				{

@@ -19,6 +19,7 @@
    			<field name="outputEnvironment" type="text" label="Output environment vars" nillable="true" description="Environment vars created by this step" />
    			<field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />   
 			<field name="runLog" type="text" description="Log of the task execution" nillable="true" />
+			<field name="failedLog" type="text" description="Failed log of the task execution" nillable="true" />
          	<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
