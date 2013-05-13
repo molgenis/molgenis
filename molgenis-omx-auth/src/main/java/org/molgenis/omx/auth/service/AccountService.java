@@ -10,8 +10,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -70,19 +68,19 @@ public class AccountService
 		database.add(molgenisUser);
 		logger.debug("created user " + molgenisUser.getName());
 
-		// add user to user group
-		List<MolgenisGroup> molgenisGroups = database.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
-				Operator.EQUALS, "AllUsers"));
-		if (molgenisGroups == null || molgenisGroups.isEmpty()) throw new DatabaseException("Missing user group '"
-				+ "AllUsers" + "'");
-		MolgenisGroup userGroup = molgenisGroups.get(0);
-
-		MolgenisRoleGroupLink molgenisRoleGroupLink = new MolgenisRoleGroupLink();
-		molgenisRoleGroupLink.setIdentifier(UUID.randomUUID().toString());
-		molgenisRoleGroupLink.setName(userGroup.getName() + '-' + molgenisUser.getName());
-		molgenisRoleGroupLink.setGroup(userGroup);
-		molgenisRoleGroupLink.setRole(molgenisUser);
-		database.add(molgenisRoleGroupLink);
+		// // add user to user group
+		// List<MolgenisGroup> molgenisGroups = database.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
+		// Operator.EQUALS, "AllUsers"));
+		// if (molgenisGroups == null || molgenisGroups.isEmpty()) throw new DatabaseException("Missing user group '"
+		// + "AllUsers" + "'");
+		// MolgenisGroup userGroup = molgenisGroups.get(0);
+		//
+		// MolgenisRoleGroupLink molgenisRoleGroupLink = new MolgenisRoleGroupLink();
+		// molgenisRoleGroupLink.setIdentifier(UUID.randomUUID().toString());
+		// molgenisRoleGroupLink.setName(userGroup.getName() + '-' + molgenisUser.getName());
+		// molgenisRoleGroupLink.setGroup(userGroup);
+		// molgenisRoleGroupLink.setRole(molgenisUser);
+		// database.add(molgenisRoleGroupLink);
 
 		// send activation email
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
