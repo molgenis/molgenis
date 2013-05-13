@@ -37,8 +37,7 @@ public class ValidationChecker
 		// Make Object Reference
 		ValidationFile ref = new ValidationFile();
 		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(file1));
-		// excelReaderReferenceFile.addCellProcessor(new TrimProcessor(false,
-		// true));
+
 		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
 
 		ref.bla(excelSheetReaderReferenceFile, IDENTIFIER);
@@ -46,10 +45,7 @@ public class ValidationChecker
 		// Make Object FileToCompare
 		ValidationFile com = new ValidationFile();
 		CsvReader csvReaderFileToCompare = new CsvReader(new File(file2));
-		// csvReaderFileToCompare.addCellProcessor(new TrimProcessor(false,
-		// true));
-		// ExcelSheetReader excelSheetReaderFileToCompare =
-		// excelReaderFileToCompare.getSheet(0);
+
 		com.bla(csvReaderFileToCompare, IDENTIFIER);
 		boolean noUniqueColums = false;
 		// Make list for shared headers
@@ -88,7 +84,6 @@ public class ValidationChecker
 			System.out.println("###There are no added/deleted columns\n");
 		}
 
-		// print the header
 		System.out.println("\n###Comparing the values ");
 		System.out.println("Sample ID\tFeature\tFile1\tFile2");
 
@@ -120,7 +115,6 @@ public class ValidationChecker
 				if (!com.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
-					// listOfUniqueSampleIdsReference.add(entry.getKey());
 				}
 			}
 			System.out.println("\n###Unique samples in file2 ");
@@ -129,7 +123,6 @@ public class ValidationChecker
 				if (!ref.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
-					// listOfUniqueSampleIdsFilesToCompare.add(entry.getKey());
 				}
 			}
 
