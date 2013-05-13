@@ -58,10 +58,9 @@ public class TaskGeneratorDB
 
 	public static void main(String[] args) throws Exception
 	{
-		new TaskGeneratorDB()
-				.generateRun(
-						"/Users/erwin/projects/molgenis/molgenis-compute-core/src/main/resources/workflows/demoNBIC2/parameters.csv",
-						"nbic25", "localhost", 2000L);
+		new TaskGeneratorDB().generateRun(
+				"../molgenis-compute-core/src/main/resources/workflows/demoNBIC2/parameters.csv", "nbic25",
+				"localhost", 2000L);
 	}
 
 }
