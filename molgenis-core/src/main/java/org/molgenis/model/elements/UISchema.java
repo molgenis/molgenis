@@ -11,7 +11,9 @@ package org.molgenis.model.elements;
 
 // jdk
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.molgenis.framework.security.Login;
@@ -119,38 +121,36 @@ public class UISchema extends SimpleTree<UISchema>
 
 	public ArrayList<String> getAllUniqueGroups()
 	{
-		ArrayList<String> res = new ArrayList<String>();
-
-		// first add all unique read/write groups
-		// FIXME: are these hardcoded excludes OK ?
+		Set<String> uniqueGroups = new LinkedHashSet<String>();
 		for (UISchema schema : getAllChildren())
 		{
-			if (schema.getGroup() != null && !res.contains(schema.getGroup())
-					&& !schema.getGroup().equals(Login.USER_ADMIN_NAME)
-					&& !schema.getGroup().equals(Login.USER_ANONYMOUS_NAME)
-					&& !schema.getGroup().equals(Login.GROUP_USERS_NAME)
-					&& !schema.getGroup().equals(Login.GROUP_SYSTEM_NAME))
+			String groupStr = schema.getGroup();
+			if (groupStr != null)
 			{
-				res.add(schema.getGroup());
+				for (String group : groupStr.split(","))
+				{
+					group = group.trim();
+					if (!group.isEmpty()) uniqueGroups.add(group);
+				}
+			}
+			String groupReadStr = schema.getGroupRead();
+			if (groupReadStr != null)
+			{
+				for (String group : groupReadStr.split(","))
+				{
+					group = group.trim();
+					if (!group.isEmpty()) uniqueGroups.add(group);
+				}
 			}
 		}
 
-		// now add all unique read groups that were NOT part of the regular
-		// read/write groups
 		// FIXME: are these hardcoded excludes OK ?
-		for (UISchema schema : getAllChildren())
-		{
-			if (schema.getGroupRead() != null && !res.contains(schema.getGroupRead())
-					&& !schema.getGroupRead().equals(Login.USER_ADMIN_NAME)
-					&& !schema.getGroupRead().equals(Login.USER_ANONYMOUS_NAME)
-					&& !schema.getGroupRead().equals(Login.GROUP_USERS_NAME)
-					&& !schema.getGroupRead().equals(Login.GROUP_SYSTEM_NAME))
-			{
-				res.add(schema.getGroupRead());
-			}
-		}
+		uniqueGroups.remove(Login.USER_ADMIN_NAME);
+		uniqueGroups.remove(Login.USER_ANONYMOUS_NAME);
+		uniqueGroups.remove(Login.GROUP_SYSTEM_NAME);
+		uniqueGroups.remove(Login.GROUP_USERS_NAME);
 
-		return res;
+		return new ArrayList<String>(uniqueGroups);
 	}
 
 	public List<Form> getAllForms()

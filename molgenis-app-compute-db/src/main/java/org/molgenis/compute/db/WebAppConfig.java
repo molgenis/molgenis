@@ -7,6 +7,7 @@ import org.molgenis.compute.db.util.ComputeMolgenisSettings;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -71,9 +72,14 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new GsonHttpMessageConverter());
 	}
 
+	@Bean
+	public ApplicationListener<?> databasePopulator()
+	{
+		return new WebAppDatabasePopulator();
+	}
+
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is
-	 * not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
 	 * 
 	 * @return
 	 */
@@ -90,8 +96,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Enable spring freemarker viewresolver. All freemarker template names
-	 * should end with '.ftl'
+	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
 	public ViewResolver viewRespolver()
@@ -104,8 +109,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Configure freemarker. All freemarker templates should be on the classpath
-	 * in a package called 'freemarker'
+	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer()
