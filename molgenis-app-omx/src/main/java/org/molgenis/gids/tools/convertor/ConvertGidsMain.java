@@ -9,9 +9,9 @@ import java.io.OutputStream;
 
 public class ConvertGidsMain
 {
-	private static final String DIRECTORY = "/Users/Roan/Work/NewGIDS/Export GIDS/Cohorts/";
+	private static final String DIRECTORY = "/Users/Roan/Work/GIDS_8_May/Cohorts/";
 	private final static String OUTPUTDIR = DIRECTORY + "Converted/";
-	private final static String PROJECTNAME = "Celiac Sprue_compare_Jules_7_may";
+	private final static String PROJECTNAME = "Bloodbank";
 
 	public static void main(String[] args) throws IOException
 	{
@@ -32,7 +32,7 @@ public class ConvertGidsMain
 			}
 			else
 			{
-				System.out.println("FAIL");
+				System.out.println("FAIL to make the directory");
 			}
 		}
 		String newOutput = theDir + "/";

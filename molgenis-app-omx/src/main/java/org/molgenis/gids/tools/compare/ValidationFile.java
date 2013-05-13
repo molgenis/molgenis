@@ -7,11 +7,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.molgenis.io.csv.CsvReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.util.tuple.Tuple;
 
 /**
- * This class is used to read the 2nd file (the compare file). The data will be
+ * 
  * put in a hashmap
  */
 public class ValidationFile
@@ -32,6 +33,23 @@ public class ValidationFile
 		}
 
 		for (Tuple t : excelSheetReader)
+		{
+			hash.put(t.getString(identifier), t);
+		}
+	}
+
+	public void bla(CsvReader csvSheetReader, String identifier) throws IOException
+
+	{
+		Iterator<String> iterableFileToCompare = csvSheetReader.colNamesIterator();
+
+		while (iterableFileToCompare.hasNext())
+		{
+			String header = iterableFileToCompare.next().toLowerCase();
+			listOfHeaders.add(header);
+		}
+
+		for (Tuple t : csvSheetReader)
 		{
 			hash.put(t.getString(identifier), t);
 		}
