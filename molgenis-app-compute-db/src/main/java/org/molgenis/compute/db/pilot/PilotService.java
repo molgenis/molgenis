@@ -1,5 +1,6 @@
 package org.molgenis.compute.db.pilot;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
@@ -63,20 +64,11 @@ public class PilotService implements MolgenisService
 
 			// we add task id to the run listing to identify task when
 			// it is done
-			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
-			String computeScript = task.getComputeScript().replaceAll("\r", "");
-			String runName = task.getComputeRun().getName();
-			String environment = task.getComputeRun().getEnvironment();
+			ScriptBuilder sb = new ScriptBuilder(task, request.getAppLocation(), request.getServicePath());
+			String taskScript = sb.build();
 
-			// TODO
-			// echo \"%s\" > environment.txt
-			// -F environment_file=@environment.txt
-
-			String taskScript = String
-					.format("echo TASKNAME:%s\necho RUNNAME:%s\n%s\ncp log.log done.log\ncurl -F status=done -F log_file=@done.log %s\n",
-							environment, task.getName(), runName, computeScript, pilotServiceUrl);
-
-			LOG.info("Script for task [" + task.getName() + "] of run [ " + runName + "]:\n" + taskScript);
+			LOG.info("Script for task [" + task.getName() + "] of run [ " + task.getComputeRun().getName() + "]:\n"
+					+ taskScript);
 
 			// change status to running
 			task.setStatusCode(PilotService.TASK_RUNNING);
@@ -122,6 +114,12 @@ public class PilotService implements MolgenisService
 					task.setStatusCode(TASK_DONE);
 					task.setRunLog(logFileContent);
 					task.setRunInfo(runInfo);
+
+					File output = request.getFile("output_file");
+					if (output != null)
+					{
+						task.setOutputEnvironment(FileUtils.readFileToString(output));
+					}
 				}
 				else
 				{

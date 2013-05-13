@@ -89,14 +89,14 @@
 							</div>
 							<div id="download-controls">
 								<button class="btn" id="download-xls-button">Download as Excel</button>
-								<#if model.showViewButton>
+								<!--#if model.showViewButton-->
 									<button class="btn" id="view-features-button">View</button>
-								</#if>
-								<#if model.saveSelectionButton>
+								<!--/#if-->
+								<!--#if model.saveSelectionButton-->
 
 								<button class="btn" id="save-selection-button"<#if !model.authenticated> disabled</#if>>Save selection</button>
 								
-								</#if>
+								<!--/#if-->
 								<button class="btn" id="request-data-button"<#if !model.authenticated> disabled</#if>>Request Data</button>
 								
 							</div>

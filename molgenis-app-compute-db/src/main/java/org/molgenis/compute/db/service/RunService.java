@@ -52,7 +52,7 @@ public class RunService
 	 * @param environment
 	 * @return the new ComputeRun
 	 */
-	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String environment)
+	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String userEnvironment)
 	{
 		try
 		{
@@ -73,7 +73,7 @@ public class RunService
 			run.setComputeBackend(backend);
 			run.setName(name);
 			run.setPollDelay(pollDelay == null ? DEFAULT_POLL_DELAY : pollDelay);
-			run.setEnvironment(environment);
+			run.setUserEnvironment(userEnvironment);
 			database.add(run);
 
 			// Add tasks to db
@@ -114,6 +114,7 @@ public class RunService
 				{
 					computeTask.setPrevSteps(prevTasks);
 				}
+				database.update(computeTask);
 
 				if (LOG.isDebugEnabled())
 				{

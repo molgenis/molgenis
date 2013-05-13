@@ -73,7 +73,7 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 				.andExpect(status().isOk())
 				.andExpect(
 						content()
-								.string("{\"orders\":[{\"id\":0,\"name\":\"request #0\",\"orderDate\":\"2012-10-12\",\"orderStatus\":\"pending\"},{\"id\":1,\"name\":\"request #1\",\"orderDate\":\"2013-02-04\",\"orderStatus\":\"rejected\"}]}"));
+								.string("{\"orders\":[{\"id\":0,\"name\":\"request #0\",\"orderDate\":\"2012-10-12\",\"orderStatus\":\"pending\"}]}"));
 	}
 
 	// TODO how to test multipart/form-data using fileUpload() and post()?
@@ -106,7 +106,8 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 			when(request1.getRequestStatus()).thenReturn("rejected");
 			when(request1.getName()).thenReturn("request #1");
 			OrderStudyDataService orderStudyDataService = mock(OrderStudyDataService.class);
-			when(orderStudyDataService.getOrders()).thenReturn(Arrays.asList(request0, request1));
+			when(orderStudyDataService.getOrders(0)).thenReturn(Arrays.asList(request0));
+			when(orderStudyDataService.getOrders(1)).thenReturn(Arrays.asList(request1));
 			return orderStudyDataService;
 		}
 
@@ -119,7 +120,9 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public Login login()
 		{
-			return mock(Login.class);
+			Login login = mock(Login.class);
+			when(login.getUserId()).thenReturn(0);
+			return login;
 		}
 
 		@Bean

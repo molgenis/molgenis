@@ -74,7 +74,7 @@ public class DatabaseLogin implements Login, Serializable
 	public DatabaseLogin(Database db, TokenFactory tm) throws Exception
 	{
 		this.tm = tm;
-		this.login(db, "anonymous", "anonymous");
+		this.login(db, USER_ANONYMOUS_NAME, USER_ANONYMOUS_PASSWORD);
 	}
 
 	public DatabaseLogin(Database db, String redirect, TokenFactory tm) throws Exception
@@ -111,15 +111,14 @@ public class DatabaseLogin implements Login, Serializable
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * Note: Anonymous is automatically logged in but does not count as being
-	 * authenticated
+	 * Note: Anonymous is automatically logged in but does not count as being authenticated
 	 */
 	@Override
 	public boolean isAuthenticated()
 	{
 		// return user != null;
 		if (user == null) return false;
-		else if ("anonymous".equals(user.getName())) return false;
+		else if (USER_ANONYMOUS_NAME.equals(user.getName())) return false;
 		else return true;
 	}
 
@@ -204,8 +203,7 @@ public class DatabaseLogin implements Login, Serializable
 	/**
 	 * Reloads all permission settings for this user from database.
 	 * 
-	 * If user is null, anonymous is logged in. Note: calling reload refreshes
-	 * the permissions cache map.
+	 * If user is null, anonymous is logged in. Note: calling reload refreshes the permissions cache map.
 	 * 
 	 * @throws Exception
 	 * 
@@ -213,7 +211,7 @@ public class DatabaseLogin implements Login, Serializable
 	@Override
 	public void reload(Database db) throws Exception
 	{
-		if (this.user == null) this.login(db, "anonymous", "anonymous");
+		if (this.user == null) this.login(db, USER_ANONYMOUS_NAME, USER_ANONYMOUS_PASSWORD);
 		// return;
 
 		// // get the groups this user is member of
@@ -247,8 +245,7 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Reload the permissions map which contains all permissions, for the logged
-	 * in user.
+	 * Reload the permissions map which contains all permissions, for the logged in user.
 	 * 
 	 * @param db
 	 *            database to load permissions from
@@ -386,9 +383,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Indicates whether the user has permissions to read data from this entity.
-	 * Note: if row-level security is activated, only rows for which the user
-	 * has been given permission will display.
+	 * Indicates whether the user has permissions to read data from this entity. Note: if row-level security is
+	 * activated, only rows for which the user has been given permission will display.
 	 * 
 	 * @param Entity
 	 *            the entity to get permission from
@@ -423,9 +419,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Indicates whether the user has permissions to write (and read) data from
-	 * this entity. Note: if row-level security is activated, only rows for
-	 * which the user has been given permission will display as editable.
+	 * Indicates whether the user has permissions to write (and read) data from this entity. Note: if row-level security
+	 * is activated, only rows for which the user has been given permission will display as editable.
 	 * 
 	 * @param Entity
 	 *            the entity to get permission from
@@ -527,8 +522,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Helper method to check if an entity is implementing the authorizable
-	 * interface, i.e. to check if we should implement row-level security.
+	 * Helper method to check if an entity is implementing the authorizable interface, i.e. to check if we should
+	 * implement row-level security.
 	 * 
 	 * @param entity
 	 * @param interfaceName
@@ -562,8 +557,9 @@ public class DatabaseLogin implements Login, Serializable
 				if (result == null)
 				{
 					Integer adminId = db
-							.find(MolgenisRole.class, new QueryRule(MolgenisRole.NAME, Operator.EQUALS, "admin"))
-							.get(0).getId();
+							.find(MolgenisRole.class,
+									new QueryRule(MolgenisRole.NAME, Operator.EQUALS, Login.USER_ADMIN_NAME)).get(0)
+							.getId();
 					Object arglist[] = new Object[1];
 					arglist[0] = adminId;
 
