@@ -146,8 +146,7 @@ public class ValidationChecker
 			}
 			else if (firstTuple.getString(e) != null && secondTuple.getString(e) == null)
 			{
-				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e)
-						&& !hashCheckedValues.containsValue(secondTuple))
+				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
 				{
 					System.out.println(firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
 							+ (secondTuple.getString(e) == null ? ("\tAdded") : secondTuple.getString(e)) + "\t"
@@ -158,8 +157,7 @@ public class ValidationChecker
 			}
 			else if (firstTuple.getString(e) == null && secondTuple.getString(e) != null)
 			{
-				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e)
-						&& !hashCheckedValues.containsValue(secondTuple))
+				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
 				{
 					System.out.println(firstTuple.getString(IDENTIFIER)
 							+ "\t"
@@ -174,8 +172,7 @@ public class ValidationChecker
 			{
 				if (!firstTuple.getString(e).equals(secondTuple.getString(e)))
 				{
-					if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e)
-							&& !hashCheckedValues.containsValue(secondTuple))
+					if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
 					{
 
 						hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
