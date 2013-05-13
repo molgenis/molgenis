@@ -122,7 +122,7 @@ public class DatabaseConfig
 
 </#if>
 	@Bean
-	@Scope("session")
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "session")
 	public Login login()
 	{
 		return new ${auth_loginclass}(tokenFactory());
