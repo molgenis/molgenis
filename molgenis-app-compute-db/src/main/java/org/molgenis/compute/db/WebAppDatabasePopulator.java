@@ -1,4 +1,4 @@
-package org.molgenis.omicsconnect;
+package org.molgenis.compute.db;
 
 import org.molgenis.framework.db.Database;
 
