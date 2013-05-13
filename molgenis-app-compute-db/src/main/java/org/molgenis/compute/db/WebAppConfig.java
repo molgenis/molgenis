@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.compute.db.util.ComputeMolgenisSettings;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -37,11 +35,6 @@ import app.DatabaseConfig;
 @Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
-	public static Database unathorizedDatabase() throws DatabaseException
-	{
-		return new app.JpaDatabase();
-	}
-
 	@Bean
 	public Scheduler scheduler()
 	{
