@@ -40,7 +40,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public ApplicationListener<?> molgenisApplicationListener()
+	public ApplicationListener<?> databasePopulator()
 	{
 		return new WebAppDatabasePopulator();
 	}
