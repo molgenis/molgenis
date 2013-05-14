@@ -53,6 +53,23 @@ public class ComputeProperties
 		saveProperties();
 	}
 
+	public ComputeProperties(String path)
+	{
+		// set path
+		this.path = path;
+		
+		// prepend path to defaults
+		updateDefaults(path);
+		
+		createPropertiesFile();
+
+		// parse properties file
+		parseProperties();
+
+		// save new config
+		saveProperties();
+	}
+
 	private void updateDefaults(String path)
 	{
 		this.workFlow = updatePath(path, this.workFlow);
