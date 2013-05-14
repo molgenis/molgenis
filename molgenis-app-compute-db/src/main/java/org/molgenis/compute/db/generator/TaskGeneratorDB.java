@@ -2,7 +2,6 @@ package org.molgenis.compute.db.generator;
 
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.service.RunService;
-import org.molgenis.compute.runtime.ComputeBackend;
 import org.molgenis.compute5.ComputeCommandLine;
 import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.model.Compute;
@@ -33,16 +32,6 @@ public class TaskGeneratorDB
 
 		try
 		{
-			if (backendName.equalsIgnoreCase("localhost") && (ComputeBackend.findByName(database, "localhost") == null))
-			{
-				ComputeBackend backend = new ComputeBackend();
-				backend.setName("localhost");
-				backend.setBackendUrl("localhost");
-				backend.setHostType("LOCALHOST");
-				backend.setCommand("sh maverick.sh");
-				database.add(backend);
-			}
-
 			RunService service = new RunService(database, null);
 
 			String userEnvironment = new EnvironmentGenerator().getEnvironment(compute);
