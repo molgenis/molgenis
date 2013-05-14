@@ -10,7 +10,7 @@ public class Protocol
 {
 	// reserved parameter names, used form system purposes
 	public static List<String> reservedNames = Arrays.asList(new String[]
-	{ Parameters.WALLTIME, Parameters.NODES, Parameters.PPN, Parameters.QUEUE, Parameters.MEMORY, Parameters.NOTAVAILABLE });
+	{ Parameters.PATH, Parameters.WORKFLOW, Parameters.DEFAULTS, Parameters.RUNDIR, Parameters.RUNID, Parameters.BACKEND, Parameters.DATABASE, Parameters.WALLTIME, Parameters.NODES, Parameters.PPN, Parameters.QUEUE, Parameters.MEMORY, Parameters.NOTAVAILABLE });
 
 	// unique name of the protocol
 	String name;

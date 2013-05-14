@@ -12,10 +12,7 @@
 #input impute2Bin
 
 #output impute2chunk
-#output impute2chunk_info
-#output impute2chunk_info_by_sample
-#output impute2chunk_summary
-#output impute2chunk_warnings
+#output impute2chunkInfo
 
 ${stage} impute/${impute2version}
 

@@ -47,7 +47,7 @@ public class ComputeCommandLine
 		// output scripts + docs
 		try
 		{
-			create(computeProperties.workFlow, computeProperties.parameters, computeProperties.workDir, computeProperties.backend, computeProperties.runId);
+			create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters, computeProperties.path, computeProperties.backend, computeProperties.runDir, computeProperties.runId, computeProperties.database);
 		}
 		catch (Exception e)
 		{
@@ -56,8 +56,8 @@ public class ComputeCommandLine
 
 	}
 
-	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir, String backend,
-			String runID) throws IOException, Exception
+	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String workDir, String backend,
+			String runDir, String runID, String database) throws IOException, Exception
 	{
 		List<File> parameterFiles = new ArrayList<File>();
 		for (String f : parametersCsv)
@@ -86,43 +86,48 @@ public class ComputeCommandLine
 //			}
 //		}
 
-		if ("".equals(workflowCsv)) throw new IOException("no workflow provided");
+//		if ("".equals(workflowCsv)) throw new IOException("no workflow provided");
+//
+//		// if not set, set default backend
+//		if (isNotSet(backend)) backend = Parameters.BACKEND_DEFAULT;
+//
+//		// if not set, set default run id
+//		if (isNotSet(runID)) runID = Parameters.RUNID_DEFAULT;
 
-		// if not set, set default backend
-		if (isNotSet(backend)) backend = Parameters.BACKEND_DEFAULT;
-
-		// if not set, set default run id
-		if (isNotSet(runID)) runID = Parameters.RUNID_DEFAULT;
-
-		// set constants
+		// add command line parameters:
 		for (WritableTuple t : compute.getParameters().getValues())
 		{
-			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
 			t.set(Parameters.WORKDIR_COLUMN, new File(workDir).getAbsolutePath());
+			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
+			t.set(Parameters.DEFAULTS_COLUMN, new File(defaults).getAbsolutePath());
+			t.set(Parameters.RUNDIR_COLUMN, new File(runDir).getAbsolutePath());
+			t.set(Parameters.RUNID_COLUMN, runID);
+			t.set(Parameters.BACKEND_COLUMN, backend);
+			t.set(Parameters.DATABASE_COLUMN, database);
 		}
 
 		System.out.println("Using workflow:   " + new File(workflowCsv).getAbsolutePath());
 		System.out.println("Using parameters: " + parameterFiles);
-		System.out.println("Using outputDir:  " + new File(workDir).getAbsolutePath());
+		System.out.println("Using run (output) dir:  " + new File(runDir).getAbsolutePath());
 		System.out.println("Using backend:    " + backend);
 		System.out.println("Using runID:    " + runID);
 
 		System.out.println(""); // newline
 
 		// create outputdir
-		File dir = new File(workDir);
-		workDir = dir.getCanonicalPath();
+		File dir = new File(runDir);
+		runDir = dir.getCanonicalPath();
 		dir.mkdirs();
 
 		// document inputs
-		new DocTotalParametersCsvGenerator().generate(new File(workDir + "/doc/inputs.csv"), compute.getParameters());
+		new DocTotalParametersCsvGenerator().generate(new File(runDir + "/doc/inputs.csv"), compute.getParameters());
 
 		// parse workflow
 		compute.setWorkflow(WorkflowCsvParser.parse(workflowCsv));
 
 		// create environment.txt with user parameters that are used in at least
 		// one of the steps
-		new EnvironmentGenerator().generate(compute, workDir);
+		new EnvironmentGenerator().generate(compute, runDir);
 
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
@@ -141,23 +146,18 @@ public class ComputeCommandLine
 		// generate outputs folders per task
 		for (Task t : compute.getTasks())
 		{
-			File f = new File(workDir + "/outputs/" + t.getName());
+			File f = new File(runDir + "/outputs/" + t.getName());
 			f.mkdirs();
 			System.out.println("Generated " + f.getAbsolutePath());
 		}
 
 		// generate documentation
-		new DocTotalParametersCsvGenerator().generate(new File(workDir + "/doc/outputs.csv"), compute.getParameters());
-		new DocWorkflowDiagramGenerator().generate(new File(workDir + "/doc"), compute.getWorkflow());
-		new DocTasksDiagramGenerator().generate(new File(workDir + "/doc"), compute.getTasks());
+		new DocTotalParametersCsvGenerator().generate(new File(runDir + "/doc/outputs.csv"), compute.getParameters());
+		new DocWorkflowDiagramGenerator().generate(new File(runDir + "/doc"), compute.getWorkflow());
+		new DocTasksDiagramGenerator().generate(new File(runDir + "/doc"), compute.getTasks());
 
 		System.out.println("Generation complete");
 		return compute;
-	}
-
-	private static boolean isNotSet(String workflowCsv)
-	{
-		return null == workflowCsv || "".equals(workflowCsv);
 	}
 
 	/**
@@ -169,8 +169,8 @@ public class ComputeCommandLine
 	 */
 	public static Compute create(String parametersCsv) throws IOException, Exception
 	{
-		Compute c = ComputeCommandLine.create("", new String[]
-		{ parametersCsv }, "", "", "");
+		Compute c = ComputeCommandLine.create("", "", new String[]
+		{ parametersCsv }, "", "", "", "", "");
 		return c;
 	}
 }
