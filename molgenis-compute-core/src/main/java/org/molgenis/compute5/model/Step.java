@@ -81,7 +81,14 @@ public class Step
 		{
 			if (!parameter.startsWith(Parameters.USER_PREFIX))
 			{
-				previousSteps.add(parameter.substring(0, parameter.indexOf(Parameters.STEP_PARAM_SEP)));
+				int ps = parameter.indexOf(Parameters.STEP_PARAM_SEP);
+				if (-1 == ps)
+				{
+					System.err.println(">> ERROR >> In your workflow in step '" + this.getName() + "', it is unclear from which step your parameter value '=" + parameter + "' originates. Please prepend user_ or step1_ or similar." );
+					System.err.println(">> Exit with exit status 1.");
+					System.exit(1);
+				}
+				previousSteps.add(parameter.substring(0, ps));
 			}
 		}
 	}
