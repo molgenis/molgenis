@@ -30,7 +30,7 @@ public class Parameters
 	public final static String PATH = "path";
 	public final static String PATH_DEFAULT = ".";
 	public final static String PATH_CMNDLINE_OPTION = "path";
-	public final static String WORKDIR_COLUMN = USER_PREFIX + PATH;
+	public final static String PATH_COLUMN = USER_PREFIX + PATH;
 	public static final String PREVIOUS = "PREVIOUS";
 	public static final String PREVIOUS_COLUMN = USER_PREFIX + PREVIOUS;
 	public static final String PARAMETERS_CMNDLINE_OPTION = "p";
