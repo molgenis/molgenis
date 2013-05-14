@@ -124,7 +124,7 @@ public class ParametersCsvParser
 			tupleLst = updatePath(tupleLst, Parameters.WORKFLOW, f);
 
 			// same for output path
-			tupleLst = updatePath(tupleLst, Parameters.WORKDIR_COLUMN, f);
+//			tupleLst = updatePath(tupleLst, Parameters.WORKDIR_COLUMN, f);
 			
 			// get other param files we have to parse, and validate that all
 			// values in 'parameters' column equal. If file path is relative
