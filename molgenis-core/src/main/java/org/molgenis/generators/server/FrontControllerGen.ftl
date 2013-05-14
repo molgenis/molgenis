@@ -31,22 +31,6 @@ import org.apache.commons.dbcp.BasicDataSource;
 import ${package}.EntitiesImporterImpl;
 import ${package}.EntitiesValidatorImpl;
 
-<#if generate_BOT>
-import java.io.IOException;
-import ircbot.IRCHandler;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import generic.JavaCompiler;
-import generic.JavaCompiler.CompileUnit;
-</#if>
-
-<#if db_mode != 'standalone' || databaseImp = 'jpa'>
-import javax.servlet.ServletContext;
-import org.molgenis.framework.db.jdbc.JndiDataSourceWrapper;
-</#if>
-
 public class FrontController extends MolgenisFrontController
 {
 	private static final long serialVersionUID = 3141439968743510237L;
@@ -95,72 +79,14 @@ public class FrontController extends MolgenisFrontController
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response)
 	{
-	<#if databaseImp = 'jpa'>
-			super.service(request, response);
-	<#else>
-		try
-		{
-			Connection conn = context.getDataSource().getConnection();
-			DatabaseFactory.create(new ${package}.JDBCDatabase(conn));
-			
-			Login login = (Login) request.getSession().getAttribute("login");
-			if (login == null)
-			{
-			<#if auth_redirect != ''>
-				login = new ${loginclass}(DatabaseFactory.get(), "${auth_redirect}", context.getTokenFactory());
-			<#else>
-				login = new ${loginclass}(DatabaseFactory.get(), context.getTokenFactory());
-			</#if>			
-				request.getSession().setAttribute("login", login);
-			}
-
-			DatabaseFactory.get().setLogin(login);
-
-			super.service(request, response);
-		}
-		catch (Exception e)
-		{
-			logger.error("Exception creating database", e);
-		}
-		finally
-		{
-			DatabaseFactory.destroy();
-		}
-	</#if>
+		super.service(request, response);
 	}
 	
 	@Override
 	public DataSource createDataSource()
 	{
-	<#if databaseImp = 'jpa'>
 		//JPA datasource is provided/managed by server or configured in persistence.xml
 		//The application code is shielded from connection/datasource pool details! 
 		return null;
-	<#else>
-		<#if db_mode != 'standalone'>
-		BasicDataSource data_src = new BasicDataSource();
-		data_src.setDriverClassName("${db_driver}");
-		data_src.setUsername("${db_user}");
-		data_src.setPassword("${db_password}");
-		data_src.setUrl("${db_uri}");
-		data_src.setMaxActive(8);
-		data_src.setMaxIdle(4);
-		DataSource dataSource = (DataSource)data_src;
-		return dataSource;
-		<#else>
-		BasicDataSource data_src = new BasicDataSource();
-		data_src.setDriverClassName("${db_driver}");
-		data_src.setUsername("${db_user}");
-		data_src.setPassword("${db_password}");
-		data_src.setUrl("${db_uri}");
-		//data_src.setMaxIdle(10);
-		//data_src.setMaxWait(1000);
-		data_src.setInitialSize(10);
-		data_src.setTestOnBorrow(true);
-		DataSource dataSource = (DataSource)data_src;
-		return dataSource;
-		</#if>
-	</#if>
 	}
-	
 }
