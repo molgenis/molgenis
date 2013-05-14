@@ -6,7 +6,7 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 
-	ns.selectEntity = function(name) {
+	ns.onEntityChange = function(name) {
 		restApi.getAsync('/api/v1/' + name, null, function(entities) {
 			var items = [];
 			// TODO deal with multiple entity pages
@@ -14,9 +14,6 @@
 				items.push('<option value="' + val.href + '">' + val.name + '</option>');
 			});
 			$('#entity-instance-select').html(items.join(''));
-			$('#entity-instance-select').change(function() {
-				ns.onEntitySelectionChange($(this).val());
-			});
 
 			// select first option
 			$('#entity-instance-select').val($("#entity-instance-select option:first").val());
@@ -76,7 +73,14 @@
 	// on document ready
 	$(function() {
 		$('#entity-select').change(function() {
-			ns.selectEntity($(this).val());
+			ns.onEntityChange($(this).val());
 		});
+		$('#entity-instance-select').change(function() {
+			ns.onEntitySelectionChange($(this).val());
+		});
+
+		var selected = $('#entity-instance-select').val();
+		if (selected != null)
+			$('#entity-instance-select').change();
 	});
 }($, window.top));

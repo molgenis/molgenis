@@ -20,13 +20,9 @@ import app.CsvExport;
 import app.CsvImport;
 import app.DatabaseFactory;
 
-<#if databaseImp != 'jpa'>	
-import app.JDBCDatabase;
-<#else>
 import javax.persistence.*;
 import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.db.jpa.JpaUtil;
-</#if>
 
 import java.io.File;
 import java.io.IOException;
@@ -73,15 +69,12 @@ public class TestCsv
 	DateFormat dateFormat = new SimpleDateFormat(SimpleTuple.DATEFORMAT, Locale.US);
 	DateFormat dateTimeFormat = new SimpleDateFormat(SimpleTuple.DATETIMEFORMAT, Locale.US);	 
 
-<#if databaseImp = 'jpa'>	
 	private static java.util.Map<String, Object> configOverrides = new java.util.HashMap<String, Object>();
 	static {
 		configOverrides.put("javax.persistence.jdbc.url", "${options.dbUri}_test");
 		configOverrides.put("hibernate.hbm2ddl.auto", "create-drop");
 	}
-</#if>
-	
-<#if databaseImp = 'jpa'>		
+
 	@BeforeClass
 	public static void oneTimeSetUp()   
 	{
@@ -102,28 +95,6 @@ public class TestCsv
 	public static void destory() {
             JpaUtil.dropTables((JpaDatabase)db, configOverrides);		
 	}	
-<#else>
-	@BeforeClass
-	public static void oneTimeSetUp()   
-	{
-		try
-		{
-        		
-			db = DatabaseFactory.createTest("${options.molgenis_properties}");
-			new Molgenis("${options.molgenis_properties}");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		logger.info("Database created");
-	}
-
-	@AfterClass
-	public static void destory() {
-            
-	}
-</#if>		
 	
 	@Test
 	public void testCsv1()  throws Exception
@@ -133,17 +104,11 @@ public class TestCsv
 		dir.delete(); //delete the file, need dir
 		
 		//create a test set1
-		<#if databaseImp = 'jpa'>
         TestDataSet set1 = new TestDataSet(50,5);		
         JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
 <#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
 			app.FillMetadata.fillMetadata(db);
 </#if>			
-        <#else>
-        TestDataSet set1 = new TestDataSet(50,5);
-        </#if>
-                
-
 
 		CsvEntityExporter entityExporter = new CsvEntityExporter();
 		CsvEntityImporter entityImporter = new CsvEntityImporterImpl();
@@ -167,15 +132,11 @@ public class TestCsv
 		entityExporter.exportAll(dir2,db);
 	
 		//clean database
-		<#if databaseImp = 'jpa'>
-            JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
+		JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
 <#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
-			app.FillMetadata.fillMetadata(db);
+		app.FillMetadata.fillMetadata(db);
 </#if>			
-		<#else>
-			new Molgenis("${options.molgenis_properties}").updateDb();
-		</#if>
-		
+
 		//import dir2 into database
 		entityImporter.importAll(dir2, db, null);
 		
@@ -190,15 +151,11 @@ public class TestCsv
 		entityExporter.exportAll(dir3,db);
 		
 		//clean database
-		<#if databaseImp = 'jpa'>
-            JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
+        JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
 <#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
-			app.FillMetadata.fillMetadata(db);
+		app.FillMetadata.fillMetadata(db);
 </#if>			
-		<#else>
-			new Molgenis("${options.molgenis_properties}").updateDb();
-		</#if>
-		
+
 		//import dir3 into database
 		entityImporter.importAll(dir3, db, null);
 		
