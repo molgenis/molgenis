@@ -140,7 +140,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
-	public ViewResolver viewRespolver()
+	public ViewResolver viewResolver()
 	{
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);
