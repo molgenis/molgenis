@@ -56,7 +56,7 @@ public class ComputeCommandLine
 
 	}
 
-	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String workDir, String backend,
+	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String path, String backend,
 			String runDir, String runID, String database) throws IOException, Exception
 	{
 		List<File> parameterFiles = new ArrayList<File>();
@@ -97,7 +97,7 @@ public class ComputeCommandLine
 		// add command line parameters:
 		for (WritableTuple t : compute.getParameters().getValues())
 		{
-			t.set(Parameters.WORKDIR_COLUMN, new File(workDir).getAbsolutePath());
+			t.set(Parameters.PATH_COLUMN, new File(path).getAbsolutePath());
 			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
 			t.set(Parameters.DEFAULTS_COLUMN, new File(defaults).getAbsolutePath());
 			t.set(Parameters.RUNDIR_COLUMN, new File(runDir).getAbsolutePath());
