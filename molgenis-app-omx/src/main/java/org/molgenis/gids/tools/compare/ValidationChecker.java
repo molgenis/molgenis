@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.io.csv.CsvReader;
 import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.util.tuple.Tuple;
@@ -36,14 +37,16 @@ public class ValidationChecker
 		// Make Object Reference
 		ValidationFile ref = new ValidationFile();
 		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(file1));
+
 		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
+
 		ref.bla(excelSheetReaderReferenceFile, IDENTIFIER);
 
 		// Make Object FileToCompare
 		ValidationFile com = new ValidationFile();
-		ExcelReader excelReaderFileToCompare = new ExcelReader(new File(file2));
-		ExcelSheetReader excelSheetReaderFileToCompare = excelReaderFileToCompare.getSheet(0);
-		com.bla(excelSheetReaderFileToCompare, IDENTIFIER);
+		CsvReader csvReaderFileToCompare = new CsvReader(new File(file2));
+
+		com.bla(csvReaderFileToCompare, IDENTIFIER);
 		boolean noUniqueColums = false;
 		// Make list for shared headers
 
@@ -81,7 +84,6 @@ public class ValidationChecker
 			System.out.println("###There are no added/deleted columns\n");
 		}
 
-		// print the header
 		System.out.println("\n###Comparing the values ");
 		System.out.println("Sample ID\tFeature\tFile1\tFile2");
 
@@ -113,7 +115,6 @@ public class ValidationChecker
 				if (!com.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
-					// listOfUniqueSampleIdsReference.add(entry.getKey());
 				}
 			}
 			System.out.println("\n###Unique samples in file2 ");
@@ -122,14 +123,13 @@ public class ValidationChecker
 				if (!ref.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
-					// listOfUniqueSampleIdsFilesToCompare.add(entry.getKey());
 				}
 			}
 
 		}
 		finally
 		{
-			IOUtils.closeQuietly(excelReaderFileToCompare);
+			IOUtils.closeQuietly(csvReaderFileToCompare);
 			IOUtils.closeQuietly(excelReaderReferenceFile);
 		}
 	}
@@ -140,33 +140,33 @@ public class ValidationChecker
 
 		for (String e : listOfHeaders)
 		{
+
 			if (firstTuple.getString(e) == null && secondTuple.getString(e) == null)
 			{
 
 			}
 			else if (firstTuple.getString(e) != null && secondTuple.getString(e) == null)
 			{
-				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e)
-						&& !hashCheckedValues.containsValue(secondTuple))
+				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
 				{
-					System.out.println(firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
+					System.out.println("### " + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
 							+ (secondTuple.getString(e) == null ? ("\tAdded") : secondTuple.getString(e)) + "\t"
 							+ firstTuple.getString(e));
 					hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
+
 				}
 
 			}
 			else if (firstTuple.getString(e) == null && secondTuple.getString(e) != null)
 			{
-				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e)
-						&& !hashCheckedValues.containsValue(secondTuple))
+				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
 				{
 					System.out.println(firstTuple.getString(IDENTIFIER)
 							+ "\t"
 							+ e
 							+ "\t"
-							+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "file2") : secondTuple
-									.getString(e)) + "\t" + firstTuple.getString(e));
+							+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "file2") : "|"
+									+ secondTuple.getString(e)) + "|\t|" + firstTuple.getString(e) + "|");
 					hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
 				}
 			}
@@ -174,8 +174,7 @@ public class ValidationChecker
 			{
 				if (!firstTuple.getString(e).equals(secondTuple.getString(e)))
 				{
-					if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e)
-							&& !hashCheckedValues.containsValue(secondTuple))
+					if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
 					{
 
 						hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
@@ -183,10 +182,8 @@ public class ValidationChecker
 								+ "\t"
 								+ e
 								+ "\t"
-								+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "Reference") : secondTuple
-										.getString(e)) + "\t" + firstTuple.getString(e)
-
-						);
+								+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "Reference") : "|"
+										+ secondTuple.getString(e)) + "|\t|" + firstTuple.getString(e) + "|");
 					}
 
 				}

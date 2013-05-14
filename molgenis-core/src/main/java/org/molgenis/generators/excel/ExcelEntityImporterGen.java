@@ -11,16 +11,14 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
-import org.molgenis.generators.sql.MySqlCreateClassPerTableGen;
+import org.molgenis.generators.Generator;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
 
 import freemarker.template.Template;
 
-public class ExcelEntityImporterGen extends MySqlCreateClassPerTableGen // TODO
-// extends
-// Generator
+public class ExcelEntityImporterGen extends Generator
 {
 	private static final Logger logger = Logger.getLogger(ExcelEntityImporterGen.class);
 

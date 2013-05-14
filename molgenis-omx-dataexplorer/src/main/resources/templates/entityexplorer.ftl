@@ -20,7 +20,7 @@
 						<div class="controls">
 							<select data-placeholder="Please Select" id="entity-select">
 						<#list entities as entity>
-							<option value="${entity?lower_case}">${entity}</option>
+								<option value="${entity?lower_case}"<#if entity == selectedEntity> selected</#if>>${entity}</option>
 						</#list>
 				      		</select>
 						</div>
@@ -29,6 +29,9 @@
 				      	<label class="control-label" for="entity-instance-select">Entity instance:</label>
 						<div class="controls">
 							<select data-placeholder="Please Select" id="entity-instance-select">
+						<#list entityInstances as entityInstance>
+								<option value="/api/v1/${selectedEntity?lower_case}/${entityInstance.id}"<#if entityInstance.id == selectedEntityInstance.id> selected</#if>>${entityInstance.identifier}</option>
+						</#list>
 					      	</select>
 					    </div>
 			      	</div>
