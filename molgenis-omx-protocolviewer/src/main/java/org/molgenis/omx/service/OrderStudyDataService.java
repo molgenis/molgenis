@@ -23,16 +23,12 @@ import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
 
 @Service
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_REQUEST)
 public class OrderStudyDataService
 {
 	private static Logger logger = Logger.getLogger(OrderStudyDataService.class);
