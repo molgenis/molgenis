@@ -71,6 +71,8 @@ import org.molgenis.generators.server.MolgenisGuiServiceGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
+import org.molgenis.generators.sql.CountPerEntityGen;
+import org.molgenis.generators.sql.CountPerTableGen;
 import org.molgenis.generators.ui.EasyPluginControllerGen;
 import org.molgenis.generators.ui.FormControllerGen;
 import org.molgenis.generators.ui.HtmlFormGen;
@@ -273,6 +275,12 @@ public class Molgenis
 				{
 					generators.add(new PersistenceGen());
 				}
+			}
+			else
+			{
+				// SQL
+				generators.add(new CountPerEntityGen());
+				generators.add(new CountPerTableGen());
 			}
 
 			if (options.generate_metadata)
