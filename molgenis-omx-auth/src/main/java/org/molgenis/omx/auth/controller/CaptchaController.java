@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
 
-@Scope(WebApplicationContext.SCOPE_SESSION)
 @Controller
 public class CaptchaController
 {

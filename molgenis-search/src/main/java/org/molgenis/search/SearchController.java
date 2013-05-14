@@ -3,12 +3,10 @@ package org.molgenis.search;
 import static org.molgenis.search.SearchController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author erwin
  * 
  */
-@Scope(SCOPE_REQUEST)
 @Controller
 @RequestMapping(URI)
 public class SearchController implements InitializingBean
@@ -46,8 +43,7 @@ public class SearchController implements InitializingBean
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ResponseEntity<SearchResult> search(@RequestBody
-	SearchRequest request)
+	public ResponseEntity<SearchResult> search(@RequestBody SearchRequest request)
 	{
 		SearchResult result;
 		try

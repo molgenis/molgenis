@@ -9,10 +9,11 @@ import nl.captcha.backgrounds.GradiatedBackgroundProducer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-@Scope(WebApplicationContext.SCOPE_SESSION)
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
 @Service
 public class CaptchaService
 {

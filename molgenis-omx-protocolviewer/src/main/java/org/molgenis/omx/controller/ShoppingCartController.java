@@ -12,7 +12,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -28,7 +26,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @Controller
-@Scope(WebApplicationContext.SCOPE_REQUEST)
 @RequestMapping("/cart")
 public class ShoppingCartController
 {
