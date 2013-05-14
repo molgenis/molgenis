@@ -1,0 +1,2 @@
+workflow,impute2Bin,impute2gridBin,impute2version,imputationIntermediatesFolder,impute2ChunkOutput,impute2ChunkOutputInfo
+workflow.csv,${tooldir}/impute_${impute2version}/impute2,impute2,v2.3.0_x86_64_static,${outputFolder}/imputationChunks/,${imputationIntermediatesFolder}/chr${chr}_${fromChrPos}-${toChrPos},${imputationIntermediatesFolder}/chr${chr}_${fromChrPos}-${toChrPos}_info
