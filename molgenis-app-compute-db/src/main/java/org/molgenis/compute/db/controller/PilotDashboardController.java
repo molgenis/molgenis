@@ -34,9 +34,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Scope("request")
 @Controller
-@RequestMapping("/plugin/dashboard")
+@RequestMapping(PilotDashboardController.URI)
 public class PilotDashboardController
 {
+	public static final String URI = "/plugin/dashboard";
 	private static final String VIEW_NAME = "PilotDashboard";
 	private final Database database;
 	private final RunService runService;

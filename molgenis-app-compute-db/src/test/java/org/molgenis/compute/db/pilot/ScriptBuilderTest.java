@@ -24,20 +24,21 @@ public class ScriptBuilderTest
 		task.setComputeRun(run);
 		task.setPrevSteps(prev);
 
-		ScriptBuilder builder = new ScriptBuilder(task, "http://localhost", "/api/pilot");
+		ScriptBuilder builder = new ScriptBuilder("username", "password");
 
 		String expected = "echo TASKNAME:task1\n"
 				+ "echo RUNNAME:run1\n"
-				+ "curl -s -S -o user.env http://localhost/environment/run1/user.env\n"
-				+ "curl -s -S -o task2.env http://localhost/environment/run1/task2.env\n"
+				+ "curl -s -S -u username:password -o user.env http://localhost/environment/run1/user.env\n"
+				+ "curl -s -S -u username:password -o task2.env http://localhost/environment/run1/task2.env\n"
 				+ "echo hallo\n"
 				+ "cp log.log done.log\n"
 				+ "if [ -f task1.env ]; then\n"
-				+ "curl -s -S -F status=done -F log_file=@done.log -F output_file=@task1.env http://localhost/api/pilot\n"
-				+ "else\n" + "curl -s -S -F status=done -F log_file=@done.log http://localhost/api/pilot\n" + "fi\n"
-				+ "rm user.env\n" + "rm task2.env\n" + "rm task1.env\n";
+				+ "curl -s -S -u username:password -F status=done -F log_file=@done.log -F output_file=@task1.env http://localhost/api/pilot\n"
+				+ "else\n"
+				+ "curl -s -S -u username:password -F status=done -F log_file=@done.log http://localhost/api/pilot\n"
+				+ "fi\n" + "rm user.env\n" + "rm task2.env\n" + "rm task1.env\n";
 
-		assertEquals(builder.build(), expected);
+		assertEquals(builder.build(task, "http://localhost", "/api/pilot"), expected);
 
 	}
 }
