@@ -23,13 +23,14 @@ public class ComputeProperties
 {
 	public File propertiesFile;
 
-	public String workFlow = Parameters.WORKFLOW_DEFAULT;
 	public String workDir = Parameters.WORKDIR_DEFAULT;
+	public String workFlow = Parameters.WORKFLOW_DEFAULT;
+	public String defaults = Parameters.DEFAULTS_DEFAULT;
+	public String[] parameters = { Parameters.PARAMETERS_DEFAULT };
 	public String backend = Parameters.BACKEND_DEFAULT;
 	public String runDir = Parameters.RUNDIR_DEFAULT;
 	public String runId = Parameters.RUNID_DEFAULT;
-	public String[] parameters =
-	{ Parameters.PARAMETERS_DEFAULT };
+	public String database = Parameters.DATABASE_DEFAULT;
 
 	public ComputeProperties(String[] args)
 	{
@@ -76,12 +77,14 @@ public class ComputeProperties
 			p.load(new FileInputStream(this.propertiesFile));
 
 			// set this.variables
-			this.workFlow = p.getProperty(Parameters.WORKFLOW, this.workFlow);
 			this.workDir = p.getProperty(Parameters.WORKDIR, this.workDir);
+			this.workFlow = p.getProperty(Parameters.WORKFLOW, this.workFlow);
+			this.defaults = p.getProperty(Parameters.DEFAULTS, this.defaults);
 			this.backend = p.getProperty(Parameters.BACKEND, this.backend);
 			this.runDir = p.getProperty(Parameters.RUNDIR, this.runDir);
 			this.runId = p.getProperty(Parameters.RUNID, this.runId);
-
+			this.database = p.getProperty(Parameters.DATABASE, this.database);
+			
 			String parametersCSVString = p.getProperty(Parameters.PARAMETERS);
 			if (null != parametersCSVString) this.parameters = parametersCSVString.split("\\s*,\\s*");
 		}
@@ -101,18 +104,21 @@ public class ComputeProperties
 			CommandLine cmd = parser.parse(options, args);
 
 			// set this.variables
-			this.workFlow = cmd.getOptionValue(Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.workDir = cmd.getOptionValue(Parameters.WORKDIR_CMNDLINE_OPTION, this.workDir);
+			this.workFlow = cmd.getOptionValue(Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
+			this.defaults = cmd.getOptionValue(Parameters.DEFAULTS, this.defaults);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
 			this.runDir = cmd.getOptionValue(Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
-
+			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
+			
 			String[] cmdParameters = cmd.getOptionValues(Parameters.PARAMETERS_CMNDLINE_OPTION);
 			if (null != cmdParameters) this.parameters = cmdParameters;
 
 			// prepend workDir to relative paths
 			String wd = this.workDir + (this.workDir.endsWith("/") ? "" : "/");
 			if (!this.workFlow.startsWith("/")) this.workFlow = wd + this.workFlow;
+			if (!this.defaults.startsWith("/")) this.defaults = wd + this.defaults;
 			if (!this.runDir.startsWith("/")) this.runDir = wd + this.runDir;
 			ArrayList<String> pathParameters = new ArrayList<String>();
 			for (String p : this.parameters)
@@ -133,11 +139,13 @@ public class ComputeProperties
 		try
 		{
 			// set this.variables
-			p.setProperty(Parameters.WORKFLOW, this.workFlow);
 			p.setProperty(Parameters.WORKDIR, this.workDir);
+			p.setProperty(Parameters.WORKFLOW, this.workFlow);
+			p.setProperty(Parameters.DEFAULTS, this.defaults);
 			p.setProperty(Parameters.BACKEND, this.backend);
 			p.setProperty(Parameters.RUNDIR, this.runDir);
 			p.setProperty(Parameters.RUNID, this.runId);
+			p.setProperty(Parameters.DATABASE, this.database);
 			p.setProperty(Parameters.PARAMETERS, Joiner.on(",").join(this.parameters));
 
 			p.store(new FileOutputStream(this.propertiesFile), "This file contains your molgenis-compute properties");
