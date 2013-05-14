@@ -26,7 +26,7 @@ public class BimFileDriver implements PlinkFileParser
 {
 	private BufferedReader reader;
 	private File file;
-	private char separator;
+	private String separators;
 	private long nrElements;
 
 	/**
@@ -37,14 +37,19 @@ public class BimFileDriver implements PlinkFileParser
 	 */
 	public BimFileDriver(File bimFile)
 	{
-		this(bimFile, DEFAULT_FIELD_SEPARATOR);
+		this(bimFile, DEFAULT_READ_FIELD_SEPARATORS);
 	}
 
 	public BimFileDriver(File bimFile, char separator)
 	{
+		this(bimFile, String.valueOf(separator));
+	}
+	
+	public BimFileDriver(File bimFile, String separators)
+	{
 		if (bimFile == null) throw new IllegalArgumentException("file is null");
 		this.file = bimFile;
-		this.separator = separator;
+		this.separators = separators;
 		this.nrElements = -1l;
 	}
 
@@ -90,7 +95,7 @@ public class BimFileDriver implements PlinkFileParser
 
 	private BimEntry parseEntry(String line) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, this.separator + "");
+		StringTokenizer strTokenizer = new StringTokenizer(line, this.separators);
 		try
 		{
 			String chromosome = strTokenizer.nextToken();

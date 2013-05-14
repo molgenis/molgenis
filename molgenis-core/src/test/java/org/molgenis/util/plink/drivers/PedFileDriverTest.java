@@ -15,6 +15,7 @@ public class PedFileDriverTest extends AbstractResourceTest
 	@BeforeClass
 	public void setup() throws Exception
 	{
+		System.out.println(getTestResource("/test.ped").getCanonicalPath());
 		pedfd = new PedFileDriver(getTestResource("/test.ped"));
 	}
 

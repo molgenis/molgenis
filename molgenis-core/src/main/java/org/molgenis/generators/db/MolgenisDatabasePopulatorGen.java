@@ -17,14 +17,14 @@ import org.molgenis.model.elements.Model;
 
 import freemarker.template.Template;
 
-public class FillMetadataGen extends Generator
+public class MolgenisDatabasePopulatorGen extends Generator
 {
-	private static final Logger logger = Logger.getLogger(FillMetadataGen.class);
+	private static final Logger logger = Logger.getLogger(MolgenisDatabasePopulatorGen.class);
 
 	@Override
 	public String getDescription()
 	{
-		return "Generates one FillMetadata class that will insert meta data into the database (for auth)";
+		return "Generates one MolgenisDatabasePopulator class that will insert data into the database (for auth)";
 	}
 
 	@Override
@@ -39,8 +39,7 @@ public class FillMetadataGen extends Generator
 			Map<String, Object> templateArgs = createTemplateArguments(options);
 
 			List<Entity> entityList = model.getEntities();
-			// this.sortEntitiesByXref(entityList,model); //side effect?
-			File target = new File(this.getSourcePath(options) + APP_DIR + "/FillMetadata.java");
+			File target = new File(this.getSourcePath(options) + APP_DIR + "/MolgenisDatabasePopulator.java");
 			boolean created = target.getParentFile().mkdirs();
 			if (!created && !target.getParentFile().exists())
 			{
@@ -62,5 +61,4 @@ public class FillMetadataGen extends Generator
 			logger.info("generated " + target);
 		}
 	}
-
 }

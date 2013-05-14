@@ -16,8 +16,10 @@
 			<description>A protocolApplication that reports the application of running a ComputeProtocol.</description>
 			<field name="computeRun" type="xref" xref_entity="ComputeRun" description="The run this task is part of" nillable="false" />
 			<field name="computeScript" type="text" description="The actual command to be sent to the cluster, is a filled in version of the one define in the ComputeProtocol" />
+   			<field name="outputEnvironment" type="text" label="Output environment vars" nillable="true" description="Environment vars created by this step" />
    			<field name="RunInfo" type="text" description="Summary of the task execution" nillable="true" />   
 			<field name="runLog" type="text" description="Log of the task execution" nillable="true" />
+			<field name="failedLog" type="text" description="Failed log of the task execution" nillable="true" />
          	<field name="interpreter" type="enum" enum_options="[bash,R]" description="the interpreter used to run this command. For example 'shellTemplate'" />
 			<field name="prevSteps" type="mref" xref_entity="ComputeTask" nillable="true" description="To keep track of calculation dependencies" />
 			<field name="statusCode" nillable="false" type="enum" enum_options="[generated,ready,running,failed,done]" default="generated"
@@ -44,7 +46,7 @@
       		<field name="creationTime" label="Creationtime" type="datetime" auto="true" description="time of creation" />
       		<field name="showInDashboard" type="boolean" label="Show in dashboard" default="true" description="Show this run in the dashboard" />
       		<field name="computeBackend" type="xref" label="Backend" xref_entity="ComputeBackend" nillable="false" description="Backend where run will be executed" />
-            <field name="environment" type="text" label="Environment" nillable="true" description="Environment vars for all steps" />
+            <field name="userEnvironment" type="text" label="User environment" nillable="true" description="Environment vars provided by the user" />
             <field name="pollDelay" type="long" nillable="false" label="Poll delay" description="Delay between two database ComputeTask polls" />
       		<unique fields="name" />
       	</entity>

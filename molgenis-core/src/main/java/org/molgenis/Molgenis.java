@@ -49,7 +49,7 @@ import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
-import org.molgenis.generators.db.FillMetadataGen;
+import org.molgenis.generators.db.MolgenisDatabasePopulatorGen;
 import org.molgenis.generators.db.JDBCDatabaseGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.JpaDatabaseGen;
@@ -360,7 +360,7 @@ public class Molgenis
 
 			if (options.generate_metadata)
 			{
-				generators.add(new FillMetadataGen());
+				generators.add(new MolgenisDatabasePopulatorGen());
 			}
 			// authorization
 			if (!options.auth_loginclass.endsWith("SimpleLogin"))

@@ -12,6 +12,7 @@ import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -63,6 +64,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		converters.add(new GsonHttpMessageConverter());
 		converters.add(new BufferedImageHttpMessageConverter());
+	}
+
+	@Bean
+	public ApplicationListener<?> databasePopulator()
+	{
+		return new WebAppDatabasePopulator();
 	}
 
 	@Bean
