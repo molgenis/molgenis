@@ -1,5 +1,7 @@
 package org.molgenis.compute5.model;
 
+import org.molgenis.compute5.Validator;
+
 /** Input for a protocol.*/
 public class Input
 {
@@ -25,7 +27,8 @@ public class Input
 
 	public void setName(String name)
 	{
-		//FIXME add validation to ensure 'name' does only contain a-zA-Z0-9
+		//Validate that 'name' does only contain a-zA-Z0-9
+		Validator.validateParameterName(name);
 		if (Protocol.reservedNames.contains(name)) throw new RuntimeException("input name cannot be '" + name
 				+ "' because it is a reserved word");
 		this.name = name;
