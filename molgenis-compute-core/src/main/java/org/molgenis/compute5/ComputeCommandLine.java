@@ -47,7 +47,7 @@ public class ComputeCommandLine
 		// output scripts + docs
 		try
 		{
-			create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters, computeProperties.workDir, computeProperties.backend, computeProperties.runDir, computeProperties.runId, computeProperties.database);
+			create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters, computeProperties.path, computeProperties.backend, computeProperties.runDir, computeProperties.runId, computeProperties.database);
 		}
 		catch (Exception e)
 		{

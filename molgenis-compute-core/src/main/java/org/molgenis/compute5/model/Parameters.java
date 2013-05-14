@@ -27,10 +27,10 @@ public class Parameters
 	public static final String DEFAULTS = "defaults";
 	public static final String DEFAULTS_DEFAULT = "defaults.csv";
 	public static final String DEFAULTS_COLUMN = USER_PREFIX + DEFAULTS;
-	public final static String WORKDIR = "workdir";
-	public final static String WORKDIR_DEFAULT = ".";
-	public final static String WORKDIR_CMNDLINE_OPTION = "d";
-	public final static String WORKDIR_COLUMN = USER_PREFIX + WORKDIR;
+	public final static String PATH = "path";
+	public final static String PATH_DEFAULT = ".";
+	public final static String PATH_CMNDLINE_OPTION = "path";
+	public final static String WORKDIR_COLUMN = USER_PREFIX + PATH;
 	public static final String PREVIOUS = "PREVIOUS";
 	public static final String PREVIOUS_COLUMN = USER_PREFIX + PREVIOUS;
 	public static final String PARAMETERS_CMNDLINE_OPTION = "p";

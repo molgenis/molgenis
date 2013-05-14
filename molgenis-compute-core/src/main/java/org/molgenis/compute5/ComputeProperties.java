@@ -23,7 +23,7 @@ public class ComputeProperties
 {
 	public File propertiesFile;
 
-	public String workDir = Parameters.WORKDIR_DEFAULT;
+	public String path = Parameters.PATH_DEFAULT;
 	public String workFlow = Parameters.WORKFLOW_DEFAULT;
 	public String defaults = Parameters.DEFAULTS_DEFAULT;
 	public String[] parameters = { Parameters.PARAMETERS_DEFAULT };
@@ -34,8 +34,8 @@ public class ComputeProperties
 
 	public ComputeProperties(String[] args)
 	{
-		// set work dir
-		parseCommandLine(args);
+		// set path
+		setPath(args);
 
 		createPropertiesFile();
 
@@ -49,10 +49,27 @@ public class ComputeProperties
 		saveProperties();
 	}
 
+	private void setPath(String[] args)
+	{
+		Options options = createOptions();
+		CommandLineParser parser = new PosixParser();
+		CommandLine cmd;
+		try
+		{
+			cmd = parser.parse(options, args);
+			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
+			this.path = this.path + (this.path.endsWith("/") ? "" : "/");
+		}
+		catch (ParseException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	private void createPropertiesFile()
 	{
 		// get location properties file
-		String propFileString = workDir + File.separator + Parameters.PROPERTIES;
+		String propFileString = path + File.separator + Parameters.PROPERTIES;
 
 		this.propertiesFile = new File(propFileString);
 
@@ -77,7 +94,7 @@ public class ComputeProperties
 			p.load(new FileInputStream(this.propertiesFile));
 
 			// set this.variables
-			this.workDir = p.getProperty(Parameters.WORKDIR, this.workDir);
+			this.path = p.getProperty(Parameters.PATH, this.path);
 			this.workFlow = p.getProperty(Parameters.WORKFLOW, this.workFlow);
 			this.defaults = p.getProperty(Parameters.DEFAULTS, this.defaults);
 			this.backend = p.getProperty(Parameters.BACKEND, this.backend);
@@ -104,7 +121,7 @@ public class ComputeProperties
 			CommandLine cmd = parser.parse(options, args);
 
 			// set this.variables
-			this.workDir = cmd.getOptionValue(Parameters.WORKDIR_CMNDLINE_OPTION, this.workDir);
+			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
 			this.workFlow = cmd.getOptionValue(Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.defaults = cmd.getOptionValue(Parameters.DEFAULTS, this.defaults);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
@@ -116,14 +133,14 @@ public class ComputeProperties
 			if (null != cmdParameters) this.parameters = cmdParameters;
 
 			// prepend workDir to relative paths
-			String wd = this.workDir + (this.workDir.endsWith("/") ? "" : "/");
-			if (!this.workFlow.startsWith("/")) this.workFlow = wd + this.workFlow;
-			if (!this.defaults.startsWith("/")) this.defaults = wd + this.defaults;
-			if (!this.runDir.startsWith("/")) this.runDir = wd + this.runDir;
+			String path = this.path + (this.path.endsWith("/") ? "" : "/");
+			if (!this.workFlow.startsWith("/")) this.workFlow = path + this.workFlow;
+			if (!this.defaults.startsWith("/")) this.defaults = path + this.defaults;
+			if (!this.runDir.startsWith("/")) this.runDir = path + this.runDir;
 			ArrayList<String> pathParameters = new ArrayList<String>();
 			for (String p : this.parameters)
 				if (p.startsWith("/")) pathParameters.add(p);
-				else pathParameters.add(wd + p);
+				else pathParameters.add(path + p);
 			this.parameters = pathParameters.toArray(new String[pathParameters.size()]);
 		}
 		catch (ParseException e)
@@ -139,7 +156,7 @@ public class ComputeProperties
 		try
 		{
 			// set this.variables
-			p.setProperty(Parameters.WORKDIR, this.workDir);
+			p.setProperty(Parameters.PATH, this.path);
 			p.setProperty(Parameters.WORKFLOW, this.workFlow);
 			p.setProperty(Parameters.DEFAULTS, this.defaults);
 			p.setProperty(Parameters.BACKEND, this.backend);
@@ -169,9 +186,9 @@ public class ComputeProperties
 				.withDescription("Path to parameter.csv file(s). Default: parameters.csv").create("p");
 		Option w = OptionBuilder.withArgName("workflow.csv").hasArg().withLongOpt(Parameters.WORKFLOW)
 				.withDescription("Path to your workflow file. Default: workflow.csv.").create("w");
-		Option d = OptionBuilder.hasArg().withLongOpt(Parameters.WORKDIR)
+		Option d = OptionBuilder.hasArg().withLongOpt(Parameters.PATH)
 				.withDescription("Path to directory this generates to. Default: <current dir>.")
-				.create(Parameters.WORKDIR_CMNDLINE_OPTION);
+				.create(Parameters.PATH_CMNDLINE_OPTION);
 		Option b = OptionBuilder.hasArg().withLongOpt(Parameters.BACKEND)
 				.withDescription("Backend for which you generate. Default: local.")
 				.create(Parameters.BACKEND_CMNDLINE_OPTION);
