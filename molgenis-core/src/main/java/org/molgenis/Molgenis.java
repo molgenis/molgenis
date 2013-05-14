@@ -49,15 +49,12 @@ import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
-import org.molgenis.generators.db.MolgenisDatabasePopulatorGen;
-import org.molgenis.generators.db.JDBCDatabaseGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.JpaDatabaseGen;
 import org.molgenis.generators.db.JpaMapperGen;
 import org.molgenis.generators.db.MapperDecoratorGen;
 import org.molgenis.generators.db.MapperSecurityDecoratorGen;
-import org.molgenis.generators.db.MultiqueryMapperGen;
-import org.molgenis.generators.db.PStatementMapperGen;
+import org.molgenis.generators.db.MolgenisDatabasePopulatorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
@@ -74,15 +71,6 @@ import org.molgenis.generators.server.MolgenisGuiServiceGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
-import org.molgenis.generators.sql.CountPerEntityGen;
-import org.molgenis.generators.sql.CountPerTableGen;
-import org.molgenis.generators.sql.DerbyCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.FillMetadataTablesGen;
-import org.molgenis.generators.sql.HSqlCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.MySqlAlterSubclassPerTableGen;
-import org.molgenis.generators.sql.MySqlCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.OracleCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.PSqlCreateSubclassPerTableGen;
 import org.molgenis.generators.ui.EasyPluginControllerGen;
 import org.molgenis.generators.ui.FormControllerGen;
 import org.molgenis.generators.ui.HtmlFormGen;
@@ -285,77 +273,6 @@ public class Molgenis
 				{
 					generators.add(new PersistenceGen());
 				}
-			}
-			else
-			{
-				// DATABASE
-				// mysql.org
-				if (options.db_driver.equals("com.mysql.jdbc.Driver"))
-				{
-					generators.add(new MySqlCreateSubclassPerTableGen());
-					generators.add(new MySqlAlterSubclassPerTableGen());
-					// use multiquery optimization
-					if (options.mapper_implementation.equals(MapperImplementation.MULTIQUERY))
-					{
-						generators.add(new JDBCDatabaseGen());
-						generators.add(new DatabaseConfigGen());
-						generators.add(new DataTypeGen());
-						generators.add(new EntityServiceGen());
-						generators.add(new MultiqueryMapperGen());
-					}
-					else if (options.mapper_implementation.equals(MapperImplementation.PREPARED_STATEMENT))
-					{
-						generators.add(new JDBCDatabaseGen());
-						generators.add(new DatabaseConfigGen());
-						generators.add(new DataTypeGen());
-						generators.add(new EntityServiceGen());
-						generators.add(new PStatementMapperGen());
-					}
-				} // hsqldb.org
-				else if (options.db_driver.equals("oracle.jdbc.driver.OracleDriver"))
-				{
-					generators.add(new OracleCreateSubclassPerTableGen());
-					generators.add(new JDBCDatabaseGen());
-					generators.add(new DatabaseConfigGen());
-					generators.add(new DataTypeGen());
-					generators.add(new EntityServiceGen());
-					generators.add(new PStatementMapperGen());
-				}
-				else if (options.db_driver.equals("org.hsqldb.jdbcDriver"))
-				{
-					logger.info("HsqlDB generators ....");
-					generators.add(new JDBCDatabaseGen());
-					generators.add(new DatabaseConfigGen());
-					generators.add(new DataTypeGen());
-					generators.add(new EntityServiceGen());
-					generators.add(new HSqlCreateSubclassPerTableGen());
-					generators.add(new PStatementMapperGen());
-				} // postgresql
-				else if (options.db_driver.equals("org.postgresql.Driver"))
-				{
-					generators.add(new PSqlCreateSubclassPerTableGen());
-					generators.add(new PStatementMapperGen());
-				} // h2database.com, branch of hsqldb?
-				else if (options.db_driver.equals("org.h2.Driver"))
-				{
-					generators.add(new HSqlCreateSubclassPerTableGen());
-					generators.add(new PStatementMapperGen());
-				} // derby, not functional ignore.
-				else if (options.db_driver.equals("org.apache.derby.jdbc.EmbeddedDriver"))
-				{
-					generators.add(new DerbyCreateSubclassPerTableGen());
-				}
-				else
-				{
-					logger.warn("Unknown database driver " + options.db_driver);
-				}
-
-				// test
-				generators.add(new JDBCMetaDatabaseGen());
-				// SQL
-				generators.add(new CountPerEntityGen());
-				generators.add(new CountPerTableGen());
-				generators.add(new FillMetadataTablesGen());
 			}
 
 			if (options.generate_metadata)

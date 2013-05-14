@@ -23,9 +23,7 @@ import org.molgenis.omx.core.MolgenisEntity;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-	<#if databaseImpl == 'JPA'>
 import javax.persistence.EntityManager;
-	</#if>
 import org.molgenis.framework.security.Login;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +128,6 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		adminToAllUsersLink.setRole(userAdmin);
 				
 		// add entities to database
-	<#if databaseImpl == 'JPA'>
 		EntityManager em = database.getEntityManager();
 		em.getTransaction().begin();
 		try
@@ -148,24 +145,6 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 			em.getTransaction().rollback();
 			throw e;
 		}
-	<#else>
-        database.beginTx();
-        try
-		{
-			database.add(userAdmin);
-			database.add(userAnonymous);
-			database.add(systemUsersGroup);
-			database.add(allUsersGroup);
-			database.add(adminToSystemLink);
-			database.add(adminToAllUsersLink);
-			database.commitTx();
-		}
-		catch(Exception e)
-		{
-			database.rollbackTx();
-			throw e;
-		}
-	</#if>
 
 		login.login(database, Login.USER_ADMIN_NAME, "admin"); // FIXME hardcoded reference to admin password
 

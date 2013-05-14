@@ -13,20 +13,12 @@
 			else if(tuple.get("${entity.name}_${f.name}")!= null) mrefs = tuple.getList("${entity.name}_${f.name}");
 			if(mrefs != null) for(Object ref: mrefs)
 			{
-			<#if databaseImp = 'JPA'>
 				if(ref instanceof String)
 					values.add(${type(xrefField(model,f))}.parse${settertype(xrefField(model,f))}((String)ref));
 				else if(ref instanceof org.molgenis.util.AbstractEntity) 	
 					values.add((${type(xrefField(model,f))})((org.molgenis.util.AbstractEntity)ref).getIdValue() );
 				else
 					values.add((${type(xrefField(model,f))})ref);		
-			<#else>
-			  	<#if JavaType(f.xrefField) == "String" >
-			  		values.add((${JavaType(f.xrefField)})ref);
-			  	<#else>
-			  		values.add(${type(f.xrefField)}.parse${settertype(f.xrefField)}((ref.toString())));
-			  	</#if>
-		  	</#if>
 			}											
 			this.set${JavaName(f)}_${JavaName(f.xrefField)}( values );
 		}
@@ -69,7 +61,6 @@
 		if( tuple.get${settertype(f)}("${entity.name}_${f.name}_${f.xrefField.name}") != null) this.set${JavaName(f)}(tuple.get${settertype(f)}("${entity.name}_${f.name}_${f.xrefField.name}"));
 		else if( tuple.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}_${f.xrefField.name?lower_case}") != null) this.set${JavaName(f)}(tuple.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}_${f.xrefField.name?lower_case}"));
 		//alias of xref
-		<#if databaseImp = 'JPA'>
 		if( tuple.get("${f.name}") != null) { 
 			if(org.molgenis.util.AbstractEntity.isObjectRepresentation(tuple.get("${f.name}").toString())) {
 				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.util.AbstractEntity.setValuesFromString((String)tuple.get("${f.name}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
@@ -95,12 +86,6 @@
 			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})tuple.get("${entity.name}.${f.name}_${f.xrefField.name}"));
 		else if( tuple.get("${entity.name?lower_case}.${f.name?lower_case}") != null) 
 			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})tuple.get("${entity.name?lower_case}.${f.name?lower_case}_${f.xrefField.name?lower_case}"));	
-		<#else>			
-		if( tuple.get("${f.name}") != null) this.set${JavaName(f)}(tuple.get${settertype(f)}("${f.name}"));
-		else if( tuple.get("${f.name?lower_case}") != null) this.set${JavaName(f)}(tuple.get${settertype(f)}("${f.name?lower_case}"));
-		if( tuple.get("${entity.name}_${f.name}") != null) this.set${JavaName(f)}(tuple.get${settertype(f)}("${entity.name}_${f.name}"));
-		else if( tuple.get("${entity.name?lower_case}_${f.name?lower_case}") != null) this.set${JavaName(f)}(tuple.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}"));
-		</#if>
 		//set label for field ${JavaName(f)}
 		<#if f.xrefLabelNames[0] != f.xrefFieldName><#list f.xrefLabelNames as label>
 		if(tuple.get("${f.name}_${label}") != null) this.set${JavaName(f)}_${JavaName(label)}(tuple.get${settertype(f.xrefLabels[label_index])}("${f.name}_${label}"));
