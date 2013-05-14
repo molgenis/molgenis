@@ -60,8 +60,8 @@ public class TaskGeneratorDB
 	{
 		new TaskGeneratorDB()
 				.generateRun(
-						"/Users/erwin/projects/molgenis/molgenis-compute-core/src/main/resources/workflows/demoNBIC2/parameters.csv",
-						"nbic25", "localhost", 2000L);
+						"molgenis/molgenis-compute-core/src/main/resources/workflows/impute2/parameters.csv",
+						"test1", "localhost", 2000L);
 	}
 
 }
