@@ -147,7 +147,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	 * should end with '.ftl'
 	 */
 	@Bean
-	public ViewResolver viewRespolver()
+	public ViewResolver viewResolver()
 	{
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);

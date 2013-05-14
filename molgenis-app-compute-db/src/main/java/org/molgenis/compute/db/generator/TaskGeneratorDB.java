@@ -47,9 +47,11 @@ public class TaskGeneratorDB
 
 	public static void main(String[] args) throws Exception
 	{
+
 		new TaskGeneratorDB().generateRun(
-				"../molgenis-compute-core/src/main/resources/workflows/demoNBIC2/parameters.csv", "nbic25",
+				"molgenis/molgenis-compute-core/src/main/resources/workflows/impute2/parameters.csv", "test1",
 				"localhost", 2000L);
+
 	}
 
 }
