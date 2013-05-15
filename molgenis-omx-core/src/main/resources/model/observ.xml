@@ -109,7 +109,7 @@
 				description="(Optional) Reference to the well-defined measurement unit used to observe this feature 
 					(if feature is that concrete). E.g. mmHg" />
 			<field name="dataType" type="enum" default="string"
-				enum_options="[xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe, text]"
+				enum_options="[xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe]"
 				description="(Optional) Reference to the technical data type. E.g. 'int'" />
 			<field name="temporal" type="boolean" default="false"
 				description="Whether this feature is time dependent and can have different values when measured 
