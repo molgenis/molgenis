@@ -3,6 +3,7 @@
 	<head>
 		<title>Data explorer plugin</title>
 		<meta charset="utf-8">
+		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/dataexplorer.css" type="text/css">
