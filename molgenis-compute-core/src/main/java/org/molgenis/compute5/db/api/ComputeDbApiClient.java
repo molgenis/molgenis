@@ -1,5 +1,7 @@
 package org.molgenis.compute5.db.api;
 
+import java.io.IOException;
+
 /**
  * Client for the compute db api
  * 
@@ -86,11 +88,19 @@ public class ComputeDbApiClient
 		return computeDbApiConnection.doRequest(request, "/resubmit-failed-tasks", ResubmitFailedTasksResponse.class);
 	}
 
-	public static void main(String[] args) throws ApiException
+	public static void main(String[] args) throws ApiException, IOException
 	{
-		ComputeDbApiConnection con = new HttpClientComputeDbApiConnection("http://localhost:8080/api/v1");
-		ComputeDbApiClient client = new ComputeDbApiClient(con);
-		ResubmitFailedTasksResponse response = client.resubmitFailedTasks(new ResubmitFailedTasksRequest("nbic25"));
-		System.out.println(response);
+		ComputeDbApiConnection con = new HttpClientComputeDbApiConnection("localhost", 8080, "/api/v1", "admin",
+				"admin");
+		try
+		{
+			ComputeDbApiClient client = new ComputeDbApiClient(con);
+			ResubmitFailedTasksResponse response = client.resubmitFailedTasks(new ResubmitFailedTasksRequest("nbic25"));
+			System.out.println(response);
+		}
+		finally
+		{
+			con.close();
+		}
 	}
 }

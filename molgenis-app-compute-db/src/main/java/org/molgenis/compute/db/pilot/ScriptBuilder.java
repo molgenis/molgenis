@@ -13,18 +13,16 @@ import org.molgenis.compute.runtime.ComputeTask;
  */
 public class ScriptBuilder
 {
-	private final ComputeTask task;
-	private final String appLocation;
-	private final String pilotServicePath;
+	private final String username;
+	private final String password;
 
-	public ScriptBuilder(ComputeTask task, String appLocation, String pilotServicePath)
+	public ScriptBuilder(String username, String password)
 	{
-		this.task = task;
-		this.appLocation = appLocation;
-		this.pilotServicePath = pilotServicePath;
+		this.username = username;
+		this.password = password;
 	}
 
-	public String build()
+	public String build(ComputeTask task, String appLocation, String pilotServicePath)
 	{
 		String pilotServiceUrl = appLocation + pilotServicePath;
 		String computeScript = task.getComputeScript().replaceAll("\r", "");
@@ -36,13 +34,15 @@ public class ScriptBuilder
 		sb.append("echo RUNNAME:").append(runName).append("\n");
 
 		// Download environments so it can be sourced in the computescript
-		sb.append("curl -s -S -o user.env ").append(appLocation).append("/environment/")
-				.append(urlEncode(task.getComputeRun().getName())).append("/user.env\n");
+		sb.append("curl -s -S -u ").append(username).append(":").append(password).append(" -o user.env ")
+				.append(appLocation).append("/environment/").append(urlEncode(task.getComputeRun().getName()))
+				.append("/user.env\n");
 
 		for (ComputeTask prev : task.getPrevSteps())
 		{
 			String fileName = prev.getName() + ".env";
-			sb.append("curl -s -S -o ").append(fileName).append(" ").append(appLocation).append("/environment/")
+			sb.append("curl -s -S -u ").append(username).append(":").append(password).append(" -o ").append(fileName)
+					.append(" ").append(appLocation).append("/environment/")
 					.append(urlEncode(task.getComputeRun().getName())).append("/").append(fileName).append("\n");
 		}
 
@@ -51,11 +51,13 @@ public class ScriptBuilder
 
 		// Upload log_file and if present the output env file
 		sb.append("if [ -f ").append(task.getName()).append(".env ]; then\n");
-		sb.append("curl -s -S -F status=done -F log_file=@done.log ");
+		sb.append("curl -s -S -u ").append(username).append(":").append(password)
+				.append(" -F status=done -F log_file=@done.log ");
 		sb.append("-F output_file=@").append(task.getName()).append(".env ");
 		sb.append(pilotServiceUrl);
 		sb.append("\nelse\n");
-		sb.append("curl -s -S -F status=done -F log_file=@done.log ");
+		sb.append("curl -s -S -u ").append(username).append(":").append(password)
+				.append(" -F status=done -F log_file=@done.log ");
 		sb.append(pilotServiceUrl);
 		sb.append("\nfi\n");
 

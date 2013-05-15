@@ -53,10 +53,22 @@ public class ComputeCommandLine
 		{
 			e.printStackTrace();
 		}
-
 	}
 
-	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String workDir, String backend,
+	public static Compute create(ComputeProperties computeProperties)
+	{
+		try
+		{
+			return create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters, computeProperties.path, computeProperties.backend, computeProperties.runDir, computeProperties.runId, computeProperties.database);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String path, String backend,
 			String runDir, String runID, String database) throws IOException, Exception
 	{
 		List<File> parameterFiles = new ArrayList<File>();
@@ -65,39 +77,10 @@ public class ComputeCommandLine
 		Compute compute = new Compute();
 		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
 
-//		// use workflow or workingdir from parameters?
-//		if (0 < compute.getParameters().getValues().size())
-//		{
-//			if (isNotSet(workflowCsv) && !compute.getParameters().getValues().get(0).isNull(Parameters.WORKFLOW_COLUMN))
-//			{
-//				workflowCsv = compute.getParameters().getValues().get(0).getString(Parameters.WORKFLOW_COLUMN);
-//			}
-//			if (isNotSet(workDir) && !compute.getParameters().getValues().get(0).isNull(Parameters.WORKDIR_COLUMN))
-//			{
-//				workDir = compute.getParameters().getValues().get(0).getString(Parameters.WORKDIR_COLUMN);
-//			}
-//			if (isNotSet(backend) && !compute.getParameters().getValues().get(0).isNull(Parameters.BACKEND_COLUMN))
-//			{
-//				backend = compute.getParameters().getValues().get(0).getString(Parameters.BACKEND_COLUMN);
-//			}
-//			if (isNotSet(runID) && !compute.getParameters().getValues().get(0).isNull(Parameters.RUNID_COLUMN))
-//			{
-//				runID = compute.getParameters().getValues().get(0).getString(Parameters.RUNID_COLUMN);
-//			}
-//		}
-
-//		if ("".equals(workflowCsv)) throw new IOException("no workflow provided");
-//
-//		// if not set, set default backend
-//		if (isNotSet(backend)) backend = Parameters.BACKEND_DEFAULT;
-//
-//		// if not set, set default run id
-//		if (isNotSet(runID)) runID = Parameters.RUNID_DEFAULT;
-
 		// add command line parameters:
 		for (WritableTuple t : compute.getParameters().getValues())
 		{
-			t.set(Parameters.WORKDIR_COLUMN, new File(workDir).getAbsolutePath());
+			t.set(Parameters.PATH_COLUMN, new File(path).getAbsolutePath());
 			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
 			t.set(Parameters.DEFAULTS_COLUMN, new File(defaults).getAbsolutePath());
 			t.set(Parameters.RUNDIR_COLUMN, new File(runDir).getAbsolutePath());
@@ -161,16 +144,16 @@ public class ComputeCommandLine
 	}
 
 	/**
-	 * Return Compute object, given one single parametersCsv
+	 * Return Compute object, given one single -path to all files
 	 * 
 	 * @param parametersCsv
 	 * @return
 	 * @throws IOException
 	 */
-	public static Compute create(String parametersCsv) throws IOException, Exception
+	public static Compute create(String path) throws IOException, Exception
 	{
-		Compute c = ComputeCommandLine.create("", "", new String[]
-		{ parametersCsv }, "", "", "", "", "");
-		return c;
+		ComputeProperties computeProperties = new ComputeProperties(path);
+		
+		return ComputeCommandLine.create(computeProperties);
 	}
 }
