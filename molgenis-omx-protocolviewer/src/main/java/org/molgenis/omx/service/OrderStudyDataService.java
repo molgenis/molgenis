@@ -1,8 +1,6 @@
 package org.molgenis.omx.service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -13,7 +11,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -83,7 +80,7 @@ public class OrderStudyDataService
 		helper.setTo(molgenisUser.getEmail());
 		helper.setBcc(MolgenisUserService.getInstance(database).findAdminEmail());
 		helper.setSubject("Order confirmation from " + getAppName());
-		helper.setText(createOrderConfirmationEmailText(studyDataRequest, molgenisUser));
+		helper.setText(createOrderConfirmationEmailText(studyDataRequest));
 		helper.addAttachment(getAppName() + "-request_" + System.currentTimeMillis() + ".doc", new FileSystemResource(
 				file));
 		mailSender.send(message);
@@ -95,7 +92,6 @@ public class OrderStudyDataService
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 
-
 	public List<StudyDataRequest> getOrders(Integer userId) throws DatabaseException
 	{
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class, new QueryRule(
@@ -106,15 +102,7 @@ public class OrderStudyDataService
 	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		String emailText = "";
-		//String emailText = "Dear " + user.getName() + 
-		//		"The request " + studyDataRequest.getName() + " was just submitted." + 
-		//		"The request was submitted by " + studyDataRequest.getMolgenisUser() + 
-		//		" on " + studyDataRequest.getRequestDate() + " including the features: " +
-		//		studyDataRequest.getFeatures() + " The status of the request is currently pending" ;
-				
-		strBuilder.append(emailText);
-		
+		strBuilder.append("TODO: ORDER CONFIRMATION EMAIL HERE");
 		return strBuilder.toString();
 	}
 
