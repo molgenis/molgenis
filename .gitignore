@@ -7,6 +7,8 @@ target/
 *.iws
 git.properties
 molgenis-compute-core/src/main/resources/workflows/*/out/
+molgenis-compute-core/src/main/resources/workflows/*/rundir/
+molgenis-compute-core/src/main/resources/workflows/*/compute.properties
 molgenis-compute-core/test-output
 data/
 test-output/

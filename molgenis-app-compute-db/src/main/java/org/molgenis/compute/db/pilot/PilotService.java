@@ -17,6 +17,7 @@ import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.WebAppUtil;
 
 /**
@@ -64,8 +65,8 @@ public class PilotService implements MolgenisService
 
 			// we add task id to the run listing to identify task when
 			// it is done
-			ScriptBuilder sb = new ScriptBuilder(task, request.getAppLocation(), request.getServicePath());
-			String taskScript = sb.build();
+			ScriptBuilder sb = ApplicationContextProvider.getApplicationContext().getBean(ScriptBuilder.class);
+			String taskScript = sb.build(task, request.getAppLocation(), request.getServicePath());
 
 			LOG.info("Script for task [" + task.getName() + "] of run [ " + task.getComputeRun().getName() + "]:\n"
 					+ taskScript);

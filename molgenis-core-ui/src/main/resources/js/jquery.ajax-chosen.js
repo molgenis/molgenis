@@ -11,7 +11,7 @@
     }
     defaultOptions = {
       minTermLength: 3,
-      afterTypeDelay: 500,
+      afterTypeDelay: 200,
       jsonTermKey: "term"
     };
     select = this;

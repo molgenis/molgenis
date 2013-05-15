@@ -1,0 +1,2 @@
+clusterQueue,mem,walltime,cores,scheduler,defaultInterpreter,stage,root,bashrc,tooldir,workdir
+gcc,4,11:59:00,1,PBS,#!/bin/bash,module load,/target/gpfs2/gcc/,${root}/gcc.bashrc,${root}/tools,out
