@@ -184,14 +184,21 @@
 	};
 
 	ns.updateObservationSetsTable = function() {
-		ns.search(function(searchResponse) {
-			var maxRowsPerPage = resultsTable.getMaxRows();
-			var nrRows = searchResponse.totalHitCount;
-
-			resultsTable.build(searchResponse, selectedFeatures, restApi);
-
-			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
-		});
+		if(selectedFeatures.length > 0){
+			ns.search(function(searchResponse) {
+				var maxRowsPerPage = resultsTable.getMaxRows();
+				var nrRows = searchResponse.totalHitCount;
+	
+				resultsTable.build(searchResponse, selectedFeatures, restApi);
+	
+				ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
+			});
+		}
+		else{
+			$('#data-table-header').html('no features selected');
+			$('#data-table-pager').empty();
+			$('#data-table').empty();
+		}
 	};
 
 	ns.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
