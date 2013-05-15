@@ -14,8 +14,8 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -163,8 +163,8 @@ public class MolgenisXrefService implements MolgenisService
 		final List<String> keyValuePairs = new ArrayList<String>();
 		for (final Entry<String, String> entry : values.entrySet())
 		{
-			keyValuePairs.add(String.format(JSON_KEY_VALUE, StringEscapeUtils.escapeJavaScript(entry.getKey()),
-					StringEscapeUtils.escapeJavaScript(entry.getValue()).replaceAll("\\\\'", "\\'")));
+			keyValuePairs.add(String.format(JSON_KEY_VALUE, StringEscapeUtils.escapeEcmaScript(entry.getKey()),
+					StringEscapeUtils.escapeEcmaScript(entry.getValue()).replaceAll("\\\\'", "\\'")));
 		}
 		final String json = String.format("[%s]", StringUtils.join(keyValuePairs, ","));
 		return json;

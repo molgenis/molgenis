@@ -1,17 +1,15 @@
 package org.molgenis.framework.ui.html;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
- * Extension of TablePanel that comes with a [+] and [-] button so one can
- * (un)repeat its contents If used in a 'label'-'value' panel the the repeatable
- * elements will be nested into the value panel. Useful for subforms with
+ * Extension of TablePanel that comes with a [+] and [-] button so one can (un)repeat its contents If used in a
+ * 'label'-'value' panel the the repeatable elements will be nested into the value panel. Useful for subforms with
  * repeating information.
  * 
- * Features: <li>can clone itself for repeat <li>can remove clone <li>TODO set
- * option how many clones to show at start <li>TODO set option minimum / maximum
- * number of clones (default 0,unlimited respectively) <li>TODO set custom
- * labels to the 'add row' and 'remove row'
+ * Features: <li>can clone itself for repeat <li>can remove clone <li>TODO set option how many clones to show at start
+ * <li>TODO set option minimum / maximum number of clones (default 0,unlimited respectively) <li>TODO set custom labels
+ * to the 'add row' and 'remove row'
  */
 public class RepeatingPanel extends DivPanel
 {
@@ -54,7 +52,7 @@ public class RepeatingPanel extends DivPanel
 		// invisible if necessary
 		addButton.setJavaScriptAction("var div = document.createElement('DIV'); "
 				+ "this.parentNode.insertBefore(div,this); div.innerHTML = '"
-				+ StringEscapeUtils.escapeJavaScript(StringEscapeUtils.escapeHtml(repeatableDiv)) + "'; "
+				+ StringEscapeUtils.escapeEcmaScript(StringEscapeUtils.escapeHtml4(repeatableDiv)) + "'; "
 				+ (this.maxElems > 1 ? "incCount();" : "") + " return false");
 
 		// create a div to contain the panel

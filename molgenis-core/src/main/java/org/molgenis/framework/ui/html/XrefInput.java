@@ -15,7 +15,7 @@ package org.molgenis.framework.ui.html;
 // jdk
 import java.text.ParseException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
 

@@ -650,7 +650,7 @@ public class MolgenisModelParser
 		// parse annotations (used by JPA)
 		if (element.getChildNodes().getLength() >= 1)
 		{
-			String annotations = org.apache.commons.lang.StringUtils.deleteWhitespace(
+			String annotations = org.apache.commons.lang3.StringUtils.deleteWhitespace(
 					element.getChildNodes().item(1).getTextContent()).trim();
 			field.setAnnotations(annotations);
 		}

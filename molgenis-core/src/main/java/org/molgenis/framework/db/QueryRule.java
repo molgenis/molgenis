@@ -13,7 +13,7 @@ package org.molgenis.framework.db;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * With this class an equation model can be described for a database-field (eg a
