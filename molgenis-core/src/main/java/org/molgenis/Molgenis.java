@@ -7,6 +7,11 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.BasicConfigurator;
@@ -69,6 +74,9 @@ import org.molgenis.generators.ui.MenuControllerGen;
 import org.molgenis.generators.ui.PluginControllerGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * MOLGENIS generator. Run this to fire up all the generators. Optionally add {@link org.molgenis.MolgenisOptions}
@@ -443,42 +451,32 @@ public class Molgenis
 			deleteContentOfDirectory(new File(options.output_sql));
 		}
 
-		List<Thread> threads = new ArrayList<Thread>();
-		for (final Generator g : generators)
+		final int nrCores = Runtime.getRuntime().availableProcessors();
+		ExecutorService executorService = Executors.newFixedThreadPool(nrCores);
+		try
 		{
-			Runnable runnable = new Runnable()
+			executorService.invokeAll(Lists.transform(generators, new Function<Generator, Callable<Boolean>>()
 			{
-
 				@Override
-				public void run()
+				@Nullable
+				public Callable<Boolean> apply(@Nullable final Generator generator)
 				{
-					try
+					return generator != null ? new Callable<Boolean>()
 					{
-						g.generate(model, options);
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-						throw new RuntimeException(e);
-					}
-				}
-			};
-			// executor.execute(runnable);
-			Thread thread = new Thread(runnable);
-			thread.start();
-			threads.add(thread);
-		}
 
-		// wait for all threads to complete
-		for (Thread thread : threads)
+						@Override
+						public Boolean call() throws Exception
+						{
+							generator.generate(model, options);
+							return true;
+						}
+					} : null;
+				}
+			}));
+		}
+		finally
 		{
-			try
-			{
-				thread.join();
-			}
-			catch (InterruptedException ignore)
-			{
-			}
+			executorService.shutdown();
 		}
 
 		logger.info("Generation completed at " + new Date());
