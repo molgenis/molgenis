@@ -2,7 +2,7 @@ package org.molgenis.framework.ui.html;
 
 import java.text.ParseException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.server.services.MolgenisGuiService;
 import org.molgenis.util.tuple.Tuple;
 

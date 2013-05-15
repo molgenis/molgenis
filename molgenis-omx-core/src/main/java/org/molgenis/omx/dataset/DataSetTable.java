@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -29,9 +28,8 @@ import org.molgenis.util.tuple.Tuple;
 /**
  * DataSetTable
  * 
- * If this table is too slow consider creating database an index on the
- * ObservedValue table : One on the fields Feature-Value and one on
- * ObservationSet-Feature-Value
+ * If this table is too slow consider creating database an index on the ObservedValue table : One on the fields
+ * Feature-Value and one on ObservationSet-Feature-Value
  * 
  */
 public class DataSetTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
@@ -351,7 +349,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				{
 					// value is always a String so LESS etc. can't be
 					// supported, NOT queries are not supported yet
-					throw new NotImplementedException("Operator [" + filter.getOperator()
+					throw new UnsupportedOperationException("Operator [" + filter.getOperator()
 							+ "] not yet implemented, only EQUALS and LIKE are supported.");
 
 				}

@@ -3,13 +3,13 @@ package org.molgenis.framework.ui.html;
 import java.text.ParseException;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.molgenis.framework.ui.html.render.RenderDecorator;
 import org.molgenis.util.tuple.Tuple;
 
 /**
- * An HtmlInput allows a user to enter data. Thus, HtmlInput is the base-class
- * for html inputs, such as button, textareas, calendars.
+ * An HtmlInput allows a user to enter data. Thus, HtmlInput is the base-class for html inputs, such as button,
+ * textareas, calendars.
  * 
  * 
  */
@@ -140,8 +140,7 @@ public abstract class HtmlInput<E> extends AbstractHtmlElement implements Input<
 	}
 
 	/**
-	 * Constructor using a tuple. Valid keys for the tuple are listed as
-	 * constant, e.g. HtmlInput.NAME
+	 * Constructor using a tuple. Valid keys for the tuple are listed as constant, e.g. HtmlInput.NAME
 	 * 
 	 * @param properties
 	 * @throws HtmlInputException
@@ -174,9 +173,8 @@ public abstract class HtmlInput<E> extends AbstractHtmlElement implements Input<
 	}
 
 	/**
-	 * Implement this for generating the specific html-code for the html-input.
-	 * All inheriting classes need to override this method in order to work in
-	 * the same fashion.
+	 * Implement this for generating the specific html-code for the html-input. All inheriting classes need to override
+	 * this method in order to work in the same fashion.
 	 * 
 	 * @return The html-code for the html-input.
 	 */
@@ -215,8 +213,7 @@ public abstract class HtmlInput<E> extends AbstractHtmlElement implements Input<
 	public String getObjectString()
 	{
 		if (this.value == null) return "";
-		else
-			return value.toString();
+		else return value.toString();
 	}
 
 	// TODO: This *needs* to be renamed to getValueToString() or removed!!!
@@ -226,8 +223,7 @@ public abstract class HtmlInput<E> extends AbstractHtmlElement implements Input<
 	}
 
 	/**
-	 * Get the value of the input as a String, optionally replacing special
-	 * characters like \\n and &gt;
+	 * Get the value of the input as a String, optionally replacing special characters like \\n and &gt;
 	 * 
 	 * @param replaceSpecialChars
 	 * @return
@@ -297,14 +293,13 @@ public abstract class HtmlInput<E> extends AbstractHtmlElement implements Input<
 
 	public String getJavaScriptValue()
 	{
-		String value = StringEscapeUtils.escapeXml(StringEscapeUtils.escapeJavaScript(this.getValue()));
+		String value = StringEscapeUtils.escapeXml(StringEscapeUtils.escapeEcmaScript(this.getValue()));
 		return value;
 	}
 
 	/**
-	 * Generic method to produce the inputs html by setting its parameters from
-	 * tuple. This is used to create Freermarker macros like <@string name="id"
-	 * /> Needs to be overriden to work.
+	 * Generic method to produce the inputs html by setting its parameters from tuple. This is used to create
+	 * Freermarker macros like <@string name="id" /> Needs to be overriden to work.
 	 * 
 	 * @throws ParseException
 	 * @throws HtmlInputException

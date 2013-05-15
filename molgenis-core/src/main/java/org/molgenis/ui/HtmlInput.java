@@ -2,15 +2,15 @@ package org.molgenis.ui;
 
 import java.util.UUID;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.framework.ui.html.HtmlSettings;
 import org.molgenis.framework.ui.html.render.RenderDecorator;
 import org.molgenis.util.tuple.Tuple;
 
 /**
- * An HtmlInput allows a user to enter data. Thus, HtmlInput is the base-class
- * for html inputs, such as button, textareas, calendars.
+ * An HtmlInput allows a user to enter data. Thus, HtmlInput is the base-class for html inputs, such as button,
+ * textareas, calendars.
  * 
  * 
  */
@@ -165,8 +165,7 @@ public abstract class HtmlInput<T extends HtmlInput<T, E>, E> extends MolgenisCo
 	public String getObjectString()
 	{
 		if (this.value == null) return "";
-		else
-			return value.toString();
+		else return value.toString();
 	}
 
 	// TODO: This *needs* to be renamed to getValueToString() or removed!!!
@@ -176,8 +175,7 @@ public abstract class HtmlInput<T extends HtmlInput<T, E>, E> extends MolgenisCo
 	}
 
 	/**
-	 * Get the value of the input as a String, optionally replacing special
-	 * characters like \\n and &gt;
+	 * Get the value of the input as a String, optionally replacing special characters like \\n and &gt;
 	 * 
 	 * @param replaceSpecialChars
 	 * @return
@@ -247,7 +245,7 @@ public abstract class HtmlInput<T extends HtmlInput<T, E>, E> extends MolgenisCo
 
 	public String getJavaScriptValue()
 	{
-		String value = StringEscapeUtils.escapeXml(StringEscapeUtils.escapeJavaScript(this.getValue()));
+		String value = StringEscapeUtils.escapeXml(StringEscapeUtils.escapeEcmaScript(this.getValue()));
 		return value;
 	}
 
