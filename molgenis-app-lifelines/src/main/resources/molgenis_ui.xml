@@ -7,7 +7,7 @@
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
  		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<plugin label="Importer (Dataset)" name="HL7StudyDataSetImporter" type="org.molgenis.lifelines.plugins.HL7StudyDataSetImporterController" />
-		
+
         <menu name="Admin">
 	        <menu name ="Entities">
 	            <form name="DataSet" entity="DataSet" />
@@ -32,7 +32,7 @@
 					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
 				<plugin label="Security tokens" name="TokenManagerPlugin"
 					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
-					
+
 			</menu>	
 		</menu>	
 		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Login" groupRead="anonymous,AllUsers" />
