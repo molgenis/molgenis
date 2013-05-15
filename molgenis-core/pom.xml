@@ -25,7 +25,6 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.1.12.Final</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -42,11 +41,6 @@
             <artifactId>hibernate-c3p0</artifactId>
             <version>4.1.12.Final</version>
         </dependency>
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>1.4</version>
-        </dependency>
         <!-- Commons Utils -->
         <dependency>
             <groupId>commons-lang</groupId>
@@ -61,11 +55,6 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-email</artifactId>
             <version>1.2</version>
         </dependency>
         <dependency>
@@ -108,12 +97,6 @@
             <artifactId>poi-ooxml</artifactId>
             <version>3.9</version>
         </dependency>
-        <!-- Tar -->
-        <dependency>
-            <groupId>javatar</groupId>
-            <artifactId>javatar</artifactId>
-            <version>2.5</version>
-        </dependency>
         <!-- JSON Lib -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -135,13 +118,6 @@
 			<artifactId>opencsv</artifactId>
 			<version>2.3</version>
 		</dependency>
-        <!-- scope: provided -->
-		<dependency>
-            <groupId>hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>1.8.0.10</version>
-            <scope>provided</scope>
-        </dependency>
          <!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -152,6 +128,11 @@
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context-support</artifactId>
 		    <version>3.2.2.RELEASE</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sun.mail</groupId>
+		    <artifactId>javax.mail</artifactId>
+		    <version>1.5.0</version>
 		</dependency>
     </dependencies>
 </project>
