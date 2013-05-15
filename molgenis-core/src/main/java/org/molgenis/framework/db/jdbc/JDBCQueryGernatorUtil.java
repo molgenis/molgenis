@@ -3,7 +3,7 @@ package org.molgenis.framework.db.jdbc;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.fieldtypes.DecimalField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
@@ -29,13 +29,10 @@ public class JDBCQueryGernatorUtil
 	 * @param mapper
 	 *            mapper that is used to extract metadata to create the
 	 * @param isNested
-	 *            wether this whereclause will be nested inside another clause,
-	 *            e.g (A AND B) OR C. If nested then the word "where" will not
-	 *            be included in the returned string so this method can be used
-	 *            recursively.
+	 *            wether this whereclause will be nested inside another clause, e.g (A AND B) OR C. If nested then the
+	 *            word "where" will not be included in the returned string so this method can be used recursively.
 	 * @param withOffset
-	 *            whether this whereclause should be calculated including offset
-	 *            and limit
+	 *            whether this whereclause should be calculated including offset and limit
 	 * @param rules
 	 *            query rules to be translated into sql where clause.
 	 * @return sql where clause. FIXME: remove the 'withOffset' part?
@@ -336,9 +333,8 @@ public class JDBCQueryGernatorUtil
 	 * @param mapper
 	 *            mapper that is used to extract metadata to create the
 	 * @param reverseSorting
-	 *            to reverese sorting order. This is used when trying to find
-	 *            the "last records" in a sorted list by instead finding the
-	 *            "first records" in the reversly ordered list.
+	 *            to reverese sorting order. This is used when trying to find the "last records" in a sorted list by
+	 *            instead finding the "first records" in the reversly ordered list.
 	 * @param rules
 	 *            query rules to be translated into sql order by clause.
 	 * @return sql with sort clause
@@ -388,8 +384,7 @@ public class JDBCQueryGernatorUtil
 	 * Helper method for creating a limit clause
 	 * 
 	 * @param withOffset
-	 *            Indicate whether offset is to be used. If false the limit
-	 *            clause is kept empty.
+	 *            Indicate whether offset is to be used. If false the limit clause is kept empty.
 	 * @param rules
 	 *            query rules to be translated into sql order by clause.
 	 * @return sql for limit,offset
@@ -420,20 +415,14 @@ public class JDBCQueryGernatorUtil
 	/**
 	 * Helper method for creating an escaped sql string for a value.
 	 * <p>
-	 * This can be used by createXXXsql methods to prevend sql-injection in data
-	 * values.
+	 * This can be used by createXXXsql methods to prevend sql-injection in data values.
 	 * 
 	 * @param value
 	 *            to be escaped
 	 */
 	public static String escapeSql(Object value)
 	{
-		if (value != null && value.toString().contains("Specific diagnosis Mutation"))
-		{
-			System.out.println("trouble");
-		}
-		if (value != null) return StringEscapeUtils.escapeSql(value.toString());
-		return null;
-		// return sql.toString().replace("'", "''");
+		// only handles the simplest of possible SQL cases
+		return value != null ? StringUtils.replace(value.toString(), "'", "''") : null;
 	}
 }
