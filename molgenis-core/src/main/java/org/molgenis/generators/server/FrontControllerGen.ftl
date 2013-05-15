@@ -27,7 +27,6 @@ import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisFrontController;
 import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.framework.security.Login;
-import org.apache.commons.dbcp.BasicDataSource;
 import ${package}.EntitiesImporterImpl;
 import ${package}.EntitiesValidatorImpl;
 
@@ -49,7 +48,7 @@ public class FrontController extends MolgenisFrontController
 		super.init(conf);
 		
 		//now we can create the MolgenisContext with objects reusable over many requests
-		context = new MolgenisContext(this.getServletConfig(), this.createDataSource(), new UsedMolgenisOptions(), "${model.name}");
+		context = new MolgenisContext(this.getServletConfig(), new UsedMolgenisOptions(), "${model.name}");
 		
 		//finally, we store all mapped services, and pass them the context used for databasing, serving, etc.
 		LinkedHashMap<String,MolgenisService> services = new LinkedHashMap<String,MolgenisService>();
@@ -80,13 +79,5 @@ public class FrontController extends MolgenisFrontController
 	public void service(HttpServletRequest request, HttpServletResponse response)
 	{
 		super.service(request, response);
-	}
-	
-	@Override
-	public DataSource createDataSource()
-	{
-		//JPA datasource is provided/managed by server or configured in persistence.xml
-		//The application code is shielded from connection/datasource pool details! 
-		return null;
 	}
 }
