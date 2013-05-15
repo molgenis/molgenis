@@ -7,7 +7,6 @@ import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,16 +16,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * Controller class for the data explorer.
  * 
- * The implementation javascript file for the resultstable is defined in a
- * MolgenisSettings property named 'dataexplorer.resultstable.js' possible
- * values are '/js/SingleObservationSetTable.js' or
- * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as
- * the default
+ * The implementation javascript file for the resultstable is defined in a MolgenisSettings property named
+ * 'dataexplorer.resultstable.js' possible values are '/js/SingleObservationSetTable.js' or
+ * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as the default
  * 
  * @author erwin
  * 
  */
-@Scope("request")
 @Controller
 @RequestMapping(URI)
 public class DataExplorerController
@@ -59,8 +55,8 @@ public class DataExplorerController
 	}
 
 	/**
-	 * When someone directly accesses /dataexplorer and is not logged in an
-	 * DataAccessException is thrown, redirect him to the home page
+	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
+	 * to the home page
 	 * 
 	 * @return
 	 */

@@ -27,9 +27,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Scope("request")
 @Controller
-@RequestMapping("/environment")
+@RequestMapping(EnvironmentController.URI)
 public class EnvironmentController
 {
+	public static final String URI = "/environment";
 	private final Database database;
 
 	@Autowired
