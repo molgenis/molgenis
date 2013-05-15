@@ -9,16 +9,19 @@ The molgenis-search-elasticsearch module provides an elasticsearch implementatio
 ## Adding search to your molgenis app
 1. Add the molgenis-search module and the molgenis-search-elasticsearch modules as a dependency in your pom.xml:
 
-       <dependency>
-         	<groupId>org.molgenis</groupId>
-         	<artifactId>molgenis-search</artifactId>
-         	<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search-elasticsearch</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+```	
+	<dependency>
+        	<groupId>org.molgenis</groupId>
+      		<artifactId>molgenis-search</artifactId>
+        	<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.molgenis</groupId>
+		<artifactId>molgenis-search-elasticsearch</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+```
+
 2. Import the `org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig` spring configuration class into your spring configuration. If you want to secure the api you should import the `org.molgenis.search.SearchSecurityConfig` config class. Users then need to be logged in to be able to use the search api.  
 Example:
 
