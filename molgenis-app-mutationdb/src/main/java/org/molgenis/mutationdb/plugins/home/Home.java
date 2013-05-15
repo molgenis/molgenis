@@ -1,22 +1,13 @@
 package org.molgenis.mutationdb.plugins.home;
 
-import java.util.List;
-
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.framework.ui.ScreenMessage;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-
-import app.FillMetadata;
 
 public class Home extends PluginModel<Entity>
 {
@@ -60,30 +51,6 @@ public class Home extends PluginModel<Entity>
 	{
 		homeModel = new HomeModel();
 		homeModel.setHomeHtml(getMolgenisSetting(KEY_APP_HOME_HTML, DEFAULT_KEY_APP_HOME_HTML));
-
-		List<MolgenisUser> listUsers;
-		try
-		{
-			listUsers = db.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS, "admin"));
-			if (listUsers.isEmpty())
-			{
-
-				FillMetadata.fillMetadata(db, false);
-				this.setMessages(new ScreenMessage("User setup complete!", true));
-			}
-
-		}
-		catch (DatabaseException e)
-		{
-			this.setMessages(new ScreenMessage("Database error: " + e.getMessage(), false));
-			e.printStackTrace();
-		}
-		catch (Exception e)
-		{
-			this.setMessages(new ScreenMessage("error: " + e.getMessage(), false));
-			e.printStackTrace();
-		}
-
 	}
 
 	@Override
