@@ -60,8 +60,8 @@ public class TaskGeneratorDB
 	{
 		new TaskGeneratorDB()
 				.generateRun(
-						"molgenis/molgenis-compute-core/src/main/resources/workflows/impute2/parameters.csv",
-						"test1", "localhost", 2000L);
+						"/Users/georgebyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/impute2",
+						"test1", "ui.grid.sara.nl", 2000L);
 	}
 
 }
