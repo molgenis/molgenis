@@ -217,6 +217,8 @@
 						<stopPort>9999</stopPort>
 						<stopKey>jetty-stop</stopKey>
 						
+						<reload>manual</reload>
+				
 						<webAppConfig>
             				<contextPath>/</contextPath>
             				<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
