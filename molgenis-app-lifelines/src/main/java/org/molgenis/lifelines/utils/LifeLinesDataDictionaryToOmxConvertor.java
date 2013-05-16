@@ -48,8 +48,6 @@ public class LifeLinesDataDictionaryToOmxConvertor
 	private static final String COL_SUB_SECTION = "Sub-section";
 	private static final String COL_SUB_SECTION2 = "Sub-section 2";
 	private static final String COL_SUB_SECTION3 = "Sub-section 3";
-	private static final String COL_COHORT = "Cohort";
-	private static final String COL_TIME = "Time";
 	private static final String COL_TYPE = "Type";
 	private static final String COL_VALUE = "Value";
 	private static final String COL_VALUE_DESCRIPTION_EN = "EN Value Description";
@@ -137,7 +135,8 @@ public class LifeLinesDataDictionaryToOmxConvertor
 			for (String tableName : excelReader.getTableNames())
 			{
 				logger.debug("converting sheet: " + tableName);
-				convertSheet(excelReader.getTupleReader(tableName), matrix, sheetMap, protocolMap, rootProtocol);
+				convertSheet(excelReader.getTupleReader(tableName), tableName, matrix, sheetMap, protocolMap,
+						rootProtocol);
 			}
 
 			// write protocols
@@ -201,20 +200,22 @@ public class LifeLinesDataDictionaryToOmxConvertor
 		return sheetMap;
 	}
 
-	private void convertSheet(TupleReader sheet, LifeLinesQuestionnaireMatrix matrix,
+	private void convertSheet(TupleReader sheet, String sheetName, LifeLinesQuestionnaireMatrix matrix,
 			Map<String, TupleWriter> sheetMap, Map<String, Protocol> protocolMap, Protocol rootProtocol)
 			throws IOException
 	{
 		List<String> featureIdentifiers = new ArrayList<String>();
 
 		String lastFeatureIdentifier = null;
+		Set<CohortTimePair> lastCohortTimePairs = null;
 
-		int rownr = 1; // 0-based, skip header
+		int rownr = 0; // 0-based, skip header
 		for (Tuple row : sheet)
 		{
+			++rownr;
 			if (!includeRow(row))
 			{
-				logger.debug("skipping row " + rownr++);
+				logger.debug("skipping row " + rownr);
 				continue;
 			}
 
@@ -223,7 +224,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 			{
 				if (lastFeatureIdentifier == null)
 				{
-					logger.debug("skipping non-feature row " + rownr++);
+					logger.debug("skipping non-feature row " + rownr);
 					continue;
 				}
 				else
@@ -231,77 +232,81 @@ public class LifeLinesDataDictionaryToOmxConvertor
 					// value row for the last detected feature
 					String value = row.getString(COL_VALUE);
 					String description = row.getString(COL_VALUE_DESCRIPTION_EN);
-					if (value != null && (description == null || description.isEmpty())) throw new IOException(
-							"missing translation for value '" + value + "'");
+					if (value != null && (description == null || description.isEmpty()))
+					{
+						logger.fatal("missing translation for value '" + value + "' on row " + rownr + " in column '"
+								+ COL_VALUE_DESCRIPTION_EN + "' in sheet '" + sheetName + "'");
+						throw new IOException("missing translation for value '" + value + "' on row " + rownr
+								+ " in column " + COL_VALUE_DESCRIPTION_EN);
+					}
 
 					if (value == null || value.isEmpty() || description == null || description.isEmpty())
 					{
-						logger.info("skipping non-feature row " + rownr++);
+						logger.info("skipping non-feature row " + rownr);
 						continue;
 					}
 					else
 					{
-						KeyValueTuple categoryMap = new KeyValueTuple();
-						categoryMap.set(ENTITY_IDENTIFIER, "category_" + lastFeatureIdentifier + "_" + value);
-						categoryMap.set(ENTITY_NAME, description);
-						categoryMap.set(VALUE_CODE, value);
-						categoryMap.set(OBSERVABLE_FEATURE_IDENTIFIER, lastFeatureIdentifier);
-						sheetMap.get(SHEET_CATEGORY).write(categoryMap);
-
-						++rownr;
+						for (CohortTimePair cohortTimePair : lastCohortTimePairs)
+						{
+							Tuple category = createCategory(
+									lastFeatureIdentifier + '.' + cohortTimePair.getProtocolId(), description, value);
+							sheetMap.get(SHEET_CATEGORY).write(category);
+						}
 						continue;
 					}
 				}
 			}
 			String code = row.getString(COL_CODE);
 
-			logger.debug("converting row: " + (rownr + 1) + " - " + row.getString(COL_GROUP) + ", "
-					+ row.getString(COL_CODE));
+			logger.debug("converting row: " + rownr + " - " + row.getString(COL_GROUP) + ", " + row.getString(COL_CODE));
 
 			// add feature
 			String featureIdentifier = group + '.' + code;
 			String featureName = row.getString(COL_DISPLAY_NAME);
 			String featureDescriptionEn = row.getString(COL_DESCRIPTION_EN);
 			String featureDescriptionNl = row.getString(COL_DESCRIPTION_NL);
-			if (featureName == null || featureName.isEmpty()) throw new IOException("expected value in column "
-					+ COL_DISPLAY_NAME);
+			if (featureName == null || featureName.isEmpty())
+			{
+				logger.fatal("missing value on row " + rownr + " in column '" + COL_DISPLAY_NAME + "' in sheet '"
+						+ sheetName + "'");
+				throw new IOException("expected value in column " + COL_DISPLAY_NAME);
+			}
 
 			if (featureDescriptionNl == null || featureDescriptionNl.isEmpty()) logger.warn("expected value in column "
 					+ COL_DESCRIPTION_NL);
-			if (featureDescriptionEn == null || featureDescriptionEn.isEmpty()) throw new IOException(
-					"expected value in column " + COL_DESCRIPTION_EN);
-			KeyValueTuple featureMap = new KeyValueTuple();
-			featureMap.set(ENTITY_IDENTIFIER, featureIdentifier);
-			featureMap.set(ENTITY_NAME, featureName);
-			Map<String, String> descriptionMap = new LinkedHashMap<String, String>();
-			if (featureDescriptionEn != null) descriptionMap.put("en", featureDescriptionEn);
-			if (featureDescriptionNl != null) descriptionMap.put("nl", featureDescriptionNl);
-			featureMap.set(ENTITY_DESCRIPTION, gson.toJson(descriptionMap));
-			if (row.getString(COL_VALUE) != null && !row.getString(COL_VALUE).isEmpty()) featureMap.set(
-					FEATURE_DATATYPE, "categorical");
-			sheetMap.get(SHEET_FEATURE).write(featureMap);
-			featureIdentifiers.add(featureIdentifier);
-			lastFeatureIdentifier = featureIdentifier;
-
-			// add category
-			String categoryValue = row.getString(COL_VALUE);
-			String categoryDescription = row.getString(COL_VALUE_DESCRIPTION_EN);
-			if (categoryValue != null && (categoryDescription == null || categoryDescription.isEmpty())) throw new IOException(
-					"missing translation for value '" + categoryValue + "'");
-
-			if (categoryValue != null && categoryDescription != null)
+			if (featureDescriptionEn == null || featureDescriptionEn.isEmpty())
 			{
-				KeyValueTuple categoryMap = new KeyValueTuple();
-				categoryMap.set(ENTITY_IDENTIFIER, "category_" + lastFeatureIdentifier + "_" + categoryValue);
-				categoryMap.set(ENTITY_NAME, categoryDescription);
-				categoryMap.set(VALUE_CODE, categoryValue);
-				categoryMap.set(OBSERVABLE_FEATURE_IDENTIFIER, lastFeatureIdentifier);
-				sheetMap.get(SHEET_CATEGORY).write(categoryMap);
+				logger.fatal("missing value on row " + rownr + " in column '" + COL_DESCRIPTION_EN + "' in sheet '"
+						+ sheetName + "'");
+				throw new IOException("expected value in column " + COL_DESCRIPTION_EN);
 			}
 
 			// get protocol
-			Set<CohortTimePair> cohortTypePairs = getCohortTimePairs(row, matrix);
-			if (cohortTypePairs == null) throw new IOException("missing cohort-type pair");
+			Set<CohortTimePair> cohortTimePairs;
+			try
+			{
+				cohortTimePairs = getCohortTimePairs(row, matrix);
+			}
+			catch (RuntimeException e)
+			{
+				logger.error(e.getMessage());
+				continue;
+			}
+			if (cohortTimePairs == null)
+			{
+				logger.error("missing cohort-type pair for " + row.getString(COL_GROUP) + "." + row.getString(COL_CODE));
+				throw new IOException("missing cohort-type pair for " + row.getString(COL_GROUP) + "."
+						+ row.getString(COL_CODE));
+			}
+			if (cohortTimePairs.isEmpty())
+			{
+				logger.error("empty cohort-type pair for " + row.getString(COL_GROUP) + "." + row.getString(COL_CODE));
+				throw new IOException("empty cohort-type pair for " + row.getString(COL_GROUP) + "."
+						+ row.getString(COL_CODE));
+			}
+			lastFeatureIdentifier = featureIdentifier;
+			lastCohortTimePairs = cohortTimePairs;
 
 			String type = row.getString(COL_TYPE);
 			String section = row.getString(COL_SECTION);
@@ -309,10 +314,44 @@ public class LifeLinesDataDictionaryToOmxConvertor
 			String subSubSection = row.getString(COL_SUB_SECTION2);
 			String subSubSubSection = row.getString(COL_SUB_SECTION3);
 
-			for (CohortTimePair cohortTypePair : cohortTypePairs)
+			for (CohortTimePair cohortTimePair : cohortTimePairs)
 			{
-				String cohort = cohortTypePair.getCohort();
-				String time = cohortTypePair.getTime();
+				String featurePerCohortIdentifier = featureIdentifier + '.' + cohortTimePair.getProtocolId();
+
+				KeyValueTuple featureMap = new KeyValueTuple();
+				featureMap.set(ENTITY_IDENTIFIER, featurePerCohortIdentifier);
+				featureMap.set(ENTITY_NAME, featureName);
+				Map<String, String> descriptionMap = new LinkedHashMap<String, String>();
+				if (featureDescriptionEn != null) descriptionMap.put("en", featureDescriptionEn);
+				if (featureDescriptionNl != null) descriptionMap.put("nl", featureDescriptionNl);
+				featureMap.set(ENTITY_DESCRIPTION, gson.toJson(descriptionMap));
+				if (row.getString(COL_VALUE) != null && !row.getString(COL_VALUE).isEmpty()) featureMap.set(
+						FEATURE_DATATYPE, "categorical");
+				sheetMap.get(SHEET_FEATURE).write(featureMap);
+				featureIdentifiers.add(featurePerCohortIdentifier);
+
+				// add category
+				String categoryValue = row.getString(COL_VALUE);
+				String categoryDescription = row.getString(COL_VALUE_DESCRIPTION_EN);
+				if (categoryValue != null && (categoryDescription == null || categoryDescription.isEmpty()))
+				{
+					logger.fatal("missing translation for value '" + categoryValue + "' on row " + rownr
+							+ " in column '" + COL_VALUE_DESCRIPTION_EN + "' in sheet '" + sheetName + "'");
+					throw new IOException("missing translation for value '" + categoryValue + "'");
+				}
+
+				if (categoryValue != null && categoryDescription != null)
+				{
+					KeyValueTuple categoryMap = new KeyValueTuple();
+					categoryMap.set(ENTITY_IDENTIFIER, "category_" + featurePerCohortIdentifier + "_" + categoryValue);
+					categoryMap.set(ENTITY_NAME, categoryDescription);
+					categoryMap.set(VALUE_CODE, categoryValue);
+					categoryMap.set(OBSERVABLE_FEATURE_IDENTIFIER, featurePerCohortIdentifier);
+					sheetMap.get(SHEET_CATEGORY).write(categoryMap);
+				}
+
+				String cohort = matrix.getProtocolDescription(cohortTimePair.getProtocolId());
+				String time = matrix.getVmidDescription(cohortTimePair.getVmidId());
 
 				String protocolIdentifier = cohort.replace(",", "");
 				String protocolName = cohort;
@@ -326,7 +365,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 					protocolMap.put(protocolIdentifier, subProtocol);
 					protocol.addSubProtocol(subProtocol);
 				}
-				if (time == null || time.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+				if (time == null || time.isEmpty()) subProtocol.addFeatureIdentifier(featurePerCohortIdentifier);
 				else
 				{
 					protocolIdentifier = protocolIdentifier + '.' + time.replace(",", "");
@@ -341,7 +380,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 						protocol.addSubProtocol(subProtocol);
 					}
 
-					if (type == null || type.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+					if (type == null || type.isEmpty()) subProtocol.addFeatureIdentifier(featurePerCohortIdentifier);
 					else
 					{
 						protocolIdentifier = protocolIdentifier + '.' + type.replace(",", "");
@@ -356,7 +395,8 @@ public class LifeLinesDataDictionaryToOmxConvertor
 							protocol.addSubProtocol(subProtocol);
 						}
 
-						if (section == null || section.isEmpty()) subProtocol.addFeatureIdentifier(featureIdentifier);
+						if (section == null || section.isEmpty()) subProtocol
+								.addFeatureIdentifier(featurePerCohortIdentifier);
 						else
 						{
 							protocolIdentifier = protocolIdentifier + '.' + section.replace(",", "");
@@ -372,7 +412,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 							}
 
 							if (subSection == null || subSection.isEmpty()) subProtocol
-									.addFeatureIdentifier(featureIdentifier);
+									.addFeatureIdentifier(featurePerCohortIdentifier);
 							else
 							{
 								protocolIdentifier = protocolIdentifier + '.' + subSection.replace(",", "");
@@ -388,7 +428,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 								}
 
 								if (subSubSection == null || subSubSection.isEmpty()) subProtocol
-										.addFeatureIdentifier(featureIdentifier);
+										.addFeatureIdentifier(featurePerCohortIdentifier);
 								else
 								{
 									protocolIdentifier = protocolIdentifier + '.' + subSubSection.replace(",", "");
@@ -404,7 +444,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 									}
 
 									if (subSubSubSection == null || subSubSubSection.isEmpty()) subProtocol
-											.addFeatureIdentifier(featureIdentifier);
+											.addFeatureIdentifier(featurePerCohortIdentifier);
 									else
 									{
 										protocolIdentifier = protocolIdentifier + '.'
@@ -421,17 +461,25 @@ public class LifeLinesDataDictionaryToOmxConvertor
 										}
 
 										// end of the line, add feature
-										subProtocol.addFeatureIdentifier(featureIdentifier);
+										subProtocol.addFeatureIdentifier(featurePerCohortIdentifier);
 									}
 								}
 							}
 						}
 					}
 				}
-
-				++rownr;
 			}
 		}
+	}
+
+	private Tuple createCategory(String identifier, String name, String value)
+	{
+		KeyValueTuple categoryMap = new KeyValueTuple();
+		categoryMap.set(ENTITY_IDENTIFIER, "category_" + identifier + "_" + value);
+		categoryMap.set(ENTITY_NAME, name);
+		categoryMap.set(VALUE_CODE, value);
+		categoryMap.set(OBSERVABLE_FEATURE_IDENTIFIER, identifier);
+		return categoryMap;
 	}
 
 	private Set<CohortTimePair> getCohortTimePairs(Tuple row, LifeLinesQuestionnaireMatrix matrix)
@@ -439,14 +487,10 @@ public class LifeLinesDataDictionaryToOmxConvertor
 		Set<CohortTimePair> cohortTypePairs = matrix != null ? matrix.get(row.getString(COL_GROUP),
 				row.getString(COL_CODE)) : null;
 
-		// fall back to existing information in translated data dictionary
 		if (cohortTypePairs == null)
 		{
-			if (matrix != null) logger.warn("missing questionnaire matrix entry for: " + row.getString(COL_GROUP) + " "
+			throw new RuntimeException("missing questionnaire matrix entry for: " + row.getString(COL_GROUP) + " "
 					+ row.getString(COL_CODE));
-			String cohort = row.getString(COL_COHORT);
-			String time = row.getString(COL_TIME);
-			cohortTypePairs = Collections.singleton(new CohortTimePair(cohort, time));
 		}
 
 		return cohortTypePairs;
@@ -537,7 +581,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 	public static void main(String[] args) throws IOException
 	{
 		BasicConfigurator.configure();
-		logger.setLevel(Level.DEBUG);
+		logger.setLevel(Level.WARN);
 
 		if (args.length < 2 || args.length > 3)
 		{
