@@ -34,6 +34,9 @@ public class ComputeProperties
 	public String runId = Parameters.RUNID_DEFAULT;
 	public String database = Parameters.DATABASE_DEFAULT;
 
+	// parameters not stored in compute.properties file:
+	public boolean databaseStart = false;
+
 	public ComputeProperties(String[] args)
 	{
 		// set path
@@ -58,8 +61,8 @@ public class ComputeProperties
 	}
 
 	/**
-	 * If this.defaultsCommandLine does not exist, then look in workflow folder for
-	 * [workflow].defaults.csv or else defaults.csv
+	 * If this.defaultsCommandLine does not exist, then look in workflow folder
+	 * for [workflow].defaults.csv or else defaults.csv
 	 */
 	private void updateWorkflowParameterDefaultsCSV()
 	{
@@ -81,9 +84,11 @@ public class ComputeProperties
 		else
 		{
 			File workflowFile = new File(this.workFlow);
-			String workflowFilePath = workflowFile.getParent(); // get workflow path
+			String workflowFilePath = workflowFile.getParent(); // get workflow
+																// path
 			String workflowName = workflowFile.getName(); // strip workflow name
-			workflowName = workflowName.substring(0, workflowName.indexOf('.')); // strip extension
+			workflowName = workflowName.substring(0, workflowName.indexOf('.')); // strip
+																					// extension
 
 			File defaultsFileTest = new File(workflowFilePath + File.separator + workflowName + "."
 					+ Parameters.DEFAULTS_DEFAULT);
@@ -123,7 +128,7 @@ public class ComputeProperties
 	private void updateDefaultParameterValues(String path)
 	{
 		this.workFlow = updatePath(path, this.workFlow);
-//		this.defaults = updatePath(path, this.defaults);
+		// this.defaults = updatePath(path, this.defaults);
 		this.runDir = updatePath(path, this.runDir);
 
 		ArrayList<String> pathParameters = new ArrayList<String>();
@@ -224,6 +229,7 @@ public class ComputeProperties
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
+			this.databaseStart = null != cmd.getOptionValue(Parameters.DATABASE_START);
 
 			String[] cmdParameters = cmd.getOptionValues(Parameters.PARAMETERS_CMNDLINE_OPTION);
 			cmdParameters = getFullPath(cmdParameters);
@@ -300,26 +306,28 @@ public class ComputeProperties
 	public Options createOptions()
 	{
 		Options options = new Options();
-		Option path = OptionBuilder.hasArg().withLongOpt(Parameters.PATH)
+		Option path = OptionBuilder.hasArg()
 				.withDescription("Path to directory this generates to. Default: <current dir>.")
-				.create(Parameters.PATH_CMNDLINE_OPTION);
-		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).isRequired(false).hasArgs()
-				.withLongOpt("parameters")
+				.withLongOpt(Parameters.PATH).create(Parameters.PATH_CMNDLINE_OPTION);
+		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).hasArgs().withLongOpt("parameters")
 				.withDescription("Path to parameter.csv file(s). Default: " + Parameters.PARAMETERS_DEFAULT)
 				.create("p");
-		Option w = OptionBuilder.withArgName(Parameters.WORKFLOW_DEFAULT).hasArg().withLongOpt(Parameters.WORKFLOW)
-				.withDescription("Path to your workflow file. Default: " + Parameters.WORKFLOW_DEFAULT).create("w");
+		Option w = OptionBuilder.withArgName(Parameters.WORKFLOW_DEFAULT).hasArg()
+				.withDescription("Path to your workflow file. Default: " + Parameters.WORKFLOW_DEFAULT)
+				.withLongOpt(Parameters.WORKFLOW).create("w");
 		Option d = OptionBuilder.hasArg()
 				.withDescription("Path to your workflow-defaults file. Default: " + Parameters.DEFAULTS_DEFAULT)
-				.create(Parameters.DEFAULTS);
-		Option b = OptionBuilder.hasArg().withLongOpt(Parameters.BACKEND)
+				.withLongOpt(Parameters.DEFAULTS).create(Parameters.DEFAULTS);
+		Option b = OptionBuilder.hasArg()
 				.withDescription("Backend for which you generate. Default: " + Parameters.BACKEND_DEFAULT)
-				.create(Parameters.BACKEND_CMNDLINE_OPTION);
+				.withLongOpt(Parameters.BACKEND).create(Parameters.BACKEND_CMNDLINE_OPTION);
 		Option runDir = OptionBuilder.hasArg().withDescription("Directory where jobs are stored")
 				.create(Parameters.RUNDIR);
-		Option runId = OptionBuilder.hasArg().withLongOpt(Parameters.RUNID)
+		Option runId = OptionBuilder.hasArg()
 				.withDescription("Id of the task set which you generate. Default: " + Parameters.RUNID_DEFAULT)
-				.create(Parameters.RUNID_CMNDLINE_OPTION);
+				.withLongOpt(Parameters.RUNID).create(Parameters.RUNID_CMNDLINE_OPTION);
+		Option databaseStart = OptionBuilder.withDescription("Starts the database")
+				.withLongOpt(Parameters.DATABASE_START).create(Parameters.DATABASE_START);
 		options.addOption(path);
 		options.addOption(p);
 		options.addOption(w);
@@ -327,6 +335,7 @@ public class ComputeProperties
 		options.addOption(b);
 		options.addOption(runDir);
 		options.addOption(runId);
+		options.addOption(databaseStart);
 
 		return options;
 	}

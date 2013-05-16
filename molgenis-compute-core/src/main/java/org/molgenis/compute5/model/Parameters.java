@@ -71,6 +71,7 @@ public class Parameters
 	public static final String DATABASE_DEFAULT = "none";
 	public static final String DATABASE_CMNDLINE_OPTION = "db";
 	public static final String DATABASE_COLUMN = USER_PREFIX + DATABASE;
+	public static final String DATABASE_START = "database-start";
 	public static final String PROPERTIES = "compute.properties";
 	
 	//table with all the values
