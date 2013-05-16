@@ -57,10 +57,10 @@ public class ComputeProperties
 	{
 		// set path
 		this.path = path;
-		
+
 		// prepend path to defaults
 		updateDefaults(path);
-		
+
 		createPropertiesFile();
 
 		// parse properties file
@@ -169,7 +169,7 @@ public class ComputeProperties
 			// set this.variables
 			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
-			this.defaults = getFullPath(cmd, Parameters.DEFAULTS, this.defaults);
+			this.defaults = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, this.defaults);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
@@ -250,21 +250,25 @@ public class ComputeProperties
 	public Options createOptions()
 	{
 		Options options = new Options();
-		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(false).hasArgs().withLongOpt("parameters")
-				.withDescription("Path to parameter.csv file(s). Default: parameters.csv").create("p");
-		Option w = OptionBuilder.withArgName("workflow.csv").hasArg().withLongOpt(Parameters.WORKFLOW)
-				.withDescription("Path to your workflow file. Default: workflow.csv.").create("w");
-		Option d = OptionBuilder.hasArg().withLongOpt(Parameters.PATH)
+		Option path = OptionBuilder.hasArg().withLongOpt(Parameters.PATH)
 				.withDescription("Path to directory this generates to. Default: <current dir>.")
 				.create(Parameters.PATH_CMNDLINE_OPTION);
+		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).isRequired(false).hasArgs().withLongOpt("parameters")
+				.withDescription("Path to parameter.csv file(s). Default: " + Parameters.PARAMETERS_DEFAULT).create("p");
+		Option w = OptionBuilder.withArgName(Parameters.WORKFLOW_DEFAULT).hasArg().withLongOpt(Parameters.WORKFLOW)
+				.withDescription("Path to your workflow file. Default: " + Parameters.WORKFLOW_DEFAULT).create("w");
+		Option d = OptionBuilder.hasArg()
+				.withDescription("Path to your workflow-defaults file. Default: " + Parameters.DEFAULTS_DEFAULT)
+				.create(Parameters.DEFAULTS);
 		Option b = OptionBuilder.hasArg().withLongOpt(Parameters.BACKEND)
-				.withDescription("Backend for which you generate. Default: local.")
+				.withDescription("Backend for which you generate. Default: " + Parameters.BACKEND_DEFAULT)
 				.create(Parameters.BACKEND_CMNDLINE_OPTION);
 		Option runDir = OptionBuilder.hasArg().withDescription("Directory where jobs are stored")
 				.create(Parameters.RUNDIR);
 		Option runId = OptionBuilder.hasArg().withLongOpt(Parameters.RUNID)
-				.withDescription("Id of the task set which you generate. Default: set01.")
+				.withDescription("Id of the task set which you generate. Default: " + Parameters.RUNID_DEFAULT)
 				.create(Parameters.RUNID_CMNDLINE_OPTION);
+		options.addOption(path);
 		options.addOption(p);
 		options.addOption(w);
 		options.addOption(d);

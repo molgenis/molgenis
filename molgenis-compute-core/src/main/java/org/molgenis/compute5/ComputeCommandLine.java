@@ -21,6 +21,8 @@ import org.molgenis.compute5.parsers.ParametersCsvParser;
 import org.molgenis.compute5.parsers.WorkflowCsvParser;
 import org.molgenis.util.tuple.WritableTuple;
 
+import com.google.common.base.Joiner;
+
 /**
  * Commandline program for compute5. Usage: -w workflow.csv -p parameters.csv
  * [-p moreParameters.csv]
@@ -40,14 +42,15 @@ public class ComputeCommandLine
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
 
-
 		// parse options
 		ComputeProperties computeProperties = new ComputeProperties(args);
 
 		// output scripts + docs
 		try
 		{
-			create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters, computeProperties.path, computeProperties.backend, computeProperties.runDir, computeProperties.runId, computeProperties.database);
+			create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters,
+					computeProperties.path, computeProperties.backend, computeProperties.runDir,
+					computeProperties.runId, computeProperties.database);
 		}
 		catch (Exception e)
 		{
@@ -59,41 +62,59 @@ public class ComputeCommandLine
 	{
 		try
 		{
-			return create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters, computeProperties.path, computeProperties.backend, computeProperties.runDir, computeProperties.runId, computeProperties.database);
+			return create(computeProperties.workFlow, computeProperties.defaults, computeProperties.parameters,
+					computeProperties.path, computeProperties.backend, computeProperties.runDir,
+					computeProperties.runId, computeProperties.database);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String path, String backend,
-			String runDir, String runID, String database) throws IOException, Exception
+
+	public static Compute create(String workflowCsv, String defaults, String[] parametersCsv, String path,
+			String backend, String runDir, String runID, String database) throws IOException, Exception
 	{
+		// create a list of parameter files
 		List<File> parameterFiles = new ArrayList<File>();
+
+		// if exist include defaults.csv in parameterFiles
+		File defaultsFile = new File(defaults);
+		if (defaultsFile.exists()) parameterFiles.add(defaultsFile);
+
 		for (String f : parametersCsv)
 			parameterFiles.add(new File(f));
+
 		Compute compute = new Compute();
+
+		// parse param files
 		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
 
 		// add command line parameters:
 		for (WritableTuple t : compute.getParameters().getValues())
 		{
-			t.set(Parameters.PATH_COLUMN, new File(path).getAbsolutePath());
-			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
-			t.set(Parameters.DEFAULTS_COLUMN, new File(defaults).getAbsolutePath());
+			t.set(Parameters.PATH_COLUMN, path);
+			t.set(Parameters.WORKFLOW_COLUMN, workflowCsv);
+			t.set(Parameters.DEFAULTS_COLUMN, defaults);
+			t.set(Parameters.PARAMETER_COLUMN, Joiner.on(",").join(parametersCsv));
 			t.set(Parameters.RUNDIR_COLUMN, new File(runDir).getAbsolutePath());
 			t.set(Parameters.RUNID_COLUMN, runID);
 			t.set(Parameters.BACKEND_COLUMN, backend);
 			t.set(Parameters.DATABASE_COLUMN, database);
 		}
 
-		System.out.println("Using workflow:   " + new File(workflowCsv).getAbsolutePath());
-		System.out.println("Using parameters: " + parameterFiles);
-		System.out.println("Using run (output) dir:  " + new File(runDir).getAbsolutePath());
-		System.out.println("Using backend:    " + backend);
-		System.out.println("Using runID:    " + runID);
+		System.out.println("Using workflow:         " + new File(workflowCsv).getAbsolutePath());
+		System.out.println("Using defaults:         " + defaultsFile.getAbsolutePath());
+		if (!defaultsFile.exists())
+		{
+			System.out.println("                        --> File does not exist and will be ignored.");
+		}
+		System.out.println("Using parameters:       " + parameterFiles);
+		System.out.println("Using run (output) dir: " + new File(runDir).getAbsolutePath());
+		System.out.println("Using backend:          " + backend);
+		System.out.println("Using runID:            " + runID);
 
 		System.out.println(""); // newline
 
@@ -153,7 +174,7 @@ public class ComputeCommandLine
 	public static Compute create(String path) throws IOException, Exception
 	{
 		ComputeProperties computeProperties = new ComputeProperties(path);
-		
+
 		return ComputeCommandLine.create(computeProperties);
 	}
 }

@@ -26,6 +26,7 @@ public class Parameters
 	public final static String WORKFLOW_COLUMN = USER_PREFIX + WORKFLOW;
 	public static final String DEFAULTS = "defaults";
 	public static final String DEFAULTS_DEFAULT = "defaults.csv";
+	public static final String DEFAULTS_CMNDLINE_OPTION = "defaults";
 	public static final String DEFAULTS_COLUMN = USER_PREFIX + DEFAULTS;
 	public final static String PATH = "path";
 	public final static String PATH_DEFAULT = ".";
