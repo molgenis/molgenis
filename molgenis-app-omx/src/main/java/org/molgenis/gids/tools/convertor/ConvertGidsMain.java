@@ -9,13 +9,12 @@ import java.io.OutputStream;
 
 public class ConvertGidsMain
 {
-	private static final String DIRECTORY = "/Users/Roan/Work/GIDS_8_May/Cohorts/";
-	private final static String OUTPUTDIR = DIRECTORY + "Converted/";
-	private final static String PROJECTNAME = "Bloodbank";
 
 	public static void main(String[] args) throws IOException
 	{
-
+		final String DIRECTORY = args[0];
+		final String OUTPUTDIR = DIRECTORY + args[1];
+		final String PROJECTNAME = args[2];
 		SampleConverter sample = new SampleConverter();
 		InputStream is = new FileInputStream(DIRECTORY + PROJECTNAME + ".xls");
 

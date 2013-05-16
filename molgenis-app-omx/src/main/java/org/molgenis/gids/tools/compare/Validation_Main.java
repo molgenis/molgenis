@@ -15,7 +15,7 @@ public class Validation_Main
 		ValidationChecker vc = new ValidationChecker();
 		try
 		{
-			BufferedWriter logger = new BufferedWriter(new FileWriter("/Users/Roan/logger.txt"));
+			BufferedWriter logger = new BufferedWriter(new FileWriter(args[2]));
 			logger.write("file1: " + args[0] + "\nfile2: " + args[1]);
 			vc.check(args[0], args[1], logger);
 			logger.close();
