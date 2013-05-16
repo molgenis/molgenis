@@ -35,7 +35,9 @@ public class ComputeProperties
 	public String database = Parameters.DATABASE_DEFAULT;
 
 	// parameters not stored in compute.properties file:
-	public boolean databaseStart = false;
+	public boolean databaseStart = false; // start db?
+	public boolean databaseEnd = false; // stop db?
+	public boolean generate = false; // should we generate?
 
 	public ComputeProperties(String[] args)
 	{
@@ -55,6 +57,24 @@ public class ComputeProperties
 
 		// look for defaults in same folder as workflow
 		updateWorkflowParameterDefaultsCSV();
+
+		// save new config
+		saveProperties();
+	}
+
+
+	public ComputeProperties(String path)
+	{
+		// set path
+		this.path = path;
+
+		// prepend path to defaults
+		updateDefaultParameterValues(path);
+
+		createPropertiesFile();
+
+		// parse properties file
+		parseProperties();
 
 		// save new config
 		saveProperties();
@@ -106,23 +126,6 @@ public class ComputeProperties
 			}
 			// else this.defaults stays null
 		}
-	}
-
-	public ComputeProperties(String path)
-	{
-		// set path
-		this.path = path;
-
-		// prepend path to defaults
-		updateDefaultParameterValues(path);
-
-		createPropertiesFile();
-
-		// parse properties file
-		parseProperties();
-
-		// save new config
-		saveProperties();
 	}
 
 	private void updateDefaultParameterValues(String path)
@@ -229,7 +232,13 @@ public class ComputeProperties
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
-			this.databaseStart = null != cmd.getOptionValue(Parameters.DATABASE_START);
+			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
+			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
+
+			// generate if -g or if -w and -p present
+			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
+					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
+							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
 
 			String[] cmdParameters = cmd.getOptionValues(Parameters.PARAMETERS_CMNDLINE_OPTION);
 			cmdParameters = getFullPath(cmdParameters);
@@ -327,7 +336,8 @@ public class ComputeProperties
 				.withDescription("Id of the task set which you generate. Default: " + Parameters.RUNID_DEFAULT)
 				.withLongOpt(Parameters.RUNID).create(Parameters.RUNID_CMNDLINE_OPTION);
 		Option databaseStart = OptionBuilder.withDescription("Starts the database")
-				.withLongOpt(Parameters.DATABASE_START).create(Parameters.DATABASE_START);
+				.withLongOpt(Parameters.DATABASE_START).create(Parameters.DATABASE_START_CMNDLINE_OPTION);
+
 		options.addOption(path);
 		options.addOption(p);
 		options.addOption(w);
@@ -336,6 +346,10 @@ public class ComputeProperties
 		options.addOption(runDir);
 		options.addOption(runId);
 		options.addOption(databaseStart);
+		options.addOption(OptionBuilder.withDescription("End the database").withLongOpt(Parameters.DATABASE_END)
+				.create(Parameters.DATABASE_END_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("Generate jobs").withLongOpt(Parameters.GENERATE)
+				.create(Parameters.GENERATE_CMNDLINE_OPTION));
 
 		return options;
 	}
