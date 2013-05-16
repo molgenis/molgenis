@@ -19,8 +19,6 @@ chr="${chr}"
 
 outputFolder="${outputFolder}"
 
-<#noparse>
-
 echo "chr: ${chr}"
 echo "outputFolder: ${outputFolder}"
 echo "impute2OutputFiles: ${impute2ChunkOutputs[@]}"
@@ -114,5 +112,3 @@ done
 echo "Impute2 output infos concattenated"
 mv ${outputFolder}/~chr${chr}_info ${outputFolder}/chr${chr}_info
 putFile ${outputFolder}/chr${chr}_info
-
-</#noparse>

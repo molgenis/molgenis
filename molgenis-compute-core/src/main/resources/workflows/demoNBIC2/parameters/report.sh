@@ -1,4 +1,5 @@
-#MOLGENIS walltime=00:05:00 
+#MOLGENIS walltime=00:05:00
+#input workflowConstant
 #input dis
 #list sample
 #list glucose
