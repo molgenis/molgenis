@@ -16,7 +16,6 @@
 
 ${stage} impute/${impute2version}
 
-<#noparse>
 
 tmpOutput="${imputationIntermediatesFolder}/~chr${chr}_${fromChrPos}-${toChrPos}"
 finalOutput="${imputationIntermediatesFolder}/chr${chr}_${fromChrPos}-${toChrPos}"
@@ -217,5 +216,3 @@ else
 fi
 echo "Running time: ${day} days ${hour} hours ${min} mins ${sec} secs"
 
-
-</#noparse>

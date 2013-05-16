@@ -26,6 +26,7 @@ public class Parameters
 	public final static String WORKFLOW_COLUMN = USER_PREFIX + WORKFLOW;
 	public static final String DEFAULTS = "defaults";
 	public static final String DEFAULTS_DEFAULT = "defaults.csv";
+	public static final String DEFAULTS_CMNDLINE_OPTION = "defaults";
 	public static final String DEFAULTS_COLUMN = USER_PREFIX + DEFAULTS;
 	public final static String PATH = "path";
 	public final static String PATH_DEFAULT = ".";
@@ -70,6 +71,7 @@ public class Parameters
 	public static final String DATABASE_DEFAULT = "none";
 	public static final String DATABASE_CMNDLINE_OPTION = "db";
 	public static final String DATABASE_COLUMN = USER_PREFIX + DATABASE;
+	public static final String DATABASE_START = "database-start";
 	public static final String PROPERTIES = "compute.properties";
 	
 	//table with all the values
