@@ -101,6 +101,12 @@ public class ComputeCommandLine
 
 		System.out.println(""); // newline
 
+		// starting database?
+		if (computeProperties.databaseStart)
+		{
+			// GEORGE, PLEASE START THE DATABASE!
+		}
+		
 		// create outputdir
 		File dir = new File(computeProperties.runDir);
 		computeProperties.runDir = dir.getCanonicalPath();
