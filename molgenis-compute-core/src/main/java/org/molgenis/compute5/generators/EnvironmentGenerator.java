@@ -75,8 +75,10 @@ public class EnvironmentGenerator
 				}
 				catch (Exception e)
 				{
-					// TODO Auto-generated catch block
+					System.err.println("In your workflow.csv you maybe refer to a parameter '" + p + "' to which you did not assign a value in your parameters.csv. If so: please add that the parameter to your parameters.csv");
 					e.printStackTrace();
+					System.err.println("Exit with code 1.");
+					System.exit(1);
 				} 
 				output += p + "[" + index + "]=" + value + "\n";
 			}
