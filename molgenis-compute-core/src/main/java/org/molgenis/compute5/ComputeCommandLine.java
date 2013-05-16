@@ -81,8 +81,14 @@ public class ComputeCommandLine
 		List<File> parameterFiles = new ArrayList<File>();
 
 		// if exist include defaults.csv in parameterFiles
-		File defaultsFile = new File(defaults);
-		if (defaultsFile.exists()) parameterFiles.add(defaultsFile);
+		boolean defaultsExists = null != defaults;
+		File defaultsFile = File.createTempFile("removeme", null);
+		if (defaultsExists)
+		{
+			defaultsFile = new File(defaults);
+			defaultsExists = defaultsFile.exists();
+			if (defaultsExists) parameterFiles.add(defaultsFile);
+		}
 
 		for (String f : parametersCsv)
 			parameterFiles.add(new File(f));
@@ -106,11 +112,7 @@ public class ComputeCommandLine
 		}
 
 		System.out.println("Using workflow:         " + new File(workflowCsv).getAbsolutePath());
-		System.out.println("Using defaults:         " + defaultsFile.getAbsolutePath());
-		if (!defaultsFile.exists())
-		{
-			System.out.println("                        --> File does not exist and will be ignored.");
-		}
+		if (defaultsExists) System.out.println("Using defaults:         " + defaultsFile.getAbsolutePath());
 		System.out.println("Using parameters:       " + parameterFiles);
 		System.out.println("Using run (output) dir: " + new File(runDir).getAbsolutePath());
 		System.out.println("Using backend:          " + backend);

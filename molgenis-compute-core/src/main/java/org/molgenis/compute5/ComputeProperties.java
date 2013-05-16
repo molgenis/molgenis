@@ -25,7 +25,8 @@ public class ComputeProperties
 
 	public String path = Parameters.PATH_DEFAULT;
 	public String workFlow = Parameters.WORKFLOW_DEFAULT;
-	public String defaults = Parameters.DEFAULTS_DEFAULT;
+	public String defaults = null;
+	public String defaultsCommandLine = null;
 	public String[] parameters =
 	{ Parameters.PARAMETERS_DEFAULT };
 	public String backend = Parameters.BACKEND_DEFAULT;
@@ -39,7 +40,7 @@ public class ComputeProperties
 		setPath(args);
 
 		// prepend path to defaults
-		updateDefaults(path);
+		updateDefaultParameterValues(path);
 
 		createPropertiesFile();
 
@@ -49,8 +50,57 @@ public class ComputeProperties
 		// overwrite with command line args
 		parseCommandLine(args);
 
+		// look for defaults in same folder as workflow
+		updateWorkflowParameterDefaultsCSV();
+
 		// save new config
 		saveProperties();
+	}
+
+	/**
+	 * If this.defaultsCommandLine does not exist, then look in workflow folder for
+	 * [workflow].defaults.csv or else defaults.csv
+	 */
+	private void updateWorkflowParameterDefaultsCSV()
+	{
+		if (null != defaultsCommandLine)
+		{
+			// validate file exists
+
+			if (!new File(defaultsCommandLine).exists())
+			{
+				System.err.println(">> ERROR >> '-defaults " + defaultsCommandLine + "' does not exist!");
+				System.err.println("Exit with code 1");
+				System.exit(1);
+			}
+			else
+			{
+				this.defaults = this.defaultsCommandLine;
+			}
+		}
+		else
+		{
+			File workflowFile = new File(this.workFlow);
+			String workflowFilePath = workflowFile.getParent(); // get workflow path
+			String workflowName = workflowFile.getName(); // strip workflow name
+			workflowName = workflowName.substring(0, workflowName.indexOf('.')); // strip extension
+
+			File defaultsFileTest = new File(workflowFilePath + File.separator + workflowName + "."
+					+ Parameters.DEFAULTS_DEFAULT);
+			if (defaultsFileTest.exists())
+			{ // first check [workflow].defaults.csv
+				this.defaults = defaultsFileTest.toString();
+			}
+			else
+			{ // else check defaults.csv
+				defaultsFileTest = new File(workflowFilePath + File.separator + Parameters.DEFAULTS_DEFAULT);
+				if (defaultsFileTest.exists())
+				{
+					this.defaults = defaultsFileTest.toString();
+				}
+			}
+			// else this.defaults stays null
+		}
 	}
 
 	public ComputeProperties(String path)
@@ -59,7 +109,7 @@ public class ComputeProperties
 		this.path = path;
 
 		// prepend path to defaults
-		updateDefaults(path);
+		updateDefaultParameterValues(path);
 
 		createPropertiesFile();
 
@@ -70,10 +120,10 @@ public class ComputeProperties
 		saveProperties();
 	}
 
-	private void updateDefaults(String path)
+	private void updateDefaultParameterValues(String path)
 	{
 		this.workFlow = updatePath(path, this.workFlow);
-		this.defaults = updatePath(path, this.defaults);
+//		this.defaults = updatePath(path, this.defaults);
 		this.runDir = updatePath(path, this.runDir);
 
 		ArrayList<String> pathParameters = new ArrayList<String>();
@@ -169,7 +219,7 @@ public class ComputeProperties
 			// set this.variables
 			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
-			this.defaults = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, this.defaults);
+			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
@@ -226,7 +276,7 @@ public class ComputeProperties
 			// set this.variables
 			p.setProperty(Parameters.PATH, this.path);
 			p.setProperty(Parameters.WORKFLOW, this.workFlow);
-			p.setProperty(Parameters.DEFAULTS, this.defaults);
+			if (null != this.defaults) p.setProperty(Parameters.DEFAULTS, this.defaults);
 			p.setProperty(Parameters.BACKEND, this.backend);
 			p.setProperty(Parameters.RUNDIR, this.runDir);
 			p.setProperty(Parameters.RUNID, this.runId);
@@ -253,8 +303,10 @@ public class ComputeProperties
 		Option path = OptionBuilder.hasArg().withLongOpt(Parameters.PATH)
 				.withDescription("Path to directory this generates to. Default: <current dir>.")
 				.create(Parameters.PATH_CMNDLINE_OPTION);
-		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).isRequired(false).hasArgs().withLongOpt("parameters")
-				.withDescription("Path to parameter.csv file(s). Default: " + Parameters.PARAMETERS_DEFAULT).create("p");
+		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).isRequired(false).hasArgs()
+				.withLongOpt("parameters")
+				.withDescription("Path to parameter.csv file(s). Default: " + Parameters.PARAMETERS_DEFAULT)
+				.create("p");
 		Option w = OptionBuilder.withArgName(Parameters.WORKFLOW_DEFAULT).hasArg().withLongOpt(Parameters.WORKFLOW)
 				.withDescription("Path to your workflow file. Default: " + Parameters.WORKFLOW_DEFAULT).create("w");
 		Option d = OptionBuilder.hasArg()
