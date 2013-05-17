@@ -14,6 +14,7 @@ import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.MolgenisEntity;
+import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
@@ -22,6 +23,7 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 
 import app.MolgenisDatabasePopulator;
+import app.servlet.GuiService;
 
 import com.sun.mail.iap.Protocol;
 
@@ -33,6 +35,13 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		Login login = database.getLogin();
 		database.setLogin(null);
 		login.login(database, Login.USER_ADMIN_NAME, "admin"); // FIXME hardcoded reference to admin password
+
+		// set app name
+		RuntimeProperty runtimeProperty = new RuntimeProperty();
+		runtimeProperty.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + GuiService.KEY_APP_NAME);
+		runtimeProperty.setName(GuiService.KEY_APP_NAME);
+		runtimeProperty.setValue("LifeLines");
+		database.add(runtimeProperty);
 
 		List<MolgenisUser> users = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
 				Login.USER_ANONYMOUS_NAME));

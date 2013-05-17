@@ -66,8 +66,10 @@ public class OrderStudyDataService
 
 		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, userId);
 
+		String appName = getAppName();
+
 		long timestamp = System.currentTimeMillis();
-		String fileName = getAppName() + "-request_" + timestamp + ".doc";
+		String fileName = appName + "-request_" + timestamp + ".doc";
 		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
 
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
@@ -83,7 +85,7 @@ public class OrderStudyDataService
 		database.add(studyDataRequest);
 
 		// create excel attachment fot study data request
-		String variablesFileName = getAppName() + "-request_" + timestamp + "-variables.xls";
+		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
 		InputStream variablesIs = createOrderExcelAttachment(studyDataRequest, features);
 		File variablesFile = fileStore.store(variablesIs, variablesFileName);
 
@@ -92,8 +94,8 @@ public class OrderStudyDataService
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
 		helper.setBcc(MolgenisUserService.getInstance(database).findAdminEmail());
-		helper.setSubject("Order confirmation from " + getAppName());
-		helper.setText(createOrderConfirmationEmailText(studyDataRequest));
+		helper.setSubject("Order confirmation from " + appName);
+		helper.setText(createOrderConfirmationEmailText(studyDataRequest, appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
 		helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
 		mailSender.send(message);
@@ -112,10 +114,14 @@ public class OrderStudyDataService
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 
-	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest)
+	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest, String appName)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append("TODO: ORDER CONFIRMATION EMAIL HERE");
+		strBuilder.append("Hello,\n\n");
+		strBuilder.append("Thank you for ordering at ").append(appName)
+				.append(", attached are the details of your order.\n\n");
+		strBuilder.append("Sincerely,\n");
+		strBuilder.append(appName);
 		return strBuilder.toString();
 	}
 
