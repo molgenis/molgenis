@@ -13,10 +13,10 @@ public class Parameters
 	
 	// SOME OF THESE CONSTANTS SHOULD BE PLACED ELSEWHERE!
 	
-	public static final String STEP = "step";
-	public static final String PROTOCOL = "script";
-	public static final String PARAMETER_MAPPING = "parameterMapping";
-	public static final String USER = "user"; // TODO: replace all "user" strings with this constant
+	public static final String STEP_HEADING_IN_WORKFLOW = "step";
+	public static final String PROTOCOL_HEADING_IN_WORKFLOW = "protocol";
+	public static final String PARAMETER_MAPPING_HEADING_IN_WORKFLOW = "parameterMapping";
+	public static final String USER = "user";
 	public static final String STEP_PARAM_SEP = "_";
 	public static final String USER_PREFIX = USER + STEP_PARAM_SEP;
 	public final static String ID_COLUMN = USER_PREFIX + Task.TASKID_COLUMN;
@@ -45,7 +45,7 @@ public class Parameters
 	public static String ENVIRONMENT = "user" + ENVIRONMENT_EXTENSION;
 	public static String ENVIRONMENT_FULLPATH = null; // to be set
 	public static String NOTAVAILABLE = "_NA";
-	public static String LIST = "list";
+	public static String LIST_INPUT = "list";
 	public static String STRING = "string";
 	public static String INPUT = "input";
 	public static final String WALLTIME = "walltime";
@@ -69,7 +69,7 @@ public class Parameters
 	public static final String RUNID_DEFAULT = "run01";
 	public static final String DATABASE = "database";
 	public static final String DATABASE_DEFAULT = "none";
-	public static final String DATABASE_CMNDLINE_OPTION = "db";
+	public static final String DATABASE_CMNDLINE_OPTION = "d";
 	public static final String DATABASE_COLUMN = USER_PREFIX + DATABASE;
 	public static final String DATABASE_START = "database-start";
 	public static final String DATABASE_START_CMNDLINE_OPTION = "dbs";
@@ -78,6 +78,12 @@ public class Parameters
 	public static final String PROPERTIES = "compute.properties";
 	public static final String GENERATE = "generate";
 	public static final String GENERATE_CMNDLINE_OPTION = "g";
+	public static final String LIST = "list";
+	public static final String LIST_CMNDLINE_OPTION = "l";
+	public static final String CREATE = "create";
+	public static final String CREATE_WORKFLOW_DEFAULT = "myworkflow";
+	public static final String HELP = "help";
+	public static final String HELP_CMNDLINE_OPTION = "h";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();

@@ -1,12 +1,14 @@
 package org.molgenis.compute5;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
+import org.molgenis.compute5.generators.CreateWorkflowGenerator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
 import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
@@ -58,6 +60,8 @@ public class ComputeCommandLine
 
 	public static Compute create(ComputeProperties computeProperties) throws IOException, Exception
 	{
+		Compute compute = new Compute(computeProperties);
+		
 		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
 		if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
 				+ (new File(computeProperties.defaults)).getAbsolutePath());
@@ -68,22 +72,40 @@ public class ComputeCommandLine
 
 		System.out.println(""); // newline
 
-		// starting database?
-		if (computeProperties.databaseStart)
+		/*
+		 * *
+		 * ** Now handle command line options:*
+		 */
+
+		if (computeProperties.create)
 		{
-			// GEORGE, PLEASE START THE DATABASE!
-		}
-		if (computeProperties.databaseEnd)
-		{
-			// GEORGE, PLEASE END THE DATABASE!
+			new CreateWorkflowGenerator(computeProperties.createWorkflow);
 		}
 
 		if (computeProperties.generate)
 		{
-			return generate(computeProperties);
+			generate(compute, computeProperties);
+		}
+		
+		
+		if (Parameters.DATABASE_DEFAULT.equals(computeProperties.database))
+		{ // if database none (= off), then do following
+			if (computeProperties.list)
+			{
+				// list files in rundir
+				File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter() { 
+	    	         public boolean accept(File dir, String filename)
+   	              { return filename.endsWith(".sh"); } 	} );
+				
+				System.out.println("Generated jobs:");
+				if (0 == scripts.length) System.out.println("None.");
+				else for (File script : scripts) {
+					System.out.println("- " + script.getName());
+				}
+			}
 		}
 
-		return null;
+		return compute;
 	}
 
 	private static boolean defaultsExists(ComputeProperties computeProperties) throws IOException
@@ -97,7 +119,7 @@ public class ComputeCommandLine
 		else return new File(computeProperties.defaults).exists();
 	}
 
-	private static Compute generate(ComputeProperties computeProperties) throws Exception
+	private static void generate(Compute compute, ComputeProperties computeProperties) throws Exception
 	{
 		// create a list of parameter files
 		List<File> parameterFiles = new ArrayList<File>();
@@ -105,8 +127,6 @@ public class ComputeCommandLine
 		for (String f : computeProperties.parameters)
 			parameterFiles.add(new File(f));
 		if (defaultsExists(computeProperties)) parameterFiles.add(new File(computeProperties.defaults));
-
-		Compute compute = new Compute();
 
 		// parse param files
 		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
@@ -171,8 +191,6 @@ public class ComputeCommandLine
 		new DocTasksDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getTasks());
 
 		System.out.println("Generation complete.");
-
-		return compute;
 	}
 
 	/**

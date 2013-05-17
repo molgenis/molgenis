@@ -108,7 +108,7 @@ public class ProtocolParser
 
 						// input
 						else if (els.get(0).equals(Parameters.INPUT) || els.get(0).equals(Parameters.STRING)
-								|| els.get(0).equals(Parameters.LIST))
+								|| els.get(0).equals(Parameters.LIST_INPUT))
 						{
 							// assume name column
 							if (els.size() < 2) throw new IOException("param requires 'name', e.g. '#string input1'");
