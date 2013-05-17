@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -28,8 +27,6 @@ import com.sun.mail.iap.Protocol;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
-	private static final Logger logger = Logger.getLogger(WebAppDatabasePopulator.class);
-
 	@Override
 	protected void initializeApplicationDatabase(Database database) throws Exception
 	{
@@ -61,7 +58,6 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 			visibleClasses.add(Category.class);
 			visibleClasses.add(ObservedValue.class);
 
-			// System.out.println(database.find(MolgenisEntity.class));
 			for (Class<?> entityClass : visibleClasses)
 			{
 				MolgenisEntity molgenisEntity = database.find(MolgenisEntity.class,
