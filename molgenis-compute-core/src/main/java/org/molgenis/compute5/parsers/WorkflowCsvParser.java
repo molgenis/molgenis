@@ -27,14 +27,14 @@ public class WorkflowCsvParser
 			for (Tuple row : reader)
 			{
 				// check value
-				if (row.isNull(Parameters.STEP)) throw new IOException("required column '" + Parameters.STEP + "' is missing in row " + row);
-				if (row.isNull(Parameters.PROTOCOL)) throw new IOException("required column '" + Parameters.PROTOCOL + "' is missing in row " + row);
-				if (row.isNull(Parameters.PARAMETER_MAPPING)) throw new IOException("required column '" + Parameters.PARAMETER_MAPPING + "' is missing in row "
+				if (row.isNull(Parameters.STEP_HEADING_IN_WORKFLOW)) throw new IOException("required column '" + Parameters.STEP_HEADING_IN_WORKFLOW + "' is missing in row " + row);
+				if (row.isNull(Parameters.PROTOCOL_HEADING_IN_WORKFLOW)) throw new IOException("required column '" + Parameters.PROTOCOL_HEADING_IN_WORKFLOW + "' is missing in row " + row);
+				if (row.isNull(Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW)) throw new IOException("required column '" + Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW + "' is missing in row "
 						+ row);
 
-				Step s = new Step(row.getString(Parameters.STEP));
-				s.setProtocol(ProtocolParser.parse(new File(workflowFile).getParentFile(), row.getString(Parameters.PROTOCOL)));
-				s.setParameters(WorkflowCsvParser.parseParameters(row.getString(Parameters.PARAMETER_MAPPING)));
+				Step s = new Step(row.getString(Parameters.STEP_HEADING_IN_WORKFLOW));
+				s.setProtocol(ProtocolParser.parse(new File(workflowFile).getParentFile(), row.getString(Parameters.PROTOCOL_HEADING_IN_WORKFLOW)));
+				s.setParameters(WorkflowCsvParser.parseParameters(row.getString(Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW)));
 
 				wf.getSteps().add(s);
 			}
@@ -44,7 +44,7 @@ public class WorkflowCsvParser
 		catch (IOException e)
 		{
 			throw new IOException("Parsing of workflow failed: " + e.getMessage()
-					+ ".\nThe workflow csv requires columns " + Parameters.STEP + "," + Parameters.PROTOCOL + "," + Parameters.PARAMETER_MAPPING + ".");
+					+ ".\nThe workflow csv requires columns " + Parameters.STEP_HEADING_IN_WORKFLOW + "," + Parameters.PROTOCOL_HEADING_IN_WORKFLOW + "," + Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW + ".");
 		}
 	}
 

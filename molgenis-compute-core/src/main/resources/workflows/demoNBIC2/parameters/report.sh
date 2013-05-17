@@ -1,6 +1,6 @@
 #MOLGENIS walltime=00:05:00
-#input workflowConstant
-#input dis
+#string workflowConstant
+#string dis
 #list sample
 #list glucose
 #list risk

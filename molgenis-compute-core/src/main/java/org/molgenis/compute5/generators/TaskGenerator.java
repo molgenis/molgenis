@@ -139,7 +139,7 @@ public class TaskGenerator
 						+ "##\n#\n";
 				for (Input input : step.getProtocol().getInputs())
 				{
-					boolean isList = Parameters.LIST.equals(input.getType());
+					boolean isList = Parameters.LIST_INPUT.equals(input.getType());
 					if (!isList)
 					{
 						String p = input.getName();
@@ -354,7 +354,7 @@ public class TaskGenerator
 			String origin = step.getParameters().get(i.getName());
 			boolean initialized = origin.startsWith(Parameters.USER_PREFIX);
 
-			boolean isList = Parameters.LIST.equals(i.getType());
+			boolean isList = Parameters.LIST_INPUT.equals(i.getType());
 
 			if (!isList && initialized) targets.add(i.getName());
 		}
