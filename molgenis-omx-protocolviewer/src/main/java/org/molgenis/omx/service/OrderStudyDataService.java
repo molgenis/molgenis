@@ -1,7 +1,11 @@
 package org.molgenis.omx.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -17,11 +21,14 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.io.TupleWriter;
+import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.FileStore;
+import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -59,8 +66,9 @@ public class OrderStudyDataService
 
 		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, userId);
 
-		String fileName = getAppName() + "-request_" + System.currentTimeMillis() + ".doc";
-		File file = fileStore.store(requestForm.getInputStream(), fileName);
+		long timestamp = System.currentTimeMillis();
+		String fileName = getAppName() + "-request_" + timestamp + ".doc";
+		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
 
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
@@ -69,10 +77,15 @@ public class OrderStudyDataService
 		studyDataRequest.setMolgenisUser(molgenisUser);
 		studyDataRequest.setRequestDate(new Date());
 		studyDataRequest.setRequestStatus("pending");
-		studyDataRequest.setRequestForm(file.getPath());
+		studyDataRequest.setRequestForm(orderFile.getPath());
 
 		logger.debug("create study data request: " + studyName);
 		database.add(studyDataRequest);
+
+		// create excel attachment fot study data request
+		String variablesFileName = getAppName() + "-request_" + timestamp + "-variables.xls";
+		InputStream variablesIs = createOrderExcelAttachment(studyDataRequest, features);
+		File variablesFile = fileStore.store(variablesIs, variablesFileName);
 
 		// send order confirmation to user and admin
 		MimeMessage message = mailSender.createMimeMessage();
@@ -81,8 +94,8 @@ public class OrderStudyDataService
 		helper.setBcc(MolgenisUserService.getInstance(database).findAdminEmail());
 		helper.setSubject("Order confirmation from " + getAppName());
 		helper.setText(createOrderConfirmationEmailText(studyDataRequest));
-		helper.addAttachment(getAppName() + "-request_" + System.currentTimeMillis() + ".doc", new FileSystemResource(
-				file));
+		helper.addAttachment(fileName, new FileSystemResource(orderFile));
+		helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
 		mailSender.send(message);
 	}
 
@@ -104,6 +117,49 @@ public class OrderStudyDataService
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("TODO: ORDER CONFIRMATION EMAIL HERE");
 		return strBuilder.toString();
+	}
+
+	private InputStream createOrderExcelAttachment(StudyDataRequest studyDataRequest, List<ObservableFeature> features)
+			throws IOException
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte[] bytes = null;
+		try
+		{
+			List<String> header = Arrays.asList("Id", "Variable", "Description");
+			ExcelWriter excelWriter = new ExcelWriter(bos);
+			try
+			{
+				TupleWriter sheetWriter = excelWriter.createTupleWriter(studyDataRequest.getName());
+				try
+				{
+					sheetWriter.writeColNames(header);
+
+					for (ObservableFeature feature : features)
+					{
+						KeyValueTuple tuple = new KeyValueTuple();
+						tuple.set(header.get(0), feature.getIdentifier());
+						tuple.set(header.get(1), feature.getName());
+						tuple.set(header.get(2), feature.getDescription());
+						sheetWriter.write(tuple);
+					}
+				}
+				finally
+				{
+					sheetWriter.close();
+				}
+			}
+			finally
+			{
+				excelWriter.close();
+			}
+		}
+		finally
+		{
+			bytes = bos.toByteArray();
+			bos.close();
+		}
+		return new ByteArrayInputStream(bytes);
 	}
 
 	// TODO move to utility class
