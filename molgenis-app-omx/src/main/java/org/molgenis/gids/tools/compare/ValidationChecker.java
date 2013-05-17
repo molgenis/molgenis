@@ -25,6 +25,7 @@ public class ValidationChecker
 	/**
 	 * @param args
 	 * @throws IOException
+	 * 
 	 */
 	public BufferedWriter logger = null;
 	private final static String IDENTIFIER = "id_sample";
@@ -35,18 +36,17 @@ public class ValidationChecker
 		LinkedHashMap<String, String> hashCheckedValues = new LinkedHashMap<String, String>();
 
 		// Make Object Reference
-		ValidationFile ref = new ValidationFile();
+		ValidationFile excelfile = new ValidationFile();
 		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(file1));
 
 		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
-
-		ref.bla(excelSheetReaderReferenceFile, IDENTIFIER);
+		excelfile.bla(excelSheetReaderReferenceFile, IDENTIFIER);
 
 		// Make Object FileToCompare
-		ValidationFile com = new ValidationFile();
+		ValidationFile csvFile = new ValidationFile();
 		CsvReader csvReaderFileToCompare = new CsvReader(new File(file2));
 
-		com.bla(csvReaderFileToCompare, IDENTIFIER);
+		csvFile.bla(csvReaderFileToCompare, IDENTIFIER);
 		boolean noUniqueColums = false;
 		// Make list for shared headers
 
@@ -54,10 +54,10 @@ public class ValidationChecker
 		// Compare the headers of Reference file with fileToCompare
 		// Add Reference headers to the listOfSharedHeaders
 		System.out.println("### Unique columns");
-		for (String o : ref.getListOfHeaders())
+		for (String o : excelfile.getListOfHeaders())
 		{
 			listOfSharedHeaders.add(o);
-			if (!com.getListOfHeaders().contains(o))
+			if (!csvFile.getListOfHeaders().contains(o))
 			{
 				System.out.println("In file1: " + o);
 				noUniqueColums = true;
@@ -66,13 +66,13 @@ public class ValidationChecker
 
 		// Compare the headers of fileToCompare file with Reference
 		// Add Reference headers to the listOfSharedHeaders
-		for (String o : com.getListOfHeaders())
+		for (String o : csvFile.getListOfHeaders())
 		{
 			if (!listOfSharedHeaders.contains(o))
 			{
 				listOfSharedHeaders.add(o);
 			}
-			if (!ref.getListOfHeaders().contains(o))
+			if (!excelfile.getListOfHeaders().contains(o))
 			{
 				System.out.println("In file2: " + o);
 				noUniqueColums = true;
@@ -89,38 +89,38 @@ public class ValidationChecker
 
 		try
 		{
-			for (Entry<String, Tuple> entry : ref.getHash().entrySet())
+			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
 			{
-				if (com.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
+				if (csvFile.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
 				{
-					compareRows(com.getHash().get(entry.getValue().getString(IDENTIFIER)), entry.getValue(),
+					compareRows(csvFile.getHash().get(entry.getValue().getString(IDENTIFIER)), entry.getValue(),
 							listOfSharedHeaders, hashCheckedValues, logger);
 				}
 
 			}
 
-			for (Entry<String, Tuple> entry : com.getHash().entrySet())
+			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
 			{
-				if (ref.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
+				if (excelfile.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
 				{
-					compareRows(entry.getValue(), ref.getHash().get(entry.getValue().getString(IDENTIFIER)),
+					compareRows(entry.getValue(), excelfile.getHash().get(entry.getValue().getString(IDENTIFIER)),
 							listOfSharedHeaders, hashCheckedValues, logger);
 				}
 
 			}
 
 			System.out.println("\n###Unique samples in file1");
-			for (Entry<String, Tuple> entry : ref.getHash().entrySet())
+			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
 			{
-				if (!com.getHash().containsKey(entry.getKey()))
+				if (!csvFile.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
 				}
 			}
 			System.out.println("\n###Unique samples in file2 ");
-			for (Entry<String, Tuple> entry : com.getHash().entrySet())
+			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
 			{
-				if (!ref.getHash().containsKey(entry.getKey()))
+				if (!excelfile.getHash().containsKey(entry.getKey()))
 				{
 					System.out.println(entry.getKey());
 				}
