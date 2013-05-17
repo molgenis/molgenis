@@ -72,7 +72,12 @@ public class Parameters
 	public static final String DATABASE_CMNDLINE_OPTION = "db";
 	public static final String DATABASE_COLUMN = USER_PREFIX + DATABASE;
 	public static final String DATABASE_START = "database-start";
+	public static final String DATABASE_START_CMNDLINE_OPTION = "dbs";
+	public static final String DATABASE_END = "database-end";
+	public static final String DATABASE_END_CMNDLINE_OPTION = "dbe";
 	public static final String PROPERTIES = "compute.properties";
+	public static final String GENERATE = "generate";
+	public static final String GENERATE_CMNDLINE_OPTION = "g";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
