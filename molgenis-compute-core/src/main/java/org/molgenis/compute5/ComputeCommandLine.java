@@ -178,13 +178,13 @@ public class ComputeCommandLine
 	/**
 	 * Return Compute object, given one single -path to all files
 	 * 
-	 * @param parametersCsv
 	 * @return
 	 * @throws IOException
 	 */
 	public static Compute create(String path) throws IOException, Exception
 	{
 		ComputeProperties computeProperties = new ComputeProperties(path);
+        computeProperties.generate = true;
 
 		return ComputeCommandLine.create(computeProperties);
 	}
