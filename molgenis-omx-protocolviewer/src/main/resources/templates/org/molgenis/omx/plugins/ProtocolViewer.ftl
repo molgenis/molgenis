@@ -118,14 +118,14 @@
  							httpMethod : "POST",
  							data: { 
  								datasetid : molgenis.getSelectedDataSet(),
- 								features : molgenis.getSelectedVariables().join()
+ 								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
  							}
  						});
  					});
  					
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
- 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + molgenis.getSelectedVariables().join();
+ 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
  					});
  					
  					// on ready

@@ -1,10 +1,9 @@
 package org.molgenis.framework.ui.html;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
- * An extension of Table that renders as a jQuery DataTable instead of a plain
- * HTML table.
+ * An extension of Table that renders as a jQuery DataTable instead of a plain HTML table.
  * 
  * @author erikroos
  * 
@@ -49,7 +48,7 @@ public class EditableJQueryDataTable extends JQueryDataTable
 							+ "_"
 							+ rowCount
 							+ "\" type=\"text\" value=\""
-							+ StringEscapeUtils.escapeHtml(getCellString(colCount, rowCount)) + "\"/>") + "</td>");
+							+ StringEscapeUtils.escapeHtml4(getCellString(colCount, rowCount)) + "\"/>") + "</td>");
 		}
 		result += "</tr>";
 		return result;

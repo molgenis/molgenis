@@ -14,9 +14,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
@@ -42,9 +41,6 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 
 	// context
 	protected MolgenisContext context;
-
-	// the datasource to be put in the context
-	public abstract DataSource createDataSource();
 
 	// the one and only service() used in the molgenis app
 	@Override

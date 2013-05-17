@@ -208,7 +208,7 @@ public class TestDatabase
 				List<${JavaName(entity)}> results = q2.find();
 				for(${JavaName(entity)} r: results)
 				{
-					assertTrue(org.apache.commons.lang.StringUtils.startsWith(r.get${JavaName(f)}(), entity.get${JavaName(f)}()));
+					assertTrue(org.apache.commons.lang3.StringUtils.startsWith(r.get${JavaName(f)}(), entity.get${JavaName(f)}()));
 				}
 			}
 <#elseif f.type == "int">

@@ -65,20 +65,6 @@ public class AccountService
 		database.add(molgenisUser);
 		logger.debug("created user " + molgenisUser.getName());
 
-		// // add user to user group
-		// List<MolgenisGroup> molgenisGroups = database.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
-		// Operator.EQUALS, "AllUsers"));
-		// if (molgenisGroups == null || molgenisGroups.isEmpty()) throw new DatabaseException("Missing user group '"
-		// + "AllUsers" + "'");
-		// MolgenisGroup userGroup = molgenisGroups.get(0);
-		//
-		// MolgenisRoleGroupLink molgenisRoleGroupLink = new MolgenisRoleGroupLink();
-		// molgenisRoleGroupLink.setIdentifier(UUID.randomUUID().toString());
-		// molgenisRoleGroupLink.setName(userGroup.getName() + '-' + molgenisUser.getName());
-		// molgenisRoleGroupLink.setGroup(userGroup);
-		// molgenisRoleGroupLink.setRole(molgenisUser);
-		// database.add(molgenisRoleGroupLink);
-
 		// send activation email
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
 

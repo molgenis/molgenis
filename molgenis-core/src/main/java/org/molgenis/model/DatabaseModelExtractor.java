@@ -1,5 +1,6 @@
 package org.molgenis.model;
 
+import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
@@ -19,7 +20,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.model.jaxb.Entity;
@@ -28,31 +28,16 @@ import org.molgenis.model.jaxb.Field.Type;
 import org.molgenis.model.jaxb.Model;
 import org.molgenis.model.jaxb.Unique;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 /**
- * java.sql.Types public static final int ARRAY 2003 public static final int
- * BIGINT -5 public static final int BINARY -2 public static final int BIT -7
- * public static final int BLOB 2004 public static final int BOOLEAN 16 public
- * static final int CHAR 1 public static final int CLOB 2005 public static final
- * int DATALINK 70 public static final int DATE 91 public static final int
- * DECIMAL 3 public static final int DISTINCT 2001 public static final int
- * DOUBLE 8 public static final int FLOAT 6 public static final int INTEGER 4
- * public static final int JAVA_OBJECT 2000 public static final int LONGNVARCHAR
- * -16 public static final int LONGVARBINARY -4 public static final int
- * LONGVARCHAR -1 public static final int NCHAR -15 public static final int
- * NCLOB 2011 public static final int NULL 0 public static final int NUMERIC 2
- * public static final int NVARCHAR -9 public static final int OTHER 1111 public
- * static final int REAL 7 public static final int REF 2006 public static final
- * int ROWID -8 public static final int SMALLINT 5 public static final int
- * SQLXML 2009 public static final int STRUCT 2002 public static final int TIME
- * 92 public static final int TIMESTAMP 93 public static final int TINYINT -6
- * public static final int VARBINARY -3 public static final int VARCHAR 12
+ * Tool to create molgenis_db.xml from an existing database
  * 
  * @author Morris Swertz
- * 
  */
-public class JDBCModelExtractor
+public class DatabaseModelExtractor
 {
-	private static final Logger logger = Logger.getLogger("JDBCModelExtractor");
+	private static final Logger logger = Logger.getLogger(DatabaseModelExtractor.class);
 
 	public static void main(String[] args) throws Exception
 	{
@@ -76,13 +61,18 @@ public class JDBCModelExtractor
 
 	public static Model extractModel(MolgenisOptions options)
 	{
-		BasicDataSource data_src = new BasicDataSource();
-
-		data_src = new BasicDataSource();
-		data_src.setDriverClassName(options.db_driver.trim());
-		data_src.setUsername(options.db_user.trim());
+		ComboPooledDataSource data_src = new ComboPooledDataSource();
+		try
+		{
+			data_src.setDriverClass(options.db_driver.trim());
+		}
+		catch (PropertyVetoException e)
+		{
+			throw new RuntimeException(e);
+		}
+		data_src.setUser(options.db_user.trim());
 		data_src.setPassword(options.db_password.trim());
-		data_src.setUrl(options.db_uri.trim());
+		data_src.setJdbcUrl(options.db_uri.trim());
 
 		return extractModel(data_src);
 	}
@@ -102,19 +92,23 @@ public class JDBCModelExtractor
 
 	public static Model extractModel(Properties p)
 	{
-		BasicDataSource data_src = new BasicDataSource();
-
-		data_src = new BasicDataSource();
-		data_src.setDriverClassName(p.getProperty("db_driver").trim());
-		data_src.setUsername(p.getProperty("db_user").trim());
+		ComboPooledDataSource data_src = new ComboPooledDataSource();
+		try
+		{
+			data_src.setDriverClass(p.getProperty("db_driver").trim());
+		}
+		catch (PropertyVetoException e)
+		{
+			throw new RuntimeException(e);
+		}
+		data_src.setUser(p.getProperty("db_user").trim());
 		data_src.setPassword(p.getProperty("db_password").trim());
-		data_src.setUrl(p.getProperty("db_uri").trim());
+		data_src.setJdbcUrl(p.getProperty("db_uri").trim());
 
 		return extractModel(data_src);
-
 	}
 
-	public static Model extractModel(BasicDataSource data_src)
+	public static Model extractModel(ComboPooledDataSource data_src)
 	{
 		Model m = new Model();
 
@@ -123,7 +117,7 @@ public class JDBCModelExtractor
 			// check conection
 			data_src.getConnection();
 
-			String url = data_src.getUrl();
+			String url = data_src.getJdbcUrl();
 			int start = url.lastIndexOf("/") + 1;
 			int end = url.indexOf("?") == -1 ? url.length() : url.indexOf("?");
 

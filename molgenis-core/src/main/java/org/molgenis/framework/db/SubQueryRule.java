@@ -1,6 +1,6 @@
 package org.molgenis.framework.db;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.util.Entity;
 
 public class SubQueryRule extends QueryRule

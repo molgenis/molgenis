@@ -679,7 +679,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
      		return false;
    		}
 		${JavaName(entity)} rhs = (${JavaName(entity)}) obj;
-   		return new org.apache.commons.lang.builder.EqualsBuilder()
+   		return new org.apache.commons.lang3.builder.EqualsBuilder()
 <#if entity.hasAncestor()>
              	.appendSuper(super.equals(obj))
 </#if>
@@ -707,7 +707,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
     		secondNumber += 1;
     	}
     
-		return new org.apache.commons.lang.builder.HashCodeBuilder(firstNumber, secondNumber)
+		return new org.apache.commons.lang3.builder.HashCodeBuilder(firstNumber, secondNumber)
 <#if entity.hasAncestor()>
              	.appendSuper(super.hashCode())
 </#if>

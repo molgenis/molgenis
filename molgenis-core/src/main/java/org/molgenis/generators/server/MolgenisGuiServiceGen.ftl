@@ -26,7 +26,7 @@ public class GuiService extends MolgenisGuiService implements MolgenisService
 {
 	private static final Logger logger = Logger.getLogger(GuiService.class);
 	
-	private static final String KEY_APP_NAME = "app.name";
+	public static final String KEY_APP_NAME = "app.name";
 
 	public GuiService(MolgenisContext mc)
 	{
