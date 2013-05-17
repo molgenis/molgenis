@@ -12,6 +12,17 @@ public class Validation_Main
 	 */
 	public static void main(String[] args)
 	{
+		if (args.length != 3)
+		{
+			System.err
+					.println("To run this script it needs 3 arguments; \n1) An excelfile\n2) a csvfile\n"
+							+ "3) a path for the logfile\n"
+							+ "e.g.\n"
+							+ "args[0] /Users/Roan/Work/GIDS_8_may/Cohorts/Bloodbank/Export_Gids1_Bloodbank.xls\n"
+							+ "args[1] /Users/Roan/Work/GIDS_8_may/Cohorts/Bloodbank/Export_Gids2_Bloodbank_dataset125_2013-05-08.csv/\n"
+							+ "args[2] /Users/Roan/logger.txt");
+			return;
+		}
 		ValidationChecker vc = new ValidationChecker();
 		try
 		{
@@ -22,7 +33,6 @@ public class Validation_Main
 		}
 		catch (IOException e1)
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 

@@ -12,9 +12,20 @@ public class ConvertGidsMain
 
 	public static void main(String[] args) throws IOException
 	{
+
+		if (args.length != 3)
+		{
+			System.err.println("To run this script it needs 3 arguments; \n1) directory\n2) an outputdirectory\n"
+					+ "3) a projectname\nThe project name should be the same name as the inputfile name e.g.\n"
+					+ "args[0] /Users/Roan/Work/GIDS_8_May/Cohorts/Bloodbank/\nargs[1] Converted/\n"
+					+ "args[2] Bloodbank");
+			return;
+		}
+
 		final String DIRECTORY = args[0];
 		final String OUTPUTDIR = DIRECTORY + args[1];
 		final String PROJECTNAME = args[2];
+
 		SampleConverter sample = new SampleConverter();
 		InputStream is = new FileInputStream(DIRECTORY + PROJECTNAME + ".xls");
 
