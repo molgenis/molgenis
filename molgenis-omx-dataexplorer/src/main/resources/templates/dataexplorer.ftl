@@ -34,12 +34,12 @@
 				<div class="span3">
 					<div class="well">
 						<div class="row-fluid">
-							<form class="form-search" onsubmit="return false">
-								<div class="input-append">
-									<input type="text" id="observationset-search" class="search-query" placeholder="Search data items">
-									<button type="submit" class="btn"><i class="icon-large icon-search"></i></button>
-								</div>
-							</form>
+							<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
+							<div class="input-append span12" id="observationset-search-container">
+								<#-- add span11 to ensure that input is styled correctly at low and high solutions -->
+								<input class="span10" id="observationset-search" type="text" placeholder="Search data values">
+								<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+							</div>
 						</div>
 						<div class="row-fluid">
 							<div class="accordion" id="feature-filters-container">
