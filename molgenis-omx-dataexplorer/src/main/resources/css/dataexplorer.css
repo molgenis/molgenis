@@ -103,9 +103,15 @@ ui-state-active .ui-icon {
 }
 
 .accordion-toggle {
-	color: white;	
+	color: white;
 }
 
+a.accordion-toggle:hover, a.accordion-toggle:focus, a.accordion-toggle:active {
+	color: white;
+	text-decoration: none;
+	cursor: default;
+}
+	
 .accordion-body {
 	background-color: white;
 }

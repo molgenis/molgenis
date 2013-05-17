@@ -45,7 +45,7 @@
 							<div class="accordion" id="feature-filters-container">
 								<div class="accordion-group">
 								    <div class="accordion-heading">
-										<a class="accordion-toggle" data-toggle="collapse" data-parent="#feature-filters-container" href="#feature-filters">Data item filters</a>
+										<a class="accordion-toggle" data-toggle="false" data-parent="#feature-filters-container" href="#feature-filters">Data item filters</a>
 									</div>
 									<div class="accordion-body collapse in">
 										<div class="accordion-inner" id="feature-filters"></div>
@@ -57,7 +57,7 @@
 							<div class="accordion" id="feature-selection-container">
 								<div class="accordion-group">
 								    <div class="accordion-heading">
-										<a class="accordion-toggle" data-toggle="collapse" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
+										<a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
 									</div>
 									<div class="accordion-body collapse in">
 										<div class="accordion-inner" id="feature-selection"></div>
