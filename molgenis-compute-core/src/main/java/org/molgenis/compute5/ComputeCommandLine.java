@@ -58,21 +58,53 @@ public class ComputeCommandLine
 
 	public static Compute create(ComputeProperties computeProperties) throws IOException, Exception
 	{
+		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
+		if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
+				+ (new File(computeProperties.defaults)).getAbsolutePath());
+		System.out.println("Using parameters:       " + computeProperties.parameters);
+		System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
+		System.out.println("Using backend:          " + computeProperties.backend);
+		System.out.println("Using runID:            " + computeProperties.runId);
+
+		System.out.println(""); // newline
+
+		// starting database?
+		if (computeProperties.databaseStart)
+		{
+			// GEORGE, PLEASE START THE DATABASE!
+		}
+		if (computeProperties.databaseEnd)
+		{
+			// GEORGE, PLEASE END THE DATABASE!
+		}
+
+		if (computeProperties.generate)
+		{
+			return generate(computeProperties);
+		}
+
+		return null;
+	}
+
+	private static boolean defaultsExists(ComputeProperties computeProperties) throws IOException
+	{
+
+		// if exist include defaults.csv in parameterFiles
+		if (null == computeProperties.defaults)
+		{
+			return false;
+		}
+		else return new File(computeProperties.defaults).exists();
+	}
+
+	private static Compute generate(ComputeProperties computeProperties) throws Exception
+	{
 		// create a list of parameter files
 		List<File> parameterFiles = new ArrayList<File>();
 
-		// if exist include defaults.csv in parameterFiles
-		boolean defaultsExists = null != computeProperties.defaults;
-		File defaultsFile = File.createTempFile("removeme", null);
-		if (defaultsExists)
-		{
-			defaultsFile = new File(computeProperties.defaults);
-			defaultsExists = defaultsFile.exists();
-			if (defaultsExists) parameterFiles.add(defaultsFile);
-		}
-
 		for (String f : computeProperties.parameters)
 			parameterFiles.add(new File(f));
+		if (defaultsExists(computeProperties)) parameterFiles.add(new File(computeProperties.defaults));
 
 		Compute compute = new Compute();
 
@@ -92,28 +124,15 @@ public class ComputeCommandLine
 			t.set(Parameters.DATABASE_COLUMN, computeProperties.database);
 		}
 
-		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
-		if (defaultsExists) System.out.println("Using defaults:         " + defaultsFile.getAbsolutePath());
-		System.out.println("Using parameters:       " + parameterFiles);
-		System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
-		System.out.println("Using backend:          " + computeProperties.backend);
-		System.out.println("Using runID:            " + computeProperties.runId);
-
-		System.out.println(""); // newline
-
-		// starting database?
-		if (computeProperties.databaseStart)
-		{
-			// GEORGE, PLEASE START THE DATABASE!
-		}
-		
+		System.out.println("Starting script generation...");
 		// create outputdir
 		File dir = new File(computeProperties.runDir);
 		computeProperties.runDir = dir.getCanonicalPath();
 		dir.mkdirs();
 
 		// document inputs
-		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/inputs.csv"), compute.getParameters());
+		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/inputs.csv"),
+				compute.getParameters());
 
 		// parse workflow
 		compute.setWorkflow(WorkflowCsvParser.parse(computeProperties.workFlow));
@@ -137,19 +156,22 @@ public class ComputeCommandLine
 		else throw new Exception("Unknown backend: " + computeProperties.backend);
 
 		// generate outputs folders per task
-		for (Task t : compute.getTasks())
-		{
-			File f = new File(computeProperties.runDir + "/outputs/" + t.getName());
-			f.mkdirs();
-			System.out.println("Generated " + f.getAbsolutePath());
-		}
+		// for (Task t : compute.getTasks())
+		// {
+		// File f = new File(computeProperties.runDir + "/outputs/" +
+		// t.getName());
+		// f.mkdirs();
+		// System.out.println("Generated " + f.getAbsolutePath());
+		// }
 
 		// generate documentation
-		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"), compute.getParameters());
+		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"),
+				compute.getParameters());
 		new DocWorkflowDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getWorkflow());
 		new DocTasksDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getTasks());
 
-		System.out.println("Generation complete");
+		System.out.println("Generation complete.");
+
 		return compute;
 	}
 
