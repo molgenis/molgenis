@@ -257,7 +257,7 @@ public class ComputeProperties
 			this.create = cmd.hasOption(Parameters.CREATE);
 			if (this.create) this.createWorkflow = cmd.getOptionValue(Parameters.CREATE);
 			if (null == this.createWorkflow) this.createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
-			updatePath(this.path, this.createWorkflow);
+			this.createWorkflow = updatePath(this.path, this.createWorkflow);
 		}
 		catch (ParseException e)
 		{
@@ -361,7 +361,7 @@ public class ComputeProperties
 		options.addOption(runDir);
 		options.addOption(runId);
 		options.addOption(OptionBuilder
-				.withDescription("Host, location of database. Default: " + Parameters.DATABASE_DEFAULT)
+				.withDescription("Host, location of database. Default: " + Parameters.DATABASE_DEFAULT).hasArg()
 				.withLongOpt(Parameters.DATABASE).create(Parameters.DATABASE_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder.withDescription("Starts the database").withLongOpt(Parameters.DATABASE_START)
 				.create(Parameters.DATABASE_START_CMNDLINE_OPTION));
@@ -372,7 +372,7 @@ public class ComputeProperties
 		options.addOption(OptionBuilder.withDescription("List jobs, generated, queued, running, completed, failed")
 				.withLongOpt(Parameters.LIST).create(Parameters.LIST_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder.withDescription(
-				"Creates empty workflow. Default name: " + Parameters.CREATE_WORKFLOW_DEFAULT)
+				"Creates empty workflow. Default name: " + Parameters.CREATE_WORKFLOW_DEFAULT).hasArg()
 				.create(Parameters.CREATE));
 
 		return options;

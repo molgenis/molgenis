@@ -12,20 +12,19 @@ public class CreateWorkflowGenerator
 
 	public CreateWorkflowGenerator(String createWorkflowDir)
 	{
-
-		// ClassLoader cl = ClassLoader.getSystemClassLoader();
-		//
-		// URL[] urls = ((URLClassLoader)cl).getURLs();
-		//
-		// for(URL url: urls){
-		// System.out.println(url.getFile());
-		// }
 		File target = new File(createWorkflowDir);
 
 		String sourcePath = CreateWorkflowGenerator.class.getResource("/workflows/myworkflow/workflow.csv").getPath();
 		File source = new File(sourcePath).getParentFile();
 
-		try
+		if (!source.exists())
+		{
+			System.err.println(">> ERROR >> Directory '" + source.toString()
+					+ "' not found. Please add molgenis-compute-core/");
+			System.err.println("Exit with code 1.");
+			System.exit(1);
+		}
+		else try
 		{
 			copyFolder(source, target);
 		}
