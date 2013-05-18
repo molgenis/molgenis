@@ -42,6 +42,7 @@ public class ComputeProperties
 	public boolean list = false; // should we list currently generated jobs?
 	public boolean create = false;
 	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
+	public boolean run = false; // does user want to run scripts?
 
 	public ComputeProperties(String[] args)
 	{
@@ -246,6 +247,11 @@ public class ComputeProperties
 					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
 							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
 
+			// want to run?
+			this.run = cmd.hasOption(Parameters.RUN_CMNDLINE_OPTION)
+					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
+							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
+
 			// do we want to list jobs?
 			this.list = cmd.hasOption(Parameters.LIST);
 
@@ -371,9 +377,13 @@ public class ComputeProperties
 				.create(Parameters.GENERATE_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder.withDescription("List jobs, generated, queued, running, completed, failed")
 				.withLongOpt(Parameters.LIST).create(Parameters.LIST_CMNDLINE_OPTION));
-		options.addOption(OptionBuilder.withDescription(
-				"Creates empty workflow. Default name: " + Parameters.CREATE_WORKFLOW_DEFAULT).hasArg()
-				.create(Parameters.CREATE));
+		options.addOption(OptionBuilder
+				.withDescription("Creates empty workflow. Default name: " + Parameters.CREATE_WORKFLOW_DEFAULT)
+				.hasArg().create(Parameters.CREATE));
+		options.addOption(OptionBuilder
+				.withDescription(
+						"Run jobs from current directory on current backend. When using --database this will return a 'id' for --pilot.")
+				.withLongOpt(Parameters.RUN).create(Parameters.RUN_CMNDLINE_OPTION));
 
 		return options;
 	}

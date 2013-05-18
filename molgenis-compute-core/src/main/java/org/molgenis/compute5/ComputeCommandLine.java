@@ -61,7 +61,7 @@ public class ComputeCommandLine
 	public static Compute create(ComputeProperties computeProperties) throws IOException, Exception
 	{
 		Compute compute = new Compute(computeProperties);
-		
+
 		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
 		if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
 				+ (new File(computeProperties.defaults)).getAbsolutePath());
@@ -86,23 +86,36 @@ public class ComputeCommandLine
 		{
 			generate(compute, computeProperties);
 		}
-		
-		
+
 		if (Parameters.DATABASE_DEFAULT.equals(computeProperties.database))
 		{ // if database none (= off), then do following
 			if (computeProperties.list)
 			{
 				// list files in rundir
-				File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter() { 
-	    	         public boolean accept(File dir, String filename)
-   	              { return filename.endsWith(".sh"); } 	} );
-				
-				System.out.println("Generated jobs:");
+				File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter()
+				{
+					public boolean accept(File dir, String filename)
+					{
+						return filename.endsWith(".sh");
+					}
+				});
+
+				System.out.println("Generated jobs that are ready to run:");
 				if (0 == scripts.length) System.out.println("None.");
-				else for (File script : scripts) {
+				else for (File script : scripts)
+				{
 					System.out.println("- " + script.getName());
 				}
 			}
+		}
+		else
+		{
+			// database is on, please call compute-db-functions
+			// you can use computeProperties.* to see what user wants
+			if (computeProperties.run)
+			{
+				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
+			}			
 		}
 
 		return compute;
