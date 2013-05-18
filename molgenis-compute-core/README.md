@@ -426,7 +426,7 @@ Below options, --full_name or -short. Options can be combined:
 	--log -l [step]				view all logs combined. Optionally only for particular step.
 
 	#jobs folder
-	--rundir -r path			sets the directory where the generated scripts should be 
+	--rundir path				sets the directory where the generated scripts should be 
 								stored, as well as runtime logs. Default: ./run
 
 	#seldomly used options						
