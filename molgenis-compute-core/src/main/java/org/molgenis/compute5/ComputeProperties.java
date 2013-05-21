@@ -35,7 +35,14 @@ public class ComputeProperties
 	public String database = Parameters.DATABASE_DEFAULT;
 
 	// parameters not stored in compute.properties file:
-	public boolean databaseStart = false;
+	public boolean help = false; // show help?
+	public boolean databaseStart = false; // start db?
+	public boolean databaseEnd = false; // stop db?
+	public boolean generate = false; // should we generate?
+	public boolean list = false; // should we list currently generated jobs?
+	public boolean create = false;
+	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
+	public boolean run = false; // does user want to run scripts?
 
 	public ComputeProperties(String[] args)
 	{
@@ -55,6 +62,23 @@ public class ComputeProperties
 
 		// look for defaults in same folder as workflow
 		updateWorkflowParameterDefaultsCSV();
+
+		// save new config
+		saveProperties();
+	}
+
+	public ComputeProperties(String path)
+	{
+		// set path
+		this.path = path;
+
+		// prepend path to defaults
+		updateDefaultParameterValues(path);
+
+		createPropertiesFile();
+
+		// parse properties file
+		parseProperties();
 
 		// save new config
 		saveProperties();
@@ -106,23 +130,6 @@ public class ComputeProperties
 			}
 			// else this.defaults stays null
 		}
-	}
-
-	public ComputeProperties(String path)
-	{
-		// set path
-		this.path = path;
-
-		// prepend path to defaults
-		updateDefaultParameterValues(path);
-
-		createPropertiesFile();
-
-		// parse properties file
-		parseProperties();
-
-		// save new config
-		saveProperties();
 	}
 
 	private void updateDefaultParameterValues(String path)
@@ -221,6 +228,9 @@ public class ComputeProperties
 		{
 			CommandLine cmd = parser.parse(options, args);
 
+			this.help = cmd.hasOption(Parameters.HELP); // show help?
+			if (this.help) throw new ParseException("");
+
 			// set this.variables
 			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
@@ -229,11 +239,31 @@ public class ComputeProperties
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
-			this.databaseStart = null != cmd.getOptionValue(Parameters.DATABASE_START);
+			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
+			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
+
+			// generate only if -g or if -w and -p present
+			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
+					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
+							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
+
+			// want to run?
+			this.run = cmd.hasOption(Parameters.RUN_CMNDLINE_OPTION)
+					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
+							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
+
+			// do we want to list jobs?
+			this.list = cmd.hasOption(Parameters.LIST);
 
 			String[] cmdParameters = cmd.getOptionValues(Parameters.PARAMETERS_CMNDLINE_OPTION);
 			cmdParameters = getFullPath(cmdParameters);
 			if (null != cmdParameters) this.parameters = cmdParameters;
+
+			// do we want to create a new workflow? If so: where?
+			this.create = cmd.hasOption(Parameters.CREATE);
+			if (this.create) this.createWorkflow = cmd.getOptionValue(Parameters.CREATE);
+			if (null == this.createWorkflow) this.createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
+			this.createWorkflow = updatePath(this.path, this.createWorkflow);
 		}
 		catch (ParseException e)
 		{
@@ -326,8 +356,9 @@ public class ComputeProperties
 		Option runId = OptionBuilder.hasArg()
 				.withDescription("Id of the task set which you generate. Default: " + Parameters.RUNID_DEFAULT)
 				.withLongOpt(Parameters.RUNID).create(Parameters.RUNID_CMNDLINE_OPTION);
-		Option databaseStart = OptionBuilder.withDescription("Starts the database")
-				.withLongOpt(Parameters.DATABASE_START).create(Parameters.DATABASE_START);
+
+		options.addOption(OptionBuilder.withDescription("Shows this help.").withLongOpt(Parameters.HELP)
+				.create(Parameters.HELP_CMNDLINE_OPTION));
 		options.addOption(path);
 		options.addOption(p);
 		options.addOption(w);
@@ -335,7 +366,24 @@ public class ComputeProperties
 		options.addOption(b);
 		options.addOption(runDir);
 		options.addOption(runId);
-		options.addOption(databaseStart);
+		options.addOption(OptionBuilder
+				.withDescription("Host, location of database. Default: " + Parameters.DATABASE_DEFAULT).hasArg()
+				.withLongOpt(Parameters.DATABASE).create(Parameters.DATABASE_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("Starts the database").withLongOpt(Parameters.DATABASE_START)
+				.create(Parameters.DATABASE_START_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("End the database").withLongOpt(Parameters.DATABASE_END)
+				.create(Parameters.DATABASE_END_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("Generate jobs").withLongOpt(Parameters.GENERATE)
+				.create(Parameters.GENERATE_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("List jobs, generated, queued, running, completed, failed")
+				.withLongOpt(Parameters.LIST).create(Parameters.LIST_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Creates empty workflow. Default name: " + Parameters.CREATE_WORKFLOW_DEFAULT)
+				.hasArg().create(Parameters.CREATE));
+		options.addOption(OptionBuilder
+				.withDescription(
+						"Run jobs from current directory on current backend. When using --database this will return a 'id' for --pilot.")
+				.withLongOpt(Parameters.RUN).create(Parameters.RUN_CMNDLINE_OPTION));
 
 		return options;
 	}

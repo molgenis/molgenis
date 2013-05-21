@@ -57,7 +57,8 @@ A typical workflow directory looks as follows:
 	/protocols/step1.sh		#example of a protocol shell script
 	/protocols/step2.sh		#example of a protocol shell script
 	workflow.csv			#file listing steps and parameter flow
-	defaults.csv			#default parameters (optional)
+	defaults.csv			#default parameters for workflow.csv (optional)
+	parameters.csv			#parameters you want to run analysis on
 
 Create a new workflow directory using:
 	
@@ -93,7 +94,7 @@ Example workflow.csv (white spaces will be trimmed):
 
 	step,  protocol,              parameters
 	stepA, ../other/workflow.csv, project=project;sample=sample
-	stepB, stepB.sh,              in=stepA_step1_out
+	stepB, stepB.sh,              in=stepA_out
 
 Explanation:
 
@@ -199,20 +200,6 @@ Merged and expanded result for f1.csv + f2.csv:
 	y,   v1,  2,    a,	  file2
 	y,   v1,  2,    b,    file2
 
-N.B. 'workflow', 'parameters', 'protocols', 'jobs', 'backend' and 'host' are special parameters that MOLGENIS uses to pass all commandline parameters to parameters.csv before the generater is started (allow reference in the protocols). This allows protocols to access these parameters within their script. This can also be used as alternative configuration method:
-
-Example 'molgenis -p analysis.csv':
-
-	workflow,              parameters,    jobs, backend, host
-	workflow/workflow.csv, f1.csv;f2.csv, jobs, grid,    localhost
-
-Is equal to analysis.sh:
-
-	molgenis -w workflow/workflow.csv -p f1.csv -p f2.csv \
-	         -j job -b grid -h localhost
-
-Experience has shown that saving the 'sh' is a good method to track your analysis configurations.
-
 ### Generate and run jobs
 Analysis jobs will be generated for each unique combination of '#string' inputs (see 'protocols').
 
@@ -243,6 +230,8 @@ Example step3.sh:
 	#list p2
 	will produce four jobs for p2,p3='1,a', p2,p3='1,b', p2,p3='2,a', p2,p3='2,b'
 	will have p2=[1], p2=[1], p2=[2] and p2=[2] in the respective jobs
+
+Experience has shown that saving the 'sh' is a good method to track your analysis configurations.
 
 ### Backends
 
@@ -437,7 +426,7 @@ Below options, --full_name or -short. Options can be combined:
 	--log -l [step]				view all logs combined. Optionally only for particular step.
 
 	#jobs folder
-	--rundir -r path			sets the directory where the generated scripts should be 
+	--rundir path				sets the directory where the generated scripts should be 
 								stored, as well as runtime logs. Default: ./run
 
 	#seldomly used options						

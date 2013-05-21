@@ -46,6 +46,8 @@ public class MolgenisUserDecorator<E extends MolgenisUser> extends MapperDecorat
 			molgenisRoleGroupLink.setIdentifier(UUID.randomUUID().toString());
 			molgenisRoleGroupLink.setRole(molgenisUser);
 			molgenisRoleGroupLink.setGroup(userGroup);
+			getDatabase().add(molgenisRoleGroupLink);
+
 		}
 
 		return count;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -15,6 +14,7 @@ import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.MolgenisEntity;
+import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
@@ -23,19 +23,25 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 
 import app.MolgenisDatabasePopulator;
+import app.servlet.GuiService;
 
 import com.sun.mail.iap.Protocol;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
-	private static final Logger logger = Logger.getLogger(WebAppDatabasePopulator.class);
-
 	@Override
 	protected void initializeApplicationDatabase(Database database) throws Exception
 	{
 		Login login = database.getLogin();
 		database.setLogin(null);
 		login.login(database, Login.USER_ADMIN_NAME, "admin"); // FIXME hardcoded reference to admin password
+
+		// set app name
+		RuntimeProperty runtimeProperty = new RuntimeProperty();
+		runtimeProperty.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + GuiService.KEY_APP_NAME);
+		runtimeProperty.setName(GuiService.KEY_APP_NAME);
+		runtimeProperty.setValue("LifeLines");
+		database.add(runtimeProperty);
 
 		List<MolgenisUser> users = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
 				Login.USER_ANONYMOUS_NAME));
@@ -61,7 +67,6 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 			visibleClasses.add(Category.class);
 			visibleClasses.add(ObservedValue.class);
 
-			// System.out.println(database.find(MolgenisEntity.class));
 			for (Class<?> entityClass : visibleClasses)
 			{
 				MolgenisEntity molgenisEntity = database.find(MolgenisEntity.class,
