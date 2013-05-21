@@ -14,8 +14,6 @@ import java.util.Set;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.EntitiesValidator;
-import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
@@ -24,6 +22,7 @@ import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.util.WebAppUtil;
 import org.molgenis.util.tuple.Tuple;
 
 public class UploadWizardPage extends WizardPage
@@ -61,10 +60,7 @@ public class UploadWizardPage extends WizardPage
 	private void validateInput(Database db, File file) throws Exception
 	{
 		// validate entity sheets
-		EntitiesValidator entitiesValidator = EntitiesValidatorSingleton.getInstance();
-		entitiesValidator.setDatabase(db);
-
-		EntitiesValidationReport validationReport = entitiesValidator.validate(file);
+		EntitiesValidationReport validationReport = WebAppUtil.getEntitiesValidator().validate(file);
 
 		// remove data sheets
 		Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();

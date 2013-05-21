@@ -40,6 +40,10 @@ import ${entity.namespace}.db.${JavaName(entity)}EntityImporter;
 </#if>
 </#list>
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class EntitiesImporterImpl implements EntitiesImporter
 {
 	/** importable entity names (lowercase) */
@@ -55,16 +59,13 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	</#list>
 	}
 	
-	private Database db;
+	private Database database;
 	
-	@Deprecated
-	public EntitiesImporterImpl()
+	@Autowired
+	public EntitiesImporterImpl(Database database)
 	{
-	}
-	
-	public EntitiesImporterImpl(Database db) {
-		if(db == null) throw new IllegalArgumentException("db is null");
-		this.db = db;
+		if (database == null) throw new IllegalArgumentException("database is null");
+		this.database = database;
 	}
 	
 	@Override
@@ -119,7 +120,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	{
 		EntityImportReport importReport = new EntityImportReport();
 
-		boolean doTx = !db.inTx();
+		boolean doTx = !database.inTx();
 		try
 		{
 			// map entity names on tuple readers
@@ -129,7 +130,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 				tupleReaderMap.put(tableName.toLowerCase(), tableReader.getTupleReader(tableName));
 			}
 
-			if (doTx) db.beginTx();
+			if (doTx) database.beginTx();
 
 			// import entities in order defined by entities map
 			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
@@ -139,23 +140,23 @@ public class EntitiesImporterImpl implements EntitiesImporter
 				if (tupleReader != null)
 				{
 					EntityImporter entityImporter = entry.getValue();
-					int nr = entityImporter.importEntity(tupleReader, db, dbAction);
+					int nr = entityImporter.importEntity(tupleReader, database, dbAction);
 					if (nr > 0) {
 						importReport.getMessages().put(entry.getKey(), "imported " + nr + " " + entityName + " entities");
 						importReport.addNrImported(nr);
 					}
 				}
 			}
-			if (doTx) db.commitTx();
+			if (doTx) database.commitTx();
 		}
 		catch (IOException e)
 		{
-			if (doTx) db.rollbackTx();
+			if (doTx) database.rollbackTx();
 			throw e;
 		}
 		catch (DatabaseException e)
 		{
-			if (doTx) db.rollbackTx();
+			if (doTx) database.rollbackTx();
 			throw e;
 		}
 		finally
@@ -163,10 +164,5 @@ public class EntitiesImporterImpl implements EntitiesImporter
 			tableReader.close();
 		}
 		return importReport;
-	}
-	
-	@Override
-	public void setDatabase(Database db) {
-		this.db = db;
 	}
 }

@@ -17,7 +17,7 @@
 
 package ${package};
 
-import app.DatabaseFactory;
+import org.molgenis.DatabaseFactory;
 
 import javax.persistence.*;
 import org.molgenis.framework.db.jpa.JpaDatabase;

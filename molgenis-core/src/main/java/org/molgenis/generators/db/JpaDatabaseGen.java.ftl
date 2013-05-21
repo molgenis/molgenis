@@ -1,6 +1,6 @@
 <#include "GeneratorHelper.ftl">
 
-package app;
+package ${package};
 
 import javax.persistence.EntityManagerFactory;
 

@@ -16,9 +16,9 @@
 
 package ${package};
 
-import app.CsvExport;
-import app.CsvImport;
-import app.DatabaseFactory;
+import org.molgenis.CsvExport;
+import org.molgenis.CsvImport;
+import org.molgenis.DatabaseFactory;
 
 import javax.persistence.*;
 import org.molgenis.framework.db.jpa.JpaDatabase;

@@ -10,7 +10,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.WebAppUtil;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import app.DatabaseConfig;
+import org.molgenis.DatabaseConfig;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 23/04/2013 Time: 08:47

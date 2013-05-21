@@ -28,7 +28,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
 
-import app.JpaDatabase;
+import org.molgenis.JpaDatabase;
 
 public class HL7StudyDataSetImporter
 {
