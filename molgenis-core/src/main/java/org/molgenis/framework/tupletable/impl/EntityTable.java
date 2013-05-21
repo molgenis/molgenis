@@ -116,8 +116,7 @@ public class EntityTable extends AbstractFilterableTupleTable
 		{
 			if (getFilters().size() > 0) return getDb().count(entityClass,
 					getFilters().toArray(new QueryRule[getFilters().size()]));
-			else
-				return getDb().count(entityClass);
+			else return getDb().count(entityClass);
 		}
 		catch (DatabaseException e)
 		{
@@ -138,14 +137,6 @@ public class EntityTable extends AbstractFilterableTupleTable
 
 	public Database getDb()
 	{
-		// try
-		// {
-		// db = DatabaseFactory.create();
-		// }
-		// catch (DatabaseException e)
-		// {
-		// throw new RuntimeException(e);
-		// }
 		return this.db;
 	}
 }
