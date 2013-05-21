@@ -84,6 +84,8 @@ public class Parameters
 	public static final String CREATE_WORKFLOW_DEFAULT = "myworkflow";
 	public static final String HELP = "help";
 	public static final String HELP_CMNDLINE_OPTION = "h";
+	public static final String RUN = "run";
+	public static final String RUN_CMNDLINE_OPTION = "r";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
