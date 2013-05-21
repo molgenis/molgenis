@@ -21,7 +21,7 @@ import org.molgenis.framework.ui.html.HtmlInput;
 import org.molgenis.framework.ui.html.TextInput;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.Entity;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * The command to add in batch/upload csv
@@ -40,7 +40,7 @@ public class AddBatchCommand<E extends Entity> extends SimpleCommand
 		this.setIcon("img/upload.png");
 		this.setDialog(true);
 		this.setMenu("File");
-		this.entitiesImporter = WebAppUtil.getEntitiesImporter();
+		this.entitiesImporter = ApplicationUtil.getEntitiesImporter();
 	}
 
 	@Override

@@ -22,7 +22,7 @@ import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 import org.molgenis.util.tuple.Tuple;
 
 public class UploadWizardPage extends WizardPage
@@ -60,7 +60,7 @@ public class UploadWizardPage extends WizardPage
 	private void validateInput(Database db, File file) throws Exception
 	{
 		// validate entity sheets
-		EntitiesValidationReport validationReport = WebAppUtil.getEntitiesValidator().validate(file);
+		EntitiesValidationReport validationReport = ApplicationUtil.getEntitiesValidator().validate(file);
 
 		// remove data sheets
 		Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();

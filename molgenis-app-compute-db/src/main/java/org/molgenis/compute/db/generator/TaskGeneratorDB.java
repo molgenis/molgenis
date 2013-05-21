@@ -7,7 +7,7 @@ import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.model.Compute;
 import org.molgenis.framework.db.Database;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import org.molgenis.DatabaseConfig;
@@ -28,7 +28,7 @@ public class TaskGeneratorDB
 		new AnnotationConfigApplicationContext(DatabaseConfig.class, ApplicationContextProvider.class);
 
 		Compute compute = ComputeCommandLine.create(parametersFile);
-		Database database = WebAppUtil.getUnauthorizedPrototypeDatabase();
+		Database database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
 
 		try
 		{

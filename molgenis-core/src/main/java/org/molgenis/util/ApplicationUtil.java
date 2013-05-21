@@ -17,7 +17,7 @@ import org.springframework.mail.javamail.JavaMailSender;
  * @author erwin
  * 
  */
-public class WebAppUtil
+public class ApplicationUtil
 {
 	public static Database getDatabase()
 	{

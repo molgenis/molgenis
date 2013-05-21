@@ -18,7 +18,7 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date:
@@ -73,7 +73,7 @@ public class PilotService implements MolgenisService
 
 			// change status to running
 			task.setStatusCode(PilotService.TASK_RUNNING);
-			WebAppUtil.getDatabase().update(task);
+			ApplicationUtil.getDatabase().update(task);
 
 			// send response
 			PrintWriter pw = response.getResponse().getWriter();
@@ -96,7 +96,7 @@ public class PilotService implements MolgenisService
 			List<String> logBlocks = logfile.getLogBlocks();
 			String runInfo = StringUtils.join(logBlocks, "\n");
 
-			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class).eq(ComputeTask.NAME, taskName)
+			List<ComputeTask> tasks = ApplicationUtil.getDatabase().query(ComputeTask.class).eq(ComputeTask.NAME, taskName)
 					.and().eq(ComputeTask.COMPUTERUN_NAME, runName).find();
 
 			if (tasks.isEmpty())
@@ -159,17 +159,17 @@ public class PilotService implements MolgenisService
 				}
 			}
 
-			WebAppUtil.getDatabase().update(task);
+			ApplicationUtil.getDatabase().update(task);
 		}
 	}
 
 	private List<ComputeTask> findRunTasksReady(String backendName) throws DatabaseException
 	{
 
-		List<ComputeRun> runs = WebAppUtil.getDatabase().query(ComputeRun.class)
+		List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
 				.equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
 
-		return WebAppUtil.getDatabase().query(ComputeTask.class)
+		return ApplicationUtil.getDatabase().query(ComputeTask.class)
 				.equals(ComputeTask.STATUSCODE, PilotService.TASK_READY).in(ComputeTask.COMPUTERUN, runs).find();
 	}
 }
