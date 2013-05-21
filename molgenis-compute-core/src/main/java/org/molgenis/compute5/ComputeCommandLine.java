@@ -112,7 +112,7 @@ public class ComputeCommandLine
 		{
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
-			if (computeProperties.run)
+			if (computeProperties.execute)
 			{
 				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
 			}			
