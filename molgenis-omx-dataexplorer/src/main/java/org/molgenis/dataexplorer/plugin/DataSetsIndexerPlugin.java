@@ -94,6 +94,7 @@ public class DataSetsIndexerPlugin extends PluginModel<Entity>
 
 		// Get the selected datasets from the databse and index them
 		List<DataSet> dataSets = db.query(DataSet.class).in("id", ids).find();
+
 		getDataSetsIndexer().index(dataSets);
 
 		setMessages(new ScreenMessage("Indexing started", true));
