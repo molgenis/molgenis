@@ -483,7 +483,7 @@ public class DatabaseLogin implements Login, Serializable
 	@Override
 	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
 	{
-		return (isAuthenticated() && (user.getSuperuser() || readMap.containsKey(screenControllerClass.getName())));
+		return (isAuthenticated() && user.getSuperuser()) || readMap.containsKey(screenControllerClass.getName());
 	}
 
 	/**
