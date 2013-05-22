@@ -41,7 +41,7 @@ public class DatabaseConfigGen extends Generator
 			}
 
 			Map<String, Object> templateArgs = createTemplateArguments(options);
-			templateArgs.put("package", APP_DIR);
+			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("databaseImp",
 					options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
 			templateArgs.put("db_mode", options.db_mode);

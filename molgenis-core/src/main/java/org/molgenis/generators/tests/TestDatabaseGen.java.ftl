@@ -17,8 +17,6 @@
 
 package ${package};
 
-import app.DatabaseFactory;
-
 import javax.persistence.*;
 import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.db.jpa.JpaUtil;
@@ -34,6 +32,7 @@ import java.util.Locale;
 import org.apache.log4j.Logger;
 
 import org.molgenis.Molgenis;
+import org.molgenis.util.DatabaseUtil;
 import org.molgenis.util.Entity;
 import org.molgenis.util.SimpleTuple;
 import org.molgenis.framework.db.Database;
@@ -74,7 +73,7 @@ public class TestDatabase
 			//bad: test expects an existing, but empty database.
 			//this means the previous test will need to end with e.g.
 			//new emptyDatabase(new MolgenisServlet().getDatabase(), false);	
-			db = DatabaseFactory.create(configOverrides);
+			db = DatabaseUtil.createDatabase(configOverrides);
 			JpaUtil.createTables(db, true, configOverrides);
 		}
 		catch (Exception e)

@@ -1,10 +1,9 @@
 <#include "GeneratorHelper.ftl">
 
-package app;
+package ${package};
 
 import javax.persistence.EntityManagerFactory;
 
-import org.molgenis.util.WebAppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class JpaDatabase extends org.molgenis.framework.db.jpa.JpaDatabase

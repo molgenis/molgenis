@@ -46,7 +46,7 @@ public class MolgenisGuiServiceGen extends Generator
 			}
 
 			templateArgs.put("model", model);
-			templateArgs.put("package", APP_DIR);
+			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("db_filepath", options.db_filepath);
 			templateArgs.put("loginclass", options.auth_loginclass);
 			templateArgs.put("auth_redirect", options.auth_redirect);

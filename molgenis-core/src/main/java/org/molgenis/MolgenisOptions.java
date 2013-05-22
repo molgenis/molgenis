@@ -35,7 +35,7 @@ public class MolgenisOptions implements Serializable
 	final public static String CLASS_PER_TABLE = "class_per_table";
 	final public static String SUBCLASS_PER_TABLE = "subclass_per_table";
 	final public static String HIERARCHY_PER_TABLE = "hierarchy_per_table";
-	
+
 	/**
 	 * Alternative generator cartridges.
 	 * 
@@ -155,7 +155,7 @@ public class MolgenisOptions implements Serializable
 	/** Advanced option: Type of object relational mapping. */
 	@Option(name = "object_relational_mapping", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Choosing OR strategy. Either 'class_per_table', 'subclass_per_table', 'hierarchy_per_table'. Default: SUBCLASS_PER_TABLE")
 	public String object_relational_mapping = SUBCLASS_PER_TABLE;
-	
+
 	/** Advanced option: Type of mapper implementation */
 	@Option(name = "mapper_implementation", param = Option.Param.ENUM, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Choosing wether multiquery is used instead of prepared statements. Default: MULTIQUERY")
 	public MapperImplementation mapper_implementation = MapperImplementation.JPA;

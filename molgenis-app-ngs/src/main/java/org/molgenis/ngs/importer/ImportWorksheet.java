@@ -13,6 +13,7 @@ import javax.persistence.Persistence;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.omx.ngs.CapturingKit;
@@ -25,8 +26,6 @@ import org.molgenis.omx.ngs.Project;
 import org.molgenis.omx.ngs.Sample;
 import org.molgenis.omx.ngs.SampleBarcode;
 import org.molgenis.util.tuple.Tuple;
-
-import app.JpaDatabase;
 
 public class ImportWorksheet
 {
@@ -716,7 +715,7 @@ public class ImportWorksheet
 		logger.info("Collected:\t" + users.size() + " NgsUser(s)");
 
 		// Put values in database
-		Database db = new app.JpaDatabase(
+		Database db = new org.molgenis.JpaDatabase(
 				Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME));
 		try
 		{

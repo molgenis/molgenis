@@ -50,7 +50,7 @@ public class MenuControllerGen extends Generator
 				{
 					templateArgs.put("menu", screen);
 					templateArgs.put("model", model);
-					templateArgs.put("package", APP_DIR + ".ui");
+					templateArgs.put("package", APP_DIR.replace('/', '.') + ".ui");
 
 					File targetDir = new File(this.getSourcePath(options) + APP_DIR + "/ui/");
 					boolean created = targetDir.mkdirs();

@@ -2,7 +2,7 @@ package org.molgenis.omicsconnect;
 
 import org.molgenis.framework.db.Database;
 
-import app.MolgenisDatabasePopulator;
+import org.molgenis.MolgenisDatabasePopulator;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
