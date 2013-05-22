@@ -24,7 +24,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.RollingFileAppender;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.DatabaseFactory;
+import org.molgenis.util.DatabaseUtil;
 
 public abstract class MolgenisFrontController extends HttpServlet implements MolgenisService
 {
@@ -59,7 +59,7 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 
 			// wrap request and response
 			MolgenisRequest req = new MolgenisRequest(request, response);
-			req.setDatabase(DatabaseFactory.get());
+			req.setDatabase(DatabaseUtil.getDatabase());
 
 			// TODO: Bad, but needed for redirection. DISCUSS.
 			MolgenisResponse res = new MolgenisResponse(response);

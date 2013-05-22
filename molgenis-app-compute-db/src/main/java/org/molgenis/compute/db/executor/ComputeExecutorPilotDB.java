@@ -11,7 +11,7 @@ import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -32,7 +32,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 		ExecutionHost executionHost = null;
 		try
 		{
-			database = WebAppUtil.getUnauthorizedPrototypeDatabase();
+			database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
 
 			List<ComputeTask> generatedTasks = database.query(ComputeTask.class)
 					.equals(ComputeTask.STATUSCODE, "generated").equals(ComputeTask.COMPUTERUN, computeRun).find();

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.compute.db.util.BasicAuthentication;
 import org.molgenis.framework.db.Database;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * Login filter for api classes.
@@ -39,7 +39,7 @@ public class AuthenticationFilter implements Filter
 
 		if (auth != null)
 		{
-			Database db = WebAppUtil.getDatabase();
+			Database db = ApplicationUtil.getDatabase();
 			try
 			{
 				boolean login = db.getLogin().login(db, auth.getUsername(), auth.getPassword());

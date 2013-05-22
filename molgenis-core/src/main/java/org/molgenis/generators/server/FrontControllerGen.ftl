@@ -12,23 +12,15 @@
 
 package ${package}.servlet;
 
-import java.sql.Connection;
 import java.util.LinkedHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
-import javax.sql.DataSource;
+
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.DatabaseFactory;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.EntitiesImporterSingleton;
-import org.molgenis.framework.db.EntitiesValidatorSingleton;
 import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisFrontController;
 import org.molgenis.framework.server.MolgenisService;
-import org.molgenis.framework.security.Login;
-import ${package}.EntitiesImporterImpl;
-import ${package}.EntitiesValidatorImpl;
 
 public class FrontController extends MolgenisFrontController
 {
@@ -67,12 +59,6 @@ public class FrontController extends MolgenisFrontController
 		}
 		
 		this.services = services;
-		
-		// register instances in singletons (simulate autowiring)
-		<#if generate_entityio>
-		EntitiesImporterSingleton.setInstance(new EntitiesImporterImpl());
-		EntitiesValidatorSingleton.setInstance(new EntitiesValidatorImpl());
-		</#if>
 	}
 	
 	@Override

@@ -11,7 +11,7 @@ public class DatabaseUtil
 
 	public static Database getDatabase()
 	{
-		return WebAppUtil.getDatabase();
+		return ApplicationUtil.getDatabase();
 	}
 
 	/**
@@ -22,7 +22,7 @@ public class DatabaseUtil
 	 */
 	public static Database createDatabase()
 	{
-		return WebAppUtil.getUnauthorizedPrototypeDatabase();
+		return ApplicationUtil.getUnauthorizedPrototypeDatabase();
 	}
 
 	/**

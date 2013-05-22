@@ -19,13 +19,13 @@ import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.omx.core.MolgenisEntity;
 import org.springframework.beans.factory.annotation.Value;
 
-import app.MolgenisDatabasePopulator;
-import app.ui.ComputeBackendsFormController;
-import app.ui.ComputeRunsFormController;
-import app.ui.ComputeTaskHistoryFormController;
-import app.ui.ComputeTaskValuesFormController;
-import app.ui.ComputeTasksFormController;
-import app.ui.PilotDashboardPluginPlugin;
+import org.molgenis.MolgenisDatabasePopulator;
+import org.molgenis.ui.ComputeBackendsFormController;
+import org.molgenis.ui.ComputeRunsFormController;
+import org.molgenis.ui.ComputeTaskHistoryFormController;
+import org.molgenis.ui.ComputeTaskValuesFormController;
+import org.molgenis.ui.ComputeTasksFormController;
+import org.molgenis.ui.PilotDashboardPluginPlugin;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
