@@ -22,8 +22,8 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 
-import app.MolgenisDatabasePopulator;
-import app.servlet.GuiService;
+import org.molgenis.MolgenisDatabasePopulator;
+import org.molgenis.servlet.GuiService;
 
 import com.sun.mail.iap.Protocol;
 

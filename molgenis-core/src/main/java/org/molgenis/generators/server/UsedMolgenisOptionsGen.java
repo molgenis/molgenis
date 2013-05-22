@@ -35,7 +35,7 @@ public class UsedMolgenisOptionsGen extends Generator
 		{
 			Template template = createTemplate(this.getClass().getSimpleName() + ".ftl");
 			Map<String, Object> templateArgs = createTemplateArguments(options);
-			templateArgs.put("package", APP_DIR);
+			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("options", options);
 			templateArgs.put("model", model);
 

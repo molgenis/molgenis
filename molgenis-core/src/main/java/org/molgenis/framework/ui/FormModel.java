@@ -55,8 +55,8 @@ import org.molgenis.util.tuple.Tuple;
 public class FormModel<E extends Entity> extends SimpleScreenModel
 {
 	/**
-	 * Parameters to enable links between parent forms and subforms using
-	 * foreign key relationships (aka master-detail views)
+	 * Parameters to enable links between parent forms and subforms using foreign key relationships (aka master-detail
+	 * views)
 	 * 
 	 * @author Morris Swertz
 	 */
@@ -227,8 +227,8 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 
 	// constructors
 	/**
-	 * TODO: make gateway part of inversion of control structure. TODO: make
-	 * parent_rules integral part of the system rules of this view.
+	 * TODO: make gateway part of inversion of control structure. TODO: make parent_rules integral part of the system
+	 * rules of this view.
 	 * 
 	 * @param parent
 	 * @throws DatabaseException
@@ -392,8 +392,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * A convenience method that merges system and user rules, excluding limit
-	 * and offset (i.e., if you want 'all').
+	 * A convenience method that merges system and user rules, excluding limit and offset (i.e., if you want 'all').
 	 * 
 	 * @return an array of all rules
 	 */
@@ -493,11 +492,9 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * Create for each record a form, with each record modeled as a list of
-	 * HtmlInput elements.
+	 * Create for each record a form, with each record modeled as a list of HtmlInput elements.
 	 * 
-	 * @return a vector of vectors, each vector containing the inputs for one
-	 *         row on screen.
+	 * @return a vector of vectors, each vector containing the inputs for one row on screen.
 	 */
 	public Vector<HtmlForm> getRecordInputs()
 	{
@@ -521,8 +518,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * This function is used by the user interface template to show rules on the
-	 * screen.
+	 * This function is used by the user interface template to show rules on the screen.
 	 * 
 	 * @return a list of query rules that can be managed by the user.
 	 * @throws DatabaseException
@@ -585,8 +581,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * @return Total number of records available to this form (given filter
-	 *         rules).
+	 * @return Total number of records available to this form (given filter rules).
 	 */
 	public int getCount()
 	{
@@ -611,8 +606,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * @return Operator indicating whether this form should be sorted ASC or
-	 *         DESC
+	 * @return Operator indicating whether this form should be sorted ASC or DESC
 	 */
 	public Operator getSortMode()
 	{
@@ -629,8 +623,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * Number of records that should be skipped before retrieving records. 0
-	 * means first record.
+	 * Number of records that should be skipped before retrieving records. 0 means first record.
 	 * 
 	 * @param offset
 	 */
@@ -640,8 +633,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * @return Number of records that should be skipped before retrieving
-	 *         records. 0 means first record.
+	 * @return Number of records that should be skipped before retrieving records. 0 means first record.
 	 */
 	public int getOffset()
 	{
@@ -707,8 +699,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * User defined filtering rules. For example, filtering by a field such as
-	 * date.
+	 * User defined filtering rules. For example, filtering by a field such as date.
 	 * 
 	 * @see QueryRule
 	 * @param rules
@@ -727,8 +718,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * System defined filtering rules. For example, filtering by a "parent"
-	 * field of a related record.
+	 * System defined filtering rules. For example, filtering by a "parent" field of a related record.
 	 */
 	public List<QueryRule> getSystemRules()
 	{
@@ -889,16 +879,6 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 		return getController().getApplicationController().getLogin();
 	}
 
-	public EntitiesImporter getCsvEntityImporter()
-	{
-		return csvEntityImporter;
-	}
-
-	public void setCsvEntityImporter(EntitiesImporter csvReader)
-	{
-		this.csvEntityImporter = csvReader;
-	}
-
 	public Class<E> getEntityClass()
 	{
 		return entityClass;
@@ -983,8 +963,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	}
 
 	/**
-	 * Helper function that translates xref field name into its label (for
-	 * showing that in the UI).
+	 * Helper function that translates xref field name into its label (for showing that in the UI).
 	 */
 	public String getSearchField(String fieldName)
 	{

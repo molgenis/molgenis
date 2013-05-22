@@ -44,6 +44,10 @@ import ${entity.namespace}.${JavaName(entity)};
 </#if>
 </#list>
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class EntitiesValidatorImpl implements EntitiesValidator 
 {
 	/** importable entity names (lowercase) */
@@ -60,17 +64,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private Database db;
-
-	@Deprecated
-	public EntitiesValidatorImpl()
+	private Database database;
+	
+	@Autowired
+	public EntitiesValidatorImpl(Database database)
 	{
-	}
-
-	public EntitiesValidatorImpl(Database db)
-	{
-		if (db == null) throw new IllegalArgumentException();
-		this.db = db;
+		if (database == null) throw new IllegalArgumentException("database is null");
+		this.database = database;
 	}
 	
 	@Override
@@ -115,19 +115,11 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		
 		return validationReport;
 	}
-
-	@Override
-	@Deprecated
-	public void setDatabase(Database db)
-	{
-		if (db == null) throw new IllegalArgumentException();
-		this.db = db;
-	}
 	
 	private void validateTable(String tableName, TupleReader tupleReader, Class<? extends Entity> entityClazz,
 			EntitiesValidationReport validationReport) throws MolgenisModelException, DatabaseException, IOException
 	{
-		List<Field> entityFields = db.getMetaData().getEntity(entityClazz.getSimpleName()).getAllFields();
+		List<Field> entityFields = database.getMetaData().getEntity(entityClazz.getSimpleName()).getAllFields();
 		
 		// construct a list of all required and optional fields
 		Map<String, Field> requiredFields = new LinkedHashMap<String, Field>();
