@@ -39,8 +39,7 @@ public class CatalogLoaderController
 	/**
 	 * Show the available catalogs.
 	 * 
-	 * Catalogs are exposed via a 'catalogs' model attribute that contains a
-	 * list of CatalogInfo objects.
+	 * Catalogs are exposed via a 'catalogs' model attribute that contains a list of CatalogInfo objects.
 	 * 
 	 * @param model
 	 * @return
@@ -61,8 +60,7 @@ public class CatalogLoaderController
 	 * 
 	 * If an error occurred an 'errorMessage' model attribute is exposed.
 	 * 
-	 * If the catalog was successfully loaded a 'successMessage' model attribute
-	 * is exposed.
+	 * If the catalog was successfully loaded a 'successMessage' model attribute is exposed.
 	 * 
 	 * @param id
 	 * @param model

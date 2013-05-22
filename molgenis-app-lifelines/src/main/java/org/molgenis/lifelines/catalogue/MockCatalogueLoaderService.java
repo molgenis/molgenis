@@ -4,8 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Dummy implementation of the CatalogueLoaderService we can us it without the
- * need to use a real LL backend
+ * Dummy implementation of the CatalogueLoaderService we can us it without the need to use a real LL backend
  * 
  * @author erwin
  * 

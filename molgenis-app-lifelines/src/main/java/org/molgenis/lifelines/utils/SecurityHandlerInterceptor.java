@@ -11,8 +11,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 /**
  * HandlerInterceptor that adds authorization to spring controllers.
  * 
- * For use with the IFramePlugin. Checks if there is a user logged in and has
- * the right to read a ScreenController
+ * For use with the IFramePlugin. Checks if there is a user logged in and has the right to read a ScreenController
  * 
  * @author erwin
  * 
