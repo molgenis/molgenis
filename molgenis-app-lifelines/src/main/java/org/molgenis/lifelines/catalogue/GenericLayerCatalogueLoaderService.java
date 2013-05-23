@@ -67,7 +67,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 		// convert to MOLGENIS OMX model and add to database
 		DataSet dataSet = new DataSet();
-		dataSet.setIdentifier(DataSet.class.getSimpleName() + "_LifeLines" + id);
+		dataSet.setIdentifier(CatalogIdConverter.catalogIdToOmxIdentifier(id));
 		dataSet.setName("LifeLines" + id);
 
 		Protocol rootProtocol = new Protocol();
