@@ -188,57 +188,50 @@
 		searchQuery = query;
 		ns.searchFeatureMeta(function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
-			var rootNode = $('#feature-selection').dynatree("getRoot");
+			var rootNode =  $('#feature-selection').dynatree("getTree").getNodeByKey(protocol.href);
 			rootNode.removeChildren();
-			rootNode.addChild({
-				key : protocol.href,
-				title : protocol.name,
-				icon : false,
-				isFolder : true,
-				isLazy : true,
-			});
-			rootNode = rootNode.tree.getNodeByKey(protocol.href);
 			$.each(searchResponse["searchHits"], function(){
 				var object = $(this)[0]["columnValueMap"];
-				if(object["type"] === "observablefeature"){
-					console.log($(this));
-					var id = object["id"];
-					var path = object["path"];
-					var nodes = path.split(".");
-					var parentNodeUrl = "";
-					for(var i = 0; i < nodes.length; i++){
+				var nodes = object["path"].split(".");
+				var entityType = object["type"];
+				var entityId = object["id"];
+				
+				if(entityType === "observablefeature"){
+					//split the path to get all ancestors
+					for(var i = 0; i < nodes.length; i++) {
 						var currentNode = null;
-						var url = null;
-						var options = {};
-						if(nodes[i] === id.toString()){
-							url = "/api/v1/observablefeature/" + nodes[i];
+						//assume the current node is a protocol first
+						var uri = "/api/v1/protocol/" + nodes[i];
+						var options = {
+							isFolder : true,
+							isLazy : true,
+							expand : true,
+						};
+						//this is the last node and check if this is a feature
+						if (nodes[i] === entityId.toString()) {
+							uri = "/api/v1/observablefeature/" + nodes[i];
 							options = {
-								"isFolder" : false,
+								isFolder : false,
 								icon : "../../img/filter-bw.png"
 							}
 						}
-						else{
-							url = "/api/v1/protocol/" + nodes[i];
-							options["isFolder"] = true;
-						}
-						
-						if (rootNode.tree.getNodeByKey(url) === null) {
+						//locate the node in dynatree and otherwise create the node and insert it
+						if (rootNode.tree.getNodeByKey(uri) === null) {
 							if(i != 0){
 								var parentUrl = "/api/v1/protocol/" + nodes[i - 1];
 								currentNode = rootNode.tree.getNodeByKey(parentUrl);
 							}
 							else
 								currentNode = rootNode;
-							var node = restApi.get(url);
-							console.log(node);
+							var node = restApi.get(uri);
 							currentNode.addChild($.extend({
 								key : node.href,
 								title : node.name,
 								tooltip : node.description,
-								isLazy : true,
-								expand : true,
 							}, options));
 							currentNode = currentNode.tree.getNodeByKey(node.href);
+						} else {
+							currentNode = rootNode.tree.getNodeByKey(uri);
 						}
 					}
 				}
