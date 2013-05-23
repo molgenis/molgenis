@@ -11,7 +11,7 @@
 	<repositories>
 	  <repository>
 	    <id>enonic</id>
-	    <url>http://repo.enonic.com/maven</url>
+	    <url>http://repo.enonic.com/artifactory/public/</url>
 	  </repository>
 	</repositories>
 

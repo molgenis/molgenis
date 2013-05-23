@@ -51,7 +51,7 @@ public class ExcelEntityExporterGen extends Generator
 
 			templateArgs.put("model", model);
 			templateArgs.put("entities", entityList);
-			templateArgs.put("package", APP_DIR);
+			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			OutputStream targetOut = new FileOutputStream(target);
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 			targetOut.close();

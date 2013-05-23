@@ -12,6 +12,10 @@
 	margin-bottom: 20px;
 }
 
+.control-label {
+	margin-right: 5px;
+}
+
 #dataset-select-container {
 	margin-top: 4px;
 	margin-bottom: 8px;
@@ -95,18 +99,23 @@ ui-state-active .ui-icon {
     background-image: url("images/ui-icons_ffffff_256x240.png");
 }
 
-.form-search {
-	margin-bottom: 0px;
+#observationset-search-container {
+	text-align: center;
 }
-
 .accordion-group {
 	background-color: #5B82A4;
 }
 
 .accordion-toggle {
-	color: white;	
+	color: white;
 }
 
+a.accordion-toggle:hover, a.accordion-toggle:focus, a.accordion-toggle:active {
+	color: white;
+	text-decoration: none;
+	cursor: default;
+}
+	
 .accordion-body {
 	background-color: white;
 }

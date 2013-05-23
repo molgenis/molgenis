@@ -34,18 +34,18 @@
 				<div class="span3">
 					<div class="well">
 						<div class="row-fluid">
-							<form class="form-search" onsubmit="return false">
-								<div class="input-append">
-									<input type="text" id="observationset-search" class="search-query" placeholder="Search data items">
-									<button type="submit" class="btn"><i class="icon-large icon-search"></i></button>
-								</div>
-							</form>
+							<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
+							<div class="input-append span12" id="observationset-search-container">
+								<#-- add span11 to ensure that input is styled correctly at low and high solutions -->
+								<input class="span10" id="observationset-search" type="text" placeholder="Search data values">
+								<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+							</div>
 						</div>
 						<div class="row-fluid">
 							<div class="accordion" id="feature-filters-container">
 								<div class="accordion-group">
 								    <div class="accordion-heading">
-										<a class="accordion-toggle" data-toggle="collapse" data-parent="#feature-filters-container" href="#feature-filters">Data item filters</a>
+										<a class="accordion-toggle" data-toggle="false" data-parent="#feature-filters-container" href="#feature-filters">Data item filters</a>
 									</div>
 									<div class="accordion-body collapse in">
 										<div class="accordion-inner" id="feature-filters"></div>
@@ -57,7 +57,7 @@
 							<div class="accordion" id="feature-selection-container">
 								<div class="accordion-group">
 								    <div class="accordion-heading">
-										<a class="accordion-toggle" data-toggle="collapse" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
+										<a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
 									</div>
 									<div class="accordion-body collapse in">
 										<div class="accordion-inner" id="feature-selection"></div>

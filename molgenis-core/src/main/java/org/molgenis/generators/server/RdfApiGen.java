@@ -54,7 +54,7 @@ public class RdfApiGen extends Generator
 			templateArgs.put("methods", methodList);
 			templateArgs.put("entities", entityList);
 			templateArgs.put("helper", new GeneratorHelper(null));
-			templateArgs.put("package", APP_DIR + ".servlet");
+			templateArgs.put("package", APP_DIR.replace('/', '.') + ".servlet");
 			templateArgs.put("db_filepath", options.db_filepath);
 			templateArgs.put("db_user", options.db_user);
 			templateArgs.put("db_password", options.db_password);

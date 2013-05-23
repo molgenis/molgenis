@@ -39,7 +39,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import app.DatabaseConfig;
+import org.molgenis.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc

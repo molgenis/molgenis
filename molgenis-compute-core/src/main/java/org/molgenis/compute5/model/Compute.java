@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.generators.BackendGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.util.tuple.Tuple;
@@ -20,6 +21,12 @@ public class Compute
 	Parameters parameters;
 	List<Task> tasks;
 	BackendGenerator backend;
+	ComputeProperties computeProperties;
+
+	public Compute(ComputeProperties computeProperties)
+	{
+		this.setComputeProperties(computeProperties);
+	}
 
 	public List<Task> generateTasks() throws IOException
 	{
@@ -65,6 +72,16 @@ public class Compute
 	public void setBackend(BackendGenerator backend)
 	{
 		this.backend = backend;
+	}
+
+	public ComputeProperties getComputeProperties()
+	{
+		return computeProperties;
+	}
+
+	public void setComputeProperties(ComputeProperties computeProperties)
+	{
+		this.computeProperties = computeProperties;
 	}
 }
 
