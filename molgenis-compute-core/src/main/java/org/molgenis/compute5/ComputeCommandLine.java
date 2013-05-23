@@ -199,11 +199,10 @@ public class ComputeCommandLine
 		{
 			new PbsBackend().generate(compute.getTasks(), dir);
 		}
-		else if (Parameters.BACKEND_LOCAL.equals(computeProperties.backend))
+		else
 		{
 			new LocalBackend().generate(compute.getTasks(), dir);
 		}
-		else throw new Exception("Unknown backend: " + computeProperties.backend);
 
 		// generate outputs folders per task
 		// for (Task t : compute.getTasks())
