@@ -29,13 +29,20 @@
 					</#if>		
 					<#if catalogs??>	
 						<p id="catalog-loader-title" class="box-title">Choose catalog to load</p>
-						<form name="catalogForm" method="post" action="/plugin/catalog/load">
 						
+						<form name="catalogForm" method="post" action="/plugin/catalog/load">
+							<div id="catalogsTable">
 							<table class="table table-striped table-hover listtable selection-table">
+								<thead>
+									<th></th>
+									<th>Id</th>
+									<th>Name</th>
+								</thead>
 								<#assign checked = true>
 								<#if catalogs?size == 0>
 									<tr><td>No catalogs found</td></tr>
 								</#if>
+								<tbody>
 								<#list catalogs as catalog>
 									<tr>
 										<td class="catalogRadio">
@@ -46,11 +53,16 @@
 											</#if>
 										</td>
 										<td>
+											<label for="catalog_${catalog.id}">${catalog.id}</label>
+										</td>
+										<td>
 											<label for="catalog_${catalog.id}">${catalog.name}</label>
 										</td>
 									</tr>
 								</#list>
+								</tbody>
 							</table>
+							</div>
 							<#if catalogs?size != 0>
 								<input type="submit" class="btn pull-right" value="Load catalog" />
 							</#if>

@@ -10,5 +10,10 @@
 }
 
 .alert {
-	margin-top: 20px;'
+	margin-top: 20px;
+}
+
+#catalogsTable {
+	max-height: 400px;
+	overflow: auto;
 }
