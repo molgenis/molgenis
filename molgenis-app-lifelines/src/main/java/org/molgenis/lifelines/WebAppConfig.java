@@ -188,7 +188,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		return new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
 	}
 
-	@Value("${lifelines.resource.manager.service.url:http://wozkh0071.zkh.umcg.intra/Umcg.Tcc.GenericLayer.ResourceManagerService-1/ResourceManagerService.svc}")
+	@Value("${lifelines.resource.manager.service.url}")
 	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
 
 	@Bean
