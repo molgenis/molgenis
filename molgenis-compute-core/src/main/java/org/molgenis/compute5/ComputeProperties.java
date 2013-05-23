@@ -33,6 +33,7 @@ public class ComputeProperties
 	public String runDir = Parameters.RUNDIR_DEFAULT;
 	public String runId = Parameters.RUNID_DEFAULT;
 	public String database = Parameters.DATABASE_DEFAULT;
+	public String port = Parameters.PORT_DEFAULT;
 
 	// parameters not stored in compute.properties file:
 	public boolean help = false; // show help?
@@ -167,7 +168,7 @@ public class ComputeProperties
 			cmd = parser.parse(options, args);
 			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
 			this.path = this.path + (this.path.endsWith("/") ? "" : "/");
-			
+
 			// do we want to create a new workflow? If so: where?
 			this.create = cmd.hasOption(Parameters.CREATE);
 			if (this.create) this.createWorkflow = cmd.getOptionValue(Parameters.CREATE);
@@ -218,6 +219,7 @@ public class ComputeProperties
 			this.runDir = p.getProperty(Parameters.RUNDIR, this.runDir);
 			this.runId = p.getProperty(Parameters.RUNID, this.runId);
 			this.database = p.getProperty(Parameters.DATABASE, this.database);
+			this.port = p.getProperty(Parameters.PORT, this.port);
 
 			String parametersCSVString = p.getProperty(Parameters.PARAMETERS);
 			if (null != parametersCSVString) this.parameters = parametersCSVString.split("\\s*,\\s*");
@@ -247,6 +249,7 @@ public class ComputeProperties
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
+			this.port = cmd.getOptionValue(Parameters.PORT_CMNDLINE_OPTION, this.port);
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
 			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
 
@@ -319,6 +322,7 @@ public class ComputeProperties
 			p.setProperty(Parameters.RUNDIR, this.runDir);
 			p.setProperty(Parameters.RUNID, this.runId);
 			p.setProperty(Parameters.DATABASE, this.database);
+			p.setProperty(Parameters.PORT_CMNDLINE_OPTION, this.port);
 			p.setProperty(Parameters.PARAMETERS, Joiner.on(",").join(this.parameters));
 
 			p.store(new FileOutputStream(this.propertiesFile), "This file contains your molgenis-compute properties");
@@ -371,6 +375,9 @@ public class ComputeProperties
 		options.addOption(OptionBuilder
 				.withDescription("Host, location of database. Default: " + Parameters.DATABASE_DEFAULT).hasArg()
 				.withLongOpt(Parameters.DATABASE).create(Parameters.DATABASE_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Port used to connect to databasae. Default: " + Parameters.PORT_DEFAULT).hasArg()
+				.withLongOpt(Parameters.PORT).create(Parameters.PORT_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder.withDescription("Starts the database").withLongOpt(Parameters.DATABASE_START)
 				.create(Parameters.DATABASE_START_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder.withDescription("End the database").withLongOpt(Parameters.DATABASE_END)
