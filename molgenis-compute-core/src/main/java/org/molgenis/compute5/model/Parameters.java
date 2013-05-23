@@ -66,7 +66,7 @@ public class Parameters
 	public static final String RUNID = "runid";
 	public static final String RUNID_CMNDLINE_OPTION = "runid";
 	public static final String RUNID_COLUMN = USER_PREFIX + RUNID;
-	public static final String RUNID_DEFAULT = "run01";
+	public static final String RUNID_DEFAULT = null; // if not set, then auto-generate unique
 	public static final String DATABASE = "database";
 	public static final String DATABASE_DEFAULT = "none";
 	public static final String DATABASE_CMNDLINE_OPTION = "d";

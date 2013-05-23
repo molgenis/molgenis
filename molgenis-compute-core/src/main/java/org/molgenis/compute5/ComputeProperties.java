@@ -15,6 +15,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.compute5.model.Parameters;
 
 import com.google.common.base.Joiner;
@@ -247,7 +248,6 @@ public class ComputeProperties
 			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
 			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
-			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
 			this.port = cmd.getOptionValue(Parameters.PORT_CMNDLINE_OPTION, this.port);
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
@@ -257,6 +257,14 @@ public class ComputeProperties
 			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
 					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
 							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
+
+			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
+			// if runId == null and we want to generate, then create one
+			if (null == this.runId && this.generate)
+			{
+				// 4 letters/LETTERS/numbers -> (26*2 + 10)^4 = 14,776,336 possibilities
+				this.runId = RandomStringUtils.random(4, true, true);
+			}
 
 			// want to run?
 			this.execute = cmd.hasOption(Parameters.RUN_CMNDLINE_OPTION)
