@@ -1,10 +1,14 @@
 package org.molgenis.lifelines.catalogue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.observ.Characteristic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,12 +32,15 @@ public class CatalogLoaderController
 	public static final String VIEW_NAME = "catalog-loader";
 	private static final Logger LOG = Logger.getLogger(CatalogLoaderController.class);
 	private final CatalogLoaderService catalogLoaderService;
+	private final Database database;
 
 	@Autowired
-	public CatalogLoaderController(CatalogLoaderService catalogLoaderService)
+	public CatalogLoaderController(CatalogLoaderService catalogLoaderService, Database database)
 	{
 		if (catalogLoaderService == null) throw new IllegalArgumentException("CatalogLoaderService is null");
+		if (database == null) throw new IllegalArgumentException("Database id null");
 		this.catalogLoaderService = catalogLoaderService;
+		this.database = database;
 	}
 
 	/**
@@ -43,14 +50,24 @@ public class CatalogLoaderController
 	 * 
 	 * @param model
 	 * @return
+	 * @throws DatabaseException
 	 */
 	@RequestMapping(LIST_URI)
-	public String listCatalogs(Model model)
+	public String listCatalogs(Model model) throws DatabaseException
 	{
 		List<CatalogInfo> catalogs = catalogLoaderService.findCatalogs();
 		LOG.debug("Got [" + catalogs.size() + "] catalogs from service");
 
-		model.addAttribute("catalogs", catalogs);
+		List<CatalogModel> models = new ArrayList<CatalogModel>(catalogs.size());
+		for (CatalogInfo catalog : catalogs)
+		{
+			String identifier = CatalogIdConverter.catalogIdToOmxIdentifier(catalog.getId());
+			Characteristic dataset = Characteristic.findByIdentifier(database, identifier);
+			boolean catalogLoaded = dataset != null;
+			models.add(new CatalogModel(catalog.getId(), catalog.getName(), catalogLoaded));
+		}
+
+		model.addAttribute("catalogs", models);
 
 		return VIEW_NAME;
 	}
@@ -65,10 +82,11 @@ public class CatalogLoaderController
 	 * @param id
 	 * @param model
 	 * @return
+	 * @throws DatabaseException
 	 */
 	@RequestMapping(LOAD_URI)
-	public String loadCatalog(@RequestParam("id")
-	String id, Model model)
+	public String loadCatalog(@RequestParam(value = "id", required = false)
+	String id, Model model) throws DatabaseException
 	{
 		try
 		{
@@ -77,6 +95,10 @@ public class CatalogLoaderController
 				catalogLoaderService.loadCatalog(id);
 				model.addAttribute("successMessage", "Catalog loaded");
 				LOG.info("Loaded catalog with id [" + id + "]");
+			}
+			else
+			{
+				model.addAttribute("errorMessage", "Please select a catalogue");
 			}
 		}
 		catch (UnknownCatalogException e)

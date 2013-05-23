@@ -3,6 +3,7 @@ package org.molgenis.mock;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.text.ParseException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,7 @@ import org.molgenis.framework.db.ExampleData;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.SubQueryRule;
 import org.molgenis.framework.security.Login;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
@@ -21,8 +23,8 @@ import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
 
 /**
- * Mock Database implementation for use in unittests. Use setEntities for define
- * entities to be returned by the query and find methods
+ * Mock Database implementation for use in unittests. Use setEntities for define entities to be returned by the query
+ * and find methods
  * 
  * Implement more methods if you need them.
  * 
@@ -167,7 +169,224 @@ public class MockDatabase implements Database
 	@Override
 	public <E extends Entity> Query<E> query(Class<E> entityClass)
 	{
-		return null;
+		return new Query<E>()
+		{
+
+			@Override
+			public Query<E> filter(String filter)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> equals(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> eq(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> search(String searchTerms) throws DatabaseException
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> in(String field, List<?> objectList)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> greater(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> gt(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> greaterOrEqual(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> less(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> lt(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> lessOrEqual(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> like(String field, Object value)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> between(String field, Object min, Object max)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> or()
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> and()
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> last()
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> limit(int limit)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> offset(int offset)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> sortASC(String orderByField)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> sortDESC(String orderByField)
+			{
+				return this;
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<E> find() throws DatabaseException
+			{
+				return entities;
+			}
+
+			@Override
+			public void find(TupleWriter writer) throws DatabaseException, ParseException
+			{
+			}
+
+			@Override
+			public void find(TupleWriter writer, List<String> fieldsToExport) throws DatabaseException, ParseException
+			{
+
+			}
+
+			@Override
+			public void find(TupleWriter writer, boolean skipAutoIds) throws DatabaseException, ParseException,
+					InstantiationException, IllegalAccessException
+			{
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<E> find(Database db, Class<E> klazz) throws DatabaseException, ParseException
+			{
+				return entities;
+			}
+
+			@Override
+			public int count() throws DatabaseException
+			{
+				return entities.size();
+			}
+
+			@Override
+			public int count(Database db, Class<E> klazz) throws DatabaseException
+			{
+				return entities.size();
+			}
+
+			@Override
+			public QueryRule[] getRules()
+			{
+				return null;
+			}
+
+			@Override
+			public void addRules(QueryRule... addRules)
+			{
+			}
+
+			@Override
+			public void setDatabase(Database db)
+			{
+			}
+
+			@Override
+			public Database getDatabase()
+			{
+				return null;
+			}
+
+			@Override
+			public Query<E> example(Entity example)
+			{
+				return this;
+			}
+
+			@Override
+			public void removeRule(QueryRule ruleToBeRemoved)
+			{
+			}
+
+			@Override
+			public String createFindSql() throws DatabaseException
+			{
+				return null;
+			}
+
+			@Override
+			public Query<E> subquery(String field, String sql)
+			{
+				return this;
+			}
+
+			@Override
+			public Query<E> subQuery(SubQueryRule subQueryRule)
+			{
+				return this;
+			}
+
+		};
 	}
 
 	@Override
