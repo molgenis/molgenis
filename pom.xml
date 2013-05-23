@@ -426,7 +426,7 @@
 		<module>molgenis-app-omx</module>
 		<module>molgenis-app-ngs</module>
 		<module>molgenis-app-omicsconnect</module>
-		<module>molgenis-app-lifelines</module>
+		<!-- module>molgenis-app-lifelines</module-->
 		<module>molgenis-compute-core</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
