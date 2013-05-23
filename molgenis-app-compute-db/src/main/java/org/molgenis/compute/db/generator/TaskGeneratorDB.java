@@ -49,8 +49,8 @@ public class TaskGeneratorDB
 	{
 		new TaskGeneratorDB()
 				.generateRun(
-						"/Users/georgebyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/impute2",
-						"test1", "ui.grid.sara.nl", 2000L);
+						"/Users/hvbyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/impute2",
+						"test1ImportImpute2", "ui.grid.sara.nl", 2000L);
 	}
 
 }
