@@ -15,13 +15,14 @@ public interface CatalogLoaderService
 	 * 
 	 * @return List of CatalogInfo
 	 */
-	List<CatalogInfo> findCatalogs();
+	public List<CatalogInfo> findCatalogs();
 
 	/**
 	 * Retrieves a catalog and store it in the database
 	 * 
 	 * @param id
+	 * @throws UnknownCatalogException
 	 */
-	void loadCatalog(String id) throws UnknownCatalogException;
+	public void loadCatalog(String id) throws UnknownCatalogException;
 
 }
