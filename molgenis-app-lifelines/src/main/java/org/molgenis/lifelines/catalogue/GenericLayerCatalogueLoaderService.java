@@ -24,6 +24,7 @@ import org.molgenis.hl7.REPCMT000100UV01Organizer;
 import org.molgenis.hl7.ValueSets;
 import org.molgenis.hl7.ValueSets.ValueSet;
 import org.molgenis.hl7.ValueSets.ValueSet.Code;
+import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -37,24 +38,26 @@ import org.w3c.dom.Node;
 public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 {
 	private static final Logger logger = Logger.getLogger(GenericLayerCatalogueLoaderService.class);
-
 	private final Database database;
-
 	private final GenericLayerCatalogService genericLayerCatalogService;
+	private final ResourceManagerService resourceManagerService;
 
 	@Autowired
-	public GenericLayerCatalogueLoaderService(Database database, GenericLayerCatalogService genericLayerCatalogService)
+	public GenericLayerCatalogueLoaderService(Database database, GenericLayerCatalogService genericLayerCatalogService,
+			ResourceManagerService resourceManagerService)
 	{
 		if (database == null) throw new IllegalArgumentException("database is null");
 		if (genericLayerCatalogService == null) throw new IllegalArgumentException("genericLayerCatalogService is null");
+		if (resourceManagerService == null) throw new IllegalArgumentException("resourceManagerService is null");
 		this.database = database;
 		this.genericLayerCatalogService = new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
+		this.resourceManagerService = resourceManagerService;
 	}
 
 	@Override
 	public List<CatalogInfo> findCatalogs()
 	{
-		throw new UnsupportedOperationException();
+		return resourceManagerService.findCatalogs();
 	}
 
 	@Override
@@ -225,7 +228,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 	private static class OntologyTermIndex
 	{
-		private Map<String, Map<String, OntologyTerm>> codeSystemMap;
+		private final Map<String, Map<String, OntologyTerm>> codeSystemMap;
 
 		public OntologyTermIndex()
 		{

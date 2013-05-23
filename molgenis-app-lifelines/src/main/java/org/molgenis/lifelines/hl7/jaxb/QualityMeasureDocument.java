@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class QualityMeasureDocument
 {
 	private List<Component> components;
+	private Id id;
+	private String name;
 
 	@XmlElement(name = "component")
 	public List<Component> getComponents()
@@ -21,11 +23,32 @@ public class QualityMeasureDocument
 		this.components = components;
 	}
 
+	@XmlElement(name = "id")
+	public Id getId()
+	{
+		return id;
+	}
+
+	public void setId(Id id)
+	{
+		this.id = id;
+	}
+
+	@XmlElement(name = "name")
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder();
-		builder.append("QualityMeasureDocument [components=").append(components).append("]");
-		return builder.toString();
+		return "QualityMeasureDocument [components=" + components + ", id=" + id + ", name=" + name + "]";
 	}
+
 }
