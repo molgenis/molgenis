@@ -324,6 +324,7 @@
 							<files>
 								<file>${user.home}/molgenis-server.properties</file>
 							</files>
+							<quiet>true</quiet>
 						</configuration>
 					</execution>
 				</executions>
