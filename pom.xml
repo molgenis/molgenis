@@ -104,6 +104,12 @@
 					<artifactId>jaxb2-maven-plugin</artifactId>
 					<version>1.5</version>
 				</plugin>
+				<!-- specify plugin version -->
+				<plugin>
+					<groupId>org.jvnet.jax-ws-commons</groupId>
+					<artifactId>jaxws-maven-plugin</artifactId>
+					<version>2.1</version>
+				</plugin>
 				<!-- configure molgenis generator execution -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -249,7 +255,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -259,6 +265,19 @@
 										<versionRange>[1.0.0,)</versionRange>
 										<goals>
 											<goal>enforce</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.jvnet.jax-ws-commons</groupId>
+										<artifactId>jaxws-maven-plugin</artifactId>
+										<versionRange>[2.1,)</versionRange>
+										<goals>
+											<goal>wsimport</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
