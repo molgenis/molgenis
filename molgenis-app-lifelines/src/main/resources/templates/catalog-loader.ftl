@@ -32,13 +32,18 @@
 						<form name="catalogForm" method="post" action="/plugin/catalog/load">
 						
 							<table class="table table-striped table-hover listtable selection-table">
+								<#assign checked = true>
 								<#if catalogs?size == 0>
 									<tr><td>No catalogs found</td></tr>
 								</#if>
 								<#list catalogs as catalog>
 									<tr>
 										<td class="catalogRadio">
-											<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" <#if catalog_index == 0>checked</#if> >
+											<#if catalog.loaded>
+												LOADED
+											<#else>
+												<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" <#if checked>checked<#assign checked = false></#if> >
+											</#if>
 										</td>
 										<td>
 											<label for="catalog_${catalog.id}">${catalog.name}</label>
