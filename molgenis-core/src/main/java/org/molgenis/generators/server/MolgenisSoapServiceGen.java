@@ -54,7 +54,7 @@ public class MolgenisSoapServiceGen extends Generator
 			templateArgs.put("methods", methodList);
 			templateArgs.put("entities", entityList);
 			templateArgs.put("helper", new GeneratorHelper(null));
-			templateArgs.put("package", APP_DIR + ".servlet");
+			templateArgs.put("package", APP_DIR.replace('/', '.') + ".servlet");
 			OutputStream targetOut = new FileOutputStream(target);
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 			targetOut.close();

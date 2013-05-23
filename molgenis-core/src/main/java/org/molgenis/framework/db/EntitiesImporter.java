@@ -61,7 +61,4 @@ public interface EntitiesImporter
 	 */
 	public EntityImportReport importEntities(TableReader tableReader, DatabaseAction dbAction) throws IOException,
 			DatabaseException;
-
-	@Deprecated
-	public void setDatabase(Database db);
 }

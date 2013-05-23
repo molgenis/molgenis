@@ -184,17 +184,16 @@
 	};
 
 	ns.updateObservationSetsTable = function() {
-		if(selectedFeatures.length > 0){
+		if (selectedFeatures.length > 0) {
 			ns.search(function(searchResponse) {
 				var maxRowsPerPage = resultsTable.getMaxRows();
 				var nrRows = searchResponse.totalHitCount;
-	
+
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
-	
+
 				ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 			});
-		}
-		else{
+		} else {
 			$('#data-table-header').html('no features selected');
 			$('#data-table-pager').empty();
 			$('#data-table').empty();
@@ -315,13 +314,12 @@
 						values : [ $(this).val() ]
 					});
 				});
-				filter.datepicker();
 				break;
 			case "datetime":
 				if (config == null)
-					filter = $('<input type="datetime" autofocus="autofocus">');
+					filter = $('<input type="datetime-local" autofocus="autofocus">');
 				else
-					filter = $('<input type="datetime" autofocus="autofocus" value="' + config.values[0] + '">');
+					filter = $('<input type="datetime-local" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,

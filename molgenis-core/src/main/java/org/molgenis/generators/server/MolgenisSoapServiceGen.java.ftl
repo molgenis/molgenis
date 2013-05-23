@@ -18,6 +18,6 @@ public class SoapService extends MolgenisSoapService implements MolgenisService
 	@Override
 	public Object getSoapImpl()
 	{
-		return new app.servlet.SoapApi(freshDatabase);
+		return new ${package}.servlet.SoapApi(freshDatabase);
 	}
 }

@@ -34,8 +34,8 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import app.DatabaseConfig;
-import app.ui.PilotDashboardPluginPlugin;
+import org.molgenis.DatabaseConfig;
+import org.molgenis.ui.PilotDashboardPluginPlugin;
 
 @Configuration
 @EnableWebMvc
