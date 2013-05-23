@@ -213,6 +213,7 @@
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>8.1.10.v20130312</version>
 					<configuration>
+						<reload>manual</reload>
 						<stopPort>9999</stopPort>
 						<stopKey>jetty-stop</stopKey>
 						<reload>manual</reload>		
