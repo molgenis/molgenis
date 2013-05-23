@@ -116,18 +116,27 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 				ontologyTerm.setTermAccession(code.getCode());
 
 				String codeSystem = code.getCodeSystem();
-				if (ontologyTermIndex.containsKey(codeSystem))
+				if (!ontologyTermIndex.containsKey(codeSystem))
 				{
+					if (codeSystem == null)
+					{
+						logger.warn("missing code system for ontology term '" + code.getDisplayName() + "'");
+						continue;
+					}
+
+					String codeSystemName = code.getCodeSystemName();
+					if (codeSystemName == null)
+					{
+						logger.warn("missing code system name for ontology term '" + code.getDisplayName() + "'");
+						continue;
+					}
+
 					// create ontology for each code system
 					Ontology ontology = new Ontology();
 					ontology.setIdentifier(UUID.randomUUID().toString());
-					// FIXME discuss with TCC if can be null
-					String codeSystemName = code.getCodeSystemName();
-					if (codeSystemName == null) codeSystemName = "WE DO NOT HAVE A CODE SYSTEM NAME";
 					ontology.setName(codeSystemName);
-					// FIXME discuss with TCC if can be null
-					if (codeSystem == null) codeSystem = "112";
 					ontology.setOntologyAccession(codeSystem);
+
 					database.add(ontology);
 				}
 

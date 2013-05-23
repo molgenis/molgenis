@@ -112,9 +112,7 @@
 						</goals>
 						<configuration>
 							<wsdlUrls>
-								<!-- Generic Layer test server -->
-								<wsdlUrl>http://wtzkh0030.zkh.umcg.intra:8081/Umcg.Tcc.GenericLayer.CatalogService-1/CatalogService.svc?wsdl</wsdlUrl>
-								<!-- <wsdlUrl>http://wozkh0071.zkh.umcg.intra/Umcg.Tcc.GenericLayer.CatalogService-1/CatalogService.svc?wsdl</wsdlUrl>  -->								
+								<wsdlUrl>${lifelines.catalog.service.wsdl.url}</wsdlUrl>								
 							</wsdlUrls>
 							<!-- for JDK 6 compilation compatibility -->
 							<xnocompile>false</xnocompile>
