@@ -35,6 +35,7 @@ public class ComputeProperties
 	public String runId = Parameters.RUNID_DEFAULT;
 	public String database = Parameters.DATABASE_DEFAULT;
 	public String port = Parameters.PORT_DEFAULT;
+	public String interval = Parameters.INTERVAL_DEFAULT;
 
 	// parameters not stored in compute.properties file:
 	public boolean help = false; // show help?
@@ -221,6 +222,7 @@ public class ComputeProperties
 			this.runId = p.getProperty(Parameters.RUNID, this.runId);
 			this.database = p.getProperty(Parameters.DATABASE, this.database);
 			this.port = p.getProperty(Parameters.PORT, this.port);
+			this.interval = p.getProperty(Parameters.INTERVAL, this.interval);
 
 			String parametersCSVString = p.getProperty(Parameters.PARAMETERS);
 			if (null != parametersCSVString) this.parameters = parametersCSVString.split("\\s*,\\s*");
@@ -252,6 +254,7 @@ public class ComputeProperties
 			this.port = cmd.getOptionValue(Parameters.PORT_CMNDLINE_OPTION, this.port);
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
 			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
+			this.interval = cmd.getOptionValue(Parameters.INTERVAL_CMNDLINE_OPTION, this.interval);
 
 			// generate only if -g or if -w and -p present
 			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
@@ -330,7 +333,8 @@ public class ComputeProperties
 			p.setProperty(Parameters.RUNDIR, this.runDir);
 			p.setProperty(Parameters.RUNID, this.runId);
 			p.setProperty(Parameters.DATABASE, this.database);
-			p.setProperty(Parameters.PORT_CMNDLINE_OPTION, this.port);
+			p.setProperty(Parameters.PORT, this.port);
+			p.setProperty(Parameters.INTERVAL, this.interval);
 			p.setProperty(Parameters.PARAMETERS, Joiner.on(",").join(this.parameters));
 
 			p.store(new FileOutputStream(this.propertiesFile), "This file contains your molgenis-compute properties");

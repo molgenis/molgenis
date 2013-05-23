@@ -120,11 +120,11 @@ public class ComputeCommandLine
 
             String runName = computeProperties.runId;
             String backendName = computeProperties.backend;
-            Long pollDelay = 2000L;
+            Long pollInterval = Long.parseLong(computeProperties.interval);
             List<Task> tasks = compute.getTasks();
             String environment = compute.getUserEnvironment();
 
-            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollDelay, tasks, environment);
+            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment);
 
             dbApiClient.createRun(createRunRequest);
 
