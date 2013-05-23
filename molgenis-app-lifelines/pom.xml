@@ -86,7 +86,7 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 			</plugin>
-			<!-- generate catalog service client -->
+			<!-- generate catalog service client
 			<plugin>
 				<groupId>org.jvnet.jax-ws-commons</groupId>
 				<artifactId>jaxws-maven-plugin</artifactId>
@@ -97,17 +97,14 @@
 						</goals>
 						<configuration>
 							<wsdlUrls>
-								<!-- Generic Layer test server -->
 								<wsdlUrl>http://wtzkh0030.zkh.umcg.intra:8081/Umcg.Tcc.GenericLayer.CatalogService-1/CatalogService.svc?wsdl</wsdlUrl>
-								<!-- Generic Layer acceptance server -->
-								<!-- <wsdlUrl>http://wozkh0071.zkh.umcg.intra/Umcg.Tcc.GenericLayer.CatalogService-1/CatalogService.svc?wsdl</wsdlUrl>  -->
 							</wsdlUrls>
-							<!-- for JDK 6 compilation compatibility -->
 							<xnocompile>false</xnocompile>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+            -->
 		</plugins>
 	</build>
 	
