@@ -66,7 +66,7 @@ public class Parameters
 	public static final String RUNID = "runid";
 	public static final String RUNID_CMNDLINE_OPTION = "runid";
 	public static final String RUNID_COLUMN = USER_PREFIX + RUNID;
-	public static final String RUNID_DEFAULT = "run01";
+	public static final String RUNID_DEFAULT = null; // if not set, then auto-generate unique
 	public static final String DATABASE = "database";
 	public static final String DATABASE_DEFAULT = "none";
 	public static final String DATABASE_CMNDLINE_OPTION = "d";
@@ -75,9 +75,12 @@ public class Parameters
 	public static final String DATABASE_START_CMNDLINE_OPTION = "dbs";
 	public static final String DATABASE_END = "database-end";
 	public static final String DATABASE_END_CMNDLINE_OPTION = "dbe";
-	public static final String PORT_DEFAULT = "8080";
 	public static final String PORT = "port";
+	public static final String PORT_DEFAULT = "8080";
 	public static final String PORT_CMNDLINE_OPTION = "port";
+	public static final String INTERVAL = "interval";
+	public static final String INTERVAL_DEFAULT = "2000";
+	public static final String INTERVAL_CMNDLINE_OPTION = "interval";
 	public static final String PROPERTIES = "compute.properties";
 	public static final String GENERATE = "generate";
 	public static final String GENERATE_CMNDLINE_OPTION = "g";
