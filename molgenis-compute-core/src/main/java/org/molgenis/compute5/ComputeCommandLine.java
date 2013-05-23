@@ -114,7 +114,7 @@ public class ComputeCommandLine
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
             ComputeDbApiConnection dbApiConnection =
-                    new HttpClientComputeDbApiConnection(computeProperties.database,computeProperties.port,"/api/v1","","");
+                    new HttpClientComputeDbApiConnection(computeProperties.database, computeProperties.port,"/api/v1","","");
 
             ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
