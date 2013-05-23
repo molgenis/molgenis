@@ -542,12 +542,22 @@
 	}
 	
 	ns.createSearchRequestFeatureMeta = function(){
+		var finalSearchQuery = null;
+		var terms = searchQuery.split(" ");
+		var queryRules = new Array();
+		$.each(terms, function(index, element){
+			queryRules.push({
+				operator : 'SEARCH',
+				value : element,
+			});
+			if(index < terms.length - 1)
+				queryRules.push({
+					operator : 'AND'
+				});
+		});
 		var searchRequest = {
 			documentType : "protocolViewer",
-			queryRules : [ {
-				operator : 'SEARCH',
-				value : searchQuery
-			} ]
+			queryRules : queryRules
 		};
 		return searchRequest;
 	}
