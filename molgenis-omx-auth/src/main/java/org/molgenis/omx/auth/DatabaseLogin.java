@@ -23,6 +23,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
+import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.util.Entity;
@@ -111,7 +112,8 @@ public class DatabaseLogin implements Login, Serializable
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * Note: Anonymous is automatically logged in but does not count as being authenticated
+	 * Note: Anonymous is automatically logged in but does not count as being
+	 * authenticated
 	 */
 	@Override
 	public boolean isAuthenticated()
@@ -203,7 +205,8 @@ public class DatabaseLogin implements Login, Serializable
 	/**
 	 * Reloads all permission settings for this user from database.
 	 * 
-	 * If user is null, anonymous is logged in. Note: calling reload refreshes the permissions cache map.
+	 * If user is null, anonymous is logged in. Note: calling reload refreshes
+	 * the permissions cache map.
 	 * 
 	 * @throws Exception
 	 * 
@@ -245,7 +248,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Reload the permissions map which contains all permissions, for the logged in user.
+	 * Reload the permissions map which contains all permissions, for the logged
+	 * in user.
 	 * 
 	 * @param db
 	 *            database to load permissions from
@@ -383,8 +387,9 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Indicates whether the user has permissions to read data from this entity. Note: if row-level security is
-	 * activated, only rows for which the user has been given permission will display.
+	 * Indicates whether the user has permissions to read data from this entity.
+	 * Note: if row-level security is activated, only rows for which the user
+	 * has been given permission will display.
 	 * 
 	 * @param Entity
 	 *            the entity to get permission from
@@ -419,8 +424,9 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Indicates whether the user has permissions to write (and read) data from this entity. Note: if row-level security
-	 * is activated, only rows for which the user has been given permission will display as editable.
+	 * Indicates whether the user has permissions to write (and read) data from
+	 * this entity. Note: if row-level security is activated, only rows for
+	 * which the user has been given permission will display as editable.
 	 * 
 	 * @param Entity
 	 *            the entity to get permission from
@@ -474,26 +480,20 @@ public class DatabaseLogin implements Login, Serializable
 		return this.owns(entity.getClass());
 	}
 
+	@Override
+	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
+	{
+		return (isAuthenticated() && user.getSuperuser()) || readMap.containsKey(screenControllerClass.getName());
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean canRead(org.molgenis.framework.ui.ScreenController<?> screen)
 	{
-		// System.out.println("User name >>>>>>>>>>>>>" + this.user);
-		// System.out.println("Screen name >>>>>>>>>>>>>" +
-		// screen.getClass().getName() + "Classname >>>>>>>>>> " +
-		// this.readMap.containsKey(screen.getClass().getName()));
-		if (this.isAuthenticated() && this.user.getSuperuser()) return true;
-
-		String className = screen.getClass().getName();
-
-		// if (className.equals("app.ui.UserLoginPlugin"))
-		// return true;
-
-		if (this.readMap.containsKey(className)) return true;
-
-		return false;
+		return canReadScreenController((Class<? extends ScreenController<?>>) screen.getClass());
 	}
 
 	// /**
@@ -522,8 +522,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Helper method to check if an entity is implementing the authorizable interface, i.e. to check if we should
-	 * implement row-level security.
+	 * Helper method to check if an entity is implementing the authorizable
+	 * interface, i.e. to check if we should implement row-level security.
 	 * 
 	 * @param entity
 	 * @param interfaceName
@@ -582,4 +582,5 @@ public class DatabaseLogin implements Login, Serializable
 	{
 		this.redirect = redirect;
 	}
+
 }

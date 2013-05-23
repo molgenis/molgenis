@@ -129,4 +129,11 @@ public class MockLogin implements Login
 	public void setRedirect(String redirect)
 	{
 	}
+
+	@Override
+	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
+			throws DatabaseException
+	{
+		return false;
+	}
 }
