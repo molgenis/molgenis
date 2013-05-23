@@ -16,9 +16,8 @@
 
 package ${package};
 
-import app.CsvExport;
-import app.CsvImport;
-import app.DatabaseFactory;
+import org.molgenis.CsvExport;
+import org.molgenis.CsvImport;
 
 import javax.persistence.*;
 import org.molgenis.framework.db.jpa.JpaDatabase;
@@ -80,9 +79,9 @@ public class TestCsv
 	{
 		try
 		{		
-            db = DatabaseFactory.create(configOverrides);
+            db = DatabaseUtil.createDatabase(configOverrides);
 	<#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
-			app.FillMetadata.fillMetadata(db);
+			${package}.FillMetadata.fillMetadata(db);
 	</#if>			
 		}
 		catch (Exception e)
@@ -107,7 +106,7 @@ public class TestCsv
         TestDataSet set1 = new TestDataSet(50,5);		
         JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
 <#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
-			app.FillMetadata.fillMetadata(db);
+			${package}.FillMetadata.fillMetadata(db);
 </#if>			
 
 		CsvEntityExporter entityExporter = new CsvEntityExporter();
@@ -134,7 +133,7 @@ public class TestCsv
 		//clean database
 		JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
 <#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
-		app.FillMetadata.fillMetadata(db);
+		${package}.FillMetadata.fillMetadata(db);
 </#if>			
 
 		//import dir2 into database
@@ -153,7 +152,7 @@ public class TestCsv
 		//clean database
         JpaUtil.dropAndCreateTables((JpaDatabase)db, configOverrides);
 <#if !options.getAuthLoginclass()?ends_with("SimpleLogin")>
-		app.FillMetadata.fillMetadata(db);
+		${package}.FillMetadata.fillMetadata(db);
 </#if>			
 
 		//import dir3 into database

@@ -6,6 +6,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.server.TokenFactory;
+import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
 
 public class SimpleLogin implements Login
@@ -146,5 +147,12 @@ public class SimpleLogin implements Login
 	@Override
 	public void setRedirect(String redirect)
 	{
+	}
+
+	@Override
+	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
+			throws DatabaseException
+	{
+		return true;
 	}
 }

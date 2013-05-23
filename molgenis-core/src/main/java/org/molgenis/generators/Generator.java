@@ -19,11 +19,11 @@ import freemarker.template.Template;
 
 public abstract class Generator
 {
-	protected final String APP_DIR = "app";
+	protected final String APP_DIR = "org/molgenis";
 
 	public abstract void generate(Model model, MolgenisOptions options) throws Exception;
 
-	// TODO make abstract (not practical to do at the moment) 
+	// TODO make abstract (not practical to do at the moment)
 	public void generate(Model model, MolgenisOptions options, String generatedPath) throws Exception
 	{
 		throw new UnsupportedOperationException();
@@ -95,8 +95,7 @@ public abstract class Generator
 	}
 
 	/**
-	 * Generate the path for the generated source code. Depends on wether the
-	 * result is a war or a jar file.
+	 * Generate the path for the generated source code. Depends on wether the result is a war or a jar file.
 	 * 
 	 * @param options
 	 * @return path string
@@ -144,8 +143,7 @@ public abstract class Generator
 	}
 
 	/**
-	 * Extension varies based on output type, i.e., .java, R, sql etc. Should
-	 * include the leading "."
+	 * Extension varies based on output type, i.e., .java, R, sql etc. Should include the leading "."
 	 */
 	public String getExtension()
 	{

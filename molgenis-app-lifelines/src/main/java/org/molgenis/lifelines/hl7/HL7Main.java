@@ -4,7 +4,7 @@ import javax.persistence.Persistence;
 
 import org.molgenis.framework.db.Database;
 
-import app.JpaDatabase;
+import org.molgenis.JpaDatabase;
 
 /**
  * 
