@@ -47,11 +47,10 @@ public class TaskGeneratorDB
 
 	public static void main(String[] args) throws Exception
 	{
-
-		new TaskGeneratorDB().generateRun(
-				"molgenis/molgenis-compute-core/src/main/resources/workflows/impute2/parameters.csv", "test1",
-				"localhost", 2000L);
-
+		new TaskGeneratorDB()
+				.generateRun(
+						"/Users/hvbyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/impute2",
+						"test1ImportImpute2", "ui.grid.sara.nl", 2000L);
 	}
 
 }
