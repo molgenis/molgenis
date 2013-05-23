@@ -9,6 +9,7 @@ import nl.umcg.hl7.GenericLayerCatalogService;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
 import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
+import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
@@ -185,6 +186,15 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public GenericLayerCatalogService genericLayerCatalogService()
 	{
 		return new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
+	}
+
+	@Value("${lifelines.resource.manager.service.url}")
+	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
+
+	@Bean
+	public ResourceManagerService resourceManagerService()
+	{
+		return new ResourceManagerService(resourceManagerServiceUrl);
 	}
 
 	@Bean
