@@ -20,8 +20,11 @@
 					<exclude>**ui.xml</exclude>
 				</excludes>
 			</resource>
+			<resource>
+				<directory>${project.basedir}/target/generated-sources/cxf</directory>
+			</resource>
 		</resources>
-		
+
 		<plugins>
 			<!-- execute molgenis generator -->
 			<plugin>
@@ -75,10 +78,10 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<webResources>
-            			<resource>
-              				<directory>target/generated-sources/molgenis/doc</directory>
-            			</resource>
-          			</webResources>
+						<resource>
+							<directory>target/generated-sources/molgenis/doc</directory>
+						</resource>
+					</webResources>
 				</configuration>
 			</plugin>
 			<!-- web server -->
@@ -110,7 +113,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -121,7 +124,7 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-core</artifactId>
@@ -153,9 +156,9 @@
 			<version>3.2.2.RELEASE</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-context-support</artifactId>
-		    <version>3.2.2.RELEASE</version>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>3.2.2.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
