@@ -115,7 +115,7 @@ public class ComputeCommandLine
 			if (computeProperties.execute)
 			{
 				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
-			}			
+			}
 		}
 
 		return compute;
