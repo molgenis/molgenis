@@ -66,7 +66,7 @@
 				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.util.AbstractEntity.setValuesFromString((String)tuple.get("${f.name}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
 				this.set${JavaName(f)}(instance);				
 			} else {
-				this.set${JavaName(f)}_${JavaName(f.xrefField)}(tuple.get${settertype(f.xrefField)}("investigation")); // FIXME hardcoded reference to investigation
+				this.set${JavaName(f)}_${JavaName(f.xrefField)}(tuple.get${settertype(f.xrefField)}("${f.name}")); 
 			}
 		}
 		else if( tuple.get("${f.name?lower_case}") != null) { 
@@ -74,7 +74,7 @@
 				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.util.AbstractEntity.setValuesFromString((String)tuple.get("${f.name?lower_case}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
 				this.set${JavaName(f)}(instance);				
 			} else {
-				this.set${JavaName(f)}_${JavaName(f.xrefField)}(tuple.get${settertype(f.xrefField)}("investigation")); // FIXME hardcoded reference to investigation
+				this.set${JavaName(f)}_${JavaName(f.xrefField)}(tuple.get${settertype(f.xrefField)}("${f.name}"));
 			}
 		}
 		if( tuple.get("${entity.name}_${f.name}") != null)
