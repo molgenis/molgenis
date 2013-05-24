@@ -24,6 +24,7 @@ import org.molgenis.hl7.REPCMT000100UV01Organizer;
 import org.molgenis.hl7.ValueSets;
 import org.molgenis.hl7.ValueSets.ValueSet;
 import org.molgenis.hl7.ValueSets.ValueSet.Code;
+import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -37,24 +38,26 @@ import org.w3c.dom.Node;
 public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 {
 	private static final Logger logger = Logger.getLogger(GenericLayerCatalogueLoaderService.class);
-
 	private final Database database;
-
 	private final GenericLayerCatalogService genericLayerCatalogService;
+	private final ResourceManagerService resourceManagerService;
 
 	@Autowired
-	public GenericLayerCatalogueLoaderService(Database database, GenericLayerCatalogService genericLayerCatalogService)
+	public GenericLayerCatalogueLoaderService(Database database, GenericLayerCatalogService genericLayerCatalogService,
+			ResourceManagerService resourceManagerService)
 	{
 		if (database == null) throw new IllegalArgumentException("database is null");
 		if (genericLayerCatalogService == null) throw new IllegalArgumentException("genericLayerCatalogService is null");
+		if (resourceManagerService == null) throw new IllegalArgumentException("resourceManagerService is null");
 		this.database = database;
 		this.genericLayerCatalogService = new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
+		this.resourceManagerService = resourceManagerService;
 	}
 
 	@Override
 	public List<CatalogInfo> findCatalogs()
 	{
-		throw new UnsupportedOperationException();
+		return resourceManagerService.findCatalogs();
 	}
 
 	@Override
@@ -113,18 +116,27 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 				ontologyTerm.setTermAccession(code.getCode());
 
 				String codeSystem = code.getCodeSystem();
-				if (ontologyTermIndex.containsKey(codeSystem))
+				if (!ontologyTermIndex.containsKey(codeSystem))
 				{
+					if (codeSystem == null)
+					{
+						logger.warn("missing code system for ontology term '" + code.getDisplayName() + "'");
+						continue;
+					}
+
+					String codeSystemName = code.getCodeSystemName();
+					if (codeSystemName == null)
+					{
+						logger.warn("missing code system name for ontology term '" + code.getDisplayName() + "'");
+						continue;
+					}
+
 					// create ontology for each code system
 					Ontology ontology = new Ontology();
 					ontology.setIdentifier(UUID.randomUUID().toString());
-					// FIXME discuss with TCC if can be null
-					String codeSystemName = code.getCodeSystemName();
-					if (codeSystemName == null) codeSystemName = "WE DO NOT HAVE A CODE SYSTEM NAME";
 					ontology.setName(codeSystemName);
-					// FIXME discuss with TCC if can be null
-					if (codeSystem == null) codeSystem = "112";
 					ontology.setOntologyAccession(codeSystem);
+
 					database.add(ontology);
 				}
 
@@ -225,7 +237,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 	private static class OntologyTermIndex
 	{
-		private Map<String, Map<String, OntologyTerm>> codeSystemMap;
+		private final Map<String, Map<String, OntologyTerm>> codeSystemMap;
 
 		public OntologyTermIndex()
 		{

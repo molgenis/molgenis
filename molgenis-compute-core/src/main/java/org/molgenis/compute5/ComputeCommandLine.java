@@ -119,15 +119,16 @@ public class ComputeCommandLine
             ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
             String runName = computeProperties.runId;
-            String backendName = "ui.grid.sara.nl";
-            Long pollDelay = 2000L;
+
+            String backendName = computeProperties.backend;
+            Long pollInterval = Long.parseLong(computeProperties.interval);
+
             List<Task> tasks = compute.getTasks();
             String environment = compute.getUserEnvironment();
 
-            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollDelay, tasks, environment);
+            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment);
 
             dbApiClient.createRun(createRunRequest);
-
 
 			if (computeProperties.execute)
 			{
@@ -199,11 +200,10 @@ public class ComputeCommandLine
 		{
 			new PbsBackend().generate(compute.getTasks(), dir);
 		}
-		else if (Parameters.BACKEND_LOCAL.equals(computeProperties.backend))
+		else
 		{
 			new LocalBackend().generate(compute.getTasks(), dir);
 		}
-		else throw new Exception("Unknown backend: " + computeProperties.backend);
 
 		// generate outputs folders per task
 		// for (Task t : compute.getTasks())
