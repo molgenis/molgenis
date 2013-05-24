@@ -22,6 +22,7 @@ public class Compute
 	List<Task> tasks;
 	BackendGenerator backend;
 	ComputeProperties computeProperties;
+	String userEnvironment;
 
 	public Compute(ComputeProperties computeProperties)
 	{
@@ -82,6 +83,16 @@ public class Compute
 	public void setComputeProperties(ComputeProperties computeProperties)
 	{
 		this.computeProperties = computeProperties;
+	}
+
+	public void setUserEnvironment(String environment)
+	{
+		this.userEnvironment = environment;		
+	}
+
+	public String getUserEnvironment()
+	{
+		return this.userEnvironment;
 	}
 }
 

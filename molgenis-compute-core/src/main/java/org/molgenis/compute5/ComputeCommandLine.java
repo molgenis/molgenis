@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
+import org.molgenis.compute5.db.api.*;
 import org.molgenis.compute5.generators.CreateWorkflowGenerator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
@@ -112,10 +113,26 @@ public class ComputeCommandLine
 		{
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
+            ComputeDbApiConnection dbApiConnection =
+                    new HttpClientComputeDbApiConnection(computeProperties.database,computeProperties.port,"/api/v1","admin","admin");
+
+            ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
+
+            String runName = computeProperties.runId;
+            String backendName = computeProperties.backend;
+            Long pollInterval = Long.parseLong(computeProperties.interval);
+            List<Task> tasks = compute.getTasks();
+            String environment = compute.getUserEnvironment();
+
+            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment);
+
+            dbApiClient.createRun(createRunRequest);
+
+
 			if (computeProperties.execute)
 			{
 				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
-			}			
+			}
 		}
 
 		return compute;
@@ -182,11 +199,10 @@ public class ComputeCommandLine
 		{
 			new PbsBackend().generate(compute.getTasks(), dir);
 		}
-		else if (Parameters.BACKEND_LOCAL.equals(computeProperties.backend))
+		else
 		{
 			new LocalBackend().generate(compute.getTasks(), dir);
 		}
-		else throw new Exception("Unknown backend: " + computeProperties.backend);
 
 		// generate outputs folders per task
 		// for (Task t : compute.getTasks())
@@ -209,13 +225,13 @@ public class ComputeCommandLine
 	/**
 	 * Return Compute object, given one single -path to all files
 	 * 
-	 * @param parametersCsv
 	 * @return
 	 * @throws IOException
 	 */
 	public static Compute create(String path) throws IOException, Exception
 	{
 		ComputeProperties computeProperties = new ComputeProperties(path);
+        computeProperties.generate = true;
 
 		return ComputeCommandLine.create(computeProperties);
 	}

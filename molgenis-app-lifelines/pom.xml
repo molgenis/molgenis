@@ -29,27 +29,42 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 			<!-- compile XML schemas -->
-			<plugin>
+		<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>hl7-xjc</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>xjc</goal>
 						</goals>
+						<configuration>
+							<quiet>true</quiet>
+							<packageName>org.molgenis.hl7</packageName>
+							<schemaDirectory>src/main/resources/schemas</schemaDirectory>
+							<staleFile>${project.build.directory}/jaxb2/.hl7XjcStaleFlag</staleFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>atom-xjc</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+						<configuration>
+							<quiet>true</quiet>
+							<packageName>org.molgenis.atom</packageName>
+							<schemaDirectory>src/main/resources/schemas/atom</schemaDirectory>
+							<staleFile>${project.build.directory}/jaxb2/.atomXjcStaleFlag</staleFile>
+							<clearOutputDir>false</clearOutputDir>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<quiet>true</quiet>
-					<packageName>org.molgenis.hl7</packageName>
-					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
-					<schemaDirectory>src/main/resources/schemas/emeasureschemas</schemaDirectory>
-					<schemaDirectory>src/main/resources/schemas/multicacheschemas</schemaDirectory>
-				</configuration>
+				
 			</plugin>
 			<!-- add sources created by jaxb -->
-			<!-- add sources/resources created by molgenis generator -->
+			<!-- add sources created by wsimport -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -63,6 +78,7 @@
 						<configuration>
 							<sources>
 								<source>target/generated-sources/jaxb</source>
+								<source>target/generated-sources/wsimport</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -84,6 +100,25 @@
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
+			</plugin>
+			<!-- generate catalog service client -->
+			<plugin>
+				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<wsdlUrls>
+								<wsdlUrl>${lifelines.catalog.service.wsdl.url}</wsdlUrl>								
+							</wsdlUrls>
+							<!-- for JDK 6 compilation compatibility -->
+							<xnocompile>false</xnocompile>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
