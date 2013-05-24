@@ -32,24 +32,39 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 			<!-- compile XML schemas -->
-			<plugin>
+		<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>hl7-xjc</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>xjc</goal>
 						</goals>
+						<configuration>
+							<quiet>true</quiet>
+							<packageName>org.molgenis.hl7</packageName>
+							<schemaDirectory>src/main/resources/schemas</schemaDirectory>
+							<staleFile>${project.build.directory}/jaxb2/.hl7XjcStaleFlag</staleFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>atom-xjc</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+						<configuration>
+							<quiet>true</quiet>
+							<packageName>org.molgenis.atom</packageName>
+							<schemaDirectory>src/main/resources/schemas/atom</schemaDirectory>
+							<staleFile>${project.build.directory}/jaxb2/.atomXjcStaleFlag</staleFile>
+							<clearOutputDir>false</clearOutputDir>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<quiet>true</quiet>
-					<packageName>org.molgenis.hl7</packageName>
-					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
-					<schemaDirectory>src/main/resources/schemas/emeasureschemas</schemaDirectory>
-					<schemaDirectory>src/main/resources/schemas/multicacheschemas</schemaDirectory>
-				</configuration>
+				
 			</plugin>
 			<!-- add sources created by jaxb -->
 			<!-- add sources created by wsimport -->
@@ -100,10 +115,7 @@
 						</goals>
 						<configuration>
 							<wsdlUrls>
-								<!-- Generic Layer test server -->
-								<wsdlUrl>http://wtzkh0030.zkh.umcg.intra:8081/Umcg.Tcc.GenericLayer.CatalogService-1/CatalogService.svc?wsdl</wsdlUrl>
-								<!-- Generic Layer acceptance server -->
-								<!-- <wsdlUrl>http://wozkh0071.zkh.umcg.intra/Umcg.Tcc.GenericLayer.CatalogService-1/CatalogService.svc?wsdl</wsdlUrl>  -->
+								<wsdlUrl>${lifelines.catalog.service.wsdl.url}</wsdlUrl>								
 							</wsdlUrls>
 							<!-- for JDK 6 compilation compatibility -->
 							<xnocompile>false</xnocompile>
