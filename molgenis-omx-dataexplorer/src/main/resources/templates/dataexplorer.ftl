@@ -47,14 +47,9 @@
 								    <div class="accordion-heading">
 										<a class="accordion-toggle" data-toggle="false" data-parent="#feature-filters-container" href="#feature-filters">Data item filters</a>
 									</div>
-									<!-- <div class="accordion-body collapse in">
+									<div class="accordion-body collapse in">
 										<div class="accordion-inner" id="feature-filters"></div>
-									</div>-->
-								</div>
-								<div class="input-append">
-									<input id="feature-search" type="text" title="Enter your search term">
-									<button class="btn" type="button" id="search-feature-button"><i class="icon-large icon-search"></i></button>
-									<button class="btn" type="button" id="search-feature-clear-button"><i class="icon-large icon-remove"></i></button>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -63,6 +58,11 @@
 								<div class="accordion-group">
 								    <div class="accordion-heading">
 										<a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
+									</div>
+									<div class="input-append">
+										<input id="feature-search" type="text" placeholder="Search data items">
+										<button class="btn" type="button" id="search-feature-button"><i class="icon-large icon-search"></i></button>
+										<button class="btn" type="button" id="search-feature-clear-button"><i class="icon-large icon-remove"></i></button>
 									</div>
 									<div class="accordion-body collapse in">
 										<div class="accordion-inner" id="feature-selection"></div>
