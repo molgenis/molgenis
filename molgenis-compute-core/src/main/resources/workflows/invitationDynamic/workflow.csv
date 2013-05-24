@@ -1,0 +1,3 @@
+step,protocol,parameterMapping
+guestStep,protocols/GuestInvitation.sh,guest=user_guest;party=user_party
+organizerStep,protocols/OrganizerInvitation.sh,guest=user_guest;party=user_party;decision=guestStep_decision;organizer=user_organizer
