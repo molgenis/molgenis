@@ -68,7 +68,7 @@ public class EnvironmentGenerator
 					if (col.equals(Parameters.USER_PREFIX + Task.TASKID_COLUMN)) index = wt.getInt(col);
 				}
 				
-				String assignment = p + "[" + index + "]=" + value + "\n";
+				String assignment = p + "[" + index + "]=\"" + value + "\"\n";
 				if (index == null || value == null) try
 				{
 					throw new Exception("Cannot add the following assignment to " + Parameters.ENVIRONMENT_FULLPATH + ":\n" + assignment);
@@ -80,7 +80,7 @@ public class EnvironmentGenerator
 					System.err.println("Exit with code 1.");
 					System.exit(1);
 				} 
-				output += p + "[" + index + "]=" + value + "\n";
+				output += assignment;
 			}
 		}
 		

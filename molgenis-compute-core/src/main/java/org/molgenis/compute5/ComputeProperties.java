@@ -139,7 +139,7 @@ public class ComputeProperties
 	{
 		this.workFlow = updatePath(path, this.workFlow);
 		// this.defaults = updatePath(path, this.defaults);
-		this.runDir = updatePath(path, this.runDir);
+//		this.runDir = updatePath(path, this.runDir);
 
 		ArrayList<String> pathParameters = new ArrayList<String>();
 		for (String p : this.parameters)
@@ -249,7 +249,7 @@ public class ComputeProperties
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
-			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
+			this.runDir = cmd.getOptionValue(Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
 			this.port = cmd.getOptionValue(Parameters.PORT_CMNDLINE_OPTION, this.port);
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
