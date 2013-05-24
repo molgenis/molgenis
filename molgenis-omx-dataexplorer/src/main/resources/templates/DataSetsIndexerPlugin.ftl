@@ -31,7 +31,7 @@
 					<div class="well" style="width: 400px; max-height:400px; overflow:auto">
 						<#list screen.dataSets as dataSet>
 							<label style="display: block; padding-left: 15px;">
-								<input id="d${dataSet.id}" class="dataset-chk" type="checkbox" name="dataset" value="${dataSet.id}" /> ${dataSet.name}
+								<input id="d${dataSet.id}" class="dataset-chk" type="checkbox" name="dataset" value="${dataSet.id?c}" /> ${dataSet.name}
 							</label> 
 						</#list>
 					</div>

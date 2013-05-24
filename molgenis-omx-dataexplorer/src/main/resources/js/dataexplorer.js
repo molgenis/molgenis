@@ -182,6 +182,62 @@
 		searchQuery = query;
 		ns.updateObservationSetsTable();
 	};
+	
+	ns.searchFeatureTable = function(query, protocolUri) {
+		console.log("searchObservationSets: " + query);
+		searchQuery = query;
+		ns.searchFeatureMeta(function(searchResponse) {
+			var protocol = restApi.get(protocolUri);
+			var rootNode =  $('#feature-selection').dynatree("getTree").getNodeByKey(protocol.href);
+			rootNode.removeChildren();
+			$.each(searchResponse["searchHits"], function(){
+				var object = $(this)[0]["columnValueMap"];
+				var nodes = object["path"].split(".");
+				var entityType = object["type"];
+				var entityId = object["id"];
+				
+				if(entityType === "observablefeature"){
+					//split the path to get all ancestors
+					for(var i = 0; i < nodes.length; i++) {
+						var currentNode = null;
+						//assume the current node is a protocol first
+						var uri = "/api/v1/protocol/" + nodes[i];
+						var options = {
+							isFolder : true,
+							isLazy : true,
+							expand : true,
+						};
+						//this is the last node and check if this is a feature
+						if (nodes[i] === entityId.toString()) {
+							uri = "/api/v1/observablefeature/" + nodes[i];
+							options = {
+								isFolder : false,
+								icon : "../../img/filter-bw.png"
+							}
+						}
+						//locate the node in dynatree and otherwise create the node and insert it
+						if (rootNode.tree.getNodeByKey(uri) === null) {
+							if(i != 0){
+								var parentUrl = "/api/v1/protocol/" + nodes[i - 1];
+								currentNode = rootNode.tree.getNodeByKey(parentUrl);
+							}
+							else
+								currentNode = rootNode;
+							var node = restApi.get(uri);
+							currentNode.addChild($.extend({
+								key : node.href,
+								title : node.name,
+								tooltip : node.description,
+							}, options));
+							currentNode = currentNode.tree.getNodeByKey(node.href);
+						} else {
+							currentNode = rootNode.tree.getNodeByKey(uri);
+						}
+					}
+				}
+			});
+		});
+	}
 
 	ns.updateObservationSetsTable = function() {
 		if (selectedFeatures.length > 0) {
@@ -480,7 +536,35 @@
 	ns.search = function(callback) {
 		searchApi.search(ns.createSearchRequest(), callback);
 	};
-
+	
+	ns.searchFeatureMeta = function(callback){
+		searchApi.search(ns.createSearchRequestFeatureMeta(), callback);
+	}
+	
+	ns.createSearchRequestFeatureMeta = function(){
+		var terms = searchQuery.split(" ");
+		var queryRules = new Array();
+		$.each(terms, function(index, element){
+			queryRules.push({
+				operator : 'SEARCH',
+				value : element,
+			});
+			if(index < terms.length - 1)
+				queryRules.push({
+					operator : 'AND'
+				});
+		});
+		queryRules.push({
+			operator : 'LIMIT',
+			value : 1000000
+		});
+		var searchRequest = {
+			documentType : "protocolViewer-" + selectedDataSet.name,
+			queryRules : queryRules
+		};
+		return searchRequest;
+	}
+	
 	ns.createSearchRequest = function() {
 		var searchRequest = {
 			documentType : selectedDataSet.name,
@@ -579,7 +663,20 @@
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
 		});
-
+		$("#feature-search").keyup(function(e){
+				e.preventDefault();
+		    if(e.keyCode == 13 || e.which === '13') // enter
+		        {$("#search-feature-button").click();}
+		});
+		$("#search-feature-button").click(function(e) {
+			if($("#feature-search").val() != "" && $("#feature-search").val() != undefined){
+				ns.searchFeatureTable($("#feature-search").val(), selectedDataSet.protocolUsed.href);
+			}
+		});
+		$("#search-feature-clear-button").click(function(e) {
+			ns.createFeatureSelection(selectedDataSet.protocolUsed.href);
+			$("#feature-search").val("");
+		});
 		$('.feature-filter-dialog').dialog({
 			modal : true,
 			width : 500,
