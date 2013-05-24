@@ -17,8 +17,10 @@ import org.apache.log4j.Logger;
 import org.molgenis.atom.ContentType;
 import org.molgenis.atom.EntryType;
 import org.molgenis.atom.FeedType;
+import org.molgenis.atom.IdType;
 import org.molgenis.lifelines.catalogue.CatalogInfo;
 import org.molgenis.lifelines.hl7.jaxb.QualityMeasureDocument;
+import org.molgenis.lifelines.studydefinition.StudyDefinitionInfo;
 import org.w3c.dom.Node;
 
 /**
@@ -37,6 +39,49 @@ public class ResourceManagerService
 	{
 		if (resourceManagerServiceUrl == null) throw new IllegalArgumentException("ResourceManagerServiceUrl is null");
 		this.resourceManagerServiceUrl = resourceManagerServiceUrl;
+	}
+
+	/**
+	 * Gets all available StudyDefinitions
+	 * 
+	 * @return
+	 */
+	public List<StudyDefinitionInfo> findStudyDefinitions()
+	{
+		try
+		{
+			FeedType feed = getFeed("/studydefinition");
+
+			List<StudyDefinitionInfo> studyDefinitions = new ArrayList<StudyDefinitionInfo>();
+			for (Object entryElementObj : feed.getAuthorOrCategoryOrContributor())
+			{
+
+				@SuppressWarnings("unchecked")
+				EntryType entry = ((JAXBElement<EntryType>) entryElementObj).getValue();
+
+				for (Object obj : entry.getAuthorOrCategoryOrContent())
+				{
+					JAXBElement<?> element = (JAXBElement<?>) obj;
+					if (element.getDeclaredType() == IdType.class)
+					{
+						IdType idType = (IdType) element.getValue();
+						studyDefinitions.add(new StudyDefinitionInfo(idType.getValue()));
+					}
+				}
+			}
+
+			return studyDefinitions;
+		}
+		catch (JAXBException e)
+		{
+			LOG.error("JAXBException findStudyDefinitions()", e);
+			throw new RuntimeException(e);
+		}
+		catch (IOException e)
+		{
+			LOG.error("JAXBException findStudyDefinitions()", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

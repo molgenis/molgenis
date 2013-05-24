@@ -1,4 +1,4 @@
-#catalog-loader-title {
+#loader-title {
 	text-align: center;
 }
 
@@ -7,20 +7,20 @@
 	padding-bottom: 40px;
 }
 
-.catalogRadio {
+.listEntryRadio {
 	width: 20px;
 	color: #468847;
 	font-family: Consolas,"Liberation Mono",Courier,monospace;
 }
 
-.catalogId {
+.listEntryId {
 	width: 30px;
 }
 .alert {
 	margin-top: 20px;
 }
 
-#catalogsTable {
+#resultsTable {
 	max-height: 450px;
 	overflow: auto;
 }
