@@ -9,21 +9,19 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import nl.umcg.hl7.CatalogService;
-import nl.umcg.hl7.GenericLayerCatalogService;
-import nl.umcg.hl7.GetCatalogResponse.GetCatalogResult;
-import nl.umcg.hl7.GetValuesetsResponse.GetValuesetsResult;
-
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.hl7.ANY;
 import org.molgenis.hl7.CD;
+import org.molgenis.hl7.PQ;
 import org.molgenis.hl7.REPCMT000100UV01Component3;
 import org.molgenis.hl7.REPCMT000100UV01Observation;
 import org.molgenis.hl7.REPCMT000100UV01Organizer;
 import org.molgenis.hl7.ValueSets;
 import org.molgenis.hl7.ValueSets.ValueSet;
 import org.molgenis.hl7.ValueSets.ValueSet.Code;
+import org.molgenis.lifelines.hl7.HL7DataTypeMapper;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -67,7 +65,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		{
 			database.beginTx();
 
-			OntologyTermIndex ontologyTermIndex = parseValueSets(id);
+			OntologyIndex ontologyTermIndex = parseValueSets(id);
 			parseCatalog(id, ontologyTermIndex);
 
 			database.commitTx();
@@ -86,7 +84,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		}
 	}
 
-	private OntologyTermIndex parseValueSets(String id) throws DatabaseException
+	private OntologyIndex parseValueSets(String id) throws DatabaseException
 	{
 		// retrieve catalog data from LifeLines Generic Layer catalog service
 		GetValuesetsResult valueSetsResult = genericLayerCatalogService.getValuesets(id, null);
@@ -101,54 +99,59 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		}
 		catch (JAXBException e)
 		{
-			throw new RuntimeException(e); // TODO add exception to loadCatalog signature
+			throw new RuntimeException(e);
 		}
 
-		OntologyTermIndex ontologyTermIndex = new OntologyTermIndex();
+		OntologyIndex ontologyIndex = new OntologyIndex();
 
 		for (ValueSet valueSet : valueSets.getValueSet())
 		{
 			for (Code code : valueSet.getCode())
 			{
-				OntologyTerm ontologyTerm = new OntologyTerm();
-				ontologyTerm.setIdentifier(UUID.randomUUID().toString());
-				ontologyTerm.setName(code.getDisplayName());
-				ontologyTerm.setTermAccession(code.getCode());
-
 				String codeSystem = code.getCodeSystem();
-				if (!ontologyTermIndex.containsKey(codeSystem))
+				Ontology ontology = ontologyIndex.get(codeSystem);
+				if (ontology == null)
 				{
-					if (codeSystem == null)
-					{
-						logger.warn("missing code system for ontology term '" + code.getDisplayName() + "'");
-						continue;
-					}
-
 					String codeSystemName = code.getCodeSystemName();
-					if (codeSystemName == null)
+					if (codeSystem == null || codeSystemName == null)
 					{
-						logger.warn("missing code system name for ontology term '" + code.getDisplayName() + "'");
-						continue;
+						logger.warn("missing code system or code system name for ontology term '"
+								+ code.getDisplayName() + "'");
 					}
+					else
+					{
+						// create ontology for each code system
+						ontology = new Ontology();
+						ontology.setIdentifier(UUID.randomUUID().toString());
+						ontology.setName(codeSystemName);
+						ontology.setOntologyAccession(codeSystem);
 
-					// create ontology for each code system
-					Ontology ontology = new Ontology();
-					ontology.setIdentifier(UUID.randomUUID().toString());
-					ontology.setName(codeSystemName);
-					ontology.setOntologyAccession(codeSystem);
-
-					database.add(ontology);
+						database.add(ontology);
+						ontologyIndex.put(codeSystem, ontology);
+					}
 				}
 
-				database.add(ontologyTerm);
-				ontologyTermIndex.put(codeSystem, code.getCode(), ontologyTerm);
+				logger.error((ontology != null ? ontology.getId() : null) + "-" + code.getCode());
+
+				OntologyTerm ontologyTerm = ontologyIndex.get(codeSystem, code.getCode());
+				if (ontologyTerm == null)
+				{
+					ontologyTerm = new OntologyTerm();
+					ontologyTerm.setIdentifier(UUID.randomUUID().toString());
+					ontologyTerm.setName(code.getDisplayName());
+					ontologyTerm.setTermAccession(code.getCode());
+					if (ontology != null) ontologyTerm.setOntology(ontology);
+
+					database.add(ontologyTerm);
+					ontologyIndex.put(codeSystem, code.getCode(), ontologyTerm);
+				}
 			}
 		}
 
-		return ontologyTermIndex;
+		return ontologyIndex;
 	}
 
-	private void parseCatalog(String id, OntologyTermIndex ontologyTermIndex) throws DatabaseException
+	private void parseCatalog(String id, OntologyIndex ontologyTermIndex) throws DatabaseException
 	{
 		// retrieve catalog data from LifeLines Generic Layer catalog service
 		GetCatalogResult catalogResult = genericLayerCatalogService.getCatalog(id, null);
@@ -163,7 +166,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		}
 		catch (JAXBException e)
 		{
-			throw new RuntimeException(e); // TODO add exception to loadCatalog signature
+			throw new RuntimeException(e);
 		}
 
 		// convert to MOLGENIS OMX model and add to database
@@ -186,21 +189,48 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 	}
 
 	private void parseComponent(REPCMT000100UV01Component3 component, Protocol parentProtocol, Database database,
-			OntologyTermIndex ontologyTermIndex) throws DatabaseException
+			OntologyIndex ontologyTermIndex) throws DatabaseException
 	{
 
 		// parse feature
 		if (component.getObservation() != null)
 		{
 			REPCMT000100UV01Observation observation = component.getObservation().getValue();
-			logger.debug("parsing observation " + observation.getCode().getDisplayName());
+			CD observationCode = observation.getCode();
+			logger.debug("parsing observation " + observationCode.getDisplayName());
 
-			String observationName = observation.getCode().getDisplayName();
-			if (observationName == null) observationName = observation.getCode().getCode();
+			String observationName = observationCode.getDisplayName();
+			if (observationName == null)
+			{
+				logger.warn("observation does not have a display name '" + observationCode.getCode() + "'");
+				observationName = observationCode.getCode();
+			}
+			OntologyTerm ontologyTerm = ontologyTermIndex.get(observationCode.getCodeSystem(),
+					observationCode.getCode());
 
+			// determine data type
+			ANY anyValue = observation.getValue();
+			String dataType = HL7DataTypeMapper.get(anyValue);
+			if (dataType == null) logger.warn("HL7 data type not supported: " + anyValue.getClass().getSimpleName());
+
+			// determine unit
+			if (anyValue instanceof PQ)
+			{
+				PQ value = (PQ) anyValue;
+				// TODO how to determine ontologyterms for units and do observableFeature.setUnit()
+			}
+			else if (anyValue instanceof CD)
+			{
+				CD value = (CD) anyValue;
+				// TODO how to determine catagories for this feature?
+			}
+
+			// TODO how to get description from originalText?
 			ObservableFeature observableFeature = new ObservableFeature();
 			observableFeature.setIdentifier(UUID.randomUUID().toString());
 			observableFeature.setName(observationName);
+			if (dataType != null) observableFeature.setDataType(dataType);
+			observableFeature.setDefinition(ontologyTerm);
 
 			parentProtocol.getFeatures().add(observableFeature);
 
@@ -215,11 +245,15 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 			logger.debug("parsing organizer " + organizerCode.getCode() + " " + organizerCode.getDisplayName());
 
 			String organizerName = organizerCode.getDisplayName();
-			// FIXME ask TCC why some components do not have a displayname
-			if (organizerName == null) organizerName = organizerCode.getCode();
+			if (organizerName == null)
+			{
+				logger.warn("organizer does not have a display name '" + organizerCode.getCode() + "'");
+				organizerName = organizerCode.getCode();
+			}
 
 			OntologyTerm ontologyTerm = ontologyTermIndex.get(organizerCode.getCodeSystem(), organizerCode.getCode());
 
+			// FIXME how to get description from originalText?
 			Protocol protocol = new Protocol();
 			protocol.setIdentifier(UUID.randomUUID().toString());
 			protocol.setName(organizerName);
@@ -235,35 +269,42 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		database.add(parentProtocol);
 	}
 
-	private static class OntologyTermIndex
+	private static class OntologyIndex
 	{
-		private final Map<String, Map<String, OntologyTerm>> codeSystemMap;
+		private final Map<String, Ontology> ontologyMap;
+		private final Map<String, Map<String, OntologyTerm>> ontologyTermMap;
 
-		public OntologyTermIndex()
+		public OntologyIndex()
 		{
-			codeSystemMap = new HashMap<String, Map<String, OntologyTerm>>();
+			ontologyMap = new HashMap<String, Ontology>();
+			ontologyTermMap = new HashMap<String, Map<String, OntologyTerm>>();
+		}
+
+		public void put(String codeSystem, Ontology ontology)
+		{
+			ontologyMap.put(codeSystem, ontology);
 		}
 
 		public void put(String codeSystem, String code, OntologyTerm ontologyTerm)
 		{
-			Map<String, OntologyTerm> codeMap = codeSystemMap.get(codeSystem);
+			Map<String, OntologyTerm> codeMap = ontologyTermMap.get(codeSystem);
 			if (codeMap == null)
 			{
 				codeMap = new HashMap<String, OntologyTerm>();
-				codeSystemMap.put(codeSystem, codeMap);
+				ontologyTermMap.put(codeSystem, codeMap);
 			}
 			codeMap.put(code, ontologyTerm);
 		}
 
-		public OntologyTerm get(String codeSystem, String code)
+		public Ontology get(String codeSystem)
 		{
-			Map<String, OntologyTerm> codeMap = codeSystemMap.get(codeSystem);
-			return codeMap != null ? codeMap.get(code) : null;
+			return ontologyMap.get(codeSystem);
 		}
 
-		public boolean containsKey(String codeSystem)
+		public OntologyTerm get(String codeSystem, String code)
 		{
-			return codeSystemMap.containsKey(codeSystem);
+			Map<String, OntologyTerm> codeMap = ontologyTermMap.get(codeSystem);
+			return codeMap != null ? codeMap.get(code) : null;
 		}
 	}
 }
