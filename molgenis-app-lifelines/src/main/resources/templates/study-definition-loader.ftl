@@ -38,6 +38,7 @@
 										<thead>
 											<th></th>
 											<th>Id</th>
+											<th>Name</th>
 										</thead>
 										<#assign foundStudyDefinition = false>
 										<#if studyDefinitions?size == 0>
@@ -55,6 +56,9 @@
 												</td>
 												<td class="listEntryId">
 													<label for="catalog_${studyDefinition.id}">${studyDefinition.id}</label>
+												</td>
+												<td>
+													<label for="catalog_${studyDefinition.id}">${studyDefinition.name}</label>
 												</td>
 											</tr>
 										</#list>

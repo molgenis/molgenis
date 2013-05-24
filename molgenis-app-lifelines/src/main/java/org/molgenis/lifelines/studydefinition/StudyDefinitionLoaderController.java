@@ -57,7 +57,8 @@ public class StudyDefinitionLoaderController
 			String identifier = StudyDefinitionIdConverter.studyDefinitionIdToOmxIdentifier(studyDefinition.getId());
 			Characteristic dataset = Characteristic.findByIdentifier(database, identifier);
 			boolean studyDefinitionLoaded = dataset != null;
-			models.add(new StudyDefinitionModel(studyDefinition.getId(), studyDefinitionLoaded));
+			models.add(new StudyDefinitionModel(studyDefinition.getId(), studyDefinition.getName(),
+					studyDefinitionLoaded));
 		}
 
 		model.addAttribute("studyDefinitions", models);
