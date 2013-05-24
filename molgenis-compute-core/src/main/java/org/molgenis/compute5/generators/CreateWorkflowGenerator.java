@@ -14,8 +14,8 @@ public class CreateWorkflowGenerator
 	{
 		File target = new File(createWorkflowDir);
 
-		String sourcePath = CreateWorkflowGenerator.class.getResource("/workflows/myworkflow/workflow.csv").getPath();
-		File source = new File(sourcePath).getParentFile();
+		String sourcePath = "workflows/myworkflow";
+		File source = new File(sourcePath);
 
 		if (!source.exists())
 		{
@@ -30,7 +30,6 @@ public class CreateWorkflowGenerator
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
