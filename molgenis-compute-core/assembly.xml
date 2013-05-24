@@ -36,6 +36,8 @@
 				<include>net.sf.opencsv:opencsv</include>
 				<include>commons-io:commons-io</include>
 				<include>org.apache.httpcomponents:httpclient</include>
+				<include>com.google.guava:guava</include>
+				<include>org.apache.commons:commons-lang3</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
