@@ -9,7 +9,9 @@ import nl.umcg.hl7.GenericLayerCatalogService;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
 import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
+import org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
@@ -208,6 +210,19 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		return new MappedInterceptor(new String[]
 		{ CatalogLoaderController.BASE_URL + "/**" }, catalogLoaderHandlerInterceptor());
+	}
+
+	@Bean
+	public MappedInterceptor studyDefinitionLoaderMappedInterceptor()
+	{
+		return new MappedInterceptor(new String[]
+		{ StudyDefinitionLoaderController.BASE_URL + "/**" }, studyDefinitionLoaderHandlerInterceptor());
+	}
+
+	@Bean
+	public SecurityHandlerInterceptor studyDefinitionLoaderHandlerInterceptor()
+	{
+		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPlugin.class);
 	}
 
 	/**

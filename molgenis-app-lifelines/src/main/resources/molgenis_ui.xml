@@ -8,6 +8,7 @@
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<plugin label="Importer (Dataset)" name="HL7StudyDataSetImporter" type="org.molgenis.lifelines.plugins.HL7StudyDataSetImporterController" />
 		<plugin label="Catalogue Loader" name="CatalogLoader" type="org.molgenis.lifelines.plugins.CatalogueLoaderPlugin"  />
+		<plugin label="Studydefinition Loader" name="StudyDefinitionLoader" type="org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin"  />
 		
         <menu name="Admin">
 	        <menu name ="Entities">
