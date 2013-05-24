@@ -46,7 +46,7 @@ public class CatalogLoaderController
 	/**
 	 * Show the available catalogs.
 	 * 
-	 * Catalogs are exposed via a 'catalogs' model attribute that contains a list of CatalogInfo objects.
+	 * Catalogs are exposed via a 'catalogs' model attribute that contains a list of CatalogModel objects.
 	 * 
 	 * @param model
 	 * @return

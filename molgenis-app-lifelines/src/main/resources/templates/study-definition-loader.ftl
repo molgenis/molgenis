@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Catalog loader plugin</title>
+		<title>Studydefinition loader plugin</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/molgenis-main.css" type="text/css">
@@ -28,11 +28,11 @@
 							${successMessage}
 						</div>
 					</#if>		
-					<#if catalogs??>	
+					<#if studyDefinitions??>	
 						<div class="well">
-							<p id="loader-title" class="box-title">Choose a catalog to load</p>
+							<p id="loader-title" class="box-title">Choose a studydefinition to load</p>
 						
-							<form name="catalogForm" method="post" action="/plugin/catalog/load" onsubmit="$('#spinner').modal('show'); return true;">
+							<form name="studyDefinitionForm" method="post" action="/plugin/studydefinition/load" onsubmit="$('#spinner').modal('show'); return true;">
 								<div id="resultsTable">
 									<table class="table table-striped table-hover listtable selection-table">
 										<thead>
@@ -40,33 +40,33 @@
 											<th>Id</th>
 											<th>Name</th>
 										</thead>
-										<#assign foundCatalog = false>
-										<#if catalogs?size == 0>
-											<tr><td>No catalogs found</td></tr>
+										<#assign foundStudyDefinition = false>
+										<#if studyDefinitions?size == 0>
+											<tr><td>No studydefinitions found</td></tr>
 										</#if>
 										<tbody>
-										<#list catalogs as catalog>
+										<#list studyDefinitions as studyDefinition>
 											<tr>
 												<td class="listEntryRadio">
-													<#if catalog.loaded>
+													<#if studyDefinition.loaded>
 														LOADED
 													<#else>
-														<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
+														<input id="catalog_${studyDefinition.id}" type="radio" name="id" value="${studyDefinition.id}" <#if !foundStudyDefinition>checked<#assign foundStudyDefinition = true></#if> >
 													</#if>
 												</td>
 												<td class="listEntryId">
-													<label for="catalog_${catalog.id}">${catalog.id}</label>
+													<label for="catalog_${studyDefinition.id}">${studyDefinition.id}</label>
 												</td>
 												<td>
-													<label for="catalog_${catalog.id}">${catalog.name}</label>
+													<label for="catalog_${studyDefinition.id}">${studyDefinition.name}</label>
 												</td>
 											</tr>
 										</#list>
 										</tbody>
 									</table>
 								</div>
-								<#if foundCatalog>
-									<input type="submit" class="btn pull-right" value="Load catalog" />
+								<#if foundStudyDefinition>
+									<input type="submit" class="btn pull-right" value="Load studydefinition" />
 								</#if>
 							</form>
 						</div>
