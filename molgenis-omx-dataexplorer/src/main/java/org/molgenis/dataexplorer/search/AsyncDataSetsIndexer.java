@@ -13,6 +13,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.impl.MemoryTable;
 import org.molgenis.omx.dataset.DataSetTable;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -135,11 +136,12 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 			List<DataSet> dataSetsUnauthorized = unauthorizedDatabase.find(DataSet.class, new QueryRule(
 					DataSet.IDENTIFIER, Operator.IN, dataSetsName));
+
 			for (DataSet dataSet : dataSetsUnauthorized)
 			{
 				// Store tree structure in protocol viewer
 				searchService.indexTupleTable(
-						"protocolViewer",
+						"protocolViewer-" + dataSet.getName(),
 						new MemoryTable(createTupleTableForTree("", dataSet.getName(), dataSet.getProtocolUsed(),
 								unauthorizedDatabase)));
 			}
@@ -169,9 +171,11 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set("id", p.getId());
 				tuple.set("identifier", p.getIdentifier());
+				tuple.set("name", p.getName().replaceAll("[^a-zA-Z0-9 ]", " "));
 				tuple.set("type", "protocol");
 				tuple.set("dataSet", dataSetName);
-				tuple.set("description", p.getDescription() == null ? StringUtils.EMPTY : p.getDescription());
+				tuple.set("description", p.getDescription() == null ? StringUtils.EMPTY : p.getDescription()
+						.replaceAll("[^a-zA-Z0-9 ]", " "));
 				if (!parentIdentifer.isEmpty()) pathBuilder.append(parentIdentifer).append('.');
 				tuple.set("path", pathBuilder.append(p.getId()).toString());
 				listOfRows.add(tuple);
@@ -187,17 +191,35 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			for (ObservableFeature feature : listOfFeatures)
 			{
 				StringBuilder pathBuilder = new StringBuilder();
+				StringBuilder categoryValue = new StringBuilder();
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set("id", feature.getId());
 				tuple.set("identifier", feature.getIdentifier());
+				tuple.set("name", feature.getName().replaceAll("[^a-zA-Z0-9 ]", " "));
 				tuple.set("type", "observablefeature");
 				tuple.set("dataSet", dataSetName);
-				tuple.set("description",
-						feature.getDescription() == null ? StringUtils.EMPTY : feature.getDescription());
+				tuple.set("description", feature.getDescription() == null ? StringUtils.EMPTY : feature
+						.getDescription().replaceAll("[^a-zA-Z0-9 ]", " "));
 				tuple.set("path", pathBuilder.append(parentIdentifer).append('.').append(feature.getId()).toString());
+				for (Category c : getCategories(feature, unauthorizedDatabase))
+				{
+					categoryValue.append(
+							c.getDescription() == null ? StringUtils.EMPTY : c.getDescription().replaceAll(
+									"[^a-zA-Z0-9 ]", " ")).append(' ');
+				}
+				tuple.set("category", categoryValue.toString());
 				listOfRows.add(tuple);
 			}
 		}
 		return listOfRows;
+	}
+
+	private List<Category> getCategories(ObservableFeature feature, Database unauthorizedDatabase)
+			throws DatabaseException
+	{
+		List<Category> listOfValues = unauthorizedDatabase.find(Category.class, new QueryRule(
+				Category.OBSERVABLEFEATURE_IDENTIFIER, Operator.EQUALS, feature.getIdentifier()));
+		if (listOfValues != null) listOfValues = new ArrayList<Category>();
+		return listOfValues;
 	}
 }
