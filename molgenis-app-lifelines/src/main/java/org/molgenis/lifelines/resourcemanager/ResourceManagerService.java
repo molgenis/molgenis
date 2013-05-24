@@ -19,7 +19,11 @@ import org.molgenis.atom.EntryType;
 import org.molgenis.atom.FeedType;
 import org.molgenis.lifelines.catalogue.CatalogInfo;
 import org.molgenis.lifelines.hl7.jaxb.QualityMeasureDocument;
+import org.molgenis.lifelines.studydefinition.StudyDefinitionInfo;
 import org.w3c.dom.Node;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * Connection to the LL Resource Manager REST Service
@@ -40,18 +44,48 @@ public class ResourceManagerService
 	}
 
 	/**
+	 * Gets all available StudyDefinitions
+	 * 
+	 * @return
+	 */
+	public List<StudyDefinitionInfo> findStudyDefinitions()
+	{
+		List<CatalogSearchResult> catalogs = findCatalogs("/studydefinition");
+		return Lists.transform(catalogs, new Function<CatalogSearchResult, StudyDefinitionInfo>()
+		{
+			@Override
+			public StudyDefinitionInfo apply(CatalogSearchResult input)
+			{
+				return new StudyDefinitionInfo(input.getId(), input.getName());
+			}
+		});
+	}
+
+	/**
 	 * Gets all available catalogs
 	 * 
 	 * @return List of CatalogInfo
 	 */
 	public List<CatalogInfo> findCatalogs()
 	{
+		List<CatalogSearchResult> catalogs = findCatalogs("/catalogrelease");
+		return Lists.transform(catalogs, new Function<CatalogSearchResult, CatalogInfo>()
+		{
+			@Override
+			public CatalogInfo apply(CatalogSearchResult input)
+			{
+				return new CatalogInfo(input.getId(), input.getName());
+			}
+		});
+	}
 
+	private List<CatalogSearchResult> findCatalogs(String uri)
+	{
 		try
 		{
-			FeedType feed = getFeed("/catalogrelease");
+			FeedType feed = getFeed(uri);
 
-			List<CatalogInfo> catalogs = new ArrayList<CatalogInfo>();
+			List<CatalogSearchResult> catalogs = new ArrayList<CatalogSearchResult>();
 
 			for (Object entryElementObj : feed.getAuthorOrCategoryOrContributor())
 			{
@@ -76,7 +110,7 @@ public class ResourceManagerService
 						QualityMeasureDocument qualityMeasureDocument = qualityMeasureDocumentElement.getValue();
 						if (qualityMeasureDocument.getId() != null)
 						{
-							catalogs.add(new CatalogInfo(qualityMeasureDocument.getId().getExtension(),
+							catalogs.add(new CatalogSearchResult(qualityMeasureDocument.getId().getExtension(),
 									qualityMeasureDocument.getName()));
 						}
 						else
@@ -125,4 +159,26 @@ public class ResourceManagerService
 
 	}
 
+	private class CatalogSearchResult
+	{
+		private final String id;
+		private final String name;
+
+		public CatalogSearchResult(String id, String name)
+		{
+			this.id = id;
+			this.name = name;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+	}
 }
