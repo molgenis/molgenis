@@ -90,7 +90,7 @@ public class ComputeDbApiClient
 
 	public static void main(String[] args) throws ApiException, IOException
 	{
-		ComputeDbApiConnection con = new HttpClientComputeDbApiConnection("localhost", 8080, "/api/v1", "admin",
+		ComputeDbApiConnection con = new HttpClientComputeDbApiConnection("localhost", "8080", "/api/v1", "admin",
 				"admin");
 		try
 		{

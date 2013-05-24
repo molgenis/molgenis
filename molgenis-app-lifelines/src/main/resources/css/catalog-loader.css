@@ -1,6 +1,10 @@
 #catalog-loader-title {
-	margin-top: 40px;
 	text-align: center;
+}
+
+.well {
+	margin-top: 40px;
+	padding-bottom: 40px;
 }
 
 .catalogRadio {
@@ -9,6 +13,14 @@
 	font-family: Consolas,"Liberation Mono",Courier,monospace;
 }
 
+.catalogId {
+	width: 30px;
+}
 .alert {
-	margin-top: 20px;'
+	margin-top: 20px;
+}
+
+#catalogsTable {
+	max-height: 450px;
+	overflow: auto;
 }

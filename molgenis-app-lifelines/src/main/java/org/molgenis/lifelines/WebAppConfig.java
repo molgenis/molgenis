@@ -3,10 +3,13 @@ package org.molgenis.lifelines;
 import java.util.List;
 import java.util.Properties;
 
+import nl.umcg.hl7.CatalogService;
+import nl.umcg.hl7.GenericLayerCatalogService;
+
+import org.molgenis.DatabaseConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
-import org.molgenis.lifelines.catalogue.CatalogLoaderService;
-import org.molgenis.lifelines.catalogue.MockCatalogueLoaderService;
 import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
+import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
@@ -42,8 +45,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-
-import org.molgenis.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
@@ -131,8 +132,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is
-	 * not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
 	 * 
 	 * @return
 	 */
@@ -144,8 +144,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Enable spring freemarker viewresolver. All freemarker template names
-	 * should end with '.ftl'
+	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
 	public ViewResolver viewResolver()
@@ -158,8 +157,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Configure freemarker. All freemarker templates should be on the classpath
-	 * in a package called 'freemarker'
+	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer()
@@ -185,9 +183,18 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public CatalogLoaderService catalogLoaderService()
+	public GenericLayerCatalogService genericLayerCatalogService()
 	{
-		return new MockCatalogueLoaderService();
+		return new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
+	}
+
+	@Value("${lifelines.resource.manager.service.url}")
+	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
+
+	@Bean
+	public ResourceManagerService resourceManagerService()
+	{
+		return new ResourceManagerService(resourceManagerServiceUrl);
 	}
 
 	@Bean

@@ -96,6 +96,9 @@ public class EnvironmentGenerator
 
 		try
 		{
+			// give user environment to compute
+			compute.setUserEnvironment(this.getEnvironment(compute));
+			
 			// create new environment file
 			env.createNewFile();
 
