@@ -119,15 +119,16 @@ public class ComputeCommandLine
             ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
             String runName = computeProperties.runId;
+
             String backendName = computeProperties.backend;
             Long pollInterval = Long.parseLong(computeProperties.interval);
+
             List<Task> tasks = compute.getTasks();
             String environment = compute.getUserEnvironment();
 
             CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment);
 
             dbApiClient.createRun(createRunRequest);
-
 
 			if (computeProperties.execute)
 			{
