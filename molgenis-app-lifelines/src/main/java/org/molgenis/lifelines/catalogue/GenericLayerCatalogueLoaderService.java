@@ -9,6 +9,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import nl.umcg.hl7.CatalogService;
+import nl.umcg.hl7.GenericLayerCatalogService;
+import nl.umcg.hl7.GetCatalogResponse.GetCatalogResult;
+import nl.umcg.hl7.GetValuesetsResponse.GetValuesetsResult;
+
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
