@@ -542,7 +542,6 @@
 	}
 	
 	ns.createSearchRequestFeatureMeta = function(){
-		var finalSearchQuery = null;
 		var terms = searchQuery.split(" ");
 		var queryRules = new Array();
 		$.each(terms, function(index, element){
@@ -555,8 +554,12 @@
 					operator : 'AND'
 				});
 		});
+		queryRules.push({
+			operator : 'LIMIT',
+			value : 1000000
+		});
 		var searchRequest = {
-			documentType : "protocolViewer",
+			documentType : "protocolViewer-" + selectedDataSet.name,
 			queryRules : queryRules
 		};
 		return searchRequest;
@@ -659,6 +662,11 @@
 		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
+		});
+		$("#feature-search").keyup(function(e){
+				e.preventDefault();
+		    if(e.keyCode == 13 || e.which === '13') // enter
+		        {$("#search-feature-button").click();}
 		});
 		$("#search-feature-button").click(function(e) {
 			if($("#feature-search").val() != "" && $("#feature-search").val() != undefined){
