@@ -178,6 +178,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 						.replaceAll("[^a-zA-Z0-9 ]", " "));
 				if (!parentIdentifer.isEmpty()) pathBuilder.append(parentIdentifer).append('.');
 				tuple.set("path", pathBuilder.append(p.getId()).toString());
+				tuple.set("category", StringUtils.EMPTY);
 				listOfRows.add(tuple);
 				// recursively traverse down the tree
 				listOfRows
@@ -204,8 +205,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				for (Category c : getCategories(feature, unauthorizedDatabase))
 				{
 					categoryValue.append(
-							c.getDescription() == null ? StringUtils.EMPTY : c.getDescription().replaceAll(
-									"[^a-zA-Z0-9 ]", " ")).append(' ');
+							c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll("[^a-zA-Z0-9 ]", " "))
+							.append(' ');
 				}
 				tuple.set("category", categoryValue.toString());
 				listOfRows.add(tuple);
@@ -219,7 +220,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	{
 		List<Category> listOfValues = unauthorizedDatabase.find(Category.class, new QueryRule(
 				Category.OBSERVABLEFEATURE_IDENTIFIER, Operator.EQUALS, feature.getIdentifier()));
-		if (listOfValues != null) listOfValues = new ArrayList<Category>();
+		if (listOfValues == null) listOfValues = new ArrayList<Category>();
 		return listOfValues;
 	}
 }
