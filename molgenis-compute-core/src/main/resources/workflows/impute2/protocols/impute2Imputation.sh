@@ -115,7 +115,7 @@ done
 mkdir -p $imputationIntermediatesFolder
 
 
-$impute2Bin \
+$impute2gridBin \
 	-known_haps_g $knownHapsG \
 	-m $m \
 	-h $h \
