@@ -114,15 +114,15 @@ public class ComputeCommandLine
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
             ComputeDbApiConnection dbApiConnection =
-                    new HttpClientComputeDbApiConnection(computeProperties.database, computeProperties.port,"/api/v1","","");
+                    new HttpClientComputeDbApiConnection(computeProperties.database,computeProperties.port,"/api/v1","admin","admin");
 
             ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
             String runName = computeProperties.runId;
-            String backendName = "server";
+            String backendName = "ui.grid.sara.nl";
             Long pollDelay = 2000L;
             List<Task> tasks = compute.getTasks();
-            String environment = "";
+            String environment = compute.getUserEnvironment();
 
             CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollDelay, tasks, environment);
 
@@ -132,7 +132,7 @@ public class ComputeCommandLine
 			if (computeProperties.execute)
 			{
 				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
-			}			
+			}
 		}
 
 		return compute;

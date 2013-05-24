@@ -54,6 +54,7 @@ public class ApplicationUtil
 		return getApplicationContext().getBean("molgenisSettings", MolgenisSettings.class);
 	}
 
+
 	public static EntitiesImporter getEntitiesImporter()
 	{
 		return getApplicationContext().getBean(EntitiesImporter.class);
