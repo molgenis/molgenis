@@ -263,7 +263,7 @@ public class ComputeProperties
 
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			// if runId == null and we want to generate, then create one
-			if (null == this.runId && this.generate)
+			if (null == this.runId && (this.generate || this.create))
 			{
 				// 4 letters/LETTERS/numbers -> (26*2 + 10)^4 = 14,776,336 possibilities
 				this.runId = RandomStringUtils.random(4, true, true);
