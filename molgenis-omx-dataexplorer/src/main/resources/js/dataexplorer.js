@@ -184,58 +184,125 @@
 	};
 	
 	ns.searchFeatureTable = function(query, protocolUri) {
+		
+		function getEntitiesbyIds(map, entityName){	
+			var array = Object.keys(map); 
+			var iteration = Math.floor(array.length / 100);
+			for(var i = 1; i <= iteration; i++ ){
+				callRestApi(map, array.slice((i - 1) * 100, i * 100), entityName);
+			}
+			if(iteration * 100 < array.length){
+				callRestApi(map, array.slice(iteration * 100, array.length), entityName);
+			}
+		}
+		
+		function callRestApi(map, array, entityName){
+			$.ajax({
+				type : 'POST',
+				url : '/api/v1/' + entityName + '?_method=GET',
+				data : JSON.stringify({
+					q : [ {
+						"field" : "id",
+						"operator" : "IN",
+						"value" : array
+					} ],
+					num : array.length
+				}),
+				contentType : 'application/json',
+				async : false,
+				success : function(entities) {
+					$.each(entities.items, function() {
+						var object = $(this)[0];
+						var fragments = object.href.split("/");
+						var id = fragments[fragments.length - 1];
+						map[id] = object;
+					});
+				}
+			});
+		}
+		
 		console.log("searchObservationSets: " + query);
 		searchQuery = query;
 		ns.searchFeatureMeta(function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
 			var rootNode =  $('#feature-selection').dynatree("getTree").getNodeByKey(protocol.href);
 			rootNode.removeChildren();
-			$.each(searchResponse["searchHits"], function(){
+			var searchHits = searchResponse["searchHits"];
+			
+			var protocolMap = {};
+			var featureMap = {};
+			$.each(searchHits, function(){
 				var object = $(this)[0]["columnValueMap"];
-				var nodes = object["path"].split(".");
 				var entityType = object["type"];
+				var nodes = object["path"].split(".");
 				var entityId = object["id"];
-				
+
+				//collect all features and their ancesters using restapi first.
 				if(entityType === "observablefeature"){
-					//split the path to get all ancestors
-					for(var i = 0; i < nodes.length; i++) {
-						var currentNode = null;
-						//assume the current node is a protocol first
-						var uri = "/api/v1/protocol/" + nodes[i];
-						var options = {
-							isFolder : true,
-							isLazy : true,
-							expand : true,
-						};
-						//this is the last node and check if this is a feature
-						if (nodes[i] === entityId.toString()) {
-							uri = "/api/v1/observablefeature/" + nodes[i];
-							options = {
-								isFolder : false,
-								icon : "../../img/filter-bw.png"
-							}
-						}
-						//locate the node in dynatree and otherwise create the node and insert it
-						if (rootNode.tree.getNodeByKey(uri) === null) {
-							if(i != 0){
-								var parentUrl = "/api/v1/protocol/" + nodes[i - 1];
-								currentNode = rootNode.tree.getNodeByKey(parentUrl);
-							}
-							else
-								currentNode = rootNode;
-							var node = restApi.get(uri);
-							currentNode.addChild($.extend({
-								key : node.href,
-								title : node.name,
-								tooltip : node.description,
-							}, options));
-							currentNode = currentNode.tree.getNodeByKey(node.href);
-						} else {
-							currentNode = rootNode.tree.getNodeByKey(uri);
+					for(var i = 0; i < nodes.length; i++){
+						if(nodes[i] == entityId.toString()){
+							featureMap[nodes[i]] = nodes[i];
+						}else{
+							protocolMap[nodes[i]] = nodes[i];
 						}
 					}
 				}
 			});
+			getEntitiesbyIds(protocolMap, "protocol");
+			getEntitiesbyIds(featureMap, "observablefeature");
+			
+			var cachedNode = {};
+			var topNodes = new Array();
+			
+			$.each(searchHits, function(){
+				var object = $(this)[0]["columnValueMap"];
+				var entityType = object["type"];
+				
+				if(entityType === "observablefeature"){
+					
+					var nodes = object["path"].split(".");
+					var entityId = object["id"];
+					//split the path to get all ancestors;
+					for(var i = 0; i < nodes.length; i++) {
+						if(!cachedNode[nodes[i]]){
+							var entityInfo = null;
+							var options = null;
+							//this is the last node and check if this is a feature
+							if (nodes[i] === entityId.toString()) {
+								entityInfo = featureMap[nodes[i]];
+								options = {
+									isFolder : false,
+									icon : "../../img/filter-bw.png"
+								}
+							}else{
+								entityInfo = protocolMap[nodes[i]];
+								options = {
+									isFolder : true,
+									isLazy : true,
+									expand : true,
+									children : []
+								};
+							}
+							options = $.extend({
+								key : entityInfo.href,
+								title : entityInfo.name,
+								tooltip : entityInfo.description
+							}, options);
+							//locate the node in dynatree and otherwise create the node and insert it
+							if(i != 0){
+								var parentNode = cachedNode[nodes[i-1]];
+								parentNode["children"].push(options);
+								cachedNode[nodes[i-1]] = parentNode;
+							}
+							else
+								topNodes.push(options);
+							cachedNode[nodes[i]] = options;
+						}
+					}
+				}
+			});
+			rootNode.addChild(topNodes);
+			console.log("finished");
 		});
 	}
 
@@ -554,6 +621,7 @@
 					operator : 'AND'
 				});
 		});
+		//todo: how to unlimit the search result
 		queryRules.push({
 			operator : 'LIMIT',
 			value : 1000000
