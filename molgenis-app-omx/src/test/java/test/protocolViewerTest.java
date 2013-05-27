@@ -60,26 +60,27 @@ public class protocolViewerTest {
     
     LoginInput.submit();
     
-    
-
     assertEquals("Molgenis", driver.getTitle());
 
-	System.out.println("@@@@@@@loginandclick1");
-
-	//Now go to catalogue    DIV#ProtocolViewer_tab_button.navigationSelected
+	//Now visit catalogue    DIV#ProtocolViewer_tab_button.navigationSelected
     //WebElement catalogueLink = driver.findElement(By.id("ProtocolViewer_tab_button"));
     //WebElement catalogueLink = driver.findElement(By.cssSelector("ProtocolViewer_tab_button.navigationSelected"));
     //WebElement catalogueLink = driver.findElement(By.className("navigationSelected"));
 	//catalogueLink.click();
 
     driver.get("http://localhost:8080/molgenis.do?__target=main&select=ProtocolViewer");
-    //And now try to click on tree 
+    //click on tree 
     try {
         Thread.sleep(4000);
     } catch (Exception e) {}
 
 	System.out.println("@@@@@@@loginandclick2");
-   
+	
+  
+	WebElement link = driver.findElement(By.linkText("Biodata_name"));
+	link.click();
+	
+	System.out.println("@@@@@@@loginandclick3");
     assertEquals("Molgenis", driver.getTitle());
 
   }
