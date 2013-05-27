@@ -4,23 +4,29 @@
 #input m
 #input h
 #input l
-#input additonalImpute2Param
+#input additonalImpute2Param1
+#input additonalImpute2Param2
+#input additonalImpute2Param3
+#input additonalImpute2Param4
 #input chr
 #input fromChrPos
 #input toChrPos
 #input imputationIntermediatesFolder
 #input impute2Bin
 
+#input impute2version
+#input knownHapsG
+
 #output impute2chunk
 #output impute2chunkInfo
 
-${stage} impute/${impute2version}
+module load impute/${impute2version}
 
 
 tmpOutput="${imputationIntermediatesFolder}/~chr${chr}_${fromChrPos}-${toChrPos}"
 finalOutput="${imputationIntermediatesFolder}/chr${chr}_${fromChrPos}-${toChrPos}"
 
-echo "known_haps_g: ${known_haps_g}";
+echo "knownHapsG: ${knownHapsG}";
 echo "chr: ${chr}"
 echo "fromChrPos: ${fromChrPos}"
 echo "toChrPos: ${toChrPos}"
@@ -45,8 +51,8 @@ startTime=$(date +%s)
 
 echo "tmpOutput: ${tmpOutput}"
 
-getFile $known_haps_g
-inputs $known_haps_g
+getFile $knownHapsG
+inputs $knownHapsG
 
 getFile $m
 inputs $m
@@ -82,7 +88,7 @@ containsElement () {
 }
 
 
-aditionalArgsArray=($additonalImpute2Param)
+aditionalArgsArray=($additonalImpute2Param1 $additonalImpute2Param2 $additonalImpute2Param3 $additonalImpute2Param4)
 
 # Loop over all aditional args. If arg is encounterd that requeres file then do inputs and getFile on next element
 for (( i=0; i<${#aditionalArgsArray[@]}; i++ ));
@@ -109,15 +115,18 @@ done
 mkdir -p $imputationIntermediatesFolder
 
 
-$impute2Bin \
-	-known_haps_g $known_haps_g \
+$impute2gridBin \
+	-known_haps_g $knownHapsG \
 	-m $m \
 	-h $h \
 	-l $l \
 	-int $fromChrPos $toChrPos \
 	-o $tmpOutput \
 	-use_prephased_g \
-	$additonalImpute2Param
+	$additonalImpute2Param1 \
+	$additonalImpute2Param2 \
+	$additonalImpute2Param3 \
+	$additonalImpute2Param4
 		
 #Get return code from last program call
 returnCode=$?

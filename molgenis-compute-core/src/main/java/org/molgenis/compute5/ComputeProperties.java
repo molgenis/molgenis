@@ -139,7 +139,7 @@ public class ComputeProperties
 	{
 		this.workFlow = updatePath(path, this.workFlow);
 		// this.defaults = updatePath(path, this.defaults);
-		this.runDir = updatePath(path, this.runDir);
+//		this.runDir = updatePath(path, this.runDir);
 
 		ArrayList<String> pathParameters = new ArrayList<String>();
 		for (String p : this.parameters)
@@ -249,7 +249,7 @@ public class ComputeProperties
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
-			this.runDir = getFullPath(cmd, Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
+			this.runDir = cmd.getOptionValue(Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
 			this.port = cmd.getOptionValue(Parameters.PORT_CMNDLINE_OPTION, this.port);
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
@@ -262,8 +262,8 @@ public class ComputeProperties
 							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
 
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
-			// if runId == null and we want to generate, then create one
-			if (null == this.runId && this.generate)
+			// if runId == null then create one
+			if (null == this.runId)
 			{
 				// 4 letters/LETTERS/numbers -> (26*2 + 10)^4 = 14,776,336 possibilities
 				this.runId = RandomStringUtils.random(4, true, true);
