@@ -92,44 +92,49 @@
 				</div>
  				<script type="text/javascript">
  					<#-- create event handlers -->
- 					$('#dataset-select').change(function() {
- 						molgenis.selectDataSet($(this).val());
-					});
- 					
- 					$("#search-text").keyup(function(e){
- 						e.preventDefault();
-					    if(e.keyCode == 13 || e.which === '13') // enter
-					        {$("#search-button").click();}
-					});
- 					
- 					$('#search-button').click(function(e) {
- 						e.preventDefault();
- 						molgenis.search($('#search-text').val());
- 					});
- 					
- 					$('#search-clear-button').click(function(e) {
- 						e.preventDefault();
- 						molgenis.clearSearch();
- 					});
- 					
- 					$('#download-xls-button').click(function(e) {
- 						e.preventDefault();
- 						$.fileDownload('molgenis.do?__target=ProtocolViewer&__action=download_xls', { 
- 							httpMethod : "POST",
- 							data: { 
- 								datasetid : molgenis.getSelectedDataSet(),
- 								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
- 							}
- 						});
- 					});
- 					
- 					$('#view-features-button').click(function(e) {
- 						e.preventDefault();
- 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
- 					});
- 					
  					// on ready
 					$(function() {
+						
+						$("#search-text").keyup(function(e){
+	 						e.preventDefault();
+						    if(e.keyCode == 13 || e.which === '13') // enter
+						        {$("#search-button").click();}
+						});
+	 					
+	 					$('#search-button').click(function(e) {
+	 						e.preventDefault();
+	 						molgenis.search($('#search-text').val());
+	 					});
+	 					
+	 					$('#search-clear-button').click(function(e) {
+	 						e.preventDefault();
+	 						molgenis.clearSearch();
+	 					});
+	 					
+	 					$('#download-xls-button').click(function(e) {
+	 						e.preventDefault();
+	 						$.fileDownload('molgenis.do?__target=ProtocolViewer&__action=download_xls', { 
+	 							httpMethod : "POST",
+	 							data: { 
+	 								datasetid : molgenis.getSelectedDataSet(),
+	 								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
+	 							}
+	 						});
+	 					});
+	 					
+	 					$('#view-features-button').click(function(e) {
+	 						e.preventDefault();
+	 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
+	 					});
+							
+						window.top.molgenis.fillDataSetSelect(function() {
+							<#-- select first dataset -->
+							$('#dataset-select option:first').val();
+							<#-- fire event handler -->
+							$('#dataset-select').change();
+							<#-- use chosen plugin for dataset select -->
+							$('#dataset-select').chosen();
+						});
 						<#-- disable all form submission -->
 						$('form').submit(function() {
 							return false;
@@ -145,14 +150,14 @@
 					    
 						$('.btn').button();
 						
-					<#if (model.dataSets?size == 1)>
-						<#-- hide dataset selection -->
-						$('#dataset-select-container').hide();
-					</#if>
-					<#if (model.dataSets?size > 0)>
-						<#-- select first dataset -->
-						$('#dataset-select').chosen().change();
-					</#if>
+						<#if (model.dataSets?size == 1)>
+							<#-- hide dataset selection -->
+							$('#dataset-select-container').hide();
+						</#if>
+						<#if (model.dataSets?size > 0)>
+							<#-- select first dataset -->
+							$('#dataset-select').chosen().change();
+						</#if>
 					});
  				</script>
  			</#if>
