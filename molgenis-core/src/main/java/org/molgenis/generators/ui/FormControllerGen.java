@@ -59,7 +59,7 @@ public class FormControllerGen extends Generator
 						parent = parent.getParent();
 					templateArgs.put("parent_form", parent);
 					templateArgs.put("model", model);
-					templateArgs.put("package", APP_DIR + ".ui");
+					templateArgs.put("package", APP_DIR.replace('/', '.') + ".ui");
 
 					File targetDir = new File(this.getSourcePath(options) + APP_DIR + "/ui/");
 					boolean created = targetDir.mkdirs();

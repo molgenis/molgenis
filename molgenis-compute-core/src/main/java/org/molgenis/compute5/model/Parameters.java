@@ -10,11 +10,88 @@ import org.molgenis.util.tuple.WritableTuple;
 public class Parameters
 {
 	//unique column used to distinguish the parameter rows provided
-	public final static String ID_COLUMN = "user."+Task.TASKID_COLUMN;
-	public static final Object WORKFLOW_COLUMN_INITIAL = "workflow";
-	public final static String WORKFLOW_COLUMN = "user.workflow";
-	public final static String WORKDIR_COLUMN = "user."+Task.WORKDIR_COLUMN;
-	public static final String PARAMETER_COLUMN = "parameters"; // why no prefix 'user.'?
+	
+	// SOME OF THESE CONSTANTS SHOULD BE PLACED ELSEWHERE!
+	
+	public static final String STEP_HEADING_IN_WORKFLOW = "step";
+	public static final String PROTOCOL_HEADING_IN_WORKFLOW = "protocol";
+	public static final String PARAMETER_MAPPING_HEADING_IN_WORKFLOW = "parameterMapping";
+	public static final String USER = "user";
+	public static final String STEP_PARAM_SEP = "_";
+	public static final String USER_PREFIX = USER + STEP_PARAM_SEP;
+	public final static String ID_COLUMN = USER_PREFIX + Task.TASKID_COLUMN;
+	public static final String WORKFLOW = "workflow";
+	public static final String WORKFLOW_DEFAULT = "workflow.csv";
+	public static final String WORKFLOW_CMNDLINE_OPTION = "w";
+	public final static String WORKFLOW_COLUMN = USER_PREFIX + WORKFLOW;
+	public static final String DEFAULTS = "defaults";
+	public static final String DEFAULTS_DEFAULT = "defaults.csv";
+	public static final String DEFAULTS_CMNDLINE_OPTION = "defaults";
+	public static final String DEFAULTS_COLUMN = USER_PREFIX + DEFAULTS;
+	public final static String PATH = "path";
+	public final static String PATH_DEFAULT = ".";
+	public final static String PATH_CMNDLINE_OPTION = "path";
+	public final static String PATH_COLUMN = USER_PREFIX + PATH;
+	public static final String PREVIOUS = "PREVIOUS";
+	public static final String PREVIOUS_COLUMN = USER_PREFIX + PREVIOUS;
+	public static final String PARAMETERS_CMNDLINE_OPTION = "p";
+	public static final String PARAMETERS = "parameters";
+	public static final String PARAMETERS_DEFAULT = "parameters.csv";
+	public static final String PARAMETER_COLUMN = "parameters";
+	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
+	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;
+	public static String ERROR_FILE_DEFAULT = "error.log"; // can be changed by user parameter
+	public static String ENVIRONMENT_EXTENSION = ".env";
+	public static String ENVIRONMENT = "user" + ENVIRONMENT_EXTENSION;
+	public static String ENVIRONMENT_FULLPATH = null; // to be set
+	public static String NOTAVAILABLE = "_NA";
+	public static String LIST_INPUT = "list";
+	public static String STRING = "string";
+	public static String INPUT = "input";
+	public static final String WALLTIME = "walltime";
+	public static final String QUEUE = "queue";
+	public static final String NODES = "nodes";
+	public static final String PPN = "ppn";
+	public static final String MEMORY = "mem";
+	public static final String BACKEND = "backend";
+	public static final String BACKEND_CMNDLINE_OPTION = "b";
+	public static final String BACKEND_COLUMN = USER_PREFIX + BACKEND;
+	public static final String BACKEND_LOCAL = "localhost";
+	public static final String BACKEND_PBS = "pbs";
+	public static final String BACKEND_DEFAULT = BACKEND_LOCAL;
+	public static final String RUNDIR = "rundir";
+	public static final String RUNDIR_COLUMN = USER_PREFIX + RUNDIR;
+	public static final String RUNDIR_DEFAULT = "rundir";
+	public static final String RUNDIR_CMNDLINE_OPTION = "rundir";
+	public static final String RUNID = "runid";
+	public static final String RUNID_CMNDLINE_OPTION = "runid";
+	public static final String RUNID_COLUMN = USER_PREFIX + RUNID;
+	public static final String RUNID_DEFAULT = null; // if not set, then auto-generate unique
+	public static final String DATABASE = "database";
+	public static final String DATABASE_DEFAULT = "none";
+	public static final String DATABASE_CMNDLINE_OPTION = "d";
+	public static final String DATABASE_COLUMN = USER_PREFIX + DATABASE;
+	public static final String DATABASE_START = "database-start";
+	public static final String DATABASE_START_CMNDLINE_OPTION = "dbs";
+	public static final String DATABASE_END = "database-end";
+	public static final String DATABASE_END_CMNDLINE_OPTION = "dbe";
+	public static final String PORT = "port";
+	public static final String PORT_DEFAULT = "8080";
+	public static final String PORT_CMNDLINE_OPTION = "port";
+	public static final String INTERVAL = "interval";
+	public static final String INTERVAL_DEFAULT = "2000";
+	public static final String INTERVAL_CMNDLINE_OPTION = "interval";
+	public static final String PROPERTIES = "compute.properties";
+	public static final String GENERATE = "generate";
+	public static final String GENERATE_CMNDLINE_OPTION = "g";
+	public static final String LIST = "list";
+	public static final String LIST_CMNDLINE_OPTION = "l";
+	public static final String CREATE = "create";
+	public static final String CREATE_WORKFLOW_DEFAULT = "myworkflow";
+	public static final String HELP = "help";
+	public static final String HELP_CMNDLINE_OPTION = "h";
+	public static final String RUN = "run";
+	public static final String RUN_CMNDLINE_OPTION = "r";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();

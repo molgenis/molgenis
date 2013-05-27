@@ -1,19 +1,21 @@
 package org.molgenis.omx;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import app.servlet.FrontController;
+import org.molgenis.servlet.FrontController;
 
 public class WebAppInitializer implements WebApplicationInitializer
 {
-	private static Logger logger = Logger.getLogger(WebAppInitializer.class);
+	private static final Logger logger = Logger.getLogger(WebAppInitializer.class);
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException
@@ -29,8 +31,10 @@ public class WebAppInitializer implements WebApplicationInitializer
 		}
 		else
 		{
+			final int maxSize = 32 * 1024 * 1024;
 			dispatcherServlet.setLoadOnStartup(1);
 			dispatcherServlet.addMapping("/");
+			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 		}
 
 		// molgenis
@@ -42,6 +46,13 @@ public class WebAppInitializer implements WebApplicationInitializer
 		else
 		{
 			frontControllerServlet.setLoadOnStartup(2);
+			frontControllerServlet.addMapping("/molgenis.do");
+			frontControllerServlet.addMapping("/xref/find"); // org.molgenis.framework.server.services.MolgenisXrefService
+			frontControllerServlet.addMapping("/captchaImg"); // org.molgenis.auth.service.MolgenisCaptchaService
+			frontControllerServlet.addMapping("/tmpfile"); // org.molgenis.framework.server.services.MolgenisTmpFileService
 		}
+
+		// enable use of request scoped beans in FrontController
+		servletContext.addListener(new RequestContextListener());
 	}
 }

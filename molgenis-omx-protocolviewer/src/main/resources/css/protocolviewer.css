@@ -10,10 +10,6 @@
 	border-spacing: 0px;
 }
 
-.grid {
-	margin-bottom: 10px;	
-}
-
 .box-title {
 	font-size: 10pt;
 	font-weight: bold;
@@ -37,7 +33,11 @@
 	overflow-y: auto;
 }
 
-#download-controls {
+#feature-selection td.center {
+	text-align: center;
+}
+
+#feature-shopping-controls {
 	padding-top: 10px;	
 }
 
@@ -52,4 +52,18 @@
 
 i:hover {
 	cursor: pointer;
+}
+
+#orderdata-selection-table td.center {
+	text-align: center;
+}
+
+#orderdata-selection-table-container {
+	max-height: 300px;
+	overflow: auto;
+}
+
+#orderdata-list-container {
+	max-height: 300px;
+	overflow: auto;
 }

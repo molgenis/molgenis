@@ -1,31 +1,30 @@
 package org.molgenis.compute5;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.BasicConfigurator;
+import org.molgenis.compute5.db.api.*;
+import org.molgenis.compute5.generators.CreateWorkflowGenerator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
 import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
+import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.compute5.generators.local.LocalBackend;
+import org.molgenis.compute5.generators.pbs.PbsBackend;
 import org.molgenis.compute5.model.Compute;
 import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Task;
 import org.molgenis.compute5.parsers.ParametersCsvParser;
 import org.molgenis.compute5.parsers.WorkflowCsvParser;
 import org.molgenis.util.tuple.WritableTuple;
+
+import com.google.common.base.Joiner;
 
 /**
  * Commandline program for compute5. Usage: -w workflow.csv -p parameters.csv
@@ -37,127 +36,204 @@ public class ComputeCommandLine
 {
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) throws ParseException, ClassNotFoundException, IOException
-	{		
+	{
 		BasicConfigurator.configure();
-		
+
 		System.out.println("### MOLGENIS COMPUTE ###");
-		System.out.println("Version: "+ ComputeCommandLine.class.getPackage().getImplementationVersion());
-		//Properties properties = new Properties();
-		//properties.load(ComputeCommandLine.class.getClassLoader().getResourceAsStream("git.properties"));
-		//System.out.println("Git hash: " + properties.getProperty("git.commit.id.abbrev"));
-		
+		System.out.println("Version: " + ComputeCommandLine.class.getPackage().getImplementationVersion());
+
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
 
-		// setup commandline options
-		Options options = new Options();
-		Option p = OptionBuilder.withArgName("parameters.csv").isRequired(true).hasArgs().withLongOpt("parameters")
-				.withDescription("path to parameter.csv file(s)").create("p");
-		Option w = OptionBuilder.withArgName("steps.csv").hasArg().withLongOpt("workflow")
-				.withDescription("path to workflow.csv.").create("w");
-		Option d = OptionBuilder.withArgName("workdir").hasArg().withLongOpt("workdir")
-				.withDescription("path to directory this generates to. Default: currentdir").create("d");
-		options.addOption(w);
-		options.addOption(p);
-		options.addOption(d);
-
 		// parse options
+		ComputeProperties computeProperties = new ComputeProperties(args);
+
+		// output scripts + docs
 		try
 		{
-			CommandLineParser parser = new PosixParser();
-			CommandLine cmd = parser.parse(options, args);
-
-			String[] parametersCsv = cmd.getOptionValues("p");
-			String workflowCsv = "";
-			if (null != cmd.getOptionValue("w"))
-			{
-				workflowCsv = cmd.getOptionValue("w");
-			}
-			String workDir = "";
-			if (null != cmd.getOptionValue("d"))
-			{
-				workDir = cmd.getOptionValue("d");
-			}
-
-			// output scripts + docs
-			create(workflowCsv, parametersCsv, workDir);
+			create(computeProperties);
 		}
 		catch (Exception e)
 		{
-			System.err.println(e.getMessage());
-
-			System.err.println("");
-
-			new HelpFormatter().printHelp("compute -p parameters.csv", options);
+			e.printStackTrace();
 		}
 	}
 
-	public static Compute create(String workflowCsv, String[] parametersCsv, String workDir) throws IOException
+	public static Compute create(ComputeProperties computeProperties) throws IOException, Exception
 	{
-		List<File> parameterFiles = new ArrayList<File>();
-		for(String f: parametersCsv) parameterFiles.add(new File(f));
-		Compute compute = new Compute();
-		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
-		
-		// use workflow or workingdir from parameters?
-		if (compute.getParameters().getValues().size() > 0)
-		{
-			if (!compute.getParameters().getValues().get(0).isNull(Parameters.WORKFLOW_COLUMN))
-			{
-				workflowCsv = compute.getParameters().getValues().get(0).getString(Parameters.WORKFLOW_COLUMN);
-			}
-			if (!compute.getParameters().getValues().get(0).isNull(Parameters.WORKDIR_COLUMN))
-			{
-				workDir = compute.getParameters().getValues().get(0).getString(Parameters.WORKDIR_COLUMN);
-			}
-		}
-		if("".equals(workflowCsv)) throw new IOException("no workflow provided");
+		Compute compute = new Compute(computeProperties);
 
-		// set constants
-		for (WritableTuple t : compute.getParameters().getValues())
-		{
-			t.set(Parameters.WORKFLOW_COLUMN, new File(workflowCsv).getAbsolutePath());
-			t.set(Parameters.WORKDIR_COLUMN, new File(workDir).getAbsolutePath());
-		}
-		
-		System.out.println("Using workflow:   " + new File(workflowCsv).getAbsolutePath());
-		System.out.println("Using parameters: "
-				+ parameterFiles);
-		System.out.println("Using outputDir:   " + new File(workDir).getAbsolutePath());
+		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
+		if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
+				+ (new File(computeProperties.defaults)).getAbsolutePath());
+		System.out.println("Using parameters:       " + computeProperties.parameters);
+		System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
+		System.out.println("Using backend:          " + computeProperties.backend);
+		System.out.println("Using runID:            " + computeProperties.runId);
 
 		System.out.println(""); // newline
 
+		/*
+		 * *
+		 * ** Now handle command line options:*
+		 */
+
+		if (computeProperties.create)
+		{
+			new CreateWorkflowGenerator(computeProperties.createWorkflow);
+		}
+
+		if (computeProperties.generate)
+		{
+			generate(compute, computeProperties);
+		}
+
+		if (Parameters.DATABASE_DEFAULT.equals(computeProperties.database))
+		{ // if database none (= off), then do following
+			if (computeProperties.list)
+			{
+				// list files in rundir
+				File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter()
+				{
+					public boolean accept(File dir, String filename)
+					{
+						return filename.endsWith(".sh");
+					}
+				});
+
+				System.out.println("Generated jobs that are ready to run:");
+				if (0 == scripts.length) System.out.println("None.");
+				else for (File script : scripts)
+				{
+					System.out.println("- " + script.getName());
+				}
+			}
+		}
+		else
+		{
+			// database is on, please call compute-db-functions
+			// you can use computeProperties.* to see what user wants
+            ComputeDbApiConnection dbApiConnection =
+                    new HttpClientComputeDbApiConnection(computeProperties.database,computeProperties.port,"/api/v1","admin","admin");
+
+            ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
+
+            String runName = computeProperties.runId;
+
+            String backendName = computeProperties.backend;
+            Long pollInterval = Long.parseLong(computeProperties.interval);
+
+            List<Task> tasks = compute.getTasks();
+            String environment = compute.getUserEnvironment();
+
+            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment);
+
+            dbApiClient.createRun(createRunRequest);
+
+			if (computeProperties.execute)
+			{
+				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
+			}
+		}
+
+		return compute;
+	}
+
+	private static boolean defaultsExists(ComputeProperties computeProperties) throws IOException
+	{
+
+		// if exist include defaults.csv in parameterFiles
+		if (null == computeProperties.defaults)
+		{
+			return false;
+		}
+		else return new File(computeProperties.defaults).exists();
+	}
+
+	private static void generate(Compute compute, ComputeProperties computeProperties) throws Exception
+	{
+		// create a list of parameter files
+		List<File> parameterFiles = new ArrayList<File>();
+
+		for (String f : computeProperties.parameters)
+			parameterFiles.add(new File(f));
+		if (defaultsExists(computeProperties)) parameterFiles.add(new File(computeProperties.defaults));
+
+		// parse param files
+		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
+
+		// add command line parameters:
+		for (WritableTuple t : compute.getParameters().getValues())
+		{
+			t.set(Parameters.PATH_COLUMN, computeProperties.path);
+			t.set(Parameters.WORKFLOW_COLUMN, computeProperties.workFlow);
+			t.set(Parameters.DEFAULTS_COLUMN, computeProperties.defaults);
+			t.set(Parameters.PARAMETER_COLUMN, Joiner.on(",").join(computeProperties.parameters));
+			t.set(Parameters.RUNDIR_COLUMN, new File(computeProperties.runDir).getAbsolutePath());
+			t.set(Parameters.RUNID_COLUMN, computeProperties.runId);
+			t.set(Parameters.BACKEND_COLUMN, computeProperties.backend);
+			t.set(Parameters.DATABASE_COLUMN, computeProperties.database);
+		}
+
+		System.out.println("Starting script generation...");
 		// create outputdir
-		File dir = new File(workDir);
-		workDir = dir.getCanonicalPath();
+		File dir = new File(computeProperties.runDir);
+		computeProperties.runDir = dir.getCanonicalPath();
 		dir.mkdirs();
-		
+
 		// document inputs
-		new DocTotalParametersCsvGenerator().generate(new File(workDir + "/doc/inputs.csv"), compute.getParameters());
+		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/inputs.csv"),
+				compute.getParameters());
 
 		// parse workflow
-		compute.setWorkflow(WorkflowCsvParser.parse(workflowCsv));
-		
+		compute.setWorkflow(WorkflowCsvParser.parse(computeProperties.workFlow));
+
+		// create environment.txt with user parameters that are used in at least
+		// one of the steps
+		new EnvironmentGenerator().generate(compute, computeProperties.runDir);
+
 		// generate the tasks
 		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
 
 		// write the task for the backend
-		new LocalBackend().generate(compute.getTasks(), dir);
-
-		// generate outputs folders per task
-		for (Task t : compute.getTasks())
+		if (Parameters.BACKEND_PBS.equals(computeProperties.backend))
 		{
-			File f = new File(workDir + "/outputs/" + t.getName());
-			f.mkdirs();
-			System.out.println("Generated "+f.getAbsolutePath());
+			new PbsBackend().generate(compute.getTasks(), dir);
+		}
+		else
+		{
+			new LocalBackend().generate(compute.getTasks(), dir);
 		}
 
-		// generate documentation
-		new DocTotalParametersCsvGenerator().generate(new File(workDir + "/doc/outputs.csv"), compute.getParameters());
-		new DocWorkflowDiagramGenerator().generate(new File(workDir + "/doc"), compute.getWorkflow());
-		new DocTasksDiagramGenerator().generate(new File(workDir + "/doc"), compute.getTasks());
+		// generate outputs folders per task
+		// for (Task t : compute.getTasks())
+		// {
+		// File f = new File(computeProperties.runDir + "/outputs/" +
+		// t.getName());
+		// f.mkdirs();
+		// System.out.println("Generated " + f.getAbsolutePath());
+		// }
 
-		System.out.println("Generation complete");
-		return compute;
+		// generate documentation
+		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"),
+				compute.getParameters());
+		new DocWorkflowDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getWorkflow());
+		new DocTasksDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getTasks());
+
+		System.out.println("Generation complete.");
+	}
+
+	/**
+	 * Return Compute object, given one single -path to all files
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public static Compute create(String path) throws IOException, Exception
+	{
+		ComputeProperties computeProperties = new ComputeProperties(path);
+        computeProperties.generate = true;
+
+		return ComputeCommandLine.create(computeProperties);
 	}
 }

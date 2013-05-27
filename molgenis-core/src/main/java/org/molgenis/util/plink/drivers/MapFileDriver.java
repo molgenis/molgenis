@@ -24,7 +24,7 @@ public class MapFileDriver implements PlinkFileParser
 {
 	private BufferedReader reader;
 	private final File file;
-	private final char separator;
+	private final String separators;
 	private long nrElements;
 
 	/**
@@ -35,14 +35,19 @@ public class MapFileDriver implements PlinkFileParser
 	 */
 	public MapFileDriver(File mapFile)
 	{
-		this(mapFile, DEFAULT_FIELD_SEPARATOR);
+		this(mapFile, DEFAULT_READ_FIELD_SEPARATORS);
 	}
 
 	public MapFileDriver(File mapFile, char separator)
 	{
+		this(mapFile, String.valueOf(separator));
+	}
+	
+	public MapFileDriver(File mapFile, String separators)
+	{
 		if (mapFile == null) throw new IllegalArgumentException("file is null");
 		this.file = mapFile;
-		this.separator = separator;
+		this.separators = separators;
 		this.nrElements = -1l;
 	}
 
@@ -63,7 +68,7 @@ public class MapFileDriver implements PlinkFileParser
 		List<MapEntry> entryList = new ArrayList<MapEntry>();
 		String line;
 		for (int i = 0; (line = reader.readLine()) != null && i < to; ++i)
-			if (i >= from) entryList.add(parseEntry(line, this.separator + ""));
+			if (i >= from) entryList.add(parseEntry(line, this.separators));
 
 		return entryList;
 	}
@@ -81,14 +86,14 @@ public class MapFileDriver implements PlinkFileParser
 		List<MapEntry> entryList = new ArrayList<MapEntry>();
 		String line;
 		while ((line = reader.readLine()) != null)
-			entryList.add(parseEntry(line, this.separator + ""));
+			entryList.add(parseEntry(line, this.separators));
 
 		return entryList;
 	}
 
-	public static MapEntry parseEntry(String line, String separator) throws IOException
+	public static MapEntry parseEntry(String line, String separators) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, separator);
+		StringTokenizer strTokenizer = new StringTokenizer(line, separators);
 		try
 		{
 			String chromosome = strTokenizer.nextToken();

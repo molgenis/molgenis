@@ -5,37 +5,45 @@ import java.util.Properties;
 
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.AsyncJavaMailSender;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import app.DatabaseConfig;
+import org.molgenis.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
+@EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
 { DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class,
@@ -43,23 +51,25 @@ import app.DatabaseConfig;
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
-	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer)
-	{
-		configurer.enable("front-controller");
-	}
-
-	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
 	}
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		converters.add(new GsonHttpMessageConverter());
+		converters.add(new BufferedImageHttpMessageConverter());
+	}
+
+	@Bean
+	public ApplicationListener<?> databasePopulator()
+	{
+		return new WebAppDatabasePopulator();
 	}
 
 	@Bean
@@ -92,9 +102,9 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	private String mailJavaQuitWait;
 
 	@Bean
-	public MailSender mailSender()
+	public JavaMailSender mailSender()
 	{
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
 		mailSender.setHost(mailHost);
 		mailSender.setPort(Integer.valueOf(mailPort));
 		mailSender.setProtocol(mailProtocol);
@@ -106,6 +116,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		javaMailProperties.setProperty("mail.smtp.quitwait", mailJavaQuitWait);
 		mailSender.setJavaMailProperties(javaMailProperties);
 		return mailSender;
+	}
+
+	@Bean
+	public FileStore fileStore()
+	{
+		return new FileStore(System.getProperty("user.home"));
 	}
 
 	/**
@@ -124,7 +140,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
-	public ViewResolver viewRespolver()
+	public ViewResolver viewResolver()
 	{
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);
@@ -146,16 +162,17 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		return result;
 	}
 
-	/**
-	 * Used by system for example indexing. Should be replaced by a system user?
-	 * 
-	 * @return
-	 * @throws DatabaseException
-	 */
-	@Bean(destroyMethod = "close")
-	public Database unauthorizedDatabase() throws DatabaseException
+	@Bean
+	public MultipartResolver multipartResolver()
 	{
-		return new app.JpaDatabase();
+		return new StandardServletMultipartResolver();
+	}
+
+	@Bean
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
+	public ShoppingCart shoppingCart()
+	{
+		return new ShoppingCart();
 	}
 
 	/**

@@ -19,7 +19,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.framework.tupletable.view.JQGridView;
 import org.molgenis.framework.tupletable.view.JQGridJSObjects.JQGridSearchOptions;
-import org.molgenis.framework.tupletable.view.renderers.ExcelExporter;
+import org.molgenis.framework.tupletable.view.renderers.CsvExporter;
 import org.molgenis.framework.ui.EasyPluginController;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenView;
@@ -94,16 +94,19 @@ public class DataSetViewerPlugin extends EasyPluginController<DataSetViewerPlugi
 		tableView.handleRequest(db, request, out);
 	}
 
-	public void download_xls(Database db, MolgenisRequest request) throws TableException, IOException
+	public void download_xls(Database db, MolgenisRequest request) throws TableException, IOException,
+			DatabaseException
 	{
 		if (tupleTable instanceof DatabaseTupleTable) ((DatabaseTupleTable) tupleTable).setDb(db);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
+		EasyPluginController.HTML_WAS_ALREADY_SERVED = true;
+
 		HttpServletResponse response = request.getResponse();
-		response.setContentType("application/ms-excel");
+		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition",
-				"attachment; filename=" + tableView.getName() + "_" + dateFormat.format(new Date()) + ".xls");
-		new ExcelExporter(tupleTable).export(response.getOutputStream());
+				"attachment; filename=" + tableView.getName() + "_" + dateFormat.format(new Date()) + ".csv");
+		new CsvExporter(tupleTable).export(response.getOutputStream());
 	}
 
 	public void selectDataSet(Database db, MolgenisRequest request) throws HandleRequestDelegationException

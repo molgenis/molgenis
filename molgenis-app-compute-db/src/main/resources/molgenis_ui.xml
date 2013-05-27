@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="compute" label="Compute Testing">
+    <plugin name="MolgenisHeader" type="org.molgenis.compute.db.ui.ComputeHeader"/>
+    
+    <menu name="mainmenu" position="left" startswith="PilotDashboardPlugin">
+    	<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
+    	
+        <menu name="Compute">
+            <plugin name="PilotDashboardPlugin" label="Pilot dashboard"
+                    type="org.molgenis.compute.db.plugin.PilotDashboardPlugin"/>
+            
+            <form name="ComputeRuns" label="Runs" entity="ComputeRun" viewtype="list">
+            	<form name="ComputeTasks" label="Tasks" entity="ComputeTask" viewtype="list">
+            		<menu name="ComputeTaskValueMenu" label="Parameters">
+            			<form name="ComputeTaskValues" label="Parameters" entity="ComputeParameterValue" viewtype="list"/>
+                		<form name="ComputeTaskHistory" label="History" entity="ComputeTaskHistory" viewtype="list"/>
+                	</menu>
+                </form>
+            </form>
+            
+            <form name="ComputeBackends" label="Backends" entity="ComputeBackend"/>
+        </menu>
+        
+       
+			<menu label="User management" name="Management">
+				<form name="MolgenisUser" entity="MolgenisUser" />
+				<form name="MolgenisGroup" entity="MolgenisGroup" />
+				<form name="MolgenisRoleGroupLink" entity="MolgenisRoleGroupLink" />
+				<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
+				<form name="MolgenisPermission" entity="MolgenisPermission" />
+			</menu>
+        
+    </menu>
+</molgenis>

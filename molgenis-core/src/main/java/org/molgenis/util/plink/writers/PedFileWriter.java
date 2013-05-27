@@ -15,8 +15,8 @@ import org.molgenis.util.plink.datatypes.PedEntry;
  */
 public class PedFileWriter implements PlinkFileParser
 {
-	private BufferedWriter writer;
-	private char separator;
+	private final BufferedWriter writer;
+	private final char separator;
 
 	public PedFileWriter(File pedFile) throws IOException
 	{
@@ -48,14 +48,17 @@ public class PedFileWriter implements PlinkFileParser
 		writer.write(Byte.toString(ped.getSex()));
 		writer.write(separator);
 		writer.write(Double.toString(ped.getPhenotype()));
-		for (Biallele biallele : ped.getBialleles())
+
+		for (Biallele biallele : ped)
 		{
 			writer.write(separator);
 			writer.write(biallele.getAllele1());
 			writer.write(separator);
 			writer.write(biallele.getAllele2());
 		}
+
 		writer.write(LINE_SEPARATOR);
+		writer.flush();
 	}
 
 	/**

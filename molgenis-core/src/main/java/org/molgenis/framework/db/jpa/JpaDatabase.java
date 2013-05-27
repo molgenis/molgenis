@@ -3,13 +3,9 @@ package org.molgenis.framework.db.jpa;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import org.molgenis.framework.db.AbstractDatabase;
 import org.molgenis.framework.db.DatabaseException;
@@ -31,88 +27,18 @@ import org.molgenis.util.tuple.WritableTuple;
  */
 public class JpaDatabase extends AbstractDatabase
 {
-	protected static class EMFactory
-	{
-		private static Map<String, EntityManagerFactory> emfs = new HashMap<String, EntityManagerFactory>();
-		private static EMFactory instance = null;
-
-		private EMFactory(String persistenceUnit, Map<String, Object> configOverrides)
-		{
-			addEntityManagerFactory(persistenceUnit, configOverrides);
-		}
-
-		private static void addEntityManagerFactory(String persistenceUnitName, Map<String, Object> configOverwrite)
-		{
-			if (!emfs.containsKey(persistenceUnitName))
-			{
-				EntityManagerFactory emFactory = null;
-				if (configOverwrite != null)
-				{
-					emFactory = Persistence.createEntityManagerFactory(persistenceUnitName, configOverwrite);
-				}
-				else
-				{
-					emFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
-				}
-				emfs.put(persistenceUnitName, emFactory);
-			}
-		}
-
-		public static EntityManager createEntityManager(String persistenceUnit)
-		{
-			if (instance == null)
-			{
-				instance = new EMFactory(persistenceUnit, null);
-			}
-			if (!emfs.containsKey(persistenceUnit))
-			{
-				addEntityManagerFactory(persistenceUnit, null);
-			}
-			EntityManager result = emfs.get(persistenceUnit).createEntityManager();
-			return result;
-		}
-
-		public static EntityManager createEntityManager()
-		{
-			if (instance == null)
-			{
-				instance = new EMFactory("molgenis", null);
-			}
-			EntityManager result = emfs.get("molgenis").createEntityManager();
-			return result;
-		}
-
-		public static EntityManagerFactory getEntityManagerFactoryByName(String name)
-		{
-			return emfs.get(name);
-		}
-
-		public static EntityManager createEntityManager(String persistenceUnitName, Map<String, Object> configOverrides)
-		{
-			if (instance == null)
-			{
-				instance = new EMFactory(persistenceUnitName, configOverrides);
-			}
-			if (!emfs.containsKey(persistenceUnitName))
-			{
-				addEntityManagerFactory(persistenceUnitName, configOverrides);
-			}
-			EntityManager result = emfs.get(persistenceUnitName).createEntityManager();
-			return result;
-		}
-	}
+	public static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
 
 	private final EntityManager em;
-	private String persistenceUnitName = "molgenis"; // default
 
-	protected JpaDatabase(String persistenceUnitName)
+	public JpaDatabase(EntityManager em)
 	{
-		this.persistenceUnitName = persistenceUnitName;
-		this.em = EMFactory.createEntityManager();
+		this(em, null);
 	}
 
 	public JpaDatabase(EntityManager em, Model model)
 	{
+		if (em == null) throw new IllegalArgumentException("entity manager is null");
 		this.em = em;
 		this.model = model;
 	}
@@ -241,7 +167,7 @@ public class JpaDatabase extends AbstractDatabase
 
 	public String getPersistenceUnitName()
 	{
-		return persistenceUnitName;
+		return DEFAULT_PERSISTENCE_UNIT_NAME;
 	}
 
 	public List<Tuple> sql(String sql, String... columnNames)

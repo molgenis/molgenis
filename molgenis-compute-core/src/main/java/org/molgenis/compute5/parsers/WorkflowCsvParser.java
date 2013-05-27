@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Step;
 import org.molgenis.compute5.model.Workflow;
 import org.molgenis.io.csv.CsvReader;
@@ -26,14 +27,14 @@ public class WorkflowCsvParser
 			for (Tuple row : reader)
 			{
 				// check value
-				if (row.isNull("step")) throw new IOException("required column 'step' is missing in row " + row);
-				if (row.isNull("protocol")) throw new IOException("required column 'protocol' is missing in row " + row);
-				if (row.isNull("parameters")) throw new IOException("required column 'parameters' is missing in row "
+				if (row.isNull(Parameters.STEP_HEADING_IN_WORKFLOW)) throw new IOException("required column '" + Parameters.STEP_HEADING_IN_WORKFLOW + "' is missing in row " + row);
+				if (row.isNull(Parameters.PROTOCOL_HEADING_IN_WORKFLOW)) throw new IOException("required column '" + Parameters.PROTOCOL_HEADING_IN_WORKFLOW + "' is missing in row " + row);
+				if (row.isNull(Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW)) throw new IOException("required column '" + Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW + "' is missing in row "
 						+ row);
 
-				Step s = new Step(row.getString("step"));
-				s.setProtocol(ProtocolFtlParser.parse(new File(workflowFile).getParentFile(), row.getString("protocol")));
-				s.setParameters(WorkflowCsvParser.parseParameters(row.getString("parameters")));
+				Step s = new Step(row.getString(Parameters.STEP_HEADING_IN_WORKFLOW));
+				s.setProtocol(ProtocolParser.parse(new File(workflowFile).getParentFile(), row.getString(Parameters.PROTOCOL_HEADING_IN_WORKFLOW)));
+				s.setParameters(WorkflowCsvParser.parseParameters(row.getString(Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW)));
 
 				wf.getSteps().add(s);
 			}
@@ -43,7 +44,7 @@ public class WorkflowCsvParser
 		catch (IOException e)
 		{
 			throw new IOException("Parsing of workflow failed: " + e.getMessage()
-					+ ".\nThe workflow csv requires columns step,protocol,parameters.");
+					+ ".\nThe workflow csv requires columns " + Parameters.STEP_HEADING_IN_WORKFLOW + "," + Parameters.PROTOCOL_HEADING_IN_WORKFLOW + "," + Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW + ".");
 		}
 	}
 

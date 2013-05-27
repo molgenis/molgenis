@@ -1,14 +1,11 @@
 package org.molgenis.omx.dataset;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -21,25 +18,18 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.converters.observablefeature.DataTypeConverter;
-import org.molgenis.omx.converters.observedvalue.ValueConverter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.WritableTuple;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 
 /**
  * DataSetTable
  * 
- * If this table is too slow consider creating database an index on the
- * ObservedValue table : One on the fields Feature-Value and one on
- * ObservationSet-Feature-Value
+ * If this table is too slow consider creating database an index on the ObservedValue table : One on the fields
+ * Feature-Value and one on ObservationSet-Feature-Value
  * 
  */
 public class DataSetTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
@@ -152,34 +142,12 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	}
 
 	@Override
-	public Iterator<Tuple> iterator()
+	public DataSetTableIterator iterator()
 	{
+
 		try
 		{
-			return getRows().iterator();
-		}
-		catch (TableException e)
-		{
-			logger.error("Exception getting iterator", e);
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public List<Tuple> getRows() throws TableException
-	{
-		try
-		{
-			List<Tuple> result = new ArrayList<Tuple>();
-
 			Query<ObservationSet> query = createQuery();
-
-			if (query == null)
-			{
-				return new ArrayList<Tuple>();
-			}
-
-			// Limit the nr of rows
 			if (getLimit() > 0)
 			{
 				query.limit(getLimit());
@@ -190,47 +158,93 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				query.offset(getOffset());
 			}
 
-			for (ObservationSet os : query.find())
-			{
-
-				WritableTuple tuple = new KeyValueTuple();
-
-				Query<ObservedValue> queryObservedValue = getDb().query(ObservedValue.class);
-
-				List<Field> columns = getColumns();
-
-				// Only retrieve the visible columns
-				Collection<String> fieldNames = Collections2.transform(columns, new Function<Field, String>()
-				{
-					@Override
-					public String apply(final Field field)
-					{
-						return field.getName();
-					}
-				});
-
-				for (ObservedValue v : queryObservedValue.eq(ObservedValue.OBSERVATIONSET, os.getId())
-						.in(ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames)).find())
-				{
-					ObservableFeature feature = v.getFeature();
-					Object value = ValueConverter.fromString(v.getValue(), db, feature);
-
-					tuple.set(feature.getIdentifier(), value);
-				}
-
-				result.add(tuple);
-			}
-
-			return result;
-
+			return new DataSetTableIterator(db, getColumns(), query);
 		}
-		catch (Exception e)
+		catch (DatabaseException e)
 		{
-			logger.error("Exception getRows", e);
-			throw new TableException(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		catch (TableException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
+
+	// @Override
+	// public List<Tuple> getRows() throws TableException
+	// {
+	// try
+	// {
+	// List<Tuple> result = new ArrayList<Tuple>();
+	//
+	// Query<ObservationSet> query = createQuery();
+	//
+	// if (query == null)
+	// {
+	// return new ArrayList<Tuple>();
+	// }
+	//
+	// // Limit the nr of rows
+	// if (getLimit() > 0)
+	// {
+	// query.limit(getLimit());
+	// }
+	//
+	// if (getOffset() > 0)
+	// {
+	// query.offset(getOffset());
+	// }
+	//
+	// for (ObservationSet os : query.find())
+	// {
+	//
+	// WritableTuple tuple = new KeyValueTuple();
+	//
+	// Query<ObservedValue> queryObservedValue =
+	// getDb().query(ObservedValue.class);
+	//
+	// List<Field> columns = getColumns();
+	//
+	// // Only retrieve the visible columns
+	// Collection<String> fieldNames = Collections2.transform(columns, new
+	// Function<Field, String>()
+	// {
+	// @Override
+	// public String apply(final Field field)
+	// {
+	// return field.getName();
+	// }
+	// });
+	//
+	// for (ObservedValue v :
+	// queryObservedValue.eq(ObservedValue.OBSERVATIONSET, os.getId())
+	// .in(ObservedValue.FEATURE_IDENTIFIER, new
+	// ArrayList<String>(fieldNames)).find())
+	// {
+	// ObservableFeature feature = v.getFeature();
+	// Object value = ValueConverter.fromString(v.getValue(), db, feature);
+	//
+	// tuple.set(feature.getIdentifier(), value);
+	// }
+	//
+	// result.add(tuple);
+	// }
+	//
+	// return result;
+	//
+	// }
+	// catch (Exception e)
+	// {
+	// logger.error("Exception getRows", e);
+	// throw new TableException(e);
+	// }
+	//
+	// }
 
 	@Override
 	public int getCount() throws TableException
@@ -335,7 +349,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				{
 					// value is always a String so LESS etc. can't be
 					// supported, NOT queries are not supported yet
-					throw new NotImplementedException("Operator [" + filter.getOperator()
+					throw new UnsupportedOperationException("Operator [" + filter.getOperator()
 							+ "] not yet implemented, only EQUALS and LIKE are supported.");
 
 				}

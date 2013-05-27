@@ -11,16 +11,14 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
-import org.molgenis.generators.sql.MySqlCreateClassPerTableGen;
+import org.molgenis.generators.Generator;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
 
 import freemarker.template.Template;
 
-public class CsvEntityImporterGen extends MySqlCreateClassPerTableGen // TODO
-// extends
-// Generator
+public class CsvEntityImporterGen extends Generator
 {
 	private static final Logger logger = Logger.getLogger(CsvEntityImporterGen.class);
 
@@ -54,7 +52,7 @@ public class CsvEntityImporterGen extends MySqlCreateClassPerTableGen // TODO
 
 			templateArgs.put("model", model);
 			templateArgs.put("entities", entityList);
-			templateArgs.put("package", APP_DIR);
+			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			OutputStream targetOut = new FileOutputStream(target);
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 			targetOut.close();

@@ -1,1 +1,0 @@
-This little example is a one step workflow that iterates over all rows in the parameters.

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -23,6 +23,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
+import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.util.Entity;
@@ -74,7 +75,7 @@ public class DatabaseLogin implements Login, Serializable
 	public DatabaseLogin(Database db, TokenFactory tm) throws Exception
 	{
 		this.tm = tm;
-		this.login(db, "anonymous", "anonymous");
+		this.login(db, USER_ANONYMOUS_NAME, USER_ANONYMOUS_PASSWORD);
 	}
 
 	public DatabaseLogin(Database db, String redirect, TokenFactory tm) throws Exception
@@ -119,7 +120,7 @@ public class DatabaseLogin implements Login, Serializable
 	{
 		// return user != null;
 		if (user == null) return false;
-		else if ("anonymous".equals(user.getName())) return false;
+		else if (USER_ANONYMOUS_NAME.equals(user.getName())) return false;
 		else return true;
 	}
 
@@ -213,7 +214,7 @@ public class DatabaseLogin implements Login, Serializable
 	@Override
 	public void reload(Database db) throws Exception
 	{
-		if (this.user == null) this.login(db, "anonymous", "anonymous");
+		if (this.user == null) this.login(db, USER_ANONYMOUS_NAME, USER_ANONYMOUS_PASSWORD);
 		// return;
 
 		// // get the groups this user is member of
@@ -479,26 +480,20 @@ public class DatabaseLogin implements Login, Serializable
 		return this.owns(entity.getClass());
 	}
 
+	@Override
+	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
+	{
+		return (isAuthenticated() && user.getSuperuser()) || readMap.containsKey(screenControllerClass.getName());
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean canRead(org.molgenis.framework.ui.ScreenController<?> screen)
 	{
-		// System.out.println("User name >>>>>>>>>>>>>" + this.user);
-		// System.out.println("Screen name >>>>>>>>>>>>>" +
-		// screen.getClass().getName() + "Classname >>>>>>>>>> " +
-		// this.readMap.containsKey(screen.getClass().getName()));
-		if (this.isAuthenticated() && this.user.getSuperuser()) return true;
-
-		String className = screen.getClass().getName();
-
-		// if (className.equals("app.ui.UserLoginPlugin"))
-		// return true;
-
-		if (this.readMap.containsKey(className)) return true;
-
-		return false;
+		return canReadScreenController((Class<? extends ScreenController<?>>) screen.getClass());
 	}
 
 	// /**
@@ -562,8 +557,9 @@ public class DatabaseLogin implements Login, Serializable
 				if (result == null)
 				{
 					Integer adminId = db
-							.find(MolgenisRole.class, new QueryRule(MolgenisRole.NAME, Operator.EQUALS, "admin"))
-							.get(0).getId();
+							.find(MolgenisRole.class,
+									new QueryRule(MolgenisRole.NAME, Operator.EQUALS, Login.USER_ADMIN_NAME)).get(0)
+							.getId();
 					Object arglist[] = new Object[1];
 					arglist[0] = adminId;
 
@@ -586,4 +582,5 @@ public class DatabaseLogin implements Login, Serializable
 	{
 		this.redirect = redirect;
 	}
+
 }

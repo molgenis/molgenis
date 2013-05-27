@@ -1,9 +1,12 @@
 package org.molgenis.compute5.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.molgenis.model.elements.Parameter;
 
 import com.google.gson.Gson;
 
@@ -22,6 +25,20 @@ public class Step
 	// map of previous steps, i.e. where inputs depend on values from previous
 	// steps.
 	Set<String> previousSteps = new HashSet<String>();
+	
+	// map taskId -> jobName
+	Map<Integer, String> idJobMap = new HashMap<Integer, String>();
+	
+	public String getJobName(Integer id)
+	{
+		return this.idJobMap.get(id);
+	}
+	
+	public void setJobName(Integer id, String name)
+	{
+		this.idJobMap.put(id, name);
+	}
+	
 
 	// reference to the protocol that should be applied on this step
 	Protocol protocol;
@@ -62,9 +79,16 @@ public class Step
 		this.previousSteps.clear();
 		for (String parameter : getParameters().values())
 		{
-			if (!parameter.startsWith("user."))
+			if (!parameter.startsWith(Parameters.USER_PREFIX))
 			{
-				previousSteps.add(parameter.substring(0, parameter.indexOf(".")));
+				int ps = parameter.indexOf(Parameters.STEP_PARAM_SEP);
+				if (-1 == ps)
+				{
+					System.err.println(">> ERROR >> In your workflow in step '" + this.getName() + "', it is unclear from which step your parameter value '=" + parameter + "' originates. Please prepend user_ or step1_ or similar." );
+					System.err.println(">> Exit with exit status 1.");
+					System.exit(1);
+				}
+				previousSteps.add(parameter.substring(0, ps));
 			}
 		}
 	}

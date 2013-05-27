@@ -11,22 +11,32 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
+import org.molgenis.io.excel.ExcelSheetReader.ExcelTuple;
 import org.molgenis.util.tuple.Tuple;
 
 public class LifeLinesQuestionnaireMatrix
 {
 	private static final Logger logger = Logger.getLogger(LifeLinesQuestionnaireMatrix.class);
 
+	private static final String TABLE_PROTOCOL = "Protocol";
+	private static final String HEADER_PROTOCOL = "Protocol";
+	private static final String HEADER_PROTOCOL_ID = "ID";
+	private static final String HEADER_PROTOCOL_DESCRIPTION = "Omschrijving";
+	private static final String HEADER_VMID = "VMID";
+	private static final String HEADER_VMID_ID = "ID";
+	private static final String HEADER_VMID_DESCRIPTION = "Baseline";
 	private static final String TABLE_CHECKLIST = "checklist";
-	private static final String HEADER_GROUP = "Group";
-	private static final String HEADER_CODE = "Code";
 	private static final String VALUE_CHECKED = "x";
 
 	private final Map<String, Set<CohortTimePair>> questionnaireMap;
+	private final Map<Integer, String> protocolMap;
+	private final Map<Integer, String> vmidMap;
 
 	public LifeLinesQuestionnaireMatrix()
 	{
 		questionnaireMap = new HashMap<String, Set<CohortTimePair>>();
+		protocolMap = new HashMap<Integer, String>();
+		vmidMap = new HashMap<Integer, String>();
 	}
 
 	public void add(String group, String code, Set<CohortTimePair> cohortTypePairs)
@@ -37,6 +47,26 @@ public class LifeLinesQuestionnaireMatrix
 		questionnaireMap.put(key, cohortTypePairs);
 	}
 
+	public void addProtocol(Integer id, String description)
+	{
+		protocolMap.put(id, description.trim());
+	}
+
+	public void addVmid(Integer id, String description)
+	{
+		vmidMap.put(id, description.trim());
+	}
+
+	public String getProtocolDescription(Integer id)
+	{
+		return protocolMap.get(id);
+	}
+
+	public String getVmidDescription(Integer id)
+	{
+		return vmidMap.get(id);
+	}
+
 	public Set<CohortTimePair> get(String group, String code)
 	{
 		String key = (group + code).toLowerCase();
@@ -45,25 +75,23 @@ public class LifeLinesQuestionnaireMatrix
 
 	static class CohortTimePair
 	{
-		private final String cohort;
-		private final String time;
+		private final int protocolId;
+		private final int vmidId;
 
-		public CohortTimePair(String cohort, String time)
+		public CohortTimePair(int protocolId, int vmidId)
 		{
-			if (cohort == null) throw new IllegalArgumentException("cohort is null");
-			if (time == null) throw new IllegalArgumentException("time is null");
-			this.cohort = cohort;
-			this.time = time;
+			this.protocolId = protocolId;
+			this.vmidId = vmidId;
 		}
 
-		public String getCohort()
+		public int getProtocolId()
 		{
-			return cohort;
+			return protocolId;
 		}
 
-		public String getTime()
+		public int getVmidId()
 		{
-			return time;
+			return vmidId;
 		}
 
 		@Override
@@ -71,8 +99,8 @@ public class LifeLinesQuestionnaireMatrix
 		{
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((cohort == null) ? 0 : cohort.hashCode());
-			result = prime * result + ((time == null) ? 0 : time.hashCode());
+			result = prime * result + protocolId;
+			result = prime * result + vmidId;
 			return result;
 		}
 
@@ -83,16 +111,8 @@ public class LifeLinesQuestionnaireMatrix
 			if (obj == null) return false;
 			if (getClass() != obj.getClass()) return false;
 			CohortTimePair other = (CohortTimePair) obj;
-			if (cohort == null)
-			{
-				if (other.cohort != null) return false;
-			}
-			else if (!cohort.equals(other.cohort)) return false;
-			if (time == null)
-			{
-				if (other.time != null) return false;
-			}
-			else if (!time.equals(other.time)) return false;
+			if (protocolId != other.protocolId) return false;
+			if (vmidId != other.vmidId) return false;
 			return true;
 		}
 	}
@@ -104,57 +124,8 @@ public class LifeLinesQuestionnaireMatrix
 		ExcelReader excelReader = new ExcelReader(in, false);
 		try
 		{
-			ExcelSheetReader checklistSheet = excelReader.getSheet(TABLE_CHECKLIST);
-			try
-			{
-				Iterator<Tuple> it = checklistSheet.iterator();
-				if (!it.hasNext()) throw new IOException("missing header row #1");
-				Tuple header1 = it.next();
-				if (!it.hasNext()) throw new IOException("missing header row #2");
-				Tuple header2 = it.next();
-				if (!it.hasNext()) throw new IOException("missing header row #3");
-				it.next(); // skip row containing time details
-
-				if (!it.hasNext()) throw new IOException("missing header row #4");
-				it.next(); // skip row containing questionnaire names
-				if (!it.hasNext()) throw new IOException("missing header row #5");
-				Tuple header5 = it.next();
-
-				String groupHeader = header5.getString(0);
-				if (groupHeader == null || !groupHeader.equals(HEADER_GROUP)) throw new IOException("missing header: "
-						+ HEADER_GROUP);
-				String codeHeader = header5.getString(1);
-				if (codeHeader == null || !codeHeader.equals(HEADER_CODE)) throw new IOException("missing header: "
-						+ HEADER_CODE);
-
-				while (it.hasNext())
-				{
-					Tuple tuple = it.next();
-					String group = tuple.getString(0);
-					String code = tuple.getString(1);
-					if (group == null || code == null)
-					{
-						logger.warn("missing group or code");
-						continue;
-					}
-
-					Set<CohortTimePair> cohortTypeSet = new HashSet<CohortTimePair>();
-					final int cols = tuple.getNrCols();
-					for (int i = 2; i < cols; ++i)
-					{
-						String val = tuple.getString(i);
-						if (val != null && val.equals(VALUE_CHECKED))
-						{
-							cohortTypeSet.add(new CohortTimePair(header1.getString(i), header2.getString(i)));
-						}
-					}
-					questionnaireMatrix.add(group, code, cohortTypeSet);
-				}
-			}
-			finally
-			{
-				checklistSheet.close();
-			}
+			parseProtocolSheet(excelReader, questionnaireMatrix);
+			parseChecklistSheet(excelReader, questionnaireMatrix);
 		}
 		finally
 		{
@@ -162,5 +133,135 @@ public class LifeLinesQuestionnaireMatrix
 		}
 
 		return questionnaireMatrix;
+	}
+
+	private static void parseProtocolSheet(ExcelReader excelReader, LifeLinesQuestionnaireMatrix questionnaireMatrix)
+			throws IOException
+	{
+		ExcelSheetReader protocolSheet = excelReader.getSheet(TABLE_PROTOCOL);
+		try
+		{
+			Iterator<Tuple> it = protocolSheet.iterator();
+			if (!it.hasNext()) throw new IOException("missing header row #1");
+			Tuple header1 = it.next();
+			String protocolHeader = header1.getString(0);
+			if (protocolHeader == null || !protocolHeader.equals(HEADER_PROTOCOL)) throw new IOException(
+					"missing header: " + HEADER_PROTOCOL);
+			Tuple header2 = it.next();
+			String protocolIdHeader = header2.getString(0);
+			if (protocolIdHeader == null || !protocolIdHeader.equals(HEADER_PROTOCOL_ID)) throw new IOException(
+					"missing header: " + HEADER_PROTOCOL_ID);
+			String protocolDescriptionHeader = header2.getString(1);
+			if (protocolDescriptionHeader == null || !protocolDescriptionHeader.equals(HEADER_PROTOCOL_DESCRIPTION)) throw new IOException(
+					"missing header: " + HEADER_PROTOCOL_DESCRIPTION);
+
+			if (!it.hasNext()) throw new IOException("missing protocol values in sheet: " + TABLE_PROTOCOL);
+			while (it.hasNext())
+			{
+				Tuple row = it.next();
+				Integer protocolId = row.getInt(0);
+				String protocolDescription = row.getString(1);
+				if (protocolId == null && (protocolDescription == null || protocolDescription.isEmpty())) break;
+				if (protocolId == null) throw new IOException("missing protocol id in sheet: " + TABLE_PROTOCOL);
+				if (protocolDescription == null) throw new IOException("missing protocol description in sheet: "
+						+ TABLE_PROTOCOL);
+
+				questionnaireMatrix.addProtocol(protocolId, protocolDescription);
+			}
+
+			if (!it.hasNext()) throw new IOException("missing header row #2");
+			Tuple header3 = it.next();
+			String vmidHeader = header3.getString(0);
+			if (vmidHeader == null || !vmidHeader.equals(HEADER_VMID)) throw new IOException("missing header: "
+					+ HEADER_VMID);
+			Tuple header4 = it.next();
+			String vmidIdHeader = header4.getString(0);
+			if (vmidIdHeader == null || !vmidIdHeader.equals(HEADER_VMID_ID)) throw new IOException("missing header: "
+					+ HEADER_VMID_ID);
+			String vmidDescriptionHeader = header4.getString(1);
+			if (vmidDescriptionHeader == null || !vmidDescriptionHeader.equals(HEADER_VMID_DESCRIPTION)) throw new IOException(
+					"missing header: " + HEADER_VMID_DESCRIPTION);
+
+			while (it.hasNext())
+			{
+				Tuple row = it.next();
+				Integer vmidId = row.getInt(0);
+				String vmidDescription = row.getString(1);
+				if (vmidId == null && (vmidDescription == null || vmidDescription.isEmpty())) break;
+				if (vmidId == null) throw new IOException("missing VMID id in sheet: " + TABLE_PROTOCOL);
+				if (vmidDescription == null) throw new IOException("missing VMID description in sheet: "
+						+ TABLE_PROTOCOL);
+
+				questionnaireMatrix.addVmid(vmidId, vmidDescription);
+			}
+		}
+		finally
+		{
+			protocolSheet.close();
+		}
+	}
+
+	private static void parseChecklistSheet(ExcelReader excelReader, LifeLinesQuestionnaireMatrix questionnaireMatrix)
+			throws IOException
+	{
+		ExcelSheetReader checklistSheet = excelReader.getSheet(TABLE_CHECKLIST);
+		try
+		{
+			Iterator<Tuple> it = checklistSheet.iterator();
+			int rownr = 0;
+			// skip first row, retrieve cohorts using protocol id
+			if (!it.hasNext()) throw new IOException("expected row, but reached end of sheet: " + TABLE_CHECKLIST);
+			it.next();
+			++rownr;
+
+			if (!it.hasNext()) throw new IOException("missing header row #1");
+			it.next(); // skip formids
+			++rownr;
+			if (!it.hasNext()) throw new IOException("missing header row #2");
+			Tuple header2 = it.next();
+			++rownr;
+			if (!it.hasNext()) throw new IOException("missing header row #3");
+			Tuple header3 = it.next();
+			++rownr;
+
+			String currentGroup = null;
+			while (it.hasNext())
+			{
+				++rownr;
+
+				ExcelTuple tuple = (ExcelTuple) it.next();
+				if (tuple.isBold(0))
+				{
+					currentGroup = tuple.getString(0);
+					continue;
+				}
+
+				String code = tuple.getString(0);
+				if (code == null)
+				{
+					logger.warn("missing code on row " + rownr + " in sheet '" + TABLE_CHECKLIST + "' (group="
+							+ currentGroup + ')');
+					continue;
+				}
+
+				Set<CohortTimePair> cohortTypeSet = new HashSet<CohortTimePair>();
+				final int cols = tuple.getNrCols();
+				for (int i = 1; i < cols; ++i)
+				{
+					String val = tuple.getString(i);
+					if (val != null && val.equalsIgnoreCase(VALUE_CHECKED))
+					{
+						String[] protocolIds = header2.getString(i).split(",");
+						for (String protocolId : protocolIds)
+							cohortTypeSet.add(new CohortTimePair(Integer.valueOf(protocolId), header3.getInt(i)));
+					}
+				}
+				questionnaireMatrix.add(currentGroup, code, cohortTypeSet);
+			}
+		}
+		finally
+		{
+			checklistSheet.close();
+		}
 	}
 }

@@ -22,6 +22,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.io.TupleWriter;
@@ -32,8 +33,10 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.KeyValueTuple;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -43,7 +46,15 @@ import com.google.gson.reflect.TypeToken;
  */
 public class ProtocolViewerController extends PluginModel<Entity>
 {
-	private static final long serialVersionUID = -6143910771849972946L;
+	private static final long serialVersionUID = 1L;
+
+	private static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
+	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
+	private static final String KEY_ACTION_VIEW = "plugin.catalogue.action.view";
+	private static final boolean DEFAULT_KEY_ACTION_VIEW = true;
+	private static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
+	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
+
 	/** Protocol viewer model */
 	private ProtocolViewer protocolViewer;
 
@@ -75,15 +86,35 @@ public class ProtocolViewerController extends PluginModel<Entity>
 		StringBuilder s = new StringBuilder();
 		s.append("<link rel=\"stylesheet\" href=\"css/protocolviewer.css\" type=\"text/css\">");
 		s.append("<link rel=\"stylesheet\" href=\"css/ui.dynatree.css\" type=\"text/css\">");
+		s.append("<link rel=\"stylesheet\" href=\"css/chosen.css\" type=\"text/css\">");
 		s.append("<script type=\"text/javascript\" src=\"js/protocolviewer.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.dynatree.min.js\"></script>");
 		s.append("<script type=\"text/javascript\" src=\"js/jquery.fileDownload-min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/jquery.validate.min.js\"></script>");
+		s.append("<script type=\"text/javascript\" src=\"js/chosen.jquery.min.js\"></script>");
 		return s.toString();
+	}
+
+	private boolean getMolgenisSettingFlag(String key, boolean defaultValue)
+	{
+		try
+		{
+			MolgenisSettings molgenisSettings = ApplicationContextProvider.getApplicationContext().getBean(
+					MolgenisSettings.class);
+			String property = molgenisSettings.getProperty(key, Boolean.toString(defaultValue));
+			return Boolean.valueOf(property);
+		}
+		catch (NoSuchBeanDefinitionException e)
+		{
+			logger.warn(e);
+			return defaultValue;
+		}
 	}
 
 	@Override
 	public Show handleRequest(Database db, MolgenisRequest request, OutputStream out) throws Exception
 	{
+
 		if (out == null)
 		{
 			this.handleRequest(db, request);
@@ -343,6 +374,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 	public void reload(Database db)
 	{
 		List<DataSet> dataSets;
+
 		try
 		{
 			dataSets = db.query(DataSet.class).find();
@@ -368,6 +400,11 @@ public class ProtocolViewerController extends PluginModel<Entity>
 			jsDataSets = Collections.emptyList();
 		}
 		this.protocolViewer.setDataSets(jsDataSets);
+
+		this.protocolViewer.setEnableDownloadAction(getMolgenisSettingFlag(KEY_ACTION_DOWNLOAD,
+				DEFAULT_KEY_ACTION_DOWNLOAD));
+		this.protocolViewer.setEnableViewAction(getMolgenisSettingFlag(KEY_ACTION_VIEW, DEFAULT_KEY_ACTION_VIEW));
+		this.protocolViewer.setEnableOrderAction(getMolgenisSettingFlag(KEY_ACTION_ORDER, DEFAULT_KEY_ACTION_ORDER));
 	}
 
 	private List<Category> findCategories(Database db, ObservableFeature feature) throws DatabaseException

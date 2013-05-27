@@ -11,7 +11,7 @@
 	<repositories>
 	  <repository>
 	    <id>enonic</id>
-	    <url>http://repo.enonic.com/maven</url>
+	    <url>http://repo.enonic.com/artifactory/public/</url>
 	  </repository>
 	</repositories>
 
@@ -63,7 +63,6 @@
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-webmvc</artifactId>
 		    <version>3.2.2.RELEASE</version>
-		    <scope>test</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>

@@ -17,7 +17,7 @@ a img {
 #container {
 	position:relative; /* needed for footer positioning*/
 	height:100%;
-	width: 95%;
+	width: 98%;
 	border-spacing: 5px;
 	margin: 0 auto 0 auto;
 }
@@ -159,4 +159,12 @@ td {
 #spinner .modal-body-inner {
 	width: 32px;
 	margin:10px auto;
+}
+
+.form-horizontal .control-group {
+	margin-bottom: 0px !important;
+}
+
+.alert {
+	margin-bottom: 0px;
 }

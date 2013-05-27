@@ -1,25 +1,19 @@
 package org.molgenis;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -49,15 +43,12 @@ import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
-import org.molgenis.generators.db.FillMetadataGen;
-import org.molgenis.generators.db.JDBCDatabaseGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.JpaDatabaseGen;
 import org.molgenis.generators.db.JpaMapperGen;
 import org.molgenis.generators.db.MapperDecoratorGen;
 import org.molgenis.generators.db.MapperSecurityDecoratorGen;
-import org.molgenis.generators.db.MultiqueryMapperGen;
-import org.molgenis.generators.db.PStatementMapperGen;
+import org.molgenis.generators.db.MolgenisDatabasePopulatorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
@@ -67,6 +58,7 @@ import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
+import org.molgenis.generators.server.EntityServiceGen;
 import org.molgenis.generators.server.FrontControllerGen;
 import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.MolgenisGuiServiceGen;
@@ -75,13 +67,6 @@ import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.generators.sql.CountPerEntityGen;
 import org.molgenis.generators.sql.CountPerTableGen;
-import org.molgenis.generators.sql.DerbyCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.FillMetadataTablesGen;
-import org.molgenis.generators.sql.HSqlCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.MySqlAlterSubclassPerTableGen;
-import org.molgenis.generators.sql.MySqlCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.OracleCreateSubclassPerTableGen;
-import org.molgenis.generators.sql.PSqlCreateSubclassPerTableGen;
 import org.molgenis.generators.ui.EasyPluginControllerGen;
 import org.molgenis.generators.ui.FormControllerGen;
 import org.molgenis.generators.ui.HtmlFormGen;
@@ -89,7 +74,9 @@ import org.molgenis.generators.ui.MenuControllerGen;
 import org.molgenis.generators.ui.PluginControllerGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
-import org.molgenis.util.cmdline.CmdLineException;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * MOLGENIS generator. Run this to fire up all the generators. Optionally add {@link org.molgenis.MolgenisOptions}
@@ -113,14 +100,6 @@ public class Molgenis
 				if (args[2].equals("--generatetests"))
 				{
 					new Molgenis(args[0], args[1]).generateTests();
-				}
-				else if (args[2].equals("--updatedb"))
-				{
-					new Molgenis(args[0], args[1]).updateDb(false);
-				}
-				else if (args[2].equals("--updatedbfillmeta"))
-				{
-					new Molgenis(args[0], args[1]).updateDb(true);
 				}
 				else
 				{
@@ -277,6 +256,7 @@ public class Molgenis
 					generators.add(new DatabaseConfigGen());
 				}
 				generators.add(new DataTypeGen());
+				generators.add(new EntityServiceGen());
 				generators.add(new JpaMapperGen());
 
 				if (options.generate_persistence)
@@ -286,75 +266,14 @@ public class Molgenis
 			}
 			else
 			{
-				// DATABASE
-				// mysql.org
-				if (options.db_driver.equals("com.mysql.jdbc.Driver"))
-				{
-					generators.add(new MySqlCreateSubclassPerTableGen());
-					generators.add(new MySqlAlterSubclassPerTableGen());
-					// use multiquery optimization
-					if (options.mapper_implementation.equals(MapperImplementation.MULTIQUERY))
-					{
-						generators.add(new JDBCDatabaseGen());
-						generators.add(new DatabaseConfigGen());
-						generators.add(new DataTypeGen());
-						generators.add(new MultiqueryMapperGen());
-					}
-					else if (options.mapper_implementation.equals(MapperImplementation.PREPARED_STATEMENT))
-					{
-						generators.add(new JDBCDatabaseGen());
-						generators.add(new DatabaseConfigGen());
-						generators.add(new DataTypeGen());
-						generators.add(new PStatementMapperGen());
-					}
-				} // hsqldb.org
-				else if (options.db_driver.equals("oracle.jdbc.driver.OracleDriver"))
-				{
-					generators.add(new OracleCreateSubclassPerTableGen());
-					generators.add(new JDBCDatabaseGen());
-					generators.add(new DatabaseConfigGen());
-					generators.add(new DataTypeGen());
-					generators.add(new PStatementMapperGen());
-				}
-				else if (options.db_driver.equals("org.hsqldb.jdbcDriver"))
-				{
-					logger.info("HsqlDB generators ....");
-					generators.add(new JDBCDatabaseGen());
-					generators.add(new DatabaseConfigGen());
-					generators.add(new DataTypeGen());
-					generators.add(new HSqlCreateSubclassPerTableGen());
-					generators.add(new PStatementMapperGen());
-				} // postgresql
-				else if (options.db_driver.equals("org.postgresql.Driver"))
-				{
-					generators.add(new PSqlCreateSubclassPerTableGen());
-					generators.add(new PStatementMapperGen());
-				} // h2database.com, branch of hsqldb?
-				else if (options.db_driver.equals("org.h2.Driver"))
-				{
-					generators.add(new HSqlCreateSubclassPerTableGen());
-					generators.add(new PStatementMapperGen());
-				} // derby, not functional ignore.
-				else if (options.db_driver.equals("org.apache.derby.jdbc.EmbeddedDriver"))
-				{
-					generators.add(new DerbyCreateSubclassPerTableGen());
-				}
-				else
-				{
-					logger.warn("Unknown database driver " + options.db_driver);
-				}
-
-				// test
-				generators.add(new JDBCMetaDatabaseGen());
 				// SQL
 				generators.add(new CountPerEntityGen());
 				generators.add(new CountPerTableGen());
-				generators.add(new FillMetadataTablesGen());
 			}
 
 			if (options.generate_metadata)
 			{
-				generators.add(new FillMetadataGen());
+				generators.add(new MolgenisDatabasePopulatorGen());
 			}
 			// authorization
 			if (!options.auth_loginclass.endsWith("SimpleLogin"))
@@ -532,42 +451,32 @@ public class Molgenis
 			deleteContentOfDirectory(new File(options.output_sql));
 		}
 
-		List<Thread> threads = new ArrayList<Thread>();
-		for (final Generator g : generators)
+		final int nrCores = Runtime.getRuntime().availableProcessors();
+		ExecutorService executorService = Executors.newFixedThreadPool(nrCores);
+		try
 		{
-			Runnable runnable = new Runnable()
+			executorService.invokeAll(Lists.transform(generators, new Function<Generator, Callable<Boolean>>()
 			{
-
 				@Override
-				public void run()
+				@Nullable
+				public Callable<Boolean> apply(@Nullable final Generator generator)
 				{
-					try
+					return generator != null ? new Callable<Boolean>()
 					{
-						g.generate(model, options);
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-						throw new RuntimeException(e);
-					}
-				}
-			};
-			// executor.execute(runnable);
-			Thread thread = new Thread(runnable);
-			thread.start();
-			threads.add(thread);
-		}
 
-		// wait for all threads to complete
-		for (Thread thread : threads)
+						@Override
+						public Boolean call() throws Exception
+						{
+							generator.generate(model, options);
+							return true;
+						}
+					} : null;
+				}
+			}));
+		}
+		finally
 		{
-			try
-			{
-				thread.join();
-			}
-			catch (InterruptedException ignore)
-			{
-			}
+			executorService.shutdown();
 		}
 
 		logger.info("Generation completed at " + new Date());
@@ -605,177 +514,6 @@ public class Molgenis
 		}
 		return result;
 
-	}
-
-	/**
-	 * Load the generated SQL into the database.
-	 * 
-	 * Warning: this will overwrite any existing data in the database!.
-	 * 
-	 * @throws SQLException
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws CmdLineException
-	 */
-	public void updateDb() throws SQLException, FileNotFoundException, IOException
-	{
-		updateDb(false);
-	}
-
-	public void updateDb(boolean filldb) throws SQLException, FileNotFoundException, IOException
-	{
-
-		boolean ask = false;
-
-		// ask for confirmation that the database can be updated
-		// TODO: Use or throw away! Make a decision.
-		while (ask)
-		{
-			logger.info("Are you sure that you want overwrite database " + options.db_uri
-					+ "?\n All existing data will be overwritten. \nAnswer 'y' or 'n'.\n");
-			StringBuilder answerBuilder = new StringBuilder();
-			int c;
-			while ((c = System.in.read()) != 13)
-			{
-				answerBuilder.append((char) c);
-			}
-			String answer = answerBuilder.toString().trim();
-			if (answer.trim().equals("y"))
-			{
-				ask = false;
-			}
-			else if (answer.equals("n"))
-			{
-				logger.info("MOLGENIS database update canceled.\n");
-				return;
-			}
-			else
-			{
-				logger.info("You must answer 'y' or 'n'.");
-			}
-		}
-
-		// start loading
-		BasicDataSource data_src = new BasicDataSource();
-		Statement stmt = null;
-		Connection conn = null;
-		try
-		{
-			data_src = new BasicDataSource();
-			data_src.setDriverClassName(options.db_driver);
-			data_src.setUsername(options.db_user);
-			data_src.setPassword(options.db_password);
-			data_src.setUrl(options.db_uri);
-
-			conn = data_src.getConnection();
-			String create_tables_file_str = "create_tables.sql";
-
-			// READ THE FILE
-			StringBuilder create_tables_sqlBuilder = new StringBuilder();
-			try
-			{
-				BufferedReader in = new BufferedReader(new InputStreamReader(Thread.currentThread()
-						.getContextClassLoader().getResourceAsStream(create_tables_file_str), Charset.forName("UTF-8")));
-
-				try
-				{
-					String line;
-					while ((line = in.readLine()) != null)
-					{
-						create_tables_sqlBuilder.append(line).append('\n');
-					}
-				}
-				finally
-				{
-					IOUtils.closeQuietly(in);
-				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-
-			if (filldb && StringUtils.isNotEmpty(this.options.getAuthLoginclass()))
-			{
-				String insert_metadata_file = "insert_metadata.sql";
-				logger.debug("using file " + insert_metadata_file);
-
-				// READ THE FILE
-				try
-				{
-					BufferedReader in = new BufferedReader(new InputStreamReader(Thread.currentThread()
-							.getContextClassLoader().getResourceAsStream(insert_metadata_file),
-							Charset.forName("UTF-8")));
-					try
-					{
-						String line;
-						while ((line = in.readLine()) != null)
-						{
-							create_tables_sqlBuilder.append(line).append('\n');
-						}
-					}
-					finally
-					{
-						IOUtils.closeQuietly(in);
-					}
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-
-			stmt = conn.createStatement();
-			boolean error = false;
-			logger.info("Updating database....");
-			int i = 0;
-
-			String create_tables_sql = create_tables_sqlBuilder.toString();
-			for (String command : create_tables_sql.split(";"))
-			{
-				if (command.trim().length() > 0)
-				{
-					try
-					{
-						logger.debug(command.trim() + ";");
-						stmt.executeUpdate(command.trim());
-
-						if (i++ % 10 == 0)
-						{
-							logger.debug(".");
-						}
-					}
-					catch (Exception e)
-					{
-						error = true;
-						logger.error("\nERROR executing command: " + command + ";\n" + e.getMessage());
-					}
-
-				}
-			}
-
-			if (error)
-			{
-				logger.debug("Errors occurred. Make sure you provided sufficient rights! Inside mysql paste the following, assuming your database is called 'molgenis':"
-						+ "\ncreate database molgenis; "
-						+ "\ngrant all privileges on molgenis.* to molgenis@localhost "
-						+ "identified by 'molgenis';"
-						+ "\nflush privileges;" + "\nuse molgenis;");
-			}
-
-			logger.info("MOLGENIS database updated succesfully");
-		}
-		finally
-		{
-			try
-			{
-				if (stmt != null) stmt.close();
-			}
-			finally
-			{
-				if (conn != null) conn.close();
-			}
-		}
 	}
 
 	/**

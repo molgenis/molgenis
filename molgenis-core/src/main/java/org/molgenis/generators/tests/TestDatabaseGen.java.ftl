@@ -17,14 +17,9 @@
 
 package ${package};
 
-import app.DatabaseFactory;
-<#if databaseImp != 'jpa'>	
-import app.JDBCDatabase;
-<#else>
 import javax.persistence.*;
 import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.db.jpa.JpaUtil;
-</#if>
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -37,6 +32,7 @@ import java.util.Locale;
 import org.apache.log4j.Logger;
 
 import org.molgenis.Molgenis;
+import org.molgenis.util.DatabaseUtil;
 import org.molgenis.util.Entity;
 import org.molgenis.util.SimpleTuple;
 import org.molgenis.framework.db.Database;
@@ -60,13 +56,11 @@ public class TestDatabase
 	DateFormat dateFormat = new SimpleDateFormat(SimpleTuple.DATEFORMAT, Locale.US);
 	DateFormat dateTimeFormat = new SimpleDateFormat(SimpleTuple.DATETIMEFORMAT, Locale.US);	 
 
-<#if databaseImp = 'jpa'>
 	private static java.util.Map<String, Object> configOverrides = new java.util.HashMap<String, Object>();
 	static {
 		configOverrides.put("javax.persistence.jdbc.url", "${options.dbUri}_test");
 		configOverrides.put("hibernate.hbm2ddl.auto", "create");		
 	}
-</#if>
 
 	/*
 	 * Create a database to use
@@ -76,22 +70,11 @@ public class TestDatabase
 	{
 		try
 		{
-		//bad: test expects an existing, but empty database.
-		//this means the previous test will need to end with e.g.
-		//new emptyDatabase(new MolgenisServlet().getDatabase(), false);	
-		<#if databaseImp = 'jpa'>		
-			db = DatabaseFactory.create(configOverrides);
+			//bad: test expects an existing, but empty database.
+			//this means the previous test will need to end with e.g.
+			//new emptyDatabase(new MolgenisServlet().getDatabase(), false);	
+			db = DatabaseUtil.createDatabase(configOverrides);
 			JpaUtil.createTables(db, true, configOverrides);
-		<#else>
-			<#if db_mode = 'standalone'>
-			//db = new MolgenisServlet().getDatabase();
-                        db = DatabaseFactory.createTest("${options.molgenis_properties}"); //correct?	
-			<#else>
-			db = DatabaseFactory.createTest("${options.molgenis_properties}");	
-			//create the database
-			new Molgenis("${options.molgenis_properties}").updateDb();
-			</#if>
-		</#if>	
 		}
 		catch (Exception e)
 		{
@@ -99,12 +82,11 @@ public class TestDatabase
 		}
 		logger.info("Database created");
 	}
-<#if databaseImp = 'jpa'>		
+	
 	@AfterClass(alwaysRun = true)
 	public static void destroy() {
 		JpaUtil.dropTables((JpaDatabase)db, configOverrides);
 	}	
-</#if>		
 		
 <#list entities as entity><#if !entity.abstract && !entity.association>
 <#assign dependson = entity.getDependencies()/>
@@ -168,25 +150,6 @@ public class TestDatabase
 		assertEquals(total, q.count());
 		List<${JavaName(entity)}> entitiesDb = q.sortASC("${pkey(entity).name}").find();
 		assertEquals(total, entitiesDb.size());
-<#if databaseImp != 'jpa'>		
-		//compare entities against insert (assumes sorting by id)
-		for(int i = 0; i < total; i++)
-		{
-			assertNotNull(entities.get(i).get${JavaName(pkey(entity))}());
-	<#list entity.allFields as f><#if pkey(entity).name != f.name && !f.auto><#if f.type == "date">
-			//check formatted because of milliseconds rounding
-			assertEquals(dateFormat.format(entities.get(i).get${JavaName(f)}()), dateFormat.format(entitiesDb.get(i).get${JavaName(f)}()));
-	<#elseif f.type == "datetime">
-			//check formatted because of milliseconds rounding
-			assertEquals(dateTimeFormat.format(entities.get(i).get${JavaName(f)}()),dateTimeFormat.format(entitiesDb.get(i).get${JavaName(f)}()));
-	<#elseif f.type == "xref" || f.type == "mref">
-			assertEquals(entities.get(i).get${JavaName(f)}_${JavaName(f.xrefField)}(), entitiesDb.get(i).get${JavaName(f)}_${JavaName(f.xrefField)}());
-	<#else>
-			assertEquals(entities.get(i).get${JavaName(f)}(), entitiesDb.get(i).get${JavaName(f)}());
-	</#if>
-	</#if></#list>		
-		}	
-</#if>
 		
 		//test the query capabilities by finding on all fields
 		for(${JavaName(entity)} entity: entitiesDb)
@@ -194,7 +157,7 @@ public class TestDatabase
 <#list entity.allFields as f>
 <#assign types = ["int", "string", "text", "varchar", "xref"]>
 <#if types?seq_contains(f.type)>
-<#if f.type == "xref" && databaseImp != 'jpa'>
+<#if f.type == "xref">
 	<#assign fieldGetter = JavaName(f) + "_" + JavaName(f.xrefField)>
 <#else>
 	<#assign fieldGetter = JavaName(f)>
@@ -244,7 +207,7 @@ public class TestDatabase
 				List<${JavaName(entity)}> results = q2.find();
 				for(${JavaName(entity)} r: results)
 				{
-					assertTrue(org.apache.commons.lang.StringUtils.startsWith(r.get${JavaName(f)}(), entity.get${JavaName(f)}()));
+					assertTrue(org.apache.commons.lang3.StringUtils.startsWith(r.get${JavaName(f)}(), entity.get${JavaName(f)}()));
 				}
 			}
 <#elseif f.type == "int">
@@ -342,7 +305,4 @@ public class TestDatabase
           value = value.substring(0, length-1);
        return value;
 	}
-	
-	 
-	 
 }

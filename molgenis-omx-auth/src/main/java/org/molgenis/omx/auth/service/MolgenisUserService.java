@@ -1,20 +1,19 @@
 package org.molgenis.omx.auth.service;
 
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
-import org.molgenis.omx.auth.util.PasswordHasher;
-import org.molgenis.omx.auth.vo.MolgenisUserSearchCriteriaVO;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.util.PasswordHasher;
+import org.molgenis.omx.auth.vo.MolgenisUserSearchCriteriaVO;
 
 public class MolgenisUserService
 {
@@ -70,9 +69,8 @@ public class MolgenisUserService
 	 * @param role
 	 * @return list of group ids
 	 * @throws DatabaseException
-	 * @throws ParseException
 	 */
-	public List<Integer> findGroupIds(MolgenisRole role) throws DatabaseException, ParseException
+	public List<Integer> findGroupIds(MolgenisRole role) throws DatabaseException
 	{
 		List<Integer> roleIdList = new ArrayList<Integer>();
 		roleIdList.add(role.getId());

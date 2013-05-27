@@ -26,6 +26,7 @@ import java.text.ParseException;
 
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
+import org.molgenis.framework.security.Login;
 import org.molgenis.framework.security.SimpleLogin;
 
 import org.molgenis.framework.db.MapperDecorator;
@@ -211,22 +212,14 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	//TODO: Move this to Login interface
 	private QueryRule[] addRowLevelSecurityFilters(String permission, QueryRule ...rules) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin().isAuthenticated() && this.getDatabase().getLogin().getUserName().equals("admin"))
+		if (this.getDatabase().getLogin().isAuthenticated() && this.getDatabase().getLogin().getUserName().equals(Login.USER_ADMIN_NAME))
 			return rules;
 
 		MolgenisUserService service = MolgenisUserService.getInstance(this.getDatabase());
-		MolgenisUser user           = service.findById(this.getDatabase().getLogin().getUserId());
+		MolgenisUser user = service.findById(this.getDatabase().getLogin().getUserId());
 		
-		List<Integer> roleIdList;
-		try
-		{
-			roleIdList              = service.findGroupIds(user);
-		}
-		catch (ParseException e)
-		{
-			return rules;
-		}
-
+		List<Integer> roleIdList = service.findGroupIds(user);
+		
 		List<QueryRule> rulesList = new ArrayList<QueryRule>();
 		Collections.addAll(rulesList, rules);
 		if (permission.equals(${entityClass}.CANREAD))

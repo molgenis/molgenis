@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified"
+	elementFormDefault="qualified" targetNamespace="urn:hl7-org:v3"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="valueSets">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" name="valueSet">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="code">
+								<xs:complexType>
+									<xs:attribute name="code" type="xs:string" use="required" />
+									<xs:attribute name="displayName" type="xs:string"
+										use="required" />
+									<xs:attribute name="codeSystemName" type="xs:string"
+										use="required" />
+									<xs:attribute name="codeSystem" type="xs:string"
+										use="optional" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="name" type="xs:string" use="required" />
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

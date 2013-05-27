@@ -3,16 +3,22 @@ package org.molgenis.omx;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.util.WebAppUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
+
+	@Autowired
+	@Qualifier("unauthorizedDatabase")
+	private Database database;
 
 	@Override
 	public String getProperty(String key)
@@ -28,7 +34,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		List<RuntimeProperty> properties;
 		try
 		{
-			properties = WebAppUtil.getDatabase().find(RuntimeProperty.class, propertyRule);
+			properties = database.find(RuntimeProperty.class, propertyRule);
 		}
 		catch (DatabaseException e)
 		{
@@ -54,7 +60,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		property.setValue(value);
 		try
 		{
-			WebAppUtil.getDatabase().add(property);
+			database.add(property);
 		}
 		catch (DatabaseException e)
 		{

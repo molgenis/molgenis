@@ -2,8 +2,13 @@ package org.molgenis.util.tuple;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.molgenis.util.AbstractEntity;
 import org.molgenis.util.ListEscapeUtils;
 
 /**
@@ -13,6 +18,7 @@ import org.molgenis.util.ListEscapeUtils;
 public abstract class AbstractTuple implements Tuple
 {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(AbstractTuple.class);
 
 	@Override
 	public boolean hasColNames()
@@ -135,18 +141,37 @@ public abstract class AbstractTuple implements Tuple
 	public Date getDate(String colName)
 	{
 		Object obj = get(colName);
-		if (obj == null) return null;
-		else if (obj instanceof Date) return (Date) obj;
-		else return Date.valueOf(obj.toString());
+		return objToDate(obj);
 	}
 
 	@Override
 	public Date getDate(int col)
 	{
 		Object obj = get(col);
+		return objToDate(obj);
+	}
+
+	private Date objToDate(Object obj)
+	{
+		Date result = null;
 		if (obj == null) return null;
 		else if (obj instanceof Date) return (Date) obj;
-		else return Date.valueOf(obj.toString());
+		else try
+		{
+			try
+			{
+				result = Date.valueOf(obj.toString());
+			}
+			catch (IllegalArgumentException e)
+			{
+				result = AbstractEntity.string2date(obj.toString());
+			}
+		}
+		catch (ParseException e)
+		{
+			logger.warn("unable to parse input tot SQL Date: " + obj.toString());
+		}
+		return result;
 	}
 
 	@Override
@@ -179,6 +204,29 @@ public abstract class AbstractTuple implements Tuple
 		else if (obj instanceof List<?>) return (List<String>) obj;
 		else if (obj instanceof String) return ListEscapeUtils.toList((String) obj);
 		else return ListEscapeUtils.toList(obj.toString());
+	}
+
+	// TODO: Improve code of getIntList (maybe merge with getList above?)
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Integer> getIntList(String colName)
+	{
+
+		Object obj = get(colName);
+		if (obj == null) return null;
+		else if (obj instanceof List<?>)
+		{
+			// it seems we need explicit cast to Int sometimes
+			ArrayList<Integer> intList = new ArrayList<Integer>();
+			for (Object o : (List<?>) obj)
+			{
+				if (o instanceof Integer) intList.add((Integer) o);
+				else if (o instanceof String) intList.add(Integer.parseInt((String) o));
+			}
+			return intList;
+		}
+		else if (obj instanceof Integer) return new ArrayList<Integer>(Arrays.asList((Integer) obj));
+		else return null;
 	}
 
 	@SuppressWarnings("unchecked")

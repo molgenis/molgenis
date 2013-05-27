@@ -2,6 +2,7 @@ package org.molgenis.omicsconnect;
 
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import app.DatabaseConfig;
+import org.molgenis.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
@@ -35,6 +36,13 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+	}
+
+	@Bean
+	public ApplicationListener<?> databasePopulator()
+	{
+		return new WebAppDatabasePopulator();
 	}
 
 	/**

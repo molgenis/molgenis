@@ -18,7 +18,7 @@ public class Workflow
 		{
 			for (String value : s.parameters.values())
 			{
-				if (value.startsWith("user."))
+				if (value.startsWith(Parameters.USER_PREFIX))
 				{
 					result.add(value);
 				}
@@ -41,5 +41,14 @@ public class Workflow
 	public void setSteps(List<Step> steps)
 	{
 		this.steps = steps;
+	}
+
+	public Step getStep(String previousStepName)
+	{
+		for (Step step : this.steps)
+		{
+			if (previousStepName.equals(step.getName())) return step;
+		}
+		return null;
 	}
 }

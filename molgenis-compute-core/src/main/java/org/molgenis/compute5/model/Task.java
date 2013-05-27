@@ -13,8 +13,7 @@ import com.google.gson.Gson;
  */
 public class Task
 {
-	public static final String WORKDIR_COLUMN = "workdir";
-
+	public static final String TASKID_INDEX_COLUMN = "taskIdIndex";
 	public static String TASKID_COLUMN = "taskId";
 
 	// unique name of the task

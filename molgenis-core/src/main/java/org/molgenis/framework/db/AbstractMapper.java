@@ -42,12 +42,12 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 	public abstract E create();
 
 	/**
-	 * Method to build a list for Entity E. This allows the finder to pick a
-	 * more efficient list implementation than the generic lists.
+	 * Method to build a list for Entity E. This allows the finder to pick a more efficient list implementation than the
+	 * generic lists.
 	 * 
 	 * @param size
-	 *            of the list
-	 * @return list
+	 *            list (allocation) size
+	 * @return list EMPTY list of given (allocation) size
 	 */
 	@Override
 	public abstract List<E> createList(int size);
@@ -60,11 +60,9 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 	protected abstract void prepareFileAttachements(List<E> entities, File dir) throws IOException;
 
 	/**
-	 * helper method to do some actions after the transaction. For example:
-	 * write files to disk. FIXME make a listener?
+	 * helper method to do some actions after the transaction. For example: write files to disk. FIXME make a listener?
 	 * 
-	 * @return true if files were saved (will cause additional update to the
-	 *         database)
+	 * @return true if files were saved (will cause additional update to the database)
 	 * @throws IOException
 	 */
 	protected abstract boolean saveFileAttachements(List<E> entities, File dir) throws IOException;
@@ -92,8 +90,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 	public abstract int executeRemove(List<? extends E> entities) throws DatabaseException;
 
 	/**
-	 * Foreign key values may be only given via the 'label'. This function
-	 * allows resolves the underlying references for a list of entities.
+	 * Foreign key values may be only given via the 'label'. This function allows resolves the underlying references for
+	 * a list of entities.
 	 * 
 	 * @param entities
 	 * @throws DatabaseException
@@ -103,10 +101,9 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 	public abstract void resolveForeignKeys(List<E> entities) throws DatabaseException, ParseException;
 
 	/**
-	 * Helper method for storing multiplicative references. This function should
-	 * check wether any mref values have been newly selected or deselected. The
-	 * newly selected elements should be added, the deselected elements should
-	 * be removed (from the entity that holds the mrefs).
+	 * Helper method for storing multiplicative references. This function should check wether any mref values have been
+	 * newly selected or deselected. The newly selected elements should be added, the deselected elements should be
+	 * removed (from the entity that holds the mrefs).
 	 * 
 	 * @param entities
 	 * @throws DatabaseException

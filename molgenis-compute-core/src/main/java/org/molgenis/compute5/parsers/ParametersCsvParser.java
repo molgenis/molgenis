@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.molgenis.compute5.generators.TupleUtils;
 import org.molgenis.compute5.model.Parameters;
+import org.molgenis.compute5.model.Task;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
@@ -47,7 +48,7 @@ public class ParametersCsvParser
 		// solve the templates
 		TupleUtils.solve(targets.getValues());
 
-		// mark all columns as 'user.*'
+		// mark all columns as 'user_*'
 		int count = 0;
 		List<WritableTuple> userTargets = new ArrayList<WritableTuple>();
 		for (WritableTuple v : targets.getValues())
@@ -55,7 +56,7 @@ public class ParametersCsvParser
 			KeyValueTuple t = new KeyValueTuple();
 			for (String col : v.getColNames())
 			{
-				t.set("user." + col, v.get(col));
+				t.set(Parameters.USER_PREFIX + col, v.get(col));
 			}
 			t.set(Parameters.ID_COLUMN, count++);
 			userTargets.add(t);
@@ -87,14 +88,6 @@ public class ParametersCsvParser
 
 		// if no files to parse, then we're done
 		if (paramFileSet.isEmpty()) return targets;
-
-		// I think that this is redundant:
-		// // (2) ensure paramFileSet is in 'AbsoluteFile notation'
-		// Set<String> tempSet = new HashSet<String>();
-		// for (String s : paramFileSet)
-		// tempSet.add((new File(s)).getAbsoluteFile().toString());
-		// paramFileSet.clear();
-		// paramFileSet.addAll(tempSet);
 
 		// get a file to parse
 		String fString = paramFileSet.iterator().next();
@@ -128,8 +121,11 @@ public class ParametersCsvParser
 
 			// If path to workflow is relative then prepend its parent's path
 			// (f).
-			tupleLst = updateWorkflowPath(tupleLst, f);
+			tupleLst = updatePath(tupleLst, Parameters.WORKFLOW, f);
 
+			// same for output path
+//			tupleLst = updatePath(tupleLst, Parameters.WORKDIR_COLUMN, f);
+			
 			// get other param files we have to parse, and validate that all
 			// values in 'parameters' column equal. If file path is relative
 			// then prepend its parent's path (f)
@@ -324,11 +320,25 @@ public class ParametersCsvParser
 		return targets;
 	}
 
-	private static List<Tuple> asTuples(File f) throws FileNotFoundException
+	/**
+	 * (1) Parse file f as list of Tuples and (2) validate that no parameters
+	 * contain the 'step_param' separator
+	 * 
+	 * @param f
+	 * @return
+	 * @throws IOException 
+	 */
+	private static List<Tuple> asTuples(File f) throws IOException
 	{
 		List<Tuple> tLst = new ArrayList<Tuple>();
 		for (Tuple t : new CsvReader(f))
+		{
 			tLst.add(t);
+			
+			for (String p : t.getColNames())
+				if (p.contains(Parameters.STEP_PARAM_SEP)) throw new IOException("Parsing " + f.getName()
+						+ " failed: column names may not contain '" + Parameters.STEP_PARAM_SEP + "'");
+		}
 		return tLst;
 	}
 
@@ -386,7 +396,9 @@ public class ParametersCsvParser
 					{
 						if (!t.getString(colName).equals(paramFilesString)) throw new IOException("Values in '"
 								+ Parameters.PARAMETER_COLUMN + "' column are not equal in file '" + f.toString()
-								+ "', please fix.\nCompare " + t.getString(colName) + "\nwith\n" + paramFilesString);
+								+ "', please fix:\n'" + t.getString(colName) + "' is different from '" + paramFilesString + "'.\n"
+								+ "You could put all values 'comma-separated' in each cell and repeat that on each line in your file, e.g.:\n" +
+								"\"" + t.getString(colName) + "," + paramFilesString + "\"");
 					}
 				}
 			}
@@ -398,24 +410,24 @@ public class ParametersCsvParser
 
 		return fileSet;
 	}
-	
 
 	/**
-	 * If path to workflow file relative, then prepend parent's path (f)
+	 * If path to 'column' (eg workflow) file relative, then prepend parent's path (f)
+	 * 
 	 * @param tupleLst
 	 * @return
 	 */
-	private static List<Tuple> updateWorkflowPath(List<Tuple> tupleLst, File f)
+	private static List<Tuple> updatePath(List<Tuple> tupleLst, String column, File f)
 	{
 		List<Tuple> tupleLstUpdated = new ArrayList<Tuple>();
-		
+
 		for (Tuple t : tupleLst)
 		{
 			WritableTuple wt = new KeyValueTuple(t);
-			
+
 			for (String colName : t.getColNames())
 			{
-				if (colName.equals(Parameters.WORKFLOW_COLUMN_INITIAL))
+				if (colName.equals(column))
 				{
 					List<String> wfLst = new ArrayList<String>();
 					// iterate through list and add absolute paths to
@@ -433,23 +445,24 @@ public class ParametersCsvParser
 							wfLst.add(f.getParent() + File.separator + fString);
 						}
 					}
-					
+
 					// put updated paths back in tuple
-					if (wfLst.size() == 1){
+					if (wfLst.size() == 1)
+					{
 						wt.set(colName, wfLst.get(0));
-					} else {
+					}
+					else
+					{
 						wt.set(colName, wfLst);
 					}
 				}
 			}
-			
+
 			tupleLstUpdated.add(wt);
 		}
-		
-		
+
 		return tupleLstUpdated;
 	}
-
 
 	public static Parameters parseMorris(List<File> filesArray) throws IOException
 	{

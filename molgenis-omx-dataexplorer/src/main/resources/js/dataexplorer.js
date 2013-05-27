@@ -1,117 +1,6 @@
 (function($, w) {
 	"use strict";
 
-	var molgenis = w.molgenis = w.molgenis || {};
-
-	molgenis.RestClient = function RestClient(cache) {
-		this.cache = cache === false ? null : [];
-	};
-
-	molgenis.RestClient.prototype.get = function(resourceUri, expands) {
-		var apiUri = this._toApiUri(resourceUri, expands);
-		var cachedResource = this.cache && this.cache[apiUri];
-		if (cachedResource) {
-			console.log('retrieved ' + apiUri + ' from cache', cachedResource);
-		} else {
-			var _this = this;
-			$.ajax({
-				dataType : 'json',
-				url : apiUri,
-				async : false,
-				success : function(resource) {
-					console.log('retrieved ' + apiUri + ' from server', resource);
-					_this._cachePut(resourceUri, resource, expands);
-					cachedResource = resource;
-				}
-			});
-		}
-		return cachedResource;
-	};
-
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, expands, callback) {
-		var apiUri = this._toApiUri(resourceUri, expands);
-		var cachedResource = this._cacheGet[apiUri];
-		if (cachedResource) {
-			console.log('retrieved ' + apiUri + ' from cache', cachedResource);
-			callback(cachedResource);
-		} else {
-			var _this = this;
-			$.ajax({
-				dataType : 'json',
-				url : apiUri,
-				async : true,
-				success : function(resource) {
-					console.log('retrieved ' + apiUri + ' from server', resource);
-					_this._cachePut(resourceUri, resource, expands);
-					callback(resource);
-				}
-			});
-		}
-	};
-
-	molgenis.RestClient.prototype._cacheGet = function(resourceUri) {
-		return this.cache !== null ? this.cache[resourceUri] : null;
-	};
-
-	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource, expands) {
-		var apiUri = this._toApiUri(resourceUri, expands);
-		this.cache[apiUri] = resource;
-		if (resource.items) {
-			for ( var i = 0; i < resource.items.length; i++) {
-				var nestedResource = resource.items[i];
-				this.cache[nestedResource.href] = nestedResource;
-			}
-		}
-		if (expands) {
-			this.cache[resourceUri] = resource;
-			for ( var i = 0; i < expands.length; i++) {
-				var expand = resource[expands[i]];
-				this.cache[expand.href] = expand;
-				if (expand.items) {
-					for ( var j = 0; j < expand.items.length; j++) {
-						var expandedResource = expand.items[j];
-						this.cache[expandedResource.href] = expandedResource;
-					}
-				}
-			}
-		}
-	};
-
-	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands) {
-		return expands ? resourceUri + '?expand=' + expands.join(',') : resourceUri;
-	};
-}($, window.top));
-
-(function($, w) {
-	"use strict";
-
-	var molgenis = w.molgenis = w.molgenis || {};
-
-	molgenis.SearchClient = function SearchClient() {
-	};
-
-	molgenis.SearchClient.prototype.search = function(searchRequest, callback) {
-		var jsonRequest = JSON.stringify(searchRequest);
-		console.log("Call SearchService json=" + jsonRequest);
-
-		$.ajax({
-			type : "POST",
-			url : '/search',
-			data : jsonRequest,
-			contentType : 'application/json',
-			success : function(searchResponse) {
-				if (searchResponse.errorMessage) {
-					alert(searchResponse.errorMessage);
-				}
-				callback(searchResponse);
-			}
-		});
-	};
-}($, window.top));
-
-(function($, w) {
-	"use strict";
-
 	var ns = w.molgenis = w.molgenis || {};
 
 	var resultsTable = null;
@@ -256,9 +145,6 @@
 					onNodeSelectionChange(this.getSelectedNodes());
 				},
 				onPostInit : function() {
-					$("#feature-selection-container").accordion({
-						collapsible : true
-					});
 					onNodeSelectionChange(this.getSelectedNodes());
 				}
 			});
@@ -298,14 +184,20 @@
 	};
 
 	ns.updateObservationSetsTable = function() {
-		ns.search(function(searchResponse) {
-			var maxRowsPerPage = resultsTable.getMaxRows();
-			var nrRows = searchResponse.totalHitCount;
+		if (selectedFeatures.length > 0) {
+			ns.search(function(searchResponse) {
+				var maxRowsPerPage = resultsTable.getMaxRows();
+				var nrRows = searchResponse.totalHitCount;
 
-			resultsTable.build(searchResponse, selectedFeatures, restApi);
+				resultsTable.build(searchResponse, selectedFeatures, restApi);
 
-			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
-		});
+				ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
+			});
+		} else {
+			$('#data-table-header').html('no features selected');
+			$('#data-table-pager').empty();
+			$('#data-table').empty();
+		}
 	};
 
 	ns.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
@@ -422,13 +314,12 @@
 						values : [ $(this).val() ]
 					});
 				});
-				filter.datepicker();
 				break;
 			case "datetime":
 				if (config == null)
-					filter = $('<input type="datetime" autofocus="autofocus">');
+					filter = $('<input type="datetime-local" autofocus="autofocus">');
 				else
-					filter = $('<input type="datetime" autofocus="autofocus" value="' + config.values[0] + '">');
+					filter = $('<input type="datetime-local" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
@@ -575,9 +466,6 @@
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
-		$('#feature-filters-container').accordion('destroy').accordion({
-			collapsible : true
-		});
 
 		$('.feature-filter-edit').click(function() {
 			ns.openFeatureFilterDialog($(this).data('href'));

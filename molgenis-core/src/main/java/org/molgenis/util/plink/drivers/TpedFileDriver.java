@@ -22,7 +22,7 @@ public class TpedFileDriver implements PlinkFileParser
 {
 	private BufferedReader reader;
 	private File file;
-	private char separator;
+	private String separators;
 	private long nrElements;
 
 	/**
@@ -33,14 +33,19 @@ public class TpedFileDriver implements PlinkFileParser
 	 */
 	public TpedFileDriver(File tpedFile)
 	{
-		this(tpedFile, DEFAULT_FIELD_SEPARATOR);
+		this(tpedFile, DEFAULT_READ_FIELD_SEPARATORS);
 	}
 
 	public TpedFileDriver(File tpedFile, char separator)
 	{
+		this(tpedFile, String.valueOf(separator));
+	}
+	
+	public TpedFileDriver(File tpedFile, String separators)
+	{
 		if (tpedFile == null) throw new IllegalArgumentException("file is null");
 		this.file = tpedFile;
-		this.separator = separator;
+		this.separators = separators;
 		this.nrElements = -1l;
 	}
 
@@ -86,7 +91,7 @@ public class TpedFileDriver implements PlinkFileParser
 
 	private TpedEntry parseEntry(String line) throws IOException
 	{
-		StringTokenizer strTokenizer = new StringTokenizer(line, separator + "");
+		StringTokenizer strTokenizer = new StringTokenizer(line, separators);
 		try
 		{
 			String chromosome = strTokenizer.nextToken();

@@ -8,7 +8,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
-import org.molgenis.util.HandleRequestDelegationException;
 
 /**
  * Simple authentication and authorization interface that enables MOLGENIS
@@ -26,6 +25,21 @@ import org.molgenis.util.HandleRequestDelegationException;
  */
 public interface Login
 {
+	/** Administrator user name */
+	public static final String USER_ADMIN_NAME = "admin";
+
+	/** Anonymous guest user name */
+	public static final String USER_ANONYMOUS_NAME = "anonymous";
+
+	/** Anonymous guest user password */
+	public static final String USER_ANONYMOUS_PASSWORD = "anonymous";
+
+	/** Administration users group */
+	public static final String GROUP_SYSTEM_NAME = "system";
+
+	/** Normal users group */
+	public static final String GROUP_USERS_NAME = "AllUsers";
+
 	/**
 	 * Authenticate the user
 	 * 
@@ -37,9 +51,8 @@ public interface Login
 	 *            of user
 	 * @return true if succesfully authenticated
 	 * @throws Exception
-	 *             ,RedirectedException
 	 */
-	public boolean login(Database db, String name, String password) throws Exception, HandleRequestDelegationException;
+	public boolean login(Database db, String name, String password) throws Exception;
 
 	/**
 	 * Un-authenticate the user. Now the user will be perceived as 'guest'.
@@ -115,6 +128,17 @@ public interface Login
 	 * @throws DatabaseException
 	 */
 	public boolean canRead(ScreenController<?> screen) throws DatabaseException;
+
+	/**
+	 * Indicates whether the user has permissions to read data from this
+	 * implementation of ScreenModel
+	 * 
+	 * @param screen
+	 * @return read permission
+	 * @throws DatabaseException
+	 */
+	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
+			throws DatabaseException;
 
 	/**
 	 * Indicates whether the user has permissions to read data from this

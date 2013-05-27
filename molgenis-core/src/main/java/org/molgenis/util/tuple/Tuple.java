@@ -133,4 +133,11 @@ public interface Tuple extends Serializable
 	public List<String> getList(String colName);
 
 	public List<String> getList(int col);
+
+	/**
+	 * Retrieves the value of the designated column as List<Integer>
+	 * @param colName
+	 * @return
+	 */
+	public List<Integer> getIntList(String colName);
 }

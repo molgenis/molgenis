@@ -10,7 +10,7 @@ public class Protocol
 {
 	// reserved parameter names, used form system purposes
 	public static List<String> reservedNames = Arrays.asList(new String[]
-	{ "cores" });
+	{ Parameters.PATH, Parameters.WORKFLOW, Parameters.DEFAULTS, Parameters.PARAMETERS, Parameters.RUNDIR, Parameters.RUNID, Parameters.BACKEND, Parameters.DATABASE, Parameters.WALLTIME, Parameters.NODES, Parameters.PPN, Parameters.QUEUE, Parameters.MEMORY, Parameters.NOTAVAILABLE });
 
 	// unique name of the protocol
 	String name;
@@ -18,10 +18,14 @@ public class Protocol
 	// optional description of the protocol
 	String description;
 
-	// number of cores that this protocol needs
-	int cores = 4;
+	// resources
+	String walltime = "08:00:00";// walltime for protocol
+	String nodes = Integer.toString(1);// number of cores that this protocol needs
+	String ppn = "4";
+	String queue = "gcc";
+	String memory = "1Gb";
 
-	// list of inputs it expects from user.* or previousStep.*
+	// list of inputs it expects from user_* or previousStep_*
 	Set<Input> inputs = new HashSet<Input>();
 
 	// outputs that this protocol produces
@@ -87,14 +91,55 @@ public class Protocol
 		this.outputs = outputs;
 	}
 
-	public int getCores()
+	public String getNodes()
 	{
-		return cores;
+		return nodes;
 	}
 
-	public void setCores(int cores)
+	public void setNodes(String nodes)
 	{
-		this.cores = cores;
+		this.nodes = nodes;
 	}
+	
+	public String getWalltime()
+	{
+		return this.walltime;
+	}
+	
+	public void setWalltime(String walltime)
+	{
+		this.walltime = walltime;
+	}
+
+	public String getPpn()
+	{
+		return ppn;
+	}
+
+	public void setPpn(String ppn)
+	{
+		this.ppn = ppn;
+	}
+
+	public String getQueue()
+	{
+		return queue;
+	}
+
+	public void setQueue(String queue)
+	{
+		this.queue = queue;
+	}
+
+	public String getMemory()
+	{
+		return memory;
+	}
+
+	public void setMemory(String memory)
+	{
+		this.memory = memory;
+	}
+	
 
 }
