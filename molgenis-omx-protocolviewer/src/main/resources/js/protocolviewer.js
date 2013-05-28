@@ -69,7 +69,6 @@
 						key : this.href,
 						title : this.name,
 						tooltip : this.description,
-						icon : "../../img/filter-bw.png",
 					}, featureOpts));
 				});
 			}
@@ -149,7 +148,7 @@
 					if($.inArray(node.data.key, selectKeys) != -1) {
 						delete updatedNodes.select[node.data.key];
 					}
-					if($.inArray(subNode.data.key, unselectKeys) == -1) updatedNodes.unselect[node.data.key] = node;
+					if($.inArray(node.data.key, unselectKeys) == -1) updatedNodes.unselect[node.data.key] = node;
 				}
 			}
 		}
@@ -331,7 +330,6 @@
 								entityInfo = featureMap[nodes[i]];
 								options = {
 									isFolder : false,
-									icon : "../../img/filter-bw.png"
 								}
 							}else{
 								entityInfo = protocolMap[nodes[i]];
@@ -410,7 +408,6 @@
 						tooltip : feature.description,
 						isFolder : false,
 						expand : true,
-						icon : "../../img/filter-bw.png"
 					};
 					if($.inArray(feature.href, expandedNodes) != -1){
 						options.select = true;
@@ -574,20 +571,24 @@
 		var nodes = tree.getSelectedNodes();
 		if(search){
 			nodes = [];
-			var keys = Object.keys(selectedAllNodes);
+			var allNodes = {};
+			$.each(selectedAllNodes, function(key, node){
+				allNodes[key] = node;
+			});
+			var keys = Object.keys(allNodes);
 			if(updatedNodes.select != null) 
 				$.each(updatedNodes.select, function(key, node){
 					if($.inArray(key, keys) == -1){
-						selectedAllNodes[key] = node;
+						allNodes[key] = node;
 					}
 				});
 			if(updatedNodes.unselect != null) 
 				$.each(updatedNodes.unselect, function(key, node){
 					if($.inArray(key, keys) !== -1){
-						delete selectedAllNodes[key];
+						delete allNodes[key];
 					}
 				});
-			$.each(selectedAllNodes, function(index, node){
+			$.each(allNodes, function(index, node){
 				nodes.push(node);
 			});
 		}
@@ -625,7 +626,8 @@
 		var features = [];
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
-				features.push({feature: node.data.key});
+				var featureId = node.data.key.split("/");
+				features.push({feature: featureId[featureId.length - 1]});
 			}
 		});
 		updateShoppingCart(features);
