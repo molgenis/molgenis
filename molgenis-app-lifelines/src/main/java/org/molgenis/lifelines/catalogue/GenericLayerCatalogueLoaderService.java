@@ -19,6 +19,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.hl7.ANY;
 import org.molgenis.hl7.CD;
+import org.molgenis.hl7.II;
 import org.molgenis.hl7.PQ;
 import org.molgenis.hl7.REPCMT000100UV01Component3;
 import org.molgenis.hl7.REPCMT000100UV01Observation;
@@ -28,6 +29,7 @@ import org.molgenis.hl7.ValueSets.ValueSet;
 import org.molgenis.hl7.ValueSets.ValueSet.Code;
 import org.molgenis.lifelines.hl7.HL7DataTypeMapper;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -70,8 +72,28 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		{
 			database.beginTx();
 
-			OntologyIndex ontologyTermIndex = parseValueSets(id);
-			parseCatalog(id, ontologyTermIndex);
+			// retrieve catalog data from LifeLines Generic Layer catalog service
+			GetCatalogResult catalogResult = genericLayerCatalogService.getCatalog(id, null);
+
+			// convert to MOLGENIS OMX model and add to database
+			DataSet dataSet = new DataSet();
+			dataSet.setIdentifier(CatalogIdConverter.catalogIdToOmxIdentifier(id));
+			dataSet.setName("Catalogue #" + id);
+
+			Protocol rootProtocol = new Protocol();
+			rootProtocol.setIdentifier(UUID.randomUUID().toString());
+			rootProtocol.setName("LifeLines");
+
+			dataSet.setProtocolUsed(rootProtocol);
+
+			Map<String, String> valueSetMap = parseCatalog(dataSet, rootProtocol, catalogResult);
+
+			database.add(rootProtocol);
+			database.add(dataSet);
+
+			// retrieve catalog data from LifeLines Generic Layer catalog service
+			GetValuesetsResult valueSetsResult = genericLayerCatalogService.getValuesets(id, null);
+			loadValueSets(valueSetsResult, valueSetMap);
 
 			database.commitTx();
 		}
@@ -89,11 +111,56 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		}
 	}
 
-	private OntologyIndex parseValueSets(String id) throws DatabaseException
+	@Override
+	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException
 	{
-		// retrieve catalog data from LifeLines Generic Layer catalog service
-		GetValuesetsResult valueSetsResult = genericLayerCatalogService.getValuesets(id, null);
+		try
+		{
+			database.beginTx();
 
+			// retrieve catalog data from LifeLines Generic Layer catalog service
+			GetCatalogResult catalogResult = genericLayerCatalogService.getCatalog(null, id);
+
+			// convert to MOLGENIS OMX model and add to database
+			DataSet dataSet = new DataSet();
+			dataSet.setIdentifier(CatalogIdConverter.catalogOfStudyDefinitionIdToOmxIdentifier(id));
+			dataSet.setName("Study definition #" + id);
+
+			Protocol rootProtocol = new Protocol();
+			rootProtocol.setIdentifier(UUID.randomUUID().toString());
+			rootProtocol.setName("LifeLines");
+
+			dataSet.setProtocolUsed(rootProtocol);
+
+			// FIXME add patient protocol/features
+
+			Map<String, String> valueSetMap = parseCatalog(dataSet, rootProtocol, catalogResult);
+
+			database.add(rootProtocol);
+			database.add(dataSet);
+
+			// retrieve catalog data from LifeLines Generic Layer catalog service
+			GetValuesetsResult valueSetsResult = genericLayerCatalogService.getValuesets(null, id);
+			loadValueSets(valueSetsResult, valueSetMap);
+
+			database.commitTx();
+		}
+		catch (DatabaseException e)
+		{
+			try
+			{
+				database.rollbackTx();
+			}
+			catch (DatabaseException e1)
+			{
+				throw new RuntimeException(e1);
+			}
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void loadValueSets(GetValuesetsResult valueSetsResult, Map<String, String> featureMap)
+	{
 		// convert to HL7 organizer
 		ValueSets valueSets;
 		try
@@ -109,57 +176,77 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 		OntologyIndex ontologyIndex = new OntologyIndex();
 
-		for (ValueSet valueSet : valueSets.getValueSet())
+		try
 		{
-			for (Code code : valueSet.getCode())
+			for (ValueSet valueSet : valueSets.getValueSet())
 			{
-				String codeSystem = code.getCodeSystem();
-				Ontology ontology = ontologyIndex.get(codeSystem);
-				if (ontology == null)
+				String identifier = featureMap.get(valueSet.getName());
+				ObservableFeature observableFeature = ObservableFeature.findByIdentifier(database, identifier);
+				if (observableFeature == null)
 				{
-					String codeSystemName = code.getCodeSystemName();
-					if (codeSystem == null || codeSystemName == null)
-					{
-						logger.warn("missing code system or code system name for ontology term '"
-								+ code.getDisplayName() + "'");
-					}
-					else
-					{
-						// create ontology for each code system
-						ontology = new Ontology();
-						ontology.setIdentifier(UUID.randomUUID().toString());
-						ontology.setName(codeSystemName);
-						ontology.setOntologyAccession(codeSystem);
-
-						database.add(ontology);
-						ontologyIndex.put(codeSystem, ontology);
-					}
+					throw new RuntimeException("missing ObservableFeature with name '" + identifier + "'");
 				}
 
-				logger.error((ontology != null ? ontology.getId() : null) + "-" + code.getCode());
-
-				OntologyTerm ontologyTerm = ontologyIndex.get(codeSystem, code.getCode());
-				if (ontologyTerm == null)
+				for (Code code : valueSet.getCode())
 				{
-					ontologyTerm = new OntologyTerm();
-					ontologyTerm.setIdentifier(UUID.randomUUID().toString());
-					ontologyTerm.setName(code.getDisplayName());
-					ontologyTerm.setTermAccession(code.getCode());
-					if (ontology != null) ontologyTerm.setOntology(ontology);
+					String codeSystem = code.getCodeSystem();
+					Ontology ontology = ontologyIndex.get(codeSystem);
+					if (ontology == null)
+					{
+						String codeSystemName = code.getCodeSystemName();
+						if (codeSystem == null || codeSystemName == null)
+						{
+							logger.warn("missing code system or code system name for ontology term '"
+									+ code.getDisplayName() + "'");
+						}
+						else
+						{
+							// create ontology for each code system
+							ontology = new Ontology();
+							ontology.setIdentifier(UUID.randomUUID().toString());
+							ontology.setName(codeSystemName);
+							ontology.setOntologyAccession(codeSystem);
 
-					database.add(ontologyTerm);
-					ontologyIndex.put(codeSystem, code.getCode(), ontologyTerm);
+							database.add(ontology);
+							ontologyIndex.put(codeSystem, ontology);
+						}
+					}
+
+					logger.error((ontology != null ? ontology.getId() : null) + "-" + code.getCode());
+
+					OntologyTerm ontologyTerm = ontologyIndex.get(codeSystem, code.getCode());
+					if (ontologyTerm == null)
+					{
+						ontologyTerm = new OntologyTerm();
+						ontologyTerm.setIdentifier(UUID.randomUUID().toString());
+						ontologyTerm.setName(code.getDisplayName());
+						ontologyTerm.setTermAccession(code.getCode());
+						if (ontology != null) ontologyTerm.setOntology(ontology);
+
+						database.add(ontologyTerm);
+						ontologyIndex.put(codeSystem, code.getCode(), ontologyTerm);
+					}
+
+					Category category = new Category();
+					category.setIdentifier(UUID.randomUUID().toString());
+					category.setName(code.getDisplayName());
+					category.setObservableFeature(observableFeature);
+					category.setDefinition(ontologyTerm);
+					category.setValueCode(code.getCodeSystem() + '.' + code.getCode());
+					database.add(category);
 				}
 			}
 		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
 
-		return ontologyIndex;
 	}
 
-	private void parseCatalog(String id, OntologyIndex ontologyTermIndex) throws DatabaseException
+	private Map<String, String> parseCatalog(DataSet dataSet, Protocol rootProtocol, GetCatalogResult catalogResult)
+			throws DatabaseException
 	{
-		// retrieve catalog data from LifeLines Generic Layer catalog service
-		GetCatalogResult catalogResult = genericLayerCatalogService.getCatalog(id, null);
 
 		// convert to HL7 organizer
 		REPCMT000100UV01Organizer catalog;
@@ -174,27 +261,18 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 			throw new RuntimeException(e);
 		}
 
-		// convert to MOLGENIS OMX model and add to database
-		DataSet dataSet = new DataSet();
-		dataSet.setIdentifier(CatalogIdConverter.catalogIdToOmxIdentifier(id));
-		dataSet.setName("LifeLines" + id);
-
-		Protocol rootProtocol = new Protocol();
-		rootProtocol.setIdentifier(UUID.randomUUID().toString());
-		rootProtocol.setName("LifeLines" + id);
-
-		dataSet.setProtocolUsed(rootProtocol);
+		Map<String, String> featureMap = new HashMap<String, String>();
 
 		// parse protocols between root protocols
 		for (REPCMT000100UV01Component3 rootComponent : catalog.getComponent())
 		{
-			parseComponent(rootComponent, rootProtocol, database, ontologyTermIndex);
+			parseComponent(rootComponent, rootProtocol, database, featureMap);
 		}
-		database.add(dataSet);
+		return featureMap;
 	}
 
 	private void parseComponent(REPCMT000100UV01Component3 component, Protocol parentProtocol, Database database,
-			OntologyIndex ontologyTermIndex) throws DatabaseException
+			Map<String, String> featureMap) throws DatabaseException
 	{
 
 		// parse feature
@@ -210,13 +288,22 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 				logger.warn("observation does not have a display name '" + observationCode.getCode() + "'");
 				observationName = observationCode.getCode();
 			}
-			OntologyTerm ontologyTerm = ontologyTermIndex.get(observationCode.getCodeSystem(),
-					observationCode.getCode());
+			OntologyTerm ontologyTerm = getOntologyTerm(observationCode.getCodeSystem(), observationCode.getCode());
 
 			// determine data type
 			ANY anyValue = observation.getValue();
 			String dataType = HL7DataTypeMapper.get(anyValue);
 			if (dataType == null) logger.warn("HL7 data type not supported: " + anyValue.getClass().getSimpleName());
+
+			// TODO how to get description from originalText?
+			List<II> observationId = observation.getId();
+			String featureId = (observationId != null && !observationId.isEmpty()) ? observationId.get(0).getRoot() : UUID
+					.randomUUID().toString();
+			ObservableFeature observableFeature = new ObservableFeature();
+			observableFeature.setIdentifier(featureId);
+			observableFeature.setName(observationName);
+			if (dataType != null) observableFeature.setDataType(dataType);
+			observableFeature.setDefinition(ontologyTerm);
 
 			// determine unit
 			if (anyValue instanceof PQ)
@@ -224,18 +311,11 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 				PQ value = (PQ) anyValue;
 				// TODO how to determine ontologyterms for units and do observableFeature.setUnit()
 			}
-			else if (anyValue instanceof CD)
+			else if (anyValue instanceof CD) // for CD and CO values
 			{
 				CD value = (CD) anyValue;
-				// TODO how to determine catagories for this feature?
+				featureMap.put(value.getCodeSystemName(), featureId);
 			}
-
-			// TODO how to get description from originalText?
-			ObservableFeature observableFeature = new ObservableFeature();
-			observableFeature.setIdentifier(UUID.randomUUID().toString());
-			observableFeature.setName(observationName);
-			if (dataType != null) observableFeature.setDataType(dataType);
-			observableFeature.setDefinition(ontologyTerm);
 
 			parentProtocol.getFeatures().add(observableFeature);
 
@@ -256,17 +336,21 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 				organizerName = organizerCode.getCode();
 			}
 
-			OntologyTerm ontologyTerm = ontologyTermIndex.get(organizerCode.getCodeSystem(), organizerCode.getCode());
+			OntologyTerm ontologyTerm = getOntologyTerm(organizerCode.getCodeSystem(), organizerCode.getCode());
 
 			// FIXME how to get description from originalText?
 			Protocol protocol = new Protocol();
-			protocol.setIdentifier(UUID.randomUUID().toString());
+
+			List<II> organizerId = organizer.getId();
+			String protocolId = (organizerId != null && !organizerId.isEmpty()) ? organizerId.get(0).getRoot() : UUID
+					.randomUUID().toString();
+			protocol.setIdentifier(protocolId);
 			protocol.setName(organizerName);
 			protocol.setProtocolType(ontologyTerm);
 
 			// recurse over nested protocols
 			for (REPCMT000100UV01Component3 subComponent : organizer.getComponent())
-				parseComponent(subComponent, protocol, database, ontologyTermIndex);
+				parseComponent(subComponent, protocol, database, featureMap);
 
 			parentProtocol.getSubprotocols().add(protocol);
 		}
@@ -274,42 +358,10 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		database.add(parentProtocol);
 	}
 
-	private static class OntologyIndex
+	private OntologyTerm getOntologyTerm(String codeSystem, String code) throws DatabaseException
 	{
-		private final Map<String, Ontology> ontologyMap;
-		private final Map<String, Map<String, OntologyTerm>> ontologyTermMap;
-
-		public OntologyIndex()
-		{
-			ontologyMap = new HashMap<String, Ontology>();
-			ontologyTermMap = new HashMap<String, Map<String, OntologyTerm>>();
-		}
-
-		public void put(String codeSystem, Ontology ontology)
-		{
-			ontologyMap.put(codeSystem, ontology);
-		}
-
-		public void put(String codeSystem, String code, OntologyTerm ontologyTerm)
-		{
-			Map<String, OntologyTerm> codeMap = ontologyTermMap.get(codeSystem);
-			if (codeMap == null)
-			{
-				codeMap = new HashMap<String, OntologyTerm>();
-				ontologyTermMap.put(codeSystem, codeMap);
-			}
-			codeMap.put(code, ontologyTerm);
-		}
-
-		public Ontology get(String codeSystem)
-		{
-			return ontologyMap.get(codeSystem);
-		}
-
-		public OntologyTerm get(String codeSystem, String code)
-		{
-			Map<String, OntologyTerm> codeMap = ontologyTermMap.get(codeSystem);
-			return codeMap != null ? codeMap.get(code) : null;
-		}
+		List<OntologyTerm> ontologyTerms = database.query(OntologyTerm.class).eq(OntologyTerm.TERMACCESSION, code)
+				.eq(OntologyTerm.ONTOLOGY_IDENTIFIER, codeSystem).find();
+		return !ontologyTerms.isEmpty() ? ontologyTerms.get(0) : null;
 	}
 }
