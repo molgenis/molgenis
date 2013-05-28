@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class StudyDefinitionLoaderController
 {
 	public static final String BASE_URL = "/plugin/studydefinition";
+	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String LIST_URI = "/list";
 	public static final String LOAD_URI = "/load";
 	public static final String VIEW_NAME = "study-definition-loader";
@@ -34,6 +35,19 @@ public class StudyDefinitionLoaderController
 				"StudyDefinitionLoaderService is null");
 		this.database = database;
 		this.studyDefinitionLoaderService = studyDefinitionLoaderService;
+	}
+
+	/**
+	 * Shows a loading spinner in the iframe and loads the studydefinitions list page
+	 * 
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(LOAD_LIST_URI)
+	public String showSpinner(Model model)
+	{
+		model.addAttribute("url", BASE_URL + LIST_URI);
+		return "spinner";
 	}
 
 	/**
