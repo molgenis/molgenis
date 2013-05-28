@@ -45,7 +45,7 @@ public class GenericLayerStudyDefinitionLoaderService implements StudyDefinition
 	{
 		try
 		{
-			catalogLoaderService.loadCatalog(id);
+			catalogLoaderService.loadCatalogOfStudyDefinition(id);
 		}
 		catch (UnknownCatalogException e)
 		{
