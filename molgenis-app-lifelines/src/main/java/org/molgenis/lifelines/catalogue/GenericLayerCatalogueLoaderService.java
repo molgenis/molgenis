@@ -364,4 +364,43 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 				.eq(OntologyTerm.ONTOLOGY_IDENTIFIER, codeSystem).find();
 		return !ontologyTerms.isEmpty() ? ontologyTerms.get(0) : null;
 	}
+
+	private static class OntologyIndex
+	{
+		private final Map<String, Ontology> ontologyMap;
+		private final Map<String, Map<String, OntologyTerm>> ontologyTermMap;
+
+		public OntologyIndex()
+		{
+			ontologyMap = new HashMap<String, Ontology>();
+			ontologyTermMap = new HashMap<String, Map<String, OntologyTerm>>();
+		}
+
+		public void put(String codeSystem, Ontology ontology)
+		{
+			ontologyMap.put(codeSystem, ontology);
+		}
+
+		public void put(String codeSystem, String code, OntologyTerm ontologyTerm)
+		{
+			Map<String, OntologyTerm> codeMap = ontologyTermMap.get(codeSystem);
+			if (codeMap == null)
+			{
+				codeMap = new HashMap<String, OntologyTerm>();
+				ontologyTermMap.put(codeSystem, codeMap);
+			}
+			codeMap.put(code, ontologyTerm);
+		}
+
+		public Ontology get(String codeSystem)
+		{
+			return ontologyMap.get(codeSystem);
+		}
+
+		public OntologyTerm get(String codeSystem, String code)
+		{
+			Map<String, OntologyTerm> codeMap = ontologyTermMap.get(codeSystem);
+			return codeMap != null ? codeMap.get(code) : null;
+		}
+	}
 }
