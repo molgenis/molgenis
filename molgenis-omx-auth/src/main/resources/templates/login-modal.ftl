@@ -104,11 +104,10 @@
 		
 		<#-- submodal events -->
 		$(document).on('molgenis-registered', function(e, msg) {
-			alert('registered');
 			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
 		$(document).on('molgenis-passwordresetted', function(e, msg) {
-			$('.modal-header', $('#login-modal')).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> </div>'));
+			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
     });
 </script>
