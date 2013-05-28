@@ -107,32 +107,23 @@
 			e.preventDefault();
 		    e.stopPropagation();
 			if(form.valid()) {
-				$.ajax({
-					type : 'POST',
-					url : '/cart/remove',
-					data: JSON.stringify({features : deletedFeatures}),
-					contentType: 'application/json',
-					success : function() {
-						$.ajax({
-						  type: 'POST',
-						  url: '/plugin/order',
-						  data: new FormData($('#orderdata-form')[0]),
-						  cache: false,
-						  contentType: false,
-						  processData: false,
-						  success: function () {
-						  	$(document).trigger('molgenis-order-placed', 'Your order has been placed');
-							modal.modal('hide');
-						  },
-				          error: function() {
-				          	alert("error"); // TODO display error message
-				          }
-						});
-					},
-					error: function() {
-						alert("error");
-			        }
-		        });	
+				if(deletedFeatures.length > 0){
+					$.ajax({
+						type : 'POST',
+						url : '/cart/remove',
+						data: JSON.stringify({features : deletedFeatures}),
+						contentType: 'application/json',
+						success : function() {
+							order();
+						},
+						error: function() {
+							alert("error");
+				        }
+			        });
+		        }
+		        else{
+		        	order();
+		        }	
 		    }
 		});
 	    submitBtn.click(function(e) {
@@ -147,5 +138,23 @@
 				form.submit();
 	    	}
 		});
+		
+		function order() {
+			$.ajax({
+			  type: 'POST',
+			  url: '/plugin/order',
+			  data: new FormData($('#orderdata-form')[0]),
+			  cache: false,
+			  contentType: false,
+			  processData: false,
+			  success: function () {
+			  	$(document).trigger('molgenis-order-placed', 'Your order has been placed');
+				modal.modal('hide');
+			  },
+	          error: function() {
+	          	alert("error"); // TODO display error message
+	          }
+			});
+		}
 	});
 </script>
