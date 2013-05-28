@@ -125,12 +125,12 @@
 							modal.modal('hide');
 						  },
 				          error: function() {
-				          	alert("error placing order"); // TODO display error message
+				          	alert("error"); // TODO display error message
 				          }
 						});
 					},
 					error: function() {
-						alert("error removing items from cart");
+						alert("error");
 			        }
 		        });	
 		    }
