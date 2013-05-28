@@ -108,6 +108,7 @@
 				nillable="true"
 				description="(Optional) Reference to the well-defined measurement unit used to observe this feature 
 					(if feature is that concrete). E.g. mmHg" />
+			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The concept that is being measured in a specific way." nillable="true" />
 			<field name="dataType" type="enum" default="string"
 				enum_options="[xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe]"
 				description="(Optional) Reference to the technical data type. E.g. 'int'" />
@@ -138,6 +139,7 @@
 				description="The Measurement these permitted values are part of." />
 			<field name="valueCode" type="string"
 				description="The value used to store this category in ObservedValue. For example '1', '2'." />
+			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The category that is being measured in a specific way." nillable="true" />
 			<field name="isMissing" type="bool" default="false"
 				description="whether this value should be treated as missing value." />
 		</entity>
