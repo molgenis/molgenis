@@ -50,6 +50,7 @@ public class DatabaseConfigGen extends Generator
 			templateArgs.put("db_user", options.db_user);
 			templateArgs.put("db_password", options.db_password);
 			templateArgs.put("auth_loginclass", options.auth_loginclass);
+			templateArgs.put("chromedriver", options.chromedriver);
 
 			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
 			OutputStream targetOut = new FileOutputStream(target);
