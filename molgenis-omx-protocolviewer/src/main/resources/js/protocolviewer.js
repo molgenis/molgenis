@@ -482,6 +482,7 @@
 		treePrevState = null;
 		selectedAllNodes = null;
 		$("#search-text").val("");
+		updateFeatureSelection(rootNode.tree);
 	};
 
 	ns.search = function(query) {
