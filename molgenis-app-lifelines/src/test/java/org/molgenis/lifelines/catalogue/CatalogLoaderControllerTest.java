@@ -1,5 +1,7 @@
 package org.molgenis.lifelines.catalogue;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.mockito.Mockito;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.mock.MockDatabase;
 import org.molgenis.util.Entity;
@@ -23,13 +26,14 @@ public class CatalogLoaderControllerTest
 	private MockDatabase database;
 
 	@BeforeMethod
-	public void setUp()
+	public void setUp() throws UnknownCatalogException
 	{
 		database = new MockDatabase();
 		database.setEntities(Collections.<Entity> emptyList());
-
-		catalogLoaderController = new CatalogLoaderController(new MockCatalogueLoaderService(
-				Arrays.asList(new CatalogInfo("id", "name"))), database);
+		CatalogLoaderService catalogLoaderService = Mockito.mock(CatalogLoaderService.class);
+		when(catalogLoaderService.findCatalogs()).thenReturn(Arrays.asList(new CatalogInfo("id", "name")));
+		doThrow(new UnknownCatalogException()).when(catalogLoaderService).loadCatalog("bogus");
+		catalogLoaderController = new CatalogLoaderController(catalogLoaderService, database);
 		model = new ExtendedModelMap();
 	}
 

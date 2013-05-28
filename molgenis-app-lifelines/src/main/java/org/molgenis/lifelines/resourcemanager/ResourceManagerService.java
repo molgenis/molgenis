@@ -61,6 +61,32 @@ public class ResourceManagerService
 		});
 	}
 
+	public QualityMeasureDocument findStudyDefinition(String id)
+	{
+		InputStream xmlStream = null;
+		try
+		{
+			URL url = new URL(resourceManagerServiceUrl + "/studydefinition/" + id);
+			xmlStream = url.openStream();
+
+			JAXBContext jaxbContext = JAXBContext.newInstance(QualityMeasureDocument.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			return jaxbUnmarshaller.unmarshal(new StreamSource(xmlStream), QualityMeasureDocument.class).getValue();
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			IOUtils.closeQuietly(xmlStream);
+		}
+	}
+
 	/**
 	 * Gets all available catalogs
 	 * 
