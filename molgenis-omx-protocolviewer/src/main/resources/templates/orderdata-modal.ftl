@@ -31,6 +31,7 @@
 </div>
 <script type="text/javascript">
 	$(function() {
+		var deletedFeatures = []; 
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
   		var form = $('#orderdata-form');
@@ -38,6 +39,7 @@
 
   		<#-- modal events -->
   		modal.on('show', function () {
+  		    deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
 				url : '/cart',
@@ -59,18 +61,13 @@
 							var deleteCol = $('<td class="center">');
 							var deleteBtn = $('<i class="icon-remove"></i>');
 							deleteBtn.click(function() {
-								$.ajax({
-									type : 'POST',
-									url : '/cart/remove',
-									data: JSON.stringify({
-										features : [{feature: feature.id}]
-									}),
-									contentType: 'application/json',
-									success : function() {
-										row.remove();
-										$(document).trigger('molgenis-order-modified');
-									}
-								});	
+							    var item = {
+        							"feature": feature.id
+    							};
+
+								deletedFeatures.push(item);
+								row.remove();
+								$(document).trigger('molgenis-order-modified');
 							});
 							deleteBtn.appendTo(deleteCol);
 							
@@ -111,20 +108,31 @@
 		    e.stopPropagation();
 			if(form.valid()) {
 				$.ajax({
-				  type: 'POST',
-				  url: '/plugin/order',
-				  data: new FormData($('#orderdata-form')[0]),
-				  cache: false,
-				  contentType: false,
-				  processData: false,
-				  success: function () {
-				  	$(document).trigger('molgenis-order-placed', 'Your order has been placed');
-					modal.modal('hide');
-				  },
-		          error: function() {
-		          	alert("error"); // TODO display error message
-		          }
-				});
+					type : 'POST',
+					url : '/cart/remove',
+					data: JSON.stringify({features : deletedFeatures}),
+					contentType: 'application/json',
+					success : function() {
+						$.ajax({
+						  type: 'POST',
+						  url: '/plugin/order',
+						  data: new FormData($('#orderdata-form')[0]),
+						  cache: false,
+						  contentType: false,
+						  processData: false,
+						  success: function () {
+						  	$(document).trigger('molgenis-order-placed', 'Your order has been placed');
+							modal.modal('hide');
+						  },
+				          error: function() {
+				          	alert("error placing order"); // TODO display error message
+				          }
+						});
+					},
+					error: function() {
+						alert("error removing items from cart");
+			        }
+		        });	
 		    }
 		});
 	    submitBtn.click(function(e) {
