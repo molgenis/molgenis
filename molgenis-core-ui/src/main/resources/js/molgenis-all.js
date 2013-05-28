@@ -238,3 +238,13 @@ function toggleCssClass(cssClass)
 		else  document.styleSheets[0].addRule("."+cssClass,"display: none", cssRules.length - 1);
 	}	
 }
+
+function showSpinner() 
+{
+	$('#spinner').modal('show');
+}
+
+function hideSpinner() 
+{
+	$('#spinner').modal('hide');
+}
