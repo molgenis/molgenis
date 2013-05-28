@@ -94,7 +94,8 @@ public class DataQueryService
 
 			String id = studyDefinition.getId().getExtension();
 			DataSet dataSet = database.query(DataSet.class)
-					.eq(DataSet.IDENTIFIER, CatalogIdConverter.catalogIdToOmxIdentifier(id)).find().get(0);
+					.eq(DataSet.IDENTIFIER, CatalogIdConverter.catalogOfStudyDefinitionIdToOmxIdentifier(id)).find()
+					.get(0);
 
 			for (REPCMT000400UV01Component4 rootComponent : actCategory.getComponent())
 			{
