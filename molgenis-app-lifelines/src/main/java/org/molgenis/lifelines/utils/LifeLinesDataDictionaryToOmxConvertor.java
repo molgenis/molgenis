@@ -316,7 +316,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 
 			for (CohortTimePair cohortTimePair : cohortTimePairs)
 			{
-				String featurePerCohortIdentifier = featureIdentifier + '.' + cohortTimePair.getProtocolId();
+				String featurePerCohortIdentifier = featureIdentifier + '.' + cohortTimePair.getProtocolId()+ '.' + cohortTimePair.getVmidId();
 
 				KeyValueTuple featureMap = new KeyValueTuple();
 				featureMap.set(ENTITY_IDENTIFIER, featurePerCohortIdentifier);
