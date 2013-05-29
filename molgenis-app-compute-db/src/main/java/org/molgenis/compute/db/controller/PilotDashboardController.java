@@ -82,7 +82,23 @@ public class PilotDashboardController
 		return init(model);
 	}
 
-	@RequestMapping("/resubmit")
+    @RequestMapping("/activate")
+    public String activate(@RequestParam("run")
+    String runName, Model model) throws DatabaseException
+    {
+        //TODO activate action
+        return init(model);
+    }
+
+    @RequestMapping("/inactivate")
+    public String inactivate(@RequestParam("run")
+                           String runName, Model model) throws DatabaseException
+    {
+        //TODO inactivate action
+        return init(model);
+    }
+
+    @RequestMapping("/resubmit")
 	public String resubmitFailedTasks(@RequestParam("run")
 	String runName, Model model) throws DatabaseException
 	{
