@@ -431,8 +431,5 @@
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
-		$(document).on('molgenis-order-modified', function(e, msg) {
-			console.log("TODO: handle molgenis-order-modified event");
-		});
 	});
 }($, window.top));
