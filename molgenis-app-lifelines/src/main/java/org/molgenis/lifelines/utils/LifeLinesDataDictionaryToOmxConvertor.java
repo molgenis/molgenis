@@ -250,7 +250,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 						for (CohortTimePair cohortTimePair : lastCohortTimePairs)
 						{
 							Tuple category = createCategory(
-									lastFeatureIdentifier + '.' + cohortTimePair.getProtocolId(), description, value);
+									lastFeatureIdentifier + '.' + cohortTimePair.getProtocolId()+ '.' + cohortTimePair.getVmidId(), description, value);
 							sheetMap.get(SHEET_CATEGORY).write(category);
 						}
 						continue;
