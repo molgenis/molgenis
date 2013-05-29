@@ -24,7 +24,7 @@ public class StudyDefinitionLoaderPlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return StudyDefinitionLoaderController.BASE_URL + StudyDefinitionLoaderController.LIST_URI;
+		return StudyDefinitionLoaderController.BASE_URL + StudyDefinitionLoaderController.LOAD_LIST_URI;
 	}
 
 }

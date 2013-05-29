@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.lifelines.catalogue.CatalogIdConverter;
 import org.molgenis.omx.observ.Characteristic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class StudyDefinitionLoaderController
 {
 	public static final String BASE_URL = "/plugin/studydefinition";
+	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String LIST_URI = "/list";
 	public static final String LOAD_URI = "/load";
 	public static final String VIEW_NAME = "study-definition-loader";
@@ -33,6 +35,19 @@ public class StudyDefinitionLoaderController
 				"StudyDefinitionLoaderService is null");
 		this.database = database;
 		this.studyDefinitionLoaderService = studyDefinitionLoaderService;
+	}
+
+	/**
+	 * Shows a loading spinner in the iframe and loads the studydefinitions list page
+	 * 
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(LOAD_LIST_URI)
+	public String showSpinner(Model model)
+	{
+		model.addAttribute("url", BASE_URL + LIST_URI);
+		return "spinner";
 	}
 
 	/**
@@ -54,7 +69,7 @@ public class StudyDefinitionLoaderController
 		List<StudyDefinitionModel> models = new ArrayList<StudyDefinitionModel>(studyDefinitions.size());
 		for (StudyDefinitionInfo studyDefinition : studyDefinitions)
 		{
-			String identifier = StudyDefinitionIdConverter.studyDefinitionIdToOmxIdentifier(studyDefinition.getId());
+			String identifier = CatalogIdConverter.catalogOfStudyDefinitionIdToOmxIdentifier(studyDefinition.getId());
 			Characteristic dataset = Characteristic.findByIdentifier(database, identifier);
 			boolean studyDefinitionLoaded = dataset != null;
 			models.add(new StudyDefinitionModel(studyDefinition.getId(), studyDefinition.getName(),

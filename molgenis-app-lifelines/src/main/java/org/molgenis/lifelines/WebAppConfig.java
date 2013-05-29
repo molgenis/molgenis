@@ -3,6 +3,8 @@ package org.molgenis.lifelines;
 import java.util.List;
 import java.util.Properties;
 
+import javax.xml.validation.Schema;
+
 import nl.umcg.hl7.CatalogService;
 import nl.umcg.hl7.GenericLayerCatalogService;
 
@@ -12,6 +14,7 @@ import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
 import org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
+import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
@@ -193,10 +196,13 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Value("${lifelines.resource.manager.service.url}")
 	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
 
+	@Value("${lifelines.validate:false}")
+	private boolean validate;// Specify in molgenis-server.properties, validate generic layer responses
+
 	@Bean
 	public ResourceManagerService resourceManagerService()
 	{
-		return new ResourceManagerService(resourceManagerServiceUrl);
+		return new ResourceManagerService(resourceManagerServiceUrl, emeasureSchema(), validate);
 	}
 
 	@Bean
@@ -223,6 +229,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public SecurityHandlerInterceptor studyDefinitionLoaderHandlerInterceptor()
 	{
 		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPlugin.class);
+	}
+
+	@Bean
+	public Schema emeasureSchema()
+	{
+		return new SchemaLoader("EMeasure.xsd").getSchema();
 	}
 
 	/**
