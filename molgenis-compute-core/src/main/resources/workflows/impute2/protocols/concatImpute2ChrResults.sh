@@ -9,9 +9,6 @@
 #list impute2ChunkOutputs
 #list impute2ChunkOutputInfos
 
-#output impute2ChrOutput
-#output impute2ChrOutputInfo
-
 declare -a impute2ChunkOutputs=(${ssvQuoted(impute2ChunkOutput)})
 declare -a impute2ChunkOutputInfos=(${ssvQuoted(impute2ChunkOutputInfo)})
 
