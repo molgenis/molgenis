@@ -372,6 +372,9 @@
 							}
 						} 
 					}
+				} else if (entityType === "protocol") {
+					var nodes = object["path"].split(".");
+					var entityId = object["id"];
 				}
 			});
 			$.each(topNodes, function(index, node){
@@ -380,17 +383,6 @@
 			rootNode.addChild(topNodes);
 			console.log("finished");
 		});
-		
-		function sortNodes(node){
-			if(node.children){
-				node.children.sort(function(a,b){
-					return naturalSort(a.title, b.title);
-				});
-				$.each(node.children, function(index, subNode){
-					sortNodes(subNode);
-				});
-			}
-		}
 	}
 	
 	ns.searchFeatureMeta = function(callback){
@@ -423,48 +415,8 @@
 	}
 	
 	ns.clearSearch = function() {
-		//merge the newly selected nodes back into the previous state of tree
-		function recursivelyExpand (expandedNodes, nodeData, cachedNodes) {
-			var entityInfo = restApi.get(nodeData.key, ["features", "subprotocols"]);
-			var options = null;
-			if(entityInfo.features.items.length && entityInfo.features.items.length != 0){
-				$.each(entityInfo.features.items, function(index, feature){
-					options = {
-						key : feature.href,
-						title : feature.name,
-						tooltip : feature.description,
-						isFolder : false,
-						expand : true,
-					};
-					if($.inArray(feature.href, expandedNodes) != -1){
-						options.select = true;
-					}
-					nodeData.children.push(options);
-				});
-			}
-			if(entityInfo.subprotocols.items.length && entityInfo.subprotocols.items.length != 0){
-				$.each(entityInfo.subprotocols.items, function(index, protocol){
-					options = {
-						key : protocol.href,
-						title : protocol.name,
-						tooltip : protocol.description,
-						isFolder : true,
-						isLazy : true,
-						children : []
-					};
-					if($.inArray(protocol.href, expandedNodes) != -1){
-						options.expand = true;
-						nodeData.children.push(recursivelyExpand(expandedNodes, options, cachedNodes));
-					}else{
-						nodeData.children.push(options);
-					}
-				});
-			}
-			return nodeData;
-		}
 		
 		var rootNode = $('#dataset-browser').dynatree("getTree").getRoot();
-		
 		if(treePrevState == null) {
 			if(rootNode.tree.getSelectedNodes().length == 0){
 				rootNode.tree.reload();
@@ -475,7 +427,6 @@
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
-		var cachedNodes = {};
 		var expandedNodes = new Array ();
 		//check if newly selected nodes exist in previous tree
 		if(updatedNodes.select != null){
@@ -487,7 +438,8 @@
 				var currentNode = rootNode.tree.getNodeByKey(oldNode.data.key);
 				if(oldNode.data.isFolder){
 					currentNode.data.children = new Array();
-					var nodeData = recursivelyExpand(expandedNodes, currentNode.data, cachedNodes);
+					var nodeData = recursivelyExpand(expandedNodes, currentNode.data);
+					sortNodes(nodeData);
 					currentNode.removeChildren();
 					currentNode.addChild(nodeData.children);
 					currentNode.toggleExpand();
@@ -518,6 +470,57 @@
 			ns.searchFeatureTable(query, selectedDataSet.protocolUsed.href);
 		}
 	};
+	
+	function sortNodes(node){
+		if(node.children){
+			node.children.sort(function(a,b){
+				return naturalSort(a.title, b.title);
+			});
+			$.each(node.children, function(index, subNode){
+				sortNodes(subNode);
+			});
+		}
+	}
+	
+	//merge the newly selected nodes back into the previous state of tree
+	function recursivelyExpand (expandedNodes, nodeData) {
+		var entityInfo = restApi.get(nodeData.key, ["features", "subprotocols"]);
+		var options = null;
+		if(entityInfo.features.items.length && entityInfo.features.items.length != 0){
+			$.each(entityInfo.features.items, function(index, feature){
+				options = {
+					key : feature.href,
+					title : feature.name,
+					tooltip : feature.description,
+					isFolder : false,
+					expand : true,
+				};
+				if($.inArray(feature.href, expandedNodes) != -1){
+					options.select = true;
+				}
+				nodeData.children.push(options);
+			});
+		}
+		if(entityInfo.subprotocols.items.length && entityInfo.subprotocols.items.length != 0){
+			$.each(entityInfo.subprotocols.items, function(index, protocol){
+				options = {
+					key : protocol.href,
+					title : protocol.name,
+					tooltip : protocol.description,
+					isFolder : true,
+					isLazy : true,
+					children : []
+				};
+				if($.inArray(protocol.href, expandedNodes) != -1){
+					options.expand = true;
+					nodeData.children.push(recursivelyExpand(expandedNodes, options));
+				}else{
+					nodeData.children.push(options);
+				}
+			});
+		}
+		return nodeData;
+	}
 	
 	function getFeature(id, callback) {
 		var data = restApi.get(id);
