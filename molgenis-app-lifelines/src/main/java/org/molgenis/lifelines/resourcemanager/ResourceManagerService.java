@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -36,11 +37,16 @@ public class ResourceManagerService
 {
 	private static final Logger LOG = Logger.getLogger(ResourceManagerService.class);
 	private final String resourceManagerServiceUrl;
+	private final Schema emeasureSchema;
+	private final boolean validate;
 
-	public ResourceManagerService(String resourceManagerServiceUrl)
+	public ResourceManagerService(String resourceManagerServiceUrl, Schema emeasureSchema, boolean validate)
 	{
 		if (resourceManagerServiceUrl == null) throw new IllegalArgumentException("ResourceManagerServiceUrl is null");
+		if (emeasureSchema == null) throw new IllegalArgumentException("EmeasureSchema is null");
 		this.resourceManagerServiceUrl = resourceManagerServiceUrl;
+		this.emeasureSchema = emeasureSchema;
+		this.validate = validate;
 	}
 
 	/**
@@ -61,6 +67,19 @@ public class ResourceManagerService
 		});
 	}
 
+	private Unmarshaller createQualityMeasureDocumentUnmarshaller() throws JAXBException
+	{
+		JAXBContext jaxbContext = JAXBContext.newInstance(QualityMeasureDocument.class);
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+		if (validate)
+		{
+			jaxbUnmarshaller.setSchema(emeasureSchema);
+		}
+
+		return jaxbUnmarshaller;
+	}
+
 	public QualityMeasureDocument findStudyDefinition(String id)
 	{
 		InputStream xmlStream = null;
@@ -69,9 +88,8 @@ public class ResourceManagerService
 			URL url = new URL(resourceManagerServiceUrl + "/studydefinition/" + id);
 			xmlStream = url.openStream();
 
-			JAXBContext jaxbContext = JAXBContext.newInstance(QualityMeasureDocument.class);
-			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			return jaxbUnmarshaller.unmarshal(new StreamSource(xmlStream), QualityMeasureDocument.class).getValue();
+			return createQualityMeasureDocumentUnmarshaller().unmarshal(new StreamSource(xmlStream),
+					QualityMeasureDocument.class).getValue();
 		}
 		catch (JAXBException e)
 		{
@@ -121,8 +139,7 @@ public class ResourceManagerService
 
 				for (Object obj : entry.getAuthorOrCategoryOrContent())
 				{
-					JAXBContext jaxbContext = JAXBContext.newInstance(QualityMeasureDocument.class);
-					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+					Unmarshaller jaxbUnmarshaller = createQualityMeasureDocumentUnmarshaller();
 
 					JAXBElement<?> element = (JAXBElement<?>) obj;
 					if (element.getDeclaredType() == ContentType.class)
