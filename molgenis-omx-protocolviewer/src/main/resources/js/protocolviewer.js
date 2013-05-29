@@ -50,6 +50,7 @@
 			var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
 			var children = [];
 			if (protocol.subprotocols) {
+				protocol.subprotocols.items.sort(characteristicSort);
 				// TODO deal with multiple entity pages
 				$.each(protocol.subprotocols.items, function() {
 					children.push($.extend({
@@ -63,6 +64,7 @@
 				});
 			}
 			if (protocol.features) {
+				protocol.features.items.sort(characteristicSort);
 				// TODO deal with multiple entity pages
 				$.each(protocol.features.items, function() {
 					children.push($.extend({
@@ -393,9 +395,23 @@
 					}
 				}
 			});
+			$.each(topNodes, function(index, node){
+				sortNodes(node);
+			});
 			rootNode.addChild(topNodes);
 			console.log("finished");
 		});
+		
+		function sortNodes(node){
+			if(node.children){
+				node.children.sort(function(a,b){
+					return naturalSort(a.title, b.title);
+				});
+				$.each(node.children, function(index, subNode){
+					sortNodes(subNode);
+				});
+			}
+		}
 	}
 	
 	ns.searchFeatureMeta = function(callback){
@@ -446,6 +462,25 @@
 					}
 					nodeData.children.push(options);
 				});
+//=======
+//
+//	function characteristicSort(a, b) {
+//		return naturalSort(a.name, b.name);
+//	}
+//	
+//	function checkExistenceOfAllSubNodes(node) {
+//		var reRenderNode = false;
+//		var listOfChildren = node.childList;
+//		for ( var i = 0; i < listOfChildren.length; i++) {
+//			var eachChildNode = listOfChildren[i];
+//			if (eachChildNode.data.isFolder) {
+//				if (eachChildNode.hasChildren()) {
+//					reRenderNode = reRenderNode || checkExistenceOfAllSubNodes(eachChildNode);
+//				} else {
+//					reRenderNode = true;
+//					break;
+//				}
+//>>>>>>> 06f90e20c706a0ae2116298cab9a2d200446a75c
 			}
 			if(entityInfo.subprotocols.items.length && entityInfo.subprotocols.items.length != 0){
 				$.each(entityInfo.subprotocols.items, function(index, protocol){
@@ -506,29 +541,6 @@
 				var currentNode = rootNode.tree.getNodeByKey(oldNode.data.key);
 				if(currentNode != null) currentNode.select(false);
 			});
-//=======
-//		return branches;
-//	}
-//	
-//	function characteristicSort(a,b){
-//		return naturalSort(a.name, b.name);
-//
-//	}
-//
-//	function checkExistenceOfAllSubNodes(node) {
-//		var reRenderNode = false;
-//		var listOfChildren = node.childList;
-//		for ( var i = 0; i < listOfChildren.length; i++) {
-//			var eachChildNode = listOfChildren[i];
-//			if (eachChildNode.data.isFolder) {
-//				if (eachChildNode.hasChildren()) {
-//					reRenderNode = reRenderNode || checkExistenceOfAllSubNodes(eachChildNode);
-//				} else {
-//					reRenderNode = true;
-//					break;
-//				}
-//			}
-//>>>>>>> e49d5a859a2252ed09e4e8e65372ce78327bbe6d
 		}
 		
 		//reset variables
@@ -588,8 +600,7 @@
 					continue;
 				table.append('<tr><td>' + "Description (" + lang + "):" + '</td><td>' + feature.i18nDescription[lang] + '</td></tr>');
 			}
-		}
-		if(feature.description) {
+		}else if(feature.description) {
 			table.append('<tr><td>' + "Description: " + '</td><td>' + feature.description + '</td></tr>');
 		}
 
@@ -616,6 +627,10 @@
 		}
 	}
 
+	function characteristicSort(a, b) {
+		return naturalSort(a.name, b.name);
+	}
+	
 	function updateFeatureSelection(tree) {
 		var container = $('#feature-selection').empty();
 		if (tree === null) {
@@ -732,9 +747,6 @@
 			ns.selectDataSet(ns.getSelectedDataSet()); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
-		});
-		$(document).on('molgenis-order-modified', function(e, msg) {
-			console.log("TODO: handle molgenis-order-modified event");
 		});
 	});
 }($, window.top));

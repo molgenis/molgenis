@@ -20,12 +20,14 @@
 		<p class="errormessage">${message.text}</p>
 		</#if>
 	</#list>
-	<#if !model.authenticated>
-		<div id="login-modal-container"></div>
-		<div class="alert">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-	  		<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection
-		</div>
+	<#if (model.dataSets?size > 0)>
+		<#if !model.authenticated>
+			<div id="login-modal-container"></div>
+			<div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+		  		<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection
+			</div>
+		</#if>
 	</#if>
 		<div class="screenbody" id="container-plugin">
 			<div class="screenpadding">
