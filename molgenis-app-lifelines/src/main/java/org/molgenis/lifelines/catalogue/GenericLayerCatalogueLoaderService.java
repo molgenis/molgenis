@@ -232,7 +232,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 					category.setName(code.getDisplayName());
 					category.setObservableFeature(observableFeature);
 					category.setDefinition(ontologyTerm);
-					category.setValueCode(code.getCodeSystem() + '.' + code.getCode());
+					category.setValueCode(code.getCodeSystemName() + ':' + code.getCode());
 					database.add(category);
 				}
 			}
@@ -295,13 +295,14 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 			String dataType = HL7DataTypeMapper.get(anyValue);
 			if (dataType == null) logger.warn("HL7 data type not supported: " + anyValue.getClass().getSimpleName());
 
-			// TODO how to get description from originalText?
 			List<II> observationId = observation.getId();
 			String featureId = (observationId != null && !observationId.isEmpty()) ? observationId.get(0).getRoot() : UUID
 					.randomUUID().toString();
 			ObservableFeature observableFeature = new ObservableFeature();
 			observableFeature.setIdentifier(featureId);
 			observableFeature.setName(observationName);
+			String originalText = observationCode.getOriginalText();
+			if (originalText != null) observableFeature.setDescription(originalText);
 			if (dataType != null) observableFeature.setDataType(dataType);
 			observableFeature.setDefinition(ontologyTerm);
 

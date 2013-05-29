@@ -303,6 +303,26 @@
 						}else{
 							protocolMap[nodes[i]] = nodes[i];
 						}
+//=======
+//	// recursively build tree for protocol, the extra dynatree node options
+//	// can be passed to the function to give different features to nodes.
+//	function createNodes(protocol, options) {
+//		var branches = [];
+//		if (protocol.subProtocols) {
+//			protocol.subProtocols.sort(characteristicSort);
+//			$.each(protocol.subProtocols, function(i, subProtocol) {
+//				var subBranches = createNodes(subProtocol, options);
+//				var newBranch = {
+//					key : subProtocol.id,
+//					title : subProtocol.name,
+//					isLazy : true,
+//					isFolder : true,
+//					children : subBranches
+//				};
+//				for ( var key in options) {
+//					if (options.hasOwnProperty(key)) {
+//						newBranch[key] = options[key];
+//>>>>>>> e49d5a859a2252ed09e4e8e65372ce78327bbe6d
 					}
 				}
 			});
@@ -357,6 +377,18 @@
 							else
 								topNodes.push(options);
 							cachedNode[nodes[i]] = options;
+//=======
+//		} else if (protocol.features) {
+//			protocol.features.sort(characteristicSort);
+//			$.each(protocol.features, function(i, feature) {
+//				// use first description as tooltip
+//				var tooltip = null;
+//				if (feature.i18nDescription) {
+//					for ( var lang in feature.i18nDescription) {
+//						if (feature.i18nDescription.hasOwnProperty(lang)) {
+//							tooltip = feature.i18nDescription[lang];
+//							break;
+//>>>>>>> e49d5a859a2252ed09e4e8e65372ce78327bbe6d
 						}
 					}
 				}
@@ -474,6 +506,29 @@
 				var currentNode = rootNode.tree.getNodeByKey(oldNode.data.key);
 				if(currentNode != null) currentNode.select(false);
 			});
+//=======
+//		return branches;
+//	}
+//	
+//	function characteristicSort(a,b){
+//		return naturalSort(a.name, b.name);
+//
+//	}
+//
+//	function checkExistenceOfAllSubNodes(node) {
+//		var reRenderNode = false;
+//		var listOfChildren = node.childList;
+//		for ( var i = 0; i < listOfChildren.length; i++) {
+//			var eachChildNode = listOfChildren[i];
+//			if (eachChildNode.data.isFolder) {
+//				if (eachChildNode.hasChildren()) {
+//					reRenderNode = reRenderNode || checkExistenceOfAllSubNodes(eachChildNode);
+//				} else {
+//					reRenderNode = true;
+//					break;
+//				}
+//			}
+//>>>>>>> e49d5a859a2252ed09e4e8e65372ce78327bbe6d
 		}
 		
 		//reset variables
