@@ -26,4 +26,26 @@ public class CatalogIdConverterTest
 	{
 		CatalogIdConverter.omxIdentifierToCatalogId("bogus");
 	}
+
+	@Test
+	public void catalogOfStudyDefinitionIdToOmxIdentifier()
+	{
+		assertEquals(CatalogIdConverter.catalogOfStudyDefinitionIdToOmxIdentifier("4"), "studydefinition_4");
+		assertEquals(CatalogIdConverter.catalogOfStudyDefinitionIdToOmxIdentifier("studydefinition_4"),
+				"studydefinition_studydefinition_4");
+	}
+
+	@Test
+	public void omxIdentifierToCatalogOfStudyDefinitionId()
+	{
+		assertEquals(CatalogIdConverter.omxIdentifierToCatalogOfStudyDefinitionId("studydefinition_4"), "4");
+		assertEquals(CatalogIdConverter.omxIdentifierToCatalogOfStudyDefinitionId("studydefinition_studydefinition_4"),
+				"studydefinition_4");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void omxIdentifierToCatalogOfStudyDefinitionIdWithInvalidIdentifier()
+	{
+		CatalogIdConverter.omxIdentifierToCatalogOfStudyDefinitionId("bogus");
+	}
 }

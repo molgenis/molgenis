@@ -25,7 +25,7 @@ public class CatalogueLoaderPlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return CatalogLoaderController.BASE_URL + CatalogLoaderController.LIST_URI;
+		return CatalogLoaderController.BASE_URL + CatalogLoaderController.LOAD_LIST_URI;
 	}
 
 }

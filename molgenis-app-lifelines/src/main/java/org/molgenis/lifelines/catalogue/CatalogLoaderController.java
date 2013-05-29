@@ -28,6 +28,7 @@ public class CatalogLoaderController
 {
 	public static final String BASE_URL = "/plugin/catalog";
 	public static final String LIST_URI = "/list";
+	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String LOAD_URI = "/load";
 	public static final String VIEW_NAME = "catalog-loader";
 	private static final Logger LOG = Logger.getLogger(CatalogLoaderController.class);
@@ -41,6 +42,19 @@ public class CatalogLoaderController
 		if (database == null) throw new IllegalArgumentException("Database id null");
 		this.catalogLoaderService = catalogLoaderService;
 		this.database = database;
+	}
+
+	/**
+	 * Shows a loading spinner in the iframe and loads the catalogs list page
+	 * 
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(LOAD_LIST_URI)
+	public String showSpinner(Model model)
+	{
+		model.addAttribute("url", BASE_URL + LIST_URI);
+		return "spinner";
 	}
 
 	/**
