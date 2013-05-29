@@ -76,7 +76,7 @@
 										</table>
 									</div>
 									<#if foundCatalog>
-										<input id="submitButton" type="submit" class="btn pull-right" value="Load catalog" />
+										<input id="submitButton" type="submit" class="btn pull-right" value="Load" />
 									</#if>
 								</form>
 							</#if>
