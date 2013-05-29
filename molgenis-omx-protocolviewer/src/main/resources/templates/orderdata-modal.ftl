@@ -116,14 +116,12 @@
 					    error: function() {
 					      alert("error");
 					        }
-					      });
-					    }
-					    else{
-					      order();
-					    }
-					});
+					    });
 				}
-		    }
+				else{
+					order();
+				}
+			}		    
 		});
 	    submitBtn.click(function(e) {
 	    	e.preventDefault();
