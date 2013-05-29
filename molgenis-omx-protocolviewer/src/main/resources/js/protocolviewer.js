@@ -211,12 +211,11 @@
 		}
 		return branches;
 	}
-	
-	function characteristicSort(a,b){
+
+	function characteristicSort(a, b) {
 		return naturalSort(a.name, b.name);
-
 	}
-
+	
 	function checkExistenceOfAllSubNodes(node) {
 		var reRenderNode = false;
 		var listOfChildren = node.childList;
@@ -437,9 +436,6 @@
 			ns.selectDataSet(ns.getSelectedDataSet()); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
-		});
-		$(document).on('molgenis-order-modified', function(e, msg) {
-			console.log("TODO: handle molgenis-order-modified event");
 		});
 	});
 }($, window.top));
