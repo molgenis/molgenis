@@ -1,4 +1,4 @@
-package test;
+package org.molgenis.omx.plugins;
 
 import static junit.framework.Assert.assertEquals;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-public class protocolViewerTest {
+public class ProtocolViewerIntegrationTest {
   private WebDriver driver;
   
   @Before
