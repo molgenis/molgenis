@@ -165,6 +165,7 @@
 	function createNodes(protocol, options) {
 		var branches = [];
 		if (protocol.subProtocols) {
+			protocol.subProtocols.sort(characteristicSort);
 			$.each(protocol.subProtocols, function(i, subProtocol) {
 				var subBranches = createNodes(subProtocol, options);
 				var newBranch = {
@@ -182,6 +183,7 @@
 				branches.push(newBranch);
 			});
 		} else if (protocol.features) {
+			protocol.features.sort(characteristicSort);
 			$.each(protocol.features, function(i, feature) {
 				// use first description as tooltip
 				var tooltip = null;
@@ -210,6 +212,10 @@
 		return branches;
 	}
 
+	function characteristicSort(a, b) {
+		return naturalSort(a.name, b.name);
+	}
+	
 	function checkExistenceOfAllSubNodes(node) {
 		var reRenderNode = false;
 		var listOfChildren = node.childList;
