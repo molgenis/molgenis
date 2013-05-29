@@ -117,11 +117,6 @@
 	</build>
 	
 	<dependencies>
-	 	<dependency>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>aspectj-maven-plugin</artifactId>
-			<version>1.0-beta-2</version>
-		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
