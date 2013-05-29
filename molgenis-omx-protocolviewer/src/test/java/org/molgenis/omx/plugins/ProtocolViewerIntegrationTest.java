@@ -33,7 +33,7 @@ public class ProtocolViewerIntegrationTest {
   }
   
   @Test
-  public void loginandclick() {
+  public void loginClickandSearch() {
 
     driver.get("http://localhost:8080/molgenis.do?__target=main&select=UserLogin");
 	WebElement LoginInput = driver.findElement(By.name("username"));
@@ -49,14 +49,31 @@ public class ProtocolViewerIntegrationTest {
 
     driver.get("http://localhost:8080/molgenis.do?__target=main&select=ProtocolViewer");
 
-    //click on tree 
     try {
-        Thread.sleep(4000);
+        Thread.sleep(40);
     } catch (Exception e) {}
 
 	WebElement link = driver.findElement(By.linkText("Biodata_name"));
 	link.click();
 	
+    try {
+        Thread.sleep(1000);
+    } catch (Exception e) {}
+
+    
+	WebElement SearchInput = driver.findElement(By.className("input-append"));
+	SearchInput.click();
+	
+	WebElement SearchText = driver.findElement(By.id("search-text"));
+	SearchText.sendKeys("Biodata");
+
+	WebElement SearchButton = driver.findElement(By.id("search-button"));
+	SearchButton.click();
+	
+    try {
+        Thread.sleep(9000);
+    } catch (Exception e) {}
+    
     assertEquals("Molgenis", driver.getTitle());
 
   }
