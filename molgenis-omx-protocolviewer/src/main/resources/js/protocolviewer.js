@@ -325,7 +325,6 @@
 				var entityType = object["type"];
 				
 				if(entityType === "observablefeature"){
-					
 					var nodes = object["path"].split(".");
 					var entityId = object["id"];
 					//split the path to get all ancestors;
@@ -365,7 +364,13 @@
 							else
 								topNodes.push(options);
 							cachedNode[nodes[i]] = options;
-						}
+						}else{
+							if (nodes[i] === entityId.toString()) {
+								var parentNode = cachedNode[nodes[i-1]];
+								parentNode["children"].push(cachedNode[nodes[i]]);
+								cachedNode[nodes[i-1]] = parentNode;
+							}
+						} 
 					}
 				}
 			});
