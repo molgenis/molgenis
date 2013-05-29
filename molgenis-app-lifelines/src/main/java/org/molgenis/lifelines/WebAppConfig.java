@@ -3,8 +3,19 @@ package org.molgenis.lifelines;
 import java.util.List;
 import java.util.Properties;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import javax.xml.validation.Schema;
+
+import nl.umcg.hl7.CatalogService;
+import nl.umcg.hl7.GenericLayerCatalogService;
+
+import org.molgenis.DatabaseConfig;
+import org.molgenis.lifelines.catalogue.CatalogLoaderController;
+import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
+import org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin;
+import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
+import org.molgenis.lifelines.utils.SchemaLoader;
+import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
@@ -12,6 +23,7 @@ import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +47,9 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-
-import app.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
@@ -54,6 +65,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
+		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
 	}
 
 	@Override
@@ -61,6 +73,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		converters.add(new GsonHttpMessageConverter());
 		converters.add(new BufferedImageHttpMessageConverter());
+	}
+
+	@Bean
+	public ApplicationListener<?> databasePopulator()
+	{
+		return new WebAppDatabasePopulator();
 	}
 
 	@Bean
@@ -100,8 +118,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		mailSender.setHost(mailHost);
 		mailSender.setPort(Integer.valueOf(mailPort));
 		mailSender.setProtocol(mailProtocol);
-		mailSender.setUsername(mailUsername); // specify in molgenis-server.properties
-		mailSender.setPassword(mailPassword); // specify in molgenis-server.properties
+		mailSender.setUsername(mailUsername); // specify in
+												// molgenis-server.properties
+		mailSender.setPassword(mailPassword); // specify in
+												// molgenis-server.properties
 		Properties javaMailProperties = new Properties();
 		javaMailProperties.setProperty("mail.smtp.auth", mailJavaAuth);
 		javaMailProperties.setProperty("mail.smtp.starttls.enable", mailJavaStartTlsEnable);
@@ -132,7 +152,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
-	public ViewResolver viewRespolver()
+	public ViewResolver viewResolver()
 	{
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);
@@ -165,6 +185,56 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public ShoppingCart shoppingCart()
 	{
 		return new ShoppingCart();
+	}
+
+	@Bean
+	public GenericLayerCatalogService genericLayerCatalogService()
+	{
+		return new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
+	}
+
+	@Value("${lifelines.resource.manager.service.url}")
+	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
+
+	@Value("${lifelines.validate:false}")
+	private boolean validate;// Specify in molgenis-server.properties, validate generic layer responses
+
+	@Bean
+	public ResourceManagerService resourceManagerService()
+	{
+		return new ResourceManagerService(resourceManagerServiceUrl, emeasureSchema(), validate);
+	}
+
+	@Bean
+	public SecurityHandlerInterceptor catalogLoaderHandlerInterceptor()
+	{
+		return new SecurityHandlerInterceptor(CatalogueLoaderPlugin.class);
+	}
+
+	@Bean
+	public MappedInterceptor catalogLoaderMappedInterceptor()
+	{
+		return new MappedInterceptor(new String[]
+		{ CatalogLoaderController.BASE_URL + "/**" }, catalogLoaderHandlerInterceptor());
+	}
+
+	@Bean
+	public MappedInterceptor studyDefinitionLoaderMappedInterceptor()
+	{
+		return new MappedInterceptor(new String[]
+		{ StudyDefinitionLoaderController.BASE_URL + "/**" }, studyDefinitionLoaderHandlerInterceptor());
+	}
+
+	@Bean
+	public SecurityHandlerInterceptor studyDefinitionLoaderHandlerInterceptor()
+	{
+		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPlugin.class);
+	}
+
+	@Bean
+	public Schema emeasureSchema()
+	{
+		return new SchemaLoader("EMeasure.xsd").getSchema();
 	}
 
 	/**

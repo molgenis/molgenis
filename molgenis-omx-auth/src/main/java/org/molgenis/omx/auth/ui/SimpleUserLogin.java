@@ -11,7 +11,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -33,7 +33,7 @@ import org.molgenis.omx.auth.ui.form.ForgotForm;
 import org.molgenis.omx.auth.ui.form.UserAreaForm;
 import org.molgenis.omx.auth.vo.MolgenisUserSearchCriteriaVO;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationUtil;
 import org.molgenis.util.tuple.HttpServletRequestTuple;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -160,7 +160,7 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			mailMessage.setText(emailContents);
 			try
 			{
-				WebAppUtil.getMailSender().send(mailMessage);
+				ApplicationUtil.getMailSender().send(mailMessage);
 				this.getModel()
 						.getMessages()
 						.add(new ScreenMessage(
@@ -226,7 +226,7 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			mailMessage.setTo(user.getEmail());
 			mailMessage.setSubject("Your registration request");
 			mailMessage.setText(emailContents);
-			WebAppUtil.getMailSender().send(mailMessage);
+			ApplicationUtil.getMailSender().send(mailMessage);
 
 			// restore login
 			db.setLogin(saveLogin);
@@ -292,7 +292,7 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			mailMessage.setText(emailContents);
 			try
 			{
-				WebAppUtil.getMailSender().send(mailMessage);
+				ApplicationUtil.getMailSender().send(mailMessage);
 				this.getModel().getMessages().add(new ScreenMessage("Sending new password successful", true));
 			}
 			catch (MailException e)

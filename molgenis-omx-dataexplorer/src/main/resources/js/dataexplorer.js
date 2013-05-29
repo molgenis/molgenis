@@ -145,9 +145,6 @@
 					onNodeSelectionChange(this.getSelectedNodes());
 				},
 				onPostInit : function() {
-					$("#feature-selection-container").accordion({
-						collapsible : true
-					});
 					onNodeSelectionChange(this.getSelectedNodes());
 				}
 			});
@@ -187,14 +184,20 @@
 	};
 
 	ns.updateObservationSetsTable = function() {
-		ns.search(function(searchResponse) {
-			var maxRowsPerPage = resultsTable.getMaxRows();
-			var nrRows = searchResponse.totalHitCount;
+		if (selectedFeatures.length > 0) {
+			ns.search(function(searchResponse) {
+				var maxRowsPerPage = resultsTable.getMaxRows();
+				var nrRows = searchResponse.totalHitCount;
 
-			resultsTable.build(searchResponse, selectedFeatures, restApi);
+				resultsTable.build(searchResponse, selectedFeatures, restApi);
 
-			ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
-		});
+				ns.onObservationSetsTableChange(nrRows, maxRowsPerPage);
+			});
+		} else {
+			$('#data-table-header').html('no features selected');
+			$('#data-table-pager').empty();
+			$('#data-table').empty();
+		}
 	};
 
 	ns.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
@@ -311,13 +314,12 @@
 						values : [ $(this).val() ]
 					});
 				});
-				filter.datepicker();
 				break;
 			case "datetime":
 				if (config == null)
-					filter = $('<input type="datetime" autofocus="autofocus">');
+					filter = $('<input type="datetime-local" autofocus="autofocus">');
 				else
-					filter = $('<input type="datetime" autofocus="autofocus" value="' + config.values[0] + '">');
+					filter = $('<input type="datetime-local" autofocus="autofocus" value="' + config.values[0] + '">');
 				filter.change(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
@@ -464,9 +466,6 @@
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
-		$('#feature-filters-container').accordion('destroy').accordion({
-			collapsible : true
-		});
 
 		$('.feature-filter-edit').click(function() {
 			ns.openFeatureFilterDialog($(this).data('href'));

@@ -2,7 +2,7 @@ package org.molgenis.util;
 
 import java.io.PrintStream;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 /**

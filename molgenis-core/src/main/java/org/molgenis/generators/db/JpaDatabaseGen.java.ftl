@@ -1,16 +1,19 @@
 <#include "GeneratorHelper.ftl">
 
-package app;
+package ${package};
 
-import org.molgenis.util.WebAppUtil;
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class JpaDatabase extends org.molgenis.framework.db.jpa.JpaDatabase
-{
- 	public JpaDatabase() throws org.molgenis.framework.db.DatabaseException {
-        super(WebAppUtil.getEntityManagerFactory().createEntityManager(), new JDBCMetaDatabase());
+{    
+	@Autowired
+	public JpaDatabase(EntityManagerFactory entityManagerFactory) throws org.molgenis.framework.db.DatabaseException {
+		super(entityManagerFactory.createEntityManager(), new JDBCMetaDatabase());
         initMappers();
-    }
-    
+	}
+	    
 	private void initMappers()
 	{
 		<#list model.entities as entity><#if !entity.isAbstract()>
@@ -31,6 +34,4 @@ public class JpaDatabase extends org.molgenis.framework.db.jpa.JpaDatabase
 			</#if>
 		</#if></#list>	
 	}
-
-   
 }

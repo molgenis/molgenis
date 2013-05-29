@@ -6,12 +6,12 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
-import org.molgenis.compute.db.WebAppConfig;
 import org.molgenis.compute.db.sysexecutor.SysCommandExecutor;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date: 22/08/2012 Time: 14:26
@@ -32,7 +32,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 		ExecutionHost executionHost = null;
 		try
 		{
-			database = WebAppConfig.unathorizedDatabase();
+			database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
 
 			List<ComputeTask> generatedTasks = database.query(ComputeTask.class)
 					.equals(ComputeTask.STATUSCODE, "generated").equals(ComputeTask.COMPUTERUN, computeRun).find();

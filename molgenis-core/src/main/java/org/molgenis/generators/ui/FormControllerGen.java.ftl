@@ -32,11 +32,8 @@ import org.molgenis.framework.ui.FormModel;
 import org.molgenis.framework.ui.FormController;
 
 import org.molgenis.framework.ui.html.*;
-import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.framework.db.QueryRule.Operator;  
 import org.molgenis.framework.db.DatabaseException;
-
-import app.EntitiesImporterImpl;
 
 ${imports(model, model.getEntity(entity), "")}
 ${imports(model, model.getEntity(entity), "ui", "Form")}
@@ -81,7 +78,6 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 		}
 		</#if>	
 		getModel().setMode(FormModel.Mode.${form.viewType});
-		getModel().setCsvEntityImporter(EntitiesImporterSingleton.getInstance());
 		getModel().setEntityClass(${entity}.class);
 
 <#-- parent form filtering -->
@@ -96,9 +92,9 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 			<#if parent_entity.getName() == field.xrefEntityName>
 		//filter on <#if field.getType() == "mref">ANY </#if>subform_entity.${name(field)} == parentform_entity.${name(field.xrefField)}
 				<#if field.xrefEntity.primaryKey.name == SqlName(field.xrefField)>
-		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${SqlName(field.xrefField)}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${SqlName(name(field))}"));
+		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${field.xrefField.name}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${field.name}"));
 				<#else>
-		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${SqlName(field.xrefField)}_${field.xrefEntity.primaryKey.name}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${SqlName(name(field))}"));
+		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${field.xrefField.name}_${field.xrefEntity.primaryKey.name}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${field.name}"));
 				</#if>
 			</#if>
 		</#list>
@@ -113,9 +109,9 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 			<#if subform_entity.getName() == field.xrefEntityName>
 		//filter on subform_entity.${name(field.xrefField)} == <#if field.getType() == "mref">ANY </#if> parentform_entity.${name(field)}
 				<#if parent_form.getRecord().getPrimaryKey().getName() == SqlName(name(field))>
-		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${SqlName(name(field))}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${SqlName(field.xrefField)}"));		
+		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${field.name}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${field.xrefField.name}"));		
 				<#else>
-		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${SqlName(name(field))}_${parent_form.getRecord().getPrimaryKey().getName()}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${SqlName(field.xrefField)}"));		
+		getModel().getParentFilters().add(new org.molgenis.framework.ui.FormModel.ParentFilter("${parent_form.name}","${field.name}_${parent_form.getRecord().getPrimaryKey().getName()}",java.util.Arrays.asList("${csv(field.xrefLabelNames)}".split(",")),"${field.xrefField.name}"));		
 				</#if>
 			</#if>
 		</#list>

@@ -1,4 +1,5 @@
-#input sample
+#string workflowConstant
+#string sample
 #list glucose
 #output risk
 

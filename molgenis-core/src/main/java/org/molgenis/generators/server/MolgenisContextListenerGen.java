@@ -44,7 +44,7 @@ public class MolgenisContextListenerGen extends Generator
 			}
 
 			templateArgs.put("model", model);
-			templateArgs.put("package", APP_DIR);
+			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("db_filepath", options.db_filepath);
 			templateArgs.put("db_user", options.db_user);
 			templateArgs.put("db_password", options.db_password);

@@ -25,8 +25,8 @@ public class HL7DataTypeMapper
 		dataTypeMap = new HashMap<Class<? extends ANY>, String>();
 		dataTypeMap.put(INT.class, "int");
 		dataTypeMap.put(ST.class, "string");
-		dataTypeMap.put(CO.class, "code"); // or categorical?
-		dataTypeMap.put(CD.class, "code"); // or categorical?
+		dataTypeMap.put(CO.class, "categorical");
+		dataTypeMap.put(CD.class, "categorical");
 		dataTypeMap.put(PQ.class, "decimal");
 		dataTypeMap.put(TS.class, "datetime");
 		dataTypeMap.put(REAL.class, "decimal");

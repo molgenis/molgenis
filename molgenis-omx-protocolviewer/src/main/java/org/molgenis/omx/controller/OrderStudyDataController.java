@@ -9,6 +9,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.security.Login;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.service.OrderStudyDataService;
 import org.molgenis.util.ShoppingCart;
@@ -31,6 +32,9 @@ import com.google.common.collect.Lists;
 public class OrderStudyDataController
 {
 	@Autowired
+	private Login login;
+
+	@Autowired
 	private OrderStudyDataService orderStudyDataService;
 
 	@Autowired
@@ -48,7 +52,7 @@ public class OrderStudyDataController
 	public void orderData(@RequestParam String name, @RequestParam Part file) throws DatabaseException, IOException,
 			MessagingException
 	{
-		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart());
+		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart(), login.getUserId());
 		shoppingCart.emptyCart();
 	}
 
@@ -56,8 +60,8 @@ public class OrderStudyDataController
 	@ResponseBody
 	public OrdersResponse getOrders() throws DatabaseException
 	{
-		Iterable<OrderResponse> ordersIterable = Iterables.transform(orderStudyDataService.getOrders(),
-				new Function<StudyDataRequest, OrderResponse>()
+		Iterable<OrderResponse> ordersIterable = Iterables.transform(
+				orderStudyDataService.getOrders(login.getUserId()), new Function<StudyDataRequest, OrderResponse>()
 				{
 					@Override
 					@Nullable

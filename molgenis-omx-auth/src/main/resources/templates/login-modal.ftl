@@ -43,7 +43,8 @@
   		modal.on('shown', function () {
 	  		form.find('input:visible:first').focus();
   		});
-  		modal.on('hide', function () {
+  		modal.on('hide', function (e) {
+  			e.stopPropagation();
 	  		form[0].reset();
 	  		$('.text-error', modal).remove();
 	  		$('.alert', modal).remove();
@@ -52,11 +53,19 @@
 	  		e.preventDefault();
 	        modal.modal('hide');
 	    });
-	    modal.keydown(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
+	    modal.keyup(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
 	    	if(e.which == 27) {
 		    	e.preventDefault();
 			    e.stopPropagation();
-			    modal.modal('hide');
+	    	}
+	    });
+	    modal.keydown(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
+	    	if(e.which == 27) {
+			    if(modal.data('modal').isShown) {
+				    e.preventDefault();
+				    e.stopPropagation();
+			    	modal.modal('hide');
+			    }
 	    	}
 	    });
 	    

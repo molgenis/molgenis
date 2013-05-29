@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.io.TupleReader;
@@ -91,8 +92,8 @@ public class ExcelSheetReader implements TupleReader
 			@Override
 			public Tuple next()
 			{
-				if (colNamesMap == null) return new RowTuple(it.next(), cellProcessors);
-				else return new RowIndexTuple(it.next(), colNamesMap, cellProcessors);
+				if (colNamesMap == null) return new ExcelTuple(it.next(), cellProcessors);
+				else return new ExcelIndexTuple(it.next(), colNamesMap, cellProcessors);
 			}
 
 			@Override
@@ -190,14 +191,14 @@ public class ExcelSheetReader implements TupleReader
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
 	}
 
-	private static class RowTuple extends AbstractTuple
+	public static class ExcelTuple extends AbstractTuple
 	{
 		private static final long serialVersionUID = 1L;
 
 		private final Row row;
 		private final List<CellProcessor> cellProcessors;
 
-		public RowTuple(Row row, List<CellProcessor> cellProcessors)
+		public ExcelTuple(Row row, List<CellProcessor> cellProcessors)
 		{
 			if (row == null) throw new IllegalArgumentException("row is null");
 			this.row = row;
@@ -234,9 +235,16 @@ public class ExcelSheetReader implements TupleReader
 			Cell cell = row.getCell(col);
 			return cell != null ? toValue(cell, cellProcessors) : null;
 		}
+
+		public boolean isBold(int col)
+		{
+			Cell cell = row.getCell(col);
+			return cell == null ? false : row.getSheet().getWorkbook().getFontAt(cell.getCellStyle().getFontIndex())
+					.getBoldweight() == Font.BOLDWEIGHT_BOLD;
+		}
 	}
 
-	private static class RowIndexTuple extends AbstractTuple
+	public static class ExcelIndexTuple extends AbstractTuple
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -244,7 +252,7 @@ public class ExcelSheetReader implements TupleReader
 		private final Map<String, Integer> colNamesMap;
 		private final List<CellProcessor> cellProcessors;
 
-		public RowIndexTuple(Row row, Map<String, Integer> colNamesMap, List<CellProcessor> cellProcessors)
+		public ExcelIndexTuple(Row row, Map<String, Integer> colNamesMap, List<CellProcessor> cellProcessors)
 		{
 			if (row == null) throw new IllegalArgumentException("row is null");
 			if (colNamesMap == null) throw new IllegalArgumentException("column names map is null");
@@ -283,6 +291,13 @@ public class ExcelSheetReader implements TupleReader
 		{
 			Cell cell = row.getCell(col);
 			return cell != null ? toValue(cell, cellProcessors) : null;
+		}
+
+		public boolean isBold(int col)
+		{
+			Cell cell = row.getCell(col);
+			return cell == null ? false : row.getSheet().getWorkbook().getFontAt(cell.getCellStyle().getFontIndex())
+					.getBoldweight() == Font.BOLDWEIGHT_BOLD;
 		}
 	}
 }

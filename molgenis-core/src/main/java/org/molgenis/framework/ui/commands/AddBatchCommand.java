@@ -21,6 +21,7 @@ import org.molgenis.framework.ui.html.HtmlInput;
 import org.molgenis.framework.ui.html.TextInput;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.Entity;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * The command to add in batch/upload csv
@@ -30,6 +31,8 @@ public class AddBatchCommand<E extends Entity> extends SimpleCommand
 	private static final long serialVersionUID = -4067952586340535730L;
 	private static final Logger logger = Logger.getLogger(AddBatchCommand.class);
 
+	private EntitiesImporter entitiesImporter;
+
 	public AddBatchCommand(String name, ScreenController<?> owner)
 	{
 		super(name, owner);
@@ -37,6 +40,7 @@ public class AddBatchCommand<E extends Entity> extends SimpleCommand
 		this.setIcon("img/upload.png");
 		this.setDialog(true);
 		this.setMenu("File");
+		this.entitiesImporter = ApplicationUtil.getEntitiesImporter();
 	}
 
 	@Override
@@ -92,9 +96,6 @@ public class AddBatchCommand<E extends Entity> extends SimpleCommand
 			{
 				CsvReader csvReader = new CsvReader(new StringReader(request.getString("__csvdata")));
 				String entityName = this.getFormScreen().getEntityClass().getSimpleName();
-
-				EntitiesImporter entitiesImporter = this.getFormScreen().getCsvEntityImporter();
-				entitiesImporter.setDatabase(db);
 
 				EntityImportReport importReport = null;
 				try

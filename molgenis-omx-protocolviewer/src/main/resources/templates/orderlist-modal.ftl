@@ -24,19 +24,23 @@
 				success : function(data) {
 					var container = $('#order-list-container');
 					var items = [];
-					items.push('<table class="table">');
-					items.push('<thead><th>#<th>Study</th><th>Order Date</th><th>Status</th></thead><tbody>');
-					$.each(data.orders, function(i, order) {
-						var clazz;
-						if(order.orderStatus === 'accepted') clazz = 'success';
-						else if(order.orderStatus === 'pending') clazz = 'warning';
-						else if(order.orderStatus === 'rejected') clazz = 'error';
-						else clazz = 'error';
-						items.push('<tr class=' + clazz + '>');
-						items.push('<td>' + order.id +'</td><td>' + order.name + '</td><td>' + order.orderDate + '</td><td>' + order.orderStatus + '</td>');
-						items.push('</tr>');
-					});
-					items.push('</tbody></table>');
+					if(data.orders.length > 0) {
+						items.push('<table class="table">');
+						items.push('<thead><th>#<th>Study</th><th>Order Date</th><th>Status</th></thead><tbody>');
+						$.each(data.orders, function(i, order) {
+							var clazz;
+							if(order.orderStatus === 'accepted') clazz = 'success';
+							else if(order.orderStatus === 'pending') clazz = 'warning';
+							else if(order.orderStatus === 'rejected') clazz = 'error';
+							else clazz = 'error';
+							items.push('<tr class=' + clazz + '>');
+							items.push('<td>' + order.id +'</td><td>' + order.name + '</td><td>' + order.orderDate + '</td><td>' + order.orderStatus + '</td>');
+							items.push('</tr>');
+						});
+						items.push('</tbody></table>');
+					} else {
+						items.push('<p>You did not place any orders</p>');
+					}
 					container.html(items.join(''));
 				}
 			});	
@@ -69,9 +73,5 @@
 			    modal.modal('hide');
 	    	}
 		});
-		
-		<#-- CSS -->
-		$('#order-list-container').css('max-height', '300px'); //TODO move to css?
-		$('#order-list-container').css('overflow','auto');
 	});
 </script>

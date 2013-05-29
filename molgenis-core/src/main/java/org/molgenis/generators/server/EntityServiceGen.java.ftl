@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 @Service
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_REQUEST)
 public class ${entity.name}Service
 {
 	private static final Logger logger = Logger.getLogger(${entity.name}Service.class);

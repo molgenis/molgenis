@@ -1,5 +1,6 @@
 package org.molgenis.compute.db.pilot;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
@@ -7,7 +8,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
@@ -16,7 +17,8 @@ import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
-import org.molgenis.util.WebAppUtil;
+import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date:
@@ -63,24 +65,15 @@ public class PilotService implements MolgenisService
 
 			// we add task id to the run listing to identify task when
 			// it is done
-			String pilotServiceUrl = request.getAppLocation() + request.getServicePath();
-			String computeScript = task.getComputeScript().replaceAll("\r", "");
-			String runName = task.getComputeRun().getName();
-			String environment = task.getComputeRun().getEnvironment();
+			ScriptBuilder sb = ApplicationContextProvider.getApplicationContext().getBean(ScriptBuilder.class);
+			String taskScript = sb.build(task, request.getAppLocation(), request.getServicePath());
 
-			// TODO
-			// echo \"%s\" > environment.txt
-			// -F environment_file=@environment.txt
-
-			String taskScript = String
-					.format("echo TASKNAME:%s\necho RUNNAME:%s\n%s\ncp log.log done.log\ncurl -F status=done -F log_file=@done.log %s\n",
-							environment, task.getName(), runName, computeScript, pilotServiceUrl);
-
-			LOG.info("Script for task [" + task.getName() + "] of run [ " + runName + "]:\n" + taskScript);
+			LOG.info("Script for task [" + task.getName() + "] of run [ " + task.getComputeRun().getName() + "]:\n"
+					+ taskScript);
 
 			// change status to running
 			task.setStatusCode(PilotService.TASK_RUNNING);
-			WebAppUtil.getDatabase().update(task);
+			ApplicationUtil.getDatabase().update(task);
 
 			// send response
 			PrintWriter pw = response.getResponse().getWriter();
@@ -103,7 +96,7 @@ public class PilotService implements MolgenisService
 			List<String> logBlocks = logfile.getLogBlocks();
 			String runInfo = StringUtils.join(logBlocks, "\n");
 
-			List<ComputeTask> tasks = WebAppUtil.getDatabase().query(ComputeTask.class).eq(ComputeTask.NAME, taskName)
+			List<ComputeTask> tasks = ApplicationUtil.getDatabase().query(ComputeTask.class).eq(ComputeTask.NAME, taskName)
 					.and().eq(ComputeTask.COMPUTERUN_NAME, runName).find();
 
 			if (tasks.isEmpty())
@@ -122,6 +115,12 @@ public class PilotService implements MolgenisService
 					task.setStatusCode(TASK_DONE);
 					task.setRunLog(logFileContent);
 					task.setRunInfo(runInfo);
+
+					File output = request.getFile("output_file");
+					if (output != null)
+					{
+						task.setOutputEnvironment(FileUtils.readFileToString(output));
+					}
 				}
 				else
 				{
@@ -146,6 +145,12 @@ public class PilotService implements MolgenisService
 					task.setRunLog(logFileContent);
 					task.setRunInfo(runInfo);
 					task.setStatusCode("failed");
+
+					File failedLog = request.getFile("failed_log_file");
+					if (failedLog != null)
+					{
+						task.setFailedLog(FileUtils.readFileToString(failedLog));
+					}
 				}
 				else if (task != null && task.getStatusCode().equalsIgnoreCase(TASK_DONE))
 				{
@@ -154,17 +159,17 @@ public class PilotService implements MolgenisService
 				}
 			}
 
-			WebAppUtil.getDatabase().update(task);
+			ApplicationUtil.getDatabase().update(task);
 		}
 	}
 
 	private List<ComputeTask> findRunTasksReady(String backendName) throws DatabaseException
 	{
 
-		List<ComputeRun> runs = WebAppUtil.getDatabase().query(ComputeRun.class)
+		List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
 				.equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
 
-		return WebAppUtil.getDatabase().query(ComputeTask.class)
+		return ApplicationUtil.getDatabase().query(ComputeTask.class)
 				.equals(ComputeTask.STATUSCODE, PilotService.TASK_READY).in(ComputeTask.COMPUTERUN, runs).find();
 	}
 }

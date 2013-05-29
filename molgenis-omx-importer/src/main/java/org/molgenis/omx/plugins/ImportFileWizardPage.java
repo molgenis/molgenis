@@ -9,11 +9,10 @@ import java.util.Map.Entry;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.EntitiesImporter;
-import org.molgenis.framework.db.EntitiesImporterSingleton;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.omx.dataset.DataSetImporter;
+import org.molgenis.util.ApplicationUtil;
 
 public class ImportFileWizardPage extends WizardPage
 {
@@ -47,9 +46,7 @@ public class ImportFileWizardPage extends WizardPage
 			if (entityDbAction == null) throw new IOException("unknown database action: " + entityAction);
 
 			// import entities
-			EntitiesImporter entitiesImporter = EntitiesImporterSingleton.getInstance();
-			entitiesImporter.setDatabase(db);
-			EntityImportReport importReport = entitiesImporter.importEntities(file, entityDbAction);
+			EntityImportReport importReport = ApplicationUtil.getEntitiesImporter().importEntities(file, entityDbAction);
 			importWizard.setImportResult(importReport);
 
 			// import dataset instances

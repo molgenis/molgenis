@@ -11,16 +11,18 @@ package org.molgenis.model.elements;
 
 // jdk
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import org.molgenis.framework.security.Login;
 import org.molgenis.util.SimpleTree;
 
 /**
- * Definition of the base-class for objects in the user interface schema. This
- * class inherits from the tree, so it can hold multiple children and have
- * convenient search-methods. Objects that need to be placed in this container
- * need to inherit from it.
+ * Definition of the base-class for objects in the user interface schema. This class inherits from the tree, so it can
+ * hold multiple children and have convenient search-methods. Objects that need to be placed in this container need to
+ * inherit from it.
  * 
  * @author RA Scheltema
  * @version 1.0.0
@@ -41,8 +43,7 @@ public class UISchema extends SimpleTree<UISchema>
 
 	// constructor(s)
 	/**
-	 * The standard constructor, which links the object in the tree (with the
-	 * parent parameter).
+	 * The standard constructor, which links the object in the tree (with the parent parameter).
 	 * 
 	 * @param name
 	 *            The name of the element.
@@ -51,52 +52,20 @@ public class UISchema extends SimpleTree<UISchema>
 	 */
 	public UISchema(String name, UISchema parent)
 	{
-		// super(buildName(name, parent), parent);
 		super(name, parent);
 	}
 
-	// naming methods
-	/**
-	 * 
-	 */
 	public String getPathName()
 	{
 		String path = getPackageName() + "/";
 		return path.replace('.', '/');
 	}
 
-	/**
-	 * 
-	 */
 	public String getPackageName()
 	{
 		return "";
-		// String name = getName();
-		//
-		// // hack to get rid of the tree-root
-		// int start = name.indexOf('.');
-		// int finish = name.lastIndexOf('.');
-		//
-		// if (start != -1 && finish != -1)
-		// {
-		// if (start == finish)
-		// return "";// name.substring(start+1);
-		// else
-		// return name.substring(start + 1, finish);
-		// }
-		// else if (start != -1)
-		// {
-		// return name.substring(start + 1);
-		// }
-		// else
-		// {
-		// return name.substring(0, finish);
-		// }
 	}
 
-	/**
-	 * 
-	 */
 	public String getClassName()
 	{
 		String name = getName();
@@ -112,39 +81,16 @@ public class UISchema extends SimpleTree<UISchema>
 		}
 	}
 
-	/**
-	 * 
-	 */
 	public String getCanonicalClassName()
 	{
 		return this.getClassName().substring(0, 1).toUpperCase();
-		// + this.getClassName().substring(1);
-		// String class_name = this.getClassName().substring(0,1).toUpperCase()
-		// + this.getClassName().substring(1);
-		// String package_name = this.getPackageName();
-		//
-		// if (package_name.equals(""))
-		// {
-		// return class_name;
-		// }
-		// else
-		// {
-		// return package_name + "." + class_name;
-		// }
 	}
 
-	/**
-	 * 
-	 */
 	public String getVelocityName()
 	{
 		return getName().replace('.', '_');
 	}
 
-	// access methods
-	/**
-	 * 
-	 */
 	public List<UISchema> getCompleteSchema()
 	{
 		Vector<UISchema> results = new Vector<UISchema>();
@@ -159,9 +105,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return results;
 	}
 
-	/**
-	 * 
-	 */
 	public List<Menu> getMenus()
 	{
 		Vector<Menu> menus = new Vector<Menu>();
@@ -178,34 +121,36 @@ public class UISchema extends SimpleTree<UISchema>
 
 	public ArrayList<String> getAllUniqueGroups()
 	{
-		ArrayList<String> res = new ArrayList<String>();
-
-		// first add all unique read/write groups
-		// FIXME: are these hardcoded excludes OK ?
+		Set<String> uniqueGroups = new LinkedHashSet<String>();
 		for (UISchema schema : getAllChildren())
 		{
-			if (schema.getGroup() != null && !res.contains(schema.getGroup()) && !schema.getGroup().equals("admin")
-					&& !schema.getGroup().equals("anonymous") && !schema.getGroup().equals("AllUsers")
-					&& !schema.getGroup().equals("system"))
+			String groupStr = schema.getGroup();
+			if (groupStr != null)
 			{
-				res.add(schema.getGroup());
+				for (String group : groupStr.split(","))
+				{
+					group = group.trim();
+					if (!group.isEmpty()) uniqueGroups.add(group);
+				}
+			}
+			String groupReadStr = schema.getGroupRead();
+			if (groupReadStr != null)
+			{
+				for (String group : groupReadStr.split(","))
+				{
+					group = group.trim();
+					if (!group.isEmpty()) uniqueGroups.add(group);
+				}
 			}
 		}
 
-		// now add all unique read groups that were NOT part of the regular
-		// read/write groups
 		// FIXME: are these hardcoded excludes OK ?
-		for (UISchema schema : getAllChildren())
-		{
-			if (schema.getGroupRead() != null && !res.contains(schema.getGroupRead())
-					&& !schema.getGroupRead().equals("admin") && !schema.getGroupRead().equals("anonymous")
-					&& !schema.getGroupRead().equals("AllUsers") && !schema.getGroupRead().equals("system"))
-			{
-				res.add(schema.getGroupRead());
-			}
-		}
+		uniqueGroups.remove(Login.USER_ADMIN_NAME);
+		uniqueGroups.remove(Login.USER_ANONYMOUS_NAME);
+		uniqueGroups.remove(Login.GROUP_SYSTEM_NAME);
+		uniqueGroups.remove(Login.GROUP_USERS_NAME);
 
-		return res;
+		return new ArrayList<String>(uniqueGroups);
 	}
 
 	public List<Form> getAllForms()
@@ -223,9 +168,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return forms;
 	}
 
-	/**
-	 * 
-	 */
 	public List<Form> getForms()
 	{
 		Vector<Form> forms = new Vector<Form>();
@@ -240,9 +182,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return forms;
 	}
 
-	/**
-	 * 
-	 */
 	public Vector<Tree> getTrees()
 	{
 		Vector<Tree> trees = new Vector<Tree>();
@@ -258,9 +197,6 @@ public class UISchema extends SimpleTree<UISchema>
 		return trees;
 	}
 
-	/**
-	 * 
-	 */
 	public Vector<Plugin> getPlugins()
 	{
 		Vector<Plugin> plugins = new Vector<Plugin>();
@@ -276,16 +212,11 @@ public class UISchema extends SimpleTree<UISchema>
 		return plugins;
 	}
 
-	//
-	/** */
 	enum Type
 	{
 		UNKNOWN, FORM, TREE, MENU, PLUGIN
 	};
 
-	/**
-	 * 
-	 */
 	public Type getType()
 	{
 		return Type.UNKNOWN;
@@ -300,8 +231,6 @@ public class UISchema extends SimpleTree<UISchema>
 	{
 		this.label = label;
 	}
-
-	// private methode
 
 	public String getNamespace()
 	{
@@ -332,9 +261,4 @@ public class UISchema extends SimpleTree<UISchema>
 	{
 		this.groupRead = groupRead;
 	}
-
-	// public String getNearestParentRole(){
-	// TODO role inheritance?
-	// }
-
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.molgenis.framework.security.Login;
+
 public class TokenFactory implements Serializable
 {
 	private static final long serialVersionUID = -1669938881359317765L;
@@ -19,8 +21,7 @@ public class TokenFactory implements Serializable
 	}
 
 	/**
-	 * Create a new token and put it in the map of all tokens. Returns the token
-	 * ID that was given out for convenience.
+	 * Create a new token and put it in the map of all tokens. Returns the token ID that was given out for convenience.
 	 * 
 	 * @param userName
 	 * @param validUntil
@@ -29,7 +30,7 @@ public class TokenFactory implements Serializable
 	public String makeNewToken(String userName, Date validUntil)
 	{
 		// no tokens for anonymous
-		if (userName.equals("anonymous"))
+		if (userName.equals(Login.USER_ANONYMOUS_NAME))
 		{
 			return null;
 		}
@@ -87,8 +88,8 @@ public class TokenFactory implements Serializable
 	}
 
 	/**
-	 * Remove tokens that are expired. Called automatically on 1) any 'token
-	 * login' attempt to prevent use of bad tokens 2) creation of new tokens.
+	 * Remove tokens that are expired. Called automatically on 1) any 'token login' attempt to prevent use of bad tokens
+	 * 2) creation of new tokens.
 	 */
 	public void invalidateTokens()
 	{

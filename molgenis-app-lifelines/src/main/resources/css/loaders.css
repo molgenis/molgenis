@@ -1,0 +1,26 @@
+#loader-title {
+	text-align: center;
+}
+
+.well {
+	margin-top: 40px;
+	padding-bottom: 40px;
+}
+
+.listEntryRadio {
+	width: 20px;
+	color: #468847;
+	font-family: Consolas,"Liberation Mono",Courier,monospace;
+}
+
+.listEntryId {
+	width: 30px;
+}
+.alert {
+	margin-top: 20px;
+}
+
+#resultsTable {
+	max-height: 450px;
+	overflow: auto;
+}

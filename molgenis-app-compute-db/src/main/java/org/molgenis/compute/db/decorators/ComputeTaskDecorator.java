@@ -4,13 +4,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.compute.db.WebAppConfig;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.compute.runtime.ComputeTaskHistory;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
+import org.molgenis.util.ApplicationUtil;
 
 /**
  * Automatically adds a new entry to the ComputeTaskHisory if the statuscode
@@ -47,7 +47,7 @@ public class ComputeTaskDecorator extends MapperDecorator<ComputeTask>
 	@Override
 	public int update(List<ComputeTask> entities) throws DatabaseException
 	{
-		Database database = WebAppConfig.unathorizedDatabase();
+		Database database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
 		try
 		{
 			for (ComputeTask task : entities)

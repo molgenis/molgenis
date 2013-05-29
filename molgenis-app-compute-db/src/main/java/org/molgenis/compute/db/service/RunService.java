@@ -52,7 +52,7 @@ public class RunService
 	 * @param environment
 	 * @return the new ComputeRun
 	 */
-	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String environment)
+	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String userEnvironment)
 	{
 		try
 		{
@@ -73,7 +73,7 @@ public class RunService
 			run.setComputeBackend(backend);
 			run.setName(name);
 			run.setPollDelay(pollDelay == null ? DEFAULT_POLL_DELAY : pollDelay);
-			run.setEnvironment(environment);
+			run.setUserEnvironment(userEnvironment);
 			database.add(run);
 
 			// Add tasks to db
@@ -114,6 +114,7 @@ public class RunService
 				{
 					computeTask.setPrevSteps(prevTasks);
 				}
+				database.update(computeTask);
 
 				if (LOG.isDebugEnabled())
 				{
@@ -162,7 +163,7 @@ public class RunService
 				LOG.error("Exception rollback transaction create ComputeRun", e1);
 			}
 
-			String msg = "DatabaseException starting creating ComputeRun with name [" + name + "]";
+			String msg = "DatabaseException starting creating ComputeRun with name [" + name + "] : " + e.getMessage();
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}
@@ -190,7 +191,7 @@ public class RunService
 		}
 		catch (DatabaseException e)
 		{
-			String msg = "DatabaseException starting run with name [" + runName + "]";
+			String msg = "DatabaseException starting run with name [" + runName + "] : " + e.getMessage();
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}
@@ -215,7 +216,7 @@ public class RunService
 		}
 		catch (DatabaseException e)
 		{
-			String msg = "DatabaseException stopping run with name [" + runName + "]";
+			String msg = "DatabaseException stopping run with name [" + runName + "] : " + e.getMessage();
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}
@@ -241,7 +242,7 @@ public class RunService
 		}
 		catch (DatabaseException e)
 		{
-			String msg = "DatabaseException check running for run  [" + runName + "]";
+			String msg = "DatabaseException check running for run  [" + runName + "] : " + e.getMessage();
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}
@@ -273,7 +274,7 @@ public class RunService
 		}
 		catch (DatabaseException e)
 		{
-			String msg = "DatabaseException getting status for run  [" + runName + "]";
+			String msg = "DatabaseException getting status for run  [" + runName + "] : " + e.getMessage();
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}
@@ -325,7 +326,7 @@ public class RunService
 				LOG.error("Exception rollback transaction resubmitFailedTasks", e1);
 			}
 
-			String msg = "DatabaseException resubmitting failed tasks for run  [" + runName + "]";
+			String msg = "DatabaseException resubmitting failed tasks for run  [" + runName + "] : " + e.getMessage();
 			LOG.error(msg, e);
 			throw new ComputeDbException(msg, e);
 		}

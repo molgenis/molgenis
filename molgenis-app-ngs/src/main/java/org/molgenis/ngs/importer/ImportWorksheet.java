@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.Persistence;
+
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.omx.ngs.CapturingKit;
@@ -712,7 +715,8 @@ public class ImportWorksheet
 		logger.info("Collected:\t" + users.size() + " NgsUser(s)");
 
 		// Put values in database
-		Database db = new app.JpaDatabase();
+		Database db = new org.molgenis.JpaDatabase(
+				Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME));
 		try
 		{
 			db.beginTx();

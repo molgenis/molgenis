@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Persistence;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBElement;
 
@@ -27,7 +28,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
 
-import app.JpaDatabase;
+import org.molgenis.JpaDatabase;
 
 public class HL7StudyDataSetImporter
 {
@@ -40,8 +41,7 @@ public class HL7StudyDataSetImporter
 	}
 
 	/**
-	 * Import a HL7 study dataset describing a OMX dataset into an empty
-	 * database
+	 * Import a HL7 study dataset describing a OMX dataset into an empty database
 	 * 
 	 * @param xmlStream
 	 * @throws DatabaseException
@@ -162,7 +162,8 @@ public class HL7StudyDataSetImporter
 		InputStream xmlStream = new FileInputStream(args[0]);
 		try
 		{
-			HL7StudyDataSetImporter importer = new HL7StudyDataSetImporter(new JpaDatabase());
+			HL7StudyDataSetImporter importer = new HL7StudyDataSetImporter(new JpaDatabase(
+					Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME)));
 			importer.importData(xmlStream);
 		}
 		finally
