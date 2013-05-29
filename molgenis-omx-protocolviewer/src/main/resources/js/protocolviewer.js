@@ -5,6 +5,7 @@
 	
 	var search = false;
 	var searchQuery = null;
+	var showSpinner = false;
 	var updatedNodes = null;
 	var selectedAllNodes = null;
 	var treePrevState = null;
@@ -32,6 +33,7 @@
 		// reset
 		$('#feature-filters p').remove();
 		search = false;
+		showSpinner = false;
 		searchQuery = null;
 		treePrevState = null;
 		updatedNodes = null;
@@ -302,18 +304,19 @@
 				var entityType = object["type"];
 				var nodes = object["path"].split(".");
 				var entityId = object["id"];
-
+				if(nodes.length < 4) showSpinner = true;
 				//collect all features and their ancesters using restapi first.
-				if(entityType === "observablefeature"){
-					for(var i = 0; i < nodes.length; i++){
-						if(nodes[i] == entityId.toString()){
-							featureMap[nodes[i]] = nodes[i];
-						}else{
-							protocolMap[nodes[i]] = nodes[i];
-						}
+				for(var i = 0; i < nodes.length; i++){
+					if(nodes[i] == entityId.toString()){
+						if(entityType === "observablefeature") featureMap[nodes[i]] = nodes[i];
+						else if(entityType === "protocol") protocolMap[nodes[i]] = nodes[i]; 
+					}else{
+						protocolMap[nodes[i]] = nodes[i];
 					}
 				}
 			});
+			
+			if(showSpinner) $('#spinner').modal('show');
 			getEntitiesbyIds(protocolMap, "protocol");
 			getEntitiesbyIds(featureMap, "observablefeature");
 			
@@ -323,65 +326,69 @@
 			$.each(searchHits, function(){
 				var object = $(this)[0]["columnValueMap"];
 				var entityType = object["type"];
-				
-				if(entityType === "observablefeature"){
-					var nodes = object["path"].split(".");
-					var entityId = object["id"];
-					//split the path to get all ancestors;
-					for(var i = 0; i < nodes.length; i++) {
-						if(!cachedNode[nodes[i]]){
-							var entityInfo = null;
-							var options = null;
-							//this is the last node and check if this is a feature
-							if (nodes[i] === entityId.toString()) {
-								entityInfo = featureMap[nodes[i]];
-								options = {
-									isFolder : false,
-								}
-							}else{
-								entityInfo = protocolMap[nodes[i]];
-								options = {
-									isFolder : true,
-									isLazy : true,
-									expand : true,
-									children : []
-								};
+				var nodes = object["path"].split(".");
+				var entityId = object["id"];
+				//split the path to get all ancestors;
+				for(var i = 0; i < nodes.length; i++) {
+					if(!cachedNode[nodes[i]]){
+						var entityInfo = null;
+						var options = null;
+						//this is the last node and check if this is a feature
+						if (nodes[i] === entityId.toString() && entityType === "observablefeature") {
+							entityInfo = featureMap[nodes[i]];
+							options = {
+								isFolder : false,
 							}
-							options = $.extend({
-								key : entityInfo.href,
-								title : entityInfo.name,
-								tooltip : entityInfo.description
-							}, options);
-							if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
-								options["select"] = true;
-							}
-							//locate the node in dynatree and otherwise create the node and insert it
-							if(i != 0){
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode["children"].push(options);
-								cachedNode[nodes[i-1]] = parentNode;
-							}
-							else
-								topNodes.push(options);
-							cachedNode[nodes[i]] = options;
 						}else{
-							if (nodes[i] === entityId.toString()) {
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode["children"].push(cachedNode[nodes[i]]);
+							entityInfo = protocolMap[nodes[i]];
+							options = {
+								isFolder : true,
+								isLazy : true,
+								expand : true,
+								children : []
+							};
+						}
+						options = $.extend({
+							key : entityInfo.href,
+							title : entityInfo.name,
+							tooltip : entityInfo.description
+						}, options);
+						
+						if(nodes[i] === entityId.toString() && entityType === "protocol"){
+							options = recursivelyExpand(selectedFeatureIds, null, options, cachedNode);
+						}
+						
+						if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
+							options["select"] = true;
+						}
+						//locate the node in dynatree and otherwise create the node and insert it
+						if(i != 0){
+							var parentNode = cachedNode[nodes[i-1]];
+							parentNode["children"].push(options);
+							cachedNode[nodes[i-1]] = parentNode;
+						}
+						else
+							topNodes.push(options);
+						cachedNode[nodes[i]] = options;
+					}else{
+						if (nodes[i] === entityId.toString() && i != 0) {
+							var parentNode = cachedNode[nodes[i-1]];
+							var childNode = cachedNode[nodes[i]];
+							if($.inArray(childNode, parentNode.children) === -1){ 
+								parentNode.children.push(cachedNode[nodes[i]]);
 								cachedNode[nodes[i-1]] = parentNode;
 							}
-						} 
-					}
-				} else if (entityType === "protocol") {
-					var nodes = object["path"].split(".");
-					var entityId = object["id"];
+						}
+					} 
 				}
 			});
 			$.each(topNodes, function(index, node){
 				sortNodes(node);
 			});
 			rootNode.addChild(topNodes);
-			console.log("finished");
+			//spinners disappear
+			$('#spinner').modal('hide');
+			showSpinner = false;
 		});
 	}
 	
@@ -423,22 +430,25 @@
 			}
 			return;
 		}
-		
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
-		var expandedNodes = new Array ();
+		var selectedFeatureNodes = [];
+		var expandedNodes = [];
 		//check if newly selected nodes exist in previous tree
 		if(updatedNodes.select != null){
-			$.each(updatedNodes.select, function(index, oldNode){
-				while(!rootNode.tree.getNodeByKey(oldNode.data.key)){
-					expandedNodes.push(oldNode.data.key);
-					oldNode = oldNode.parent;
+			$.each(updatedNodes.select, function(index, node){
+				while(!rootNode.tree.getNodeByKey(node.data.key)){
+					if(node.data.isFolder)
+						expandedNodes.push(node.data.key);
+					else
+						selectedFeatureNodes.push(node.data.key);
+					node = node.parent;
 				}
-				var currentNode = rootNode.tree.getNodeByKey(oldNode.data.key);
-				if(oldNode.data.isFolder){
+				var currentNode = rootNode.tree.getNodeByKey(node.data.key);
+				if(node.data.isFolder){
 					currentNode.data.children = new Array();
-					var nodeData = recursivelyExpand(expandedNodes, currentNode.data);
+					var nodeData = recursivelyExpand(selectedFeatureNodes, expandedNodes, currentNode.data);
 					sortNodes(nodeData);
 					currentNode.removeChildren();
 					currentNode.addChild(nodeData.children);
@@ -449,8 +459,8 @@
 			});
 		}
 		if(updatedNodes.unselect != null){
-			$.each(updatedNodes.unselect, function(index, oldNode){
-				var currentNode = rootNode.tree.getNodeByKey(oldNode.data.key);
+			$.each(updatedNodes.unselect, function(index, node){
+				var currentNode = rootNode.tree.getNodeByKey(node.data.key);
 				if(currentNode != null) currentNode.select(false);
 			});
 		}
@@ -483,7 +493,7 @@
 	}
 	
 	//merge the newly selected nodes back into the previous state of tree
-	function recursivelyExpand (expandedNodes, nodeData) {
+	function recursivelyExpand (selectedFeatures, expandedNodes, nodeData, cachedNodes) {
 		var entityInfo = restApi.get(nodeData.key, ["features", "subprotocols"]);
 		var options = null;
 		if(entityInfo.features.items.length && entityInfo.features.items.length != 0){
@@ -495,10 +505,15 @@
 					isFolder : false,
 					expand : true,
 				};
-				if($.inArray(feature.href, expandedNodes) != -1){
+				if($.inArray(feature.href, selectedFeatures) != -1){
 					options.select = true;
 				}
 				nodeData.children.push(options);
+				if(cachedNodes != null){
+					var fragments = options.key.split("/");
+					var id = fragments[fragments.length - 1];
+					if(!cachedNodes[id]) cachedNodes[id] = options; 
+				}
 			});
 		}
 		if(entityInfo.subprotocols.items.length && entityInfo.subprotocols.items.length != 0){
@@ -511,11 +526,16 @@
 					isLazy : true,
 					children : []
 				};
-				if($.inArray(protocol.href, expandedNodes) != -1){
+				if(expandedNodes === null || $.inArray(protocol.href, expandedNodes) != -1){
 					options.expand = true;
-					nodeData.children.push(recursivelyExpand(expandedNodes, options));
+					nodeData.children.push(recursivelyExpand(selectedFeatures, expandedNodes, options, cachedNodes));
 				}else{
 					nodeData.children.push(options);
+				}
+				if(cachedNodes != null){
+					var fragments = options.key.split("/");
+					var id = fragments[fragments.length - 1];
+					if(!cachedNodes[id]) cachedNodes[id] = options; 
 				}
 			});
 		}
