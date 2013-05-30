@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.molgenis.lifelines.catalogue.CatalogLoaderService;
 import org.molgenis.lifelines.catalogue.UnknownCatalogException;
-import org.molgenis.lifelines.hl7.jaxb.QualityMeasureDocument;
 import org.molgenis.lifelines.plugins.DataQueryService;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +51,6 @@ public class GenericLayerStudyDefinitionLoaderService implements StudyDefinition
 			throw new UnknownStudyDefinitionException(e);
 		}
 
-		QualityMeasureDocument studyDefinition = resourceManagerService.findStudyDefinition(id);
-
-		dataQueryService.loadStudyDefinitionData(studyDefinition);
+		dataQueryService.loadStudyDefinitionData(resourceManagerService.findStudyDefinition(id));
 	}
 }

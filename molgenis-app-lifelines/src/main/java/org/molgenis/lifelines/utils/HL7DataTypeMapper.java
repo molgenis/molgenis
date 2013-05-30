@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.hl7;
+package org.molgenis.lifelines.utils;
 
 import java.util.HashMap;
 import java.util.Map;
