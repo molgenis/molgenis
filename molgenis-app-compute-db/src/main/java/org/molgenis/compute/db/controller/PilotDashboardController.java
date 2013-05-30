@@ -86,15 +86,15 @@ public class PilotDashboardController
     public String activate(@RequestParam("run")
     String runName, Model model) throws DatabaseException
     {
-        //TODO activate action
+        runService.activate(runName);
         return init(model);
     }
 
     @RequestMapping("/inactivate")
     public String inactivate(@RequestParam("run")
-                           String runName, Model model) throws DatabaseException
+    String runName, Model model) throws DatabaseException
     {
-        //TODO inactivate action
+        runService.inactivate(runName);
         return init(model);
     }
 
@@ -133,7 +133,11 @@ public class PilotDashboardController
 				.sortDESC("creationTime");
 		for (ComputeRun run : runs.find())
 		{
-			runModels.add(new RunModel(run.getName(), runService.isRunning(run.getName()), run.getComputeBackend()
+			runModels.add(new RunModel(run.getName(),
+                    runService.isRunning(run.getName()),
+                    runService.isSubmitting(run.getName()),
+                    runService.isComplete(run.getName()),
+                    run.getComputeBackend()
 					.getBackendUrl(), run.getCreationTime()));
 		}
 

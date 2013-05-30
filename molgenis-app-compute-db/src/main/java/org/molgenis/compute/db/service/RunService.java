@@ -187,7 +187,10 @@ public class RunService
 				throw new ComputeDbException("Unknown run name [" + runName + "]");
 			}
 
-			scheduler.schedule(run, username, password);
+            run.setIsSubmittingPilots(true);
+            database.update(run);
+
+            scheduler.schedule(run, username, password);
 		}
 		catch (DatabaseException e)
 		{
@@ -198,8 +201,8 @@ public class RunService
 	}
 
 	/**
-	 * Stop database olling
-	 * 
+	 * Stop database polling
+     *
 	 * @param runName
 	 */
 	public void stop(String runName)
@@ -213,7 +216,10 @@ public class RunService
 			}
 
 			scheduler.unschedule(run.getId());
-		}
+
+            run.setIsSubmittingPilots(false);
+            database.update(run);
+        }
 		catch (DatabaseException e)
 		{
 			String msg = "DatabaseException stopping run with name [" + runName + "] : " + e.getMessage();
@@ -222,7 +228,60 @@ public class RunService
 		}
 	}
 
-	/**
+    /**
+     * Activate run for execution
+     *
+     * @param runName
+     */
+    public void activate(String runName)
+    {
+        try
+        {
+            ComputeRun run = ComputeRun.findByName(database, runName);
+            if (run == null)
+            {
+                throw new ComputeDbException("Unknown run name [" + runName + "]");
+            }
+
+            run.setIsActive(true);
+            database.update(run);
+        }
+        catch (DatabaseException e)
+        {
+            String msg = "DatabaseException stopping run with name [" + runName + "] : " + e.getMessage();
+            LOG.error(msg, e);
+            throw new ComputeDbException(msg, e);
+        }
+    }
+
+    /**
+     * Inactivate run for execution
+     *
+     * @param runName
+     */
+    public void inactivate(String runName)
+    {
+        try
+        {
+            ComputeRun run = ComputeRun.findByName(database, runName);
+            if (run == null)
+            {
+                throw new ComputeDbException("Unknown run name [" + runName + "]");
+            }
+
+            run.setIsActive(false);
+            database.update(run);
+        }
+        catch (DatabaseException e)
+        {
+            String msg = "DatabaseException stopping run with name [" + runName + "] : " + e.getMessage();
+            LOG.error(msg, e);
+            throw new ComputeDbException(msg, e);
+        }
+    }
+
+
+    /**
 	 * Check is a run is currently running
 	 * 
 	 * @param runName
@@ -238,7 +297,8 @@ public class RunService
 				throw new ComputeDbException("Unknown run name [" + runName + "]");
 			}
 
-			return scheduler.isRunning(run.getId());
+            return run.getIsActive();
+			//return scheduler.isRunning(run.getId());
 		}
 		catch (DatabaseException e)
 		{
@@ -248,7 +308,61 @@ public class RunService
 		}
 	}
 
-	/**
+    /**
+     * Check is a run is currently submitting pilots
+     *
+     * @param runName
+     * @return
+     */
+    public boolean isSubmitting(String runName)
+    {
+        try
+        {
+            ComputeRun run = ComputeRun.findByName(database, runName);
+            if (run == null)
+            {
+                throw new ComputeDbException("Unknown run name [" + runName + "]");
+            }
+
+            return run.getIsSubmittingPilots();
+        }
+        catch (DatabaseException e)
+        {
+            String msg = "DatabaseException check running for run  [" + runName + "] : " + e.getMessage();
+            LOG.error(msg, e);
+            throw new ComputeDbException(msg, e);
+        }
+    }
+
+    /**
+     * Check is a run is complete
+     *
+     * @param runName
+     * @return
+     */
+    public boolean isComplete(String runName)
+    {
+        try
+        {
+            ComputeRun run = ComputeRun.findByName(database, runName);
+            if (run == null)
+            {
+                throw new ComputeDbException("Unknown run name [" + runName + "]");
+            }
+
+            return run.getIsDone();
+        }
+        catch (DatabaseException e)
+        {
+            String msg = "DatabaseException check running for run  [" + runName + "] : " + e.getMessage();
+            LOG.error(msg, e);
+            throw new ComputeDbException(msg, e);
+        }
+    }
+
+
+
+    /**
 	 * Get the status of all tasks of a run
 	 * 
 	 * @param runName
@@ -270,7 +384,15 @@ public class RunService
 			int failed = getTaskStatusCount(run.getId(), PilotService.TASK_FAILED);
 			int done = getTaskStatusCount(run.getId(), PilotService.TASK_DONE);
 
-			return new RunStatus(generated, ready, running, failed, done);
+            boolean status = false;
+
+            if((generated == 0) && (ready == 0) && (running == 0) && (failed == 0))
+            {
+                status = true;
+                run.setIsDone(true);
+                database.update(run);
+            }
+            return new RunStatus(generated, ready, running, failed, done, status);
 		}
 		catch (DatabaseException e)
 		{
@@ -363,4 +485,5 @@ public class RunService
 		return database.query(ComputeTask.class).eq(ComputeTask.COMPUTERUN, runId).and()
 				.eq(ComputeTask.STATUSCODE, status).count();
 	}
+
 }
