@@ -41,7 +41,7 @@
 					</#if>		
 					<#if studyDefinitions??>	
 						<div class="well">
-							<p id="loader-title" class="box-title">Choose a studydefinition to load</p>
+							<p id="loader-title" class="box-title">Choose a study definition to load</p>
 							<#if studyDefinitions?size == 0>
 								<p>No studydefinitions found</p>
 							<#else>
@@ -76,7 +76,7 @@
 										</table>
 									</div>
 									<#if foundStudyDefinition>
-										<input id="submitButton" type="submit" class="btn pull-right" value="Load studydefinition" />
+										<input id="submitButton" type="submit" class="btn pull-right" value="Load" />
 									</#if>
 								</form>
 							</#if>

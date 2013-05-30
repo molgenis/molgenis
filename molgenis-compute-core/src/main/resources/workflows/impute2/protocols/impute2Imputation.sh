@@ -13,6 +13,7 @@
 #input toChrPos
 #input imputationIntermediatesFolder
 #input impute2Bin
+#input impute2gridBin
 
 #input impute2version
 #input knownHapsG
@@ -20,6 +21,7 @@
 #output impute2chunk
 #output impute2chunkInfo
 
+hostname
 module load impute/${impute2version}
 
 
@@ -35,7 +37,7 @@ echo "tmpOutput: ${tmpOutput}"
 echo "finalOutput: ${finalOutput}"
 
 impute2chunk=${finalOutput}
-impute2chunk_info=${finalOutput}_info
+impute2chunkInfo=${finalOutput}_info
 impute2chunk_info_by_sample=${finalOutput}_info_by_sample
 impute2chunk_summary=${finalOutput}_summary
 impute2chunk_warnings=${finalOutput}_warnings
