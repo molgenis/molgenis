@@ -385,6 +385,11 @@ public class RunService
 			int failed = getTaskStatusCount(run.getId(), PilotService.TASK_FAILED);
 			int done = getTaskStatusCount(run.getId(), PilotService.TASK_DONE);
 
+            ComputeBackend backend = run.getComputeBackend();
+            int submitted = backend.getPilotsSubmitted();
+            int started = backend.getPilotsStarted();
+
+
             boolean status = false;
 
             if((generated == 0) && (ready == 0) && (running == 0) && (failed == 0))
@@ -393,7 +398,7 @@ public class RunService
                 run.setIsDone(true);
                 database.update(run);
             }
-            return new RunStatus(generated, ready, running, failed, done, status);
+            return new RunStatus(generated, ready, running, failed, done, submitted, started, status);
 		}
 		catch (DatabaseException e)
 		{

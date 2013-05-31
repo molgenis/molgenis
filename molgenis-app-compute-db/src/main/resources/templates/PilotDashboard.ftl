@@ -29,6 +29,8 @@
 				$('#' + run + ' td.running').html(response.running);
 				$('#' + run + ' td.failed').html(response.failed);
 				$('#' + run + ' td.done').html(response.done);
+                $('#' + run + ' td.submitted').html(response.submitted);
+                $('#' + run + ' td.started').html(response.started);
 				
 				if (response.failed > 0) {
 					$('#resubmitFailedTasksForm_' + run).show();
@@ -143,9 +145,9 @@
     								</tr>
                                     <tr>
                                         <td class="text-warning">Pilots submitted</td>
-                                        <td class="running text-warning"></td>
+                                        <td class="submitted text-info"></td>
                                         <td class="text-warning">Pilots started</td>
-                                        <td class="running text-warning"></td>
+                                        <td class="started text-info"></td>
                                     </tr>
     							</table>
     						</div>
