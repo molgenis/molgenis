@@ -65,8 +65,8 @@ public class IndexRequestGenerator
 		{
 			if (entity instanceof DataSet)
 			{
-				buildIndexRequest(documentName + '-' + entity.getIdValue(), ((DataSet) entity).getProtocolUsed(),
-						bulkRequest);
+				buildIndexRequestForProtocol(documentName + '-' + entity.getIdValue(),
+						((DataSet) entity).getProtocolUsed(), bulkRequest);
 			}
 			else
 			{
@@ -97,13 +97,13 @@ public class IndexRequestGenerator
 		return bulkRequest;
 	}
 
-	private void buildIndexRequest(String documentName, Protocol entity, BulkRequestBuilder bulkRequest)
+	private void buildIndexRequestForProtocol(String documentName, Protocol entity, BulkRequestBuilder bulkRequest)
 	{
 		Database db = DatabaseUtil.createDatabase();
 
 		try
 		{
-			createTupleTableForTree(documentName, "", entity, db, bulkRequest);
+			buildIndexRequestForProtocolRec(documentName, "", entity, db, bulkRequest);
 		}
 		catch (DatabaseException e)
 		{
@@ -116,13 +116,15 @@ public class IndexRequestGenerator
 
 	}
 
-	private void createTupleTableForTree(String documentName, String protocolPath, Protocol protocol, Database db,
-			BulkRequestBuilder bulkRequest) throws DatabaseException
+	private void buildIndexRequestForProtocolRec(String documentName, String protocolPath, Protocol protocol,
+			Database db, BulkRequestBuilder bulkRequest) throws DatabaseException
 	{
-		if (protocol.getSubprotocols_Id().size() > 0)
+
+		List<Integer> protocolIds = protocol.getSubprotocols_Id();
+
+		if (protocolIds.size() > 0)
 		{
-			List<Protocol> subProtocols = db.find(Protocol.class,
-					new QueryRule(Protocol.ID, Operator.IN, protocol.getSubprotocols_Id()));
+			List<Protocol> subProtocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.IN, protocolIds));
 			for (Protocol p : subProtocols)
 			{
 				StringBuilder pathBuilder = new StringBuilder();
@@ -144,42 +146,47 @@ public class IndexRequestGenerator
 				bulkRequest.add(request);
 
 				// recursively traverse down the tree
-				createTupleTableForTree(documentName, pathBuilder.toString(), p, db, bulkRequest);
+				buildIndexRequestForProtocolRec(documentName, pathBuilder.toString(), p, db, bulkRequest);
 
 			}
 		}
 		else
 		{
-			List<ObservableFeature> listOfFeatures = db.find(ObservableFeature.class, new QueryRule(
-					ObservableFeature.ID, Operator.IN, protocol.getFeatures_Id()));
-			for (ObservableFeature feature : listOfFeatures)
+			List<Integer> featureIds = protocol.getFeatures_Id();
+			if (featureIds.size() > 0)
 			{
-				StringBuilder pathBuilder = new StringBuilder();
-				String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
-				String description = feature.getDescription() == null ? StringUtils.EMPTY : feature.getDescription()
-						.replaceAll("[^a-zA-Z0-9 ]", " ");
-				String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
-				StringBuilder categoryValue = new StringBuilder();
-
-				for (Category c : Category.find(db, new QueryRule(Category.OBSERVABLEFEATURE_IDENTIFIER,
-						Operator.EQUALS, feature.getIdentifier())))
+				List<ObservableFeature> listOfFeatures = db.find(ObservableFeature.class, new QueryRule(
+						ObservableFeature.ID, Operator.IN, featureIds));
+				for (ObservableFeature feature : listOfFeatures)
 				{
-					String categoryName = c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll(
-							"[^a-zA-Z0-9 ]", " ");
-					categoryValue.append(categoryName).append(' ');
+					StringBuilder pathBuilder = new StringBuilder();
+					String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
+					String description = feature.getDescription() == null ? StringUtils.EMPTY : feature
+							.getDescription().replaceAll("[^a-zA-Z0-9 ]", " ");
+					String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
+					StringBuilder categoryValue = new StringBuilder();
+
+					for (Category c : Category.find(db, new QueryRule(Category.OBSERVABLEFEATURE_IDENTIFIER,
+							Operator.EQUALS, feature.getIdentifier())))
+					{
+						String categoryName = c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll(
+								"[^a-zA-Z0-9 ]", " ");
+						categoryValue.append(categoryName).append(' ');
+					}
+
+					Map<String, Object> doc = new HashMap<String, Object>();
+					doc.put("id", feature.getId());
+					doc.put("name", name);
+					doc.put("type", "observablefeature");
+					doc.put("description", description);
+					doc.put("path", path);
+					doc.put("category", categoryValue.toString());
+
+					IndexRequestBuilder request = client.prepareIndex(indexName, documentName, feature.getIdValue()
+							+ "");
+					request.setSource(doc);
+					bulkRequest.add(request);
 				}
-
-				Map<String, Object> doc = new HashMap<String, Object>();
-				doc.put("id", feature.getId());
-				doc.put("name", name);
-				doc.put("type", "observablefeature");
-				doc.put("description", description);
-				doc.put("path", path);
-				doc.put("category", categoryValue.toString());
-
-				IndexRequestBuilder request = client.prepareIndex(indexName, documentName, feature.getIdValue() + "");
-				request.setSource(doc);
-				bulkRequest.add(request);
 			}
 		}
 	}
