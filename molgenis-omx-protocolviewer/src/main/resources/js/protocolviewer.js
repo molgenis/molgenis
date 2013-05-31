@@ -5,7 +5,6 @@
 	
 	var search = false;
 	var searchQuery = null;
-	var showSpinner = false;
 	var updatedNodes = null;
 	var selectedAllNodes = null;
 	var treePrevState = null;
@@ -15,7 +14,7 @@
 	
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		restApi.getAsync('/api/v1/dataset', null, function(datasets) {
+		restApi.getAsync('/api/v1/dataset', null, null, function(datasets) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(datasets.items, function(key, val) {
@@ -33,11 +32,10 @@
 		// reset
 		$('#feature-filters p').remove();
 		search = false;
-		showSpinner = false;
 		searchQuery = null;
 		treePrevState = null;
 		updatedNodes = null;
-		restApi.getAsync(dataSetUri, null, function(dataSet) {
+		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
@@ -163,7 +161,7 @@
 			}
 		}
 
-		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], function(protocol) {
+		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], null, function(protocol) {
 			var container = $('#dataset-browser');
 			if (container.children('ul').length > 0) {
 				container.dynatree('destroy');
@@ -236,39 +234,41 @@
 	};
 	
 	ns.searchFeatureTable = function(query, protocolUri) {
-		function getEntitiesbyIds(map, entityName){	
-			var array = Object.keys(map); 
-			var iteration = Math.floor(array.length / 100);
-			for(var i = 1; i <= iteration; i++ ){
-				callRestApi(map, array.slice((i - 1) * 100, i * 100), entityName);
-			}
-			if(iteration * 100 < array.length){
-				callRestApi(map, array.slice(iteration * 100, array.length), entityName);
-			}
-		}
-		function callRestApi(map, array, entityName){
-			$.ajax({
-				type : 'POST',
-				url : '/api/v1/' + entityName + '?_method=GET',
-				data : JSON.stringify({
-					q : [ {
-						"field" : "id",
-						"operator" : "IN",
-						"value" : array
-					} ],
-					num : array.length
-				}),
-				contentType : 'application/json',
-				async : false,
-				success : function(entities) {
-					$.each(entities.items, function() {
-						var object = $(this)[0];
-						var fragments = object.href.split("/");
-						var id = fragments[fragments.length - 1];
-						map[id] = object;
-					});
+		
+		function preloadEntities(protocolIds, featureIds, callback) {
+			
+			var batchSize = 500;
+			var nrProtocolRequests = Math.ceil(protocolIds.length / batchSize);
+			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
+			var nrRequest = nrFeatureRequests + nrProtocolRequests;
+			if(nrRequest > 0){
+				var workers = [];
+				for(var i = 0 ; i < nrRequest ; i++) {
+					workers[i] = false;
 				}
-			});
+				for(var i = 0 ; i < nrRequest ; i++) {
+					var entityType = i < nrProtocolRequests ?  "protocol" : "observablefeature";
+					var ids = i < nrProtocolRequests ?  protocolIds : featureIds;
+					var start = i < nrProtocolRequests ? i * batchSize : (i - nrProtocolRequests) * batchSize;
+					var q = {
+							q : [ {
+								"field" : "id",
+								"operator" : "IN",
+								"value" : ids
+							} ],
+							num : batchSize,
+							start : start
+					};
+					restApi.getAsync('/api/v1/' + entityType, null, q, $.proxy(function(){
+						workers[this.i] = true;
+						if($.inArray(false, workers) === -1){
+							this.callback();
+						}
+					}, {"i" : i, "callback" : callback}));
+				}
+			}else{
+				callback();
+			}
 		}
 		
 		function selectedNodeIds(selectedNodes){
@@ -294,112 +294,96 @@
 					selectedAllNodes[node.data.key] = node;
 				});
 			}
-			rootNode.removeChildren();
 			var searchHits = searchResponse["searchHits"];
 			
-			var protocolMap = {};
-			var featureMap = {};
+			var protocols = {};
+			var features = {};
 			$.each(searchHits, function(){
 				var object = $(this)[0]["columnValueMap"];
-				var entityType = object["type"];
 				var nodes = object["path"].split(".");
-				var entityId = object["id"];
-				if(nodes.length < 4) showSpinner = true;
 				//collect all features and their ancesters using restapi first.
 				for(var i = 0; i < nodes.length; i++){
-					if(nodes[i] == entityId.toString()){
-						if(entityType === "observablefeature") featureMap[nodes[i]] = nodes[i];
-						else if(entityType === "protocol") protocolMap[nodes[i]] = nodes[i]; 
-					}else{
-						protocolMap[nodes[i]] = nodes[i];
-					}
+					if(nodes[i].indexOf("F") === 0) features[nodes[i].substring(1)] = null;
+					else protocols[nodes[i]] = null;
 				}
 			});
 			
-			if(showSpinner) $('#spinner').modal('show');
-			getEntitiesbyIds(protocolMap, "protocol");
-			getEntitiesbyIds(featureMap, "observablefeature");
-			
-			var cachedNode = {};
-			var topNodes = new Array();
-			
-			$.each(searchHits, function(){
-				var object = $(this)[0]["columnValueMap"];
-				var entityType = object["type"];
-				var nodes = object["path"].split(".");
-				var entityId = object["id"];
-				//split the path to get all ancestors;
-				for(var i = 0; i < nodes.length; i++) {
-					if(!cachedNode[nodes[i]]){
-						var entityInfo = null;
-						var options = null;
-						//this is the last node and check if this is a feature
-						if (nodes[i] === entityId.toString() && entityType === "observablefeature") {
-							entityInfo = featureMap[nodes[i]];
-							options = {
-								isFolder : false,
+			preloadEntities(Object.keys(protocols), Object.keys(features), function(){
+				var cachedNode = {};
+				var topNodes = new Array();
+				$.each(searchHits, function(){
+					var object = $(this)[0]["columnValueMap"];
+					var nodes = object["path"].split(".");
+					var entityId = object["id"];
+					//split the path to get all ancestors;
+					for(var i = 0; i < nodes.length; i++) {
+						if(!cachedNode[nodes[i]]){
+							var entityInfo = null;
+							var options = null;
+							var isFeature = nodes[i].indexOf("F") === 0;
+							//this is the last node and check if this is a feature
+							if(isFeature){
+								entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i].substring(1));
+								options = {
+									isFolder : false,
+								};
+							}else{
+								entityInfo = restApi.get('/api/v1/protocol/' + nodes[i]);
+								options = {
+									isFolder : true,
+									isLazy : true,
+									expand : true,
+									children : []
+								};
 							}
-						}else{
-							entityInfo = protocolMap[nodes[i]];
-							options = {
-								isFolder : true,
-								isLazy : true,
-								expand : true,
-								children : []
-							};
-						}
-						options = $.extend({
-							key : entityInfo.href,
-							title : entityInfo.name,
-							tooltip : entityInfo.description
-						}, options);
-						
-						if(nodes[i] === entityId.toString() && entityType === "protocol"){
-							options = recursivelyExpand(selectedFeatureIds, null, options, cachedNode);
-						}
-						
-						if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
-							options["select"] = true;
-						}
-						//locate the node in dynatree and otherwise create the node and insert it
-						if(i != 0){
-							var parentNode = cachedNode[nodes[i-1]];
-							parentNode["children"].push(options);
-							cachedNode[nodes[i-1]] = parentNode;
-						}
-						else
-							topNodes.push(options);
-						cachedNode[nodes[i]] = options;
-					}else{
-						if (nodes[i] === entityId.toString() && i != 0) {
-							var parentNode = cachedNode[nodes[i-1]];
-							var childNode = cachedNode[nodes[i]];
-							if($.inArray(childNode, parentNode.children) === -1){ 
-								parentNode.children.push(cachedNode[nodes[i]]);
+							options = $.extend({
+								key : entityInfo.href,
+								title : entityInfo.name,
+								tooltip : entityInfo.description
+							}, options);
+							
+							if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
+								options["select"] = true;
+							}
+							//locate the node in dynatree and otherwise create the node and insert it
+							if(i != 0){
+								var parentNode = cachedNode[nodes[i-1]];
+								parentNode["children"].push(options);
 								cachedNode[nodes[i-1]] = parentNode;
 							}
-						}
-					} 
-				}
+							else
+								topNodes.push(options);
+							cachedNode[nodes[i]] = options;
+						}else{
+							if (nodes[i] === entityId.toString() && i != 0) {
+								var parentNode = cachedNode[nodes[i-1]];
+								var childNode = cachedNode[nodes[i]];
+								if($.inArray(childNode, parentNode.children) === -1){ 
+									parentNode.children.push(cachedNode[nodes[i]]);
+									cachedNode[nodes[i-1]] = parentNode;
+								}
+							}
+						} 
+					}
+				});
+				$.each(topNodes, function(index, node){
+					sortNodes(node);
+				});
+				rootNode.removeChildren();
+				rootNode.addChild(topNodes);
 			});
-			$.each(topNodes, function(index, node){
-				sortNodes(node);
-			});
-			rootNode.addChild(topNodes);
-			//spinners disappear
-			$('#spinner').modal('hide');
-			showSpinner = false;
 		});
-	}
+	};
 	
 	ns.searchFeatureMeta = function(callback){
 		searchApi.search(ns.createSearchRequestFeatureMeta(), callback);
-	}
+	};
 	
 	ns.createSearchRequestFeatureMeta = function(){
 		var terms = searchQuery.split(" ");
 		var queryRules = new Array();
 		$.each(terms, function(index, element){
+			//FIXME can searchApi do the tokenization?
 			queryRules.push({
 				operator : 'SEARCH',
 				value : element,
@@ -409,17 +393,19 @@
 					operator : 'AND'
 				});
 		});
+		
 		//todo: how to unlimit the search result
 		queryRules.push({
 			operator : 'LIMIT',
 			value : 1000000
 		});
+		var fragments = selectedDataSet.href.split("/");
 		var searchRequest = {
-			documentType : "protocolViewer-" + selectedDataSet.name,
+			documentType : "protocolTree-" + fragments[fragments.length - 1],
 			queryRules : queryRules
 		};
 		return searchRequest;
-	}
+	};
 	
 	ns.clearSearch = function() {
 		
