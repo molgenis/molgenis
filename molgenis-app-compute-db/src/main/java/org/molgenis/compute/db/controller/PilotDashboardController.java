@@ -82,7 +82,23 @@ public class PilotDashboardController
 		return init(model);
 	}
 
-	@RequestMapping("/resubmit")
+    @RequestMapping("/activate")
+    public String activate(@RequestParam("run")
+    String runName, Model model) throws DatabaseException
+    {
+        runService.activate(runName);
+        return init(model);
+    }
+
+    @RequestMapping("/inactivate")
+    public String inactivate(@RequestParam("run")
+    String runName, Model model) throws DatabaseException
+    {
+        runService.inactivate(runName);
+        return init(model);
+    }
+
+    @RequestMapping("/resubmit")
 	public String resubmitFailedTasks(@RequestParam("run")
 	String runName, Model model) throws DatabaseException
 	{
@@ -117,7 +133,11 @@ public class PilotDashboardController
 				.sortDESC("creationTime");
 		for (ComputeRun run : runs.find())
 		{
-			runModels.add(new RunModel(run.getName(), runService.isRunning(run.getName()), run.getComputeBackend()
+			runModels.add(new RunModel(run.getName(),
+                    runService.isRunning(run.getName()),
+                    runService.isSubmitting(run.getName()),
+                    runService.isComplete(run.getName()),
+                    run.getComputeBackend()
 					.getBackendUrl(), run.getCreationTime()));
 		}
 

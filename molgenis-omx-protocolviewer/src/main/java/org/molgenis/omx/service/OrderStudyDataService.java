@@ -107,6 +107,11 @@ public class OrderStudyDataService
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 
+	public StudyDataRequest getOrder(Integer orderId) throws DatabaseException
+	{
+		return StudyDataRequest.findById(database, orderId);
+	}
+
 	public List<StudyDataRequest> getOrders(Integer userId) throws DatabaseException
 	{
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class, new QueryRule(
@@ -117,9 +122,11 @@ public class OrderStudyDataService
 	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest, String appName)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append("Hello,\n\n");
+		strBuilder.append("Dear Researcher,\n\n");
 		strBuilder.append("Thank you for ordering at ").append(appName)
-				.append(", attached are the details of your order.\n\n");
+				.append(", attached are the details of your order.\n");
+		strBuilder.append("The ").append(appName)
+				.append(" Research Office will contact you upon receiving your application.\n\n");
 		strBuilder.append("Sincerely,\n");
 		strBuilder.append(appName);
 		return strBuilder.toString();

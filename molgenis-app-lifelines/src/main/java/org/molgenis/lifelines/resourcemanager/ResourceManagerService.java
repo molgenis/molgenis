@@ -18,8 +18,9 @@ import org.apache.log4j.Logger;
 import org.molgenis.atom.ContentType;
 import org.molgenis.atom.EntryType;
 import org.molgenis.atom.FeedType;
+import org.molgenis.hl7.POQMMT000001UVQualityMeasureDocument;
+import org.molgenis.hl7.ST;
 import org.molgenis.lifelines.catalogue.CatalogInfo;
-import org.molgenis.lifelines.hl7.jaxb.QualityMeasureDocument;
 import org.molgenis.lifelines.studydefinition.StudyDefinitionInfo;
 import org.w3c.dom.Node;
 
@@ -69,7 +70,7 @@ public class ResourceManagerService
 
 	private Unmarshaller createQualityMeasureDocumentUnmarshaller() throws JAXBException
 	{
-		JAXBContext jaxbContext = JAXBContext.newInstance(QualityMeasureDocument.class);
+		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 		if (validate)
@@ -80,7 +81,7 @@ public class ResourceManagerService
 		return jaxbUnmarshaller;
 	}
 
-	public QualityMeasureDocument findStudyDefinition(String id)
+	public POQMMT000001UVQualityMeasureDocument findStudyDefinition(String id)
 	{
 		InputStream xmlStream = null;
 		try
@@ -89,7 +90,7 @@ public class ResourceManagerService
 			xmlStream = url.openStream();
 
 			return createQualityMeasureDocumentUnmarshaller().unmarshal(new StreamSource(xmlStream),
-					QualityMeasureDocument.class).getValue();
+					POQMMT000001UVQualityMeasureDocument.class).getValue();
 		}
 		catch (JAXBException e)
 		{
@@ -147,14 +148,16 @@ public class ResourceManagerService
 						ContentType content = (ContentType) element.getValue();
 						Node qualityMeasureDocumentNode = (Node) content.getContent().get(0);
 
-						JAXBElement<QualityMeasureDocument> qualityMeasureDocumentElement = jaxbUnmarshaller.unmarshal(
-								qualityMeasureDocumentNode, QualityMeasureDocument.class);
+						JAXBElement<POQMMT000001UVQualityMeasureDocument> qualityMeasureDocumentElement = jaxbUnmarshaller
+								.unmarshal(qualityMeasureDocumentNode, POQMMT000001UVQualityMeasureDocument.class);
 
-						QualityMeasureDocument qualityMeasureDocument = qualityMeasureDocumentElement.getValue();
+						POQMMT000001UVQualityMeasureDocument qualityMeasureDocument = qualityMeasureDocumentElement
+								.getValue();
 						if (qualityMeasureDocument.getId() != null)
 						{
+							ST title = qualityMeasureDocument.getTitle();
 							catalogs.add(new CatalogSearchResult(qualityMeasureDocument.getId().getExtension(),
-									qualityMeasureDocument.getName()));
+									title != null ? title.getContent().toString() : ""));
 						}
 						else
 						{
@@ -202,7 +205,7 @@ public class ResourceManagerService
 
 	}
 
-	private class CatalogSearchResult
+	private static class CatalogSearchResult
 	{
 		private final String id;
 		private final String name;

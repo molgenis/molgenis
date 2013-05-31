@@ -92,7 +92,7 @@ public class SchemaLoader implements LSResourceResolver
 		return new LSInputImpl(publicId, systemId, resourceAsStream);
 	}
 
-	protected class LSInputImpl implements LSInput
+	protected static class LSInputImpl implements LSInput
 	{
 
 		private String publicId;

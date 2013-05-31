@@ -20,6 +20,8 @@ import org.molgenis.hl7.ANY;
 import org.molgenis.hl7.BL;
 import org.molgenis.hl7.CD;
 import org.molgenis.hl7.INT;
+import org.molgenis.hl7.ObjectFactory;
+import org.molgenis.hl7.POQMMT000001UVQualityMeasureDocument;
 import org.molgenis.hl7.PQ;
 import org.molgenis.hl7.REAL;
 import org.molgenis.hl7.REPCMT000100UV01Component3;
@@ -30,8 +32,8 @@ import org.molgenis.hl7.REPCMT000400UV01Component4;
 import org.molgenis.hl7.ST;
 import org.molgenis.hl7.TS;
 import org.molgenis.lifelines.catalogue.CatalogIdConverter;
-import org.molgenis.lifelines.hl7.jaxb.QualityMeasureDocument;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.lifelines.utils.OmxIdentifierGenerator;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -58,7 +60,9 @@ public class DataQueryService
 		this.dataQueryServiceUrl = dataQueryServiceUrl;
 	}
 
-	public void loadStudyDefinitionData(QualityMeasureDocument studyDefinition)
+	// suppress false Eclipse warning
+	@SuppressWarnings("resource")
+	public void loadStudyDefinitionData(POQMMT000001UVQualityMeasureDocument studyDefinition)
 	{
 		HttpURLConnection urlConnection = null;
 		OutputStream outStream = null;
@@ -68,10 +72,7 @@ public class DataQueryService
 			database.beginTx();
 
 			JAXBContext jaxbContext = JAXBContext.newInstance(REPCMT000100UV01Organizer.class,
-					QualityMeasureDocument.class);
-
-			Marshaller eenMarshaller = jaxbContext.createMarshaller();
-			eenMarshaller.marshal(studyDefinition, System.out);
+					POQMMT000001UVQualityMeasureDocument.class);
 
 			URL url = new URL(dataQueryServiceUrl + "/data");
 			urlConnection = (HttpURLConnection) url.openConnection();
@@ -81,10 +82,11 @@ public class DataQueryService
 			urlConnection.setDoInput(true);
 			urlConnection.setDoOutput(true);
 			urlConnection.setUseCaches(false);
+			urlConnection.setConnectTimeout(100000);
 
 			outStream = urlConnection.getOutputStream();
 			Marshaller marshaller = jaxbContext.createMarshaller();
-			marshaller.marshal(studyDefinition, outStream);
+			marshaller.marshal(new ObjectFactory().createQualityMeasureDocument(studyDefinition), outStream);
 			outStream.flush();
 
 			// convert to HL7 organizer
@@ -122,12 +124,16 @@ public class DataQueryService
 					if (observableFeature == null) throw new RuntimeException(
 							"missing ObservableFeature with identifier " + featureId);
 
-					ObservedValue observedValue = new ObservedValue();
-					observedValue.setObservationSet(observationSet);
-					observedValue.setFeature(observableFeature);
-					observedValue.setValue(toValue(observation.getValue()));
+					String value = toValue(observation.getValue());
+					if (value != null)
+					{
+						ObservedValue observedValue = new ObservedValue();
+						observedValue.setObservationSet(observationSet);
+						observedValue.setFeature(observableFeature);
+						observedValue.setValue(value);
 
-					database.add(observedValue);
+						database.add(observedValue);
+					}
 				}
 				database.add(observationSet);
 			}
@@ -217,11 +223,12 @@ public class DataQueryService
 		}
 		else if (anyValue instanceof CD) // for CD and CO values
 		{
-			// boolean
+			// categorical
 			CD value = (CD) anyValue;
-			// TODO to common class
-			Category category = Category.findByIdentifier(database, value.getCodeSystem() + '.' + value.getCode());
-			return category != null ? category.getName() : "NEED TO FIX THIS"; // FIXME grote hackaton!
+			String identifier = OmxIdentifierGenerator.from(Category.class, value.getCodeSystem(), value.getCode());
+			Category category = Category.findByIdentifier(database, identifier);
+			if (category == null) logger.error("missing category identifier: " + identifier);
+			return category != null ? category.getName() : null;
 		}
 
 		throw new UnsupportedOperationException("ANY instance not supported: " + anyValue.getClass());
