@@ -270,6 +270,7 @@ public class RunService
             }
 
             run.setIsActive(false);
+            run.setIsSubmittingPilots(false);
             database.update(run);
         }
         catch (DatabaseException e)

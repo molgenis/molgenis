@@ -166,10 +166,13 @@ public class PilotService implements MolgenisService
 	private List<ComputeTask> findRunTasksReady(String backendName) throws DatabaseException
 	{
 
-		List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
-				.equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
+//		List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
+//				.equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
+        List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
+				.eq(ComputeRun.COMPUTEBACKEND_NAME, backendName)
+                .and().eq(ComputeRun.ISACTIVE, true).find();
 
-		return ApplicationUtil.getDatabase().query(ComputeTask.class)
+        return ApplicationUtil.getDatabase().query(ComputeTask.class)
 				.equals(ComputeTask.STATUSCODE, PilotService.TASK_READY).in(ComputeTask.COMPUTERUN, runs).find();
 	}
 }
