@@ -24,7 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DataSetFilterDecoratorTestAdmin
+public class StudyDataRequestDecoratorTest
 {
 	private MolgenisUser admin;
 	private MolgenisUser user;
