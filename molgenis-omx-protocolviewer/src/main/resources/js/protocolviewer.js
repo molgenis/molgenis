@@ -687,21 +687,6 @@
 			});
 		}
 	}
-	
-	function getBottomNodes(node, hits) {
-		if (node.subProtocols && node.subProtocols.length > 0) {
-			$.each(node.subProtocols, function(i, subNode) {
-				hits.push(getBottomNodes(subNode, hits));
-			});
-		} else {
-			if (node.features && node.features.length > 0) {
-				$.each(node.features, function(i, lastNode) {
-					hits.push(lastNode.id);
-				});
-			}
-		}
-		return hits;
-	}
 
 	// on document ready
 	$(function() {
