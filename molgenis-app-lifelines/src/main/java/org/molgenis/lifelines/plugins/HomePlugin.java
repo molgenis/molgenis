@@ -5,7 +5,7 @@
  * THIS FILE IS A TEMPLATE. PLEASE EDIT :-)
  */
 
-package org.molgenis.lifelines.plugins.home;
+package org.molgenis.lifelines.plugins;
 
 import java.io.Serializable;
 
@@ -21,7 +21,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 /**
  * Shows table of experiment information for WormQTL
  */
-public class Home extends PluginModel<Entity>
+public class HomePlugin extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,7 @@ public class Home extends PluginModel<Entity>
 		return homeModel;
 	}
 
-	public Home(String name, ScreenController<?> parent)
+	public HomePlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}
@@ -43,13 +43,13 @@ public class Home extends PluginModel<Entity>
 	@Override
 	public String getViewName()
 	{
-		return Home.class.getSimpleName();
+		return HomePlugin.class.getSimpleName();
 	}
 
 	@Override
 	public String getViewTemplate()
 	{
-		return "templates/" + Home.class.getName().replace('.', '/') + ".ftl";
+		return "templates/" + HomePlugin.class.getName().replace('.', '/') + ".ftl";
 	}
 
 	@Override
