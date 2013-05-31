@@ -38,6 +38,7 @@ public class ComputeProperties
 	public String interval = Parameters.INTERVAL_DEFAULT;
 
 	// parameters not stored in compute.properties file:
+	public boolean parseExceptionOrHelp = false; // parse exception?
 	public boolean help = false; // show help?
 	public boolean databaseStart = false; // start db?
 	public boolean databaseEnd = false; // stop db?
@@ -49,25 +50,39 @@ public class ComputeProperties
 
 	public ComputeProperties(String[] args)
 	{
-		// set path
-		setPath(args);
+		Options options = createOptions();
+		try
+		{
+			// validate command line args
+			CommandLine cl = new PosixParser().parse(options, args);
+			this.help = cl.hasOption(Parameters.HELP) || 0 == args.length;
+			if (this.help) throw new ParseException("");
 
-		// prepend path to defaults
-		updateDefaultParameterValues(path);
+			// set path
+			setPath(args);
 
-		createPropertiesFile();
+			// prepend path to defaults
+			updateDefaultParameterValues(path);
 
-		// parse properties file
-		parseProperties();
+			createPropertiesFile();
 
-		// overwrite with command line args
-		parseCommandLine(args);
+			// parse properties file
+			parseProperties();
 
-		// look for defaults in same folder as workflow
-		updateWorkflowParameterDefaultsCSV();
+			// overwrite with command line args
+			parseCommandLine(args);
 
-		// save new config
-		saveProperties();
+			// look for defaults in same folder as workflow
+			updateWorkflowParameterDefaultsCSV();
+
+			// save new config
+			saveProperties();
+		}
+		catch (ParseException e)
+		{
+			System.err.println(e.getMessage() + "\n");
+			new HelpFormatter().printHelp("sh molgenis-compute.sh -p parameters.csv", options);
+		}
 	}
 
 	public ComputeProperties(String path)
@@ -139,7 +154,7 @@ public class ComputeProperties
 	{
 		this.workFlow = updatePath(path, this.workFlow);
 		// this.defaults = updatePath(path, this.defaults);
-//		this.runDir = updatePath(path, this.runDir);
+		// this.runDir = updatePath(path, this.runDir);
 
 		ArrayList<String> pathParameters = new ArrayList<String>();
 		for (String p : this.parameters)
@@ -265,7 +280,8 @@ public class ComputeProperties
 			// if runId == null then create one
 			if (null == this.runId)
 			{
-				// 4 letters/LETTERS/numbers -> (26*2 + 10)^4 = 14,776,336 possibilities
+				// 4 letters/LETTERS/numbers -> (26*2 + 10)^4 = 14,776,336
+				// possibilities
 				this.runId = RandomStringUtils.random(4, true, true);
 			}
 
