@@ -1,49 +1,55 @@
 package test;
+import static org.testng.Assert.assertEquals;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
-import junit.framework.Assert;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.molgenis.MolgenisOptions;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class DataExplorerTest {
+import test.DataExplorerTest.DataExplorerTestConfig;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+
+@WebAppConfiguration
+@ContextConfiguration(classes = DataExplorerTestConfig.class)
+public class DataExplorerTest extends AbstractTestNGSpringContextTests {
   private WebDriver driver;
   
-  @Before
+  @Value("${chromedriver}")
+  private String chromedriver;
+  
+  @BeforeMethod
   public void openBrowser() {
-	MolgenisOptions mo = new MolgenisOptions();
-	
-    System.setProperty("webdriver.chrome.driver", mo.getChromeDriver()); 
+    
+	System.setProperty("webdriver.chrome.driver", chromedriver); 
     driver = new ChromeDriver();
-   
-    driver.get("http://localhost:8080/");
+    System.out.println(chromedriver);
+	//FileSystemResource a = new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties");
+	driver.get("http://localhost:8080/");
    
   }
 
   
-  @After
+  @AfterMethod
   public void quit() throws IOException {
     driver.quit();
   }
-  
+
  
   @Test
   public void loginandclick() {
@@ -73,4 +79,20 @@ public class DataExplorerTest {
 
   }
   
+  @Configuration
+	public static class DataExplorerTestConfig extends WebMvcConfigurationSupport
+	{
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer properties()
+		{
+			PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
+			Resource[] resources = new FileSystemResource[]
+			{ new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties") };
+			pspc.setLocations(resources);
+			pspc.setIgnoreUnresolvablePlaceholders(true);
+			pspc.setIgnoreResourceNotFound(true);
+			return pspc;
+		}
+	}
+
 }
