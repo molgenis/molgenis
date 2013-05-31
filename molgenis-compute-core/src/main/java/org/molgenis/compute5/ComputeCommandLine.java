@@ -8,7 +8,10 @@ import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
-import org.molgenis.compute5.db.api.*;
+import org.molgenis.compute5.db.api.ComputeDbApiClient;
+import org.molgenis.compute5.db.api.ComputeDbApiConnection;
+import org.molgenis.compute5.db.api.CreateRunRequest;
+import org.molgenis.compute5.db.api.HttpClientComputeDbApiConnection;
 import org.molgenis.compute5.generators.CreateWorkflowGenerator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
