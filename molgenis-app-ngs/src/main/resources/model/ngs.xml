@@ -18,7 +18,7 @@
 			<field name="ProjectAnalist" type="mref" xref_entity="NgsUser" description="The user which will be responsible for performing the wet-lab activities." nillable="true" label="Analist name(s)" />
 			<!-- <field name="ProjectPlannedStartDate" type="datetime" description="The date a project is expected to start" nillable="true" label="Planned start date" />  -->
 			<field name="ProjectPlannedFinishDate" type="datetime" description="The date a project is expected to be finished" nillable="true" label="Planned finish date" /> <!-- In the GAF-lijst referred to as TargetDateShipment -->
-			<field name="LaneAmount" type="decimal" description="Number of lanes planned in this project" nillable="true" label="Lane amount" />
+			<field name="LaneAmount" type="int" description="Number of lanes planned in this project" nillable="true" label="Lane amount" />
 			<field name="SampleAmount" type="int" description="Number of samples planned in this project" nillable="true" label="Sample amount" />
 			<field name="SampleType" type="enum" enum_options="[DNA,RNA]" default="DNA" description="Type of sample" label="Sample type" />
 			<field name="SeqType" type="enum" enum_options="[SR,PE,MP,Unknown]" default="PE" description="The type of sequencing." nillable="true" label="Sequencing type" />
@@ -75,6 +75,7 @@
 		
 		<!-- <entity name="Flowcell" implements="Autoid" xref_label="FlowcellName" decorator="org.molgenis.ngs.decorators.FlowcellDecorator"> -->
 		<entity name="Flowcell" implements="Autoid" xref_label="FlowcellName">
+			<field name="FlowcellDirection" type="enum" enum_options="[A,B]" description="The direction used to read sequences" nillable="true" label="Direction" />
 			<field name="FlowcellName" type="string" unique="true" description="The unique name of a flowcell" label="Flowcell name" />
 			<field name="Machine" type="xref" xref_entity="Machine" description="The machine used for sequencing" nillable="true" label="Sequencer" />
 			<field name="Run" type="string" description="The run number always use 4 digits (with leading 0's)" nillable="true"  />
@@ -82,10 +83,16 @@
 		</entity>
 		
 		<entity name="SampleBarcode" implements="Autoid" xref_label="SampleBarcodeName">
-		<!-- <entity name="SampleBarcode" implements="Autoid" xref_label="BarcodeType,SampleBarcodeName"> Note: does not work, but I want it to work -->
-			<field name="SampleBarcodeName" type="string" unique="true" description="The nucleotide sequence which forms the barcode" label="Barcode" />
-			<field name="BarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" />
-			<unique fields="BarcodeType,SampleBarcodeName" description="The combination BarcodeType and SampleBarcodeName is unique." />
+			<field name="SampleBarcodeNr" type="string" nillable="true" description="The identifier of a barcode given by the supplier" label="Number" />
+			<field name="SampleBarcodeSequence" type="string" description="The nucleotide sequence which forms the barcode" label="Barcode" />
+			<!-- <field name="SampleBarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" /> -->
+			<field name="SampleBarcodeType" type="xref" xref_entity="SampleBarcodeType" nillable="true" label="Type" />
+			<field name="SampleBarcodeName" type="string" unique="true" nillable="true" description="A concatenated value of Type, Nr and Sequence" label="Value" />
+			<unique fields="SampleBarcodeType,SampleBarcodeNr,SampleBarcodeSequence" description="The combination BarcodeType and SampleBarcodeName is unique." />
+		</entity>
+				
+		<entity name="SampleBarcodeType" implements="Autoid" xref_label="SampleBarcodeTypeName">
+			<field name="SampleBarcodeTypeName" type="string" unique="true" description="The name of a barcode type" label="Barcode type"/>
 		</entity>
 				
 		<entity name="CapturingKit" implements="Autoid" xref_label="CapturingKitName">

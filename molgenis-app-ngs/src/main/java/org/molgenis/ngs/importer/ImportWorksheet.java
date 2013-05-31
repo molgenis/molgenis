@@ -25,6 +25,7 @@ import org.molgenis.omx.ngs.PrepKit;
 import org.molgenis.omx.ngs.Project;
 import org.molgenis.omx.ngs.Sample;
 import org.molgenis.omx.ngs.SampleBarcode;
+import org.molgenis.omx.ngs.SampleBarcodeType;
 import org.molgenis.util.tuple.Tuple;
 
 public class ImportWorksheet
@@ -98,7 +99,7 @@ public class ImportWorksheet
 				}
 				for (String d : nd.values())
 				{
-					logger.info("Not registerd user yet:\t" + d);
+					logger.info("Not registered user yet:\t" + d);
 				}
 			}
 		}
@@ -112,6 +113,7 @@ public class ImportWorksheet
 	{
 		// Declare collections to hold collected variables
 		Map<String, NgsUser> users = new LinkedHashMap<String, NgsUser>();
+		Map<String, SampleBarcodeType> sampleBarcodeTypes = new LinkedHashMap<String, SampleBarcodeType>();
 		Map<String, SampleBarcode> sampleBarcodes = new LinkedHashMap<String, SampleBarcode>();
 		Map<String, CapturingKit> capturingKits = new LinkedHashMap<String, CapturingKit>();
 		Map<String, PrepKit> prepKits = new LinkedHashMap<String, PrepKit>();
@@ -188,48 +190,49 @@ public class ImportWorksheet
 					users.put(u.getUserName(), u);
 				}
 
+				// SampleBarcodeType
+				if (!row.isNull("barcodeType"))
+				{
+					SampleBarcodeType sbt = new SampleBarcodeType();
+
+					if (row.getString("barcodeType") != null)
+					{
+						if (!row.getString("barcodeType").toLowerCase().trim().equals("none")
+								&& !row.getString("barcodeType").toLowerCase().trim().contains("error"))
+						{
+							sbt.setSampleBarcodeTypeName(row.getString("barcodeType").toUpperCase().trim());
+
+							sampleBarcodeTypes.put(sbt.getSampleBarcodeTypeName(), sbt);
+						}
+					}
+				}
+
 				// SampleBarcode
-				if (!row.isNull("barcode"))
+				if (row.getString("barcodeMenu") != null) // GAF 01 ACTGTC
 				{
 					SampleBarcode sb = new SampleBarcode();
 
-					// SampleBarcodeName
-					if (row.getString("barcode") != null)
-					{
-						if (row.getString("barcode").toLowerCase().trim().equals("none")
-								|| row.getString("barcode").toLowerCase().trim().contains("error"))
-						{
-							sb.setSampleBarcodeName("None");
-						}
-						else
-						{
-							sb.setSampleBarcodeName(row.getString("barcode").toUpperCase().trim());
-						}
-					}
-					else
-					{
-						sb.setSampleBarcodeName("None");
-					}
+					String[] bmp = row.getString("barcodeMenu").split(" ");
 
-					// BarcodeType
-					if (row.getString("barcodeType") != null)
+					if (bmp.length == 3) // Valid data
 					{
-						if (row.getString("barcodeType").toLowerCase().trim().equals("none")
-								|| row.getString("barcodeType").toLowerCase().trim().contains("error"))
+						if (!bmp[0].equalsIgnoreCase(""))
 						{
-							sb.setBarcodeType("None");
+							sb.setSampleBarcodeType_SampleBarcodeTypeName(bmp[0].toUpperCase().trim());
 						}
-						else
+						if (!bmp[1].equalsIgnoreCase(""))
 						{
-							sb.setBarcodeType(row.getString("barcodeType").toUpperCase().trim());
+							sb.setSampleBarcodeNr(bmp[1]);
 						}
-					}
-					else
-					{
-						sb.setBarcodeType("None");
-					}
+						if (!bmp[2].equalsIgnoreCase(""))
+						{
+							sb.setSampleBarcodeSequence(bmp[2].toUpperCase().trim());
+						}
 
-					sampleBarcodes.put(sb.getSampleBarcodeName(), sb);
+						sb.setSampleBarcodeName(row.getString("barcodeMenu"));
+
+						sampleBarcodes.put(sb.getSampleBarcodeName(), sb);
+					}
 				}
 
 				// CapturingKit
@@ -240,21 +243,14 @@ public class ImportWorksheet
 					// CapturingKitName
 					if (row.getString("capturingKit") != null)
 					{
-						if (row.getString("capturingKit").toLowerCase().trim().equals("none"))
-						{
-							ck.setCapturingKitName("None");
-						}
-						else
+						if (!row.getString("capturingKit").toLowerCase().trim().equals("none"))
 						{
 							ck.setCapturingKitName(row.getString("capturingKit").trim());
-						}
-					}
-					else
-					{
-						ck.setCapturingKitName("None");
-					}
 
-					capturingKits.put(ck.getCapturingKitName(), ck);
+							capturingKits.put(ck.getCapturingKitName(), ck);
+						}
+
+					}
 				}
 
 				// PrepKit
@@ -265,22 +261,14 @@ public class ImportWorksheet
 					// PrepKitName
 					if (row.getString("prepKit") != null)
 					{
-						if (row.getString("prepKit").toLowerCase().trim().equals("none")
-								|| row.getString("prepKit").toLowerCase().trim().equals("_"))
-						{
-							pk.setPrepKitName("None");
-						}
-						else
+						if (!row.getString("prepKit").toLowerCase().trim().equals("none")
+								&& !row.getString("prepKit").toLowerCase().trim().equals("_"))
 						{
 							pk.setPrepKitName(row.getString("prepKit").toUpperCase().trim());
+
+							prepKits.put(pk.getPrepKitName(), pk);
 						}
 					}
-					else
-					{
-						pk.setPrepKitName("None");
-					}
-
-					prepKits.put(pk.getPrepKitName(), pk);
 				}
 
 				// Machine
@@ -288,23 +276,16 @@ public class ImportWorksheet
 				{
 					Machine m = new Machine();
 
+					// MachineName
 					if (row.getString("sequencer") != null)
 					{
-						if (row.getString("sequencer").toLowerCase().trim().equals("none"))
-						{
-							m.setMachineName("None");
-						}
-						else
+						if (!row.getString("sequencer").toLowerCase().trim().equals("none"))
 						{
 							m.setMachineName(row.getString("sequencer"));
+
+							machines.put(m.getMachineName(), m);
 						}
 					}
-					else
-					{
-						m.setMachineName("None");
-					}
-
-					machines.put(m.getMachineName(), m);
 				}
 
 				// Flowcell
@@ -312,16 +293,36 @@ public class ImportWorksheet
 				{
 					Flowcell f = new Flowcell();
 
-					// FlowcellName
+					// FlowcellName and FlowcellDirection
 					if (row.getString("flowcell") != null)
 					{
-						f.setFlowcellName(row.getString("flowcell"));
+						char[] fc = row.getString("flowcell").trim().toCharArray();
+
+						if (("" + fc[0]).equalsIgnoreCase("A") || ("" + fc[0]).equalsIgnoreCase("B"))
+						{
+							// First character is the Direction
+							f.setFlowcellDirection("" + fc[0]);
+
+							// The remaining nine characters are the Name
+							f.setFlowcellName(row.getString("flowcell")
+									.substring(1, row.getString("flowcell").length()));
+						}
+
+						// In case the Direction was not filled in only assign
+						// the Name
+						if (!("" + fc[0]).equalsIgnoreCase("A") && !("" + fc[0]).equalsIgnoreCase("B"))
+						{
+							f.setFlowcellName(row.getString("flowcell"));
+						}
 					}
 
 					// MachineId
 					if (row.getString("sequencer") != null)
 					{
-						f.setMachine_MachineName(row.getString("sequencer"));
+						if (!row.getString("sequencer").toLowerCase().trim().equals("none"))
+						{
+							f.setMachine_MachineName(row.getString("sequencer"));
+						}
 					}
 
 					// Run
@@ -407,12 +408,8 @@ public class ImportWorksheet
 					// PrepKit
 					if (row.getString("prepKit") != null)
 					{
-						if (row.getString("prepKit").trim().equalsIgnoreCase("none")
-								|| row.getString("prepKit").toLowerCase().trim().equals("_"))
-						{
-							p.setPrepKit_PrepKitName("None");
-						}
-						else
+						if (!row.getString("prepKit").trim().equalsIgnoreCase("none")
+								&& !row.getString("prepKit").toLowerCase().trim().equals("_"))
 						{
 							p.setPrepKit_PrepKitName(row.getString("prepKit").toUpperCase().trim());
 						}
@@ -450,7 +447,7 @@ public class ImportWorksheet
 								// LaneAmount
 								if (rowp.getString("Aantal lanes") != null)
 								{
-									p.setLaneAmount(rowp.getDouble("Aantal lanes"));
+									p.setLaneAmount(rowp.getInt("Aantal lanes"));
 								}
 
 								// SampleAmount
@@ -521,39 +518,23 @@ public class ImportWorksheet
 						s.setLabStatus(row.getString("labStatusPhase"));
 					}
 
-					// SampleBarcode
-					if (row.getString("barcode") != null)
+					if (row.getString("barcodeMenu") != null)
 					{
-						if (row.getString("barcode").toLowerCase().trim().equals("none")
-								|| row.getString("barcode").toLowerCase().trim().contains("error"))
+						String[] bmp = row.getString("barcodeMenu").split(" ");
+
+						if (bmp.length == 3) // Valid data
 						{
-							s.setSampleBarcode_SampleBarcodeName("None");
+							s.setSampleBarcode_SampleBarcodeName(row.getString("barcodeMenu"));
 						}
-						else
-						{
-							s.setSampleBarcode_SampleBarcodeName(row.getString("barcode").toUpperCase().trim());
-						}
-					}
-					else
-					{
-						s.setSampleBarcode_SampleBarcodeName("None");
 					}
 
 					// CapturingKit
 					if (row.getString("capturingKit") != null)
 					{
-						if (row.getString("capturingKit").toLowerCase().trim().equals("none"))
-						{
-							s.setCapturingKit_CapturingKitName("None");
-						}
-						else
+						if (!row.getString("capturingKit").toLowerCase().trim().equals("none"))
 						{
 							s.setCapturingKit_CapturingKitName(row.getString("capturingKit").trim());
 						}
-					}
-					else
-					{
-						s.setCapturingKit_CapturingKitName("None");
 					}
 
 					samples.put(s.getInternalId(), s);
@@ -562,7 +543,7 @@ public class ImportWorksheet
 				// FlowcellLane
 				if (!row.isNull("internalSampleID"))
 				{
-					// For each Lane
+					// For each Lane []
 					if (row.getString("lane") != null)
 					{
 						String[] lanes = row.getString("lane").split(",");
@@ -587,7 +568,22 @@ public class ImportWorksheet
 							// Flowcell
 							if (row.getString("flowcell") != null)
 							{
-								fl.setFlowcell_FlowcellName(row.getString("flowcell"));
+								String _FlowcellName = "";
+								char[] fc = row.getString("flowcell").trim().toCharArray();
+
+								if (("" + fc[0]).equalsIgnoreCase("A") || ("" + fc[0]).equalsIgnoreCase("B"))
+								{
+									_FlowcellName = row.getString("flowcell").substring(1,
+											row.getString("flowcell").length());
+								}
+
+								// If Direction not exists only assign the Name
+								if (!("" + fc[0]).equalsIgnoreCase("A") && !("" + fc[0]).equalsIgnoreCase("B"))
+								{
+									_FlowcellName = row.getString("flowcell");
+								}
+
+								fl.setFlowcell_FlowcellName(_FlowcellName);
 							}
 
 							// QcWetMet
@@ -630,6 +626,7 @@ public class ImportWorksheet
 							// QcDryDate
 							fl.setQcDryDate(getFixedDate(row.getString("GCC_QC_Date")));
 
+							// TODO: What's happening here?
 							List<FlowcellLane> flList = flowcellLane.get(fl.getSample_InternalId());
 							if (flList == null)
 							{
@@ -693,6 +690,11 @@ public class ImportWorksheet
 				logger.info(sb);
 			}
 
+			for (SampleBarcodeType sbt : sampleBarcodeTypes.values())
+			{
+				logger.info(sbt);
+			}
+
 			for (NgsUser u : users.values())
 			{
 				logger.info(u);
@@ -712,6 +714,7 @@ public class ImportWorksheet
 		logger.info("Collected:\t" + prepKits.size() + " Preparation kit(s)");
 		logger.info("Collected:\t" + capturingKits.size() + " Capturing kit(s)");
 		logger.info("Collected:\t" + sampleBarcodes.size() + " Barcode(s)");
+		logger.info("Collected:\t" + sampleBarcodeTypes.size() + " BarcodeType(s)");
 		logger.info("Collected:\t" + users.size() + " NgsUser(s)");
 
 		// Put values in database
@@ -732,10 +735,13 @@ public class ImportWorksheet
 				db.remove(db.find(PrepKit.class));
 				db.remove(db.find(CapturingKit.class));
 				db.remove(db.find(SampleBarcode.class));
+				db.remove(db.find(SampleBarcodeType.class));
 				db.remove(db.find(NgsUser.class));
 			}
 
 			logger.info("Imported:\t" + db.add(new ArrayList<NgsUser>(users.values())) + " NgsUser(s)");
+			logger.info("Imported:\t" + db.add(new ArrayList<SampleBarcodeType>(sampleBarcodeTypes.values()))
+					+ " BarcodeType(s)");
 			logger.info("Imported:\t" + db.add(new ArrayList<SampleBarcode>(sampleBarcodes.values())) + " Barcode(s)");
 			logger.info("Imported:\t" + db.add(new ArrayList<CapturingKit>(capturingKits.values()))
 					+ " Capturing kit(s)");

@@ -10,7 +10,6 @@ import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenView;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
-import org.molgenis.JpaDatabase;
 
 public class Worksheet extends PluginModel<Entity>
 {
