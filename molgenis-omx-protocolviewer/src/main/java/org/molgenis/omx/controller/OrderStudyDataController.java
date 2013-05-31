@@ -7,6 +7,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.servlet.http.Part;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
@@ -17,11 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -46,11 +50,13 @@ public class OrderStudyDataController
 		return "orderdata-modal";
 	}
 
-	// Spring's StandardServletMultipartResolver can't bind a RequestBody or ModelAttribute
+	// Spring's StandardServletMultipartResolver can't bind a RequestBody or
+	// ModelAttribute
 	@RequestMapping(value = "/order", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void orderData(@RequestParam String name, @RequestParam Part file) throws DatabaseException, IOException,
-			MessagingException
+	public void orderData(@RequestParam
+	String name, @RequestParam
+	Part file) throws DatabaseException, IOException, MessagingException
 	{
 		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart(), login.getUserId());
 		shoppingCart.emptyCart();
@@ -65,7 +71,8 @@ public class OrderStudyDataController
 				{
 					@Override
 					@Nullable
-					public OrderResponse apply(@Nullable StudyDataRequest studyDataRequest)
+					public OrderResponse apply(@Nullable
+					StudyDataRequest studyDataRequest)
 					{
 						return studyDataRequest != null ? new OrderResponse(studyDataRequest) : null;
 					}
@@ -77,6 +84,20 @@ public class OrderStudyDataController
 	public String getOrdersForm() throws DatabaseException
 	{
 		return "orderlist-modal";
+	}
+
+	@RequestMapping(value = "/orders/{orderId}/view", method = RequestMethod.GET)
+	public ModelAndView getOrderDetailsForm(@Valid
+	@NotNull
+	@PathVariable
+	Integer orderId) throws DatabaseException
+	{
+		StudyDataRequest studyDataRequest = orderStudyDataService.getOrder(orderId);
+		if (studyDataRequest == null) throw new DatabaseException("invalid order id");
+
+		ModelAndView model = new ModelAndView("orderdetails-modal");
+		model.addObject("order", studyDataRequest);
+		return model;
 	}
 
 	private static class OrdersResponse

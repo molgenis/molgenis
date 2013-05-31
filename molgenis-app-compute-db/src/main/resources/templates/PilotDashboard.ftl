@@ -29,6 +29,8 @@
 				$('#' + run + ' td.running').html(response.running);
 				$('#' + run + ' td.failed').html(response.failed);
 				$('#' + run + ' td.done').html(response.done);
+                $('#' + run + ' td.submitted').html(response.submitted);
+                $('#' + run + ' td.started').html(response.started);
 				
 				if (response.failed > 0) {
 					$('#resubmitFailedTasksForm_' + run).show();
@@ -78,35 +80,42 @@
 							<div class="host-header">
 								<span class="host-name">${run.name}@${run.backendUrl}</span>
 								<span class="creation-time">(${run.creationTime})</span>
-								<#if run.running>
-  									<div class="text-success">Active</div>
-                                    <form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/inactivate" class="form-inline" method="post">
-                                        <input type="hidden" name="run" value="${run.name}" />
-                                        <button type="submit" class="btn resubmit-btn">Inactivate</button>
-                                    </form>
-  								<#else>
-  									<div class="text-error">Not active</div>
-                                    <form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/activate" class="form-inline" method="post">
-                                        <input type="hidden" name="run" value="${run.name}" />
-                                        <button type="submit" class="btn resubmit-btn">Activate</button>
-                                    </form>
+
+                                <#if run.complete>
+                                    <div class="text-success">Completed</div>
+                                </div>
+                                <#else>
+                                    <#if run.running>
+                                        <div class="text-info">Active</div>
+                                             <form action="/plugin/dashboard/inactivate" class="form-inline" method="post">
+                                                <input type="hidden" name="run" value="${run.name}" />
+                                                <button type="submit" class="btn inactivate-btn">Inactivate</button>
+                                             </form>
+                                        <#else>
+                                            <div class="text-error">Not active</div>
+                                            <form action="/plugin/dashboard/activate" class="form-inline" method="post">
+                                                <input type="hidden" name="run" value="${run.name}" />
+                                                <button type="submit" class="btn activate-btn">Activate</button>
+                                            </form>
+                                        </#if>
+
+                                    </div>
+                                    <#if run.running>
+                                        <#if run.submitting>
+                                            <form action="/plugin/dashboard/stop" class="form-inline" method="post">
+                                                <input type="hidden" name="run" value="${run.name}" />
+                                                <button type="submit" class="btn">Stop Submitting Pilots</button>
+                                            </form>
+                                        <#else>
+                                            <form action="/plugin/dashboard/start" class="form-inline" method="post">
+                                                <input type="hidden" name="run" value="${run.name}" />
+                                                <input type="text" name="username" id="inputUsername" placeholder="Username"  />
+                                                <input type="password" name="password" id="inputPassword" placeholder="Password"  />
+                                                <button type="submit" class="btn">Submit Pilots</button>
+                                            </form>
+                                         </#if>
+                                    </#if>
                                 </#if>
-  								
-  							</div>	
-							<#if run.running>
-  								<form action="/plugin/dashboard/stop" class="form-inline" method="post">		
-  									<input type="hidden" name="run" value="${run.name}" />
-  									<button type="submit" class="btn">Stop Submitting Pilots</button>
-  								</form>
-  							<#else>
-  								<form action="/plugin/dashboard/start" class="form-inline" method="post">
-  									<input type="hidden" name="run" value="${run.name}" />
-  									<input type="text" name="username" id="inputUsername" placeholder="Username"  />
-  									<input type="password" name="password" id="inputPassword" placeholder="Password"  />
-    								<button type="submit" class="btn">Submit Pilots</button>
-    							</form>		
-  							</#if>
-  							
   							<form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/resubmit" class="form-inline" method="post">
   								<input type="hidden" name="run" value="${run.name}" />
   								<button type="submit" class="btn resubmit-btn">Resubmit failed jobs</button>
@@ -135,10 +144,10 @@
     									<td></td>
     								</tr>
                                     <tr>
-                                        <td class="text-warning">Pilots submitted</td>
-                                        <td class="running text-warning"></td>
-                                        <td class="text-warning">Pilots started</td>
-                                        <td class="running text-warning"></td>
+                                        <td class="text-info">Pilots submitted</td>
+                                        <td class="submitted text-info"></td>
+                                        <td class="text-info">Pilots started</td>
+                                        <td class="started text-info"></td>
                                     </tr>
     							</table>
     						</div>

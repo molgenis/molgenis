@@ -1,4 +1,6 @@
-package org.molgenis.lifelines.plugins.header;
+package org.molgenis.lifelines.plugins;
+
+import java.io.Serializable;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -10,7 +12,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
-public class Header extends PluginModel<Entity>
+public class HeaderPlugin extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -21,7 +23,7 @@ public class Header extends PluginModel<Entity>
 
 	private HeaderModel headerModel;
 
-	public Header(String name, ScreenController<?> parent)
+	public HeaderPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}
@@ -47,7 +49,7 @@ public class Header extends PluginModel<Entity>
 	@Override
 	public String getViewTemplate()
 	{
-		return "templates/" + Header.class.getName().replace('.', '/') + ".ftl";
+		return "templates/" + HeaderPlugin.class.getName().replace('.', '/') + ".ftl";
 	}
 
 	@Override
@@ -83,8 +85,10 @@ public class Header extends PluginModel<Entity>
 		}
 	}
 
-	public static class HeaderModel
+	public static class HeaderModel implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String hrefLogo;
 
 		public String getHrefLogo()

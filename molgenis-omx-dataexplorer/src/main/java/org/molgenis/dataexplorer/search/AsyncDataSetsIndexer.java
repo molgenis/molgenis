@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.search;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -62,7 +63,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
+				// FIXME: dataset is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 			}
 		}
 		catch (Exception e)
@@ -94,7 +97,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				if (!searchService.documentTypeExists(dataSet.getName()))
 				{
+					// FIXME: dataset is not unique
 					searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+					searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 				}
 			}
 		}
@@ -119,7 +124,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : dataSets)
 			{
+				// FIXME: dataset is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 			}
 		}
 		catch (Exception e)

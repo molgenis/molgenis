@@ -53,9 +53,8 @@ public class FrontController extends MolgenisFrontController
 		}
 		catch(Exception e)
 		{
-			System.err.println("FATAL EXCEPTION: failure in starting services in FrontController. Check your services and/or mapping and try again.");
-			e.printStackTrace();
-			System.exit(0);
+			logger.fatal("failure in starting services in FrontController. Check your services and/or mapping and try again.");
+			throw new RuntimeException(e);
 		}
 		
 		this.services = services;

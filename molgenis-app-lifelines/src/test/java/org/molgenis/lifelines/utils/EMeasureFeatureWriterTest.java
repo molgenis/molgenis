@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.lifelines.utils;
 
 import static org.molgenis.util.DetectOS.getLineSeparator;
 
