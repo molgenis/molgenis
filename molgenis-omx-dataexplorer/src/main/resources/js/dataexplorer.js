@@ -14,7 +14,7 @@
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		restApi.getAsync('/api/v1/dataset', null, null, function(datasets) {
+		restApi.getAsync('/api/v1/dataset', null, function(datasets) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(datasets.items, function(key, val) {
@@ -97,7 +97,7 @@
 			ns.onFeatureSelectionChange(sortedFeatures);
 		}
 
-		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], null, function(protocol) {
+		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], function(protocol) {
 			var container = $('#feature-selection');
 			if (container.children('ul').length > 0) {
 				container.dynatree('destroy');
@@ -161,7 +161,7 @@
 		currentPage = 1;
 		$("#observationset-search").val("");
 
-		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
+		restApi.getAsync(dataSetUri, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
@@ -182,129 +182,6 @@
 		searchQuery = query;
 		ns.updateObservationSetsTable();
 	};
-	
-	ns.searchFeatureTable = function(query, protocolUri) {
-		
-		function getEntitiesbyIds(map, entityName){	
-			var array = Object.keys(map); 
-			var iteration = Math.floor(array.length / 100);
-			for(var i = 1; i <= iteration; i++ ){
-				callRestApi(map, array.slice((i - 1) * 100, i * 100), entityName);
-			}
-			if(iteration * 100 < array.length){
-				callRestApi(map, array.slice(iteration * 100, array.length), entityName);
-			}
-		}
-		
-		function callRestApi(map, array, entityName){
-			$.ajax({
-				type : 'POST',
-				url : '/api/v1/' + entityName + '?_method=GET',
-				data : JSON.stringify({
-					q : [ {
-						"field" : "id",
-						"operator" : "IN",
-						"value" : array
-					} ],
-					num : array.length
-				}),
-				contentType : 'application/json',
-				async : false,
-				success : function(entities) {
-					$.each(entities.items, function() {
-						var object = $(this)[0];
-						var fragments = object.href.split("/");
-						var id = fragments[fragments.length - 1];
-						map[id] = object;
-					});
-				}
-			});
-		}
-		
-		console.log("searchObservationSets: " + query);
-		searchQuery = query;
-		ns.searchFeatureMeta(function(searchResponse) {
-			var protocol = restApi.get(protocolUri);
-			var rootNode =  $('#feature-selection').dynatree("getTree").getNodeByKey(protocol.href);
-			rootNode.removeChildren();
-			var searchHits = searchResponse["searchHits"];
-			
-			var protocolMap = {};
-			var featureMap = {};
-			$.each(searchHits, function(){
-				var object = $(this)[0]["columnValueMap"];
-				var entityType = object["type"];
-				var nodes = object["path"].split(".");
-				var entityId = object["id"];
-
-				//collect all features and their ancesters using restapi first.
-				if(entityType === "observablefeature"){
-					for(var i = 0; i < nodes.length; i++){
-						if(nodes[i] == entityId.toString()){
-							featureMap[nodes[i]] = nodes[i];
-						}else{
-							protocolMap[nodes[i]] = nodes[i];
-						}
-					}
-				}
-			});
-			getEntitiesbyIds(protocolMap, "protocol");
-			getEntitiesbyIds(featureMap, "observablefeature");
-			
-			var cachedNode = {};
-			var topNodes = new Array();
-			
-			$.each(searchHits, function(){
-				var object = $(this)[0]["columnValueMap"];
-				var entityType = object["type"];
-				
-				if(entityType === "observablefeature"){
-					
-					var nodes = object["path"].split(".");
-					var entityId = object["id"];
-					//split the path to get all ancestors;
-					for(var i = 0; i < nodes.length; i++) {
-						if(!cachedNode[nodes[i]]){
-							var entityInfo = null;
-							var options = null;
-							//this is the last node and check if this is a feature
-							if (nodes[i] === entityId.toString()) {
-								entityInfo = featureMap[nodes[i]];
-								options = {
-									isFolder : false,
-									icon : "../../img/filter-bw.png"
-								}
-							}else{
-								entityInfo = protocolMap[nodes[i]];
-								options = {
-									isFolder : true,
-									isLazy : true,
-									expand : true,
-									children : []
-								};
-							}
-							options = $.extend({
-								key : entityInfo.href,
-								title : entityInfo.name,
-								tooltip : entityInfo.description
-							}, options);
-							//locate the node in dynatree and otherwise create the node and insert it
-							if(i != 0){
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode["children"].push(options);
-								cachedNode[nodes[i-1]] = parentNode;
-							}
-							else
-								topNodes.push(options);
-							cachedNode[nodes[i]] = options;
-						}
-					}
-				}
-			});
-			rootNode.addChild(topNodes);
-			console.log("finished");
-		});
-	}
 
 	ns.updateObservationSetsTable = function() {
 		if (selectedFeatures.length > 0) {
@@ -400,7 +277,7 @@
 
 	ns.openFeatureFilterDialog = function(featureUri) {
 		console.log("openFeatureFilterDialog: " + featureUri);
-		restApi.getAsync(featureUri, null, null, function(feature) {
+		restApi.getAsync(featureUri, null, function(feature) {
 			var items = [];
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
@@ -603,36 +480,7 @@
 	ns.search = function(callback) {
 		searchApi.search(ns.createSearchRequest(), callback);
 	};
-	
-	ns.searchFeatureMeta = function(callback){
-		searchApi.search(ns.createSearchRequestFeatureMeta(), callback);
-	}
-	
-	ns.createSearchRequestFeatureMeta = function(){
-		var terms = searchQuery.split(" ");
-		var queryRules = new Array();
-		$.each(terms, function(index, element){
-			queryRules.push({
-				operator : 'SEARCH',
-				value : element,
-			});
-			if(index < terms.length - 1)
-				queryRules.push({
-					operator : 'AND'
-				});
-		});
-		//todo: how to unlimit the search result
-		queryRules.push({
-			operator : 'LIMIT',
-			value : 1000000
-		});
-		var searchRequest = {
-			documentType : "protocolViewer-" + selectedDataSet.name,
-			queryRules : queryRules
-		};
-		return searchRequest;
-	}
-	
+
 	ns.createSearchRequest = function() {
 		var searchRequest = {
 			documentType : selectedDataSet.name,
@@ -731,20 +579,7 @@
 		$("#observationset-search").change(function(e) {
 			ns.searchObservationSets($(this).val());
 		});
-		$("#feature-search").keyup(function(e){
-				e.preventDefault();
-		    if(e.keyCode == 13 || e.which === '13') // enter
-		        {$("#search-feature-button").click();}
-		});
-		$("#search-feature-button").click(function(e) {
-			if($("#feature-search").val() != "" && $("#feature-search").val() != undefined){
-				ns.searchFeatureTable($("#feature-search").val(), selectedDataSet.protocolUsed.href);
-			}
-		});
-		$("#search-feature-clear-button").click(function(e) {
-			ns.createFeatureSelection(selectedDataSet.protocolUsed.href);
-			$("#feature-search").val("");
-		});
+
 		$('.feature-filter-dialog').dialog({
 			modal : true,
 			width : 500,
