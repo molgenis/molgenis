@@ -63,6 +63,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
+				// FIXME: dataset is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 				searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 			}
@@ -96,6 +97,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				if (!searchService.documentTypeExists(dataSet.getName()))
 				{
+					// FIXME: dataset is not unique
 					searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 					searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 				}
