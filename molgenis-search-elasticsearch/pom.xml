@@ -9,6 +9,11 @@
 	<packaging>jar</packaging>
 	
 	<dependencies>
+		<dependency>
+         	<groupId>org.molgenis</groupId>
+            <artifactId>molgenis-omx-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
          	<groupId>org.molgenis</groupId>
             <artifactId>molgenis-search</artifactId>

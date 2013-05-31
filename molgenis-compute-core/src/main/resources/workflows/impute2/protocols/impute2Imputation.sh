@@ -4,10 +4,7 @@
 #input m
 #input h
 #input l
-#input additonalImpute2Param1
-#input additonalImpute2Param2
-#input additonalImpute2Param3
-#input additonalImpute2Param4
+#input additonalImpute2Param
 #input chr
 #input fromChrPos
 #input toChrPos
@@ -90,7 +87,7 @@ containsElement () {
 }
 
 
-aditionalArgsArray=($additonalImpute2Param1 $additonalImpute2Param2 $additonalImpute2Param3 $additonalImpute2Param4)
+aditionalArgsArray=($additonalImpute2Param)
 
 # Loop over all aditional args. If arg is encounterd that requeres file then do inputs and getFile on next element
 for (( i=0; i<${#aditionalArgsArray[@]}; i++ ));
@@ -125,10 +122,7 @@ $impute2gridBin \
 	-int $fromChrPos $toChrPos \
 	-o $tmpOutput \
 	-use_prephased_g \
-	$additonalImpute2Param1 \
-	$additonalImpute2Param2 \
-	$additonalImpute2Param3 \
-	$additonalImpute2Param4
+	$additonalImpute2Param
 		
 #Get return code from last program call
 returnCode=$?

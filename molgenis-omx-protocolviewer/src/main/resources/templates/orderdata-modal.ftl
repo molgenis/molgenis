@@ -53,10 +53,16 @@
 						var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
 						table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
 						var body = $('<tbody>');
+						
 						$.each(cart.features, function(i, feature) {
 							var row = $('<tr>');
 							row.append('<td>' + feature.name + '</td>');
-							row.append('<td>' + feature.i18nDescription.en + '</td>');
+							if(feature.i18nDescription){
+								row.append('<td>' + feature.i18nDescription.en + '</td>');	
+							}
+							catch(err){
+								row.append('<td>null</td>');	
+							}
 							
 							var deleteCol = $('<td class="center">');
 							var deleteBtn = $('<i class="icon-remove"></i>');
