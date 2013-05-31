@@ -50,4 +50,22 @@ If you want to, you may inspect the generated scripts first. After which you can
 	sh submit.sh
 	
 # Adapt the workflow for your own case
-To be continued...
+
+## Run workflow on cluster
+Let's make our scripts suitable for a PBS-schedular
+
+	molgenis_compute.sh -b pbs
+
+The header of the generated scripts now specifies some default resources like 'walltime=08:00:00', which you may want to overrule. You can do this by adding the following line to the top of one of your scripts, say protocols/step2_0.sh.
+
+	#MOLGENIS walltime=00:30:00
+	
+Now you can generate again:
+
+	molgenis_compute.sh -g
+
+And inspect the generated script:
+
+	less rundir/step2_0.sh
+	
+You may want to submit the new bundle of scripts on the cluster.
