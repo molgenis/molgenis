@@ -12,19 +12,14 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	
-	// fill dataset select
-	ns.fillDataSetSelect = function(callback) {
-		restApi.getAsync('/api/v1/dataset', null, null, function(datasets) {
-			var items = [];
-			// TODO deal with multiple entity pages
-			$.each(datasets.items, function(key, val) {
-				items.push('<option value="' + val.href + '">' + val.name + '</option>');
-			});
-			$('#dataset-select').html(items.join(''));
-			$('#dataset-select').change(function() {
-				ns.onDataSetSelectionChange($(this).val());
-			});
-			callback();
+	ns.selectDataSet = function(id) {
+		restApi.getAsync('/api/v1/dataset/' + id, null, null, function(dataSet) {
+		  // update
+	      setFeatureDetails(null);
+	      updateFeatureSelection(null);
+	      ns.createFeatureSelection(dataSet.protocolUsed.href);
+	      // set selected data set
+	      selectedDataSet = dataSet;
 		});
 	};
 	
@@ -39,10 +34,6 @@
 			selectedDataSet = dataSet;
 			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
-	};
-
-	ns.getSelectedDataSet = function() {
-		return $(document).data('datasets').selected;
 	};
 	
 	ns.createFeatureSelection = function(protocolUri) {
@@ -559,16 +550,11 @@
 		}
 
 		var table = $('<table />');
+		
 		table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
-		if (feature.i18nDescription) {
-			for ( var lang in feature.i18nDescription) {
-				if (!feature.i18nDescription.hasOwnProperty(lang))
-					continue;
-				table.append('<tr><td>' + "Description (" + lang + "):" + '</td><td>' + feature.i18nDescription[lang] + '</td></tr>');
-			}
-		}else if(feature.description) {
-			table.append('<tr><td>' + "Description: " + '</td><td>' + feature.description + '</td></tr>');
-		}
+		$.each(getDescription(feature), function(key, val){
+			table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
+		});
 
 		table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 		if (feature.unit)
@@ -646,7 +632,6 @@
 				$('<td />').text(typeof protocol_name !== 'undefined' ? protocol_name : "").appendTo(row);
 				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
 				$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-
 				var deleteButton = $('<i class="icon-remove"></i>');
 				deleteButton.click($.proxy(function() {
 					tree.getNodeByKey(node.data.key).select(false);
@@ -668,6 +653,13 @@
 			}
 		});
 		updateShoppingCart(features);
+	}
+	
+	function getDescription(feature){
+		var str = feature.description;
+		if(str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}'))
+			str = '{"en" : "' + str + '"}';
+		return JSON.parse(str ? str : '{}');
 	}
 
 	function updateShoppingCart(features) {
@@ -695,7 +687,7 @@
 			updateShoppingCart(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
-			ns.selectDataSet(ns.getSelectedDataSet()); // reset catalogue
+			ns.selectDataSet(selectedDataSet.id); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
