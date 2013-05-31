@@ -144,9 +144,9 @@
     									<td></td>
     								</tr>
                                     <tr>
-                                        <td class="text-warning">Pilots submitted</td>
+                                        <td class="text-info">Pilots submitted</td>
                                         <td class="submitted text-info"></td>
-                                        <td class="text-warning">Pilots started</td>
+                                        <td class="text-info">Pilots started</td>
                                         <td class="started text-info"></td>
                                     </tr>
     							</table>
