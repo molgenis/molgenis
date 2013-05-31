@@ -30,7 +30,7 @@
   </div>
 </div>
 <script type="text/javascript">
-	$(function(w) {
+	$(function() {
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
