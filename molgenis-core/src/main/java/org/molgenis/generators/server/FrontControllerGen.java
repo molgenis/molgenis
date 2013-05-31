@@ -51,7 +51,6 @@ public class FrontControllerGen extends Generator
 			templateArgs.put("db_filepath", options.db_filepath);
 			templateArgs.put("loginclass", options.auth_loginclass);
 			templateArgs.put("auth_redirect", options.auth_redirect);
-			templateArgs.put("chromedriver", options.chromedriver);
 
 			
 			templateArgs.put("databaseImp",
