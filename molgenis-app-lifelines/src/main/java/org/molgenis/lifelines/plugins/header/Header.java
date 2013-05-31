@@ -1,5 +1,7 @@
 package org.molgenis.lifelines.plugins.header;
 
+import java.io.Serializable;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
@@ -83,8 +85,10 @@ public class Header extends PluginModel<Entity>
 		}
 	}
 
-	public static class HeaderModel
+	public static class HeaderModel implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String hrefLogo;
 
 		public String getHrefLogo()

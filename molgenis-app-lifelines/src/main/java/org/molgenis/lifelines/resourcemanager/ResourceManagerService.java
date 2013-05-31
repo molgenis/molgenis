@@ -205,7 +205,7 @@ public class ResourceManagerService
 
 	}
 
-	private class CatalogSearchResult
+	private static class CatalogSearchResult
 	{
 		private final String id;
 		private final String name;
