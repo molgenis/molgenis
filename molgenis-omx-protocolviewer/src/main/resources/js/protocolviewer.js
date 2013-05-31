@@ -359,9 +359,6 @@
 					}
 				});
 				sortNodes(topNodes);
-//				$.each(topNodes, function(index, node){
-//					sortNodes();
-//				});
 				rootNode.removeChildren();
 				rootNode.addChild(topNodes);
 			});
