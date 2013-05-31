@@ -51,7 +51,7 @@ public class ComputeCommandLine
 		// output scripts + docs
 		try
 		{
-			create(computeProperties);
+			if (!computeProperties.parseExceptionOrHelp) create(computeProperties);
 		}
 		catch (Exception e)
 		{
@@ -66,7 +66,7 @@ public class ComputeCommandLine
 		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
 		if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
 				+ (new File(computeProperties.defaults)).getAbsolutePath());
-		System.out.println("Using parameters:       " + computeProperties.parameters);
+		System.out.println("Using parameters:       " + Joiner.on(",").join(computeProperties.parameters));
 		System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
 		System.out.println("Using backend:          " + computeProperties.backend);
 		System.out.println("Using runID:            " + computeProperties.runId);
@@ -92,7 +92,7 @@ public class ComputeCommandLine
 		{ // if database none (= off), then do following
 			if (computeProperties.list)
 			{
-				// list files in rundir
+				// list *.sh files in rundir
 				File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter()
 				{
 					public boolean accept(File dir, String filename)
