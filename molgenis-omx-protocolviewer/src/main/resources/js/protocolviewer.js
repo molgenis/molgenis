@@ -233,7 +233,7 @@
 		return features;
 	};
 	
-	ns.searchFeatureTable = function(query, protocolUri) {
+	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
 		function preloadEntities(protocolIds, featureIds, callback) {
 			
@@ -281,7 +281,8 @@
 		
 		console.log("searchObservationSets: " + query);
 		searchQuery = query;
-		ns.searchFeatureMeta(function(searchResponse) {
+		
+		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
 			var rootNode =  $('#dataset-browser').dynatree("getTree").getNodeByKey(protocol.href);
 			var selectedFeatureIds = selectedNodeIds(rootNode.tree.getSelectedNodes());
@@ -375,11 +376,7 @@
 		});
 	};
 	
-	ns.searchFeatureMeta = function(callback){
-		searchApi.search(ns.createSearchRequestFeatureMeta(), callback);
-	};
-	
-	ns.createSearchRequestFeatureMeta = function(){
+	ns.createSearchRequest = function(){
 		var terms = searchQuery.split(" ");
 		var queryRules = new Array();
 		$.each(terms, function(index, element){
@@ -463,7 +460,7 @@
 	ns.search = function(query) {
 		if (query) {
 			search = true;
-			ns.searchFeatureTable(query, selectedDataSet.protocolUsed.href);
+			ns.searchAndUpdateTree(query, selectedDataSet.protocolUsed.href);
 		}
 	};
 	
