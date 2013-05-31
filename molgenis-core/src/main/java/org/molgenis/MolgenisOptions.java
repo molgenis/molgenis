@@ -180,10 +180,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "auth_loginclass", param = Option.Param.CLASS, type = Option.Type.REQUIRED_ARGUMENT, usage = "Expert option. Set the class used for login. Default: org.molgenis.framework.security.SimpleLogin")
 	public String auth_loginclass = "org.molgenis.framework.security.SimpleLogin";
 
-	/** A path to chromedriver */
-	@Option(name = "chromedriver", param = Option.Param.CLASS, type = Option.Type.REQUIRED_ARGUMENT, usage = "Path to chromedriver")
-	public String chromedriver = "/Users/despoina/Downloads/chromedriver2_mac32_0.8_latest/chromedriver";
-	
 	/** Name of form/plugin to redirect to after login */
 	@Option(name = "auth_redirect", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Get name of form/plugin to redirect to after login. Default: ''")
 	public String auth_redirect = "";
@@ -664,20 +660,9 @@ public class MolgenisOptions implements Serializable
 		this.exclude_system = exclude_system;
 	}
 
-	public String getChromeDriver()
-	{
-		return chromedriver;
-	}
-
 	public String getAuthLoginclass()
 	{
 		return auth_loginclass;
-	}
-	
-	
-	public void setChromedriver(String chromedriver)
-	{
-		this.chromedriver = chromedriver;
 	}
 
 	public void setAuthLoginclass(String auth_loginclass)
