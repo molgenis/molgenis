@@ -130,6 +130,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			List<String> dataSetsName = new ArrayList<String>();
 			for (DataSet dataSet : dataSets)
 			{
+				// FIXME: dataset is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
 				dataSetsName.add(dataSet.getIdentifier());
 			}
@@ -140,10 +141,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			for (DataSet dataSet : dataSetsUnauthorized)
 			{
 				// Store tree structure in protocol viewer
-				searchService.indexTupleTable(
-						"protocolViewer-" + dataSet.getName(),
-						new MemoryTable(createTupleTableForTree("", dataSet.getName(), dataSet.getProtocolUsed(),
-								unauthorizedDatabase)));
+				searchService.indexTupleTable("protocolTree-" + dataSet.getId(), new MemoryTable(
+						createTupleTableForTree("", dataSet.getId(), dataSet.getProtocolUsed(), unauthorizedDatabase)));
 			}
 		}
 		catch (Exception e)
@@ -157,7 +156,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 	}
 
-	public List<Tuple> createTupleTableForTree(String parentIdentifer, String dataSetName, Protocol protocolUsed,
+	public List<Tuple> createTupleTableForTree(String parentIdentifer, Integer dataSetId, Protocol protocolUsed,
 			Database unauthorizedDatabase) throws DatabaseException
 	{
 		List<Tuple> listOfRows = new ArrayList<Tuple>();
@@ -167,22 +166,21 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (Protocol p : subProtocols)
 			{
-				StringBuilder pathBuilder = new StringBuilder();
 				KeyValueTuple tuple = new KeyValueTuple();
+				StringBuilder pathBuilder = new StringBuilder();
+				if (!parentIdentifer.isEmpty()) pathBuilder.append(parentIdentifer).append('.');
+				final String path = pathBuilder.append(p.getId()).toString();
+				tuple.set("path", path);
+
+				// recursively traverse down the tree
+				listOfRows.addAll(createTupleTableForTree(pathBuilder.toString(), dataSetId, p, unauthorizedDatabase));
 				tuple.set("id", p.getId());
-				tuple.set("identifier", p.getIdentifier());
 				tuple.set("name", p.getName().replaceAll("[^a-zA-Z0-9 ]", " "));
 				tuple.set("type", "protocol");
-				tuple.set("dataSet", dataSetName);
+				tuple.set("dataSet", dataSetId);
 				tuple.set("description", p.getDescription() == null ? StringUtils.EMPTY : p.getDescription()
 						.replaceAll("[^a-zA-Z0-9 ]", " "));
-				if (!parentIdentifer.isEmpty()) pathBuilder.append(parentIdentifer).append('.');
-				tuple.set("path", pathBuilder.append(p.getId()).toString());
-				tuple.set("category", StringUtils.EMPTY);
 				listOfRows.add(tuple);
-				// recursively traverse down the tree
-				listOfRows
-						.addAll(createTupleTableForTree(pathBuilder.toString(), dataSetName, p, unauthorizedDatabase));
 			}
 		}
 		else
@@ -195,13 +193,12 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				StringBuilder categoryValue = new StringBuilder();
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set("id", feature.getId());
-				tuple.set("identifier", feature.getIdentifier());
 				tuple.set("name", feature.getName().replaceAll("[^a-zA-Z0-9 ]", " "));
 				tuple.set("type", "observablefeature");
-				tuple.set("dataSet", dataSetName);
+				tuple.set("dataSet", dataSetId);
 				tuple.set("description", feature.getDescription() == null ? StringUtils.EMPTY : feature
 						.getDescription().replaceAll("[^a-zA-Z0-9 ]", " "));
-				tuple.set("path", pathBuilder.append(parentIdentifer).append('.').append(feature.getId()).toString());
+				tuple.set("path", pathBuilder.append(parentIdentifer).append(".F").append(feature.getId()).toString());
 				for (Category c : getCategories(feature, unauthorizedDatabase))
 				{
 					categoryValue.append(
