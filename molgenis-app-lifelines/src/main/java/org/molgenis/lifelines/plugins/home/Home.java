@@ -7,6 +7,8 @@
 
 package org.molgenis.lifelines.plugins.home;
 
+import java.io.Serializable;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -84,8 +86,10 @@ public class Home extends PluginModel<Entity>
 		}
 	}
 
-	public static class HomeModel
+	public static class HomeModel implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String homeHtml;
 
 		public String getHomeHtml()
