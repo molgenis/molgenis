@@ -358,9 +358,7 @@
 						} 
 					}
 				});
-				$.each(topNodes, function(index, node){
-					sortNodes(node);
-				});
+				sortNodes(topNodes);
 				rootNode.removeChildren();
 				rootNode.addChild(topNodes);
 			});
@@ -423,7 +421,7 @@
 				if(node.data.isFolder){
 					currentNode.data.children = new Array();
 					var nodeData = recursivelyExpand(selectedFeatureNodes, expandedNodes, currentNode.data);
-					sortNodes(nodeData);
+					sortNodes(nodeData.children);
 					currentNode.removeChildren();
 					currentNode.addChild(nodeData.children);
 					currentNode.toggleExpand();
@@ -455,13 +453,13 @@
 		}
 	};
 	
-	function sortNodes(node){
-		if(node.children){
-			node.children.sort(function(a,b){
+	function sortNodes(nodes){
+		if(nodes){
+			nodes.sort(function(a,b){
 				return naturalSort(a.title, b.title);
 			});
-			$.each(node.children, function(index, subNode){
-				sortNodes(subNode);
+			$.each(nodes, function(index, node){
+				if(node.children) sortNodes(node.children);
 			});
 		}
 	}
