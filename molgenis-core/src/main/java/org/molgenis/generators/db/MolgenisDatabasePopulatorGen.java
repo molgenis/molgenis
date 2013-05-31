@@ -50,7 +50,6 @@ public class MolgenisDatabasePopulatorGen extends Generator
 			templateArgs.put("entities", entityList);
 			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("auth_loginclass", options.auth_loginclass);
-			templateArgs.put("chromedriver", options.auth_loginclass);
 
 			templateArgs.put("decorator_overriders", options.decorator_overriders);
 			templateArgs.put("metaData", !options.auth_loginclass.endsWith("SimpleLogin"));
