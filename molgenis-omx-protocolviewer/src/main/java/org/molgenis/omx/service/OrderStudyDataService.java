@@ -107,6 +107,11 @@ public class OrderStudyDataService
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 
+	public StudyDataRequest getOrder(Integer orderId) throws DatabaseException
+	{
+		return StudyDataRequest.findById(database, orderId);
+	}
+
 	public List<StudyDataRequest> getOrders(Integer userId) throws DatabaseException
 	{
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class, new QueryRule(
