@@ -116,7 +116,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
 		mailSender.setHost(mailHost);
-		mailSender.setPort(Integer.valueOf(mailPort));
+		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
 		mailSender.setUsername(mailUsername); // specify in
 												// molgenis-server.properties
