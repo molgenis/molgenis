@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.lifelines.utils;
 
 import java.io.Closeable;
 import java.io.IOException;

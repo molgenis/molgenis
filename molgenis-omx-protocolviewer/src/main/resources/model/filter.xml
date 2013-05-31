@@ -5,7 +5,7 @@
 			Model extension to make it possible to store a DataSetFilter that is linked to a user
 		</description>
 		
-		<entity name="StudyDataRequest" implements="Identifiable">
+		<entity name="StudyDataRequest" implements="Identifiable" decorator="org.molgenis.omx.decorators.StudyDataRequestDecorator">
 			<field name="RequestForm" type="string" description="request form filename"/>
 			<field name="Features" type="mref" xref_entity="ObservableFeature" />
 			<field name="MolgenisUser" type="xref" xref_entity="MolgenisUser" />
