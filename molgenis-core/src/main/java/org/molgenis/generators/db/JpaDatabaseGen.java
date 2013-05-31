@@ -51,7 +51,6 @@ public class JpaDatabaseGen extends Generator
 			templateArgs.put("entities", entityList);
 			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("auth_loginclass", options.auth_loginclass);
-			templateArgs.put("chromedriver", options.chromedriver);
 			templateArgs.put("disable_decorators", options.disable_decorators);
 			OutputStream targetOut = new FileOutputStream(target);
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
