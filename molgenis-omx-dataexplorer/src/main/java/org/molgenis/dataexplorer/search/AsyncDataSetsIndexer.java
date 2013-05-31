@@ -1,26 +1,17 @@
 package org.molgenis.dataexplorer.search;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.impl.MemoryTable;
 import org.molgenis.omx.dataset.DataSetTable;
-import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.DatabaseUtil;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -73,6 +64,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 			}
 		}
 		catch (Exception e)
@@ -105,6 +97,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				if (!searchService.documentTypeExists(dataSet.getName()))
 				{
 					searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+					searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 				}
 			}
 		}
@@ -127,22 +120,11 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
-			List<String> dataSetsName = new ArrayList<String>();
 			for (DataSet dataSet : dataSets)
 			{
 				// FIXME: dataset is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
-				dataSetsName.add(dataSet.getIdentifier());
-			}
-
-			List<DataSet> dataSetsUnauthorized = unauthorizedDatabase.find(DataSet.class, new QueryRule(
-					DataSet.IDENTIFIER, Operator.IN, dataSetsName));
-
-			for (DataSet dataSet : dataSetsUnauthorized)
-			{
-				// Store tree structure in protocol viewer
-				searchService.indexTupleTable("protocolTree-" + dataSet.getId(), new MemoryTable(
-						createTupleTableForTree("", dataSet.getId(), dataSet.getProtocolUsed(), unauthorizedDatabase)));
+				searchService.updateIndex("protocolTree", Collections.singletonList(dataSet));
 			}
 		}
 		catch (Exception e)
@@ -154,70 +136,5 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 			runningIndexProcesses.decrementAndGet();
 		}
-	}
-
-	public List<Tuple> createTupleTableForTree(String parentIdentifer, Integer dataSetId, Protocol protocolUsed,
-			Database unauthorizedDatabase) throws DatabaseException
-	{
-		List<Tuple> listOfRows = new ArrayList<Tuple>();
-
-		List<Protocol> subProtocols = protocolUsed.getSubprotocols();
-		if (subProtocols.size() > 0)
-		{
-			for (Protocol p : subProtocols)
-			{
-				KeyValueTuple tuple = new KeyValueTuple();
-				StringBuilder pathBuilder = new StringBuilder();
-				if (!parentIdentifer.isEmpty()) pathBuilder.append(parentIdentifer).append('.');
-				final String path = pathBuilder.append(p.getId()).toString();
-				tuple.set("path", path);
-
-				// recursively traverse down the tree
-				listOfRows.addAll(createTupleTableForTree(pathBuilder.toString(), dataSetId, p, unauthorizedDatabase));
-				tuple.set("id", p.getId());
-				tuple.set("name", p.getName().replaceAll("[^a-zA-Z0-9 ]", " "));
-				tuple.set("type", "protocol");
-				tuple.set("dataSet", dataSetId);
-				tuple.set("description", p.getDescription() == null ? StringUtils.EMPTY : p.getDescription()
-						.replaceAll("[^a-zA-Z0-9 ]", " "));
-				listOfRows.add(tuple);
-			}
-		}
-		else
-		{
-			List<ObservableFeature> listOfFeatures = unauthorizedDatabase.find(ObservableFeature.class, new QueryRule(
-					ObservableFeature.ID, Operator.IN, protocolUsed.getFeatures_Id()));
-			for (ObservableFeature feature : listOfFeatures)
-			{
-				StringBuilder pathBuilder = new StringBuilder();
-				StringBuilder categoryValue = new StringBuilder();
-				KeyValueTuple tuple = new KeyValueTuple();
-				tuple.set("id", feature.getId());
-				tuple.set("name", feature.getName().replaceAll("[^a-zA-Z0-9 ]", " "));
-				tuple.set("type", "observablefeature");
-				tuple.set("dataSet", dataSetId);
-				tuple.set("description", feature.getDescription() == null ? StringUtils.EMPTY : feature
-						.getDescription().replaceAll("[^a-zA-Z0-9 ]", " "));
-				tuple.set("path", pathBuilder.append(parentIdentifer).append(".F").append(feature.getId()).toString());
-				for (Category c : getCategories(feature, unauthorizedDatabase))
-				{
-					categoryValue.append(
-							c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll("[^a-zA-Z0-9 ]", " "))
-							.append(' ');
-				}
-				tuple.set("category", categoryValue.toString());
-				listOfRows.add(tuple);
-			}
-		}
-		return listOfRows;
-	}
-
-	private List<Category> getCategories(ObservableFeature feature, Database unauthorizedDatabase)
-			throws DatabaseException
-	{
-		List<Category> listOfValues = unauthorizedDatabase.find(Category.class, new QueryRule(
-				Category.OBSERVABLEFEATURE_IDENTIFIER, Operator.EQUALS, feature.getIdentifier()));
-		if (listOfValues == null) listOfValues = new ArrayList<Category>();
-		return listOfValues;
 	}
 }
