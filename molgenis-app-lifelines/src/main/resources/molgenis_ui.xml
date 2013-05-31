@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="lifelines" label="LifeLines">
-	<plugin name="oc_header" type="org.molgenis.lifelines.plugins.header.Header" />
+	<plugin name="Header" type="org.molgenis.lifelines.plugins.HeaderPlugin" />
 	<menu name="main">
-		<plugin label="Home" name="Home" type="org.molgenis.lifelines.plugins.home.Home"/>
+		<plugin label="Home" name="Home" type="org.molgenis.lifelines.plugins.HomePlugin"/>
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" groupRead="anonymous,AllUsers" />
 		<plugin label="Research Data" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
 		<plugin label="Catalogue Loader" name="CatalogLoader" type="org.molgenis.lifelines.plugins.CatalogueLoaderPlugin" />

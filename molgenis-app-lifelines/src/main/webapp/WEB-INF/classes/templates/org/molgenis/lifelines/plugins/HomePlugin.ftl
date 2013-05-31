@@ -1,4 +1,4 @@
-<#macro Home screen>
+<#macro HomePlugin screen>
 <#assign model = screen.myModel>
 <!-- normally you make one big form for the whole plugin-->
 <form method="post" enctype="multipart/form-data" name="${screen.name}" action="">
