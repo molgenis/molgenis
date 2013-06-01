@@ -36,12 +36,6 @@ import org.molgenis.framework.ui.html.*;
 ${imports(model, model.getEntity(entity), "")}
 ${imports(model, model.getEntity(entity), "ui", "Form")}
 
-<#if parent_form?exists>
-//imports parent forms
-<#assign xrefentity = parent_form.getRecord()>
-import ${xrefentity.getNamespace()}.${JavaName(xrefentity)};
-</#if>
-
 /**
  *
  */
@@ -81,7 +75,6 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 <#-- parent form filtering -->
 <#assign parent_xref = false>		
 <#if parent_form?exists>
-<#assign xrefentity = Name(parent_form.getRecord())>		
 <#list form.getRecord().getAllFields() as field>
 	<#--if subform entity refers to parent form entity: show only records that point to parent record-->
 	<#--if multiple references exist, then use union, so 'OR' in query rule-->
