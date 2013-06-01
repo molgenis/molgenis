@@ -11,26 +11,28 @@
 
 package ${package};
 
+<#if authorizable??>
 import java.util.ArrayList;
 import java.util.Collections;
+</#if>
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
+import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
-
-import java.text.ParseException;
-
+<#if authorizable??>
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
-import org.molgenis.framework.security.Login;
-import org.molgenis.framework.security.SimpleLogin;
+</#if>
 
-import org.molgenis.framework.db.MapperDecorator;
-
+/**
+ * TODO add column level security filters
+ */
 public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 {
 	public ${clazzName}(Mapper<E> generatedMapper)
@@ -45,11 +47,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
 				throw new DatabaseAccessException("No write permission on ${entityClass}");
-
-<#if authorizable??>
-			//this.addRowLevelSecurityDefaults(entities); Commented out 07-10-2011 by ER because of unwanted behavior
-</#if>
-			//TODO: Add column level security filters
 		}
 		return super.add(entities);
 	}
@@ -65,7 +62,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 <#if authorizable??>
 			this.addRowLevelSecurityFilters(entities);
 </#if>
-			//TODO: Add column level security filters
 		}
 		return super.update(entities);
 	}
@@ -92,8 +88,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		{
 			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
 				throw new DatabaseAccessException("No write permission on ${entityClass}");
-
-			//TODO: Add column level security filters
 		}
 		return super.add(reader, writer);
 	}
@@ -127,9 +121,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		}
 
 		List<E> result = super.find(rules);
-
-		//TODO: Add column level security filters
-
 		return result;
 	}
 
@@ -147,7 +138,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		}
 
 		super.find(writer, rules);
-		//TODO: Add column level security filters. How???
 	}
 
 	@Override
@@ -157,8 +147,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		{
 			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
 				throw new DatabaseAccessException("No read permission on ${entityClass}");
-
-			//TODO: Add column level security filters
 		}
 		
 		return super.findById(id);
@@ -186,13 +174,12 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 				throw new DatabaseAccessException("No write permission on ${entityClass}");
 
 			//TODO: Add row level security filters
-			//TODO: Add column level security filters
 		}
 		return super.update(reader);
 	}
 
 	@Override
-	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule ...rules) throws DatabaseException
+	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
 	{
 		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
 		{
@@ -205,7 +192,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		}
 
 		super.find(writer, fieldsToExport, rules);
-		//TODO: Add column level security filters. How???
 	}
 
 <#if authorizable??>
@@ -243,13 +229,5 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 			}
 		}
 	}
-
-	/*private void addRowLevelSecurityDefaults(List<E> entities)
-	{
-		for (E entity : entities)
-		{
-			entity.setOwns(this.getDatabase().getLogin().getUserId());
-		}
-	}*/
 </#if>
 }
