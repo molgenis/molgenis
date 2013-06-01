@@ -67,7 +67,8 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 {
 <#if entity.abstract>
 <#--interface only has method signatures-->
-	<#foreach field in entity.getImplementedFields()>
+	<#-- get all fields, excluding fields from parent interfaces -->
+	<#foreach field in entity.getFields(false, false, true, false)>
 		<#assign type_label = field.getType().toString()>
 		<#if (field.name != typefield()) || !entity.hasAncestor()>
 	public <#if type_label == "xref">${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)}<#else>${type(field)}</#if> get${JavaName(field)}();
