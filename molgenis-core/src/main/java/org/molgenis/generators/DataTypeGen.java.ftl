@@ -682,7 +682,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
    		if (obj.getClass() != getClass()) {
      		return false;
    		}
-		${JavaName(entity)} rhs = (${JavaName(entity)}) obj;
    		return new org.apache.commons.lang3.builder.EqualsBuilder()
 <#if entity.hasAncestor()>
              	.appendSuper(super.equals(obj))
@@ -692,7 +691,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		//${name(uniqueFields)}
 		<#if uniqueFields.type != "mref" && uniqueFields.type != "xref">
 			<#if name(uniqueFields) != "type_" >
-				.append(${name(uniqueFields)}, rhs.get${JavaName(uniqueFields)}())
+				.append(${name(uniqueFields)}, ((${JavaName(entity)}) obj).get${JavaName(uniqueFields)}())
 			</#if>
 		</#if>
 	</#list>

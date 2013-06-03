@@ -34,7 +34,7 @@ import org.molgenis.util.tuple.Tuple;
  */
 public class DataSetTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
 {
-	private static Logger logger = Logger.getLogger(DataSetTable.class);
+	private static final Logger logger = Logger.getLogger(DataSetTable.class);
 	private DataSet dataSet;
 	private Database db;
 	private List<Field> columns;
