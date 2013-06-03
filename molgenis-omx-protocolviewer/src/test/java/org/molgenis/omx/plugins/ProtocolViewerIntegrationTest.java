@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.molgenis.MolgenisOptions;
 import org.molgenis.omx.plugins.ProtocolViewerIntegrationTest.ProtocolViewerIntegrationTestConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -40,7 +39,6 @@ public class ProtocolViewerIntegrationTest extends AbstractTestNGSpringContextTe
 	System.setProperty("webdriver.chrome.driver", chromedriver); 
     driver = new ChromeDriver();
     System.out.println(chromedriver);
-	//FileSystemResource a = new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties");
 	driver.get("http://localhost:8080/");
    
   }
