@@ -37,9 +37,6 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.EntityImporter;
-import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.framework.db.Query;
-import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.io.TupleReader;
 import org.molgenis.util.tuple.Tuple;
@@ -201,7 +198,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 		<#list allFields(entity) as f><#if (f.type == 'xref' || f.type == 'mref') && f.getXrefLabelNames()[0] != f.xrefFieldName>
 		<#if f.xrefLabels?size &gt; 1>
 		//resolve <#if f.type="mref">mref<#else>xref</#if> '${name(f)}' from composite key ${name(f.getXrefEntityName())}.[${csv(f.getXrefLabelNames())}] -> ${name(f.getXrefEntityName())}.${name(f.getXrefFieldName())})
-		Query<${JavaName(f.getXrefEntityName())}> ${name(f)}Query = db.query(${JavaName(f.getXrefEntityName())}.class);
+		org.molgenis.framework.db.Query<${JavaName(f.getXrefEntityName())}> ${name(f)}Query = db.query(${JavaName(f.getXrefEntityName())}.class);
 		for(${JavaName(entity)} o: ${name(entity)}List)
 		{
 			if(<#list f.xrefLabelNames as label>o.get${JavaName(f)}_${JavaName(label)}() != null<#if label_has_next> || </#if></#list>)

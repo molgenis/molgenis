@@ -60,8 +60,6 @@ public class DataSetTableIterator implements Iterator<Tuple>
 	@Override
 	public Tuple next()
 	{
-		long now = System.currentTimeMillis();
-
 		ObservationSet currentRowToGet = this.observationSets.get(currentRow);
 
 		WritableTuple tuple = new KeyValueTuple();
@@ -98,8 +96,6 @@ public class DataSetTableIterator implements Iterator<Tuple>
 		}
 
 		currentRow++;
-
-		long later = System.currentTimeMillis();
 
 		return tuple;
 	}

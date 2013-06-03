@@ -227,7 +227,7 @@
 	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
 		function preloadEntities(protocolIds, featureIds, callback) {
-			
+	
 			var batchSize = 500;
 			var nrProtocolRequests = Math.ceil(protocolIds.length / batchSize);
 			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
@@ -361,6 +361,7 @@
 				sortNodes(topNodes);
 				rootNode.removeChildren();
 				rootNode.addChild(topNodes);
+				if(topNodes.length === 0) rootNode.tree.getRoot().ul.hidden = true;
 			});
 		});
 	};
@@ -443,6 +444,7 @@
 		treePrevState = null;
 		selectedAllNodes = null;
 		$("#search-text").val("");
+		if(rootNode.tree.getRoot().ul.hidden == true) rootNode.tree.getRoot().ul.hidden = false;
 		updateFeatureSelection(rootNode.tree);
 	};
 

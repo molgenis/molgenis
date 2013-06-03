@@ -1,10 +1,3 @@
-<#--div style="border: 1px #AAA solid;"> 
-${input.isNillable()}
-<textarea id="${input.id}" <#if input.isNillable() == false>class="required"</#if> name="${input.name}" cols="80" rows="5"> 
-<#if input.value?exists>${input.value}</#if>
-</textarea>
-</div-->
-									
 <textarea id="${input.name}" name="${input.name}" <#if input.isNillable() == false>class="required" </#if><#if input.readonly>readonly="readonly" </#if> cols="80" rows="5"><#if input.value?exists>${input.value}</#if></textarea>
  
 <script type="text/javascript"> 
