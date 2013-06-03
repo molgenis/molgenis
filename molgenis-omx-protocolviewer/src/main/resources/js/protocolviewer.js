@@ -53,7 +53,7 @@
 					children.push($.extend({
 						key : this.href,
 						title : this.name,
-						tooltip : this.description,
+						tooltip : getDescription(this).en,
 						isFolder : true,
 						isLazy : protocolOpts.expand != true,
 						children : protocolOpts.expand ? createChildren(this.href, featureOpts, protocolOpts) : null
@@ -67,7 +67,7 @@
 					children.push($.extend({
 						key : this.href,
 						title : this.name,
-						tooltip : this.description,
+						tooltip : getDescription(this).en,
 					}, featureOpts));
 				});
 			}
@@ -276,7 +276,6 @@
 			return selectedIds;
 		}
 		
-		console.log("searchObservationSets: " + query);
 		searchQuery = query;
 		
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
@@ -337,7 +336,7 @@
 							options = $.extend({
 								key : entityInfo.href,
 								title : entityInfo.name,
-								tooltip : entityInfo.description
+								tooltip : getDescription(entityInfo).en
 							}, options);
 							
 							if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
@@ -481,7 +480,7 @@
 				options = {
 					key : feature.href,
 					title : feature.name,
-					tooltip : feature.description,
+					tooltip : getDescription(feature).en,
 					isFolder : false,
 					expand : true,
 				};
@@ -501,7 +500,7 @@
 				options = {
 					key : protocol.href,
 					title : protocol.name,
-					tooltip : protocol.description,
+					tooltip : getDescription(protocol).en,
 					isFolder : true,
 					isLazy : true,
 					children : []
