@@ -277,7 +277,7 @@
 		}
 		
 		console.log("searchObservationSets: " + query);
-		searchQuery = query;
+		searchQuery = $.trim(query);
 		
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
