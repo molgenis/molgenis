@@ -4,6 +4,7 @@
 	 * @param i initial capacity of returned EMPTY list
 	 * @return an EMPTY list with initial capacity given by size
 	 */
+	@Override
 	public java.util.List<${entity.namespace}.${JavaName(entity)}> createList(int size)
 	{
 <#if !entity.abstract>
@@ -13,6 +14,7 @@
 </#if>
 	}			
 
+	@Override
 	public ${entity.namespace}.${JavaName(entity)} create()
 	{
 <#if !entity.abstract>	

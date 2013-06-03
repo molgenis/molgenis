@@ -75,7 +75,7 @@
 	      <select id="reg-position" name="position">
 	      	<option value="" disabled selected>Please Select</option>
 		<#list personroles as personrole>
-			<option value="${personrole.id}">${personrole.name}</option>
+			<option value="${personrole.id?c}">${personrole.name}</option>
 		</#list>
 	      </select>
 	    </div>
@@ -86,7 +86,7 @@
 	      <select id="reg-institute" name="institute">
 	      	<option value="" disabled selected>Please Select</option>
 		<#list institutes as institute>
-			<option value="${institute.id}">${institute.name}</option>
+			<option value="${institute.id?c}">${institute.name}</option>
 		</#list>
 	      </select>
 	    </div>

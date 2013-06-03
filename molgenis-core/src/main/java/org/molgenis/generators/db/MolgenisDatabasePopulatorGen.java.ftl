@@ -14,15 +14,11 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisPermission;
-import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.MolgenisEntity;
 
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import javax.persistence.EntityManager;
 import org.molgenis.framework.security.Login;
 
@@ -178,10 +174,10 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 			<#list roles?split(",") as role>
 				<#if screen.type == "FORM">
 			{
-				MolgenisRole role = MolgenisRole.findByName(database, "${role}");	
-				MolgenisEntity entity = database.find(MolgenisEntity.class, new QueryRule(MolgenisEntity.NAME, Operator.EQUALS, "${screen.getName()}${screen.getType()?lower_case?cap_first}Controller")).get(0);
+				org.molgenis.omx.auth.MolgenisRole role = org.molgenis.omx.auth.MolgenisRole.findByName(database, "${role}");	
+				MolgenisEntity entity = database.find(MolgenisEntity.class, new org.molgenis.framework.db.QueryRule(MolgenisEntity.NAME, org.molgenis.framework.db.QueryRule.Operator.EQUALS, "${screen.getName()}${screen.getType()?lower_case?cap_first}Controller")).get(0);
 				
-				MolgenisPermission mp = new MolgenisPermission();
+				org.molgenis.omx.auth.MolgenisPermission mp = new org.molgenis.omx.auth.MolgenisPermission();
 				mp.setName(role.getName());
 				mp.setIdentifier(UUID.randomUUID().toString());
 				mp.setRole(role.getId());
@@ -190,11 +186,11 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 				database.add(mp);
 			}		
 			{
-				MolgenisEntity id = database.find(MolgenisEntity.class, new QueryRule(MolgenisEntity.CLASSNAME, Operator.EQUALS, "${screen.getEntity().namespace}.${screen.getEntity().name}")).get(0);
-				MolgenisRole role = MolgenisRole.findByName(database, "${role}");
-				MolgenisEntity entity = database.find(MolgenisEntity.class, new QueryRule(MolgenisEntity.ID, Operator.EQUALS, id.getId())).get(0);
+				MolgenisEntity id = database.find(MolgenisEntity.class, new org.molgenis.framework.db.QueryRule(MolgenisEntity.CLASSNAME, org.molgenis.framework.db.QueryRule.Operator.EQUALS, "${screen.getEntity().namespace}.${screen.getEntity().name}")).get(0);
+				org.molgenis.omx.auth.MolgenisRole role = org.molgenis.omx.auth.MolgenisRole.findByName(database, "${role}");
+				MolgenisEntity entity = database.find(MolgenisEntity.class, new org.molgenis.framework.db.QueryRule(MolgenisEntity.ID, org.molgenis.framework.db.QueryRule.Operator.EQUALS, id.getId())).get(0);
 				
-				MolgenisPermission mp = new MolgenisPermission();
+				org.molgenis.omx.auth.MolgenisPermission mp = new org.molgenis.omx.auth.MolgenisPermission();
 				mp.setName(role.getName());
 				mp.setIdentifier(UUID.randomUUID().toString());
 				mp.setRole(role.getId());
@@ -204,10 +200,10 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 			}
 				<#else>
 			{
-				MolgenisRole role = MolgenisRole.findByName(database, "${role}");		
-				MolgenisEntity entity = database.find(MolgenisEntity.class, new QueryRule(MolgenisEntity.NAME, Operator.EQUALS, "${screen.getName()}${screen.getType()?lower_case?cap_first}")).get(0);
+				org.molgenis.omx.auth.MolgenisRole role = org.molgenis.omx.auth.MolgenisRole.findByName(database, "${role}");		
+				MolgenisEntity entity = database.find(MolgenisEntity.class, new org.molgenis.framework.db.QueryRule(MolgenisEntity.NAME, org.molgenis.framework.db.QueryRule.Operator.EQUALS, "${screen.getName()}${screen.getType()?lower_case?cap_first}")).get(0);
 				
-				MolgenisPermission mp = new MolgenisPermission();
+				org.molgenis.omx.auth.MolgenisPermission mp = new org.molgenis.omx.auth.MolgenisPermission();
 				mp.setName(role.getName());
 				mp.setIdentifier(UUID.randomUUID().toString());
 				mp.setRole(role.getId());
