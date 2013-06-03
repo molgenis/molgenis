@@ -1,4 +1,5 @@
-	public void set( org.molgenis.util.tuple.Tuple tuple, boolean strict ) throws Exception
+	@Override
+	public void set(org.molgenis.util.tuple.Tuple tuple, boolean strict ) throws Exception
 	{
 <#list allFields(entity) as f>
 	<#assign type_label = f.getType().toString()>

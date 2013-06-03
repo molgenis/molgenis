@@ -67,7 +67,8 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 {
 <#if entity.abstract>
 <#--interface only has method signatures-->
-	<#foreach field in entity.getImplementedFields()>
+	<#-- get all fields, excluding fields from parent interfaces -->
+	<#foreach field in entity.getFields(false, false, true, false)>
 		<#assign type_label = field.getType().toString()>
 		<#if (field.name != typefield()) || !entity.hasAncestor()>
 	public <#if type_label == "xref">${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)}<#else>${type(field)}</#if> get${JavaName(field)}();
@@ -524,6 +525,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	/**
 	 * Generic getter. Get the property by using the name.
 	 */
+	@Override
 	public Object get(String name)
 	{
 		name = name.toLowerCase();
@@ -545,6 +547,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		return null;
 	}	
 	
+	@Override
 	public void validate() throws org.molgenis.framework.db.DatabaseException
 	{
 	<#list allFields(entity) as field><#if field.nillable == false>
@@ -585,6 +588,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	/**
 	 * Get the names of all public properties of ${JavaName(entity)}.
 	 */
+	@Override
 	public java.util.Vector<String> getFields(boolean skipAutoIds)
 	{
 		java.util.Vector<String> fields = new java.util.Vector<String>();
@@ -608,6 +612,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		return fields;
 	}	
 
+	@Override
 	public java.util.Vector<String> getFields()
 	{
 		return getFields(false);
@@ -618,9 +623,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	{
 		return "${name(pkey(entity))}";
 	}
-	
 
-	
 	@Override
 	public java.util.List<String> getLabelFields()
 	{
@@ -632,6 +635,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	}
 
 	@Deprecated
+	@Override
 	public String getFields(String sep)
 	{
 		return (""
@@ -648,7 +652,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		return get(getIdField());
 	}		
 	
-	
+	@Override
     public String getXrefIdFieldName(String fieldName) {
         <#list allFields(entity) as field>
         	<#if field.type = 'xref' >
@@ -722,10 +726,9 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 </#list>    
    			.toHashCode();
     }  	
-  	
-
 
 	@Deprecated
+	@Override
 	public String getValues(String sep)
 	{
 		java.io.StringWriter out = new java.io.StringWriter();

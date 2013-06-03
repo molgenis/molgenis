@@ -17,13 +17,10 @@ package ${package};
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.io.TableWriter;
@@ -37,8 +34,6 @@ import com.google.common.collect.Lists;
 
 public class ExcelEntityExporter
 {
-	private static Logger logger = Logger.getLogger(ExcelEntityExporter.class);
-	
 	/**
 	 * Default export all using a target file and a database to export
 	 * @param directory
