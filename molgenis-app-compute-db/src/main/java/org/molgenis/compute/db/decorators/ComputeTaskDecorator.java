@@ -13,22 +13,21 @@ import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.util.ApplicationUtil;
 
 /**
- * Automatically adds a new entry to the ComputeTaskHisory if the statuscode
- * changed
+ * Automatically adds a new entry to the ComputeTaskHisory if the statuscode changed
  * 
  * @author erwin
  * 
  */
-public class ComputeTaskDecorator extends MapperDecorator<ComputeTask>
+public class ComputeTaskDecorator<E extends ComputeTask> extends MapperDecorator<E>
 {
 
-	public ComputeTaskDecorator(Mapper<ComputeTask> generatedMapper)
+	public ComputeTaskDecorator(Mapper<E> generatedMapper)
 	{
 		super(generatedMapper);
 	}
 
 	@Override
-	public int add(List<ComputeTask> entities) throws DatabaseException
+	public int add(List<E> entities) throws DatabaseException
 	{
 		int result = super.add(entities);
 
@@ -45,7 +44,7 @@ public class ComputeTaskDecorator extends MapperDecorator<ComputeTask>
 	}
 
 	@Override
-	public int update(List<ComputeTask> entities) throws DatabaseException
+	public int update(List<E> entities) throws DatabaseException
 	{
 		Database database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
 		try

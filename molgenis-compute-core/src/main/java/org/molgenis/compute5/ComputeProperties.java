@@ -38,8 +38,7 @@ public class ComputeProperties
 	public String interval = Parameters.INTERVAL_DEFAULT;
 
 	// parameters not stored in compute.properties file:
-	public boolean parseExceptionOrHelp = false; // parse exception?
-	public boolean help = false; // show help?
+	public boolean showHelp = false; // show help?
 	public boolean databaseStart = false; // start db?
 	public boolean databaseEnd = false; // stop db?
 	public boolean generate = false; // should we generate?
@@ -55,8 +54,8 @@ public class ComputeProperties
 		{
 			// validate command line args
 			CommandLine cl = new PosixParser().parse(options, args);
-			this.help = cl.hasOption(Parameters.HELP) || 0 == args.length;
-			if (this.help) throw new ParseException("");
+			this.showHelp = cl.hasOption(Parameters.HELP) || 0 == cl.getOptions().length;
+			if (this.showHelp) throw new ParseException("");
 
 			// set path
 			setPath(args);
@@ -80,6 +79,7 @@ public class ComputeProperties
 		}
 		catch (ParseException e)
 		{
+			this.showHelp = true;
 			System.err.println(e.getMessage() + "\n");
 			new HelpFormatter().printHelp("sh molgenis-compute.sh -p parameters.csv", options);
 		}
@@ -257,8 +257,8 @@ public class ComputeProperties
 		{
 			CommandLine cmd = parser.parse(options, args);
 
-			this.help = cmd.hasOption(Parameters.HELP); // show help?
-			if (this.help) throw new ParseException("");
+			this.showHelp = cmd.hasOption(Parameters.HELP); // show help?
+			if (this.showHelp) throw new ParseException("");
 
 			// set this.variables
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);

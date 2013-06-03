@@ -227,7 +227,7 @@
 	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
 		function preloadEntities(protocolIds, featureIds, callback) {
-			
+	
 			var batchSize = 500;
 			var nrProtocolRequests = Math.ceil(protocolIds.length / batchSize);
 			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
@@ -358,11 +358,10 @@
 						} 
 					}
 				});
-				$.each(topNodes, function(index, node){
-					sortNodes(node);
-				});
+				sortNodes(topNodes);
 				rootNode.removeChildren();
 				rootNode.addChild(topNodes);
+				if(topNodes.length === 0) rootNode.tree.getRoot().ul.hidden = true;
 			});
 		});
 	};
@@ -423,7 +422,7 @@
 				if(node.data.isFolder){
 					currentNode.data.children = new Array();
 					var nodeData = recursivelyExpand(selectedFeatureNodes, expandedNodes, currentNode.data);
-					sortNodes(nodeData);
+					sortNodes(nodeData.children);
 					currentNode.removeChildren();
 					currentNode.addChild(nodeData.children);
 					currentNode.toggleExpand();
@@ -445,6 +444,7 @@
 		treePrevState = null;
 		selectedAllNodes = null;
 		$("#search-text").val("");
+		if(rootNode.tree.getRoot().ul.hidden == true) rootNode.tree.getRoot().ul.hidden = false;
 		updateFeatureSelection(rootNode.tree);
 	};
 
@@ -455,13 +455,13 @@
 		}
 	};
 	
-	function sortNodes(node){
-		if(node.children){
-			node.children.sort(function(a,b){
+	function sortNodes(nodes){
+		if(nodes){
+			nodes.sort(function(a,b){
 				return naturalSort(a.title, b.title);
 			});
-			$.each(node.children, function(index, subNode){
-				sortNodes(subNode);
+			$.each(nodes, function(index, node){
+				if(node.children) sortNodes(node.children);
 			});
 		}
 	}

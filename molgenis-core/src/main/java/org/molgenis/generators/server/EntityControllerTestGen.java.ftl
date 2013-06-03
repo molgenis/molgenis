@@ -4,7 +4,6 @@ package org.molgenis.controller;
 
 import java.util.List;
 
-import static org.mockito.Matchers.any;
 import org.mockito.Matchers;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,7 +11,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+<#list fields as field>
+	<#if !field.system && !field.hidden && field.name != "__Type">
+		<#if field.type == "xref">
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+			<#break>			 
+		</#if>
+	</#if>
+</#list>
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.controller.${entity.name}ControllerTest.${entity.name}ControllerConfig;

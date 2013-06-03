@@ -32,17 +32,9 @@ import org.molgenis.framework.ui.FormModel;
 import org.molgenis.framework.ui.FormController;
 
 import org.molgenis.framework.ui.html.*;
-import org.molgenis.framework.db.QueryRule.Operator;  
-import org.molgenis.framework.db.DatabaseException;
 
 ${imports(model, model.getEntity(entity), "")}
 ${imports(model, model.getEntity(entity), "ui", "Form")}
-
-<#if parent_form?exists>
-//imports parent forms
-<#assign xrefentity = parent_form.getRecord()>
-import ${xrefentity.getNamespace()}.${JavaName(xrefentity)};
-</#if>
 
 /**
  *
@@ -69,10 +61,10 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 		try
 		{
 			((FormController)this).getPager().setOrderByField("${form.sortby}".toLowerCase());
-			((FormController)this).getPager().setOrderByOperator(Operator.SORT${form.sortorder});
+			((FormController)this).getPager().setOrderByOperator(org.molgenis.framework.db.QueryRule.Operator.SORT${form.sortorder});
 			this.getModel().setSort("${form.sortby}");
 		}
-		catch (DatabaseException e)
+		catch (org.molgenis.framework.db.DatabaseException e)
 		{
 			e.printStackTrace();
 		}
@@ -83,7 +75,6 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 <#-- parent form filtering -->
 <#assign parent_xref = false>		
 <#if parent_form?exists>
-<#assign xrefentity = Name(parent_form.getRecord())>		
 <#list form.getRecord().getAllFields() as field>
 	<#--if subform entity refers to parent form entity: show only records that point to parent record-->
 	<#--if multiple references exist, then use union, so 'OR' in query rule-->
@@ -137,7 +128,7 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 
 <#list form.getRecord().getAllFields() as field>
 	<#if field.getType() == "xref" || field.getType() == "mref">
-		getModel().addCommand(new org.molgenis.framework.ui.commands.AddXrefCommand("${entity}_${field.getName()}", this, new ${JavaName(field.getXrefEntityName())}(), new ${JavaName(field.getXrefEntityName())}Form()));
+		getModel().addCommand(new org.molgenis.framework.ui.commands.AddXrefCommand<${JavaName(field.getXrefEntityName())}>("${entity}_${field.getName()}", this, new ${JavaName(field.getXrefEntityName())}(), new ${JavaName(field.getXrefEntityName())}Form()));
 	</#if>
 </#list>
 	}
@@ -154,6 +145,7 @@ public class ${JavaName(form.className)}FormController extends FormController<${
 		return form;
 	}
 	
+	@Override
 	public void resetSystemHiddenColumns()
 	{
 		Vector<String> systemHiddenColumns = new Vector<String>();
