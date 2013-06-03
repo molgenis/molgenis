@@ -16,9 +16,8 @@ import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.filter.StudyDataRequest;
 
 /**
- * decorator for DataSetFilter, Checks for every read, update and delete
- * operation if the user requesting the operation matches the user owning the
- * DataSetFilter on which the operation is requested
+ * decorator for DataSetFilter, Checks for every read, update and delete operation if the user requesting the operation
+ * matches the user owning the DataSetFilter on which the operation is requested
  */
 public class StudyDataRequestDecorator<E extends StudyDataRequest> extends MapperDecorator<E>
 {
@@ -105,11 +104,11 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 		List<E> filteredEntities = new ArrayList<E>();
 		if (!user.getSuperuser())
 		{
-			for (StudyDataRequest request : entities)
+			for (E request : entities)
 			{
 				if (hasEntityPermission(request))
 				{
-					filteredEntities.add((E) request);
+					filteredEntities.add(request);
 				}
 			}
 		}
