@@ -119,7 +119,7 @@
  						$.fileDownload('molgenis.do?__target=ProtocolViewer&__action=download_xls', { 
  							httpMethod : "POST",
  							data: { 
- 								datasetid : molgenis.getSelectedDataSet().id,
+ 								datasetid : molgenis.restApiUriToEntityId(molgenis.getSelectedDataSet().href),
  								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
  							}
  						});
