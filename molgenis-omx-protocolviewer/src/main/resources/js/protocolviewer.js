@@ -226,7 +226,8 @@
 		var tree = $('#dataset-browser').dynatree('getTree');
 		var features = $.map(tree.getSelectedNodes(), function(node) {
 			if(!node.data.isFolder){
-				return {feature: ns.restApiUriToEntityId(node.data.key)};
+				var uri = node.data.key;
+				return {feature: uri.substring(uri.lastIndexOf('/') + 1)};
 			}
 			return null;
 		});
