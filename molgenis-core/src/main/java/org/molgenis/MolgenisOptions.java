@@ -181,7 +181,7 @@ public class MolgenisOptions implements Serializable
 	public String auth_loginclass = "org.molgenis.framework.security.SimpleLogin";
 
 	/** Option to indicate the use of the bootstrap modal dialog for login, if so, then the login tab should be hidden when not logged in */
-	@Option(name = "auth_use_dialog", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Indicate the use of the bootstrap modal dialog for login. Default: ")
+	@Option(name = "auth_use_dialog", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Indicate the use of the bootstrap modal dialog for login. Default: false")
 	public boolean auth_use_dialog =  false;
 	
 	/** Name of form/plugin to redirect to after login */
