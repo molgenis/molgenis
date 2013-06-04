@@ -168,3 +168,10 @@ td {
 .alert {
 	margin-bottom: 0px;
 }
+
+.login-header {
+	font-family: arial;
+	font-size: 12pt;
+	position: absolute;
+	right: 0px;
+}
