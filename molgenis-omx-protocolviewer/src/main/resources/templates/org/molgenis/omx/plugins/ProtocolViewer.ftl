@@ -116,10 +116,11 @@
  					
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
+ 						var uri = molgenis.getSelectedDataSet().href;
  						$.fileDownload('molgenis.do?__target=ProtocolViewer&__action=download_xls', { 
  							httpMethod : "POST",
- 							data: { 
- 								datasetid : molgenis.getSelectedDataSet().id,
+ 							data: {
+ 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
  								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
  							}
  						});
@@ -127,7 +128,8 @@
  					
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
- 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet().id + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
+ 						var uri = molgenis.getSelectedDataSet().href;
+ 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + uri.substring(uri.lastIndexOf('/') + 1) + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
  					});
  					
  					// on ready

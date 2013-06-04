@@ -52,7 +52,22 @@ public class PilotService implements MolgenisService
 		{
 			String backend = request.getString("backend");
 
-			LOG.info("Looking for task to execute for host [" + backend + "]");
+            List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
+                    .equals(ComputeBackend.NAME, backend).find();
+
+            if(computeBackends.size() > 0)
+            {
+                ComputeBackend computeBackend = computeBackends.get(0);
+                int pilotsStarted = computeBackend.getPilotsStarted();
+                computeBackend.setPilotsStarted(pilotsStarted + 1);
+                ApplicationUtil.getDatabase().update(computeBackend);
+            }
+            else
+            {
+                LOG.error("No backend found for BACKENDNAME [" + backend + "]");
+            }
+
+            LOG.info("Looking for task to execute for host [" + backend + "]");
 
 			List<ComputeTask> tasks = findRunTasksReady(backend);
 
@@ -88,20 +103,6 @@ public class PilotService implements MolgenisService
 				IOUtils.closeQuietly(pw);
 			}
 
-            List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
-                .equals(ComputeBackend.NAME, backend).find();
-
-            if(computeBackends.size() > 0)
-            {
-                ComputeBackend computeBackend = computeBackends.get(0);
-                int pilotsStarted = computeBackend.getPilotsStarted();
-                computeBackend.setPilotsStarted(pilotsStarted + 1);
-                ApplicationUtil.getDatabase().update(computeBackend);
-            }
-            else
-            {
-                LOG.error("No backend found for BACKENDNAME [" + backend + "]");
-            }
 
 		}
 		else
