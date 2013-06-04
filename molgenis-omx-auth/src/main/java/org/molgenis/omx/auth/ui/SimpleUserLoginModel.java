@@ -90,7 +90,8 @@ public class SimpleUserLoginModel extends EasyPluginModel
 	public boolean isVisible()
 	{
 		if (this.getController().getApplicationController().getLogin() instanceof SimpleLogin) return false;
-		if (this.getController().getApplicationController().getMolgenisContext().getUsedOptions().getAuthUseDialog()) return false;
+		if (this.getController().getApplicationController().getMolgenisContext().getUsedOptions().getAuthUseDialog()
+				&& !this.getController().getApplicationController().getLogin().isAuthenticated()) return false;
 		return true;
 	}
 }
