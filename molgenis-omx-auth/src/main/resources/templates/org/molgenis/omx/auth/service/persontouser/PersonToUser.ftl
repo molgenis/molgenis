@@ -62,7 +62,7 @@
 			Select a person to be upgraded:
 			<select name="personId">
 			<#list model.personList as p>
-				<option value=${p.id}>${p.name}</option>
+				<option value=${p.id?c}>${p.name}</option>
 			</#list>
 			</select>
 		</td>
@@ -76,7 +76,7 @@
 			<select name="groupId">
 			<#list model.groupList as g>
 				<#if g.name != 'system' && g.name != 'AllUsers'>
-				<option value="${g.id}">${g.name}</option>
+				<option value="${g.id?c}">${g.name}</option>
 				</#if>
 			</#list>
 			<option value="-1">Do not put in group</option>

@@ -8,7 +8,6 @@
 	var updatedNodes = null;
 	var selectedAllNodes = null;
 	var treePrevState = null;
-	var selectedDataSet = null;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	
@@ -18,9 +17,16 @@
 	      setFeatureDetails(null);
 	      updateFeatureSelection(null);
 	      ns.createFeatureSelection(dataSet.protocolUsed.href);
-	      // set selected data set
-	      selectedDataSet = dataSet;
+	      ns.setSelectedDataSet(dataSet)
 		});
+	};
+	
+	ns.setSelectedDataSet = function(dataSet) {
+		ns.selectedDataSet = dataSet;
+	};
+	
+	ns.getSelectedDataSet = function() {
+		return ns.selectedDataSet;
 	};
 	
 	ns.onDataSetSelectionChange = function(dataSetUri) {
@@ -31,7 +37,7 @@
 		treePrevState = null;
 		updatedNodes = null;
 		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
-			selectedDataSet = dataSet;
+			ns.setSelectedDataSet(dataSet);
 			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
 	};
@@ -47,7 +53,7 @@
 					children.push($.extend({
 						key : this.href,
 						title : this.name,
-						tooltip : this.description,
+						tooltip : getDescription(this).en,
 						isFolder : true,
 						isLazy : protocolOpts.expand != true,
 						children : protocolOpts.expand ? createChildren(this.href, featureOpts, protocolOpts) : null
@@ -61,7 +67,7 @@
 					children.push($.extend({
 						key : this.href,
 						title : this.name,
-						tooltip : this.description,
+						tooltip : getDescription(this).en,
 					}, featureOpts));
 				});
 			}
@@ -227,7 +233,7 @@
 	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
 		function preloadEntities(protocolIds, featureIds, callback) {
-			
+	
 			var batchSize = 500;
 			var nrProtocolRequests = Math.ceil(protocolIds.length / batchSize);
 			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
@@ -270,8 +276,7 @@
 			return selectedIds;
 		}
 		
-		console.log("searchObservationSets: " + query);
-		searchQuery = query;
+		searchQuery = $.trim(query);
 		
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
@@ -331,7 +336,7 @@
 							options = $.extend({
 								key : entityInfo.href,
 								title : entityInfo.name,
-								tooltip : entityInfo.description
+								tooltip : getDescription(entityInfo).en
 							}, options);
 							
 							if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
@@ -358,11 +363,15 @@
 						} 
 					}
 				});
-				$.each(topNodes, function(index, node){
-					sortNodes(node);
-				});
+				sortNodes(topNodes);
 				rootNode.removeChildren();
 				rootNode.addChild(topNodes);
+				
+				if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
+					if(topNodes.length === 0) {
+						rootNode.tree.getRoot().ul.hidden = true;
+					$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
+				} else rootNode.tree.getRoot().ul.hidden = false;
 			});
 		});
 	};
@@ -387,7 +396,7 @@
 			operator : 'LIMIT',
 			value : 1000000
 		});
-		var fragments = selectedDataSet.href.split("/");
+		var fragments = ns.getSelectedDataSet().href.split("/");
 		var searchRequest = {
 			documentType : "protocolTree-" + fragments[fragments.length - 1],
 			queryRules : queryRules
@@ -423,7 +432,7 @@
 				if(node.data.isFolder){
 					currentNode.data.children = new Array();
 					var nodeData = recursivelyExpand(selectedFeatureNodes, expandedNodes, currentNode.data);
-					sortNodes(nodeData);
+					sortNodes(nodeData.children);
 					currentNode.removeChildren();
 					currentNode.addChild(nodeData.children);
 					currentNode.toggleExpand();
@@ -445,23 +454,25 @@
 		treePrevState = null;
 		selectedAllNodes = null;
 		$("#search-text").val("");
+		if(rootNode.tree.getRoot().ul.hidden == true) rootNode.tree.getRoot().ul.hidden = false;
+		if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 		updateFeatureSelection(rootNode.tree);
 	};
 
 	ns.search = function(query) {
 		if (query) {
 			search = true;
-			ns.searchAndUpdateTree(query, selectedDataSet.protocolUsed.href);
+			ns.searchAndUpdateTree(query, ns.getSelectedDataSet().protocolUsed.href);
 		}
 	};
 	
-	function sortNodes(node){
-		if(node.children){
-			node.children.sort(function(a,b){
+	function sortNodes(nodes){
+		if(nodes){
+			nodes.sort(function(a,b){
 				return naturalSort(a.title, b.title);
 			});
-			$.each(node.children, function(index, subNode){
-				sortNodes(subNode);
+			$.each(nodes, function(index, node){
+				if(node.children) sortNodes(node.children);
 			});
 		}
 	}
@@ -475,7 +486,7 @@
 				options = {
 					key : feature.href,
 					title : feature.name,
-					tooltip : feature.description,
+					tooltip : getDescription(feature).en,
 					isFolder : false,
 					expand : true,
 				};
@@ -495,7 +506,7 @@
 				options = {
 					key : protocol.href,
 					title : protocol.name,
-					tooltip : protocol.description,
+					tooltip : getDescription(protocol).en,
 					isFolder : true,
 					isLazy : true,
 					children : []
@@ -687,7 +698,7 @@
 			updateShoppingCart(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
-			ns.selectDataSet(selectedDataSet.id); // reset catalogue
+			ns.selectDataSet(ns.getSelectedDataSet().id); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
