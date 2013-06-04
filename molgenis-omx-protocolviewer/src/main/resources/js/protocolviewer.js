@@ -706,6 +706,10 @@
 			ns.selectDataSet(uri.substring(uri.lastIndexOf('/') + 1)); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			search = false;
+			updatedNodes = null;
+			treePrevState = null;
+			selectedAllNodes = null;
 		});
 	});
 }($, window.top));
