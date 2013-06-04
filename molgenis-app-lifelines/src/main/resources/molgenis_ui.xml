@@ -34,6 +34,6 @@
 			</menu>
 			<plugin label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
 		</menu>	
-		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Login" groupRead="anonymous,AllUsers" />
+		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Account" groupRead="anonymous,AllUsers" />
 	</menu>
 </molgenis>
