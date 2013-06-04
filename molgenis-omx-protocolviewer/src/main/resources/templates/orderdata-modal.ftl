@@ -60,7 +60,7 @@
 							if(feature.i18nDescription){
 								row.append('<td>' + feature.i18nDescription.en + '</td>');	
 							}
-							catch(err){
+							else{
 								row.append('<td>null</td>');	
 							}
 							
