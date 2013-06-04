@@ -1,6 +1,7 @@
 <#--
 Common parts for saving files to an entity.
 -->
+	@Override
 	public void prepareFileAttachements(java.util.List<${entity.namespace}.${JavaName(entity)}> entities, java.io.File baseDir) throws java.io.IOException
 	{
 <#if hasFiles(entity)>		
@@ -19,6 +20,7 @@ Common parts for saving files to an entity.
 </#if>
 	}
 
+	@Override
 	public boolean saveFileAttachements(java.util.List<${entity.namespace}.${JavaName(entity)}> entities, java.io.File baseDir) throws java.io.IOException
 	{
 <#if hasFiles(entity)>		

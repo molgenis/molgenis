@@ -8,7 +8,6 @@
 	var updatedNodes = null;
 	var selectedAllNodes = null;
 	var treePrevState = null;
-	var selectedDataSet = null;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	
@@ -18,9 +17,16 @@
 	      setFeatureDetails(null);
 	      updateFeatureSelection(null);
 	      ns.createFeatureSelection(dataSet.protocolUsed.href);
-	      // set selected data set
-	      selectedDataSet = dataSet;
+	      ns.setSelectedDataSet(dataSet)
 		});
+	};
+	
+	ns.setSelectedDataSet = function(dataSet) {
+		ns.selectedDataSet = dataSet;
+	};
+	
+	ns.getSelectedDataSet = function() {
+		return ns.selectedDataSet;
 	};
 	
 	ns.onDataSetSelectionChange = function(dataSetUri) {
@@ -31,7 +37,7 @@
 		treePrevState = null;
 		updatedNodes = null;
 		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
-			selectedDataSet = dataSet;
+			ns.setSelectedDataSet(dataSet);
 			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
 	};
@@ -271,7 +277,7 @@
 		}
 		
 		console.log("searchObservationSets: " + query);
-		searchQuery = query;
+		searchQuery = $.trim(query);
 		
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
@@ -361,7 +367,12 @@
 				sortNodes(topNodes);
 				rootNode.removeChildren();
 				rootNode.addChild(topNodes);
-				if(topNodes.length === 0) rootNode.tree.getRoot().ul.hidden = true;
+				
+				if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
+				if(topNodes.length === 0) {
+					rootNode.tree.getRoot().ul.hidden = true;
+					$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
+				} else rootNode.tree.getRoot().ul.hidden = false;
 			});
 		});
 	};
@@ -386,7 +397,7 @@
 			operator : 'LIMIT',
 			value : 1000000
 		});
-		var fragments = selectedDataSet.href.split("/");
+		var fragments = ns.getSelectedDataSet().href.split("/");
 		var searchRequest = {
 			documentType : "protocolTree-" + fragments[fragments.length - 1],
 			queryRules : queryRules
@@ -445,13 +456,14 @@
 		selectedAllNodes = null;
 		$("#search-text").val("");
 		if(rootNode.tree.getRoot().ul.hidden == true) rootNode.tree.getRoot().ul.hidden = false;
+		if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 		updateFeatureSelection(rootNode.tree);
 	};
 
 	ns.search = function(query) {
 		if (query) {
 			search = true;
-			ns.searchAndUpdateTree(query, selectedDataSet.protocolUsed.href);
+			ns.searchAndUpdateTree(query, ns.getSelectedDataSet().protocolUsed.href);
 		}
 	};
 	
@@ -687,7 +699,7 @@
 			updateShoppingCart(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
-			ns.selectDataSet(selectedDataSet.id); // reset catalogue
+			ns.selectDataSet(ns.getSelectedDataSet().id); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});

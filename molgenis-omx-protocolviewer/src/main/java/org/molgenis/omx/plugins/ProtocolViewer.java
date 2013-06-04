@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.omx.plugins.ProtocolViewerController.JSDataSet;
+import org.molgenis.omx.observ.DataSet;
 
 /**
  * Protocol viewer model
@@ -13,7 +13,7 @@ public class ProtocolViewer implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private List<JSDataSet> dataSets;
+	private List<DataSet> dataSets;
 
 	private boolean enableDownloadAction;
 
@@ -23,12 +23,12 @@ public class ProtocolViewer implements Serializable
 
 	private boolean authenticated;
 
-	public List<JSDataSet> getDataSets()
+	public List<DataSet> getDataSets()
 	{
-		return dataSets != null ? dataSets : Collections.<JSDataSet> emptyList();
+		return dataSets != null ? dataSets : Collections.<DataSet> emptyList();
 	}
 
-	public void setDataSets(List<JSDataSet> dataSets)
+	public void setDataSets(List<DataSet> dataSets)
 	{
 		this.dataSets = dataSets;
 	}

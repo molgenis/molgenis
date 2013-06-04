@@ -16,10 +16,7 @@
 package ${package};
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +35,7 @@ import org.molgenis.util.tuple.EntityTuple;
 
 <#list entities as entity>
 	<#if !entity.abstract && entity.association==false>
-	import ${entity.namespace}.${JavaName(entity)};
+import ${entity.namespace}.${JavaName(entity)};
 	</#if>
 </#list>
 
@@ -118,7 +115,7 @@ public class CsvEntityExporter
 		logger.debug("done");
 	}
 	
-	public void exportAll(File directory, List ... entityLists) throws Exception
+	public void exportAll(File directory, List<? extends Entity> ... entityLists) throws Exception
 	{				
 		for(List<? extends Entity> l: entityLists) if(l.size()>0)
 		{
@@ -192,7 +189,7 @@ public class CsvEntityExporter
 		if(db.count(${JavaName(entity)}.class<#if entity.hasAncestor() || entity.isRootAncestor()>, new QueryRule("${typefield()}",Operator.EQUALS, "${Name(entity)}")</#if>) > 0)
 		{
 			
-			org.molgenis.framework.db.Query<${JavaName(entity)}> query = db.query(${JavaName(entity)}.class);
+			Query<${JavaName(entity)}> query = db.query(${JavaName(entity)}.class);
 			<#if entity.hasAncestor() || entity.isRootAncestor()>QueryRule type = new QueryRule("${typefield()}",Operator.EQUALS, "${Name(entity)}");
 			query.addRules(type);</#if>
 			QueryRule[] newRules = matchQueryRulesToEntity(db.getMetaData().getEntity("${Name(entity)}"), rules);
@@ -209,7 +206,6 @@ public class CsvEntityExporter
 					${name(entity)}Writer.close();
 				}
 			}
-			<#--db.find(${Name(entity)}.class, ${name(entity)}Writer<#if entity.hasAncestor() || entity.isRootAncestor()>, new QueryRule(${typefield()},Operator.EQUALS, "${Name(entity)}")</#if>);-->
 		}
 	}
 	

@@ -30,7 +30,7 @@
 						<div class="controls">
 							<select data-placeholder="Please Select" id="entity-instance-select">
 						<#list entityInstances as entityInstance>
-								<option value="/api/v1/${selectedEntity?lower_case}/${entityInstance.id}"<#if entityInstance.id == selectedEntityInstance.id> selected</#if>>${entityInstance.identifier}</option>
+								<option value="/api/v1/${selectedEntity?lower_case}/${entityInstance.id?c}"<#if entityInstance.id == selectedEntityInstance.id> selected</#if>>${entityInstance.identifier}</option>
 						</#list>
 					      	</select>
 					    </div>

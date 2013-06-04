@@ -9,28 +9,28 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 
-public class ComputeRunDecorator extends MapperDecorator<ComputeRun>
+public class ComputeRunDecorator<E extends ComputeRun> extends MapperDecorator<E>
 {
-	public ComputeRunDecorator(Mapper<ComputeRun> generatedMapper)
+	public ComputeRunDecorator(Mapper<E> generatedMapper)
 	{
 		super(generatedMapper);
 	}
 
 	@Override
-	public int add(List<ComputeRun> entities) throws DatabaseException
+	public int add(List<E> entities) throws DatabaseException
 	{
 		validate(entities);
 		return super.add(entities);
 	}
 
 	@Override
-	public int update(List<ComputeRun> entities) throws DatabaseException
+	public int update(List<E> entities) throws DatabaseException
 	{
 		validate(entities);
 		return super.update(entities);
 	}
 
-	private void validate(List<ComputeRun> entities) throws DatabaseException
+	private void validate(List<E> entities) throws DatabaseException
 	{
 		for (ComputeRun run : entities)
 		{
