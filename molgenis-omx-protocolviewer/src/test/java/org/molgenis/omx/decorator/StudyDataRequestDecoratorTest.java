@@ -31,7 +31,7 @@ public class StudyDataRequestDecoratorTest
 	private StudyDataRequestDecorator<StudyDataRequest> decorator;
 	private QueryRule[] initialRules;
 	private MolgenisUserService userService;
-	private Mapper mapper;
+	private Mapper<StudyDataRequest> mapper;
 	private QueryRule[] expectedUserRules;
 	private TupleWriter writer;
 	private TupleReader reader;
@@ -71,9 +71,9 @@ public class StudyDataRequestDecoratorTest
 		when(user.getId()).thenReturn(2);
 
 		decorator.setMolgenisUserService(userService);
-		//initially the set of query rules is empty
+		// initially the set of query rules is empty
 		initialRules = new QueryRule[0];
-		//for user that are not superusers, a queryrule checking for the user is added
+		// for user that are not superusers, a queryrule checking for the user is added
 		expectedUserRules = new QueryRule[1];
 		expectedUserRules[0] = new QueryRule("MolgenisUser", Operator.EQUALS, user);
 		adminStudyDataRequest = new StudyDataRequest();
@@ -94,7 +94,7 @@ public class StudyDataRequestDecoratorTest
 		decorator.find(initialRules);
 		verify(mapper).find(initialRules);
 	}
-	
+
 	@Test
 	public void find() throws DatabaseException
 	{
@@ -112,7 +112,7 @@ public class StudyDataRequestDecoratorTest
 		decorator.find(initialRules);
 		verify(mapper).find(initialRules);
 	}
-	
+
 	@Test
 	public void count() throws DatabaseException
 	{
@@ -130,7 +130,7 @@ public class StudyDataRequestDecoratorTest
 		decorator.find(writer, initialRules);
 		verify(mapper).find(writer, initialRules);
 	}
-	
+
 	@Test
 	public void findWithWriter() throws DatabaseException
 	{
@@ -139,7 +139,7 @@ public class StudyDataRequestDecoratorTest
 		decorator.find(writer, initialRules);
 		verify(mapper).find(writer, expectedUserRules);
 	}
-	
+
 	@Test
 	public void createFindSqlInclRulesAdmin() throws DatabaseException
 	{
@@ -148,7 +148,7 @@ public class StudyDataRequestDecoratorTest
 		decorator.createFindSqlInclRules(initialRules);
 		verify(mapper).createFindSqlInclRules(initialRules);
 	}
-	
+
 	@Test
 	public void createFindSqlInclRules() throws DatabaseException
 	{
@@ -158,7 +158,6 @@ public class StudyDataRequestDecoratorTest
 		verify(mapper).createFindSqlInclRules(expectedUserRules);
 	}
 
-
 	@Test
 	public void findWithExportAdmin() throws DatabaseException
 	{
@@ -167,7 +166,7 @@ public class StudyDataRequestDecoratorTest
 		decorator.find(writer, fieldsToExport, initialRules);
 		verify(mapper).find(writer, fieldsToExport, initialRules);
 	}
-	
+
 	@Test
 	public void findWithExport() throws DatabaseException
 	{
@@ -194,7 +193,7 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.update(adminEntities);
 	}
-	
+
 	@Test
 	public void updateOwn() throws DatabaseException
 	{
@@ -210,7 +209,7 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.remove(adminEntities);
 	}
-	
+
 	@Test
 	public void removeOwn() throws DatabaseException
 	{
@@ -226,7 +225,7 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.findById(123);
 	}
-	
+
 	@Test
 	public void ownFindById() throws DatabaseException
 	{
@@ -258,7 +257,7 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.remove(userEntities);
 	}
-	
+
 	@Test(expectedExceptions = DatabaseException.class)
 	public void removeOther() throws DatabaseException
 	{
@@ -274,7 +273,7 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.findById(456);
 	}
-	
+
 	@Test(expectedExceptions = DatabaseException.class)
 	public void otherFindById() throws DatabaseException
 	{
