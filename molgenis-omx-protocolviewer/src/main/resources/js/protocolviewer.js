@@ -276,7 +276,7 @@
 			return selectedIds;
 		}
 		
-		searchQuery = query;
+		searchQuery = $.trim(query);
 		
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
 			var protocol = restApi.get(protocolUri);
