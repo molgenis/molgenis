@@ -320,3 +320,8 @@ function hideSpinner()
     }
     return 0;
 }
+ $(function() {
+	$(document).on('molgenis-login', function(e, msg) {
+		window.location.href=window.location.href;
+	});
+ });
