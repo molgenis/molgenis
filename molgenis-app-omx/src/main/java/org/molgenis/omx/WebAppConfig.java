@@ -100,6 +100,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	private String mailJavaStartTlsEnable;
 	@Value("${mail.java.quitwait:false}")
 	private String mailJavaQuitWait;
+	@Value("${chromedriver}")
+	private String chromedriver;
 
 	@Bean
 	public JavaMailSender mailSender()

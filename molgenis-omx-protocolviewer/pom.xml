@@ -43,6 +43,38 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			
+			 <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+               <excludes>
+                  <exclude>**/integration/*Test.java
+                  </exclude>
+               </excludes>
+            </configuration>
+            <executions>
+               <execution>
+                  <id>integration-tests</id>
+                  <phase>integration-test</phase>
+                  <goals>
+                     <goal>test</goal>
+                  </goals>
+                  <configuration>
+                     <skip>false</skip>
+                     <excludes>
+                        <exclude>none</exclude>
+                     </excludes>
+                     <includes>
+                        <include>**/integration/*Test.java
+                        </include>
+                     </includes>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+			
+			
 		</plugins>
 	</build>
 	
@@ -67,5 +99,11 @@
 			<artifactId>molgenis-omx-dataviewer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		 <dependency>
+	        <groupId>org.seleniumhq.selenium</groupId>
+	        <artifactId>selenium-java</artifactId>
+	        <version>2.4.0</version>
+	        <scope>test</scope>
+	    </dependency>
 	</dependencies>
 </project>

@@ -679,6 +679,7 @@ public class MolgenisOptions implements Serializable
 		this.auth_loginclass = auth_loginclass;
 	}
 
+	
 	// internal
 	public String path = "";
 
