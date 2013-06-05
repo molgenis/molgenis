@@ -70,6 +70,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
 	}
 
 	@Override
