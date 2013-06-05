@@ -70,12 +70,6 @@ public abstract class AbstractJpaMapper<E extends Entity> extends AbstractMapper
 		return getDatabase().getEntityManager().find(getEntityClass(), id);
 	}
 
-	@Override
-	public List<E> findByExample(E example)
-	{
-		return JpaFrameworkFactory.createFramework().findByExample(getEntityManager(), example);
-	}
-
 	public EntityManager getEntityManager()
 	{
 		return getDatabase().getEntityManager();

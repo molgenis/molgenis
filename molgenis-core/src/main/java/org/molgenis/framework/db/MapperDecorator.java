@@ -126,12 +126,6 @@ public class MapperDecorator<E extends Entity> implements Mapper<E>
 	}
 
 	@Override
-	public List<E> findByExample(E example) throws DatabaseException
-	{
-		return this.mapper.findByExample(example);
-	}
-
-	@Override
 	public final int executeAdd(List<? extends E> entities) throws DatabaseException
 	{
 		return this.mapper.executeAdd(entities);
