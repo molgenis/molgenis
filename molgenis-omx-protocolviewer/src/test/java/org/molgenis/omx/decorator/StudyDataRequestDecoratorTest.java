@@ -20,7 +20,6 @@ import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.decorators.StudyDataRequestDecorator;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.util.HandleRequestDelegationException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,6 +42,7 @@ public class StudyDataRequestDecoratorTest
 	private StudyDataRequest userStudyDataRequest;
 	private Login login;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
@@ -55,13 +55,12 @@ public class StudyDataRequestDecoratorTest
 		mapper = mock(Mapper.class);
 		when(mapper.findById(123)).thenReturn(adminStudyDataRequest);
 		when(mapper.findById(456)).thenReturn(userStudyDataRequest);
-		decorator = new StudyDataRequestDecorator(mapper);
+		decorator = new StudyDataRequestDecorator<StudyDataRequest>(mapper);
 		login = mock(Login.class);
 		Database database = mock(Database.class);
 		userService = mock(MolgenisUserService.class);
 
 		when(mapper.getDatabase()).thenReturn(database);
-		when(mapper.findByExample(adminStudyDataRequest)).thenReturn(allEntities);
 		when(database.getLogin()).thenReturn(login);
 		when(userService.findById(1)).thenReturn(admin);
 		when(admin.getSuperuser()).thenReturn(true);
@@ -174,15 +173,6 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.find(writer, fieldsToExport, initialRules);
 		verify(mapper).find(writer, fieldsToExport, expectedUserRules);
-	}
-
-	@Test
-	public void ownFindByExampleAdmin() throws DatabaseException
-	{
-		when(login.getUserId()).thenReturn(1);
-
-		List<StudyDataRequest> results = decorator.findByExample(adminStudyDataRequest);
-		Assert.assertEquals(results, allEntities);
 	}
 
 	// read, update, delete own entities, no exceptions expected

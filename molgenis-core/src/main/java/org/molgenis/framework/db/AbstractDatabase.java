@@ -1,10 +1,6 @@
 package org.molgenis.framework.db;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -12,10 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.db.jdbc.JDBCQueryGernatorUtil;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.io.TupleReader;
@@ -23,10 +17,7 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.CaseInsensitiveKeyValueTuple;
 import org.molgenis.util.tuple.EntityTuple;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.WritableTuple;
 
 public abstract class AbstractDatabase implements Database
 {
@@ -126,95 +117,6 @@ public abstract class AbstractDatabase implements Database
 	public <E extends Entity> Query<E> queryByExample(E entity)
 	{
 		return new QueryImp<E>(this, getEntityClass(entity)).example(entity);
-	}
-
-	/**
-	 * Only use when really needed!
-	 * 
-	 * Executes SQL using stmt.execute(), allowing data manipulation statements
-	 * but does not return a ResultSet.
-	 * 
-	 * @param sql
-	 * @return
-	 */
-	public boolean executeSql(String sql) throws DatabaseException
-	{
-		if (logger.isDebugEnabled()) logger.debug("stmt.execute(" + sql + ")");
-		boolean success = false;
-		Connection conn = getConnection();
-		Statement stmt = null;
-		try
-		{
-
-			stmt = conn.createStatement();
-			stmt.execute(sql);
-			success = true;
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
-		finally
-		{
-			try
-			{
-				if (stmt != null) stmt.close();
-			}
-			catch (SQLException sqlEx)
-			{
-				throw new DatabaseException(sqlEx);
-			}
-		}
-		return success;
-	}
-
-	@Override
-	public <E extends Entity> List<E> findByExample(E example) throws DatabaseException
-	{
-		Query<E> q = this.query(getClassForEntity(example));
-
-		for (String field : example.getFields())
-		{
-			if (example.get(field) != null)
-			{
-				q.equals(field, example.get(field));
-			}
-		}
-
-		return q.find();
-	}
-
-	/**
-	 * Only use when really needed!
-	 * 
-	 * @throws DatabaseException
-	 * 
-	 * @throws DatabaseException
-	 */
-	public void executeUpdate(String sql) throws DatabaseException
-	{
-		Connection con = getConnection();
-		Statement stmt = null;
-		try
-		{
-			stmt = con.createStatement();
-			stmt.executeUpdate(sql);
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
-		finally
-		{
-			try
-			{
-				if (stmt != null) stmt.close();
-			}
-			catch (SQLException e)
-			{
-				throw new DatabaseException(e);
-			}
-		}
 	}
 
 	@Override
@@ -697,96 +599,6 @@ public abstract class AbstractDatabase implements Database
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Only use when really needed!
-	 * 
-	 * @throws DatabaseException
-	 */
-	@Override
-	public synchronized List<Tuple> sql(String sql, QueryRule... rules) throws DatabaseException
-	{
-		ResultSet rs = null;
-		Statement stmt = null;
-		try
-		{
-			String allSql = sql
-					+ (rules.length > 0 ? JDBCQueryGernatorUtil.createWhereSql(null, false, true, rules) : "");
-
-			if (logger.isDebugEnabled()) logger.debug("executeQuery: " + allSql);
-			Connection con = getConnection();
-			stmt = con.createStatement();
-
-			if (stmt == null)
-			{
-				throw new Exception("statement is null???");
-			}
-			rs = stmt.executeQuery(allSql);
-
-			// get field types
-			java.sql.ResultSetMetaData metadata = rs.getMetaData();
-			int colcount = metadata.getColumnCount();
-
-			List<Field> fieldTypes = new ArrayList<Field>();
-			for (int i = 1; i <= colcount; i++)
-			{
-				if (metadata.getColumnName(i) == null)
-				{
-					System.out.println("column name for column " + i + " unknown,sql=" + sql);
-				}
-				Field f = new Field(metadata.getColumnLabel(i));
-				f.setType(MolgenisFieldTypes.getTypeBySqlTypesCode(metadata.getColumnType(i)));
-				fieldTypes.add(f);
-			}
-
-			// transform result set in entity list
-			List<Tuple> tuples = new ArrayList<Tuple>();
-			if (rs != null)
-			{
-				while (rs.next())
-				{
-					WritableTuple tuple = new CaseInsensitiveKeyValueTuple();
-					for (int i = 1; i <= colcount; i++)
-					{
-						tuple.set(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
-					}
-					tuples.add(tuple);
-				}
-			}
-			rs.close();
-			rs = null;
-			stmt.close();
-			stmt = null;
-
-			if (logger.isDebugEnabled()) logger.debug("sql(" + allSql + ")" + tuples.size() + " objects found");
-			return tuples;
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
-		finally
-		{
-			if (rs != null) try
-			{
-				rs.close();
-			}
-			catch (SQLException e)
-			{
-				e.printStackTrace();
-			}
-			if (stmt != null) try
-			{
-				stmt.close();
-			}
-			catch (SQLException e)
-			{
-				e.printStackTrace();
-			}
-			rs = null;
-			stmt = null;
-		}
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.molgenis.framework.db.jpa;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import javax.persistence.EntityManager;
 
 import org.molgenis.framework.db.AbstractDatabase;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.ExampleData;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
@@ -114,37 +112,6 @@ public class JpaDatabase extends AbstractDatabase
 		{
 			throw new IOException(e);
 		}
-	}
-
-	@Override
-	public void createTables()
-	{
-		JpaUtil.dropAndCreateTables(this, null);
-	}
-
-	@Override
-	public void updateTables()
-	{
-		JpaUtil.updateTables(this, null);
-	}
-
-	@Override
-	public void dropTables()
-	{
-		JpaUtil.dropTables(this, null);
-	}
-
-	@Override
-	public void loadExampleData(ExampleData exampleData) throws DatabaseException
-	{
-		exampleData.load(this);
-	}
-
-	@Override
-	@Deprecated
-	public Connection getConnection() throws DatabaseException
-	{
-		return JpaFrameworkFactory.createFramework().getConnection(em);
 	}
 
 	@Override
