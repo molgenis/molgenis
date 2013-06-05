@@ -5,9 +5,6 @@ import java.util.Properties;
 
 import javax.xml.validation.Schema;
 
-import nl.umcg.hl7.CatalogService;
-import nl.umcg.hl7.GenericLayerCatalogService;
-
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
@@ -70,6 +67,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
 	}
 
 	@Override
