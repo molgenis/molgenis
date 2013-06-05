@@ -50,7 +50,7 @@ public abstract class AbstractJpaMapper<E extends Entity> extends AbstractMapper
 	@Override
 	public int count(QueryRule... rules) throws DatabaseException
 	{
-		TypedQuery<Long> query = JPAQueryGeneratorUtil.createCount(getDatabase(), getEntityClass(), this, getDatabase()
+		TypedQuery<Long> query = JpaQueryGeneratorUtil.createCount(getDatabase(), getEntityClass(), this, getDatabase()
 				.getEntityManager(), rules);
 		Long result = query.getSingleResult();
 		return result.intValue();
@@ -59,7 +59,7 @@ public abstract class AbstractJpaMapper<E extends Entity> extends AbstractMapper
 	@Override
 	public List<E> find(QueryRule... rules) throws DatabaseException
 	{
-		TypedQuery<E> query = JPAQueryGeneratorUtil.createQuery(this.getDatabase(), getEntityClass(), this,
+		TypedQuery<E> query = JpaQueryGeneratorUtil.createQuery(this.getDatabase(), getEntityClass(), this,
 				getDatabase().getEntityManager(), rules);
 		return query.getResultList();
 	}
