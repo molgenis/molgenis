@@ -90,7 +90,8 @@ public class ExcelEntityExporter
 		
 		// Create temporary directory
 		File directory = new File(System.getProperty("java.io.tmpdir") + File.separator + "molgenis_export"+System.currentTimeMillis());
-		directory.mkdir();
+		boolean ok = directory.mkdir();
+		if(!ok) throw new IOException("failed to create directory " + directory.toString());
 		
 		// Export CSV to this directory
 		CsvEntityExporter entityExporter = new CsvEntityExporter();

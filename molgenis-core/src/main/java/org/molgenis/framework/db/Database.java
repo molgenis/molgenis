@@ -18,7 +18,6 @@ package org.molgenis.framework.db;
 
 import java.io.Closeable;
 import java.io.File;
-import java.sql.Connection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -28,7 +27,6 @@ import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.Tuple;
 
 /**
  * Interface to manage and search persistent data Entity objects. It wraps basic functionality such as find, count, add,
@@ -39,34 +37,6 @@ import org.molgenis.util.tuple.Tuple;
  */
 public interface Database extends Closeable
 {
-	/**
-	 * Create tables.
-	 * 
-	 * @throws DatabaseException
-	 */
-	public void createTables() throws DatabaseException;
-
-	/**
-	 * Update tables.
-	 * 
-	 * @throws DatabaseException
-	 */
-	public void updateTables() throws DatabaseException;
-
-	/**
-	 * Drop tables.
-	 * 
-	 * @throws DatabaseException
-	 */
-	public void dropTables() throws DatabaseException;
-
-	/**
-	 * Load example data into database.
-	 * 
-	 * @throws DatabaseException
-	 */
-	public void loadExampleData(ExampleData exampleData) throws DatabaseException;
-
 	/**
 	 * Retrieve meta data describing data structure in this Database.
 	 * 
@@ -165,18 +135,6 @@ public interface Database extends Closeable
 	 */
 	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, List<String> fieldsToExport,
 			QueryRule... rules) throws DatabaseException;
-
-	/**
-	 * Find all entity objects matching the not-null properties of one example object.
-	 * 
-	 * @param <E>
-	 *            type of entity
-	 * @param example
-	 *            object which not-null properties will be used as QueryRules for search
-	 * @return list of entities that match the example
-	 * @throws DatabaseException
-	 */
-	public <E extends Entity> List<E> findByExample(E example) throws DatabaseException;
 
 	/**
 	 * Find one entity object of type entityClass by using its primary id.
@@ -453,18 +411,9 @@ public interface Database extends Closeable
 	public void flush();
 
 	/**
-	 * Executes a query and get back a List of (Molgenis)Tuples
-	 * 
-	 * @return List<Tuple>
-	 */
-	public List<Tuple> sql(String query, QueryRule... queryRules) throws DatabaseException;
-
-	/**
 	 * Generate the find SQL (use with caution!)
 	 */
 	public <E extends Entity> String createFindSql(Class<E> entityClass, QueryRule... rules) throws DatabaseException;
-
-	public Connection getConnection() throws DatabaseException;
 
 	public <E extends Entity> Mapper<E> getMapper(String name) throws DatabaseException;
 
