@@ -16,14 +16,12 @@
 			<field name="ProjectComment" type="string" description="The comment of a project." nillable="true" label="Comment" />
 			<field name="ProjectCustomer" type="xref" xref_entity="NgsUser" description="The user who ordered the project." nillable="true" label="Custumor name" /> <!-- In the GAF-lijst referred to as ProjectOwner -->
 			<field name="ProjectAnalist" type="mref" xref_entity="NgsUser" description="The user which will be responsible for performing the wet-lab activities." nillable="true" label="Analist name(s)" />
-			<!-- <field name="ProjectPlannedStartDate" type="datetime" description="The date a project is expected to start" nillable="true" label="Planned start date" />  -->
 			<field name="ProjectPlannedFinishDate" type="datetime" description="The date a project is expected to be finished" nillable="true" label="Planned finish date" /> <!-- In the GAF-lijst referred to as TargetDateShipment -->
 			<field name="LaneAmount" type="int" description="Number of lanes planned in this project" nillable="true" label="Lane amount" />
 			<field name="SampleAmount" type="int" description="Number of samples planned in this project" nillable="true" label="Sample amount" />
 			<field name="SampleType" type="enum" enum_options="[DNA,RNA]" default="DNA" description="Type of sample" label="Sample type" />
 			<field name="SeqType" type="enum" enum_options="[SR,PE,MP,Unknown]" default="PE" description="The type of sequencing." nillable="true" label="Sequencing type" />
 			<field name="PrepKit" type="xref" xref_entity="PrepKit" nillable="true" description="Preparation kit used on the sample for this experiment" label="Preparation kit" />
-			<!-- <field name="Multiplexed" type="bool" description="Indication if samples will be multiplexed (e.g. more then one sample will be added on one lane)." label="Multiplex" default="false" /> -->
 			<field name="DeclarationNr" type="string" description="The Declaration Nr of a project." nillable="true" label="Declaration Nr" />
 			<field name="GccAnalysis" type="boolean" nillable="true" description="Indication if variant calling has to be performed on the experiment." />
 			<field name="GccInstructions" type="string" nillable="true" description="Specific instructions for GCC members for the analysis." /> <!-- new field -->
@@ -43,7 +41,7 @@
 		
 		<entity name="Sample" implements="Autoid" xref_label="InternalId">
 			<description>A Sample bundles information about a sample. Sample can be pooled. A pooled sample is just another sample, but with a additional mref (many to many) linking to the samples inside the pool.</description>
-			<field name="InternalId" type="string" unique="true" description="The name of a sample as used in-house"/>
+			<field name="InternalId" type="string" unique="true" description="The number of a sample as used in-house"/>
 			<field name="ExternalId" type="string" nillable="true" description="The name of a sample as known by the customer" />
 			<field name="SampleComment" type="text" description="Comments about the sample" nillable="true" label="Comment" /> <!-- labStatusComments -->
 			<field name="ProjectId" type="xref" xref_entity="Project" description="the sample that this sample is part of" label="Project name"/>
@@ -59,7 +57,6 @@
 		
 		<entity name="FlowcellLane" implements="Autoid" xref_label="Flowcell,Lane,Sample">
 			<description>A FlowcellLaneSampleBarcode bundles information about a sample which is added to a lane on a flowcell.</description>
-			<!-- komt het voor dat een sample in meerdere projecten zit, bijvoorbeeld terugkomende klant<field name="Project" type="xref" xref_entity="Project" />-->
 			<field name="Flowcell" type="xref" xref_entity="Flowcell" description="The flowcell to which this lane belongs" nillable="true" label="Flowcell name" /> 
 			<field name="Lane" type="enum" enum_options="[1,2,3,4,5,6,7,8]" description="The lane number that is unique within a flow cell with a range of 1-8." nillable="true" />
 			<field name="Sample" type="xref" xref_entity="Sample" />
@@ -85,7 +82,6 @@
 		<entity name="SampleBarcode" implements="Autoid" xref_label="SampleBarcodeName">
 			<field name="SampleBarcodeNr" type="string" nillable="true" description="The identifier of a barcode given by the supplier" label="Number" />
 			<field name="SampleBarcodeSequence" type="string" description="The nucleotide sequence which forms the barcode" label="Barcode" />
-			<!-- <field name="SampleBarcodeType" type="enum" enum_options="[GAF,RPI,MON,None]" default="GAF" nillable="true" label="Type" /> -->
 			<field name="SampleBarcodeType" type="xref" xref_entity="SampleBarcodeType" nillable="true" label="Type" />
 			<field name="SampleBarcodeName" type="string" unique="true" nillable="true" description="A concatenated value of Type, Nr and Sequence" label="Value" />
 			<unique fields="SampleBarcodeType,SampleBarcodeNr,SampleBarcodeSequence" description="The combination BarcodeType and SampleBarcodeName is unique." />

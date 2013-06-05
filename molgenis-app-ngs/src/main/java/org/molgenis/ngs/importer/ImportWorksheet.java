@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Persistence;
 
@@ -121,7 +122,8 @@ public class ImportWorksheet
 		Map<String, Flowcell> flowcells = new LinkedHashMap<String, Flowcell>();
 		Map<String, Project> projects = new LinkedHashMap<String, Project>();
 		Map<String, Sample> samples = new LinkedHashMap<String, Sample>();
-		Map<String, List<FlowcellLane>> flowcellLane = new LinkedHashMap<String, List<FlowcellLane>>();
+		Map<String, FlowcellLane> flowcellLanesTmp = new LinkedHashMap<String, FlowcellLane>();
+		Map<String, FlowcellLane> flowcellLanes = new LinkedHashMap<String, FlowcellLane>();
 
 		// Import sheets
 		TupleReader readerp = null;
@@ -515,7 +517,7 @@ public class ImportWorksheet
 					// LabStatus
 					if (row.getString("labStatusPhase") != null)
 					{
-						s.setLabStatus(row.getString("labStatusPhase"));
+						s.setLabStatus(row.getString("labStatusPhase").trim());
 					}
 
 					if (row.getString("barcodeMenu") != null)
@@ -540,10 +542,11 @@ public class ImportWorksheet
 					samples.put(s.getInternalId(), s);
 				}
 
-				// FlowcellLane
+				// FlowcellLaneTmp: Collect all samples which are added to lanes
+				// on a flowcell
 				if (!row.isNull("internalSampleID"))
 				{
-					// For each Lane []
+					// For each Lane
 					if (row.getString("lane") != null)
 					{
 						String[] lanes = row.getString("lane").split(",");
@@ -626,14 +629,7 @@ public class ImportWorksheet
 							// QcDryDate
 							fl.setQcDryDate(getFixedDate(row.getString("GCC_QC_Date")));
 
-							// TODO: What's happening here?
-							List<FlowcellLane> flList = flowcellLane.get(fl.getSample_InternalId());
-							if (flList == null)
-							{
-								flList = new ArrayList<FlowcellLane>();
-								flowcellLane.put(fl.getSample_InternalId(), flList);
-							}
-							flList.add(fl);
+							flowcellLanesTmp.put(fl.getSample_InternalId(), fl);
 						}
 					}
 				}
@@ -644,15 +640,132 @@ public class ImportWorksheet
 			if (readers != null) readers.close();
 		}
 
+		// Create a max InternalId value
+		String _MaxInternalId = "5000";
+
+		// Loop through the FlowcellLanes(Tmp) from the GAF data, determine what
+		// are Samples and what are Pools and assign them to justified
+		// FlowcellLanes
+		for (FlowcellLane fl : flowcellLanesTmp.values())
+		{
+			List<FlowcellLane> fls = new ArrayList<FlowcellLane>();
+
+			for (FlowcellLane flb : flowcellLanesTmp.values())
+			{
+				if (fl.getFlowcell_FlowcellName().equalsIgnoreCase(flb.getFlowcell_FlowcellName())
+						&& fl.getLane().equalsIgnoreCase(flb.getLane()) && fl.getFlowcell_FlowcellName() != null
+						&& fl.getLane() != null && flb.getFlowcell_FlowcellName() != null && flb.getLane() != null)
+				{
+					// Check if record is already in the list
+					boolean _Present = false;
+					for (int i = 0; i < fls.size(); i++)
+					{
+						if (fls.get(i).equals(flb)) // TODO: this is not working
+						{
+							_Present = true;
+						}
+					}
+					if (!_Present)
+					{
+						fls.add(flb);
+					}
+				}
+			}
+
+			// Single Sample
+			if (fls.size() == 1)
+			{
+				FlowcellLane flss = new FlowcellLane();
+
+				if (fls.get(0).getLane() != null)
+				{
+					flss.setLane(fls.get(0).getLane());
+				}
+				if (fls.get(0).getSample_InternalId() != null)
+				{
+					flss.setSample_InternalId(fls.get(0).getSample_InternalId());
+				}
+				if (fls.get(0).getFlowcellLaneComment() != null)
+				{
+					flss.setFlowcellLaneComment(fls.get(0).getFlowcellLaneComment());
+				}
+				if (fls.get(0).getFlowcell_FlowcellName() != null)
+				{
+					flss.setFlowcell_FlowcellName(fls.get(0).getFlowcell_FlowcellName());
+				}
+				if (fls.get(0).getQcWetMet() != null)
+				{
+					flss.setQcWetMet(fls.get(0).getQcWetMet());
+				}
+				if (fls.get(0).getQcWetUser_UserName() != null)
+				{
+					flss.setQcWetUser_UserName(fls.get(0).getQcWetUser_UserName());
+				}
+				if (fls.get(0).getQcWetDate() != null)
+				{
+					flss.setQcWetDate(fls.get(0).getQcWetDate());
+				}
+				if (fls.get(0).getQcDryMet() != null)
+				{
+					flss.setQcDryMet(fls.get(0).getQcDryMet());
+				}
+				if (fls.get(0).getQcDryUser_UserName() != null)
+				{
+					flss.setQcDryUser_UserName(fls.get(0).getQcDryUser_UserName());
+				}
+				if (fls.get(0).getQcDryDate() != null)
+				{
+					flss.setQcDryDate(fls.get(0).getQcDryDate());
+				}
+
+				flowcellLanes.put(flss.getSample_InternalId(), flss);
+			}
+
+			// Pooled sample
+			if (fls.size() > 1)
+			{
+				// Create a Pooled Sample
+				int _NewInternalId = Integer.parseInt(_MaxInternalId);
+				FlowcellLane flsp = new FlowcellLane();
+				Sample ps = new Sample();
+
+				// InternalId
+				ps.setInternalId("" + _NewInternalId);
+
+				// SamplesInPool
+				List<String> sList = new ArrayList<String>();
+				for (int i = 0; i < fls.size(); i++)
+				{
+					if (fls.get(i).getSample_InternalId() != null)
+					{
+						sList.add(fls.get(i).getSample_InternalId());
+					}
+				}
+
+				if (sList.size() > 1)
+				{
+					ps.setSampleInPool_InternalId(sList);
+
+					// Add SamplePool to samples collection
+					samples.put(ps.getInternalId(), ps);
+
+					// Add SamplePool to a Flowcelllane
+					flsp.setSample_InternalId(ps.getInternalId());
+
+					flowcellLanes.put(flsp.getSample_InternalId(), flsp);
+
+					// Increment the InternalId
+					_MaxInternalId = "" + (_NewInternalId + 1);
+				}
+			}
+		}
+
 		// Show all collected values
 		if (debug)
 		{
-			for (List<FlowcellLane> flList : flowcellLane.values())
+			for (FlowcellLane fl : flowcellLanes.values())
 			{
-				for (FlowcellLane fl : flList)
-				{
-					logger.info(fl);
-				}
+				logger.info(fl);
 			}
 
 			for (Sample s : samples.values())
@@ -701,12 +814,7 @@ public class ImportWorksheet
 			}
 		}
 
-		int flowcellLaneCounter = 0;
-		for (List<FlowcellLane> flList : flowcellLane.values())
-		{
-			flowcellLaneCounter += flList.size();
-		}
-		logger.info("Collected:\t" + flowcellLaneCounter + " FlowcellLane(s)");
+		logger.info("Collected:\t" + flowcellLanes.size() + " FlowcellLane(s)");
 		logger.info("Collected:\t" + samples.size() + " Sample(s)");
 		logger.info("Collected:\t" + projects.size() + " Project(s)");
 		logger.info("Collected:\t" + flowcells.size() + " Flowcell(s)");
@@ -749,17 +857,27 @@ public class ImportWorksheet
 			logger.info("Imported:\t" + db.add(new ArrayList<Machine>(machines.values())) + " Sequencer(s)");
 			logger.info("Imported:\t" + db.add(new ArrayList<Flowcell>(flowcells.values())) + " Flowcell(s)");
 			logger.info("Imported:\t" + db.add(new ArrayList<Project>(projects.values())) + " Project(s)");
-			logger.info("Imported:\t" + db.add(new ArrayList<Sample>(samples.values())) + " Sample(s)");
 
-			// Fix for importing the FlowcellLane collections.
+			// Fix for importing the StackOverFlow error caused by Sample and
+			// FlowcellLane collections.
 			boolean crash = false;
-			int sampleRecordCounter = 0;
-			for (List<FlowcellLane> flList : flowcellLane.values())
+
+			for (Sample s : samples.values())
 			{
 				try
 				{
-					db.add(flList);
-					sampleRecordCounter += flList.size();
+					db.add(s);
+				}
+				catch (Exception ex)
+				{
+					crash = true;
+				}
+			}
+			for (FlowcellLane fl : flowcellLanes.values())
+			{
+				try
+				{
+					db.add(fl);
 				}
 				catch (Exception ex)
 				{
@@ -770,7 +888,8 @@ public class ImportWorksheet
 			if (!crash)
 			{
 				db.commitTx();
-				logger.info("Imported:\t" + sampleRecordCounter + " FlowcellLane(s)");
+				logger.info("Imported:\t" + samples.size() + " Sample(s)");
+				logger.info("Imported:\t" + flowcellLanes.size() + " FlowcellLane(s)");
 				logger.info("Import completed succesfully.");
 			}
 			else

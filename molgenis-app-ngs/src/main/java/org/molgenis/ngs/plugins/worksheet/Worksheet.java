@@ -2,14 +2,18 @@ package org.molgenis.ngs.plugins.worksheet;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenView;
 import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Tuple;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 
 public class Worksheet extends PluginModel<Entity>
 {
@@ -89,7 +93,20 @@ public class Worksheet extends PluginModel<Entity>
 			// Debug
 			logger.info(worksheetQuery);
 
-			currentRows = db.sql2(worksheetQuery, "internalSampleID", "externalSampleID", "project", "contact",
+			// Workaround to call sql2 method (which is not desirable in
+			// Database interface)
+			JpaDatabase jpaDb;
+			if (AopUtils.isAopProxy(db) && db instanceof Advised)
+			{
+				Object target = ((Advised) db).getTargetSource().getTarget();
+				jpaDb = (JpaDatabase) target;
+			}
+			else
+			{
+				jpaDb = (JpaDatabase) db;
+			}
+
+			currentRows = jpaDb.sql2(worksheetQuery, "internalSampleID", "externalSampleID", "project", "contact",
 					"sequencer", "labStatusPhase", "labStatusComments", "sequencingStartDate", "run", "flowcell",
 					"lane", "seqType", "prepKit", "capturingKit", "arrayFile", "arrayID", "GAF_QC_Name", "GAF_QC_Date",
 					"GAF_QC_Status", "GCC_Analysis", "GCC_QC_Name", "GCC_QC_Date", "GCC_QC_Status",
