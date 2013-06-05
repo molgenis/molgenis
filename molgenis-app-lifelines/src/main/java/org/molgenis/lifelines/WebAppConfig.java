@@ -5,6 +5,9 @@ import java.util.Properties;
 
 import javax.xml.validation.Schema;
 
+import nl.umcg.hl7.CatalogService;
+import nl.umcg.hl7.GenericLayerCatalogService;
+
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
