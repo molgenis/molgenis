@@ -598,14 +598,14 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		</#if>
 		{
 			<#if field.type="xref" || field.type="mref">
-			fields.add("${name(field)}_${name(field.getXrefEntity().getPrimaryKey())}");
+			fields.add("${field.name}_${field.getXrefEntity().getPrimaryKey().name}");
 			<#else>
-			fields.add("${name(field)}");
+			fields.add("${field.name}");
 			</#if>
 		}
 		<#if field.type="xref" || field.type="mref">
 			<#if field.xrefLabelNames[0] != field.xrefFieldName><#list field.xrefLabelNames as label>
-		fields.add("${name(field)}_${name(label)}");
+		fields.add("${field.name}_${label}");
 			</#list></#if>
 		</#if>
 	</#list>		

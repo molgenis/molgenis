@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.Persistence;
 
@@ -27,6 +26,7 @@ import org.molgenis.omx.ngs.Project;
 import org.molgenis.omx.ngs.Sample;
 import org.molgenis.omx.ngs.SampleBarcode;
 import org.molgenis.omx.ngs.SampleBarcodeType;
+import org.molgenis.omx.ngs.Sample_SampleInPool;
 import org.molgenis.util.tuple.Tuple;
 
 public class ImportWorksheet
@@ -646,119 +646,203 @@ public class ImportWorksheet
 		// Loop through the FlowcellLanes(Tmp) from the GAF data, determine what
 		// are Samples and what are Pools and assign them to justified
 		// FlowcellLanes
+		Map<String, List<FlowcellLane>> flsMap = new LinkedHashMap<String, List<FlowcellLane>>();
+
 		for (FlowcellLane fl : flowcellLanesTmp.values())
 		{
-			List<FlowcellLane> fls = new ArrayList<FlowcellLane>();
+			String key = fl.getFlowcell_FlowcellName() + "_" + fl.getLane();
 
-			for (FlowcellLane flb : flowcellLanesTmp.values())
+			if (flsMap.get(key) == null)
 			{
-				if (fl.getFlowcell_FlowcellName().equalsIgnoreCase(flb.getFlowcell_FlowcellName())
-						&& fl.getLane().equalsIgnoreCase(flb.getLane()) && fl.getFlowcell_FlowcellName() != null
-						&& fl.getLane() != null && flb.getFlowcell_FlowcellName() != null && flb.getLane() != null)
-				{
-					// Check if record is already in the list
-					boolean _Present = false;
-					for (int i = 0; i < fls.size(); i++)
-					{
-						if (fls.get(i).equals(flb)) // TODO: this is not working
-						{
-							_Present = true;
-						}
-					}
-					if (!_Present)
-					{
-						fls.add(flb);
-					}
-				}
+				flsMap.put(key, new ArrayList<FlowcellLane>());
 			}
+			flsMap.get(key).add(fl);
+		}
 
-			// Single Sample
-			if (fls.size() == 1)
+		// get the pools
+		int maxInternalId = 5000;
+		for (String key : flsMap.keySet())
+		{
+			// we only use the first lane
+			FlowcellLane fl = flsMap.get(key).get(0);
+			flowcellLanes.put(fl.getFlowcell_FlowcellName() + "_" + fl.getLane(), fl);
+
+			// if pool, we create a pool and make lane refer to pool instead of
+			// individual samples
+			if (flsMap.get(key).size() > 1)
 			{
-				FlowcellLane flss = new FlowcellLane();
+				// deal with a pool
+				Sample pool = new Sample();
+				pool.setProjectId_ProjectName(samples.get(fl.getSample_InternalId()).getProjectId_ProjectName());
+				pool.setInternalId("" + maxInternalId++);
 
-				if (fls.get(0).getLane() != null)
+				samples.put(pool.getInternalId(), pool);
+
+				// put all samples in the pool
+				for (FlowcellLane lane : flsMap.get(key))
 				{
-					flss.setLane(fls.get(0).getLane());
-				}
-				if (fls.get(0).getSample_InternalId() != null)
-				{
-					flss.setSample_InternalId(fls.get(0).getSample_InternalId());
-				}
-				if (fls.get(0).getFlowcellLaneComment() != null)
-				{
-					flss.setFlowcellLaneComment(fls.get(0).getFlowcellLaneComment());
-				}
-				if (fls.get(0).getFlowcell_FlowcellName() != null)
-				{
-					flss.setFlowcell_FlowcellName(fls.get(0).getFlowcell_FlowcellName());
-				}
-				if (fls.get(0).getQcWetMet() != null)
-				{
-					flss.setQcWetMet(fls.get(0).getQcWetMet());
-				}
-				if (fls.get(0).getQcWetUser_UserName() != null)
-				{
-					flss.setQcWetUser_UserName(fls.get(0).getQcWetUser_UserName());
-				}
-				if (fls.get(0).getQcWetDate() != null)
-				{
-					flss.setQcWetDate(fls.get(0).getQcWetDate());
-				}
-				if (fls.get(0).getQcDryMet() != null)
-				{
-					flss.setQcDryMet(fls.get(0).getQcDryMet());
-				}
-				if (fls.get(0).getQcDryUser_UserName() != null)
-				{
-					flss.setQcDryUser_UserName(fls.get(0).getQcDryUser_UserName());
-				}
-				if (fls.get(0).getQcDryDate() != null)
-				{
-					flss.setQcDryDate(fls.get(0).getQcDryDate());
+					pool.getSampleInPool_InternalId().add(lane.getSample_InternalId());
 				}
 
-				flowcellLanes.put(flss.getSample_InternalId(), flss);
-			}
-
-			// Pooled sample
-			if (fls.size() > 1)
-			{
-				// Create a Pooled Sample
-				int _NewInternalId = Integer.parseInt(_MaxInternalId);
-				FlowcellLane flsp = new FlowcellLane();
-				Sample ps = new Sample();
-
-				// InternalId
-				ps.setInternalId("" + _NewInternalId);
-
-				// SamplesInPool
-				List<String> sList = new ArrayList<String>();
-				for (int i = 0; i < fls.size(); i++)
-				{
-					if (fls.get(i).getSample_InternalId() != null)
-					{
-						sList.add(fls.get(i).getSample_InternalId());
-					}
-				}
-
-				if (sList.size() > 1)
-				{
-					ps.setSampleInPool_InternalId(sList);
-
-					// Add SamplePool to samples collection
-					samples.put(ps.getInternalId(), ps);
-
-					// Add SamplePool to a Flowcelllane
-					flsp.setSample_InternalId(ps.getInternalId());
-
-					flowcellLanes.put(flsp.getSample_InternalId(), flsp);
-
-					// Increment the InternalId
-					_MaxInternalId = "" + (_NewInternalId + 1);
-				}
+				// add pool to this one lane
+				fl.setSample_InternalId(pool.getInternalId());
 			}
 		}
+
+		// for (FlowcellLane fl : flowcellLanesTmp.values())
+		// {
+		// List<FlowcellLane> fls = new ArrayList<FlowcellLane>();
+		//
+		// for (FlowcellLane flb : flowcellLanesTmp.values())
+		// {
+		// if
+		// (fl.getFlowcell_FlowcellName().equalsIgnoreCase(flb.getFlowcell_FlowcellName())
+		// && fl.getLane().equalsIgnoreCase(flb.getLane()) &&
+		// fl.getFlowcell_FlowcellName() != null
+		// && fl.getLane() != null && flb.getFlowcell_FlowcellName() != null &&
+		// flb.getLane() != null)
+		// {
+		// // Check if record is already in the list
+		// boolean _Present = false;
+		// for (int i = 0; i < fls.size(); i++)
+		// {
+		// if
+		// (fls.get(i).getSample_InternalId().equalsIgnoreCase(flb.getSample_InternalId()))
+		// {
+		// _Present = true;
+		// }
+		// }
+		// if (!_Present)
+		// {
+		// fls.add(flb);
+		// }
+		// }
+		// }
+		//
+		// // Single Sample
+		// if (fls.size() == 1)
+		// {
+		// FlowcellLane flss = new FlowcellLane();
+		//
+		// if (fls.get(0).getLane() != null)
+		// {
+		// flss.setLane(fls.get(0).getLane());
+		// }
+		// if (fls.get(0).getSample_InternalId() != null)
+		// {
+		// flss.setSample_InternalId(fls.get(0).getSample_InternalId());
+		// }
+		// if (fls.get(0).getFlowcellLaneComment() != null)
+		// {
+		// flss.setFlowcellLaneComment(fls.get(0).getFlowcellLaneComment());
+		// }
+		// if (fls.get(0).getFlowcell_FlowcellName() != null)
+		// {
+		// flss.setFlowcell_FlowcellName(fls.get(0).getFlowcell_FlowcellName());
+		// }
+		// if (fls.get(0).getQcWetMet() != null)
+		// {
+		// flss.setQcWetMet(fls.get(0).getQcWetMet());
+		// }
+		// if (fls.get(0).getQcWetUser_UserName() != null)
+		// {
+		// flss.setQcWetUser_UserName(fls.get(0).getQcWetUser_UserName());
+		// }
+		// if (fls.get(0).getQcWetDate() != null)
+		// {
+		// flss.setQcWetDate(fls.get(0).getQcWetDate());
+		// }
+		// if (fls.get(0).getQcDryMet() != null)
+		// {
+		// flss.setQcDryMet(fls.get(0).getQcDryMet());
+		// }
+		// if (fls.get(0).getQcDryUser_UserName() != null)
+		// {
+		// flss.setQcDryUser_UserName(fls.get(0).getQcDryUser_UserName());
+		// }
+		// if (fls.get(0).getQcDryDate() != null)
+		// {
+		// flss.setQcDryDate(fls.get(0).getQcDryDate());
+		// }
+		//
+		// flowcellLanes.put(flss.getSample_InternalId(), flss);
+		// }
+		//
+		// // Pooled sample
+		// if (fls.size() > 1)
+		// {
+		// // Create a Pooled Sample
+		// int _NewInternalId = Integer.parseInt(_MaxInternalId);
+		// FlowcellLane flsp = new FlowcellLane();
+		// Sample ps = new Sample();
+		//
+		// // InternalId
+		// ps.setInternalId("" + _NewInternalId);
+		//
+		// // SamplesInPool
+		// List<String> sList = new ArrayList<String>();
+		// for (int i = 0; i < fls.size(); i++)
+		// {
+		// if (fls.get(i).getSample_InternalId() != null)
+		// {
+		// sList.add(fls.get(i).getSample_InternalId());
+		// }
+		// }
+		//
+		// if (sList.size() > 1)
+		// {
+		// ps.setSampleInPool_InternalId(sList);
+		//
+		// // Add SamplePool to samples collection
+		// samples.put(ps.getInternalId(), ps);
+		//
+		// // Add SamplePool to a Flowcelllane
+		// flsp.setSample_InternalId(ps.getInternalId());
+		//
+		// if (fls.get(0).getLane() != null)
+		// {
+		// flsp.setLane(fls.get(0).getLane());
+		// }
+		// if (fls.get(0).getFlowcellLaneComment() != null)
+		// {
+		// flsp.setFlowcellLaneComment(fls.get(0).getFlowcellLaneComment());
+		// }
+		// if (fls.get(0).getFlowcell_FlowcellName() != null)
+		// {
+		// flsp.setFlowcell_FlowcellName(fls.get(0).getFlowcell_FlowcellName());
+		// }
+		// if (fls.get(0).getQcWetMet() != null)
+		// {
+		// flsp.setQcWetMet(fls.get(0).getQcWetMet());
+		// }
+		// if (fls.get(0).getQcWetUser_UserName() != null)
+		// {
+		// flsp.setQcWetUser_UserName(fls.get(0).getQcWetUser_UserName());
+		// }
+		// if (fls.get(0).getQcWetDate() != null)
+		// {
+		// flsp.setQcWetDate(fls.get(0).getQcWetDate());
+		// }
+		// if (fls.get(0).getQcDryMet() != null)
+		// {
+		// flsp.setQcDryMet(fls.get(0).getQcDryMet());
+		// }
+		// if (fls.get(0).getQcDryUser_UserName() != null)
+		// {
+		// flsp.setQcDryUser_UserName(fls.get(0).getQcDryUser_UserName());
+		// }
+		// if (fls.get(0).getQcDryDate() != null)
+		// {
+		// flsp.setQcDryDate(fls.get(0).getQcDryDate());
+		// }
+		//
+		// flowcellLanes.put(flsp.getSample_InternalId(), flsp);
+		//
+		// // Increment the InternalId
+		// _MaxInternalId = "" + (_NewInternalId + 1);
+		// }
+		// }
+		// }
 
 		// Show all collected values
 		if (debug)

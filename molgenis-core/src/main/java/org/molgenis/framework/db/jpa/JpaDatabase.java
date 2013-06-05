@@ -138,8 +138,7 @@ public class JpaDatabase extends AbstractDatabase
 		return DEFAULT_PERSISTENCE_UNIT_NAME;
 	}
 
-	@Deprecated
-	public List<Tuple> sql2(String sql, String... columnNames)
+	public List<Tuple> sql(String sql, String... columnNames)
 	{
 		javax.persistence.Query q = this.em.createNativeQuery(sql);
 
