@@ -4,15 +4,13 @@
 #input m
 #input h
 #input l
-#input additonalImpute2Param1
-#input additonalImpute2Param2
-#input additonalImpute2Param3
-#input additonalImpute2Param4
+#input additonalImpute2Param
 #input chr
 #input fromChrPos
 #input toChrPos
 #input imputationIntermediatesFolder
 #input impute2Bin
+#input impute2gridBin
 
 #input impute2version
 #input knownHapsG
@@ -20,6 +18,7 @@
 #output impute2chunk
 #output impute2chunkInfo
 
+hostname
 module load impute/${impute2version}
 
 
@@ -35,7 +34,7 @@ echo "tmpOutput: ${tmpOutput}"
 echo "finalOutput: ${finalOutput}"
 
 impute2chunk=${finalOutput}
-impute2chunk_info=${finalOutput}_info
+impute2chunkInfo=${finalOutput}_info
 impute2chunk_info_by_sample=${finalOutput}_info_by_sample
 impute2chunk_summary=${finalOutput}_summary
 impute2chunk_warnings=${finalOutput}_warnings
@@ -88,7 +87,7 @@ containsElement () {
 }
 
 
-aditionalArgsArray=($additonalImpute2Param1 $additonalImpute2Param2 $additonalImpute2Param3 $additonalImpute2Param4)
+aditionalArgsArray=($additonalImpute2Param)
 
 # Loop over all aditional args. If arg is encounterd that requeres file then do inputs and getFile on next element
 for (( i=0; i<${#aditionalArgsArray[@]}; i++ ));
@@ -123,10 +122,7 @@ $impute2gridBin \
 	-int $fromChrPos $toChrPos \
 	-o $tmpOutput \
 	-use_prephased_g \
-	$additonalImpute2Param1 \
-	$additonalImpute2Param2 \
-	$additonalImpute2Param3 \
-	$additonalImpute2Param4
+	$additonalImpute2Param
 		
 #Get return code from last program call
 returnCode=$?

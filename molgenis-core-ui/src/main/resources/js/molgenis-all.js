@@ -26,45 +26,70 @@ $(function() {
 		this.cache = cache === false ? null : [];
 	};
 
-	molgenis.RestClient.prototype.get = function(resourceUri, expands) {
-		var apiUri = this._toApiUri(resourceUri, expands);
+	molgenis.RestClient.prototype.get = function(resourceUri, expands, q) {
+		var apiUri = this._toApiUri(resourceUri, expands, q);
 		var cachedResource = this.cache && this.cache[apiUri];
-		if (cachedResource) {
-			console.log('retrieved ' + apiUri + ' from cache', cachedResource);
-		} else {
+		if (!cachedResource) {
 			var _this = this;
-			$.ajax({
-				dataType : 'json',
-				url : apiUri,
-				async : false,
-				success : function(resource) {
-					console.log('retrieved ' + apiUri + ' from server', resource);
-					_this._cachePut(resourceUri, resource, expands);
-					cachedResource = resource;
-				}
-			});
+			if(q) {
+				$.ajax({
+					type : 'POST',
+					dataType : 'json',
+					url : apiUri,
+					data : JSON.stringify(q),
+					contentType : 'application/json',
+					async : false,
+					success : function(resource) {
+						_this._cachePut(resourceUri, resource, expands);
+						cachedResource = resource;	
+					}
+				});
+			} else {
+				$.ajax({
+					dataType : 'json',
+					url : apiUri,
+					async : false,
+					success : function(resource) {
+						_this._cachePut(resourceUri, resource, expands);
+						cachedResource = resource;
+					}
+				});
+			}
 		}
 		return cachedResource;
 	};
 
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, expands, callback) {
-		var apiUri = this._toApiUri(resourceUri, expands);
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, expands, q, callback) {
+		var apiUri = this._toApiUri(resourceUri, expands, q);
 		var cachedResource = this._cacheGet[apiUri];
 		if (cachedResource) {
-			console.log('retrieved ' + apiUri + ' from cache', cachedResource);
 			callback(cachedResource);
 		} else {
 			var _this = this;
-			$.ajax({
-				dataType : 'json',
-				url : apiUri,
-				async : true,
-				success : function(resource) {
-					console.log('retrieved ' + apiUri + ' from server', resource);
-					_this._cachePut(resourceUri, resource, expands);
-					callback(resource);
-				}
-			});
+			if(q) {
+				$.ajax({
+					type : 'POST',
+					dataType : 'json',
+					url : apiUri,
+					data : JSON.stringify(q),
+					contentType : 'application/json',
+					async : true,
+					success : function(resource) {
+						_this._cachePut(resourceUri, resource, expands);
+						callback(resource);	
+					}
+				});
+			} else {
+				$.ajax({
+					dataType : 'json',
+					url : apiUri,
+					async : true,
+					success : function(resource) {
+						_this._cachePut(resourceUri, resource, expands);
+						callback(resource);
+					}
+				});
+			}
 		}
 	};
 
@@ -96,8 +121,11 @@ $(function() {
 		}
 	};
 
-	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands) {
-		return expands ? resourceUri + '?expand=' + expands.join(',') : resourceUri;
+	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands, q) {
+		var qs = "";
+		if(expands) qs += (qs.length == 0 ? '?' : '&') + 'expand=' + expands.join(',');
+		if(q) qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
+		return resourceUri + qs;
 	};
 }($, window.top));
 
@@ -112,7 +140,6 @@ $(function() {
 
 	molgenis.SearchClient.prototype.search = function(searchRequest, callback) {
 		var jsonRequest = JSON.stringify(searchRequest);
-		console.log("Call SearchService json=" + jsonRequest);
 
 		$.ajax({
 			type : "POST",
@@ -293,3 +320,8 @@ function hideSpinner()
     }
     return 0;
 }
+ $(function() {
+	$(document).on('molgenis-login', function(e, msg) {
+		window.location.href=window.location.href;
+	});
+ });

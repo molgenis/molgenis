@@ -41,7 +41,7 @@
 					</#if>		
 					<#if studyDefinitions??>	
 						<div class="well">
-							<p id="loader-title" class="box-title">Choose a studydefinition to load</p>
+							<p id="loader-title" class="box-title">Choose a study definition to load</p>
 							<#if studyDefinitions?size == 0>
 								<p>No studydefinitions found</p>
 							<#else>
@@ -61,14 +61,14 @@
 															<#if studyDefinition.loaded>
 																LOADED
 															<#else>
-																<input id="catalog_${studyDefinition.id}" type="radio" name="id" value="${studyDefinition.id}" <#if !foundStudyDefinition>checked<#assign foundStudyDefinition = true></#if> >
+																<input id="catalog_${studyDefinition.id?c}" type="radio" name="id" value="${studyDefinition.id?c}" <#if !foundStudyDefinition>checked<#assign foundStudyDefinition = true></#if> >
 															</#if>
 														</td>
 														<td class="listEntryId">
-															<label for="catalog_${studyDefinition.id}">${studyDefinition.id}</label>
+															<label for="catalog_${studyDefinition.id?c}">${studyDefinition.id?c}</label>
 														</td>
 														<td>
-															<label for="catalog_${studyDefinition.id}">${studyDefinition.name}</label>
+															<label for="catalog_${studyDefinition.id?c}">${studyDefinition.name}</label>
 														</td>
 													</tr>
 												</#list>
@@ -76,7 +76,7 @@
 										</table>
 									</div>
 									<#if foundStudyDefinition>
-										<input id="submitButton" type="submit" class="btn pull-right" value="Load studydefinition" />
+										<input id="submitButton" type="submit" class="btn pull-right" value="Load" />
 									</#if>
 								</form>
 							</#if>

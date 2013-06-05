@@ -250,7 +250,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 						for (CohortTimePair cohortTimePair : lastCohortTimePairs)
 						{
 							Tuple category = createCategory(
-									lastFeatureIdentifier + '.' + cohortTimePair.getProtocolId(), description, value);
+									lastFeatureIdentifier + '.' + cohortTimePair.getProtocolId()+ '.' + cohortTimePair.getVmidId(), description, value);
 							sheetMap.get(SHEET_CATEGORY).write(category);
 						}
 						continue;
@@ -316,7 +316,7 @@ public class LifeLinesDataDictionaryToOmxConvertor
 
 			for (CohortTimePair cohortTimePair : cohortTimePairs)
 			{
-				String featurePerCohortIdentifier = featureIdentifier + '.' + cohortTimePair.getProtocolId();
+				String featurePerCohortIdentifier = featureIdentifier + '.' + cohortTimePair.getProtocolId()+ '.' + cohortTimePair.getVmidId();
 
 				KeyValueTuple featureMap = new KeyValueTuple();
 				featureMap.set(ENTITY_IDENTIFIER, featurePerCohortIdentifier);

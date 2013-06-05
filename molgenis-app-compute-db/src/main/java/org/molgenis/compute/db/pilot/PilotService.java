@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.compute.runtime.ComputeBackend;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.DatabaseException;
@@ -51,7 +52,22 @@ public class PilotService implements MolgenisService
 		{
 			String backend = request.getString("backend");
 
-			LOG.info("Looking for task to execute for host [" + backend + "]");
+            List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
+                    .equals(ComputeBackend.NAME, backend).find();
+
+            if(computeBackends.size() > 0)
+            {
+                ComputeBackend computeBackend = computeBackends.get(0);
+                int pilotsStarted = computeBackend.getPilotsStarted();
+                computeBackend.setPilotsStarted(pilotsStarted + 1);
+                ApplicationUtil.getDatabase().update(computeBackend);
+            }
+            else
+            {
+                LOG.error("No backend found for BACKENDNAME [" + backend + "]");
+            }
+
+            LOG.info("Looking for task to execute for host [" + backend + "]");
 
 			List<ComputeTask> tasks = findRunTasksReady(backend);
 
@@ -86,6 +102,8 @@ public class PilotService implements MolgenisService
 			{
 				IOUtils.closeQuietly(pw);
 			}
+
+
 		}
 		else
 		{
@@ -166,10 +184,13 @@ public class PilotService implements MolgenisService
 	private List<ComputeTask> findRunTasksReady(String backendName) throws DatabaseException
 	{
 
-		List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
-				.equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
+//		List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
+//				.equals(ComputeRun.COMPUTEBACKEND_NAME, backendName).find();
+        List<ComputeRun> runs = ApplicationUtil.getDatabase().query(ComputeRun.class)
+				.eq(ComputeRun.COMPUTEBACKEND_NAME, backendName)
+                .and().eq(ComputeRun.ISACTIVE, true).find();
 
-		return ApplicationUtil.getDatabase().query(ComputeTask.class)
+        return ApplicationUtil.getDatabase().query(ComputeTask.class)
 				.equals(ComputeTask.STATUSCODE, PilotService.TASK_READY).in(ComputeTask.COMPUTERUN, runs).find();
 	}
 }

@@ -79,7 +79,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
 		mailSender.setHost(mailHost);
-		mailSender.setPort(Integer.valueOf(mailPort));
+		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
 		mailSender.setUsername(mailUsername); // specify in
 												// molgenis-server.properties
@@ -133,6 +133,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
 	}
 
 	@Override

@@ -18,8 +18,6 @@
 package ${package};
 
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.framework.ui.ScreenModel;
-import org.molgenis.util.Entity;
 
 /**
  *

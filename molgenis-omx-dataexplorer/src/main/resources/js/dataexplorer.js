@@ -14,7 +14,7 @@
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		restApi.getAsync('/api/v1/dataset', null, function(datasets) {
+		restApi.getAsync('/api/v1/dataset', null, null, function(datasets) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(datasets.items, function(key, val) {
@@ -97,7 +97,7 @@
 			ns.onFeatureSelectionChange(sortedFeatures);
 		}
 
-		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], function(protocol) {
+		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], null, function(protocol) {
 			var container = $('#feature-selection');
 			if (container.children('ul').length > 0) {
 				container.dynatree('destroy');
@@ -161,7 +161,7 @@
 		currentPage = 1;
 		$("#observationset-search").val("");
 
-		restApi.getAsync(dataSetUri, null, function(dataSet) {
+		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			ns.createFeatureSelection(dataSet.protocolUsed.href);
 		});
@@ -277,7 +277,7 @@
 
 	ns.openFeatureFilterDialog = function(featureUri) {
 		console.log("openFeatureFilterDialog: " + featureUri);
-		restApi.getAsync(featureUri, null, function(feature) {
+		restApi.getAsync(featureUri, null, null, function(feature) {
 			var items = [];
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');

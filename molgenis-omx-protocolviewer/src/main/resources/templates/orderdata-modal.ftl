@@ -31,7 +31,7 @@
 </div>
 <script type="text/javascript">
 	$(function() {
-		var deletedFeatures = []; 
+		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
   		var form = $('#orderdata-form');
@@ -39,7 +39,7 @@
 
   		<#-- modal events -->
   		modal.on('show', function () {
-  		    deletedFeatures = [];
+  			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
 				url : '/cart',
@@ -53,21 +53,24 @@
 						var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
 						table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
 						var body = $('<tbody>');
+						
 						$.each(cart.features, function(i, feature) {
 							var row = $('<tr>');
 							row.append('<td>' + feature.name + '</td>');
-							row.append('<td>' + feature.i18nDescription.en + '</td>');
+							if(feature.i18nDescription.en){
+								row.append('<td>' + feature.i18nDescription.en + '</td>');	
+							}
+							else{
+								row.append('<td>null</td>');	
+							}
 							
 							var deleteCol = $('<td class="center">');
 							var deleteBtn = $('<i class="icon-remove"></i>');
 							deleteBtn.click(function() {
-							    var item = {
-        							"feature": feature.id
-    							};
-
-								deletedFeatures.push(item);
+				                deletedFeatures.push({
+									"feature": feature.id
+				                });
 								row.remove();
-								$(document).trigger('molgenis-order-modified');
 							});
 							deleteBtn.appendTo(deleteCol);
 							
@@ -107,24 +110,24 @@
 			e.preventDefault();
 		    e.stopPropagation();
 			if(form.valid()) {
-				if(deletedFeatures.length > 0){
+				if(deletedFeatures.length > 0) {
 					$.ajax({
-						type : 'POST',
-						url : '/cart/remove',
-						data: JSON.stringify({features : deletedFeatures}),
-						contentType: 'application/json',
-						success : function() {
-							order();
-						},
-						error: function() {
-							alert("error");
-				        }
-			        });
-		        }
-		        else{
-		        	order();
-		        }	
-		    }
+    					type : 'POST',
+					    url : '/cart/remove',
+					    data: JSON.stringify({features : deletedFeatures}),
+					    contentType: 'application/json',
+					    success : function() {
+					      order();
+					    },
+					    error: function() {
+					      alert("error");
+					        }
+					    });
+				}
+				else{
+					order();
+				}
+			}		    
 		});
 	    submitBtn.click(function(e) {
 	    	e.preventDefault();
@@ -141,19 +144,19 @@
 		
 		function order() {
 			$.ajax({
-			  type: 'POST',
-			  url: '/plugin/order',
-			  data: new FormData($('#orderdata-form')[0]),
-			  cache: false,
-			  contentType: false,
-			  processData: false,
-			  success: function () {
-			  	$(document).trigger('molgenis-order-placed', 'Your order has been placed');
-				modal.modal('hide');
-			  },
-	          error: function() {
-	          	alert("error"); // TODO display error message
-	          }
+			    type: 'POST',
+			    url: '/plugin/order',
+			    data: new FormData($('#orderdata-form')[0]),
+			    cache: false,
+			    contentType: false,
+			    processData: false,
+			    success: function () {
+					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
+					modal.modal('hide');
+			    },
+			    error: function() {
+			      alert("error"); // TODO display error message
+			    }
 			});
 		}
 	});

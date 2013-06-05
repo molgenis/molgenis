@@ -9,6 +9,8 @@ import nl.umcg.hl7.CatalogService;
 import nl.umcg.hl7.GenericLayerCatalogService;
 
 import org.molgenis.DatabaseConfig;
+import org.molgenis.dataexplorer.config.DataExplorerConfig;
+import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
 import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
 import org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin;
@@ -17,6 +19,7 @@ import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
 import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
+import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -56,7 +59,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class })
+{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class,
+		SearchSecurityConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
@@ -66,6 +70,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
 	}
 
 	@Override
@@ -116,7 +121,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
 		mailSender.setHost(mailHost);
-		mailSender.setPort(Integer.valueOf(mailPort));
+		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
 		mailSender.setUsername(mailUsername); // specify in
 												// molgenis-server.properties

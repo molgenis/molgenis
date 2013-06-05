@@ -425,7 +425,7 @@ public class ${entity.name}Controller
 			<#elseif field.type == "mref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
+			<#if field.nillable>java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();</#if>
 			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>_retrieve${entity.name}Mref${field.name?cap_first}(${entity.name?uncap_first}, new EntityCollectionRequest());
 			else this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
 				</#if>

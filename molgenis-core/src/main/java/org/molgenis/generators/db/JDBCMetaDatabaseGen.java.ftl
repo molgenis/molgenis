@@ -37,8 +37,6 @@ import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.MolgenisModelValidator;
-import org.molgenis.MolgenisOptions;
 
 /**
  * This class is an in memory representation of the contents of your *_db.xml file
@@ -47,6 +45,8 @@ import org.molgenis.MolgenisOptions;
  */
 public class JDBCMetaDatabase extends Model
 {
+	private static final long serialVersionUID = 1L;
+	
 	public JDBCMetaDatabase() throws DatabaseException
 	{
 		super("${model.name}");
@@ -103,11 +103,6 @@ public class JDBCMetaDatabase extends Model
 			
 				</#if>
 			</#list>
-			
-			//disabled validation, this means above must be perfect!
-			//new MolgenisModelValidator();
-			//MolgenisModelValidator.validate(this, new MolgenisOptions());
-
 		} catch (MolgenisModelException e)
 		{
 			throw new DatabaseException(e);

@@ -117,8 +117,12 @@ index:
     	analyzer: 
     		default:
     			type: custom
-    			filter: [lowercase]
+    			filter: [lowercase, default_stemmer]
     			tokenizer: whitespace
+    	filter:
+    		default_stemmer:
+    			type: stemmer
+    			name: english
 
 index.number_of_shards: 1
 index.number_of_replicas: 0

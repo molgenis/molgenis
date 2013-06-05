@@ -13,8 +13,8 @@ public class EntityCollectionRequest
 	@Min(0)
 	private int start = 0;
 	@Min(0)
-	@Max(100)
-	private int num = 10;
+	@Max(500)
+	private int num = 100;
 
 	public int getStart()
 	{

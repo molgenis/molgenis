@@ -21,6 +21,7 @@
 		<script type="text/javascript" src="js/molgenis-all.js"></script>
 		<script type="text/javascript" src="js/molgenis-menu.js"></script>
 		<script type="text/javascript" src="js/overlib.js"></script>
+		<script type="text/javascript" src="js/jquery.validate.min.js"></script>
 		<#if screen.controller??>${screen.controller.getCustomHtmlHeaders()}</#if>
 	</head>
 	<body>

@@ -6,11 +6,13 @@
   </div>
   <div class="modal-body">
   	<div id="order-list-container"></div>
+  	<div id="orderdetails-model-container"></div>
   </div>
   <div class="modal-footer">
     <a href="#" id="orderlist-btn" class="btn btn-primary" aria-hidden="true">Ok</a>
   </div>
 </div>
+
 <script type="text/javascript">
 	$(function() {
 		var modal = $('#orderlist-modal');
@@ -26,15 +28,18 @@
 					var items = [];
 					if(data.orders.length > 0) {
 						items.push('<table class="table">');
-						items.push('<thead><th>#<th>Study</th><th>Order Date</th><th>Status</th></thead><tbody>');
+						items.push('<thead><th>#<th>Study</th><th>Order Date</th><th>Status</th><th></th></thead><tbody>');
 						$.each(data.orders, function(i, order) {
 							var clazz;
 							if(order.orderStatus === 'accepted') clazz = 'success';
 							else if(order.orderStatus === 'pending') clazz = 'warning';
 							else if(order.orderStatus === 'rejected') clazz = 'error';
 							else clazz = 'error';
-							items.push('<tr class=' + clazz + '>');
+							var containerId = 'orderdetails' + order.id + 'modal-container';
+							items.push('<tr class=' + clazz + '>');	
+							items.push('<div id="' + containerId + '"></div>')
 							items.push('<td>' + order.id +'</td><td>' + order.name + '</td><td>' + order.orderDate + '</td><td>' + order.orderStatus + '</td>');
+							items.push('<td><a class="modal-href" href="/plugin/orders/' + order.id + '/view" data-target="'+containerId+'">view</a></td>');
 							items.push('</tr>');
 						});
 						items.push('</tbody></table>');

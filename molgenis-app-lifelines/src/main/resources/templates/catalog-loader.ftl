@@ -61,14 +61,14 @@
 															<#if catalog.loaded>
 																LOADED
 															<#else>
-																<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
+																<input id="catalog_${catalog.id?c}" type="radio" name="id" value="${catalog.id?c}" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
 															</#if>
 														</td>
 														<td class="listEntryId">
-															<label for="catalog_${catalog.id}">${catalog.id}</label>
+															<label for="catalog_${catalog.id?c}">${catalog.id?c}</label>
 														</td>
 														<td>
-															<label for="catalog_${catalog.id}">${catalog.name}</label>
+															<label for="catalog_${catalog.id?c}">${catalog.name}</label>
 														</td>
 													</tr>
 												</#list>
@@ -76,7 +76,7 @@
 										</table>
 									</div>
 									<#if foundCatalog>
-										<input id="submitButton" type="submit" class="btn pull-right" value="Load catalog" />
+										<input id="submitButton" type="submit" class="btn pull-right" value="Load" />
 									</#if>
 								</form>
 							</#if>

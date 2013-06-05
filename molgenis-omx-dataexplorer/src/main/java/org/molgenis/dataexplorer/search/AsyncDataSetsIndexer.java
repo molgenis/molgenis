@@ -8,6 +8,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
+import org.molgenis.omx.dataset.ProtocolTable;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.DatabaseUtil;
@@ -62,7 +63,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
+				// FIXME: dataset name is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 			}
 		}
 		catch (Exception e)
@@ -94,7 +98,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				if (!searchService.documentTypeExists(dataSet.getName()))
 				{
+					// FIXME: dataset name is not unique
 					searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+					searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+							new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 				}
 			}
 		}
@@ -119,7 +126,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : dataSets)
 			{
+				// FIXME: dataset name is not unique
 				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 			}
 		}
 		catch (Exception e)

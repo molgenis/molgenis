@@ -20,12 +20,14 @@
 		<p class="errormessage">${message.text}</p>
 		</#if>
 	</#list>
-	<#if !model.authenticated>
-		<div id="login-modal-container"></div>
-		<div class="alert">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-	  		<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection
-		</div>
+	<#if (model.dataSets?size > 0)>
+		<#if !model.authenticated>
+			<div id="login-modal-container"></div>
+			<div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+		  		<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection. (your current selection will be discarded)
+			</div>
+		</#if>
 	</#if>
 		<div class="screenbody" id="container-plugin">
 			<div class="screenpadding">
@@ -114,10 +116,11 @@
  					
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
- 						$.fileDownload('molgenis.do?__target=ProtocolViewer&__action=download_xls', { 
+ 						var uri = molgenis.getSelectedDataSet().href;
+ 						$.fileDownload('molgenis.do?__target=${screen.name}&__action=download_xls', { 
  							httpMethod : "POST",
- 							data: { 
- 								datasetid : molgenis.getSelectedDataSet(),
+ 							data: {
+ 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
  								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
  							}
  						});
@@ -125,7 +128,8 @@
  					
  					$('#view-features-button').click(function(e) {
  						e.preventDefault();
- 						window.location = 'molgenis.do?__target=ProtocolViewer&__action=download_viewer&datasetid=' + molgenis.getSelectedDataSet() + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
+ 						var uri = molgenis.getSelectedDataSet().href;
+ 						window.location = 'molgenis.do?__target=${screen.name}&__action=download_viewer&datasetid=' + uri.substring(uri.lastIndexOf('/') + 1) + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
  					});
  					
  					// on ready

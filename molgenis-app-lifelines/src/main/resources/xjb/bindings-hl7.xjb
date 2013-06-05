@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	jaxb:version="2.1" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	jaxb:extensionBindingPrefixes="xjc">
+	<jaxb:globalBindings generateMixedExtensions="true" />
+</jaxb:bindings>

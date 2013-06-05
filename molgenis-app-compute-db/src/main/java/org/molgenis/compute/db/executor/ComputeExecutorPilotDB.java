@@ -66,7 +66,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 								password, SSH_PORT);
 					}
 
-					executionHost.submitPilot(computeRun.getComputeBackend().getCommand());
+					executionHost.submitPilot(computeRun.getComputeBackend(), computeRun.getComputeBackend().getCommand());
 				}
 
 				// sleep, because we have a strange behavior in pilot service

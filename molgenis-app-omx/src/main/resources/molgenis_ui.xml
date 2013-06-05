@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="omx" label="Molgenis">
-	<plugin name="oc_header" type="org.molgenis.omx.plugins.header.Header" />
+	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
 	<menu name="main">
-		<plugin label="Home" name="Home" type="org.molgenis.omx.plugins.home.Home"/>
-		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
+		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
+		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>

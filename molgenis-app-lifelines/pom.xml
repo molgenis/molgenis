@@ -41,6 +41,8 @@
 						<configuration>
 							<quiet>true</quiet>
 							<packageName>org.molgenis.hl7</packageName>
+							<bindingDirectory>src/main/resources/xjb</bindingDirectory>
+							<bindingFiles>bindings-hl7.xjb</bindingFiles>
 							<schemaDirectory>src/main/resources/schemas</schemaDirectory>
 							<staleFile>${project.build.directory}/jaxb2/.hl7XjcStaleFlag</staleFile>
 						</configuration>
@@ -155,6 +157,21 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-search</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-search-elasticsearch</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-omx-dataexplorer</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-protocolviewer</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -172,6 +189,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>3.2.2.RELEASE</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sun.xml.bind</groupId>
+		    <artifactId>jaxb-impl</artifactId>
+		    <version>2.1.13</version>
 		</dependency>
 	</dependencies>
 </project>
