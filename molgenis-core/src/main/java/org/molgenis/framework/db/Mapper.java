@@ -78,8 +78,6 @@ public interface Mapper<E extends Entity>
 
 	public E findById(Object id) throws DatabaseException;
 
-	List<E> findByExample(E example) throws DatabaseException;
-
 	int executeAdd(List<? extends E> entities) throws DatabaseException;
 
 	int executeUpdate(List<? extends E> entities) throws DatabaseException;

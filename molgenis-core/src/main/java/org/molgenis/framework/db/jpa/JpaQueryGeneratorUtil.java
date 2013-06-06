@@ -33,9 +33,9 @@ import org.molgenis.util.Entity;
 /**
  * @author joris lops
  */
-public class JPAQueryGeneratorUtil
+public class JpaQueryGeneratorUtil
 {
-	private static final Logger logger = Logger.getLogger(JPAQueryGeneratorUtil.class);
+	private static final Logger logger = Logger.getLogger(JpaQueryGeneratorUtil.class);
 
 	public static <IN extends Entity> TypedQuery<IN> createQuery(Database db, Class<IN> inputClass, Mapper<IN> mapper,
 			EntityManager em, QueryRule... rules) throws DatabaseException

@@ -6,12 +6,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
+import org.molgenis.servlet.FrontController;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-
-import org.molgenis.servlet.FrontController;
 
 public class WebAppInitializer implements WebApplicationInitializer
 {
@@ -35,6 +34,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 			dispatcherServlet.setLoadOnStartup(1);
 			dispatcherServlet.addMapping("/");
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
+			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
 
 		// molgenis

@@ -1,5 +1,6 @@
 package org.molgenis.omicsconnect;
 
+import org.molgenis.DatabaseConfig;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationListener;
@@ -14,8 +15,6 @@ import org.springframework.web.servlet.config.annotation.DefaultServletHandlerCo
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import org.molgenis.DatabaseConfig;
 
 @Configuration
 @EnableWebMvc
@@ -37,6 +36,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
 	}
 
 	@Bean

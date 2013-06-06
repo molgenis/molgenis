@@ -90,14 +90,6 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 		return entity;
 	}
 
-	@Override
-	public List<E> findByExample(E example) throws DatabaseException
-	{
-		List<E> entities = super.findByExample(example);
-		List<E> filteredEntities = filterEntities(entities);
-		return filteredEntities;
-	}
-
 	private List<E> filterEntities(List<E> entities) throws DatabaseException
 	{
 		MolgenisUser user = getCurrentUser();
