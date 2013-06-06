@@ -50,8 +50,8 @@
 			<field name="CapturingKit" type="xref" xref_entity="CapturingKit" nillable="true" description="Capturing kit used." label="Capturing kit" />
 			<field name="SampleBarcode" type="xref" xref_entity="SampleBarcode" nillable="true" description="Multiple samples can be on one flowcell using barcodes." label="Barcode" />			
 			<field name="SampleInPool" type="mref" nillable="true" xref_entity="Sample" description="List of samples inside the pool" label="Pooled InternalSampleId(s)" />
-			<field name="LabStatus" type="enum" default="Not started"
-				enum_options="[Not started,Sample prep - started,Sample prep - failed,Ready for clustering,Clustering and sequencing - started,Clustering and sequencing - failed,Gerald,Finished Successfully,Other issue]"
+			<field name="LabStatus" type="enum" default="Not Started"
+				enum_options="[Not Started,Sample Prep _ Started,Sample Prep _ Failed,Ready for Clustering,Clustering and Sequencing _ Started,Clustering and Sequencing _ Failed,Data Post Processing,Finished Successfully,Other]"
 				description="Lab status phase of this sample" label="Lab status" />
 		</entity>
 		
