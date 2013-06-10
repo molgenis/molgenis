@@ -7,9 +7,10 @@
 		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap-fileupload.min.css" type="text/css">
-		<link rel="stylesheet" href="/css/harmonization.indexer.css" type="text/css">
+		<link rel="stylesheet" href="/css/harmonization-indexer.css" type="text/css">
 		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+		<script type="text/javascript" src="/js/harmonization-indexer.js"></script>
 		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="/js/bootstrap-fileupload.min.js"></script>
@@ -72,9 +73,17 @@
 							</div>
 						</div>
 					</div>
-					<div class="span6">
-						<div class="alert alert-success">
-						...
+					<div class="span5">
+						<div class="accordion-group">
+						    <div class="accordion-heading">
+								<h5 class="text-left text-info">Help!</h5>	
+							</div>
+							<div class="accordion-body collapse in">
+								<p class="justify-text">Ontologies are used to expand semantics of data items so that those data items annotated with 
+								ontologies terms would have more synonyms and relevent terms that would be more likely matched with 
+								other catalogue data items. Please index the ontologies in advance. It will largely speed up the matching process.
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>
