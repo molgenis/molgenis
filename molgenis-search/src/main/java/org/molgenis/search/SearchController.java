@@ -2,11 +2,15 @@ package org.molgenis.search;
 
 import static org.molgenis.search.SearchController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -43,7 +47,8 @@ public class SearchController implements InitializingBean
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ResponseEntity<SearchResult> search(@RequestBody SearchRequest request)
+	public ResponseEntity<SearchResult> search(@RequestBody
+	SearchRequest request)
 	{
 		SearchResult result;
 		try
@@ -56,7 +61,16 @@ public class SearchController implements InitializingBean
 			result = new SearchResult(e.getMessage());
 		}
 
-		return new ResponseEntity<SearchResult>(result, HttpStatus.OK);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Access-Control-Allow-Origin", "*");
+		return new ResponseEntity<SearchResult>(result, httpHeaders, HttpStatus.OK);
 	}
 
+	@RequestMapping(method = OPTIONS)
+	public void preflightCors(HttpServletResponse response)
+	{
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.addHeader("Access-Control-Allow-Methods", "POST");
+		response.addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Origin");
+	}
 }
