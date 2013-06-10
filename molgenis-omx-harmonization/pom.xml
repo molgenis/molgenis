@@ -34,16 +34,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- exclude files from jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/molgenis.properties</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build> 
   
