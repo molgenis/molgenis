@@ -675,57 +675,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
     }	
 </#if>
 
-	@Override
-	public boolean equals(Object obj) {
-   		if (obj == null) { return false; }
-   		if (obj == this) { return true; }
-   		if (obj.getClass() != getClass()) {
-     		return false;
-   		}
-   		return new org.apache.commons.lang3.builder.EqualsBuilder()
-<#if entity.hasAncestor()>
-             	.appendSuper(super.equals(obj))
-</#if>
-<#list entity.getUniqueKeysWithoutPk() as uniqueKeys >
-	<#list key_fields(uniqueKeys) as uniqueFields >
-		//${name(uniqueFields)}
-		<#if uniqueFields.type != "mref" && uniqueFields.type != "xref">
-			<#if name(uniqueFields) != "type_" >
-				.append(${name(uniqueFields)}, ((${JavaName(entity)}) obj).get${JavaName(uniqueFields)}())
-			</#if>
-		</#if>
-	</#list>
-</#list>                 
-                .isEquals();
-  	}
-
-  	@Override
-    public int hashCode() {
-    	int firstNumber = this.getClass().getName().hashCode();
-    	int secondNumber = this.getClass().getSimpleName().hashCode();
-    	if(firstNumber % 2 == 0) {
-    	  firstNumber += 1;
-    	}
-    	if(secondNumber % 2 == 0) {
-    		secondNumber += 1;
-    	}
-    
-		return new org.apache.commons.lang3.builder.HashCodeBuilder(firstNumber, secondNumber)
-<#if entity.hasAncestor()>
-             	.appendSuper(super.hashCode())
-</#if>
-<#list entity.getUniqueKeysWithoutPk() as uniqueKeys >
-	<#list key_fields(uniqueKeys) as uniqueFields >
-		<#if uniqueFields.type != "mref" && uniqueFields.type != "xref">
-			<#if name(uniqueFields) != 'type_' >
-				.append(${name(uniqueFields)})
-			</#if>
-		</#if>
-	</#list>
-</#list>    
-   			.toHashCode();
-    }  	
-
 	@Deprecated
 	@Override
 	public String getValues(String sep)
@@ -785,7 +734,49 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	</#if>
 </#list>
 
+<#-- Implement equals() and hashCode() using business key equality -->
+<#assign uniqueKeys = entity.getUniqueKeysWithoutPk()>
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+<#if entity.hasAncestor()>
+		if (!super.equals(obj)) return false;
+</#if>
+		if (getClass() != obj.getClass()) return false;
+<#if uniqueKeys?has_content>
+		${JavaName(entity)} other = (${JavaName(entity)}) obj;
+	<#list uniqueKeys as uniqueKey>
+		<#list key_fields(uniqueKey) as field>
+		if (${name(field)} == null)
+		{
+			if (other.${name(field)} != null) return false;
+		}
+		else if (!${name(field)}.equals(other.${name(field)})) return false;
+		</#list>
+	</#list>
+</#if>
+		return true;
+	}
 	
+	@Override
+	public int hashCode()
+	{
+<#if uniqueKeys?has_content>
+		final int prime = 31;
+</#if>
+<#if entity.hasAncestor()>
+		int result = super.hashCode();
+<#else>
+		int result = 1;
+</#if>
+<#list uniqueKeys as uniqueKey>
+	<#list key_fields(uniqueKey) as field>
+		result = prime * result + ((${name(field)} == null) ? 0 : ${name(field)}.hashCode());
+	</#list>
+</#list>
+		return result;
+	}
 </#if>
 }
-
