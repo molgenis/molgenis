@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -27,7 +26,7 @@
 		<connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
 		<url>https://github.com/molgenis/molgenis</url>
 	</scm>
-	<developers></developers>
+	<developers/>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,7 +60,7 @@
 						<source>1.6</source>
 						<target>1.6</target>
 						<compilerArguments>
-							<Xlint />
+							<Xlint/>
 						</compilerArguments>
 					</configuration>
 				</plugin>
@@ -122,12 +121,12 @@
 							<configuration>
 								<tasks>
 									<path id="generate-classpath">
-										<path refid="maven.compile.classpath" />
-										<pathelement path="${project.basedir}/src/main/resources" />
+										<path refid="maven.compile.classpath"/>
+										<pathelement path="${project.basedir}/src/main/resources"/>
 									</path>
 									<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-										<arg value="molgenis.properties" />
-										<arg value="${project.build.directory}/generated-sources/molgenis" />
+										<arg value="molgenis.properties"/>
+										<arg value="${project.build.directory}/generated-sources/molgenis"/>
 									</java>
 								</tasks>
 							</configuration>
@@ -141,13 +140,13 @@
 							<configuration>
 								<tasks>
 									<path id="generate-classpath">
-										<path refid="maven.compile.classpath" />
-										<pathelement path="${project.basedir}/src/main/resources" />
+										<path refid="maven.compile.classpath"/>
+										<pathelement path="${project.basedir}/src/main/resources"/>
 									</path>
 									<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-										<arg value="molgenis.properties" />
-										<arg value="${project.build.directory}/generated-test-sources/molgenis" />
-										<arg value="--generatetests" />
+										<arg value="molgenis.properties"/>
+										<arg value="${project.build.directory}/generated-test-sources/molgenis"/>
+										<arg value="--generatetests"/>
 									</java>
 								</tasks>
 							</configuration>
@@ -261,7 +260,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -274,7 +273,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -287,7 +286,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -300,7 +299,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -451,5 +450,6 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-app-compute-db</module>
-	</modules>
+    <module>molgenis-omx-harmonization</module>
+  </modules>
 </project>
