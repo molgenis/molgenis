@@ -36,26 +36,26 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
-	@Value("${app.profile}")
+	@Value("${app.lifelines.profile}")
 	private String appProfile;
 	@Value("${admin.password}")
 	private String adminPassword;
-	@Value("${researcher.password}")
+	@Value("${lifelines.researcher.password}")
 	private String dataManagerPassword;
-	@Value("${datamanager.password}")
+	@Value("${lifelines.datamanager.password}")
 	private String researchPassword;
 
 	@Override
 	protected void initializeApplicationDatabase(Database database) throws Exception
 	{
-		if ("${app.profile}".equals(appProfile) || "${datamanager.password}".equals(dataManagerPassword)
-				|| "${researcher.password}".equals(researchPassword) || "${admin.password}".equals(adminPassword))
+		if ("${app.lifelines.profile}".equals(appProfile) || "${lifelines.datamanager.password}".equals(dataManagerPassword)
+				|| "${lifelines.researcher.password}".equals(researchPassword) || "${admin.password}".equals(adminPassword))
 		{
 			StringBuilder message = new StringBuilder("please configure: ");
-			if ("${app.profile}".equals(appProfile)) message
-					.append("app.profile(possible values: workspace or website), ");
-			if ("${datamanager.password}".equals(dataManagerPassword)) message.append("default datamanager.password, ");
-			if ("${researcher.password}".equals(researchPassword)) message.append("default researcher.password ");
+			if ("${app.lifelines.profile}".equals(appProfile)) message
+					.append("app.lifelines.profile(possible values: workspace or website), ");
+			if ("${lifelines.datamanager.password}".equals(dataManagerPassword)) message.append("default lifelines.datamanager.password, ");
+			if ("${lifelines.researcher.password}".equals(researchPassword)) message.append("default lifelines.researcher.password ");
 			if ("${admin.password}".equals(adminPassword)) message.append("default admin.password ");
 			message.append("in your molgenis-server.properties.");
 			throw new RuntimeException(message.toString());
