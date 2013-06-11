@@ -6,11 +6,13 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
@@ -29,9 +31,11 @@ public class HarmonizationIndexerController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws Exception
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public IndexResponse getAvailableIndexer()
 	{
-		return "Hamronization-indexer";
+		return null;
 	}
 
 	/**
@@ -44,5 +48,11 @@ public class HarmonizationIndexerController
 	public String handleNotAuthenticated()
 	{
 		return "redirect:/";
+	}
+
+	class IndexResponse
+	{
+		private String name;
+
 	}
 }
