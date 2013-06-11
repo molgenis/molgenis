@@ -35,6 +35,7 @@ import org.molgenis.omx.auth.vo.MolgenisUserSearchCriteriaVO;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.util.ApplicationUtil;
 import org.molgenis.util.tuple.HttpServletRequestTuple;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -44,7 +45,9 @@ import org.springframework.mail.SimpleMailMessage;
 public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 {
 	private static final long serialVersionUID = -3084964114182861171L;
-
+	@Value("${admin.password:@null}")
+	private String adminPassword;
+	
 	public SimpleUserLogin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
@@ -256,7 +259,7 @@ public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 			// login as admin
 			// (a bit evil but less so than giving anonymous write-rights on the
 			// MolgenisUser table)
-			this.getApplicationController().getLogin().login(db, "admin", "admin"); // TODO
+			this.getApplicationController().getLogin().login(db, "admin", adminPassword); // TODO
 			this.getApplicationController().getLogin().reload(db);
 			// save current login and then set to null, to bypass security
 			Login saveLogin = db.getLogin();

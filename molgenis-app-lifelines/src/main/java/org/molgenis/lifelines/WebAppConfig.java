@@ -12,14 +12,14 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
-import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
-import org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin;
 import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
 import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
 import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.search.SearchSecurityConfig;
+import org.molgenis.ui.CatalogueLoaderPluginPlugin;
+import org.molgenis.ui.StudyDefinitionLoaderPluginPlugin;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -96,6 +96,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
+		pspc.setNullValue("@null");
 		return pspc;
 	}
 
@@ -213,7 +214,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public SecurityHandlerInterceptor catalogLoaderHandlerInterceptor()
 	{
-		return new SecurityHandlerInterceptor(CatalogueLoaderPlugin.class);
+		return new SecurityHandlerInterceptor(CatalogueLoaderPluginPlugin.class);
 	}
 
 	@Bean
@@ -233,7 +234,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public SecurityHandlerInterceptor studyDefinitionLoaderHandlerInterceptor()
 	{
-		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPlugin.class);
+		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPluginPlugin.class);
 	}
 
 	@Bean
