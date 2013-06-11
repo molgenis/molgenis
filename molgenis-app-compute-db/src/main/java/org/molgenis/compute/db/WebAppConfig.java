@@ -54,6 +54,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		pspc.setLocations(resources);
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
+		pspc.setNullValue("@null");
 		return pspc;
 	}
 

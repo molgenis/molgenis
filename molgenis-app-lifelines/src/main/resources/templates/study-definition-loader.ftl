@@ -61,14 +61,14 @@
 															<#if studyDefinition.loaded>
 																LOADED
 															<#else>
-																<input id="catalog_${studyDefinition.id?c}" type="radio" name="id" value="${studyDefinition.id?c}" <#if !foundStudyDefinition>checked<#assign foundStudyDefinition = true></#if> >
+																<input id="catalog_${studyDefinition.id}" type="radio" name="id" value="${studyDefinition.id}" <#if !foundStudyDefinition>checked<#assign foundStudyDefinition = true></#if> >
 															</#if>
 														</td>
 														<td class="listEntryId">
-															<label for="catalog_${studyDefinition.id?c}">${studyDefinition.id?c}</label>
+															<label for="catalog_${studyDefinition.id}">${studyDefinition.id}</label>
 														</td>
 														<td>
-															<label for="catalog_${studyDefinition.id?c}">${studyDefinition.name}</label>
+															<label for="catalog_${studyDefinition.id}">${studyDefinition.name}</label>
 														</td>
 													</tr>
 												</#list>
