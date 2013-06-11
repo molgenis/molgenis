@@ -96,6 +96,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
+		pspc.setNullValue("@null");
 		return pspc;
 	}
 

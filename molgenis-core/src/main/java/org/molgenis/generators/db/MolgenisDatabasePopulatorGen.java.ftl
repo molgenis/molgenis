@@ -36,7 +36,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	@Qualifier("unauthorizedPrototypeDatabase")
 	private Database database;
 	
-	@Value(${r'"${admin.password}"'})
+	@Value(${r'"${admin.password:@null}"'})
 	private String adminPassword;
 	
 </#if>
@@ -83,7 +83,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	
 	private void initializeDefaultApplicationDatabase(Database database) throws Exception
 	{
-		if(${r'"${admin.password}"'}.equals(adminPassword)) throw new RuntimeException("please configure the default admin password in your molgenis-server.properties");	
+		if(adminPassword==null) throw new RuntimeException("please configure the default admin password in your molgenis-server.properties");	
 		
 		Login login = database.getLogin();
     	database.setLogin(null); // so we don't run into trouble with the Security Decorators

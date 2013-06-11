@@ -45,7 +45,7 @@ import org.springframework.mail.SimpleMailMessage;
 public class SimpleUserLogin extends EasyPluginController<SimpleUserLoginModel>
 {
 	private static final long serialVersionUID = -3084964114182861171L;
-	@Value("${admin.password}")
+	@Value("${admin.password:@null}")
 	private String adminPassword;
 	
 	public SimpleUserLogin(String name, ScreenController<?> parent)

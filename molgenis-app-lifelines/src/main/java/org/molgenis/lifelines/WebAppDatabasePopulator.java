@@ -36,27 +36,28 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
-	@Value("${app.lifelines.profile}")
+	@Value("${app.lifelines.profile:@null}")
 	private String appProfile;
-	@Value("${admin.password}")
+	@Value("${admin.password:@null}")
 	private String adminPassword;
-	@Value("${lifelines.researcher.password}")
+	@Value("${lifelines.researcher.password:@null}")
 	private String dataManagerPassword;
-	@Value("${lifelines.datamanager.password}")
+	@Value("${lifelines.datamanager.password:@null}")
 	private String researchPassword;
 
 	@Override
 	protected void initializeApplicationDatabase(Database database) throws Exception
 	{
-		if ("${app.lifelines.profile}".equals(appProfile) || "${lifelines.datamanager.password}".equals(dataManagerPassword)
-				|| "${lifelines.researcher.password}".equals(researchPassword) || "${admin.password}".equals(adminPassword))
+		if (appProfile == null || dataManagerPassword == null || researchPassword == null || adminPassword == null)
 		{
 			StringBuilder message = new StringBuilder("please configure: ");
-			if ("${app.lifelines.profile}".equals(appProfile)) message
+			if (appProfile == null) message
 					.append("app.lifelines.profile(possible values: workspace or website), ");
-			if ("${lifelines.datamanager.password}".equals(dataManagerPassword)) message.append("default lifelines.datamanager.password, ");
-			if ("${lifelines.researcher.password}".equals(researchPassword)) message.append("default lifelines.researcher.password ");
-			if ("${admin.password}".equals(adminPassword)) message.append("default admin.password ");
+			if (dataManagerPassword == null) message
+					.append("default lifelines.datamanager.password, ");
+			if (researchPassword == null) message
+					.append("default lifelines.researcher.password ");
+			if (adminPassword == null) message.append("default admin.password ");
 			message.append("in your molgenis-server.properties.");
 			throw new RuntimeException(message.toString());
 		}
