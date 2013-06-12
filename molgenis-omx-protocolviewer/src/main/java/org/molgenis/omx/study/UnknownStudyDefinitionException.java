@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.studydefinition;
+package org.molgenis.omx.study;
 
 public class UnknownStudyDefinitionException extends Exception
 {
@@ -6,6 +6,7 @@ public class UnknownStudyDefinitionException extends Exception
 
 	public UnknownStudyDefinitionException()
 	{
+		super();
 	}
 
 	public UnknownStudyDefinitionException(String message)

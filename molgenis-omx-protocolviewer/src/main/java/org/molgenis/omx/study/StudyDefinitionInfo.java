@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.studydefinition;
+package org.molgenis.omx.study;
 
 public class StudyDefinitionInfo
 {
@@ -21,5 +21,4 @@ public class StudyDefinitionInfo
 	{
 		return name;
 	}
-
 }
