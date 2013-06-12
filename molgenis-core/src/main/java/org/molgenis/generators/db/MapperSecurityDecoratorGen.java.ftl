@@ -230,4 +230,34 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		}
 	}
 </#if>
+	@Override
+	public int executeAdd(List<? extends E> entities) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		return super.executeAdd(entities);
+	}
+	
+	public int executeUpdate(List<? extends E> entities) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		return super.executeUpdate(entities);
+	}
+	
+	public int executeRemove(List<? extends E> entities) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		return super.executeRemove(entities);
+	}
 }
