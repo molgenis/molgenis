@@ -65,11 +65,19 @@ Log in via terminal using your root credentials:
 
 Give create a database with permissions to molgenis user:
 
-    create database omicsconnect;
+    create database omx;
     grant all privileges on omx.* to molgenis@localhost identified by 'molgenis';
     flush privileges;
 
-## 7. Run the OMX app (example)
+## 7. Configure the default admin password
+
+Create a file called molgenis-server.properties in your home folder (so ~/molgenis-server.properties)
+
+Add a property "admin.password" to this file, so the content becomes "admin.password=admin"
+
+If the property is not present the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
+
+## 8. Run the OMX app (example)
 
 Right click 'molgenis-app-omx' -> Run as ... -> Maven build ...
 
@@ -86,7 +94,7 @@ It is advised to add a bit more memory to run the application. Under 'Run Config
     -XX:MaxPermSize=512M
     -Xmx2g
 
-## 8. Keep your code up to date
+## 9. Keep your code up to date
 
 Add the original molgenis repository as a remote location.
 
@@ -101,7 +109,7 @@ And push back any merges or commits of your own to your online fork.
 
     git push origin master
     
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 ### When I try to start an application, the console tells me 'Address already in use'!
 
