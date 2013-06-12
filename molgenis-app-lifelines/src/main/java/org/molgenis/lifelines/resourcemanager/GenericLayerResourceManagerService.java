@@ -96,20 +96,25 @@ public class GenericLayerResourceManagerService
 
 	public POQMMT000001UVQualityMeasureDocument findStudyDefinition(String id)
 	{
+		HttpGet httpGet = new HttpGet(resourceManagerServiceUrl + "/studydefinition/" + id);
 		InputStream xmlStream = null;
 		try
 		{
-			URL url = new URL(resourceManagerServiceUrl + "/studydefinition/" + id);
-			xmlStream = url.openStream();
-
+			HttpResponse response = httpClient.execute(httpGet);
+			xmlStream = response.getEntity().getContent();
 			return createQualityMeasureDocumentUnmarshaller().unmarshal(new StreamSource(xmlStream),
 					POQMMT000001UVQualityMeasureDocument.class).getValue();
 		}
-		catch (JAXBException e)
+		catch (RuntimeException e)
+		{
+			httpGet.abort();
+			throw e;
+		}
+		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
-		catch (IOException e)
+		catch (JAXBException e)
 		{
 			throw new RuntimeException(e);
 		}
