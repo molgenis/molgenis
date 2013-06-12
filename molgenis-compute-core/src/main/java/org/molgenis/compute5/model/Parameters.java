@@ -37,6 +37,7 @@ public class Parameters
 	public static final String PARAMETERS_CMNDLINE_OPTION = "p";
 	public static final String PARAMETERS = "parameters";
 	public static final String PARAMETERS_DEFAULT = "parameters.csv";
+	// we may consider changing this to parameterFiles to make it more descriptive:
 	public static final String PARAMETER_COLUMN = "parameters";
 	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
 	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;

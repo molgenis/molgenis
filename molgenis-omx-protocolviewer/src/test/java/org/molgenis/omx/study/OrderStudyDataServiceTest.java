@@ -1,4 +1,4 @@
-package org.molgenis.omx.service;
+package org.molgenis.omx.study;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -27,6 +27,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.study.OrderStudyDataService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

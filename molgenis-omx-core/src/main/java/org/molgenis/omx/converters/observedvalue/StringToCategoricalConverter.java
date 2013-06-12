@@ -5,6 +5,7 @@ import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -13,6 +14,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 
 public class StringToCategoricalConverter implements StringConverter<String>
 {
+	private static final Logger LOG = Logger.getLogger(StringToCategoricalConverter.class);
 
 	@Override
 	public String fromString(String value, Database db, ObservableFeature feature)
@@ -30,8 +32,9 @@ public class StringToCategoricalConverter implements StringConverter<String>
 
 			if (categories.isEmpty())
 			{
-				throw new IllegalArgumentException("Value [" + value
-						+ "] is not a valid valueCode for ObservableFeature [" + feature.getName() + "]");
+				LOG.warn("Value [" + value + "] is not a valid valueCode for ObservableFeature [" + feature.getName()
+						+ "]");
+				return value;
 			}
 
 			return categories.get(0).getName();

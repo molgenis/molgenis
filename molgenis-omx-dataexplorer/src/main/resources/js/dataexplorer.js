@@ -483,7 +483,7 @@
 
 	ns.createSearchRequest = function() {
 		var searchRequest = {
-			documentType : selectedDataSet.name,
+			documentType : selectedDataSet.identifier,
 			queryRules : [ {
 				operator : 'LIMIT',
 				value : resultsTable.getMaxRows()

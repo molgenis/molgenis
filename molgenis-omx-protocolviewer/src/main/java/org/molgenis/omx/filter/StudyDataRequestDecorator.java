@@ -1,6 +1,5 @@
-package org.molgenis.omx.decorators;
+package org.molgenis.omx.filter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseAccessException;
@@ -88,27 +87,6 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 			throw new DatabaseAccessException("No permission on DataSetFilter");
 		}
 		return entity;
-	}
-
-	private List<E> filterEntities(List<E> entities) throws DatabaseException
-	{
-		MolgenisUser user = getCurrentUser();
-		List<E> filteredEntities = new ArrayList<E>();
-		if (!user.getSuperuser())
-		{
-			for (E request : entities)
-			{
-				if (hasEntityPermission(request))
-				{
-					filteredEntities.add(request);
-				}
-			}
-		}
-		else
-		{
-			filteredEntities = entities;
-		}
-		return filteredEntities;
 	}
 
 	private MolgenisUser getCurrentUser() throws DatabaseException
