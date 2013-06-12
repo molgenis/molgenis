@@ -63,8 +63,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
-				// FIXME: dataset name is not unique
-				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 			}
@@ -96,10 +95,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
-				if (!searchService.documentTypeExists(dataSet.getName()))
+				if (!searchService.documentTypeExists(dataSet.getIdentifier()))
 				{
-					// FIXME: dataset name is not unique
-					searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+					searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet,
+							unauthorizedDatabase));
 					searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 							new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 				}
@@ -126,8 +125,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : dataSets)
 			{
-				// FIXME: dataset name is not unique
-				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 			}
