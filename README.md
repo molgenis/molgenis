@@ -23,6 +23,8 @@ Clone your fork to this folder:
 
 MOLGENIS is created with help of Maven and Freemarker. You need a few eclipse plugins to work with those.
 
+Important: get the LATEST version of Eclipse and all plugins mentioned. For example, using Eclipse Juno Release 1 or lower might result in infinite build loops.
+
 Start Eclipse and select a workspace location (e.g. ~/eclipse/workspace - do not pick the ~/git folder).
 
 Now install the plugins. Click: Help -> Eclipse marketplace. Add the following (restart Eclipse when done):
@@ -83,3 +85,27 @@ It is advised to add a bit more memory to run the application. Under 'Run Config
 
     -XX:MaxPermSize=512M
     -Xmx2g
+
+## 8. Keep your code up to date
+
+Add the original molgenis repository as a remote location.
+
+    cd ~/git/molgenis
+    git remote add blessed https://github.com/molgenis/molgenis.git
+    
+Perform regular updates so the latest changes are merged with your local clone.
+
+    git pull blessed master
+    
+And push back any merges or commits of your own to your online fork.
+
+    git push origin master
+    
+## 9. Troubleshooting
+
+### When I try to start an application, the console tells me 'Address already in use'!
+
+Run the Maven target 'jetty:stop'. If that does not help, use your opering systems process manager to kill anything running on port 8080. For example:
+
+    kill -9 `lsof -i :8080 -t`
+    
