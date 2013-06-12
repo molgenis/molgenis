@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.omx.cart;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.molgenis.omx.decorator;
+package org.molgenis.omx.filter;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -17,8 +17,8 @@ import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
-import org.molgenis.omx.decorators.StudyDataRequestDecorator;
 import org.molgenis.omx.filter.StudyDataRequest;
+import org.molgenis.omx.filter.StudyDataRequestDecorator;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
