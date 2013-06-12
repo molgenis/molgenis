@@ -3,8 +3,6 @@ package org.molgenis.lifelines.resourcemanager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +18,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.log4j.Logger;
 import org.molgenis.atom.ContentType;
 import org.molgenis.atom.EntryType;
@@ -129,40 +129,67 @@ public class GenericLayerResourceManagerService
 	 * 
 	 * @param studyDefinition
 	 */
-	public void persistStudyDefinition(POQMMT000001UVQualityMeasureDocument studyDefinition)
+	public void persistStudyDefinition(final POQMMT000001UVQualityMeasureDocument studyDefinition)
 	{
-		HttpURLConnection connection = null;
+		HttpPost httpPost = new HttpPost(resourceManagerServiceUrl + "/studydefinition");
+		httpPost.setHeader("Content-Type", "application/xml");
+		httpPost.setEntity(new AbstractHttpEntity()
+		{
+			@Override
+			public boolean isRepeatable()
+			{
+				return false;
+			}
+
+			@Override
+			public long getContentLength()
+			{
+				return -1;
+			}
+
+			@Override
+			public boolean isStreaming()
+			{
+				return false;
+			}
+
+			@Override
+			public InputStream getContent() throws IOException
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void writeTo(final OutputStream outstream) throws IOException
+			{
+				try
+				{
+					createQualityMeasureDocumentMarshaller().marshal(
+							new ObjectFactory().createQualityMeasureDocument(studyDefinition), outstream);
+				}
+				catch (JAXBException e)
+				{
+					throw new RuntimeException(e);
+				}
+				outstream.close();
+			}
+		});
+
 		try
 		{
-			URL url = new URL(resourceManagerServiceUrl + "/studydefinition");
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "application/xml");
-			connection.setUseCaches(false);
-			connection.setDoInput(true);
-			connection.setDoOutput(true);
-			connection.setConnectTimeout(10000);
-
-			OutputStream outputStream = connection.getOutputStream();
-			createQualityMeasureDocumentMarshaller().marshal(
-					new ObjectFactory().createQualityMeasureDocument(studyDefinition), outputStream);
-			IOUtils.closeQuietly(outputStream);
-
-			int responseCode = connection.getResponseCode();
-			if (responseCode < 200 || responseCode > 299) throw new IOException(
-					"Error persisting study definition (statuscode " + responseCode + ")");
+			HttpResponse response = httpClient.execute(httpPost);
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode < 200 || statusCode > 299) throw new IOException(
+					"Error persisting study definition (statuscode " + statusCode + ")");
+		}
+		catch (RuntimeException e)
+		{
+			httpPost.abort();
+			throw e;
 		}
 		catch (IOException e)
 		{
 			throw new RuntimeException(e);
-		}
-		catch (JAXBException e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			if (connection != null) connection.disconnect();
 		}
 	}
 
@@ -248,20 +275,26 @@ public class GenericLayerResourceManagerService
 		JAXBContext jaxbContext = JAXBContext.newInstance("org.molgenis.atom");
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-		String resourceUrl = resourceManagerServiceUrl + uri;
-
-		HttpGet httpGet = new HttpGet(resourceUrl);
-		HttpResponse response = httpClient.execute(httpGet);
-		InputStream xmlStream = response.getEntity().getContent();
+		HttpGet httpGet = new HttpGet(resourceManagerServiceUrl + uri);
+		InputStream xmlStream = null;
 		try
 		{
-			JAXBElement<FeedType> feed = jaxbUnmarshaller.unmarshal(new StreamSource(xmlStream), FeedType.class);
-			return feed.getValue();
+			HttpResponse response = httpClient.execute(httpGet);
+			xmlStream = response.getEntity().getContent();
+			return jaxbUnmarshaller.unmarshal(new StreamSource(xmlStream), FeedType.class).getValue();
 		}
 		catch (RuntimeException e)
 		{
 			httpGet.abort();
 			throw e;
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
 		}
 		finally
 		{
