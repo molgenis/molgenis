@@ -8,6 +8,10 @@ import javax.xml.validation.Schema;
 import nl.umcg.hl7.CatalogService;
 import nl.umcg.hl7.GenericLayerCatalogService;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
@@ -183,6 +187,21 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public HttpClient httpClient()
+	{
+		return new DefaultHttpClient(connectionManager());
+	}
+
+	@Bean(destroyMethod = "shutdown")
+	protected ClientConnectionManager connectionManager()
+	{
+		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
+		connectionManager.setDefaultMaxPerRoute(10);
+		connectionManager.setMaxTotal(20);
+		return connectionManager;
+	}
+
+	@Bean
 	public GenericLayerCatalogService genericLayerCatalogService()
 	{
 		return new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
@@ -194,7 +213,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public GenericLayerResourceManagerService resourceManagerService()
 	{
-		return new GenericLayerResourceManagerService(resourceManagerServiceUrl, emeasureSchema());
+		return new GenericLayerResourceManagerService(httpClient(), resourceManagerServiceUrl, emeasureSchema());
 	}
 
 	@Bean

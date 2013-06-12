@@ -17,6 +17,9 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.molgenis.atom.ContentType;
 import org.molgenis.atom.EntryType;
@@ -41,13 +44,18 @@ import com.google.common.collect.Lists;
 public class GenericLayerResourceManagerService
 {
 	private static final Logger LOG = Logger.getLogger(GenericLayerResourceManagerService.class);
+
+	private final HttpClient httpClient;
 	private final String resourceManagerServiceUrl;
 	private final Schema emeasureSchema;
 
-	public GenericLayerResourceManagerService(String resourceManagerServiceUrl, Schema emeasureSchema)
+	public GenericLayerResourceManagerService(HttpClient httpClient, String resourceManagerServiceUrl,
+			Schema emeasureSchema)
 	{
+		if (httpClient == null) throw new IllegalArgumentException("HttpClient is null");
 		if (resourceManagerServiceUrl == null) throw new IllegalArgumentException("ResourceManagerServiceUrl is null");
 		if (emeasureSchema == null) throw new IllegalArgumentException("EmeasureSchema is null");
+		this.httpClient = httpClient;
 		this.resourceManagerServiceUrl = resourceManagerServiceUrl;
 		this.emeasureSchema = emeasureSchema;
 	}
@@ -236,20 +244,24 @@ public class GenericLayerResourceManagerService
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 		String resourceUrl = resourceManagerServiceUrl + uri;
-		JAXBElement<FeedType> feed = null;
 
-		URL url = new URL(resourceUrl);
-		InputStream xml = url.openStream();
+		HttpGet httpGet = new HttpGet(resourceUrl);
+		HttpResponse response = httpClient.execute(httpGet);
+		InputStream xmlStream = response.getEntity().getContent();
 		try
 		{
-			feed = jaxbUnmarshaller.unmarshal(new StreamSource(xml), FeedType.class);
+			JAXBElement<FeedType> feed = jaxbUnmarshaller.unmarshal(new StreamSource(xmlStream), FeedType.class);
 			return feed.getValue();
+		}
+		catch (RuntimeException e)
+		{
+			httpGet.abort();
+			throw e;
 		}
 		finally
 		{
-			IOUtils.closeQuietly(xml);
+			IOUtils.closeQuietly(xmlStream);
 		}
-
 	}
 
 	private static class CatalogSearchResult
