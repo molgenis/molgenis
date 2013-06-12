@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.omx.cart;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.cart.ShoppingCartController;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
