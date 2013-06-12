@@ -1,5 +1,7 @@
 package org.molgenis.elasticsearch;
 
+import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -73,7 +75,9 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public long count(String documentType, List<QueryRule> queryRules)
 	{
-		SearchRequest request = new SearchRequest(documentType, queryRules, Collections.<String> emptyList());
+
+		SearchRequest request = new SearchRequest(sanitizeMapperType(documentType), queryRules,
+				Collections.<String> emptyList());
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
@@ -83,8 +87,11 @@ public class ElasticSearchService implements SearchService
 	{
 
 		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
-		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(request.getDocumentType(), searchType,
+
+		String documentType = sanitizeMapperType(request.getDocumentType());
+		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentType, searchType,
 				request.getQueryRules(), request.getFieldsToReturn());
+
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("SearchRequestBuilder:" + requestBuilder);
@@ -97,7 +104,6 @@ public class ElasticSearchService implements SearchService
 		}
 
 		return responseParser.parseSearchResponse(response);
-
 	}
 
 	@Override
@@ -108,13 +114,15 @@ public class ElasticSearchService implements SearchService
 			return;
 		}
 
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
 		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
-		deleteDocumentsByType(documentType);
+		deleteDocumentsByType(documentTypeSantized);
 
 		LOG.info("Going to insert documents of type [" + documentType + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
 
-		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentType, entities);
+		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentTypeSantized, entities);
 		LOG.info("Request created");
 		if (LOG.isDebugEnabled())
 		{
@@ -150,16 +158,18 @@ public class ElasticSearchService implements SearchService
 			throw new RuntimeException(e);
 		}
 
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
 		LOG.info("Going to create mapping for documentType [" + documentType + "]");
-		createMappings(documentType, tupleTable);
+		createMappings(documentTypeSantized, tupleTable);
 
 		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
-		deleteDocumentsByType(documentType);
+		deleteDocumentsByType(documentTypeSantized);
 
 		LOG.info("Going to insert documents of type [" + documentType + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
 
-		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentType, tupleTable);
+		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
 		LOG.info("Request created");
 		if (LOG.isDebugEnabled())
 		{
@@ -182,15 +192,20 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public boolean documentTypeExists(String documentType)
 	{
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
 		return client.admin().indices().typesExists(new TypesExistsRequest(new String[]
-		{ indexName }, documentType)).actionGet().exists();
+		{ indexName }, documentTypeSantized)).actionGet().exists();
 	}
 
 	private void deleteDocumentsByType(String documentType)
 	{
 		LOG.info("Going to delete all documents of type [" + documentType + "]");
+
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
 		DeleteByQueryResponse deleteResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", documentType)).execute().actionGet();
+				.setQuery(new TermQueryBuilder("_type", documentTypeSantized)).execute().actionGet();
 
 		if (deleteResponse != null)
 		{
@@ -222,10 +237,12 @@ public class ElasticSearchService implements SearchService
 
 	private void createMappings(String documentType, TupleTable tupleTable)
 	{
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
 		XContentBuilder jsonBuilder;
 		try
 		{
-			jsonBuilder = MappingsBuilder.buildMapping(documentType, tupleTable);
+			jsonBuilder = MappingsBuilder.buildMapping(documentTypeSantized, tupleTable);
 		}
 		catch (Exception e)
 		{
@@ -243,8 +260,8 @@ public class ElasticSearchService implements SearchService
 			LOG.error(e);
 		}
 
-		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName).setType(documentType)
-				.setSource(jsonBuilder).execute().actionGet();
+		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
+				.setType(documentTypeSantized).setSource(jsonBuilder).execute().actionGet();
 
 		if (!response.acknowledged())
 		{

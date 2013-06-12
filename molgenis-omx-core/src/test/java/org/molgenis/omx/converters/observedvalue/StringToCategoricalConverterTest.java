@@ -43,10 +43,10 @@ public class StringToCategoricalConverterTest
 		assertNull(converter.fromString(null, mockDatabase, feature));
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test
 	public void fromStringWithInvalidValueCode()
 	{
 		mockDatabase.setEntities(Collections.<Entity> emptyList());
-		converter.fromString("0", mockDatabase, feature);
+		assertEquals(converter.fromString("0", mockDatabase, feature), "0");
 	}
 }
