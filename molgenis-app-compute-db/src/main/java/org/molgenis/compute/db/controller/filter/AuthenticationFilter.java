@@ -73,14 +73,6 @@ public class AuthenticationFilter implements Filter {
 			}
 		}
 
-        System.out.println("parameters");
-        Enumeration<String> e = request.getParameterNames();
-
-        while(e.hasMoreElements())
-        {
-            System.out.println(e.nextElement());
-        }
-
         chain.doFilter(request, response);
     }
 
