@@ -191,13 +191,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Value("${lifelines.resource.manager.service.url}")
 	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
 
-	@Value("${lifelines.validate:false}")
-	private boolean validate;// Specify in molgenis-server.properties, validate generic layer responses
-
 	@Bean
 	public GenericLayerResourceManagerService resourceManagerService()
 	{
-		return new GenericLayerResourceManagerService(resourceManagerServiceUrl, emeasureSchema(), validate);
+		return new GenericLayerResourceManagerService(resourceManagerServiceUrl, emeasureSchema());
 	}
 
 	@Bean

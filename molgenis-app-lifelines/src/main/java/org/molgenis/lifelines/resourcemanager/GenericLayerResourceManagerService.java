@@ -43,15 +43,13 @@ public class GenericLayerResourceManagerService
 	private static final Logger LOG = Logger.getLogger(GenericLayerResourceManagerService.class);
 	private final String resourceManagerServiceUrl;
 	private final Schema emeasureSchema;
-	private final boolean validate;
 
-	public GenericLayerResourceManagerService(String resourceManagerServiceUrl, Schema emeasureSchema, boolean validate)
+	public GenericLayerResourceManagerService(String resourceManagerServiceUrl, Schema emeasureSchema)
 	{
 		if (resourceManagerServiceUrl == null) throw new IllegalArgumentException("ResourceManagerServiceUrl is null");
 		if (emeasureSchema == null) throw new IllegalArgumentException("EmeasureSchema is null");
 		this.resourceManagerServiceUrl = resourceManagerServiceUrl;
 		this.emeasureSchema = emeasureSchema;
-		this.validate = validate;
 	}
 
 	/**
@@ -76,12 +74,7 @@ public class GenericLayerResourceManagerService
 	{
 		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
 		Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
-		if (validate)
-		{
-			jaxbMarshaller.setSchema(emeasureSchema);
-		}
-
+		jaxbMarshaller.setSchema(emeasureSchema);
 		return jaxbMarshaller;
 	}
 
@@ -89,12 +82,7 @@ public class GenericLayerResourceManagerService
 	{
 		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-		if (validate)
-		{
-			jaxbUnmarshaller.setSchema(emeasureSchema);
-		}
-
+		jaxbUnmarshaller.setSchema(emeasureSchema);
 		return jaxbUnmarshaller;
 	}
 
