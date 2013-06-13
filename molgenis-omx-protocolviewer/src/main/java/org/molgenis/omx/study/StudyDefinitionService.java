@@ -2,6 +2,8 @@ package org.molgenis.omx.study;
 
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Async;
+
 /**
  * Find, retrieve and persist study definitions
  * 
@@ -29,5 +31,6 @@ public interface StudyDefinitionService
 	 * 
 	 * @param studyDefinition
 	 */
+	@Async
 	public void persistStudyDefinition(StudyDefinition studyDefinition);
 }
