@@ -1,12 +1,16 @@
 package org.molgenis.omx.harmonizationIndexer.controller;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -27,12 +31,17 @@ public class OntologyModel
 	private OWLOntology ontology = null;
 	private OWLOntologyManager manager = null;
 	private HashMap<String, OWLClass> labelToClass = new HashMap<String, OWLClass>();
+	private Set<String> synonymsProperties;
+	{
+		synonymsProperties = new HashSet<String>(
+				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"));
+	}
 
-	public OntologyModel(String ontologyFileName) throws OWLOntologyCreationException
+	public OntologyModel(File ontologyFile) throws OWLOntologyCreationException
 	{
 		this.manager = OWLManager.createOWLOntologyManager();
 		this.factory = manager.getOWLDataFactory();
-		this.ontology = manager.loadOntologyFromOntologyDocument(new File(ontologyFileName));
+		this.ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
 		this.ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
 	}
 
@@ -42,7 +51,6 @@ public class OntologyModel
 		{
 			OWLAnnotationProperty label = factory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI());
 			String labelString = "";
-			// Get the annotations on the class that use the label property
 			for (OWLAnnotation annotation : cls.getAnnotations(ontology, label))
 			{
 				if (annotation.getValue() instanceof OWLLiteral)
@@ -64,6 +72,21 @@ public class OntologyModel
 					&& ontology.getEquivalentClassesAxioms(cls).size() == 0) listOfTopClasses.add(cls);
 		}
 		return listOfTopClasses;
+	}
+
+	public List<String> getSynonyms(OWLClass cls)
+	{
+		List<String> listOfSynonyms = new ArrayList<String>();
+		for (String eachSynonymProperty : synonymsProperties)
+		{
+			OWLAnnotationProperty property = factory.getOWLAnnotationProperty(IRI.create(eachSynonymProperty));
+			for (OWLAnnotation annotation : cls.getAnnotations(ontology, property))
+			{
+				OWLLiteral val = (OWLLiteral) annotation.getValue();
+				listOfSynonyms.add(val.getLiteral());
+			}
+		}
+		return listOfSynonyms;
 	}
 
 	public Set<OWLClass> getParentClass(OWLClass cls)
