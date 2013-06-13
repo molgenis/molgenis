@@ -81,14 +81,14 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
                     Hashtable<String, String> values = new Hashtable<String, String>();
 
                     values.put("pilotid", pilotID);
-                    values.put("SERVER", "SERVER");
+                    values.put("SERVER", "129.125.141.171");
 
                     String command = weaveFreemarker(comTemplate, values);
                     String jdl = weaveFreemarker(jdlTemplate, values);
                     String sh = weaveFreemarker(shTemplate, values);
 
 					executionHost.submitPilot(computeRun.getComputeBackend(),
-                                                command, pilotID, sh, jdl);
+                                                command, pilotID, sh, jdl, computeRun.getOwner());
 				}
 
 				// sleep, because we have a strange behavior in pilot service
