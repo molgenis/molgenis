@@ -37,7 +37,16 @@ public class PilotService implements MolgenisService
 	public static final String TASK_FAILED = "failed";
 	public static final String TASK_DONE = "done";
 
-	public PilotService(MolgenisContext mc)
+
+    public static final String PILOT_ID = "pilotid";
+
+    public static final String PILOT_SUBMITTED = "submitted";
+    public static final String PILOT_USED = "used";
+    public static final String PILOT_EXPIRED = "expired";
+    public static final String PILOT_FAILED = "failed";
+
+
+    public PilotService(MolgenisContext mc)
 	{
 	}
 
@@ -50,7 +59,7 @@ public class PilotService implements MolgenisService
 
 		if ("started".equals(request.getString("status")))
 		{
-			String backend = request.getString("backend");
+        	String backend = request.getString("backend");
 
             List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
                     .equals(ComputeBackend.NAME, backend).find();
@@ -102,7 +111,6 @@ public class PilotService implements MolgenisService
 			{
 				IOUtils.closeQuietly(pw);
 			}
-
 
 		}
 		else
