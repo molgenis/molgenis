@@ -81,7 +81,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
                     Hashtable<String, String> values = new Hashtable<String, String>();
 
                     values.put("pilotid", pilotID);
-                    values.put("SERVER", "129.125.141.171");
+                    values.put("SERVER", "SERVER");
 
                     String command = weaveFreemarker(comTemplate, values);
                     String jdl = weaveFreemarker(jdlTemplate, values);
