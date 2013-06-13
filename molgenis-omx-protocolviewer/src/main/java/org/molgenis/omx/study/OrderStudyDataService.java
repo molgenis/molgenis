@@ -1,4 +1,4 @@
-package org.molgenis.omx.service;
+package org.molgenis.omx.study;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +52,9 @@ public class OrderStudyDataService
 	@Autowired
 	private FileStore fileStore;
 
+	@Autowired(required = false)
+	private StudyDefinitionService studyDefinitionService;
+
 	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds, Integer userId)
 			throws DatabaseException, MessagingException, IOException
 	{
@@ -84,7 +87,12 @@ public class OrderStudyDataService
 		logger.debug("create study data request: " + studyName);
 		database.add(studyDataRequest);
 
-		// create excel attachment fot study data request
+		if (studyDefinitionService != null)
+		{
+			studyDefinitionService.persistStudyDefinition(new OmxStudyDefinition(studyDataRequest));
+		}
+
+		// create excel attachment for study data request
 		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
 		InputStream variablesIs = createOrderExcelAttachment(studyDataRequest, features);
 		File variablesFile = fileStore.store(variablesIs, variablesFileName);

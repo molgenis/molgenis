@@ -29,9 +29,6 @@ import org.molgenis.util.ApplicationUtil;
  */
 public class AuthenticationFilter implements Filter {
 
-    public static final String PILOT_ID = "pilotid";
-    public static final String SUBMITTED = "submitted";
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }

@@ -74,7 +74,7 @@ Describes workflow steps and how they depend on each other via parameter input=s
 
 Example workflow.csv (whitespaces will be trimmed):
 
-	step,  protocol, parameters
+	step,  protocol, parameterMappings
 	step1, step1.sh, in=sample;in2=project
 	step2, step2.sh, in=step1_out
 
@@ -84,7 +84,7 @@ Explanation:
 * protocol = path to a protocol script. 
   * default, molgenis looks in current dir, same dir as workflow.csv and its 'protocols' dir
   * optionally, more protocols folders can be added via --protocols
-* parameters = mapping of input parameters from either previous step or parameters.csv, E.g.
+* parameterMappings = mapping of input parameters from either previous step or parameters.csv, E.g.
   * step1.sh has input 'in' that is set from column 'sample' in parameters.csv 
   * step2.sh has input 'in' that takes output 'out' of step1, indicated by 'step1_' prefix
 
@@ -92,7 +92,7 @@ Explanation:
 
 Example workflow.csv (white spaces will be trimmed):
 
-	step,  protocol,              parameters
+	step,  protocol,              parameterMappings
 	stepA, ../other/workflow.csv, project=project;sample=sample
 	stepB, stepB.sh,              in=stepA_out
 
@@ -378,7 +378,7 @@ Below options, --full_name or -short. Options can be combined:
 	Below listing of options, --full_name and -short:
 
 	#help						
-	--help						prints this message
+	--help								prints this message
 
 	#defaults
 	molgenis					--help
@@ -386,12 +386,12 @@ Below options, --full_name or -short. Options can be combined:
 	molgenis -p path			--generate --run if -w has been set, otherwise error.
 
 	#actions
-	--generate -g				generate jobs
-	--run -r					runs jobs from current run directory on current backend.
+	--generate -g				Generate jobs
+	--run -r					Runs jobs from current run directory on current backend.
 								When using --database this will return a 'id' for --pilot.
-	--stop -s [step]			stops running jobs. Optionally add step to stop only one job 
+	--stop -s [step]			Stops running jobs. Optionally add step to stop only one job 
 								(and dependent jobs).
-	--list -l					list jobs, generated, queued, running, completed, failed
+	--list -l					List jobs, generated, queued, running, completed, failed
 	--clean	-c					--stop + cleans the run folder from scripts + logs. 
 								In case of database the jobs are removed there as well
 
@@ -400,34 +400,35 @@ Below options, --full_name or -short. Options can be combined:
 								--defaults path/workflow.defaults.csv
 	--workflow -w path.csv		Loads workflow from path.csv and
 								--defaults path.defaults.csv
-	--new -n [path]				initializes template of a workflow in current folder or [path]
+	--new -n [path]				Initializes template of a workflow in current folder or [path]
 
 	#parameters
-	--parameters -p	path		Loads parameters from path.csv. 
-								This option can be repeated to combine parameter files
-	--parameters -p path.csv	identical to -p path
+	--parameters -p path		Loads parameters from path.csv
+								This option can be repeated to combine parameter files, e.g.:
+								-p path1 -p path2, or equivalently, -p path1 path2
+	--parameters -p path.csv	Identical to -p path
 
 	#backend
-	--backend -b name			sets the backend, either 'local', 'pbs', 'pilot', 'custom'
+	--backend -b name			Sets the backend, either 'local', 'pbs', 'pilot', 'custom'
 
 	#pilot jobs
-	--database -d host			(optional) configure the pilot database. Default: none
+	--database -d host			(Optional) configure the pilot database. Default: none
 								When 'localhost' molgenis will start database in background.
 	--pilot	N user@grid.ui 		ssh to grid UI and submit pilot N jobs (e.g. N=20) using 
 								credentials user@grid.ui. Optionally you can use '--id'.
 	--runid 					Configure runid (optional using --pilot)
-	--database-start -dbs		start job database on localhost
-	--database-end	-dbe		end job database on localhost
+	--database-start -dbs		Start job database on localhost
+	--database-end	-dbe		End job database on localhost
 
 	#inspection
-	--fail -f [step]			view all fail logs. Optionally only for particular step.
-	--error -e [step]			view all error logs. Optionally only for particular step.
-	--output -o [step]			view all output logs. Optionally only for particular step.
-	--log -l [step]				view all logs combined. Optionally only for particular step.
+	--fail -f [step]			View all fail logs. Optionally only for particular step.
+	--error -e [step]			View all error logs. Optionally only for particular step.
+	--output -o [step]			View all output logs. Optionally only for particular step.
+	--log -l [step]				View all logs combined. Optionally only for particular step.
 
 	#jobs folder
-	--rundir path				sets the directory where the generated scripts should be 
-								stored, as well as runtime logs. Default: ./run
+	--rundir path				Sets the directory where the generated scripts should be 
+								Stored, as well as runtime logs. Default: ./run
 
 	#seldomly used options						
 	--defaults path 			Loads workflow defaults parameter file. Default: defaults.csv.

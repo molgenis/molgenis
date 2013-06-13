@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.omx.study;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -15,7 +15,8 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.filter.StudyDataRequest;
-import org.molgenis.omx.service.OrderStudyDataService;
+import org.molgenis.omx.study.OrderStudyDataController;
+import org.molgenis.omx.study.OrderStudyDataService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
