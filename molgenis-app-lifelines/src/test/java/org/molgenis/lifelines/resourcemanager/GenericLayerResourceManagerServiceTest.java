@@ -12,8 +12,6 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import javax.xml.validation.Schema;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -22,6 +20,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.molgenis.lifelines.catalogue.CatalogInfo;
+import org.molgenis.lifelines.utils.GenericLayerDataBinder;
 import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.omx.study.StudyDefinitionInfo;
 import org.testng.annotations.BeforeClass;
@@ -31,8 +30,8 @@ import org.testng.annotations.Test;
 public class GenericLayerResourceManagerServiceTest
 {
 	private HttpClient httpClient;
-	private Schema eMeasureSchema;
 	private String resourceManagerUrl;
+	private GenericLayerDataBinder genericLayerDataBinder;
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void GenericLayerResourceManagerService()
@@ -66,7 +65,7 @@ public class GenericLayerResourceManagerServiceTest
 		}))).thenReturn(catalogReleaseResponse);
 
 		GenericLayerResourceManagerService resourceManagerService = new GenericLayerResourceManagerService(httpClient,
-				resourceManagerUrl, eMeasureSchema);
+				resourceManagerUrl, genericLayerDataBinder);
 		List<CatalogInfo> catalogs = resourceManagerService.findCatalogs();
 		assertEquals(catalogs.size(), 1);
 		assertEquals(catalogs.get(0).getId(), "1");
@@ -98,7 +97,7 @@ public class GenericLayerResourceManagerServiceTest
 		}))).thenReturn(studyDefinitionResponse);
 
 		GenericLayerResourceManagerService resourceManagerService = new GenericLayerResourceManagerService(httpClient,
-				resourceManagerUrl, eMeasureSchema);
+				resourceManagerUrl, genericLayerDataBinder);
 		assertNotNull(resourceManagerService.findStudyDefinition("1"));
 	}
 
@@ -127,7 +126,7 @@ public class GenericLayerResourceManagerServiceTest
 		}))).thenReturn(studyDefinitionsResponse);
 
 		GenericLayerResourceManagerService resourceManagerService = new GenericLayerResourceManagerService(httpClient,
-				resourceManagerUrl, eMeasureSchema);
+				resourceManagerUrl, genericLayerDataBinder);
 		List<StudyDefinitionInfo> studyDefinitions = resourceManagerService.findStudyDefinitions();
 		assertEquals(studyDefinitions.size(), 2);
 		assertEquals(studyDefinitions.get(0).getId(), "1");
@@ -152,7 +151,7 @@ public class GenericLayerResourceManagerServiceTest
 	public void setUp() throws ClientProtocolException, IOException
 	{
 		this.resourceManagerUrl = "http://www.dummy.org";
-		this.eMeasureSchema = new SchemaLoader("EMeasure.xsd").getSchema();
+		this.genericLayerDataBinder = new GenericLayerDataBinder(new SchemaLoader("EMeasure.xsd").getSchema());
 		this.httpClient = mock(HttpClient.class);
 	}
 }

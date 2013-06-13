@@ -9,17 +9,14 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.log4j.Logger;
 import org.molgenis.atom.ContentType;
 import org.molgenis.atom.EntryType;
@@ -28,6 +25,8 @@ import org.molgenis.hl7.ObjectFactory;
 import org.molgenis.hl7.POQMMT000001UVQualityMeasureDocument;
 import org.molgenis.hl7.ST;
 import org.molgenis.lifelines.catalogue.CatalogInfo;
+import org.molgenis.lifelines.utils.GenericLayerDataBinder;
+import org.molgenis.lifelines.utils.OutputStreamHttpEntity;
 import org.molgenis.omx.study.StudyDefinitionInfo;
 import org.w3c.dom.Node;
 
@@ -47,17 +46,17 @@ public class GenericLayerResourceManagerService
 
 	private final HttpClient httpClient;
 	private final String resourceManagerServiceUrl;
-	private final Schema emeasureSchema;
+	private final GenericLayerDataBinder genericLayerDataBinder;
 
 	public GenericLayerResourceManagerService(HttpClient httpClient, String resourceManagerServiceUrl,
-			Schema emeasureSchema)
+			GenericLayerDataBinder genericLayerDataBinder)
 	{
 		if (httpClient == null) throw new IllegalArgumentException("HttpClient is null");
 		if (resourceManagerServiceUrl == null) throw new IllegalArgumentException("ResourceManagerServiceUrl is null");
-		if (emeasureSchema == null) throw new IllegalArgumentException("EmeasureSchema is null");
+		if (genericLayerDataBinder == null) throw new IllegalArgumentException("GenericLayerDataBinder is null");
 		this.httpClient = httpClient;
 		this.resourceManagerServiceUrl = resourceManagerServiceUrl;
-		this.emeasureSchema = emeasureSchema;
+		this.genericLayerDataBinder = genericLayerDataBinder;
 	}
 
 	/**
@@ -78,22 +77,6 @@ public class GenericLayerResourceManagerService
 		});
 	}
 
-	private Marshaller createQualityMeasureDocumentMarshaller() throws JAXBException
-	{
-		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
-		Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-		jaxbMarshaller.setSchema(emeasureSchema);
-		return jaxbMarshaller;
-	}
-
-	private Unmarshaller createQualityMeasureDocumentUnmarshaller() throws JAXBException
-	{
-		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-		jaxbUnmarshaller.setSchema(emeasureSchema);
-		return jaxbUnmarshaller;
-	}
-
 	public POQMMT000001UVQualityMeasureDocument findStudyDefinition(String id)
 	{
 		HttpGet httpGet = new HttpGet(resourceManagerServiceUrl + "/studydefinition/" + id);
@@ -102,8 +85,8 @@ public class GenericLayerResourceManagerService
 		{
 			HttpResponse response = httpClient.execute(httpGet);
 			xmlStream = response.getEntity().getContent();
-			return createQualityMeasureDocumentUnmarshaller().unmarshal(new StreamSource(xmlStream),
-					POQMMT000001UVQualityMeasureDocument.class).getValue();
+			return genericLayerDataBinder.createQualityMeasureDocumentUnmarshaller()
+					.unmarshal(new StreamSource(xmlStream), POQMMT000001UVQualityMeasureDocument.class).getValue();
 		}
 		catch (RuntimeException e)
 		{
@@ -133,38 +116,14 @@ public class GenericLayerResourceManagerService
 	{
 		HttpPost httpPost = new HttpPost(resourceManagerServiceUrl + "/studydefinition");
 		httpPost.setHeader("Content-Type", "application/xml");
-		httpPost.setEntity(new AbstractHttpEntity()
+		httpPost.setEntity(new OutputStreamHttpEntity()
 		{
-			@Override
-			public boolean isRepeatable()
-			{
-				return false;
-			}
-
-			@Override
-			public long getContentLength()
-			{
-				return -1;
-			}
-
-			@Override
-			public boolean isStreaming()
-			{
-				return false;
-			}
-
-			@Override
-			public InputStream getContent() throws IOException
-			{
-				throw new UnsupportedOperationException();
-			}
-
 			@Override
 			public void writeTo(final OutputStream outstream) throws IOException
 			{
 				try
 				{
-					createQualityMeasureDocumentMarshaller().marshal(
+					genericLayerDataBinder.createQualityMeasureDocumentMarshaller().marshal(
 							new ObjectFactory().createQualityMeasureDocument(studyDefinition), outstream);
 				}
 				catch (JAXBException e)
@@ -227,7 +186,7 @@ public class GenericLayerResourceManagerService
 
 				for (Object obj : entry.getAuthorOrCategoryOrContent())
 				{
-					Unmarshaller jaxbUnmarshaller = createQualityMeasureDocumentUnmarshaller();
+					Unmarshaller jaxbUnmarshaller = genericLayerDataBinder.createQualityMeasureDocumentUnmarshaller();
 
 					JAXBElement<?> element = (JAXBElement<?>) obj;
 					if (element.getDeclaredType() == ContentType.class)
