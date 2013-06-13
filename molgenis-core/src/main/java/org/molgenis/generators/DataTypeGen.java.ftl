@@ -253,7 +253,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	private java.util.List<${type(field.xrefField)}> ${name(field)}_${name(field.xrefField)} = new java.util.ArrayList<${type(field.xrefField)}>();		
 			<#if field.xrefLabelNames[0] != field.xrefFieldName><#list field.xrefLabelNames as label>
 	@javax.persistence.Transient
-	private java.util.List<String> ${name(field)}_${label} = new java.util.ArrayList<String>();
+	private java.util.List<${type(field.xrefLabels[label_index])}> ${name(field)}_${label} = new java.util.ArrayList<${type(field.xrefLabels[label_index])}>();
 			</#list></#if>	
 			<#elseif type_label == "file" || type_label=="image" >
 	@javax.persistence.Lob
@@ -482,7 +482,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		if(this.${name(field)} != null && !this.${name(field)}.isEmpty())
 		{
 			java.util.List<${type(field.xrefLabels[label_index])}> result = new java.util.ArrayList<${type(field.xrefLabels[label_index])}>(this.${name(field)}.size());
-			for(${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)} o: ${name(field)}) result.add(o.get${JavaName(label)}().toString());
+			for(${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)} o: ${name(field)}) result.add(o.get${JavaName(label)}());
 			return java.util.Collections.unmodifiableList(result);
 		}	
 		else
@@ -495,7 +495,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	 * Update the foreign key ${JavaName(field)}
 	 * This sets ${name(field)} to null until next database transaction.
 	 */
-	public void set${JavaName(field)}_${JavaName(label)}(java.util.List<String> ${name(field)}_${label})
+	public void set${JavaName(field)}_${JavaName(label)}(java.util.List<${type(field.xrefLabels[label_index])}> ${name(field)}_${label})
 	{
 		this.${name(field)}_${label} = ${name(field)}_${label};
 	}		
