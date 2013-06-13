@@ -128,14 +128,17 @@ public class ComputeCommandLine
 
 			String runName = computeProperties.runId;
 
-			String backendName = computeProperties.backend;
-			Long pollInterval = Long.parseLong(computeProperties.interval);
+
+            //TODO implement proper userID in ComputeProperties
+            String userName = "admin";
+
+            String backendName = computeProperties.backend;
+            Long pollInterval = Long.parseLong(computeProperties.interval);
 
 			List<Task> tasks = compute.getTasks();
 			String environment = compute.getUserEnvironment();
 
-			CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks,
-					environment);
+            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment, userName);
 
 			dbApiClient.createRun(createRunRequest);
 

@@ -16,6 +16,7 @@ import org.molgenis.compute5.db.api.RunStatus;
 import org.molgenis.compute5.model.Task;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.auth.MolgenisUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -49,10 +50,11 @@ public class RunService
 	 * @param backendName
 	 * @param pollDelay
 	 * @param tasks
-	 * @param environment
+	 * @param userEnvironment
+     * @param userName
 	 * @return the new ComputeRun
 	 */
-	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String userEnvironment)
+	public ComputeRun create(String name, String backendName, Long pollDelay, List<Task> tasks, String userEnvironment, String userName)
 	{
 		try
 		{
@@ -62,18 +64,25 @@ public class RunService
 				throw new ComputeDbException("Unknown backend with name [" + backendName + "]");
 			}
 
-			if (ComputeRun.findByName(database, name) != null)
+            MolgenisUser user = MolgenisUser.findByName(database, userName);
+            if (user == null)
+            {
+                throw new ComputeDbException("Unknown user with name [" + userName + "]");
+            }
+
+            if (ComputeRun.findByName(database, name) != null)
 			{
 				throw new ComputeDbException("Run with name [" + name + "] already exists");
 			}
 
-			database.beginTx();
+            database.beginTx();
 
 			ComputeRun run = new ComputeRun();
 			run.setComputeBackend(backend);
 			run.setName(name);
 			run.setPollDelay(pollDelay == null ? DEFAULT_POLL_DELAY : pollDelay);
 			run.setUserEnvironment(userEnvironment);
+            run.setOwner(user);
 			database.add(run);
 
 			// Add tasks to db
