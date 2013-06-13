@@ -1,21 +1,19 @@
 package org.molgenis.compute5.parsers;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NavigableSet;
+import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.molgenis.compute5.generators.TupleUtils;
 import org.molgenis.compute5.model.Parameters;
-import org.molgenis.compute5.model.Task;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
@@ -114,7 +112,7 @@ public class ParametersCsvParser
 
 			// add parsed file to the list of parsed files and ensure we'll not
 			// do this file again
-			paramFileSetDone.add(fString); 
+			paramFileSetDone.add(fString);
 
 			// get file f as list of tuples
 			List<Tuple> tupleLst = asTuples(f);
@@ -124,8 +122,8 @@ public class ParametersCsvParser
 			tupleLst = updatePath(tupleLst, Parameters.WORKFLOW, f);
 
 			// same for output path
-//			tupleLst = updatePath(tupleLst, Parameters.WORKDIR_COLUMN, f);
-			
+			// tupleLst = updatePath(tupleLst, Parameters.WORKDIR_COLUMN, f);
+
 			// get other param files we have to parse, and validate that all
 			// values in 'parameters' column equal. If file path is relative
 			// then prepend its parent's path (f)
@@ -326,19 +324,60 @@ public class ParametersCsvParser
 	 * 
 	 * @param f
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
+	@SuppressWarnings("resource")
 	private static List<Tuple> asTuples(File f) throws IOException
 	{
 		List<Tuple> tLst = new ArrayList<Tuple>();
-		for (Tuple t : new CsvReader(f))
+		
+		if (f.toString().endsWith(".properties"))
 		{
-			tLst.add(t);
+			Properties p = new Properties();
+			p.load(new FileInputStream(f));
+
+			// set this.variables
+			KeyValueTuple t = new KeyValueTuple();
+			Iterator<Object> it = p.keySet().iterator();
+			while (it.hasNext())
+			{
+				String key = (String) it.next();
+				String value = p.getProperty(key);
+				t.set(key, value);
+			}
 			
-			for (String p : t.getColNames())
-				if (p.contains(Parameters.STEP_PARAM_SEP)) throw new IOException("Parsing " + f.getName()
-						+ " failed: column names may not contain '" + Parameters.STEP_PARAM_SEP + "'");
+			tLst.add(t);
 		}
+		else
+		{ // assume we want to parse csv
+			if (!f.toString().endsWith(".csv"))
+			{ // assume we want to append '.csv'
+				System.out.println(">> File '" + f.toString() + "' does not end with *.properties or *.csv.");
+				if (f.exists() && f.isFile())
+				{
+					System.out
+							.println("\tThe file exists. We'll assume it is in the CSV-format and start parsing it...");
+				}
+				else
+				{
+					System.out
+							.println("\tWe couldn't find the file. We'll append the extension '.csv' and try again with");
+					System.out.println("\t" + f.toString() + ".csv");
+
+					f = new File(f.toString() + ".csv");
+				}
+			}
+
+			for (Tuple t : new CsvReader(f))
+			{
+				tLst.add(t);
+
+				for (String p : t.getColNames())
+					if (p.contains(Parameters.STEP_PARAM_SEP)) throw new IOException("Parsing " + f.getName()
+							+ " failed: column names may not contain '" + Parameters.STEP_PARAM_SEP + "'");
+			}
+		}
+		
 		return tLst;
 	}
 
@@ -394,11 +433,18 @@ public class ParametersCsvParser
 					}
 					else
 					{
-						if (!t.getString(colName).equals(paramFilesString)) throw new IOException("Values in '"
-								+ Parameters.PARAMETER_COLUMN + "' column are not equal in file '" + f.toString()
-								+ "', please fix:\n'" + t.getString(colName) + "' is different from '" + paramFilesString + "'.\n"
-								+ "You could put all values 'comma-separated' in each cell and repeat that on each line in your file, e.g.:\n" +
-								"\"" + t.getString(colName) + "," + paramFilesString + "\"");
+						if (!t.getString(colName).equals(paramFilesString)) throw new IOException(
+								"Values in '"
+										+ Parameters.PARAMETER_COLUMN
+										+ "' column are not equal in file '"
+										+ f.toString()
+										+ "', please fix:\n'"
+										+ t.getString(colName)
+										+ "' is different from '"
+										+ paramFilesString
+										+ "'.\n"
+										+ "You could put all values 'comma-separated' in each cell and repeat that on each line in your file, e.g.:\n"
+										+ "\"" + t.getString(colName) + "," + paramFilesString + "\"");
 					}
 				}
 			}
@@ -412,7 +458,8 @@ public class ParametersCsvParser
 	}
 
 	/**
-	 * If path to 'column' (eg workflow) file relative, then prepend parent's path (f)
+	 * If path to 'column' (eg workflow) file relative, then prepend parent's
+	 * path (f)
 	 * 
 	 * @param tupleLst
 	 * @return

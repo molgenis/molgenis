@@ -2,6 +2,8 @@ package org.molgenis.lifelines.resourcemanager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -18,10 +21,11 @@ import org.apache.log4j.Logger;
 import org.molgenis.atom.ContentType;
 import org.molgenis.atom.EntryType;
 import org.molgenis.atom.FeedType;
+import org.molgenis.hl7.ObjectFactory;
 import org.molgenis.hl7.POQMMT000001UVQualityMeasureDocument;
 import org.molgenis.hl7.ST;
 import org.molgenis.lifelines.catalogue.CatalogInfo;
-import org.molgenis.lifelines.studydefinition.StudyDefinitionInfo;
+import org.molgenis.omx.study.StudyDefinitionInfo;
 import org.w3c.dom.Node;
 
 import com.google.common.base.Function;
@@ -34,14 +38,14 @@ import com.google.common.collect.Lists;
  * @author erwin
  * 
  */
-public class ResourceManagerService
+public class GenericLayerResourceManagerService
 {
-	private static final Logger LOG = Logger.getLogger(ResourceManagerService.class);
+	private static final Logger LOG = Logger.getLogger(GenericLayerResourceManagerService.class);
 	private final String resourceManagerServiceUrl;
 	private final Schema emeasureSchema;
 	private final boolean validate;
 
-	public ResourceManagerService(String resourceManagerServiceUrl, Schema emeasureSchema, boolean validate)
+	public GenericLayerResourceManagerService(String resourceManagerServiceUrl, Schema emeasureSchema, boolean validate)
 	{
 		if (resourceManagerServiceUrl == null) throw new IllegalArgumentException("ResourceManagerServiceUrl is null");
 		if (emeasureSchema == null) throw new IllegalArgumentException("EmeasureSchema is null");
@@ -66,6 +70,19 @@ public class ResourceManagerService
 				return new StudyDefinitionInfo(input.getId(), input.getName());
 			}
 		});
+	}
+
+	private Marshaller createQualityMeasureDocumentMarshaller() throws JAXBException
+	{
+		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
+		Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+		if (validate)
+		{
+			jaxbMarshaller.setSchema(emeasureSchema);
+		}
+
+		return jaxbMarshaller;
 	}
 
 	private Unmarshaller createQualityMeasureDocumentUnmarshaller() throws JAXBException
@@ -103,6 +120,48 @@ public class ResourceManagerService
 		finally
 		{
 			IOUtils.closeQuietly(xmlStream);
+		}
+	}
+
+	/**
+	 * Persist a studydefinition
+	 * 
+	 * @param studyDefinition
+	 */
+	public void persistStudyDefinition(POQMMT000001UVQualityMeasureDocument studyDefinition)
+	{
+		HttpURLConnection connection = null;
+		try
+		{
+			URL url = new URL(resourceManagerServiceUrl + "/studydefinition");
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Content-Type", "application/xml");
+			connection.setUseCaches(false);
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
+			connection.setConnectTimeout(10000);
+
+			OutputStream outputStream = connection.getOutputStream();
+			createQualityMeasureDocumentMarshaller().marshal(
+					new ObjectFactory().createQualityMeasureDocument(studyDefinition), outputStream);
+			IOUtils.closeQuietly(outputStream);
+
+			int responseCode = connection.getResponseCode();
+			if (responseCode < 200 || responseCode > 299) throw new IOException(
+					"Error persisting study definition (statuscode " + responseCode + ")");
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if (connection != null) connection.disconnect();
 		}
 	}
 

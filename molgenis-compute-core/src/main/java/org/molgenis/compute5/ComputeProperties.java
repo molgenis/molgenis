@@ -59,6 +59,9 @@ public class ComputeProperties
 
 			// set path
 			setPath(args);
+			
+			// if --create, then done
+			if (this.create) return; 
 
 			// prepend path to defaults
 			updateDefaultParameterValues(path);
@@ -171,7 +174,7 @@ public class ComputeProperties
 	 */
 	private String updatePath(String path, String fileName)
 	{
-		if (fileName.startsWith("/")) return fileName;
+		if (fileName.startsWith("/") || fileName.startsWith("~")) return fileName;
 		else return path + (path.endsWith("/") ? "" : "/") + fileName;
 	}
 
@@ -188,11 +191,11 @@ public class ComputeProperties
 
 			// do we want to create a new workflow? If so: where?
 			this.create = cmd.hasOption(Parameters.CREATE);
-			if (this.create) this.createWorkflow = cmd.getOptionValue(Parameters.CREATE);
-			if (null == this.createWorkflow) this.createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
-			this.createWorkflow = updatePath(this.path, this.createWorkflow);
-			// also update 'path' and postpend name of new workflow
-			if (this.create) this.path = this.createWorkflow;
+			if (this.create)
+			{
+				this.createWorkflow = cmd.getOptionValue(Parameters.CREATE, this.createWorkflow);
+				this.createWorkflow = updatePath(this.path, this.createWorkflow);
+			}
 		}
 		catch (ParseException e)
 		{

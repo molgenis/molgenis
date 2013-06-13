@@ -66,13 +66,16 @@ public class ComputeCommandLine
 	{
 		Compute compute = new Compute(computeProperties);
 
-		System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
-		if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
-				+ (new File(computeProperties.defaults)).getAbsolutePath());
-		System.out.println("Using parameters:       " + Joiner.on(",").join(computeProperties.parameters));
-		System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
-		System.out.println("Using backend:          " + computeProperties.backend);
-		System.out.println("Using runID:            " + computeProperties.runId);
+		if (!computeProperties.create)
+		{// inform user:
+			System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
+			if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
+					+ (new File(computeProperties.defaults)).getAbsolutePath());
+			System.out.println("Using parameters:       " + Joiner.on(",").join(computeProperties.parameters));
+			System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
+			System.out.println("Using backend:          " + computeProperties.backend);
+			System.out.println("Using runID:            " + computeProperties.runId);
+		}
 
 		System.out.println(""); // newline
 
@@ -105,7 +108,8 @@ public class ComputeCommandLine
 				});
 
 				System.out.println("Generated jobs that are ready to run:");
-				if (null == scripts) System.out.println("None. Remark: the run (output) directory '" + computeProperties.runDir + "' does not exist.");
+				if (null == scripts) System.out.println("None. Remark: the run (output) directory '"
+						+ computeProperties.runDir + "' does not exist.");
 				else if (0 == scripts.length) System.out.println("None.");
 				else for (File script : scripts)
 				{
@@ -117,26 +121,28 @@ public class ComputeCommandLine
 		{
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
-            ComputeDbApiConnection dbApiConnection =
-                    new HttpClientComputeDbApiConnection(computeProperties.database,computeProperties.port,"/api/v1","admin","admin");
+			ComputeDbApiConnection dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
+					computeProperties.port, "/api/v1", "admin", "admin");
 
-            ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
+			ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
-            String runName = computeProperties.runId;
+			String runName = computeProperties.runId;
 
-            String backendName = computeProperties.backend;
-            Long pollInterval = Long.parseLong(computeProperties.interval);
+			String backendName = computeProperties.backend;
+			Long pollInterval = Long.parseLong(computeProperties.interval);
 
-            List<Task> tasks = compute.getTasks();
-            String environment = compute.getUserEnvironment();
+			List<Task> tasks = compute.getTasks();
+			String environment = compute.getUserEnvironment();
 
-            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment);
+			CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks,
+					environment);
 
-            dbApiClient.createRun(createRunRequest);
+			dbApiClient.createRun(createRunRequest);
 
 			if (computeProperties.execute)
 			{
-				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '" + computeProperties.backend + "'");				
+				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '"
+						+ computeProperties.backend + "'");
 			}
 		}
 
@@ -236,7 +242,7 @@ public class ComputeCommandLine
 	public static Compute create(String path) throws IOException, Exception
 	{
 		ComputeProperties computeProperties = new ComputeProperties(path);
-        computeProperties.generate = true;
+		computeProperties.generate = true;
 
 		return ComputeCommandLine.create(computeProperties);
 	}

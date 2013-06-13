@@ -1,4 +1,4 @@
-package org.molgenis.lifelines.plugins;
+package org.molgenis.lifelines.studydefinition;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ import org.molgenis.hl7.REPCMT000400UV01Component4;
 import org.molgenis.hl7.ST;
 import org.molgenis.hl7.TS;
 import org.molgenis.lifelines.catalogue.CatalogIdConverter;
-import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.lifelines.resourcemanager.GenericLayerResourceManagerService;
 import org.molgenis.lifelines.utils.OmxIdentifierGenerator;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
@@ -44,21 +44,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataQueryService
+public class GenericLayerDataQueryService
 {
-	private static final Logger logger = Logger.getLogger(ResourceManagerService.class);
-	private final Database database;
-	private final String dataQueryServiceUrl;
+	private static final Logger logger = Logger.getLogger(GenericLayerResourceManagerService.class);
 
 	@Autowired
-	public DataQueryService(Database database, @Value("${lifelines.data.query.service.url}")
-	String dataQueryServiceUrl)
-	{
-		if (database == null) throw new IllegalArgumentException("database is null");
-		if (dataQueryServiceUrl == null) throw new IllegalArgumentException("DataQueryServiceUrl is null");
-		this.database = database;
-		this.dataQueryServiceUrl = dataQueryServiceUrl;
-	}
+	private Database database;
+	@Value("${lifelines.data.query.service.url}")
+	private String dataQueryServiceUrl;
 
 	// suppress false Eclipse warning
 	@SuppressWarnings("resource")
@@ -82,7 +75,7 @@ public class DataQueryService
 			urlConnection.setDoInput(true);
 			urlConnection.setDoOutput(true);
 			urlConnection.setUseCaches(false);
-			urlConnection.setConnectTimeout(100000);
+			urlConnection.setConnectTimeout(10000);
 
 			outStream = urlConnection.getOutputStream();
 			Marshaller marshaller = jaxbContext.createMarshaller();
