@@ -12,14 +12,17 @@ public class CreateRunRequest
 	private final Long pollDelay;
 	private final List<Task> tasks;
 	private final String environment;
+	private final String userName;
 
-	public CreateRunRequest(String runName, String backendName, Long pollDelay, List<Task> tasks, String environment)
+
+	public CreateRunRequest(String runName, String backendName, Long pollDelay, List<Task> tasks, String environment, String userName)
 	{
 		this.runName = runName;
 		this.backendName = backendName;
 		this.pollDelay = pollDelay;
 		this.tasks = tasks;
 		this.environment = environment;
+        this.userName = userName;
 	}
 
 	public String getRunName()
@@ -47,4 +50,8 @@ public class CreateRunRequest
 		return environment;
 	}
 
+    public String getUserName()
+    {
+        return userName;
+    }
 }
