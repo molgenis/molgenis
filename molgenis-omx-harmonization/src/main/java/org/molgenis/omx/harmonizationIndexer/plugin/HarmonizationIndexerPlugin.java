@@ -6,19 +6,27 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
+import org.molgenis.omx.harmonizationIndexer.controller.OntologyModel;
+import org.molgenis.search.SearchService;
 import org.molgenis.util.Entity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 
 public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+	private SearchService searchService;
 
 	public HarmonizationIndexerPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
+	}
+
+	@Autowired
+	public void setSearchService(SearchService searchService)
+	{
+		this.searchService = searchService;
 	}
 
 	@Override
@@ -51,6 +59,23 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 		{
 			File file = request.getFile("uploadedOntology");
 			System.out.println("----------------" + file.getAbsolutePath());
+			indexOntology(file, db);
+		}
+	}
+
+	@Async
+	public void indexOntology(File ontologyFile, Database db)
+	{
+		try
+		{
+			OntologyModel model = new OntologyModel(ontologyFile);
+			searchService.indexTupleTable("ontology", new OntologyTable(model, db));
+			// searchService.indexTupleTable("ontologyTerm", new
+			// OntologyTermTable(model, db));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
