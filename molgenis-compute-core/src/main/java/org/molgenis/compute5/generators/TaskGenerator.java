@@ -1,5 +1,6 @@
 package org.molgenis.compute5.generators;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -92,7 +93,7 @@ public class TaskGenerator
 
 				// now source the task's parameters from each prevStep.env on
 				// which this task depends
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\n\nsource " + Parameters.ENVIRONMENT + "\n\n";
+				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\n\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
 
 				for (String previousStepName : step.getPreviousSteps())
 				{ // we have jobs on which we depend in this prev step
@@ -108,7 +109,7 @@ public class TaskGenerator
 							task.getPreviousTasks().add(prevJobName);
 
 							// source its environment
-							parameterHeader += "source " + prevJobName + Parameters.ENVIRONMENT_EXTENSION + "\n";
+							parameterHeader += Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + prevJobName + Parameters.ENVIRONMENT_EXTENSION + "\n";
 						}
 					}
 				}
@@ -163,7 +164,7 @@ public class TaskGenerator
 
 				// append footer that appends the task's parameters to
 				// environment of this task
-				String myEnvironmentFile = task.getName() + Parameters.ENVIRONMENT_EXTENSION;
+				String myEnvironmentFile = Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + task.getName() + Parameters.ENVIRONMENT_EXTENSION;
 				script = script + "\n# End of your protocol template\n";
 				script = script + "\n#\n##\n### Save output in environment file: '" + myEnvironmentFile
 						+ "' with the output vars of this step\n##\n#";

@@ -1,6 +1,11 @@
 #header
 
 #
+## Set location of *.env files
+#
+ENVIRONMENT_DIR="."
+
+#
 ## Load functions to handle errors
 #
 exitWithError(){
