@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
-	@Value("${app.lifelines.profile:@null}")
+	@Value("${lifelines.profile:@null}")
 	private String appProfile;
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -52,7 +52,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		{
 			StringBuilder message = new StringBuilder("please configure: ");
 			if (appProfile == null) message
-					.append("app.lifelines.profile(possible values: workspace or website), ");
+					.append("lifelines.profile(possible values: workspace or website), ");
 			if (dataManagerPassword == null) message
 					.append("default lifelines.datamanager.password, ");
 			if (researchPassword == null) message
