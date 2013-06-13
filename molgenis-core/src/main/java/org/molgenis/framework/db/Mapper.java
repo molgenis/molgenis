@@ -72,7 +72,7 @@ public interface Mapper<E extends Entity>
 
 	public FieldType getFieldType(String field);
 
-	public void resolveForeignKeys(List<E> enteties) throws ParseException, DatabaseException;
+	public void resolveForeignKeys(List<E> entities) throws ParseException, DatabaseException;
 
 	public String createFindSqlInclRules(QueryRule[] rules) throws DatabaseException;
 
