@@ -26,6 +26,7 @@ import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.ui.CatalogueLoaderPluginPlugin;
+import org.molgenis.ui.StudyDefinitionLoaderPluginPlugin;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
