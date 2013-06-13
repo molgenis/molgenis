@@ -153,7 +153,7 @@ public class ApiController
 		try
 		{
 			runService.create(request.getRunName(), request.getBackendName(), request.getPollDelay(),
-					request.getTasks(), request.getEnvironment());
+					request.getTasks(), request.getEnvironment(), request.getUserName());
 		}
 		catch (Exception e)
 		{

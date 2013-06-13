@@ -20,8 +20,8 @@ import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
 
 /**
- * Mock Database implementation for use in unittests. Use setEntities for define entities to be returned by the query
- * and find methods
+ * Mock Database implementation for use in unittests. Use setEntities for define
+ * entities to be returned by the query and find methods
  * 
  * Implement more methods if you need them.
  * 
