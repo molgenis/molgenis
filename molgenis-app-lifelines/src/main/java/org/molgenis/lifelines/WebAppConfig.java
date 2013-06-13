@@ -12,12 +12,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
 import org.molgenis.lifelines.resourcemanager.GenericLayerResourceManagerService;
 import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
+import org.molgenis.lifelines.utils.GenericLayerDataBinder;
 import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
@@ -189,7 +192,11 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public HttpClient httpClient()
 	{
-		return new DefaultHttpClient(connectionManager());
+		DefaultHttpClient defaultHttpClient = new DefaultHttpClient(connectionManager());
+		HttpParams httpParams = defaultHttpClient.getParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, 2000);
+		HttpConnectionParams.setSoTimeout(httpParams, 10000);
+		return defaultHttpClient;
 	}
 
 	@Bean(destroyMethod = "shutdown")
@@ -211,9 +218,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
 
 	@Bean
-	public GenericLayerResourceManagerService resourceManagerService()
+	public GenericLayerResourceManagerService genericLayerResourceManagerService()
 	{
-		return new GenericLayerResourceManagerService(httpClient(), resourceManagerServiceUrl, emeasureSchema());
+		return new GenericLayerResourceManagerService(httpClient(), resourceManagerServiceUrl,
+				qualityMeasureDocumentBinder());
 	}
 
 	@Bean
@@ -243,9 +251,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public Schema emeasureSchema()
+	public GenericLayerDataBinder genericLayerDataBinder()
 	{
-		return new SchemaLoader("EMeasure.xsd").getSchema();
+		Schema eMeasureSchema = new SchemaLoader("EMeasure.xsd").getSchema();
+		return new GenericLayerDataBinder(eMeasureSchema);
 	}
 
 	/**
