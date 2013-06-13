@@ -5,16 +5,12 @@ import java.util.Properties;
 
 import javax.xml.validation.Schema;
 
-import nl.umcg.hl7.CatalogService;
-import nl.umcg.hl7.GenericLayerCatalogService;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
@@ -25,8 +21,6 @@ import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.search.SearchSecurityConfig;
-import org.molgenis.ui.CatalogueLoaderPluginPlugin;
-import org.molgenis.ui.StudyDefinitionLoaderPluginPlugin;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -209,6 +203,13 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public GenericLayerDataBinder genericLayerDataBinder()
+	{
+		Schema eMeasureSchema = new SchemaLoader("EMeasure.xsd").getSchema();
+		return new GenericLayerDataBinder(eMeasureSchema);
+	}
+
+	@Bean
 	public GenericLayerCatalogService genericLayerCatalogService()
 	{
 		return new CatalogService().getBasicHttpBindingGenericLayerCatalogService();
@@ -220,8 +221,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public GenericLayerResourceManagerService genericLayerResourceManagerService()
 	{
-		return new GenericLayerResourceManagerService(httpClient(), resourceManagerServiceUrl,
-				qualityMeasureDocumentBinder());
+		return new GenericLayerResourceManagerService(httpClient(), resourceManagerServiceUrl, genericLayerDataBinder());
 	}
 
 	@Bean
@@ -248,13 +248,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public SecurityHandlerInterceptor studyDefinitionLoaderHandlerInterceptor()
 	{
 		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPluginPlugin.class);
-	}
-
-	@Bean
-	public GenericLayerDataBinder genericLayerDataBinder()
-	{
-		Schema eMeasureSchema = new SchemaLoader("EMeasure.xsd").getSchema();
-		return new GenericLayerDataBinder(eMeasureSchema);
 	}
 
 	/**
