@@ -17,6 +17,7 @@ import java.util.Collections;
 </#if>
 import java.util.List;
 
+import java.text.ParseException;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
@@ -230,4 +231,75 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		}
 	}
 </#if>
+	@Override
+	public int executeAdd(List<? extends E> entities) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		return super.executeAdd(entities);
+	}
+	
+	@Override
+	public int executeUpdate(List<? extends E> entities) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		return super.executeUpdate(entities);
+	}
+	
+	@Override
+	public int executeRemove(List<? extends E> entities) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		return super.executeRemove(entities);
+	}
+	
+	@Override
+	public void resolveForeignKeys(List<E> entities) throws ParseException, DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+					throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}
+		super.resolveForeignKeys(entities);
+	}
+	
+	@Override
+	public List<E> toList(TupleReader reader, int limit) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
+				throw new DatabaseAccessException("No write permission on ${entityClass}");
+
+			//TODO: Add row level security filters
+		}
+		return super.toList(reader, limit);
+	}
+	
+	@Override
+	public String createFindSqlInclRules(QueryRule[] rules) throws DatabaseException
+	{
+		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		{
+			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
+				throw new DatabaseAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.createFindSqlInclRules(rules);
+	}
+
+	
+	
 }
