@@ -28,7 +28,7 @@ import org.molgenis.hl7.REPCMT000100UV01Organizer;
 import org.molgenis.hl7.ValueSets;
 import org.molgenis.hl7.ValueSets.ValueSet;
 import org.molgenis.hl7.ValueSets.ValueSet.Code;
-import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.lifelines.resourcemanager.GenericLayerResourceManagerService;
 import org.molgenis.lifelines.utils.HL7DataTypeMapper;
 import org.molgenis.lifelines.utils.OmxIdentifierGenerator;
 import org.molgenis.omx.observ.Category;
@@ -48,11 +48,11 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 	private final Database database;
 	private final GenericLayerCatalogService genericLayerCatalogService;
-	private final ResourceManagerService resourceManagerService;
+	private final GenericLayerResourceManagerService resourceManagerService;
 
 	@Autowired
 	public GenericLayerCatalogueLoaderService(Database database, GenericLayerCatalogService genericLayerCatalogService,
-			ResourceManagerService resourceManagerService)
+			GenericLayerResourceManagerService resourceManagerService)
 	{
 		if (database == null) throw new IllegalArgumentException("database is null");
 		if (genericLayerCatalogService == null) throw new IllegalArgumentException("genericLayerCatalogService is null");

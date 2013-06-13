@@ -155,4 +155,13 @@ public abstract class ForEachEntityGenerator extends Generator
 		this.handwritten = handwritten;
 	}
 
+	public boolean isIncludeAbstract()
+	{
+		return includeAbstract;
+	}
+
+	public void setIncludeAbstract(boolean includeAbstract)
+	{
+		this.includeAbstract = includeAbstract;
+	}
 }

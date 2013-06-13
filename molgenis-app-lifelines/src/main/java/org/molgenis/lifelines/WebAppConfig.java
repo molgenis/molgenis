@@ -8,31 +8,35 @@ import javax.xml.validation.Schema;
 import nl.umcg.hl7.CatalogService;
 import nl.umcg.hl7.GenericLayerCatalogService;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.lifelines.catalogue.CatalogLoaderController;
-import org.molgenis.lifelines.plugins.CatalogueLoaderPlugin;
-import org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin;
-import org.molgenis.lifelines.resourcemanager.ResourceManagerService;
+import org.molgenis.lifelines.resourcemanager.GenericLayerResourceManagerService;
 import org.molgenis.lifelines.studydefinition.StudyDefinitionLoaderController;
+import org.molgenis.lifelines.utils.GenericLayerDataBinder;
 import org.molgenis.lifelines.utils.SchemaLoader;
 import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.search.SearchSecurityConfig;
+import org.molgenis.ui.CatalogueLoaderPluginPlugin;
+import org.molgenis.ui.StudyDefinitionLoaderPluginPlugin;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -43,7 +47,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -70,6 +73,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
 	}
 
 	@Override
@@ -95,6 +99,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
+		pspc.setNullValue("@null");
 		return pspc;
 	}
 
@@ -185,10 +190,29 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
-	public ShoppingCart shoppingCart()
+	public HttpClient httpClient()
 	{
-		return new ShoppingCart();
+		DefaultHttpClient defaultHttpClient = new DefaultHttpClient(connectionManager());
+		HttpParams httpParams = defaultHttpClient.getParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, 2000);
+		HttpConnectionParams.setSoTimeout(httpParams, 30000);
+		return defaultHttpClient;
+	}
+
+	@Bean(destroyMethod = "shutdown")
+	protected ClientConnectionManager connectionManager()
+	{
+		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager();
+		connectionManager.setDefaultMaxPerRoute(10);
+		connectionManager.setMaxTotal(20);
+		return connectionManager;
+	}
+
+	@Bean
+	public GenericLayerDataBinder genericLayerDataBinder()
+	{
+		Schema eMeasureSchema = new SchemaLoader("EMeasure.xsd").getSchema();
+		return new GenericLayerDataBinder(eMeasureSchema);
 	}
 
 	@Bean
@@ -200,19 +224,16 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Value("${lifelines.resource.manager.service.url}")
 	private String resourceManagerServiceUrl;// Specify in molgenis-server.properties
 
-	@Value("${lifelines.validate:false}")
-	private boolean validate;// Specify in molgenis-server.properties, validate generic layer responses
-
 	@Bean
-	public ResourceManagerService resourceManagerService()
+	public GenericLayerResourceManagerService genericLayerResourceManagerService()
 	{
-		return new ResourceManagerService(resourceManagerServiceUrl, emeasureSchema(), validate);
+		return new GenericLayerResourceManagerService(httpClient(), resourceManagerServiceUrl, genericLayerDataBinder());
 	}
 
 	@Bean
 	public SecurityHandlerInterceptor catalogLoaderHandlerInterceptor()
 	{
-		return new SecurityHandlerInterceptor(CatalogueLoaderPlugin.class);
+		return new SecurityHandlerInterceptor(CatalogueLoaderPluginPlugin.class);
 	}
 
 	@Bean
@@ -232,13 +253,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public SecurityHandlerInterceptor studyDefinitionLoaderHandlerInterceptor()
 	{
-		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPlugin.class);
-	}
-
-	@Bean
-	public Schema emeasureSchema()
-	{
-		return new SchemaLoader("EMeasure.xsd").getSchema();
+		return new SecurityHandlerInterceptor(StudyDefinitionLoaderPluginPlugin.class);
 	}
 
 	/**

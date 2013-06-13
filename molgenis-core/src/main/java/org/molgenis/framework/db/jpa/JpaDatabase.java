@@ -1,7 +1,6 @@
 package org.molgenis.framework.db.jpa;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,18 +8,18 @@ import javax.persistence.EntityManager;
 
 import org.molgenis.framework.db.AbstractDatabase;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.ExampleData;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
 
 /**
- * Java Persistence API (JPA) implementation of Database to query relational databases.
+ * Java Persistence API (JPA) implementation of Database to query relational
+ * databases.
  * <p>
- * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be added for each
- * {@link org.molgenis.framework.util.Entity} E that can be queried. These mappers take care of the interaction with a
- * database.
+ * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be
+ * added for each {@link org.molgenis.framework.util.Entity} E that can be
+ * queried. These mappers take care of the interaction with a database.
  * 
  * @author Morris Swertz
  * @author Joris Lops
@@ -114,37 +113,6 @@ public class JpaDatabase extends AbstractDatabase
 		{
 			throw new IOException(e);
 		}
-	}
-
-	@Override
-	public void createTables()
-	{
-		JpaUtil.dropAndCreateTables(this, null);
-	}
-
-	@Override
-	public void updateTables()
-	{
-		JpaUtil.updateTables(this, null);
-	}
-
-	@Override
-	public void dropTables()
-	{
-		JpaUtil.dropTables(this, null);
-	}
-
-	@Override
-	public void loadExampleData(ExampleData exampleData) throws DatabaseException
-	{
-		exampleData.load(this);
-	}
-
-	@Override
-	@Deprecated
-	public Connection getConnection() throws DatabaseException
-	{
-		return JpaFrameworkFactory.createFramework().getConnection(em);
 	}
 
 	@Override

@@ -8,6 +8,9 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.lifelines.catalogue.CatalogIdConverter;
 import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.omx.study.StudyDefinitionInfo;
+import org.molgenis.omx.study.StudyDefinitionService;
+import org.molgenis.omx.study.UnknownStudyDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,16 +28,15 @@ public class StudyDefinitionLoaderController
 	public static final String VIEW_NAME = "study-definition-loader";
 	private static final Logger LOG = Logger.getLogger(StudyDefinitionLoaderController.class);
 	private final Database database;
-	private final StudyDefinitionLoaderService studyDefinitionLoaderService;
+	private final StudyDefinitionService studyDefinitionService;
 
 	@Autowired
-	public StudyDefinitionLoaderController(Database database, StudyDefinitionLoaderService studyDefinitionLoaderService)
+	public StudyDefinitionLoaderController(Database database, StudyDefinitionService studyDefinitionService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database id null");
-		if (studyDefinitionLoaderService == null) throw new IllegalArgumentException(
-				"StudyDefinitionLoaderService is null");
+		if (database == null) throw new IllegalArgumentException("database is null");
+		if (studyDefinitionService == null) throw new IllegalArgumentException("study definition service is null");
 		this.database = database;
-		this.studyDefinitionLoaderService = studyDefinitionLoaderService;
+		this.studyDefinitionService = studyDefinitionService;
 	}
 
 	/**
@@ -63,7 +65,7 @@ public class StudyDefinitionLoaderController
 	@RequestMapping(LIST_URI)
 	public String listStudyDefinitions(Model model) throws DatabaseException
 	{
-		List<StudyDefinitionInfo> studyDefinitions = studyDefinitionLoaderService.findStudyDefinitions();
+		List<StudyDefinitionInfo> studyDefinitions = studyDefinitionService.findStudyDefinitions();
 		LOG.debug("Got [" + studyDefinitions.size() + "] catalogs from service");
 
 		List<StudyDefinitionModel> models = new ArrayList<StudyDefinitionModel>(studyDefinitions.size());
@@ -101,7 +103,7 @@ public class StudyDefinitionLoaderController
 		{
 			if (id != null)
 			{
-				studyDefinitionLoaderService.loadStudyDefinition(id);
+				studyDefinitionService.loadStudyDefinition(id);
 				model.addAttribute("successMessage", "Studydefinition loaded");
 				LOG.info("Loaded studydefinition with id [" + id + "]");
 			}
