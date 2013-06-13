@@ -21,7 +21,7 @@ public class TaskGeneratorDB
 	private static final Logger LOG = Logger.getLogger(TaskGeneratorDB.class);
 
 	@SuppressWarnings("resource")
-	public void generateRun(String parametersFile, String runName, String backendName, Long pollDelay) throws Exception
+	public void generateRun(String parametersFile, String runName, String backendName, Long pollDelay, String userName) throws Exception
 	{
 		LOG.info("Generating task for backend [" + backendName + "] with parametersfile [" + parametersFile + "]");
 
@@ -35,7 +35,7 @@ public class TaskGeneratorDB
 			RunService service = new RunService(database, null);
 
 			String userEnvironment = new EnvironmentGenerator().getEnvironment(compute);
-			service.create(runName, backendName, pollDelay, compute.getTasks(), userEnvironment);
+			service.create(runName, backendName, pollDelay, compute.getTasks(), userEnvironment, userName);
 			LOG.info("Tasks created");
 		}
 		finally
@@ -50,7 +50,7 @@ public class TaskGeneratorDB
 		new TaskGeneratorDB()
 				.generateRun(
 						"/Users/hvbyelas/Development/molgenis/molgenis-compute-core/src/main/resources/workflows/impute2",
-						"test1ImportImpute2", "ui.grid.sara.nl", 2000L);
+						"test1ImportImpute2", "ui.grid.sara.nl", 2000L, "admin");
 	}
 
 }

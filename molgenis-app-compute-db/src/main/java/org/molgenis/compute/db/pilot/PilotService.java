@@ -50,7 +50,7 @@ public class PilotService implements MolgenisService
 
 		if ("started".equals(request.getString("status")))
 		{
-			String backend = request.getString("backend");
+        	String backend = request.getString("backend");
 
             List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
                     .equals(ComputeBackend.NAME, backend).find();

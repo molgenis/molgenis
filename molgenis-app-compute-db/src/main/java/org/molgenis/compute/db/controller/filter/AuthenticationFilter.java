@@ -49,22 +49,12 @@ public class AuthenticationFilter implements Filter {
 				boolean login = db.getLogin().login(db, auth.getUsername(), auth.getPassword());
 				if (!login)
 				{
-
 					((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
 					return;
 				}
                 else
                 {
-                    Map<String, String[]> parameters = request.getParameterMap();
-                    String pilotID = parameters.get(PILOT_ID)[0];
 
-                    List< Pilot > pilotList = db.query(Pilot.class).eq(Pilot.VALUE, pilotID)
-                            .and().eq(Pilot.STATUS, SUBMITTED).find();
-                    if(pilotList.size() == 0)
-                    {
-                        ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                        return;
-                    }
                 }
 			}
 			catch (Exception e)
