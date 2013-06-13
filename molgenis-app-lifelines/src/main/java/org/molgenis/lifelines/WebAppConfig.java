@@ -26,7 +26,6 @@ import org.molgenis.lifelines.utils.SecurityHandlerInterceptor;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.ui.CatalogueLoaderPluginPlugin;
-import org.molgenis.ui.StudyDefinitionLoaderPluginPlugin;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -195,7 +194,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		DefaultHttpClient defaultHttpClient = new DefaultHttpClient(connectionManager());
 		HttpParams httpParams = defaultHttpClient.getParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, 2000);
-		HttpConnectionParams.setSoTimeout(httpParams, 10000);
+		HttpConnectionParams.setSoTimeout(httpParams, 30000);
 		return defaultHttpClient;
 	}
 
