@@ -83,10 +83,10 @@
 				<#if f.type == 'xref'>
 				Object label = object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}();
 				<#else>
-				for(${type(field.xrefLabels[label_index])} label: object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}())
+				for(Object label: object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}())
 				</#if>
 				{
-					org.molgenis.framework.db.QueryRule xrefFilter = new org.molgenis.framework.db.QueryRule("${f.xrefLabelNames[0]}", org.molgenis.framework.db.QueryRule.Operator.EQUALS, label);
+					org.molgenis.framework.db.QueryRule xrefFilter = new org.molgenis.framework.db.QueryRule("${f.xrefLabelNames[0]}", org.molgenis.framework.db.QueryRule.Operator.EQUALS, label.toString());
 					
 					if(label != null && !${name(f)}Rules.containsKey(label))
 					{
