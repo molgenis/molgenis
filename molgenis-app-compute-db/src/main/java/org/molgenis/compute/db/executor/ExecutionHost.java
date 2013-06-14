@@ -33,7 +33,7 @@ public class ExecutionHost extends Ssh
 	}
 
 	public void submitPilot(ComputeBackend computeBackend, String command,
-                            String pilotID, String sh, String jdl) throws IOException
+                            String pilotID, String sh, String jdl, MolgenisUser owner) throws IOException
 	{
 
         LOG.info("Transferring file maverick" + pilotID + ".jdl ...");
@@ -53,14 +53,11 @@ public class ExecutionHost extends Ssh
             SshResult result = executeCommand(command);
             if (!"".equals(result.getStdErr()))
             {
-                //throw new IOException(result.getStdErr());
                 System.out.println(result.getStdErr());
             }
 
             String sOut = result.getStdOut();
             LOG.info("Command StdOut result:\n" + sOut);
-
-
 
             if(sOut.contains(CORRECT_GLITE_RESPOND))
             {
@@ -87,11 +84,10 @@ public class ExecutionHost extends Ssh
                     }
 
                     List<MolgenisUser> owners = database.query(MolgenisUser.class).eq(MolgenisUser.NAME,
-                            database.getLogin().getUserName()).find();
+                            owner.getName()).find();
 
                     if(owners.size() == 0)
                         LOG.error("No molgenis user found [" + database.getLogin().getUserName() + "] to submit pilot job");
-
 
                     database.beginTx();
 
