@@ -182,7 +182,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		grid.setName("ui.grid.sara.nl");
 		grid.setBackendUrl("ui.grid.sara.nl");
 		grid.setHostType("GRID");
-		grid.setCommand("glite-wms-job-submit  -d $USER -o pilot-one $HOME/maverick/maverick.jdl");
+		grid.setCommand("glite-wms-job-submit  -d $USER -o pilot-one $HOME/maverick/maverick${pilotid}.jdl");
 		database.add(grid);
 	}
 }

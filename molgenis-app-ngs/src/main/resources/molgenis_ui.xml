@@ -5,29 +5,30 @@
 	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
 	
 	<menu name="main">
-		<plugin label="Home" name="Home" type="org.molgenis.ngs.plugins.home.Home"/>
+		<plugin name="Home" type="org.molgenis.ngs.plugins.home.Home" label="Home" />
+		
+		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
 		
 		<form name="Projects" entity="Project" label="Projects" viewtype="list">
 			<form name="Samples1" entity="Sample" label="Samples" viewtype="list" />
 		</form>
 
-		<form name="FlowcellsAndRuns" entity="Flowcell">
+		<form name="FlowcellRuns" entity="Flowcell">
 			<form name="FlowcellLanes" entity="FlowcellLane" label="Samples in Lanes" viewtype="list" />
 		</form>
 		
 		<plugin name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
 		
-		<menu name="Settings" >
+		<menu name="Configuration" >
 			<form name="Users" entity="NgsUser" label="User" />
 			<form name="Flowcells" entity="Flowcell" label="Flowcell"/>
+			<form name="SampleBarcodeTypes" entity="SampleBarcodeType" label="Barcode type" />
 			<form name="SampleBarcodes" entity="SampleBarcode" label="Barcode" />
 			<form name="CapturingKits" entity="CapturingKit" label="Capturing kit" />
 			<form name="PrepKits" entity="PrepKit" label="Preperation kit" />
 			<form name="Sequencers" entity="Machine" label="Sequencer" />
 			<form name="Samples2" entity="Sample" label="Samples" viewtype="list" />
 		</menu>
-		
-		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
 		
 		<!-- To be added in the future 
 		<menu name="Admin">
