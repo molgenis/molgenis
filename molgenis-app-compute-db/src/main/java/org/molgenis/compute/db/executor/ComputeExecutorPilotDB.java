@@ -91,7 +91,6 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
                                                 command, pilotID, sh, jdl, computeRun.getOwner());
 				}
 
-				// sleep, because we have a strange behavior in pilot service
 				try
 				{
 					Thread.sleep(2000);

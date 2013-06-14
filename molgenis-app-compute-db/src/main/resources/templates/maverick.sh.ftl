@@ -107,7 +107,7 @@ while [ 1 ] ; do
                 echo "NOT RUNNING $COUNTER"
 
                 #time to make sure that job reported back to db
-                if [ $COUNTER -eq 3 ];
+                if [ $COUNTER -eq 10 ];
                 then
                 	echo 'FAILED 3 TIMES'
                 	cp log.log inter.log
@@ -125,5 +125,5 @@ while [ 1 ] ; do
         fi
         #this sleep can be modified depending on how often, you like to receive the job status
         #it also depends on the number of running jobs, more jobs -> bigger interval
-        sleep 10
+        sleep 30
 done

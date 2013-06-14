@@ -21,12 +21,12 @@ RetryCount = 0;
 # Requirements = (other.GlueCEPolicyMaxCPUTime >= 1440);
 # && other.GlueCEPolicyMaxCPUTime >= 1440
 
-Requirements = ((other.GlueCEInfoHostName =="creamce.gina.sara.nl")
-#other.GlueCEInfoHostName == "cygnus.grid.rug.nl")
+Requirements = ((other.GlueCEInfoHostName =="creamce.gina.sara.nl" ||
+other.GlueCEInfoHostName == "cygnus.grid.rug.nl" ||
 #other.GlueCEInfoHostName == "ce.lsg.hubrecht.eu" ||
 #other.GlueCEInfoHostName == "ce.lsg.psy.vu.nl")
 #other.GlueCEInfoHostName == "creamce.gina.sara.nl" ||
-#other.GlueCEInfoHostName == "gazon.nikhef.nl")
+other.GlueCEInfoHostName == "gazon.nikhef.nl")
 #other.GlueCEInfoHostName == "juk.nikhef.nl" ||
 #other.GlueCEInfoHostName == "gb-ce-amc.amc.nl" ||
 #other.GlueCEInfoHostName == "gb-ce-emc.erasmusmc.nl" ||
