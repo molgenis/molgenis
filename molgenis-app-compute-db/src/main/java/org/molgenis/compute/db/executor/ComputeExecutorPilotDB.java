@@ -88,7 +88,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
                     String sh = weaveFreemarker(shTemplate, values);
 
 					executionHost.submitPilot(computeRun.getComputeBackend(),
-                                                command, pilotID, sh, jdl);
+                                                command, pilotID, sh, jdl, computeRun.getOwner());
 				}
 
 				// sleep, because we have a strange behavior in pilot service
