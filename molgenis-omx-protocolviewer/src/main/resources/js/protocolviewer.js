@@ -673,7 +673,7 @@
 	function getDescription(feature){
 		var str = feature.description;
 		if(str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}'))
-			str = '{"en" : "' + str + '"}';
+			return {"en": str};
 		return JSON.parse(str ? str : '{}');
 	}
 
