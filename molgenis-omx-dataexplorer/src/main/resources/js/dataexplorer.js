@@ -1,7 +1,10 @@
 (function($, w) {
 	"use strict";
 
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = w.molgenis = w.molgenis || a
+	{
+	}
+	;
 
 	var resultsTable = null;
 	var featureFilters = {};
@@ -475,6 +478,14 @@
 			ns.removeFeatureFilter($(this).data('href'));
 			return false;
 		});
+	};
+
+	ns.formatValue = function(value, dataType) {
+		if (dataType == "hyperlink")
+			value = '<a href="' + value + '">' + value + '</a>';
+		else if (dataType == "email")
+			value = '<a href="mailto:' + value + '">' + value + '</a>';
+		return value;
 	};
 
 	ns.search = function(callback) {

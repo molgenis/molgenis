@@ -3,22 +3,22 @@
 
 	var molgenis = w.molgenis = w.molgenis || {};
 	var sortRule = null;
-	
-	molgenis.ResultsTable = function ResultsTable () {
+
+	molgenis.ResultsTable = function ResultsTable() {
 	};
 
 	molgenis.ResultsTable.prototype.getMaxRows = function() {
 		return 20;
 	};
-	
+
 	molgenis.ResultsTable.prototype.getSortRule = function() {
 		return sortRule;
 	};
-	
+
 	molgenis.ResultsTable.prototype.resetSortRule = function() {
 		sortRule = null;
 	};
-	
+
 	molgenis.ResultsTable.prototype.build = function(searchResponse, selectedFeatures, restApi) {
 		var nrRows = searchResponse.totalHitCount;
 
@@ -55,7 +55,7 @@
 				var feature = restApi.get(this);
 				var value = columnValueMap[feature.identifier];
 				if (value) {
-					items.push('<td>' + value + '</td>');
+					items.push('<td>' + molgenis.formatValue(value, feature.dataType) + '</td>');
 				} else {
 					items.push('<td></td>');
 				}
@@ -85,10 +85,10 @@
 					operator : 'SORTASC'
 				};
 			}
-			
+
 			molgenis.updateObservationSetsTable();
 			return false;
 		});
 	};
-	
+
 }($, window.top));
