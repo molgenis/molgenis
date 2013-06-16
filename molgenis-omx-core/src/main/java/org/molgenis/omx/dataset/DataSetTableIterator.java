@@ -10,7 +10,8 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
 import org.molgenis.model.elements.Field;
-import org.molgenis.omx.converters.observedvalue.ValueConverter;
+import org.molgenis.omx.converters.ValueConverter;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
@@ -82,16 +83,16 @@ public class DataSetTableIterator implements Iterator<Tuple>
 					.in(ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames)).find())
 			{
 				ObservableFeature feature = v.getFeature();
-
-				Object value = ValueConverter.fromString(v.getValue(), db, feature);
-
+				Object value = ValueConverter.extractValue(v.getValue());
 				tuple.set(feature.getIdentifier(), value);
 			}
 		}
 		catch (DatabaseException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		catch (ValueConverterException e)
+		{
 			throw new RuntimeException(e);
 		}
 
