@@ -16,10 +16,12 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
+import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.Value;
 import org.molgenis.util.tuple.Tuple;
 
 public class DataSetImporter
@@ -109,8 +111,9 @@ public class DataSetImporter
 
 				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
+					Value value = ValueConverter.fromTuple(row, entry.getKey(), db, entry.getValue());
+
 					// create observed value
-					String value = row.getString(entry.getKey());
 					ObservedValue observedValue = new ObservedValue();
 					observedValue.setFeature(entry.getValue());
 					observedValue.setValue(value);
