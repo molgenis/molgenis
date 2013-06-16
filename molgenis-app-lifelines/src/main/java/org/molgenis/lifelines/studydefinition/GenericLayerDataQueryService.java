@@ -32,14 +32,15 @@ import org.molgenis.hl7.ST;
 import org.molgenis.hl7.TS;
 import org.molgenis.lifelines.catalogue.CatalogIdConverter;
 import org.molgenis.lifelines.resourcemanager.GenericLayerResourceManagerService;
+import org.molgenis.lifelines.utils.GenericLayerDataBinder;
 import org.molgenis.lifelines.utils.OmxIdentifierGenerator;
 import org.molgenis.lifelines.utils.OutputStreamHttpEntity;
-import org.molgenis.lifelines.utils.GenericLayerDataBinder;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.StringValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -146,7 +147,9 @@ public class GenericLayerDataQueryService
 						ObservedValue observedValue = new ObservedValue();
 						observedValue.setObservationSet(observationSet);
 						observedValue.setFeature(observableFeature);
-						observedValue.setValue(value);
+						StringValue stringValue = new StringValue();
+						stringValue.setValue(value);
+						observedValue.setValue(stringValue);
 
 						database.add(observedValue);
 					}
