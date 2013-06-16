@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.molgenis.fieldtypes.BoolField;
+import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.DatetimeField;
 import org.molgenis.fieldtypes.DecimalField;
@@ -12,16 +13,13 @@ import org.molgenis.fieldtypes.EmailField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.FileField;
-import org.molgenis.fieldtypes.FreemarkerField;
 import org.molgenis.fieldtypes.HyperlinkField;
 import org.molgenis.fieldtypes.ImageField;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.RichtextField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
-import org.molgenis.fieldtypes.UnknownField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.ui.html.HtmlInput;
 import org.molgenis.framework.ui.html.HtmlInputException;
@@ -42,7 +40,7 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CHAR, DATE, DATE_TIME, DECIMAL, ENUM, EMAIL, FILE, FREEMARKER, HEXA, HYPERLINK, IMAGE, INT, LIST, LONG, MREF, STRING, TEXT, LONGTEXT, XREF, CATEGORICAL, UNKNOWN, RICHTEXT
+		BOOL, CATEGORICAL, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF
 	}
 
 	/** Initialize default field types */
@@ -51,6 +49,7 @@ public class MolgenisFieldTypes
 		if (!init)
 		{
 			addType(new BoolField());
+			addType(new CategoricalField());
 			addType(new DateField());
 			addType(new DatetimeField());
 			addType(new DecimalField());
@@ -59,14 +58,12 @@ public class MolgenisFieldTypes
 			addType(new FileField());
 			addType(new HyperlinkField());
 			addType(new ImageField());
+			addType(new IntField());
 			addType(new LongField());
 			addType(new MrefField());
 			addType(new StringField());
 			addType(new TextField());
 			addType(new XrefField());
-			addType(new IntField());
-			addType(new RichtextField());
-			addType(new FreemarkerField());
 
 			init = true;
 		}
@@ -107,7 +104,7 @@ public class MolgenisFieldTypes
 		else
 		{
 			logger.warn("couldn't get type for name '" + name + "'");
-			return new UnknownField();
+			return null;
 		}
 	}
 
@@ -174,7 +171,7 @@ public class MolgenisFieldTypes
 
 			default:
 				logger.error("UNKNOWN sql code: " + sqlCode);
-				return new UnknownField();
+				return null;
 		}
 	}
 }
