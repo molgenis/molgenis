@@ -477,6 +477,14 @@
 		});
 	};
 
+	ns.formatValue = function(value, dataType) {
+		if (dataType == "hyperlink")
+			value = '<a href="' + value + '">' + value + '</a>';
+		else if (dataType == "email")
+			value = '<a href="mailto:' + value + '">' + value + '</a>';
+		return value;
+	};
+
 	ns.search = function(callback) {
 		searchApi.search(ns.createSearchRequest(), callback);
 	};

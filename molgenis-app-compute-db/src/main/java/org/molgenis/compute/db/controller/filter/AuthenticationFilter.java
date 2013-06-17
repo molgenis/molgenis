@@ -1,6 +1,9 @@
 package org.molgenis.compute.db.controller.filter;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -12,16 +15,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.compute.db.util.BasicAuthentication;
+import org.molgenis.compute.runtime.ComputeRun;
+import org.molgenis.compute.runtime.Pilot;
 import org.molgenis.framework.db.Database;
 import org.molgenis.util.ApplicationUtil;
 
 /**
  * Login filter for api classes.
- * 
+ * <p/>
  * Api client can login by providing a basic authentication header.
- * 
+ *
  * @author erwin
- * 
  */
 public class AuthenticationFilter implements Filter
 {
@@ -47,6 +51,10 @@ public class AuthenticationFilter implements Filter
 				{
 					((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
 					return;
+				}
+				else
+				{
+
 				}
 			}
 			catch (Exception e)

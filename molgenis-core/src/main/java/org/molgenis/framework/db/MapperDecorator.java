@@ -14,6 +14,7 @@ public class MapperDecorator<E extends Entity> implements Mapper<E>
 
 	public MapperDecorator(Mapper<E> generatedMapper)
 	{
+		if (generatedMapper == null) throw new IllegalArgumentException("Mapper is null");
 		this.mapper = generatedMapper;
 	}
 

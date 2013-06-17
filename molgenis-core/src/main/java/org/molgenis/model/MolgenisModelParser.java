@@ -29,7 +29,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.fieldtypes.UnknownField;
 import org.molgenis.model.elements.DBSchema;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
@@ -65,8 +64,7 @@ public class MolgenisModelParser
 	 * 
 	 * @param model
 	 * @param element
-	 *            a DOM element that looks like <entity name="a"
-	 *            abstract="true"><field name="a" type="....
+	 *            a DOM element that looks like <entity name="a" abstract="true"><field name="a" type="....
 	 * @throws MolgenisModelException
 	 */
 	public static Entity parseEntity(Model model, Element element) throws MolgenisModelException
@@ -471,7 +469,7 @@ public class MolgenisModelParser
 			throw new MolgenisModelException("type is missing for field '" + name + "' of entity '" + entity.getName()
 					+ "'");
 		}
-		if (MolgenisFieldTypes.getType(type) instanceof UnknownField)
+		if (MolgenisFieldTypes.getType(type) == null)
 		{
 			throw new MolgenisModelException("type '" + type + "' unknown for field '" + name + "' of entity '"
 					+ entity.getName() + "'");
@@ -1380,8 +1378,8 @@ public class MolgenisModelParser
 				}
 			}
 			/*
-			 * else { // this is the unexpected throw new Exception("Encountered
-			 * unknown element: " + element.getTagName()); }
+			 * else { // this is the unexpected throw new Exception("Encountered unknown element: " +
+			 * element.getTagName()); }
 			 */
 
 			// recurse the children

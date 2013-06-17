@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.compute.runtime.ComputeBackend;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
+import org.molgenis.compute.runtime.Pilot;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisRequest;
@@ -20,6 +21,7 @@ import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ApplicationUtil;
+
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date:
@@ -37,7 +39,17 @@ public class PilotService implements MolgenisService
 	public static final String TASK_FAILED = "failed";
 	public static final String TASK_DONE = "done";
 
-	public PilotService(MolgenisContext mc)
+
+    public static final String PILOT_ID = "pilotid";
+
+    public static final String PILOT_SUBMITTED = "submitted";
+    public static final String PILOT_USED = "used";
+    public static final String PILOT_EXPIRED = "expired";
+    public static final String PILOT_FAILED = "failed";
+    public static final String PILOT_DONE = "done";
+
+
+    public PilotService(MolgenisContext mc)
 	{
 	}
 
@@ -50,6 +62,24 @@ public class PilotService implements MolgenisService
 
 		if ("started".equals(request.getString("status")))
 		{
+			LOG.info("Checking pilot ID");
+			String pilotID = request.getString(PILOT_ID);
+			List<Pilot> pilots = ApplicationUtil.getDatabase().query(Pilot.class).eq(Pilot.VALUE, pilotID)
+					.and().eq(Pilot.STATUS, PILOT_SUBMITTED).find();
+
+			if(pilots.size() > 0)
+			{
+				LOG.info("Pilot value is correct");
+				Pilot pilot = pilots.get(0);
+				pilot.setStatus(PILOT_USED);
+				ApplicationUtil.getDatabase().update(pilot);
+			}
+			else
+			{
+				LOG.warn("MALICIOUS PILOT [ " + pilotID + " ] in start");
+				return;
+			}
+
 			String backend = request.getString("backend");
 
             List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
@@ -82,7 +112,7 @@ public class PilotService implements MolgenisService
 			// we add task id to the run listing to identify task when
 			// it is done
 			ScriptBuilder sb = ApplicationContextProvider.getApplicationContext().getBean(ScriptBuilder.class);
-			String taskScript = sb.build(task, request.getAppLocation(), request.getServicePath());
+			String taskScript = sb.build(task, request.getAppLocation(), request.getServicePath(), pilotID);
 
 			LOG.info("Script for task [" + task.getName() + "] of run [ " + task.getComputeRun().getName() + "]:\n"
 					+ taskScript);
@@ -103,10 +133,36 @@ public class PilotService implements MolgenisService
 				IOUtils.closeQuietly(pw);
 			}
 
-
 		}
 		else
 		{
+
+			LOG.info("Checking pilot ID");
+			String pilotID = request.getString(PILOT_ID);
+
+			List<Pilot> pilots = ApplicationUtil.getDatabase().query(Pilot.class).eq(Pilot.VALUE, pilotID)
+					.and().eq(Pilot.STATUS, PILOT_DONE).find();
+
+			if((pilots.size() > 0) && request.getString("status").equalsIgnoreCase("nopulse"))
+			{
+				LOG.info("Job is already reported back");
+			}
+			else
+			{
+				pilots = ApplicationUtil.getDatabase().query(Pilot.class).eq(Pilot.VALUE, pilotID)
+						.and().eq(Pilot.STATUS, PILOT_USED).find();
+
+				if(pilots.size() > 0)
+				{
+					LOG.info("Pilot value is correct in report");
+				}
+				else
+				{
+					LOG.warn("MALICIOUS PILOT [ " + pilotID + " ] in report");
+					return;
+				}
+			}
+
 			String logFileContent = FileUtils.readFileToString(request.getFile("log_file"));
 			LogFileParser logfile = new LogFileParser(logFileContent);
 			String taskName = logfile.getTaskName();
@@ -127,6 +183,10 @@ public class PilotService implements MolgenisService
 
 			if ("done".equals(request.getString("status")))
 			{
+				Pilot pilot = pilots.get(0);
+				pilot.setStatus(PILOT_DONE);
+				ApplicationUtil.getDatabase().update(pilot);
+
 				LOG.info(">>> task [" + taskName + "] of run [" + runName + "] is finished");
 				if (task.getStatusCode().equalsIgnoreCase(TASK_RUNNING))
 				{
@@ -157,8 +217,15 @@ public class PilotService implements MolgenisService
 			}
 			else if ("nopulse".equals(request.getString("status")))
 			{
+				//TODO sometimes there is no pulse received, but later job reports back itself
+				//todo improve pulse-task management
+
 				if (task.getStatusCode().equalsIgnoreCase(TASK_RUNNING))
 				{
+					Pilot pilot = pilots.get(0);
+					pilot.setStatus(PILOT_FAILED);
+					ApplicationUtil.getDatabase().update(pilot);
+
 					LOG.info(">>> no pulse from task [" + taskName + "] of run [" + runName + "]");
 					task.setRunLog(logFileContent);
 					task.setRunInfo(runInfo);
