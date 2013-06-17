@@ -102,7 +102,7 @@ public class DataSetImporter
 			{
 				if (rownr % transactionRows == 0) db.beginTx();
 
-				ArrayList<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
+				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 
 				// create observation set
 				ObservationSet observationSet = new ObservationSet();
@@ -120,6 +120,7 @@ public class DataSetImporter
 					observedValue.setObservationSet(observationSet);
 
 					// add to db
+					db.add(value);
 					obsValueList.add(observedValue);
 				}
 				db.add(obsValueList);
