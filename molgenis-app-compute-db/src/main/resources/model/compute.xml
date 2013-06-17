@@ -60,7 +60,7 @@
             <field name="backend" type="xref" xref_entity="ComputeBackend" nillable="false" />
             <field name="cteationTime" type="datetime" auto="true" description="time when pilot was submitted" />
             <field name="lifeTerm" type="int" nillable="false" default="120" description="term after which pilot id expires in minutes" />
-            <field name="status" type="enum" nillable="false" enum_options="[submitted,used,expired,failed]"/>
+            <field name="status" type="enum" nillable="false" enum_options="[submitted,used,expired,failed,done]"/>
         </entity>
         <entity name="ComputeBackend" implements="Nameable" xref_label="name">
             <field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
