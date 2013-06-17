@@ -357,6 +357,10 @@
 			<description></description>
 			<field name="Value" type="email" />
 		</entity>
+		<entity name="HtmlValue" extends="Value">
+			<description></description>
+			<field name="Value" type="text" />
+		</entity>
 		<entity name="HyperlinkValue" extends="Value" decorator="org.molgenis.omx.decorators.HyperlinkValueDecorator">
 			<description></description>
 			<field name="Value" type="hyperlink" />

@@ -89,6 +89,7 @@ public class MappingsBuilder
 			case CATEGORICAL:
 			case EMAIL:
 			case ENUM:
+			case HTML:
 			case HYPERLINK:
 			case STRING:
 			case TEXT:
