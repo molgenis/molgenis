@@ -63,6 +63,6 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 	@Override
 	public int getCount() throws TableException
 	{
-		return 0;
+		return 1;
 	}
 }

@@ -4,15 +4,17 @@ import java.io.File;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
+import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.harmonizationIndexer.controller.OntologyModel;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.Entity;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
-public class HarmonizationIndexerPlugin extends PluginModel<Entity>
+public class HarmonizationIndexerPlugin extends PluginModel<Entity> implements InitializingBean
 {
 
 	private static final long serialVersionUID = 1L;
@@ -27,6 +29,12 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 	public void setSearchService(SearchService searchService)
 	{
 		this.searchService = searchService;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
 	@Override
@@ -69,7 +77,8 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 		try
 		{
 			OntologyModel model = new OntologyModel(ontologyFile);
-			searchService.indexTupleTable("ontology", new OntologyTable(model, db));
+			TupleTable table = new OntologyTable(model, db);
+			searchService.indexTupleTable("ontology", table);
 			// searchService.indexTupleTable("ontologyTerm", new
 			// OntologyTermTable(model, db));
 		}

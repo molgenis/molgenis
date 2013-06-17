@@ -107,6 +107,6 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	@Override
 	public int getCount() throws TableException
 	{
-		return 0;
+		return 1;
 	}
 }
