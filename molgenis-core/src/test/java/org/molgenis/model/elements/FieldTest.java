@@ -10,7 +10,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Vector;
 
-import org.molgenis.fieldtypes.CharField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
@@ -191,16 +190,9 @@ public class FieldTest
 	@Test
 	public void testGetSetVarCharLength() throws MolgenisModelException
 	{
-		{
-			Field field = new Field(mock(Entity.class), "field", new CharField());
-			field.setVarCharLength(10);
-			assertEquals(field.getVarCharLength(), 10);
-		}
-		{
-			Field field = new Field(mock(Entity.class), "field", new StringField());
-			field.setVarCharLength(10);
-			assertEquals(field.getVarCharLength(), 10);
-		}
+		Field field = new Field(mock(Entity.class), "field", new StringField());
+		field.setVarCharLength(10);
+		assertEquals(field.getVarCharLength(), 10);
 	}
 
 	@Test(expectedExceptions = MolgenisModelException.class)

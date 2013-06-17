@@ -9,7 +9,7 @@ import org.molgenis.framework.ui.html.HtmlInput;
 import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 
-public class CategoricalType extends FieldType
+public class CategoricalField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
 

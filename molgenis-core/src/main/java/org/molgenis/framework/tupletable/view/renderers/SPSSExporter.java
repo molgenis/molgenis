@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.fieldtypes.CategoricalType;
+import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
@@ -63,7 +63,7 @@ public class SPSSExporter extends CsvExporter
 		// add category labels to variables if appropriate
 		for (Field field : categoricalFields)
 		{
-			Map<String, String> categoryMapping = ((CategoricalType) field.getType()).getCategoryMapping();
+			Map<String, String> categoryMapping = ((CategoricalField) field.getType()).getCategoryMapping();
 			valLabels.write(String.format("ADD VALUE LABELS %s ", field.getName()));
 			for (Entry<String, String> entry : categoryMapping.entrySet())
 			{
