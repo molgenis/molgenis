@@ -110,7 +110,7 @@
 					(if feature is that concrete). E.g. mmHg" />
 			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The concept that is being measured in a specific way." nillable="true" />
 			<field name="dataType" type="enum" default="string"
-				enum_options="[xref,string,categorical,nominal,ordinal,date,datetime,int,code,image,decimal,bool,file,log,data,exe]"
+				enum_options="[bool,categorical,date,datetime,decimal,email,enum,file,html,hyperlink,image,int,long,mref,string,text,xref]"
 				description="(Optional) Reference to the technical data type. E.g. 'int'" />
 			<field name="temporal" type="boolean" default="false"
 				description="Whether this feature is time dependent and can have different values when measured 
@@ -213,7 +213,7 @@
 				description="References the ObservableFeature that this observation was made on. For example 'probe123'." />
 			<!-- removed: <field name="Characteristic" nillable="true" type="xref"
 				xref_entity="Characteristic" description="Is brother of [characteristic], or Average of [height]" /> -->
-			<field name="Value" nillable="true" description="The value observed" /> 
+			<field name="Value" type="xref" xref_entity="Value" nillable="true" description="The value observed" /> 
 		</entity>
 	</module>
 	<module name="observ.target">
@@ -327,6 +327,67 @@
 				name='R13H8.1', ontology='ensembl' or name='WBgene00000912',
 				ontology='wormbase'.
 			</description>
+		</entity>
+	</module>
+	<module name="observ.value">
+		<entity name="Value" implements="Autoid">
+			<description></description>
+		</entity>
+		<entity name="BoolValue" extends="Value">
+			<description></description>
+			<field name="Value" type="bool" />
+		</entity>
+		<entity name="CategoricalValue" extends="Value">
+			<description></description>
+			<field name="Value" type="xref" xref_entity="Category" />
+		</entity>
+		<entity name="DateValue" extends="Value">
+			<description></description>
+			<field name="Value" type="date" />
+		</entity>
+		<entity name="DateTimeValue" extends="Value">
+			<description></description>
+			<field name="Value" type="datetime" />
+		</entity>
+		<entity name="DecimalValue" extends="Value">
+			<description></description>
+			<field name="Value" type="decimal" />
+		</entity>
+		<entity name="EmailValue" extends="Value" decorator="org.molgenis.omx.decorators.EmailValueDecorator">
+			<description></description>
+			<field name="Value" type="email" />
+		</entity>
+		<entity name="HtmlValue" extends="Value">
+			<description></description>
+			<field name="Value" type="text" />
+		</entity>
+		<entity name="HyperlinkValue" extends="Value" decorator="org.molgenis.omx.decorators.HyperlinkValueDecorator">
+			<description></description>
+			<field name="Value" type="hyperlink" />
+		</entity>
+		<entity name="IntValue" extends="Value">
+			<description></description>
+			<field name="Value" type="int" />
+		</entity>
+		<entity name="LongValue" extends="Value">
+			<description></description>
+			<field name="Value" type="long" />
+		</entity>
+		<entity name="MrefValue" extends="Value">
+			<description></description>
+			<field name="Value" type="mref" xref_entity="Characteristic" />
+		</entity>
+		<entity name="StringValue" extends="Value">
+			<description></description>
+			<field name="Value" type="string" />
+		</entity>
+		<entity name="TextValue" extends="Value">
+			<description></description>
+			<field name="Value" type="text" />
+		</entity>
+		<entity name="XrefValue" extends="Value">
+			<description></description>
+			<field name="Value" type="xref" xref_entity="Characteristic" />
 		</entity>
 	</module>
 </molgenis>

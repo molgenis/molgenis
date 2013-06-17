@@ -184,6 +184,6 @@
 			if("${name(f)}".equalsIgnoreCase(fieldName) || "${name(f.entity)}.${name(f)}".equalsIgnoreCase(fieldName)) 
 				return new org.molgenis.fieldtypes.${JavaName(f.type.toString())}Field();
 		</#list>
-		return new org.molgenis.fieldtypes.UnknownField();
+		return null;
 	}		
 	
