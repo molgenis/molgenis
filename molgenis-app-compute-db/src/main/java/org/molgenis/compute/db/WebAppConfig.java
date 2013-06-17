@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import org.molgenis.DatabaseConfig;
 import org.molgenis.compute.db.controller.PilotDashboardController;
+import org.molgenis.compute.db.executor.PilotManager;
 import org.molgenis.compute.db.executor.Scheduler;
 import org.molgenis.compute.db.pilot.ScriptBuilder;
 import org.molgenis.compute.db.util.ComputeMolgenisSettings;
@@ -26,6 +27,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +44,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @Configuration
 @EnableWebMvc
+@EnableScheduling
 @ComponentScan("org.molgenis")
 @Import(DatabaseConfig.class)
 public class WebAppConfig extends WebMvcConfigurerAdapter
@@ -104,6 +108,18 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public ScriptBuilder scriptBuilder()
 	{
 		return new ScriptBuilder(apiUserName, apiUserPassword);
+	}
+
+	@Scheduled(fixedDelay = 5000)
+	public void expired()
+	{
+		pilotManager().checkExperiredPilots();
+	}
+
+	@Bean
+	public PilotManager pilotManager()
+	{
+		return new PilotManager();
 	}
 
 	@Bean
