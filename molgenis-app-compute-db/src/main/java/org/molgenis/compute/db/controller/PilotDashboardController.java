@@ -131,14 +131,25 @@ public class PilotDashboardController
 
 		Query<ComputeRun> runs = database.query(ComputeRun.class).eq(ComputeRun.SHOWINDASHBOARD, true)
 				.sortDESC("creationTime");
+
+		String userLogin = database.getLogin().getUserName();
+
 		for (ComputeRun run : runs.find())
 		{
+
+			String runOwner = run.getOwner().getName();
+			boolean isSame = false;
+			if(userLogin.equalsIgnoreCase(runOwner))
+				isSame = true;
+
 			runModels.add(new RunModel(run.getName(),
                     runService.isRunning(run.getName()),
                     runService.isSubmitting(run.getName()),
                     runService.isComplete(run.getName()),
-                    run.getComputeBackend()
-					.getBackendUrl(), run.getCreationTime()));
+					isSame,
+                    run.getComputeBackend().getBackendUrl(),
+					run.getCreationTime(),
+					runOwner));
 		}
 
 		return runModels;
