@@ -42,7 +42,6 @@ public class ValueConverter
 		tupleConverters.put(FieldTypeEnum.DATE_TIME, new TupleToDateTimeValueConverter());
 		tupleConverters.put(FieldTypeEnum.DECIMAL, new TupleToDecimalValueConverter());
 		tupleConverters.put(FieldTypeEnum.EMAIL, new TupleToEmailValueConverter());
-		tupleConverters.put(FieldTypeEnum.HTML, new TupleToHtmlValueConverter());
 		tupleConverters.put(FieldTypeEnum.HYPERLINK, new TupleToHyperlinkValueConverter());
 		tupleConverters.put(FieldTypeEnum.INT, new TupleToIntValueConverter());
 		tupleConverters.put(FieldTypeEnum.LONG, new TupleToLongValueConverter());

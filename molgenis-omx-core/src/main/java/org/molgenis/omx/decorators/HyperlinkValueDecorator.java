@@ -14,6 +14,7 @@ public class HyperlinkValueDecorator<E extends HyperlinkValue> extends MapperDec
 	public HyperlinkValueDecorator(Mapper<E> generatedMapper)
 	{
 		super(generatedMapper);
+		if (generatedMapper == null) throw new IllegalArgumentException("Mapper is null");
 	}
 
 	@Override

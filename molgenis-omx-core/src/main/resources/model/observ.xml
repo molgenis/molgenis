@@ -110,7 +110,7 @@
 					(if feature is that concrete). E.g. mmHg" />
 			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The concept that is being measured in a specific way." nillable="true" />
 			<field name="dataType" type="enum" default="string"
-				enum_options="[bool,categorical,date,datetime,decimal,email,enum,file,hyperlink,image,int,long,mref,string,text,xref]"
+				enum_options="[bool,categorical,date,datetime,decimal,email,enum,file,html,hyperlink,image,int,long,mref,string,text,xref]"
 				description="(Optional) Reference to the technical data type. E.g. 'int'" />
 			<field name="temporal" type="boolean" default="false"
 				description="Whether this feature is time dependent and can have different values when measured 

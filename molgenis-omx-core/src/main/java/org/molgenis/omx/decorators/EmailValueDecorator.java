@@ -15,6 +15,7 @@ public class EmailValueDecorator<E extends EmailValue> extends MapperDecorator<E
 	public EmailValueDecorator(Mapper<E> generatedMapper)
 	{
 		super(generatedMapper);
+		if (generatedMapper == null) throw new IllegalArgumentException("Mapper is null");
 		emailValidator = new EmailValidator();
 	}
 

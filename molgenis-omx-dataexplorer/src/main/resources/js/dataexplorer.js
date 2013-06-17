@@ -1,10 +1,7 @@
 (function($, w) {
 	"use strict";
 
-	var ns = w.molgenis = w.molgenis || a
-	{
-	}
-	;
+	var ns = w.molgenis = w.molgenis || {};
 
 	var resultsTable = null;
 	var featureFilters = {};
