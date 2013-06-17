@@ -19,8 +19,6 @@ import java.util.List;
  */
 public class PilotManager
 {
-	private static Calendar calendar;
-
 	public void checkExperiredPilots()
 	{
 		Database database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
@@ -31,7 +29,7 @@ public class PilotManager
 
 			for(Pilot pilot : pilots)
 			{
-				calendar = Calendar.getInstance();
+				Calendar calendar = Calendar.getInstance();
 				long now = calendar.getTimeInMillis();
 				long creationTime = pilot.getCteationTime().getTime();
 

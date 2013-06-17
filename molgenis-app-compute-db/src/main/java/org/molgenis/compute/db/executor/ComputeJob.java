@@ -21,8 +21,6 @@ public class ComputeJob implements Runnable
 	@Override
 	public void run()
 	{
-		//TODO schedule pilot manager in another place
-		pilotManager.checkExperiredPilots();
 		executor.executeTasks(computeRun, username, password);
 	}
 
