@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer.search;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.util.DataSetImportedEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -16,8 +15,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
  */
 public class StartUpIndexer implements ApplicationListener<ApplicationEvent>
 {
-	@Autowired
-	private DataSetsIndexer dataSetsIndexer;
+	private final DataSetsIndexer dataSetsIndexer;
+
+	public StartUpIndexer(DataSetsIndexer dataSetsIndexer)
+	{
+		if (dataSetsIndexer == null) throw new IllegalArgumentException("DataSetsIndexer is null");
+		this.dataSetsIndexer = dataSetsIndexer;
+	}
 
 	// Index new datasets after the app config is loaded
 	@Override
