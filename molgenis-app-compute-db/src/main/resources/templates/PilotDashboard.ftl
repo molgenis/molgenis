@@ -160,8 +160,10 @@
     						</div>
     					</div>
     					<div class="span1">
-    						<a href="/plugin/dashboard/close?run=${run.name}" title="Remove from dashboard" class="close" >&times;</a>
-    					</div>
+                            <#if run.owned>
+                                <a href="/plugin/dashboard/close?run=${run.name}" title="Remove from dashboard" class="close" >&times;</a>
+    					    </#if>
+                        </div>
     				</div>
     			</div>
     		</#list>					
