@@ -86,6 +86,7 @@ public class ValueConverter
 
 	public static Object extractValue(Value value) throws ValueConverterException
 	{
+		if (value == null) return null;
 		TupleToValueConverter<? extends Value, ?> valueConverter = valueConverters.get(value.getClass());
 		if (valueConverter == null)
 		{
