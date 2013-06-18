@@ -43,37 +43,6 @@
 	};
 	
 	ns.createFeatureSelection = function(protocolUri) {
-		function createChildren(protocolUri, featureOpts, protocolOpts) {
-			var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
-			var children = [];
-			if (protocol.subprotocols) {
-				protocol.subprotocols.items.sort(characteristicSort);
-				// TODO deal with multiple entity pages
-				$.each(protocol.subprotocols.items, function() {
-					children.push($.extend({
-						key : this.href,
-						title : this.name,
-						tooltip : getDescription(this).en,
-						isFolder : true,
-						isLazy : protocolOpts.expand != true,
-						children : protocolOpts.expand ? createChildren(this.href, featureOpts, protocolOpts) : null
-					}, protocolOpts));
-				});
-			}
-			if (protocol.features) {
-				protocol.features.items.sort(characteristicSort);
-				// TODO deal with multiple entity pages
-				$.each(protocol.features.items, function() {
-					children.push($.extend({
-						key : this.href,
-						title : this.name,
-						tooltip : getDescription(this).en,
-					}, featureOpts));
-				});
-			}
-			return children;
-		}
-
 		function expandNodeRec(node) {
 			if (node.childList == undefined) {
 				node.toggleExpand();
@@ -336,6 +305,10 @@
 									expand : true,
 									children : []
 								};
+								//check if the last node is protocol if so recursively adding all subNodes
+								if(i === nodes.length - 1){
+									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : true});
+								}
 							}
 							options = $.extend({
 								key : entityInfo.href,
@@ -479,6 +452,37 @@
 				if(node.children) sortNodes(node.children);
 			});
 		}
+	}
+	
+	function createChildren(protocolUri, featureOpts, protocolOpts) {
+		var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
+		var children = [];
+		if (protocol.subprotocols) {
+			protocol.subprotocols.items.sort(characteristicSort);
+			// TODO deal with multiple entity pages
+			$.each(protocol.subprotocols.items, function() {
+				children.push($.extend({
+					key : this.href,
+					title : this.name,
+					tooltip : getDescription(this).en,
+					isFolder : true,
+					isLazy : protocolOpts.expand != true,
+					children : protocolOpts.expand ? createChildren(this.href, featureOpts, protocolOpts) : null
+				}, protocolOpts));
+			});
+		}
+		if (protocol.features) {
+			protocol.features.items.sort(characteristicSort);
+			// TODO deal with multiple entity pages
+			$.each(protocol.features.items, function() {
+				children.push($.extend({
+					key : this.href,
+					title : this.name,
+					tooltip : getDescription(this).en,
+				}, featureOpts));
+			});
+		}
+		return children;
 	}
 	
 	//merge the newly selected nodes back into the previous state of tree

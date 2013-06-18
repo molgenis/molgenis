@@ -85,42 +85,49 @@
                                     <div class="text-success">Completed</div>
                                 </div>
                                 <#else>
-                                    <#if run.running>
-                                        <div class="text-info">Active</div>
-                                             <form action="/plugin/dashboard/inactivate" class="form-inline" method="post">
-                                                <input type="hidden" name="run" value="${run.name}" />
-                                                <button type="submit" class="btn inactivate-btn">Inactivate</button>
-                                             </form>
-                                        <#else>
-                                            <div class="text-error">Not active</div>
-                                            <form action="/plugin/dashboard/activate" class="form-inline" method="post">
-                                                <input type="hidden" name="run" value="${run.name}" />
-                                                <button type="submit" class="btn activate-btn">Activate</button>
-                                            </form>
-                                        </#if>
+                                    <#if run.owned>
+                                        <#if run.running>
+                                            <div class="text-info">Active</div>
+                                                 <form action="/plugin/dashboard/inactivate" class="form-inline" method="post">
+                                                    <input type="hidden" name="run" value="${run.name}" />
+                                                    <button type="submit" class="btn inactivate-btn">Inactivate</button>
+                                                 </form>
+                                            <#else>
+                                                <div class="text-error">Not active</div>
+                                                <form action="/plugin/dashboard/activate" class="form-inline" method="post">
+                                                    <input type="hidden" name="run" value="${run.name}" />
+                                                    <button type="submit" class="btn activate-btn">Activate</button>
+                                                </form>
+                                            </#if>
 
-                                    </div>
-                                    <#if run.running>
-                                        <#if run.submitting>
-                                            <form action="/plugin/dashboard/stop" class="form-inline" method="post">
-                                                <input type="hidden" name="run" value="${run.name}" />
-                                                <button type="submit" class="btn">Stop Submitting Pilots</button>
-                                            </form>
-                                        <#else>
-                                            <form action="/plugin/dashboard/start" class="form-inline" method="post">
-                                                <input type="hidden" name="run" value="${run.name}" />
-                                                <input type="text" name="username" id="inputUsername" placeholder="Username"  />
-                                                <input type="password" name="password" id="inputPassword" placeholder="Password"  />
-                                                <button type="submit" class="btn">Submit Pilots</button>
-                                            </form>
-                                         </#if>
+                                        </div>
+                                        <#if run.running>
+                                            <#if run.submitting>
+                                                <form action="/plugin/dashboard/stop" class="form-inline" method="post">
+                                                    <input type="hidden" name="run" value="${run.name}" />
+                                                    <button type="submit" class="btn">Stop Submitting Pilots</button>
+                                                </form>
+                                            <#else>
+                                                <form action="/plugin/dashboard/start" class="form-inline" method="post">
+                                                    <input type="hidden" name="run" value="${run.name}" />
+                                                    <input type="text" name="username" id="inputUsername" placeholder="Username"  />
+                                                    <input type="password" name="password" id="inputPassword" placeholder="Password"  />
+                                                    <button type="submit" class="btn">Submit Pilots</button>
+                                                </form>
+                                             </#if>
+                                        </#if>
+                                    <#else>
+                                        <div class="text-info">${run.owner}</div>
+                                        </div>
                                     </#if>
+
                                 </#if>
-  							<form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/resubmit" class="form-inline" method="post">
-  								<input type="hidden" name="run" value="${run.name}" />
-  								<button type="submit" class="btn resubmit-btn">Resubmit failed jobs</button>
-  							</form>
-  							
+                            <#if run.owned>
+                                <form id="resubmitFailedTasksForm_${run.name}" action="/plugin/dashboard/resubmit" class="form-inline" method="post">
+                                    <input type="hidden" name="run" value="${run.name}" />
+                                    <button type="submit" class="btn resubmit-btn">Resubmit failed jobs</button>
+                                </form>
+  							</#if>
 						</div>
     					<div class="span5 status">
     						<div class="status-table">
