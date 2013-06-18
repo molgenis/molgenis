@@ -190,3 +190,14 @@ input[type=number] {
 .feature-filter-dialog h3 {
 	border-bottom: 1px solid #AAAAAA;
 }
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
+}
+
+.multi-os-datacell input[type=checkbox] {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
