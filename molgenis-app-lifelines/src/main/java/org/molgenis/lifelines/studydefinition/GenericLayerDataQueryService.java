@@ -40,6 +40,9 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.BoolValue;
+import org.molgenis.omx.observ.value.CategoricalValue;
+import org.molgenis.omx.observ.value.LongValue;
 import org.molgenis.omx.observ.value.StringValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -141,15 +144,13 @@ public class GenericLayerDataQueryService
 					if (observableFeature == null) throw new RuntimeException(
 							"missing ObservableFeature with identifier " + featureId);
 
-					String value = toValue(observation.getValue());
+					org.molgenis.omx.observ.value.Value value = toValue(observation.getValue());
 					if (value != null)
 					{
 						ObservedValue observedValue = new ObservedValue();
 						observedValue.setObservationSet(observationSet);
 						observedValue.setFeature(observableFeature);
-						StringValue stringValue = new StringValue();
-						stringValue.setValue(value);
-						observedValue.setValue(stringValue);
+						observedValue.setValue(value);
 
 						database.add(observedValue);
 					}
@@ -208,43 +209,57 @@ public class GenericLayerDataQueryService
 		}
 	}
 
-	private String toValue(ANY anyValue) throws DatabaseException
+	private org.molgenis.omx.observ.value.Value toValue(ANY anyValue) throws DatabaseException
 	{
 		if (anyValue instanceof INT)
 		{
 			// integer
 			INT value = (INT) anyValue;
-			return value.getValue().toString();
+			// convert to long, not to int
+			LongValue longValue = new LongValue();
+			longValue.setValue(value.getValue().longValue());
+			return longValue;
 		}
 		else if (anyValue instanceof ST)
 		{
 			// string
 			ST value = (ST) anyValue;
-			return value.getRepresentation().value();
+			StringValue stringValue = new StringValue();
+			stringValue.setValue(value.getRepresentation().value());
+			return stringValue;
 		}
 		else if (anyValue instanceof PQ)
 		{
 			// physical quantity
 			PQ value = (PQ) anyValue;
-			return value.getValue();
+			StringValue stringValue = new StringValue();
+			stringValue.setValue(value.getValue());
+			return stringValue;
 		}
 		else if (anyValue instanceof TS)
 		{
 			// time
 			TS value = (TS) anyValue;
-			return value.getValue();
+			StringValue stringValue = new StringValue();
+			stringValue.setValue(value.getValue());
+			return stringValue;
 		}
 		else if (anyValue instanceof REAL)
 		{
 			// fractional number
 			REAL value = (REAL) anyValue;
-			return value.getValue();
+			// conversion to double not always possible, see HL7 docs
+			StringValue stringValue = new StringValue();
+			stringValue.setValue(value.getValue());
+			return stringValue;
 		}
 		else if (anyValue instanceof BL)
 		{
 			// boolean
 			BL value = (BL) anyValue;
-			return value.isValue().toString();
+			BoolValue boolValue = new BoolValue();
+			boolValue.setValue(value.isValue());
+			return boolValue;
 		}
 		else if (anyValue instanceof CD) // for CD and CO values
 		{
@@ -252,8 +267,14 @@ public class GenericLayerDataQueryService
 			CD value = (CD) anyValue;
 			String identifier = OmxIdentifierGenerator.from(Category.class, value.getCodeSystem(), value.getCode());
 			Category category = Category.findByIdentifier(database, identifier);
-			if (category == null) logger.error("missing category identifier: " + identifier);
-			return category != null ? category.getName() : null;
+			if (category == null)
+			{
+				logger.error("missing category identifier: " + identifier);
+				return null;
+			}
+			CategoricalValue categoricalValue = new CategoricalValue();
+			categoricalValue.setValue(category);
+			return categoricalValue;
 		}
 
 		throw new UnsupportedOperationException("ANY instance not supported: " + anyValue.getClass());

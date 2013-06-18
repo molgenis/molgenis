@@ -583,7 +583,7 @@
 		table.find('td:first-child').addClass('feature-table-col1');
 		container.append(table);
 
-		if (feature.categories) {
+		if (feature.categories && feature.categories.length > 0) {
 			var categoryTable = $('<table class="table table-striped table-condensed" />');
 			$('<thead />').append('<th>Code</th><th>Label</th><th>Description</th>').appendTo(categoryTable);
 			$.each(feature.categories, function(i, category) {
