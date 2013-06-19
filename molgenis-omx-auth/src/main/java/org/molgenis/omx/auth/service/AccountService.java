@@ -23,7 +23,7 @@ public class AccountService
 {
 	private static Logger logger = Logger.getLogger(AccountService.class);
 
-	private static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
+	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
