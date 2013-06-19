@@ -15,6 +15,7 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.omx.core.MolgenisEntity;
 import org.molgenis.omx.core.RuntimeProperty;
@@ -40,23 +41,24 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 	private String appProfile;
 	@Value("${admin.password:@null}")
 	private String adminPassword;
-	@Value("${lifelines.researcher.password:@null}")
-	private String dataManagerPassword;
 	@Value("${lifelines.datamanager.password:@null}")
-	private String researchPassword;
+	private String dataManagerPassword;
+	@Value("${lifelines.datamanager.email:molgenis+datamanager@gmail.com}")
+	private String dataManagerEmail;
+	@Value("${lifelines.researcher.password:@null}")
+	private String researcherPassword;
+	@Value("${lifelines.researcher.email:molgenis+researcher@gmail.com}")
+	private String researcherEmail;
 
 	@Override
 	protected void initializeApplicationDatabase(Database database) throws Exception
 	{
-		if (appProfile == null || dataManagerPassword == null || researchPassword == null || adminPassword == null)
+		if (appProfile == null || dataManagerPassword == null || researcherPassword == null || adminPassword == null)
 		{
 			StringBuilder message = new StringBuilder("please configure: ");
-			if (appProfile == null) message
-					.append("lifelines.profile(possible values: workspace or website), ");
-			if (dataManagerPassword == null) message
-					.append("default lifelines.datamanager.password, ");
-			if (researchPassword == null) message
-					.append("default lifelines.researcher.password ");
+			if (appProfile == null) message.append("lifelines.profile(possible values: workspace or website), ");
+			if (dataManagerPassword == null) message.append("default lifelines.datamanager.password, ");
+			if (researcherPassword == null) message.append("default lifelines.researcher.password ");
 			if (adminPassword == null) message.append("default admin.password ");
 			message.append("in your molgenis-server.properties.");
 			throw new RuntimeException(message.toString());
@@ -73,11 +75,19 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimeProperty.setValue("LifeLines");
 		database.add(runtimeProperty);
 
-		MolgenisUser userResearcher = createUser(database, "researcher", "Researcher", "Researcher",
-				"molgenis@gmail.com", researchPassword, false);
-		MolgenisUser userDataManager = createUser(database, "datamanager", "DataManager", "DataManager",
-				"molgenis@gmail.com", dataManagerPassword, false);
+		RuntimeProperty runtimePropertyAuthentication = new RuntimeProperty();
+		runtimePropertyAuthentication.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
+				+ AccountService.KEY_PLUGIN_AUTH_ACTIVATIONMODE);
+		runtimePropertyAuthentication.setName(AccountService.KEY_PLUGIN_AUTH_ACTIVATIONMODE);
+		runtimePropertyAuthentication.setValue("user");
+		database.add(runtimePropertyAuthentication);
 
+		MolgenisUser userResearcher = createUser(database, "researcher", "researcher", "researcher", researcherEmail,
+				researcherPassword, false);
+		MolgenisUser userDataManager = createUser(database, "datamanager", "datamanager", "datamanager",
+				dataManagerEmail, dataManagerPassword, false);
+
+		MolgenisGroup allUsersGroup = null;
 		List<MolgenisUser> users = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
 				Login.USER_ANONYMOUS_NAME));
 		if (users != null && !users.isEmpty())
@@ -87,7 +97,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 					Operator.EQUALS, Login.GROUP_USERS_NAME));
 			if (molgenisGroups == null || molgenisGroups.isEmpty()) throw new DatabaseException(
 					"missing required MolgenisGroup with name '" + Login.GROUP_USERS_NAME + "'");
-			MolgenisGroup allUsersGroup = molgenisGroups.get(0);
+			allUsersGroup = molgenisGroups.get(0);
 
 			List<MolgenisRole> molgenisRoles = new ArrayList<MolgenisRole>();
 			molgenisRoles.add(userAnonymous);
@@ -122,6 +132,9 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		createPermission(database, ObservableFeature.class, userDataManager, "write");
 		createPermission(database, Category.class, userDataManager, "write");
 		createPermission(database, ObservedValue.class, userDataManager, "write");
+		createPermission(database, MolgenisUser.class, userDataManager, "write");
+		createPermission(database, MolgenisUser.class, userResearcher, "write");
+		createPermission(database, MolgenisUser.class, allUsersGroup, "write");
 
 		if ("website".equals(appProfile))
 		{

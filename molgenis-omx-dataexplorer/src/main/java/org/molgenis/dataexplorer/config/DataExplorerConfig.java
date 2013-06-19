@@ -34,15 +34,15 @@ public class DataExplorerConfig
 	}
 
 	/**
-	 * Indexes not yet indexed DataSets at application startup, does not reindex
-	 * already indexed DataSets (even not when there are chenges)
+	 * Indexes not yet indexed DataSets at application startup, does not reindex already indexed DataSets (even not when
+	 * there are chenges)
 	 * 
 	 * @return
 	 */
 	@Bean
 	public StartUpIndexer startUpIndexer()
 	{
-		return new StartUpIndexer();
+		return new StartUpIndexer(dataSetsIndexer());
 	}
 
 	/**
