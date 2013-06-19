@@ -31,9 +31,9 @@ You can choose anything instead of "xyz" as long as it matches identifiers in th
 .dataset_xyz
 [options="header", role="table table-bordered"]
 |==============================================
-|patient |age |height |sex |diastolic |systolic
-|p1      |56  |180    |m   |90        |140
-|p2      |77  |176    |f   |80        |120
+|paid |age |height |sex |diastolic |systolic
+|p1   |56  |180    |m   |90        |140
+|p2   |77  |176    |f   |80        |120
 |==============================================
 
 The meaning of each of the column identifiers (i.e. headers) is defined by matching identifiers in the "observablefeature" list.
@@ -81,7 +81,7 @@ Feature sheet can be used to define the parameters / data items in a protocol, i
 [options="header", role="table table-bordered"]
 |================================================================================================================
 |identifier |name                     |datatype         |unit_identifier |required |description
-|patient    |unique id of participant |xref             |                |y        |reference to individual in indvidual.txt
+|paid       |unique id of participant |xref             |                |y        |reference to individual in indvidual.txt
 |age        |age of participant       |int              |year            |n        |NA
 |height     |height standing up       |int              |cm              |n        |NA
 |sex        |sex genetically          |categorical      |                |y        |see category.txt
