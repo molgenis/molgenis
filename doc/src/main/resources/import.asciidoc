@@ -169,6 +169,10 @@ name:: human readible name for this ontology
 ontologyuri:: (optional) reference to the authoritive source of this ontology
 description:: (optional) description of the ontology
 
+= XREF to other entities
+
+TODO, complete example for Individual
+
 = Wish list
 
 Change or change documentation:
