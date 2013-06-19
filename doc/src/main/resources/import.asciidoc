@@ -79,15 +79,15 @@ Feature sheet can be used to define the parameters / data items in a protocol, i
 
 .observablefeature
 [options="header", role="table table-bordered"]
-|================================================================================================================
-|identifier |name                     |datatype         |unit_identifier |required |description
-|paid       |unique id of participant |xref             |                |y        |reference to individual in indvidual.txt
-|age        |age of participant       |int              |year            |n        |NA
-|height     |height standing up       |int              |cm              |n        |NA
-|sex        |sex genetically          |categorical      |                |y        |see category.txt
-|diastolic  |diastolic                |int              |mmHg            |n        |minimum pressure
-|systolic   |systolic                 |int              |mmHg            |n        |maximum pressure
-|================================================================================================================
+|=================================================================================================================
+|identifier |name                     |datatype         |unit_identifier |description
+|paid       |unique id of participant |xref             |                |reference to individual in indvidual.txt
+|age        |age of participant       |int              |year            |NA
+|height     |height standing up       |int              |cm              |NA
+|sex        |sex genetically          |categorical      |                |see category.txt
+|diastolic  |diastolic                |int              |mmHg            |minimum pressure
+|systolic   |systolic                 |int              |mmHg            |maximum pressure
+|=================================================================================================================
 
 *Meaning of feature fields:*
 
@@ -173,6 +173,7 @@ description:: (optional) description of the ontology
 
 Change or change documentation:
 
+* 'required' and 'unique' (and xref_entity?) property for observablefeature
 * rename observablefeature to feature (arg!)
 * get rid of _identifier extension (molgenis core). we never import using autoids!
 * create separate 'unit' list?
