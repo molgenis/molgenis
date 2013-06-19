@@ -1,0 +1,192 @@
+OMX · upload
+============
+OMX
+:title: OMX upload
+:description: How to import data into OmicsConnect.
+:brand: MOLGENIS
+:doctype: book
+:toc:
+:glyphicons: http://glyphicons.com[Glyphicons]
+
+= Introduction
+
+OmicsConnect comes with a very flexible data model to describe clinical, phenotypic, genetic and experimental data sets. Next to that it comes with a more strict data model for "metadata" such as individuals, samples, panels, SNPs, genes, etc.
+OmicsConnect data model is an extension of the Observ Model tabular format. We therefore named it OMX (Observ Model eXtensions). There is an import wizard to guide you through the data loading process.
+This document describes how format works. A typical OMX Excel contains the following tabs:
+
+dataset:: List datasets in this set, their description and what protocol was used (protocol can be reused in many datasets).
+protocol:: List protocols, their description and their features, i.e. data items. Protocols can have subprotocols to enable fine-grained grouping of features (e.g. sub-questionnaire, detailed clinical model, ...). Protocols can be reused over datasets.
+feature:: List features used, their description, their type (int, string, categorical), unit and ontology term. For example: "age", "height", etc. Features can be reused accross protocols.
+catogory:: List categories used per feature (applies only for feature that are type=categorical).
+ontologyterm:: List ontology terms used, if used, for example for feature.unit
+dataset_xyz:: A tabular data set with column headers matching entries in the feature list. The part "_xyz" should match identifiers in the dataset list. One can add multiple dataset_*.
+
+NOTE: You can either provide your data as one Excel file with multiple sheets (feature, category, protocol, dataset, etc) or as one big zipfile with files named (feature.txt, category.txt, protocol.txt, dataset.txt, etc.)
+
+= dataset
+
+One OMX file bundle can contain multiple dataset_xyz with "xyz" the customizable identifier of the dataset. Each dataset is a tabular matrix represented in either Excel tab or CSV. The columns are defined in the feature list (via the link dataset->protocol->feature).
+You can choose anything instead of "xyz" as long as it matches identifiers in the 'dataset' list.
+
+.dataset_xyz
+[options="header", role="table table-bordered"]
+|==============================================
+|patient |age |height |sex |diastolic |systolic
+|p1      |56  |180    |m   |90        |140
+|p2      |77  |176    |f   |80        |120
+|==============================================
+
+The meaning of each of the column identifiers (i.e. headers) is defined by matching identifiers in the "observablefeature" list.
+The features are linked to the dataset via a dataset.protocolused. To this end all dataset_* are listed in the dataset list, i.e. dataset_xyz matches identifier "xyz":
+
+.dataset
+[options="header", role="table table-bordered"]
+|========================================================
+|identifier  |name               |protocolused_identifier
+|xyz 		 |My first dataset   |prot1
+|abc         |My second dataset  |prot1
+|========================================================
+
+*Meaning of dataset fields:*
+
+identifier:: unique identifier of the dataset
+name:: human readable name of the dataset
+protocolused_identifier:: identifier of the protocol used; protocol defines the features (columns) in the dataset. A protocol can be used by more than one dataset.
+description:: (optional) free text description of the dataset
+
+= protocol
+
+The protocol sheet is used to list the protocols used, and for each protocol what features (parameters, data items) it has. Protocols can be split up in subprotocols, for example to denote questionnaire blocks, to structure detailed clinical models (DCMs), or to simply create a sensible sub grouping.
+
+.protocol
+[options="header", role="table table-bordered"]
+|========================================================================
+|identifier |name	        |features_identifier |subprotocols_identifier
+|prot1      |first protocol |paid,age,height,sex |bp
+|bp         |blood pressure |systolic,diastolic  |
+|========================================================================
+
+*Meaning of protocol fields:*
+
+identifier:: unique identifier of the protocol
+name:: human readable label of the protocol
+features_identifier:: comma separated list of feature identifiers, as listed in observablefeature. In the "bp" protocol for example "systolic,diastolic".
+subprotocols_identifier:: (optional) comma separated list of other protocol identifiers that should be considered subprotocols. In this example "bp".
+
+= observablefeature
+
+Feature sheet can be used to define the parameters / data items in a protocol, i.e., the columns in a dataset. Example:
+
+.observablefeature
+[options="header", role="table table-bordered"]
+|================================================================================================================
+|identifier |name                     |datatype         |unit_identifier |required |description
+|patient    |unique id of participant |xref             |                |y        |reference to individual in indvidual.txt
+|age        |age of participant       |int              |year            |n        |NA
+|height     |height standing up       |int              |cm              |n        |NA
+|sex        |sex genetically          |categorical      |                |y        |see category.txt
+|diastolic  |diastolic                |int              |mmHg            |n        |minimum pressure
+|systolic   |systolic                 |int              |mmHg            |n        |maximum pressure
+|================================================================================================================
+
+*Meaning of feature fields:*
+
+identifier:: short identifier for this feature. This identifier is unique accross all datasets and cannot contain spaces (required).
+name:: short human readable name (required)
+datatype:: (optional) technical type of the values. This determines validation of the data and influences query and sorting options. Default: string.
+unit_identifier:: (optional) reference to ontologyterm identifier that defines a unit. 
+required:: (optional) whether the importer should assume this data to be always provided. Default: n or false
+definition_identifier:: (optional) reference to ontologyterm identifier that defines this
+description:: (optional) free description. Default: "".
+
+*Valid feature.datatype options:*
+
+int:: natural numbers like -1, 0, 3
+decimal:: decimal numbers like -1.3, 0.5, 3.75 (float precision)
+string:: text strings with a maximum length of 255 characters
+text:: text strings larger than 255 characters
+xref:: reference to other identifiable objects in the database (see 'targets')
+categorical:: value as defined in Category (see below)
+
+= category
+
+The category sheet is optional. It can be used to describe category options features that have datatype=categorical. Example matching the "sex" feature described above:
+
+.category
+[options="header", role="table table-bordered"]
+|===========================================================
+|observablefeature_identifier |identifier |name   |valuecode
+|sex                          |sex_m      |male   |m
+|sex                          |sex_f      |female |f
+|===========================================================
+
+*Meaning of feature fields:*
+
+observablefeature_identifier:: reference to feature.identifier to which this category applies
+identifier:: unique identifier of this category
+name:: human readable label of the category code
+valuecode:: the code used for this category
+description:: (optional) extensive description of the category
+ismissing:: (optional) mark to indicate that this category should be treated as missing value. Valid options: true, false. Default: false.
+definition_identifier:: (optional) reference to a definition as listed in the ontologyterm sheet
+ 
+= ontologyterm
+
+The ontologyterm sheet is optional. It is used to list formal definitions such as referenced by feature.unit, feature.definition and category.definition. Example:
+
+.ontologyterm
+[options="header", role="table table-bordered"]
+|=======================================================================
+|identifier	|name
+|cm         |centimeter equal to one hundredth of a metre
+|year       |year, such as 1976
+|mmHg       |pressure defined as exactly 1/760 of a standard atmosphere
+|======================================================================
+
+*Meaning of ontologyterm fields:*
+
+identifier:: unique id for this term
+name:: human readible name of this term
+termaccession:: (optional) external identifier or accession number for this term in an external ontology
+ontology_identifier:: (optional) reference to the source ontology as listed in the ontology sheet
+
+= ontology
+
+The ontology sheet is optional. It is used to list ontologies that are used by ontologyterm. Example:
+
+.ontology
+[options="header", role="table table-bordered"]
+|================================================================================
+|identifier |name                  |ontologyuri
+|SNOMED     |SNOMED clinical terms |http://purl.bioontology.org/ontology/SNOMEDCT
+|NCI        |NCI thesaurus         |http://purl.bioontology.org/ontology/NCIt
+|================================================================================
+
+*Meaning of ontology fields:*
+
+identifier:: unique id for this ontology
+name:: human readible name for this ontology
+ontologyuri:: (optional) reference to the authoritive source of this ontology
+description:: (optional) description of the ontology
+
+= Wish list
+
+Change or change documentation:
+
+* rename observablefeature to feature (arg!)
+* get rid of _identifier extension (molgenis core). we never import using autoids!
+* create separate 'unit' list?
+* ontologyterm is missing from admin panel
+* can we have a feature to load dataset without protocol / features (auto load?)
+* rename protocolused to protocol (unless reason not to)
+* simplify 'category'
+  * code, label, ismissing, description, ontology
+  * use decorator to automatically produce identifier (optional)
+* check for 'orphan' features (that are not part of one or protocol)
+* bugfix: update of mref fails
+* update a dataset (now it just adds)
+* make xref specify what entity is xref to (either by syntax xref(sample) or additional field).
+* remove start/end from dataset -> we might want to create a seperate annotation class for this.
+* rename 'definition' to 'ontologyterm'. 
+
+
