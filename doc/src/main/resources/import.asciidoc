@@ -141,7 +141,7 @@ The ontologyterm sheet is optional. It is used to list formal definitions such a
 |cm         |centimeter equal to one hundredth of a metre
 |year       |year, such as 1976
 |mmHg       |pressure defined as exactly 1/760 of a standard atmosphere
-|======================================================================
+|=======================================================================
 
 *Meaning of ontologyterm fields:*
 
