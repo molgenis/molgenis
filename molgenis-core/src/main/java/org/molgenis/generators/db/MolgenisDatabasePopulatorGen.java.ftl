@@ -246,43 +246,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		}		
 		return result;		
 	}
-	
-	public void createPermission(Database database, Class<?> clazz, MolgenisRole role, String permissionString)
-			throws DatabaseException
-	{
-		MolgenisPermission permission = new MolgenisPermission();
-		permission.setEntity(MolgenisEntity.findByClassName(database, clazz.getName()));
-		permission.setName(role.getName() + "_" + clazz.getSimpleName() + "_Permission");
-		permission.setIdentifier(UUID.randomUUID().toString());
-		permission.setPermission(permissionString);
-		permission.setRole(role);
-		database.add(permission);
-	}
-	
-	public MolgenisUser createUser(Database database, String userName, String firstName, String lastName,
-			String email, String password, boolean superUser) throws NoSuchAlgorithmException, DatabaseException
-	{
-		MolgenisUser user = new MolgenisUser();
-		user.setName(userName);
-		user.setIdentifier(UUID.randomUUID().toString());
-		user.setPassword(new PasswordHasher().toMD5(password));
-		user.setEmail(email);
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		user.setActive(true);
-		user.setSuperuser(superUser);
-		database.add(user);
-		return user;
-	}
-	
-	public MolgenisGroup createGroup(Database database, String groupName) throws NoSuchAlgorithmException, DatabaseException
-	{
-		MolgenisGroup group = new MolgenisGroup();
-		group.setName(groupName);
-		group.setIdentifier(UUID.randomUUID().toString());
-		database.add(group);
-		return group;
-	}
+
 	private static final String[][] ENTITY_VALUES = new String[][] {
 	<#list model.getConcreteEntities() as entity>
 		new String[] {"${JavaName(entity)}", "ENTITY", "${entity.namespace}.${JavaName(entity)}"}<#if entity_has_next>,</#if>

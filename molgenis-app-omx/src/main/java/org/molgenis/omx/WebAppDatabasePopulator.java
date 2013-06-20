@@ -1,7 +1,9 @@
 package org.molgenis.omx;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.molgenis.MolgenisDatabasePopulator;
 import org.molgenis.framework.db.Database;
@@ -10,8 +12,11 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.util.PasswordHasher;
+import org.molgenis.omx.core.MolgenisEntity;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Characteristic;
@@ -114,6 +119,51 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		createPermission(database, DataExplorerPluginPlugin.class, groupName, "read");
 		createPermission(database, ProtocolViewerControllerPlugin.class, groupName, "read");
 		createPermission(database, UploadWizardPlugin.class, groupName, "read");
+	}
+
+	public void createPermission(Database database, Class<?> clazz, MolgenisRole role, String permissionString)
+			throws DatabaseException
+	{
+		MolgenisPermission permission = new MolgenisPermission();
+		permission.setEntity(MolgenisEntity.findByClassName(database, clazz.getName()));
+		permission.setName(role.getName() + "_" + clazz.getSimpleName() + "_Permission");
+		permission.setIdentifier(UUID.randomUUID().toString());
+		permission.setPermission(permissionString);
+		permission.setRole(role);
+		database.add(permission);
+	}
+
+	public MolgenisUser createUser(Database database, String userName, String firstName, String lastName, String email,
+			String password, boolean superUser) throws DatabaseException
+	{
+		MolgenisUser user = new MolgenisUser();
+		user.setName(userName);
+		user.setIdentifier(UUID.randomUUID().toString());
+		try
+		{
+			user.setPassword(new PasswordHasher().toMD5(password));
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		user.setEmail(email);
+		user.setFirstName(firstName);
+		user.setLastName(lastName);
+		user.setActive(true);
+		user.setSuperuser(superUser);
+		database.add(user);
+		return user;
+	}
+
+	public MolgenisGroup createGroup(Database database, String groupName) throws DatabaseException
+	{
+		MolgenisGroup group = new MolgenisGroup();
+		group.setName(groupName);
+		group.setIdentifier(UUID.randomUUID().toString());
+		database.add(group);
+		return group;
 	}
 
 }
