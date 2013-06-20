@@ -24,8 +24,8 @@ public class LocalBackend extends BackendGenerator
 		File s = new File(cp.path + File.separator + "submit.ftl");
 
 		// overwrite if files already defined by user
-		if (h.exists()) this.setHeaderTemplate(FileUtils.readFileToString(h));
-		if (f.exists()) this.setFooterTemplate(FileUtils.readFileToString(f));
+		if (h.exists()) this.appendCustomHeader(FileUtils.readFileToString(h));
+		if (f.exists()) this.appendCustomFooter(FileUtils.readFileToString(f));
 		if (s.exists()) this.setSubmitTemplate(FileUtils.readFileToString(s));
 	}
 

@@ -4,4 +4,6 @@ echo " "
 bash ${t.name}.sh
 echo " "
 echo "--- end step: ${t.name} ---"
+echo " "
+echo " "
 </#foreach>

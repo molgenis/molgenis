@@ -1,4 +1,4 @@
-#header
+# General header
 
 #
 ## Set location of *.env files
