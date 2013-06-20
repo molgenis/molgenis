@@ -19,7 +19,7 @@ public class TupleToXrefValueConverterTest
 	@Test
 	public void extractValue()
 	{
-		Characteristic ch1 = when(mock(Characteristic.class).getLabelValue()).thenReturn("ch1").getMock();
+		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
 
 		XrefValue value = new XrefValue();
 		value.setValue(ch1);
@@ -30,7 +30,7 @@ public class TupleToXrefValueConverterTest
 	@Test
 	public void fromTuple() throws ValueConverterException, DatabaseException
 	{
-		Characteristic ch1 = when(mock(Characteristic.class).getLabelValue()).thenReturn("ch1").getMock();
+		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
 
 		Database database = mock(Database.class);
 
