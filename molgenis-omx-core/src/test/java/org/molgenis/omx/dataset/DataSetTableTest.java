@@ -5,13 +5,10 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
@@ -26,42 +23,41 @@ public class DataSetTableTest
 	@Test
 	public void getAllColumns() throws TableException, DatabaseException
 	{
-		DataSet dataSet = when(mock(DataSet.class).getProtocolUsed_Id()).thenReturn(1).getMock();
-
-		Protocol p0 = mock(Protocol.class);
-		when(p0.getFeatures_Id()).thenReturn(Arrays.asList(10));
-		when(p0.getSubprotocols_Id()).thenReturn(Arrays.asList(1, 2));
-		Protocol p1 = mock(Protocol.class);
-		when(p1.getFeatures_Id()).thenReturn(Arrays.asList(11));
-		Protocol p2 = mock(Protocol.class);
-		when(p2.getFeatures_Id()).thenReturn(Arrays.asList(12));
 
 		ObservableFeature f10 = mock(ObservableFeature.class);
 		when(f10.getIdentifier()).thenReturn("10");
 		when(f10.getName()).thenReturn("name10");
 		when(f10.getDataType()).thenReturn("string");
+
 		ObservableFeature f11 = mock(ObservableFeature.class);
 		when(f11.getIdentifier()).thenReturn("11");
 		when(f11.getName()).thenReturn("name11");
 		when(f11.getDataType()).thenReturn("string");
+
 		ObservableFeature f12 = mock(ObservableFeature.class);
 		when(f12.getIdentifier()).thenReturn("12");
 		when(f12.getName()).thenReturn("name12");
 		when(f12.getDataType()).thenReturn("string");
 
+		Protocol p1 = mock(Protocol.class);
+		when(p1.getFeatures()).thenReturn(Arrays.asList(f11));
+
+		Protocol p2 = mock(Protocol.class);
+		when(p2.getFeatures()).thenReturn(Arrays.asList(f12));
+
+		Protocol p0 = mock(Protocol.class);
+		when(p0.getFeatures()).thenReturn(Arrays.asList(f10));
+		when(p0.getSubprotocols()).thenReturn(Arrays.asList(p1, p2));
+
+		DataSet dataSet = when(mock(DataSet.class).getProtocolUsed()).thenReturn(p0).getMock();
+
 		Database db = mock(Database.class);
-		when(db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, 1))).thenReturn(
-				Collections.singletonList(p0));
-		when(db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.IN, Arrays.asList(1, 2)))).thenReturn(
-				Arrays.asList(p1, p2));
-		when(
-				db.find(ObservableFeature.class,
-						new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(10, 11, 12)))).thenReturn(
-				Arrays.asList(f10, f11, f12));
 		Model model = mock(Model.class);
 		Entity entity = mock(Entity.class);
+
 		when(model.getEntity(ObservableFeature.class.getSimpleName())).thenReturn(entity);
 		when(db.getMetaData()).thenReturn(model);
+
 		List<Field> cols = new DataSetTable(dataSet, db).getAllColumns();
 		assertEquals("10", cols.get(0).getName());
 		assertEquals("name10", cols.get(0).getLabel());
