@@ -32,7 +32,7 @@
 			<description>Having gDNA position</description>
 			<field name="gdna" nillable="true" type="xref" xref_entity="Chromosome"
 				description="The genome this element lies on." />
-			<field name="gdna_start" nillable="true" type="int" index="true"
+			<field name="gdna_start" nillable="true" type="int"
 				description="Start position on genomic sequence." />
 			<field name="gdna_end" nillable="true" type="int"
 				description="End position on genomic sequence." />
@@ -41,7 +41,7 @@
 			<desciption>Having cDNA position</desciption>
 			<field name="cdna" type="xref" nillable="true" xref_entity="Gene"
 				description="The gene this element lies on." />
-			<field name="cdna_start" type="int" nillable="true" index="true"
+			<field name="cdna_start" type="int" nillable="true"
 				description="Start position on cDNA sequence." />
 			<field name="cdna_end" type="int" nillable="true"
 				description="End position on cDNA sequence." />
@@ -50,7 +50,7 @@
 			<description>Having aa position</description>
 			<field name="aa" type="xref" nillable="true" xref_entity="Protein"
 				description="The protein sequence this element lies on." />
-			<field name="aa_start" type="int" nillable="true" index="true"
+			<field name="aa_start" type="int" nillable="true"
 				description="Start position on amino acid sequence." />
 			<field name="aa_end" type="int" nillable="true"
 				description="End position on amino acid sequence." />
@@ -89,7 +89,7 @@
 			<description>Serves as a view on SequenceCharacteristics that are
 				exons or introns.
 			</description>
-			<field name="isIntron" type="bool" nillable="false" index="true"
+			<field name="isIntron" type="bool" nillable="false"
 				description="Is this exon actually an intron?" />
 		</entity>
 		<entity name="Variant" extends="Characteristic"
@@ -97,11 +97,11 @@
 			<description>Convenient entity to define in one place variants on
 				gdna, cdna and aa level.
 			</description>
-			<field name="gdna_notation" nillable="false" index="true"
+			<field name="gdna_notation" nillable="false"
 				description="gDNA notation of the variant, e.g. g.1234567C>T" />
-			<field name="cdna_notation" nillable="false" index="true"
+			<field name="cdna_notation" nillable="false"
 				description="cDNA notation of the variant, e.g. c.123C>T" />
-			<field name="aa_notation" nillable="true" index="true"
+			<field name="aa_notation" nillable="true"
 				description="Aa notation of the variant, e.g. p.Ser123ArgfsX12" />
 			<field name="variantType" type="xref" xref_entity="OntologyTerm"
 				nillable="true" description="Type of the variant." />
