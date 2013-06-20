@@ -19,8 +19,8 @@ public class TupleToMrefValueConverterTest
 	@Test
 	public void extractValue()
 	{
-		Characteristic ch1 = when(mock(Characteristic.class).getLabelValue()).thenReturn("ch1").getMock();
-		Characteristic ch2 = when(mock(Characteristic.class).getLabelValue()).thenReturn("ch2").getMock();
+		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
+		Characteristic ch2 = when(mock(Characteristic.class).getName()).thenReturn("ch2").getMock();
 
 		MrefValue value = new MrefValue();
 		value.setValue(Arrays.asList(ch1, ch2));
@@ -31,8 +31,8 @@ public class TupleToMrefValueConverterTest
 	@Test
 	public void fromTuple() throws ValueConverterException, DatabaseException
 	{
-		Characteristic ch1 = when(mock(Characteristic.class).getLabelValue()).thenReturn("ch1").getMock();
-		Characteristic ch2 = when(mock(Characteristic.class).getLabelValue()).thenReturn("ch2").getMock();
+		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
+		Characteristic ch2 = when(mock(Characteristic.class).getName()).thenReturn("ch2").getMock();
 
 		Database database = mock(Database.class);
 		Query<Characteristic> query = mock(Query.class);
