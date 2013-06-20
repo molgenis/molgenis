@@ -207,10 +207,7 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 		<#if type_label == "xref">
 			${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())} ${fieldName}New = ${name(entity)}.get${JavaName(field)}();
 
-			if (${fieldName}New != null) {
-				${fieldName}New = getEntityManager().getReference((Class<${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())}>) org.hibernate.Hibernate.getClass(${fieldName}New), ${fieldName}New.getIdValue());
-				${name(entity)}.set${JavaName(field)}(${fieldName}New);
-			} else { //object is reference by xref		
+			if (${fieldName}New == null) { //object is reference by xref		
                             if(${name(entity)}.get${JavaName(field)}_${JavaName(field.xrefField)}() != null) {
                                 ${name(entity)}.set${JavaName(field)}((${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())})getEntityManager().find(${field.getXrefEntity().namespace}.${JavaName(field.getXrefEntity())}.class, ${name(entity)}.get${JavaName(field)}_${JavaName(field.xrefField)}()));
                             }
@@ -271,15 +268,6 @@ public class ${JavaName(entity)}JpaMapper extends org.molgenis.framework.db.jpa.
 				create(${name(entity)});
 				++count;
 			}
-		}
-		catch (org.hibernate.exception.SQLGrammarException sge)
-		{
-			log.error("Message: " + sge.getMessage());
-			log.error("SQL: " + sge.getSQL());
-			log.error("SQLState: " + sge.getSQLState());
-			log.error("SQLException: " + sge.getSQLException());
-			sge.printStackTrace();
-			throw new org.molgenis.framework.db.DatabaseException(sge);
 		}
 		catch (Exception ex) 
 		{

@@ -37,6 +37,6 @@ public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValu
 	@Override
 	public String extractValue(Value value)
 	{
-		return ((XrefValue) value).getValue().getLabelValue();
+		return ((XrefValue) value).getValue().getName();
 	}
 }

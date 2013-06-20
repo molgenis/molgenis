@@ -56,7 +56,7 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 			@Override
 			public String apply(Characteristic characteristic)
 			{
-				return characteristic.getLabelValue();
+				return characteristic.getName();
 			}
 		});
 	}
