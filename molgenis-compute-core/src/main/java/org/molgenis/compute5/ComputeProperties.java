@@ -378,10 +378,10 @@ public class ComputeProperties
 				.withLongOpt(Parameters.PATH).create(Parameters.PATH_CMNDLINE_OPTION);
 		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).hasArgs().withLongOpt("parameters")
 				.withDescription("Path to parameter.csv file(s). Default: " + Parameters.PARAMETERS_DEFAULT)
-				.create("p");
+				.create(Parameters.PARAMETERS_CMNDLINE_OPTION);
 		Option w = OptionBuilder.withArgName(Parameters.WORKFLOW_DEFAULT).hasArg()
 				.withDescription("Path to your workflow file. Default: " + Parameters.WORKFLOW_DEFAULT)
-				.withLongOpt(Parameters.WORKFLOW).create("w");
+				.withLongOpt(Parameters.WORKFLOW).create(Parameters.WORKFLOW_CMNDLINE_OPTION);
 		Option d = OptionBuilder.hasArg()
 				.withDescription("Path to your workflow-defaults file. Default: " + Parameters.DEFAULTS_DEFAULT)
 				.withLongOpt(Parameters.DEFAULTS).create(Parameters.DEFAULTS);
