@@ -3,6 +3,8 @@ package org.molgenis.dataexplorer.search;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
+
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.util.DataSetImportedEvent;
@@ -35,11 +37,11 @@ public class StartUpIndexerTest
 	@Test
 	public void onApplicationEventDataSetImportedEvent() throws DatabaseException, TableException
 	{
-		String identifier = "dataset1";
-		DataSetImportedEvent event = new DataSetImportedEvent(this, identifier);
+		Integer id = 2;
+		DataSetImportedEvent event = new DataSetImportedEvent(this, id);
 		context.publishEvent(event);
 
-		verify(mockDataSetsIndexer).index(identifier);
+		verify(mockDataSetsIndexer).index(Arrays.asList(id));
 	}
 
 }

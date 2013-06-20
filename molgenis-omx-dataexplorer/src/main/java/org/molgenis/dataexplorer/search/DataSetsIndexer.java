@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.omx.observ.DataSet;
 
 /**
  * Indexes DataSet matrices.
@@ -16,9 +15,7 @@ public interface DataSetsIndexer
 {
 	void index() throws DatabaseException, TableException;
 
-	void index(List<DataSet> dataSets) throws TableException;
-
-	void index(String dataSetIdentifier) throws DatabaseException, TableException;
+	void index(List<Integer> datasetIds) throws TableException;
 
 	void indexNew() throws DatabaseException, TableException;
 

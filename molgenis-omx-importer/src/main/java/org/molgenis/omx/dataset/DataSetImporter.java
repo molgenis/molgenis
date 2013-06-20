@@ -70,19 +70,11 @@ public class DataSetImporter
 	{
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
-		List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier));
-		if (dataSets == null || dataSets.isEmpty())
+		DataSet dataSet = DataSet.findByIdentifier(db, identifier);
+		if (dataSet == null)
 		{
-			LOG.warn("dataset " + identifier + " does not exist in db");
-			return;
+			throw new DatabaseException("dataset '" + identifier + "' does not exist in db");
 		}
-		else if (dataSets.size() > 1)
-		{
-			LOG.warn("multiple datasets exist for identifier " + identifier);
-			return;
-		}
-
-		DataSet dataSet = dataSets.get(0);
 
 		Iterator<String> colIt = sheetReader.colNamesIterator();
 		if (!colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no columns");
@@ -104,37 +96,42 @@ public class DataSetImporter
 			{
 				if (rownr % transactionRows == 0) db.beginTx();
 
-				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
-
-				// create observation set
-				ObservationSet observationSet = new ObservationSet();
-				observationSet.setPartOfDataSet(dataSet);
-				db.add(observationSet);
-
-				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
+				// Skip empty rows
+				if (!row.isEmpty())
 				{
-					Value value = ValueConverter.fromTuple(row, entry.getKey(), db, entry.getValue());
+					List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 
-					// create observed value
-					ObservedValue observedValue = new ObservedValue();
-					observedValue.setFeature(entry.getValue());
-					observedValue.setValue(value);
-					observedValue.setObservationSet(observationSet);
+					// create observation set
+					ObservationSet observationSet = new ObservationSet();
+					observationSet.setPartOfDataSet(dataSet);
+					db.add(observationSet);
 
-					// add to db
-					if (value != null)
+					for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 					{
-						db.add(value);
+						Value value = ValueConverter.fromTuple(row, entry.getKey(), db, entry.getValue());
+
+						// create observed value
+						ObservedValue observedValue = new ObservedValue();
+						observedValue.setFeature(entry.getValue());
+						observedValue.setValue(value);
+						observedValue.setObservationSet(observationSet);
+
+						// add to db
+						if (value != null)
+						{
+							db.add(value);
+						}
+						obsValueList.add(observedValue);
 					}
-					obsValueList.add(observedValue);
+					db.add(obsValueList);
 				}
-				db.add(obsValueList);
 
 				if (++rownr % transactionRows == 0) db.commitTx();
 			}
 			if (rownr % transactionRows != 0) db.commitTx();
 
-			ApplicationContextProvider.getApplicationContext().publishEvent(new DataSetImportedEvent(this, identifier));
+			ApplicationContextProvider.getApplicationContext().publishEvent(
+					new DataSetImportedEvent(this, dataSet.getId()));
 		}
 		catch (DatabaseException e)
 		{

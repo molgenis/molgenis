@@ -241,6 +241,21 @@ public abstract class AbstractTuple implements Tuple
 	}
 
 	@Override
+	public boolean isEmpty()
+	{
+		for (String colName : getColNames())
+		{
+			if (!isNull(colName))
+			{
+				return false;
+			}
+		}
+
+		return true;
+
+	}
+
+	@Override
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
