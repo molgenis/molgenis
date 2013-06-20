@@ -45,8 +45,7 @@
 				</li>
 			</ul>
 		</description>
-		<entity name="Characteristic" implements="Identifiable"
-			xref_label="Identifier">
+		<entity name="Characteristic" implements="Identifiable">
 			<description> Characteristics are yes-no
 				statements about things in
 				the world. These can be used as part of an observation, as
@@ -300,8 +299,7 @@
 			<field nillable="true" auto="false" name="ontologyURI" type="hyperlink"
 				description="(Optional) A URI that references the location of the ontology." />
 		</entity>
-		<entity name="OntologyTerm" implements="Identifiable"
-			xref_label="Identifier">
+		<entity name="OntologyTerm" extends="Characteristic">
 			<description>
 				OntologyTerm defines a single entry (term) from an
 				ontology or a controlled vocabulary (defined by Ontology). The
