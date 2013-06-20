@@ -60,14 +60,6 @@ references-many(${field.xrefEntityName}.${field.xrefFieldName}),</#if>
 		<#assign index = index + 1>
 	</tr>
 </#list>
-	<!-- all the indices -->
-<#--list entity.indices as index>
-	<tr>
-		<td>Index</td>
-		<td>${index.getName()}</td>
-		<td colspan="2"><#list index.getFields() as field>${field.getName()}, </#list></td>
-	</tr>
-</#list-->
 	
 </table>
 *inherited field<br>

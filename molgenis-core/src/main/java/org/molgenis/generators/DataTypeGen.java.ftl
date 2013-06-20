@@ -43,18 +43,6 @@ public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list 
 
 )
 
-<#if entity.indices?has_content >
-@org.hibernate.annotations.Table(appliesTo="${SqlName(entity)}", indexes={
-<#foreach index in entity.indices>
-    @org.hibernate.annotations.Index(name="${index.name}", columnNames={
-			<#foreach field in index.fields>
-	"${field}"<#if field_has_next>,</#if>
-			</#foreach>
-    })<#if index_has_next>,</#if>
-</#foreach>    
-})
-</#if>
-
 		<#if !entity.hasAncestor() && entity.hasDescendants() >
 @javax.persistence.Inheritance(strategy=javax.persistence.InheritanceType.JOINED)
 @javax.persistence.DiscriminatorColumn(name="DType", discriminatorType=javax.persistence.DiscriminatorType.STRING)
