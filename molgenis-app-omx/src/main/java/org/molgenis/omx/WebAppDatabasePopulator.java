@@ -31,18 +31,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
-	@Value("${lifelines.profile:@null}")
-	private String appProfile;
+
 	@Value("${admin.password:@null}")
 	private String adminPassword;
-	@Value("${lifelines.datamanager.password:@null}")
-	private String dataManagerPassword;
-	@Value("${lifelines.datamanager.email:molgenis+datamanager@gmail.com}")
-	private String dataManagerEmail;
-	@Value("${lifelines.researcher.password:@null}")
-	private String researcherPassword;
-	@Value("${lifelines.researcher.email:molgenis+researcher@gmail.com}")
-	private String researcherEmail;
 
 	@Override
 	protected void initializeApplicationDatabase(Database database) throws Exception
