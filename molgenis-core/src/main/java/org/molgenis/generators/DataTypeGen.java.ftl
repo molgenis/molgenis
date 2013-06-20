@@ -209,8 +209,8 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 				</#if>
 			<#else>
 				<#if field.type == "text" >			
-//	@javax.persistence.Lob()
-	@javax.persistence.Column(name="${SqlName(field)}", length=16777216<#if !field.nillable>, nullable=false</#if>)
+	@javax.persistence.Lob
+	@javax.persistence.Column(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)
 				<#else>
         <#if SqlName(field) == '__Type'>
 	@javax.persistence.Column(name="DType"<#if field.type == "string">, length=${field.length?c}</#if><#if !field.nillable>, nullable=false</#if>)            
