@@ -210,7 +210,7 @@ public class ComputeProperties
 	public void createPropertiesFile()
 	{
 		// get location properties file
-		String propFileString = path + File.separator + Parameters.PROPERTIES;
+		String propFileString = Parameters.PROPERTIES;
 
 		this.propertiesFile = new File(propFileString);
 
@@ -218,7 +218,7 @@ public class ComputeProperties
 		{
 			try
 			{
-				this.propertiesFile.getParentFile().mkdirs();
+//				this.propertiesFile.getParentFile().mkdirs();
 				this.propertiesFile.createNewFile();
 			}
 			catch (IOException e)
