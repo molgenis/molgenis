@@ -352,7 +352,7 @@ public class ComputeProperties
 		{
 			// set this.variables
 			p.setProperty(Parameters.PATH, this.path);
-			p.setProperty(Parameters.PARAMETERS, Joiner.on(",").join(this.parameters));
+			p.setProperty(Parameters.PARAMETERS, this.parametersString());
 			p.setProperty(Parameters.WORKFLOW, this.workFlow);
 			if (null != this.defaults) p.setProperty(Parameters.DEFAULTS, this.defaults);
 			p.setProperty(Parameters.BACKEND, this.backend);
@@ -369,6 +369,11 @@ public class ComputeProperties
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public String parametersString()
+	{
+		return Joiner.on(",").join(this.parameters);
 	}
 
 	/**

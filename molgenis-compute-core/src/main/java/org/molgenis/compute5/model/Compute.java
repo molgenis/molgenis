@@ -31,7 +31,7 @@ public class Compute
 
 	public List<Task> generateTasks() throws IOException
 	{
-		tasks = TaskGenerator.generate(workflow, parameters);
+		tasks = TaskGenerator.generate(workflow, parameters, new ComputeProperties("."));
 		return tasks;
 	}
 

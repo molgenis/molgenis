@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.model.Input;
 import org.molgenis.compute5.model.Output;
 import org.molgenis.compute5.model.Parameters;
@@ -30,7 +31,7 @@ import freemarker.template.Template;
 
 public class TaskGenerator
 {
-	public static List<Task> generate(Workflow workflow, Parameters parameters) throws IOException
+	public static List<Task> generate(Workflow workflow, Parameters parameters, ComputeProperties computeProperties) throws IOException
 	{
 		List<Task> result = new ArrayList<Task>();
 
@@ -56,7 +57,7 @@ public class TaskGenerator
 			localParameters = addStepIds(localParameters, step);
 
 			// generate the tasks from template, add step id
-			result.addAll(generateTasks(step, localParameters, workflow));
+			result.addAll(generateTasks(step, localParameters, workflow, computeProperties));
 
 			// uncollapse
 			localParameters = TupleUtils.uncollapse(localParameters, Parameters.ID_COLUMN);
@@ -70,7 +71,7 @@ public class TaskGenerator
 	}
 
 	private static Collection<? extends Task> generateTasks(Step step, List<WritableTuple> localParameters,
-			Workflow workflow) throws IOException
+			Workflow workflow, ComputeProperties computeProperties) throws IOException
 	{
 		List<Task> tasks = new ArrayList<Task>();
 
@@ -114,7 +115,21 @@ public class TaskGenerator
 					}
 				}
 
-				parameterHeader += "\n#\n##\n### Map parameters to environment\n##\n#\n";
+				parameterHeader += "\n# Assign values to the parameters in this script\n";
+				
+				parameterHeader += "\n#\n##\n### Make compute.properties available \n##\n#";
+				parameterHeader += "\nrundir=\"" + computeProperties.runDir + "\"";
+				parameterHeader += "\nrunid=\"" + computeProperties.runId + "\"";
+				parameterHeader += "\nworkflow=\"" + computeProperties.workFlow + "\"";
+				parameterHeader += "\nparameters=\"" + computeProperties.parametersString() + "\"";
+				parameterHeader += "\nuser=\"" + computeProperties.user + "\"";
+				parameterHeader += "\ndatabase=\"" + computeProperties.database + "\"";
+				parameterHeader += "\nbackend=\"" + computeProperties.backend + "\"";
+				parameterHeader += "\nport=\"" + computeProperties.port + "\"";
+				parameterHeader += "\ninterval=\"" + computeProperties.interval + "\"";
+				parameterHeader += "\npath=\"" + computeProperties.path + "\"";
+				
+				parameterHeader += "\n\n#\n##\n### Connect parameters to environment\n##\n#\n";
 
 				// now couple input parameters to parameters in sourced
 				// environment
