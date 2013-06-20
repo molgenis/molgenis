@@ -75,6 +75,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		Resource[] resources = new FileSystemResource[]
 		{ new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties") };
 		pspc.setLocations(resources);
+		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
 		pspc.setIgnoreResourceNotFound(true);
 		pspc.setNullValue("@null");

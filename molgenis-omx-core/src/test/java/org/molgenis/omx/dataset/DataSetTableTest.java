@@ -13,7 +13,9 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
+import org.molgenis.model.elements.Model;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -56,7 +58,10 @@ public class DataSetTableTest
 				db.find(ObservableFeature.class,
 						new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(10, 11, 12)))).thenReturn(
 				Arrays.asList(f10, f11, f12));
-
+		Model model = mock(Model.class);
+		Entity entity = mock(Entity.class);
+		when(model.getEntity(ObservableFeature.class.getSimpleName())).thenReturn(entity);
+		when(db.getMetaData()).thenReturn(model);
 		List<Field> cols = new DataSetTable(dataSet, db).getAllColumns();
 		assertEquals("10", cols.get(0).getName());
 		assertEquals("name10", cols.get(0).getLabel());

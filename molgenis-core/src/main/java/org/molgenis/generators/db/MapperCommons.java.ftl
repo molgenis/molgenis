@@ -57,7 +57,7 @@
 				<#if f.type == 'xref'>
 				Object label = object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}();
 				<#else>
-				for(String label: object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}())
+				for(${type(field.xrefField)}> ${name(field)}_${name(field.xrefField)} label: object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}())
 				</#if>
 				{
 					<#list f.xrefLabelNames as label>
@@ -83,10 +83,10 @@
 				<#if f.type == 'xref'>
 				Object label = object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}();
 				<#else>
-				for(String label: object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}())
+				for(Object label: object.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}())
 				</#if>
 				{
-					org.molgenis.framework.db.QueryRule xrefFilter = new org.molgenis.framework.db.QueryRule("${f.xrefLabelNames[0]}", org.molgenis.framework.db.QueryRule.Operator.EQUALS, label);
+					org.molgenis.framework.db.QueryRule xrefFilter = new org.molgenis.framework.db.QueryRule("${f.xrefLabelNames[0]}", org.molgenis.framework.db.QueryRule.Operator.EQUALS, label.toString());
 					
 					if(label != null && !${name(f)}Rules.containsKey(label))
 					{
@@ -184,6 +184,6 @@
 			if("${name(f)}".equalsIgnoreCase(fieldName) || "${name(f.entity)}.${name(f)}".equalsIgnoreCase(fieldName)) 
 				return new org.molgenis.fieldtypes.${JavaName(f.type.toString())}Field();
 		</#list>
-		return new org.molgenis.fieldtypes.UnknownField();
+		return null;
 	}		
 	

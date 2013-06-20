@@ -33,12 +33,12 @@ public class ScriptBuilderTest
 				+ "echo hallo\n"
 				+ "cp log.log done.log\n"
 				+ "if [ -f task1.env ]; then\n"
-				+ "curl -s -S -u username:password -F status=done -F log_file=@done.log -F output_file=@task1.env http://localhost/api/pilot\n"
+				+ "curl -s -S -u username:password -F status=done -F pilotid=xxx -F log_file=@done.log -F output_file=@task1.env http://localhost/api/pilot\n"
 				+ "else\n"
-				+ "curl -s -S -u username:password -F status=done -F log_file=@done.log http://localhost/api/pilot\n"
+				+ "curl -s -S -u username:password -F status=done -F pilotid=xxx -F log_file=@done.log http://localhost/api/pilot\n"
 				+ "fi\n" + "rm user.env\n" + "rm task2.env\n" + "rm task1.env\n";
 
-		assertEquals(builder.build(task, "http://localhost", "/api/pilot"), expected);
+		assertEquals(builder.build(task, "http://localhost", "/api/pilot", "xxx"), expected);
 
 	}
 }

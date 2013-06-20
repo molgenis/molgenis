@@ -17,7 +17,7 @@
 			<unique fields="group_,role_"/>
 		</entity>
 		
-		<entity name="Contact" implements="Identifiable" abstract="true">
+		<entity name="Contact" abstract="true">
 			<description> A contact is either a person or an organization. Copied
 				from FuGE::Contact.</description>
 			<field name="Address" type="text" nillable="true"
@@ -36,7 +36,20 @@
 				description="Added from the old definition of MolgenisUser. Country of this contact." />	
 		</entity>
 		
-		<entity name="Person" extends="MolgenisRole" implements="Contact" xref_label="Name">
+		<entity name="PersonContact" abstract="true">
+			<field name="FirstName" label="First Name" nillable="true" />
+			<field name="MidInitials" label="Mid Initials" nillable="true" />
+			<field name="LastName" label="Last Name" nillable="true"/>
+			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD" />
+			<field name="Affiliation" type="xref" xref_entity="Institute"
+				nillable="true" />
+			<field name="Department" type="string" nillable="true" 
+				description="Added from the old definition of MolgenisUser. Department of this contact." />	
+			<field name="Roles" type="xref" xref_field="PersonRole.id"
+				nillable="true" description="Indicate role of the contact, e.g. lab worker or PI. Changed from mref to xref in oct 2011." />
+		</entity>
+		
+		<entity name="Person" extends="Characteristic" implements="Contact,PersonContact" xref_label="Name">
 			<description>
 				Person represents one or more people involved with an Investigation.
 				This may include authors on a paper, lab personnel or PIs. Person
@@ -54,30 +67,20 @@
 				<br />
 				The FUGE equivalent to Person is FuGE::Person.
 			</description>
-			<field name="FirstName" label="First Name" nillable="true" />
-			<field name="MidInitials" label="Mid Initials" nillable="true" />
-			<field name="LastName" label="Last Name" nillable="true"/>
-			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD" />
-			<field name="Affiliation" type="xref" xref_entity="Institute"
-				nillable="true" />
-			<field name="Department" type="string" nillable="true" 
-				description="Added from the old definition of MolgenisUser. Department of this contact." />	
-			<field name="Roles" type="xref" xref_field="PersonRole.id"
-				nillable="true" description="Indicate role of the contact, e.g. lab worker or PI. Changed from mref to xref in oct 2011." />
-			<unique fields="FirstName,MidInitials,LastName" />
+			<unique fields="Email" />
 		</entity>
 		
 		<entity name="PersonRole" extends="OntologyTerm">
 		<description>Seperate type of ontologyTerm to administrate roles.</description>
 		</entity>
 		
-		<entity name="Institute" implements="Contact" xref_label="Name">
+		<entity name="Institute" extends="Characteristic" implements="Contact" xref_label="Name">
 			<description> A contact is either a person or an organization. Copied
 				from FuGE::Contact.</description>
 				<field name="Name" unique="true"/>
 		</entity>
 
-		<entity name="MolgenisUser" extends="Person" decorator="org.molgenis.omx.auth.decorators.MolgenisUserDecorator" system="true">
+		<entity name="MolgenisUser" extends="MolgenisRole" implements="Contact,PersonContact" decorator="org.molgenis.omx.auth.decorators.MolgenisUserDecorator" system="true">
 			<description>Anyone who can login</description>
 			<field name="password_" type="string" default="secret" description="big fixme: password type" />
 			<field name="activationCode" type="string"
@@ -85,8 +88,8 @@
 				nillable="true" />
 			<field name="active" type="bool" default="false"
 				description="Boolean to indicate if this account can be used to login" />
-
 			<field name="superuser" type="bool" default="false" />
+			<unique fields="Email" />
 			<!-- todo: profile: picture, field, address, zip, timezone, flag to set public email, website, other details -->
 		</entity>
 		<entity name="MolgenisPermission" system="true" implements="Identifiable">

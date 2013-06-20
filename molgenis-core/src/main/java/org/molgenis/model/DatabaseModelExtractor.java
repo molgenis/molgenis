@@ -1,11 +1,11 @@
 package org.molgenis.model;
 
-import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -21,14 +21,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisOptions;
 import org.molgenis.model.jaxb.Entity;
 import org.molgenis.model.jaxb.Field;
 import org.molgenis.model.jaxb.Field.Type;
 import org.molgenis.model.jaxb.Model;
 import org.molgenis.model.jaxb.Unique;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * Tool to create molgenis_db.xml from an existing database
@@ -46,38 +43,7 @@ public class DatabaseModelExtractor
 		extractXml(props);
 	}
 
-	public static String extractXml(MolgenisOptions options)
-	{
-		try
-		{
-			return toString(extractModel(options));
-		}
-		catch (JAXBException e)
-		{
-			logger.error(e);
-			return null;
-		}
-	}
-
-	public static Model extractModel(MolgenisOptions options)
-	{
-		ComboPooledDataSource data_src = new ComboPooledDataSource();
-		try
-		{
-			data_src.setDriverClass(options.db_driver.trim());
-		}
-		catch (PropertyVetoException e)
-		{
-			throw new RuntimeException(e);
-		}
-		data_src.setUser(options.db_user.trim());
-		data_src.setPassword(options.db_password.trim());
-		data_src.setJdbcUrl(options.db_uri.trim());
-
-		return extractModel(data_src);
-	}
-
-	public static String extractXml(Properties p)
+	private static String extractXml(Properties p)
 	{
 		try
 		{
@@ -88,52 +54,32 @@ public class DatabaseModelExtractor
 			logger.error(e);
 			return null;
 		}
-	}
-
-	public static Model extractModel(Properties p)
-	{
-		ComboPooledDataSource data_src = new ComboPooledDataSource();
-		try
-		{
-			data_src.setDriverClass(p.getProperty("db_driver").trim());
-		}
-		catch (PropertyVetoException e)
+		catch (ClassNotFoundException e)
 		{
 			throw new RuntimeException(e);
 		}
-		data_src.setUser(p.getProperty("db_user").trim());
-		data_src.setPassword(p.getProperty("db_password").trim());
-		data_src.setJdbcUrl(p.getProperty("db_uri").trim());
-
-		return extractModel(data_src);
 	}
 
-	public static Model extractModel(ComboPooledDataSource data_src)
+	private static Model extractModel(Properties p) throws ClassNotFoundException
 	{
+		Class.forName(p.getProperty("db_driver").trim()); // register JDBC driver
+
+		String url = p.getProperty("db_uri").trim();
+		String user = p.getProperty("db_user").trim();
+		String password = p.getProperty("db_password").trim();
+
 		Model m = new Model();
 
 		try
 		{
-			// check conection
-			data_src.getConnection();
-
-			String url = data_src.getJdbcUrl();
 			int start = url.lastIndexOf("/") + 1;
 			int end = url.indexOf("?") == -1 ? url.length() : url.indexOf("?");
 
 			String SCHEMA_NAME = url.substring(start, end);
 			logger.debug("trying to extract: " + SCHEMA_NAME);
 
-			Connection conn = data_src.getConnection();
+			Connection conn = DriverManager.getConnection(url, user, password);
 			DatabaseMetaData md = conn.getMetaData();
-
-			// ResultSet rs = md.getSchemas();
-			// logger.debug("schema's:");
-			// logResultSet(rs);
-
-			// rs = md.getCatalogs();
-			// logger.debug("catalogs:");
-			// logResultSet(rs);
 
 			m.setName(SCHEMA_NAME);
 
@@ -505,7 +451,7 @@ public class DatabaseModelExtractor
 		}
 	}
 
-	public static String toString(Model model) throws JAXBException
+	private static String toString(Model model) throws JAXBException
 	{
 		// save to xml (FIXME: now print only)
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

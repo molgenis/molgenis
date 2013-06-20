@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
@@ -17,7 +20,9 @@ import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
-import org.molgenis.omx.converters.observablefeature.DataTypeConverter;
+import org.molgenis.omx.converters.ValueConverter;
+import org.molgenis.omx.observ.Category;
+import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -95,10 +100,26 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 					columns = new ArrayList<Field>(features.size());
 					for (ObservableFeature feature : features)
 					{
+						FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
+
 						Field field = new Field(feature.getIdentifier());
+						field.setEntity(db.getMetaData().getEntity(ObservableFeature.class.getSimpleName()));
 						field.setLabel(feature.getName());
-						field.setType(DataTypeConverter.getMolgenisFieldType(feature.getDataType()));
+						field.setType(fieldType);
 						field.setName(feature.getIdentifier());
+
+						FieldTypeEnum enumType = fieldType.getEnumType();
+						if (enumType.equals(FieldTypeEnum.XREF) || enumType.equals(FieldTypeEnum.MREF))
+						{
+							field.setXRefEntity(Characteristic.class.getSimpleName());
+							field.setXrefField(Characteristic.NAME);
+						}
+						else if (enumType.equals(FieldTypeEnum.CATEGORICAL))
+						{
+							field.setXRefEntity(Category.class.getSimpleName());
+							field.setXrefField(org.molgenis.omx.observ.Category.NAME);
+						}
+
 						columns.add(field);
 					}
 				}
@@ -162,89 +183,14 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 		}
 		catch (DatabaseException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		catch (TableException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 
 	}
-
-	// @Override
-	// public List<Tuple> getRows() throws TableException
-	// {
-	// try
-	// {
-	// List<Tuple> result = new ArrayList<Tuple>();
-	//
-	// Query<ObservationSet> query = createQuery();
-	//
-	// if (query == null)
-	// {
-	// return new ArrayList<Tuple>();
-	// }
-	//
-	// // Limit the nr of rows
-	// if (getLimit() > 0)
-	// {
-	// query.limit(getLimit());
-	// }
-	//
-	// if (getOffset() > 0)
-	// {
-	// query.offset(getOffset());
-	// }
-	//
-	// for (ObservationSet os : query.find())
-	// {
-	//
-	// WritableTuple tuple = new KeyValueTuple();
-	//
-	// Query<ObservedValue> queryObservedValue =
-	// getDb().query(ObservedValue.class);
-	//
-	// List<Field> columns = getColumns();
-	//
-	// // Only retrieve the visible columns
-	// Collection<String> fieldNames = Collections2.transform(columns, new
-	// Function<Field, String>()
-	// {
-	// @Override
-	// public String apply(final Field field)
-	// {
-	// return field.getName();
-	// }
-	// });
-	//
-	// for (ObservedValue v :
-	// queryObservedValue.eq(ObservedValue.OBSERVATIONSET, os.getId())
-	// .in(ObservedValue.FEATURE_IDENTIFIER, new
-	// ArrayList<String>(fieldNames)).find())
-	// {
-	// ObservableFeature feature = v.getFeature();
-	// Object value = ValueConverter.fromString(v.getValue(), db, feature);
-	//
-	// tuple.set(feature.getIdentifier(), value);
-	// }
-	//
-	// result.add(tuple);
-	// }
-	//
-	// return result;
-	//
-	// }
-	// catch (Exception e)
-	// {
-	// logger.error("Exception getRows", e);
-	// throw new TableException(e);
-	// }
-	//
-	// }
 
 	@Override
 	public int getCount() throws TableException
@@ -269,20 +215,19 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 			getDb().beginTx();
 
 			// validate features
-			Map<String, Integer> featureMap = new TreeMap<String, Integer>();
+			Map<String, ObservableFeature> featureMap = new TreeMap<String, ObservableFeature>();
 			for (Field f : table.getAllColumns())
 			{
 				try
 				{
-					List<ObservableFeature> feature = getDb().query(ObservableFeature.class)
-							.eq(ObservableFeature.IDENTIFIER, f.getName()).find();
-					if (feature.size() != 1)
+					ObservableFeature feature = ObservableFeature.findByIdentifier(getDb(), f.getName());
+					if (feature == null)
 					{
 						throw new TableException("add failed: " + f.getName() + " not known ObservableFeature");
 					}
 					else
 					{
-						featureMap.put(f.getName(), feature.get(0).getId());
+						featureMap.put(f.getName(), feature);
 					}
 				}
 				catch (DatabaseException e)
@@ -301,10 +246,12 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 				List<ObservedValue> values = new ArrayList<ObservedValue>();
 				for (String name : t.getColNames())
 				{
+					ObservableFeature feature = featureMap.get(name);
+
 					ObservedValue v = new ObservedValue();
 					v.setObservationSet(es.getId());
-					v.setFeature(featureMap.get(name));
-					v.setValue(t.getString(name));
+					v.setFeature(feature);
+					v.setValue(ValueConverter.fromTuple(t, name, db, feature));
 					values.add(v);
 				}
 				getDb().add(values);
@@ -321,7 +268,6 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 			}
 			catch (DatabaseException e1)
 			{
-				;
 			}
 			throw new TableException(e);
 		}

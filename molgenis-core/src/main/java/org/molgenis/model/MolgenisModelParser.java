@@ -29,7 +29,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.fieldtypes.UnknownField;
 import org.molgenis.model.elements.DBSchema;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
@@ -65,8 +64,7 @@ public class MolgenisModelParser
 	 * 
 	 * @param model
 	 * @param element
-	 *            a DOM element that looks like <entity name="a"
-	 *            abstract="true"><field name="a" type="....
+	 *            a DOM element that looks like <entity name="a" abstract="true"><field name="a" type="....
 	 * @throws MolgenisModelException
 	 */
 	public static Entity parseEntity(Model model, Element element) throws MolgenisModelException
@@ -346,9 +344,9 @@ public class MolgenisModelParser
 		// check for illegal words
 		String[] keywords = new String[]
 		{ "type", "name", "label", "auto", "nillable", "optional", "readonly", "default", "description", "desc",
-				"unique", "hidden", "length", "index", "enum_options", "default_code", "xref", "xref_entity",
-				"xref_field", "xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter",
-				"filtertype", "filterfield", "filtervalue", "xref_cascade" + "", "allocationSize", "jpaCascade" };
+				"unique", "hidden", "length", "enum_options", "default_code", "xref", "xref_entity", "xref_field",
+				"xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter", "filtertype",
+				"filterfield", "filtervalue", "xref_cascade" + "", "allocationSize", "jpaCascade" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -381,7 +379,6 @@ public class MolgenisModelParser
 		String unique = element.getAttribute("unique");
 		String hidden = element.getAttribute("hidden");
 		String length = element.getAttribute("length");
-		String index = element.getAttribute("index");
 		String enum_options = element.getAttribute("enum_options").replace('[', ' ').replace(']', ' ').trim();
 		String default_code = element.getAttribute("default_code");
 		// xref and mref
@@ -420,7 +417,7 @@ public class MolgenisModelParser
 		String filtervalue = element.getAttribute("filtervalue");
 
 		// (re)set optional properties
-		if (type.equals("varchar"))
+		if (type.equals("varchar")) // TODO delete aliases
 		{
 			type = "string";
 		}
@@ -471,7 +468,7 @@ public class MolgenisModelParser
 			throw new MolgenisModelException("type is missing for field '" + name + "' of entity '" + entity.getName()
 					+ "'");
 		}
-		if (MolgenisFieldTypes.getType(type) instanceof UnknownField)
+		if (MolgenisFieldTypes.getType(type) == null)
 		{
 			throw new MolgenisModelException("type '" + type + "' unknown for field '" + name + "' of entity '"
 					+ entity.getName() + "'");
@@ -622,23 +619,6 @@ public class MolgenisModelParser
 		{
 			throw new MolgenisModelException("duplicate field '" + field.getName() + "' in entity '" + entity.getName()
 					+ "'");
-		}
-
-		// check whether this field has a short-hand for index
-		if (index.equals("true"))
-		{
-			Index i = new Index(name);
-			try
-			{
-				i.addField(name);
-			}
-			catch (Exception e)
-			{
-				throw new MolgenisModelException("duplicate field '" + field.getName() + "' in entity '"
-						+ entity.getName() + "'");
-			}
-
-			entity.addIndex(i);
 		}
 
 		// check whether this field has a short-hand for unique
@@ -1380,8 +1360,8 @@ public class MolgenisModelParser
 				}
 			}
 			/*
-			 * else { // this is the unexpected throw new Exception("Encountered
-			 * unknown element: " + element.getTagName()); }
+			 * else { // this is the unexpected throw new Exception("Encountered unknown element: " +
+			 * element.getTagName()); }
 			 */
 
 			// recurse the children

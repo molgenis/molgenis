@@ -16,10 +16,14 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
+import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.Value;
+import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.DataSetImportedEvent;
 import org.molgenis.util.tuple.Tuple;
 
 public class DataSetImporter
@@ -100,7 +104,7 @@ public class DataSetImporter
 			{
 				if (rownr % transactionRows == 0) db.beginTx();
 
-				ArrayList<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
+				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 
 				// create observation set
 				ObservationSet observationSet = new ObservationSet();
@@ -109,14 +113,19 @@ public class DataSetImporter
 
 				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
+					Value value = ValueConverter.fromTuple(row, entry.getKey(), db, entry.getValue());
+
 					// create observed value
-					String value = row.getString(entry.getKey());
 					ObservedValue observedValue = new ObservedValue();
 					observedValue.setFeature(entry.getValue());
 					observedValue.setValue(value);
 					observedValue.setObservationSet(observationSet);
 
 					// add to db
+					if (value != null)
+					{
+						db.add(value);
+					}
 					obsValueList.add(observedValue);
 				}
 				db.add(obsValueList);
@@ -124,6 +133,8 @@ public class DataSetImporter
 				if (++rownr % transactionRows == 0) db.commitTx();
 			}
 			if (rownr % transactionRows != 0) db.commitTx();
+
+			ApplicationContextProvider.getApplicationContext().publishEvent(new DataSetImportedEvent(this, identifier));
 		}
 		catch (DatabaseException e)
 		{

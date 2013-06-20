@@ -22,7 +22,7 @@ public class ScriptBuilder
 		this.password = password;
 	}
 
-	public String build(ComputeTask task, String appLocation, String pilotServicePath)
+	public String build(ComputeTask task, String appLocation, String pilotServicePath, String pilotID)
 	{
 		String pilotServiceUrl = appLocation + pilotServicePath;
 		String computeScript = task.getComputeScript().replaceAll("\r", "");
@@ -52,12 +52,12 @@ public class ScriptBuilder
 		// Upload log_file and if present the output env file
 		sb.append("if [ -f ").append(task.getName()).append(".env ]; then\n");
 		sb.append("curl -s -S -u ").append(username).append(":").append(password)
-				.append(" -F status=done -F log_file=@done.log ");
+				.append(" -F status=done -F pilotid="+ pilotID +" -F log_file=@done.log ");
 		sb.append("-F output_file=@").append(task.getName()).append(".env ");
 		sb.append(pilotServiceUrl);
 		sb.append("\nelse\n");
 		sb.append("curl -s -S -u ").append(username).append(":").append(password)
-				.append(" -F status=done -F log_file=@done.log ");
+				.append(" -F status=done -F pilotid="+ pilotID +" -F log_file=@done.log ");
 		sb.append(pilotServiceUrl);
 		sb.append("\nfi\n");
 
