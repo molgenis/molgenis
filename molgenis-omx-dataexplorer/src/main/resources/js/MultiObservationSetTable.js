@@ -54,8 +54,8 @@
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
 				var value = columnValueMap[feature.identifier];
-				if (value) {
-					items.push('<td>' + molgenis.formatValue(value, feature.dataType) + '</td>');
+				if ((value != null) && (value != undefined)) {
+					items.push('<td class="multi-os-datacell">' + molgenis.formatValue(value, feature.dataType) + '</td>');
 				} else {
 					items.push('<td></td>');
 				}
@@ -65,7 +65,8 @@
 		}
 		items.push('</tbody>');
 		$('#data-table').html(items.join(''));
-
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
+		
 		// Sort click
 		$('#data-table thead th .ui-icon').click(function() {
 			if (nrRows == 0) {

@@ -18,6 +18,8 @@ public interface DataSetsIndexer
 
 	void index(List<DataSet> dataSets) throws TableException;
 
+	void index(String dataSetIdentifier) throws DatabaseException, TableException;
+
 	void indexNew() throws DatabaseException, TableException;
 
 	/**

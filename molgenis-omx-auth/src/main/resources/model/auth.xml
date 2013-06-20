@@ -87,6 +87,7 @@
 				description="Boolean to indicate if this account can be used to login" />
 
 			<field name="superuser" type="bool" default="false" />
+			<unique fields="Email" />
 			<!-- todo: profile: picture, field, address, zip, timezone, flag to set public email, website, other details -->
 		</entity>
 		<entity name="MolgenisPermission" system="true" implements="Identifiable">

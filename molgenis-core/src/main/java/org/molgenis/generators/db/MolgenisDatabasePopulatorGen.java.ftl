@@ -38,6 +38,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	
 	@Value(${r'"${admin.password:@null}"'})
 	private String adminPassword;
+	@Value(${r'"${admin.email:molgenis+admin@gmail.com}"'})
+	private String adminEmail;
 	
 </#if>
 	@Override
@@ -83,7 +85,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	
 	private void initializeDefaultApplicationDatabase(Database database) throws Exception
 	{
-		if(adminPassword==null) throw new RuntimeException("please configure the default admin password in your molgenis-server.properties");	
+		if(adminPassword == null) throw new RuntimeException("please configure the admin.password property in your molgenis-server.properties");	
 		
 		Login login = database.getLogin();
     	database.setLogin(null); // so we don't run into trouble with the Security Decorators
@@ -93,7 +95,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		userAdmin.setName(Login.USER_ADMIN_NAME);
 		userAdmin.setIdentifier(UUID.randomUUID().toString());
 		userAdmin.setPassword(new PasswordHasher().toMD5(adminPassword));
-		userAdmin.setEmail("molgenis@gmail.com");
+		userAdmin.setEmail(adminEmail);
 		userAdmin.setFirstName(Login.USER_ADMIN_NAME);
 		userAdmin.setLastName(Login.USER_ADMIN_NAME);
 		userAdmin.setActive(true);
@@ -102,8 +104,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		MolgenisUser userAnonymous = new MolgenisUser();
 		userAnonymous.setName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setIdentifier(UUID.randomUUID().toString());
-		userAnonymous.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf"); 
-		userAnonymous.setEmail(Login.USER_ANONYMOUS_NAME);
+		userAnonymous.setPassword(new PasswordHasher().toMD5("anonymous")); 
+		userAnonymous.setEmail("molgenis+anonymous@gmail.com");
 		userAnonymous.setFirstName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setLastName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setActive(true);

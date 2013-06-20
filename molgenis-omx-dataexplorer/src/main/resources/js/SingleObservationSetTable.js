@@ -39,7 +39,7 @@
 
 			items.push('<tr>');
 			items.push('<td>' + feature.name + '</td>');
-			if (value) {
+			if ((value != null) && (value != undefined)) {
 				items.push('<td>' + molgenis.formatValue(value, feature.dataType) + '</td>');
 			} else {
 				items.push('<td></td>');
@@ -50,6 +50,7 @@
 
 		items.push('</tbody>');
 		$('#data-table').html(items.join(''));
+		$('.show-popover').popover({trigger:'hover', placement: 'right'});
 	};
 
 }($, window.top));
