@@ -63,8 +63,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
-				// FIXME: dataset name is not unique
-				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 			}
@@ -96,10 +95,10 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		{
 			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
 			{
-				if (!searchService.documentTypeExists(dataSet.getName()))
+				if (!searchService.documentTypeExists(dataSet.getIdentifier()))
 				{
-					// FIXME: dataset name is not unique
-					searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+					searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet,
+							unauthorizedDatabase));
 					searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 							new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 				}
@@ -120,14 +119,25 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Async
 	public void index(List<DataSet> dataSets)
 	{
+		while (isIndexingRunning())
+		{
+			try
+			{
+				Thread.sleep(5000);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
 		runningIndexProcesses.incrementAndGet();
 		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
 			for (DataSet dataSet : dataSets)
 			{
-				// FIXME: dataset name is not unique
-				searchService.indexTupleTable(dataSet.getName(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
 			}
@@ -141,5 +151,41 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 			runningIndexProcesses.decrementAndGet();
 		}
+	}
+
+	@Override
+	@Async
+	public void index(String dataSetIdentifier) throws DatabaseException, TableException
+	{
+		while (isIndexingRunning())
+		{
+			try
+			{
+				Thread.sleep(5000);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		runningIndexProcesses.incrementAndGet();
+		Database unauthorizedDatabase = null;
+		try
+		{
+			unauthorizedDatabase = DatabaseUtil.createDatabase();
+			DataSet dataSet = DataSet.findByIdentifier(unauthorizedDatabase, dataSetIdentifier);
+			if (dataSet == null) throw new DatabaseException("Unknown DataSet identifier [" + dataSetIdentifier + "]");
+
+			searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
+			searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+					new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
+		}
+		finally
+		{
+			DatabaseUtil.closeQuietly(unauthorizedDatabase);
+			runningIndexProcesses.decrementAndGet();
+		}
+
 	}
 }

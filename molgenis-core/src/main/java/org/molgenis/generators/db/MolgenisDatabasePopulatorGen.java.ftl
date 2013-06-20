@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -24,6 +25,7 @@ import org.molgenis.framework.security.Login;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 </#if>
 
 public abstract class MolgenisDatabasePopulator implements ApplicationListener<ContextRefreshedEvent> {
@@ -33,6 +35,11 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	@Autowired
 	@Qualifier("unauthorizedPrototypeDatabase")
 	private Database database;
+	
+	@Value(${r'"${admin.password:@null}"'})
+	private String adminPassword;
+	@Value(${r'"${admin.email:molgenis+admin@gmail.com}"'})
+	private String adminEmail;
 	
 </#if>
 	@Override
@@ -78,6 +85,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	
 	private void initializeDefaultApplicationDatabase(Database database) throws Exception
 	{
+		if(adminPassword == null) throw new RuntimeException("please configure the admin.password property in your molgenis-server.properties");	
+		
 		Login login = database.getLogin();
     	database.setLogin(null); // so we don't run into trouble with the Security Decorators
 
@@ -85,8 +94,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		MolgenisUser userAdmin = new MolgenisUser();
 		userAdmin.setName(Login.USER_ADMIN_NAME);
 		userAdmin.setIdentifier(UUID.randomUUID().toString());
-		userAdmin.setPassword("md5_21232f297a57a5a743894a0e4a801fc3"); // FIXME hardcoded reference to admin password hash
-		userAdmin.setEmail("molgenis@gmail.com");
+		userAdmin.setPassword(new PasswordHasher().toMD5(adminPassword));
+		userAdmin.setEmail(adminEmail);
 		userAdmin.setFirstName(Login.USER_ADMIN_NAME);
 		userAdmin.setLastName(Login.USER_ADMIN_NAME);
 		userAdmin.setActive(true);
@@ -95,8 +104,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		MolgenisUser userAnonymous = new MolgenisUser();
 		userAnonymous.setName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setIdentifier(UUID.randomUUID().toString());
-		userAnonymous.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf"); 
-		userAnonymous.setEmail(Login.USER_ANONYMOUS_NAME);
+		userAnonymous.setPassword(new PasswordHasher().toMD5("anonymous")); 
+		userAnonymous.setEmail("molgenis+anonymous@gmail.com");
 		userAnonymous.setFirstName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setLastName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setActive(true);
@@ -141,8 +150,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 			em.getTransaction().rollback();
 			throw e;
 		}
-
-		login.login(database, Login.USER_ADMIN_NAME, "admin"); // FIXME hardcoded reference to admin password
+		
+		login.login(database, Login.USER_ADMIN_NAME, adminPassword);
 
 		database.beginTx();
 		try

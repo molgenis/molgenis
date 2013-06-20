@@ -1,8 +1,13 @@
 package org.molgenis.compute.db.executor;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.UUID;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
@@ -66,10 +71,26 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 								password, SSH_PORT);
 					}
 
-					executionHost.submitPilot(computeRun.getComputeBackend(), computeRun.getComputeBackend().getCommand());
+                    //generate unique pilot and its submission command
+                    String pilotID = String.valueOf(UUID.randomUUID());
+
+                    String jdlTemplate = getFileAsString("src/main/resources/templates/maverick.jdl.ftl");
+                    String shTemplate = getFileAsString("src/main/resources/templates/maverick.sh.ftl");
+                    String comTemplate = computeRun.getComputeBackend().getCommand();
+
+                    Hashtable<String, String> values = new Hashtable<String, String>();
+
+                    values.put("pilotid", pilotID);
+                    values.put("SERVER", "SERVER");
+
+                    String command = weaveFreemarker(comTemplate, values);
+                    String jdl = weaveFreemarker(jdlTemplate, values);
+                    String sh = weaveFreemarker(shTemplate, values);
+
+					executionHost.submitPilot(computeRun.getComputeBackend(),
+                                                command, pilotID, sh, jdl, computeRun.getOwner());
 				}
 
-				// sleep, because we have a strange behavior in pilot service
 				try
 				{
 					Thread.sleep(2000);
@@ -146,5 +167,45 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 		}
 
 	}
+
+    private final String getFileAsString(String filename) throws IOException
+    {
+        File file = new File(filename);
+
+        if (!file.exists())
+        {
+            LOG.error("File [" + filename + "] does not exist");
+            throw new ComputeDbException("File [" + filename + "] does not exist");
+        }
+        final BufferedInputStream bis = new BufferedInputStream(
+                new FileInputStream(file));
+        final byte[] bytes = new byte[(int) file.length()];
+        bis.read(bytes);
+        bis.close();
+        return new String(bytes);
+    }
+
+    public String weaveFreemarker(String strTemplate, Hashtable<String, String> values)
+    {
+        Configuration cfg = new Configuration();
+
+        Template t = null;
+        StringWriter out = new StringWriter();
+        try
+        {
+            t = new Template("name", new StringReader(strTemplate), cfg);
+            t.process(values, out);
+        }
+        catch (TemplateException e)
+        {
+            //e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            //e.printStackTrace();
+        }
+
+        return out.toString();
+    }
 
 }

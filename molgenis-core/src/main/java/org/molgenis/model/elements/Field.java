@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.fieldtypes.CharField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
@@ -480,7 +479,7 @@ public class Field implements Serializable
 	 */
 	public int getVarCharLength() throws MolgenisModelException
 	{
-		if (!(this.type instanceof StringField) && !(this.type instanceof CharField))
+		if (!(this.type instanceof StringField))
 		{
 			throw new MolgenisModelException("Field is not a VARCHAR, so length cannot be retrieved.");
 		}
@@ -881,7 +880,7 @@ public class Field implements Serializable
 
 		// type
 		str += ", type=" + type;
-		if (type instanceof StringField || type instanceof CharField)
+		if (type instanceof StringField)
 		{
 			str += "[" + varchar_length + "]";
 		}

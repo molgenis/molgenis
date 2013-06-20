@@ -20,13 +20,15 @@ public class CreateWorkflowGenerator
 		if (!source.exists())
 		{
 			System.err.println(">> ERROR >> Directory '" + source.toString()
-					+ "' not found. Please add molgenis-compute-core/");
+					+ "' not found. Please add molgenis-compute-core/ to your classpath.");
 			System.err.println("Exit with code 1.");
 			System.exit(1);
 		}
 		else try
 		{
 			copyFolder(source, target);
+			System.out.println("Created new workflow design in '" + target + "'.");
+			System.out.println("You can generate the corresponding workflow by changing to that directory and executing 'molgenis_compute.sh -g'");
 		}
 		catch (IOException e)
 		{
@@ -37,7 +39,6 @@ public class CreateWorkflowGenerator
 
 	public static void copyFolder(File src, File dest) throws IOException
 	{
-
 		if (src.isDirectory())
 		{
 
@@ -45,7 +46,6 @@ public class CreateWorkflowGenerator
 			if (!dest.exists())
 			{
 				dest.mkdir();
-				System.out.println("Directory copied from " + src + "  to " + dest);
 			}
 
 			// list all the directory contents
@@ -79,7 +79,6 @@ public class CreateWorkflowGenerator
 
 			in.close();
 			out.close();
-			System.out.println("File copied from " + src + " to " + dest);
 		}
 	}
 }

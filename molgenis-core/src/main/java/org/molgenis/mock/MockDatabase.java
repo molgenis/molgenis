@@ -2,7 +2,6 @@ package org.molgenis.mock;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.text.ParseException;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import javax.persistence.EntityManager;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.ExampleData;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
@@ -20,11 +18,10 @@ import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.Tuple;
 
 /**
- * Mock Database implementation for use in unittests. Use setEntities for define entities to be returned by the query
- * and find methods
+ * Mock Database implementation for use in unittests. Use setEntities for define
+ * entities to be returned by the query and find methods
  * 
  * Implement more methods if you need them.
  * 
@@ -69,26 +66,6 @@ public class MockDatabase implements Database
 	public void setEntities(List<? extends Entity> entities)
 	{
 		this.entities = entities;
-	}
-
-	@Override
-	public void createTables() throws DatabaseException
-	{
-	}
-
-	@Override
-	public void updateTables() throws DatabaseException
-	{
-	}
-
-	@Override
-	public void dropTables() throws DatabaseException
-	{
-	}
-
-	@Override
-	public void loadExampleData(ExampleData exampleData) throws DatabaseException
-	{
 	}
 
 	public void setMetaData(Model metaData)
@@ -151,13 +128,6 @@ public class MockDatabase implements Database
 			QueryRule... rules) throws DatabaseException
 	{
 
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E extends Entity> List<E> findByExample(E example) throws DatabaseException
-	{
-		return entities;
 	}
 
 	@Override
@@ -524,19 +494,7 @@ public class MockDatabase implements Database
 	}
 
 	@Override
-	public List<Tuple> sql(String query, QueryRule... queryRules) throws DatabaseException
-	{
-		return null;
-	}
-
-	@Override
 	public <E extends Entity> String createFindSql(Class<E> entityClass, QueryRule... rules) throws DatabaseException
-	{
-		return null;
-	}
-
-	@Override
-	public Connection getConnection() throws DatabaseException
 	{
 		return null;
 	}

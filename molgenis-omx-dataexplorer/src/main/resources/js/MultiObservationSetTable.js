@@ -3,22 +3,22 @@
 
 	var molgenis = w.molgenis = w.molgenis || {};
 	var sortRule = null;
-	
-	molgenis.ResultsTable = function ResultsTable () {
+
+	molgenis.ResultsTable = function ResultsTable() {
 	};
 
 	molgenis.ResultsTable.prototype.getMaxRows = function() {
 		return 20;
 	};
-	
+
 	molgenis.ResultsTable.prototype.getSortRule = function() {
 		return sortRule;
 	};
-	
+
 	molgenis.ResultsTable.prototype.resetSortRule = function() {
 		sortRule = null;
 	};
-	
+
 	molgenis.ResultsTable.prototype.build = function(searchResponse, selectedFeatures, restApi) {
 		var nrRows = searchResponse.totalHitCount;
 
@@ -54,8 +54,8 @@
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
 				var value = columnValueMap[feature.identifier];
-				if (value) {
-					items.push('<td>' + value + '</td>');
+				if ((value != null) && (value != undefined)) {
+					items.push('<td class="multi-os-datacell">' + molgenis.formatValue(value, feature.dataType) + '</td>');
 				} else {
 					items.push('<td></td>');
 				}
@@ -65,7 +65,8 @@
 		}
 		items.push('</tbody>');
 		$('#data-table').html(items.join(''));
-
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
+		
 		// Sort click
 		$('#data-table thead th .ui-icon').click(function() {
 			if (nrRows == 0) {
@@ -85,10 +86,10 @@
 					operator : 'SORTASC'
 				};
 			}
-			
+
 			molgenis.updateObservationSetsTable();
 			return false;
 		});
 	};
-	
+
 }($, window.top));

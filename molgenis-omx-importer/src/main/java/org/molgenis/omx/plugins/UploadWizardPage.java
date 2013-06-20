@@ -3,7 +3,6 @@ package org.molgenis.omx.plugins;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -14,8 +13,6 @@ import java.util.Set;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
@@ -126,22 +123,26 @@ public class UploadWizardPage extends WizardPage
 		try
 		{
 			TupleReader dataSetReader = tableReader.getTupleReader(DATASET_PREFIX);
-			if (dataSetReader == null) return Collections.<String, Boolean> emptyMap();
 
 			// get dataset identifiers (case insensitive)
 			Set<String> datasetIdentifiers = new HashSet<String>();
-			try
+
+			if (dataSetReader != null)
 			{
-				dataSetReader.addCellProcessor(new LowerCaseProcessor(true, false));
-				for (Tuple tuple : dataSetReader)
+				try
 				{
-					String identifier = tuple.getString(DataSet.IDENTIFIER.toLowerCase());
-					if (identifier != null) datasetIdentifiers.add(identifier);
+					dataSetReader.addCellProcessor(new LowerCaseProcessor(true, false));
+					for (Tuple tuple : dataSetReader)
+					{
+						String identifier = tuple.getString(DataSet.IDENTIFIER.toLowerCase());
+						if (identifier != null) datasetIdentifiers.add(identifier);
+					}
 				}
-			}
-			finally
-			{
-				dataSetReader.close();
+				finally
+				{
+
+					dataSetReader.close();
+				}
 			}
 
 			// validate dataset matrices
@@ -150,15 +151,16 @@ public class UploadWizardPage extends WizardPage
 			// determine if dataset matrices can be imported
 			for (String tableName : tableReader.getTableNames())
 			{
-				if (!tableName.toLowerCase().startsWith(DATASET_PREFIX + "_")) continue;
+				if (tableName.toLowerCase().startsWith(DATASET_PREFIX + "_"))
+				{
+					String identifier = tableName.substring((DATASET_PREFIX + "_").length());
 
-				String identifier = tableName.substring((DATASET_PREFIX + "_").length());
-				boolean canImport;
-				if (datasetIdentifiers.contains(identifier)) canImport = true;
-				else if (!db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier))
-						.isEmpty()) canImport = true;
-				else canImport = false;
-				dataSetValidationMap.put(identifier, canImport);
+					// Check if dataset is present in the excel or in the database
+					boolean canImport = datasetIdentifiers.contains(identifier)
+							|| (DataSet.findByIdentifier(db, identifier) != null);
+
+					dataSetValidationMap.put(identifier, canImport);
+				}
 			}
 
 			return dataSetValidationMap;
