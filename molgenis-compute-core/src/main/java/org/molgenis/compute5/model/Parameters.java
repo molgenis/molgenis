@@ -95,6 +95,8 @@ public class Parameters
 	public static final String HELP_CMNDLINE_OPTION = "h";
 	public static final String RUN = "run";
 	public static final String RUN_CMNDLINE_OPTION = "r";
+	public static final String USER_CMNDLINE = "user";
+	public static final String USER_CMNDLINE_OPTION = "u";
 	
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
