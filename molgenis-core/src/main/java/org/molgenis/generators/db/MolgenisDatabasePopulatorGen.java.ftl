@@ -246,7 +246,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		}		
 		return result;		
 	}
-	
+
 	private static final String[][] ENTITY_VALUES = new String[][] {
 	<#list model.getConcreteEntities() as entity>
 		new String[] {"${JavaName(entity)}", "ENTITY", "${entity.namespace}.${JavaName(entity)}"}<#if entity_has_next>,</#if>
