@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.search;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -8,8 +9,8 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
-import org.molgenis.omx.dataset.ProtocolTable;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.protocol.ProtocolTable;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
@@ -89,7 +90,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Async
 	public void indexNew()
 	{
-		runningIndexProcesses.incrementAndGet();
+		List<Integer> dataSetIds = new ArrayList<Integer>();
+
 		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
@@ -97,10 +99,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				if (!searchService.documentTypeExists(dataSet.getIdentifier()))
 				{
-					searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet,
-							unauthorizedDatabase));
-					searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-							new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
+					dataSetIds.add(dataSet.getId());
 				}
 			}
 		}
@@ -111,13 +110,17 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		finally
 		{
 			DatabaseUtil.closeQuietly(unauthorizedDatabase);
-			runningIndexProcesses.decrementAndGet();
+		}
+
+		if (!dataSetIds.isEmpty())
+		{
+			index(dataSetIds);
 		}
 	}
 
 	@Override
 	@Async
-	public void index(List<DataSet> dataSets)
+	public void index(List<Integer> dataSetIds)
 	{
 		while (isIndexingRunning())
 		{
@@ -135,6 +138,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
+			List<DataSet> dataSets = unauthorizedDatabase.query(DataSet.class).in(DataSet.ID, dataSetIds).find();
+
 			for (DataSet dataSet : dataSets)
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
@@ -153,39 +158,4 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 	}
 
-	@Override
-	@Async
-	public void index(String dataSetIdentifier) throws DatabaseException, TableException
-	{
-		while (isIndexingRunning())
-		{
-			try
-			{
-				Thread.sleep(5000);
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
-		runningIndexProcesses.incrementAndGet();
-		Database unauthorizedDatabase = null;
-		try
-		{
-			unauthorizedDatabase = DatabaseUtil.createDatabase();
-			DataSet dataSet = DataSet.findByIdentifier(unauthorizedDatabase, dataSetIdentifier);
-			if (dataSet == null) throw new DatabaseException("Unknown DataSet identifier [" + dataSetIdentifier + "]");
-
-			searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
-			searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-					new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
-		}
-		finally
-		{
-			DatabaseUtil.closeQuietly(unauthorizedDatabase);
-			runningIndexProcesses.decrementAndGet();
-		}
-
-	}
 }

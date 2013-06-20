@@ -1,4 +1,4 @@
-package org.molgenis.omx.dataset;
+package org.molgenis.omx.protocol;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,8 +11,6 @@ import java.util.Iterator;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -28,20 +26,6 @@ public class ProtocolTableTest
 	@BeforeMethod
 	public void setUp() throws DatabaseException, TableException
 	{
-		Protocol protocol = mock(Protocol.class);
-		when(protocol.getSubprotocols_Id()).thenReturn(Arrays.asList(1, 2));
-		when(protocol.getName()).thenReturn("p0");
-
-		Protocol subProtocol1 = mock(Protocol.class);
-		when(subProtocol1.getSubprotocols_Id()).thenReturn(Collections.<Integer> emptyList());
-		when(subProtocol1.getFeatures_Id()).thenReturn(Arrays.asList(10, 11));
-		when(subProtocol1.getName()).thenReturn("p1");
-
-		Protocol subProtocol2 = mock(Protocol.class);
-		when(subProtocol2.getSubprotocols_Id()).thenReturn(Collections.<Integer> emptyList());
-		when(subProtocol2.getFeatures_Id()).thenReturn(Arrays.asList(12));
-		when(subProtocol2.getName()).thenReturn("p2");
-
 		ObservableFeature feature10 = mock(ObservableFeature.class);
 		when(feature10.getName()).thenReturn("f10");
 		ObservableFeature feature11 = mock(ObservableFeature.class);
@@ -49,17 +33,21 @@ public class ProtocolTableTest
 		ObservableFeature feature12 = mock(ObservableFeature.class);
 		when(feature12.getName()).thenReturn("f12");
 
+		Protocol subProtocol1 = mock(Protocol.class);
+		when(subProtocol1.getSubprotocols()).thenReturn(Collections.<Protocol> emptyList());
+		when(subProtocol1.getFeatures()).thenReturn(Arrays.asList(feature10, feature11));
+		when(subProtocol1.getName()).thenReturn("p1");
+
+		Protocol subProtocol2 = mock(Protocol.class);
+		when(subProtocol2.getSubprotocols_Id()).thenReturn(Collections.<Integer> emptyList());
+		when(subProtocol2.getFeatures()).thenReturn(Arrays.asList(feature12));
+		when(subProtocol2.getName()).thenReturn("p2");
+
+		Protocol protocol = mock(Protocol.class);
+		when(protocol.getSubprotocols()).thenReturn(Arrays.asList(subProtocol1, subProtocol2));
+		when(protocol.getName()).thenReturn("p0");
+
 		database = mock(Database.class);
-		when(database.find(Protocol.class, new QueryRule(Protocol.ID, Operator.IN, Arrays.asList(1, 2)))).thenReturn(
-				Arrays.asList(subProtocol1, subProtocol2));
-		when(
-				database.find(ObservableFeature.class,
-						new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(10, 11)))).thenReturn(
-				Arrays.asList(feature10, feature11));
-		when(
-				database.find(ObservableFeature.class,
-						new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(12)))).thenReturn(
-				Arrays.asList(feature12));
 
 		protocolTable = new ProtocolTable(protocol, database);
 	}
