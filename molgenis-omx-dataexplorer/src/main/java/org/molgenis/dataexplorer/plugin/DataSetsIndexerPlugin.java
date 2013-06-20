@@ -18,8 +18,7 @@ import org.molgenis.util.Entity;
 import org.molgenis.util.HandleRequestDelegationException;
 
 /**
- * Plugin for indexing datasets. It shows a list of all dataset wich you can
- * choose to index.
+ * Plugin for indexing datasets. It shows a list of all dataset wich you can choose to index.
  * 
  * @author erwin
  * 
@@ -92,9 +91,7 @@ public class DataSetsIndexerPlugin extends PluginModel<Entity>
 			}
 		}
 
-		// Get the selected datasets from the databse and index them
-		List<DataSet> dataSets = db.query(DataSet.class).in("id", ids).find();
-		getDataSetsIndexer().index(dataSets);
+		getDataSetsIndexer().index(ids);
 
 		setMessages(new ScreenMessage("Indexing started", true));
 	}

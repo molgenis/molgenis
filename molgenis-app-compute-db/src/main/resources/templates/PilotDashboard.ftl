@@ -79,7 +79,7 @@
 						<div class="span6">
 							<div class="host-header">
 								<span class="host-name">${run.name}@${run.backendUrl}</span>
-								<span class="creation-time">(${run.creationTime})</span>
+								<span class="creation-time">(${run.creationTime?datetime})</span>
 
                                 <#if run.complete>
                                     <div class="text-success">Completed</div>

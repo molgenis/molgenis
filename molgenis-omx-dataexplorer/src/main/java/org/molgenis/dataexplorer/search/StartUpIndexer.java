@@ -1,5 +1,7 @@
 package org.molgenis.dataexplorer.search;
 
+import java.util.Arrays;
+
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.util.DataSetImportedEvent;
@@ -37,7 +39,7 @@ public class StartUpIndexer implements ApplicationListener<ApplicationEvent>
 			else if (event instanceof DataSetImportedEvent)
 			{
 				DataSetImportedEvent dataSetImportedEvent = (DataSetImportedEvent) event;
-				dataSetsIndexer.index(dataSetImportedEvent.getDataSetIdentifier());
+				dataSetsIndexer.index(Arrays.asList(dataSetImportedEvent.getDataSetId()));
 			}
 		}
 		catch (DatabaseException e)

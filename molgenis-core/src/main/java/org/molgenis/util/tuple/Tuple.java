@@ -112,8 +112,7 @@ public interface Tuple extends Serializable
 	public Date getDate(int col);
 
 	/**
-	 * Retrieves the value of the designated column as
-	 * {@link java.sql.Timestamp}.
+	 * Retrieves the value of the designated column as {@link java.sql.Timestamp}.
 	 * 
 	 * @param columnName
 	 * @return
@@ -136,8 +135,14 @@ public interface Tuple extends Serializable
 
 	/**
 	 * Retrieves the value of the designated column as List<Integer>
+	 * 
 	 * @param colName
 	 * @return
 	 */
 	public List<Integer> getIntList(String colName);
+
+	/**
+	 * Returns true if this tuple only contains null values
+	 */
+	public boolean isEmpty();
 }
