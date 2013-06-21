@@ -1,1 +1,3 @@
-# My own custom footer
+#
+## My own custom footer
+#
