@@ -54,6 +54,20 @@ import org.molgenis.util.tuple.Tuple;
 
 public class FormModel<E extends Entity> extends SimpleScreenModel
 {
+
+	private int recordId;
+
+	public void setRecordId(int recordId)
+	{
+		this.recordId = recordId;
+	}
+
+	public int getRecordId()
+	{
+		return recordId;
+	}
+
+
 	/**
 	 * Parameters to enable links between parent forms and subforms using foreign key relationships (aka master-detail
 	 * views)
@@ -152,6 +166,7 @@ public class FormModel<E extends Entity> extends SimpleScreenModel
 	public static final String INPUT_SHOW = "__show";
 	public static final String INPUT_COMMAND = "__command";
 	public static final String INPUT_OFFSET = "__offset";
+	public static final String INPUT_ID = "__id";
 	public static final String INPUT_DOWNLOADFILENAME = "__filename";
 	public static final String INPUT_BATCHADD = "__batchadd";
 	public static final String INPUT_SELECTED = "massUpdate";
