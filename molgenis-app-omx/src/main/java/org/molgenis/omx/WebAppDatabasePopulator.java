@@ -53,22 +53,21 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		List<MolgenisGroup> listMolgenisGroup = database.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
 				Operator.EQUALS, "AllUsers"));
 
-		createPermission(database, MolgenisUser.class, listMolgenisGroup.get(0), "write");
-
 		MolgenisGroup readUsersGroup = createGroup(database, "readUsers");
 		MolgenisGroup readWriteUsersGroup = createGroup(database, "readWriteUsers");
 
 		// Set write permissions that a user can edit own account
 		createPermission(database, MolgenisUser.class, listMolgenisGroup.get(0), "write");
-		permissionGroup(database, readUsersGroup, "read");
-		permissionGroup(database, readWriteUsersGroup, "write");
+		setPermissionsForUserGroup(database, readUsersGroup, "read");
+		setPermissionsForUserGroup(database, readWriteUsersGroup, "write");
 
 		// Add UploadWizard for readWriteUsersGroup
 		createPermission(database, UploadWizardPlugin.class, readWriteUsersGroup, "write");
 		database.setLogin(login); // restore login
 	}
 
-	private void permissionGroup(Database database, MolgenisRole groupName, String permission) throws DatabaseException
+	private void setPermissionsForUserGroup(Database database, MolgenisRole groupName, String permission)
+			throws DatabaseException
 	{
 		// Set entity permissions
 		Vector<org.molgenis.model.elements.Entity> entities = database.getMetaData().getEntities(false, false);
