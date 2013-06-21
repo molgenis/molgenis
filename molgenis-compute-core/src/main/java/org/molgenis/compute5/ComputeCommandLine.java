@@ -211,7 +211,7 @@ public class ComputeCommandLine
 		// write the task for the backend
 		if (Parameters.BACKEND_PBS.equals(computeProperties.backend))
 		{
-			new PbsBackend().generate(compute.getTasks(), dir);
+			new PbsBackend(computeProperties).generate(compute.getTasks(), dir);
 		}
 		else
 		{

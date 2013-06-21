@@ -92,9 +92,11 @@ public class TaskGenerator
 					step.setJobName(id, task.getName());
 				}
 
+				String parameterHeader = "\n#\n## Generated header\n#\n";
+				
 				// now source the task's parameters from each prevStep.env on
 				// which this task depends
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\n\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
+				parameterHeader += "\n# Load parameters from previous steps\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
 
 				for (String previousStepName : step.getPreviousSteps())
 				{ // we have jobs on which we depend in this prev step
@@ -117,7 +119,7 @@ public class TaskGenerator
 
 				parameterHeader += "\n# Assign values to the parameters in this script\n";
 				
-				parameterHeader += "\n#\n##\n### Make compute.properties available \n##\n#";
+				parameterHeader += "\n# Make compute.properties available";
 				parameterHeader += "\nrundir=\"" + computeProperties.runDir + "\"";
 				parameterHeader += "\nrunid=\"" + computeProperties.runId + "\"";
 				parameterHeader += "\nworkflow=\"" + computeProperties.workFlow + "\"";
@@ -129,7 +131,7 @@ public class TaskGenerator
 				parameterHeader += "\ninterval=\"" + computeProperties.interval + "\"";
 				parameterHeader += "\npath=\"" + computeProperties.path + "\"";
 				
-				parameterHeader += "\n\n#\n##\n### Connect parameters to environment\n##\n#\n";
+				parameterHeader += "\n\n# Connect parameters to environment\n";
 
 				// now couple input parameters to parameters in sourced
 				// environment
@@ -150,9 +152,8 @@ public class TaskGenerator
 				}
 
 				parameterHeader = parameterHeader
-						+ "\n#\n##\n### Validate that each 'value' parameter has only identical values in its list\n"
-						+ "### We do that to protect you against parameter values that might not be correctly set at runtime.\n"
-						+ "##\n#\n";
+						+ "\n# Validate that each 'value' parameter has only identical values in its list\n"
+						+ "# We do that to protect you against parameter values that might not be correctly set at runtime.\n";
 				for (Input input : step.getProtocol().getInputs())
 				{
 					boolean isList = Parameters.LIST_INPUT.equals(input.getType());
@@ -172,7 +173,7 @@ public class TaskGenerator
 					}
 				}
 
-				parameterHeader += "\n# Start of your protocol template\n";
+				parameterHeader += "\n#\n## Start of your protocol template\n#\n\n";
 
 				String script = step.getProtocol().getTemplate();
 				script = parameterHeader + script;
@@ -180,10 +181,9 @@ public class TaskGenerator
 				// append footer that appends the task's parameters to
 				// environment of this task
 				String myEnvironmentFile = Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + task.getName() + Parameters.ENVIRONMENT_EXTENSION;
-				script = script + "\n# End of your protocol template\n";
-				script = script + "\n#\n##\n### Save output in environment file: '" + myEnvironmentFile
-						+ "' with the output vars of this step\n##\n#";
-				script += "\n";
+				script = script + "\n#\n## End of your protocol template\n#\n";
+				script = script + "\n# Save output in environment file: '" + myEnvironmentFile
+						+ "' with the output vars of this step\n";
 
 				Iterator<String> itParam = map.keySet().iterator();
 				while (itParam.hasNext())
