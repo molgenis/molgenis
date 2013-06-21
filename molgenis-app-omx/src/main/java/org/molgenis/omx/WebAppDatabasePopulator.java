@@ -46,7 +46,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		RuntimeProperty runtimePropertyLogo = new RuntimeProperty();
 		runtimePropertyLogo.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + "app.href.logo");
 		runtimePropertyLogo.setName("app.href.logo");
-		runtimePropertyLogo.setValue("img/logo_default");
+		runtimePropertyLogo.setValue("img/logo_default.png");
 		database.add(runtimePropertyLogo);
 
 		List<MolgenisGroup> listMolgenisGroup = database.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
