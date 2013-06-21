@@ -92,9 +92,11 @@ public class TaskGenerator
 					step.setJobName(id, task.getName());
 				}
 
+				String parameterHeader = "\n#\n##Generated header\n#\n";
+				
 				// now source the task's parameters from each prevStep.env on
 				// which this task depends
-				String parameterHeader = "\n#\n##\n### Load parameters from previous steps\n##\n#\n\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
+				parameterHeader += "\n# Load parameters from previous steps\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
 
 				for (String previousStepName : step.getPreviousSteps())
 				{ // we have jobs on which we depend in this prev step
@@ -117,7 +119,7 @@ public class TaskGenerator
 
 				parameterHeader += "\n# Assign values to the parameters in this script\n";
 				
-				parameterHeader += "\n#\n##\n### Make compute.properties available \n##\n#";
+				parameterHeader += "\n# Make compute.properties available";
 				parameterHeader += "\nrundir=\"" + computeProperties.runDir + "\"";
 				parameterHeader += "\nrunid=\"" + computeProperties.runId + "\"";
 				parameterHeader += "\nworkflow=\"" + computeProperties.workFlow + "\"";
