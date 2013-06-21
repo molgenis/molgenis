@@ -20,12 +20,12 @@ public class LocalBackend extends BackendGenerator
 		super("header.ftl", "footer.ftl", "submit.ftl");
 
 		File h = new File(cp.path + File.separator + "header.ftl");
-		File f = new File(cp.path + File.separator + "Footer.ftl");
-		File s = new File(cp.path + File.separator + "Submit.ftl");
+		File f = new File(cp.path + File.separator + "footer.ftl");
+		File s = new File(cp.path + File.separator + "submit.ftl");
 
 		// overwrite if files already defined by user
-		if (h.exists()) this.setHeaderTemplate(FileUtils.readFileToString(h));
-		if (f.exists()) this.setFooterTemplate(FileUtils.readFileToString(f));
+		if (h.exists()) this.appendCustomHeader(FileUtils.readFileToString(h));
+		if (f.exists()) this.appendCustomFooter(FileUtils.readFileToString(f));
 		if (s.exists()) this.setSubmitTemplate(FileUtils.readFileToString(s));
 	}
 
