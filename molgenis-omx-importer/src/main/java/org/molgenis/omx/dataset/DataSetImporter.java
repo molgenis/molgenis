@@ -3,6 +3,7 @@ package org.molgenis.omx.dataset;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,11 +32,13 @@ public class DataSetImporter
 	private static final Logger LOG = Logger.getLogger(DataSetImporter.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
 	private final Database db;
+	private final ValueConverter valueConverter;
 
 	public DataSetImporter(Database db)
 	{
 		if (db == null) throw new IllegalArgumentException();
 		this.db = db;
+		this.valueConverter = new ValueConverter(db);
 	}
 
 	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, DatabaseException
@@ -100,6 +103,7 @@ public class DataSetImporter
 				if (!row.isEmpty())
 				{
 					List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
+					Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
 
 					// create observation set
 					ObservationSet observationSet = new ObservationSet();
@@ -108,22 +112,29 @@ public class DataSetImporter
 
 					for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 					{
-						Value value = ValueConverter.fromTuple(row, entry.getKey(), db, entry.getValue());
+						Value value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
 
-						// create observed value
-						ObservedValue observedValue = new ObservedValue();
-						observedValue.setFeature(entry.getValue());
-						observedValue.setValue(value);
-						observedValue.setObservationSet(observationSet);
-
-						// add to db
 						if (value != null)
 						{
-							db.add(value);
+							// create observed value
+							ObservedValue observedValue = new ObservedValue();
+							observedValue.setFeature(entry.getValue());
+							observedValue.setValue(value);
+							observedValue.setObservationSet(observationSet);
+
+							List<Value> valueList = valueMap.get(value.getClass());
+							if (valueList == null)
+							{
+								valueList = new ArrayList<Value>();
+								valueMap.put(value.getClass(), valueList);
+							}
+							valueList.add(value);
+							obsValueList.add(observedValue);
 						}
-						obsValueList.add(observedValue);
 					}
 					db.add(obsValueList);
+					for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
+						db.add(entry.getValue());
 				}
 
 				if (++rownr % transactionRows == 0) db.commitTx();

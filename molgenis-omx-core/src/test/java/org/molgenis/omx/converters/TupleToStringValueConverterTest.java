@@ -22,7 +22,7 @@ public class TupleToStringValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "value");
-		StringValue value = new TupleToStringValueConverter().fromTuple(tuple, colName, null, null);
+		StringValue value = new TupleToStringValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), "value");
 	}
 }
