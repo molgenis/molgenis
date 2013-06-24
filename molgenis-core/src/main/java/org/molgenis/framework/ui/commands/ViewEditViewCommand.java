@@ -34,7 +34,9 @@ public class ViewEditViewCommand extends SimpleCommand
 	{
 		getFormScreen().setMode(Mode.EDIT_VIEW);
 		Integer offset = request.getInt(FormModel.INPUT_OFFSET);
+		Integer recordId = request.getInt(FormModel.INPUT_ID);
 		if (offset != null) getFormScreen().getPager().setOffset(offset - 1);
+		if (recordId != null) getFormScreen().getPager().setRecordId(recordId);
 		return ScreenModel.Show.SHOW_MAIN;
 	}
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -19,8 +20,11 @@ import org.molgenis.framework.server.MolgenisContext;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
+import org.molgenis.framework.ui.FormController;
+import org.molgenis.framework.ui.html.HtmlForm;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ApplicationUtil;
+import org.molgenis.util.Entity;
 
 
 /**
@@ -31,6 +35,7 @@ import org.molgenis.util.ApplicationUtil;
  */
 public class PilotService implements MolgenisService
 {
+
 	private static final Logger LOG = Logger.getLogger(PilotService.class);
 
 	public static final String TASK_GENERATED = "generated";
