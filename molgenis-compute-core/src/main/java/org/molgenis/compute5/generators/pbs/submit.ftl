@@ -19,12 +19,12 @@ else
 	dependenciesExist=false
 	dependencies="-W depend=afterok"
 	<#foreach d in t.previousTasks>
-		if [[ -n "${d}" ]]; then
+		if [[ -n "$${d}" ]]; then
 			dependenciesExist=true
 			dependencies="<#noparse>${dependencies}</#noparse>:$${d}"
 		fi
 	</#foreach>
-	if [[ !dependenciesExist ]]; then
+	if ! $dependenciesExist; then
 		unset dependencies
 	fi
 
