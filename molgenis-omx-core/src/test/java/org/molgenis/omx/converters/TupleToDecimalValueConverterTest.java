@@ -22,7 +22,7 @@ public class TupleToDecimalValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, 1.23);
-		DecimalValue value = new TupleToDecimalValueConverter().fromTuple(tuple, colName, null, null);
+		DecimalValue value = new TupleToDecimalValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), Double.valueOf(1.23));
 	}
 }

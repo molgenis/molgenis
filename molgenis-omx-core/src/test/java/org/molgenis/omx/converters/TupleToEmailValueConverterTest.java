@@ -22,7 +22,7 @@ public class TupleToEmailValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "a@b.org");
-		EmailValue value = new TupleToEmailValueConverter().fromTuple(tuple, colName, null, null);
+		EmailValue value = new TupleToEmailValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), "a@b.org");
 	}
 }

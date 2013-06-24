@@ -22,7 +22,7 @@ public class TupleToBoolValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, true);
-		BoolValue value = new TupleToBoolValueConverter().fromTuple(tuple, colName, null, null);
+		BoolValue value = new TupleToBoolValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), Boolean.TRUE);
 	}
 }
