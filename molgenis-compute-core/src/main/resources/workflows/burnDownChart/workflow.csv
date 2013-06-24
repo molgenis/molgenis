@@ -1,2 +1,2 @@
-step,protocol,parameters
-CreateChartPDF,CreateChartPDF.ftl,points=user.points;day=user.day;month=user.month;dayName=user.dayName;team=user.team;sprint=user.sprint
+step,protocol,parameterMapping
+CreateChartPDF,CreateChartPDF.sh,points=user_points;day=user_day;month=user_month;dayName=user_dayName;team=user_team;sprint=user_sprint

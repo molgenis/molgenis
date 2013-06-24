@@ -1,4 +1,4 @@
-package org.molgenis.omx.dataset;
+package org.molgenis.omx.protocol;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -71,10 +71,9 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 
 	private void createTuplesRec(String protocolPath, Protocol protocol, List<Tuple> tuples) throws DatabaseException
 	{
-		List<Integer> protocolIds = protocol.getSubprotocols_Id();
-		if (!protocolIds.isEmpty())
+		List<Protocol> subProtocols = protocol.getSubprotocols();
+		if (!subProtocols.isEmpty())
 		{
-			List<Protocol> subProtocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.IN, protocolIds));
 			for (Protocol p : subProtocols)
 			{
 				StringBuilder pathBuilder = new StringBuilder();
@@ -98,38 +97,33 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 		}
 		else
 		{
-			List<Integer> featureIds = protocol.getFeatures_Id();
-			if (!featureIds.isEmpty())
+			for (ObservableFeature feature : protocol.getFeatures())
 			{
-				List<ObservableFeature> listOfFeatures = db.find(ObservableFeature.class, new QueryRule(
-						ObservableFeature.ID, Operator.IN, featureIds));
-				for (ObservableFeature feature : listOfFeatures)
+				StringBuilder pathBuilder = new StringBuilder();
+				String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
+				String description = feature.getDescription() == null ? StringUtils.EMPTY : feature.getDescription()
+						.replaceAll("[^a-zA-Z0-9 ]", " ");
+				String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
+				StringBuilder categoryValue = new StringBuilder();
+
+				for (Category c : Category.find(db, new QueryRule(Category.OBSERVABLEFEATURE_IDENTIFIER,
+						Operator.EQUALS, feature.getIdentifier())))
 				{
-					StringBuilder pathBuilder = new StringBuilder();
-					String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
-					String description = feature.getDescription() == null ? StringUtils.EMPTY : feature
-							.getDescription().replaceAll("[^a-zA-Z0-9 ]", " ");
-					String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
-					StringBuilder categoryValue = new StringBuilder();
-
-					for (Category c : Category.find(db, new QueryRule(Category.OBSERVABLEFEATURE_IDENTIFIER,
-							Operator.EQUALS, feature.getIdentifier())))
-					{
-						String categoryName = c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll(
-								"[^a-zA-Z0-9 ]", " ");
-						categoryValue.append(categoryName).append(' ');
-					}
-
-					KeyValueTuple tuple = new KeyValueTuple();
-					tuple.set(FIELD_TYPE, ObservableFeature.class.getSimpleName().toLowerCase());
-					tuple.set(FIELD_ID, feature.getId());
-					tuple.set(FIELD_NAME, name);
-					tuple.set(FIELD_DESCRIPTION, description);
-					tuple.set(FIELD_PATH, path);
-					tuple.set(FIELD_CATEGORY, categoryValue.toString());
-					tuples.add(tuple);
+					String categoryName = c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll(
+							"[^a-zA-Z0-9 ]", " ");
+					categoryValue.append(categoryName).append(' ');
 				}
+
+				KeyValueTuple tuple = new KeyValueTuple();
+				tuple.set(FIELD_TYPE, ObservableFeature.class.getSimpleName().toLowerCase());
+				tuple.set(FIELD_ID, feature.getId());
+				tuple.set(FIELD_NAME, name);
+				tuple.set(FIELD_DESCRIPTION, description);
+				tuple.set(FIELD_PATH, path);
+				tuple.set(FIELD_CATEGORY, categoryValue.toString());
+				tuples.add(tuple);
 			}
+
 		}
 	}
 
@@ -165,10 +159,9 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 
 	private void countTuplesRec(Protocol protocol, AtomicInteger count) throws DatabaseException
 	{
-		List<Integer> protocolIds = protocol.getSubprotocols_Id();
-		if (!protocolIds.isEmpty())
+		List<Protocol> subProtocols = protocol.getSubprotocols();
+		if (!subProtocols.isEmpty())
 		{
-			List<Protocol> subProtocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.IN, protocolIds));
 			for (Protocol p : subProtocols)
 			{
 				count.incrementAndGet();
@@ -177,8 +170,8 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 		}
 		else
 		{
-			List<Integer> featureIds = protocol.getFeatures_Id();
-			if (!featureIds.isEmpty()) count.addAndGet(featureIds.size());
+			List<ObservableFeature> features = protocol.getFeatures();
+			if (!features.isEmpty()) count.addAndGet(features.size());
 		}
 	}
 }

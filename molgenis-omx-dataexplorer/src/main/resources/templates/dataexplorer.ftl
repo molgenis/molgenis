@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap-datetimepicker.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/dataexplorer.css" type="text/css">
 		<link rel="stylesheet" href="/css/ui.dynatree.css" type="text/css">
 		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
@@ -15,6 +16,7 @@
 		<script type="text/javascript" src="/js/dataexplorer.js"></script>
 		<script type="text/javascript" src="${resultsTableJavascriptFile}"></script>
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
 				window.top.molgenis.fillDataSetSelect(function() {

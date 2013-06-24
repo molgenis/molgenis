@@ -5,7 +5,7 @@ import org.molgenis.framework.db.Database;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-
+import java.security.NoSuchAlgorithmException;
 <#if metaData>
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,11 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import org.molgenis.omx.auth.util.PasswordHasher;
+import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.MolgenisRole;
+import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.core.MolgenisEntity;
 
 import org.molgenis.framework.db.DatabaseException;
@@ -38,6 +40,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	
 	@Value(${r'"${admin.password:@null}"'})
 	private String adminPassword;
+	@Value(${r'"${admin.email:molgenis+admin@gmail.com}"'})
+	private String adminEmail;
 	
 </#if>
 	@Override
@@ -83,7 +87,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 	
 	private void initializeDefaultApplicationDatabase(Database database) throws Exception
 	{
-		if(adminPassword==null) throw new RuntimeException("please configure the default admin password in your molgenis-server.properties");	
+		if(adminPassword == null) throw new RuntimeException("please configure the admin.password property in your molgenis-server.properties");	
 		
 		Login login = database.getLogin();
     	database.setLogin(null); // so we don't run into trouble with the Security Decorators
@@ -93,7 +97,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		userAdmin.setName(Login.USER_ADMIN_NAME);
 		userAdmin.setIdentifier(UUID.randomUUID().toString());
 		userAdmin.setPassword(new PasswordHasher().toMD5(adminPassword));
-		userAdmin.setEmail("molgenis@gmail.com");
+		userAdmin.setEmail(adminEmail);
 		userAdmin.setFirstName(Login.USER_ADMIN_NAME);
 		userAdmin.setLastName(Login.USER_ADMIN_NAME);
 		userAdmin.setActive(true);
@@ -102,8 +106,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		MolgenisUser userAnonymous = new MolgenisUser();
 		userAnonymous.setName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setIdentifier(UUID.randomUUID().toString());
-		userAnonymous.setPassword("md5_294de3557d9d00b3d2d8a1e6aab028cf"); 
-		userAnonymous.setEmail(Login.USER_ANONYMOUS_NAME);
+		userAnonymous.setPassword(new PasswordHasher().toMD5("anonymous")); 
+		userAnonymous.setEmail("molgenis+anonymous@gmail.com");
 		userAnonymous.setFirstName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setLastName(Login.USER_ANONYMOUS_NAME);
 		userAnonymous.setActive(true);
@@ -233,6 +237,58 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		database.setLogin(login); // restore login
 	}
 		
+	public void createPermission(Database database, Class<?> clazz, MolgenisRole role, String permissionString)
+	throws DatabaseException
+	{
+		database.beginTx();
+		MolgenisPermission permission = new MolgenisPermission();
+		permission.setEntity(MolgenisEntity.findByClassName(database, clazz.getName()));
+		permission.setName(role.getName() + "_" + clazz.getSimpleName() + "_Permission");
+		permission.setIdentifier(UUID.randomUUID().toString());
+		permission.setPermission(permissionString);
+		permission.setRole(role);		
+		database.add(permission);
+		database.commitTx();
+	}
+
+	public MolgenisUser createUser(Database database, String userName, String firstName, String lastName, String email,
+			String password, boolean superUser) throws DatabaseException
+	{
+		database.beginTx();
+		MolgenisUser user = new MolgenisUser();
+		user.setName(userName);
+		user.setIdentifier(UUID.randomUUID().toString());
+		try
+		{
+			user.setPassword(new PasswordHasher().toMD5(password));
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		user.setEmail(email);
+		user.setFirstName(firstName);
+		user.setLastName(lastName);
+		user.setActive(true);
+		user.setSuperuser(superUser);
+		database.add(user);
+		database.commitTx();
+		return user;
+	}
+
+	public MolgenisGroup createGroup(Database database, String groupName) throws DatabaseException
+	{
+		database.beginTx();
+		MolgenisGroup group = new MolgenisGroup();
+		group.setName(groupName);
+		group.setIdentifier(UUID.randomUUID().toString());
+		database.add(group);
+		database.commitTx();
+		return group;
+		
+	}
+		
 	public static List<MolgenisEntity> createEntities(String[][] entityValues) {
 		List<MolgenisEntity> result = new ArrayList<MolgenisEntity>(entityValues.length);
 		for(String[] values : entityValues) {
@@ -244,7 +300,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		}		
 		return result;		
 	}
-	
+
 	private static final String[][] ENTITY_VALUES = new String[][] {
 	<#list model.getConcreteEntities() as entity>
 		new String[] {"${JavaName(entity)}", "ENTITY", "${entity.namespace}.${JavaName(entity)}"}<#if entity_has_next>,</#if>

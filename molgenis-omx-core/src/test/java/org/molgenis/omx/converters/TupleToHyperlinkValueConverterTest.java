@@ -22,7 +22,7 @@ public class TupleToHyperlinkValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "http://www.a.org/");
-		HyperlinkValue value = new TupleToHyperlinkValueConverter().fromTuple(tuple, colName, null, null);
+		HyperlinkValue value = new TupleToHyperlinkValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), "http://www.a.org/");
 	}
 }

@@ -20,13 +20,16 @@ public class CreateWorkflowGenerator
 		if (!source.exists())
 		{
 			System.err.println(">> ERROR >> Directory '" + source.toString()
-					+ "' not found. Please add molgenis-compute-core/ to your classpath.");
+					+ "' not found. Please run this command from the directory where molgenis-compute.sh is located, where " +
+					" the relative path to this directory exists." +
+					"\n\nTODO for development team:" +
+					" please add this path to the classpath so that it's accessible from everywhere.");
 			System.err.println("Exit with code 1.");
 			System.exit(1);
 		}
 		else try
 		{
-			copyFolder(source, target);
+			copyFolder(source, target.getAbsoluteFile());
 			System.out.println("Created new workflow design in '" + target + "'.");
 			System.out.println("You can generate the corresponding workflow by changing to that directory and executing 'molgenis_compute.sh -g'");
 		}
@@ -45,7 +48,7 @@ public class CreateWorkflowGenerator
 			// if directory not exists, create it
 			if (!dest.exists())
 			{
-				dest.mkdir();
+				dest.mkdirs();
 			}
 
 			// list all the directory contents

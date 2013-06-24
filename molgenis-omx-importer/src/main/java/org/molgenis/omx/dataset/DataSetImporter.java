@@ -3,6 +3,7 @@ package org.molgenis.omx.dataset;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,11 +32,13 @@ public class DataSetImporter
 	private static final Logger LOG = Logger.getLogger(DataSetImporter.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
 	private final Database db;
+	private final ValueConverter valueConverter;
 
 	public DataSetImporter(Database db)
 	{
 		if (db == null) throw new IllegalArgumentException();
 		this.db = db;
+		this.valueConverter = new ValueConverter(db);
 	}
 
 	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, DatabaseException
@@ -70,19 +73,11 @@ public class DataSetImporter
 	{
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
-		List<DataSet> dataSets = db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier));
-		if (dataSets == null || dataSets.isEmpty())
+		DataSet dataSet = DataSet.findByIdentifier(db, identifier);
+		if (dataSet == null)
 		{
-			LOG.warn("dataset " + identifier + " does not exist in db");
-			return;
+			throw new DatabaseException("dataset '" + identifier + "' does not exist in db");
 		}
-		else if (dataSets.size() > 1)
-		{
-			LOG.warn("multiple datasets exist for identifier " + identifier);
-			return;
-		}
-
-		DataSet dataSet = dataSets.get(0);
 
 		Iterator<String> colIt = sheetReader.colNamesIterator();
 		if (!colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no columns");
@@ -104,37 +99,50 @@ public class DataSetImporter
 			{
 				if (rownr % transactionRows == 0) db.beginTx();
 
-				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
-
-				// create observation set
-				ObservationSet observationSet = new ObservationSet();
-				observationSet.setPartOfDataSet(dataSet);
-				db.add(observationSet);
-
-				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
+				// Skip empty rows
+				if (!row.isEmpty())
 				{
-					Value value = ValueConverter.fromTuple(row, entry.getKey(), db, entry.getValue());
+					List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
+					Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
 
-					// create observed value
-					ObservedValue observedValue = new ObservedValue();
-					observedValue.setFeature(entry.getValue());
-					observedValue.setValue(value);
-					observedValue.setObservationSet(observationSet);
+					// create observation set
+					ObservationSet observationSet = new ObservationSet();
+					observationSet.setPartOfDataSet(dataSet);
+					db.add(observationSet);
 
-					// add to db
-					if (value != null)
+					for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 					{
-						db.add(value);
+						Value value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
+
+						if (value != null)
+						{
+							// create observed value
+							ObservedValue observedValue = new ObservedValue();
+							observedValue.setFeature(entry.getValue());
+							observedValue.setValue(value);
+							observedValue.setObservationSet(observationSet);
+
+							List<Value> valueList = valueMap.get(value.getClass());
+							if (valueList == null)
+							{
+								valueList = new ArrayList<Value>();
+								valueMap.put(value.getClass(), valueList);
+							}
+							valueList.add(value);
+							obsValueList.add(observedValue);
+						}
 					}
-					obsValueList.add(observedValue);
+					db.add(obsValueList);
+					for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
+						db.add(entry.getValue());
 				}
-				db.add(obsValueList);
 
 				if (++rownr % transactionRows == 0) db.commitTx();
 			}
 			if (rownr % transactionRows != 0) db.commitTx();
 
-			ApplicationContextProvider.getApplicationContext().publishEvent(new DataSetImportedEvent(this, identifier));
+			ApplicationContextProvider.getApplicationContext().publishEvent(
+					new DataSetImportedEvent(this, dataSet.getId()));
 		}
 		catch (DatabaseException e)
 		{

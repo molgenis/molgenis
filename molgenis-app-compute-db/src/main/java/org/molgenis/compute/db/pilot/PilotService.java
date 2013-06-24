@@ -1,11 +1,5 @@
 package org.molgenis.compute.db.pilot;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +16,12 @@ import org.molgenis.framework.server.MolgenisService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ApplicationUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.util.List;
+
 
 /**
  * Created with IntelliJ IDEA. User: georgebyelas Date:
@@ -31,6 +31,7 @@ import org.molgenis.util.ApplicationUtil;
  */
 public class PilotService implements MolgenisService
 {
+
 	private static final Logger LOG = Logger.getLogger(PilotService.class);
 
 	public static final String TASK_GENERATED = "generated";

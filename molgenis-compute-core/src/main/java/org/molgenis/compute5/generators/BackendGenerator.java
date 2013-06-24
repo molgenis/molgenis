@@ -91,7 +91,7 @@ public class BackendGenerator
 		}
 		catch (TemplateException e)
 		{
-			throw new IOException("Backend generation failed for " + this.getClass().getSimpleName());
+			throw new IOException("Backend generation failed for " + this.getClass().getSimpleName() + "\n\nError is:\n" + e.toString());
 		}
 
 		// generate the tasks scripts
@@ -130,6 +130,11 @@ public class BackendGenerator
 		this.headerTemplate = headerTemplate;
 	}
 
+	public void appendCustomHeader(String customHeader)
+	{
+		this.headerTemplate += "\n" + customHeader;
+	}
+	
 	public String getFooterTemplate()
 	{
 		return footerTemplate;
@@ -138,6 +143,11 @@ public class BackendGenerator
 	public void setFooterTemplate(String footerTemplate)
 	{
 		this.footerTemplate = footerTemplate;
+	}
+	
+	public void appendCustomFooter(String customFooter)
+	{
+		this.footerTemplate += "\n" + customFooter;
 	}
 
 	public String getSubmitTemplate()

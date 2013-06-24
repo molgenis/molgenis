@@ -206,12 +206,12 @@ public class ComputeCommandLine
 		new EnvironmentGenerator().generate(compute, computeProperties.runDir);
 
 		// generate the tasks
-		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters()));
+		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters(), compute.getComputeProperties()));
 
 		// write the task for the backend
 		if (Parameters.BACKEND_PBS.equals(computeProperties.backend))
 		{
-			new PbsBackend().generate(compute.getTasks(), dir);
+			new PbsBackend(computeProperties).generate(compute.getTasks(), dir);
 		}
 		else
 		{

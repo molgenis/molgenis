@@ -22,7 +22,7 @@ public class TupleToHtmlValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "value");
-		HtmlValue value = new TupleToHtmlValueConverter().fromTuple(tuple, colName, null, null);
+		HtmlValue value = new TupleToHtmlValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), "value");
 	}
 }

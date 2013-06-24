@@ -43,6 +43,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	private DataSet dataSet;
 	private Database db;
 	private List<Field> columns;
+	private ValueConverter valueConverter;
 
 	public DataSetTable(DataSet set, Database db) throws TableException
 	{
@@ -63,6 +64,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	public void setDb(Database db)
 	{
 		this.db = db;
+		this.valueConverter = new ValueConverter(db);
 	}
 
 	public DataSet getDataSet()
@@ -86,15 +88,14 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	{
 		try
 		{
-			Integer protocolId = dataSet.getProtocolUsed_Id();
-			List<Protocol> protocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.EQUALS, protocolId));
+			Protocol protocol = dataSet.getProtocolUsed();
 
 			// if dataset has protocol-used, determine columns from protocol
-			if (protocols != null && !protocols.isEmpty())
+			if (protocol != null)
 			{
-				List<Integer> featureIds = getFeatureIds(protocols);
-				List<ObservableFeature> features = db.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
-						Operator.IN, featureIds));
+				List<ObservableFeature> features = new ArrayList<ObservableFeature>();
+				getFeatures(protocol, features);
+
 				if (features != null && !features.isEmpty())
 				{
 					columns = new ArrayList<Field>(features.size());
@@ -135,30 +136,14 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 		}
 	}
 
-	private List<Integer> getFeatureIds(List<Protocol> protocols) throws DatabaseException
+	private void getFeatures(Protocol protocol, List<ObservableFeature> features) throws DatabaseException
 	{
-		List<Integer> protocolIds = new ArrayList<Integer>();
-		for (Protocol protocol : protocols)
-			getFeatureIdsRec(protocol, protocolIds);
-		return protocolIds;
-	}
+		// store features
+		features.addAll(protocol.getFeatures());
 
-	private void getFeatureIdsRec(Protocol protocol, List<Integer> featureIds) throws DatabaseException
-	{
-		// store feature ids
-		featureIds.addAll(protocol.getFeatures_Id());
-
-		// recurse sub protocols
-		List<Integer> subProtocolIds = protocol.getSubprotocols_Id();
-		if (subProtocolIds != null && !subProtocolIds.isEmpty())
+		for (Protocol subProtocol : protocol.getSubprotocols())
 		{
-			List<Protocol> subProtocols = db.find(Protocol.class, new QueryRule(Protocol.ID, Operator.IN,
-					subProtocolIds));
-			if (subProtocols != null)
-			{
-				for (Protocol subProtocol : subProtocols)
-					getFeatureIdsRec(subProtocol, featureIds);
-			}
+			getFeatures(subProtocol, features);
 		}
 	}
 
@@ -251,7 +236,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 					ObservedValue v = new ObservedValue();
 					v.setObservationSet(es.getId());
 					v.setFeature(feature);
-					v.setValue(ValueConverter.fromTuple(t, name, db, feature));
+					v.setValue(valueConverter.fromTuple(t, name, feature));
 					values.add(v);
 				}
 				getDb().add(values);

@@ -14,8 +14,16 @@ import org.molgenis.util.tuple.Tuple;
 
 public class TupleToCategoricalValueConverter implements TupleToValueConverter<CategoricalValue, String>
 {
+	private final Database database;
+
+	public TupleToCategoricalValueConverter(Database database)
+	{
+		if (database == null) throw new IllegalArgumentException("Database is null");
+		this.database = database;
+	}
+
 	@Override
-	public CategoricalValue fromTuple(Tuple tuple, String colName, Database db, ObservableFeature feature)
+	public CategoricalValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
 		String categoryValueCode = tuple.getString(colName);
@@ -24,7 +32,7 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 		Category category;
 		try
 		{
-			List<Category> categories = db.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
+			List<Category> categories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
 					Operator.EQUALS, feature), new QueryRule(Category.VALUECODE, Operator.EQUALS, categoryValueCode));
 			if (categories == null || categories.isEmpty())
 			{

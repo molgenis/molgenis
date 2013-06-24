@@ -3,7 +3,6 @@ package org.molgenis.omx.converters;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DateValue;
 import org.molgenis.omx.observ.value.Value;
@@ -14,8 +13,7 @@ public class TupleToDateValueConverter implements TupleToValueConverter<DateValu
 	private static final String DATEFORMAT_DATE = "yyyy-MM-dd";
 
 	@Override
-	public DateValue fromTuple(Tuple tuple, String colName, Database db, ObservableFeature feature)
-			throws ValueConverterException
+	public DateValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
 		String dateStr = tuple.getString(colName);
 		if (dateStr == null) return null;

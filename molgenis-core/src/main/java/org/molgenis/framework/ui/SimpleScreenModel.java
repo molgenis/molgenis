@@ -325,4 +325,5 @@ public abstract class SimpleScreenModel implements ScreenModel, Serializable
 	{
 		return null;
 	}
+
 }
