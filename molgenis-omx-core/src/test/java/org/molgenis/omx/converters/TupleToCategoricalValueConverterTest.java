@@ -22,12 +22,13 @@ public class TupleToCategoricalValueConverterTest
 	@Test
 	public void extractValue()
 	{
+		Database database = mock(Database.class);
 		String catName = "category #1";
 		Category category = new Category();
 		category.setName(catName);
 		CategoricalValue value = new CategoricalValue();
 		value.setValue(category);
-		assertEquals(new TupleToCategoricalValueConverter().extractValue(value), catName);
+		assertEquals(new TupleToCategoricalValueConverter(database).extractValue(value), catName);
 	}
 
 	@Test
@@ -47,7 +48,7 @@ public class TupleToCategoricalValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, valueCode);
-		CategoricalValue value = new TupleToCategoricalValueConverter().fromTuple(tuple, colName, database, feature);
+		CategoricalValue value = new TupleToCategoricalValueConverter(database).fromTuple(tuple, colName, feature);
 		assertEquals(value.getValue(), category);
 	}
 }

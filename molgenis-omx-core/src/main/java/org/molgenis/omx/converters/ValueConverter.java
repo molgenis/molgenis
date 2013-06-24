@@ -30,44 +30,39 @@ import org.molgenis.util.tuple.Tuple;
  */
 public class ValueConverter
 {
-	private static final EnumMap<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>> tupleConverters;
-	private static final Map<Class<? extends Value>, TupleToValueConverter<? extends Value, ?>> valueConverters;
+	private static final Map<Class<? extends Value>, FieldTypeEnum> VALUE_FIELDTYPE_MAP;
 
 	static
 	{
-		tupleConverters = new EnumMap<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>>(FieldTypeEnum.class);
-		tupleConverters.put(FieldTypeEnum.BOOL, new TupleToBoolValueConverter());
-		tupleConverters.put(FieldTypeEnum.CATEGORICAL, new TupleToCategoricalValueConverter());
-		tupleConverters.put(FieldTypeEnum.DATE, new TupleToDateValueConverter());
-		tupleConverters.put(FieldTypeEnum.DATE_TIME, new TupleToDateTimeValueConverter());
-		tupleConverters.put(FieldTypeEnum.DECIMAL, new TupleToDecimalValueConverter());
-		tupleConverters.put(FieldTypeEnum.EMAIL, new TupleToEmailValueConverter());
-		tupleConverters.put(FieldTypeEnum.HYPERLINK, new TupleToHyperlinkValueConverter());
-		tupleConverters.put(FieldTypeEnum.INT, new TupleToIntValueConverter());
-		tupleConverters.put(FieldTypeEnum.LONG, new TupleToLongValueConverter());
-		tupleConverters.put(FieldTypeEnum.MREF, new TupleToMrefValueConverter());
-		tupleConverters.put(FieldTypeEnum.STRING, new TupleToStringValueConverter());
-		tupleConverters.put(FieldTypeEnum.TEXT, new TupleToTextValueConverter());
-		tupleConverters.put(FieldTypeEnum.XREF, new TupleToXrefValueConverter());
-
-		valueConverters = new HashMap<Class<? extends Value>, TupleToValueConverter<? extends Value, ?>>();
-		valueConverters.put(BoolValue.class, new TupleToBoolValueConverter());
-		valueConverters.put(CategoricalValue.class, new TupleToCategoricalValueConverter());
-		valueConverters.put(DateValue.class, new TupleToDateValueConverter());
-		valueConverters.put(DateTimeValue.class, new TupleToDateTimeValueConverter());
-		valueConverters.put(DecimalValue.class, new TupleToDecimalValueConverter());
-		valueConverters.put(EmailValue.class, new TupleToEmailValueConverter());
-		valueConverters.put(HyperlinkValue.class, new TupleToHyperlinkValueConverter());
-		valueConverters.put(IntValue.class, new TupleToIntValueConverter());
-		valueConverters.put(LongValue.class, new TupleToLongValueConverter());
-		valueConverters.put(MrefValue.class, new TupleToMrefValueConverter());
-		valueConverters.put(StringValue.class, new TupleToStringValueConverter());
-		valueConverters.put(TextValue.class, new TupleToTextValueConverter());
-		valueConverters.put(XrefValue.class, new TupleToXrefValueConverter());
+		VALUE_FIELDTYPE_MAP = new HashMap<Class<? extends Value>, FieldTypeEnum>();
+		VALUE_FIELDTYPE_MAP.put(BoolValue.class, FieldTypeEnum.BOOL);
+		VALUE_FIELDTYPE_MAP.put(CategoricalValue.class, FieldTypeEnum.CATEGORICAL);
+		VALUE_FIELDTYPE_MAP.put(DateValue.class, FieldTypeEnum.DATE);
+		VALUE_FIELDTYPE_MAP.put(DateTimeValue.class, FieldTypeEnum.DATE_TIME);
+		VALUE_FIELDTYPE_MAP.put(DecimalValue.class, FieldTypeEnum.DECIMAL);
+		VALUE_FIELDTYPE_MAP.put(EmailValue.class, FieldTypeEnum.EMAIL);
+		VALUE_FIELDTYPE_MAP.put(HyperlinkValue.class, FieldTypeEnum.HYPERLINK);
+		VALUE_FIELDTYPE_MAP.put(IntValue.class, FieldTypeEnum.INT);
+		VALUE_FIELDTYPE_MAP.put(LongValue.class, FieldTypeEnum.LONG);
+		VALUE_FIELDTYPE_MAP.put(MrefValue.class, FieldTypeEnum.MREF);
+		VALUE_FIELDTYPE_MAP.put(StringValue.class, FieldTypeEnum.STRING);
+		VALUE_FIELDTYPE_MAP.put(TextValue.class, FieldTypeEnum.TEXT);
+		VALUE_FIELDTYPE_MAP.put(XrefValue.class, FieldTypeEnum.XREF);
 	}
 
-	public static Value fromTuple(Tuple tuple, String colName, Database db, ObservableFeature feature)
-			throws ValueConverterException
+	private final Database database;
+	private final Map<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>> tupleConverters;
+	private CharacteristicLoadingCache characteristicLoadingCache;
+
+	public ValueConverter(Database database)
+	{
+		if (database == null) throw new IllegalArgumentException("Database is null");
+		this.database = database;
+		this.tupleConverters = new EnumMap<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>>(
+				FieldTypeEnum.class);
+	}
+
+	public Value fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
 		FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
 		if (fieldType == null)
@@ -75,23 +70,94 @@ public class ValueConverter
 			throw new ValueConverterException("data type is not a molgenis field type [" + feature.getDataType() + "]");
 		}
 
-		TupleToValueConverter<? extends Value, ?> converter = tupleConverters.get(fieldType.getEnumType());
+		TupleToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
 		if (converter == null)
 		{
 			throw new IllegalArgumentException("unsupported field type [" + fieldType.getEnumType() + "]");
 		}
 
-		return converter.fromTuple(tuple, colName, db, feature);
+		return converter.fromTuple(tuple, colName, feature);
 	}
 
-	public static Object extractValue(Value value) throws ValueConverterException
+	public Object extractValue(Value value) throws ValueConverterException
 	{
 		if (value == null) return null;
-		TupleToValueConverter<? extends Value, ?> valueConverter = valueConverters.get(value.getClass());
+
+		FieldTypeEnum fieldTypeEnum = VALUE_FIELDTYPE_MAP.get(value.getClass());
+		if (fieldTypeEnum == null)
+		{
+			throw new ValueConverterException("unknown value type [" + value.getClass().getSimpleName() + "]");
+		}
+		TupleToValueConverter<? extends Value, ?> valueConverter = getTupleConverter(fieldTypeEnum);
 		if (valueConverter == null)
 		{
 			throw new ValueConverterException("unsupported value type [" + value.getClass().getSimpleName() + "]");
 		}
 		return valueConverter.extractValue(value);
+	}
+
+	private TupleToValueConverter<? extends Value, ?> getTupleConverter(FieldTypeEnum fieldTypeEnum)
+	{
+		TupleToValueConverter<? extends Value, ?> tupleConverter = tupleConverters.get(fieldTypeEnum);
+		if (tupleConverter == null)
+		{
+			// lazy initialization of tuple converters
+			switch (fieldTypeEnum)
+			{
+				case BOOL:
+					tupleConverter = new TupleToBoolValueConverter();
+					break;
+				case CATEGORICAL:
+					tupleConverter = new TupleToCategoricalValueConverter(database);
+					break;
+				case DATE:
+					tupleConverter = new TupleToDateValueConverter();
+					break;
+				case DATE_TIME:
+					tupleConverter = new TupleToDateTimeValueConverter();
+					break;
+				case DECIMAL:
+					tupleConverter = new TupleToDecimalValueConverter();
+					break;
+				case EMAIL:
+					tupleConverter = new TupleToEmailValueConverter();
+					break;
+				case HYPERLINK:
+					tupleConverter = new TupleToHyperlinkValueConverter();
+					break;
+				case INT:
+					tupleConverter = new TupleToIntValueConverter();
+					break;
+				case LONG:
+					tupleConverter = new TupleToLongValueConverter();
+					break;
+				case MREF:
+					tupleConverter = new TupleToMrefValueConverter(getCharacteristicLoadingCache());
+					break;
+				case STRING:
+					tupleConverter = new TupleToStringValueConverter();
+					break;
+				case TEXT:
+					tupleConverter = new TupleToTextValueConverter();
+					break;
+				case XREF:
+					tupleConverter = new TupleToXrefValueConverter(getCharacteristicLoadingCache());
+					break;
+				// $CASES-OMITTED$
+				default:
+					throw new IllegalArgumentException("unsupported field type [" + fieldTypeEnum + "]");
+			}
+			tupleConverters.put(fieldTypeEnum, tupleConverter);
+		}
+		return tupleConverter;
+	}
+
+	private CharacteristicLoadingCache getCharacteristicLoadingCache()
+	{
+		if (characteristicLoadingCache == null)
+		{
+			characteristicLoadingCache = new CharacteristicLoadingCache(database);
+		}
+		return characteristicLoadingCache;
 	}
 }

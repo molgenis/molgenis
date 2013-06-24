@@ -43,6 +43,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	private DataSet dataSet;
 	private Database db;
 	private List<Field> columns;
+	private ValueConverter valueConverter;
 
 	public DataSetTable(DataSet set, Database db) throws TableException
 	{
@@ -63,6 +64,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	public void setDb(Database db)
 	{
 		this.db = db;
+		this.valueConverter = new ValueConverter(db);
 	}
 
 	public DataSet getDataSet()
@@ -234,7 +236,7 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 					ObservedValue v = new ObservedValue();
 					v.setObservationSet(es.getId());
 					v.setFeature(feature);
-					v.setValue(ValueConverter.fromTuple(t, name, db, feature));
+					v.setValue(valueConverter.fromTuple(t, name, feature));
 					values.add(v);
 				}
 				getDb().add(values);

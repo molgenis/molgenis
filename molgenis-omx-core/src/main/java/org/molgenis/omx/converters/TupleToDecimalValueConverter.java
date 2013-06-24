@@ -1,6 +1,5 @@
 package org.molgenis.omx.converters;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.Value;
@@ -9,7 +8,7 @@ import org.molgenis.util.tuple.Tuple;
 public class TupleToDecimalValueConverter implements TupleToValueConverter<DecimalValue, Double>
 {
 	@Override
-	public DecimalValue fromTuple(Tuple tuple, String colName, Database db, ObservableFeature feature)
+	public DecimalValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
 		Double doubleObj;
