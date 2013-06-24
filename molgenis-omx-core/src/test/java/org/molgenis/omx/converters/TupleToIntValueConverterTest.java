@@ -22,7 +22,7 @@ public class TupleToIntValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, 123);
-		IntValue value = new TupleToIntValueConverter().fromTuple(tuple, colName, null, null);
+		IntValue value = new TupleToIntValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), Integer.valueOf(123));
 	}
 }

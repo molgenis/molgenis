@@ -29,26 +29,15 @@ public class DataSetTableIterator implements Iterator<Tuple>
 	private int currentRow;
 	private final List<ObservationSet> observationSets;
 	private final List<Field> columns;
+	private final ValueConverter valueConverter;
 
 	public DataSetTableIterator(Database db, List<Field> columns, Query<ObservationSet> query) throws DatabaseException
 	{
-
 		this.db = db;
-		currentRow = 0;
 		this.columns = columns;
-
-		// find out total rows
-		// TODO
-
-		if (query == null)
-		{
-			this.observationSets = Collections.emptyList();
-		}
-		else
-		{
-			this.observationSets = query.find();
-		}
-
+		this.observationSets = query != null ? query.find() : Collections.<ObservationSet> emptyList();
+		this.currentRow = 0;
+		this.valueConverter = new ValueConverter(db);
 	}
 
 	@Override
@@ -83,7 +72,7 @@ public class DataSetTableIterator implements Iterator<Tuple>
 					.in(ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames)).find())
 			{
 				ObservableFeature feature = v.getFeature();
-				Object value = ValueConverter.extractValue(v.getValue());
+				Object value = valueConverter.extractValue(v.getValue());
 				tuple.set(feature.getIdentifier(), value);
 			}
 		}
