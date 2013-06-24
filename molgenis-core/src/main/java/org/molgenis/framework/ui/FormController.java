@@ -389,9 +389,9 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 			}
 			else
 				model.setRecords(this.getData(db));
-			model.setCount(pager.getCount(db));
 
-			model.setOffset(pager.getOffset());
+			model.setCount(pager.getCount(db));
+            model.setOffset(pager.getOffset());
 			model.setSort(pager.getOrderByField());
 			model.setSortMode(pager.getOrderByOperator());
 
