@@ -11,17 +11,17 @@ import org.springframework.context.ApplicationEvent;
 public class DataSetImportedEvent extends ApplicationEvent
 {
 	private static final long serialVersionUID = 1L;
-	private final String dataSetIdentifier;
+	private final Integer dataSetId;
 
-	public DataSetImportedEvent(Object source, String dataSetIdentifier)
+	public DataSetImportedEvent(Object source, Integer dataSetId)
 	{
 		super(source);
-		this.dataSetIdentifier = dataSetIdentifier;
+		this.dataSetId = dataSetId;
 	}
 
-	public String getDataSetIdentifier()
+	public Integer getDataSetId()
 	{
-		return dataSetIdentifier;
+		return dataSetId;
 	}
 
 }

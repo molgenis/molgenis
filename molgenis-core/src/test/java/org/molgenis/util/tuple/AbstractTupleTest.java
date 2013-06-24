@@ -201,4 +201,44 @@ public class AbstractTupleTest
 	{
 		assertEquals(tuple.getList(7), Arrays.asList("1", "2", "3"));
 	}
+
+	@Test
+	public void isEmpty()
+	{
+		assertFalse(tuple.isEmpty());
+
+		Tuple emptyTuple = new AbstractTuple()
+		{
+			private static final long serialVersionUID = 1L;
+
+			private final List<String> header = Arrays.<String> asList("col1", "col2", "col3", "col4", "col5", "col6",
+					"col7", "col8", "col9", "col10", "col11");
+
+			@Override
+			public int getNrCols()
+			{
+				return header.size();
+			}
+
+			@Override
+			public Iterable<String> getColNames()
+			{
+				return header;
+			}
+
+			@Override
+			public Object get(int col)
+			{
+				return null;
+			}
+
+			@Override
+			public Object get(String colName)
+			{
+				return null;
+			}
+		};
+
+		assertTrue(emptyTuple.isEmpty());
+	}
 }

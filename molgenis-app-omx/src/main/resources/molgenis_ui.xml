@@ -8,6 +8,8 @@
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+		<plugin label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
+		<plugin label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
 		<menu name="Converters">
 			<plugin label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverter" />
 		</menu>

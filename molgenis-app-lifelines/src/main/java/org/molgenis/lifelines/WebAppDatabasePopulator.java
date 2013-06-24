@@ -1,9 +1,7 @@
 package org.molgenis.lifelines;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.molgenis.MolgenisDatabasePopulator;
 import org.molgenis.framework.db.Database;
@@ -12,12 +10,9 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
-import org.molgenis.omx.auth.util.PasswordHasher;
-import org.molgenis.omx.core.MolgenisEntity;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.Category;
@@ -155,31 +150,4 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		database.setLogin(login); // restore login
 	}
 
-	private MolgenisUser createUser(Database database, String userName, String firstName, String lastName,
-			String email, String password, boolean superUser) throws NoSuchAlgorithmException, DatabaseException
-	{
-		MolgenisUser user = new MolgenisUser();
-		user.setName(userName);
-		user.setIdentifier(UUID.randomUUID().toString());
-		user.setPassword(new PasswordHasher().toMD5(password));
-		user.setEmail(email);
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		user.setActive(true);
-		user.setSuperuser(superUser);
-		database.add(user);
-		return user;
-	}
-
-	private void createPermission(Database database, Class<?> clazz, MolgenisRole role, String permissionString)
-			throws DatabaseException
-	{
-		MolgenisPermission permission = new MolgenisPermission();
-		permission.setEntity(MolgenisEntity.findByClassName(database, clazz.getName()));
-		permission.setName(role.getName() + "_" + clazz.getSimpleName() + "_Permission");
-		permission.setIdentifier(UUID.randomUUID().toString());
-		permission.setPermission(permissionString);
-		permission.setRole(role);
-		database.add(permission);
-	}
 }
