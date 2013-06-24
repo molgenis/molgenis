@@ -91,7 +91,7 @@ public class BackendGenerator
 		}
 		catch (TemplateException e)
 		{
-			throw new IOException("Backend generation failed for " + this.getClass().getSimpleName());
+			throw new IOException("Backend generation failed for " + this.getClass().getSimpleName() + "\n\nError is:\n" + e.toString());
 		}
 
 		// generate the tasks scripts
