@@ -201,3 +201,7 @@ input[type=number] {
     margin-right: auto;
     width: 100%;
 }
+
+#date-feature-from, #date-feature-to {
+	width:240px;
+}
