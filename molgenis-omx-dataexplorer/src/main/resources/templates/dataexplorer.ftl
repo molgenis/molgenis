@@ -12,6 +12,7 @@
 		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
 		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
+		<script type="text/javascript" src="/js/molgenis-all.js"></script>
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="/js/dataexplorer.js"></script>
 		<script type="text/javascript" src="${resultsTableJavascriptFile}"></script>
@@ -70,8 +71,9 @@
 					</div>		
 				</div>
 				<div class="span9">
-					<div id="dataset-select-container" class="control-group form-horizontal pull-right">
-						<div class="controls">
+					<div id="dataset-select-container" class="control-group form-horizontal">
+						<div id="data-table-header" class="pull-left"></div>
+						<div class="controls pull-right">
 							<label class="control-label" for="dataset-select">Choose a dataset:</label>
 							<select data-placeholder="Choose a Dataset" id="dataset-select">
 							</select>
@@ -80,8 +82,8 @@
 					<div class="row-fluid data-table-container">
 						<table id="data-table" class="table table-striped table-condensed"></table>
 					</div>
-					<div class="row-fluid data-table-header-container">
-						<span id="data-table-header"></span>
+					<div class="row-fluid data-table-pager-container">
+						<a id="download-button" class="btn" href="#">Download as csv</a>
 						<div id="data-table-pager" class="pagination pagination-centered"></div>
 					</div>
 				</div>

@@ -1,6 +1,6 @@
 (function($, w) {
 	"use strict";
-
+	
 	var ns = w.molgenis = w.molgenis || {};
 
 	var resultsTable = null;
@@ -599,24 +599,28 @@
 	};
 	
 	ns.search = function(callback) {
-		searchApi.search(ns.createSearchRequest(), callback);
+		searchApi.search(ns.createSearchRequest(true), callback);
 	};
 
-	ns.createSearchRequest = function() {
+	ns.createSearchRequest = function(includeLimitOffset) {
 		var searchRequest = {
 			documentType : selectedDataSet.identifier,
-			queryRules : [ {
+			queryRules : [ ]
+		};
+		
+		if (includeLimitOffset) {
+			searchRequest.queryRules.push({
 				operator : 'LIMIT',
 				value : resultsTable.getMaxRows()
-			} ]
-		};
-
-		if (currentPage > 1) {
-			var offset = (currentPage - 1) * resultsTable.getMaxRows();
-			searchRequest.queryRules.push({
-				operator : 'OFFSET',
-				value : offset
 			});
+			
+			if (currentPage > 1) {
+				var offset = (currentPage - 1) * resultsTable.getMaxRows();
+				searchRequest.queryRules.push({
+					operator : 'OFFSET',
+					value : offset
+				});
+			}
 		}
 
 		var count = 0;
@@ -691,7 +695,15 @@
 
 		return searchRequest;
 	};
-
+	
+	ns.download = function() {
+		var jsonRequest = JSON.stringify(ns.createSearchRequest(false));
+		
+		parent.showSpinner();
+		$.download('/plugin/dataexplorer/download',{searchRequest :  jsonRequest});
+		parent.hideSpinner();
+	};
+	
 	// on document ready
 	$(function() {
 		resultsTable = new ns.ResultsTable();
@@ -706,5 +718,10 @@
 			width : 500,
 			autoOpen : false
 		});
+		
+		$('#download-button').click(function() {
+			ns.download();
+		});
+		
 	});
 }($, window.top));
