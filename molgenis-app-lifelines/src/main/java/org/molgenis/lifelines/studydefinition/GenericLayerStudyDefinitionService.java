@@ -41,6 +41,7 @@ import org.molgenis.lifelines.catalogue.UnknownCatalogException;
 import org.molgenis.lifelines.resourcemanager.GenericLayerResourceManagerService;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.study.StudyDefinition;
 import org.molgenis.omx.study.StudyDefinitionInfo;
 import org.molgenis.omx.study.StudyDefinitionService;
@@ -214,10 +215,23 @@ public class GenericLayerStudyDefinitionService implements StudyDefinitionServic
 			observation.setClassCode(ActClass.OBS);
 			observation.setMoodCode(ActMood.CRT);
 
+			String observationCodeCode, observationCodeCodesystem;
+			OntologyTerm ontologyTerm = feature.getDefinition();
+			if (ontologyTerm != null)
+			{
+				observationCodeCode = ontologyTerm.getTermAccession();
+				observationCodeCodesystem = ontologyTerm.getOntology().getOntologyAccession();
+			}
+			else
+			{
+				// TODO remove once catalogues are always loaded from LL GL
+				observationCodeCode = feature.getIdentifier();
+				observationCodeCodesystem = "2.16.840.1.113883.2.4.3.8.1000.54.4";
+			}
 			CD observationCode = new CD();
 			observationCode.setDisplayName(feature.getName());
-			observationCode.setCode(feature.getIdentifier());
-			observationCode.setCodeSystem("2.16.840.1.113883.2.4.3.8.1000.54.4");
+			observationCode.setCode(observationCodeCode);
+			observationCode.setCodeSystem(observationCodeCodesystem);
 			ED observationOriginalText = new ED();
 			observationOriginalText.getContent().add(I18nTools.get(feature.getDescription()));
 			observationCode.setOriginalText(observationOriginalText);
