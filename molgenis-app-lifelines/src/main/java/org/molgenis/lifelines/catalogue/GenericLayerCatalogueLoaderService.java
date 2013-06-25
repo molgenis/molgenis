@@ -192,58 +192,11 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 				for (Code code : valueSet.getCode())
 				{
-					// create and index ontology
-					String codeSystem = code.getCodeSystem();
-					Ontology ontology = ontologyIndex.get(codeSystem);
-					if (ontology == null)
-					{
-						String codeSystemName = code.getCodeSystemName();
-						if (codeSystem == null || codeSystemName == null)
-						{
-							logger.warn("missing code system or code system name for ontology term '"
-									+ code.getDisplayName() + "'");
-						}
-						else
-						{
-							String ontologyIdentifier = OmxIdentifierGenerator.from(Ontology.class, codeSystem);
-							ontology = Ontology.findByIdentifier(database, ontologyIdentifier);
-							if (ontology == null)
-							{
-								// create ontology for each code system
-								ontology = new Ontology();
-								ontology.setIdentifier(ontologyIdentifier);
-								ontology.setName(codeSystemName);
-								ontology.setOntologyAccession(codeSystem);
-
-								database.add(ontology);
-							}
-							ontologyIndex.put(codeSystem, ontology);
-						}
-					}
-
-					// create and index ontology term
-					String codeCode = code.getCode();
-					OntologyTerm ontologyTerm = ontologyIndex.get(codeSystem, codeCode);
-					if (ontologyTerm == null)
-					{
-						String ontologyTermIdentifier = OmxIdentifierGenerator.from(OntologyTerm.class, codeSystem,
-								codeCode);
-						ontologyTerm = OntologyTerm.findByIdentifier(database, ontologyTermIdentifier);
-						if (ontologyTerm == null)
-						{
-							ontologyTerm = new OntologyTerm();
-							ontologyTerm.setIdentifier(ontologyTermIdentifier);
-							ontologyTerm.setName(code.getDisplayName());
-							ontologyTerm.setTermAccession(codeCode);
-							if (ontology != null) ontologyTerm.setOntology(ontology);
-
-							database.add(ontologyTerm);
-						}
-						ontologyIndex.put(codeSystem, codeCode, ontologyTerm);
-					}
+					OntologyTerm ontologyTerm = toOntologyTerm(code, ontologyIndex);
 
 					// create category
-					String categoryIdentifier = OmxIdentifierGenerator.from(Category.class, codeSystem, codeCode);
+					String categoryIdentifier = OmxIdentifierGenerator.from(Category.class, code.getCodeSystem(),
+							code.getCode());
 					Category category = Category.findByIdentifier(database, categoryIdentifier);
 					if (category == null)
 					{
@@ -283,17 +236,18 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		}
 
 		Map<String, String> featureMap = new HashMap<String, String>();
+		OntologyIndex ontologyIndex = new OntologyIndex();
 
 		// parse protocols between root protocols
 		for (REPCMT000100UV01Component3 rootComponent : catalog.getComponent())
 		{
-			parseComponent(rootComponent, rootProtocol, database, featureMap);
+			parseComponent(rootComponent, rootProtocol, database, featureMap, ontologyIndex);
 		}
 		return featureMap;
 	}
 
 	private void parseComponent(REPCMT000100UV01Component3 component, Protocol parentProtocol, Database database,
-			Map<String, String> featureMap) throws DatabaseException
+			Map<String, String> featureMap, OntologyIndex ontologyIndex) throws DatabaseException
 	{
 
 		// parse feature
@@ -301,6 +255,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		{
 			REPCMT000100UV01Observation observation = component.getObservation().getValue();
 			CD observationCode = observation.getCode();
+
 			logger.debug("parsing observation " + observationCode.getDisplayName());
 
 			// get or create feature
@@ -323,7 +278,13 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 					logger.warn("observation does not have a display name '" + observationCode.getCode() + "'");
 					observationName = observationCode.getCode();
 				}
-				OntologyTerm ontologyTerm = getOntologyTerm(observationCode.getCodeSystem(), observationCode.getCode());
+
+				// TODO what to do in case of multiple translations?
+				OntologyTerm ontologyTerm;
+				List<CD> translationCodes = observationCode.getTranslation();
+				if (translationCodes != null && !translationCodes.isEmpty()) ontologyTerm = toOntologyTerm(
+						translationCodes.get(0), ontologyIndex);
+				else ontologyTerm = null;
 
 				// determine data type
 				String dataType = HL7DataTypeMapper.get(anyValue);
@@ -373,7 +334,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 					organizerName = organizerCode.getCode();
 				}
 
-				OntologyTerm ontologyTerm = getOntologyTerm(organizerCode.getCodeSystem(), organizerCode.getCode());
+				OntologyTerm ontologyTerm = toOntologyTerm(organizerCode, ontologyIndex);
 
 				protocol = new Protocol();
 				protocol.setIdentifier(protocolId);
@@ -386,7 +347,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 
 			// recurse over nested protocols
 			for (REPCMT000100UV01Component3 subComponent : organizer.getComponent())
-				parseComponent(subComponent, protocol, database, featureMap);
+				parseComponent(subComponent, protocol, database, featureMap, ontologyIndex);
 
 			// add protocol to parent protocol
 			parentProtocol.getSubprotocols().add(protocol);
@@ -395,11 +356,66 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		database.add(parentProtocol);
 	}
 
-	private OntologyTerm getOntologyTerm(String codeSystem, String code) throws DatabaseException
+	private OntologyTerm toOntologyTerm(Code code, OntologyIndex ontologyIndex) throws DatabaseException
 	{
-		List<OntologyTerm> ontologyTerms = database.query(OntologyTerm.class).eq(OntologyTerm.TERMACCESSION, code)
-				.eq(OntologyTerm.ONTOLOGY_IDENTIFIER, codeSystem).find();
-		return !ontologyTerms.isEmpty() ? ontologyTerms.get(0) : null;
+		return toOntologyTerm(code.getCodeSystem(), code.getCodeSystemName(), code.getDisplayName(), code.getCode(),
+				ontologyIndex);
+	}
+
+	private OntologyTerm toOntologyTerm(CD code, OntologyIndex ontologyIndex) throws DatabaseException
+	{
+		return toOntologyTerm(code.getCodeSystem(), code.getCodeSystemName(), code.getDisplayName(), code.getCode(),
+				ontologyIndex);
+	}
+
+	private OntologyTerm toOntologyTerm(String codeSystem, String codeSystemName, String displayName, String codeCode,
+			OntologyIndex ontologyIndex) throws DatabaseException
+	{
+		// create and index ontology
+		Ontology ontology = ontologyIndex.get(codeSystem);
+		if (ontology == null)
+		{
+			if (codeSystem == null || codeSystemName == null)
+			{
+				logger.warn("missing code system or code system name for ontology term '" + displayName + "'");
+			}
+			else
+			{
+				String ontologyIdentifier = OmxIdentifierGenerator.from(Ontology.class, codeSystem);
+				ontology = Ontology.findByIdentifier(database, ontologyIdentifier);
+				if (ontology == null)
+				{
+					// create ontology for each code system
+					ontology = new Ontology();
+					ontology.setIdentifier(ontologyIdentifier);
+					ontology.setName(codeSystemName);
+					ontology.setOntologyAccession(codeSystem);
+
+					database.add(ontology);
+				}
+				ontologyIndex.put(codeSystem, ontology);
+			}
+		}
+
+		// create and index ontology term
+		OntologyTerm ontologyTerm = ontologyIndex.get(codeSystem, codeCode);
+		if (ontologyTerm == null)
+		{
+			String ontologyTermIdentifier = OmxIdentifierGenerator.from(OntologyTerm.class, codeSystem, codeCode);
+			ontologyTerm = OntologyTerm.findByIdentifier(database, ontologyTermIdentifier);
+			if (ontologyTerm == null)
+			{
+				ontologyTerm = new OntologyTerm();
+				ontologyTerm.setIdentifier(ontologyTermIdentifier);
+				ontologyTerm.setName(displayName != null ? displayName : "");
+				ontologyTerm.setTermAccession(codeCode);
+				if (ontology != null) ontologyTerm.setOntology(ontology);
+
+				database.add(ontologyTerm);
+			}
+			ontologyIndex.put(codeSystem, codeCode, ontologyTerm);
+		}
+		return ontologyTerm;
 	}
 
 	private static class OntologyIndex
