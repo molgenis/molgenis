@@ -119,6 +119,7 @@ index:
     			type: custom
     			filter: [lowercase, default_stemmer]
     			tokenizer: whitespace
+    			char_filter: html_strip
     	filter:
     		default_stemmer:
     			type: stemmer

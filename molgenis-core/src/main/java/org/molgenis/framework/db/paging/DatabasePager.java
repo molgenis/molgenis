@@ -104,6 +104,10 @@ public interface DatabasePager<E extends Entity> extends Serializable
 	 */
 	public void setOffset(int index);
 
+	public void setRecordId(int id);
+
+	public int getRecordId();
+
 	/**
 	 * Retrieve the name of the field that the pages are currently ordered by.
 	 * 

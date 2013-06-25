@@ -371,9 +371,9 @@ var molgenis_required = new Array(${required});
 	<td>
 		<label style="display:inline;">${offset?c}. 
 		<#if readonly == "*" >
-			<img class="edit_button" src="img/recordview.png" title="view record" alt="edit${offset?c}" onClick="setInput('${screen.name}_form','_self','','${screen.name}','editview','iframe'); document.forms.${screen.name}_form.__offset.value='${offset?c}'; document.forms.${screen.name}_form.submit();">${readonly}</label>
+			<img class="edit_button" src="img/recordview.png" title="view record" alt="edit${offset?c}" onClick="setInput('${screen.name}_form','_self','','${screen.name}','editview','iframe'); document.forms.${screen.name}_form.__id.value='${record.entity.idValue?c}'; document.forms.${screen.name}_form.__offset.value='${offset?c}'; document.forms.${screen.name}_form.submit();">${readonly}</label>
 		<#else>
-			<img class="edit_button" src="img/editview.gif" title="edit record" alt="edit${offset?c}" onClick="setInput('${screen.name}_form','_self','','${screen.name}','editview','iframe'); document.forms.${screen.name}_form.__offset.value='${offset?c}'; document.forms.${screen.name}_form.submit();">${readonly}</label>
+			<img class="edit_button" src="img/editview.gif" title="edit record" alt="edit${offset?c}" onClick="setInput('${screen.name}_form','_self','','${screen.name}','editview','iframe'); document.forms.${screen.name}_form.__id.value='${record.entity.idValue?c}'; document.forms.${screen.name}_form.__offset.value='${offset?c}'; document.forms.${screen.name}_form.submit();">${readonly}</label>
 		</#if>
 	</td>
 		
@@ -458,6 +458,7 @@ var molgenis_required = new Array(${required});
 			<input type="hidden" name="value" />-->
 			<input type="hidden" name="limit">
 			<input type="hidden" name="filter_id" />
+            <input type="hidden" name="__id">
 			<@form_header screen/>
 			<!-- put in table so we can collapse the content panel-->
 			<@form_toolbar screen/>
