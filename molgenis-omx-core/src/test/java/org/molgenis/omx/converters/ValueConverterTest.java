@@ -4,28 +4,37 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import org.molgenis.framework.db.Database;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.util.tuple.KeyValueTuple;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ValueConverterTest
 {
+	private Database database;
+
+	@BeforeMethod
+	public void setUp()
+	{
+		database = mock(Database.class);
+	}
 
 	@Test
 	public void extractValue() throws ValueConverterException
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
-		assertEquals(ValueConverter.extractValue(value), Boolean.TRUE);
+		assertEquals(new ValueConverter(database).extractValue(value), Boolean.TRUE);
 	}
 
 	@Test(expectedExceptions = ValueConverterException.class)
 	public void extractValue_UnsupportValue() throws ValueConverterException
 	{
-		ValueConverter.extractValue(new Value());
+		new ValueConverter(database).extractValue(new Value());
 	}
 
 	@Test
@@ -37,6 +46,6 @@ public class ValueConverterTest
 		tuple.set(colName, "value");
 		TextValue value = new TextValue();
 		value.setValue("value");
-		assertEquals(ValueConverter.fromTuple(tuple, colName, null, feature), value);
+		assertEquals(new ValueConverter(database).fromTuple(tuple, colName, feature), value);
 	}
 }
