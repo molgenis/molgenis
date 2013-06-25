@@ -17,6 +17,7 @@ $(dirname -- "$0")/lib/httpclient-4.2.5.jar:\
 $(dirname -- "$0")/lib/httpcore-4.2.4.jar:\
 $(dirname -- "$0")/lib/guava-14.0.1.jar:\
 $(dirname -- "$0")/lib/commons-logging-1.1.1.jar:\
+$(dirname -- "$0")/lib/gson-2.2.2.jar:\
 $(dirname -- "$0")/lib/commons-lang3-3.1.jar \
 org.molgenis.compute5.ComputeCommandLine \
 $*
