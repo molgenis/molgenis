@@ -14,7 +14,8 @@ $(dirname -- "$0")/lib/freemarker-2.3.18.jar:\
 $(dirname -- "$0")/lib/log4j-1.2.17.jar:\
 $(dirname -- "$0")/lib/opencsv-2.3.jar:\
 $(dirname -- "$0")/lib/httpclient-4.2.5.jar:\
-$(dirname -- "$0")/lib/guava-13.0.1.jar:\
+$(dirname -- "$0")/lib/httpcore-4.2.4.jar:\
+$(dirname -- "$0")/lib/guava-14.0.1.jar:\
 $(dirname -- "$0")/lib/commons-lang3-3.1.jar \
 org.molgenis.compute5.ComputeCommandLine \
 $*
