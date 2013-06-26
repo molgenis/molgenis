@@ -2,7 +2,7 @@
 
 /**color of title*/
 .colorOfTitle,#header {
-	color: #5B82A4;
+	color: #3079C2;
 }
 
 /**overall background*/
@@ -22,7 +22,7 @@
 
 /**shade header*/
 .shadeHeader,.leftNavigationSelected,.navigationSelected,.form_header, td.submenuitem:hover {
-	background: #5B82A4;
+	background: #3079C2;
 }
 
 /**highlight*/
@@ -34,7 +34,7 @@
 /**shade borders*/
 .shadeBorder,.leftNavigationSelected,.navigationSelected,.formscreen,.form_new,.form_filter,.popup, .form_menu 
 {
-	border-color: #5B82A4;
+	border-color: #3079C2;
 }
 
 /**font color*/
