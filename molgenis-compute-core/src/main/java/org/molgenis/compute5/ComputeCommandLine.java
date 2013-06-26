@@ -121,16 +121,15 @@ public class ComputeCommandLine
 		{
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
+			String userName = computeProperties.user;
+			String pass = computeProperties.pass;
+
 			ComputeDbApiConnection dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
-					computeProperties.port, "/api/v1", "admin", "admin");
+					computeProperties.port, "/api/v1", userName, pass);
 
 			ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
 			String runName = computeProperties.runId;
-
-
-            //TODO implement proper userID in ComputeProperties
-            String userName = "admin";
 
             String backendName = computeProperties.backend;
             Long pollInterval = Long.parseLong(computeProperties.interval);
