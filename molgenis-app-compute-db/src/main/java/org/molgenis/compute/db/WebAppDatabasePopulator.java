@@ -56,6 +56,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 			userApi.setFirstName("api");
 			userApi.setLastName("api");
 			userApi.setActive(true);
+			userApi.setSuperuser(true);
 			database.add(userApi);
 			logger.info("Added api user");
 

@@ -211,3 +211,9 @@ input[type=number] {
 #date-feature-from, #date-feature-to {
 	width:240px;
 }
+
+#applybutton-holder {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	width: 100%;
+}

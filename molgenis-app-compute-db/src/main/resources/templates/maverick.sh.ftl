@@ -66,6 +66,7 @@ export -f putFile
 #-------end transfer
 
 export MODULEPATH=${VO_BBMRI_NL_SW_DIR}/modules/:${MODULEPATH}
+export ENVIRONMENT_DIR="."
 export WORKDIR=$TMPDIR
 
 check_process(){
