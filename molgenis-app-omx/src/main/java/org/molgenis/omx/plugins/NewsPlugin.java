@@ -55,12 +55,6 @@ public class NewsPlugin extends PluginModel<Entity>
 		newsModel.setNews(getMolgenisSetting(KEY_APP_NEWS, DEFAULT_KEY_APP_NEWS));
 	}
 
-	@Override
-	public boolean isVisible()
-	{
-		return true;
-	}
-
 	private String getMolgenisSetting(String key, String defaultValue)
 	{
 		try
