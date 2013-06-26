@@ -10,6 +10,7 @@ import nl.umcg.hl7.GenericLayerCatalogService;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DecompressingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpConnectionParams;
@@ -196,7 +197,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		HttpParams httpParams = defaultHttpClient.getParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, 2000);
 		HttpConnectionParams.setSoTimeout(httpParams, 30000);
-		return defaultHttpClient;
+		return new DecompressingHttpClient(defaultHttpClient);
 	}
 
 	@Bean(destroyMethod = "shutdown")

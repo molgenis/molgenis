@@ -39,6 +39,8 @@
                 <include>org.apache.httpcomponents:httpcore</include>
                 <include>com.google.guava:guava</include>
 				<include>org.apache.commons:commons-lang3</include>
+                <include>commons-logging:commons-logging</include>
+                <include>com.google.code.gson:gson</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
