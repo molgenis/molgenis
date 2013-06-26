@@ -2,6 +2,7 @@ package org.molgenis.lifelines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.molgenis.MolgenisDatabasePopulator;
 import org.molgenis.framework.db.Database;
@@ -11,6 +12,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisRole;
+import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.core.RuntimeProperty;
@@ -82,6 +84,23 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		MolgenisUser userDataManager = createUser(database, "datamanager", "datamanager", "datamanager",
 				dataManagerEmail, dataManagerPassword, false);
 
+		MolgenisGroup groupDataManagers = createGroup(database, "dataManagers");
+		MolgenisGroup groupResearchers = createGroup(database, "researchers");
+		
+		MolgenisRoleGroupLink linkDatamanager = new MolgenisRoleGroupLink();
+		linkDatamanager.setGroup(groupDataManagers);
+		linkDatamanager.setRole(userDataManager);	
+		linkDatamanager.setIdentifier(UUID.randomUUID().toString());
+		linkDatamanager.setName(UUID.randomUUID().toString());
+		database.add(linkDatamanager);
+		
+		MolgenisRoleGroupLink linkResearcher = new MolgenisRoleGroupLink();
+		linkResearcher.setGroup(groupResearchers);
+		linkResearcher.setRole(userResearcher);	
+		linkResearcher.setIdentifier(UUID.randomUUID().toString());
+		linkResearcher.setName(UUID.randomUUID().toString());
+		database.add(linkResearcher);
+		
 		MolgenisGroup allUsersGroup = null;
 		List<MolgenisUser> users = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
 				Login.USER_ANONYMOUS_NAME));
@@ -118,17 +137,17 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 			createPermission(database, StudyDataRequest.class, allUsersGroup, "own");
 		}
 
-		createPermission(database, Characteristic.class, userDataManager, "write");
-		createPermission(database, OntologyTerm.class, userDataManager, "write");
-		createPermission(database, Ontology.class, userDataManager, "write");
-		createPermission(database, DataSet.class, userDataManager, "write");
-		createPermission(database, Protocol.class, userDataManager, "write");
-		createPermission(database, ObservationSet.class, userDataManager, "write");
-		createPermission(database, ObservableFeature.class, userDataManager, "write");
-		createPermission(database, Category.class, userDataManager, "write");
-		createPermission(database, ObservedValue.class, userDataManager, "write");
-		createPermission(database, MolgenisUser.class, userDataManager, "write");
-		createPermission(database, MolgenisUser.class, userResearcher, "write");
+		createPermission(database, Characteristic.class, groupDataManagers, "write");
+		createPermission(database, OntologyTerm.class, groupDataManagers, "write");
+		createPermission(database, Ontology.class, groupDataManagers, "write");
+		createPermission(database, DataSet.class, groupDataManagers, "write");
+		createPermission(database, Protocol.class, groupDataManagers, "write");
+		createPermission(database, ObservationSet.class, groupDataManagers, "write");
+		createPermission(database, ObservableFeature.class, groupDataManagers, "write");
+		createPermission(database, Category.class, groupDataManagers, "write");
+		createPermission(database, ObservedValue.class, groupDataManagers, "write");
+		createPermission(database, MolgenisUser.class, groupDataManagers, "write");
+		createPermission(database, MolgenisUser.class, groupResearchers, "write");
 		createPermission(database, MolgenisUser.class, allUsersGroup, "write");
 
 		if ("website".equals(appProfile))
@@ -137,9 +156,9 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		}
 		else if ("workspace".equals(appProfile))
 		{
-			createPermission(database, DataSetViewerPluginPlugin.class, userDataManager, "read");
-			createPermission(database, DataSetViewerPluginPlugin.class, userResearcher, "read");
-			createPermission(database, StudyDefinitionLoaderPluginPlugin.class, userDataManager, "read");
+			createPermission(database, DataSetViewerPluginPlugin.class, groupDataManagers, "read");
+			createPermission(database, DataSetViewerPluginPlugin.class, groupResearchers, "read");
+			createPermission(database, StudyDefinitionLoaderPluginPlugin.class, groupDataManagers, "read");
 		}
 		else
 		{
