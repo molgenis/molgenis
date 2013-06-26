@@ -10,6 +10,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
+import org.molgenis.lifelines.plugins.HomePlugin;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisRoleGroupLink;
@@ -26,6 +27,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.omx.plugins.ProtocolViewerController;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.CatalogueLoaderPluginPlugin;
 import org.molgenis.ui.DataSetViewerPluginPlugin;
@@ -78,6 +80,32 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimePropertyAuthentication.setName(AccountService.KEY_PLUGIN_AUTH_ACTIVATIONMODE);
 		runtimePropertyAuthentication.setValue("user");
 		database.add(runtimePropertyAuthentication);
+
+		RuntimeProperty runtimePropertyViewButton = new RuntimeProperty();
+		runtimePropertyViewButton.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
+				+ ProtocolViewerController.KEY_ACTION_VIEW);
+		runtimePropertyViewButton.setName(ProtocolViewerController.KEY_ACTION_VIEW);
+		runtimePropertyViewButton.setValue("false");
+		database.add(runtimePropertyViewButton);
+
+		String homeHtml = "<div class=\"container-fluid\">"
+				+ "<div class=\"row-fluid\">"
+				+ "<div class=\"span6\">"
+				+ "<h3>Welcome at the LifeLines Data Catalogue!</h3>"
+				+ "<p>The LifeLines Data Catalogue provides an overview of all the data collected in LifeLines.</p>"
+				+ "<p>When you click 'catalogue' you can browse all available data items from questionnaires,  measurements and (blood and urine) sample analysis. Also, you can make a selection of data  items that you will need for your research, and download the list.</p>"
+				+ "<p>If you want to save your selection and apply for LifeLines data, you need to  register first. You can register by clicking the 'login' button on top. After you  have registered, you will receive a confirmation email. Subsequently, you are able  to download your selection or submit the selection together with you proposal.</p>"
+				+ "<p>The catalogue will regularly be updated with new collected data items.  For questions regarding the catalogue or submission of your proposal, please contact the  LifeLines Research Office  <a href=\"mailto:LLscience@umcg.nl\">LLscience@umcg.nl</a></p>"
+				+ "<p>The catalogue is working in the newest browsers. <u>If you are experiencing any problems  please switch to a modern browser (IE9+, Chrome, Firefox, Safari).</u></p>"
+				+ "</div>" + "<div class=\"span6\">"
+				+ "<img src=\"/img/lifelines_family.png\" alt=\"LifeLines family\">" + "</div>" + "</div>" + "</div>";
+
+		RuntimeProperty runtimePropertyHomeHtml = new RuntimeProperty();
+		runtimePropertyHomeHtml.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
+				+ HomePlugin.KEY_APP_HOME_HTML);
+		runtimePropertyHomeHtml.setName(HomePlugin.KEY_APP_HOME_HTML);
+		runtimePropertyHomeHtml.setValue(homeHtml);
+		database.add(runtimePropertyHomeHtml);
 
 		MolgenisUser userResearcher = createUser(database, "researcher", "researcher", "researcher", researcherEmail,
 				researcherPassword, false);
