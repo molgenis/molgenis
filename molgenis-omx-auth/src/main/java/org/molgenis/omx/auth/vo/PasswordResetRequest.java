@@ -2,19 +2,22 @@ package org.molgenis.omx.auth.vo;
 
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.Email;
+
 public class PasswordResetRequest
 {
 	@NotNull
-	private String username;
+	@Email
+	private String email;
 
-	public String getUsername()
+	public String getEmail()
 	{
-		return username;
+		return email;
 	}
 
-	public void setUsername(String username)
+	public void setEmail(String email)
 	{
-		this.username = username;
+		this.email = email;
 	}
 
 }
