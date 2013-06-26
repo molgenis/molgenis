@@ -1,5 +1,16 @@
+/**color of title*/
+.colorOfTitle,#header {
+	color: #3079C2;
+}
+
+/**shade header*/
+.shadeHeader,.leftNavigationSelected,.navigationSelected,.form_header, td.submenuitem:hover {
+	background: #3079C2;
+}
+
 /**shade borders*/
 .shadeBorder,.leftNavigationSelected,.navigationSelected,.formscreen,.form_new,.form_filter,.popup, .form_menu 
 {
-	border-color: #F39229;
+	border-color: #3079C2;
 }
+
