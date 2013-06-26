@@ -325,3 +325,34 @@ function hideSpinner()
 		window.location.href=window.location.href;
 	});
  });
+
+ $(function() {
+	 /**
+	 * Add download functionality to JQuery.
+	 * data can be string of parameters or array/object
+	 * 
+	 * Default method is POST
+	 * 
+	 * Usage:
+	 * <code>download('/localhost:8080', 'param1=value1&param2=value2')</code> Or:
+	 * <code>download('/localhost:8080', {param1 : 'value1', param2 : 'value2'})</code>
+	 * 
+	 */
+	 $.download = function(url, data, method) {
+		 if (!method) {
+			 method = 'POST';
+		 }
+			
+		 data = typeof data == 'string' ? data : $.param(data);
+				
+		 //split params into form inputs
+		 var inputs = [];
+		 $.each(data.split('&'), function() { 
+			 var pair = this.split('=');
+			 inputs.push('<input type="hidden" name="' + pair[0] + '" value="' + pair[1] + '" />'); 
+		 });
+			
+		 //send request and remove form from dom
+		 $('<form action="' + url +'" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
+	 }; 
+ });

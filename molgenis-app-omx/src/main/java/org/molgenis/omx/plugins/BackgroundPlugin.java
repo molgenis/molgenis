@@ -55,12 +55,6 @@ public class BackgroundPlugin extends PluginModel<Entity>
 		backgroundModel.setBackground(getMolgenisSetting(KEY_APP_BACKGROUND, DEFAULT_KEY_APP_BACKGROUND));
 	}
 
-	@Override
-	public boolean isVisible()
-	{
-		return true;
-	}
-
 	private String getMolgenisSetting(String key, String defaultValue)
 	{
 		try
