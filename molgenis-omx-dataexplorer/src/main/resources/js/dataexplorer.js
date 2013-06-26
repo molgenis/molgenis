@@ -300,7 +300,8 @@
 			items.push('<h3>Filter:</h3>');
 			var filter = null;
 			var config = featureFilters[featureUri];
-
+			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
+			
 			switch (feature.dataType) {
 			case "html":
 			case "mref":
@@ -309,16 +310,27 @@
 			case "hyperlink":
 			case "text":
 			case "string":
-				if (config == null)
+				if (config == null) {
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
-				else
+					applyButton.attr('disabled', 'disabled');
+				} else {
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+				}
+				
+				filter.keyup(function(e){
+					if (filter.val() == '') {
+						applyButton.attr('disabled', 'disabled');
+					} else {
+						applyButton.removeAttr('disabled');
+					}
+				});
+				
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						values : [ filter.val() ]
 					});
 				});
 				break;
@@ -327,25 +339,16 @@
 				var datePickerFrom = $('<div id="from" class="input-append date" />');
 				var filterFrom;
 				
-				if (config == null)
+				if (config == null) {
 					filterFrom = datePickerFrom.append($('<input id="date-feature-from"  type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-				else
+					applyButton.attr('disabled', 'disabled');
+				} else {
 					filterFrom = datePickerFrom.append($('<input id="date-feature-from"  type="text" value="' + config.values[0].replace("T", "'T'") + '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-						
+				}
+				
 				datePickerFrom.on('changeDate', function(e) {
-					
-					// If 'from' changed set 'to' at the same value
-					var value = $('#date-feature-from').val();
-					$('#date-feature-to').val(value);
-					value = value.replace("'T'", "T");// DatePicker format needs 'T', isodate is without the apostrophs
-					
-					ns.updateFeatureFilter(featureUri, {
-						name : feature.name,
-						identifier : feature.identifier,
-						type : feature.dataType,
-						range: true,
-						values : [ value,  value]
-					});
+					$('#date-feature-to').val($('#date-feature-from').val());
+					applyButton.removeAttr('disabled');
 				});
 				
 				var datePickerTo = $('<div id="to" class="input-append date" />');
@@ -356,8 +359,14 @@
 				else
 					filterTo = datePickerTo.append($('<input id="date-feature-to" type="text" value="' + config.values[1].replace("T", "'T'") + '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				
+				filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
+				$( ".feature-filter-dialog" ).dialog( "option", "width", 710 );
 				
-				datePickerTo.on('changeDate', function(e) {
+				datePickerTo.on('changeDate', function(e){
+					applyButton.removeAttr('disabled');
+				});
+				
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
@@ -366,40 +375,31 @@
 						values : [ $('#date-feature-from').val().replace("'T'", "T"), $('#date-feature-to').val().replace("'T'", "T")]
 					});
 				});
-				
-				filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
-				$( ".feature-filter-dialog" ).dialog( "option", "width", 710 );
 				break;
 			case "long":
 			case "integer":
 			case "int":
 			case "decimal":
 				var fromFilter;
-				if (config == null)
+				var toFilter;
+				
+				if (config == null) {
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
-				else
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');	
+					applyButton.attr('disabled', 'disabled');
+				} else {
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-
-				fromFilter.change(function() {
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');	
+				}
+				
+				fromFilter.on('keyup input', function() {
 					// If 'from' changed set 'to' at the same value
-					var value = $('#from').val();
-					$('#to').val(value);
-					ns.updateFeatureFilter(featureUri, {
-						name : feature.name,
-						identifier : feature.identifier,
-						type : feature.dataType,
-						values : [ value, value ],
-						range : true
-					});
+					$('#to').val($('#from').val());
 				});
 
-				var toFilter;
-				if (config == null)
-					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');
-				else
-					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');
-
-				toFilter.change(function() {
+				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
+			
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
@@ -408,26 +408,37 @@
 						range : true
 					});
 				});
-
-				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
+				
+				$('input[type=number]').live('keyup input', function(e) {
+					if ((fromFilter.val() == '') && (toFilter.val() == '')) {
+						applyButton.attr('disabled', 'disabled');
+					} else {
+						applyButton.removeAttr('disabled');
+					}
+				});
 				break;
 			case "bool":
 				if (config == null) {
 					filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" value="false">False</label>');
+					applyButton.attr('disabled', 'disabled');
 				} else {
-					if (config.values[0]) {
+					if (config.values[0] == 'true') {
 						filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" value="false">False</label>');
 					} else {
 						filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" checked value="false">False</label>');
 					}
 				}
 				
-				$('input[name="bool-feature"]').live('change', function() {
+				$('input[name=bool-feature]').live('change', function() {
+					applyButton.removeAttr('disabled');
+				});
+				
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						values : [ $('input[name=bool-feature]:checked').val() ]
 					});
 				});
 				break;
@@ -449,29 +460,52 @@
 						$.each(categories.items, function() {
 							var input;
 							if (config && ($.inArray(this.name, config.values) > -1)) {
-								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '" checked>');
+								input = $('<input type="checkbox" class="cat-value" name="' + feature.identifier + '" value="' + this.name + '" checked>');
 							} else {
-								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
+								input = $('<input type="checkbox" class="cat-value" name="' + feature.identifier + '" value="' + this.name + '">');
 							}
 
-							input.change(function() {
-								ns.updateFeatureFilter(featureUri, {
-									name : feature.name,
-									identifier : feature.identifier,
-									type : feature.dataType,
-									values : $.makeArray($('input[name="' + feature.identifier + '"]:checked').map(function() {
-										return $(this).val();
-									}))
-								});
-							});
 							filter.push($('<label class="checkbox">').html(' ' + this.name).prepend(input));
 						});
 					}
+				});
+				
+				if (config && config.values.length > 0) {
+					applyButton.removeAttr('disabled');
+				} else {
+					applyButton.attr('disabled', 'disabled');
+				}
+				
+				$('.cat-value').live('change', function() {
+					if ($('.cat-value:checked').length > 0) {
+						applyButton.removeAttr('disabled');
+					} else {
+						applyButton.attr('disabled', 'disabled');
+					}
+				});
+				
+				applyButton.click(function() {
+					ns.updateFeatureFilter(featureUri, {
+						name : feature.name,
+						identifier : feature.identifier,
+						type : feature.dataType,
+						values : $.makeArray($('.cat-value:checked').map(function() {
+							return $(this).val();
+						}))
+					});
 				});
 				break;
 			default:
 				console.log("TODO: '" + feature.dataType + "' not supported");
 				return;
+			}
+			
+			var applyButtonHolder = $('<div id="applybutton-holder" />').append(applyButton);
+			
+			if ($.isArray(filter)) {
+				filter.push(applyButtonHolder);
+			} else {
+				filter.after(applyButtonHolder);
 			}
 			
 			$('.feature-filter-dialog').html(items.join('')).append(filter);
