@@ -2,8 +2,6 @@ package org.molgenis.omx.converters;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -16,35 +14,46 @@ import com.google.common.collect.Lists;
 
 public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValue, List<String>>
 {
-	@Override
-	public MrefValue fromTuple(Tuple tuple, String colName, Database db, ObservableFeature feature)
-			throws ValueConverterException
+	private final CharacteristicLoadingCache characteristicLoader;
+
+	public TupleToMrefValueConverter(CharacteristicLoadingCache characteristicLoader)
 	{
-		List<String> identifierList;
+		if (characteristicLoader == null) throw new IllegalArgumentException("characteristic loader is null");
+		this.characteristicLoader = characteristicLoader;
+	}
+
+	@Override
+	public MrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	{
+		// get identifiers
+		List<String> xrefIdentifiers;
 		try
 		{
-			identifierList = tuple.getList(colName);
+			xrefIdentifiers = tuple.getList(colName);
 		}
 		catch (RuntimeException e)
 		{
 			throw new ValueConverterException(e);
 		}
-		if (identifierList == null || identifierList.isEmpty()) return null;
+		if (xrefIdentifiers == null || xrefIdentifiers.isEmpty()) return null;
 
-		List<Characteristic> characteristics;
+		// get characteristics for identifiers
+		MrefValue mrefValue = new MrefValue();
 		try
 		{
-			characteristics = db.query(Characteristic.class).in(Characteristic.IDENTIFIER, identifierList).find();
+			if (xrefIdentifiers.size() == 1)
+			{
+				mrefValue.setValue(characteristicLoader.findCharacteristic(xrefIdentifiers.get(0)));
+			}
+			else
+			{
+				mrefValue.setValue(characteristicLoader.findCharacteristics(xrefIdentifiers));
+			}
 		}
 		catch (DatabaseException e)
 		{
-			throw new RuntimeException(e);
+			throw new ValueConverterException(e);
 		}
-		if (characteristics.size() != identifierList.size()) throw new ValueConverterException(
-				"one or more mref characteristics does not exist [" + StringUtils.join(identifierList, ',') + "]");
-
-		MrefValue mrefValue = new MrefValue();
-		mrefValue.setValue(characteristics);
 		return mrefValue;
 	}
 
@@ -56,7 +65,7 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 			@Override
 			public String apply(Characteristic characteristic)
 			{
-				return characteristic.getLabelValue();
+				return characteristic.getName();
 			}
 		});
 	}

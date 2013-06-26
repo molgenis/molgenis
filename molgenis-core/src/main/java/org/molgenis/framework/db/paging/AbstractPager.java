@@ -19,6 +19,7 @@ public abstract class AbstractPager<E extends Entity> implements DatabasePager<E
 {
 	private static final long serialVersionUID = -5113663340351891980L;
 
+	private int recordID = -1;
 	/**
 	 * State of paging, that is, what is the last known event that has to be
 	 * processed.
@@ -293,4 +294,15 @@ public abstract class AbstractPager<E extends Entity> implements DatabasePager<E
 	{
 		this.entityClass = entityClass;
 	}
+
+	public void setRecordId(int id)
+	{
+	 	this.recordID = id;
+	}
+
+	public int getRecordId()
+	{
+		return recordID;
+	}
+
 }

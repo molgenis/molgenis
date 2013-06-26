@@ -30,7 +30,8 @@ public class Input
 		//Validate that 'name' does only contain a-zA-Z0-9
 		Validator.validateParameterName(name);
 		if (Protocol.reservedNames.contains(name)) throw new RuntimeException("input name cannot be '" + name
-				+ "' because it is a reserved word");
+				+ "' because it is a reserved word. The parameters in the compute.properties that are set by Molgenis Compute," +
+				" are automatically available in your scripts as e.g. $rundir.");
 		this.name = name;
 	}
 

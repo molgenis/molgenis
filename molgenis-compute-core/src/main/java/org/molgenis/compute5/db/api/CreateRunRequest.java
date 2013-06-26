@@ -14,7 +14,6 @@ public class CreateRunRequest
 	private final String environment;
 	private final String userName;
 
-
 	public CreateRunRequest(String runName, String backendName, Long pollDelay, List<Task> tasks, String environment, String userName)
 	{
 		this.runName = runName;
@@ -22,7 +21,7 @@ public class CreateRunRequest
 		this.pollDelay = pollDelay;
 		this.tasks = tasks;
 		this.environment = environment;
-        this.userName = userName;
+		this.userName = userName;
 	}
 
 	public String getRunName()

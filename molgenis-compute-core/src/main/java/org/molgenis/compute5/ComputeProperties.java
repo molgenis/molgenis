@@ -36,6 +36,8 @@ public class ComputeProperties
 	public String database = Parameters.DATABASE_DEFAULT;
 	public String port = Parameters.PORT_DEFAULT;
 	public String interval = Parameters.INTERVAL_DEFAULT;
+	public String user = "get user name from system";
+	public String pass = "xxx";
 
 	// parameters not stored in compute.properties file:
 	public boolean showHelp = false; // show help?
@@ -61,10 +63,13 @@ public class ComputeProperties
 			setPath(args);
 			
 			// if --create, then done
-			if (this.create) return; 
+			if (this.create) return;
 
 			// prepend path to defaults
 			updateDefaultParameterValues(path);
+			
+			// get user name and set that one as default
+			this.user = System.getProperty("user.name"); 
 
 			createPropertiesFile();
 
@@ -206,7 +211,7 @@ public class ComputeProperties
 	public void createPropertiesFile()
 	{
 		// get location properties file
-		String propFileString = path + File.separator + Parameters.PROPERTIES;
+		String propFileString = Parameters.PROPERTIES;
 
 		this.propertiesFile = new File(propFileString);
 
@@ -214,7 +219,7 @@ public class ComputeProperties
 		{
 			try
 			{
-				this.propertiesFile.getParentFile().mkdirs();
+//				this.propertiesFile.getParentFile().mkdirs();
 				this.propertiesFile.createNewFile();
 			}
 			catch (IOException e)
@@ -241,6 +246,7 @@ public class ComputeProperties
 			this.database = p.getProperty(Parameters.DATABASE, this.database);
 			this.port = p.getProperty(Parameters.PORT, this.port);
 			this.interval = p.getProperty(Parameters.INTERVAL, this.interval);
+			this.user = p.getProperty(Parameters.USER_CMNDLINE, this.user);
 
 			String parametersCSVString = p.getProperty(Parameters.PARAMETERS);
 			if (null != parametersCSVString) this.parameters = parametersCSVString.split("\\s*,\\s*");
@@ -273,6 +279,9 @@ public class ComputeProperties
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
 			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
 			this.interval = cmd.getOptionValue(Parameters.INTERVAL_CMNDLINE_OPTION, this.interval);
+			this.user = cmd.getOptionValue(Parameters.USER_CMNDLINE_OPTION, this.user);
+			this.pass = cmd.getOptionValue(Parameters.PASS_CMNDLINE_OPTION, this.pass);
+
 
 			// generate only if -g or if -w and -p present
 			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
@@ -346,6 +355,7 @@ public class ComputeProperties
 		{
 			// set this.variables
 			p.setProperty(Parameters.PATH, this.path);
+			p.setProperty(Parameters.PARAMETERS, this.parametersString());
 			p.setProperty(Parameters.WORKFLOW, this.workFlow);
 			if (null != this.defaults) p.setProperty(Parameters.DEFAULTS, this.defaults);
 			p.setProperty(Parameters.BACKEND, this.backend);
@@ -354,7 +364,7 @@ public class ComputeProperties
 			p.setProperty(Parameters.DATABASE, this.database);
 			p.setProperty(Parameters.PORT, this.port);
 			p.setProperty(Parameters.INTERVAL, this.interval);
-			p.setProperty(Parameters.PARAMETERS, Joiner.on(",").join(this.parameters));
+			p.setProperty(Parameters.USER_CMNDLINE, this.user);
 
 			p.store(new FileOutputStream(this.propertiesFile), "This file contains your molgenis-compute properties");
 		}
@@ -362,6 +372,11 @@ public class ComputeProperties
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public String parametersString()
+	{
+		return Joiner.on(",").join(this.parameters);
 	}
 
 	/**
@@ -378,10 +393,10 @@ public class ComputeProperties
 				.withLongOpt(Parameters.PATH).create(Parameters.PATH_CMNDLINE_OPTION);
 		Option p = OptionBuilder.withArgName(Parameters.PARAMETERS_DEFAULT).hasArgs().withLongOpt("parameters")
 				.withDescription("Path to parameter.csv file(s). Default: " + Parameters.PARAMETERS_DEFAULT)
-				.create("p");
+				.create(Parameters.PARAMETERS_CMNDLINE_OPTION);
 		Option w = OptionBuilder.withArgName(Parameters.WORKFLOW_DEFAULT).hasArg()
 				.withDescription("Path to your workflow file. Default: " + Parameters.WORKFLOW_DEFAULT)
-				.withLongOpt(Parameters.WORKFLOW).create("w");
+				.withLongOpt(Parameters.WORKFLOW).create(Parameters.WORKFLOW_CMNDLINE_OPTION);
 		Option d = OptionBuilder.hasArg()
 				.withDescription("Path to your workflow-defaults file. Default: " + Parameters.DEFAULTS_DEFAULT)
 				.withLongOpt(Parameters.DEFAULTS).create(Parameters.DEFAULTS);
@@ -424,6 +439,16 @@ public class ComputeProperties
 				.withDescription(
 						"Run jobs from current directory on current backend. When using --database this will return a 'id' for --pilot.")
 				.withLongOpt(Parameters.RUN).create(Parameters.RUN_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Supply user name to login to your backend. Default is your own user name.")
+				.hasArg()
+				.withLongOpt(Parameters.USER_CMNDLINE)
+				.create(Parameters.USER_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Supply user pass to login to your backend. Default is not saved.")
+				.hasArg()
+				.withLongOpt(Parameters.PASS_CMNDLINE)
+				.create(Parameters.PASS_CMNDLINE_OPTION));
 
 		return options;
 	}

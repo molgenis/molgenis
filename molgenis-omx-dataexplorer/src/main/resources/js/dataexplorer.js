@@ -1,6 +1,6 @@
 (function($, w) {
 	"use strict";
-
+	
 	var ns = w.molgenis = w.molgenis || {};
 
 	var resultsTable = null;
@@ -275,18 +275,39 @@
 		pager.append($('</ul>'));
 	};
 
+	 ns.pad = function(number, length) {
+		 var str = "" + number;
+		 while (str.length < length) {
+			 str = '0' + str;
+		 }
+
+		 return str;
+	};
+
+	 ns.timezoneOffset = function() {
+		 var offset = new Date().getTimezoneOffset();
+		 offset = ((offset<0? '+':'-') + ns.pad(parseInt(Math.abs(offset/60)), 2) + ns.pad(Math.abs(offset%60), 2));
+		          
+		 return offset;
+	};
+
 	ns.openFeatureFilterDialog = function(featureUri) {
 		console.log("openFeatureFilterDialog: " + featureUri);
 		restApi.getAsync(featureUri, null, null, function(feature) {
 			var items = [];
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
-			items.push('<h3>Value (' + feature.dataType + ')</h3>');
+			items.push('<h3>Filter:</h3>');
 			var filter = null;
 			var config = featureFilters[featureUri];
 
 			switch (feature.dataType) {
+			case "html":
+			case "mref":
 			case "xref":
+			case "email":
+			case "hyperlink":
+			case "text":
 			case "string":
 				if (config == null)
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
@@ -302,33 +323,54 @@
 				});
 				break;
 			case "date":
+			case "datetime":	
+				var datePickerFrom = $('<div id="from" class="input-append date" />');
+				var filterFrom;
+				
 				if (config == null)
-					filter = $('<input type="date" autofocus="autofocus">');
+					filterFrom = datePickerFrom.append($('<input id="date-feature-from"  type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				else
-					filter = $('<input type="date" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+					filterFrom = datePickerFrom.append($('<input id="date-feature-from"  type="text" value="' + config.values[0].replace("T", "'T'") + '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+						
+				datePickerFrom.on('changeDate', function(e) {
+					
+					// If 'from' changed set 'to' at the same value
+					var value = $('#date-feature-from').val();
+					$('#date-feature-to').val(value);
+					value = value.replace("'T'", "T");// DatePicker format needs 'T', isodate is without the apostrophs
+					
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						range: true,
+						values : [ value,  value]
 					});
 				});
-				break;
-			case "datetime":
+				
+				var datePickerTo = $('<div id="to" class="input-append date" />');
+				var filterTo;
+				
 				if (config == null)
-					filter = $('<input type="datetime-local" autofocus="autofocus">');
+					filterTo = datePickerTo.append($('<input id="date-feature-to" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				else
-					filter = $('<input type="datetime-local" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+					filterTo = datePickerTo.append($('<input id="date-feature-to" type="text" value="' + config.values[1].replace("T", "'T'") + '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+				
+				
+				datePickerTo.on('changeDate', function(e) {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						range: true,
+						values : [ $('#date-feature-from').val().replace("'T'", "T"), $('#date-feature-to').val().replace("'T'", "T")]
 					});
 				});
+				
+				filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
+				$( ".feature-filter-dialog" ).dialog( "option", "width", 710 );
 				break;
+			case "long":
 			case "integer":
 			case "int":
 			case "decimal":
@@ -370,11 +412,17 @@
 				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				break;
 			case "bool":
-				if (config == null)
-					filter = $('<input type="checkbox" autofocus="autofocus">');
-				else
-					filter = $('<input type="checkbox" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+				if (config == null) {
+					filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" value="false">False</label>');
+				} else {
+					if (config.values[0]) {
+						filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" value="false">False</label>');
+					} else {
+						filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" checked value="false">False</label>');
+					}
+				}
+				
+				$('input[name="bool-feature"]').live('change', function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
@@ -421,19 +469,52 @@
 					}
 				});
 				break;
-			case "nominal":
-			case "ordinal":
-			case "code":
-			case "image":
-			case "file":
-			case "log":
-			case "data":
-			case "exe":
+			default:
 				console.log("TODO: '" + feature.dataType + "' not supported");
-				break;
+				return;
 			}
-
+			
 			$('.feature-filter-dialog').html(items.join('')).append(filter);
+			
+			if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
+				$('.feature-filter-dialog input[type=text]').autocomplete({
+					source: function( request, response ) {
+						$.ajax({
+							type : 'POST',
+							url : '/api/v1/characteristic?_method=GET',
+							data : JSON.stringify({
+								num : 15,
+								q : [ {
+									"field" : "name",
+									"operator" : "LIKE",
+									"value" : request.term
+								} ]
+							}),
+							contentType : 'application/json',
+							async : true,
+							success : function(characteristicList) {
+								response( $.map(characteristicList.items,function(item) {
+									return item.name;
+								}));
+							}
+						});
+					},
+					minLength: 2
+				});
+			} else if (feature.dataType == 'date')  {
+				$('.date').datetimepicker({
+					format: 'yyyy-MM-dd',
+					language: 'en',
+				    pickTime: false
+				});
+			} else if (feature.dataType == 'datetime') {
+				$('.date').datetimepicker({
+					format: "yyyy-MM-dd'T'hh:mm:ss" + ns.timezoneOffset(),
+					language: 'en',
+				    pickTime: true
+				});
+			}
+			
 			$('.feature-filter-dialog').dialog({
 				title : feature.name,
 				dialogClass : 'ui-dialog-shadow'
@@ -518,24 +599,28 @@
 	};
 	
 	ns.search = function(callback) {
-		searchApi.search(ns.createSearchRequest(), callback);
+		searchApi.search(ns.createSearchRequest(true), callback);
 	};
 
-	ns.createSearchRequest = function() {
+	ns.createSearchRequest = function(includeLimitOffset) {
 		var searchRequest = {
 			documentType : selectedDataSet.identifier,
-			queryRules : [ {
+			queryRules : [ ]
+		};
+		
+		if (includeLimitOffset) {
+			searchRequest.queryRules.push({
 				operator : 'LIMIT',
 				value : resultsTable.getMaxRows()
-			} ]
-		};
-
-		if (currentPage > 1) {
-			var offset = (currentPage - 1) * resultsTable.getMaxRows();
-			searchRequest.queryRules.push({
-				operator : 'OFFSET',
-				value : offset
 			});
+			
+			if (currentPage > 1) {
+				var offset = (currentPage - 1) * resultsTable.getMaxRows();
+				searchRequest.queryRules.push({
+					operator : 'OFFSET',
+					value : offset
+				});
+			}
 		}
 
 		var count = 0;
@@ -610,7 +695,15 @@
 
 		return searchRequest;
 	};
-
+	
+	ns.download = function() {
+		var jsonRequest = JSON.stringify(ns.createSearchRequest(false));
+		
+		parent.showSpinner();
+		$.download('/plugin/dataexplorer/download',{searchRequest :  jsonRequest});
+		parent.hideSpinner();
+	};
+	
 	// on document ready
 	$(function() {
 		resultsTable = new ns.ResultsTable();
@@ -625,5 +718,10 @@
 			width : 500,
 			autoOpen : false
 		});
+		
+		$('#download-button').click(function() {
+			ns.download();
+		});
+		
 	});
 }($, window.top));

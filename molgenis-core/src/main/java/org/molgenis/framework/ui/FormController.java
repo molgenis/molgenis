@@ -379,10 +379,19 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 
 			// set readonly records
 			// view.setRecords( pager.getPage() );
-			model.setRecords(this.getData(db));
-			model.setCount(pager.getCount(db));
+			if (model.getMode().equals(Mode.EDIT_VIEW) && (pager.getRecordId() > 0))
+			{
+				model.setRecordId(pager.getRecordId());
+				List<E> entities = new ArrayList<E>();
+				E entity= db.findById(this.getEntityClass(), pager.getRecordId());
+				entities.add((E)entity);
+				model.setRecords(entities);
+			}
+			else
+				model.setRecords(this.getData(db));
 
-			model.setOffset(pager.getOffset());
+			model.setCount(pager.getCount(db));
+            model.setOffset(pager.getOffset());
 			model.setSort(pager.getOrderByField());
 			model.setSortMode(pager.getOrderByOperator());
 
@@ -531,6 +540,8 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 	// helper method
 	protected void doRemove(Database db, MolgenisRequest request) throws DatabaseException, ParseException, IOException
 	{
+		//reload(db);
+
 		Entity entity = getModel().create();
 		ScreenMessage msg = null;
 		try

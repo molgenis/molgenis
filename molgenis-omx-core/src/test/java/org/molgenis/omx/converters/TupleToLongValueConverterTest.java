@@ -22,7 +22,7 @@ public class TupleToLongValueConverterTest
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, 1234l);
-		LongValue value = new TupleToLongValueConverter().fromTuple(tuple, colName, null, null);
+		LongValue value = new TupleToLongValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), Long.valueOf(1234l));
 	}
 }
