@@ -1,4 +1,8 @@
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+	  cache: false
+	});
 	// async load bootstrap modal and display
 	$(document).on('click', 'a.modal-href', function(e) {
 		e.preventDefault();
