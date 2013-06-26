@@ -569,6 +569,7 @@
 
 	ns.onFeatureFilterChange = function(featureFilters) {
 		ns.createFeatureFilterList(featureFilters);
+		currentPage = 1;
 		ns.updateObservationSetsTable();
 	};
 
