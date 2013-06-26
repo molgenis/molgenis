@@ -40,6 +40,7 @@ $(function() {
 					type : 'POST',
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					data : JSON.stringify(q),
 					contentType : 'application/json',
 					async : false,
@@ -52,6 +53,7 @@ $(function() {
 				$.ajax({
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					async : false,
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
@@ -75,6 +77,7 @@ $(function() {
 					type : 'POST',
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					data : JSON.stringify(q),
 					contentType : 'application/json',
 					async : true,
@@ -87,6 +90,7 @@ $(function() {
 				$.ajax({
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					async : true,
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
