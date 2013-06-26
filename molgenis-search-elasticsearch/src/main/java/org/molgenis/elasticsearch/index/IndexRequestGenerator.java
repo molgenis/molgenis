@@ -105,6 +105,8 @@ public class IndexRequestGenerator
 			Map<String, Object> doc = new HashMap<String, Object>();
 			for (String columnName : tuple.getColNames())
 			{
+				// Serialize collections to be able to sort on them, elasticsearch does not support sorting on list
+				// fields
 				Object value = tuple.get(columnName);
 				if (value instanceof Collection)
 				{
@@ -112,8 +114,6 @@ public class IndexRequestGenerator
 				}
 
 				doc.put(columnName, value);
-
-				// doc.put(columnName, tuple.get(columnName));
 			}
 
 			List<Object> xrefValues = new ArrayList<Object>();
