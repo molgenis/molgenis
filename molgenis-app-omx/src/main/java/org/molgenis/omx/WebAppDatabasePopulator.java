@@ -40,7 +40,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimePropertyMap.put("app.home.html", "Welcome to Molgenis!");
 		runtimePropertyMap.put("app.background", "There is no background information");
 		runtimePropertyMap.put("app.news", "There is no news ");
-		runtimePropertyMap.put("app.href.css", "css/default.css");
+		runtimePropertyMap.put("app.href.css", "");
 
 		Login login = database.getLogin();
 		database.setLogin(null);
