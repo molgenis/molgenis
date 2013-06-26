@@ -96,7 +96,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 				+ "<p>The catalogue will regularly be updated with new collected data items.  For questions regarding the catalogue or submission of your proposal, please contact the  LifeLines Research Office  <a href=\"mailto:LLscience@umcg.nl\">LLscience@umcg.nl</a></p>"
 				+ "<p>The catalogue is working in the newest browsers. <u>If you are experiencing any problems  please switch to a modern browser (IE9+, Chrome, Firefox, Safari).</u></p>"
 				+ "</div>" + "<div class=\"span6\">"
-				+ "<img src=\"/img/lifelines_family.png\" alt=\"LifeLines family\">" + "</div>" + "	</div>" + "</div>";
+				+ "<img src=\"/img/lifelines_family.png\" alt=\"LifeLines family\">" + "</div>" + "</div>" + "</div>";
 
 		RuntimeProperty runtimePropertyHomeHtml = new RuntimeProperty();
 		runtimePropertyHomeHtml.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
