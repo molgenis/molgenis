@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.omx.harmonizationIndexer.config.HarmonizationIndexerConfig;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
@@ -41,8 +42,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class,
-		SearchSecurityConfig.class })
+{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, HarmonizationIndexerConfig.class,
+		DataExplorerConfig.class, SearchSecurityConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
@@ -106,8 +107,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		mailSender.setHost(mailHost);
 		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
-		mailSender.setUsername(mailUsername); // specify in molgenis-server.properties
-		mailSender.setPassword(mailPassword); // specify in molgenis-server.properties
+		mailSender.setUsername(mailUsername); // specify in
+												// molgenis-server.properties
+		mailSender.setPassword(mailPassword); // specify in
+												// molgenis-server.properties
 		Properties javaMailProperties = new Properties();
 		javaMailProperties.setProperty("mail.smtp.auth", mailJavaAuth);
 		javaMailProperties.setProperty("mail.smtp.starttls.enable", mailJavaStartTlsEnable);
@@ -123,7 +126,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is
+	 * not managed by Spring
 	 * 
 	 * @return
 	 */
@@ -135,7 +139,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
+	 * Enable spring freemarker viewresolver. All freemarker template names
+	 * should end with '.ftl'
 	 */
 	@Bean
 	public ViewResolver viewResolver()
@@ -148,7 +153,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
+	 * Configure freemarker. All freemarker templates should be on the classpath
+	 * in a package called 'freemarker'
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer()
