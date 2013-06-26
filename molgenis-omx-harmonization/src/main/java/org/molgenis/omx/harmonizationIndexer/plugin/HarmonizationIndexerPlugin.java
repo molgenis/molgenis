@@ -4,37 +4,20 @@ import java.io.File;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.framework.tupletable.TupleTable;
+import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.omx.harmonizationIndexer.controller.OntologyModel;
-import org.molgenis.search.SearchService;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 
-public class HarmonizationIndexerPlugin extends PluginModel<Entity> implements InitializingBean
+public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 {
 
 	private static final long serialVersionUID = 1L;
-	private SearchService searchService;
 
 	public HarmonizationIndexerPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
-	}
-
-	@Autowired
-	public void setSearchService(SearchService searchService)
-	{
-		this.searchService = searchService;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
 	@Override
@@ -65,33 +48,26 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity> implements I
 	{
 		if ("indexOntology".equals(request.getAction()))
 		{
-			File file = request.getFile("uploadedOntology");
-			System.out.println("----------------" + file.getAbsolutePath());
-			indexOntology(file, db);
-		}
-	}
-
-	@Async
-	public void indexOntology(File ontologyFile, Database db)
-	{
-		try
-		{
-			OntologyModel model = new OntologyModel(ontologyFile);
-			TupleTable table = new OntologyTable(model, db);
-			searchService.indexTupleTable("ontology", table);
-			// searchService.indexTupleTable("ontologyTerm", new
-			// OntologyTermTable(model, db));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
+			try
+			{
+				File file = request.getFile("uploadedOntology");
+				getHarmonizationIndexer().index(file);
+			}
+			catch (TableException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
 	@Override
 	public void reload(Database db)
 	{
-		// TODO Auto-generated method stub
 
+	}
+
+	private HarmonizationIndexer getHarmonizationIndexer()
+	{
+		return ApplicationContextProvider.getApplicationContext().getBean(HarmonizationIndexer.class);
 	}
 }
