@@ -1,8 +1,9 @@
 <#-- Bootstrap order details modal -->
-<div id="orderdetails-${order.id}-modal" class="modal hide" tabindex="-1">
+<div id="orderdetails-${order.id?c}-modal" class="modal hide" tabindex="-1">
+	
  	<div class="modal-header">
-    	<button type="button" class="close" data-dismiss="#orderdetails-${order.id}-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    	<h4>Orderdetails</h4>
+    	<button type="button" class="close" data-dismiss="#orderdetails-${order.id?c}-modal" data-backdrop="true" aria-hidden="true">&times;</button>
+    	<h3>Orderdetails</h3>
   	</div>
  	<div class="modal-body">
 		<h5>Name: ${order.name}</h5>
@@ -28,12 +29,12 @@
 		</table>
 	</div>
 	<div class="modal-footer">
-		<a href="#" id="orderdetails-${order.id}-btn-close" class="btn btn-primary" aria-hidden="true">Ok</a>
+		<a href="#" id="orderdetails-${order.id?c}-btn-close" class="btn btn-primary" aria-hidden="true">Ok</a>
 	</div>
 </div>
 <script type="text/javascript">
 	$(function() {
-		var modal = $('#orderdetails-${order.id}-modal');
+		var modal = $('#orderdetails-${order.id?c}-modal');
   		
   		<#-- modal events -->
   		modal.on('shown', function (e) {
@@ -62,7 +63,7 @@
 			    }
 	    	}
 	    });
-	   	$('#orderdetails-${order.id}-btn-close').click(function() {
+	   	$('#orderdetails-${order.id?c}-btn-close').click(function() {
 		    modal.modal('hide');
 		});
 	});
