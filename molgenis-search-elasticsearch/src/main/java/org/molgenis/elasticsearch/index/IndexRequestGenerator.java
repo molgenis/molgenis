@@ -1,6 +1,7 @@
 package org.molgenis.elasticsearch.index;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.base.Joiner;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
@@ -103,7 +105,15 @@ public class IndexRequestGenerator
 			Map<String, Object> doc = new HashMap<String, Object>();
 			for (String columnName : tuple.getColNames())
 			{
-				doc.put(columnName, tuple.get(columnName));
+				Object value = tuple.get(columnName);
+				if (value instanceof Collection)
+				{
+					value = Joiner.on(" , ").join((Collection<?>) value);
+				}
+
+				doc.put(columnName, value);
+
+				// doc.put(columnName, tuple.get(columnName));
 			}
 
 			List<Object> xrefValues = new ArrayList<Object>();
@@ -123,5 +133,4 @@ public class IndexRequestGenerator
 
 		return bulkRequest;
 	}
-
 }
