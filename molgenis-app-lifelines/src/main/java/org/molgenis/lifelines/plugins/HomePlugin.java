@@ -26,7 +26,7 @@ public class HomePlugin extends PluginModel<Entity>
 	private static final long serialVersionUID = 1L;
 
 	private static final String DEFAULT_KEY_APP_HOME_HTML = "<p>Welcome to LifeLines!</p>";
-	private static final String KEY_APP_HOME_HTML = "app.home.html";
+	public static final String KEY_APP_HOME_HTML = "app.home.html";
 
 	private HomeModel homeModel;
 
