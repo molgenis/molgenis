@@ -36,10 +36,11 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 		runtimePropertyMap.put(GuiService.KEY_APP_NAME, "OMX");
-		runtimePropertyMap.put("app.logo", "img/logo_default.png");
+		runtimePropertyMap.put("app.href.logo", "img/logo_default.png");
 		runtimePropertyMap.put("app.home.html", "Welcome to Molgenis!");
 		runtimePropertyMap.put("app.background", "There is no background information");
 		runtimePropertyMap.put("app.news", "There is no news ");
+		runtimePropertyMap.put("app.href.css", "");
 
 		Login login = database.getLogin();
 		database.setLogin(null);

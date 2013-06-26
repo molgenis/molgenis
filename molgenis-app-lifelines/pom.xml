@@ -28,7 +28,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 			<!-- compile XML schemas -->
-		<plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
 				<executions>
@@ -62,7 +62,6 @@
 						</configuration>
 					</execution>
 				</executions>
-				
 			</plugin>
 			<!-- add sources created by jaxb -->
 			<!-- add sources created by wsimport -->
@@ -199,6 +198,24 @@
 		    <groupId>org.apache.httpcomponents</groupId>
 		    <artifactId>httpclient</artifactId>
 		    <version>4.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>2.33.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-htmlunit-driver</artifactId>
+			<version>2.33.0</version>
+			<scope>test</scope>
+			<exclusions>
+                <exclusion>
+                    <groupId>org.seleniumhq.selenium</groupId>
+                    <artifactId>selenium-remote-driver</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 	</dependencies>
 </project>
