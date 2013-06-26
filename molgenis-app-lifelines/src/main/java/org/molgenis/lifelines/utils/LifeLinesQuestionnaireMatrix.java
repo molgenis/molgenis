@@ -24,7 +24,7 @@ public class LifeLinesQuestionnaireMatrix
 	private static final String HEADER_PROTOCOL_DESCRIPTION = "Omschrijving";
 	private static final String HEADER_VMID = "VMID";
 	private static final String HEADER_VMID_ID = "ID";
-	private static final String HEADER_VMID_DESCRIPTION = "Baseline";
+	private static final String HEADER_VMID_DESCRIPTION = "Time";
 	private static final String TABLE_CHECKLIST = "checklist";
 	private static final String VALUE_CHECKED = "x";
 
