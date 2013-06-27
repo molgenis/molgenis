@@ -34,11 +34,11 @@ public class ProtocolViewerController extends PluginModel<Entity>
 {
 	private static final long serialVersionUID = 1L;
 
-	private static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
+	public static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
 	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
-	private static final String KEY_ACTION_VIEW = "plugin.catalogue.action.view";
+	public static final String KEY_ACTION_VIEW = "plugin.catalogue.action.view";
 	private static final boolean DEFAULT_KEY_ACTION_VIEW = true;
-	private static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
+	public static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
 	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
 
 	/** Protocol viewer model */
