@@ -4,7 +4,6 @@
 	<menu name="main">
 		<plugin label="Home" name="HomePlugin" type="org.molgenis.lifelines.plugins.HomePlugin"/>
 		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" groupRead="anonymous,AllUsers" />
-		<plugin label="Research Data" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
 		<plugin label="Catalogue Loader" name="CatalogueLoaderPlugin" type="org.molgenis.lifelines.plugins.CatalogueLoaderPlugin" />
 		<plugin label="Research Data Loader" name="StudyDefinitionLoaderPlugin" type="org.molgenis.lifelines.plugins.StudyDefinitionLoaderPlugin" />
 		<plugin label="Upload" name="ImportWizardController" type="org.molgenis.omx.plugins.ImportWizardController" />
