@@ -133,7 +133,7 @@ public class SampleConverter
 					{
 						printCategories.append(e + "^");
 					}
-					printCategories.append("########\n");
+					printCategories.append("\n");
 				}
 
 			}
