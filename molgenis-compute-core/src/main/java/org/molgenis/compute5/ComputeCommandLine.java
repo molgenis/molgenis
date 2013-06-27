@@ -43,7 +43,9 @@ public class ComputeCommandLine
 		BasicConfigurator.configure();
 
 		System.out.println("### MOLGENIS COMPUTE ###");
-		System.out.println("Version: " + ComputeCommandLine.class.getPackage().getImplementationVersion());
+		String version = ComputeCommandLine.class.getPackage().getImplementationVersion();
+		if (null == version) version = "development";
+		System.out.println("Version: " + version);
 
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
