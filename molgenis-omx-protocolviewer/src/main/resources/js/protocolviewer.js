@@ -306,8 +306,8 @@
 									children : []
 								};
 								//check if the last node is protocol if so recursively adding all subNodes
-								if(i === nodes.length - 1){
-									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : true});
+								if(i === nodes.length - 1) {
+									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
 								}
 							}
 							options = $.extend({
