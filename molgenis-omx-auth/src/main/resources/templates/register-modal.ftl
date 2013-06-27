@@ -147,6 +147,13 @@
   		var form = $('#register-form');
   		form.validate();
   		
+  		$('#reg-password').rules('add', {
+			minlength: 6
+		});
+		$('#reg-password-confirm').rules('add', {
+			equalTo: '#reg-password'
+		});
+		
   		<#-- captcha events -->
 		$('#reg-captcha').rules('add', {
 			required: true,
@@ -157,7 +164,7 @@
 		});
 		$('#captcha-href').click(function(e){
 		    e.preventDefault();
-			$('#captcha-img').attr('src', '/captcha');
+			$('#captcha-img').attr('src', '/captcha?_=' + Date.now());
 	 	});
 
   		<#-- modal events -->

@@ -68,13 +68,19 @@
 	background-image: url("images/ui-icons_ffffff_256x240.png");
 }
 
-.data-table-header-container {
+.data-table-pager-container {
 	margin-bottom: 0px;
 }
 
+
 #data-table-header {
 	font-style:italic;
-	float:right;
+	margin-bottom: 8px;
+    margin-top: 4px;
+}
+
+#download-button {
+	float: right;	
 }
 
 .pagination {
@@ -204,4 +210,10 @@ input[type=number] {
 
 #date-feature-from, #date-feature-to {
 	width:240px;
+}
+
+#applybutton-holder {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	width: 100%;
 }

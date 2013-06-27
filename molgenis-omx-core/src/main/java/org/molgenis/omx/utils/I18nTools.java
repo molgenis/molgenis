@@ -19,10 +19,6 @@ public class I18nTools
 
 	private static final String DEFAULT_LANG = "en";
 
-	private I18nTools()
-	{
-	}
-
 	/**
 	 * If the given string is a internationalized string return the value for the default language, else return the
 	 * input string
