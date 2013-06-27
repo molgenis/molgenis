@@ -1,0 +1,3 @@
+internalSampleID,externalSampleID,project,sequencer,contact,sequencingStartDate,run,flowcell,lane,barcodeMenu,seqType,prepKit,capturingKit,arrayFile,arrayID,barcode,barcodeType
+1546,801_D38103_over,Cardio,SN163,Jan Jongbloed <J.D.H.Jongbloed@umcg.nl>,130322,0491,AC1P9TACXX,5,GAF 04 TGACTT,PE,NEB,SureSelect_All_Exon_50MB_v4,XXXX,,TGACTT,GAF
+800.,D51265,Cardio,SN163,Jan Jongbloed <J.D.H.Jongbloed@umcg.nl>,130322,0491,AC1P9TACXX,4,GAF 13 ATCGAT,PE,NEB,SureSelect_All_Exon_50MB_v4,,,ATCGAT,GAF

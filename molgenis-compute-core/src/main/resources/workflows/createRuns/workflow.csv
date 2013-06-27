@@ -1,0 +1,2 @@
+step,protocol,parameterMapping
+CreateGafRuns,protocols/CreateGafRuns.sh,arrayFile=user_arrayFile;run=user_run;umask=user_umask;runJobsDir=user_runJobsDir;runResultsDir=user_runResultsDir;scriptsDir=user_scriptsDir;McWorksheet=user_McWorksheet;bcl2FastqWorkflowDir=user_bcl2FastqWorkflowDir;gafDir=user_gafDir

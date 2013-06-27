@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -199,6 +200,10 @@ public class ParametersCsvParser
 	private static List<String> asList(Tuple t, String col)
 	{
 		String s = t.getString(col);
+
+		// deal with 'empty' values
+		if (null == s)
+			return new ArrayList<String>(Arrays.asList(""));
 
 		Pattern pattern = Pattern.compile("([+-]?[0-9]+)\\.\\.([+-]?[0-9]+)");
 		Matcher matcher = pattern.matcher(s);

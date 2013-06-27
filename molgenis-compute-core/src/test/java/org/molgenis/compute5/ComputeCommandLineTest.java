@@ -20,7 +20,7 @@ public class ComputeCommandLineTest
 	public void test2() throws ComputeException, ParseException, ClassNotFoundException, IOException
 	{
 		String path = "target/test1";
-		this.runtest(path, new String[]{"--path","src/main/resources/workflows/demoNBIC2","--rundir",path, "-g", "--workflow", "workflow.csv"});
+		this.runtest(path, new String[]{"--path","src/main/resources/workflows/demoNBIC2","--rundir",path, "-g", "--workflow", "parameters/workflow.csv"});
 	}
 	
 	public void runtest(String dir, String[] params) throws IOException, ParseException, ClassNotFoundException
