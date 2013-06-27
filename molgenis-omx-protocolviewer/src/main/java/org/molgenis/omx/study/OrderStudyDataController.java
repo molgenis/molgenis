@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.omx.filter.StudyDataRequest;
+import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -96,6 +97,7 @@ public class OrderStudyDataController
 
 		ModelAndView model = new ModelAndView("orderdetails-modal");
 		model.addObject("order", studyDataRequest);
+		model.addObject("i18n", new I18nTools());
 		return model;
 	}
 

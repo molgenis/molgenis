@@ -306,8 +306,8 @@
 									children : []
 								};
 								//check if the last node is protocol if so recursively adding all subNodes
-								if(i === nodes.length - 1){
-									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : true});
+								if(i === nodes.length - 1) {
+									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
 								}
 							}
 							options = $.extend({
@@ -345,10 +345,10 @@
 				rootNode.addChild(topNodes);
 				
 				if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
-					if(topNodes.length === 0) {
-						rootNode.tree.getRoot().ul.hidden = true;
+				if(topNodes.length === 0) {
+					$('#dataset-browser').hide();
 					$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
-				} else rootNode.tree.getRoot().ul.hidden = false;
+				} else $('#dataset-browser').show();
 			});
 		});
 	};
@@ -431,7 +431,7 @@
 		treePrevState = null;
 		selectedAllNodes = null;
 		$("#search-text").val("");
-		if(rootNode.tree.getRoot().ul.hidden == true) rootNode.tree.getRoot().ul.hidden = false;
+		$('#dataset-browser').show();
 		if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 		updateFeatureSelection(rootNode.tree);
 	};

@@ -3,10 +3,10 @@
 	
  	<div class="modal-header">
     	<button type="button" class="close" data-dismiss="#orderdetails-${order.id?c}-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    	<h3>Orderdetails</h3>
+    	<h3>Order details</h3>
   	</div>
  	<div class="modal-body">
-		<h5>Name: ${order.name}</h5>
+		<h5>Project title: ${order.name}</h5>
 		<table class="table table-striped table-condensed listtable">
 			<thead>
 				<th>Variable</th>
@@ -16,13 +16,7 @@
 				<#list order.features as feature>				
 					<tr>
 						<td>${feature.name}</td>
-						<td>
-						<#if feature.i18ndescription??>
-							${feature.i18ndescription.en}
-						<#else>
-							null
-						</#if>
-						</td>
+						<td>${i18n.get(feature.description)}</td>
 					</tr>
 				</#list>	
 			</tbody>
