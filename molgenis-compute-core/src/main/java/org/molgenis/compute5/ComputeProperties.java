@@ -270,6 +270,10 @@ public class ComputeProperties
 			if (this.showHelp) throw new ParseException("");
 
 			// set this.variables
+			
+			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
+			this.path = this.path + (this.path.endsWith("/") ? "" : "/");
+			
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
