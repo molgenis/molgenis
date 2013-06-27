@@ -165,7 +165,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	public void resetPassword() throws Exception
 	{
 		this.mockMvc.perform(
-				post("/account/password/reset").param("username", "admin").contentType(
+				post("/account/password/reset").param("email", "admin@molgenis.org").contentType(
 						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 		verify(accountService).resetPassword(any(MolgenisUser.class));
 	}
@@ -174,7 +174,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	public void resetPassword_invalidUser() throws Exception
 	{
 		this.mockMvc.perform(
-				post("/account/password/reset").param("username", "invalidUser").contentType(
+				post("/account/password/reset").param("email", "invalidUser@molgenis.org").contentType(
 						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 		verifyZeroInteractions(accountService);
 	}
@@ -221,8 +221,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		{
 			Database database = mock(Database.class);
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
-			when(database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS, "admin")))
-					.thenReturn(Collections.<MolgenisUser> singletonList(molgenisUser));
+			when(
+					database.find(MolgenisUser.class, new QueryRule(MolgenisUser.EMAIL, Operator.EQUALS,
+							"admin@molgenis.org"))).thenReturn(Collections.<MolgenisUser> singletonList(molgenisUser));
 			return database;
 		}
 

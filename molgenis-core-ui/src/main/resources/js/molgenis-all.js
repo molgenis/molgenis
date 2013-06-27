@@ -1,4 +1,8 @@
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+	  cache: false
+	});
 	// async load bootstrap modal and display
 	$(document).on('click', 'a.modal-href', function(e) {
 		e.preventDefault();
@@ -36,6 +40,7 @@ $(function() {
 					type : 'POST',
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					data : JSON.stringify(q),
 					contentType : 'application/json',
 					async : false,
@@ -48,6 +53,7 @@ $(function() {
 				$.ajax({
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					async : false,
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
@@ -71,6 +77,7 @@ $(function() {
 					type : 'POST',
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					data : JSON.stringify(q),
 					contentType : 'application/json',
 					async : true,
@@ -83,6 +90,7 @@ $(function() {
 				$.ajax({
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					async : true,
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);

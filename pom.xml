@@ -485,6 +485,9 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-app-compute-db</module>
-		<module>molgenis-app-mutationdb</module>
+<<<<<<< HEAD
 	</modules>
+=======
+    </modules>
+>>>>>>> 30aaff9055d2743cd985ce3a24997b466958b353
 </project>

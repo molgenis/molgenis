@@ -37,6 +37,7 @@ public class ComputeProperties
 	public String port = Parameters.PORT_DEFAULT;
 	public String interval = Parameters.INTERVAL_DEFAULT;
 	public String user = "get user name from system";
+	public String pass = "xxx";
 
 	// parameters not stored in compute.properties file:
 	public boolean showHelp = false; // show help?
@@ -279,6 +280,8 @@ public class ComputeProperties
 			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
 			this.interval = cmd.getOptionValue(Parameters.INTERVAL_CMNDLINE_OPTION, this.interval);
 			this.user = cmd.getOptionValue(Parameters.USER_CMNDLINE_OPTION, this.user);
+			this.pass = cmd.getOptionValue(Parameters.PASS_CMNDLINE_OPTION, this.pass);
+
 
 			// generate only if -g or if -w and -p present
 			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
@@ -441,6 +444,11 @@ public class ComputeProperties
 				.hasArg()
 				.withLongOpt(Parameters.USER_CMNDLINE)
 				.create(Parameters.USER_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Supply user pass to login to your backend. Default is not saved.")
+				.hasArg()
+				.withLongOpt(Parameters.PASS_CMNDLINE)
+				.create(Parameters.PASS_CMNDLINE_OPTION));
 
 		return options;
 	}
