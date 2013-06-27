@@ -118,7 +118,7 @@ public class TaskGenerator
 				}
 
 				parameterHeader += "\n# Assign values to the parameters in this script\n";
-				parameterHeader += "\n# Set taskId, which is the jobname of this task";
+				parameterHeader += "\n# Set taskId, which is the job name of this task";
 				parameterHeader += "\ntaskId=\"" + task.getName() + "\"\n";
 				
 				parameterHeader += "\n# Make compute.properties available";
