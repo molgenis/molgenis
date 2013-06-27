@@ -1,10 +1,12 @@
 package org.molgenis.gids.tools.convertor;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,20 +122,22 @@ public class SampleConverter
 				makeFeaturesList();
 			}
 			mkmetadataExcelFile(listOfEntity);
-
+			// Write categories to file
+			PrintWriter printCategories = new PrintWriter(new File(OUTPUTDIR + "/categories.txt"));
 			for (Entry<String, HashSet<String>> entry : hashMapCategories.entrySet())
 			{
 				if (entry.getValue().size() > 1 && entry.getValue().size() < 100)
 				{
-					System.out.println(entry.getKey());
+					printCategories.append(entry.getKey() + "^");
 					for (String e : entry.getValue())
 					{
-						System.out.print(e + "^");
+						printCategories.append(e + "^");
 					}
-					System.out.println("########");
+					printCategories.append("########\n");
 				}
 
 			}
+			printCategories.close();
 
 		}
 		finally
