@@ -35,8 +35,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 	public static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
 	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
-	public static final String KEY_ACTION_VIEW = "plugin.catalogue.action.view";
-	private static final boolean DEFAULT_KEY_ACTION_VIEW = true;
 	public static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
 	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
 
@@ -173,7 +171,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 		this.protocolViewer.setEnableDownloadAction(getMolgenisSettingFlag(KEY_ACTION_DOWNLOAD,
 				DEFAULT_KEY_ACTION_DOWNLOAD));
-		this.protocolViewer.setEnableViewAction(getMolgenisSettingFlag(KEY_ACTION_VIEW, DEFAULT_KEY_ACTION_VIEW));
 		this.protocolViewer.setEnableOrderAction(getMolgenisSettingFlag(KEY_ACTION_ORDER, DEFAULT_KEY_ACTION_ORDER));
 	}
 
