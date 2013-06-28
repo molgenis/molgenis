@@ -18,7 +18,6 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.DataExplorerPluginPlugin;
-import org.molgenis.ui.DataSetViewerPluginPlugin;
 import org.molgenis.ui.ProtocolViewerControllerPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
 import org.molgenis.util.Entity;
@@ -84,7 +83,6 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		}
 
 		// Set plugin permissions
-		createPermission(database, DataSetViewerPluginPlugin.class, groupName, "read");
 		createPermission(database, DataExplorerPluginPlugin.class, groupName, "read");
 		createPermission(database, ProtocolViewerControllerPlugin.class, groupName, "read");
 

@@ -71,9 +71,6 @@
 		  				<div class="row-fluid grid" id="feature-shopping-controls">
 		  					<div class="span9">
 			  					<div class="btn-group pull-left">			
-							<#if model.enableViewAction>
-									<button class="btn" id="view-features-button">View</button>
-							</#if>
 							<#if model.enableDownloadAction>
 									<button class="btn" id="download-xls-button">Download</button>
 							</#if>
@@ -124,12 +121,6 @@
  								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
  							}
  						});
- 					});
- 					
- 					$('#view-features-button').click(function(e) {
- 						e.preventDefault();
- 						var uri = molgenis.getSelectedDataSet().href;
- 						window.location = 'molgenis.do?__target=${screen.name}&__action=download_viewer&datasetid=' + uri.substring(uri.lastIndexOf('/') + 1) + "&features=" + $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',');
  					});
  					
  					// on ready

@@ -17,8 +17,6 @@ public class ProtocolViewer implements Serializable
 
 	private boolean enableDownloadAction;
 
-	private boolean enableViewAction;
-
 	private boolean enableOrderAction;
 
 	private boolean authenticated;
@@ -41,16 +39,6 @@ public class ProtocolViewer implements Serializable
 	public void setEnableDownloadAction(boolean enableDownloadAction)
 	{
 		this.enableDownloadAction = enableDownloadAction;
-	}
-
-	public boolean isEnableViewAction()
-	{
-		return enableViewAction;
-	}
-
-	public void setEnableViewAction(boolean enableViewAction)
-	{
-		this.enableViewAction = enableViewAction;
 	}
 
 	public boolean isEnableOrderAction()
