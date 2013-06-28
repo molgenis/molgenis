@@ -5,9 +5,20 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	
-	ns.searchAvailableIndices = function() {
+	ns.searchAvailableIndices = function(runningIndexUri) {
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
-			console.log(searchResponse);
+			var searchHits = searchResponse.searchHits;
+			if(searchHits.length > 0){
+				$.each(searchHits, function(){
+					var ontologyInfo = $(this)[0]["columnValueMap"];
+					var ontologyUri = ontologyInfo.url;
+					var status = "Indexed";
+					if(runningIndexUri !== null){
+						status = "Being indexed ...";
+					}
+					$('#ontology-table').append('<tr><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
+				});
+			}
 		});
 	};
 	
@@ -18,9 +29,13 @@
 			operator : 'LIMIT',
 			value : 1000000
 		});
+		queryRules.push({
+			operator : 'SEARCH',
+			value : 'indexedOntology'
+		});
 		
 		var searchRequest = {
-			documentType : "protocolTree-51008",
+			documentType : null,
 			queryRules : queryRules
 		};
 		return searchRequest;
