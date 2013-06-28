@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
+import org.molgenis.framework.tupletable.view.renderers.ExcelExporter;
 import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.model.elements.Field;
