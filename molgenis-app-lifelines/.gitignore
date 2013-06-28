@@ -3,3 +3,4 @@ target/
 test-output/
 .classpath
 .project
+/target
