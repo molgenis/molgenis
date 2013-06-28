@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
+import org.molgenis.framework.tupletable.view.renderers.CsvExporter;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.tuple.Tuple;
 import org.testng.Assert;
