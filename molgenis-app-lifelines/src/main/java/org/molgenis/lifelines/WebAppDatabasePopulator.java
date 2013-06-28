@@ -27,7 +27,6 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.omx.plugins.ProtocolViewerController;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.CatalogueLoaderPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
@@ -80,13 +79,6 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimePropertyAuthentication.setName(AccountService.KEY_PLUGIN_AUTH_ACTIVATIONMODE);
 		runtimePropertyAuthentication.setValue("user");
 		database.add(runtimePropertyAuthentication);
-
-		RuntimeProperty runtimePropertyViewButton = new RuntimeProperty();
-		runtimePropertyViewButton.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
-				+ ProtocolViewerController.KEY_ACTION_VIEW);
-		runtimePropertyViewButton.setName(ProtocolViewerController.KEY_ACTION_VIEW);
-		runtimePropertyViewButton.setValue("false");
-		database.add(runtimePropertyViewButton);
 
 		String homeHtml = "<div class=\"container-fluid\">"
 				+ "<div class=\"row-fluid\">"
