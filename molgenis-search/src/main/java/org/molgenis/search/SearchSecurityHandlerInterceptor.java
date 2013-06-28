@@ -22,7 +22,7 @@ public class SearchSecurityHandlerInterceptor extends HandlerInterceptorAdapter
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
 	{
 		Login login = ApplicationContextProvider.getApplicationContext().getBean(Login.class);
-		if ((login != null) && (login.isAuthenticated() || !login.isLoginRequired()))
+		if ((login != null) && (login.isAuthenticated()))
 		{
 			return true;
 		}

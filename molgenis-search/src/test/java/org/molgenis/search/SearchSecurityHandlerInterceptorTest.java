@@ -54,12 +54,4 @@ public class SearchSecurityHandlerInterceptorTest
 		assertEquals(response.getStatus(), HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
-	@Test
-	public void testPreHandleLoginNotRequired() throws Exception
-	{
-		when(login.isAuthenticated()).thenReturn(false);
-		when(login.isLoginRequired()).thenReturn(false);
-		assertTrue(interceptor.preHandle(request, response, null));
-	}
-
 }

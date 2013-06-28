@@ -118,7 +118,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void logoutUser() throws Exception
 	{
-		this.mockMvc.perform(post("/account/logout")).andExpect(status().isNoContent());
+		this.mockMvc.perform(get("/account/logout")).andExpect(view().name("redirect:http://localhost"));
 	}
 
 	@Test
