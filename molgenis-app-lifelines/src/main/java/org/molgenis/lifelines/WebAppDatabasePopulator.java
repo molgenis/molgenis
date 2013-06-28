@@ -185,6 +185,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		else if ("workspace".equals(appProfile))
 		{
 			createPermission(database, DataExplorerPluginPlugin.class, groupDataManagers, "read");
+			createPermission(database, DataExplorerPluginPlugin.class, groupResearchers, "read");
 			createPermission(database, StudyDefinitionLoaderPluginPlugin.class, groupDataManagers, "read");
 		}
 		else
