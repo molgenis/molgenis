@@ -76,8 +76,7 @@ public class ElasticSearchService implements SearchService
 	public long count(String documentType, List<QueryRule> queryRules)
 	{
 
-		SearchRequest request = new SearchRequest(sanitizeMapperType(documentType), queryRules,
-				Collections.<String> emptyList());
+		SearchRequest request = new SearchRequest(documentType, queryRules, Collections.<String> emptyList());
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
@@ -88,7 +87,7 @@ public class ElasticSearchService implements SearchService
 
 		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
 
-		String documentType = sanitizeMapperType(request.getDocumentType());
+		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentType, searchType,
 				request.getQueryRules(), request.getFieldsToReturn());
 
