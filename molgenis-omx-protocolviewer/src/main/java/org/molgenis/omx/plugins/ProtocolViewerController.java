@@ -148,43 +148,8 @@ public class ProtocolViewerController extends PluginModel<Entity>
 				excelWriter.close();
 			}
 		}
-		// TODO: Commented out, maybe re-use in dataexplorer??
-		// else if (request.getAction().equals("download_viewer"))
-		// {
-		// req.getRequest().getSession().setAttribute("selectedObservableFeatures", features);
-		//
-		// String dataSetViewerName = this.getDataSetViewerName();
-		// if (dataSetViewerName != null)
-		// {
-		// StringBuilder sb = new StringBuilder();
-		// sb.append(req.getAppLocation());
-		// sb.append("/molgenis.do?__target=").append(dataSetViewerName);
-		// sb.append("&select=").append(dataSetViewerName);
-		// sb.append("&__action=selectDataSet");
-		// sb.append("&dataSetId=").append(dataSetId);
-		// response.sendRedirect(sb.toString());
-		// }
-		// }
 
 	}
-
-	/*
-	 * Find the name of the DataSetViewer for user in a url. For now if there are multiple DataSetViewers it returns the
-	 * first Returns null if not found
-	 */
-	// private String getDataSetViewerName()
-	// {
-	// ScreenController<?> menu = getParent();
-	// for (ScreenController<?> controller : menu.getAllChildren())
-	// {
-	// if (controller instanceof DataSetViewerPlugin)
-	// {
-	// return controller.getName();
-	// }
-	// }
-	//
-	// return null;
-	// }
 
 	// TODO reload should throw DatabaseException
 	@Override
