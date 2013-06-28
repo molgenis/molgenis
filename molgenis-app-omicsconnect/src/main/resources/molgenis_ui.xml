@@ -5,7 +5,6 @@
 	<menu name="main">
 		<plugin name="Pubmed" type="org.molgenis.omicsconnect.plugins.pubmed.PubMedLookup" />
 		<plugin label="Catalogue" name="ProtocolViewer" type="org.molgenis.omx.plugins.ProtocolViewerController" />
-		<plugin label="Dataset Viewer" name="DataSetViewerPlugin" type="org.molgenis.omx.dataset.DataSetViewerPlugin"/>
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />	
 		<menu name="Admin">
 			<form name="FileManager" entity="MolgenisFile" label="File manager" header="Navigate files">
