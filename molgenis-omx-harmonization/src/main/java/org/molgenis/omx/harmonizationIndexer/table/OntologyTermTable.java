@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonizationIndexer.plugin;
+package org.molgenis.omx.harmonizationIndexer.table;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +25,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	private final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	private final String SYNONYMS = "ontologyTermSynonym";
 	private final String ONTOLOGY_LABEL = "ontologyLabel";
+	private final String ENTITY_TYPE = "entity_type";
 
 	public OntologyTermTable(OntologyModel model, Database db)
 	{
@@ -60,6 +61,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		tuple.set(ONTOLOGY_TERM, label);
 		tuple.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
 		tuple.set(ONTOLOGY_LABEL, model.getOntologyLabel());
+		tuple.set(ENTITY_TYPE, "ontologyTerm");
 		tuple.set(SYNONYMS, label);
 
 		for (String synonym : model.getSynonyms(cls))
@@ -101,6 +103,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		columns.add(new Field(ONTOLOGY_TERM_IRI));
 		columns.add(new Field(ONTOLOGY_LABEL));
 		columns.add(new Field(SYNONYMS));
+		columns.add(new Field(ENTITY_TYPE));
 		return columns;
 	}
 

@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonizationIndexer.plugin;
+package org.molgenis.omx.harmonizationIndexer.table;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +18,7 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 	private Database db;
 	private OntologyModel model;
 	private final String ONTOLOGY_URL = "url";
+	private final String ENTITY_TYPE = "entity_type";
 	private final String ONTOLOGY_LABEL = "ontologyLabel";
 
 	public OntologyTable(OntologyModel model, Database db)
@@ -34,6 +35,7 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(ONTOLOGY_URL, model.getOntologyIRI());
 		tuple.set(ONTOLOGY_LABEL, model.getOntologyLabel());
+		tuple.set(ENTITY_TYPE, "indexedOntology");
 		tuples.add(tuple);
 
 		return tuples.iterator();
@@ -57,6 +59,7 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 		List<Field> columns = new ArrayList<Field>();
 		columns.add(new Field(ONTOLOGY_URL));
 		columns.add(new Field(ONTOLOGY_LABEL));
+		columns.add(new Field(ENTITY_TYPE));
 		return columns;
 	}
 
