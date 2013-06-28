@@ -27,10 +27,9 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.omx.plugins.ProtocolViewerController;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.CatalogueLoaderPluginPlugin;
-import org.molgenis.ui.DataSetViewerPluginPlugin;
+import org.molgenis.ui.DataExplorerPluginPlugin;
 import org.molgenis.ui.StudyDefinitionLoaderPluginPlugin;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -81,13 +80,6 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimePropertyAuthentication.setValue("user");
 		database.add(runtimePropertyAuthentication);
 
-		RuntimeProperty runtimePropertyViewButton = new RuntimeProperty();
-		runtimePropertyViewButton.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
-				+ ProtocolViewerController.KEY_ACTION_VIEW);
-		runtimePropertyViewButton.setName(ProtocolViewerController.KEY_ACTION_VIEW);
-		runtimePropertyViewButton.setValue("false");
-		database.add(runtimePropertyViewButton);
-
 		String homeHtml = "<div class=\"container-fluid\">"
 				+ "<div class=\"row-fluid\">"
 				+ "<div class=\"span6\">"
@@ -114,21 +106,21 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 
 		MolgenisGroup groupDataManagers = createGroup(database, "dataManagers");
 		MolgenisGroup groupResearchers = createGroup(database, "researchers");
-		
+
 		MolgenisRoleGroupLink linkDatamanager = new MolgenisRoleGroupLink();
 		linkDatamanager.setGroup(groupDataManagers);
-		linkDatamanager.setRole(userDataManager);	
+		linkDatamanager.setRole(userDataManager);
 		linkDatamanager.setIdentifier(UUID.randomUUID().toString());
 		linkDatamanager.setName(UUID.randomUUID().toString());
 		database.add(linkDatamanager);
-		
+
 		MolgenisRoleGroupLink linkResearcher = new MolgenisRoleGroupLink();
 		linkResearcher.setGroup(groupResearchers);
-		linkResearcher.setRole(userResearcher);	
+		linkResearcher.setRole(userResearcher);
 		linkResearcher.setIdentifier(UUID.randomUUID().toString());
 		linkResearcher.setName(UUID.randomUUID().toString());
 		database.add(linkResearcher);
-		
+
 		MolgenisGroup allUsersGroup = null;
 		List<MolgenisUser> users = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME, Operator.EQUALS,
 				Login.USER_ANONYMOUS_NAME));
@@ -184,8 +176,8 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		}
 		else if ("workspace".equals(appProfile))
 		{
-			createPermission(database, DataSetViewerPluginPlugin.class, groupDataManagers, "read");
-			createPermission(database, DataSetViewerPluginPlugin.class, groupResearchers, "read");
+			createPermission(database, DataExplorerPluginPlugin.class, groupDataManagers, "read");
+			createPermission(database, DataExplorerPluginPlugin.class, groupResearchers, "read");
 			createPermission(database, StudyDefinitionLoaderPluginPlugin.class, groupDataManagers, "read");
 		}
 		else

@@ -87,12 +87,12 @@ public class AccountController
 		if (!ok) throw new DatabaseAccessException("Login failed: username or password unknown");
 	}
 
-	@RequestMapping(value = "/logout", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void logoutUser() throws Exception
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	public String logoutUser() throws Exception
 	{
 		database.getLogin().logout(database);
 		database.getLogin().reload(database);
+		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)

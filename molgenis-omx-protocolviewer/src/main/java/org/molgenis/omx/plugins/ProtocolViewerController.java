@@ -19,7 +19,6 @@ import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.omx.dataset.DataSetViewerPlugin;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.ApplicationContextProvider;
@@ -36,8 +35,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 	public static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
 	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
-	public static final String KEY_ACTION_VIEW = "plugin.catalogue.action.view";
-	private static final boolean DEFAULT_KEY_ACTION_VIEW = true;
 	public static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
 	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
 
@@ -149,41 +146,7 @@ public class ProtocolViewerController extends PluginModel<Entity>
 				excelWriter.close();
 			}
 		}
-		else if (request.getAction().equals("download_viewer"))
-		{
-			req.getRequest().getSession().setAttribute("selectedObservableFeatures", features);
 
-			String dataSetViewerName = this.getDataSetViewerName();
-			if (dataSetViewerName != null)
-			{
-				StringBuilder sb = new StringBuilder();
-				sb.append(req.getAppLocation());
-				sb.append("/molgenis.do?__target=").append(dataSetViewerName);
-				sb.append("&select=").append(dataSetViewerName);
-				sb.append("&__action=selectDataSet");
-				sb.append("&dataSetId=").append(dataSetId);
-				response.sendRedirect(sb.toString());
-			}
-		}
-
-	}
-
-	/*
-	 * Find the name of the DataSetViewer for user in a url. For now if there are multiple DataSetViewers it returns the
-	 * first Returns null if not found
-	 */
-	private String getDataSetViewerName()
-	{
-		ScreenController<?> menu = getParent();
-		for (ScreenController<?> controller : menu.getAllChildren())
-		{
-			if (controller instanceof DataSetViewerPlugin)
-			{
-				return controller.getName();
-			}
-		}
-
-		return null;
 	}
 
 	// TODO reload should throw DatabaseException
@@ -208,7 +171,6 @@ public class ProtocolViewerController extends PluginModel<Entity>
 
 		this.protocolViewer.setEnableDownloadAction(getMolgenisSettingFlag(KEY_ACTION_DOWNLOAD,
 				DEFAULT_KEY_ACTION_DOWNLOAD));
-		this.protocolViewer.setEnableViewAction(getMolgenisSettingFlag(KEY_ACTION_VIEW, DEFAULT_KEY_ACTION_VIEW));
 		this.protocolViewer.setEnableOrderAction(getMolgenisSettingFlag(KEY_ACTION_ORDER, DEFAULT_KEY_ACTION_ORDER));
 	}
 
