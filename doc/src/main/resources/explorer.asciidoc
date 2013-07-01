@@ -1,0 +1,21 @@
+OMX · introduction
+=======================
+OMX
+:title: OMX manual
+:description: Introduction into OMX
+:brand: MOLGENIS
+:doctype: book
+:toc:
+:glyphicons: http://glyphicons.com[Glyphicons]
+
+= Introduction
+
+todo
+
+= Wish list
+
+* upload data set immediately here
+* have a way to list view and select other datasets
+* join or union data sets
+* plot one data item
+* create two or more subsets and compare those
