@@ -1,0 +1,17 @@
+OMX · introduction
+=======================
+OMX
+:title: OMX manual
+:description: Introduction into OMX
+:brand: MOLGENIS
+:doctype: book
+:toc:
+:glyphicons: http://glyphicons.com[Glyphicons]
+
+= Introduction
+
+todo
+
+= Wish list
+
+* delete a data set (cascading delete dataset->observationset->value)
