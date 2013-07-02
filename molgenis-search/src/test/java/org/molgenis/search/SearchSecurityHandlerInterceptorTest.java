@@ -9,6 +9,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.framework.security.Login;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -24,6 +25,7 @@ public class SearchSecurityHandlerInterceptorTest
 	private ApplicationContext applicationContext;
 
 	private Login login;
+	private MolgenisSettings molgenisSettings;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -35,7 +37,19 @@ public class SearchSecurityHandlerInterceptorTest
 		applicationContext = mock(ApplicationContext.class);
 		new ApplicationContextProvider().setApplicationContext(applicationContext);
 		login = mock(Login.class);
+		molgenisSettings = mock(MolgenisSettings.class);
 		when(applicationContext.getBean(Login.class)).thenReturn(login);
+		when(applicationContext.getBean(MolgenisSettings.class)).thenReturn(molgenisSettings);
+	}
+
+	@Test
+	public void testPreHandleAllowAnonymous() throws Exception
+	{
+		when(molgenisSettings.getProperty(SearchSecurityHandlerInterceptor.KEY_ACTION_ALLOW_ANONYMOUS_SEARCH, "false"))
+				.thenReturn("true");
+		when(login.isAuthenticated()).thenReturn(false);
+		when(login.isLoginRequired()).thenReturn(false);
+		assertTrue(interceptor.preHandle(request, response, null));
 	}
 
 	@Test
