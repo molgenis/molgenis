@@ -36,16 +36,21 @@ Alternatively you can configure molgenis compute stepwise:
 
 Download MOLGENIS compute as binary zip, see http://www.molgenis.org/wiki/ComputeStart for latest:
 
-	wget http://www.molgenis.org/releases/compute/molgenis-compute-5.x.x.zip
-	unzip molgenis-compute-5.x.x.zip
-	export PATH=$PATH:molgenis-compute-5.x.x
-
+	wget http://molgenis26.target.rug.nl/downloads/molgenis_compute-latest.zip
+	unzip molgenis_compute-latest.zip
+	cd molgenis-compute-core-0.0.1-SNAPSHOT
+	export PATH=${PATH}:${PWD}
+	cd ..
+	
 Run your first workflow example on your local machine
 
-	mkdir demo1
-	cd demo1
-	cp -R ../molgenis-compute-5.x.x/demo1 .
-	molgenis -w workflow.csv -p parameters.csv -b local
+	( Not available yet. Please follow the example below	)
+	( in Section '1. Design a workflow' instead				)
+	(														)
+	( mkdir demo1											)
+	( cd demo1												)
+	( cp -R ../molgenis-compute-5.x.x/demo1 .				)
+	( molgenis -w workflow.csv -p parameters.csv -b local	)
 
 Below details how to run.
 
@@ -64,6 +69,10 @@ Create a new workflow directory using:
 	
 	molgenis --create myworkflow
 	cd myworkflow
+	
+Generate your first workflow example on your local machine:
+
+	molgenis_compute.sh -w workflow.csv -p parameters.csv -b local
 
 Download example workflows:
 
