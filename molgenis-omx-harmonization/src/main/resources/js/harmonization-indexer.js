@@ -4,22 +4,83 @@
 	var ns = w.molgenis = w.molgenis || {};
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
+	var selectedDataSet = null;
+	var offSet = 1;
+	var currentPage = 1;
+	var pager = 10;
+	var totalPage = 0;
 	
-	ns.searchAvailableIndices = function(runningIndexUri) {
+	ns.changeDataSet = function(selectedDataSet){
+		resetVariables();
+		ns.updateSelectedDataset(selectedDataSet);
+		ns.createMatrixForDataItems();
+		function resetVariables(){
+			offSet = 1;
+			currentPage = 1;
+		}
+	};
+	
+	ns.createMatrixForDataItems = function() {
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
+			createTableHeader();
 			var searchHits = searchResponse.searchHits;
-			if(searchHits.length > 0){
-				$.each(searchHits, function(){
-					var ontologyInfo = $(this)[0]["columnValueMap"];
-					var ontologyUri = ontologyInfo.url;
-					var status = "Indexed";
-					if(runningIndexUri !== null && ontologyUri === runningIndexUri){
-						status = "Being indexed ...";
-					}
-					$('#ontology-table').append('<tr><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
-				});
-			}
+			$.each(searchHits, function(){
+				var feature = $(this)[0]["columnValueMap"];
+				$('#dataitem-table').append('<tr><td>' + feature.name + '</td><td>' + feature.description + '</td><td></td></tr>');
+			});
+			totalPage = Math.ceil(searchResponse.totalHitCount / pager) - 1;
+			ns.updateMatrixPagination();
 		});
+		
+		function createTableHeader(){
+			$('#dataitem-table').empty();
+			$('#dataitem-table').append('<tr><th>Name</th><th>Description</th><th>Annotation</th></tr>');
+		}
+	};
+	
+	ns.updateMatrixPagination = function() {
+		if(totalPage !== 0){
+			$('.pagination ul').empty();
+			$('.pagination ul').append('<li><a href="#">Prev</a></li>');
+			var displayedPage = (totalPage < 10 ? totalPage : 9) + offSet; 
+			for(var i = offSet; i <= displayedPage ; i++){
+				var element = $('<li />');
+				if(i == currentPage)
+					element.addClass('active');
+				element.append('<a href="/">' + i + '</a>');
+				$('.pagination ul').append(element);
+			}
+			var lastPage = totalPage + 1 > 10 ? totalPage + 1 : 10;
+			if(totalPage - offSet > 9){
+				$('.pagination ul').append('<li class="active"><a href="#">...</a></li>');
+				$('.pagination ul').append('<li><a href="#">' + lastPage + ' </a></li>');
+			}
+			$('.pagination ul').append('<li><a href="#">Next</a></li>');
+			$('.pagination ul li').each(function(){
+				$(this).click(function(){
+					var pageNumber = $(this).find('a').html();
+					if(pageNumber === "Prev"){
+						if(currentPage > offSet) currentPage--;
+						else if(offSet > 1) {
+							offSet--;
+							currentPage--;	
+						}
+					}else if(pageNumber === "Next"){
+						if(currentPage <= totalPage) {
+							currentPage++;
+							if(currentPage >= offSet + 9) offSet++;
+						}
+					}else if(pageNumber !== "..."){
+						currentPage = parseInt(pageNumber);
+						if(currentPage > offSet + 9){
+							offSet = currentPage - 9;
+						} 
+					}
+					ns.createMatrixForDataItems();
+					return false;
+				});
+			});
+		}
 	};
 	
 	ns.createSearchRequest = function() {
@@ -27,34 +88,30 @@
 		//todo: how to unlimit the search result
 		queryRules.push({
 			operator : 'LIMIT',
-			value : 1000000
+			value : pager
+		});
+		queryRules.push({
+			operator : 'OFFSET',
+			value : (currentPage - 1) * pager
 		});
 		queryRules.push({
 			operator : 'SEARCH',
-			value : 'indexedOntology'
+			value : 'observablefeature'
 		});
-		
 		var searchRequest = {
-			documentType : null,
+			documentType : 'protocolTree-' + getSelectedDataSet(),
 			queryRules : queryRules
 		};
 		return searchRequest;
 	};
 	
-	ns.indexerApi = function(callback) {
-		$.ajax({
-			type : 'POST',
-			url : '/plugin/ontologyindexer?_method=GET',
-			data : JSON.stringify({
-				
-			}),
-			contentType : 'application/json',
-			async : false,
-			success : function(entities) {
-				callback(entities);
-			}
-		});
+	ns.updateSelectedDataset = function(dataSet) {
+		selectedDataSet = dataSet;
 	};
+	
+	function getSelectedDataSet(){
+		return selectedDataSet;
+	}
 	
 	$(function() {
 		$('#index-button').click(function(){

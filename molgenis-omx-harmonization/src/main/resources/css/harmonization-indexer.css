@@ -29,3 +29,13 @@
 h5 {
 	padding-left : 10px;
 }
+
+.data-table-container {
+	overflow: auto;
+	white-space: nowrap;
+}
+
+.table thead th {
+    background-color: #5B82A4; 
+    color: white;
+}
