@@ -350,12 +350,26 @@ You can use the following methods to standardize file management. (TODO: describ
 
 ### Standard tool management
 
-In addition we recommend use of the 'module' system to standardize tool installation and management. See [ref].
+MOLGENIS Compute does not handle tool dependencies. Hence when you want to execute an application, you will need to
+* either provide the complete path to that application optionally as a parameter (not recommended)
+* or modify your evironment, so the application can be found without specifying the absolute path (recommended)
 
-	module load $mytool 	#load $mytool before use
-	$mytool					#execute $mytool
+We recommend the [Environment Modules](http://modules.sourceforge.net/) system for standardizing tool installation and management.
+When your tool was installed and a module file was deployed for use with the Environment Modules system, you can use the `module` command to modify the environment for that tool:
 
-See [WHERE?] for pre-configured modules to use.
+	module avail				# Get a list of available tools and their versions.
+	module load $mytool 			# Load $mytool before use without specifying a specific version.
+	module load $mytool/$myversion		# Request a specific version of $mytool.
+	module list				# List currently loaded modules.
+	$mytool					# Execute $mytool.
+
+In order to be able to trace back which version of which tool was used for a specific analysis, we recommend to always use:
+
+	module load $mytool/$myversion		# Request a specific version of $mytool.
+	module list				# List currently loaded modules.
+
+in your protocols and to capture STDOUT into a log file. The `module list` command will then make sure the names and version numbers of all tools used in the analysis are listed in your logs.
+See the [Environment Modules](http://modules.sourceforge.net/) system [documentation](http://modules.sourceforge.net/man/module.html) for instructions on how to create and deploy modules.
 
 ### Standard fail logging
 Many commandline tools don't use out and error streams properly. Therefore, we also provide standard 'fail' logging methods which MOLGENIS will pick-up in monitoring.

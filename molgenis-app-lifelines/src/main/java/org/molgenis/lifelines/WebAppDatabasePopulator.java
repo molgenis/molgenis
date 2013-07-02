@@ -27,6 +27,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.search.SearchSecurityHandlerInterceptor;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.CatalogueLoaderPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
@@ -173,6 +174,14 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		if ("website".equals(appProfile))
 		{
 			createPermission(database, CatalogueLoaderPluginPlugin.class, userDataManager, "read");
+
+			RuntimeProperty runtimePropertyAllowAnonymousSearch = new RuntimeProperty();
+			runtimePropertyAllowAnonymousSearch.setIdentifier(RuntimeProperty.class.getSimpleName() + '_'
+					+ SearchSecurityHandlerInterceptor.KEY_ACTION_ALLOW_ANONYMOUS_SEARCH);
+			runtimePropertyAllowAnonymousSearch
+					.setName(SearchSecurityHandlerInterceptor.KEY_ACTION_ALLOW_ANONYMOUS_SEARCH);
+			runtimePropertyAllowAnonymousSearch.setValue("true");
+			database.add(runtimePropertyAllowAnonymousSearch);
 		}
 		else if ("workspace".equals(appProfile))
 		{
