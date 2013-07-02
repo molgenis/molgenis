@@ -6,7 +6,7 @@ import java.util.Properties;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.omx.harmonizationIndexer.config.HarmonizationIndexerConfig;
+import org.molgenis.omx.harmonization.config.HarmonizationConfig;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
@@ -42,7 +42,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, HarmonizationIndexerConfig.class,
+{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, HarmonizationConfig.class,
 		DataExplorerConfig.class, SearchSecurityConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
