@@ -28,11 +28,6 @@ exitWithError(){
 # For bookkeeping how long your task takes
 MOLGENIS_START=$(date +%s)
 
-# Skip this step if step finished already successfully
-if [ -f $ENVIRONMENT_DIR/${taskId}.sh.finished ]; then
-	exitWithError 0 "Skipped."
-fi
-
 # Show that the task has started
 touch $ENVIRONMENT_DIR/${taskId}.sh.started
 
