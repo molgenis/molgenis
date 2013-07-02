@@ -17,8 +17,10 @@ import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.servlet.GuiService;
+import org.molgenis.ui.ContactPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
 import org.molgenis.ui.ProtocolViewerControllerPlugin;
+import org.molgenis.ui.ReferencesPluginPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,8 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimePropertyMap.put("app.background", "There is no background information");
 		runtimePropertyMap.put("app.news", "There is no news ");
 		runtimePropertyMap.put("app.href.css", "");
+		runtimePropertyMap.put("app.references", "There are no references");
+		runtimePropertyMap.put("app.contact", "There is no contact information");
 
 		Login login = database.getLogin();
 		database.setLogin(null);
@@ -83,6 +87,8 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		}
 
 		// Set plugin permissions
+		createPermission(database, ContactPluginPlugin.class, groupName, "read");
+		createPermission(database, ReferencesPluginPlugin.class, groupName, "read");
 		createPermission(database, DataExplorerPluginPlugin.class, groupName, "read");
 		createPermission(database, ProtocolViewerControllerPlugin.class, groupName, "read");
 
