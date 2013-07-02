@@ -173,7 +173,7 @@
 								<minPortNumber>8080</minPortNumber>
 								<portNames>
 									<portName>jetty.http.port</portName>
-									<portName>selenium.server.port</portName>
+									<portName>selenium.http.port</portName>
 								</portNames>
 							</configuration>
 						</execution>
@@ -266,7 +266,7 @@
 										<maxIdleTime>60000</maxIdleTime>
 									</connector>
 								</connectors>
-							</configuration>
+							</configuration> 
 						</execution>
 						<execution>
 							<id>stop-jetty</id>
