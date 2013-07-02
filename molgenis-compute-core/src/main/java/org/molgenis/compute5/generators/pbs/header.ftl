@@ -34,7 +34,6 @@ touch $ENVIRONMENT_DIR/${taskId}.sh.started
 # Define the root to all your tools and data
 WORKDIR=/target/gpfs2/gcc/
 
-
 # Source getFile, putFile, inputs, alloutputsexist
 include () {
 	if [[ -f "$1" ]]; then
@@ -44,6 +43,82 @@ include () {
 		echo "File not found: $1"
 	fi		
 }
+
 include $WORKDIR/gcc.bashrc
-include $WORKDIR/tools/scripts/transferData.sh
-include $WORKDIR/tools/scripts/import.sh
+
+<#noparse>
+getFile()
+{
+        ARGS=($@)
+        NUMBER="${#ARGS[@]}";
+        if [ "$NUMBER" -eq "1" ]
+        then
+                myFile=${ARGS[0]}
+
+                if test ! -e $myFile;
+                then
+                                echo "WARNING in getFile/putFile: $myFile is missing" 1>&2
+                fi
+
+        else
+                echo "Example usage: getData \"\$TMPDIR/datadir/myfile.txt\""
+        fi
+}
+
+putFile()
+{
+        `getFile $@`
+}
+
+inputs()
+{
+  for name in $@
+  do
+    if test ! -e $name;
+    then
+      echo "$name is missing" 1>&2
+      exit 1;
+    fi
+  done
+}
+
+outputs()
+{
+  for name in $@
+  do
+    if test -e $name;
+    then
+      echo "skipped"
+      echo "skipped" 1>&2
+      exit 0;
+    else
+      return;
+    fi
+  done
+}
+
+alloutputsexist()
+{
+  all_exist=true
+  for name in $@
+  do
+    if test ! -e $name;
+    then
+        all_exist=false
+    fi
+  done
+  if $all_exist;
+  then
+      echo "skipped"
+      echo "skipped" 1>&2
+      sleep 30
+      exit 0;
+  else
+      return;
+  fi
+}
+</#noparse>
+
+#
+## End of header for PBS backend
+#
