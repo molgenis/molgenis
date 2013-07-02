@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonizationIndexer.plugin;
+package org.molgenis.omx.ontologyIndexer.plugin;
 
 import java.io.File;
 
@@ -9,7 +9,6 @@ import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 {
@@ -21,6 +20,7 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 	public HarmonizationIndexerPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
+		this.model = new HarmonizationModel();
 	}
 
 	@Override
@@ -61,14 +61,8 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 				File file = request.getFile("uploadedOntology");
 				getHarmonizationIndexer().index(file);
 			}
-			catch (OWLOntologyCreationException e)
-			{
-				model.setErrorMessage("Failed to load ontology");
-				e.printStackTrace();
-			}
 			catch (TableException e)
 			{
-				model.setErrorMessage("Failed to create index");
 				e.printStackTrace();
 			}
 		}
@@ -77,8 +71,9 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 	@Override
 	public void reload(Database db)
 	{
-		this.model = new HarmonizationModel();
-		this.model.setOntologyUri(getRunningIndex());
+		this.model.setOntologyUri(getOntologyUri());
+		this.model.setStartProcess(isIndexingRunning());
+		this.model.setCorrectOntology(isCorrectOntology());
 	}
 
 	private HarmonizationIndexer getHarmonizationIndexer()
@@ -86,8 +81,18 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 		return ApplicationContextProvider.getApplicationContext().getBean(HarmonizationIndexer.class);
 	}
 
-	public String getRunningIndex()
+	public boolean isIndexingRunning()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(HarmonizationIndexer.class).getOntologyUri();
+		return getHarmonizationIndexer().isIndexingRunning();
+	}
+
+	public boolean isCorrectOntology()
+	{
+		return getHarmonizationIndexer().isCorrectOntology();
+	}
+
+	public String getOntologyUri()
+	{
+		return getHarmonizationIndexer().getOntologyUri();
 	}
 }

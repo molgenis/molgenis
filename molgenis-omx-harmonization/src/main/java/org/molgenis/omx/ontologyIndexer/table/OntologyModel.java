@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonizationIndexer.controller;
+package org.molgenis.omx.ontologyIndexer.table;
 
 import java.io.File;
 import java.util.ArrayList;

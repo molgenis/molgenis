@@ -1,13 +1,13 @@
-package org.molgenis.omx.harmonizationIndexer.plugin;
+package org.molgenis.omx.ontologyIndexer.plugin;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
-import org.molgenis.omx.harmonizationIndexer.controller.OntologyModel;
-import org.molgenis.omx.harmonizationIndexer.table.OntologyTable;
-import org.molgenis.omx.harmonizationIndexer.table.OntologyTermTable;
+import org.molgenis.omx.ontologyIndexer.table.OntologyModel;
+import org.molgenis.omx.ontologyIndexer.table.OntologyTable;
+import org.molgenis.omx.ontologyIndexer.table.OntologyTermTable;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.DatabaseUtil;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -19,6 +19,7 @@ public class AsyncHarmonizationIndexer implements HarmonizationIndexer, Initiali
 {
 	private SearchService searchService;
 	private String ontologyUri = null;
+	private boolean isCorrectOntology = true;
 
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
@@ -43,6 +44,7 @@ public class AsyncHarmonizationIndexer implements HarmonizationIndexer, Initiali
 	@Async
 	public void index(File ontologyFile)
 	{
+		isCorrectOntology = true;
 		runningIndexProcesses.incrementAndGet();
 		Database db = DatabaseUtil.createDatabase();
 
@@ -55,6 +57,7 @@ public class AsyncHarmonizationIndexer implements HarmonizationIndexer, Initiali
 		}
 		catch (OWLOntologyCreationException e)
 		{
+			isCorrectOntology = false;
 			e.printStackTrace();
 		}
 		finally
@@ -68,5 +71,11 @@ public class AsyncHarmonizationIndexer implements HarmonizationIndexer, Initiali
 	public String getOntologyUri()
 	{
 		return ontologyUri;
+	}
+
+	@Override
+	public boolean isCorrectOntology()
+	{
+		return this.isCorrectOntology;
 	}
 }
