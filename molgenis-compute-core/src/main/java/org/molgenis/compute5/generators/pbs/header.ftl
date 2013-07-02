@@ -8,7 +8,7 @@
 #PBS -W umask=0007
 
 #
-## General header
+## Header for PBS backend
 #
 
 set -e # exit if any subcommand or pipeline returns a non-zero status

@@ -1,5 +1,5 @@
 #
-## General header
+## Header for 'local' backend
 #
 
 set -e # exit if any subcommand or pipeline returns a non-zero status
