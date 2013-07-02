@@ -16,7 +16,6 @@ a img {
 
 #container {
 	position:relative; /* needed for footer positioning*/
-	height:100%;
 	width: 98%;
 	border-spacing: 5px;
 	margin: 0 auto 0 auto;
