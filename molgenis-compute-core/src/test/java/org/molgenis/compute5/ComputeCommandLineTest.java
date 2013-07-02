@@ -33,6 +33,14 @@ public class ComputeCommandLineTest
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
+		File f = new File("src/main/resources/workflows/benchmark/run");
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
 		ComputeCommandLine.main(new String[]{
 				"--generate", "--run", "--workflow", "src/main/resources/workflows/benchmark/workflow.csv",
 						"--defaults", "src/main/resources/workflows/benchmark/workflow.defaults.csv",
