@@ -29,9 +29,9 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testCommandLineParametersVSComputeProperties() throws ParseException, IOException, ClassNotFoundException
+	public void testCommandLineParametersComputePropertiesFilesCreated() throws ParseException, IOException, ClassNotFoundException
 	{
-		System.out.println("--- Start TestCommandLineParametersVSComputeProperties ---");
+		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
 		ComputeCommandLine.main(new String[]{
 				"--generate", "--run", "--workflow", "src/main/resources/workflows/benchmark/workflow.csv",
@@ -42,6 +42,7 @@ public class ComputeCommandLineTest
 						"--database","none"});
 
 
+		System.out.println("--- Test Compute Properties ---");
 		String resultProperties =  getFileAsString(".compute.properties");
 
 		if(!resultProperties.contains("rundir=src/main/resources/workflows/benchmark/run"))
@@ -68,6 +69,48 @@ public class ComputeCommandLineTest
 		{
 			Assert.fail("backend parameter is failed");
 		}
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File("src/main/resources/workflows/benchmark/run/step1_0.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/step1_1.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/step2_0.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/submit.sh");
+		if (!file.exists())
+		{
+			Assert.fail("submit.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/user.env");
+		if (!file.exists())
+		{
+			Assert.fail("user.env is not generated");
+		}
+
+		System.out.println("Test correct headers insertion");
+
+		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
+
+		if(!script.contains("# My own custom header"))
+		{
+			Assert.fail("headers/footers are not correctly inserted");
+		}
+
 
 	}
 
