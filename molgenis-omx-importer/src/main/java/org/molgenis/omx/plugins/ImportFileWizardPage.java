@@ -12,7 +12,10 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.omx.dataset.DataSetImporter;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ApplicationUtil;
+import org.molgenis.util.DataSetImportedEvent;
 
 public class ImportFileWizardPage extends WizardPage
 {
@@ -46,7 +49,8 @@ public class ImportFileWizardPage extends WizardPage
 			if (entityDbAction == null) throw new IOException("unknown database action: " + entityAction);
 
 			// import entities
-			EntityImportReport importReport = ApplicationUtil.getEntitiesImporter().importEntities(file, entityDbAction);
+			EntityImportReport importReport = ApplicationUtil.getEntitiesImporter()
+					.importEntities(file, entityDbAction);
 			importWizard.setImportResult(importReport);
 
 			// import dataset instances
@@ -76,6 +80,18 @@ public class ImportFileWizardPage extends WizardPage
 
 			logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityAction + "]", e);
 			importWizard.setValidationMessage("<b>Your import failed:</b><br />" + e.getMessage());
+		}
+
+		// publish dataset imported event(s)
+		try
+		{
+			for (DataSet dataSet : db.find(DataSet.class))
+				ApplicationContextProvider.getApplicationContext().publishEvent(
+						new DataSetImportedEvent(this, dataSet.getId()));
+		}
+		catch (DatabaseException e)
+		{
+			logger.error("Error publishing " + DataSet.class.getSimpleName() + " imported event(s)");
 		}
 	}
 
