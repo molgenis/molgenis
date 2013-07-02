@@ -161,8 +161,22 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.7</version>
+					<version>1.8</version>
 					<executions>
+						<execution>
+							<id>reserve-network-port</id>
+							<goals>
+								<goal>reserve-network-port</goal>
+							</goals>
+							<phase>process-resources</phase>
+							<configuration>
+								<minPortNumber>8080</minPortNumber>
+								<portNames>
+									<portName>jetty.http.port</portName>
+									<portName>selenium.server.port</portName>
+								</portNames>
+							</configuration>
+						</execution>
 						<execution>
 							<id>execution-molgenis-generator</id>
 							<phase>generate-sources</phase>
@@ -233,7 +247,7 @@
 							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
 								<resourcesAsCSV>${basedir}/src/main/webapp,${basedir}/target/generated-sources/molgenis/doc</resourcesAsCSV>
 							</baseResource>
-						</webAppConfig> 
+						</webAppConfig>
 					</configuration>
 					<!-- use jetty to run integration tests  -->
 					<executions>
@@ -246,6 +260,12 @@
 							<configuration>
 								<scanIntervalSeconds>0</scanIntervalSeconds>
 								<daemon>true</daemon>
+								<connectors>
+									<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+										<port>${selenium.http.port}</port>
+										<maxIdleTime>60000</maxIdleTime>
+									</connector>
+								</connectors>
 							</configuration>
 						</execution>
 						<execution>
