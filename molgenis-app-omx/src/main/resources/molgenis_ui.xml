@@ -4,7 +4,10 @@
 	<menu name="main">
 		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
 		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
-		<plugin label="Harmonization" name="HarmonizationPlugin" type="org.molgenis.omx.harmonizationIndexer.plugin.HarmonizationIndexerPlugin"/>
+		<menu name="HarmonizationPlatform" label="Harmonization platform">
+			<plugin label="OntologyIndexer" name="OntologyIndexer" type="org.molgenis.omx.ontologyIndexer.plugin.OntologyIndexerPlugin"/>
+			<plugin label="Harmonization" name="Harmonization" type="org.molgenis.omx.harmonization.plugin.HarmonizationPlugin"/>
+		</menu>
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
 		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
