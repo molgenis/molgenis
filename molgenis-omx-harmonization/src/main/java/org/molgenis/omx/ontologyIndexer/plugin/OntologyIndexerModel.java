@@ -2,7 +2,7 @@ package org.molgenis.omx.ontologyIndexer.plugin;
 
 import java.io.Serializable;
 
-public class HarmonizationModel implements Serializable
+public class OntologyIndexerModel implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 

@@ -10,23 +10,23 @@ import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 
-public class HarmonizationIndexerPlugin extends PluginModel<Entity>
+public class OntologyIndexerPlugin extends PluginModel<Entity>
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private HarmonizationModel model;
+	private OntologyIndexerModel model;
 
-	public HarmonizationIndexerPlugin(String name, ScreenController<?> parent)
+	public OntologyIndexerPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
-		this.model = new HarmonizationModel();
+		this.model = new OntologyIndexerModel();
 	}
 
 	@Override
 	public String getViewTemplate()
 	{
-		return "templates/" + HarmonizationIndexerPlugin.class.getName().replace('.', '/') + ".ftl";
+		return "templates/" + OntologyIndexerPlugin.class.getName().replace('.', '/') + ".ftl";
 	}
 
 	@Override
@@ -43,10 +43,10 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 	@Override
 	public String getViewName()
 	{
-		return "HarmonizationIndexerPlugin";
+		return "OntologyIndexerPlugin";
 	}
 
-	public HarmonizationModel getMyModel()
+	public OntologyIndexerModel getMyModel()
 	{
 		return model;
 	}
@@ -76,9 +76,9 @@ public class HarmonizationIndexerPlugin extends PluginModel<Entity>
 		this.model.setCorrectOntology(isCorrectOntology());
 	}
 
-	private HarmonizationIndexer getHarmonizationIndexer()
+	private OntologyIndexer getHarmonizationIndexer()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(HarmonizationIndexer.class);
+		return ApplicationContextProvider.getApplicationContext().getBean(OntologyIndexer.class);
 	}
 
 	public boolean isIndexingRunning()

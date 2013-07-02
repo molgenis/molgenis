@@ -1,4 +1,4 @@
-<#macro HarmonizationIndexerPlugin screen>
+<#macro OntologyIndexerPlugin screen>
 <#assign model = screen.myModel>
 	<script>
 		$(function(){

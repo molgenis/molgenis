@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.molgenis.framework.tupletable.TableException;
 
-public interface HarmonizationIndexer
+public interface OntologyIndexer
 {
 	void index(File file) throws TableException;
 

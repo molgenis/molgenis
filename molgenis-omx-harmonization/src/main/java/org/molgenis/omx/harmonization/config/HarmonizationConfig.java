@@ -1,7 +1,7 @@
 package org.molgenis.omx.harmonization.config;
 
-import org.molgenis.omx.ontologyIndexer.plugin.AsyncHarmonizationIndexer;
-import org.molgenis.omx.ontologyIndexer.plugin.HarmonizationIndexer;
+import org.molgenis.omx.ontologyIndexer.plugin.AsyncOntologyIndexer;
+import org.molgenis.omx.ontologyIndexer.plugin.OntologyIndexer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -16,8 +16,8 @@ public class HarmonizationConfig
 	 * @return HarmonizationIndexer
 	 */
 	@Bean
-	public HarmonizationIndexer harmonizationIndexer()
+	public OntologyIndexer harmonizationIndexer()
 	{
-		return new AsyncHarmonizationIndexer();
+		return new AsyncOntologyIndexer();
 	}
 }

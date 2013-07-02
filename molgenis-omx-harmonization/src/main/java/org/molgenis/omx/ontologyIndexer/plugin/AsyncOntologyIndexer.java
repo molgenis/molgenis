@@ -15,7 +15,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
-public class AsyncHarmonizationIndexer implements HarmonizationIndexer, InitializingBean
+public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 {
 	private SearchService searchService;
 	private String ontologyUri = null;
