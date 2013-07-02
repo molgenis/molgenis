@@ -1,0 +1,29 @@
+/**color of title*/
+.colorOfTitle,#header {
+	color: #FF7D00;
+}
+
+/**shade header*/
+.shadeHeader,.leftNavigationSelected,.navigationSelected,.form_header, td.submenuitem:hover {
+	background: #FF7D00;
+}
+
+/**shade borders*/
+.shadeBorder,.leftNavigationSelected,.navigationSelected,.formscreen,.form_new,.form_filter,.popup, .form_menu 
+{
+	border-color: #FF7D00;
+}
+
+/**highlight*/
+.highlight,.leftNavigationNotSelected,.navigationNotSelected, .form_menu, .submenuitem   {
+	background: #BDCDDA;
+	color: black;
+}
+
+.matrixRowColor0,.form_listrow0 {
+	background: #FF7D00;
+}
+
+.matrixRowColor1,.form_listrow1 {
+	background: #FF7D00;
+}
