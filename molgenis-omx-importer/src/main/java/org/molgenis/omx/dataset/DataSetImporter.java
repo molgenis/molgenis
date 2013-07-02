@@ -21,8 +21,6 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.DataSetImportedEvent;
 import org.molgenis.util.tuple.Tuple;
 
 public class DataSetImporter
@@ -148,9 +146,6 @@ public class DataSetImporter
 				if (++rownr % transactionRows == 0) db.commitTx();
 			}
 			if (rownr % transactionRows != 0) db.commitTx();
-
-			ApplicationContextProvider.getApplicationContext().publishEvent(
-					new DataSetImportedEvent(this, dataSet.getId()));
 		}
 		catch (DatabaseException e)
 		{
