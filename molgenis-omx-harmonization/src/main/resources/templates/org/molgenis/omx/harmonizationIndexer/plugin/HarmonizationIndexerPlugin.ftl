@@ -7,6 +7,14 @@
 				ontologyUri = "${model.ontologyUri}"; 
 			</#if>
 			molgenis.searchAvailableIndices(ontologyUri);
+			
+			var isRunningIndex = false;
+			<#if model.isStartProcess()>
+				isRunningIndex = true;
+			</#if>
+			if(isRunningIndex){
+				$('#index-button').attr('disabled','disabled');
+			}
 		});
 	</script>
 <form method="post" id="harmonizationIndexer-form" name="${screen.name}" enctype="multipart/form-data" action="molgenis.do">
@@ -14,6 +22,20 @@
 	<input type="hidden" name="__target" value="${screen.name}">
 	<input type="hidden" name="__action">
 	<div class="formscreen">
+		<div class="form_header" id="${screen.name}">
+			${screen.label}
+		</div>
+		<#if !model.isCorrectOntology()> 
+			<div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+		  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
+			</div>
+		<#elseif model.isStartProcess()>
+			<div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+		  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
+			</div>
+		</#if>
 		<div class="screenbody">
 			<div class="container-fluid">
 				<div class="row-fluid">
@@ -46,7 +68,7 @@
 											<span class="btn btn-file btn-info">
 												<span class="fileupload-new">Select file</span>
 												<span class="fileupload-exists">Change</span>
-												<input type="file" id="uploadedOntology" name="uploadedOntology"/>
+												<input type="file" id="uploadedOntology" name="uploadedOntology" />
 											</span>
 											<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
 										</div>

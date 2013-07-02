@@ -13,7 +13,7 @@
 					var ontologyInfo = $(this)[0]["columnValueMap"];
 					var ontologyUri = ontologyInfo.url;
 					var status = "Indexed";
-					if(runningIndexUri !== null){
+					if(runningIndexUri !== null && ontologyUri === runningIndexUri){
 						status = "Being indexed ...";
 					}
 					$('#ontology-table').append('<tr><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
@@ -58,7 +58,14 @@
 	
 	$(function() {
 		$('#index-button').click(function(){
-			$('input[name="__action"]').val("indexOntology");
+			if($('#uploadedOntology').val() !== ''){
+				$('input[name="__action"]').val("indexOntology");
+				$('#harmonizationIndexer-form').submit();
+			}else{
+				alert('Please upload a file in OWL or OBO format!');
+			}
+		});
+		$('#refresh-button').click(function(){
 			$('#harmonizationIndexer-form').submit();
 		});
 	});
