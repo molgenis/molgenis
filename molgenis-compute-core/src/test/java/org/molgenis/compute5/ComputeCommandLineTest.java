@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class ComputeCommandLineTest
 {
 	@Test
-	public void testHelp1()
+	public void testHelp()
 	{
 		try
 		{
@@ -26,6 +26,27 @@ public class ComputeCommandLineTest
 			Assert.fail("compute -h does not work");
 		}
 
+	}
+
+	@Test
+	public void testClear()
+	{
+		try
+		{
+			ComputeCommandLine.main(new String[]{"--clear"});
+
+			File f = new File(".compute.properties");
+
+			if(f.exists())
+			{
+				Assert.fail(".compute.properties is not deleted");
+			}
+
+		}
+		catch (Exception e)
+		{
+			Assert.fail("compute --clear does not work");
+		}
 	}
 
 	@Test
@@ -47,7 +68,10 @@ public class ComputeCommandLineTest
 						"--parameters","src/main/resources/workflows/benchmark/parameters.csv",
 						"--rundir","src/main/resources/workflows/benchmark/run",
 						"--backend","pbs",
-						"--database","none"});
+						"--database","none",
+						"-header", "src/main/resources/workflows/benchmark/header.ftl",
+						"-footer", "src/main/resources/workflows/benchmark/footer.ftl"
+						});
 
 
 		System.out.println("--- Test Compute Properties ---");
@@ -110,14 +134,19 @@ public class ComputeCommandLineTest
 			Assert.fail("user.env is not generated");
 		}
 
-//		System.out.println("Test correct headers insertion");
-//
-//		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
-//
-//		if(!script.contains("# My own custom header"))
-//		{
-//			Assert.fail("headers/footers are not correctly inserted");
-//		}
+		System.out.println("--- Test correct headers insertion ---");
+
+		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
+
+		if(!script.contains("# My own custom header"))
+		{
+			Assert.fail("header is not correctly inserted");
+		}
+
+		if(!script.contains("# My own custom footer"))
+		{
+			Assert.fail("footer is not correctly inserted");
+		}
 	}
 
 	@Test
@@ -203,13 +232,18 @@ public class ComputeCommandLineTest
 			Assert.fail("user.env is not generated");
 		}
 
-		System.out.println("Test correct headers insertion");
+		System.out.println("--- Test correct headers insertion ---");
 
 		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
 
 		if(!script.contains("# My own custom header"))
 		{
-			Assert.fail("headers/footers are not correctly inserted");
+			Assert.fail("header is not correctly inserted");
+		}
+
+		if(!script.contains("# My own custom footer"))
+		{
+			Assert.fail("footer is not correctly inserted");
 		}
 	}
 

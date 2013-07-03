@@ -42,6 +42,8 @@ public class ComputeProperties
 	public String user = "user name unknown";
 	public String pass = "password unknown";
 
+
+
 	// parameters not stored in compute.properties file:
 	public boolean showHelp = false; // show help?
 	public boolean databaseStart = false; // start db?
@@ -49,6 +51,7 @@ public class ComputeProperties
 	public boolean generate = false; // should we generate?
 	public boolean list = false; // should we list currently generated jobs?
 	public boolean create = false;
+	public boolean clear = false;
 	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean execute = false; // does user want to execute scripts?
 
@@ -305,6 +308,8 @@ public class ComputeProperties
 					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
 							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
 
+			this.clear = cmd.hasOption(Parameters.CLEAR);
+
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			// if runId == null then create one
 			if (null == this.runId)
@@ -475,6 +480,8 @@ public class ComputeProperties
 				.hasArg()
 				.withLongOpt(Parameters.PASS_CMNDLINE)
 				.create(Parameters.PASS_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("Clear properties file").withLongOpt(Parameters.CLEAR)
+				.create(Parameters.CLEAR));
 
 		return options;
 	}
