@@ -84,7 +84,7 @@ public class Parameters
 	public static final String INTERVAL = "interval";
 	public static final String INTERVAL_DEFAULT = "2000";
 	public static final String INTERVAL_CMNDLINE_OPTION = "interval";
-	public static final String PROPERTIES = "compute.properties";
+	public static final String PROPERTIES = ".compute.properties";
 	public static final String GENERATE = "generate";
 	public static final String GENERATE_CMNDLINE_OPTION = "g";
 	public static final String LIST = "list";

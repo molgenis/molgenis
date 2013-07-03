@@ -33,6 +33,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<repositories>
+	  <repository>
+	    <id>enonic</id>
+	    <url>http://repo.enonic.com/artifactory/public/</url>
+	  </repository>
+	</repositories>
+
 	<build>
 		<!-- include *.ftl in src folder -->
 		<resources>
@@ -453,6 +460,7 @@
 				<configuration>
 					<!-- improve report generation performance -->
 					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+					<project.remoteArtifactRepositories>enonic</project.remoteArtifactRepositories>
 				</configuration>
 			</plugin>
 		</plugins>
