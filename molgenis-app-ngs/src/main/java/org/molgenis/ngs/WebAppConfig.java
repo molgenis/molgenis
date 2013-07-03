@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.molgenis.DatabaseConfig;
+
+import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.OmxConfig;
+import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -37,7 +40,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 @EnableWebMvc
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class })
+{ DatabaseConfig.class, OmxConfig.class ,EmbeddedElasticSearchConfig.class,
+	SearchSecurityConfig.class})
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Override
