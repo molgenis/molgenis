@@ -147,6 +147,13 @@ public class ComputeCommandLineTest
 		{
 			Assert.fail("footer is not correctly inserted");
 		}
+
+		System.out.println("--- Test correct data management ---");
+
+		if(!script.contains("getFile()") || !script.contains("putFile()"))
+		{
+			Assert.fail("get/put file is not inserted");
+		}
 	}
 
 	@Test
@@ -244,6 +251,13 @@ public class ComputeCommandLineTest
 		if(!script.contains("# My own custom footer"))
 		{
 			Assert.fail("footer is not correctly inserted");
+		}
+
+		System.out.println("--- Test correct data management ---");
+
+		if(!script.contains("getFile()") || !script.contains("putFile()"))
+		{
+			Assert.fail("get/put file is not inserted");
 		}
 	}
 
