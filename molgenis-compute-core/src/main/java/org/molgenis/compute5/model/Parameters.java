@@ -39,7 +39,13 @@ public class Parameters
 	public static final String PARAMETERS_DEFAULT = "parameters.csv";
 	// we may consider changing this to parameterFiles to make it more descriptive:
 	public static final String PARAMETER_COLUMN = "parameters";
-	public static final String ERROR_LOG = "errorlog"; // parameter name of log file
+    public static final String CUSTOM_HEADER_COLUMN = "header";
+    public static final String CUSTOM_FOOTER_COLUMN = "footer";
+    public static final String CUSTOM_SUBMIT_COLUMN = "submit";
+    public static final String CUSTOM_HEADER_DEFAULT = "header.ftl";
+    public static final String CUSTOM_FOOTER_DEFAULT = "footer.ftl";
+    public static final String CUSTOM_SUBMIT_DEFAULT = "submit.sh.ftl";
+    public static final String ERROR_LOG = "errorlog"; // parameter name of log file
 	public static final String ERROR_LOG_COLUMN = USER_PREFIX + ERROR_LOG;
 	public static String ERROR_FILE_DEFAULT = "error.log"; // can be changed by user parameter
 	public static String SOURCE_COMMAND = "source";

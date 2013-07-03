@@ -1,8 +1,15 @@
+# First cd to the directory with the *.sh and *.finished scripts
+<#noparse>
+MOLGENIS_scriptsDir=$( cd -P "$( dirname "$0" )" && pwd )
+echo "cd $MOLGENIS_scriptsDir"
+cd $MOLGENIS_scriptsDir
+</#noparse>
+
 touch molgenis.submit.started
 
 # Use this to indicate that we skip a step
 skip(){
-	echo "0: Skipped --- TASK '$1' --- ON $(date +"%Y-%m-%d %T")" >> molgenis.error.log
+	echo "0: Skipped --- TASK '$1' --- ON $(date +"%Y-%m-%d %T")" >> molgenis.skipped.log
 }
 
 <#foreach t in tasks>

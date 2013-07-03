@@ -30,14 +30,17 @@ public class ComputeProperties
 	public String defaultsCommandLine = null;
 	public String[] parameters =
 	{ Parameters.PARAMETERS_DEFAULT };
+    public String customHeader = Parameters.CUSTOM_HEADER_DEFAULT;
+    public String customFooter = Parameters.CUSTOM_FOOTER_DEFAULT;
+    public String customSubmit = Parameters.CUSTOM_SUBMIT_DEFAULT;
 	public String backend = Parameters.BACKEND_DEFAULT;
 	public String runDir = Parameters.RUNDIR_DEFAULT;
 	public String runId = Parameters.RUNID_DEFAULT;
 	public String database = Parameters.DATABASE_DEFAULT;
 	public String port = Parameters.PORT_DEFAULT;
 	public String interval = Parameters.INTERVAL_DEFAULT;
-	public String user = "get user name from system";
-	public String pass = "xxx";
+	public String user = "user name unknown";
+	public String pass = "password unknown";
 
 	// parameters not stored in compute.properties file:
 	public boolean showHelp = false; // show help?
@@ -168,6 +171,10 @@ public class ComputeProperties
 		for (String p : this.parameters)
 			pathParameters.add(updatePath(path, p));
 		this.parameters = pathParameters.toArray(new String[pathParameters.size()]);
+
+        this.customHeader = updatePath(path, this.customHeader);
+        this.customFooter = updatePath(path, this.customFooter);
+        this.customSubmit = updatePath(path, this.customSubmit);
 	}
 
 	/**
@@ -240,6 +247,9 @@ public class ComputeProperties
 			this.path = p.getProperty(Parameters.PATH, this.path);
 			this.workFlow = p.getProperty(Parameters.WORKFLOW, this.workFlow);
 			this.defaults = p.getProperty(Parameters.DEFAULTS, this.defaults);
+            this.customHeader = p.getProperty(Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
+            this.customFooter = p.getProperty(Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+            this.customSubmit = p.getProperty(Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
 			this.backend = p.getProperty(Parameters.BACKEND, this.backend);
 			this.runDir = p.getProperty(Parameters.RUNDIR, this.runDir);
 			this.runId = p.getProperty(Parameters.RUNID, this.runId);
@@ -276,6 +286,9 @@ public class ComputeProperties
 			
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
+            this.customHeader = getFullPath(cmd, Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
+            this.customFooter = getFullPath(cmd, Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+            this.customSubmit = getFullPath(cmd, Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
 			this.runDir = cmd.getOptionValue(Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
@@ -362,6 +375,9 @@ public class ComputeProperties
 			p.setProperty(Parameters.PARAMETERS, this.parametersString());
 			p.setProperty(Parameters.WORKFLOW, this.workFlow);
 			if (null != this.defaults) p.setProperty(Parameters.DEFAULTS, this.defaults);
+            p.setProperty(Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
+            p.setProperty(Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+            p.setProperty(Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
 			p.setProperty(Parameters.BACKEND, this.backend);
 			p.setProperty(Parameters.RUNDIR, this.runDir);
 			p.setProperty(Parameters.RUNID, this.runId);
@@ -404,6 +420,12 @@ public class ComputeProperties
 		Option d = OptionBuilder.hasArg()
 				.withDescription("Path to your workflow-defaults file. Default: " + Parameters.DEFAULTS_DEFAULT)
 				.withLongOpt(Parameters.DEFAULTS).create(Parameters.DEFAULTS);
+        options.addOption(OptionBuilder.hasArg().withDescription("Adds a custom header. Default: " + Parameters.CUSTOM_HEADER_DEFAULT)
+        .create(Parameters.CUSTOM_HEADER_COLUMN));
+        options.addOption(OptionBuilder.hasArg().withDescription("Adds a custom footer. Default: " + Parameters.CUSTOM_FOOTER_DEFAULT)
+                .create(Parameters.CUSTOM_FOOTER_COLUMN));
+        options.addOption(OptionBuilder.hasArg().withDescription("Set a custom submit.sh template. Default: " + Parameters.CUSTOM_SUBMIT_DEFAULT)
+        		.create(Parameters.CUSTOM_SUBMIT_COLUMN));
 		Option b = OptionBuilder.hasArg()
 				.withDescription("Backend for which you generate. Default: " + Parameters.BACKEND_DEFAULT)
 				.withLongOpt(Parameters.BACKEND).create(Parameters.BACKEND_CMNDLINE_OPTION);
