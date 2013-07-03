@@ -462,6 +462,32 @@ Below options, --full_name or -short. Options can be combined:
 	--pilot-command				Put a custom command for pilot job submission
 	--pilot-delay				Change the polling time (default: 10 seconds)
 
+### List of reserved words
+
+We have a list of words, which are reserved and cannot be used in compute to name parameters etc. These words are listed below:
+
+	port
+	interval
+	workflow
+	path
+	defaults
+	parameters
+	rundir
+	runid
+	backend
+	database
+	walltime
+	nodes
+	ppn
+	queue
+	mem
+	_NA
+	password
+	user
+	header
+	footer
+	submit
+
 ## wish lists
 * multiple default files
 

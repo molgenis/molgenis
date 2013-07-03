@@ -10,7 +10,7 @@ public class Protocol
 {
 	// reserved parameter names, used form system purposes
 	public static List<String> reservedNames = Arrays.asList(new String[]
-	{ Parameters.USER_CMNDLINE,
+	{
 			Parameters.PORT_CMNDLINE_OPTION,
 			Parameters.INTERVAL_CMNDLINE_OPTION,
 			Parameters.PATH, Parameters.WORKFLOW,
