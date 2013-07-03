@@ -1,1 +1,1 @@
-# My own custom header is cool
+# My own custom header
