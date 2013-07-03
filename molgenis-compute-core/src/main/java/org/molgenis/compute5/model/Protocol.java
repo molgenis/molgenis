@@ -10,7 +10,28 @@ public class Protocol
 {
 	// reserved parameter names, used form system purposes
 	public static List<String> reservedNames = Arrays.asList(new String[]
-	{ Parameters.USER_CMNDLINE, Parameters.PORT_CMNDLINE_OPTION, Parameters.INTERVAL_CMNDLINE_OPTION, Parameters.PATH, Parameters.WORKFLOW, Parameters.DEFAULTS, Parameters.PARAMETERS, Parameters.RUNDIR, Parameters.RUNID, Parameters.BACKEND, Parameters.DATABASE, Parameters.WALLTIME, Parameters.NODES, Parameters.PPN, Parameters.QUEUE, Parameters.MEMORY, Parameters.NOTAVAILABLE });
+	{
+			Parameters.PORT_CMNDLINE_OPTION,
+			Parameters.INTERVAL_CMNDLINE_OPTION,
+			Parameters.PATH, Parameters.WORKFLOW,
+			Parameters.DEFAULTS,
+			Parameters.PARAMETERS,
+			Parameters.RUNDIR,
+			Parameters.RUNID,
+			Parameters.BACKEND,
+			Parameters.DATABASE,
+			Parameters.WALLTIME,
+			Parameters.NODES,
+			Parameters.PPN,
+			Parameters.QUEUE,
+			Parameters.MEMORY,
+			Parameters.NOTAVAILABLE,
+			Parameters.PASS_CMNDLINE,
+			Parameters.USER_CMNDLINE,
+			Parameters.CUSTOM_HEADER_COLUMN,
+			Parameters.CUSTOM_FOOTER_COLUMN,
+			Parameters.CUSTOM_SUBMIT_COLUMN
+	});
 
 	// unique name of the protocol
 	String name;
