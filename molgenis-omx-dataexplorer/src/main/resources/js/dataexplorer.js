@@ -14,9 +14,11 @@
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		restApi.getAsync('/api/v1/dataset', null, null, function(datasets) {
+		var maxNrOfDataSets = 500;
+		
+		restApi.getAsync('/api/v1/dataset', null, {num: maxNrOfDataSets}, function(datasets) {
 			var items = [];
-			// TODO deal with multiple entity pages
+			
 			$.each(datasets.items, function(key, val) {
 				items.push('<option value="' + val.href + '">' + val.name + '</option>');
 			});
@@ -30,12 +32,13 @@
 
 	ns.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
-			var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
-
+			//var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
+			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
+			//var features = restApi.get(protocolUri + '/features');
+			
 			var children = [];
-			if (protocol.subprotocols) {
-				// TODO deal with multiple entity pages
-				$.each(protocol.subprotocols.items, function() {
+			if (subprotocols.items) {
+				$.each(subprotocols.items, function() {
 					children.push($.extend({
 						key : this.href,
 						title : this.name,
@@ -46,20 +49,45 @@
 					}, protocolOpts));
 				});
 			}
-			if (protocol.features) {
-				// TODO deal with multiple entity pages
-				$.each(protocol.features.items, function() {
-					children.push($.extend({
+			
+			var featureNodes = createFeatureNodes(protocolUri + '/features', featureOpts);
+			$.each(featureNodes, function() {
+				children.push(this);
+			});
+			
+			return children;
+		}
+		
+		function createFeatureNodes(protocolFeaturesUri, featureOpts) {
+			var features = restApi.get(protocolFeaturesUri);
+			var nodes = [];
+			
+			if (features.items) {
+				
+				$.each(features.items, function() {
+					nodes.push($.extend({
 						key : this.href,
 						title : this.name,
 						tooltip : this.description,
 						icon : "../../img/filter-bw.png",
 					}, featureOpts));
 				});
+				
+				if (features.nextHref) {
+					nodes.push($.extend({
+						key : 'more',
+						nextHref: features.nextHref,
+						title : '<i>more...</i>',
+						icon: false,
+						hideCheckbox: true,
+						tooltip : 'Load more'
+					}));
+				}
 			}
-			return children;
-		}
 
+			return nodes;
+		}
+		
 		function expandNodeRec(node) {
 			if (node.childList == undefined) {
 				node.toggleExpand();
@@ -92,12 +120,12 @@
 				return diff <= 0 ? -1 : 1;
 			});
 			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder ? null : node.data.key;
+				return node.data.isFolder || node.data.key == 'more' ? null : node.data.key;
 			});
 			ns.onFeatureSelectionChange(sortedFeatures);
 		}
 
-		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], null, function(protocol) {
+		restApi.getAsync(protocolUri, null, null, function(protocol) {
 			var container = $('#feature-selection');
 			if (container.children('ul').length > 0) {
 				container.dynatree('destroy');
@@ -135,6 +163,13 @@
 					node.addChild(children);
 				},
 				onClick : function(node, event) {
+					
+					if (node.data.key == 'more') {
+						var nextFeatureNodes = createFeatureNodes(node.data.nextHref, {});
+						node.remove();
+						node.parent.addChild(nextFeatureNodes);
+					}
+					
 					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
 						ns.openFeatureFilterDialog(node.data.key);
 				},
