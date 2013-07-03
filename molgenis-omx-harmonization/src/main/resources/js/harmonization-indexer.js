@@ -26,7 +26,23 @@
 			var searchHits = searchResponse.searchHits;
 			$.each(searchHits, function(){
 				var feature = $(this)[0]["columnValueMap"];
-				$('#dataitem-table').append('<tr><td>' + feature.name + '</td><td>' + feature.description + '</td><td></td></tr>');
+				var description = feature.description;
+				var isPopOver = description.length < 50;
+				var popover = $('<span />');
+				popover.html(isPopOver ? description : description.substring(0, 50) + '...');
+				if(!isPopOver){
+					popover.addClass('show-popover');
+					popover.popover({
+						content : description,
+						trigger : 'hover',
+						placement : 'bottom'
+					});
+				}
+				var row = $('<tr />');
+				row.append('<td>' + feature.name + '</td>');
+				$('<td />').append(popover).appendTo(row);
+				row.append('<td></td>');
+				$(row).appendTo($('#dataitem-table'));
 			});
 			totalPage = Math.ceil(searchResponse.totalHitCount / pager) - 1;
 			ns.updateMatrixPagination();
@@ -34,7 +50,7 @@
 		
 		function createTableHeader(){
 			$('#dataitem-table').empty();
-			$('#dataitem-table').append('<tr><th>Name</th><th>Description</th><th>Annotation</th></tr>');
+			$('#dataitem-table').append('<thead><tr><th>Name</th><th>Description</th><th>Annotation</th></tr></thead>');
 		}
 	};
 	
@@ -109,6 +125,11 @@
 		selectedDataSet = dataSet;
 	};
 	
+	ns.annotateDataItems = function() {
+		$('input[name="__action"]').val("annotateDataItems");
+		$('#harmonizationIndexer-form').submit();
+	};
+	
 	function getSelectedDataSet(){
 		return selectedDataSet;
 	}
@@ -124,6 +145,9 @@
 		});
 		$('#refresh-button').click(function(){
 			$('#harmonizationIndexer-form').submit();
+		});
+		$('#annotate-dataitems').click(function(){
+			ns.annotateDataItems();
 		});
 	});
 }($, window.top));

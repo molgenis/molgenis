@@ -50,9 +50,13 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 	}
 
 	@Override
-	public void handleRequest(Database db, MolgenisRequest request)
+	public void handleRequest(Database db, MolgenisRequest request) throws DatabaseException
 	{
-
+		if ("annotateDataItems".equals(request.getAction()))
+		{
+			Integer selectedDataSetId = Integer.parseInt(request.getString("selectedDataSet"));
+			model.setSelectedDataSet(db.findById(DataSet.class, selectedDataSetId));
+		}
 	}
 
 	@Override
@@ -64,6 +68,8 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 
 			for (DataSet dataSet : db.find(DataSet.class))
 				model.getDataSets().add(dataSet);
+
+			if (model.getDataSets().size() > 0) model.setSelectedDataSet(model.getDataSets().get(0));
 		}
 		catch (DatabaseException e)
 		{

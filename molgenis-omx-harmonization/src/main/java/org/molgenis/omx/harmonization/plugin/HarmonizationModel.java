@@ -9,6 +9,18 @@ public class HarmonizationModel
 {
 	List<DataSet> dataSets = new ArrayList<DataSet>();
 
+	DataSet selectedDataSet = null;
+
+	public DataSet getSelectedDataSet()
+	{
+		return selectedDataSet;
+	}
+
+	public void setSelectedDataSet(DataSet selectedDataSet)
+	{
+		this.selectedDataSet = selectedDataSet;
+	}
+
 	public List<DataSet> getDataSets()
 	{
 		return dataSets;

@@ -3,13 +3,13 @@
 }
 
 .accordion-group {
-	margin-left : 50px;
-	margin-top : 50px;
-	height : 200px;
+	margin-top : 70px;
+	height : 300px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
+	height : 200px;
 	background-color: white;
 }
 
@@ -38,4 +38,13 @@ h5 {
 .table thead th {
     background-color: #5B82A4; 
     color: white;
+}
+
+.table {
+	 border: 1px solid #5B82A4;
+}
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
 }
