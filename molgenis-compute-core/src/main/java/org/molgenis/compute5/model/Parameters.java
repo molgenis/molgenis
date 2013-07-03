@@ -105,7 +105,9 @@ public class Parameters
 	public static final String USER_CMNDLINE_OPTION = "u";
 	public static final String PASS_CMNDLINE = "password";
 	public static final String PASS_CMNDLINE_OPTION = "pass";
-	
+	public static final String CLEAR = "clear";
+
+
 	//table with all the values
 	List<WritableTuple> values = new ArrayList<WritableTuple>();
 
