@@ -213,7 +213,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 						}
 						if (pcsummary.getIsClassifiedBy().getRace().size() > 1)
 						{
-
 							String raceString = raceStringBuilder.substring(0, raceStringBuilder.length() - 1);
 							kvtdataSetCBM.set("race", raceString);
 						}
@@ -231,15 +230,26 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 								.getId().toString());
 						kvtdataSetCBM.set("specimenCount", pcsummary.getProvides().getSpecimenCollectionSummary()
 								.get(0).getSpecimenCount().toString());
-						kvtdataSetCBM.set("specimenType", pcsummary.getProvides().getSpecimenCollectionSummary().get(0)
-								.getSpecimenType().toString());
-						kvtdataSetCBM.set("anatomicSource",
-								pcsummary.getProvides().getSpecimenCollectionSummary().get(0).getAnatomicSource()
-										.toString());
-						kvtdataSetCBM.set("patientAgeGroupLow", pcsummary.getProvides().getSpecimenCollectionSummary()
-								.get(0).getQualifiesPatientAgeAtSpecimenCollection().getPatientAgeGroupLow());
-						kvtdataSetCBM.set("patientAgeGroupHigh", pcsummary.getProvides().getSpecimenCollectionSummary()
-								.get(0).getQualifiesPatientAgeAtSpecimenCollection().getPatientAgeGroupHigh());
+						if (pcsummary.getProvides().getSpecimenCollectionSummary().get(0).getSpecimenType() != null)
+						{
+							kvtdataSetCBM.set("specimenType", (pcsummary.getProvides().getSpecimenCollectionSummary()
+									.get(0).getSpecimenType().toString()));
+						}
+						if (pcsummary.getProvides().getSpecimenCollectionSummary().get(0).getAnatomicSource() != null)
+						{
+							kvtdataSetCBM.set("anatomicSource", pcsummary.getProvides().getSpecimenCollectionSummary()
+									.get(0).getAnatomicSource().toString());
+						}
+						if (pcsummary.getProvides().getSpecimenCollectionSummary().get(0)
+								.getQualifiesPatientAgeAtSpecimenCollection() != null)
+						{
+							kvtdataSetCBM.set("patientAgeGroupLow", pcsummary.getProvides()
+									.getSpecimenCollectionSummary().get(0).getQualifiesPatientAgeAtSpecimenCollection()
+									.getPatientAgeGroupLow());
+							kvtdataSetCBM.set("patientAgeGroupHigh", pcsummary.getProvides()
+									.getSpecimenCollectionSummary().get(0).getQualifiesPatientAgeAtSpecimenCollection()
+									.getPatientAgeGroupHigh());
+						}
 
 						StringBuilder diagnosisStringBuilder = new StringBuilder();
 
