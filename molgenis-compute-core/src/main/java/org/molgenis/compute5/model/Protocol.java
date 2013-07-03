@@ -43,7 +43,7 @@ public class Protocol
 	String walltime = "08:00:00";// walltime for protocol
 	String nodes = Integer.toString(1);// number of cores that this protocol needs
 	String ppn = "4";
-	String queue = "none";
+	String queue = "default";
 	String memory = "1Gb";
 
 	// list of inputs it expects from user_* or previousStep_*
