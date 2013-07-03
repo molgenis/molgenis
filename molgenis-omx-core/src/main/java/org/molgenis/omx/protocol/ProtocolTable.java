@@ -17,6 +17,7 @@ import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
@@ -80,9 +81,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				if (!protocolPath.isEmpty()) pathBuilder.append(protocolPath).append('.');
 				String name = p.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
 				final String path = pathBuilder.append(p.getId()).toString();
-				String description = p.getDescription() == null ? StringUtils.EMPTY : p.getDescription().replaceAll(
-						"[^a-zA-Z0-9 ]", " ");
-
+				String description = p.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(p.getDescription());
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
 				tuple.set(FIELD_ID, p.getId());
@@ -101,8 +100,8 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 			{
 				StringBuilder pathBuilder = new StringBuilder();
 				String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
-				String description = feature.getDescription() == null ? StringUtils.EMPTY : feature.getDescription()
-						.replaceAll("[^a-zA-Z0-9 ]", " ");
+				String description = feature.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(feature
+						.getDescription());
 				String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
 				StringBuilder categoryValue = new StringBuilder();
 
@@ -140,7 +139,8 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	}
 
 	/**
-	 * Count the number of protocols and features of this protocol (excluding this protocol itself)
+	 * Count the number of protocols and features of this protocol (excluding
+	 * this protocol itself)
 	 */
 	@Override
 	public int getCount() throws TableException
