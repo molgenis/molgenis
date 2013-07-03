@@ -32,9 +32,7 @@
 
 	ns.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
-			//var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
-			//var features = restApi.get(protocolUri + '/features');
 			
 			var children = [];
 			if (subprotocols.items) {
