@@ -53,8 +53,10 @@ public class ComputeCommandLineTest
 	public void testCommandLineParametersComputePropertiesFilesCreated() throws ParseException, IOException, ClassNotFoundException
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
+		String outputDir = "target/test/benchmark/run";
 
-		File f = new File("src/main/resources/workflows/benchmark/run");
+
+		File f = new File(outputDir);
 		FileUtils.deleteDirectory(f);
 		Assert.assertFalse(f.exists());
 
@@ -66,7 +68,7 @@ public class ComputeCommandLineTest
 				"--generate", "--run", "--workflow", "src/main/resources/workflows/benchmark/workflow.csv",
 						"--defaults", "src/main/resources/workflows/benchmark/workflow.defaults.csv",
 						"--parameters","src/main/resources/workflows/benchmark/parameters.csv",
-						"--rundir","src/main/resources/workflows/benchmark/run",
+						"--rundir",outputDir,
 						"--backend","pbs",
 						"--database","none",
 						"-header", "src/main/resources/workflows/benchmark/header.ftl",
@@ -77,7 +79,7 @@ public class ComputeCommandLineTest
 		System.out.println("--- Test Compute Properties ---");
 		String resultProperties =  getFileAsString(".compute.properties");
 
-		if(!resultProperties.contains("rundir=src/main/resources/workflows/benchmark/run"))
+		if(!resultProperties.contains("rundir=" + outputDir))
 		{
 			Assert.fail("rundir parameter is failed");
 		}
@@ -104,31 +106,31 @@ public class ComputeCommandLineTest
 
 		System.out.println("--- Test Created Files ---");
 
-		File file = new File("src/main/resources/workflows/benchmark/run/step1_0.sh");
+		File file = new File(outputDir + "/step1_0.sh");
 		if (!file.exists())
 		{
 			Assert.fail("step1_0.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/step1_1.sh");
+		file = new File(outputDir + "/step1_1.sh");
 		if (!file.exists())
 		{
 			Assert.fail("step1_1.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/step2_0.sh");
+		file = new File(outputDir + "/step2_0.sh");
 		if (!file.exists())
 		{
 			Assert.fail("step2_0.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/submit.sh");
+		file = new File(outputDir + "/submit.sh");
 		if (!file.exists())
 		{
 			Assert.fail("submit.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/user.env");
+		file = new File(outputDir + "/user.env");
 		if (!file.exists())
 		{
 			Assert.fail("user.env is not generated");
@@ -136,7 +138,7 @@ public class ComputeCommandLineTest
 
 		System.out.println("--- Test correct headers insertion ---");
 
-		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
+		String script = getFileAsString(outputDir+"/step1_0.sh");
 
 		if(!script.contains("# My own custom header"))
 		{
@@ -160,8 +162,9 @@ public class ComputeCommandLineTest
 	public void testPathparameter() throws ParseException, IOException, ClassNotFoundException
 	{
 		System.out.println("--- Testing path parameter ---");
+		String outputDir = "target/test/benchmark/run";
 
-		File f = new File("src/main/resources/workflows/benchmark/run");
+		File f = new File(outputDir);
 		FileUtils.deleteDirectory(f);
 		Assert.assertFalse(f.exists());
 
@@ -174,7 +177,7 @@ public class ComputeCommandLineTest
 				"--workflow", "workflow.csv",
 				"--defaults", "workflow.defaults.csv",
 				"--parameters","parameters.csv",
-				"--rundir","src/main/resources/workflows/benchmark/run",
+				"--rundir",outputDir,
 				"--backend","pbs",
 				"--database","none"});
 
@@ -182,7 +185,7 @@ public class ComputeCommandLineTest
 		System.out.println("--- Test Compute Properties ---");
 		String resultProperties =  getFileAsString(".compute.properties");
 
-		if(!resultProperties.contains("rundir=src/main/resources/workflows/benchmark/run"))
+		if(!resultProperties.contains("rundir="+outputDir))
 		{
 			Assert.fail("rundir parameter is failed");
 		}
@@ -209,31 +212,31 @@ public class ComputeCommandLineTest
 
 		System.out.println("--- Test Created Files ---");
 
-		File file = new File("src/main/resources/workflows/benchmark/run/step1_0.sh");
+		File file = new File(outputDir + "/step1_0.sh");
 		if (!file.exists())
 		{
 			Assert.fail("step1_0.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/step1_1.sh");
+		file = new File(outputDir + "/step1_1.sh");
 		if (!file.exists())
 		{
 			Assert.fail("step1_1.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/step2_0.sh");
+		file = new File(outputDir + "/step2_0.sh");
 		if (!file.exists())
 		{
 			Assert.fail("step2_0.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/submit.sh");
+		file = new File(outputDir + "/submit.sh");
 		if (!file.exists())
 		{
 			Assert.fail("submit.sh is not generated");
 		}
 
-		file = new File("src/main/resources/workflows/benchmark/run/user.env");
+		file = new File(outputDir + "/user.env");
 		if (!file.exists())
 		{
 			Assert.fail("user.env is not generated");
@@ -241,7 +244,7 @@ public class ComputeCommandLineTest
 
 		System.out.println("--- Test correct headers insertion ---");
 
-		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
+		String script = getFileAsString(outputDir + "/step1_0.sh");
 
 		if(!script.contains("# My own custom header"))
 		{
