@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class IndexingEventListenerTest
 {
 	private StaticApplicationContext context;
-	private IndexingEventListener startUpIndexer;
+	private IndexingEventListener indexingEventListener;
 	private DataSetsIndexer mockDataSetsIndexer;
 
 	@BeforeMethod
@@ -23,15 +23,9 @@ public class IndexingEventListenerTest
 	{
 		context = new StaticApplicationContext();
 		mockDataSetsIndexer = mock(DataSetsIndexer.class);
-		startUpIndexer = new IndexingEventListener(mockDataSetsIndexer);
-		context.addApplicationListener(startUpIndexer);
+		indexingEventListener = new IndexingEventListener(mockDataSetsIndexer);
+		context.addApplicationListener(indexingEventListener);
 		context.refresh();
-	}
-
-	@Test
-	public void onApplicationEventContextRefreshedEvent() throws DatabaseException, TableException
-	{
-		verify(mockDataSetsIndexer).indexNew();
 	}
 
 	@Test
