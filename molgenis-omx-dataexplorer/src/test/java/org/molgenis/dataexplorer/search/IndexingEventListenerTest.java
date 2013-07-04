@@ -12,10 +12,10 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class StartUpIndexerTest
+public class IndexingEventListenerTest
 {
 	private StaticApplicationContext context;
-	private StartUpIndexer startUpIndexer;
+	private IndexingEventListener startUpIndexer;
 	private DataSetsIndexer mockDataSetsIndexer;
 
 	@BeforeMethod
@@ -23,7 +23,7 @@ public class StartUpIndexerTest
 	{
 		context = new StaticApplicationContext();
 		mockDataSetsIndexer = mock(DataSetsIndexer.class);
-		startUpIndexer = new StartUpIndexer(mockDataSetsIndexer);
+		startUpIndexer = new IndexingEventListener(mockDataSetsIndexer);
 		context.addApplicationListener(startUpIndexer);
 		context.refresh();
 	}
