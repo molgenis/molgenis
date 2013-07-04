@@ -79,27 +79,30 @@ public class AccountController
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void loginUser(@RequestParam("username") String username, @RequestParam("password") String password)
-			throws HandleRequestDelegationException, Exception
+	public void loginUser(@RequestParam("username")
+	String username, @RequestParam("password")
+	String password) throws HandleRequestDelegationException, Exception
 	{
 		boolean ok = database.getLogin().login(database, username, password);
 		if (!ok) throw new DatabaseAccessException("Login failed: username or password unknown");
 	}
 
-	@RequestMapping(value = "/logout", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void logoutUser() throws Exception
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	public String logoutUser() throws Exception
 	{
 		database.getLogin().logout(database);
 		database.getLogin().reload(database);
+		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest) throws DatabaseException, CaptchaException,
-			BindException
+	public void registerUser(@Valid
+	@ModelAttribute
+	RegisterRequest registerRequest, @Valid
+	@ModelAttribute
+	CaptchaRequest captchaRequest) throws DatabaseException, CaptchaException, BindException
 	{
 		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
@@ -116,7 +119,10 @@ public class AccountController
 	}
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
-	public String activateUser(@Valid @NotNull @PathVariable String activationCode) throws DatabaseException
+	public String activateUser(@Valid
+	@NotNull
+	@PathVariable
+	String activationCode) throws DatabaseException
 	{
 		accountService.activateUser(activationCode);
 		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
@@ -125,11 +131,12 @@ public class AccountController
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@RequestMapping(value = "/password/reset", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void resetPassword(@Valid @ModelAttribute PasswordResetRequest passwordResetRequest)
-			throws DatabaseException
+	public void resetPassword(@Valid
+	@ModelAttribute
+	PasswordResetRequest passwordResetRequest) throws DatabaseException
 	{
-		List<MolgenisUser> molgenisUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.NAME,
-				Operator.EQUALS, passwordResetRequest.getUsername()));
+		List<MolgenisUser> molgenisUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.EMAIL,
+				Operator.EQUALS, passwordResetRequest.getEmail()));
 		if (molgenisUsers != null && !molgenisUsers.isEmpty()) accountService.resetPassword(molgenisUsers.get(0));
 	}
 

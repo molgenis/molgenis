@@ -19,13 +19,13 @@ Typical command to generate and run jobs:
 
 If you don't like to use defaults, above translates to:
 
-	molgenis	--generate --run
-				--workflow workflow/workflow.csv \
-				--defaults workflow/defaults.csv \
-				--parameters parameters.csv \
-				--rundir ./run \
-				--backend pbs \
-				--database none
+	molgenis --generate --run
+			 --workflow workflow/workflow.csv \
+			 --defaults workflow/defaults.csv \
+			 --parameters parameters.csv \
+			 --rundir ./run \
+			 --backend pbs \
+			 --database none
 
 Alternatively you can configure molgenis compute stepwise:
 	
@@ -36,16 +36,20 @@ Alternatively you can configure molgenis compute stepwise:
 
 Download MOLGENIS compute as binary zip, see http://www.molgenis.org/wiki/ComputeStart for latest:
 
-	wget http://www.molgenis.org/releases/compute/molgenis-compute-5.x.x.zip
-	unzip molgenis-compute-5.x.x.zip
-	export PATH=$PATH:molgenis-compute-5.x.x
-
+	wget http://molgenis26.target.rug.nl/downloads/molgenis_compute-latest.zip
+	unzip molgenis_compute-latest.zip
+	cd molgenis-compute-core-0.0.1-SNAPSHOT
+	export PATH=${PATH}:${PWD}
+	
 Run your first workflow example on your local machine
 
-	mkdir demo1
-	cd demo1
-	cp -R ../molgenis-compute-5.x.x/demo1 .
-	molgenis -w workflow.csv -p parameters.csv -b local
+	( Not available yet. Please follow the example below	)
+	( in Section '1. Design a workflow' instead.			)
+	(														)
+	( mkdir demo1											)
+	( cd demo1												)
+	( cp -R ../molgenis-compute-5.x.x/demo1 .				)
+	( molgenis -w workflow.csv -p parameters.csv -b local	)
 
 Below details how to run.
 
@@ -60,10 +64,14 @@ A typical workflow directory looks as follows:
 	defaults.csv			#default parameters for workflow.csv (optional)
 	parameters.csv			#parameters you want to run analysis on
 
-Create a new workflow directory using:
+Create a new workflow directory having all of these files using:
 	
 	molgenis --create myworkflow
 	cd myworkflow
+	
+Generate your first workflow example on your local machine:
+
+	molgenis_compute.sh -w workflow.csv -p parameters.csv -b local
 
 Download example workflows:
 
@@ -166,7 +174,7 @@ Example commands in your 'analysis.sh':
 	molgenis -w path/workflow -p parameters.csv -j ./jobs2
 
 ### parameters.csv
-Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9) and parameter values in each rown. Use quotes to escape commas, e.g. "a,b". 
+Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b". 
 
 Each value is one of the following:
 
@@ -199,6 +207,9 @@ Merged and expanded result for f1.csv + f2.csv:
 	x,   v1,  1,    b,    file1
 	y,   v1,  2,    a,	  file2
 	y,   v1,  2,    b,    file2
+	
+#### Reserved words
+MOLGENIS compute has some parameters that are part of its framework. Consequently, the names of these parameters are reserved words: user, port, interval, path, workflow, defaults, parameters, rundir, runid, backend, database, walltime, nodes, ppn, queue, mem. These parameters [[check: also the last 5?]] are available in each of the protocols, i.e. without mapping them in the workflow.csv.
 
 ### Generate and run jobs
 Analysis jobs will be generated for each unique combination of '#string' inputs (see 'protocols').
@@ -350,12 +361,26 @@ You can use the following methods to standardize file management. (TODO: describ
 
 ### Standard tool management
 
-In addition we recommend use of the 'module' system to standardize tool installation and management. See [ref].
+MOLGENIS Compute does not handle tool dependencies. Hence when you want to execute an application, you will need to
+* either provide the complete path to that application optionally as a parameter (not recommended)
+* or modify your evironment, so the application can be found without specifying the absolute path (recommended)
 
-	module load $mytool 	#load $mytool before use
-	$mytool					#execute $mytool
+We recommend the [Environment Modules](http://modules.sourceforge.net/) system for standardizing tool installation and management.
+When your tool was installed and a module file was deployed for use with the Environment Modules system, you can use the `module` command to modify the environment for that tool:
 
-See [WHERE?] for pre-configured modules to use.
+	module avail				# Get a list of available tools and their versions.
+	module load $mytool 			# Load $mytool before use without specifying a specific version.
+	module load $mytool/$myversion		# Request a specific version of $mytool.
+	module list				# List currently loaded modules.
+	$mytool					# Execute $mytool.
+
+In order to be able to trace back which version of which tool was used for a specific analysis, we recommend to always use:
+
+	module load $mytool/$myversion		# Request a specific version of $mytool.
+	module list				# List currently loaded modules.
+
+in your protocols and to capture STDOUT into a log file. The `module list` command will then make sure the names and version numbers of all tools used in the analysis are listed in your logs.
+See the [Environment Modules](http://modules.sourceforge.net/) system [documentation](http://modules.sourceforge.net/man/module.html) for instructions on how to create and deploy modules.
 
 ### Standard fail logging
 Many commandline tools don't use out and error streams properly. Therefore, we also provide standard 'fail' logging methods which MOLGENIS will pick-up in monitoring.
@@ -438,6 +463,32 @@ Below options, --full_name or -short. Options can be combined:
 								This parameter can be repeated.
 	--pilot-command				Put a custom command for pilot job submission
 	--pilot-delay				Change the polling time (default: 10 seconds)
+
+### List of reserved words
+
+We have a list of words, which are reserved and cannot be used in compute to name parameters etc. These words are listed below:
+
+	port
+	interval
+	workflow
+	path
+	defaults
+	parameters
+	rundir
+	runid
+	backend
+	database
+	walltime
+	nodes
+	ppn
+	queue
+	mem
+	_NA
+	password
+	user
+	header
+	footer
+	submit
 
 ## wish lists
 * multiple default files

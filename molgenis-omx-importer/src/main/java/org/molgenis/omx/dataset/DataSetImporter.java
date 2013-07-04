@@ -12,8 +12,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
@@ -23,8 +21,6 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.DataSetImportedEvent;
 import org.molgenis.util.tuple.Tuple;
 
 public class DataSetImporter
@@ -80,16 +76,26 @@ public class DataSetImporter
 		}
 
 		Iterator<String> colIt = sheetReader.colNamesIterator();
-		if (!colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no columns");
+		if (colIt == null || !colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no header");
 
-		// create observation feature map
+		// create feature map
 		Map<String, ObservableFeature> featureMap = new LinkedHashMap<String, ObservableFeature>();
 		while (colIt.hasNext())
 		{
-			String observableFeatureIdentifier = colIt.next();
-			ObservableFeature observableFeature = findObservableFeature(observableFeatureIdentifier);
-			featureMap.put(observableFeatureIdentifier, observableFeature);
+			String featureIdentifier = colIt.next();
+			if (featureIdentifier != null && !featureIdentifier.isEmpty())
+			{
+				ObservableFeature feature = ObservableFeature.findByIdentifier(db, featureIdentifier);
+				if (feature == null)
+				{
+					throw new DatabaseException(ObservableFeature.class.getSimpleName() + " with identifier '"
+							+ featureIdentifier + "' does not exist");
+				}
+				featureMap.put(featureIdentifier, feature);
+			}
+			else throw new DatabaseException("sheet '" + sheetName + "' contains empty column header");
 		}
+		if (featureMap.isEmpty()) throw new DatabaseException("sheet '" + sheetName + "' contains no header");
 
 		int rownr = 0;
 		int transactionRows = Math.max(1, 5000 / featureMap.size());
@@ -140,9 +146,6 @@ public class DataSetImporter
 				if (++rownr % transactionRows == 0) db.commitTx();
 			}
 			if (rownr % transactionRows != 0) db.commitTx();
-
-			ApplicationContextProvider.getApplicationContext().publishEvent(
-					new DataSetImportedEvent(this, dataSet.getId()));
 		}
 		catch (DatabaseException e)
 		{
@@ -154,16 +157,5 @@ public class DataSetImporter
 			db.rollbackTx();
 			throw new IOException(e);
 		}
-	}
-
-	private ObservableFeature findObservableFeature(String observableFeatureIdentifier) throws DatabaseException,
-			IOException
-	{
-		List<ObservableFeature> observableFeatures = db.find(ObservableFeature.class, new QueryRule(
-				ObservableFeature.IDENTIFIER, Operator.EQUALS, observableFeatureIdentifier));
-		if (observableFeatures == null || observableFeatures.isEmpty()) throw new IOException("ObservableFeature "
-				+ observableFeatureIdentifier + " does not exist in db");
-		ObservableFeature observableFeature = observableFeatures.get(0);
-		return observableFeature;
 	}
 }

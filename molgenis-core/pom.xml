@@ -82,6 +82,12 @@
             <artifactId>poi-ooxml</artifactId>
             <version>3.9</version>
         </dependency>
+        <!-- override version xml-apis 1.0b2 (poi-ooxml dependency) to prevent conflicts -->
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+        </dependency>
         <!-- JSON Lib -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -107,12 +113,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>3.2.2.RELEASE</version>
+			<version>3.2.3.RELEASE</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context-support</artifactId>
-		    <version>3.2.2.RELEASE</version>
+		    <version>3.2.3.RELEASE</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.sun.mail</groupId>

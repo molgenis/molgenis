@@ -43,7 +43,9 @@ public class ComputeCommandLine
 		BasicConfigurator.configure();
 
 		System.out.println("### MOLGENIS COMPUTE ###");
-		System.out.println("Version: " + ComputeCommandLine.class.getPackage().getImplementationVersion());
+		String version = ComputeCommandLine.class.getPackage().getImplementationVersion();
+		if (null == version) version = "development";
+		System.out.println("Version: " + version);
 
 		// disable freemarker logging
 		freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
@@ -66,7 +68,7 @@ public class ComputeCommandLine
 	{
 		Compute compute = new Compute(computeProperties);
 
-		if (!computeProperties.create)
+		if (!computeProperties.create && !computeProperties.clear)
 		{// inform user:
 			System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
 			if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
@@ -87,6 +89,21 @@ public class ComputeCommandLine
 		if (computeProperties.create)
 		{
 			new CreateWorkflowGenerator(computeProperties.createWorkflow);
+		}
+
+		if (computeProperties.clear)
+		{
+			File file = new File(Parameters.PROPERTIES);
+
+			if(file.delete())
+			{
+				System.out.println(file.getName() + " is cleared");
+			}
+			else
+			{
+				System.out.println("Fail to clear " + file.getName());
+			}
+			return null;
 		}
 
 		if (computeProperties.generate)
@@ -121,16 +138,15 @@ public class ComputeCommandLine
 		{
 			// database is on, please call compute-db-functions
 			// you can use computeProperties.* to see what user wants
+			String userName = computeProperties.user;
+			String pass = computeProperties.pass;
+
 			ComputeDbApiConnection dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
-					computeProperties.port, "/api/v1", "admin", "admin");
+					computeProperties.port, "/api/v1", userName, pass);
 
 			ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
 
 			String runName = computeProperties.runId;
-
-
-            //TODO implement proper userID in ComputeProperties
-            String userName = "admin";
 
             String backendName = computeProperties.backend;
             Long pollInterval = Long.parseLong(computeProperties.interval);

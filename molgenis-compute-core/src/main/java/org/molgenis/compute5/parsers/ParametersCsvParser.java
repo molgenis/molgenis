@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -200,6 +201,9 @@ public class ParametersCsvParser
 	{
 		String s = t.getString(col);
 
+		// deal with 'empty' values
+		if (null == s) return new ArrayList<String>(Arrays.asList(""));
+
 		Pattern pattern = Pattern.compile("([+-]?[0-9]+)\\.\\.([+-]?[0-9]+)");
 		Matcher matcher = pattern.matcher(s);
 
@@ -242,8 +246,7 @@ public class ParametersCsvParser
 	}
 
 	/**
-	 * Merge tupleLst with targets based on overlapping columns (except
-	 * 'parameters')
+	 * Merge tupleLst with targets based on overlapping columns (except 'parameters')
 	 * 
 	 * @param targets
 	 * @param right
@@ -267,7 +270,7 @@ public class ParametersCsvParser
 			for (Tuple t : right)
 			{
 				KeyValueTuple newValue = new KeyValueTuple(t);
-				joined.add((WritableTuple) newValue);
+				joined.add(newValue);
 			}
 		}
 		else
@@ -319,8 +322,7 @@ public class ParametersCsvParser
 	}
 
 	/**
-	 * (1) Parse file f as list of Tuples and (2) validate that no parameters
-	 * contain the 'step_param' separator
+	 * (1) Parse file f as list of Tuples and (2) validate that no parameters contain the 'step_param' separator
 	 * 
 	 * @param f
 	 * @return
@@ -330,12 +332,19 @@ public class ParametersCsvParser
 	private static List<Tuple> asTuples(File f) throws IOException
 	{
 		List<Tuple> tLst = new ArrayList<Tuple>();
-		
+
 		if (f.toString().endsWith(".properties"))
 		{
 			Properties p = new Properties();
-			p.load(new FileInputStream(f));
-
+			FileInputStream fis = new FileInputStream(f);
+			try
+			{
+				p.load(fis);
+			}
+			finally
+			{
+				fis.close();
+			}
 			// set this.variables
 			KeyValueTuple t = new KeyValueTuple();
 			Iterator<Object> it = p.keySet().iterator();
@@ -345,7 +354,7 @@ public class ParametersCsvParser
 				String value = p.getProperty(key);
 				t.set(key, value);
 			}
-			
+
 			tLst.add(t);
 		}
 		else
@@ -377,14 +386,13 @@ public class ParametersCsvParser
 							+ " failed: column names may not contain '" + Parameters.STEP_PARAM_SEP + "'");
 			}
 		}
-		
+
 		return tLst;
 	}
 
 	/**
-	 * (1) Validate that all values (set of files) in 'parameters' column are
-	 * equal and (2) return them as a set. (3) If a file does not have an
-	 * absolute path, then use the path of its parent as a starting point.
+	 * (1) Validate that all values (set of files) in 'parameters' column are equal and (2) return them as a set. (3) If
+	 * a file does not have an absolute path, then use the path of its parent as a starting point.
 	 * 
 	 * @param tupleLst
 	 * @return set of files (in AbsoluteFile notation) to be included
@@ -458,8 +466,7 @@ public class ParametersCsvParser
 	}
 
 	/**
-	 * If path to 'column' (eg workflow) file relative, then prepend parent's
-	 * path (f)
+	 * If path to 'column' (eg workflow) file relative, then prepend parent's path (f)
 	 * 
 	 * @param tupleLst
 	 * @return

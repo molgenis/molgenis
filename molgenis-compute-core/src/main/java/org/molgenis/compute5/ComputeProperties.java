@@ -30,13 +30,17 @@ public class ComputeProperties
 	public String defaultsCommandLine = null;
 	public String[] parameters =
 	{ Parameters.PARAMETERS_DEFAULT };
+	public String customHeader = Parameters.CUSTOM_HEADER_DEFAULT;
+	public String customFooter = Parameters.CUSTOM_FOOTER_DEFAULT;
+	public String customSubmit = Parameters.CUSTOM_SUBMIT_DEFAULT;
 	public String backend = Parameters.BACKEND_DEFAULT;
 	public String runDir = Parameters.RUNDIR_DEFAULT;
 	public String runId = Parameters.RUNID_DEFAULT;
 	public String database = Parameters.DATABASE_DEFAULT;
 	public String port = Parameters.PORT_DEFAULT;
 	public String interval = Parameters.INTERVAL_DEFAULT;
-	public String user = "get user name from system";
+	public String user = "user name unknown";
+	public String pass = "password unknown";
 
 	// parameters not stored in compute.properties file:
 	public boolean showHelp = false; // show help?
@@ -45,6 +49,7 @@ public class ComputeProperties
 	public boolean generate = false; // should we generate?
 	public boolean list = false; // should we list currently generated jobs?
 	public boolean create = false;
+	public boolean clear = false;
 	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean execute = false; // does user want to execute scripts?
 
@@ -60,15 +65,15 @@ public class ComputeProperties
 
 			// set path
 			setPath(args);
-			
+
 			// if --create, then done
 			if (this.create) return;
 
 			// prepend path to defaults
 			updateDefaultParameterValues(path);
-			
+
 			// get user name and set that one as default
-			this.user = System.getProperty("user.name"); 
+			this.user = System.getProperty("user.name");
 
 			createPropertiesFile();
 
@@ -110,8 +115,8 @@ public class ComputeProperties
 	}
 
 	/**
-	 * If this.defaultsCommandLine does not exist, then look in workflow folder
-	 * for [workflow].defaults.csv or else defaults.csv
+	 * If this.defaultsCommandLine does not exist, then look in workflow folder for [workflow].defaults.csv or else
+	 * defaults.csv
 	 */
 	private void updateWorkflowParameterDefaultsCSV()
 	{
@@ -167,6 +172,10 @@ public class ComputeProperties
 		for (String p : this.parameters)
 			pathParameters.add(updatePath(path, p));
 		this.parameters = pathParameters.toArray(new String[pathParameters.size()]);
+
+		this.customHeader = updatePath(path, this.customHeader);
+		this.customFooter = updatePath(path, this.customFooter);
+		this.customSubmit = updatePath(path, this.customSubmit);
 	}
 
 	/**
@@ -218,7 +227,7 @@ public class ComputeProperties
 		{
 			try
 			{
-//				this.propertiesFile.getParentFile().mkdirs();
+				// this.propertiesFile.getParentFile().mkdirs();
 				this.propertiesFile.createNewFile();
 			}
 			catch (IOException e)
@@ -233,12 +242,23 @@ public class ComputeProperties
 		try
 		{
 			Properties p = new Properties();
-			p.load(new FileInputStream(this.propertiesFile));
+			FileInputStream fis = new FileInputStream(this.propertiesFile);
+			try
+			{
+				p.load(fis);
+			}
+			finally
+			{
+				fis.close();
+			}
 
 			// set this.variables
 			this.path = p.getProperty(Parameters.PATH, this.path);
 			this.workFlow = p.getProperty(Parameters.WORKFLOW, this.workFlow);
 			this.defaults = p.getProperty(Parameters.DEFAULTS, this.defaults);
+			this.customHeader = p.getProperty(Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
+			this.customFooter = p.getProperty(Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+			this.customSubmit = p.getProperty(Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
 			this.backend = p.getProperty(Parameters.BACKEND, this.backend);
 			this.runDir = p.getProperty(Parameters.RUNDIR, this.runDir);
 			this.runId = p.getProperty(Parameters.RUNID, this.runId);
@@ -269,8 +289,15 @@ public class ComputeProperties
 			if (this.showHelp) throw new ParseException("");
 
 			// set this.variables
+
+			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
+			this.path = this.path + (this.path.endsWith("/") ? "" : "/");
+
 			this.workFlow = getFullPath(cmd, Parameters.WORKFLOW_CMNDLINE_OPTION, this.workFlow);
 			this.defaultsCommandLine = getFullPath(cmd, Parameters.DEFAULTS_CMNDLINE_OPTION, null);
+			this.customHeader = getFullPath(cmd, Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
+			this.customFooter = getFullPath(cmd, Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+			this.customSubmit = getFullPath(cmd, Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
 			this.backend = cmd.getOptionValue(Parameters.BACKEND_CMNDLINE_OPTION, this.backend);
 			this.runDir = cmd.getOptionValue(Parameters.RUNDIR_CMNDLINE_OPTION, this.runDir);
 			this.database = cmd.getOptionValue(Parameters.DATABASE_CMNDLINE_OPTION, this.database);
@@ -279,11 +306,14 @@ public class ComputeProperties
 			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
 			this.interval = cmd.getOptionValue(Parameters.INTERVAL_CMNDLINE_OPTION, this.interval);
 			this.user = cmd.getOptionValue(Parameters.USER_CMNDLINE_OPTION, this.user);
+			this.pass = cmd.getOptionValue(Parameters.PASS_CMNDLINE_OPTION, this.pass);
 
 			// generate only if -g or if -w and -p present
 			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
 					|| (cmd.hasOption(Parameters.WORKFLOW_CMNDLINE_OPTION) && cmd
 							.hasOption(Parameters.PARAMETERS_CMNDLINE_OPTION));
+
+			this.clear = cmd.hasOption(Parameters.CLEAR);
 
 			this.runId = cmd.getOptionValue(Parameters.RUNID_CMNDLINE_OPTION, this.runId);
 			// if runId == null then create one
@@ -324,8 +354,7 @@ public class ComputeProperties
 	}
 
 	/**
-	 * Returns path as specified by this cmndlineOption. If path is relative,
-	 * then this.path/ will be prepended.
+	 * Returns path as specified by this cmndlineOption. If path is relative, then this.path/ will be prepended.
 	 * 
 	 * @param cmd
 	 * @param cmndlineOption
@@ -355,6 +384,9 @@ public class ComputeProperties
 			p.setProperty(Parameters.PARAMETERS, this.parametersString());
 			p.setProperty(Parameters.WORKFLOW, this.workFlow);
 			if (null != this.defaults) p.setProperty(Parameters.DEFAULTS, this.defaults);
+			p.setProperty(Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
+			p.setProperty(Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+			p.setProperty(Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
 			p.setProperty(Parameters.BACKEND, this.backend);
 			p.setProperty(Parameters.RUNDIR, this.runDir);
 			p.setProperty(Parameters.RUNID, this.runId);
@@ -363,7 +395,15 @@ public class ComputeProperties
 			p.setProperty(Parameters.INTERVAL, this.interval);
 			p.setProperty(Parameters.USER_CMNDLINE, this.user);
 
-			p.store(new FileOutputStream(this.propertiesFile), "This file contains your molgenis-compute properties");
+			FileOutputStream fos = new FileOutputStream(this.propertiesFile);
+			try
+			{
+				p.store(fos, "This file contains your molgenis-compute properties");
+			}
+			finally
+			{
+				fos.close();
+			}
 		}
 		catch (Exception e)
 		{
@@ -397,6 +437,15 @@ public class ComputeProperties
 		Option d = OptionBuilder.hasArg()
 				.withDescription("Path to your workflow-defaults file. Default: " + Parameters.DEFAULTS_DEFAULT)
 				.withLongOpt(Parameters.DEFAULTS).create(Parameters.DEFAULTS);
+		options.addOption(OptionBuilder.hasArg()
+				.withDescription("Adds a custom header. Default: " + Parameters.CUSTOM_HEADER_DEFAULT)
+				.create(Parameters.CUSTOM_HEADER_COLUMN));
+		options.addOption(OptionBuilder.hasArg()
+				.withDescription("Adds a custom footer. Default: " + Parameters.CUSTOM_FOOTER_DEFAULT)
+				.create(Parameters.CUSTOM_FOOTER_COLUMN));
+		options.addOption(OptionBuilder.hasArg()
+				.withDescription("Set a custom submit.sh template. Default: " + Parameters.CUSTOM_SUBMIT_DEFAULT)
+				.create(Parameters.CUSTOM_SUBMIT_COLUMN));
 		Option b = OptionBuilder.hasArg()
 				.withDescription("Backend for which you generate. Default: " + Parameters.BACKEND_DEFAULT)
 				.withLongOpt(Parameters.BACKEND).create(Parameters.BACKEND_CMNDLINE_OPTION);
@@ -437,10 +486,13 @@ public class ComputeProperties
 						"Run jobs from current directory on current backend. When using --database this will return a 'id' for --pilot.")
 				.withLongOpt(Parameters.RUN).create(Parameters.RUN_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder
-				.withDescription("Supply user name to login to your backend. Default is your own user name.")
-				.hasArg()
-				.withLongOpt(Parameters.USER_CMNDLINE)
-				.create(Parameters.USER_CMNDLINE_OPTION));
+				.withDescription("Supply user name to login to your backend. Default is your own user name.").hasArg()
+				.withLongOpt(Parameters.USER_CMNDLINE).create(Parameters.USER_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Supply user pass to login to your backend. Default is not saved.").hasArg()
+				.withLongOpt(Parameters.PASS_CMNDLINE).create(Parameters.PASS_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder.withDescription("Clear properties file").withLongOpt(Parameters.CLEAR)
+				.create(Parameters.CLEAR));
 
 		return options;
 	}

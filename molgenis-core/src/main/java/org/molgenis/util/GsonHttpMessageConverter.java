@@ -39,8 +39,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * Converts objects to json string and vica versa If logging is set to debug it
- * will print the incoming and outgoing json strings
+ * Converts objects to json string and vica versa If logging is set to debug it will print the incoming and outgoing
+ * json strings
  * 
  * @author Roy Clarkson
  * @since 1.0
@@ -55,8 +55,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	private boolean prefixJson = false;
 
 	/**
-	 * Construct a new {@code GsonHttpMessageConverter} with a default
-	 * {@link Gson#Gson() Gson}.
+	 * Construct a new {@code GsonHttpMessageConverter} with a default {@link Gson#Gson() Gson}.
 	 */
 	public GsonHttpMessageConverter()
 	{
@@ -93,15 +92,17 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		return type;
 	}
 
+	public Gson getGson()
+	{
+		return gson;
+	}
+
 	/**
-	 * Indicates whether the JSON output by this view should be prefixed with
-	 * "{} &&". Default is false.
+	 * Indicates whether the JSON output by this view should be prefixed with "{} &&". Default is false.
 	 * <p>
-	 * Prefixing the JSON string in this manner is used to help prevent JSON
-	 * Hijacking. The prefix renders the string syntactically invalid as a
-	 * script so that it cannot be hijacked. This prefix does not affect the
-	 * evaluation of JSON, but if JSON validation is performed on the string,
-	 * the prefix would need to be ignored.
+	 * Prefixing the JSON string in this manner is used to help prevent JSON Hijacking. The prefix renders the string
+	 * syntactically invalid as a script so that it cannot be hijacked. This prefix does not affect the evaluation of
+	 * JSON, but if JSON validation is performed on the string, the prefix would need to be ignored.
 	 */
 	public void setPrefixJson(boolean prefixJson)
 	{

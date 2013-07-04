@@ -1,4 +1,8 @@
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+	  cache: false
+	});
 	// async load bootstrap modal and display
 	$(document).on('click', 'a.modal-href', function(e) {
 		e.preventDefault();
@@ -36,6 +40,7 @@ $(function() {
 					type : 'POST',
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					data : JSON.stringify(q),
 					contentType : 'application/json',
 					async : false,
@@ -48,6 +53,7 @@ $(function() {
 				$.ajax({
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					async : false,
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
@@ -71,6 +77,7 @@ $(function() {
 					type : 'POST',
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					data : JSON.stringify(q),
 					contentType : 'application/json',
 					async : true,
@@ -83,6 +90,7 @@ $(function() {
 				$.ajax({
 					dataType : 'json',
 					url : apiUri,
+					cache: true,
 					async : true,
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
@@ -324,4 +332,35 @@ function hideSpinner()
 	$(document).on('molgenis-login', function(e, msg) {
 		window.location.href=window.location.href;
 	});
+ });
+
+ $(function() {
+	 /**
+	 * Add download functionality to JQuery.
+	 * data can be string of parameters or array/object
+	 * 
+	 * Default method is POST
+	 * 
+	 * Usage:
+	 * <code>download('/localhost:8080', 'param1=value1&param2=value2')</code> Or:
+	 * <code>download('/localhost:8080', {param1 : 'value1', param2 : 'value2'})</code>
+	 * 
+	 */
+	 $.download = function(url, data, method) {
+		 if (!method) {
+			 method = 'POST';
+		 }
+			
+		 data = typeof data == 'string' ? data : $.param(data);
+				
+		 //split params into form inputs
+		 var inputs = [];
+		 $.each(data.split('&'), function() { 
+			 var pair = this.split('=');
+			 inputs.push('<input type="hidden" name="' + pair[0] + '" value="' + pair[1] + '" />'); 
+		 });
+			
+		 //send request and remove form from dom
+		 $('<form action="' + url +'" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
+	 }; 
  });

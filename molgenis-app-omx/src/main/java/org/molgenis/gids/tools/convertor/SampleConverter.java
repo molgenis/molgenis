@@ -1,16 +1,20 @@
 package org.molgenis.gids.tools.convertor;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.molgenis.io.TupleReader;
@@ -34,6 +38,7 @@ public class SampleConverter
 	private static String IDENTIFIER = "id_sample";
 	private List<String> featureColNames = null;
 	MakeEntityNameAndIdentifier mkObsProtocol = null;
+	private HashMap<String, HashSet<String>> hashMapCategories = new HashMap<String, HashSet<String>>();
 	MakeEntityNameAndIdentifier mkObsFeature = null;
 	List<MakeEntityNameAndIdentifier> mkObsProtocollist = new ArrayList<MakeEntityNameAndIdentifier>();
 	List<MakeEntityNameAndIdentifier> mkObsFeaturelist = new ArrayList<MakeEntityNameAndIdentifier>();
@@ -57,21 +62,21 @@ public class SampleConverter
 		{
 			for (TupleReader sheetReader : excelReader)
 			{
-				featureColNames = new ArrayList<String>();
+				this.featureColNames = new ArrayList<String>();
 				for (Iterator<String> it = sheetReader.colNamesIterator(); it.hasNext();)
 				{
 					String colName = it.next();
 					if (colName.equals(IDENTIFIER))
 					{
-						featureColNames.add(0, colName);
+						this.featureColNames.add(0, colName);
 					}
 					else
 					{
-						featureColNames.add(colName);
+						this.featureColNames.add(colName);
 					}
 				}
 
-				csvWriter.writeColNames(featureColNames);
+				csvWriter.writeColNames(this.featureColNames);
 				for (Iterator<Tuple> it = sheetReader.iterator(); it.hasNext();)
 				{
 					Tuple row = it.next();
@@ -86,6 +91,8 @@ public class SampleConverter
 						}
 						else
 						{
+							createCategoryList(row, sampleId);
+
 							csvWriter.write(row);
 						}
 					}
@@ -109,12 +116,29 @@ public class SampleConverter
 					}
 				}
 			}
-			makeProtocolList(featureColNames);
-			if (featureColNames != null)
+			makeProtocolList(this.featureColNames);
+			if (this.featureColNames != null)
 			{
 				makeFeaturesList();
 			}
 			mkmetadataExcelFile(listOfEntity);
+			// Write categories to file
+			PrintWriter printCategories = new PrintWriter(new File(OUTPUTDIR + "/categories.txt"));
+			for (Entry<String, HashSet<String>> entry : hashMapCategories.entrySet())
+			{
+				if (entry.getValue().size() > 1 && entry.getValue().size() < 100)
+				{
+					printCategories.append(entry.getKey() + "^");
+					for (String e : entry.getValue())
+					{
+						printCategories.append(e + "^");
+					}
+					printCategories.append("\n");
+				}
+
+			}
+			printCategories.close();
+
 		}
 		finally
 		{
@@ -133,6 +157,24 @@ public class SampleConverter
 			{
 			}
 		}
+	}
+
+	private void createCategoryList(Tuple row, String sampleId)
+	{
+		for (String feature : this.featureColNames)
+		{
+			HashSet<String> hashset = this.hashMapCategories.get(feature);
+			if (hashMapCategories.get(feature) == null)
+			{
+				hashMapCategories.put(feature, new HashSet<String>());
+			}
+			else
+			{
+				hashset.add(row.getString(feature));
+				hashMapCategories.put(feature, hashset);
+			}
+		}
+
 	}
 
 	public boolean checkIfDouble(String sample)

@@ -71,6 +71,8 @@
 									"feature": feature.id
 				                });
 								row.remove();
+								// restore focus
+								form.find('input:visible:first').focus();
 							});
 							deleteBtn.appendTo(deleteCol);
 							

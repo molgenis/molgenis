@@ -8,9 +8,9 @@
   	<#-- reset password form -->
 	<form id="resetpassword-form" class="form-horizontal">
 	  <div class="control-group">
-	    <label class="control-label" for="resetpassword-username">Username *</label>
+	    <label class="control-label" for="resetpassword-email">Email *</label>
 	    <div class="controls">
-	      <input type="text" id="resetpassword-username" name="username" required>
+	      <input type="email" id="resetpassword-email" name="email" required>
 	    </div>
 	  </div>
 	</form>

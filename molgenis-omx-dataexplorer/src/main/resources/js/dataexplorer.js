@@ -1,6 +1,6 @@
 (function($, w) {
 	"use strict";
-
+	
 	var ns = w.molgenis = w.molgenis || {};
 
 	var resultsTable = null;
@@ -14,9 +14,11 @@
 
 	// fill dataset select
 	ns.fillDataSetSelect = function(callback) {
-		restApi.getAsync('/api/v1/dataset', null, null, function(datasets) {
+		var maxNrOfDataSets = 500;
+		
+		restApi.getAsync('/api/v1/dataset', null, {num: maxNrOfDataSets}, function(datasets) {
 			var items = [];
-			// TODO deal with multiple entity pages
+			
 			$.each(datasets.items, function(key, val) {
 				items.push('<option value="' + val.href + '">' + val.name + '</option>');
 			});
@@ -30,12 +32,11 @@
 
 	ns.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
-			var protocol = restApi.get(protocolUri, [ "features", "subprotocols" ]);
-
+			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
+			
 			var children = [];
-			if (protocol.subprotocols) {
-				// TODO deal with multiple entity pages
-				$.each(protocol.subprotocols.items, function() {
+			if (subprotocols.items) {
+				$.each(subprotocols.items, function() {
 					children.push($.extend({
 						key : this.href,
 						title : this.name,
@@ -46,20 +47,45 @@
 					}, protocolOpts));
 				});
 			}
-			if (protocol.features) {
-				// TODO deal with multiple entity pages
-				$.each(protocol.features.items, function() {
-					children.push($.extend({
+			
+			var featureNodes = createFeatureNodes(protocolUri + '/features', featureOpts);
+			$.each(featureNodes, function() {
+				children.push(this);
+			});
+			
+			return children;
+		}
+		
+		function createFeatureNodes(protocolFeaturesUri, featureOpts) {
+			var features = restApi.get(protocolFeaturesUri);
+			var nodes = [];
+			
+			if (features.items) {
+				
+				$.each(features.items, function() {
+					nodes.push($.extend({
 						key : this.href,
 						title : this.name,
 						tooltip : this.description,
 						icon : "../../img/filter-bw.png",
 					}, featureOpts));
 				});
+				
+				if (features.nextHref) {
+					nodes.push($.extend({
+						key : 'more',
+						nextHref: features.nextHref,
+						title : '<i>more...</i>',
+						icon: false,
+						hideCheckbox: true,
+						tooltip : 'Load more'
+					}));
+				}
 			}
-			return children;
-		}
 
+			return nodes;
+		}
+		
 		function expandNodeRec(node) {
 			if (node.childList == undefined) {
 				node.toggleExpand();
@@ -92,12 +118,12 @@
 				return diff <= 0 ? -1 : 1;
 			});
 			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder ? null : node.data.key;
+				return node.data.isFolder || node.data.key == 'more' ? null : node.data.key;
 			});
 			ns.onFeatureSelectionChange(sortedFeatures);
 		}
 
-		restApi.getAsync(protocolUri, [ "features", "subprotocols" ], null, function(protocol) {
+		restApi.getAsync(protocolUri, null, null, function(protocol) {
 			var container = $('#feature-selection');
 			if (container.children('ul').length > 0) {
 				container.dynatree('destroy');
@@ -135,6 +161,13 @@
 					node.addChild(children);
 				},
 				onClick : function(node, event) {
+					
+					if (node.data.key == 'more') {
+						var nextFeatureNodes = createFeatureNodes(node.data.nextHref, {});
+						node.remove();
+						node.parent.addChild(nextFeatureNodes);
+					}
+					
 					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
 						ns.openFeatureFilterDialog(node.data.key);
 				},
@@ -275,89 +308,131 @@
 		pager.append($('</ul>'));
 	};
 
+	 ns.pad = function(number, length) {
+		 var str = "" + number;
+		 while (str.length < length) {
+			 str = '0' + str;
+		 }
+
+		 return str;
+	};
+
+	 ns.timezoneOffset = function() {
+		 var offset = new Date().getTimezoneOffset();
+		 offset = ((offset<0? '+':'-') + ns.pad(parseInt(Math.abs(offset/60)), 2) + ns.pad(Math.abs(offset%60), 2));
+		          
+		 return offset;
+	};
+
 	ns.openFeatureFilterDialog = function(featureUri) {
 		console.log("openFeatureFilterDialog: " + featureUri);
 		restApi.getAsync(featureUri, null, null, function(feature) {
 			var items = [];
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
-			items.push('<h3>Value (' + feature.dataType + ')</h3>');
+			items.push('<h3>Filter:</h3>');
 			var filter = null;
 			var config = featureFilters[featureUri];
-
+			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
+			
 			switch (feature.dataType) {
+			case "html":
+			case "mref":
 			case "xref":
+			case "email":
+			case "hyperlink":
+			case "text":
 			case "string":
-				if (config == null)
+				if (config == null) {
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus">');
-				else
+					applyButton.attr('disabled', 'disabled');
+				} else {
 					filter = $('<input type="text" placeholder="filter text" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+				}
+				
+				filter.keyup(function(e){
+					if (filter.val() == '') {
+						applyButton.attr('disabled', 'disabled');
+					} else {
+						applyButton.removeAttr('disabled');
+					}
+				});
+				
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						values : [ filter.val() ]
 					});
 				});
 				break;
 			case "date":
+			case "datetime":	
+				var datePickerFrom = $('<div id="from" class="input-append date" />');
+				var filterFrom;
+				
+				if (config == null) {
+					filterFrom = datePickerFrom.append($('<input id="date-feature-from"  type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+					applyButton.attr('disabled', 'disabled');
+				} else {
+					filterFrom = datePickerFrom.append($('<input id="date-feature-from"  type="text" value="' + config.values[0].replace("T", "'T'") + '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+				}
+				
+				datePickerFrom.on('changeDate', function(e) {
+					$('#date-feature-to').val($('#date-feature-from').val());
+					applyButton.removeAttr('disabled');
+				});
+				
+				var datePickerTo = $('<div id="to" class="input-append date" />');
+				var filterTo;
+				
 				if (config == null)
-					filter = $('<input type="date" autofocus="autofocus">');
+					filterTo = datePickerTo.append($('<input id="date-feature-to" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				else
-					filter = $('<input type="date" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+					filterTo = datePickerTo.append($('<input id="date-feature-to" type="text" value="' + config.values[1].replace("T", "'T'") + '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+				
+				filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
+				$( ".feature-filter-dialog" ).dialog( "option", "width", 710 );
+				
+				datePickerTo.on('changeDate', function(e){
+					applyButton.removeAttr('disabled');
+				});
+				
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						range: true,
+						values : [ $('#date-feature-from').val().replace("'T'", "T"), $('#date-feature-to').val().replace("'T'", "T")]
 					});
 				});
 				break;
-			case "datetime":
-				if (config == null)
-					filter = $('<input type="datetime-local" autofocus="autofocus">');
-				else
-					filter = $('<input type="datetime-local" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
-					ns.updateFeatureFilter(featureUri, {
-						name : feature.name,
-						identifier : feature.identifier,
-						type : feature.dataType,
-						values : [ $(this).val() ]
-					});
-				});
-				break;
+			case "long":
 			case "integer":
 			case "int":
 			case "decimal":
 				var fromFilter;
-				if (config == null)
+				var toFilter;
+				
+				if (config == null) {
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any">');
-				else
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');	
+					applyButton.attr('disabled', 'disabled');
+				} else {
 					fromFilter = $('<input id="from" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-
-				fromFilter.change(function() {
+					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');	
+				}
+				
+				fromFilter.on('keyup input', function() {
 					// If 'from' changed set 'to' at the same value
-					var value = $('#from').val();
-					$('#to').val(value);
-					ns.updateFeatureFilter(featureUri, {
-						name : feature.name,
-						identifier : feature.identifier,
-						type : feature.dataType,
-						values : [ value, value ],
-						range : true
-					});
+					$('#to').val($('#from').val());
 				});
 
-				var toFilter;
-				if (config == null)
-					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any">');
-				else
-					toFilter = $('<input id="to" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');
-
-				toFilter.change(function() {
+				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
+			
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
@@ -366,20 +441,37 @@
 						range : true
 					});
 				});
-
-				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
+				
+				$('input[type=number]').live('keyup input', function(e) {
+					if ((fromFilter.val() == '') && (toFilter.val() == '')) {
+						applyButton.attr('disabled', 'disabled');
+					} else {
+						applyButton.removeAttr('disabled');
+					}
+				});
 				break;
 			case "bool":
-				if (config == null)
-					filter = $('<input type="checkbox" autofocus="autofocus">');
-				else
-					filter = $('<input type="checkbox" autofocus="autofocus" value="' + config.values[0] + '">');
-				filter.change(function() {
+				if (config == null) {
+					filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" value="false">False</label>');
+					applyButton.attr('disabled', 'disabled');
+				} else {
+					if (config.values[0] == 'true') {
+						filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" value="false">False</label>');
+					} else {
+						filter = $('<label class="radio"><input type="radio" id="bool-feature-true" name="bool-feature" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl" name="bool-feature" checked value="false">False</label>');
+					}
+				}
+				
+				$('input[name=bool-feature]').live('change', function() {
+					applyButton.removeAttr('disabled');
+				});
+				
+				applyButton.click(function() {
 					ns.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $(this).val() ]
+						values : [ $('input[name=bool-feature]:checked').val() ]
 					});
 				});
 				break;
@@ -401,39 +493,95 @@
 						$.each(categories.items, function() {
 							var input;
 							if (config && ($.inArray(this.name, config.values) > -1)) {
-								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '" checked>');
+								input = $('<input type="checkbox" class="cat-value" name="' + feature.identifier + '" value="' + this.name + '" checked>');
 							} else {
-								input = $('<input type="checkbox" name="' + feature.identifier + '" value="' + this.name + '">');
+								input = $('<input type="checkbox" class="cat-value" name="' + feature.identifier + '" value="' + this.name + '">');
 							}
 
-							input.change(function() {
-								ns.updateFeatureFilter(featureUri, {
-									name : feature.name,
-									identifier : feature.identifier,
-									type : feature.dataType,
-									values : $.makeArray($('input[name="' + feature.identifier + '"]:checked').map(function() {
-										return $(this).val();
-									}))
-								});
-							});
 							filter.push($('<label class="checkbox">').html(' ' + this.name).prepend(input));
 						});
 					}
 				});
+				
+				if (config && config.values.length > 0) {
+					applyButton.removeAttr('disabled');
+				} else {
+					applyButton.attr('disabled', 'disabled');
+				}
+				
+				$('.cat-value').live('change', function() {
+					if ($('.cat-value:checked').length > 0) {
+						applyButton.removeAttr('disabled');
+					} else {
+						applyButton.attr('disabled', 'disabled');
+					}
+				});
+				
+				applyButton.click(function() {
+					ns.updateFeatureFilter(featureUri, {
+						name : feature.name,
+						identifier : feature.identifier,
+						type : feature.dataType,
+						values : $.makeArray($('.cat-value:checked').map(function() {
+							return $(this).val();
+						}))
+					});
+				});
 				break;
-			case "nominal":
-			case "ordinal":
-			case "code":
-			case "image":
-			case "file":
-			case "log":
-			case "data":
-			case "exe":
+			default:
 				console.log("TODO: '" + feature.dataType + "' not supported");
-				break;
+				return;
 			}
-
+			
+			var applyButtonHolder = $('<div id="applybutton-holder" />').append(applyButton);
+			
+			if ($.isArray(filter)) {
+				filter.push(applyButtonHolder);
+			} else {
+				filter.after(applyButtonHolder);
+			}
+			
 			$('.feature-filter-dialog').html(items.join('')).append(filter);
+			
+			if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
+				$('.feature-filter-dialog input[type=text]').autocomplete({
+					source: function( request, response ) {
+						$.ajax({
+							type : 'POST',
+							url : '/api/v1/characteristic?_method=GET',
+							data : JSON.stringify({
+								num : 15,
+								q : [ {
+									"field" : "name",
+									"operator" : "LIKE",
+									"value" : request.term
+								} ]
+							}),
+							contentType : 'application/json',
+							async : true,
+							success : function(characteristicList) {
+								response( $.map(characteristicList.items,function(item) {
+									return item.name;
+								}));
+							}
+						});
+					},
+					minLength: 2
+				});
+			} else if (feature.dataType == 'date')  {
+				$('.date').datetimepicker({
+					format: 'yyyy-MM-dd',
+					language: 'en',
+				    pickTime: false
+				});
+			} else if (feature.dataType == 'datetime') {
+				$('.date').datetimepicker({
+					format: "yyyy-MM-dd'T'hh:mm:ss" + ns.timezoneOffset(),
+					language: 'en',
+				    pickTime: true
+				});
+			}
+			
 			$('.feature-filter-dialog').dialog({
 				title : feature.name,
 				dialogClass : 'ui-dialog-shadow'
@@ -454,6 +602,7 @@
 
 	ns.onFeatureFilterChange = function(featureFilters) {
 		ns.createFeatureFilterList(featureFilters);
+		currentPage = 1;
 		ns.updateObservationSetsTable();
 	};
 
@@ -518,24 +667,28 @@
 	};
 	
 	ns.search = function(callback) {
-		searchApi.search(ns.createSearchRequest(), callback);
+		searchApi.search(ns.createSearchRequest(true), callback);
 	};
 
-	ns.createSearchRequest = function() {
+	ns.createSearchRequest = function(includeLimitOffset) {
 		var searchRequest = {
 			documentType : selectedDataSet.identifier,
-			queryRules : [ {
+			queryRules : [ ]
+		};
+		
+		if (includeLimitOffset) {
+			searchRequest.queryRules.push({
 				operator : 'LIMIT',
 				value : resultsTable.getMaxRows()
-			} ]
-		};
-
-		if (currentPage > 1) {
-			var offset = (currentPage - 1) * resultsTable.getMaxRows();
-			searchRequest.queryRules.push({
-				operator : 'OFFSET',
-				value : offset
 			});
+			
+			if (currentPage > 1) {
+				var offset = (currentPage - 1) * resultsTable.getMaxRows();
+				searchRequest.queryRules.push({
+					operator : 'OFFSET',
+					value : offset
+				});
+			}
 		}
 
 		var count = 0;
@@ -610,7 +763,15 @@
 
 		return searchRequest;
 	};
-
+	
+	ns.download = function() {
+		var jsonRequest = JSON.stringify(ns.createSearchRequest(false));
+		
+		parent.showSpinner();
+		$.download('/plugin/dataexplorer/download',{searchRequest :  jsonRequest});
+		parent.hideSpinner();
+	};
+	
 	// on document ready
 	$(function() {
 		resultsTable = new ns.ResultsTable();
@@ -625,5 +786,10 @@
 			width : 500,
 			autoOpen : false
 		});
+		
+		$('#download-button').click(function() {
+			ns.download();
+		});
+		
 	});
 }($, window.top));

@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import javax.servlet.ServletOutputStream;
@@ -15,19 +12,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.framework.tupletable.view.JQGridView;
-import org.molgenis.framework.tupletable.view.JQGridJSObjects.JQGridResult;
 import org.molgenis.framework.ui.html.HtmlWidget;
 import org.molgenis.util.ZipUtils;
 import org.molgenis.util.ZipUtils.DirectoryStructure;
 
-import com.google.gson.Gson;
-
 /**
- * Class containing a series of simple renderers to do the administrative
- * busywork required to render from a particular {@link TupleTable} to a
- * particular view (current options are an {@link AbstractExporter} or a
- * {@link HtmlWidget}. See the org.molgenis.modules.datatable.view package.
+ * Class containing a series of simple renderers to do the administrative busywork required to render from a particular
+ * {@link TupleTable} to a particular view (current options are an {@link AbstractExporter} or a {@link HtmlWidget}. See
+ * the org.molgenis.modules.datatable.view package.
  */
 public class Renderers
 {
@@ -42,34 +34,13 @@ public class Renderers
 	}
 
 	/**
-	 * Interface to render from a Table/request combination to a particular
-	 * view. Current implementations are trivial except {@link SPSSRenderer}.
+	 * Interface to render from a Table/request combination to a particular view. Current implementations are trivial
+	 * except {@link SPSSRenderer}.
 	 */
 	public interface Renderer
 	{
 		public void export(MolgenisRequest request, String datasetName, TupleTable tupleTable, int totalPages, int page)
 				throws TableException, IOException;
-	}
-
-	public static class JQGridRenderer implements Renderer
-	{
-		@Override
-		public void export(MolgenisRequest request, String fileName, TupleTable tupleTable, int totalPages,
-				int currentPage) throws TableException, IOException
-		{
-			final JQGridResult result = JQGridView.buildJQGridResults(tupleTable.getCount(), totalPages, currentPage,
-					tupleTable);
-
-			Writer writer = new OutputStreamWriter(request.getResponse().getOutputStream(), Charset.forName("UTF-8"));
-			try
-			{
-				new Gson().toJson(result, writer);
-			}
-			finally
-			{
-				writer.close();
-			}
-		}
 	}
 
 	public static class ExcelRenderer implements Renderer
@@ -100,13 +71,10 @@ public class Renderers
 	 * Several things need to happen to export to SPSS:
 	 * <ul>
 	 * <li>Several files need to be created in the temp dir:
-	 * <li>One textfile encoding the actual data, for example as tab-separated
-	 * values.</li>
-	 * <li>One .sps syntax script that will set the variables and labels in SPSS
-	 * and load the data.</li>
+	 * <li>One textfile encoding the actual data, for example as tab-separated values.</li>
+	 * <li>One .sps syntax script that will set the variables and labels in SPSS and load the data.</li>
 	 * <li>One textfile with instructions on how to use the script in SPSS.</li>
-	 * <li>These files should be compressed together into a .zip file for
-	 * download.</li>
+	 * <li>These files should be compressed together into a .zip file for download.</li>
 	 * </ul>
 	 */
 	public static class SPSSRenderer implements Renderer

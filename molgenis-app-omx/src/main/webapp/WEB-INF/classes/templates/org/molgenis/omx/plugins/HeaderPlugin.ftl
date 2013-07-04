@@ -5,4 +5,13 @@
 		<img src="${model.hrefLogo?html}">
 	</a>
 </div>
+<div id="login-modal-container-header"></div>
+<div class="login-header">
+	<#assign login = screen.login/>
+	<#if !login.authenticated>
+		<div><a class="modal-href" href="/account/login" data-target="login-modal-container-header">login/register</a></div>
+	<#else>
+		<div><a href="/account/logout">logout</a></div>
+	</#if>
+</div>
 </#macro>

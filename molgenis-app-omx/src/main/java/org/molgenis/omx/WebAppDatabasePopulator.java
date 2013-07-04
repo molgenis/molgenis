@@ -1,6 +1,9 @@
 package org.molgenis.omx;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.molgenis.MolgenisDatabasePopulator;
@@ -14,9 +17,10 @@ import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.servlet.GuiService;
+import org.molgenis.ui.ContactPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
-import org.molgenis.ui.DataSetViewerPluginPlugin;
 import org.molgenis.ui.ProtocolViewerControllerPlugin;
+import org.molgenis.ui.ReferencesPluginPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,23 +35,29 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 	protected void initializeApplicationDatabase(Database database) throws Exception
 	{
 
+		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
+		runtimePropertyMap.put(GuiService.KEY_APP_NAME, "OMX");
+		runtimePropertyMap.put("app.href.logo", "img/logo_molgenis_letterbox.png");
+		runtimePropertyMap.put("app.home.html", "Welcome to Molgenis!");
+		runtimePropertyMap.put("app.background", "There is no background information");
+		runtimePropertyMap.put("app.news", "There is no news ");
+		runtimePropertyMap.put("app.href.css", "");
+		runtimePropertyMap.put("app.references", "There are no references");
+		runtimePropertyMap.put("app.contact", "There is no contact information");
+
 		Login login = database.getLogin();
 		database.setLogin(null);
 		login.login(database, Login.USER_ADMIN_NAME, adminPassword);
 
-		// set app name
-		RuntimeProperty runtimeProperty = new RuntimeProperty();
-		runtimeProperty.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + GuiService.KEY_APP_NAME);
-		runtimeProperty.setName(GuiService.KEY_APP_NAME);
-		runtimeProperty.setValue("OMX");
-		database.add(runtimeProperty);
-
-		// set logo
-		RuntimeProperty runtimePropertyLogo = new RuntimeProperty();
-		runtimePropertyLogo.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + "app.href.logo");
-		runtimePropertyLogo.setName("app.href.logo");
-		runtimePropertyLogo.setValue("img/logo_default.png");
-		database.add(runtimePropertyLogo);
+		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
+		{
+			RuntimeProperty runtimeProperty = new RuntimeProperty();
+			String app = entry.getKey();
+			runtimeProperty.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + app);
+			runtimeProperty.setName(app);
+			runtimeProperty.setValue(entry.getValue());
+			database.add(runtimeProperty);
+		}
 
 		List<MolgenisGroup> listMolgenisGroup = database.find(MolgenisGroup.class, new QueryRule(MolgenisGroup.NAME,
 				Operator.EQUALS, "AllUsers"));
@@ -77,7 +87,8 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		}
 
 		// Set plugin permissions
-		createPermission(database, DataSetViewerPluginPlugin.class, groupName, "read");
+		createPermission(database, ContactPluginPlugin.class, groupName, "read");
+		createPermission(database, ReferencesPluginPlugin.class, groupName, "read");
 		createPermission(database, DataExplorerPluginPlugin.class, groupName, "read");
 		createPermission(database, ProtocolViewerControllerPlugin.class, groupName, "read");
 

@@ -287,13 +287,14 @@
 					var entityId = object["id"];
 					//split the path to get all ancestors;
 					for(var i = 0; i < nodes.length; i++) {
+						var isFeature = nodes[i].indexOf("F") === 0;
+						if(isFeature) nodes[i] = nodes[i].substring(1);
 						if(!cachedNode[nodes[i]]){
 							var entityInfo = null;
 							var options = null;
-							var isFeature = nodes[i].indexOf("F") === 0;
 							//this is the last node and check if this is a feature
 							if(isFeature){
-								entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i].substring(1));
+								entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i]);
 								options = {
 									isFolder : false,
 								};
@@ -306,8 +307,15 @@
 									children : []
 								};
 								//check if the last node is protocol if so recursively adding all subNodes
-								if(i === nodes.length - 1){
-									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : true});
+								if(i === nodes.length - 1) {
+									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
+									$.each(options.children, function(index, child){
+										var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
+										if(!cachedNode[nodeId]){
+											if(child.isFolder) child.children = [];
+											cachedNode[nodeId] = child;
+										}
+									});
 								}
 							}
 							options = $.extend({
@@ -322,6 +330,7 @@
 							//locate the node in dynatree and otherwise create the node and insert it
 							if(i != 0){
 								var parentNode = cachedNode[nodes[i-1]];
+								parentNode.expand = true;
 								parentNode["children"].push(options);
 								cachedNode[nodes[i-1]] = parentNode;
 							}
@@ -331,6 +340,7 @@
 						}else{
 							if (nodes[i] === entityId.toString() && i != 0) {
 								var parentNode = cachedNode[nodes[i-1]];
+								parentNode.expand = true;
 								var childNode = cachedNode[nodes[i]];
 								if($.inArray(childNode, parentNode.children) === -1){ 
 									parentNode.children.push(cachedNode[nodes[i]]);
@@ -345,10 +355,10 @@
 				rootNode.addChild(topNodes);
 				
 				if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
-					if(topNodes.length === 0) {
-						rootNode.tree.getRoot().ul.hidden = true;
+				if(topNodes.length === 0) {
+					$('#dataset-browser').hide();
 					$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
-				} else rootNode.tree.getRoot().ul.hidden = false;
+				} else $('#dataset-browser').show();
 			});
 		});
 	};
@@ -431,7 +441,7 @@
 		treePrevState = null;
 		selectedAllNodes = null;
 		$("#search-text").val("");
-		if(rootNode.tree.getRoot().ul.hidden == true) rootNode.tree.getRoot().ul.hidden = false;
+		$('#dataset-browser').show();
 		if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 		updateFeatureSelection(rootNode.tree);
 	};
