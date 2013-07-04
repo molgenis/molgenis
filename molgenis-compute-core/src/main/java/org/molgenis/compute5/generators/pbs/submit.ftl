@@ -28,7 +28,7 @@ else
 	<#foreach d in t.previousTasks>
 		if [[ -n "$${d}" ]]; then
 			dependenciesExist=true
-			dependencies="<#noparse>${dependencies}</#noparse>:\$$${d}"
+			dependencies="<#noparse>${dependencies}</#noparse>:$${d}"
 		fi
 	</#foreach>
 	if ! $dependenciesExist; then
