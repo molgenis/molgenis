@@ -184,7 +184,15 @@ public class ${entity.name}Controller
 	{
 		final Set<String> expandFields = expandFieldsStr != null ? new HashSet<String>(Arrays.asList(expandFieldsStr)) : null;
 		java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
-		EntityPager<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Pager = new EntityPager<${field.xrefEntity.name}>(entityCollectionRequest.getStart(), entityCollectionRequest.getNum(), ${field.xrefEntity.name?uncap_first}Collection.size(), ${field.xrefEntity.name?uncap_first}Collection);
+		
+		int total = ${field.xrefEntity.name?uncap_first}Collection.size();
+		int toIndex = entityCollectionRequest.getStart() + entityCollectionRequest.getNum();
+		${field.xrefEntity.name?uncap_first}Collection = ${field.xrefEntity.name?uncap_first}Collection.subList(entityCollectionRequest.getStart(),
+				toIndex > total ? total : toIndex);
+		
+		
+		EntityPager<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Pager = new EntityPager<${field.xrefEntity.name}>(entityCollectionRequest.getStart(), entityCollectionRequest.getNum(), total, ${field.xrefEntity.name?uncap_first}Collection);
+		
 		return new EntityCollectionResponse<${field.xrefEntity.name}Response>(${field.xrefEntity.name?uncap_first}Pager, Lists.newArrayList(Iterables.transform(${field.xrefEntity.name?uncap_first}Collection,
 				new Function<${field.xrefEntity.name}, ${field.xrefEntity.name}Response>()
 				{
@@ -201,7 +209,7 @@ public class ${entity.name}Controller
 							throw new RuntimeException(e);
 						}
 					}
-				})), "/api/v1/${field.xrefEntity.name?lower_case}");
+				})), "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.getId() + "/${field.name?uncap_first}");
 	}
 		</#if>
 	</#if>
