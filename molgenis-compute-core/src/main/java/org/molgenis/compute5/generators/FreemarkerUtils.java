@@ -16,7 +16,7 @@ public class FreemarkerUtils
 		Configuration conf = new Configuration();
 		conf.setClassForTemplateLoading(this.getClass(), "");
 		conf.setObjectWrapper(new DefaultObjectWrapper());
-	
+
 		Template template = conf.getTemplate(templatePath);
 		dotFile.getParentFile().mkdirs();
 		FileWriter out = new FileWriter(dotFile);
@@ -27,6 +27,10 @@ public class FreemarkerUtils
 		catch (Exception e)
 		{
 			throw new IOException(e);
+		}
+		finally
+		{
+			out.close();
 		}
 	}
 
