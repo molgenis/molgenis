@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class ComputeCommandLineTest
 {
 	@Test
-	public void testHelp1()
+	public void testHelp()
 	{
 		try
 		{
@@ -26,6 +26,27 @@ public class ComputeCommandLineTest
 			Assert.fail("compute -h does not work");
 		}
 
+	}
+
+	@Test
+	public void testClear()
+	{
+		try
+		{
+			ComputeCommandLine.main(new String[]{"--clear"});
+
+			File f = new File(".compute.properties");
+
+			if(f.exists())
+			{
+				Assert.fail(".compute.properties is not deleted");
+			}
+
+		}
+		catch (Exception e)
+		{
+			Assert.fail("compute --clear does not work");
+		}
 	}
 
 	@Test
@@ -47,7 +68,10 @@ public class ComputeCommandLineTest
 						"--parameters","src/main/resources/workflows/benchmark/parameters.csv",
 						"--rundir","src/main/resources/workflows/benchmark/run",
 						"--backend","pbs",
-						"--database","none"});
+						"--database","none",
+						"-header", "src/main/resources/workflows/benchmark/header.ftl",
+						"-footer", "src/main/resources/workflows/benchmark/footer.ftl"
+						});
 
 
 		System.out.println("--- Test Compute Properties ---");
@@ -110,14 +134,26 @@ public class ComputeCommandLineTest
 			Assert.fail("user.env is not generated");
 		}
 
-//		System.out.println("Test correct headers insertion");
-//
-//		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
-//
-//		if(!script.contains("# My own custom header"))
-//		{
-//			Assert.fail("headers/footers are not correctly inserted");
-//		}
+		System.out.println("--- Test correct headers insertion ---");
+
+		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
+
+		if(!script.contains("# My own custom header"))
+		{
+			Assert.fail("header is not correctly inserted");
+		}
+
+		if(!script.contains("# My own custom footer"))
+		{
+			Assert.fail("footer is not correctly inserted");
+		}
+
+		System.out.println("--- Test correct data management ---");
+
+		if(!script.contains("getFile()") || !script.contains("putFile()"))
+		{
+			Assert.fail("get/put file is not inserted");
+		}
 	}
 
 	@Test
@@ -138,7 +174,7 @@ public class ComputeCommandLineTest
 				"--workflow", "workflow.csv",
 				"--defaults", "workflow.defaults.csv",
 				"--parameters","parameters.csv",
-				"--rundir","benchmark/run",
+				"--rundir","src/main/resources/workflows/benchmark/run",
 				"--backend","pbs",
 				"--database","none"});
 
@@ -146,10 +182,10 @@ public class ComputeCommandLineTest
 		System.out.println("--- Test Compute Properties ---");
 		String resultProperties =  getFileAsString(".compute.properties");
 
-//		if(!resultProperties.contains("rundir=src/main/resources/workflows/benchmark/run"))
-//		{
-//			Assert.fail("rundir parameter is failed");
-//		}
+		if(!resultProperties.contains("rundir=src/main/resources/workflows/benchmark/run"))
+		{
+			Assert.fail("rundir parameter is failed");
+		}
 
 		if(!resultProperties.contains("defaults=src/main/resources/workflows/benchmark/workflow.defaults.csv"))
 		{
@@ -171,46 +207,58 @@ public class ComputeCommandLineTest
 			Assert.fail("backend parameter is failed");
 		}
 
-//		System.out.println("--- Test Created Files ---");
-//
-//		File file = new File("src/main/resources/workflows/benchmark/run/step1_0.sh");
-//		if (!file.exists())
-//		{
-//			Assert.fail("step1_0.sh is not generated");
-//		}
-//
-//		file = new File("src/main/resources/workflows/benchmark/run/step1_1.sh");
-//		if (!file.exists())
-//		{
-//			Assert.fail("step1_1.sh is not generated");
-//		}
-//
-//		file = new File("src/main/resources/workflows/benchmark/run/step2_0.sh");
-//		if (!file.exists())
-//		{
-//			Assert.fail("step2_0.sh is not generated");
-//		}
-//
-//		file = new File("src/main/resources/workflows/benchmark/run/submit.sh");
-//		if (!file.exists())
-//		{
-//			Assert.fail("submit.sh is not generated");
-//		}
-//
-//		file = new File("src/main/resources/workflows/benchmark/run/user.env");
-//		if (!file.exists())
-//		{
-//			Assert.fail("user.env is not generated");
-//		}
-//
-//		System.out.println("Test correct headers insertion");
-//
-//		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
-//
-//		if(!script.contains("# My own custom header"))
-//		{
-//			Assert.fail("headers/footers are not correctly inserted");
-//		}
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File("src/main/resources/workflows/benchmark/run/step1_0.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/step1_1.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/step2_0.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/submit.sh");
+		if (!file.exists())
+		{
+			Assert.fail("submit.sh is not generated");
+		}
+
+		file = new File("src/main/resources/workflows/benchmark/run/user.env");
+		if (!file.exists())
+		{
+			Assert.fail("user.env is not generated");
+		}
+
+		System.out.println("--- Test correct headers insertion ---");
+
+		String script = getFileAsString("src/main/resources/workflows/benchmark/run/step1_0.sh");
+
+		if(!script.contains("# My own custom header"))
+		{
+			Assert.fail("header is not correctly inserted");
+		}
+
+		if(!script.contains("# My own custom footer"))
+		{
+			Assert.fail("footer is not correctly inserted");
+		}
+
+		System.out.println("--- Test correct data management ---");
+
+		if(!script.contains("getFile()") || !script.contains("putFile()"))
+		{
+			Assert.fail("get/put file is not inserted");
+		}
 	}
 
 	private final String getFileAsString(String filename) throws IOException

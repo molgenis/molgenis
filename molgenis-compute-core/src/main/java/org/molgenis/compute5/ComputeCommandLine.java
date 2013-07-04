@@ -68,7 +68,7 @@ public class ComputeCommandLine
 	{
 		Compute compute = new Compute(computeProperties);
 
-		if (!computeProperties.create)
+		if (!computeProperties.create && !computeProperties.clear)
 		{// inform user:
 			System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
 			if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
@@ -89,6 +89,21 @@ public class ComputeCommandLine
 		if (computeProperties.create)
 		{
 			new CreateWorkflowGenerator(computeProperties.createWorkflow);
+		}
+
+		if (computeProperties.clear)
+		{
+			File file = new File(Parameters.PROPERTIES);
+
+			if(file.delete())
+			{
+				System.out.println(file.getName() + " is cleared");
+			}
+			else
+			{
+				System.out.println("Fail to clear " + file.getName());
+			}
+			return null;
 		}
 
 		if (computeProperties.generate)

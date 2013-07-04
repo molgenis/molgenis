@@ -19,13 +19,13 @@ Typical command to generate and run jobs:
 
 If you don't like to use defaults, above translates to:
 
-	molgenis	--generate --run
-				--workflow workflow/workflow.csv \
-				--defaults workflow/defaults.csv \
-				--parameters parameters.csv \
-				--rundir ./run \
-				--backend pbs \
-				--database none
+	molgenis --generate --run
+			 --workflow workflow/workflow.csv \
+			 --defaults workflow/defaults.csv \
+			 --parameters parameters.csv \
+			 --rundir ./run \
+			 --backend pbs \
+			 --database none
 
 Alternatively you can configure molgenis compute stepwise:
 	
@@ -40,12 +40,11 @@ Download MOLGENIS compute as binary zip, see http://www.molgenis.org/wiki/Comput
 	unzip molgenis_compute-latest.zip
 	cd molgenis-compute-core-0.0.1-SNAPSHOT
 	export PATH=${PATH}:${PWD}
-	cd ..
 	
 Run your first workflow example on your local machine
 
 	( Not available yet. Please follow the example below	)
-	( in Section '1. Design a workflow' instead				)
+	( in Section '1. Design a workflow' instead.			)
 	(														)
 	( mkdir demo1											)
 	( cd demo1												)
@@ -65,7 +64,7 @@ A typical workflow directory looks as follows:
 	defaults.csv			#default parameters for workflow.csv (optional)
 	parameters.csv			#parameters you want to run analysis on
 
-Create a new workflow directory using:
+Create a new workflow directory having all of these files using:
 	
 	molgenis --create myworkflow
 	cd myworkflow
@@ -175,7 +174,7 @@ Example commands in your 'analysis.sh':
 	molgenis -w path/workflow -p parameters.csv -j ./jobs2
 
 ### parameters.csv
-Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9) and parameter values in each rown. Use quotes to escape commas, e.g. "a,b". 
+Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b". 
 
 Each value is one of the following:
 
@@ -208,6 +207,9 @@ Merged and expanded result for f1.csv + f2.csv:
 	x,   v1,  1,    b,    file1
 	y,   v1,  2,    a,	  file2
 	y,   v1,  2,    b,    file2
+	
+#### Reserved words
+MOLGENIS compute has some parameters that are part of its framework. Consequently, the names of these parameters are reserved words: user, port, interval, path, workflow, defaults, parameters, rundir, runid, backend, database, walltime, nodes, ppn, queue, mem. These parameters [[check: also the last 5?]] are available in each of the protocols, i.e. without mapping them in the workflow.csv.
 
 ### Generate and run jobs
 Analysis jobs will be generated for each unique combination of '#string' inputs (see 'protocols').
@@ -461,6 +463,32 @@ Below options, --full_name or -short. Options can be combined:
 								This parameter can be repeated.
 	--pilot-command				Put a custom command for pilot job submission
 	--pilot-delay				Change the polling time (default: 10 seconds)
+
+### List of reserved words
+
+We have a list of words, which are reserved and cannot be used in compute to name parameters etc. These words are listed below:
+
+	port
+	interval
+	workflow
+	path
+	defaults
+	parameters
+	rundir
+	runid
+	backend
+	database
+	walltime
+	nodes
+	ppn
+	queue
+	mem
+	_NA
+	password
+	user
+	header
+	footer
+	submit
 
 ## wish lists
 * multiple default files
