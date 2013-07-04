@@ -2,12 +2,10 @@ package org.molgenis.dataexplorer.search;
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.util.DataSetImportedEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
  * Indexes not yet indexed DataSets at application startup and when a dataset is imported
@@ -15,42 +13,30 @@ import org.springframework.context.event.ContextRefreshedEvent;
  * @author erwin
  * 
  */
-public class StartUpIndexer implements ApplicationListener<ApplicationEvent>
+public class IndexingEventListener implements ApplicationListener<ApplicationEvent>
 {
 	private final DataSetsIndexer dataSetsIndexer;
 
-	public StartUpIndexer(DataSetsIndexer dataSetsIndexer)
+	public IndexingEventListener(DataSetsIndexer dataSetsIndexer)
 	{
 		if (dataSetsIndexer == null) throw new IllegalArgumentException("DataSetsIndexer is null");
 		this.dataSetsIndexer = dataSetsIndexer;
 	}
 
-	// Index new datasets after the app config is loaded
 	@Override
 	public void onApplicationEvent(ApplicationEvent event)
 	{
-
 		try
 		{
-			if (event instanceof ContextRefreshedEvent)
-			{
-				dataSetsIndexer.indexNew();
-			}
-			else if (event instanceof DataSetImportedEvent)
+			if (event instanceof DataSetImportedEvent)
 			{
 				DataSetImportedEvent dataSetImportedEvent = (DataSetImportedEvent) event;
 				dataSetsIndexer.index(Arrays.asList(dataSetImportedEvent.getDataSetId()));
 			}
 		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
 		catch (TableException e)
 		{
 			throw new RuntimeException(e);
 		}
-
 	}
-
 }
