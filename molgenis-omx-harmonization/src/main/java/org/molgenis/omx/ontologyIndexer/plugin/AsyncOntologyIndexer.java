@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
-import org.molgenis.omx.ontologyIndexer.table.OntologyModel;
+import org.molgenis.omx.ontologyIndexer.table.OntologyLoader;
 import org.molgenis.omx.ontologyIndexer.table.OntologyTable;
 import org.molgenis.omx.ontologyIndexer.table.OntologyTermTable;
 import org.molgenis.search.SearchService;
@@ -50,7 +50,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 
 		try
 		{
-			OntologyModel model = new OntologyModel(ontologyFile);
+			OntologyLoader model = new OntologyLoader(ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
 			searchService.indexTupleTable("ontology" + ontologyUri, new OntologyTable(model, db));
 			searchService.indexTupleTable("ontologyTerm" + ontologyUri, new OntologyTermTable(model, db));
