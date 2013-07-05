@@ -99,12 +99,11 @@ public class DataSetImporter
 
 		int rownr = 0;
 		int transactionRows = Math.max(1, 5000 / featureMap.size());
+		db.beginTx();
 		try
 		{
 			for (Tuple row : sheetReader)
 			{
-				if (rownr % transactionRows == 0) db.beginTx();
-
 				// Skip empty rows
 				if (!row.isEmpty())
 				{
@@ -143,9 +142,18 @@ public class DataSetImporter
 						db.add(entry.getValue());
 				}
 
-				if (++rownr % transactionRows == 0) db.commitTx();
+				if (++rownr % transactionRows == 0)
+				{
+					db.getEntityManager().flush();
+					db.getEntityManager().clear();
+				}
 			}
-			if (rownr % transactionRows != 0) db.commitTx();
+			if (rownr % transactionRows != 0)
+			{
+				db.getEntityManager().flush();
+				db.getEntityManager().clear();
+			}
+			db.commitTx();
 		}
 		catch (DatabaseException e)
 		{

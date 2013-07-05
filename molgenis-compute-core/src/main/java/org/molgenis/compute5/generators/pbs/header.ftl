@@ -92,7 +92,7 @@ outputs()
       echo "skipped" 1>&2
       exit 0;
     else
-      return;
+      return 0;
     fi
   done
 }
@@ -114,7 +114,7 @@ alloutputsexist()
       sleep 30
       exit 0;
   else
-      return;
+      return 0;
   fi
 }
 </#noparse>
