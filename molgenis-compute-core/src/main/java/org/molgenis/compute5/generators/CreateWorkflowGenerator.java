@@ -15,45 +15,20 @@ import java.util.Enumeration;
 public class CreateWorkflowGenerator
 {
 	private static final Logger LOG = Logger.getLogger(CreateWorkflowGenerator.class);
-	public static final String WORKFOW_NAME = "myworkflow";
+	public static final String WORKFlOW_NAME = "workflows/myworkflow";
 
 
 	public CreateWorkflowGenerator(String createWorkflowDir)
 	{
 		File target = new File(createWorkflowDir);
+		File file = new File(Thread.currentThread().getContextClassLoader().getResource(WORKFlOW_NAME).getFile());
 
 		try
 		{
-			Enumeration<URL> en=getClass().getClassLoader().getResources("workflows");
-			if (en.hasMoreElements()) {
-				URL metaInf=en.nextElement();
-				File fileMetaInf=new File(metaInf.toURI());
-
-				File[] files=fileMetaInf.listFiles();
-				//or
-				String[] filenames=fileMetaInf.list();
-
-				int index = -1;
-				for (int i = 0; i < filenames.length; i++)
-				{
-					//System.out.println("file " + filenames[i]);
-					if(filenames[i].equalsIgnoreCase(WORKFOW_NAME))
-						index = i;
-				}
-
-				if(index >= 0)
-				{
-					copyFolder(files[index], target.getAbsoluteFile());
-					LOG.info("... Basic workflow structure is created");
-
-				}
-				else
-					throw new Exception("The original workflow is absent");
-
-			}
-
+			copyFolder(file, target.getAbsoluteFile());
+			LOG.info("... Basic workflow structure is created");
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
