@@ -37,11 +37,10 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	{
 		List<Tuple> tuples = new ArrayList<Tuple>();
 		createOntologyTable(tuples, loader);
-
 		return tuples.iterator();
 	}
 
-	public void createOntologyTable(List<Tuple> tuples, OntologyLoader model)
+	private void createOntologyTable(List<Tuple> tuples, OntologyLoader model)
 	{
 		int count = 0;
 		for (OWLClass subClass : model.getTopClasses())
@@ -53,7 +52,6 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 
 	private void recursiveAddTuple(String termPath, OWLClass cls, OntologyLoader model, List<Tuple> tuples)
 	{
-
 		String label = model.getLabel(cls).replaceAll("[^a-zA-Z0-9 ]", " ");
 		List<String> synonyms = new ArrayList<String>();
 		synonyms.add(label);
@@ -109,8 +107,10 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	}
 
 	@Override
-	public int getCount() throws TableException
+	public int getCount()
 	{
-		return 1;
+		List<Tuple> tuples = new ArrayList<Tuple>();
+		createOntologyTable(tuples, loader);
+		return tuples.size();
 	}
 }
