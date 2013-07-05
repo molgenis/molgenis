@@ -15,13 +15,13 @@ import java.util.Enumeration;
 public class CreateWorkflowGenerator
 {
 	private static final Logger LOG = Logger.getLogger(CreateWorkflowGenerator.class);
-	public static final String WORKFOW_NAME = "workflows/myworkflow";
+	public static final String WORKFlOW_NAME = "workflows/myworkflow";
 
 
 	public CreateWorkflowGenerator(String createWorkflowDir)
 	{
 		File target = new File(createWorkflowDir);
-		File file = new File(Thread.currentThread().getContextClassLoader().getResource(WORKFOW_NAME).getFile());
+		File file = new File(Thread.currentThread().getContextClassLoader().getResource(WORKFlOW_NAME).getFile());
 
 		try
 		{
