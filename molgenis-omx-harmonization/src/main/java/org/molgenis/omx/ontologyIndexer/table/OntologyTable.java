@@ -63,8 +63,16 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 	}
 
 	@Override
-	public int getCount() throws TableException
+	public int getCount()
 	{
-		return 1;
+		List<Tuple> tuples = new ArrayList<Tuple>();
+
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(ONTOLOGY_URL, loader.getOntologyIRI());
+		tuple.set(ONTOLOGY_LABEL, loader.getOntologyLabel());
+		tuple.set(ENTITY_TYPE, "indexedOntology");
+		tuples.add(tuple);
+
+		return tuples.size();
 	}
 }
