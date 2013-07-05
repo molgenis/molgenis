@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,56 +82,97 @@ public class IndexRequestGenerator
 		return bulkRequest;
 	}
 
-	public BulkRequestBuilder buildIndexRequest(String documentName, TupleTable tupleTable)
+	public Iterable<BulkRequestBuilder> buildIndexRequest(final String documentName, final TupleTable tupleTable)
 	{
-		BulkRequestBuilder bulkRequest = client.prepareBulk();
-
-		Set<String> xrefColumns = new HashSet<String>();
-		try
+		return new Iterable<BulkRequestBuilder>()
 		{
-			for (Field field : tupleTable.getColumns())
+			@Override
+			public Iterator<BulkRequestBuilder> iterator()
 			{
-				boolean isXref = field.getType().getEnumType().equals(FieldTypeEnum.XREF);
-				if (isXref) xrefColumns.add(field.getName());
-			}
-		}
-		catch (TableException e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		int count = 0;
-		for (Tuple tuple : tupleTable)
-		{
-			Map<String, Object> doc = new HashMap<String, Object>();
-			for (String columnName : tuple.getColNames())
-			{
-				// Serialize collections to be able to sort on them, elasticsearch does not support sorting on list
-				// fields
-				Object value = tuple.get(columnName);
-				if (value instanceof Collection)
+				try
 				{
-					value = Joiner.on(" , ").join((Collection<?>) value);
+					return indexRequestIterator(documentName, tupleTable);
 				}
-
-				doc.put(columnName, value);
+				catch (TableException e)
+				{
+					throw new RuntimeException(e);
+				}
 			}
+		};
+	}
 
-			List<Object> xrefValues = new ArrayList<Object>();
-			for (String columnName : tuple.getColNames())
-			{
-				if (xrefColumns.contains(columnName)) xrefValues.add(tuple.get(columnName));
-
-			}
-			doc.put("_xrefvalue", xrefValues);
-
-			IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
-
-			request.setSource(doc);
-			bulkRequest.add(request);
-			LOG.info("Added [" + (++count) + "] documents");
+	private Iterator<BulkRequestBuilder> indexRequestIterator(final String documentName, final TupleTable tupleTable)
+			throws TableException
+	{
+		final Set<String> xrefColumns = new HashSet<String>();
+		for (Field field : tupleTable.getColumns())
+		{
+			boolean isXref = field.getType().getEnumType().equals(FieldTypeEnum.XREF);
+			if (isXref) xrefColumns.add(field.getName());
 		}
 
-		return bulkRequest;
+		return new Iterator<BulkRequestBuilder>()
+		{
+			private final int rows = tupleTable.getCount();
+			private final int docsPerBulk = 1000;
+			private final Iterator<Tuple> it = tupleTable.iterator();
+
+			private int row = 0;
+
+			@Override
+			public boolean hasNext()
+			{
+				return it.hasNext();
+			}
+
+			@Override
+			public BulkRequestBuilder next()
+			{
+				BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+				final int maxRow = Math.min(row + docsPerBulk, rows);
+				for (; row < maxRow; ++row)
+				{
+					Tuple tuple = it.next();
+					Map<String, Object> doc = new HashMap<String, Object>();
+					for (String columnName : tuple.getColNames())
+					{
+						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on
+						// list
+						// fields
+						Object value = tuple.get(columnName);
+						if (value instanceof Collection)
+						{
+							value = Joiner.on(" , ").join((Collection<?>) value);
+						}
+
+						doc.put(columnName, value);
+					}
+
+					List<Object> xrefValues = new ArrayList<Object>();
+					for (String columnName : tuple.getColNames())
+					{
+						if (xrefColumns.contains(columnName)) xrefValues.add(tuple.get(columnName));
+
+					}
+					doc.put("_xrefvalue", xrefValues);
+
+					IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
+
+					request.setSource(doc);
+					bulkRequest.add(request);
+					if ((row + 1) % 100 == 0) LOG.info("Added [" + (row + 1) + "] documents");
+				}
+				LOG.info("Added [" + row + "] documents");
+
+				return bulkRequest;
+			}
+
+			@Override
+			public void remove()
+			{
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }
