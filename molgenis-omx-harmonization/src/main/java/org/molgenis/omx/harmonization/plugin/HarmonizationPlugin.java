@@ -6,6 +6,7 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 
 public class HarmonizationPlugin extends PluginModel<Entity>
@@ -56,6 +57,7 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 		{
 			Integer selectedDataSetId = Integer.parseInt(request.getString("selectedDataSet"));
 			model.setSelectedDataSet(db.findById(DataSet.class, selectedDataSetId));
+			getOntologyAnnotator().annotate(selectedDataSetId);
 		}
 	}
 
@@ -75,5 +77,10 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private OntologyAnnotator getOntologyAnnotator()
+	{
+		return ApplicationContextProvider.getApplicationContext().getBean(OntologyAnnotator.class);
 	}
 }
