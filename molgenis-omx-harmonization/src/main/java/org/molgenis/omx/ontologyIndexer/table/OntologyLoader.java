@@ -3,7 +3,6 @@ package org.molgenis.omx.ontologyIndexer.table;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +29,6 @@ public class OntologyLoader
 	private OWLDataFactory factory = null;
 	private OWLOntology ontology = null;
 	private OWLOntologyManager manager = null;
-	private HashMap<String, OWLClass> labelToClass = new HashMap<String, OWLClass>();
 	private Set<String> synonymsProperties;
 	{
 		synonymsProperties = new HashSet<String>(
@@ -43,24 +41,6 @@ public class OntologyLoader
 		this.factory = manager.getOWLDataFactory();
 		this.ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
 		this.ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
-	}
-
-	public void labelMapURI()
-	{
-		for (OWLClass cls : ontology.getClassesInSignature())
-		{
-			OWLAnnotationProperty label = factory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI());
-			String labelString = "";
-			for (OWLAnnotation annotation : cls.getAnnotations(ontology, label))
-			{
-				if (annotation.getValue() instanceof OWLLiteral)
-				{
-					OWLLiteral val = (OWLLiteral) annotation.getValue();
-					labelString = val.getLiteral().toLowerCase();
-					labelToClass.put(labelString.toLowerCase(), cls);
-				}
-			}
-		}
 	}
 
 	public Set<OWLClass> getTopClasses()
@@ -87,20 +67,6 @@ public class OntologyLoader
 			}
 		}
 		return listOfSynonyms;
-	}
-
-	public Set<OWLClass> getParentClass(OWLClass cls)
-	{
-		Set<OWLClass> listOfClasses = new HashSet<OWLClass>();
-		for (OWLSubClassOfAxiom axiom : ontology.getSubClassAxiomsForSubClass(cls))
-		{
-			OWLClassExpression expression = axiom.getSuperClass();
-			if (!expression.isAnonymous())
-			{
-				listOfClasses.add(expression.asOWLClass());
-			}
-		}
-		return listOfClasses;
 	}
 
 	public Set<OWLClass> getChildClass(OWLClass cls)
@@ -159,25 +125,8 @@ public class OntologyLoader
 		return this.ontology;
 	}
 
-	public HashMap<String, OWLClass> getLabelToClass()
-	{
-		return labelToClass;
-	}
-
-	public String getOntologyTermID(String ontologyTerm)
-	{
-		OWLClass cls = labelToClass.get(ontologyTerm.toLowerCase());
-		String owlClassID = cls.getIRI().toString().substring(ontologyIRI.length() - 2);
-		return owlClassID;
-	}
-
 	public String getOntologyIRI()
 	{
 		return ontologyIRI;
-	}
-
-	public OWLDataFactory getFactory()
-	{
-		return factory;
 	}
 }
