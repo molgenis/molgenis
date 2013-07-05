@@ -16,10 +16,15 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      ontologyIRI="http://harmonization/test/owl/1.0.0">
-    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
-    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Annotation>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <Literal datatypeIRI="&xsd;string">unit test ontology</Literal>
+    </Annotation>
     <Declaration>
         <Class IRI="#Child"/>
     </Declaration>
@@ -68,6 +73,11 @@
         <Class IRI="#Son"/>
         <Class IRI="#Child"/>
     </SubClassOf>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"/>
+        <IRI>#Child</IRI>
+        <Literal datatypeIRI="&xsd;string">Strange childhood</Literal>
+    </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
         <IRI>#Child</IRI>
@@ -109,9 +119,14 @@
         <Literal datatypeIRI="&xsd;string">Parent</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
+        <AnnotationProperty IRI="http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"/>
+        <IRI>#Person</IRI>
+        <Literal datatypeIRI="&xsd;string">People</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
         <IRI>#Person</IRI>
-        <Literal datatypeIRI="&xsd;string">Person</Literal>
+        <Literal datatypeIRI="&xsd;string">Person label test</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>

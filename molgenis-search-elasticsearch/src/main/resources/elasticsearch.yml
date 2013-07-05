@@ -117,13 +117,17 @@ index:
     	analyzer: 
     		default:
     			type: custom
-    			filter: [lowercase, default_stemmer]
+    			filter: [lowercase, default_stemmer, default_remove_stop]
     			tokenizer: whitespace
     			char_filter: html_strip
     	filter:
     		default_stemmer:
     			type: stemmer
     			name: english
+    		default_remove_stop: 
+    			type: stop
+    			stopwords: english
+    			ignore_case: true
 
 index.number_of_shards: 1
 index.number_of_replicas: 0

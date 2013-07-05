@@ -48,7 +48,7 @@ public class OntologyLoaderTest
 	public void getLabel()
 	{
 		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getTopClasses());
-		assertEquals(loader.getLabel(topClasses.get(0)), "Person label test!");
+		assertEquals(loader.getLabel(topClasses.get(0)), "Person label test");
 	}
 
 	@Test
