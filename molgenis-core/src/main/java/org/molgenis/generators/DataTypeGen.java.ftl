@@ -228,7 +228,14 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	@javax.persistence.Transient
 	private String ${name(field)}_label = null;
 	@javax.persistence.Transient
-	private java.util.List<org.molgenis.util.ValueLabel> ${name(field)}_options = new java.util.ArrayList<org.molgenis.util.ValueLabel>();
+	private static final java.util.List<org.molgenis.util.ValueLabel> ${name(field)}_options;
+	
+	static {
+		${name(field)}_options = new java.util.ArrayList<org.molgenis.util.ValueLabel>();
+		<#list field.getEnumOptions() as option>
+		${name(field)}_options.add(new org.molgenis.util.ValueLabel("${option}","${option}"));
+		</#list>	
+	}
 		<#elseif type_label == "xref">
 	@javax.persistence.Transient
 	private ${type(field.xrefField)} ${name(field)}_${name(field.xrefField)} = ${default(field)};	
@@ -255,16 +262,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	<#if entity.hasAncestor() || entity.hasDescendants()>
 		//set the type for a new instance
 		set${typefield()}(this.getClass().getSimpleName());
-	</#if>	
-	
-	<#list entity.getFields() as f>
-		<#if f.type == "enum">
-		//options for enum ${JavaName(f)}
-			<#list f.getEnumOptions() as option>
-		${name(f)}_options.add(new org.molgenis.util.ValueLabel("${option}","${option}"));
-			</#list>
-		</#if>	
-	</#list>
+	</#if>
 	}
 	
 	/** copy constructor */
@@ -353,7 +351,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	{
 		this.set${JavaName(field)}(string2date(datestring));
 	}	
-	<#elseif type_label == "enum" >	 
+	<#elseif type_label == "enum" >
 	/**
 	 * Get tha label for enum ${JavaName(field)}.
 	 */
@@ -361,7 +359,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	{
 		return this.${name(field)}_label;
 	}
-	
 	/**
 	 * ${JavaName(field)} is enum. This method returns all available enum options.
 	 */
@@ -699,11 +696,12 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 				<#assign multipleXrefs = model.getNumberOfReferencesTo(entity)/>
 	//${multipleXrefs}
     @javax.persistence.ManyToMany(fetch=javax.persistence.FetchType.LAZY, mappedBy="${name(f)}"/*, cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/)
-    private java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> ${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection = new java.util.ArrayList<${f.entity.namespace}.${JavaName(f.entity)}>();
+    private java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> ${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection;
 
 	@javax.xml.bind.annotation.XmlTransient
 	public java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> get${JavaName(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection()
 	{
+		if(${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection == null) ${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection = new java.util.ArrayList<${f.entity.namespace}.${JavaName(f.entity)}>(); 
         return ${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection;
 	}
 
@@ -715,6 +713,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 
     public void set${JavaName(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection(java.util.Collection<${f.entity.namespace}.${JavaName(f.entity)}> collection)
     {
+		if(${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection == null) ${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection = new java.util.ArrayList<${f.entity.namespace}.${JavaName(f.entity)}>();
     	${name(f)}<#if multipleXrefs &gt; 1 >${JavaName(f.entity)}</#if>Collection.addAll(collection);
     }	
 			</#if>
