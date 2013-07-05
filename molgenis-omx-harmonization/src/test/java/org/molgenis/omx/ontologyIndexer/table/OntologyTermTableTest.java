@@ -38,7 +38,7 @@ public class OntologyTermTableTest
 	@Test
 	public void getCount()
 	{
-		assertEquals(table.getCount(), 10);
+		assertEquals(table.getCount(), 12);
 	}
 
 	@Test
@@ -53,32 +53,42 @@ public class OntologyTermTableTest
 		Iterator<Tuple> it = table.iterator();
 		assertTrue(it.hasNext());
 		Tuple tuple0 = it.next();
-		assertEquals(tuple0.get("ontologyTerm"), "Person");
+		assertEquals(tuple0.get("ontologyTerm"), "Person label test");
 		assertEquals(tuple0.get("entity_type"), "ontologyTerm");
 
 		assertTrue(it.hasNext());
 		Tuple tuple1 = it.next();
-		assertEquals(tuple1.get("ontologyTerm"), "Child");
+		assertEquals(tuple1.get("ontologyTerm"), "Person label test");
+		assertEquals(tuple1.get("ontologyTermSynonym"), "People");
+		assertEquals(tuple1.get("entity_type"), "ontologyTerm");
 
 		assertTrue(it.hasNext());
 		Tuple tuple2 = it.next();
-		assertEquals(tuple2.get("ontologyTermSynonym"), "Son");
+		assertEquals(tuple2.get("ontologyTerm"), "Child");
 
 		assertTrue(it.hasNext());
 		Tuple tuple3 = it.next();
-		assertEquals(tuple3.get("ontologyTermSynonym"), "Daughter");
+		assertEquals(tuple3.get("ontologyTermSynonym"), "Strange childhood");
 
 		assertTrue(it.hasNext());
 		Tuple tuple4 = it.next();
-		assertEquals(tuple4.get("ontologyTerm"), "Parent");
+		assertEquals(tuple4.get("ontologyTermSynonym"), "Son");
 
 		assertTrue(it.hasNext());
 		Tuple tuple5 = it.next();
-		assertEquals(tuple5.get("ontologyTermSynonym"), "Father");
+		assertEquals(tuple5.get("ontologyTermSynonym"), "Daughter");
 
 		assertTrue(it.hasNext());
 		Tuple tuple6 = it.next();
-		assertEquals(tuple6.get("ontologyTermSynonym"), "Papa");
-		assertEquals(tuple6.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Father");
+		assertEquals(tuple6.get("ontologyTerm"), "Parent");
+
+		assertTrue(it.hasNext());
+		Tuple tuple7 = it.next();
+		assertEquals(tuple7.get("ontologyTermSynonym"), "Father");
+
+		assertTrue(it.hasNext());
+		Tuple tuple8 = it.next();
+		assertEquals(tuple8.get("ontologyTermSynonym"), "Papa");
+		assertEquals(tuple8.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Father");
 	}
 }
