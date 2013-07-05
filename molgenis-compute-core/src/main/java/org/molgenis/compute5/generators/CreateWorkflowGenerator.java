@@ -1,39 +1,59 @@
 package org.molgenis.compute5.generators;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Enumeration;
 
 public class CreateWorkflowGenerator
 {
+	private static final Logger LOG = Logger.getLogger(CreateWorkflowGenerator.class);
+	public static final String WORKFOW_NAME = "myworkflow";
+
 
 	public CreateWorkflowGenerator(String createWorkflowDir)
 	{
 		File target = new File(createWorkflowDir);
 
-		String sourcePath = "workflows/myworkflow";
-		File source = new File(sourcePath);
+		try
+		{
+			Enumeration<URL> en=getClass().getClassLoader().getResources("workflows");
+			if (en.hasMoreElements()) {
+				URL metaInf=en.nextElement();
+				File fileMetaInf=new File(metaInf.toURI());
 
-		if (!source.exists())
-		{
-			System.err.println(">> ERROR >> Directory '" + source.toString()
-					+ "' not found. Please run this command from the directory where molgenis-compute.sh is located, where " +
-					" the relative path to this directory exists." +
-					"\n\nTODO for development team:" +
-					" please add this path to the classpath so that it's accessible from everywhere.");
-			System.err.println("Exit with code 1.");
-			System.exit(1);
+				File[] files=fileMetaInf.listFiles();
+				//or
+				String[] filenames=fileMetaInf.list();
+
+				int index = -1;
+				for (int i = 0; i < filenames.length; i++)
+				{
+					//System.out.println("file " + filenames[i]);
+					if(filenames[i].equalsIgnoreCase(WORKFOW_NAME))
+						index = i;
+				}
+
+				if(index >= 0)
+				{
+					copyFolder(files[index], target.getAbsoluteFile());
+					LOG.info("... Basic workflow structure is created");
+
+				}
+				else
+					throw new Exception("The original workflow is absent");
+
+			}
+
 		}
-		else try
-		{
-			copyFolder(source, target.getAbsoluteFile());
-			System.out.println("Created new workflow design in '" + target + "'.");
-			System.out.println("You can generate the corresponding workflow by changing to that directory and executing 'molgenis_compute.sh -g'");
-		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
