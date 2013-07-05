@@ -2,7 +2,7 @@ package org.molgenis.dataexplorer.config;
 
 import org.molgenis.dataexplorer.search.AsyncDataSetsIndexer;
 import org.molgenis.dataexplorer.search.DataSetsIndexer;
-import org.molgenis.dataexplorer.search.StartUpIndexer;
+import org.molgenis.dataexplorer.search.IndexingEventListener;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.springframework.context.annotation.Bean;
@@ -40,9 +40,9 @@ public class DataExplorerConfig
 	 * @return
 	 */
 	@Bean
-	public StartUpIndexer startUpIndexer()
+	public IndexingEventListener startUpIndexer()
 	{
-		return new StartUpIndexer(dataSetsIndexer());
+		return new IndexingEventListener(dataSetsIndexer());
 	}
 
 	/**

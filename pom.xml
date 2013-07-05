@@ -350,6 +350,19 @@
 										<ignore/>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>build-helper-maven-plugin</artifactId>
+										<versionRange>[1.8,)</versionRange>
+										<goals>
+											<goal>reserve-network-port</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -476,7 +489,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>3.2.2.RELEASE</version>
+			<version>3.2.3.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- scope: provided -->
@@ -500,6 +513,7 @@
 		<module>molgenis-omx-auth</module>
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-dataexplorer</module>
+		<module>molgenis-omx-protocolmanager</module>
 		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>

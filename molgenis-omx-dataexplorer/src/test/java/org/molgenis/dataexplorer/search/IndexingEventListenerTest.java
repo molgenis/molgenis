@@ -12,10 +12,10 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class StartUpIndexerTest
+public class IndexingEventListenerTest
 {
 	private StaticApplicationContext context;
-	private StartUpIndexer startUpIndexer;
+	private IndexingEventListener indexingEventListener;
 	private DataSetsIndexer mockDataSetsIndexer;
 
 	@BeforeMethod
@@ -23,15 +23,9 @@ public class StartUpIndexerTest
 	{
 		context = new StaticApplicationContext();
 		mockDataSetsIndexer = mock(DataSetsIndexer.class);
-		startUpIndexer = new StartUpIndexer(mockDataSetsIndexer);
-		context.addApplicationListener(startUpIndexer);
+		indexingEventListener = new IndexingEventListener(mockDataSetsIndexer);
+		context.addApplicationListener(indexingEventListener);
 		context.refresh();
-	}
-
-	@Test
-	public void onApplicationEventContextRefreshedEvent() throws DatabaseException, TableException
-	{
-		verify(mockDataSetsIndexer).indexNew();
 	}
 
 	@Test
