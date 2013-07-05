@@ -66,8 +66,14 @@ A typical workflow directory looks as follows:
 
 Create a new workflow directory having all of these files using:
 	
-	molgenis --create myworkflow
+	molgenis_compute --create
 	cd myworkflow
+
+or
+
+	
+	molgenis_compute --create <your_workflow_name>
+	cd <your_workflow_name>
 	
 Generate your first workflow example on your local machine:
 
@@ -82,10 +88,9 @@ Describes workflow steps and how they depend on each other via parameter input=s
 
 Example workflow.csv (whitespaces will be trimmed):
 
-	step,  protocol, parameterMappings
-	step1, step1.sh, in=sample;in2=project
-	step2, step2.sh, in=step1_out
-
+	step,protocol,parameterMapping
+	step1,protocols/step1.sh,in=user_input
+	step2,protocols/step2.sh,wf=user_workflowName;date=user_creationDate;strings=step1_out
 Explanation:
 
 * step = unique name of the step within the workflow (a-zA-Z0-9)
@@ -101,8 +106,8 @@ Explanation:
 Example workflow.csv (white spaces will be trimmed):
 
 	step,  protocol,              parameterMappings
-	stepA, ../other/workflow.csv, project=project;sample=sample
-	stepB, stepB.sh,              in=stepA_out
+	stepA, ../other/workflow.csv, in=user_input
+	stepB, stepB.sh,              wf=user_workflowName;date=user_creationDate;strings=step1_out
 
 Explanation:
 
