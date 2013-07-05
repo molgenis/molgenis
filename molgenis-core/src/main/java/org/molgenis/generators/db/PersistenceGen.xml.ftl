@@ -24,6 +24,8 @@
           <property name="eclipselink.ddl-generation" value="create-tables"/>
 		  <property name="eclipselink.ddl-generation.output-mode" value="database"/>
 		  <property name="eclipselink.logging.level" value="OFF"/>
+		  <property name="eclipselink.cache.shared.default" value="false"/>
+		  <property name="eclipselink.ddl-generation.index-foreign-keys" value="true"/>
 	    </properties>
 	</persistence-unit>
 </persistence>
