@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
-public class OntologyModel
+public class OntologyLoader
 {
 	private String ontologyIRI = null;
 	private OWLDataFactory factory = null;
@@ -37,7 +37,7 @@ public class OntologyModel
 				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"));
 	}
 
-	public OntologyModel(File ontologyFile) throws OWLOntologyCreationException
+	public OntologyLoader(File ontologyFile) throws OWLOntologyCreationException
 	{
 		this.manager = OWLManager.createOWLOntologyManager();
 		this.factory = manager.getOWLDataFactory();
