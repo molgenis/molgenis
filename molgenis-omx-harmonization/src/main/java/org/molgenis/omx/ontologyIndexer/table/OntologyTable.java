@@ -15,14 +15,14 @@ import org.molgenis.util.tuple.Tuple;
 public class OntologyTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
 {
 	private Database db;
-	private OntologyModel model;
+	private OntologyLoader loader;
 	private final String ONTOLOGY_URL = "url";
 	private final String ENTITY_TYPE = "entity_type";
 	private final String ONTOLOGY_LABEL = "ontologyLabel";
 
-	public OntologyTable(OntologyModel model, Database db)
+	public OntologyTable(OntologyLoader loader, Database db)
 	{
-		this.model = model;
+		this.loader = loader;
 		setDb(db);
 	}
 
@@ -32,8 +32,8 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 		List<Tuple> tuples = new ArrayList<Tuple>();
 
 		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(ONTOLOGY_URL, model.getOntologyIRI());
-		tuple.set(ONTOLOGY_LABEL, model.getOntologyLabel());
+		tuple.set(ONTOLOGY_URL, loader.getOntologyIRI());
+		tuple.set(ONTOLOGY_LABEL, loader.getOntologyLabel());
 		tuple.set(ENTITY_TYPE, "indexedOntology");
 		tuples.add(tuple);
 

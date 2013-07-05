@@ -17,7 +17,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 public class OntologyTermTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
 {
 
-	private OntologyModel model;
+	private OntologyLoader loader;
 	private Database db;
 	private final String NODE_PATH = "nodePath";
 	private final String ONTOLOGY_TERM = "ontologyTerm";
@@ -26,9 +26,9 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	private final String ONTOLOGY_LABEL = "ontologyLabel";
 	private final String ENTITY_TYPE = "entity_type";
 
-	public OntologyTermTable(OntologyModel model, Database db)
+	public OntologyTermTable(OntologyLoader loader, Database db)
 	{
-		this.model = model;
+		this.loader = loader;
 		setDb(db);
 	}
 
@@ -36,12 +36,12 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	public Iterator<Tuple> iterator()
 	{
 		List<Tuple> tuples = new ArrayList<Tuple>();
-		createOntologyTable(tuples, model);
+		createOntologyTable(tuples, loader);
 
 		return tuples.iterator();
 	}
 
-	public void createOntologyTable(List<Tuple> tuples, OntologyModel model)
+	public void createOntologyTable(List<Tuple> tuples, OntologyLoader model)
 	{
 		int count = 0;
 		for (OWLClass subClass : model.getTopClasses())
@@ -51,22 +51,24 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		}
 	}
 
-	private void recursiveAddTuple(String termPath, OWLClass cls, OntologyModel model, List<Tuple> tuples)
+	private void recursiveAddTuple(String termPath, OWLClass cls, OntologyLoader model, List<Tuple> tuples)
 	{
 
-		String label = model.getLabel(cls);
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(NODE_PATH, termPath);
-		tuple.set(ONTOLOGY_TERM, label);
-		tuple.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
-		tuple.set(ONTOLOGY_LABEL, model.getOntologyLabel());
-		tuple.set(ENTITY_TYPE, "ontologyTerm");
-		tuple.set(SYNONYMS, label);
-
-		for (String synonym : model.getSynonyms(cls))
-			tuple.set(SYNONYMS, synonym);
-
-		tuples.add(tuple);
+		String label = model.getLabel(cls).replaceAll("[^a-zA-Z0-9 ]", " ");
+		List<String> synonyms = new ArrayList<String>();
+		synonyms.add(label);
+		synonyms.addAll(model.getSynonyms(cls));
+		for (String synonym : synonyms)
+		{
+			KeyValueTuple tuple = new KeyValueTuple();
+			tuple.set(NODE_PATH, termPath);
+			tuple.set(ONTOLOGY_TERM, label);
+			tuple.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
+			tuple.set(ONTOLOGY_LABEL, model.getOntologyLabel());
+			tuple.set(ENTITY_TYPE, "ontologyTerm");
+			tuple.set(SYNONYMS, synonym.replaceAll("[^a-zA-Z0-9 ]", " "));
+			tuples.add(tuple);
+		}
 
 		Set<OWLClass> listOfChildren = model.getChildClass(cls);
 		if (listOfChildren.size() > 0)
