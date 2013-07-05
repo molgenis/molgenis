@@ -120,11 +120,6 @@ public class OntologyLoader
 		return ontologyLabel;
 	}
 
-	public OWLOntology getOntology()
-	{
-		return this.ontology;
-	}
-
 	public String getOntologyIRI()
 	{
 		return ontologyIRI;
