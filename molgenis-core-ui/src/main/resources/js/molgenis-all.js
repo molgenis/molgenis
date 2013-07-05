@@ -118,11 +118,13 @@ $(function() {
 			this.cache[resourceUri] = resource;
 			for ( var i = 0; i < expands.length; i++) {
 				var expand = resource[expands[i]];
-				this.cache[expand.href] = expand;
-				if (expand.items) {
-					for ( var j = 0; j < expand.items.length; j++) {
-						var expandedResource = expand.items[j];
-						this.cache[expandedResource.href] = expandedResource;
+				if(expand){
+					this.cache[expand.href] = expand;
+					if (expand.items) {
+						for ( var j = 0; j < expand.items.length; j++) {
+							var expandedResource = expand.items[j];
+							this.cache[expandedResource.href] = expandedResource;
+						}
 					}
 				}
 			}
