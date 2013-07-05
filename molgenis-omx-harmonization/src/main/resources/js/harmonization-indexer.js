@@ -135,7 +135,9 @@
 					if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
 					if(ontologyTermId != null) addAnnotation(restApi.get(this.feature.href), ontologyTermId);
 					$('#annotation-modal').modal('hide');
-					createAnnotationModal(restApi.get(this.feature.href));
+					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
+						createAnnotationModal(updatedFeature);
+					});
 				},{'feature' : this.feature}));
 			}
 		}
@@ -195,7 +197,6 @@
 				success : function(data, textStatus, request) {
 					var href = request.getResponseHeader('Location');
 					ontologyTermId = href.substring(href.lastIndexOf('/') + 1);
-					return ontologyTermId;
 				},
 				error : function(request, textStatus, error){
 					console.log(error);
@@ -213,7 +214,14 @@
 				var ontologyTermAnnotations = $('<ul />');
 				$.each(feature.definition.items, function(index, element){
 					var uri = element.termAccession;
-					ontologyTermAnnotations.append('<li>' + element.name  + ' : <a href="' + uri + '" target="_blank">' + uri + '</a></li>');
+					var linkOut = $('<a href="' + uri + '" target="_blank">' + element.name + '</a>');
+//					linkOut.popover({
+//						content : uri,
+//						title : uri,
+//						trigger : 'hover',
+//						placement : 'right'
+//					});
+					$('<li />').append(linkOut).appendTo(ontologyTermAnnotations);
 				});
 				var annotationRow = $('<tr />');
 				annotationRow.append('<th>Annotation : </th>');

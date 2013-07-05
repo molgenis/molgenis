@@ -50,5 +50,10 @@ h5 {
 }
 
 .modal-body {
-   overflow-y: visible
+	overflow-y: visible;
+}
+
+.popover-content{
+	max-height: 500px;
+    overflow-y: auto;
 }
