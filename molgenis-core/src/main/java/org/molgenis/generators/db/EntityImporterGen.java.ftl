@@ -115,7 +115,10 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 				${name(entity)}List.clear();		
 				
 				//keep count
-				total.set(total.get() + BATCH_SIZE);				
+				total.set(total.get() + BATCH_SIZE);
+				
+				db.getEntityManager().flush();
+				db.getEntityManager().clear();		
 			}
 		}
 			
