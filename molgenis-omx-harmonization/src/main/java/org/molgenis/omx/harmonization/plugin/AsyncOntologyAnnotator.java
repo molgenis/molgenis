@@ -72,10 +72,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	public List<ObservableFeature> annotateDataItem(Database db, Integer featureId, String description)
 	{
-		ObservableFeature feature = new ObservableFeature();
-
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(description.split(" +")));
-		uniqueTerms.removeAll(CreatePotentialTerms.STOPWORDSLIST);
+		uniqueTerms.removeAll(HarmonizationModel.STOPWORDSLIST);
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		for (String term : uniqueTerms)
 		{
