@@ -168,23 +168,26 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Going to insert documents of type [" + documentType + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
 
-		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
-		LOG.info("Request created");
-		if (LOG.isDebugEnabled())
+		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
+		for (BulkRequestBuilder request : requests)
 		{
-			LOG.debug("BulkRequest:" + request);
-		}
+			LOG.info("Request created");
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("BulkRequest:" + request);
+			}
 
-		BulkResponse response = request.execute().actionGet();
-		LOG.info("Request done");
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("BulkResponse:" + response);
-		}
+			BulkResponse response = request.execute().actionGet();
+			LOG.info("Request done");
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("BulkResponse:" + response);
+			}
 
-		if (response.hasFailures())
-		{
-			throw new ElasticSearchException(response.buildFailureMessage());
+			if (response.hasFailures())
+			{
+				throw new ElasticSearchException(response.buildFailureMessage());
+			}
 		}
 	}
 
