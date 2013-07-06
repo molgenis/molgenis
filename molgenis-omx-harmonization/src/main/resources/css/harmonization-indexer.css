@@ -57,3 +57,10 @@ h5 {
 	max-height: 500px;
     overflow-y: auto;
 }
+
+.icon-remove{
+	position: absolute;
+	right:20px;
+	cursor: hand; 
+	cursor: pointer;
+}

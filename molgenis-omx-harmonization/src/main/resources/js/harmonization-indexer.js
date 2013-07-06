@@ -133,7 +133,7 @@
 						ontologyTermId = href.substring(href.lastIndexOf('/') + 1);
 					}
 					if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
-					if(ontologyTermId != null) addAnnotation(restApi.get(this.feature.href), ontologyTermId);
+					if(ontologyTermId != null) updateAnnotation(restApi.get(this.feature.href), ontologyTermId, true);
 					$('#annotation-modal').modal('hide');
 					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 						createAnnotationModal(updatedFeature);
@@ -142,7 +142,7 @@
 			}
 		}
 
-		function addAnnotation(feature, ontologyTermId){
+		function updateAnnotation(feature, ontologyTermId, add){
 			var data = {};
 			$.map(feature, function(value, key){
 				if(key !== 'href'){
@@ -157,11 +157,15 @@
 						data[key] = value;
 				}	
 			});
-			if($.inArray(ontologyTermId, data.definition) === -1) data.definition.push(ontologyTermId);
-			updateOntologyTerm(feature, data);
+			if($.inArray(ontologyTermId, data.definition) === -1 && add) data.definition.push(ontologyTermId);
+			if($.inArray(ontologyTermId, data.definition) !== -1 && !add) {
+				var index = data.definition.indexOf(ontologyTermId);
+				data.definition.splice(index, 1);
+			}
+			updateFeature(feature, data);
 		}
 		
-		function updateOntologyTerm(feature, data){
+		function updateFeature(feature, data){
 			$.ajax({
 				type : 'PUT',
 				dataType : 'json',
@@ -183,7 +187,7 @@
 			var ontologyTermId = null;
 			var query = {};
 			query.name = data.ontologyTerm;
-			query.identifier = data.ontologyTermIRI.replace(/\W/g, '');
+			query.identifier = data.ontologyTermIRI;
 			query.termAccession = data.ontologyTermIRI;
 			query.description = data.ontologyTermLabel;
 			$.ajax({
@@ -210,18 +214,28 @@
 			table.append('<tr><th>ID : </th><td>' + feature.href.substring(feature.href.lastIndexOf('/') + 1) + '</td></tr>');
 			table.append('<tr><th>Name : </th><td>' + feature.name + '</td></tr>');
 			table.append('<tr><th>Description : </th><td>' + feature.description + '</td></tr>');
-			if(feature.definition.items.length != 0){
+			if(feature.definition.items.length !== 0){
 				var ontologyTermAnnotations = $('<ul />');
 				$.each(feature.definition.items, function(index, element){
 					var uri = element.termAccession;
 					var linkOut = $('<a href="' + uri + '" target="_blank">' + element.name + '</a>');
-//					linkOut.popover({
+					var removeIcon = $('<i class="icon-remove"></i>');
+					//					linkOut.popover({
 //						content : uri,
 //						title : uri,
 //						trigger : 'hover',
 //						placement : 'right'
 //					});
-					$('<li />').append(linkOut).appendTo(ontologyTermAnnotations);
+					$('<li />').append(linkOut).append(removeIcon).appendTo(ontologyTermAnnotations);
+					
+					removeIcon.click($.proxy(function(){
+						var ontologyTermId = this.ontologyTermHref.substring(this.ontologyTermHref.lastIndexOf('/') + 1)
+						updateAnnotation(this.feature, ontologyTermId, false);
+						$('#annotation-modal').modal('hide');
+						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
+							createAnnotationModal(updatedFeature);
+						});
+					}, {'feature' : feature, 'ontologyTermHref' : element.href}));
 				});
 				var annotationRow = $('<tr />');
 				annotationRow.append('<th>Annotation : </th>');
