@@ -50,7 +50,18 @@
 				var row = $('<tr />');
 				$('<td />').append(clickFeature).appendTo(row);
 				$('<td />').append(popover).appendTo(row);
-				row.append('<td></td>');
+				var annotation = $('<td />');
+				var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definition"]);
+				if(featureEntity.definition.items !== 0){
+					var annotationText = '';
+					$.each(featureEntity.definition.items, function(index, ontologyTerm){
+						annotationText += ontologyTerm.name + ',';
+					});
+					annotationText.substring(0, annotationText.length - 2);
+					annotation.append(annotationText);
+				}
+				
+				annotation.appendTo(row);
 				$(row).appendTo($('#dataitem-table'));
 			});
 			totalPage = Math.ceil(searchResponse.totalHitCount / pager) - 1;
@@ -137,6 +148,7 @@
 					$('#annotation-modal').modal('hide');
 					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 						createAnnotationModal(updatedFeature);
+						ns.createMatrixForDataItems();
 					});
 				},{'feature' : this.feature}));
 			}
@@ -220,20 +232,14 @@
 					var uri = element.termAccession;
 					var linkOut = $('<a href="' + uri + '" target="_blank">' + element.name + '</a>');
 					var removeIcon = $('<i class="icon-remove"></i>');
-					//					linkOut.popover({
-//						content : uri,
-//						title : uri,
-//						trigger : 'hover',
-//						placement : 'right'
-//					});
 					$('<li />').append(linkOut).append(removeIcon).appendTo(ontologyTermAnnotations);
-					
 					removeIcon.click($.proxy(function(){
 						var ontologyTermId = this.ontologyTermHref.substring(this.ontologyTermHref.lastIndexOf('/') + 1)
 						updateAnnotation(this.feature, ontologyTermId, false);
 						$('#annotation-modal').modal('hide');
 						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 							createAnnotationModal(updatedFeature);
+							ns.createMatrixForDataItems();
 						});
 					}, {'feature' : feature, 'ontologyTermHref' : element.href}));
 				});
