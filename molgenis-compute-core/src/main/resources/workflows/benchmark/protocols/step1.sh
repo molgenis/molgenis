@@ -1,4 +1,4 @@
-#input in
+#string in
 #output out
 
 # Let's do something with string 'in'
