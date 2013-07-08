@@ -1,0 +1,31 @@
+.container-fluid {
+	margin-top: 10px;
+}
+
+.accordion-group {
+	margin-left : 50px;
+	margin-top : 50px;
+	height : 200px;
+	background-color: #5B82A4;
+}
+
+.accordion-body {
+	background-color: white;
+}
+
+.accordion-toggle {
+	color: white;
+}
+
+.accordion-heading h5{
+	color : white;
+}
+
+.justify-text {
+	padding : 10px;
+	text-align : justify;
+}
+
+h5 {
+	padding-left : 10px;
+}

@@ -6,7 +6,8 @@
 		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<menu name="HarmonizationPlatform" label="Harmonization platform">
 			<plugin label="OntologyIndexer" name="OntologyIndexer" type="org.molgenis.omx.ontologyIndexer.plugin.OntologyIndexerPlugin"/>
-			<plugin label="Harmonization" name="Harmonization" type="org.molgenis.omx.harmonization.plugin.HarmonizationPlugin"/>
+			<plugin label="OntologyAnnotator" name="OntologyAnnotator" type="org.molgenis.omx.harmonization.plugin.HarmonizationPlugin"/>
+			<plugin label="OntologyMatcher" name="OntologyMatcher" type="org.molgenis.omx.ontologyMatcher.plugin.OntologyMatcherPlugin"/>
 		</menu>
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
