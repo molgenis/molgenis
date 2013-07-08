@@ -22,10 +22,6 @@
 			<directory>src/main/resources/workflows</directory>
 			<outputDirectory>workflows</outputDirectory>
 		</fileSet>
-        <fileSet>
-            <directory>src/main/resources/templates</directory>
-            <outputDirectory>templates</outputDirectory>
-        </fileSet>
     </fileSets>
     <dependencySets>
 		<dependencySet>

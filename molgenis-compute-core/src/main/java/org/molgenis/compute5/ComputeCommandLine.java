@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.molgenis.compute5.db.api.ComputeDbApiClient;
 import org.molgenis.compute5.db.api.ComputeDbApiConnection;
 import org.molgenis.compute5.db.api.CreateRunRequest;
@@ -25,6 +26,7 @@ import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Task;
 import org.molgenis.compute5.parsers.ParametersCsvParser;
 import org.molgenis.compute5.parsers.WorkflowCsvParser;
+import org.molgenis.compute5.sysexecutor.SysCommandExecutor;
 import org.molgenis.util.tuple.WritableTuple;
 
 import com.google.common.base.Joiner;
@@ -37,6 +39,8 @@ import com.google.common.base.Joiner;
  */
 public class ComputeCommandLine
 {
+	private static final Logger LOG = Logger.getLogger(ComputeCommandLine.class);
+
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) throws ParseException, ClassNotFoundException, IOException
 	{
@@ -157,13 +161,30 @@ public class ComputeCommandLine
             CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment, userName);
 
 			dbApiClient.createRun(createRunRequest);
+		}
 
-			if (computeProperties.execute)
+		if (computeProperties.execute)
+		{
+			if(computeProperties.database.equalsIgnoreCase(Parameters.DATABASE_DEFAULT))
 			{
-				System.out.println("Running jobs via db '" + computeProperties.database + "' on backend '"
-						+ computeProperties.backend + "'");
+				String runDir = computeProperties.runDir;
+				new SysCommandExecutor().runCommand("sh "+ runDir +"/submit.sh");
+				System.out.println("Scripts are executed/submitted on " + computeProperties.backend);
+			}
+			else
+			{
+
+				//these three parameters can not be null, otherwise we will not get here
+				String database = computeProperties.database;
+				String user = computeProperties.user;
+				String pass = computeProperties.pass;
+				String backend = computeProperties.backend;
+
+				//TODO implement submission from database
+
 			}
 		}
+
 
 		return compute;
 	}
