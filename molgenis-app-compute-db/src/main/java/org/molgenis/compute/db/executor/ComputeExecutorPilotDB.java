@@ -11,7 +11,7 @@ import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.compute.db.ComputeDbException;
-import org.molgenis.compute.db.sysexecutor.SysCommandExecutor;
+import org.molgenis.compute5.sysexecutor.SysCommandExecutor;
 import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.framework.db.Database;
