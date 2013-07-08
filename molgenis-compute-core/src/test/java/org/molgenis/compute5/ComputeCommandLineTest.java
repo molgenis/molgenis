@@ -52,7 +52,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testCommandLineParametersComputePropertiesFilesCreated() throws ParseException, IOException, ClassNotFoundException
+	public void testCommandLineParametersComputePropertiesFilesCreated() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -159,7 +159,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testDoubleParameterNamesInParametersFile() throws ParseException, IOException, ClassNotFoundException
+	public void testDoubleParameterNamesInParametersFile() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -267,7 +267,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testRunLocally()  throws ParseException, IOException, ClassNotFoundException
+	public void testRunLocally() throws Exception
 	{
 		System.out.println("--- Start TestRunLocally ---");
 
@@ -340,7 +340,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testPathparameter() throws ParseException, IOException, ClassNotFoundException
+	public void testPathparameter() throws Exception
 	{
 		System.out.println("--- Testing path parameter ---");
 		String outputDir = "target/test/benchmark/run";
@@ -444,6 +444,53 @@ public class ComputeCommandLineTest
 			Assert.fail("get/put file is not inserted");
 		}
 	}
+
+	@Test(expectedExceptions = Exception.class)
+	public void testCommandLineParametersMissingParameter() throws Exception
+	{
+		System.out.println("--- Start TestCommandLineParametersMissingParameter ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate", "--workflow", "src/main/resources/workflows/benchmark/workflow.csv",
+				"--defaults", "src/main/resources/workflows/benchmark/workflow.defaults.missingparameter.csv",
+				"--parameters","src/main/resources/workflows/benchmark/parameters.csv",
+				"--rundir",outputDir,
+				"--backend","pbs",
+				"--database","none"
+		});
+	}
+
+	@Test(expectedExceptions = Exception.class)
+	public void testCommandLineParametersMissingValue() throws Exception
+	{
+		System.out.println("--- Start TestCommandLineParametersMissingValue ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate", "--workflow", "src/main/resources/workflows/benchmark/workflow.csv",
+				"--defaults", "src/main/resources/workflows/benchmark/workflow.defaults.missingvalue.csv",
+				"--parameters","src/main/resources/workflows/benchmark/parameters.csv",
+				"--rundir",outputDir,
+				"--backend","pbs",
+				"--database","none"
+		});
+	}
+
 
 	private final String getFileAsString(String filename) throws IOException
 	{

@@ -21,7 +21,7 @@ public class EnvironmentGenerator
 	 * @param compute
 	 * @return
 	 */
-	public String getEnvironment(Compute compute)
+	public String getEnvironment(Compute compute) throws Exception
 	{
 		// put header 'adding user params' in environment
 		String output = "#\n## User parameters\n#\n";
@@ -69,17 +69,12 @@ public class EnvironmentGenerator
 				}
 				
 				String assignment = p + "[" + index + "]=\"" + value + "\"\n";
-				if (index == null || value == null) try
-				{
-					throw new Exception("Cannot add the following assignment to " + Parameters.ENVIRONMENT_FULLPATH + ":\n" + assignment);
-				}
-				catch (Exception e)
-				{
-					System.err.println("In your workflow.csv you maybe refer to a parameter '" + p + "' to which you did not assign a value in your parameters.csv. If so: please add that the parameter to your parameters.csv");
-					e.printStackTrace();
-					System.err.println("Exit with code 1.");
-					System.exit(1);
-				} 
+
+				if (index == null || value == null)
+					throw new Exception("Parameter '" + p +
+							"' does not value in the parameters (.csv, .properties) files ");
+
+
 				output += assignment;
 			}
 		}
@@ -87,15 +82,15 @@ public class EnvironmentGenerator
 		return output;
 	}
 	
-	public void generate(Compute compute, String workDir)
+	public void generate(Compute compute, String workDir) throws Exception
 	{
 		Parameters.ENVIRONMENT_FULLPATH = workDir + File.separator + Parameters.ENVIRONMENT;
 		
 		File env = new File(Parameters.ENVIRONMENT_FULLPATH);
 		env.delete();
 
-		try
-		{
+//		try
+//		{
 			// give user environment to compute
 			compute.setUserEnvironment(this.getEnvironment(compute));
 			
@@ -105,10 +100,10 @@ public class EnvironmentGenerator
 			BufferedWriter output = new BufferedWriter(new FileWriter(env, true));
 			output.write(this.getEnvironment(compute));
 			output.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+//		}
+//		catch (Exception e)
+//		{
+//			e.printStackTrace();
+//		}
 	}
 }
