@@ -1,4 +1,4 @@
-package org.molgenis.compute.db.sysexecutor;
+package org.molgenis.compute5.sysexecutor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
