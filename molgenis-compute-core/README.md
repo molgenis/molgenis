@@ -213,6 +213,20 @@ Merged and expanded result for f1.csv + f2.csv:
 	y,   v1,  2,    a,	  file2
 	y,   v1,  2,    b,    file2
 	
+
+### parameters in .properties format
+
+Alternatively, parameters can be specified in the .properties file format. In this case, f1.csv will be replaced by f1.properties file and has the following content:
+
+	p0= x, y
+	p2= 1, 2
+
+More complex parameter examples can combine values with template, as following:
+
+	foo=    item1 , item2
+	bar=    ${foo}, item3
+	number= 123
+
 #### Reserved words
 MOLGENIS compute has some parameters that are part of its framework. Consequently, the names of these parameters are reserved words: user, port, interval, path, workflow, defaults, parameters, rundir, runid, backend, database, walltime, nodes, ppn, queue, mem. These parameters [[check: also the last 5?]] are available in each of the protocols, i.e. without mapping them in the workflow.csv.
 
