@@ -42,7 +42,7 @@ public class ComputeCommandLine
 	private static final Logger LOG = Logger.getLogger(ComputeCommandLine.class);
 
 	@SuppressWarnings("static-access")
-	public static void main(String[] args) throws ParseException, ClassNotFoundException, IOException
+	public static void main(String[] args) throws Exception
 	{
 		BasicConfigurator.configure();
 
@@ -58,17 +58,17 @@ public class ComputeCommandLine
 		ComputeProperties computeProperties = new ComputeProperties(args);
 
 		// output scripts + docs
-		try
-		{
+//		try
+//		{
 			if (!computeProperties.showHelp) create(computeProperties);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+//		}
+//		catch (Exception e)
+//		{
+//			e.printStackTrace();
+//		}
 	}
 
-	public static Compute create(ComputeProperties computeProperties) throws IOException, Exception
+	public static Compute create(ComputeProperties computeProperties) throws Exception
 	{
 		Compute compute = new Compute(computeProperties);
 
