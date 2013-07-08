@@ -43,7 +43,8 @@
 									</div>
 									<div>
 										<button id="annotate-dataitems" class="btn">Go annotation</button>
-										<button id="refresh-annotate" class="btn">Refresh</button>
+										<button id="refresh-button" class="btn">Refresh</button>
+										<button id="match-catalogue" class="btn">Match catalogue</button>
 									</div>
 								</div>
 							</div>

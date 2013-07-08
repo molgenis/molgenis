@@ -1,13 +1,21 @@
 package org.molgenis.omx.harmonization.plugin;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.ontologyMatcher.lucene.LuceneMatcher;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class HarmonizationPlugin extends PluginModel<Entity>
 {
@@ -59,6 +67,24 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 			model.setSelectedDataSet(db.findById(DataSet.class, selectedDataSetId));
 			getOntologyAnnotator().annotate(selectedDataSetId);
 		}
+		else if ("ontologyMatch".equals(request.getAction()))
+		{
+			Integer selectedDataSetId = Integer.parseInt(request.getString("selectedDataSet"));
+			Map<String, String> selectedCatalogues = new Gson().fromJson(request.getString("selectedStudiesToMatch"),
+					new TypeToken<Map<String, String>>()
+					{
+					}.getType());
+			System.out.println("The catalogue to match is : " + selectedCatalogues.keySet());
+			System.out.println("The selected catalogue is : " + selectedDataSetId);
+
+			Set<Integer> cataloguesToMatch = new HashSet<Integer>();
+
+			for (String id : selectedCatalogues.keySet())
+			{
+				cataloguesToMatch.add(Integer.parseInt(id));
+			}
+			getLuceneMatcher().match(selectedDataSetId, cataloguesToMatch);
+		}
 	}
 
 	@Override
@@ -77,6 +103,11 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private LuceneMatcher getLuceneMatcher()
+	{
+		return ApplicationContextProvider.getApplicationContext().getBean(LuceneMatcher.class);
 	}
 
 	private OntologyAnnotator getOntologyAnnotator()

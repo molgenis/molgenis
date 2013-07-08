@@ -70,11 +70,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 				if (definitions.size() > 0)
 				{
-					// List<Integer> term_ids = new ArrayList<Integer>();
-					// for (OntologyTerm ot : db.find(OntologyTerm.class, new
-					// QueryRule(OntologyTerm.IDENTIFIER,
-					// Operator.IN, definitions)))
-					// term_ids.add(ot.getId());
 					definitions.addAll(feature.getDefinition_Identifier());
 					feature.setDefinition_Identifier(definitions);
 				}
@@ -107,6 +102,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(description.split(" +")));
 		uniqueTerms.removeAll(HarmonizationModel.STOPWORDSLIST);
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		queryRules.add(new QueryRule(Operator.LIMIT, 100));
 		for (String term : uniqueTerms)
 		{
 			if (!term.isEmpty() && !term.matches(" +"))
@@ -120,14 +116,37 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		SearchRequest request = new SearchRequest(null, queryRules, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
+
 		Map<String, String> mapUriTerm = new HashMap<String, String>();
+		List<Hit> hitSecondChoice = new ArrayList<Hit>();
 		while (iterator.hasNext())
 		{
 			Hit hit = iterator.next();
 			Map<String, Object> data = hit.getColumnValueMap();
 			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
-					.toString(), data.get("ontologyTerm").toString());
+			if (ontologyTermSynonym.equalsIgnoreCase("weight"))
+			{
+				System.out.println();
+			}
+			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
+			if (ontologyTerm.equals(ontologyTermSynonym))
+			{
+				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
+						.toString(), ontologyTerm);
+			}
+			else hitSecondChoice.add(hit);
+		}
+
+		for (Hit hit : hitSecondChoice)
+		{
+			Map<String, Object> data = hit.getColumnValueMap();
+			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
+			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
+			if (!mapUriTerm.containsValue(ontologyTermSynonym))
+			{
+				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
+						.toString(), ontologyTerm);
+			}
 		}
 
 		List<String> identifiers = new ArrayList<String>();
@@ -159,18 +178,18 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return identifiers;
 	}
 
+	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym)
+	{
+		for (String eachTerm : new HashSet<String>(Arrays.asList(ontologyTermSynonym.split(" +"))))
+			if (!uniqueSets.contains(eachTerm)) return false;
+		return true;
+	}
+
 	public QueryRule[] toNestedQuery(List<QueryRule> rules)
 	{
 		QueryRule[] nestedQuery = new QueryRule[rules.size()];
 		rules.toArray(nestedQuery);
 		return nestedQuery;
-	}
-
-	public boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym)
-	{
-		for (String eachTerm : new HashSet<String>(Arrays.asList(ontologyTermSynonym.split(" +"))))
-			if (!uniqueSets.contains(eachTerm)) return false;
-		return true;
 	}
 
 	@Override
