@@ -22,8 +22,12 @@
 			<directory>src/main/resources/workflows</directory>
 			<outputDirectory>workflows</outputDirectory>
 		</fileSet>
-	</fileSets>
-	<dependencySets>
+        <fileSet>
+            <directory>src/main/resources/templates</directory>
+            <outputDirectory>templates</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
 		<dependencySet>
 			<outputDirectory>/lib</outputDirectory>
 			<unpack>false</unpack>
