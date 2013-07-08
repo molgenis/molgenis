@@ -14,6 +14,8 @@ import org.testng.annotations.Test;
 
 public class ComputeCommandLineTest
 {
+	private String outputDir = "target/test/benchmark/run";
+
 	@Test
 	public void testHelp()
 	{
@@ -53,8 +55,6 @@ public class ComputeCommandLineTest
 	public void testCommandLineParametersComputePropertiesFilesCreated() throws ParseException, IOException, ClassNotFoundException
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
-		String outputDir = "target/test/benchmark/run";
-
 
 		File f = new File(outputDir);
 		FileUtils.deleteDirectory(f);
@@ -162,8 +162,6 @@ public class ComputeCommandLineTest
 	public void testDoubleParameterNamesInParametersFile() throws ParseException, IOException, ClassNotFoundException
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
-		String outputDir = "target/test/benchmark/run";
-
 
 		File f = new File(outputDir);
 		FileUtils.deleteDirectory(f);
@@ -268,6 +266,78 @@ public class ComputeCommandLineTest
 		}
 	}
 
+	@Test
+	public void testRunLocally()  throws ParseException, IOException, ClassNotFoundException
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark/workflow.csv",
+				"--defaults",
+				"src/main/resources/workflows/benchmark/workflow.defaults.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark/parameters.csv",
+				"--rundir",
+				"target/test/benchmark/run",
+				"--database",
+				"none",
+				"-header",
+				"src/main/resources/workflows/benchmark/header.ftl",
+				"-footer",
+				"src/main/resources/workflows/benchmark/footer.ftl"
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step1_0.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step1_1.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step2_0.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step1_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh.finished is not generated");
+		}
+
+		file = new File(outputDir + "/step1_1.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh.finished is not generated");
+		}
+
+		file = new File(outputDir + "/step2_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.finished is not generated");
+		}
+
+
+	}
 
 	@Test
 	public void testPathparameter() throws ParseException, IOException, ClassNotFoundException
