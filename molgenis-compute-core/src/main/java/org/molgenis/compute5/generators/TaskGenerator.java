@@ -96,26 +96,6 @@ public class TaskGenerator
 				
 				// now source the task's parameters from each prevStep.env on
 				// which this task depends
-				parameterHeader += "\n# Load parameters from previous steps\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
-
-				for (String previousStepName : step.getPreviousSteps())
-				{ // we have jobs on which we depend in this prev step
-					Step prevStep = workflow.getStep(previousStepName);
-					for (Integer id : target.getIntList(Parameters.ID_COLUMN))
-					{
-						String prevJobName = prevStep.getJobName(id);
-						
-						// prevent duplicate work
-						if (!task.getPreviousTasks().contains(prevJobName))
-						{
-							// for this task: add task dependencies
-							task.getPreviousTasks().add(prevJobName);
-
-							// source its environment
-							parameterHeader += Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + prevJobName + Parameters.ENVIRONMENT_EXTENSION + "\n";
-						}
-					}
-				}
 
 				parameterHeader += "\n# Assign values to the parameters in this script\n";
 				parameterHeader += "\n# Set taskId, which is the job name of this task";
@@ -132,7 +112,29 @@ public class TaskGenerator
 				parameterHeader += "\nport=\"" + computeProperties.port + "\"";
 				parameterHeader += "\ninterval=\"" + computeProperties.interval + "\"";
 				parameterHeader += "\npath=\"" + computeProperties.path + "\"";
-				
+
+				parameterHeader += "\n# Load parameters from previous steps\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
+
+				for (String previousStepName : step.getPreviousSteps())
+				{ // we have jobs on which we depend in this prev step
+					Step prevStep = workflow.getStep(previousStepName);
+					for (Integer id : target.getIntList(Parameters.ID_COLUMN))
+					{
+						String prevJobName = prevStep.getJobName(id);
+
+						// prevent duplicate work
+						if (!task.getPreviousTasks().contains(prevJobName))
+						{
+							// for this task: add task dependencies
+							task.getPreviousTasks().add(prevJobName);
+
+							// source its environment
+							parameterHeader += Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + prevJobName + Parameters.ENVIRONMENT_EXTENSION + "\n";
+						}
+					}
+				}
+
+
 				parameterHeader += "\n\n# Connect parameters to environment\n";
 
 				// now couple input parameters to parameters in sourced
