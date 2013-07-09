@@ -87,7 +87,7 @@ public class TupleUtils
 		Configuration conf = new Configuration();
 
 		boolean done = false;
-		while (!done)
+//		while (!done)
 		{
 			boolean updated = false;
 
@@ -101,10 +101,11 @@ public class TupleUtils
 				for (String col : t.getColNames())
 				{
 					original = t.getString(col);
-					if (original.contains("${"))
+					//if (original.contains("${"))
 					{
 						// check for self reference (??)
-						if (original.contains("${" + col + "}")) throw new IOException("could not solve " + col + "='"
+						if (original.contains("${" + col + "}"))
+							throw new IOException("could not solve " + col + "='"
 								+ original + "' because template references to self");
 
 						template = new Template(col, new StringReader(original), conf);
@@ -114,11 +115,11 @@ public class TupleUtils
 							Map<String, Object> map = toMap(t);
 							template.process(map, out);
 							value = out.toString();
-							if (!value.equals(original))
-							{
-								updated = true;
+//							if (!value.equals(original))
+//							{
+//								updated = true;
 								t.set(col, value);
-							}
+//							}
 						}
 						catch (Exception e)
 						{
@@ -128,14 +129,14 @@ public class TupleUtils
 				}
 			}
 
-			if (!updated)
-			{
-				if (unsolved.length() > 0)
-				{
-					throw new IOException(unsolved);
-				}
-				done = true;
-			}
+//			if (!updated)
+//			{
+//				if (unsolved.length() > 0)
+//				{
+//					throw new IOException(unsolved);
+//				}
+//				done = true;
+//			}
 		}
 	}
 
