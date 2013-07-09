@@ -145,6 +145,9 @@ public class ComputeCommandLine
 				CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment, userName);
 
 				dbApiClient.createRun(createRunRequest);
+
+				System.out.println("\n Run " + computeProperties.runId + " is inserted into database on "
+						+ computeProperties.database);
 			}
 		}
 
