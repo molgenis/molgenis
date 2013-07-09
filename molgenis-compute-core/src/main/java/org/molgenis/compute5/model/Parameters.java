@@ -101,10 +101,15 @@ public class Parameters
 	public static final String HELP_CMNDLINE_OPTION = "h";
 	public static final String RUN = "run";
 	public static final String RUN_CMNDLINE_OPTION = "r";
-	public static final String USER_CMNDLINE = "user";
-	public static final String USER_CMNDLINE_OPTION = "u";
-	public static final String PASS_CMNDLINE = "password";
-	public static final String PASS_CMNDLINE_OPTION = "pass";
+	public static final String MOLGENIS_USER_CMNDLINE = "molgenisuser";
+	public static final String MOLGENIS_USER_CMNDLINE_OPTION = "mu";
+	public static final String MOLGENIS_PASS_CMNDLINE = "molgenispassword";
+	public static final String MOLGENIS_PASS_CMNDLINE_OPTION = "mpass";
+	public static final String BACKEND_USER_CMNDLINE = "backenduser";
+	public static final String BACKEND_USER_CMNDLINE_OPTION = "bu";
+	public static final String BACKEND_PASS_CMNDLINE = "backendpassword";
+	public static final String BACKEND_PASS_CMNDLINE_OPTION = "bp";
+
 	public static final String CLEAR = "clear";
 
 

@@ -21,6 +21,8 @@ public class ComputeJob implements Runnable
 	@Override
 	public void run()
 	{
+		computeRun.setIsActive(true);
+		computeRun.setIsSubmittingPilots(true);
 		executor.executeTasks(computeRun, username, password);
 	}
 

@@ -39,8 +39,10 @@ public class ComputeProperties
 	public String database = Parameters.DATABASE_DEFAULT;
 	public String port = Parameters.PORT_DEFAULT;
 	public String interval = Parameters.INTERVAL_DEFAULT;
-	public String user = "user name unknown";
-	public String pass = "password unknown";
+	public String molgenisuser = null;
+	public String molgenispass = null;
+	public String backenduser = null;
+	public String backendpass = null;
 
 	// parameters not stored in compute.properties file:
 	public boolean showHelp = false; // show help?
@@ -73,7 +75,8 @@ public class ComputeProperties
 			updateDefaultParameterValues(path);
 
 			// get user name and set that one as default
-			this.user = System.getProperty("user.name");
+			this.molgenisuser = System.getProperty("user.name");
+			this.backenduser = System.getProperty("user.name");
 
 			createPropertiesFile();
 
@@ -265,7 +268,8 @@ public class ComputeProperties
 			this.database = p.getProperty(Parameters.DATABASE, this.database);
 			this.port = p.getProperty(Parameters.PORT, this.port);
 			this.interval = p.getProperty(Parameters.INTERVAL, this.interval);
-			this.user = p.getProperty(Parameters.USER_CMNDLINE, this.user);
+			this.molgenisuser = p.getProperty(Parameters.MOLGENIS_USER_CMNDLINE, this.molgenisuser);
+			this.backenduser = p.getProperty(Parameters.BACKEND_USER_CMNDLINE, this.backenduser);
 
 			String parametersCSVString = p.getProperty(Parameters.PARAMETERS);
 			if (null != parametersCSVString) this.parameters = parametersCSVString.split("\\s*,\\s*");
@@ -305,8 +309,10 @@ public class ComputeProperties
 			this.databaseStart = cmd.hasOption(Parameters.DATABASE_START_CMNDLINE_OPTION);
 			this.databaseEnd = cmd.hasOption(Parameters.DATABASE_END_CMNDLINE_OPTION);
 			this.interval = cmd.getOptionValue(Parameters.INTERVAL_CMNDLINE_OPTION, this.interval);
-			this.user = cmd.getOptionValue(Parameters.USER_CMNDLINE_OPTION, this.user);
-			this.pass = cmd.getOptionValue(Parameters.PASS_CMNDLINE_OPTION, this.pass);
+			this.molgenisuser = cmd.getOptionValue(Parameters.MOLGENIS_USER_CMNDLINE_OPTION, this.molgenisuser);
+			this.molgenispass = cmd.getOptionValue(Parameters.MOLGENIS_PASS_CMNDLINE_OPTION, this.molgenispass);
+			this.backenduser = cmd.getOptionValue(Parameters.BACKEND_USER_CMNDLINE_OPTION, this.backenduser);
+			this.backendpass = cmd.getOptionValue(Parameters.BACKEND_PASS_CMNDLINE_OPTION, this.backendpass);
 
 			// generate only if -g or if -w and -p present
 			this.generate = cmd.hasOption(Parameters.GENERATE_CMNDLINE_OPTION)
@@ -393,7 +399,8 @@ public class ComputeProperties
 			p.setProperty(Parameters.DATABASE, this.database);
 			p.setProperty(Parameters.PORT, this.port);
 			p.setProperty(Parameters.INTERVAL, this.interval);
-			p.setProperty(Parameters.USER_CMNDLINE, this.user);
+			p.setProperty(Parameters.MOLGENIS_USER_CMNDLINE, this.molgenisuser);
+			p.setProperty(Parameters.BACKEND_USER_CMNDLINE, this.backenduser);
 
 			FileOutputStream fos = new FileOutputStream(this.propertiesFile);
 			try
@@ -486,11 +493,17 @@ public class ComputeProperties
 						"Run jobs from current directory on current backend. When using --database this will return a 'id' for --pilot.")
 				.withLongOpt(Parameters.RUN).create(Parameters.RUN_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder
-				.withDescription("Supply user name to login to your backend. Default is your own user name.").hasArg()
-				.withLongOpt(Parameters.USER_CMNDLINE).create(Parameters.USER_CMNDLINE_OPTION));
+				.withDescription("Supply user name to login to molgenis database. Default is your own user name.").hasArg()
+				.withLongOpt(Parameters.MOLGENIS_USER_CMNDLINE).create(Parameters.MOLGENIS_USER_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder
-				.withDescription("Supply user pass to login to your backend. Default is not saved.").hasArg()
-				.withLongOpt(Parameters.PASS_CMNDLINE).create(Parameters.PASS_CMNDLINE_OPTION));
+				.withDescription("Supply user pass to login to molgenis. Default is not saved.").hasArg()
+				.withLongOpt(Parameters.MOLGENIS_PASS_CMNDLINE).create(Parameters.MOLGENIS_PASS_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Supply user name to login to execution backend. Default is your own user name.").hasArg()
+				.withLongOpt(Parameters.BACKEND_USER_CMNDLINE).create(Parameters.BACKEND_USER_CMNDLINE_OPTION));
+		options.addOption(OptionBuilder
+				.withDescription("Supply user pass to login to execution backend. Default is not saved.").hasArg()
+				.withLongOpt(Parameters.BACKEND_PASS_CMNDLINE).create(Parameters.BACKEND_PASS_CMNDLINE_OPTION));
 		options.addOption(OptionBuilder.withDescription("Clear properties file").withLongOpt(Parameters.CLEAR)
 				.create(Parameters.CLEAR));
 

@@ -26,8 +26,8 @@ public class Protocol
 			Parameters.QUEUE,
 			Parameters.MEMORY,
 			Parameters.NOTAVAILABLE,
-			Parameters.PASS_CMNDLINE,
-			Parameters.USER_CMNDLINE,
+			Parameters.MOLGENIS_PASS_CMNDLINE,
+			Parameters.MOLGENIS_USER_CMNDLINE,
 			Parameters.CUSTOM_HEADER_COLUMN,
 			Parameters.CUSTOM_FOOTER_COLUMN,
 			Parameters.CUSTOM_SUBMIT_COLUMN
