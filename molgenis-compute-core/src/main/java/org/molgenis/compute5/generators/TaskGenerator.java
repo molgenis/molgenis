@@ -126,7 +126,7 @@ public class TaskGenerator
 				parameterHeader += "\nrunid=\"" + computeProperties.runId + "\"";
 				parameterHeader += "\nworkflow=\"" + computeProperties.workFlow + "\"";
 				parameterHeader += "\nparameters=\"" + computeProperties.parametersString() + "\"";
-				parameterHeader += "\nuser=\"" + computeProperties.user + "\"";
+				parameterHeader += "\nuser=\"" + computeProperties.molgenisuser + "\"";
 				parameterHeader += "\ndatabase=\"" + computeProperties.database + "\"";
 				parameterHeader += "\nbackend=\"" + computeProperties.backend + "\"";
 				parameterHeader += "\nport=\"" + computeProperties.port + "\"";
