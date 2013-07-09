@@ -9,10 +9,7 @@ import java.util.List;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.molgenis.compute5.db.api.ComputeDbApiClient;
-import org.molgenis.compute5.db.api.ComputeDbApiConnection;
-import org.molgenis.compute5.db.api.CreateRunRequest;
-import org.molgenis.compute5.db.api.HttpClientComputeDbApiConnection;
+import org.molgenis.compute5.db.api.*;
 import org.molgenis.compute5.generators.CreateWorkflowGenerator;
 import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
@@ -57,45 +54,36 @@ public class ComputeCommandLine
 		// parse options
 		ComputeProperties computeProperties = new ComputeProperties(args);
 
-		// output scripts + docs
-//		try
-//		{
-			if (!computeProperties.showHelp) create(computeProperties);
-//		}
-//		catch (Exception e)
-//		{
-//			e.printStackTrace();
-//		}
+		if (!computeProperties.showHelp)
+			new ComputeCommandLine().execute(computeProperties);
 	}
 
-	public static Compute create(ComputeProperties computeProperties) throws Exception
+	public Compute execute(ComputeProperties computeProperties) throws Exception
 	{
 		Compute compute = new Compute(computeProperties);
 
-		if (!computeProperties.create && !computeProperties.clear)
-		{// inform user:
-			System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
-			if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
-					+ (new File(computeProperties.defaults)).getAbsolutePath());
-			System.out.println("Using parameters:       " + Joiner.on(",").join(computeProperties.parameters));
-			System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
-			System.out.println("Using backend:          " + computeProperties.backend);
-			System.out.println("Using runID:            " + computeProperties.runId);
+		String userName = null;
+		String pass = null;
+		ComputeDbApiConnection dbApiConnection = null;
+		ComputeDbApiClient dbApiClient = null;
+
+		//check if we are working with database; database default is database=none
+		if(!computeProperties.database.equalsIgnoreCase(Parameters.DATABASE_DEFAULT))
+		{
+			userName = computeProperties.user;
+			pass = computeProperties.pass;
+
+			dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
+					computeProperties.port, "/api/v1", userName, pass);
+			dbApiClient = new ComputeDbApiClient(dbApiConnection);
 		}
-
-		System.out.println(""); // newline
-
-		/*
-		 * *
-		 * ** Now handle command line options:*
-		 */
 
 		if (computeProperties.create)
 		{
 			new CreateWorkflowGenerator(computeProperties.createWorkflow);
+			return compute;
 		}
-
-		if (computeProperties.clear)
+		else if (computeProperties.clear)
 		{
 			File file = new File(Parameters.PROPERTIES);
 
@@ -107,60 +95,57 @@ public class ComputeCommandLine
 			{
 				System.out.println("Fail to clear " + file.getName());
 			}
-			return null;
+			return compute;
 		}
-
-		if (computeProperties.generate)
+		else if (computeProperties.generate)
 		{
+			System.out.println("Using workflow:         " + new File(computeProperties.workFlow).getAbsolutePath());
+			if (defaultsExists(computeProperties)) System.out.println("Using defaults:         "
+					+ (new File(computeProperties.defaults)).getAbsolutePath());
+			System.out.println("Using parameters:       " + Joiner.on(",").join(computeProperties.parameters));
+			System.out.println("Using run (output) dir: " + new File(computeProperties.runDir).getAbsolutePath());
+			System.out.println("Using backend:          " + computeProperties.backend);
+			System.out.println("Using runID:            " + computeProperties.runId + "\n\n");
+
 			generate(compute, computeProperties);
-		}
 
-		if (Parameters.DATABASE_DEFAULT.equals(computeProperties.database))
-		{ // if database none (= off), then do following
-			if (computeProperties.list)
-			{
-				// list *.sh files in rundir
-				File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter()
+			if (Parameters.DATABASE_DEFAULT.equals(computeProperties.database))
+			{ // if database none (= off), then do following
+				if (computeProperties.list)
 				{
-					public boolean accept(File dir, String filename)
+					// list *.sh files in rundir
+					File[] scripts = new File(computeProperties.runDir).listFiles(new FilenameFilter()
 					{
-						return filename.endsWith(".sh");
-					}
-				});
+						public boolean accept(File dir, String filename)
+						{
+							return filename.endsWith(".sh");
+						}
+					});
 
-				System.out.println("Generated jobs that are ready to run:");
-				if (null == scripts) System.out.println("None. Remark: the run (output) directory '"
-						+ computeProperties.runDir + "' does not exist.");
-				else if (0 == scripts.length) System.out.println("None.");
-				else for (File script : scripts)
-				{
-					System.out.println("- " + script.getName());
+					System.out.println("Generated jobs that are ready to run:");
+					if (null == scripts) System.out.println("None. Remark: the run (output) directory '"
+							+ computeProperties.runDir + "' does not exist.");
+					else if (0 == scripts.length) System.out.println("None.");
+					else for (File script : scripts)
+						{
+							System.out.println("- " + script.getName());
+						}
 				}
 			}
-		}
-		else
-		{
-			// database is on, please call compute-db-functions
-			// you can use computeProperties.* to see what user wants
-			String userName = computeProperties.user;
-			String pass = computeProperties.pass;
+			else
+			{
+				String runName = computeProperties.runId;
 
-			ComputeDbApiConnection dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
-					computeProperties.port, "/api/v1", userName, pass);
+				String backendName = computeProperties.backend;
+				Long pollInterval = Long.parseLong(computeProperties.interval);
 
-			ComputeDbApiClient dbApiClient = new ComputeDbApiClient(dbApiConnection);
+				List<Task> tasks = compute.getTasks();
+				String environment = compute.getUserEnvironment();
 
-			String runName = computeProperties.runId;
+				CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment, userName);
 
-            String backendName = computeProperties.backend;
-            Long pollInterval = Long.parseLong(computeProperties.interval);
-
-			List<Task> tasks = compute.getTasks();
-			String environment = compute.getUserEnvironment();
-
-            CreateRunRequest createRunRequest = new CreateRunRequest(runName, backendName, pollInterval, tasks, environment, userName);
-
-			dbApiClient.createRun(createRunRequest);
+				dbApiClient.createRun(createRunRequest);
+			}
 		}
 
 		if (computeProperties.execute)
@@ -173,19 +158,10 @@ public class ComputeCommandLine
 			}
 			else
 			{
-
-				//these three parameters can not be null, otherwise we will not get here
-				String database = computeProperties.database;
-				String user = computeProperties.user;
-				String pass = computeProperties.pass;
-				String backend = computeProperties.backend;
-
-				//TODO implement submission from database
-
+				StartRunRequest startRunRequest = new StartRunRequest(computeProperties.runId, userName, pass);
+				dbApiClient.start(startRunRequest);
 			}
 		}
-
-
 		return compute;
 	}
 
@@ -255,15 +231,6 @@ public class ComputeCommandLine
 			new LocalBackend(computeProperties).generate(compute.getTasks(), dir);
 		}
 
-		// generate outputs folders per task
-		// for (Task t : compute.getTasks())
-		// {
-		// File f = new File(computeProperties.runDir + "/outputs/" +
-		// t.getName());
-		// f.mkdirs();
-		// System.out.println("Generated " + f.getAbsolutePath());
-		// }
-
 		// generate documentation
 		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"),
 				compute.getParameters());
@@ -273,17 +240,4 @@ public class ComputeCommandLine
 		System.out.println("Generation complete.");
 	}
 
-	/**
-	 * Return Compute object, given one single -path to all files
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public static Compute create(String path) throws IOException, Exception
-	{
-		ComputeProperties computeProperties = new ComputeProperties(path);
-		computeProperties.generate = true;
-
-		return ComputeCommandLine.create(computeProperties);
-	}
 }
