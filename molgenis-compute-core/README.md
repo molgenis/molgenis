@@ -509,6 +509,7 @@ We have a list of words, which are reserved and cannot be used in compute to nam
 	header
 	footer
 	submit
+	autoid
 
 ## wish lists
 * multiple default files
