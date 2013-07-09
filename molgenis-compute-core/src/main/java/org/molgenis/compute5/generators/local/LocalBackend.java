@@ -7,13 +7,16 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.generators.BackendGenerator;
 
-public class LocalBackend extends BackendGenerator {
+public class LocalBackend extends BackendGenerator
+{
 
-	public LocalBackend() throws IOException {
+	public LocalBackend() throws IOException
+	{
 		super("header.ftl", "footer.ftl", "submit.ftl");
 	}
 
-	public LocalBackend(ComputeProperties cp) throws IOException {
+	public LocalBackend(ComputeProperties cp) throws IOException
+	{
 		super("header.ftl", "footer.ftl", "submit.ftl");
 
 		File h = new File(cp.customHeader);
@@ -21,22 +24,28 @@ public class LocalBackend extends BackendGenerator {
 		File s = new File(cp.customSubmit);
 
 		// overwrite if files already defined by user
-		if (h.exists()) {
+		if (h.exists())
+		{
 			System.out.println(">> Custom header: " + h);
 			this.appendCustomHeader(FileUtils.readFileToString(h));
-		} else
+		}
+		else
 			System.out.println(">> Custom header not found (" + h + ")");
 
-		if (f.exists()) {
+		if (f.exists())
+		{
 			System.out.println(">> Custom footer: " + f);
 			this.appendCustomFooter(FileUtils.readFileToString(f));
-		} else
+		}
+		else
 			System.out.println(">> Custom footer not found (" + f + ")");
 
-		if (s.exists()) {
+		if (s.exists())
+		{
 			System.out.println(">> Custom submit script: " + s);
 			this.setSubmitTemplate(FileUtils.readFileToString(s));
-		} else
+		}
+		else
 			System.out.println(">> Custom submit script not found (" + s + ")");
 	}
 
