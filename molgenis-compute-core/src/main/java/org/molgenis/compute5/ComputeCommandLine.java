@@ -70,8 +70,8 @@ public class ComputeCommandLine
 		//check if we are working with database; database default is database=none
 		if(!computeProperties.database.equalsIgnoreCase(Parameters.DATABASE_DEFAULT))
 		{
-			userName = computeProperties.user;
-			pass = computeProperties.pass;
+			userName = computeProperties.molgenisuser;
+			pass = computeProperties.molgenispass;
 
 			dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
 					computeProperties.port, "/api/v1", userName, pass);
@@ -154,13 +154,24 @@ public class ComputeCommandLine
 			{
 				String runDir = computeProperties.runDir;
 				new SysCommandExecutor().runCommand("sh "+ runDir +"/submit.sh");
-				System.out.println("Scripts are executed/submitted on " + computeProperties.backend);
+				System.out.println("\nScripts are executed/submitted on " + computeProperties.backend);
 			}
 			else
 			{
-				StartRunRequest startRunRequest = new StartRunRequest(computeProperties.runId, userName, pass);
+				String backendUserName = computeProperties.backenduser;
+				String backendPass = computeProperties.backendpass;
+
+				if((backendPass == null) || (backendUserName == null))
+				{
+					System.out.println("\nPlease specify username and password for computational back-end");
+					System.out.println("Use --backenduser[-bu] and --backendpassword[-bp] for this");
+					return compute;
+				}
+
+				StartRunRequest startRunRequest = new StartRunRequest(computeProperties.runId, backendUserName, backendPass);
 				dbApiClient.start(startRunRequest);
-				System.out.println(computeProperties.runId + "is submitted for execution by user " + userName);
+				System.out.println("\n" + computeProperties.runId + "is submitted for execution "
+						+ computeProperties.backend + " by user " + backendUserName);
 			}
 		}
 		return compute;
