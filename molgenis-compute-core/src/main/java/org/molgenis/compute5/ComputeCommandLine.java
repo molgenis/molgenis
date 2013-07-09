@@ -160,6 +160,7 @@ public class ComputeCommandLine
 			{
 				StartRunRequest startRunRequest = new StartRunRequest(computeProperties.runId, userName, pass);
 				dbApiClient.start(startRunRequest);
+				System.out.println(computeProperties.runId + "is submitted for execution by user " + userName);
 			}
 		}
 		return compute;
