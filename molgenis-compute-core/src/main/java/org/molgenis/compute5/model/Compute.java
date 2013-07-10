@@ -29,11 +29,11 @@ public class Compute
 		this.setComputeProperties(computeProperties);
 	}
 
-	public List<Task> generateTasks() throws IOException
-	{
-		tasks = TaskGenerator.generate(workflow, parameters, new ComputeProperties("."));
-		return tasks;
-	}
+//	public List<Task> generateTasks() throws IOException
+//	{
+//		tasks = TaskGenerator.generate(workflow, parameters, new ComputeProperties("."));
+//		return tasks;
+//	}
 
 	public List<Task> getTasks()
 	{

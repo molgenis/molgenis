@@ -30,9 +30,9 @@ public class ComputeProperties
 	public String defaultsCommandLine = null;
 	public String[] parameters =
 	{ Parameters.PARAMETERS_DEFAULT };
-	public String customHeader = Parameters.CUSTOM_HEADER_DEFAULT;
-	public String customFooter = Parameters.CUSTOM_FOOTER_DEFAULT;
-	public String customSubmit = Parameters.CUSTOM_SUBMIT_DEFAULT;
+	public String customHeader = null;
+	public String customFooter = null;
+	public String customSubmit = null;
 	public String backend = Parameters.BACKEND_DEFAULT;
 	public String runDir = Parameters.RUNDIR_DEFAULT;
 	public String runId = Parameters.RUNID_DEFAULT;
@@ -104,23 +104,6 @@ public class ComputeProperties
 		}
 	}
 
-	public ComputeProperties(String path)
-	{
-		// set path
-		this.path = path;
-
-		// prepend path to defaults
-		updateDefaultParameterValues(path);
-
-		createPropertiesFile();
-
-		// parse properties file
-		parseProperties();
-
-		// save new config
-		saveProperties();
-	}
-
 	/**
 	 * If this.defaultsCommandLine does not exist, then look in workflow folder for [workflow].defaults.csv or else
 	 * defaults.csv
@@ -180,9 +163,6 @@ public class ComputeProperties
 			pathParameters.add(updatePath(path, p));
 		this.parameters = pathParameters.toArray(new String[pathParameters.size()]);
 
-		this.customHeader = updatePath(path, this.customHeader);
-		this.customFooter = updatePath(path, this.customFooter);
-		this.customSubmit = updatePath(path, this.customSubmit);
 	}
 
 	/**
@@ -391,8 +371,11 @@ public class ComputeProperties
 		try
 		{
 			// set this.variables
+			if(this.customSubmit != null)
 			p.setProperty(Parameters.CUSTOM_SUBMIT_COLUMN, this.customSubmit);
+			if(this.customFooter != null)
 			p.setProperty(Parameters.CUSTOM_FOOTER_COLUMN, this.customFooter);
+			if(this.customHeader != null)
 			p.setProperty(Parameters.CUSTOM_HEADER_COLUMN, this.customHeader);
 
 			p.setProperty(Parameters.INTERVAL, this.interval);
