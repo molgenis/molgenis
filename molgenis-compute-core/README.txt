@@ -14,4 +14,27 @@ Molgenis Computeje Users can:
 . Design a workflow.csv with each step as a shell script 'protocol'
 . Generate and run jobs by iterating over parameters.csv and execute on a compute backend
 . (Optional) use standardized file and tool management for portable workflows
-Typical command to generate and run jobs:
+
+Download
+--------
+
+Get Started
+-----------
+
+Create workflow
+~~~~~~~~~~~~~~~
+
+Generate workflow
+~~~~~~~~~~~~~~~~~
+
+Execute workflow
+~~~~~~~~~~~~~~~~
+
+Command-line options
+--------------------
+
+Reserved words
+--------------
+
+Database usage
+--------------
