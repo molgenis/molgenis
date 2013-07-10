@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.model.Task;
 
 import freemarker.template.Configuration;
@@ -158,5 +160,53 @@ public class BackendGenerator
 	public void setSubmitTemplate(String submitTemplate)
 	{
 		this.submitTemplate = submitTemplate;
+	}
+
+	public BackendGenerator(ComputeProperties cp) throws IOException
+	{
+		this.setHeaderTemplate(readFile("header.ftl"));
+		this.setFooterTemplate(readFile("footer.ftl"));
+		this.setSubmitTemplate(readFile("submit.ftl"));
+
+
+		if (cp.customHeader != null)
+		{
+			File h = new File(cp.customHeader);
+			if (h.exists())
+			{
+				System.out.println(">> Custom header: " + h);
+				this.appendCustomHeader(FileUtils.readFileToString(h));
+			}
+			else
+				System.out.println(">> Custom header not found (" + h + ")");
+
+		}
+
+		if(cp.customFooter != null)
+		{
+			File f = new File(cp.customFooter);
+			if (f.exists())
+			{
+				System.out.println(">> Custom footer: " + f);
+				this.appendCustomFooter(FileUtils.readFileToString(f));
+			}
+			else
+				System.out.println(">> Custom footer not found (" + f + ")");
+
+		}
+
+		if(cp.customSubmit != null)
+		{
+			File s = new File(cp.customSubmit);
+			if (s.exists())
+			{
+				System.out.println(">> Custom submit script: " + s);
+				this.setSubmitTemplate(FileUtils.readFileToString(s));
+			}
+			else
+				System.out.println(">> Custom submit script not found (" + s + ")");
+
+		}
+
 	}
 }
