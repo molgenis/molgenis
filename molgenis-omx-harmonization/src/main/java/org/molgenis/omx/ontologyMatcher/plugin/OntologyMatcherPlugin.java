@@ -32,9 +32,10 @@ public class OntologyMatcherPlugin extends PluginModel<Entity>
 	{
 		StringBuilder header = new StringBuilder();
 		header.append("<link rel=\"stylesheet\" href=\"/css/bootstrap-fileupload.min.css\" type=\"text/css\">")
-				.append("<link rel=\"stylesheet\" href=\"/css/harmonization-indexer.css\" type=\"text/css\">")
+				.append("<script type=\"text/javascript\" src=\"/js/common-component.js\"></script>")
+				.append("<link rel=\"stylesheet\" href=\"/css/ontology-matcher.css\" type=\"text/css\">")
 				.append("<script type=\"text/javascript\" src=\"/js/bootstrap-fileupload.min.js\"></script>")
-				.append("<script type=\"text/javascript\" src=\"/js/harmonization-indexer.js\"></script>");
+				.append("<script type=\"text/javascript\" src=\"/js/ontology-matcher.js\"></script>");
 		return header.toString();
 	}
 

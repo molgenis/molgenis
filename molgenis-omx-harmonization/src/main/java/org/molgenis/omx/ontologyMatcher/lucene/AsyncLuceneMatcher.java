@@ -1,0 +1,307 @@
+package org.molgenis.omx.ontologyMatcher.lucene;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.ObservationSet;
+import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.omx.observ.value.MrefValue;
+import org.molgenis.omx.observ.value.XrefValue;
+import org.molgenis.search.Hit;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
+import org.molgenis.search.SearchService;
+import org.molgenis.util.DatabaseUtil;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+
+public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
+{
+	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
+	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
+	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
+	private static final String CATALOGUE_PREFIX = "protocolTree-";
+	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
+	private static final String ONTOLOGY_IRI = "ontologyTermIRI";
+	private static final String ENTITY_TYPE = "type";
+
+	private SearchService searchService;
+
+	@Autowired
+	public void setSearchService(SearchService searchService)
+	{
+		this.searchService = searchService;
+	}
+
+	public void afterPropertiesSet() throws Exception
+	{
+		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
+	}
+
+	@Override
+	public void matchPercentage()
+	{
+
+	}
+
+	@Async
+	public void match(Integer selectedDataSet, Set<Integer> dataSetsToMatch) throws DatabaseException
+	{
+		Database db = DatabaseUtil.createDatabase();
+
+		try
+		{
+			db.beginTx();
+			// Initialize the protocol and features that are used to store
+			// mappings
+			createMappingStore(selectedDataSet, dataSetsToMatch, db);
+
+			List<QueryRule> queryRules = new ArrayList<QueryRule>();
+			queryRules.add(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
+					.toLowerCase()));
+			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
+
+			SearchRequest request = new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, queryRules, null);
+			SearchResult result = searchService.search(request);
+			Iterator<Hit> iterator = result.iterator();
+
+			List<ObservedValue> listOfValues = new ArrayList<ObservedValue>();
+			List<ObservedValue> listOfOldValues = new ArrayList<ObservedValue>();
+
+			while (iterator.hasNext())
+			{
+				Hit hit = iterator.next();
+				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID.toString())
+						.toString());
+				// String name = hit.getColumnValueMap().get("name").toString();
+				String description = hit.getColumnValueMap().get(ObservableFeature.DESCRIPTION.toLowerCase())
+						.toString();
+				ObservableFeature feature = db.findById(ObservableFeature.class, featureId);
+
+				if (feature != null)
+				{
+					Map<Integer, List<String>> positions = createQueryRules(description, feature.getDefinition());
+					List<QueryRule> subQueries = new ArrayList<QueryRule>();
+					for (List<String> terms : positions.values())
+					{
+						List<QueryRule> rules = new ArrayList<QueryRule>();
+						for (String term : terms)
+						{
+							rules.add(new QueryRule(Operator.SEARCH, term));
+						}
+						QueryRule disMaxQuery = new QueryRule(rules);
+						disMaxQuery.setOperator(Operator.DIS_MAX);
+						subQueries.add(disMaxQuery);
+					}
+					QueryRule finalQuery = new QueryRule(subQueries);
+					finalQuery.setOperator(Operator.SHOULD);
+
+					for (Integer catalogueId : dataSetsToMatch)
+					{
+						String dataSetIdentifier = selectedDataSet + "-" + catalogueId;
+						List<Integer> mappedFeatureIds = searchDisMaxQuery(CATALOGUE_PREFIX + catalogueId, finalQuery);
+						ObservationSet observation = getObservationSet(featureId, STORE_MAPPING_FEATURE,
+								dataSetIdentifier, db);
+
+						ObservedValue valueForFeature = getObservedValues(observation.getId(), STORE_MAPPING_FEATURE,
+								dataSetIdentifier, db);
+						if (valueForFeature == null)
+						{
+							XrefValue value = new XrefValue();
+							value.setValue(db.findById(Characteristic.class, featureId));
+
+							valueForFeature = new ObservedValue();
+							valueForFeature.setObservationSet(observation);
+							valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
+							valueForFeature.setValue(value);
+							listOfValues.add(valueForFeature);
+						}
+
+						ObservedValue valueForMappedFeature = getObservedValues(observation.getId(),
+								STORE_MAPPING_MAPPED_FEATURE, dataSetIdentifier, db);
+						if (valueForMappedFeature != null) listOfOldValues.add(valueForMappedFeature);
+
+						if (mappedFeatureIds.size() != 0)
+						{
+							MrefValue mrefValue = new MrefValue();
+							mrefValue.setValue(db.find(Characteristic.class, new QueryRule(Characteristic.ID,
+									Operator.IN, mappedFeatureIds)));
+
+							valueForMappedFeature = new ObservedValue();
+							valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
+							valueForMappedFeature.setObservationSet(observation);
+							valueForMappedFeature.setValue(mrefValue);
+							listOfValues.add(valueForMappedFeature);
+						}
+					}
+				}
+			}
+
+			db.remove(listOfOldValues);
+			db.add(listOfValues);
+			db.commitTx();
+		}
+		catch (Exception e)
+		{
+			db.rollbackTx();
+			e.printStackTrace();
+		}
+		finally
+		{
+			DatabaseUtil.closeQuietly(db);
+		}
+	}
+
+	private List<Integer> searchDisMaxQuery(String documentType, QueryRule disMaxQuery)
+	{
+		List<Integer> featureIds = new ArrayList<Integer>();
+		List<QueryRule> finalQuery = new ArrayList<QueryRule>();
+		finalQuery.add(new QueryRule(Operator.LIMIT, 50));
+		finalQuery.add(disMaxQuery);
+		SearchRequest request = new SearchRequest(documentType, finalQuery, null);
+		SearchResult result = searchService.search(request);
+		Iterator<Hit> iterator = result.iterator();
+		while (iterator.hasNext())
+		{
+			Hit hit = iterator.next();
+			Map<String, Object> data = hit.getColumnValueMap();
+			Integer id = Integer.parseInt(data.get(ObservableFeature.ID).toString());
+			featureIds.add(id);
+		}
+		return featureIds;
+	}
+
+	private Map<Integer, List<String>> createQueryRules(String dataItem, List<OntologyTerm> definitions)
+	{
+		List<String> uniqueTokens = new ArrayList<String>();
+
+		for (String token : Arrays.asList(dataItem.split(" +")))
+			if (!uniqueTokens.contains(token)) uniqueTokens.add(token);
+
+		Map<Integer, List<String>> position = new HashMap<Integer, List<String>>();
+
+		for (OntologyTerm ot : definitions)
+		{
+			List<QueryRule> queryRules = new ArrayList<QueryRule>();
+			queryRules.add(new QueryRule(ONTOLOGY_IRI, Operator.EQUALS, ot.getTermAccession()));
+			queryRules.add(new QueryRule(Operator.LIMIT, 100));
+			SearchRequest request = new SearchRequest(null, queryRules, null);
+			SearchResult result = searchService.search(request);
+			Iterator<Hit> iterator = result.iterator();
+			while (iterator.hasNext())
+			{
+				Hit hit = iterator.next();
+				String ontologyTermSynonym = hit.getColumnValueMap().get(ONTOLOGYTERM_SYNONYM).toString().toLowerCase();
+				int index = uniqueTokens.indexOf(ontologyTermSynonym);
+				if (index != -1)
+				{
+					List<String> terms = null;
+					if (!position.containsKey(index)) terms = new ArrayList<String>();
+					else terms = position.get(index);
+					terms.add(ontologyTermSynonym);
+					position.put(index, terms);
+				}
+			}
+		}
+		return position;
+	}
+
+	private ObservedValue getObservedValues(Integer observationId, String featureIdentifier, String dataSetIdentifier,
+			Database db) throws DatabaseException
+	{
+		ObservedValue ov = null;
+		Query<ObservedValue> rules = db.query(ObservedValue.class);
+		rules.addRules(new QueryRule(ObservedValue.FEATURE_IDENTIFIER, Operator.EQUALS, featureIdentifier));
+		rules.addRules(new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, observationId));
+		if (rules.find().size() > 0) ov = rules.find().get(0);
+		return ov;
+	}
+
+	private ObservationSet getObservationSet(Object featureId, String featureIdentifier, String dataSetIdentifier,
+			Database db) throws DatabaseException
+	{
+		ObservationSet observation = null;
+
+		Query<ObservedValue> rules = db.query(ObservedValue.class);
+		rules.addRules(new QueryRule(ObservedValue.FEATURE_IDENTIFIER, Operator.EQUALS, featureIdentifier));
+		XrefValue value = new XrefValue();
+		value.setValue(Integer.parseInt(featureId.toString()));
+		rules.addRules(new QueryRule(ObservedValue.VALUE, Operator.EQUALS, value));
+		if (rules.find().size() > 0) observation = rules.find().get(0).getObservationSet();
+		else
+		{
+			observation = new ObservationSet();
+			observation.setPartOfDataSet_Identifier(dataSetIdentifier);
+			db.add(observation);
+		}
+		return observation;
+	}
+
+	private void createMappingStore(Integer selectedDataSet, Set<Integer> dataSetsToMatch, Database db)
+			throws DatabaseException
+	{
+		boolean isFeatureExists = db.find(ObservableFeature.class,
+				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_FEATURE)).size() == 0;
+		if (isFeatureExists)
+		{
+			ObservableFeature feature = new ObservableFeature();
+			feature.setIdentifier(STORE_MAPPING_FEATURE);
+			feature.setDataType("xref");
+			feature.setName("Features");
+			db.add(feature);
+		}
+
+		boolean isMappedFeatureExists = db.find(ObservableFeature.class,
+				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_MAPPED_FEATURE)).size() == 0;
+		if (isMappedFeatureExists)
+		{
+			ObservableFeature mappedFeature = new ObservableFeature();
+			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
+			mappedFeature.setDataType("mref");
+			mappedFeature.setName("Mapped features");
+			db.add(mappedFeature);
+		}
+
+		boolean ifProtocolExists = db.find(Protocol.class,
+				new QueryRule(Protocol.IDENTIFIER, Operator.EQUALS, PROTOCOL_IDENTIFIER)).size() == 0;
+		if (ifProtocolExists)
+		{
+			Protocol protocol = new Protocol();
+			protocol.setIdentifier("store_mapping");
+			protocol.setName("store_mapping");
+			protocol.setFeatures_Identifier(Arrays.asList(STORE_MAPPING_FEATURE, STORE_MAPPING_MAPPED_FEATURE));
+			db.add(protocol);
+		}
+
+		for (Integer dataSetId : dataSetsToMatch)
+		{
+			String identifier = selectedDataSet + "-" + dataSetId;
+			boolean ifDataSetExists = db.find(DataSet.class,
+					new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier)).size() == 0;
+			if (ifDataSetExists)
+			{
+				DataSet dataSet = new DataSet();
+				dataSet.setIdentifier(identifier);
+				dataSet.setName(identifier);
+				dataSet.setProtocolUsed_Identifier(PROTOCOL_IDENTIFIER);
+				db.add(dataSet);
+			}
+		}
+	}
+}

@@ -68,5 +68,8 @@
 		$('#refresh-button').click(function(){
 			$('#harmonizationIndexer-form').submit();
 		});
+		$('#match-catalogue').click(function(){
+			
+		});
 	});
 }($, window.top));

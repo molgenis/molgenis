@@ -1,9 +1,11 @@
 package org.molgenis.omx.harmonization.config;
 
-import org.molgenis.omx.harmonization.plugin.AsyncOntologyAnnotator;
-import org.molgenis.omx.harmonization.plugin.OntologyAnnotator;
+import org.molgenis.omx.ontologyAnnotator.plugin.AsyncOntologyAnnotator;
+import org.molgenis.omx.ontologyAnnotator.plugin.OntologyAnnotator;
 import org.molgenis.omx.ontologyIndexer.plugin.AsyncOntologyIndexer;
 import org.molgenis.omx.ontologyIndexer.plugin.OntologyIndexer;
+import org.molgenis.omx.ontologyMatcher.lucene.AsyncLuceneMatcher;
+import org.molgenis.omx.ontologyMatcher.lucene.LuceneMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -27,5 +29,11 @@ public class HarmonizationConfig
 	public OntologyAnnotator ontologyAnnotator()
 	{
 		return new AsyncOntologyAnnotator();
+	}
+
+	@Bean
+	public LuceneMatcher luceneMatcher()
+	{
+		return new AsyncLuceneMatcher();
 	}
 }

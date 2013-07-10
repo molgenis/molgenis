@@ -16,7 +16,7 @@
 		<div class="screenbody">
 			<div class="container-fluid">
 				<div>
-					<h1>Harmonization</h1>
+					<h1>Matching result</h1>
 				</div>
 				<div class="row-fluid">
 					<div class="span12">
@@ -28,35 +28,12 @@
 							</select>
 						</div>
 						<div class="row-fluid">
-							<div class="span8">
-								<div class="row-fluid">
-									<div class="input-append span4">
-										<input id="search-text" type="text" title="Enter your search term" />
-										<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
-									</div>
-								</div>
+							<div class="span12">
 								<div class="row-fluid data-table-container">
 									<table id="dataitem-table" class="table table-striped table-condensed">
 									</table>
 									<div class="pagination pagination-centered">
 										<ul></ul>
-									</div>
-									<div>
-										<button id="annotate-dataitems" class="btn">Go annotation</button>
-										<button id="refresh-annotate" class="btn">Refresh</button>
-									</div>
-								</div>
-							</div>
-							<div class="span4">
-								<div class="accordion-group">
-								    <div class="accordion-heading">
-										<h5 class="text-left text-info">Help!</h5>	
-									</div>
-									<div class="accordion-body in">
-										<p class="justify-text">Ontologies are used to expand semantics of data items so that those data items annotated with 
-										ontologies terms would have more synonyms and relevent terms that would be more likely matched with 
-										other catalogue data items. Please index the ontologies in advance. It will largely speed up the matching process.
-										</p>
 									</div>
 								</div>
 							</div>
