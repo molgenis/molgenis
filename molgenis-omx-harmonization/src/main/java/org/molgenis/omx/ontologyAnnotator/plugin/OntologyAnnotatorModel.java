@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.plugin;
+package org.molgenis.omx.ontologyAnnotator.plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,12 +8,13 @@ import java.util.Set;
 
 import org.molgenis.omx.observ.DataSet;
 
-public class HarmonizationModel
+public class OntologyAnnotatorModel
 {
 	List<DataSet> dataSets = new ArrayList<DataSet>();
 
 	DataSet selectedDataSet = null;
 
+	// TODO : solve this guy
 	public static final Set<String> STOPWORDSLIST;
 
 	static

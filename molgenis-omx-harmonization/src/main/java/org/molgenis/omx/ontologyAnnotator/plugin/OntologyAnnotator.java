@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.plugin;
+package org.molgenis.omx.ontologyAnnotator.plugin;
 
 import org.molgenis.framework.db.DatabaseException;
 

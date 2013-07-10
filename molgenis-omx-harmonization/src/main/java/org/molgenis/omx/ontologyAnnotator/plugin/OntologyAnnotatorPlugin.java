@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.plugin;
+package org.molgenis.omx.ontologyAnnotator.plugin;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -17,23 +17,23 @@ import org.molgenis.util.Entity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public class HarmonizationPlugin extends PluginModel<Entity>
+public class OntologyAnnotatorPlugin extends PluginModel<Entity>
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private HarmonizationModel model;
+	private OntologyAnnotatorModel model;
 
-	public HarmonizationPlugin(String name, ScreenController<?> parent)
+	public OntologyAnnotatorPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
-		this.model = new HarmonizationModel();
+		this.model = new OntologyAnnotatorModel();
 	}
 
 	@Override
 	public String getViewTemplate()
 	{
-		return "templates/" + HarmonizationPlugin.class.getName().replace('.', '/') + ".ftl";
+		return "templates/" + OntologyAnnotatorPlugin.class.getName().replace('.', '/') + ".ftl";
 	}
 
 	@Override
@@ -41,19 +41,21 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 	{
 		StringBuilder header = new StringBuilder();
 		header.append("<link rel=\"stylesheet\" href=\"/css/bootstrap-fileupload.min.css\" type=\"text/css\">")
-				.append("<link rel=\"stylesheet\" href=\"/css/harmonization-indexer.css\" type=\"text/css\">")
+				.append("<link rel=\"stylesheet\" href=\"/css/ontology-annotator.css\" type=\"text/css\">")
+				.append("<script type=\"text/javascript\" src=\"/js/common-component.js\"></script>")
 				.append("<script type=\"text/javascript\" src=\"/js/bootstrap-fileupload.min.js\"></script>")
-				.append("<script type=\"text/javascript\" src=\"/js/harmonization-indexer.js\"></script>");
+				.append("<script type=\"text/javascript\" src=\"/js/ontology-annotator.js\"></script>");
+
 		return header.toString();
 	}
 
 	@Override
 	public String getViewName()
 	{
-		return "HarmonizationPlugin";
+		return "OntologyAnnotatorPlugin";
 	}
 
-	public HarmonizationModel getMyModel()
+	public OntologyAnnotatorModel getMyModel()
 	{
 		return model;
 	}
@@ -77,13 +79,13 @@ public class HarmonizationPlugin extends PluginModel<Entity>
 			System.out.println("The catalogue to match is : " + selectedCatalogues.keySet());
 			System.out.println("The selected catalogue is : " + selectedDataSetId);
 
-			Set<Integer> cataloguesToMatch = new HashSet<Integer>();
+			Set<Integer> dataSetsToMatch = new HashSet<Integer>();
 
 			for (String id : selectedCatalogues.keySet())
 			{
-				cataloguesToMatch.add(Integer.parseInt(id));
+				dataSetsToMatch.add(Integer.parseInt(id));
 			}
-			getLuceneMatcher().match(selectedDataSetId, cataloguesToMatch);
+			getLuceneMatcher().match(selectedDataSetId, dataSetsToMatch);
 		}
 	}
 

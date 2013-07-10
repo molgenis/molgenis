@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.plugin;
+package org.molgenis.omx.ontologyAnnotator.plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,7 +100,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			throws DatabaseException
 	{
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(description.split(" +")));
-		uniqueTerms.removeAll(HarmonizationModel.STOPWORDSLIST);
+		uniqueTerms.removeAll(OntologyAnnotatorModel.STOPWORDSLIST);
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		queryRules.add(new QueryRule(Operator.LIMIT, 100));
 		for (String term : uniqueTerms)
@@ -124,10 +124,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			Hit hit = iterator.next();
 			Map<String, Object> data = hit.getColumnValueMap();
 			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			if (ontologyTermSynonym.equalsIgnoreCase("weight"))
-			{
-				System.out.println();
-			}
 			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
 			if (ontologyTerm.equals(ontologyTermSynonym))
 			{
@@ -161,6 +157,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 					new ArrayList<String>(mapUriTerm.keySet()))))
 				mapUriTerm.remove(ot.getTermAccession());
 		}
+
 		List<OntologyTerm> listOfOntologyTerms = new ArrayList<OntologyTerm>();
 
 		for (Entry<String, String> entry : mapUriTerm.entrySet())
