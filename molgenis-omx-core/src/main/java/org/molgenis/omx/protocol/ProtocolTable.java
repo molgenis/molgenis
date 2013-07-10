@@ -28,6 +28,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	private static final String FIELD_NAME = "name";
 	private static final String FIELD_DESCRIPTION = "description";
 	private static final String FIELD_PATH = "path";
+	private static final String DATA_TYPE = "dataType";
 	private static final String FIELD_CATEGORY = "category";
 
 	private final Protocol protocol;
@@ -120,6 +121,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, description);
 				tuple.set(FIELD_PATH, path);
+				tuple.set(DATA_TYPE, feature.getDataType());
 				tuple.set(FIELD_CATEGORY, categoryValue.toString());
 				tuples.add(tuple);
 			}
