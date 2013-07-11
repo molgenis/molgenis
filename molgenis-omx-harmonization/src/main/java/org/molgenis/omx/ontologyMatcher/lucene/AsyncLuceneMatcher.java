@@ -94,28 +94,20 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 				Hit hit = iterator.next();
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID.toString())
 						.toString());
-				// String name = hit.getColumnValueMap().get("name").toString();
+				String name = hit.getColumnValueMap().get(ObservableFeature.NAME.toLowerCase()).toString();
 				String description = hit.getColumnValueMap().get(ObservableFeature.DESCRIPTION.toLowerCase())
 						.toString();
 				ObservableFeature feature = db.findById(ObservableFeature.class, featureId);
 
 				if (feature != null)
 				{
-					Map<Integer, List<String>> positions = createQueryRules(description, feature.getDefinition());
-					List<QueryRule> subQueries = new ArrayList<QueryRule>();
-					for (List<String> terms : positions.values())
-					{
-						List<QueryRule> rules = new ArrayList<QueryRule>();
-						for (String term : terms)
-						{
-							rules.add(new QueryRule(Operator.SEARCH, term));
-						}
-						QueryRule disMaxQuery = new QueryRule(rules);
-						disMaxQuery.setOperator(Operator.DIS_MAX);
-						subQueries.add(disMaxQuery);
-					}
-					QueryRule finalQuery = new QueryRule(subQueries);
-					finalQuery.setOperator(Operator.SHOULD);
+					List<QueryRule> rules = new ArrayList<QueryRule>();
+					rules.add(makeQueryForOntologyTerms(createQueryRules(name, feature.getDefinition())));
+					rules.add(makeQueryForOntologyTerms(createQueryRules(description, feature.getDefinition())));
+					rules.add(makeQueryForName(name.toLowerCase()));
+					rules.add(makeQueryForName(description.toLowerCase()));
+					QueryRule finalQuery = new QueryRule(rules);
+					finalQuery.setOperator(Operator.DIS_MAX);
 
 					for (Integer catalogueId : dataSetsToMatch)
 					{
@@ -171,6 +163,36 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		}
 	}
 
+	private QueryRule makeQueryForName(String name)
+	{
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+		rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(), Operator.SEARCH, name));
+		rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, name));
+		QueryRule disMaxQuery = new QueryRule(rules);
+		disMaxQuery.setOperator(Operator.DIS_MAX);
+		return disMaxQuery;
+	}
+
+	private QueryRule makeQueryForOntologyTerms(Map<Integer, List<String>> nameTokens)
+	{
+		List<QueryRule> subQueries = new ArrayList<QueryRule>();
+		for (List<String> terms : nameTokens.values())
+		{
+			List<QueryRule> rules = new ArrayList<QueryRule>();
+			for (String term : terms)
+			{
+				rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(), Operator.SEARCH, term));
+				rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, term));
+			}
+			QueryRule disMaxQuery = new QueryRule(rules);
+			disMaxQuery.setOperator(Operator.DIS_MAX);
+			subQueries.add(disMaxQuery);
+		}
+		QueryRule finalQuery = new QueryRule(subQueries);
+		finalQuery.setOperator(Operator.SHOULD);
+		return finalQuery;
+	}
+
 	private List<Integer> searchDisMaxQuery(String documentType, QueryRule disMaxQuery)
 	{
 		List<Integer> featureIds = new ArrayList<Integer>();
@@ -195,7 +217,7 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		List<String> uniqueTokens = new ArrayList<String>();
 
 		for (String token : Arrays.asList(dataItem.split(" +")))
-			if (!uniqueTokens.contains(token)) uniqueTokens.add(token);
+			if (!uniqueTokens.contains(token.toLowerCase())) uniqueTokens.add(token.toLowerCase());
 
 		Map<Integer, List<String>> position = new HashMap<Integer, List<String>>();
 
