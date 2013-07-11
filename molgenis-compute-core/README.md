@@ -2,7 +2,7 @@
 
 Licence: LGPLv3. http://www.molgenis.org
 
-The new version of documentation is available <a href="https://rawgithub.com/georgebyelas/molgenis/master/molgenis-compute-core/README.html"> Molgenis Compute 5 User Guide</>
+The new version of documentation is available <a href="https://rawgithub.com/georgebyelas/molgenis/master/molgenis-compute-core/README.html"> Molgenis Compute 5 User Guide</a>
 
 ## Overview
 
