@@ -62,13 +62,20 @@ public class ComputeProperties
 	public ComputeProperties(String[] args)
 	{
 		Options options = createOptions();
+
+			// validate command line args
+		CommandLine cl = null;
 		try
 		{
-			// validate command line args
-			CommandLine cl = new PosixParser().parse(options, args);
-			this.showHelp = cl.hasOption(Parameters.HELP) || 0 == cl.getOptions().length;
-			if (this.showHelp) throw new ParseException("");
-
+			cl = new PosixParser().parse(options, args);
+		}
+		catch (ParseException e)
+		{
+			e.printStackTrace();
+		}
+		this.showHelp = cl.hasOption(Parameters.HELP) || 0 == cl.getOptions().length;
+			if (this.showHelp)
+				showHelp(options);
 			// set path
 			setPath(args);
 
@@ -95,13 +102,13 @@ public class ComputeProperties
 
 			// save new config
 			saveProperties();
-		}
-		catch (ParseException e)
-		{
-			this.showHelp = true;
-			System.err.println(e.getMessage() + "\n");
-			new HelpFormatter().printHelp("sh molgenis-compute.sh -p parameters.csv", options);
-		}
+
+	}
+
+	private void showHelp(Options options)
+	{
+		new HelpFormatter().printHelp("sh molgenis-compute.sh -p parameters.csv", options);
+		System.exit(0);
 	}
 
 	/**

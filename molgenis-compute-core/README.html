@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <meta name="generator" content="AsciiDoc 8.6.8, bootstrap-docs backend">
-    <title>Molgenis Computeje 5 User Guide</title>
+    <title>Molgenis Compute 5 User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="George Byelas">
     <style>
 /*!
  * Bootstrap v2.3.2
@@ -8824,7 +8825,7 @@ AAAAAAAAgAEAAA==">
     </div>
     <header class="jumbotron subhead" id="overview">
       <div class="container">
-        <h1>Molgenis Computeje 5 User Guide</h1>
+        <h1>Molgenis Compute 5 User Guide</h1>
       </div>
     </header>
     <div class="container">
@@ -8834,51 +8835,342 @@ AAAAAAAAgAEAAA==">
 </ul>
         </div>
         <div id="content" class="span9">
-<section id="introduction">
+<section id="a_id_x5_a_introduction">
   <div class="page-header">
-    <h1>1. Introduction</h1>
+    <h1>1. <a id="X5"></a>Introduction</h1>
   </div>
-<p>Born from bioinformatics and life sciences, MOLGENIS compute is a flexible shell script
+<p>Made for bioinformatics and life sciences, MOLGENIS compute is a flexible shell script
 framework to generate big data workflows that can run parallel on clusters and grids.
-Molgenis Computeje Users can:</p>
+Molgenis Compute Users can:</p>
 <ol>
 <li>
-Design a workflow.csv with each step as a shell script <em>protocol</em>
+Design a workflow.csv with each step as a shell script <em>protocol</em>;
 </li>
 <li>
-Generate and run jobs by iterating over parameters.csv and execute on a compute backend
+Generate and run jobs by iterating over parameters.csv and execute on a compute backend;
 </li>
 <li>
-(Optional) use standardized file and tool management for portable workflows
+(Optional) use standardized file and tool management for portable workflows.
 </li>
 </ol>
 </section>
-<section id="download">
-  <div class="page-header">
-    <h1>2. Download</h1>
-  </div>
-</section>
 <section id="get_started">
   <div class="page-header">
-    <h1>3. Get Started</h1>
+    <h1>2. Get Started</h1>
   </div>
+<p>The latest distribution of Molgenis Compute is available
+at <a id="X1"></a><a href="http://www.molgenis.org/wiki/ComputeStart">Molgenis Compute start page</a>.
+Direct download link is <a id="X2"></a><a href="http://www.molgenis.org/hudson/job/molgenis-compute-core/ws/molgenis/molgenis-compute-core/target/molgenis-compute-core-0.0.1-SNAPSHOT-distribution/*zip\*/molgenis-compute-core-0.0.1-SNAPSHOT-distribution.zip">here</a>.
+Unzip the archive and the command-line version is ready to use.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>unzip molgenis-compute-core-0.0.1-SNAPSHOT-distribution.zip
+cd molgenis-compute-core-0.0.1-SNAPSHOT</pre>
+</div></div>
 <h2 id="create_workflow">Create workflow</h2>
+<p>Now, use can create your first workflow just by command</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>sh molgenis_compute.sh --create myfirst_workflow</pre>
+</div></div>
+<p>The directory containing workflow is created.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>  cd myfirst_workflow
+and you will see the typical Molgenis Compute workflow structure</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>/protocols              #folder with bash script 'protocols'
+/protocols/step1.sh     #example of a protocol shell script
+/protocols/step2.sh     #example of a protocol shell script
+workflow.csv            #file listing steps and parameter flow
+defaults.csv            #default parameters for workflow.csv (optional)
+parameters.csv          #parameters you want to run analysis on</pre>
+</div></div>
+<p>The similar structure should be created for every workflow. The example +workflow.csv+file has
+the following content</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>step,protocol,parameterMapping
+step1,protocols/step1.sh,in=user_input
+step2,protocols/step2.sh,wf=user_workflowName;date=user_creationDate;strings=step1_out</pre>
+</div></div>
+<p>This means that the workflow consists of two steps <em>step1</em> and <em>step2</em>. All parameters, that
+specified in <code>parameters.csv</code> is mapped in <code>workflow.csv</code> using <em>user_</em> prefix. Parameters,
+which are output of previous steps have prefix with a name of the step. In this example
+the <em>step1_</em> prefix means, that the <em>out</em> variable is the output of the <em>step1</em> step.</p>
+<p>The <code>parameters.csv</code> file contains some workflow parameters. In this example, one parameter
+<em>input</em> has two values <em>hello</em> and <em>bye</em></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>input
+hello
+bye</pre>
+</div></div>
+<p>More parameters can be specified using the next format</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>parameter1, parameter2
+value11,    value21
+value12,    value22
+value13,    value23</pre>
+</div></div>
+<p>Alternatively, parameters can be specified in the <code>.properties</code> style. The parameters file also should have
+the +.properties+extension.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>parameter1 = value11, value12, value13
+parameter2 = value21, value22, value23</pre>
+</div></div>
+<p>Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b".</p>
+<p>Each value is one of the following:</p>
+<ol>
+<li>
+a string
+</li>
+<li>
+</li>
+<li>
+a series i..j (where i and j are two integers), meaning from i to j including i and j
+</li>
+<li>
+a list of <em>;</em> separated values (may contain templates)
+</li>
+</ol>
+<p>You can combine multiple parameter files: the values will be <em>natural joined</em> based on overlapping columns.</p>
+<p>Example with two parameter files:</p>
+<p>molgenis -w path/to/workflow -p f1.csv -p f2.csv
+Example f1.csv (white space will be trimmed):</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>  p0,  p2
+  x,   1
+  y,   2
+Example f2.csv (white space will be trimmed):</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>  p1,  p2,    p3,     p4
+  v1,  1..2,  a;b,    file${p2}
+Merged and expanded result for f1.csv + f2.csv:</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>p0,  p1,  p2,   p3,   p4
+x,   v1,  1,    a,    file1
+x,   v1,  1,    b,    file1
+y,   v1,  2,    a,    file2
+y,   v1,  2,    b,    file2</pre>
+</div></div>
+<p>More complex parameter examples can combine values with template, as following:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>foo=    item1 , item2
+bar=    ${foo}, item3
+number= 123</pre>
+</div></div>
+<p>Here, variable <em>bar</em> has two values of variable <em>foo</em>.</p>
+<p>The example protocols has the following listings:</p>
+<p><code>step1.sh</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string in
+#output out
+# Let's do something with string 'in'
+out=${in}_hasBeenInStep1</pre>
+</div></div>
+<p><code>step2.sh</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string wf
+#string date
+#list strings
+echo "Workflow name: ${wf}"
+echo "Created: ${date}"
+echo "Result of step1.sh:"
+for s in "${strings[@]}"
+do
+  echo ${s}
+done
+echo "(FOR TESTING PURPOSES: your runid is ${runid})"</pre>
+</div></div>
+<p>In the header of protocols, we specify inputs with flags <em>#string</em> for variables with a single value
+and <em>#list</em> for variables with multiple values.</p>
+<p>I our example variables <em>date</em> and <em>wf</em> are defined in
+additional parameters file <code>workflow.defaults.csv</code>.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>workflowName,creationDate
+myFirstWorkflow,today</pre>
+</div></div>
+<p>In this way, the parameters can be divided in several group and re-used in different workflows.</p>
+<p>In this example, in <code>workflow.csv</code> parameters are mapped to protocols using different names, for example:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>step1,protocols/step1.sh,in=user_input</pre>
+</div></div>
+<p>However, they can have the same names</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>step1,protocols/step1.sh,input=user_input</pre>
+</div></div>
+<p>Then, <code>step1.sh</code> will look like</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string input
+#output out
+# Let's do something with string 'input'
+out=${input}_hasBeenInStep1</pre>
+</div></div>
 <h2 id="generate_workflow">Generate workflow</h2>
+<p>To generate actual workflow jobs, run the next command-line</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv</pre>
+</div></div>
+<p>The directory <code>rundir</code> is created.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>ls rundir/</pre>
+</div></div>
+<p>It contains a number of files</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>doc           step1_0.sh      step1_1.sh      step2_0.sh      submit.sh       user.env</pre>
+</div></div>
+<p><code>.sh</code> are actual scripts generated from the specified workflow. <em>step1</em> has two scripts and <em>step2</em> has only one, because it treats
+outputs from scripts of the <em>step1</em> as a list, which is specified in +step2.sh+by</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#list strings</pre>
+</div></div>
+<p><code>user.env</code> contains all actual parameters mappings. In this example:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#
+## User parameters
+#
+user_creationDate[0]="today"
+user_creationDate[1]="today"
+user_input[0]="hello"
+user_input[1]="bye"
+user_workflowName[0]="myFirstWorkflow"
+user_workflowName[1]="myFirstWorkflow"</pre>
+</div></div>
 <h2 id="execute_workflow">Execute workflow</h2>
+<p>The workflow can be executed with the command</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>sh molgenis_compute.sh --run
+ls rundir/</pre>
+</div></div>
+<p>Now, <code>rundir</code> contains more files</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>doc                           step1_0.sh.finished             step1_1.sh.finished             step2_0.sh.finished
+molgenis.bookkeeping.log      step1_0.sh.started              step1_1.sh.started              step2_0.sh.started
+step1_0.env                   step1_1.env                     step2_0.env                     submit.sh
+step1_0.sh                    step1_1.sh                      step2_0.sh                      user.env</pre>
+</div></div>
+<p><code>.started</code> and <code>.finished</code> files are created, when certain jobs is started and finished respectively.</p>
 </section>
 <section id="command_line_options">
   <div class="page-header">
-    <h1>4. Command-line options</h1>
+    <h1>3. Command-line options</h1>
   </div>
+<p>The Molgenis Compute has the following command-line options:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>-b,--backend &lt;arg&gt;                 Backend for which you generate.
+                                   Default: localhost
+-bp,--backendpassword &lt;arg&gt;        Supply user pass to login to execution
+                                   backend. Default is not saved.
+-bu,--backenduser &lt;arg&gt;            Supply user name to login to execution
+                                   backend. Default is your own user
+                                   name.
+-clear,--clear                     Clear properties file
+-create &lt;arg&gt;                      Creates empty workflow. Default name:
+                                   myworkflow
+-d,--database &lt;arg&gt;                Host, location of database. Default:
+                                   none
+-dbe,--database-end                End the database
+-dbs,--database-start              Starts the database
+-defaults,--defaults &lt;arg&gt;         Path to your workflow-defaults file.
+                                   Default: defaults.csv
+-footer &lt;arg&gt;                      Adds a custom footer. Default:
+                                   footer.ftl
+-g,--generate                      Generate jobs
+-h,--help                          Shows this help.
+-header &lt;arg&gt;                      Adds a custom header. Default:
+                                   header.ftl
+-l,--list                          List jobs, generated, queued, running,
+                                   completed, failed
+-mpass,--molgenispassword &lt;arg&gt;    Supply user pass to login to molgenis.
+                                   Default is not saved.
+-mu,--molgenisuser &lt;arg&gt;           Supply user name to login to molgenis
+                                   database. Default is your own user
+                                   name.
+-p,--parameters &lt;parameters.csv&gt;   Path to parameter.csv file(s).
+                                   Default: parameters.csv
+-path,--path                       Path to directory this generates to.
+                                   Default: &lt;current dir&gt;.
+-port,--port &lt;arg&gt;                 Port used to connect to databasae.
+                                   Default: 8080
+-r,--run                           Run jobs from current directory on
+                                   current backend. When using --database
+                                   this will return a 'id' for --pilot.
+-rundir &lt;arg&gt;                      Directory where jobs are stored
+-runid,--runid &lt;arg&gt;               Id of the task set which you generate.
+                                   Default: null
+-submit &lt;arg&gt;                      Set a custom submit.sh template.
+                                   Default: submit.sh.ftl
+-w,--workflow &lt;workflow.csv&gt;       Path to your workflow file. Default:
+                                   workflow.csv</pre>
+</div></div>
 </section>
 <section id="reserved_words">
   <div class="page-header">
-    <h1>5. Reserved words</h1>
+    <h1>4. Reserved words</h1>
+  </div>
+<p>Molgenis Compute has a list of reserved words, which cannot be used in compute to name
+parameters workflow steps etc. These words are listed below:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>port                  interval
+workflow              path
+defaults              parameters
+rundir                runid
+backend               database
+walltime              nodes
+ppn                   queue
+mem                   _NA
+password              molgenisuser
+backenduser           header
+footer                submit
+autoid</pre>
+</div></div>
+<p>The reserved word are used in compute.properties file. This file is created to save the latest
+compute configuration and discuss further.</p>
+</section>
+<section id="advanced_compute_features">
+  <div class="page-header">
+    <h1>5. Advanced Compute Features</h1>
   </div>
 </section>
 <section id="database_usage">
   <div class="page-header">
     <h1>6. Database usage</h1>
+  </div>
+</section>
+<section id="advanced_a_imputation_workflow_example">
+  <div class="page-header">
+    <h1>7. Advanced A: Imputation workflow example</h1>
+  </div>
+</section>
+<section id="advanced_b_ngs_alignment_workflow_example">
+  <div class="page-header">
+    <h1>8. Advanced B: NGS Alignment workflow example</h1>
   </div>
 </section>
         </div>

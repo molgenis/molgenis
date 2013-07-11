@@ -1,5 +1,5 @@
-#input wf
-#input date
+#string wf
+#string date
 #list strings
 
 echo "Workflow name: ${wf}"
