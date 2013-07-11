@@ -125,8 +125,8 @@
 			});
 			var dataSet = restApi.get('/api/v1/dataset/' + getSelectedDataSet());
 			$('<div />').append('<h4>' + dataSet.name + '</h4>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Data item to be mapped : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Data item description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 			var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + selectedFeatures.join(' , ') + '</span>').appendTo(infoDiv);
 			var confirmButton = $('<button class="btn">Confirm</button>');
 			infoDiv.append('<br /><br />');
@@ -188,7 +188,7 @@
 				var messageAlert = $('<div />').addClass('alert alert-info').append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
 				$('<span><strong>Message : </strong>the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedBiobank + '</strong> Biobank!</span>').appendTo(messageAlert);
 				messageAlert.appendTo('#alertMessage');
-				w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 3000);
+				w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
 				callback();
 			}
 		}
