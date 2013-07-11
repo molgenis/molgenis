@@ -106,7 +106,10 @@
 					if(ontologyTermId != null) updateAnnotation(restApi.get(this.feature.href), ontologyTermId, true);
 					$('#annotation-modal').modal('hide');
 					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
-						createAnnotationModal(updatedFeature);
+						var components = [];
+						components.push(featureTable(feature));
+						components.push(createSearchDiv(feature));
+						standardModal.createModal('Annotate data item', components);
 						ns.createMatrixForDataItems();
 					});
 				},{'feature' : this.feature}));
@@ -203,7 +206,10 @@
 						updateAnnotation(this.feature, ontologyTermId, false);
 						$('#annotation-modal').modal('hide');
 						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
-							createAnnotationModal(updatedFeature);
+							var components = [];
+							components.push(featureTable(updatedFeature));
+							components.push(createSearchDiv(updatedFeature));
+							standardModal.createModal('Annotate data item', components);
 							ns.createMatrixForDataItems();
 						});
 					}, {'feature' : feature, 'ontologyTermHref' : element.href}));

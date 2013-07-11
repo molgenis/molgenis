@@ -74,10 +74,12 @@
 							position : 'relative',
 							float : 'right'
 						}).click(function(){
-							standardModal.createModal('Candidate mappings', createMappingTable(feature, mapping, dataSetName));
+							standardModal.createModalCallback('Candidate mappings', function(modal){
+								createMappingTable(feature, mapping, dataSetName, modal);
+							});
 							standardModal.modal.css({
-								'width' : 900,
-								'margin-left' : -450
+								'width' : 950,
+								'margin-left' : -475
 							});
 						});
 						$('<td />').addClass('add-border').append('<span>' + value + '</span>').append(editIcon).appendTo(row);
@@ -92,16 +94,8 @@
 			pagination.updateMatrixPagination($('.pagination ul'), ns.createMatrixForDataItems);
 		});
 		
-		function createMappingTable(feature, mapping, mappedBiobank){
-			
-			var infoDiv = $('<infoDiv />').addClass('span4').css('margin-left', 0);
-			var dataSet = restApi.get('/api/v1/dataset/' + getSelectedDataSet());
-			$('<div />').append('<h4>' + dataSet.name + '</h4>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Data item to be mapped : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Data item description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
-			var confirmButton = $('<button class="btn">Confirm</button>');
-			infoDiv.append('<br /><br />');
-			
+		function createMappingTable(feature, mapping, mappedBiobank, modal){
+			var selectedFeatures = [];
 			var tableDiv = $('<div />').addClass('span7').css('margin-right', -100);
 			$('<div />').append('<h4>' + mappedBiobank + '</h4>').appendTo(tableDiv);
 			var mappingTable = $('<table />').addClass('table table-bordered'); 
@@ -113,31 +107,58 @@
 				var checkBox = $('<input type="checkbox">');
 				if(eachMapping.confirmed){
 					checkBox.attr('checked', true);
+					selectedFeatures.push(mappedFeature.name);
 				}
 				checkBox.data('eachMapping', eachMapping);
-				row.append('<td>' + mappedFeature.name + '</td><td>' + i18nDescription(mappedFeature).en + '</td>').append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
+				row.append('<td>' + mappedFeature.name + '</td><td>' + i18nDescription(mappedFeature).en + '</td>');
+				row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 			});
 			tableDiv.append(mappingTable);
+			var body = modal.find('.modal-body:eq(0)');
+			$('<div />').append('<div class="span4"></div>').append(tableDiv).appendTo(body);
 			
-			confirmButton.appendTo(infoDiv).click(function(){
-				updateMappingInfo(mappingTable);
-				standardModal.closeModal();
-				ns.createMatrixForDataItems();
+			var infoDiv = $('<div />').addClass('span4').css({
+				'position' : 'absolute',
+				'margin-left' : 0,
+				'margin-top' : 25,
+				'z-index' : 10000
 			});
+			var dataSet = restApi.get('/api/v1/dataset/' + getSelectedDataSet());
+			$('<div />').append('<h4>' + dataSet.name + '</h4>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Data item to be mapped : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Data item description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
+			var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + selectedFeatures.join(' , ') + '</span>').appendTo(infoDiv);
+			var confirmButton = $('<button class="btn">Confirm</button>');
+			infoDiv.append('<br /><br />');
+			confirmButton.appendTo(infoDiv).click(function(){
+				updateMappingInfo(feature, mappingTable, mappedBiobank, ns.createMatrixForDataItems);
+				standardModal.closeModal();
+			});
+			var footer = modal.find('.modal-header:eq(0)');
+			footer.append(infoDiv);
 			
-			return $('<div />').append(infoDiv).append(tableDiv);
+			tableDiv.find('input[type="checkbox"]').click(function(){
+				var dataItems = [];
+				tableDiv.find('input:checked').each(function(index, checkbox){
+					dataItems.push($(checkbox).data('eachMapping').mappedFeature.name);
+				});
+				selectedMappings.find('span:eq(1)').html(dataItems.join(' , '));
+			});
 		}
 		
-		function updateMappingInfo(mappingTable){
+		function updateMappingInfo(feature, mappingTable, mappedBiobank, callback){
+			var ifShowMessage = false;
 			mappingTable.find('input').each(function(index, checkBox){
 				var eachMapping = $(checkBox).data('eachMapping');
 				var observationHref = eachMapping.observationSetIdentifier;
 				var changedValue = null;
 				if(checkBox.checked && !eachMapping.confirmed){
 					changedValue = true;
+					ifShowMessage = true;
 				}
 				if(!checkBox.checked && eachMapping.confirmed){
 					changedValue = false;
+					ifShowMessage = true;
 				}
 				if(changedValue !== null){
 					var confirmFeature = restApi.get('/api/v1/observablefeature', null, {
@@ -163,6 +184,13 @@
 					updateEntity(xrefValue.href, xrefValue);
 				}
 			});
+			if(ifShowMessage){
+				var messageAlert = $('<div />').addClass('alert alert-info').append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
+				$('<span><strong>Message : </strong>the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedBiobank + '</strong> Biobank!</span>').appendTo(messageAlert);
+				messageAlert.appendTo('#alertMessage');
+				w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 3000);
+				callback();
+			}
 		}
 		
 		function i18nDescription(feature){
@@ -173,7 +201,6 @@
 			return eval('(' + feature.description + ')');
 		}
 
-		
 		function createMapping(dataSet){
 			var batchSize = 500;
 			var tuple = {};
@@ -290,7 +317,7 @@
 				cache: true,
 				data : JSON.stringify(data),
 				contentType : 'application/json',
-				async : false,
+				async : true,
 				success : function(data, textStatus, request) {
 					console.log(data);
 				},
@@ -346,7 +373,4 @@
 		return selectedDataSet;
 	}
 	
-	$(function() {
-		
-	});
 }($, window.top));
