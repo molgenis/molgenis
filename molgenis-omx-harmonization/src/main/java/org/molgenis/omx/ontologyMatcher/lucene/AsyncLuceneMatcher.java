@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.observ.Characteristic;
@@ -20,7 +19,7 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.omx.observ.value.MrefValue;
+import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -36,6 +35,7 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
+	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private static final String CATALOGUE_PREFIX = "protocolTree-";
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
 	private static final String ONTOLOGY_IRI = "ontologyTermIRI";
@@ -81,8 +81,13 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 			SearchResult result = searchService.search(request);
 			Iterator<Hit> iterator = result.iterator();
 
-			List<ObservedValue> listOfValues = new ArrayList<ObservedValue>();
-			List<ObservedValue> listOfOldValues = new ArrayList<ObservedValue>();
+			List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
+			List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
+			for (Integer catalogueId : dataSetsToMatch)
+			{
+				String dataSetIdentifier = selectedDataSet + "-" + catalogueId;
+				deleteExistingRecords(dataSetIdentifier, db);
+			}
 
 			while (iterator.hasNext())
 			{
@@ -116,45 +121,43 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 					{
 						String dataSetIdentifier = selectedDataSet + "-" + catalogueId;
 						List<Integer> mappedFeatureIds = searchDisMaxQuery(CATALOGUE_PREFIX + catalogueId, finalQuery);
-						ObservationSet observation = getObservationSet(featureId, STORE_MAPPING_FEATURE,
-								dataSetIdentifier, db);
 
-						ObservedValue valueForFeature = getObservedValues(observation.getId(), STORE_MAPPING_FEATURE,
-								dataSetIdentifier, db);
-						if (valueForFeature == null)
+						for (Integer mappedId : mappedFeatureIds)
 						{
-							XrefValue value = new XrefValue();
-							value.setValue(db.findById(Characteristic.class, featureId));
+							ObservationSet observation = new ObservationSet();
+							observation.setPartOfDataSet_Identifier(dataSetIdentifier);
+							listOfNewObservationSets.add(observation);
 
-							valueForFeature = new ObservedValue();
+							XrefValue xrefForFeature = new XrefValue();
+							xrefForFeature.setValue(db.findById(Characteristic.class, featureId));
+							ObservedValue valueForFeature = new ObservedValue();
 							valueForFeature.setObservationSet(observation);
 							valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
-							valueForFeature.setValue(value);
-							listOfValues.add(valueForFeature);
-						}
+							valueForFeature.setValue(xrefForFeature);
+							listOfNewObservedValues.add(valueForFeature);
 
-						ObservedValue valueForMappedFeature = getObservedValues(observation.getId(),
-								STORE_MAPPING_MAPPED_FEATURE, dataSetIdentifier, db);
-						if (valueForMappedFeature != null) listOfOldValues.add(valueForMappedFeature);
-
-						if (mappedFeatureIds.size() != 0)
-						{
-							MrefValue mrefValue = new MrefValue();
-							mrefValue.setValue(db.find(Characteristic.class, new QueryRule(Characteristic.ID,
-									Operator.IN, mappedFeatureIds)));
-
-							valueForMappedFeature = new ObservedValue();
+							XrefValue xrefForMappedFeature = new XrefValue();
+							xrefForMappedFeature.setValue(db.findById(Characteristic.class, mappedId));
+							ObservedValue valueForMappedFeature = new ObservedValue();
 							valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
 							valueForMappedFeature.setObservationSet(observation);
-							valueForMappedFeature.setValue(mrefValue);
-							listOfValues.add(valueForMappedFeature);
+							valueForMappedFeature.setValue(xrefForMappedFeature);
+							listOfNewObservedValues.add(valueForMappedFeature);
+
+							BoolValue boolValue = new BoolValue();
+							boolValue.setValue(false);
+							ObservedValue confirmMappingValue = new ObservedValue();
+							confirmMappingValue.setFeature_Identifier(STORE_MAPPING_CONFIRM_MAPPING);
+							confirmMappingValue.setObservationSet(observation);
+							confirmMappingValue.setValue(boolValue);
+							listOfNewObservedValues.add(confirmMappingValue);
 						}
 					}
 				}
 			}
 
-			db.remove(listOfOldValues);
-			db.add(listOfValues);
+			db.add(listOfNewObservationSets);
+			db.add(listOfNewObservedValues);
 			db.commitTx();
 		}
 		catch (Exception e)
@@ -222,35 +225,23 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		return position;
 	}
 
-	private ObservedValue getObservedValues(Integer observationId, String featureIdentifier, String dataSetIdentifier,
-			Database db) throws DatabaseException
+	private void deleteExistingRecords(String dataSetIdentifier, Database db) throws DatabaseException
 	{
-		ObservedValue ov = null;
-		Query<ObservedValue> rules = db.query(ObservedValue.class);
-		rules.addRules(new QueryRule(ObservedValue.FEATURE_IDENTIFIER, Operator.EQUALS, featureIdentifier));
-		rules.addRules(new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, observationId));
-		if (rules.find().size() > 0) ov = rules.find().get(0);
-		return ov;
-	}
+		List<ObservationSet> listOfObservationSets = db.find(ObservationSet.class, new QueryRule(
+				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSetIdentifier));
 
-	private ObservationSet getObservationSet(Object featureId, String featureIdentifier, String dataSetIdentifier,
-			Database db) throws DatabaseException
-	{
-		ObservationSet observation = null;
-
-		Query<ObservedValue> rules = db.query(ObservedValue.class);
-		rules.addRules(new QueryRule(ObservedValue.FEATURE_IDENTIFIER, Operator.EQUALS, featureIdentifier));
-		XrefValue value = new XrefValue();
-		value.setValue(Integer.parseInt(featureId.toString()));
-		rules.addRules(new QueryRule(ObservedValue.VALUE, Operator.EQUALS, value));
-		if (rules.find().size() > 0) observation = rules.find().get(0).getObservationSet();
-		else
+		if (listOfObservationSets.size() > 0)
 		{
-			observation = new ObservationSet();
-			observation.setPartOfDataSet_Identifier(dataSetIdentifier);
-			db.add(observation);
+			List<Integer> listOfObservationIds = new ArrayList<Integer>();
+			for (ObservationSet observation : listOfObservationSets)
+			{
+				listOfObservationIds.add(observation.getId());
+			}
+			List<ObservedValue> listOfObservedValues = db.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET_ID, Operator.IN, listOfObservationIds));
+			if (listOfObservedValues.size() > 0) db.remove(listOfObservedValues);
+			db.remove(listOfObservationSets);
 		}
-		return observation;
 	}
 
 	private void createMappingStore(Integer selectedDataSet, Set<Integer> dataSetsToMatch, Database db)
@@ -273,9 +264,20 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		{
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
-			mappedFeature.setDataType("mref");
+			mappedFeature.setDataType("xref");
 			mappedFeature.setName("Mapped features");
 			db.add(mappedFeature);
+		}
+
+		boolean isConfirmMappingExists = db.find(ObservableFeature.class,
+				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_CONFIRM_MAPPING)).size() == 0;
+		if (isConfirmMappingExists)
+		{
+			ObservableFeature confirmMapping = new ObservableFeature();
+			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
+			confirmMapping.setDataType("bool");
+			confirmMapping.setName("Mapping confirmed");
+			db.add(confirmMapping);
 		}
 
 		boolean ifProtocolExists = db.find(Protocol.class,
@@ -285,7 +287,8 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 			Protocol protocol = new Protocol();
 			protocol.setIdentifier("store_mapping");
 			protocol.setName("store_mapping");
-			protocol.setFeatures_Identifier(Arrays.asList(STORE_MAPPING_FEATURE, STORE_MAPPING_MAPPED_FEATURE));
+			protocol.setFeatures_Identifier(Arrays.asList(STORE_MAPPING_FEATURE, STORE_MAPPING_MAPPED_FEATURE,
+					STORE_MAPPING_CONFIRM_MAPPING));
 			db.add(protocol);
 		}
 

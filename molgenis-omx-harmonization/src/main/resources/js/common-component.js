@@ -91,3 +91,54 @@
 	};
 	
 }($, window.top));
+
+(function($, w){
+	"use strict";
+	var molgenis = w.molgenis = w.molgenis || {};
+	
+	molgenis.StandardModal = function StandardModal(){
+		this.modal = $('<div />');
+	}
+	
+	molgenis.StandardModal.prototype.getModal = function(){
+		return this.modal;
+	}
+	
+	molgenis.StandardModal.prototype.createModal = function(title, bodyComponents){
+		
+		this.modal = $('<div />');
+		if($('#annotation-modal').length != 0){
+			this.modal = $('#annotation-modal');
+			this.modal.empty();
+		}else{
+			$('body').append(this.modal);
+		}
+		this.modal.addClass('modal hide');
+		this.modal.attr('id', 'annotation-modal');
+		this.modal.attr('data-backdrop', false);
+		
+		var header = $('<div />');
+		header.addClass('modal-header');
+		header.append('<button type="button" name="annotation-btn-close" class="close" data-dismiss="#annotation-modal" data-backdrop="true" aria-hidden="true">&times;</button>');
+		header.append('<h3>' + title + '</h3>');
+		
+		var body = $('<div />');
+		body.addClass('modal-body');
+		if(bodyComponents !== null){
+			$.each(bodyComponents, function(index, component){
+				body.append(component);
+			});
+		}
+		var footer = $('<div />');
+		footer.addClass('modal-footer');
+		footer.append('<button name="annotation-btn-close" class="btn" data-dismiss="#annotation-modal" aria-hidden="true">Close</button>');
+
+		this.modal.append(header);
+		this.modal.append(body);
+		this.modal.append(footer);
+		this.modal.modal('show');
+		$('button[name="annotation-btn-close"]').click(function(){
+			$('#annotation-modal').modal('hide');
+		});
+	}
+}($, window.top));

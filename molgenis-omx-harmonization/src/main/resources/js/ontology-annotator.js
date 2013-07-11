@@ -3,6 +3,7 @@
 	"use strict";
 	var ns = w.molgenis = w.molgenis || {};
 	var pagination = new ns.Pagination();
+	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
@@ -36,7 +37,10 @@
 				clickFeature.click(function(){
 					var featureId = $(this).data('feature').id;
 					restApi.getAsync('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null, function(feature){
-						createAnnotationModal(feature);
+						var components = [];
+						components.push(featureTable(feature));
+						components.push(createSearchDiv(feature));
+						standardModal.createModal('Annotate data item', components);
 					});
 				});
 				
@@ -48,10 +52,9 @@
 				if(featureEntity.definition.items !== 0){
 					var annotationText = '';
 					$.each(featureEntity.definition.items, function(index, ontologyTerm){
-						annotationText += ontologyTerm.name + ',';
+						annotationText += ontologyTerm.name + ' , ';
 					});
-					annotationText.substring(0, annotationText.length - 2);
-					annotation.append(annotationText);
+					annotation.append(annotationText.substring(0, annotationText.length - 3));
 				}
 				
 				annotation.appendTo(row);
@@ -60,43 +63,6 @@
 			pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()) - 1);
 			pagination.updateMatrixPagination($('.pagination ul'), ns.createMatrixForDataItems);
 		});
-		
-		function createAnnotationModal(feature) {
-			
-			var modal = $('<div />');
-			if($('#annotation-modal').length != 0){
-				modal = $('#annotation-modal');
-				modal.empty();
-			}else{
-				$('body').append(modal);
-			}
-			modal.addClass('modal hide');
-			modal.attr('id', 'annotation-modal');
-			modal.attr('data-backdrop', false);
-			
-			var header = $('<div />');
-			header.addClass('modal-header');
-			header.append('<button type="button" name="annotation-btn-close" class="close" data-dismiss="#annotation-modal" data-backdrop="true" aria-hidden="true">&times;</button>');
-			header.append("<h3>Annotate data item</h3>");
-			
-			var body = $('<div />');
-			body.addClass('modal-body');
-			body.append(featureTable(feature));
-			body.append(createSearchDiv(feature));
-			
-			var footer = $('<div />');
-			footer.addClass('modal-footer');
-			footer.append('<button name="annotation-btn-close" class="btn" data-dismiss="#annotation-modal" aria-hidden="true">Close</button>');
-			
-			modal.append(header);
-			modal.append(body);
-			modal.append(footer);
-			modal.modal('show');
-			
-			$('button[name="annotation-btn-close"]').click(function(){
-				$('#annotation-modal').modal('hide');
-			});
-		}
 		
 		function createSearchDiv(feature){
 			var searchDiv = $('<div class="row-fluid"></div>');

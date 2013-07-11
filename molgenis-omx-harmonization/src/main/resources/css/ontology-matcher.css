@@ -4,8 +4,8 @@
 
 .accordion-group {
 	margin-left : 50px;
-	margin-top : 50px;
-	height : 200px;
+	margin-top : -50px;
+	margin-bottom : -30px;
 	background-color: #5B82A4;
 }
 
@@ -28,4 +28,24 @@
 
 h5 {
 	padding-left : 10px;
+}
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
+}
+
+td.add-border {
+	border:2px solid #5B82A4;
+}
+
+table thead th {
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
+    color: white;
+}
+
+.float-right {
+	float : right;
+	margin-right : 10px;
 }

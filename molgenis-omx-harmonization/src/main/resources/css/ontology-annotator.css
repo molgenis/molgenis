@@ -35,8 +35,13 @@ h5 {
 	white-space: nowrap;
 }
 
-.table thead th {
+td.add-border {
+	border:2px solid #5B82A4;
+}
+
+table thead th {
     background-color: #5B82A4; 
+    border:2px solid #5B82A4;
     color: white;
 }
 
