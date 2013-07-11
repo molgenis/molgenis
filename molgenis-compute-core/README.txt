@@ -23,7 +23,6 @@ Get Started
 -----------
 The latest distribution of Molgenis Compute is available 
 at [[X1]]http://www.molgenis.org/wiki/ComputeStart[Molgenis Compute start page]. 
-Direct download link is [[X2]]http://www.molgenis.org/hudson/job/molgenis-compute-core/ws/molgenis/molgenis-compute-core/target/molgenis-compute-core-0.0.1-SNAPSHOT-distribution/\*zip\*/molgenis-compute-core-0.0.1-SNAPSHOT-distribution.zip[here].
 Unzip the archive and the command-line version is ready to use.  
 
   unzip molgenis-compute-core-0.0.1-SNAPSHOT-distribution.zip
