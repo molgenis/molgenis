@@ -13,6 +13,8 @@
 	<input type="hidden" name="__target" value="${screen.name}">
 	<input type="hidden" name="__action">
 	<div class="formscreen">
+		<div id="alertMessage">
+		</div>
 		<div class="screenbody">
 			<div class="container-fluid">
 				<div>
