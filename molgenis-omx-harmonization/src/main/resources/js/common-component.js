@@ -98,11 +98,15 @@
 	
 	molgenis.StandardModal = function StandardModal(){
 		this.modal = $('<div />');
-	}
+	};
 	
 	molgenis.StandardModal.prototype.getModal = function(){
 		return this.modal;
-	}
+	};
+	
+	molgenis.StandardModal.prototype.closeModal = function(){
+		$('#annotation-modal').modal('hide');
+	};
 	
 	molgenis.StandardModal.prototype.createModal = function(title, bodyComponents){
 		
@@ -125,9 +129,7 @@
 		var body = $('<div />');
 		body.addClass('modal-body');
 		if(bodyComponents !== null){
-			$.each(bodyComponents, function(index, component){
-				body.append(component);
-			});
+			body.append(bodyComponents);
 		}
 		var footer = $('<div />');
 		footer.addClass('modal-footer');
@@ -140,5 +142,5 @@
 		$('button[name="annotation-btn-close"]').click(function(){
 			$('#annotation-modal').modal('hide');
 		});
-	}
+	};
 }($, window.top));
