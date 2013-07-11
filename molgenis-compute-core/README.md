@@ -2,6 +2,8 @@
 
 Licence: LGPLv3. http://www.molgenis.org
 
+The new version of documentation is available <a href="https://rawgithub.com/georgebyelas/molgenis/master/molgenis-compute-core/README.html"> Molgenis Compute 5 User Guide</>
+
 ## Overview
 
 Born from bioinformatics and life sciences, MOLGENIS compute is a flexible shell script framework to generate big data workflows that can run parallel on clusters and grids:

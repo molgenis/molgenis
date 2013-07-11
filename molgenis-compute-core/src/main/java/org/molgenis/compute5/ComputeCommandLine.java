@@ -156,8 +156,17 @@ public class ComputeCommandLine
 			if(computeProperties.database.equalsIgnoreCase(Parameters.DATABASE_DEFAULT))
 			{
 				String runDir = computeProperties.runDir;
-				new SysCommandExecutor().runCommand("sh "+ runDir +"/submit.sh");
+				SysCommandExecutor exe =  new SysCommandExecutor();
+				exe.runCommand("sh " + runDir + "/submit.sh");
+
+				String err = exe.getCommandError();
+				String out = exe.getCommandOutput();
+
 				System.out.println("\nScripts are executed/submitted on " + computeProperties.backend);
+
+				System.out.println(out);
+				System.out.println(err);
+
 			}
 			else
 			{
