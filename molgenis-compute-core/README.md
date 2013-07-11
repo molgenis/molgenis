@@ -504,10 +504,12 @@ We have a list of words, which are reserved and cannot be used in compute to nam
 	mem
 	_NA
 	password
-	user
+	molgenisuser
+	backenduser
 	header
 	footer
 	submit
+	autoid
 
 ## wish lists
 * multiple default files

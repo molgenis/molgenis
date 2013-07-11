@@ -96,6 +96,23 @@ public class TaskGenerator
 				
 				// now source the task's parameters from each prevStep.env on
 				// which this task depends
+
+				parameterHeader += "\n# Assign values to the parameters in this script\n";
+				parameterHeader += "\n# Set taskId, which is the job name of this task";
+				parameterHeader += "\ntaskId=\"" + task.getName() + "\"\n";
+				
+				parameterHeader += "\n# Make compute.properties available";
+				parameterHeader += "\nrundir=\"" + computeProperties.runDir + "\"";
+				parameterHeader += "\nrunid=\"" + computeProperties.runId + "\"";
+				parameterHeader += "\nworkflow=\"" + computeProperties.workFlow + "\"";
+				parameterHeader += "\nparameters=\"" + computeProperties.parametersString() + "\"";
+				parameterHeader += "\nuser=\"" + computeProperties.molgenisuser + "\"";
+				parameterHeader += "\ndatabase=\"" + computeProperties.database + "\"";
+				parameterHeader += "\nbackend=\"" + computeProperties.backend + "\"";
+				parameterHeader += "\nport=\"" + computeProperties.port + "\"";
+				parameterHeader += "\ninterval=\"" + computeProperties.interval + "\"";
+				parameterHeader += "\npath=\"" + computeProperties.path + "\"";
+
 				parameterHeader += "\n# Load parameters from previous steps\n" + Parameters.SOURCE_COMMAND + " " + Parameters.ENVIRONMENT_DIR_VARIABLE + File.separator + Parameters.ENVIRONMENT + "\n\n";
 
 				for (String previousStepName : step.getPreviousSteps())
@@ -104,7 +121,7 @@ public class TaskGenerator
 					for (Integer id : target.getIntList(Parameters.ID_COLUMN))
 					{
 						String prevJobName = prevStep.getJobName(id);
-						
+
 						// prevent duplicate work
 						if (!task.getPreviousTasks().contains(prevJobName))
 						{
@@ -117,22 +134,7 @@ public class TaskGenerator
 					}
 				}
 
-				parameterHeader += "\n# Assign values to the parameters in this script\n";
-				parameterHeader += "\n# Set taskId, which is the job name of this task";
-				parameterHeader += "\ntaskId=\"" + task.getName() + "\"\n";
-				
-				parameterHeader += "\n# Make compute.properties available";
-				parameterHeader += "\nrundir=\"" + computeProperties.runDir + "\"";
-				parameterHeader += "\nrunid=\"" + computeProperties.runId + "\"";
-				parameterHeader += "\nworkflow=\"" + computeProperties.workFlow + "\"";
-				parameterHeader += "\nparameters=\"" + computeProperties.parametersString() + "\"";
-				parameterHeader += "\nuser=\"" + computeProperties.user + "\"";
-				parameterHeader += "\ndatabase=\"" + computeProperties.database + "\"";
-				parameterHeader += "\nbackend=\"" + computeProperties.backend + "\"";
-				parameterHeader += "\nport=\"" + computeProperties.port + "\"";
-				parameterHeader += "\ninterval=\"" + computeProperties.interval + "\"";
-				parameterHeader += "\npath=\"" + computeProperties.path + "\"";
-				
+
 				parameterHeader += "\n\n# Connect parameters to environment\n";
 
 				// now couple input parameters to parameters in sourced
