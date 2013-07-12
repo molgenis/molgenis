@@ -59,10 +59,11 @@ public class ComputeProperties
 	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean execute = false; // does user want to execute scripts?
 
+	private Options options = null;
+
 	public ComputeProperties(String[] args)
 	{
-		Options options = createOptions();
-
+		options = createOptions();
 			// validate command line args
 		CommandLine cl = null;
 		try
@@ -75,7 +76,7 @@ public class ComputeProperties
 		}
 		this.showHelp = cl.hasOption(Parameters.HELP) || 0 == cl.getOptions().length;
 			if (this.showHelp)
-				showHelp(options);
+				return;
 			// set path
 			setPath(args);
 
@@ -105,10 +106,9 @@ public class ComputeProperties
 
 	}
 
-	private void showHelp(Options options)
+	public Options getOptions()
 	{
-		new HelpFormatter().printHelp("sh molgenis-compute.sh -p parameters.csv", options);
-		System.exit(0);
+		return options;
 	}
 
 	/**

@@ -52,7 +52,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testCommandLineParametersComputePropertiesFilesCreated() throws Exception
+	public void testFilesCreated() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -159,7 +159,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testCommandLineParametersComputePropertiesFilesCreatedLocal() throws Exception
+	public void testPropertiesFilesCreatedLocal() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -266,7 +266,7 @@ public class ComputeCommandLineTest
 
 
 	@Test
-	public void testCommandLineParametersRunID() throws Exception
+	public void testRunID() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -329,7 +329,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testCommandLineParameters3Levels() throws Exception
+	public void testParameters3Levels() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -379,7 +379,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testCommandLineParameters3Levels1() throws Exception
+	public void testParameters3Levels1() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -428,9 +428,79 @@ public class ComputeCommandLineTest
 		}
 	}
 
+	@Test
+	public void testRunLocally() throws Exception
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark/workflow.csv",
+				"--defaults",
+				"src/main/resources/workflows/benchmark/workflow.defaults.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark/parameters.csv",
+				"--rundir",
+				"target/test/benchmark/run",
+				"--database",
+				"none",
+				"-header",
+				"src/main/resources/workflows/benchmark/header.ftl",
+				"-footer",
+				"src/main/resources/workflows/benchmark/footer.ftl"
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step1_0.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step1_1.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step2_0.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step1_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh.finished is not generated");
+		}
+
+		file = new File(outputDir + "/step1_1.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh.finished is not generated");
+		}
+
+		file = new File(outputDir + "/step2_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.finished is not generated");
+		}
+	}
 
 	@Test
-	public void testDoubleParameterNamesInParametersFile() throws Exception
+	public void testDoubleParameterNames() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersComputePropertiesFilesCreated ---");
 
@@ -538,7 +608,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
-	public void testRunLocally() throws Exception
+	public void testHeaderPBS() throws Exception
 	{
 		System.out.println("--- Start TestRunLocally ---");
 
@@ -552,61 +622,30 @@ public class ComputeCommandLineTest
 
 		ComputeCommandLine.main(new String[]{
 				"--generate",
-				"--run",
 				"--workflow",
-				"src/main/resources/workflows/benchmark/workflow.csv",
+				"src/main/resources/workflows/benchmark/workflowa.csv",
 				"--defaults",
-				"src/main/resources/workflows/benchmark/workflow.defaults.csv",
+				"src/main/resources/workflows/benchmark/workflow.defaults.pbs.csv",
 				"--parameters",
 				"src/main/resources/workflows/benchmark/parameters.csv",
 				"--rundir",
-				"target/test/benchmark/run",
-				"--database",
-				"none",
-				"-header",
-				"src/main/resources/workflows/benchmark/header.ftl",
-				"-footer",
-				"src/main/resources/workflows/benchmark/footer.ftl"
+				outputDir,
+				"--backend","pbs"
 		});
 
-		System.out.println("--- Test Created Files ---");
+		String script = getFileAsString(outputDir + "/step1_0.sh");
 
-		File file = new File(outputDir + "/step1_0.sh.started");
-		if (!file.exists())
+		if(!script.contains("05:59:00"))
 		{
-			Assert.fail("step1_0.sh.started is not generated");
+			Assert.fail("header is not created correctly");
 		}
 
-		file = new File(outputDir + "/step1_1.sh.started");
-		if (!file.exists())
-		{
-			Assert.fail("step1_1.sh.started is not generated");
-		}
+		script = getFileAsString(outputDir + "/step2_0.sh");
 
-		file = new File(outputDir + "/step2_0.sh.started");
-		if (!file.exists())
+		if(!script.contains("00:59:00"))
 		{
-			Assert.fail("step2_0.sh.started is not generated");
+			Assert.fail("header is not created correctly");
 		}
-
-		file = new File(outputDir + "/step1_0.sh.finished");
-		if (!file.exists())
-		{
-			Assert.fail("step1_0.sh.finished is not generated");
-		}
-
-		file = new File(outputDir + "/step1_1.sh.finished");
-		if (!file.exists())
-		{
-			Assert.fail("step1_1.sh.finished is not generated");
-		}
-
-		file = new File(outputDir + "/step2_0.sh.finished");
-		if (!file.exists())
-		{
-			Assert.fail("step2_0.sh.finished is not generated");
-		}
-
 
 	}
 
@@ -717,7 +756,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test(expectedExceptions = Exception.class)
-	public void testCommandLineParametersMissingParameter() throws Exception
+	public void testMissingParameter() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersMissingParameter ---");
 
@@ -740,7 +779,7 @@ public class ComputeCommandLineTest
 	}
 
 	@Test(expectedExceptions = Exception.class)
-	public void testCommandLineParametersMissingValue() throws Exception
+	public void testParametersMissingValue() throws Exception
 	{
 		System.out.println("--- Start TestCommandLineParametersMissingValue ---");
 
