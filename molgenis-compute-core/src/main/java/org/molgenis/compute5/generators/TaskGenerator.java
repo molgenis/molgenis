@@ -350,7 +350,6 @@ public class TaskGenerator
 		for (WritableTuple target : localParameters)
 		{
 			// add parameters for resource management:
-			//quick fix: take the default values, only if the default is not present in parameters file
 			Tuple defaultResousesMap = globalParameters.get(0);
 
 			//choices to get value for resources
