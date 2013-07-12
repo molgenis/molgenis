@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -54,8 +56,8 @@ public class ComputeCommandLine
 		// parse options
 		ComputeProperties computeProperties = new ComputeProperties(args);
 
-		if (!computeProperties.showHelp)
-			new ComputeCommandLine().execute(computeProperties);
+		new ComputeCommandLine().execute(computeProperties);
+
 	}
 
 	public Compute execute(ComputeProperties computeProperties) throws Exception
@@ -76,6 +78,12 @@ public class ComputeCommandLine
 			dbApiConnection = new HttpClientComputeDbApiConnection(computeProperties.database,
 					computeProperties.port, "/api/v1", userName, pass);
 			dbApiClient = new ComputeDbApiClient(dbApiConnection);
+		}
+
+		if(computeProperties.showHelp)
+		{
+			new HelpFormatter().printHelp("sh molgenis-compute.sh -p parameters.csv", computeProperties.getOptions());
+			return compute;
 		}
 
 		if (computeProperties.create)
@@ -200,7 +208,7 @@ public class ComputeCommandLine
 		else return new File(computeProperties.defaults).exists();
 	}
 
-	private static void generate(Compute compute, ComputeProperties computeProperties) throws Exception
+	private void generate(Compute compute, ComputeProperties computeProperties) throws Exception
 	{
 		// create a list of parameter files
 		List<File> parameterFiles = new ArrayList<File>();
@@ -243,7 +251,7 @@ public class ComputeCommandLine
 		new EnvironmentGenerator().generate(compute, computeProperties.runDir);
 
 		// generate the tasks
-		compute.setTasks(TaskGenerator.generate(compute.getWorkflow(), compute.getParameters(), compute.getComputeProperties()));
+		compute.setTasks(new TaskGenerator().generate(compute.getWorkflow(), compute.getParameters(), compute.getComputeProperties()));
 
 		// write the task for the backend
 		if (Parameters.BACKEND_PBS.equals(computeProperties.backend))
