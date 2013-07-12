@@ -31,11 +31,13 @@ import freemarker.template.Template;
 
 public class TaskGenerator
 {
-	public static List<Task> generate(Workflow workflow, Parameters parameters, ComputeProperties computeProperties) throws IOException
+	private List<WritableTuple> globalParameters = null;
+
+	public List<Task> generate(Workflow workflow, Parameters parameters, ComputeProperties computeProperties) throws IOException
 	{
 		List<Task> result = new ArrayList<Task>();
 
-		final List<WritableTuple> globalParameters = parameters.getValues();
+		globalParameters = parameters.getValues();
 		for (Step step : workflow.getSteps())
 		{
 
@@ -341,18 +343,75 @@ public class TaskGenerator
 		}
 	}
 
-	private static List<WritableTuple> addOutputValues(Step step, List<WritableTuple> localParameters)
+	private List<WritableTuple> addOutputValues(Step step, List<WritableTuple> localParameters)
 	{
 		// try
 		// {
 		for (WritableTuple target : localParameters)
 		{
 			// add parameters for resource management:
-			target.set(Parameters.QUEUE, step.getProtocol().getQueue());
-			target.set(Parameters.NODES, step.getProtocol().getNodes());
-			target.set(Parameters.PPN, step.getProtocol().getPpn());
-			target.set(Parameters.WALLTIME, step.getProtocol().getWalltime());
-			target.set(Parameters.MEMORY, step.getProtocol().getMemory());
+			//quick fix: take the default values, only if the default is not present in parameters file
+			Tuple defaultResousesMap = globalParameters.get(0);
+
+			//choices to get value for resources
+			//1. get from protocol
+			//2. get default from parameters file
+			//3. get default from protocol file
+
+			if(step.getProtocol().getQueue() == null)
+			{
+				String queue = (String) defaultResousesMap.get("user_"+ Parameters.QUEUE);
+				if(queue != null)
+					target.set(Parameters.QUEUE, queue);
+				else
+					target.set(Parameters.QUEUE, step.getProtocol().getDefaultQueue());
+			}
+			else
+				target.set(Parameters.QUEUE, step.getProtocol().getQueue());
+
+			if(step.getProtocol().getNodes() == null)
+			{
+				String nodes = (String) defaultResousesMap.get("user_"+ Parameters.NODES);
+				if(nodes != null)
+					target.set(Parameters.NODES, nodes);
+				else
+					target.set(Parameters.NODES, step.getProtocol().getDefaultNodes());
+			}
+			else
+				target.set(Parameters.NODES, step.getProtocol().getNodes());
+
+			if(step.getProtocol().getPpn() == null)
+			{
+				String ppn = (String) defaultResousesMap.get("user_"+ Parameters.PPN);
+				if(ppn != null)
+					target.set(Parameters.PPN, ppn);
+				else
+					target.set(Parameters.PPN, step.getProtocol().getDefaultPpn());
+			}
+			else
+				target.set(Parameters.PPN, step.getProtocol().getPpn());
+
+			if(step.getProtocol().getWalltime() == null)
+			{
+				String walltime = (String) defaultResousesMap.get("user_"+ Parameters.WALLTIME);
+				if(walltime != null)
+					target.set(Parameters.WALLTIME, walltime);
+				else
+					target.set(Parameters.WALLTIME, step.getProtocol().getDefaultWalltime());
+			}
+			else
+				target.set(Parameters.WALLTIME, step.getProtocol().getWalltime());
+
+			if(step.getProtocol().getMemory() == null)
+			{
+				String memory = (String) defaultResousesMap.get("user_"+ Parameters.MEMORY);
+				if(memory != null)
+					target.set(Parameters.MEMORY, memory);
+				else
+					target.set(Parameters.MEMORY, step.getProtocol().getDefaultMemory());
+			}
+			else
+				target.set(Parameters.MEMORY, step.getProtocol().getMemory());
 
 			// add protocol parameters
 			for (Output o : step.getProtocol().getOutputs())
@@ -394,7 +453,7 @@ public class TaskGenerator
 		}
 	}
 
-	private static List<WritableTuple> mapGlobalToLocalParameters(List<WritableTuple> globalParameters, Step step)
+	private List<WritableTuple> mapGlobalToLocalParameters(List<WritableTuple> globalParameters, Step step)
 			throws IOException
 	{
 		List<WritableTuple> localParameters = new ArrayList<WritableTuple>();
