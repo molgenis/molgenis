@@ -23,7 +23,7 @@ public class OntologyTableTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
-		loader = new OntologyLoader(new File("src/test/resources/test-ontology-loader.owl"));
+		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
 		db = mock(Database.class);
 		table = new OntologyTable(loader, db);
 	}
@@ -55,6 +55,6 @@ public class OntologyTableTest
 		Tuple tuple0 = it.next();
 		assertEquals(tuple0.get("url"), "http://harmonization/test/owl/1.0.0");
 		assertEquals(tuple0.get("entity_type"), "indexedOntology");
-		assertEquals(tuple0.get("ontologyLabel"), "unit test ontology");
+		assertEquals(tuple0.get("ontologyLabel"), "ontology-test");
 	}
 }

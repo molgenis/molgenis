@@ -21,7 +21,7 @@ public class OntologyLoaderTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
-		loader = new OntologyLoader(new File("src/test/resources/test-ontology-loader.owl"));
+		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
 	}
 
 	@Test

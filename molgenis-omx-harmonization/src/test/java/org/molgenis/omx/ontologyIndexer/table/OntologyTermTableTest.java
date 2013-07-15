@@ -24,7 +24,7 @@ public class OntologyTermTableTest
 	@BeforeMethod
 	public void setUp() throws DatabaseException, TableException, OWLOntologyCreationException
 	{
-		loader = new OntologyLoader(new File("src/test/resources/test-ontology-loader.owl"));
+		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
 		db = mock(Database.class);
 		table = new OntologyTermTable(loader, db);
 	}
