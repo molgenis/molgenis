@@ -16,7 +16,7 @@ public class ParametersParserTest {
 	{
 		File f = new File("src/main/resources/workflows/includeParams/parameters.csv");
 		
-		Parameters parameters = ParametersCsvParser.parse(f);
+		Parameters parameters = new ParametersCsvParser().parse(f);
 		
 		for(Tuple t: parameters.getValues())
 		{
