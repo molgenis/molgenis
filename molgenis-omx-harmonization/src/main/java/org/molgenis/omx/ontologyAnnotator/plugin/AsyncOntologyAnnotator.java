@@ -117,7 +117,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		SearchRequest request = new SearchRequest(null, queryRules, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
-		Map<String, String> mapUriTerm = new HashMap<String, String>();
+		Map<String, Map<String, Object>> mapUriTerm = new HashMap<String, Map<String, Object>>();
 		List<Hit> hitSecondChoice = new ArrayList<Hit>();
 		while (iterator.hasNext())
 		{
@@ -128,7 +128,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (ontologyTerm.equals(ontologyTermSynonym))
 			{
 				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
-						.toString(), ontologyTerm);
+						.toString(), data);
 			}
 			else hitSecondChoice.add(hit);
 		}
@@ -141,7 +141,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (!mapUriTerm.containsValue(ontologyTermSynonym))
 			{
 				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
-						.toString(), ontologyTerm);
+						.toString(), data);
 			}
 		}
 
@@ -160,10 +160,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		List<OntologyTerm> listOfOntologyTerms = new ArrayList<OntologyTerm>();
 
-		for (Entry<String, String> entry : mapUriTerm.entrySet())
+		for (Entry<String, Map<String, Object>> entry : mapUriTerm.entrySet())
 		{
 			String uri = entry.getKey();
-			String term = entry.getValue();
+			Map<String, Object> data = entry.getValue();
+			String ontologyLabel = data.get("ontologyLabel").toString();
+			String term = ontologyLabel == null ? data.get("ontologyTerm").toString().toLowerCase() : ontologyLabel
+					+ ":" + data.get("ontologyTerm").toString().toLowerCase();
 			OntologyTerm ot = new OntologyTerm();
 			ot.setIdentifier(uri);
 			ot.setTermAccession(uri);

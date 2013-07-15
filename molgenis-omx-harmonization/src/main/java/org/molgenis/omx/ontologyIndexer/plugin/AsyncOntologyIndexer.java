@@ -42,7 +42,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 	}
 
 	@Async
-	public void index(File ontologyFile)
+	public void index(String ontologyName, File ontologyFile)
 	{
 		isCorrectOntology = true;
 		runningIndexProcesses.incrementAndGet();
@@ -50,7 +50,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 
 		try
 		{
-			OntologyLoader model = new OntologyLoader(ontologyFile);
+			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
 			searchService.indexTupleTable("ontology" + ontologyUri, new OntologyTable(model, db));
 			searchService.indexTupleTable("ontologyTerm" + ontologyUri, new OntologyTermTable(model, db));

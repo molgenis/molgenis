@@ -59,7 +59,8 @@ public class OntologyIndexerPlugin extends PluginModel<Entity>
 			try
 			{
 				File file = request.getFile("uploadedOntology");
-				getHarmonizationIndexer().index(file);
+				String ontologyName = request.getString("ontologyName");
+				getHarmonizationIndexer().index(ontologyName, file);
 			}
 			catch (TableException e)
 			{

@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 public class OntologyLoader
 {
 	private String ontologyIRI = null;
+	private String ontologyName = null;
 	private OWLDataFactory factory = null;
 	private OWLOntology ontology = null;
 	private OWLOntologyManager manager = null;
@@ -35,8 +36,9 @@ public class OntologyLoader
 				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"));
 	}
 
-	public OntologyLoader(File ontologyFile) throws OWLOntologyCreationException
+	public OntologyLoader(String ontologyName, File ontologyFile) throws OWLOntologyCreationException
 	{
+		this.ontologyName = ontologyName;
 		this.manager = OWLManager.createOWLOntologyManager();
 		this.factory = manager.getOWLDataFactory();
 		this.ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
@@ -123,5 +125,10 @@ public class OntologyLoader
 	public String getOntologyIRI()
 	{
 		return ontologyIRI;
+	}
+
+	public String getOntologyName()
+	{
+		return ontologyName;
 	}
 }

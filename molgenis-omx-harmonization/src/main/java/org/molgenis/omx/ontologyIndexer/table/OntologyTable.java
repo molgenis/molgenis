@@ -33,7 +33,7 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(ONTOLOGY_URL, loader.getOntologyIRI());
-		tuple.set(ONTOLOGY_LABEL, loader.getOntologyLabel());
+		tuple.set(ONTOLOGY_LABEL, loader.getOntologyName());
 		tuple.set(ENTITY_TYPE, "indexedOntology");
 		tuples.add(tuple);
 

@@ -62,7 +62,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 			tuple.set(NODE_PATH, termPath);
 			tuple.set(ONTOLOGY_TERM, label);
 			tuple.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
-			tuple.set(ONTOLOGY_LABEL, model.getOntologyLabel());
+			tuple.set(ONTOLOGY_LABEL, model.getOntologyName());
 			tuple.set(ENTITY_TYPE, "ontologyTerm");
 			tuple.set(SYNONYMS, synonym.replaceAll("[^a-zA-Z0-9 ]", " "));
 			tuples.add(tuple);
