@@ -16,12 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.molgenis.compute5.ComputeProperties;
-import org.molgenis.compute5.model.Input;
-import org.molgenis.compute5.model.Output;
-import org.molgenis.compute5.model.Parameters;
-import org.molgenis.compute5.model.Step;
-import org.molgenis.compute5.model.Task;
-import org.molgenis.compute5.model.Workflow;
+import org.molgenis.compute5.model.*;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
@@ -32,9 +27,16 @@ import freemarker.template.Template;
 public class TaskGenerator
 {
 	private List<WritableTuple> globalParameters = null;
+	private HashMap<String, String> environment = null;
+	private Workflow workflow = null;
 
-	public List<Task> generate(Workflow workflow, Parameters parameters, ComputeProperties computeProperties) throws IOException
+	public List<Task> generate(Compute compute) throws IOException
 	{
+		workflow = compute.getWorkflow();
+		Parameters parameters = compute.getParameters();
+		ComputeProperties computeProperties = compute.getComputeProperties();
+		environment = compute.getMapUserEnvironment();
+
 		List<Task> result = new ArrayList<Task>();
 
 		globalParameters = parameters.getValues();
@@ -64,7 +66,7 @@ public class TaskGenerator
 			// uncollapse
 			localParameters = TupleUtils.uncollapse(localParameters, Parameters.ID_COLUMN);
 			// add local input/output parameters to the global parameters
-			addLocalToGlobalParameters(step, globalParameters, localParameters);
+			addLocalToGlobalParameters(step,  localParameters);
 
 		}
 
@@ -72,7 +74,7 @@ public class TaskGenerator
 
 	}
 
-	private static Collection<? extends Task> generateTasks(Step step, List<WritableTuple> localParameters,
+	private Collection<? extends Task> generateTasks(Step step, List<WritableTuple> localParameters,
 			Workflow workflow, ComputeProperties computeProperties) throws IOException
 	{
 		List<Task> tasks = new ArrayList<Task>();
@@ -151,7 +153,7 @@ public class TaskGenerator
 						Object rowIndexObject = rowIndex.get(i);
 						String rowIndexString = (String) rowIndexObject.toString();
 
-						parameterHeader += p + "[" + i + "]=${" + step.getParameters().get(p) + "[" + rowIndexString
+						parameterHeader += p + "[" + i + "]=${" + step.getParametersMapping().get(p) + "[" + rowIndexString
 								+ "]}\n";
 					}
 
@@ -231,9 +233,7 @@ public class TaskGenerator
 						}
 					}
 				}
-				script = appendToEnv(script, "", myEnvironmentFile); // empty
-																		// line
-
+				script = appendToEnv(script, "", myEnvironmentFile);
 				script += "\n";
 
 				task.setScript(script);
@@ -252,64 +252,15 @@ public class TaskGenerator
 		return tasks;
 	}
 
-	private static String appendToEnv(String script, String string, String thisFile)
+	private String appendToEnv(String script, String string, String thisFile)
 	{
 		String appendString = "echo \"" + string + "\" >> " + thisFile;
 
 		return script + "\n" + appendString;
 	}
 
-	private static String guessParametersNeeded(String ftl)
+	private List<WritableTuple> addStepIds(List<WritableTuple> localParameters, Step step)
 	{
-		Set<String> params = new HashSet<String>();
-		Pattern pattern = Pattern.compile("\\{(.*?)\\}");
-		Matcher matcher = pattern.matcher(ftl);
-		while (matcher.find())
-		{
-			params.add(matcher.group(0).replace("{", "").replace("}", "")); // prints
-																			// /{item}/
-		}
-
-		String result = "\nParameters ${x} refered include:";
-		for (String p : params)
-			result += "\n" + p;
-		return result;
-	}
-
-	private static List<WritableTuple> addStepIds(List<WritableTuple> localParameters, Step step)
-	{
-		// // determine list length so that we can replicate thisTaskId that
-		// number of times
-		// Integer nCollapsedTargets = 0;
-		// if (0 < localParameters.size())
-		// {
-		// nCollapsedTargets =
-		// localParameters.get(0).getList(Parameters.ID_COLUMN).size();
-		// }
-
-		// int stepId = 0;
-		// for (WritableTuple target : localParameters)
-		// {
-		// // String thisTaskId = step.getName() + Parameters.STEP_PARAM_SEP +
-		// stepId;
-		// // List<String> prevTaskIds =
-		// target.getList(Parameters.PREVIOUS_COLUMN);
-		// // List<String> allTaskIds = new ArrayList<String>();
-		// // if (null != prevTaskIds)
-		// // {
-		// // allTaskIds = prevTaskIds;
-		// // }
-		// // allTaskIds.add(thisTaskId);
-		// // target.set(Parameters.PREVIOUS_COLUMN, allTaskIds); // for
-		// previous
-		// // // steps
-		//
-		// String name = step.getName() + Parameters.PREVIOUS_COLUMN + stepId;
-		// target.set(Task.TASKID_COLUMN, name);
-		// target.set(Task.TASKID_INDEX_COLUMN, stepId++);
-		// }
-		// return localParameters;
-
 		int stepId = 0;
 		for (WritableTuple target : localParameters)
 		{
@@ -320,8 +271,7 @@ public class TaskGenerator
 		return localParameters;
 	}
 
-	private static void addLocalToGlobalParameters(Step step, final List<WritableTuple> globalParameters,
-			List<WritableTuple> localParameters)
+	private void addLocalToGlobalParameters(Step step, List<WritableTuple> localParameters)
 	{
 		for (int i = 0; i < localParameters.size(); i++)
 		{
@@ -331,14 +281,9 @@ public class TaskGenerator
 			{
 				if (!localName.contains(Parameters.STEP_PARAM_SEP))
 				{
-					globalParameters.get(i).set(step.getName() + Parameters.STEP_PARAM_SEP + localName,
-							local.get(localName));
+					WritableTuple tuple = globalParameters.get(i);
+					tuple.set(step.getName() + Parameters.STEP_PARAM_SEP + localName, local.get(localName));
 				}
-				// else if (localName.equals(Parameters.PREVIOUS_COLUMN))
-				// {
-				// // handle previous step
-				// globalParameters.get(i).set(localName, local.get(localName));
-				// }
 			}
 		}
 	}
@@ -422,25 +367,21 @@ public class TaskGenerator
 		return localParameters;
 	}
 
-	private static List<WritableTuple> collapseOnTargets(List<WritableTuple> localParameters, Step step)
+	private List<WritableTuple> collapseOnTargets(List<WritableTuple> localParameters, Step step)
 	{
 
 		List<String> targets = new ArrayList<String>();
 
 		for (Input i : step.getProtocol().getInputs())
 		{
-			String origin = step.getParameters().get(i.getName());
-			boolean initialized = origin.startsWith(Parameters.USER_PREFIX);
+//			String origin = step.getParametersMapping().get(i.getName());
+			boolean initialized = true; //origin.startsWith(Parameters.USER_PREFIX);
 
 			boolean isList = Parameters.LIST_INPUT.equals(i.getType());
 
-			if (!isList && initialized) targets.add(i.getName());
+			if (!isList && initialized)
+				targets.add(i.getName());
 		}
-
-		// System.out.println(">> targets   >> " + targets);
-		// System.out.println(">> original  >> " + localParameters);
-		// System.out.println(">> collapsed >> " +
-		// TupleUtils.collapse(localParameters, targets));
 
 		if (0 == targets.size()) // no values from user_*, so do not collapse
 		{
@@ -461,9 +402,6 @@ public class TaskGenerator
 		{
 			WritableTuple local = new KeyValueTuple();
 
-			// add previous steps
-			// local.set(global);
-
 			// include row number for later to enable uncollapse
 			local.set(Parameters.ID_COLUMN, global.get(Parameters.ID_COLUMN));
 
@@ -473,17 +411,30 @@ public class TaskGenerator
 				// check the mapping, give error if missing
 				String localName = i.getName();
 				String globalName = step.getLocalGlobalParameterMap().get(localName);
-				if (globalName == null) throw new IOException("Generation of step '" + step.getName()
-						+ "' failed: mapping of input '" + localName
-						+ "' is missing from workflow file.\nProvided mappings: " + step.getLocalGlobalParameterMap());
 
-				// check if the parameter name exists in parameters (todo: also
-				// check for null??)
+				//appending "user_" if needed
+				String parameterNameWithPrefix = null;
+				if (globalName == null)
+				{
+					//automapping
+					globalName = localName;
+				}
+
 				boolean found = false;
 				for (String col : global.getColNames())
 				{
-					if (globalName.equals(col)) found = true;
+					if(!workflow.parameterHasStepPrefix(globalName))
+						parameterNameWithPrefix = Parameters.USER_PREFIX + globalName;
+					else
+						parameterNameWithPrefix = globalName;
+
+					if (col.equals(parameterNameWithPrefix))
+					{
+						found = true;
+						break;
+					}
 				}
+
 				if (!found)
 				{
 					throw new IOException("Generation of step '" + step.getName() + "' failed: mapped input '"
@@ -491,20 +442,8 @@ public class TaskGenerator
 							+ globalParameters);
 				}
 
-				// set
-				local.set(localName, global.get(globalName));
+				local.set(localName, global.get(parameterNameWithPrefix));
 			}
-
-			// // set previous step info
-			// for (String col : global.getColNames())
-			// {
-			// System.out.println(">> In mapGlobalToLocalParams >> " + col);
-			// if (Parameters.PREVIOUS_COLUMN.equals(col))
-			// {
-			// // found info in which jobs this target was part of
-			// local.set(col, global.getString(col));
-			// }
-			// }
 
 			localParameters.add(local);
 		}

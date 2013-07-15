@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.cli.HelpFormatter;
@@ -23,6 +24,7 @@ import org.molgenis.compute5.generators.pbs.PbsBackend;
 import org.molgenis.compute5.model.Compute;
 import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Task;
+import org.molgenis.compute5.model.Workflow;
 import org.molgenis.compute5.parsers.ParametersCsvParser;
 import org.molgenis.compute5.parsers.WorkflowCsvParser;
 import org.molgenis.compute5.sysexecutor.SysCommandExecutor;
@@ -55,6 +57,8 @@ public class ComputeCommandLine
 
 		// parse options
 		ComputeProperties computeProperties = new ComputeProperties(args);
+
+		System.out.println("parameters: " + computeProperties.parametersToOverwrite);
 
 		new ComputeCommandLine().execute(computeProperties);
 
@@ -218,7 +222,8 @@ public class ComputeCommandLine
 		if (defaultsExists(computeProperties)) parameterFiles.add(new File(computeProperties.defaults));
 
 		// parse param files
-		compute.setParameters(ParametersCsvParser.parse(parameterFiles));
+		Parameters parameters = new ParametersCsvParser().parse(parameterFiles);
+		compute.setParameters(parameters);
 
 		// add command line parameters:
 		for (WritableTuple t : compute.getParameters().getValues())
@@ -244,14 +249,17 @@ public class ComputeCommandLine
 				compute.getParameters());
 
 		// parse workflow
-		compute.setWorkflow(WorkflowCsvParser.parse(computeProperties.workFlow));
+		Workflow workflow = new WorkflowCsvParser().parse(computeProperties.workFlow);
+		compute.setWorkflow(workflow);
 
 		// create environment.txt with user parameters that are used in at least
 		// one of the steps
-		new EnvironmentGenerator().generate(compute, computeProperties.runDir);
+		HashMap<String, String> userEnvironment = new EnvironmentGenerator().generate(compute, computeProperties.runDir);
+		compute.setMapUserEnvironment(userEnvironment);
 
 		// generate the tasks
-		compute.setTasks(new TaskGenerator().generate(compute.getWorkflow(), compute.getParameters(), compute.getComputeProperties()));
+		List<Task> tasks = new TaskGenerator().generate(compute);
+		compute.setTasks(tasks);
 
 		// write the task for the backend
 		if (Parameters.BACKEND_PBS.equals(computeProperties.backend))
@@ -264,10 +272,10 @@ public class ComputeCommandLine
 		}
 
 		// generate documentation
-		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"),
-				compute.getParameters());
-		new DocWorkflowDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getWorkflow());
-		new DocTasksDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getTasks());
+//		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"),
+//				compute.getParameters());
+//		new DocWorkflowDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getWorkflow());
+//		new DocTasksDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getTasks());
 
 		System.out.println("Generation complete.");
 	}
