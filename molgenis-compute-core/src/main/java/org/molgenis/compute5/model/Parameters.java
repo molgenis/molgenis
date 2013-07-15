@@ -53,7 +53,7 @@ public class Parameters
 	public static String ENVIRONMENT_EXTENSION = ".env";
 	public static String ENVIRONMENT = "user" + ENVIRONMENT_EXTENSION;
 	public static String ENVIRONMENT_FULLPATH = null; // to be set
-	public static String NOTAVAILABLE = "_NA";
+	public static String NOTAVAILABLE = "notavailable";
 	public static String LIST_INPUT = "list";
 	public static String STRING = "string";
 	public static String INPUT = "input";

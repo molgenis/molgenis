@@ -34,26 +34,31 @@ public class Protocol
 	});
 
 	// unique name of the protocol
-	String name;
+	private String name = null;
 
 	// optional description of the protocol
-	String description;
+	private String description;
 
 	// resources
-	String walltime = "08:00:00";// walltime for protocol
-	String nodes = Integer.toString(1);// number of cores that this protocol needs
-	String ppn = "4";
-	String queue = "default";
-	String memory = "1Gb";
+	private String walltime = null;
+	private String defaultWalltime = "08:00:00";// walltime for protocol
+	private String nodes = null;
+	private String defaultNodes	= "1";
+	private String ppn = null;
+	private String defaultPpn = "4";
+	private String queue = null;
+	private String defaultQueue = "default";
+	private String defaultMemory = "1Gb";
+	private String memory = null;
 
 	// list of inputs it expects from user_* or previousStep_*
-	Set<Input> inputs = new HashSet<Input>();
+	private Set<Input> inputs = new HashSet<Input>();
 
 	// outputs that this protocol produces
-	Set<Output> outputs = new HashSet<Output>();
+	private Set<Output> outputs = new HashSet<Output>();
 
 	// freemarker template of the protocol
-	String template;
+	private String template = null;
 
 	public Protocol(String name)
 	{
@@ -161,6 +166,29 @@ public class Protocol
 	{
 		this.memory = memory;
 	}
-	
 
+	public String getDefaultWalltime()
+	{
+		return defaultWalltime;
+	}
+
+	public String getDefaultNodes()
+	{
+		return defaultNodes;
+	}
+
+	public String getDefaultPpn()
+	{
+		return defaultPpn;
+	}
+
+	public String getDefaultQueue()
+	{
+		return defaultQueue;
+	}
+
+	public String getDefaultMemory()
+	{
+		return defaultMemory;
+	}
 }
