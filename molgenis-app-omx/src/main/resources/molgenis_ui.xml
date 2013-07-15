@@ -4,7 +4,7 @@
 	<menu name="main">
 		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
 		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
-		<menu name="HarmonizationPlatform" label="Harmonization platform">
+		<menu name="BiobankConnect" label="BiobankConnect">
 			<plugin label="OntologyIndexer" name="OntologyIndexer" type="org.molgenis.omx.ontologyIndexer.plugin.OntologyIndexerPlugin"/>
 			<plugin label="OntologyAnnotator" name="OntologyAnnotator" type="org.molgenis.omx.ontologyAnnotator.plugin.OntologyAnnotatorPlugin"/>
 			<plugin label="OntologyMatcher" name="OntologyMatcher" type="org.molgenis.omx.ontologyMatcher.plugin.OntologyMatcherPlugin"/>
