@@ -103,9 +103,10 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 				{
 					List<QueryRule> rules = new ArrayList<QueryRule>();
 					rules.add(makeQueryForOntologyTerms(createQueryRules(name, feature.getDefinition())));
-					rules.add(makeQueryForOntologyTerms(createQueryRules(description, feature.getDefinition())));
+					// rules.add(makeQueryForOntologyTerms(createQueryRules(description,
+					// feature.getDefinition())));
 					rules.add(makeQueryForName(name.toLowerCase()));
-					rules.add(makeQueryForName(description.toLowerCase()));
+					// rules.add(makeQueryForName(description.toLowerCase()));
 					QueryRule finalQuery = new QueryRule(rules);
 					finalQuery.setOperator(Operator.DIS_MAX);
 
