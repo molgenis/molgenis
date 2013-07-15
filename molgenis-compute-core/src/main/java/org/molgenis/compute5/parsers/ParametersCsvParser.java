@@ -23,7 +23,7 @@ import org.molgenis.util.tuple.WritableTuple;
 /** Parser for parameters csv file(s). Includes the solving of templated values. */
 public class ParametersCsvParser
 {
-	public static Parameters parse(File... filesArray) throws IOException
+	public Parameters parse(File... filesArray) throws IOException
 	{
 		// convert filesArray and
 		// call the parse below
@@ -34,7 +34,7 @@ public class ParametersCsvParser
 		return parse(fileLst);
 	}
 
-	public static Parameters parse(List<File> filesArray) throws IOException
+	public Parameters parse(List<File> filesArray) throws IOException
 	{
 		Set<String> fileSet = new HashSet<String>();
 		for (File f : filesArray)

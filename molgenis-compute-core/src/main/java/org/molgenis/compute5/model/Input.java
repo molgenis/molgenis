@@ -6,14 +6,10 @@ import org.molgenis.compute5.Validator;
 public class Input
 {
 	//unique name within a protocol
-	String name;
-	
+	private String name;
 	//description of this parameter
-	String description;
-	
-	//FIXME use molgenis FieldType framework
-	//type of this input, e.g. string or list (influences hasOne folding)
-	String type;
+	private String description;
+	private String type;
 
 	public Input(String name)
 	{

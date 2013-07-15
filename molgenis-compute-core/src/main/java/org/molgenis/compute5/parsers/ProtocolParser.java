@@ -33,7 +33,7 @@ public class ProtocolParser
 	 * @return
 	 * @throws IOException
 	 */
-	public static Protocol parse(File workflowDir, String protocolFile) throws IOException
+	public Protocol parse(File workflowDir, String protocolFile) throws IOException
 	{
 		try
 		{

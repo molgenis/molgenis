@@ -4,10 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.generators.BackendGenerator;
@@ -17,23 +14,20 @@ import org.molgenis.util.tuple.WritableTuple;
 
 public class Compute
 {
-	Workflow workflow;
-	Parameters parameters;
-	List<Task> tasks;
-	BackendGenerator backend;
-	ComputeProperties computeProperties;
-	String userEnvironment;
+	private Workflow workflow;
+	private Parameters parameters;
+	private List<Task> tasks;
+	private BackendGenerator backend;
+	private ComputeProperties computeProperties;
+	private String userEnvironment;
+
+	HashMap<String, String> mapUserEnvironment = null;
+
 
 	public Compute(ComputeProperties computeProperties)
 	{
 		this.setComputeProperties(computeProperties);
 	}
-
-//	public List<Task> generateTasks() throws IOException
-//	{
-//		tasks = TaskGenerator.generate(workflow, parameters, new ComputeProperties("."));
-//		return tasks;
-//	}
 
 	public List<Task> getTasks()
 	{
@@ -65,16 +59,6 @@ public class Compute
 		this.parameters = parameters;
 	}
 
-	public BackendGenerator getBackend()
-	{
-		return backend;
-	}
-
-	public void setBackend(BackendGenerator backend)
-	{
-		this.backend = backend;
-	}
-
 	public ComputeProperties getComputeProperties()
 	{
 		return computeProperties;
@@ -93,6 +77,16 @@ public class Compute
 	public String getUserEnvironment()
 	{
 		return this.userEnvironment;
+	}
+
+	public HashMap<String, String> getMapUserEnvironment()
+	{
+		return mapUserEnvironment;
+	}
+
+	public void setMapUserEnvironment(HashMap<String, String> mapUserEnvironment)
+	{
+		this.mapUserEnvironment = mapUserEnvironment;
 	}
 }
 
