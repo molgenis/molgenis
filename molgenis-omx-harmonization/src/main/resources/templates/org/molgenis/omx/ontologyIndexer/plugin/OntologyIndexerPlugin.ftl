@@ -25,8 +25,9 @@
 		<div class="form_header" id="${screen.name}">
 			${screen.label}
 		</div>
+		<div id="alertMessage">
 		<#if !model.isCorrectOntology()> 
-			<div class="alert">
+			<div class="alert alert-error">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
 			</div>
@@ -36,6 +37,7 @@
 		  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
 			</div>
 		</#if>
+		</div>
 		<div class="screenbody">
 			<div class="container-fluid">
 				<div class="row-fluid">
@@ -50,6 +52,9 @@
 												Ontology
 											</th>
 											<th>
+												Ontology uri
+											</th>
+											<th>
 												Status
 											</th>
 										</tr>
@@ -58,7 +63,12 @@
 							</div>
 							<div class="row-fluid">
 								<div class="span12">
-									<h1>Index new ontologies</h1>	
+									<h1>Index new ontologies</h1>
+									<div>
+										<p><strong>1. Please name the ontology</strong></p>
+										<input id="ontologyName" name="ontologyName" type="text" /> 
+									</div>
+									<p><strong>2. Please uploda ontology file</strong></p>
 									<div class="fileupload fileupload-new" data-provides="fileupload">
 										<div class="input-append">
 											<div class="uneditable-input">

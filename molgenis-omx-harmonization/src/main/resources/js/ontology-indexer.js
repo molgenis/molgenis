@@ -12,11 +12,12 @@
 				$.each(searchHits, function(){
 					var ontologyInfo = $(this)[0]["columnValueMap"];
 					var ontologyUri = ontologyInfo.url;
+					var ontologyName = ontologyInfo.ontologyLabel;
 					var status = "Indexed";
 					if(runningIndexUri !== null && ontologyUri === runningIndexUri){
 						status = "Being indexed ...";
 					}
-					$('#ontology-table').append('<tr><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
+					$('#ontology-table').append('<tr><td>' + ontologyName + '</td><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
 				});
 			}
 		});
@@ -56,13 +57,23 @@
 		});
 	};
 	
+	ns.showAlertMessage = function(message){
+		var messageAlert = $('<div />').addClass('alert alert-error').append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
+		$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
+		$('#alertMessage').append(messageAlert);
+		w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
+	}
+	
 	$(function() {
 		$('#index-button').click(function(){
-			if($('#uploadedOntology').val() !== ''){
+			var ontologyName = $('#ontologyName').val();
+			if(ontologyName == null || ontologyName == ''){
+				ns.showAlertMessage('Please define the name of ontology!');
+			}else if($('#uploadedOntology').val() !== ''){
 				$('input[name="__action"]').val("indexOntology");
 				$('#harmonizationIndexer-form').submit();
 			}else{
-				alert('Please upload a file in OWL or OBO format!');
+				ns.showAlertMessage('Please upload a file in OWL or OBO format!');
 			}
 		});
 		$('#refresh-button').click(function(){

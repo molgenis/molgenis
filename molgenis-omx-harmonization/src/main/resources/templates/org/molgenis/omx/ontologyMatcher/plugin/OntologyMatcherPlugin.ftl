@@ -30,30 +30,34 @@
 									</#list>
 								</select>
 							</div>
-							<div class="offset6 span3">
+							<div class="offset5 span4">
 								<div class="accordion" id="feature-filters-container">
-								<div class="accordion-group">
-								    <div class="accordion-heading">
-										<span class="accordion-toggle" data-toggle="false" data-parent="#feature-filters-container">Icon meanings</span>
-									</div>
-									<div class="accordion-body collapse in">
-										<div class="accordion-inner" id="feature-filters">
-											<div>
-												<i class="icon-ok"></i>
-												<span class="float-right text-success">Mappings have been selected</span>
-											</div>
-											<div>
-												<i class="icon-pencil"></i>
-												<span class="float-right text-info">Select the mappings</span>
-											</div>
-											<div>
-												<i class="icon-ban-circle"></i>
-												<span class="float-right text-error">No candidate available</span>
+									<div class="accordion-group">
+									    <div class="accordion-heading">
+											<span class="accordion-toggle" data-toggle="false" data-parent="#feature-filters-container">Icon meanings</span>
+										</div>
+										<div class="accordion-body collapse in">
+											<div class="accordion-inner" id="feature-filters">
+												<div>
+													<i class="icon-ok"></i>
+													<span class="float-right text-success">Mappings have been selected</span>
+												</div>
+												<div>
+													<i class="icon-pencil"></i>
+													<span class="float-right text-info">Select the mappings</span>
+												</div>
+												<div>
+													<i class="icon-trash"></i>
+													<span class="float-right text-warning">Delete all mappings</span>
+												</div>
+												<div>
+													<i class="icon-ban-circle"></i>
+													<span class="float-right text-error">No candidate available</span>
+												</div>
 											</div>
 										</div>
 									</div>
 								</div>
-							</div>
 							</div>
 						</div>
 						<div class="row-fluid">

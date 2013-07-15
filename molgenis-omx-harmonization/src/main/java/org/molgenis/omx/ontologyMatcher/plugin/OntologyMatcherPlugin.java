@@ -14,6 +14,7 @@ public class OntologyMatcherPlugin extends PluginModel<Entity>
 	private static final long serialVersionUID = 1L;
 
 	private OntologyMatcherModel model;
+	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 
 	public OntologyMatcherPlugin(String name, ScreenController<?> parent)
 	{
@@ -68,8 +69,10 @@ public class OntologyMatcherPlugin extends PluginModel<Entity>
 			model.getDataSets().clear();
 
 			for (DataSet dataSet : db.find(DataSet.class))
-				model.getDataSets().add(dataSet);
+			{
+				if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) model.getDataSets().add(dataSet);
 
+			}
 			if (model.getDataSets().size() > 0) model.setSelectedDataSet(model.getDataSets().get(0));
 		}
 		catch (DatabaseException e)

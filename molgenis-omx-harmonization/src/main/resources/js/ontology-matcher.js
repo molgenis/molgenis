@@ -29,6 +29,7 @@
 					value : getSelectedDataSet() + '-'
 				}],
 			});
+			
 			$.each(dataSetMapping.items, function(index, dataSet){
 				var dataSetsId = dataSet.identifier.split('-');
 				var mappingDataSet = restApi.get('/api/v1/dataset/' + dataSetsId[1]);
@@ -39,6 +40,7 @@
 			//create table header
 			createDynamicTableHeader(involedDataSets);
 			var searchHits = searchResponse.searchHits;
+			
 			$.each(searchHits, function(){
 				var feature = $(this)[0]["columnValueMap"];
 				var row = $('<tr />');
@@ -51,19 +53,29 @@
 				$('<td />').addClass('add-border').append(popover).appendTo(row);
 				$.each(mappingPerStudy, function(dataSetName, mapping){
 					if(mapping[feature.id]){
-						var value = '';
+						var displayTerm = '';
 						var count = 0;
 						var confirmed = false;
+						var selectedMappings = [];
 						$.each(mapping[feature.id], function(index, eachValue){
 							if(count === 0){
-								value = eachValue.mappedFeature.name;
+								displayTerm = eachValue.mappedFeature.name;
 							}
 							if(eachValue.confirmed === true){
+								selectedMappings.push(eachValue.mappedFeature.name);
 								confirmed = true;
-								return false;
 							}
 							count++;
 						});
+						displayTerm = selectedMappings.length > 0 ? selectedMappings.join(' , ') : displayTerm;
+						var removeIcon = $('<i />').addClass('icon-trash show-popover').css({
+							position : 'relative',
+							float : 'right'
+						}).click(function(){
+							removeAnnotation(mapping[feature.id]);
+							ns.createMatrixForDataItems();
+						});
+						
 						var editIcon = $('<i />');
 						if(confirmed === true){
 							editIcon.addClass('icon-ok show-popover');
@@ -82,7 +94,7 @@
 								'margin-left' : -475
 							});
 						});
-						$('<td />').addClass('add-border').append('<span>' + value + '</span>').append(editIcon).appendTo(row);
+						$('<td />').addClass('add-border').append('<span>' + displayTerm + '</span>').append(removeIcon).append(editIcon).appendTo(row);
 					}else{
 						$('<td />').addClass('add-border').append('<i class="icon-ban-circle show-popover" title="Not available"></i>').appendTo(row);
 					}
@@ -94,11 +106,57 @@
 			pagination.updateMatrixPagination($('.pagination ul'), ns.createMatrixForDataItems);
 		});
 		
+		function removeAnnotation(mappings){
+			var observationSetIds = [];
+			$.each(mappings, function(index, eachMapping){
+				observationSetIds.push(hrefToId(eachMapping.observationSetIdentifier));
+			});
+			showMessage('alert alert-info', observationSetIds.length + ' candidate mappings are being deleted!');
+			var observedValues = restApi.get('/api/v1/observedvalue', null, {
+				q : [{
+					field : 'observationSet',
+					operator : 'IN',
+					value : observationSetIds
+				}],
+				num : 500
+			});
+			
+			var observedValueIds = [];
+			$.each(observedValues.items, function(index, ov){
+				observedValueIds.push(hrefToId(ov.href));
+			});
+			deleteEntity('/api/v1/observedvalue/', observedValueIds, function(){deleteEntity('/api/v1/observationset/', observationSetIds, null)});
+		}
+		
+		function deleteEntity(entityType, ids, callback){
+			var workers = [];
+			for(var i = 0 ; i < ids.length ; i++) {
+				workers[i] = false;
+			}
+			for(var i = 0 ; i < ids.length ; i++) {
+				$.ajax({
+					type : 'DELETE',
+					async : false,
+					url : entityType + ids[i],
+					success : function(data, textStatus, request) {
+						workers[i] = true;
+						if($.inArray(false, workers) === -1){
+							if(callback !== null)
+								callback();
+						}
+					},
+					error : function(request, textStatus, error){
+						console.log(error);
+					} 
+				});
+			}
+		}
+		
 		function createMappingTable(feature, mapping, mappedBiobank, modal){
 			var selectedFeatures = [];
 			var tableDiv = $('<div />').addClass('span7').css('margin-right', -100);
 			$('<div />').append('<h4>' + mappedBiobank + '</h4>').appendTo(tableDiv);
-			var mappingTable = $('<table />').addClass('table table-bordered'); 
+			var mappingTable = $('<table />').addClass('table table-bordered table-striped'); 
 			var header = $('<tr><th>Name</th><th>Description</th><th>Select</th></tr>');
 			mappingTable.append(header);
 			$.each(mapping[feature.id], function(index, eachMapping){
@@ -185,12 +243,16 @@
 				}
 			});
 			if(ifShowMessage){
-				var messageAlert = $('<div />').addClass('alert alert-info').append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
-				$('<span><strong>Message : </strong>the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedBiobank + '</strong> Biobank!</span>').appendTo(messageAlert);
-				messageAlert.appendTo('#alertMessage');
-				w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
+				showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedBiobank + '</strong> Biobank!');
 				callback();
 			}
+		}
+		
+		function showMessage(alertClass, message){
+			var messageAlert = $('<div />').addClass(alertClass).append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
+			$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
+			messageAlert.appendTo('#alertMessage');
+			w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
 		}
 		
 		function i18nDescription(feature){
