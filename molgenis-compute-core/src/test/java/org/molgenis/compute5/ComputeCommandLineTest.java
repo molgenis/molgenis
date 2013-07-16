@@ -571,6 +571,92 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
+	public void testRunLocally5a() throws Exception
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark.5.1/workflow.a.csv",
+				"--defaults",
+				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.a.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark.5.1/parameters.csv",
+				"--rundir",
+				"target/test/benchmark/run"
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step3_0.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step3_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step3_1.sh");
+		if (file.exists())
+		{
+			Assert.fail("step3_1.sh should not be generated");
+		}
+
+	}
+
+	@Test
+	public void testRunLocallyA() throws Exception
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark/workflow.3.csv",
+				"--defaults",
+				"src/main/resources/workflows/benchmark/workflow.defaults.3.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark/parameters.csv",
+				"--rundir",
+				"target/test/benchmark/run"
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step3_0.sh");
+		if (!file.exists())
+		{
+			Assert.fail("step3_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step3_1.sh");
+		if (file.exists())
+		{
+			Assert.fail("step3_1.sh should not be generated");
+		}
+
+	}
+
+
+
+	@Test
 	public void testGenerate5PBS() throws Exception
 	{
 		System.out.println("--- Start TestRunLocally ---");
