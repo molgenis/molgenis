@@ -1025,7 +1025,7 @@ public class ComputeCommandLineTest
 	}
 
 
-	private final String getFileAsString(String filename) throws IOException
+	public static String getFileAsString(String filename) throws IOException
 	{
 		File file = new File(filename);
 
