@@ -124,4 +124,14 @@ public class Step
 
 		return false;
 	}
+
+	public boolean hasParameter(String parameterName)
+	{
+		for(String parameter : parameterNames)
+		{
+			if(parameter.equalsIgnoreCase(parameterName))
+				return true;
+		}
+		return false;
+	}
 }
