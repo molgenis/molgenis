@@ -82,11 +82,7 @@ public class BackendGenerator
 			taskMap.put("tasks", tasks);
 			
 			submit.process(taskMap, out);
-//			for(Task t: tasks)
-//			{
-//				out.write("sh "+t.getName()+".sh\n");
-//			}
-			
+
 			out.close();
 			
 			System.out.println("Generated " + outFile);

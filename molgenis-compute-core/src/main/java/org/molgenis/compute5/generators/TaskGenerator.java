@@ -2,27 +2,18 @@ package org.molgenis.compute5.generators;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.model.*;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 public class TaskGenerator
 {
@@ -53,15 +44,16 @@ public class TaskGenerator
 			// localParameters);
 
 			// add the output templates/values + generate step ids
-			localParameters = addOutputValues(step, localParameters);
+			localParameters = addResourceValues(step, localParameters);
 
 			// add step ids as
 			// (i) taskId = name_id
 			// (ii) taskIndex = id
 			localParameters = addStepIds(localParameters, step);
 
+			List<Task> tasks = (List<Task>) generateTasks(step, localParameters, workflow, computeProperties);
 			// generate the tasks from template, add step id
-			result.addAll(generateTasks(step, localParameters, workflow, computeProperties));
+			result.addAll(tasks);
 
 			// uncollapse
 			localParameters = TupleUtils.uncollapse(localParameters, Parameters.ID_COLUMN);
@@ -145,15 +137,28 @@ public class TaskGenerator
 				// environment
 				for (Input input : step.getProtocol().getInputs())
 				{
-					String p = input.getName();
+					String parameterName = input.getName();
 
 					List<String> rowIndex = target.getList(Parameters.ID_COLUMN);
 					for (int i = 0; i < rowIndex.size(); i++)
 					{
 						Object rowIndexObject = rowIndex.get(i);
-						String rowIndexString = (String) rowIndexObject.toString();
+						String rowIndexString = rowIndexObject.toString();
 
-						parameterHeader += p + "[" + i + "]=${" + step.getParametersMapping().get(p) + "[" + rowIndexString
+						String value = null;
+						String parameterMapping = step.getParametersMapping().get(parameterName);
+						if(parameterMapping != null)
+						{
+							//parameter is mapped locally
+							value = parameterMapping;
+						}
+						else
+						{
+							if(step.hasParameter(parameterName))
+								value = parameterName;
+						}
+
+						parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
 								+ "]}\n";
 					}
 
@@ -162,29 +167,32 @@ public class TaskGenerator
 				parameterHeader = parameterHeader
 						+ "\n# Validate that each 'value' parameter has only identical values in its list\n"
 						+ "# We do that to protect you against parameter values that might not be correctly set at runtime.\n";
-				for (Input input : step.getProtocol().getInputs())
-				{
-					boolean isList = Parameters.LIST_INPUT.equals(input.getType());
-					if (!isList)
-					{
-						String p = input.getName();
-
-						parameterHeader += "if [[ ! $(IFS=$'\\n' sort -u <<< \"${"
-								+ p
-								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"Error in Step '"
-								+ step.getName()
-								+ "': input parameter '"
-								+ p
-								+ "' is an array with different values. Maybe '"
-								+ p
-								+ "' is a runtime parameter with 'more variable' values than what was folded on generation-time?\" >&2; exit 1; fi\n";
-					}
-				}
+//				for (Input input : step.getProtocol().getInputs())
+//				{
+//					boolean isList = Parameters.LIST_INPUT.equals(input.getType());
+//					if (!isList)
+//					{
+//						String p = input.getName();
+//
+//						parameterHeader += "if [[ ! $(IFS=$'\\n' sort -u <<< \"${"
+//								+ p
+//								+ "[*]}\" | wc -l | sed -e 's/^[[:space:]]*//') = 1 ]]; then echo \"Error in Step '"
+//								+ step.getName()
+//								+ "': input parameter '"
+//								+ p
+//								+ "' is an array with different values. Maybe '"
+//								+ p
+//								+ "' is a runtime parameter with 'more variable' values than what was folded on generation-time?\" >&2; exit 1; fi\n";
+//					}
+//				}
 
 				parameterHeader += "\n#\n## Start of your protocol template\n#\n\n";
 
 				String script = step.getProtocol().getTemplate();
 				script = parameterHeader + script;
+
+
+
 
 				// append footer that appends the task's parameters to
 				// environment of this task
@@ -241,9 +249,7 @@ public class TaskGenerator
 			}
 			catch (Exception e)
 			{
-				// String params =
-				// guessParametersNeeded(step.getProtocol().getTemplate());
-				throw new IOException("Generation of protocol '" + step.getProtocol().getName() + "' failed: "
+					throw new IOException("Generation of protocol '" + step.getProtocol().getName() + "' failed: "
 						+ e.getMessage() + ".\nParameters used: " + target);
 			}
 
@@ -288,7 +294,7 @@ public class TaskGenerator
 		}
 	}
 
-	private List<WritableTuple> addOutputValues(Step step, List<WritableTuple> localParameters)
+	private List<WritableTuple> addResourceValues(Step step, List<WritableTuple> localParameters)
 	{
 		// try
 		// {
