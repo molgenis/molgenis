@@ -37,11 +37,6 @@ public class TaskGenerator
 			// map global to local parameters
 			List<WritableTuple> localParameters = mapGlobalToLocalParameters(globalParameters, step);
 
-			if(step.getName().equalsIgnoreCase("step2"))
-			{
-				int i = 0;
-			}
-
 			// collapse parameter values
 			localParameters = collapseOnTargets(localParameters, step);
 
