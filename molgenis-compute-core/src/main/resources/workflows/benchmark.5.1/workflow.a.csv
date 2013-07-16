@@ -1,0 +1,5 @@
+step,protocol,parameterMapping
+step0,protocols/step0.sh,
+step1,protocols/step1.sh,step0
+step2,protocols/step2.sh,strings=step1_out
+step3,protocols/step3a.sh,step2;mytool=tool

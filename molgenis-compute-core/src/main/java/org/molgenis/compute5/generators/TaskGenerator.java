@@ -37,6 +37,11 @@ public class TaskGenerator
 			// map global to local parameters
 			List<WritableTuple> localParameters = mapGlobalToLocalParameters(globalParameters, step);
 
+			if(step.getName().equalsIgnoreCase("step2"))
+			{
+				int i = 0;
+			}
+
 			// collapse parameter values
 			localParameters = collapseOnTargets(localParameters, step);
 
@@ -189,6 +194,10 @@ public class TaskGenerator
 				parameterHeader += "\n#\n## Start of your protocol template\n#\n\n";
 
 				String script = step.getProtocol().getTemplate();
+
+				//weave actual values into script here
+				String weavedScript = weaveProtocol(step.getProtocol(), environment, target);
+
 				script = parameterHeader + script;
 
 
@@ -256,6 +265,25 @@ public class TaskGenerator
 			tasks.add(task);
 		}
 		return tasks;
+	}
+
+	private String weaveProtocol(Protocol protocol, HashMap<String, String> environment, WritableTuple target)
+	{
+		String template = protocol.getTemplate();
+
+		for(Input input : protocol.getInputs())
+		{
+			if(input.getType().equalsIgnoreCase(Parameters.STRING))
+			{
+				int i = 0;
+			}
+			else if(input.getType().equalsIgnoreCase(Parameters.LIST_INPUT))
+			{
+				int i = 0;
+			}
+		}
+
+		return null;
 	}
 
 	private String appendToEnv(String script, String string, String thisFile)
@@ -395,7 +423,8 @@ public class TaskGenerator
 		}
 		else
 		{
-			return TupleUtils.collapse(localParameters, targets);
+			List<WritableTuple> collapsed = TupleUtils.collapse(localParameters, targets);
+			return collapsed;
 		}
 	}
 

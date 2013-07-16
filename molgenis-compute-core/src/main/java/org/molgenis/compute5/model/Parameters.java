@@ -56,7 +56,6 @@ public class Parameters
 	public static String NOTAVAILABLE = "notavailable";
 	public static String LIST_INPUT = "list";
 	public static String STRING = "string";
-	public static String INPUT = "input";
 	public static final String WALLTIME = "walltime";
 	public static final String QUEUE = "queue";
 	public static final String NODES = "nodes";
