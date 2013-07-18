@@ -612,6 +612,87 @@ public class ComputeCommandLineTest
 
 	}
 
+//	@Test(expectedExceptions = Exception.class)
+//	public void testRunLocally5b_1() throws Exception
+//	{
+//		System.out.println("--- Start TestRunLocally ---");
+//
+//		File f = new File(outputDir);
+//		FileUtils.deleteDirectory(f);
+//		Assert.assertFalse(f.exists());
+//
+//		f = new File(".compute.properties");
+//		FileUtils.deleteQuietly(f);
+//		Assert.assertFalse(f.exists());
+//
+//		ComputeCommandLine.main(new String[]{
+//				"--generate",
+//				"--run",
+//				"--workflow",
+//				"src/main/resources/workflows/benchmark.5.1/workflow.b.csv",
+//				"--defaults",
+//				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.csv",
+//				"--parameters",
+//				"src/main/resources/workflows/benchmark.5.1/parameters.csv",
+//				"--rundir",
+//				"target/test/benchmark/run"
+//		});
+//	}
+//
+//	@Test(expectedExceptions = Exception.class)
+//	public void testRunLocally5b_2() throws Exception
+//	{
+//		System.out.println("--- Start TestRunLocally ---");
+//
+//		File f = new File(outputDir);
+//		FileUtils.deleteDirectory(f);
+//		Assert.assertFalse(f.exists());
+//
+//		f = new File(".compute.properties");
+//		FileUtils.deleteQuietly(f);
+//		Assert.assertFalse(f.exists());
+//
+//		ComputeCommandLine.main(new String[]{
+//				"--generate",
+//				"--run",
+//				"--workflow",
+//				"src/main/resources/workflows/benchmark.5.1/workflow.b.csv",
+//				"--defaults",
+//				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.b.csv",
+//				"--parameters",
+//				"src/main/resources/workflows/benchmark.5.1/parameters.csv",
+//				"--rundir",
+//				"target/test/benchmark/run"
+//		});
+//	}
+//
+//	@Test(expectedExceptions = Exception.class)
+//	public void testRunLocally5c() throws Exception
+//	{
+//		System.out.println("--- Start TestRunLocally ---");
+//
+//		File f = new File(outputDir);
+//		FileUtils.deleteDirectory(f);
+//		Assert.assertFalse(f.exists());
+//
+//		f = new File(".compute.properties");
+//		FileUtils.deleteQuietly(f);
+//		Assert.assertFalse(f.exists());
+//
+//		ComputeCommandLine.main(new String[]{
+//				"--generate",
+//				"--run",
+//				"--workflow",
+//				"src/main/resources/workflows/benchmark.5.1/workflow.c.csv",
+//				"--defaults",
+//				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.b.csv",
+//				"--parameters",
+//				"src/main/resources/workflows/benchmark.5.1/parameters.c.csv",
+//				"--rundir",
+//				"target/test/benchmark/run"
+//		});
+//	}
+
 	@Test
 	public void testRunLocallyA() throws Exception
 	{
