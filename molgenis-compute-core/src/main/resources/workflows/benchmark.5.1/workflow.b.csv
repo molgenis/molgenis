@@ -1,0 +1,3 @@
+step,protocol,parameterMapping
+step1,protocols/step1.sh,
+step2,protocols/step2.b.sh,step1
