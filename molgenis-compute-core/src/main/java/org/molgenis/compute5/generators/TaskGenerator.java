@@ -2,13 +2,7 @@ package org.molgenis.compute5.generators;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.model.*;
 import org.molgenis.util.tuple.KeyValueTuple;
@@ -193,10 +187,7 @@ public class TaskGenerator
 				//weave actual values into script here
 				String weavedScript = weaveProtocol(step.getProtocol(), environment, target);
 
-				script = parameterHeader + script;
-
-
-
+				script = parameterHeader + weavedScript;
 
 				// append footer that appends the task's parameters to
 				// environment of this task
@@ -265,20 +256,75 @@ public class TaskGenerator
 	private String weaveProtocol(Protocol protocol, HashMap<String, String> environment, WritableTuple target)
 	{
 		String template = protocol.getTemplate();
+		Hashtable<String, String> values = new Hashtable<String, String>();
 
 		for(Input input : protocol.getInputs())
 		{
 			if(input.getType().equalsIgnoreCase(Parameters.STRING))
 			{
-				int i = 0;
+				String name = input.getName();
+				String value = (String) target.get(name);
+				if(value.equalsIgnoreCase(Parameters.NOTAVAILABLE))
+				{
+					//run time value and to prevent weaving
+					value = formFreemarker(name);
+				}
+				name = formFreemarker(name);
+				values.put(name, value);
 			}
 			else if(input.getType().equalsIgnoreCase(Parameters.LIST_INPUT))
 			{
-				int i = 0;
+				String name = input.getName();
+				ArrayList<String> arrayList = (ArrayList<String>) target.get(name);
+
+				name += FreemarkerUtils.LIST_SIGN;
+
+				if(checkIfAllAvailable(arrayList))
+				{
+					String strList = "";
+					for(String s : arrayList)
+					{
+						s = addQuotes(s);
+						strList += s + " ";
+					}
+					strList = strList.trim();
+					name = formFreemarker(name);
+					name = addQuotes(name);
+					values.put(name , strList);
+				}
+				else
+				{
+					String value = formFreemarker(name);
+					name = formFreemarker(name);
+					name = addQuotes(name);
+					value = addQuotes(value);
+					values.put(name, value);
+				}
 			}
 		}
 
-		return null;
+		String result = FreemarkerUtils.weaveWithoutFreemarker(template, values);
+		return result;
+	}
+
+	private String addQuotes(String str)
+	{
+		return "\"" + str + "\"";
+	}
+
+	private String formFreemarker(String str)
+	{
+		return "${" + str + "}";
+	}
+
+	private boolean checkIfAllAvailable(ArrayList<String> arrayList)
+	{
+		for(String s : arrayList)
+		{
+			if(s.equalsIgnoreCase(Parameters.NOTAVAILABLE))
+				return false;
+		}
+		return true;
 	}
 
 	private String appendToEnv(String script, String string, String thisFile)
@@ -480,6 +526,8 @@ public class TaskGenerator
 
 		return localParameters;
 	}
+
+
 
 	/** Convert all parameters to lists, except the once marked as target */
 
