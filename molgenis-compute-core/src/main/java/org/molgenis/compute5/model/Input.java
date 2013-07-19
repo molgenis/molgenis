@@ -11,6 +11,9 @@ public class Input
 	private String description;
 	private String type;
 
+	//
+	private boolean isKnownRunTime = false;
+
 	public Input(String name)
 	{
 		this.setName(name);
@@ -49,5 +52,15 @@ public class Input
 	public void setType(String type)
 	{
 		this.type = type;
+	}
+
+	public boolean isKnownRunTime()
+	{
+		return isKnownRunTime;
+	}
+
+	public void setKnownRunTime(boolean knownRunTime)
+	{
+		isKnownRunTime = knownRunTime;
 	}
 }

@@ -3,6 +3,8 @@ package org.molgenis.compute5.generators;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import org.apache.log4j.Logger;
 import org.molgenis.compute5.ComputeProperties;
 import org.molgenis.compute5.model.*;
 import org.molgenis.util.tuple.KeyValueTuple;
@@ -14,6 +16,9 @@ public class TaskGenerator
 	private List<WritableTuple> globalParameters = null;
 	private HashMap<String, String> environment = null;
 	private Workflow workflow = null;
+
+	private static final Logger LOG = Logger.getLogger(TaskGenerator.class);
+
 
 	public List<Task> generate(Compute compute) throws IOException
 	{
@@ -145,15 +150,33 @@ public class TaskGenerator
 						{
 							//parameter is mapped locally
 							value = parameterMapping;
+
+							parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
+									+ "]}\n";
 						}
 						else
 						{
 							if(step.hasParameter(parameterName))
+							{
 								value = parameterName;
+
+								Object oValue = map.get(parameterName);
+
+								if(oValue instanceof String)
+								{
+									value = parameterName; // or can be = (String)oValue;
+								}
+								else if (oValue instanceof ArrayList)
+								{
+									value = (String) ((ArrayList) oValue).get(Integer.parseInt(rowIndexString));
+								}
+
+								parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
+										+ "]}\n";
+							}
 						}
 
-						parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
-								+ "]}\n";
+
 					}
 
 				}
@@ -260,6 +283,8 @@ public class TaskGenerator
 
 		for(Input input : protocol.getInputs())
 		{
+			if(input.isKnownRunTime())
+				continue;
 			if(input.getType().equalsIgnoreCase(Parameters.STRING))
 			{
 				String name = input.getName();
@@ -513,12 +538,13 @@ public class TaskGenerator
 
 				if (!found)
 				{
-					throw new IOException("Generation of step '" + step.getName() + "' failed: mapped input '"
-							+ globalName + "' is missing from parameter file(s).\nProvided parameters: "
-							+ globalParameters);
+					LOG.warn("Parameter [" + localName + "] is unknown at design time");
+//					throw new IOException("Generation of step '" + step.getName() + "' failed: mapped input '"
+//							+ globalName + "' is missing from parameter file(s).\nProvided parameters: "
+//							+ globalParameters);
 				}
-
-				local.set(localName, global.get(parameterNameWithPrefix));
+				else
+					local.set(localName, global.get(parameterNameWithPrefix));
 			}
 
 			localParameters.add(local);
