@@ -2,5 +2,3 @@ step,protocol,parameterMapping
 test1,protocols/test1.sh,
 test2,protocols/test2.sh,
 test3,protocols/test3.sh,
-test4,protocols/test4.sh,
-test5,protocols/test5.sh,

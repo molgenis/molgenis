@@ -78,29 +78,6 @@ public class FoldingTest
 			Assert.fail("test3_3.sh should not be generated");
 		}
 
-		file = new File(outputDir + "/test4_0.sh");
-		if (!file.exists())
-		{
-			Assert.fail("test4_0.sh is not generated");
-		}
-
-//		file = new File(outputDir + "/test4_1.sh");
-//		if (file.exists())
-//		{
-//			Assert.fail("test4_1.sh should not be generated");
-//		}
-
-		file = new File(outputDir + "/test5_0.sh");
-		if (!file.exists())
-		{
-			Assert.fail("test5_0.sh is not generated");
-		}
-
-//		file = new File(outputDir + "/test5_1.sh");
-//		if (file.exists())
-//		{
-//			Assert.fail("test5_1.sh should not be generated");
-//		}
 
 		System.out.println("--- Test Lists Correctness ---");
 
