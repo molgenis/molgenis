@@ -39,9 +39,6 @@ public class TaskGenerator
 			// collapse parameter values
 			localParameters = collapseOnTargets(localParameters, step);
 
-			// System.out.println(">> localParameters 'collapseOnTargets': \n" +
-			// localParameters);
-
 			// add the output templates/values + generate step ids
 			localParameters = addResourceValues(step, localParameters);
 
@@ -164,11 +161,13 @@ public class TaskGenerator
 
 								if(oValue instanceof String)
 								{
-									value = parameterName; // or can be = (String)oValue;
+									if(input.isKnownRunTime())
+										value = parameterName; // or can be = (String)oValue;
 								}
 								else if (oValue instanceof ArrayList)
 								{
-									value = (String) ((ArrayList) oValue).get(Integer.parseInt(rowIndexString));
+									if(input.isKnownRunTime())
+										value = (String) ((ArrayList) oValue).get(i);
 								}
 
 								parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
