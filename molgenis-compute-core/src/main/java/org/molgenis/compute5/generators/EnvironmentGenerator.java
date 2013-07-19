@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 
+import org.apache.log4j.Logger;
 import org.molgenis.compute5.model.*;
 import org.molgenis.util.tuple.WritableTuple;
 
@@ -19,6 +20,9 @@ public class EnvironmentGenerator
 	private HashMap<String, String> environment = new HashMap<String, String>();
 	private List<Step> steps = null;
 	private Workflow workflow = null;
+
+	private static final Logger LOG = Logger.getLogger(EnvironmentGenerator.class);
+
 
 	public String getEnvironmentAsString(Compute compute) throws Exception
 	{
@@ -74,20 +78,75 @@ public class EnvironmentGenerator
 						index = wt.getInt(col);
 				}
 
-				if (index == null || value == null)
-					throw new Exception("Parameter '" + parameter +
-							"' does not value in the parameters (.csv, .properties) files ");
+				if (value == null)
+				{
 
-				String assignment = parameter + "[" + index + "]=\"" + value + "\"\n";
+					if(!isFoundAsOutput(parameter, wt))
+						throw new Exception("Parameter '" + parameter +
+								"' does not value in the parameters (.csv, .properties) files ");
+					else
+					{
+						LOG.warn("Variable [" + index + "] has run time value");
+					}
 
-				environment.put(parameter + "[" + index + "]", value);
-				output += assignment;
+				}
+				else
+				{
+					String assignment = parameter + "[" + index + "]=\"" + value + "\"\n";
+
+					environment.put(parameter + "[" + index + "]", value);
+					output += assignment;
+				}
 			}
 		}
 		
 		return output;
 	}
 
+	private boolean isFoundAsOutput(String parameter, WritableTuple wt)
+	{
+		for(Step step: workflow.getSteps())
+		{
+			Set<Output> outputs = step.getProtocol().getOutputs();
+			for(Output output : outputs)
+			{
+				String name = output.getName();
+				if(name.equalsIgnoreCase(parameter))
+				{
+					boolean canBeKnown = checkIfVariableCanbeKnown(step.getName(), parameter);
+
+					if(canBeKnown)
+					{
+						wt.set("user_" + parameter, step.getName() + "_" + parameter);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean checkIfVariableCanbeKnown(String previousStepName, String parameterName)
+	{
+		for(Step step: workflow.getSteps())
+		{
+			for(Input input: step.getProtocol().getInputs())
+			{
+				if(input.getName().equalsIgnoreCase(parameterName))
+				{
+					//this step has input named parameterName
+					Set<String> previousSteps = step.getPreviousSteps();
+					if(previousSteps.contains(previousStepName))
+					{
+						//this step has previous step with output parameterName, so it can be known at run time
+						input.setKnownRunTime(true);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 
 	public HashMap<String, String> generate(Compute compute, String workDir) throws Exception

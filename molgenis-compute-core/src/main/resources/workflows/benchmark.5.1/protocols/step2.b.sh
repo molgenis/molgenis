@@ -6,7 +6,7 @@ echo "Workflow name: ${workflowName}"
 echo "Created: ${creationDate}"
 
 echo "Result of step1.sh:"
-for s in "${strings[@]}"
+for s in "${out[@]}"
 do
     echo ${s}
 done
