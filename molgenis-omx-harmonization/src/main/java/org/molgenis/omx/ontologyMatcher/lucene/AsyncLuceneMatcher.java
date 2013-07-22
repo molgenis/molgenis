@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -29,6 +30,7 @@ import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 {
@@ -40,6 +42,9 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
 	private static final String ONTOLOGY_IRI = "ontologyTermIRI";
 	private static final String ENTITY_TYPE = "type";
+	private final AtomicInteger runningProcesses = new AtomicInteger();
+	private int totalNumber = 0;
+	private int finishedNumber = 0;
 
 	private SearchService searchService;
 
@@ -54,15 +59,23 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
+	public boolean isRunning()
+	{
+		if (runningProcesses.get() == 0) return false;
+		return true;
+	}
+
 	@Override
 	public void matchPercentage()
 	{
-
+		System.out.println("Total number of variables is " + totalNumber + ". The number of finished variables is "
+				+ finishedNumber);
 	}
 
 	@Async
 	public void match(Integer selectedDataSet, Set<Integer> dataSetsToMatch) throws DatabaseException
 	{
+		runningProcesses.incrementAndGet();
 		Database db = DatabaseUtil.createDatabase();
 
 		try
@@ -79,19 +92,24 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 
 			SearchRequest request = new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, queryRules, null);
 			SearchResult result = searchService.search(request);
-			Iterator<Hit> iterator = result.iterator();
 
 			List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
 			List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 			for (Integer catalogueId : dataSetsToMatch)
 			{
-				String dataSetIdentifier = selectedDataSet + "-" + catalogueId;
-				deleteExistingRecords(dataSetIdentifier, db);
+				StringBuilder dataSetIdentifier = new StringBuilder();
+				dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
+				deleteExistingRecords(dataSetIdentifier.toString(), db);
 			}
 
-			while (iterator.hasNext())
+			PorterStemmer stemmer = new PorterStemmer();
+
+			List<Hit> listOfHits = result.getSearchHits();
+
+			totalNumber = listOfHits.size();
+
+			for (Hit hit : listOfHits)
 			{
-				Hit hit = iterator.next();
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID.toString())
 						.toString());
 				String name = hit.getColumnValueMap().get(ObservableFeature.NAME.toLowerCase()).toString();
@@ -102,23 +120,23 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 				if (feature != null)
 				{
 					List<QueryRule> rules = new ArrayList<QueryRule>();
-					rules.add(makeQueryForOntologyTerms(createQueryRules(name, feature.getDefinition())));
-					// rules.add(makeQueryForOntologyTerms(createQueryRules(description,
-					// feature.getDefinition())));
+					rules.add(makeQueryForOntologyTerms(createQueryRules(name, feature.getDefinition(), stemmer)));
+					rules.add(makeQueryForOntologyTerms(createQueryRules(description, feature.getDefinition(), stemmer)));
 					rules.add(makeQueryForName(name.toLowerCase()));
-					// rules.add(makeQueryForName(description.toLowerCase()));
+					rules.add(makeQueryForName(description.toLowerCase()));
 					QueryRule finalQuery = new QueryRule(rules);
 					finalQuery.setOperator(Operator.DIS_MAX);
 
 					for (Integer catalogueId : dataSetsToMatch)
 					{
-						String dataSetIdentifier = selectedDataSet + "-" + catalogueId;
+						StringBuilder dataSetIdentifier = new StringBuilder();
+						dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
 						List<Integer> mappedFeatureIds = searchDisMaxQuery(CATALOGUE_PREFIX + catalogueId, finalQuery);
 
 						for (Integer mappedId : mappedFeatureIds)
 						{
 							ObservationSet observation = new ObservationSet();
-							observation.setPartOfDataSet_Identifier(dataSetIdentifier);
+							observation.setPartOfDataSet_Identifier(dataSetIdentifier.toString());
 							listOfNewObservationSets.add(observation);
 
 							XrefValue xrefForFeature = new XrefValue();
@@ -146,6 +164,8 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 							listOfNewObservedValues.add(confirmMappingValue);
 						}
 					}
+
+					finishedNumber++;
 				}
 			}
 
@@ -161,6 +181,9 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		finally
 		{
 			DatabaseUtil.closeQuietly(db);
+			runningProcesses.decrementAndGet();
+			totalNumber = 0;
+			finishedNumber = 0;
 		}
 	}
 
@@ -169,9 +192,9 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(), Operator.SEARCH, name));
 		rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, name));
-		QueryRule disMaxQuery = new QueryRule(rules);
-		disMaxQuery.setOperator(Operator.DIS_MAX);
-		return disMaxQuery;
+		QueryRule finalQuery = new QueryRule(rules);
+		finalQuery.setOperator(Operator.DIS_MAX);
+		return finalQuery;
 	}
 
 	private QueryRule makeQueryForOntologyTerms(Map<Integer, List<String>> nameTokens)
@@ -185,9 +208,9 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 				rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(), Operator.SEARCH, term));
 				rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, term));
 			}
-			QueryRule disMaxQuery = new QueryRule(rules);
-			disMaxQuery.setOperator(Operator.DIS_MAX);
-			subQueries.add(disMaxQuery);
+			QueryRule queryRule = new QueryRule(rules);
+			queryRule.setOperator(Operator.DIS_MAX);
+			subQueries.add(queryRule);
 		}
 		QueryRule finalQuery = new QueryRule(subQueries);
 		finalQuery.setOperator(Operator.SHOULD);
@@ -213,12 +236,18 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		return featureIds;
 	}
 
-	private Map<Integer, List<String>> createQueryRules(String dataItem, List<OntologyTerm> definitions)
+	private Map<Integer, List<String>> createQueryRules(String dataItem, List<OntologyTerm> definitions,
+			PorterStemmer stemmer)
 	{
 		List<String> uniqueTokens = new ArrayList<String>();
 
 		for (String token : Arrays.asList(dataItem.split(" +")))
+		{
+			stemmer.setCurrent(token);
+			stemmer.stem();
+			token = stemmer.getCurrent();
 			if (!uniqueTokens.contains(token.toLowerCase())) uniqueTokens.add(token.toLowerCase());
+		}
 
 		Map<Integer, List<String>> position = new HashMap<Integer, List<String>>();
 
@@ -234,13 +263,16 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 			{
 				Hit hit = iterator.next();
 				String ontologyTermSynonym = hit.getColumnValueMap().get(ONTOLOGYTERM_SYNONYM).toString().toLowerCase();
+				stemmer.setCurrent(ontologyTermSynonym.split(" +")[0]);
+				stemmer.stem();
+				ontologyTermSynonym = stemmer.getCurrent();
 				int index = uniqueTokens.indexOf(ontologyTermSynonym);
 				if (index != -1)
 				{
 					List<String> terms = null;
 					if (!position.containsKey(index)) terms = new ArrayList<String>();
 					else terms = position.get(index);
-					terms.add(ontologyTermSynonym);
+					if (!terms.contains(ontologyTermSynonym)) terms.add(ontologyTermSynonym);
 					position.put(index, terms);
 				}
 			}
