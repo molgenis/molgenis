@@ -3,6 +3,7 @@ package org.molgenis.compute5.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
 
@@ -12,7 +13,9 @@ public class Parameters
 	//unique column used to distinguish the parameter rows provided
 	
 	// SOME OF THESE CONSTANTS SHOULD BE PLACED ELSEWHERE!
-	
+
+
+
 	public static final String STEP_HEADING_IN_WORKFLOW = "step";
 	public static final String PROTOCOL_HEADING_IN_WORKFLOW = "protocol";
 	public static final String PARAMETER_MAPPING_HEADING_IN_WORKFLOW = "parameterMapping";
@@ -136,4 +139,5 @@ public class Parameters
 			result += t;
 		return result;
 	}
+
 }
