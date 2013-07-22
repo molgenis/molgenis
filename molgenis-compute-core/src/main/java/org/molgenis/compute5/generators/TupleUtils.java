@@ -26,6 +26,8 @@ public class TupleUtils
 	 * @param targets
 	 * @return
 	 */
+	private String runID = null;
+
 	public static List<WritableTuple> collapse(List<? extends Tuple> parameters, List<String> targets)
 	{
 		Map<String, WritableTuple> result = new LinkedHashMap<String, WritableTuple>();
@@ -81,13 +83,13 @@ public class TupleUtils
 	 * @throws IOException
 	 * @throws TemplateException
 	 */
-	public static void solve(List<WritableTuple> values) throws IOException
+	public void solve(List<WritableTuple> values) throws IOException
 	{
 		// Freemarker configuration
 		Configuration conf = new Configuration();
 
 		boolean done = false;
-//		while (!done)
+		while (!done)
 		{
 			boolean updated = false;
 
@@ -101,7 +103,7 @@ public class TupleUtils
 				for (String col : t.getColNames())
 				{
 					original = t.getString(col);
-					//if (original.contains("${"))
+					if (original.contains("${"))
 					{
 						// check for self reference (??)
 						if (original.contains("${" + col + "}"))
@@ -113,13 +115,15 @@ public class TupleUtils
 						try
 						{
 							Map<String, Object> map = toMap(t);
+							//I do not know, how to fix it differently
+							map.put("runid", runID);
 							template.process(map, out);
 							value = out.toString();
-//							if (!value.equals(original))
-//							{
-//								updated = true;
+							if (!value.equals(original))
+							{
+								updated = true;
 								t.set(col, value);
-//							}
+							}
 						}
 						catch (Exception e)
 						{
@@ -129,14 +133,14 @@ public class TupleUtils
 				}
 			}
 
-//			if (!updated)
-//			{
-//				if (unsolved.length() > 0)
-//				{
-//					throw new IOException(unsolved);
-//				}
-//				done = true;
-//			}
+			if (!updated)
+			{
+				if (unsolved.length() > 0)
+				{
+					throw new IOException(unsolved);
+				}
+				done = true;
+			}
 		}
 	}
 
@@ -222,5 +226,10 @@ public class TupleUtils
 		}
 
 		return result;
+	}
+
+	public void setRunID(String runID)
+	{
+		this.runID = runID;
 	}
 }

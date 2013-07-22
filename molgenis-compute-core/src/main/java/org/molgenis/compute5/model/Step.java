@@ -1,10 +1,6 @@
 package org.molgenis.compute5.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.molgenis.model.elements.Parameter;
 
@@ -17,17 +13,18 @@ import com.google.gson.Gson;
 public class Step
 {
 	// name of the step
-	String name;
+	private String name;
 
 	// map between global parameters and local inputs
-	Map<String, String> parameters = new LinkedHashMap<String, String>();
+	private Map<String, String> parametersMapping = new LinkedHashMap<String, String>();
+	private List<String> parameterNames = new ArrayList();
 
 	// map of previous steps, i.e. where inputs depend on values from previous
 	// steps.
-	Set<String> previousSteps = new HashSet<String>();
+	private Set<String> previousSteps = new HashSet<String>();
 	
 	// map taskId -> jobName
-	Map<Integer, String> idJobMap = new HashMap<Integer, String>();
+	private Map<Integer, String> idJobMap = new HashMap<Integer, String>();
 	
 	public String getJobName(Integer id)
 	{
@@ -70,32 +67,17 @@ public class Step
 
 	public Map<String, String> getLocalGlobalParameterMap()
 	{
-		return parameters;
+		return parametersMapping;
 	}
 
-	public void setParameters(Map<String, String> parameters)
+	public void setParametersMapping(Map<String, String> parameters)
 	{
-		this.parameters = parameters;
-		this.previousSteps.clear();
-		for (String parameter : getParameters().values())
-		{
-			if (!parameter.startsWith(Parameters.USER_PREFIX))
-			{
-				int ps = parameter.indexOf(Parameters.STEP_PARAM_SEP);
-				if (-1 == ps)
-				{
-					System.err.println(">> ERROR >> In your workflow in step '" + this.getName() + "', it is unclear from which step your parameter value '=" + parameter + "' originates. Please prepend user_ or step1_ or similar." );
-					System.err.println(">> Exit with exit status 1.");
-					System.exit(1);
-				}
-				previousSteps.add(parameter.substring(0, ps));
-			}
-		}
+		this.parametersMapping = parameters;
 	}
 	
-	public Map<String, String> getParameters()
+	public Map<String, String> getParametersMapping()
 	{
-		return parameters;
+		return parametersMapping;
 	}
 
 	public Set<String> getPreviousSteps()
@@ -108,5 +90,48 @@ public class Step
 		return new Gson().toJson(this);
 	}
 
+	public void setPreviousSteps(Set<String> previousSteps)
+	{
+		this.previousSteps = previousSteps;
+	}
 
+	public void addParameter(String name)
+	{
+		parameterNames.add(name);
+	}
+
+	public List<String> getAutoMappedParameters()
+	{
+		List autoMapped = new ArrayList<String>();
+
+		for(String parameter : parameterNames)
+		{
+			boolean isMapped = lookInMapping(parameter);
+			if(!isMapped)
+				autoMapped.add(parameter);
+		}
+
+		return autoMapped;
+	}
+
+	private boolean lookInMapping(String parameter)
+	{
+		for (String key : parametersMapping.keySet())
+		{
+			if(key.equalsIgnoreCase(parameter))
+				return true;
+		}
+
+		return false;
+	}
+
+	public boolean hasParameter(String parameterName)
+	{
+		for(String parameter : parameterNames)
+		{
+			if(parameter.equalsIgnoreCase(parameterName))
+				return true;
+		}
+		return false;
+	}
 }

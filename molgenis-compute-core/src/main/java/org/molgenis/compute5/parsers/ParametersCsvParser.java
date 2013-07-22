@@ -23,7 +23,9 @@ import org.molgenis.util.tuple.WritableTuple;
 /** Parser for parameters csv file(s). Includes the solving of templated values. */
 public class ParametersCsvParser
 {
-	public static Parameters parse(File... filesArray) throws IOException
+	private String runID;
+
+	public Parameters parse(File... filesArray) throws IOException
 	{
 		// convert filesArray and
 		// call the parse below
@@ -34,7 +36,7 @@ public class ParametersCsvParser
 		return parse(fileLst);
 	}
 
-	public static Parameters parse(List<File> filesArray) throws IOException
+	public Parameters parse(List<File> filesArray) throws IOException
 	{
 		Set<String> fileSet = new HashSet<String>();
 		for (File f : filesArray)
@@ -45,7 +47,9 @@ public class ParametersCsvParser
 		Parameters targets = parseParamFiles(null, fileSet);
 
 		// solve the templates
-		TupleUtils.solve(targets.getValues());
+		TupleUtils tupleUtils = new TupleUtils();
+		tupleUtils.setRunID(runID);
+		tupleUtils.solve(targets.getValues());
 
 		// mark all columns as 'user_*'
 		int count = 0;
@@ -78,15 +82,19 @@ public class ParametersCsvParser
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	public static Parameters parseParamFiles(Parameters targets, Set<String> paramFileSet) throws IOException
+	public Parameters parseParamFiles(Parameters targets, Set<String> paramFileSet) throws IOException
 	{
 		System.out.println(">> Start of parseParamFiles " + paramFileSet.toString());
 		// Pre-process input in (1) and (2):
 		// (1) ensure targets initialized
-		if (targets == null) targets = new Parameters();
-
+		if (targets == null)
+		{
+			targets = new Parameters();
+//			targets.setRunID(runID);
+		}
 		// if no files to parse, then we're done
-		if (paramFileSet.isEmpty()) return targets;
+		if (paramFileSet.isEmpty())
+			return targets;
 
 		// get a file to parse
 		String fString = paramFileSet.iterator().next();
@@ -251,7 +259,7 @@ public class ParametersCsvParser
 	 * @param targets
 	 * @param right
 	 */
-	private static Parameters join(Parameters targets, List<Tuple> right)
+	private Parameters join(Parameters targets, List<Tuple> right)
 	{
 		// joined tuples that we want to return
 		List<WritableTuple> joined = new ArrayList<WritableTuple>();
@@ -516,5 +524,10 @@ public class ParametersCsvParser
 		}
 
 		return tupleLstUpdated;
+	}
+
+	public void setRunID(String runID)
+	{
+		this.runID = runID;
 	}
 }

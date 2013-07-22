@@ -33,7 +33,7 @@ public class ProtocolParser
 	 * @return
 	 * @throws IOException
 	 */
-	public static Protocol parse(File workflowDir, String protocolFile) throws IOException
+	public Protocol parse(File workflowDir, String protocolFile) throws IOException
 	{
 		try
 		{
@@ -108,11 +108,12 @@ public class ProtocolParser
 							}
 
 							// input
-							else if (els.get(0).equals(Parameters.INPUT) || els.get(0).equals(Parameters.STRING)
+							else if (els.get(0).equals(Parameters.STRING)
 									|| els.get(0).equals(Parameters.LIST_INPUT))
 							{
 								// assume name column
-								if (els.size() < 2) throw new IOException(
+								if (els.size() < 2)
+									throw new IOException(
 										"param requires 'name', e.g. '#string input1'");
 
 								Input input = new Input(els.get(1));

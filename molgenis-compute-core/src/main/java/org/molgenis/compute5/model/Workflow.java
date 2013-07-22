@@ -9,14 +9,14 @@ import com.google.gson.Gson;
 
 public class Workflow
 {
-	List<Step> steps = new ArrayList<Step>();
+	private List<Step> steps = new ArrayList<Step>();
 
 	public Set<String> getUserParameters()
 	{
 		Set<String> result = new HashSet<String>();
 		for (Step s : steps)
 		{
-			for (String value : s.parameters.values())
+			for (String value : s.getParametersMapping().values())
 			{
 				if (value.startsWith(Parameters.USER_PREFIX))
 				{
@@ -38,9 +38,9 @@ public class Workflow
 		return steps;
 	}
 
-	public void setSteps(List<Step> steps)
+	public void addStep(Step step)
 	{
-		this.steps = steps;
+		this.steps.add(step);
 	}
 
 	public Step getStep(String previousStepName)
@@ -50,5 +50,15 @@ public class Workflow
 			if (previousStepName.equals(step.getName())) return step;
 		}
 		return null;
+	}
+
+	public boolean parameterHasStepPrefix(String parameter)
+	{
+		for(Step step : steps)
+		{
+			if(parameter.contains(step.getName()+ Parameters.STEP_PARAM_SEP))
+				return true;
+		}
+		return false;
 	}
 }

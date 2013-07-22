@@ -1,3 +1,3 @@
 step,protocol,parameterMapping
-step1,protocols/step1.sh,in=user_input
-step2,protocols/step2a.sh,wf=user_workflowName;date=user_creationDate;strings=step1_out
+step1,protocols/step1.sh,in=input
+step2,protocols/step2a.sh,wf=workflowName;date=creationDate;strings=step1_out

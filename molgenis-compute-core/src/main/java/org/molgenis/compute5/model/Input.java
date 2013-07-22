@@ -6,14 +6,13 @@ import org.molgenis.compute5.Validator;
 public class Input
 {
 	//unique name within a protocol
-	String name;
-	
+	private String name;
 	//description of this parameter
-	String description;
-	
-	//FIXME use molgenis FieldType framework
-	//type of this input, e.g. string or list (influences hasOne folding)
-	String type;
+	private String description;
+	private String type;
+
+	//
+	private boolean isKnownRunTime = false;
 
 	public Input(String name)
 	{
@@ -53,5 +52,15 @@ public class Input
 	public void setType(String type)
 	{
 		this.type = type;
+	}
+
+	public boolean isKnownRunTime()
+	{
+		return isKnownRunTime;
+	}
+
+	public void setKnownRunTime(boolean knownRunTime)
+	{
+		isKnownRunTime = knownRunTime;
 	}
 }
