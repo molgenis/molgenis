@@ -57,8 +57,8 @@ public class ComputeProperties
 	public boolean generate = false; // should we generate?
 	public boolean list = false; // should we list currently generated jobs?
 	public boolean create = false;
+	public String createDirName = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean clear = false;
-	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean execute = false; // does user want to execute scripts?
 
 
@@ -203,8 +203,8 @@ public class ComputeProperties
 			this.create = cmd.hasOption(Parameters.CREATE);
 			if (this.create)
 			{
-				this.createWorkflow = cmd.getOptionValue(Parameters.CREATE, this.createWorkflow);
-				this.createWorkflow = updatePath(this.path, this.createWorkflow);
+//				this.createWorkflow = cmd.getOptionValue(Parameters.CREATE, this.createWorkflow);
+//				this.createWorkflow = updatePath(this.path, this.createWorkflow);
 			}
 		}
 		catch (ParseException e)
@@ -310,6 +310,8 @@ public class ComputeProperties
 			this.molgenispass = cmd.getOptionValue(Parameters.MOLGENIS_PASS_CMNDLINE_OPTION, this.molgenispass);
 			this.backenduser = cmd.getOptionValue(Parameters.BACKEND_USER_CMNDLINE_OPTION, this.backenduser);
 			this.backendpass = cmd.getOptionValue(Parameters.BACKEND_PASS_CMNDLINE_OPTION, this.backendpass);
+			this.create = cmd.hasOption(Parameters.CREATE);
+			this.createDirName = cmd.getOptionValue(Parameters.CREATE, this.createDirName);
 
 			this.parametersToOverwrite = cmd.getOptionValue(Parameters.PARAMETERS_TO_OVERWRITE_CMDLINE_OPTION);
 
