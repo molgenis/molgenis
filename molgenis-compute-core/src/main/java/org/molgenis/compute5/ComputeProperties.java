@@ -57,8 +57,8 @@ public class ComputeProperties
 	public boolean generate = false; // should we generate?
 	public boolean list = false; // should we list currently generated jobs?
 	public boolean create = false;
+	public String createDirName = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean clear = false;
-	public String createWorkflow = Parameters.CREATE_WORKFLOW_DEFAULT;
 	public boolean execute = false; // does user want to execute scripts?
 
 
@@ -188,31 +188,6 @@ public class ComputeProperties
 		else return path + (path.endsWith("/") ? "" : "/") + fileName;
 	}
 
-	private void setPath(String[] args)
-	{
-		Options options = createOptions();
-		CommandLineParser parser = new PosixParser();
-		CommandLine cmd;
-		try
-		{
-			cmd = parser.parse(options, args);
-			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
-			this.path = this.path + (this.path.endsWith("/") ? "" : "/");
-
-			// do we want to create a new workflow? If so: where?
-			this.create = cmd.hasOption(Parameters.CREATE);
-			if (this.create)
-			{
-				this.createWorkflow = cmd.getOptionValue(Parameters.CREATE, this.createWorkflow);
-				this.createWorkflow = updatePath(this.path, this.createWorkflow);
-			}
-		}
-		catch (ParseException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
 	public void createPropertiesFile()
 	{
 		// get location properties file
@@ -310,6 +285,8 @@ public class ComputeProperties
 			this.molgenispass = cmd.getOptionValue(Parameters.MOLGENIS_PASS_CMNDLINE_OPTION, this.molgenispass);
 			this.backenduser = cmd.getOptionValue(Parameters.BACKEND_USER_CMNDLINE_OPTION, this.backenduser);
 			this.backendpass = cmd.getOptionValue(Parameters.BACKEND_PASS_CMNDLINE_OPTION, this.backendpass);
+			this.create = cmd.hasOption(Parameters.CREATE);
+			this.createDirName = cmd.getOptionValue(Parameters.CREATE, this.createDirName);
 
 			this.parametersToOverwrite = cmd.getOptionValue(Parameters.PARAMETERS_TO_OVERWRITE_CMDLINE_OPTION);
 
