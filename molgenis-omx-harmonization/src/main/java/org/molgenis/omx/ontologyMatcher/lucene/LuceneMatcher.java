@@ -9,4 +9,6 @@ public interface LuceneMatcher
 	void match(Integer selectedCatalogue, Set<Integer> cataloguesToMatch) throws DatabaseException;
 
 	void matchPercentage();
+
+	boolean isRunning();
 }
