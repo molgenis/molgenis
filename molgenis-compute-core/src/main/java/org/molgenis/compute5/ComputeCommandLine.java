@@ -219,10 +219,14 @@ public class ComputeCommandLine
 
 		for (String f : computeProperties.parameters)
 			parameterFiles.add(new File(f));
-		if (defaultsExists(computeProperties)) parameterFiles.add(new File(computeProperties.defaults));
+		if (defaultsExists(computeProperties))
+			parameterFiles.add(new File(computeProperties.defaults));
 
 		// parse param files
-		Parameters parameters = new ParametersCsvParser().parse(parameterFiles);
+		ParametersCsvParser parser = new ParametersCsvParser();
+		//set runID here, which will be passed to TupleUtils to solve method
+		parser.setRunID(computeProperties.runId);
+		Parameters parameters = parser.parse(parameterFiles);
 		compute.setParameters(parameters);
 
 		// add command line parameters:
