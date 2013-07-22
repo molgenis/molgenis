@@ -2,6 +2,7 @@ package org.molgenis.omx.ontologyAnnotator.plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBean
 {
@@ -47,6 +49,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		try
 		{
+			PorterStemmer stemmer = new PorterStemmer();
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
 			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
@@ -65,8 +68,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				String description = hit.getColumnValueMap().get("description").toString().toLowerCase()
 						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
 				List<String> definitions = new ArrayList<String>();
-				definitions.addAll(annotateDataItem(db, feature, name));
-				definitions.addAll(annotateDataItem(db, feature, description));
+				definitions.addAll(annotateDataItem(db, feature, name, stemmer));
+				definitions.addAll(annotateDataItem(db, feature, description, stemmer));
 
 				if (definitions.size() > 0)
 				{
@@ -96,10 +99,22 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return newFeature;
 	}
 
-	public List<String> annotateDataItem(Database db, ObservableFeature feature, String description)
-			throws DatabaseException
+	public List<String> annotateDataItem(Database db, ObservableFeature feature, String description,
+			PorterStemmer stemmer) throws DatabaseException
 	{
-		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(description.split(" +")));
+		Set<String> stopWords = OntologyAnnotatorModel.STOPWORDSLIST;
+		List<String> uniqueTerms = new ArrayList<String>();
+		for (String eachTerm : Arrays.asList(description.split(" +")))
+		{
+			String termLowerCase = eachTerm.toLowerCase();
+			if (!stopWords.contains(termLowerCase) && !uniqueTerms.contains(termLowerCase))
+			{
+				stemmer.setCurrent(termLowerCase);
+				stemmer.stem();
+				eachTerm = stemmer.getCurrent();
+				uniqueTerms.add(eachTerm);
+			}
+		}
 		uniqueTerms.removeAll(OntologyAnnotatorModel.STOPWORDSLIST);
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		queryRules.add(new QueryRule(Operator.LIMIT, 100));
@@ -117,33 +132,51 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		SearchRequest request = new SearchRequest(null, queryRules, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
-		Map<String, Map<String, Object>> mapUriTerm = new HashMap<String, Map<String, Object>>();
-		List<Hit> hitSecondChoice = new ArrayList<Hit>();
+		List<TermComparison> listOfHits = new ArrayList<TermComparison>();
 		while (iterator.hasNext())
 		{
 			Hit hit = iterator.next();
+			listOfHits.add(new TermComparison(hit));
+		}
+		Collections.sort(listOfHits);
+
+		Set<String> positionFilter = new HashSet<String>();
+		Set<String> addedCandidates = new HashSet<String>();
+		Map<String, Map<String, Object>> mapUriTerm = new HashMap<String, Map<String, Object>>();
+		List<Hit> hitSecondChoice = new ArrayList<Hit>();
+		for (TermComparison termComparision : listOfHits)
+		{
+			Hit hit = termComparision.getHit();
 			Map<String, Object> data = hit.getColumnValueMap();
 			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
 			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
-			if (ontologyTerm.equals(ontologyTermSynonym))
+			if (ontologyTerm.equals(ontologyTermSynonym) || !addedCandidates.contains(ontologyTermSynonym))
 			{
-				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
-						.toString(), data);
+				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer, positionFilter))
+				{
+					mapUriTerm.put(data.get("ontologyTermIRI").toString(), data);
+					addedCandidates.add(ontologyTermSynonym);
+				}
 			}
-			else hitSecondChoice.add(hit);
+			// else hitSecondChoice.add(hit);
 		}
 
-		for (Hit hit : hitSecondChoice)
-		{
-			Map<String, Object> data = hit.getColumnValueMap();
-			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
-			if (!mapUriTerm.containsValue(ontologyTermSynonym))
-			{
-				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym)) mapUriTerm.put(data.get("ontologyTermIRI")
-						.toString(), data);
-			}
-		}
+		// positionFilter.clear();
+		//
+		// for (Hit hit : hitSecondChoice)
+		// {
+		// Map<String, Object> data = hit.getColumnValueMap();
+		// String ontologyTermSynonym =
+		// data.get("ontologyTermSynonym").toString().toLowerCase();
+		// if (!mapUriTerm.containsValue(ontologyTermSynonym))
+		// {
+		// if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer,
+		// positionFilter)
+		// && !addedCandidates.contains(ontologyTermSynonym))
+		// mapUriTerm.put(data.get("ontologyTermIRI")
+		// .toString(), data);
+		// }
+		// }
 
 		List<String> identifiers = new ArrayList<String>();
 		if (feature.getDefinition_Identifier() != null) identifiers.addAll(feature.getDefinition_Identifier());
@@ -178,10 +211,25 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return identifiers;
 	}
 
-	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym)
+	private boolean validateOntologyTerm(List<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
+			Set<String> positionFilter)
 	{
-		for (String eachTerm : new HashSet<String>(Arrays.asList(ontologyTermSynonym.split(" +"))))
+		Set<String> termsFromDescription = new HashSet<String>(Arrays.asList(ontologyTermSynonym.split(" +")));
+		Set<String> stemmedWords = new HashSet<String>();
+		for (String eachTerm : termsFromDescription)
+		{
+			stemmer.setCurrent(eachTerm);
+			stemmer.stem();
+			eachTerm = stemmer.getCurrent();
+			stemmedWords.add(eachTerm);
 			if (!uniqueSets.contains(eachTerm)) return false;
+		}
+
+		for (String eachTerm : stemmedWords)
+		{
+			if (positionFilter.contains(eachTerm)) return false;
+			else positionFilter.add(eachTerm);
+		}
 		return true;
 	}
 
@@ -196,5 +244,47 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public float finishedPercentage()
 	{
 		return 0;
+	}
+
+	class TermComparison implements Comparable<TermComparison>
+	{
+		private final Hit hit;
+		private final Integer synonymLength;
+		private final Integer termLength;
+
+		public TermComparison(Hit hit)
+		{
+			Map<String, Object> data = hit.getColumnValueMap();
+			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
+			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
+			this.hit = hit;
+			this.synonymLength = ontologyTermSynonym.split(" +").length;
+			this.termLength = ontologyTerm.split(" +").length;
+		}
+
+		private Integer getSynonymLength()
+		{
+			return synonymLength;
+		}
+
+		private Integer getTermLength()
+		{
+			return termLength;
+		}
+
+		public Hit getHit()
+		{
+			return hit;
+		}
+
+		@Override
+		public int compareTo(TermComparison other)
+		{
+			if (synonymLength.compareTo(other.getSynonymLength()) == 0)
+			{
+				return this.termLength.compareTo(other.getTermLength());
+			}
+			else return this.synonymLength.compareTo(other.getSynonymLength()) * (-1);
+		}
 	}
 }
