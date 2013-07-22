@@ -35,6 +35,11 @@
             <artifactId>molgenis-search</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-search-elasticsearch</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-dataviewer</artifactId>
