@@ -3,10 +3,7 @@ package org.molgenis.compute5.generators;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.compute5.model.Parameters;
 import org.molgenis.util.tuple.KeyValueTuple;
@@ -27,6 +24,7 @@ public class TupleUtils
 	 * @return
 	 */
 	private String runID = null;
+	private HashMap<String, String> parametersToOverwrite = null;
 
 	public static List<WritableTuple> collapse(List<? extends Tuple> parameters, List<String> targets)
 	{
@@ -89,6 +87,8 @@ public class TupleUtils
 		Configuration conf = new Configuration();
 
 		boolean done = false;
+		replaceParameters(values);
+
 		while (!done)
 		{
 			boolean updated = false;
@@ -140,6 +140,23 @@ public class TupleUtils
 					throw new IOException(unsolved);
 				}
 				done = true;
+			}
+		}
+	}
+
+	private void replaceParameters(List<WritableTuple> map)
+	{
+		if(parametersToOverwrite != null)
+		{
+			for (Map.Entry<String, String> entry : parametersToOverwrite.entrySet())
+			{
+				String key = entry.getKey();
+				String value = entry.getValue();
+				//map.put(key, value);
+				for(WritableTuple tuple: map)
+				{
+					tuple.set(key, value);
+				}
 			}
 		}
 	}
@@ -231,5 +248,10 @@ public class TupleUtils
 	public void setRunID(String runID)
 	{
 		this.runID = runID;
+	}
+
+	public void setParametersToOverwrite(HashMap parametersToOverwrite)
+	{
+		this.parametersToOverwrite = parametersToOverwrite;
 	}
 }
