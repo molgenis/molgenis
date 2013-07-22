@@ -8,15 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.molgenis.compute5.db.api.*;
 import org.molgenis.compute5.generators.CreateWorkflowGenerator;
-import org.molgenis.compute5.generators.DocTasksDiagramGenerator;
 import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
-import org.molgenis.compute5.generators.DocWorkflowDiagramGenerator;
 import org.molgenis.compute5.generators.EnvironmentGenerator;
 import org.molgenis.compute5.generators.TaskGenerator;
 import org.molgenis.compute5.generators.local.LocalBackend;
@@ -58,8 +54,6 @@ public class ComputeCommandLine
 		// parse options
 		ComputeProperties computeProperties = new ComputeProperties(args);
 
-		System.out.println("parameters: " + computeProperties.parametersToOverwrite);
-
 		new ComputeCommandLine().execute(computeProperties);
 
 	}
@@ -92,7 +86,7 @@ public class ComputeCommandLine
 
 		if (computeProperties.create)
 		{
-			new CreateWorkflowGenerator(computeProperties.createWorkflow);
+			new CreateWorkflowGenerator(computeProperties.createDirName);
 			return compute;
 		}
 		else if (computeProperties.clear)
