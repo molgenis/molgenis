@@ -44,7 +44,7 @@
 			$.each(searchHits, function(){
 				var feature = $(this)[0]["columnValueMap"];
 				var row = $('<tr />');
-				var popover = $('<span />').html(feature.name).addClass('show-popover');
+				var popover = $('<span />').html(feature.name + ' : ' + feature.description).addClass('show-popover');
 				popover.popover({
 					content : feature.description,
 					trigger : 'hover',
@@ -54,12 +54,14 @@
 				$.each(mappingPerStudy, function(dataSetName, mapping){
 					if(mapping[feature.id]){
 						var displayTerm = '';
+						var description = '';
 						var count = 0;
 						var confirmed = false;
 						var selectedMappings = [];
 						$.each(mapping[feature.id], function(index, eachValue){
 							if(count === 0){
 								displayTerm = eachValue.mappedFeature.name;
+								description = eachValue.mappedFeature.description;
 							}
 							if(eachValue.confirmed === true){
 								selectedMappings.push(eachValue.mappedFeature.name);
@@ -274,14 +276,31 @@
 				}],
 				num : batchSize
 			});
-			
+			var observationIds = [];
 			if(observationSets.items.length > 0){
 				var map = {};
-				var observationIds = [];
+				
 				$.each(observationSets.items, function(index, observation){
 					observationIds.push(hrefToId(observation.href));
 				});
-				
+			}
+			var iteration = Math.ceil(observationSets.total / batchSize);
+			for(var i = 1; i < iteration; i++){
+				var query = {
+						q : [{
+							field : 'partOfDataSet',
+							operator : 'EQUALS',
+							value : hrefToId(dataSet.href)
+						}],
+						num : batchSize,
+						start : i * batchSize
+				};
+				observationSets = restApi.get('/api/v1/observationset/', null, query);
+				$.each(observationSets.items, function(index, observation){
+					observationIds.push(hrefToId(observation.href));
+				});
+			}
+			if(observationIds.length > 0){	
 				var observedValues = restApi.get('/api/v1/observedvalue/', ['feature', 'value', 'observationSet'], {
 					start : 0,
 					num : batchSize,
@@ -292,7 +311,7 @@
 					}],
 				});
 				preLoadValueEntities(observedValues.items, map);
-				var iteration = Math.ceil(observedValues.total / batchSize);
+				iteration = Math.ceil(observedValues.total / batchSize);
 				for(var i = 1; i < iteration; i++){
 					var query = {
 							q : [ {
