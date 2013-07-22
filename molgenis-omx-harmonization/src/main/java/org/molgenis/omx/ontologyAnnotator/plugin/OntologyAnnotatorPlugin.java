@@ -72,21 +72,28 @@ public class OntologyAnnotatorPlugin extends PluginModel<Entity>
 		}
 		else if ("ontologyMatch".equals(request.getAction()))
 		{
-			Integer selectedDataSetId = Integer.parseInt(request.getString("selectedDataSet"));
-			Map<String, String> selectedCatalogues = new Gson().fromJson(request.getString("selectedStudiesToMatch"),
-					new TypeToken<Map<String, String>>()
-					{
-					}.getType());
-			System.out.println("The catalogue to match is : " + selectedCatalogues.keySet());
-			System.out.println("The selected catalogue is : " + selectedDataSetId);
-
-			Set<Integer> dataSetsToMatch = new HashSet<Integer>();
-
-			for (String id : selectedCatalogues.keySet())
+			if (getLuceneMatcher().isRunning())
 			{
-				dataSetsToMatch.add(Integer.parseInt(id));
+				getLuceneMatcher().matchPercentage();
 			}
-			getLuceneMatcher().match(selectedDataSetId, dataSetsToMatch);
+			else
+			{
+				Integer selectedDataSetId = Integer.parseInt(request.getString("selectedDataSet"));
+				Map<String, String> selectedCatalogues = new Gson().fromJson(
+						request.getString("selectedStudiesToMatch"), new TypeToken<Map<String, String>>()
+						{
+						}.getType());
+				System.out.println("The catalogue to match is : " + selectedCatalogues.keySet());
+				System.out.println("The selected catalogue is : " + selectedDataSetId);
+
+				Set<Integer> dataSetsToMatch = new HashSet<Integer>();
+
+				for (String id : selectedCatalogues.keySet())
+				{
+					dataSetsToMatch.add(Integer.parseInt(id));
+				}
+				getLuceneMatcher().match(selectedDataSetId, dataSetsToMatch);
+			}
 		}
 	}
 
@@ -103,6 +110,7 @@ public class OntologyAnnotatorPlugin extends PluginModel<Entity>
 
 			}
 			if (model.getDataSets().size() > 0) model.setSelectedDataSet(model.getDataSets().get(0));
+			if (getLuceneMatcher().isRunning()) getLuceneMatcher().matchPercentage();
 		}
 		catch (DatabaseException e)
 		{
