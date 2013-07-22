@@ -188,31 +188,6 @@ public class ComputeProperties
 		else return path + (path.endsWith("/") ? "" : "/") + fileName;
 	}
 
-	private void setPath(String[] args)
-	{
-		Options options = createOptions();
-		CommandLineParser parser = new PosixParser();
-		CommandLine cmd;
-		try
-		{
-			cmd = parser.parse(options, args);
-			this.path = cmd.getOptionValue(Parameters.PATH_CMNDLINE_OPTION, this.path);
-			this.path = this.path + (this.path.endsWith("/") ? "" : "/");
-
-			// do we want to create a new workflow? If so: where?
-			this.create = cmd.hasOption(Parameters.CREATE);
-			if (this.create)
-			{
-//				this.createWorkflow = cmd.getOptionValue(Parameters.CREATE, this.createWorkflow);
-//				this.createWorkflow = updatePath(this.path, this.createWorkflow);
-			}
-		}
-		catch (ParseException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
 	public void createPropertiesFile()
 	{
 		// get location properties file
