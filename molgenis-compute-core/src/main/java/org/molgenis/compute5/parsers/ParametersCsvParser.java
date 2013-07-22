@@ -3,13 +3,7 @@ package org.molgenis.compute5.parsers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +18,7 @@ import org.molgenis.util.tuple.WritableTuple;
 public class ParametersCsvParser
 {
 	private String runID;
+	private HashMap parametersToOverwrite = null;
 
 	public Parameters parse(File... filesArray) throws IOException
 	{
@@ -49,6 +44,8 @@ public class ParametersCsvParser
 		// solve the templates
 		TupleUtils tupleUtils = new TupleUtils();
 		tupleUtils.setRunID(runID);
+		if(parametersToOverwrite != null)
+			tupleUtils.setParametersToOverwrite(parametersToOverwrite);
 		tupleUtils.solve(targets.getValues());
 
 		// mark all columns as 'user_*'
@@ -529,5 +526,10 @@ public class ParametersCsvParser
 	public void setRunID(String runID)
 	{
 		this.runID = runID;
+	}
+
+	public void setParametersToOverwrite(HashMap parametersToOverwrite)
+	{
+		this.parametersToOverwrite = parametersToOverwrite;
 	}
 }

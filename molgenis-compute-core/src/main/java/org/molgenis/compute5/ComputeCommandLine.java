@@ -226,6 +226,10 @@ public class ComputeCommandLine
 		ParametersCsvParser parser = new ParametersCsvParser();
 		//set runID here, which will be passed to TupleUtils to solve method
 		parser.setRunID(computeProperties.runId);
+
+		if(computeProperties.hasParametersToOverwrite())
+			parser.setParametersToOverwrite(computeProperties.getParametersToOverwrite());
+
 		Parameters parameters = parser.parse(parameterFiles);
 		compute.setParameters(parameters);
 
