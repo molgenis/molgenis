@@ -398,7 +398,7 @@ Or also it can be specified in the molgenis header in protocols
 
 +step1.ftl with molgenis header+
 
-  #MOLGENIS queue=short_queue, mem=4, walltime=05:59:00, nodes=1, ppn=1
+  #MOLGENIS queue=short_queue mem=4 walltime=05:59:00 nodes=1 ppn=1
   #string in
   #output out
   # Let's do something with string 'in'
