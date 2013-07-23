@@ -18,7 +18,7 @@ public class Parameters
 
 	public static final String STEP_HEADING_IN_WORKFLOW = "step";
 	public static final String PROTOCOL_HEADING_IN_WORKFLOW = "protocol";
-	public static final String PARAMETER_MAPPING_HEADING_IN_WORKFLOW = "parameterMapping";
+	public static final String PARAMETER_MAPPING_HEADING_IN_WORKFLOW = "dependencies";
 	public static final String USER = "user";
 	public static final String STEP_PARAM_SEP = "_";
 	public static final String USER_PREFIX = USER + STEP_PARAM_SEP;

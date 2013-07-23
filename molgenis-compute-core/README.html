@@ -8875,9 +8875,9 @@ cd molgenis-compute-core-0.0.1-SNAPSHOT</pre>
 <p>The directory containing workflow is created.</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>  cd myfirst_workflow
-and you will see the typical Molgenis Compute workflow structure</pre>
+<pre>cd myfirst_workflow</pre>
 </div></div>
+<p>You see the typical Molgenis Compute workflow structure</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>/protocols              #folder with bash script 'protocols'
@@ -8892,8 +8892,8 @@ the following content</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>step,protocol,parameterMapping
-step1,protocols/step1.sh,in=user_input
-step2,protocols/step2.sh,wf=user_workflowName;date=user_creationDate;strings=step1_out</pre>
+step1,protocols/step1.sh,in=input
+step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out</pre>
 </div></div>
 <p>This means that the workflow consists of two steps <em>step1</em> and <em>step2</em>. All parameters, that
 specified in <code>parameters.csv</code> is mapped in <code>workflow.csv</code> using <em>user_</em> prefix. Parameters,

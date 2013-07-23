@@ -38,7 +38,8 @@ Now, use can create your first workflow just by command
 The directory containing workflow is created.
 
   cd myfirst_workflow
-and you will see the typical Molgenis Compute workflow structure
+
+You see the typical Molgenis Compute workflow structure
 
   /protocols              #folder with bash script 'protocols'
   /protocols/step1.sh     #example of a protocol shell script
@@ -51,8 +52,8 @@ The similar structure should be created for every workflow. The example +workflo
 the following content
 
   step,protocol,parameterMapping
-  step1,protocols/step1.sh,in=user_input
-  step2,protocols/step2.sh,wf=user_workflowName;date=user_creationDate;strings=step1_out
+  step1,protocols/step1.sh,in=input
+  step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out
 
 This means that the workflow consists of two steps 'step1' and 'step2'. All parameters, that 
 specified in +parameters.csv+ is mapped in +workflow.csv+ using 'user_' prefix. Parameters, 
