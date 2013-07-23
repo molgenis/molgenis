@@ -48,24 +48,73 @@ You see the typical Molgenis Compute workflow structure
   defaults.csv            #default parameters for workflow.csv (optional)
   parameters.csv          #parameters you want to run analysis on
 
-The similar structure should be created for every workflow. The example +workflow.csv+file has
-the following content
+The similar structure should be created for every workflow. In the easiest scenario, the 
++workflow.csv+ file has the following structure:
+
+  step,protocol,dependencies
+  step1,protocols/step1.sh,
+  step2,protocols/step2.sh,step1
+
+This means that the workflow consists of two steps 'step1' and 'step2', where 'step2' depends on 'step1'.
+'step1' has its analysis protocol in the file +protocols/step1.sh+ and 'step2' in the file +protocols/step2.sh+ respectively.
+The created in our example +workflow.csv+ is a bit more complex.
+
+Let's first look at the +parameters.csv+ file, which contains some workflow parameters. In this example, one parameter
+'input' has two values 'hello' and 'bye'.
+
+  input
+  hello
+  bye
+
+These parameters can be used in protocols.
+In the following protocol example
+
+  #string input
+  #output out
+  # Let's do something with string 'input'
+  out=${input}_hasBeenInStep1
+
+'input' will be substituted with values 'hello' or 'bye'
+
+In our example protocol +step1.sh+ , we would like to call 'input' as 'in'
+
++step1.ftl+
+
+  #string in
+  #output out
+  # Let's do something with string 'in'
+  out=${in}_hasBeenInStep1
+
+In this case, we need to map these names in our example +workflow.csv+ file
 
   step,protocol,parameterMapping
   step1,protocols/step1.sh,in=input
   step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out
 
-This means that the workflow consists of two steps 'step1' and 'step2'. All parameters, that 
-specified in +parameters.csv+ is mapped in +workflow.csv+ using 'user_' prefix. Parameters, 
-which are output of previous steps have prefix with a name of the step. In this example
-the 'step1_' prefix means, that the 'out' variable is the output of the 'step1' step.
+  in=input
 
-The +parameters.csv+ file contains some workflow parameters. In this example, one parameter
-'input' has two values 'hello' and 'bye'
+does the trick. In the same way, we can map outputs of one step to the inputs of the next steps. In our example, 'strings' in the 'step2', 
+which has protocol 
 
-  input
-  hello
-  bye
++step2.ftl+ 
+
+  #string wf
+  #string date
+  #list strings
+  echo "Workflow name: ${wf}"
+  echo "Created: ${date}"
+  echo "Result of step1.sh:"
+  for s in "${strings[@]}"
+  do
+    echo ${s}
+  done
+  echo "(FOR TESTING PURPOSES: your runid is ${runid})"
+
+are mapped using
+
+  strings=step1_out
+
+Here, prefix 'step1_' says that 'out' is coming from 'step1'.
 
 More parameters can be specified using the next format
 
@@ -99,10 +148,12 @@ Example f1.csv (white space will be trimmed):
   p0,  p2
   x,   1
   y,   2
+  
 Example f2.csv (white space will be trimmed):
 
   p1,  p2,    p3,     p4
   v1,  1..2,  a;b,    file${p2}
+  
 Merged and expanded result for f1.csv + f2.csv:
 
   p0,  p1,  p2,   p3,   p4
@@ -121,27 +172,6 @@ Here, variable 'bar' has two values of variable 'foo'.
 
 The example protocols has the following listings:
 
-+step1.sh+
-
-  #string in
-  #output out
-  # Let's do something with string 'in'
-  out=${in}_hasBeenInStep1
-
-+step2.sh+
-
-  #string wf
-  #string date
-  #list strings
-  echo "Workflow name: ${wf}"
-  echo "Created: ${date}"
-  echo "Result of step1.sh:"
-  for s in "${strings[@]}"
-  do
-    echo ${s}
-  done
-  echo "(FOR TESTING PURPOSES: your runid is ${runid})"
-
 In the header of protocols, we specify inputs with flags '#string' for variables with a single value 
 and '#list' for variables with multiple values. 
 
@@ -152,21 +182,6 @@ additional parameters file +workflow.defaults.csv+.
   myFirstWorkflow,today
 
 In this way, the parameters can be divided in several group and re-used in different workflows.
-
-In this example, in +workflow.csv+ parameters are mapped to protocols using different names, for example:
-
-  step1,protocols/step1.sh,in=user_input
-
-However, they can have the same names
-
-  step1,protocols/step1.sh,input=user_input
-
-Then, +step1.sh+ will look like
-
-  #string input
-  #output out
-  # Let's do something with string 'input'
-  out=${input}_hasBeenInStep1
 
 
 Generate workflow
@@ -194,12 +209,72 @@ outputs from scripts of the 'step1' as a list, which is specified in +step2.sh+b
   #
   ## User parameters
   #
-  user_creationDate[0]="today"
-  user_creationDate[1]="today"
-  user_input[0]="hello"
-  user_input[1]="bye"
-  user_workflowName[0]="myFirstWorkflow"
-  user_workflowName[1]="myFirstWorkflow"
+  creationDate[0]="today"
+  creationDate[1]="today"
+  input[0]="hello"
+  input[1]="bye"
+  workflowName[0]="myFirstWorkflow"
+  workflowName[1]="myFirstWorkflow"
+
+Parameters, which are known before hand are directly weaved in the protocols. In our example, two shell scripts are generated for 
+the 'step1'
+
++step1_0.sh+
+
+  #string in
+  #output out
+  # Let's do something with string 'in'
+  echo "hello_hasBeenInStep1"
+  out=hello_hasBeenInStep1
+
+and
+
++step1_1.sh+
+
+  #string in
+  #output out
+  # Let's do something with string 'in'
+  echo "bye_hasBeenInStep1"
+  out=bye_hasBeenInStep1
+
+The output values of the first step is not know beforehand, so, 'string' cannot be weaved and will stay 
+in the generated for the 'step2' script as it was. However, 'wf' and 'date' values are weaved.
+
++step2_0.sh+
+
+  #string wf
+  #string date
+  #list strings
+
+  echo "Workflow name: myFirstWorkflow"
+  echo "Created: today"
+
+  echo "Result of step1.sh:"
+  for s in "${strings[@]}"
+  do
+      echo ${s}
+  done
+
+If values can be known, the script will have the following content 
+
++step2_0.sh with all known values+
+
+  #string wf
+  #string date
+  #list strings
+
+  echo "Workflow name: myFirstWorkflow"
+  echo "Created: today"
+
+  echo "Result of step1.sh:"
+  for s in "hello" "bye"
+  do
+      echo ${s}
+  done
+
+In the currect implementation, values are first taken from parameter files. If they are not present, then compute looks,
+if these values can be known in run-time, by analysing all previous steps of the protocol, where values are unknown.
+If values cannot be known at run-time, compute will give a generation error.
 
 Execute workflow
 ~~~~~~~~~~~~~~~~
@@ -223,6 +298,9 @@ Command-line options
 
 The Molgenis Compute has the following command-line options:
 
+  ### MOLGENIS COMPUTE ###
+  Version: development
+  usage: sh molgenis-compute.sh -p parameters.csv
   -b,--backend <arg>                 Backend for which you generate.
                                      Default: localhost
   -bp,--backendpassword <arg>        Supply user pass to login to execution
@@ -252,6 +330,11 @@ The Molgenis Compute has the following command-line options:
   -mu,--molgenisuser <arg>           Supply user name to login to molgenis
                                      database. Default is your own user
                                      name.
+  -o,--overwrite <arg>               Parameters and values, which will
+                                     overwritten in the parameters file.
+                                     Parameters should be placed into
+                                     brackets and listed using equality
+                                     sign, e.g. "mem=6GB;queue=long"
   -p,--parameters <parameters.csv>   Path to parameter.csv file(s).
                                      Default: parameters.csv
   -path,--path                       Path to directory this generates to.
@@ -293,6 +376,35 @@ compute configuration and discuss further.
 
 Advanced Compute Features
 -------------------------
+
+Script generation for PBS cluster and other back-ends
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When generating script for computational cluster or grid, some additional parameters, such as execution wall-time, memory requirement, should be 
+specified.
+
+These can be done in the parameters file
+
+  workflowName,creationDate,queue,mem,walltime,nodes,ppn
+  myFirstWorkflow,today,short_queue,4,05:59:00,1,1
+
+  queue - cluster/grid queue
+  mem - memory required in GB
+  walltime - execution wall time
+  nodes - number of nodes needed
+  ppn - number of cores needed
+  
+Or also it can be specified in the molgenis header in protocols
+
++step1.ftl with molgenis header+
+
+  #MOLGENIS queue=short_queue, mem=4, walltime=05:59:00, nodes=1, ppn=1
+  #string in
+  #output out
+  # Let's do something with string 'in'
+  out=${in}_hasBeenInStep1
+
+The specification in protocols has priority over specification in parameter files.
 
 Database usage
 --------------

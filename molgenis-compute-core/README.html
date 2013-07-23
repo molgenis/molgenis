@@ -8887,26 +8887,78 @@ workflow.csv            #file listing steps and parameter flow
 defaults.csv            #default parameters for workflow.csv (optional)
 parameters.csv          #parameters you want to run analysis on</pre>
 </div></div>
-<p>The similar structure should be created for every workflow. The example +workflow.csv+file has
-the following content</p>
+<p>The similar structure should be created for every workflow. In the easiest scenario, the
+<code>workflow.csv</code> file has the following structure:</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>step,protocol,parameterMapping
-step1,protocols/step1.sh,in=input
-step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out</pre>
+<pre>step,protocol,dependencies
+step1,protocols/step1.sh,
+step2,protocols/step2.sh,step1</pre>
 </div></div>
-<p>This means that the workflow consists of two steps <em>step1</em> and <em>step2</em>. All parameters, that
-specified in <code>parameters.csv</code> is mapped in <code>workflow.csv</code> using <em>user_</em> prefix. Parameters,
-which are output of previous steps have prefix with a name of the step. In this example
-the <em>step1_</em> prefix means, that the <em>out</em> variable is the output of the <em>step1</em> step.</p>
-<p>The <code>parameters.csv</code> file contains some workflow parameters. In this example, one parameter
-<em>input</em> has two values <em>hello</em> and <em>bye</em></p>
+<p>This means that the workflow consists of two steps <em>step1</em> and <em>step2</em>, where <em>step2</em> depends on <em>step1</em>.
+<em>step1</em> has its analysis protocol in the file <code>protocols/step1.sh</code> and <em>step2</em> in the file <code>protocols/step2.sh</code> respectively.
+The created in our example <code>workflow.csv</code> is a bit more complex.</p>
+<p>Let&#8217;s first look at the <code>parameters.csv</code> file, which contains some workflow parameters. In this example, one parameter
+<em>input</em> has two values <em>hello</em> and <em>bye</em>.</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>input
 hello
 bye</pre>
 </div></div>
+<p>These parameters can be used in protocols.
+In the following protocol example</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string input
+#output out
+# Let's do something with string 'input'
+out=${input}_hasBeenInStep1</pre>
+</div></div>
+<p><em>input</em> will be substituted with values <em>hello</em> or <em>bye</em></p>
+<p>In our example protocol <code>step1.sh</code> , we would like to call <em>input</em> as <em>in</em></p>
+<p><code>step1.ftl</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string in
+#output out
+# Let's do something with string 'in'
+out=${in}_hasBeenInStep1</pre>
+</div></div>
+<p>In this case, we need to map these names in our example <code>workflow.csv</code> file</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>step,protocol,parameterMapping
+step1,protocols/step1.sh,in=input
+step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>in=input</pre>
+</div></div>
+<p>does the trick. In the same way, we can map outputs of one step to the inputs of the next steps. In our example, <em>strings</em> in the <em>step2</em>,
+which has protocol</p>
+<p><code>step2.ftl</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string wf
+#string date
+#list strings
+echo "Workflow name: ${wf}"
+echo "Created: ${date}"
+echo "Result of step1.sh:"
+for s in "${strings[@]}"
+do
+  echo ${s}
+done
+echo "(FOR TESTING PURPOSES: your runid is ${runid})"</pre>
+</div></div>
+<p>are mapped using</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>strings=step1_out</pre>
+</div></div>
+<p>Here, prefix <em>step1_</em> says that <em>out</em> is coming from <em>step1</em>.</p>
 <p>More parameters can be specified using the next format</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -8943,17 +8995,17 @@ a list of <em>;</em> separated values (may contain templates)
 Example f1.csv (white space will be trimmed):</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>  p0,  p2
-  x,   1
-  y,   2
-Example f2.csv (white space will be trimmed):</pre>
+<pre>p0,  p2
+x,   1
+y,   2</pre>
 </div></div>
+<p>Example f2.csv (white space will be trimmed):</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>  p1,  p2,    p3,     p4
-  v1,  1..2,  a;b,    file${p2}
-Merged and expanded result for f1.csv + f2.csv:</pre>
+<pre>p1,  p2,    p3,     p4
+v1,  1..2,  a;b,    file${p2}</pre>
 </div></div>
+<p>Merged and expanded result for f1.csv + f2.csv:</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>p0,  p1,  p2,   p3,   p4
@@ -8971,29 +9023,6 @@ number= 123</pre>
 </div></div>
 <p>Here, variable <em>bar</em> has two values of variable <em>foo</em>.</p>
 <p>The example protocols has the following listings:</p>
-<p><code>step1.sh</code></p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>#string in
-#output out
-# Let's do something with string 'in'
-out=${in}_hasBeenInStep1</pre>
-</div></div>
-<p><code>step2.sh</code></p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>#string wf
-#string date
-#list strings
-echo "Workflow name: ${wf}"
-echo "Created: ${date}"
-echo "Result of step1.sh:"
-for s in "${strings[@]}"
-do
-  echo ${s}
-done
-echo "(FOR TESTING PURPOSES: your runid is ${runid})"</pre>
-</div></div>
 <p>In the header of protocols, we specify inputs with flags <em>#string</em> for variables with a single value
 and <em>#list</em> for variables with multiple values.</p>
 <p>I our example variables <em>date</em> and <em>wf</em> are defined in
@@ -9004,24 +9033,6 @@ additional parameters file <code>workflow.defaults.csv</code>.</p>
 myFirstWorkflow,today</pre>
 </div></div>
 <p>In this way, the parameters can be divided in several group and re-used in different workflows.</p>
-<p>In this example, in <code>workflow.csv</code> parameters are mapped to protocols using different names, for example:</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>step1,protocols/step1.sh,in=user_input</pre>
-</div></div>
-<p>However, they can have the same names</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>step1,protocols/step1.sh,input=user_input</pre>
-</div></div>
-<p>Then, <code>step1.sh</code> will look like</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>#string input
-#output out
-# Let's do something with string 'input'
-out=${input}_hasBeenInStep1</pre>
-</div></div>
 <h2 id="generate_workflow">Generate workflow</h2>
 <p>To generate actual workflow jobs, run the next command-line</p>
 <div class="literalblock">
@@ -9050,13 +9061,80 @@ outputs from scripts of the <em>step1</em> as a list, which is specified in +ste
 <pre>#
 ## User parameters
 #
-user_creationDate[0]="today"
-user_creationDate[1]="today"
-user_input[0]="hello"
-user_input[1]="bye"
-user_workflowName[0]="myFirstWorkflow"
-user_workflowName[1]="myFirstWorkflow"</pre>
+creationDate[0]="today"
+creationDate[1]="today"
+input[0]="hello"
+input[1]="bye"
+workflowName[0]="myFirstWorkflow"
+workflowName[1]="myFirstWorkflow"</pre>
 </div></div>
+<p>Parameters, which are known before hand are directly weaved in the protocols. In our example, two shell scripts are generated for
+the <em>step1</em></p>
+<p><code>step1_0.sh</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string in
+#output out
+# Let's do something with string 'in'
+echo "hello_hasBeenInStep1"
+out=hello_hasBeenInStep1</pre>
+</div></div>
+<p>and</p>
+<p><code>step1_1.sh</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string in
+#output out
+# Let's do something with string 'in'
+echo "bye_hasBeenInStep1"
+out=bye_hasBeenInStep1</pre>
+</div></div>
+<p>The output values of the first step is not know beforehand, so, <em>string</em> cannot be weaved and will stay
+in the generated for the <em>step2</em> script as it was. However, <em>wf</em> and <em>date</em> values are weaved.</p>
+<p><code>step2_0.sh</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string wf
+#string date
+#list strings</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>echo "Workflow name: myFirstWorkflow"
+echo "Created: today"</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>echo "Result of step1.sh:"
+for s in "${strings[@]}"
+do
+    echo ${s}
+done</pre>
+</div></div>
+<p>If values can be known, the script will have the following content</p>
+<p><code>step2_0.sh with all known values</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#string wf
+#string date
+#list strings</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>echo "Workflow name: myFirstWorkflow"
+echo "Created: today"</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>echo "Result of step1.sh:"
+for s in "hello" "bye"
+do
+    echo ${s}
+done</pre>
+</div></div>
+<p>In the currect implementation, values are first taken from parameter files. If they are not present, then compute looks,
+if these values can be known in run-time, by analysing all previous steps of the protocol, where values are unknown.
+If values cannot be known at run-time, compute will give a generation error.</p>
 <h2 id="execute_workflow">Execute workflow</h2>
 <p>The workflow can be executed with the command</p>
 <div class="literalblock">
@@ -9081,7 +9159,10 @@ step1_0.sh                    step1_1.sh                      step2_0.sh        
 <p>The Molgenis Compute has the following command-line options:</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>-b,--backend &lt;arg&gt;                 Backend for which you generate.
+<pre>### MOLGENIS COMPUTE ###
+Version: development
+usage: sh molgenis-compute.sh -p parameters.csv
+-b,--backend &lt;arg&gt;                 Backend for which you generate.
                                    Default: localhost
 -bp,--backendpassword &lt;arg&gt;        Supply user pass to login to execution
                                    backend. Default is not saved.
@@ -9110,6 +9191,11 @@ step1_0.sh                    step1_1.sh                      step2_0.sh        
 -mu,--molgenisuser &lt;arg&gt;           Supply user name to login to molgenis
                                    database. Default is your own user
                                    name.
+-o,--overwrite &lt;arg&gt;               Parameters and values, which will
+                                   overwritten in the parameters file.
+                                   Parameters should be placed into
+                                   brackets and listed using equality
+                                   sign, e.g. "mem=6GB;queue=long"
 -p,--parameters &lt;parameters.csv&gt;   Path to parameter.csv file(s).
                                    Default: parameters.csv
 -path,--path                       Path to directory this generates to.
@@ -9156,6 +9242,34 @@ compute configuration and discuss further.</p>
   <div class="page-header">
     <h1>5. Advanced Compute Features</h1>
   </div>
+<h2 id="script_generation_for_pbs_cluster_and_other_back_ends">Script generation for PBS cluster and other back-ends</h2>
+<p>When generating script for computational cluster or grid, some additional parameters, such as execution wall-time, memory requirement, should be
+specified.</p>
+<p>These can be done in the parameters file</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>workflowName,creationDate,queue,mem,walltime,nodes,ppn
+myFirstWorkflow,today,short_queue,4,05:59:00,1,1</pre>
+</div></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>queue - cluster/grid queue
+mem - memory required in GB
+walltime - execution wall time
+nodes - number of nodes needed
+ppn - number of cores needed</pre>
+</div></div>
+<p>Or also it can be specified in the molgenis header in protocols</p>
+<p><code>step1.ftl with molgenis header</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>#MOLGENIS queue=short_queue, mem=4, walltime=05:59:00, nodes=1, ppn=1
+#string in
+#output out
+# Let's do something with string 'in'
+out=${in}_hasBeenInStep1</pre>
+</div></div>
+<p>The specification in protocols has priority over specification in parameter files.</p>
 </section>
 <section id="database_usage">
   <div class="page-header">
