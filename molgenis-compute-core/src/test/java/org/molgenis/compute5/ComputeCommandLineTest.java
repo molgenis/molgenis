@@ -31,6 +31,29 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
+	public void testCreate()
+	{
+		try
+		{
+			ComputeCommandLine.main(new String[]{"--create", outputDir});
+		}
+		catch (Exception e)
+		{
+			Assert.fail("--create does not work");
+		}
+
+		File file = new File(outputDir + "/parameters.csv");
+		if (!file.exists())
+		{
+			Assert.fail("workflow is not generated correctly");
+		}
+
+
+
+	}
+
+
+	@Test
 	public void testClear()
 	{
 		try
