@@ -385,10 +385,6 @@ public class ParametersCsvParser
 			for (Tuple t : new CsvReader(f))
 			{
 				tLst.add(t);
-
-				for (String p : t.getColNames())
-					if (p.contains(Parameters.STEP_PARAM_SEP)) throw new IOException("Parsing " + f.getName()
-							+ " failed: column names may not contain '" + Parameters.STEP_PARAM_SEP + "'");
 			}
 		}
 

@@ -773,6 +773,80 @@ public class ComputeCommandLineTest
 
 	}
 
+	@Test
+	public void testRunLocally5b_runtime_automapping() throws Exception
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark.5.1/workflow.runtime.automapping.csv",
+				"--defaults",
+				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark.5.1/parameters.csv",
+				"--rundir",
+				"target/test/benchmark/run"
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step2_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.finished is not generated");
+		}
+
+	}
+
+	@Test
+	public void testRunLocally5_underscore() throws Exception
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark.5.1/workflow._.csv",
+				"--defaults",
+				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark.5.1/parameters_.csv",
+				"--rundir",
+				"target/test/benchmark/run"
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step2_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.finished is not generated");
+		}
+
+	}
+
+
+
 //	@Test(expectedExceptions = Exception.class)
 //	public void testRunLocally5b_2() throws Exception
 //	{

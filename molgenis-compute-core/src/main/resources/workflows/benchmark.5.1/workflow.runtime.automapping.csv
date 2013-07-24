@@ -1,0 +1,3 @@
+step,protocol,dependencies
+step1,protocols/step1.runtime.automapping.sh,
+step2,protocols/step2.runtime.automapping.sh,step1

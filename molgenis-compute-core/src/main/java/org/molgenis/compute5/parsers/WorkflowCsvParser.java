@@ -13,7 +13,9 @@ import org.molgenis.util.tuple.Tuple;
 /** Parser for the workflow csv */
 public class WorkflowCsvParser
 {
-	Vector<String> stepNames = new Vector();
+	private Vector<String> stepNames = new Vector();
+	private ProtocolParser parser = new ProtocolParser();
+
 
 	public Workflow parse(String workflowFile) throws IOException
 	{
@@ -36,8 +38,11 @@ public class WorkflowCsvParser
 				String stepName = row.getString(Parameters.STEP_HEADING_IN_WORKFLOW);
 				Step step = new Step(stepName);
 				stepNames.add(stepName);
-				Protocol protocol = new ProtocolParser().parse(new File(workflowFile).getParentFile(),
-						row.getString(Parameters.PROTOCOL_HEADING_IN_WORKFLOW));
+				File workflowDir = new File(workflowFile).getParentFile();
+				String fileName = row.getString(Parameters.PROTOCOL_HEADING_IN_WORKFLOW);
+
+				Protocol protocol = parser.parse(workflowDir,fileName);
+
 				step.setProtocol(protocol);
 				String strParameters = row.getString(Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW);
 				if(strParameters!=null)
@@ -85,7 +90,8 @@ public class WorkflowCsvParser
 			{
 				resultParsing.put(expr[0], expr[1]);
 				//here find dependencies from parameters names
-				String [] subExpr = expr[1].split(Parameters.STEP_PARAM_SEP);
+				expr[1] = expr[1].replace(Parameters.STEP_PARAM_SEP_PROTOCOL, Parameters.TRIPLE_UNDERSCORE);
+				String [] subExpr = expr[1].split(Parameters.TRIPLE_UNDERSCORE);
 				if(subExpr.length > 1)
 					if(stepNames.contains(subExpr[0]))
 						dependencies.add(subExpr[0]);

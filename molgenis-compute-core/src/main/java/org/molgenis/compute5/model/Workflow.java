@@ -56,7 +56,7 @@ public class Workflow
 	{
 		for(Step step : steps)
 		{
-			if(parameter.contains(step.getName()+ Parameters.STEP_PARAM_SEP))
+			if(parameter.contains(step.getName()+ Parameters.STEP_PARAM_SEP_SCRIPT))
 				return true;
 		}
 		return false;
