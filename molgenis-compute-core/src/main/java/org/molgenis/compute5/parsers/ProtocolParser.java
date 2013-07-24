@@ -14,14 +14,6 @@ import org.molgenis.compute5.model.Output;
 import org.molgenis.compute5.model.Parameters;
 import org.molgenis.compute5.model.Protocol;
 
-/**
- * Parser for protocol ftl file
- * 
- * parameters are defined as follows:
- * 
- * #string NAME DESCRIPTION #list NAME DESCRIPTION #output NAME VALUE DESCRIPTION
- */
-// FIXME: add parsing for cores, mem, etc
 public class ProtocolParser
 {
 

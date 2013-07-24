@@ -13,7 +13,9 @@ import org.molgenis.util.tuple.Tuple;
 /** Parser for the workflow csv */
 public class WorkflowCsvParser
 {
-	Vector<String> stepNames = new Vector();
+	private Vector<String> stepNames = new Vector();
+	private ProtocolParser parser = new ProtocolParser();
+
 
 	public Workflow parse(String workflowFile) throws IOException
 	{
@@ -36,8 +38,11 @@ public class WorkflowCsvParser
 				String stepName = row.getString(Parameters.STEP_HEADING_IN_WORKFLOW);
 				Step step = new Step(stepName);
 				stepNames.add(stepName);
-				Protocol protocol = new ProtocolParser().parse(new File(workflowFile).getParentFile(),
-						row.getString(Parameters.PROTOCOL_HEADING_IN_WORKFLOW));
+				File workflowDir = new File(workflowFile).getParentFile();
+				String fileName = row.getString(Parameters.PROTOCOL_HEADING_IN_WORKFLOW);
+
+				Protocol protocol = parser.parse(workflowDir,fileName);
+
 				step.setProtocol(protocol);
 				String strParameters = row.getString(Parameters.PARAMETER_MAPPING_HEADING_IN_WORKFLOW);
 				if(strParameters!=null)

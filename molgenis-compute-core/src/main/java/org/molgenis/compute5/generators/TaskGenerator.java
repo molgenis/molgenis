@@ -168,7 +168,7 @@ public class TaskGenerator
 									if(input.isKnownRunTime())
 									{
 										value = parameterName;
-										value = value.replace(Parameters.UNDERSCORE,
+										value = value.replaceFirst(Parameters.UNDERSCORE,
 												Parameters.STEP_PARAM_SEP_SCRIPT);
 									}
 								}
@@ -177,7 +177,7 @@ public class TaskGenerator
 									if(input.isKnownRunTime())
 									{
 										value = (String) ((ArrayList) oValue).get(i);
-										value = value.replace(Parameters.UNDERSCORE,
+										value = value.replaceFirst(Parameters.UNDERSCORE,
 												Parameters.STEP_PARAM_SEP_SCRIPT);
 									}
 								}
