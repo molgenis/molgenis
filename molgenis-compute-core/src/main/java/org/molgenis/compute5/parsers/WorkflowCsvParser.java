@@ -85,8 +85,8 @@ public class WorkflowCsvParser
 			{
 				resultParsing.put(expr[0], expr[1]);
 				//here find dependencies from parameters names
-				expr[1] = expr[1].replace(Parameters.STEP_PARAM_SEP_PROTOCOL, Parameters.UNDERSCORE);
-				String [] subExpr = expr[1].split(Parameters.UNDERSCORE);
+				expr[1] = expr[1].replace(Parameters.STEP_PARAM_SEP_PROTOCOL, Parameters.TRIPLE_UNDERSCORE);
+				String [] subExpr = expr[1].split(Parameters.TRIPLE_UNDERSCORE);
 				if(subExpr.length > 1)
 					if(stepNames.contains(subExpr[0]))
 						dependencies.add(subExpr[0]);

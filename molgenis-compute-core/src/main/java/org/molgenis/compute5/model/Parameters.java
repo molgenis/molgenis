@@ -22,6 +22,7 @@ public class Parameters
 	public static final String USER = "user";
 	public static final String STEP_PARAM_SEP_PROTOCOL = ".";
 	public static final String UNDERSCORE = "_";
+	public static final String TRIPLE_UNDERSCORE = "___";
 	public static final String STEP_PARAM_SEP_SCRIPT = "__has__";
 	public static final String USER_PREFIX = USER + UNDERSCORE;
 	public final static String ID_COLUMN = USER_PREFIX + Task.TASKID_COLUMN;
