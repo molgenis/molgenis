@@ -148,6 +148,10 @@ public class TaskGenerator
 							//parameter is mapped locally
 							value = parameterMapping;
 
+							if(input.isKnownRunTime())
+								value = value.replace(Parameters.STEP_PARAM_SEP_PROTOCOL,
+														Parameters.STEP_PARAM_SEP_SCRIPT);
+
 							parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
 									+ "]}\n";
 						}
@@ -162,12 +166,20 @@ public class TaskGenerator
 								if(oValue instanceof String)
 								{
 									if(input.isKnownRunTime())
-										value = parameterName; // or can be = (String)oValue;
+									{
+										value = parameterName;
+										value = value.replace(Parameters.UNDERSCORE,
+												Parameters.STEP_PARAM_SEP_SCRIPT);
+									}
 								}
 								else if (oValue instanceof ArrayList)
 								{
 									if(input.isKnownRunTime())
+									{
 										value = (String) ((ArrayList) oValue).get(i);
+										value = value.replace(Parameters.UNDERSCORE,
+												Parameters.STEP_PARAM_SEP_SCRIPT);
+									}
 								}
 
 								parameterHeader += parameterName + "[" + i + "]=${" + value + "[" + rowIndexString
@@ -248,9 +260,8 @@ public class TaskGenerator
 							for (int i = 0; i < rowIndex.size(); i++)
 							{
 								Object rowIndexObject = rowIndex.get(i);
-								String rowIndexString = (String) rowIndexObject.toString();
-								// System.out.println(">> " + rowIndexString);
-								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP + p + "["
+								String rowIndexString = rowIndexObject.toString();
+								line += "echo \"" + step.getName() + Parameters.STEP_PARAM_SEP_SCRIPT + p + "["
 										+ rowIndexString + "]=${" + p + "[" + i + "]}\" >> " + myEnvironmentFile + "\n";
 							}
 
@@ -378,10 +389,10 @@ public class TaskGenerator
 
 			for (String localName : local.getColNames())
 			{
-				if (!localName.contains(Parameters.STEP_PARAM_SEP))
+				if (!localName.contains(Parameters.UNDERSCORE))
 				{
 					WritableTuple tuple = globalParameters.get(i);
-					tuple.set(step.getName() + Parameters.STEP_PARAM_SEP + localName, local.get(localName));
+					tuple.set(step.getName() + Parameters.UNDERSCORE + localName, local.get(localName));
 				}
 			}
 		}

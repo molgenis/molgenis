@@ -105,11 +105,14 @@ public class EnvironmentGenerator
 
 	private boolean isFoundAsOutput(String parameter, WritableTuple wt)
 	{
+		boolean isRunTime = false;
+
 		for(Step step: workflow.getSteps())
 		{
 			Set<Output> outputs = step.getProtocol().getOutputs();
 			for(Output output : outputs)
 			{
+				//first search for auto.mapping
 				String name = output.getName();
 				if(name.equalsIgnoreCase(parameter))
 				{
@@ -118,6 +121,19 @@ public class EnvironmentGenerator
 					if(canBeKnown)
 					{
 						wt.set("user_" + parameter, step.getName() + "_" + parameter);
+						return true;
+					}
+				}
+
+				//else search for step.mapping
+				name = step.getName() + Parameters.STEP_PARAM_SEP_PROTOCOL + output.getName();
+				if(name.equalsIgnoreCase(parameter))
+				{
+					boolean canBeKnown = checkIfVariableCanbeMapped(step.getName(), parameter);
+
+					if(canBeKnown)
+					{
+						wt.set("user_" + parameter, step.getName() + Parameters.STEP_PARAM_SEP_SCRIPT + parameter);
 						return true;
 					}
 				}
@@ -146,6 +162,43 @@ public class EnvironmentGenerator
 			}
 		}
 		return false;
+	}
+
+	private boolean checkIfVariableCanbeMapped(String previousStepName, String parameterName)
+	{
+		boolean isRunTimeVariable = false;
+		String key = null;
+
+		for(Step step: workflow.getSteps())
+		{
+			if(step.getPreviousSteps().contains(previousStepName))
+			{
+				Map<String, String> parameterMappings = step.getParametersMapping();
+
+				for (Map.Entry<String, String> entry : parameterMappings.entrySet())
+				{
+					key = entry.getKey();
+					String value = entry.getValue();
+
+					if(value.equalsIgnoreCase(parameterName))
+					{
+						isRunTimeVariable = true;
+						continue;
+					}
+				}
+			}
+
+			if(isRunTimeVariable)
+			for(Input input: step.getProtocol().getInputs())
+			{
+				if(input.getName().equalsIgnoreCase(key))
+				{
+						input.setKnownRunTime(true);
+						return isRunTimeVariable;
+				}
+			}
+		}
+		return isRunTimeVariable;
 	}
 
 
