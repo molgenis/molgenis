@@ -29,4 +29,18 @@ public class ValidatorTest
 	{
 		Validator.validateParameterName("7b");
 	}
+
+	@Test
+	public void testUnderscore()
+	{
+		try
+		{
+			Validator.validateParameterName("out_out");
+		}
+		catch (Exception e)
+		{
+			Assert.fail("incorrect validation");
+		}
+	}
+
 }

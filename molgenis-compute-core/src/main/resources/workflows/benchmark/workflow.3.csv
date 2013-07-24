@@ -1,4 +1,4 @@
 step,protocol,dependencies
 step1,protocols/step1.sh,in=input
-step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out
+step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1.out
 step3,protocols/step3.sh,mytool=tool
