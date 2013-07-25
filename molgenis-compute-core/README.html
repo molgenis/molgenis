@@ -8859,7 +8859,7 @@ Generate and run jobs by iterating over parameters.csv and execute on a compute 
     <h1>2. Get Started</h1>
   </div>
 <p>The latest distribution of Molgenis Compute is available
-at <a id="X1"></a><a href="http://www.molgenis.org/wiki/ComputeStart">Molgenis Compute start page</a>.
+at the <a id="X1"></a><a href="http://www.molgenis.org/wiki/ComputeStart">Molgenis Compute start page</a>.
 Unzip the archive and the command-line version is ready to use.</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -8867,12 +8867,12 @@ Unzip the archive and the command-line version is ready to use.</p>
 cd molgenis-compute-core-0.0.1-SNAPSHOT</pre>
 </div></div>
 <h2 id="create_workflow">Create workflow</h2>
-<p>Now, use can create your first workflow just by command</p>
+<p>Now u can create your first workflow by executing the following command</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>sh molgenis_compute.sh --create myfirst_workflow</pre>
 </div></div>
-<p>The directory containing workflow is created.</p>
+<p>Afterwards go to the created workflow directory.</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>cd myfirst_workflow</pre>
@@ -8887,7 +8887,7 @@ workflow.csv            #file listing steps and parameter flow
 defaults.csv            #default parameters for workflow.csv (optional)
 parameters.csv          #parameters you want to run analysis on</pre>
 </div></div>
-<p>The similar structure should be created for every workflow. In the easiest scenario, the
+<p>A similar structure should be created for every workflow. In the easiest scenario, the
 <code>workflow.csv</code> file has the following structure:</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -8897,7 +8897,7 @@ step2,protocols/step2.sh,step1</pre>
 </div></div>
 <p>This means that the workflow consists of two steps <em>step1</em> and <em>step2</em>, where <em>step2</em> depends on <em>step1</em>.
 <em>step1</em> has its analysis protocol in the file <code>protocols/step1.sh</code> and <em>step2</em> in the file <code>protocols/step2.sh</code> respectively.
-The created in our example <code>workflow.csv</code> is a bit more complex.</p>
+The created workflow in our example <code>workflow.csv</code> is a bit more complex.</p>
 <p>Let&#8217;s first look at the <code>parameters.csv</code> file, which contains some workflow parameters. In this example, one parameter
 <em>input</em> has two values <em>hello</em> and <em>bye</em>.</p>
 <div class="literalblock">
@@ -8936,7 +8936,7 @@ step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out</pr
 <div class="content monospaced">
 <pre>in=input</pre>
 </div></div>
-<p>does the trick. In the same way, we can map outputs of one step to the inputs of the next steps. In our example, <em>strings</em> in the <em>step2</em>,
+<p>This does the trick. In the same way, we can map outputs of one step to the inputs of the next steps. In our example, <em>strings</em> in the <em>step2</em>,
 which has protocol</p>
 <p><code>step2.ftl</code></p>
 <div class="literalblock">
@@ -8968,7 +8968,7 @@ value12,    value22
 value13,    value23</pre>
 </div></div>
 <p>Alternatively, parameters can be specified in the <code>.properties</code> style. The parameters file also should have
-the +.properties+extension.</p>
+the <code>.properties</code> extension.</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>parameter1 = value11, value12, value13
@@ -8991,8 +8991,8 @@ a list of <em>;</em> separated values (may contain templates)
 </ol>
 <p>You can combine multiple parameter files: the values will be <em>natural joined</em> based on overlapping columns.</p>
 <p>Example with two parameter files:</p>
-<p>molgenis -w path/to/workflow -p f1.csv -p f2.csv
-Example f1.csv (white space will be trimmed):</p>
+<p>molgenis -w path/to/workflow -p f1.csv -p f2.csv</p>
+<p>Example f1.csv (white space will be trimmed):</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>p0,  p2
@@ -9025,14 +9025,14 @@ number= 123</pre>
 <p>The example protocols has the following listings:</p>
 <p>In the header of protocols, we specify inputs with flags <em>#string</em> for variables with a single value
 and <em>#list</em> for variables with multiple values.</p>
-<p>I our example variables <em>date</em> and <em>wf</em> are defined in
-additional parameters file <code>workflow.defaults.csv</code>.</p>
+<p>In our example variables <em>date</em> and <em>wf</em> are defined in
+an additional parameters file <code>workflow.defaults.csv</code>.</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>workflowName,creationDate
 myFirstWorkflow,today</pre>
 </div></div>
-<p>In this way, the parameters can be divided in several group and re-used in different workflows.</p>
+<p>In this way, the parameters can be divided in several groups and re-used in different workflows.</p>
 <h2 id="generate_workflow">Generate workflow</h2>
 <p>To generate actual workflow jobs, run the next command-line</p>
 <div class="literalblock">
@@ -9050,7 +9050,7 @@ myFirstWorkflow,today</pre>
 <pre>doc           step1_0.sh      step1_1.sh      step2_0.sh      submit.sh       user.env</pre>
 </div></div>
 <p><code>.sh</code> are actual scripts generated from the specified workflow. <em>step1</em> has two scripts and <em>step2</em> has only one, because it treats
-outputs from scripts of the <em>step1</em> as a list, which is specified in +step2.sh+by</p>
+outputs from scripts of the <em>step1</em> as a list, which is specified in <code>step2.sh</code> by</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>#list strings</pre>
@@ -9089,8 +9089,8 @@ out=hello_hasBeenInStep1</pre>
 echo "bye_hasBeenInStep1"
 out=bye_hasBeenInStep1</pre>
 </div></div>
-<p>The output values of the first step is not know beforehand, so, <em>string</em> cannot be weaved and will stay
-in the generated for the <em>step2</em> script as it was. However, <em>wf</em> and <em>date</em> values are weaved.</p>
+<p>The output values of the first steps are not known beforehand, so, <em>string</em> cannot be weaved and will stay
+in the generated for the <em>step2</em> script as it was. However, the <em>wf</em> and <em>date</em> values are weaved.</p>
 <p><code>step2_0.sh</code></p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -9133,7 +9133,7 @@ do
 done</pre>
 </div></div>
 <p>In the currect implementation, values are first taken from parameter files. If they are not present, then compute looks,
-if these values can be known in run-time, by analysing all previous steps of the protocol, where values are unknown.
+if these values can be known at run-time, by analysing all previous steps of the protocol, where values are unknown.
 If values cannot be known at run-time, compute will give a generation error.</p>
 <h2 id="execute_workflow">Execute workflow</h2>
 <p>The workflow can be executed with the command</p>
@@ -9150,13 +9150,13 @@ molgenis.bookkeeping.log      step1_0.sh.started              step1_1.sh.started
 step1_0.env                   step1_1.env                     step2_0.env                     submit.sh
 step1_0.sh                    step1_1.sh                      step2_0.sh                      user.env</pre>
 </div></div>
-<p><code>.started</code> and <code>.finished</code> files are created, when certain jobs is started and finished respectively.</p>
+<p><code>.started</code> and <code>.finished</code> files are created, when certain jobs are started and finished respectively.</p>
 </section>
 <section id="command_line_options">
   <div class="page-header">
     <h1>3. Command-line options</h1>
   </div>
-<p>The Molgenis Compute has the following command-line options:</p>
+<p>Molgenis Compute has the following command-line options:</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>### MOLGENIS COMPUTE ###
@@ -9219,7 +9219,7 @@ usage: sh molgenis-compute.sh -p parameters.csv
     <h1>4. Reserved words</h1>
   </div>
 <p>Molgenis Compute has a list of reserved words, which cannot be used in compute to name
-parameters workflow steps etc. These words are listed below:</p>
+parameters, workflow steps, etc. These words are listed below:</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>port                  interval
@@ -9235,7 +9235,7 @@ backenduser           header
 footer                submit
 autoid</pre>
 </div></div>
-<p>The reserved word are used in compute.properties file. This file is created to save the latest
+<p>The reserved words are used in the compute.properties file. This file is created to save the latest
 compute configuration and discuss further.</p>
 </section>
 <section id="advanced_compute_features">
@@ -9243,9 +9243,9 @@ compute configuration and discuss further.</p>
     <h1>5. Advanced Compute Features</h1>
   </div>
 <h2 id="script_generation_for_pbs_cluster_and_other_back_ends">Script generation for PBS cluster and other back-ends</h2>
-<p>When generating script for computational cluster or grid, some additional parameters, such as execution wall-time, memory requirement, should be
+<p>When generating script for computational clusters or grid, some additional parameters, such as execution wall-time, memory requirement, etc. should be
 specified.</p>
-<p>These can be done in the parameters file</p>
+<p>This can be done in the parameters file</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>workflowName,creationDate,queue,mem,walltime,nodes,ppn
@@ -9254,7 +9254,7 @@ myFirstWorkflow,today,short_queue,4,05:59:00,1,1</pre>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>queue - cluster/grid queue
-mem - memory required in GB
+mem - memory required
 walltime - execution wall time
 nodes - number of nodes needed
 ppn - number of cores needed</pre>
@@ -9263,7 +9263,7 @@ ppn - number of cores needed</pre>
 <p><code>step1.ftl with molgenis header</code></p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>#MOLGENIS queue=short_queue mem=4 walltime=05:59:00 nodes=1 ppn=1
+<pre>#MOLGENIS queue=short_queue mem=4gb walltime=05:59:00 nodes=1 ppn=1
 #string in
 #output out
 # Let's do something with string 'in'
