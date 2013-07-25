@@ -9218,16 +9218,26 @@ a list of <em>;</em> separated values (may contain templates)
 </li>
 </ol>
 <p>You can combine multiple parameter files: the values will be <em>natural joined</em> based on overlapping columns.</p>
-<p>Example with two parameter files:</p>
-<p>molgenis -w path/to/workflow -p f1.csv -p f2.csv</p>
-<p>Example f1.csv (white space will be trimmed):</p>
+<p>Example with two or more parameter files:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>molgenis --path path/to/workflow -p f1.csv -p f2.csv -p f3.csv</pre>
+</div></div>
+<p>However, in this case, parameter called <em>workflow</em> should be present in one of parameter files:</p>
+<p><code>f3.csv</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>workflow
+workflow.csv</pre>
+</div></div>
+<p><code>f1.csv</code> (white space will be trimmed):</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>p0,  p2
 x,   1
 y,   2</pre>
 </div></div>
-<p>Example f2.csv (white space will be trimmed):</p>
+<p><code>f2.csv</code> (white space will be trimmed):</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>p1,  p2,    p3,     p4
@@ -9251,6 +9261,8 @@ number= 123</pre>
 </div></div>
 <p>Here, variable <em>bar</em> has two values of variable <em>foo</em>.</p>
 <h2 id="script_generation_for_pbs_cluster_and_other_back_ends">Script generation for PBS cluster and other back-ends</h2>
+<p>To generate for pbs, the next options should be added to the command line</p>
+<p>--backend pbs</p>
 <p>When generating script for computational clusters or grid, some additional parameters, such as execution wall-time, memory requirement, etc. should be
 specified.</p>
 <p>This can be done in the parameters file</p>
