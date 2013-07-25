@@ -22,7 +22,7 @@ Molgenis Compute Users can:
 Get Started
 -----------
 The latest distribution of Molgenis Compute is available 
-at [[X1]]http://www.molgenis.org/wiki/ComputeStart[Molgenis Compute start page]. 
+at the [[X1]]http://www.molgenis.org/wiki/ComputeStart[Molgenis Compute start page]. 
 Unzip the archive and the command-line version is ready to use.  
 
   unzip molgenis-compute-core-0.0.1-SNAPSHOT-distribution.zip
@@ -31,11 +31,11 @@ Unzip the archive and the command-line version is ready to use.
 Create workflow
 ~~~~~~~~~~~~~~~
 
-Now, use can create your first workflow just by command
+Now u can create your first workflow by executing the following command
 
   sh molgenis_compute.sh --create myfirst_workflow
 
-The directory containing workflow is created.
+Afterwards go to the created workflow directory.
 
   cd myfirst_workflow
 
@@ -48,7 +48,7 @@ You see the typical Molgenis Compute workflow structure
   defaults.csv            #default parameters for workflow.csv (optional)
   parameters.csv          #parameters you want to run analysis on
 
-The similar structure should be created for every workflow. In the easiest scenario, the 
+A similar structure should be created for every workflow. In the easiest scenario, the 
 +workflow.csv+ file has the following structure:
 
   step,protocol,dependencies
@@ -57,7 +57,7 @@ The similar structure should be created for every workflow. In the easiest scena
 
 This means that the workflow consists of two steps 'step1' and 'step2', where 'step2' depends on 'step1'.
 'step1' has its analysis protocol in the file +protocols/step1.sh+ and 'step2' in the file +protocols/step2.sh+ respectively.
-The created in our example +workflow.csv+ is a bit more complex.
+The created workflow in our example +workflow.csv+ is a bit more complex.
 
 Let's first look at the +parameters.csv+ file, which contains some workflow parameters. In this example, one parameter
 'input' has two values 'hello' and 'bye'.
@@ -124,7 +124,7 @@ More parameters can be specified using the next format
   value13,    value23
 
 Alternatively, parameters can be specified in the +.properties+ style. The parameters file also should have
-the +.properties+extension.
+the +.properties+ extension.
 
   parameter1 = value11, value12, value13
   parameter2 = value21, value22, value23
@@ -143,6 +143,7 @@ You can combine multiple parameter files: the values will be 'natural joined' ba
 Example with two parameter files:
 
 molgenis -w path/to/workflow -p f1.csv -p f2.csv
+
 Example f1.csv (white space will be trimmed):
 
   p0,  p2
@@ -175,13 +176,13 @@ The example protocols has the following listings:
 In the header of protocols, we specify inputs with flags '#string' for variables with a single value 
 and '#list' for variables with multiple values. 
 
-I our example variables 'date' and 'wf' are defined in 
-additional parameters file +workflow.defaults.csv+.
+In our example variables 'date' and 'wf' are defined in 
+an additional parameters file +workflow.defaults.csv+.
 
   workflowName,creationDate
   myFirstWorkflow,today
 
-In this way, the parameters can be divided in several group and re-used in different workflows.
+In this way, the parameters can be divided in several groups and re-used in different workflows.
 
 
 Generate workflow
@@ -200,7 +201,7 @@ It contains a number of files
   doc		step1_0.sh	step1_1.sh	step2_0.sh	submit.sh	user.env
 
 +.sh+ are actual scripts generated from the specified workflow. 'step1' has two scripts and 'step2' has only one, because it treats
-outputs from scripts of the 'step1' as a list, which is specified in +step2.sh+by
+outputs from scripts of the 'step1' as a list, which is specified in +step2.sh+ by
 
     #list strings
 
@@ -237,8 +238,8 @@ and
   echo "bye_hasBeenInStep1"
   out=bye_hasBeenInStep1
 
-The output values of the first step is not know beforehand, so, 'string' cannot be weaved and will stay 
-in the generated for the 'step2' script as it was. However, 'wf' and 'date' values are weaved.
+The output values of the first steps are not known beforehand, so, 'string' cannot be weaved and will stay 
+in the generated for the 'step2' script as it was. However, the 'wf' and 'date' values are weaved.
 
 +step2_0.sh+
 
@@ -273,7 +274,7 @@ If values can be known, the script will have the following content
   done
 
 In the currect implementation, values are first taken from parameter files. If they are not present, then compute looks,
-if these values can be known in run-time, by analysing all previous steps of the protocol, where values are unknown.
+if these values can be known at run-time, by analysing all previous steps of the protocol, where values are unknown.
 If values cannot be known at run-time, compute will give a generation error.
 
 Execute workflow
@@ -291,12 +292,12 @@ Now, +rundir+ contains more files
   step1_0.env			step1_1.env			step2_0.env			submit.sh
   step1_0.sh			step1_1.sh			step2_0.sh			user.env
 
-+.started+ and +.finished+ files are created, when certain jobs is started and finished respectively. 
++.started+ and +.finished+ files are created, when certain jobs are started and finished respectively. 
 
 Command-line options
 --------------------
 
-The Molgenis Compute has the following command-line options:
+Molgenis Compute has the following command-line options:
 
   ### MOLGENIS COMPUTE ###
   Version: development
@@ -356,7 +357,7 @@ Reserved words
 --------------
 
 Molgenis Compute has a list of reserved words, which cannot be used in compute to name 
-parameters workflow steps etc. These words are listed below:
+parameters, workflow steps, etc. These words are listed below:
 
   port			interval
   workflow		path
@@ -371,7 +372,7 @@ parameters workflow steps etc. These words are listed below:
   footer		submit
   autoid
 
-The reserved word are used in compute.properties file. This file is created to save the latest
+The reserved words are used in the compute.properties file. This file is created to save the latest
 compute configuration and discuss further.
 
 Advanced Compute Features
@@ -380,16 +381,16 @@ Advanced Compute Features
 Script generation for PBS cluster and other back-ends
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When generating script for computational cluster or grid, some additional parameters, such as execution wall-time, memory requirement, should be 
+When generating script for computational clusters or grid, some additional parameters, such as execution wall-time, memory requirement, etc. should be 
 specified.
 
-These can be done in the parameters file
+This can be done in the parameters file
 
   workflowName,creationDate,queue,mem,walltime,nodes,ppn
   myFirstWorkflow,today,short_queue,4,05:59:00,1,1
 
   queue - cluster/grid queue
-  mem - memory required in GB
+  mem - memory required
   walltime - execution wall time
   nodes - number of nodes needed
   ppn - number of cores needed
@@ -398,7 +399,7 @@ Or also it can be specified in the molgenis header in protocols
 
 +step1.ftl with molgenis header+
 
-  #MOLGENIS queue=short_queue mem=4 walltime=05:59:00 nodes=1 ppn=1
+  #MOLGENIS queue=short_queue mem=4gb walltime=05:59:00 nodes=1 ppn=1
   #string in
   #output out
   # Let's do something with string 'in'
