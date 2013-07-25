@@ -108,6 +108,9 @@ public class FoldingTest
 		String test3_2_list1 = "chunk[0]=${chunk[2]}\n";
 		String test3_2_list2 =	"chr[0]=${chr[2]}";
 
+		String test_weaving_2_0 = "for s in \"a\" \"b\" \"c\"";
+		String test_weaving_2_1 = "for s in \"a\" \"b\"";
+
 		String t = ComputeCommandLineTest.getFileAsString(outputDir + "/test2_0.sh");
 
 		if(!t.contains(test2_0_list1) || !t.contains(test2_0_list2))
@@ -139,6 +142,21 @@ public class FoldingTest
 		{
 			Assert.fail("folding broken");
 		}
+
+		System.out.println("Test Weaving Correctness");
+
+		t = ComputeCommandLineTest.getFileAsString(outputDir + "/test2_0.sh");
+		if(!t.contains(test_weaving_2_0))
+		{
+			Assert.fail("weaving is broken");
+		}
+
+		t = ComputeCommandLineTest.getFileAsString(outputDir + "/test2_1.sh");
+		if(!t.contains(test_weaving_2_1))
+		{
+			Assert.fail("weaving is broken");
+		}
+
 
 	}
 
