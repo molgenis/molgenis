@@ -4,4 +4,5 @@
 for s in "${concat[@]}"
 do
     echo ${s}
+    echo ${local_chr}
 done
