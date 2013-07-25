@@ -45,8 +45,10 @@ You see the typical Molgenis Compute workflow structure
   /protocols/step1.sh     #example of a protocol shell script
   /protocols/step2.sh     #example of a protocol shell script
   workflow.csv            #file listing steps and parameter flow
-  defaults.csv            #default parameters for workflow.csv (optional)
+  workflow.defaults.csv   #default parameters for workflow.csv (optional)
   parameters.csv          #parameters you want to run analysis on
+  header.ftl              #user extra script header (optinal)
+  footer.ftl              #user extra script footer (optinal)
 
 A similar structure should be created for every workflow. In the easiest scenario, the 
 +workflow.csv+ file has the following structure:
@@ -72,9 +74,13 @@ In the following protocol example
   #string input
   #output out
   # Let's do something with string 'input'
+  echo ${input}_hasBeenInStep1
   out=${input}_hasBeenInStep1
 
-'input' will be substituted with values 'hello' or 'bye'
+'input' will be substituted with values 'hello' or 'bye'. In the header of protocols, 
+we specify inputs with flags '#string' for variables with a single value 
+and '#list' for variables with multiple values.
+The outputs are specified with the flag '#output'
 
 In our example protocol +step1.sh+ , we would like to call 'input' as 'in'
 
@@ -83,13 +89,14 @@ In our example protocol +step1.sh+ , we would like to call 'input' as 'in'
   #string in
   #output out
   # Let's do something with string 'in'
+  echo ${in}_hasBeenInStep1
   out=${in}_hasBeenInStep1
 
 In this case, we need to map these names in our example +workflow.csv+ file
 
   step,protocol,parameterMapping
   step1,protocols/step1.sh,in=input
-  step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out
+  step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1.out
 
   in=input
 
@@ -116,65 +123,7 @@ are mapped using
 
 Here, prefix 'step1_' says that 'out' is coming from 'step1'.
 
-More parameters can be specified using the next format
-
-  parameter1, parameter2
-  value11,    value21
-  value12,    value22
-  value13,    value23
-
-Alternatively, parameters can be specified in the +.properties+ style. The parameters file also should have
-the +.properties+ extension.
-
-  parameter1 = value11, value12, value13
-  parameter2 = value21, value22, value23
-
-Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b".
-
-Each value is one of the following:
-
-. a string
-. an expression, e.g. "${p}file${c}", to create derived parameters such as directory paths
-. a series i..j (where i and j are two integers), meaning from i to j including i and j
-. a list of ';' separated values (may contain templates)
-
-You can combine multiple parameter files: the values will be 'natural joined' based on overlapping columns.
-
-Example with two parameter files:
-
-molgenis -w path/to/workflow -p f1.csv -p f2.csv
-
-Example f1.csv (white space will be trimmed):
-
-  p0,  p2
-  x,   1
-  y,   2
-  
-Example f2.csv (white space will be trimmed):
-
-  p1,  p2,    p3,     p4
-  v1,  1..2,  a;b,    file${p2}
-  
-Merged and expanded result for f1.csv + f2.csv:
-
-  p0,  p1,  p2,   p3,   p4
-  x,   v1,  1,    a,    file1 
-  x,   v1,  1,    b,    file1
-  y,   v1,  2,    a,    file2
-  y,   v1,  2,    b,    file2
-
-More complex parameter examples can combine values with template, as following:
-
-  foo=    item1 , item2
-  bar=    ${foo}, item3
-  number= 123
-
-Here, variable 'bar' has two values of variable 'foo'.
-
 The example protocols has the following listings:
-
-In the header of protocols, we specify inputs with flags '#string' for variables with a single value 
-and '#list' for variables with multiple values. 
 
 In our example variables 'date' and 'wf' are defined in 
 an additional parameters file +workflow.defaults.csv+.
@@ -190,7 +139,7 @@ Generate workflow
 
 To generate actual workflow jobs, run the next command-line
 
-  sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv
+  sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv --defaults myfirst_workflow/workflow.defaults.csv
 
 The directory +rundir+ is created.
 
@@ -246,10 +195,8 @@ in the generated for the 'step2' script as it was. However, the 'wf' and 'date' 
   #string wf
   #string date
   #list strings
-
   echo "Workflow name: myFirstWorkflow"
   echo "Created: today"
-
   echo "Result of step1.sh:"
   for s in "${strings[@]}"
   do
@@ -263,10 +210,8 @@ If values can be known, the script will have the following content
   #string wf
   #string date
   #list strings
-
   echo "Workflow name: myFirstWorkflow"
   echo "Created: today"
-
   echo "Result of step1.sh:"
   for s in "hello" "bye"
   do
@@ -293,6 +238,20 @@ Now, +rundir+ contains more files
   step1_0.sh			step1_1.sh			step2_0.sh			user.env
 
 +.started+ and +.finished+ files are created, when certain jobs are started and finished respectively. 
+
+In our example, 'strings' variable from 'step2' requires run-time values produced in 'step1'. These values are taken from 
++step1_X.env+ files. For example:
+
++step1_0.env+
+
+  step1__has__out[0]=hello_hasBeenInStep1
+
+In the workflow file, it is specified with a simple '.' 
+
+  strings=step1.out
+
+and substituted with '__has__' in generated script files.
+
 
 Command-line options
 --------------------
@@ -378,6 +337,64 @@ compute configuration and discuss further.
 Advanced Compute Features
 -------------------------
 
+Advanced parameter formats
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+More parameters can be specified using the next format
+
+  parameter1, parameter2
+  value11,    value21
+  value12,    value22
+  value13,    value23
+
+Alternatively, parameters can be specified in the +.properties+ style. The parameters file also should have
+the +.properties+ extension.
+
+  parameter1 = value11, value12, value13
+  parameter2 = value21, value22, value23
+
+Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9 and underscore, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b".
+
+Each value is one of the following:
+
+. a string
+. a Freemarker template [[X11]]http://freemarker.org/[Freemarker]
+. a series i..j (where i and j are two integers), meaning from i to j including i and j
+. a list of ';' separated values (may contain templates)
+
+You can combine multiple parameter files: the values will be 'natural joined' based on overlapping columns.
+
+Example with two parameter files:
+
+molgenis -w path/to/workflow -p f1.csv -p f2.csv
+
+Example f1.csv (white space will be trimmed):
+
+  p0,  p2
+  x,   1
+  y,   2
+  
+Example f2.csv (white space will be trimmed):
+
+  p1,  p2,    p3,     p4
+  v1,  1..2,  a;b,    file${p2}
+  
+Merged and expanded result for f1.csv + f2.csv:
+
+  p0,  p1,  p2,   p3,   p4
+  x,   v1,  1,    a,    file1 
+  x,   v1,  1,    b,    file1
+  y,   v1,  2,    a,    file2
+  y,   v1,  2,    b,    file2
+
+More complex parameter examples can combine values with template, as following:
+
+  foo=    item1 , item2
+  bar=    ${foo}, item3
+  number= 123
+
+Here, variable 'bar' has two values of variable 'foo'.
+
 Script generation for PBS cluster and other back-ends
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -387,7 +404,7 @@ specified.
 This can be done in the parameters file
 
   workflowName,creationDate,queue,mem,walltime,nodes,ppn
-  myFirstWorkflow,today,short_queue,4,05:59:00,1,1
+  myFirstWorkflow,today,short_queue,4GB,05:59:00,1,1
 
   queue - cluster/grid queue
   mem - memory required
@@ -406,6 +423,15 @@ Or also it can be specified in the molgenis header in protocols
   out=${in}_hasBeenInStep1
 
 The specification in protocols has priority over specification in parameter files.
+
+Starting with a new workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is very advisable to start working with a new workflow with running 
+
+sh molgenis_compute.sh --clear
+
+This command clears the +.compute.properties file+ , which contains previous generation and running options.
 
 Database usage
 --------------

@@ -8884,8 +8884,10 @@ cd molgenis-compute-core-0.0.1-SNAPSHOT</pre>
 /protocols/step1.sh     #example of a protocol shell script
 /protocols/step2.sh     #example of a protocol shell script
 workflow.csv            #file listing steps and parameter flow
-defaults.csv            #default parameters for workflow.csv (optional)
-parameters.csv          #parameters you want to run analysis on</pre>
+workflow.defaults.csv   #default parameters for workflow.csv (optional)
+parameters.csv          #parameters you want to run analysis on
+header.ftl              #user extra script header (optinal)
+footer.ftl              #user extra script footer (optinal)</pre>
 </div></div>
 <p>A similar structure should be created for every workflow. In the easiest scenario, the
 <code>workflow.csv</code> file has the following structure:</p>
@@ -8913,9 +8915,13 @@ In the following protocol example</p>
 <pre>#string input
 #output out
 # Let's do something with string 'input'
+echo ${input}_hasBeenInStep1
 out=${input}_hasBeenInStep1</pre>
 </div></div>
-<p><em>input</em> will be substituted with values <em>hello</em> or <em>bye</em></p>
+<p><em>input</em> will be substituted with values <em>hello</em> or <em>bye</em>. In the header of protocols,
+we specify inputs with flags <em>#string</em> for variables with a single value
+and <em>#list</em> for variables with multiple values.
+The outputs are specified with the flag <em>#output</em></p>
 <p>In our example protocol <code>step1.sh</code> , we would like to call <em>input</em> as <em>in</em></p>
 <p><code>step1.ftl</code></p>
 <div class="literalblock">
@@ -8923,6 +8929,7 @@ out=${input}_hasBeenInStep1</pre>
 <pre>#string in
 #output out
 # Let's do something with string 'in'
+echo ${in}_hasBeenInStep1
 out=${in}_hasBeenInStep1</pre>
 </div></div>
 <p>In this case, we need to map these names in our example <code>workflow.csv</code> file</p>
@@ -8930,7 +8937,7 @@ out=${in}_hasBeenInStep1</pre>
 <div class="content monospaced">
 <pre>step,protocol,parameterMapping
 step1,protocols/step1.sh,in=input
-step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1_out</pre>
+step2,protocols/step2.sh,wf=workflowName;date=creationDate;strings=step1.out</pre>
 </div></div>
 <div class="literalblock">
 <div class="content monospaced">
@@ -8959,72 +8966,7 @@ echo "(FOR TESTING PURPOSES: your runid is ${runid})"</pre>
 <pre>strings=step1_out</pre>
 </div></div>
 <p>Here, prefix <em>step1_</em> says that <em>out</em> is coming from <em>step1</em>.</p>
-<p>More parameters can be specified using the next format</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>parameter1, parameter2
-value11,    value21
-value12,    value22
-value13,    value23</pre>
-</div></div>
-<p>Alternatively, parameters can be specified in the <code>.properties</code> style. The parameters file also should have
-the <code>.properties</code> extension.</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>parameter1 = value11, value12, value13
-parameter2 = value21, value22, value23</pre>
-</div></div>
-<p>Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b".</p>
-<p>Each value is one of the following:</p>
-<ol>
-<li>
-a string
-</li>
-<li>
-</li>
-<li>
-a series i..j (where i and j are two integers), meaning from i to j including i and j
-</li>
-<li>
-a list of <em>;</em> separated values (may contain templates)
-</li>
-</ol>
-<p>You can combine multiple parameter files: the values will be <em>natural joined</em> based on overlapping columns.</p>
-<p>Example with two parameter files:</p>
-<p>molgenis -w path/to/workflow -p f1.csv -p f2.csv</p>
-<p>Example f1.csv (white space will be trimmed):</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>p0,  p2
-x,   1
-y,   2</pre>
-</div></div>
-<p>Example f2.csv (white space will be trimmed):</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>p1,  p2,    p3,     p4
-v1,  1..2,  a;b,    file${p2}</pre>
-</div></div>
-<p>Merged and expanded result for f1.csv + f2.csv:</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>p0,  p1,  p2,   p3,   p4
-x,   v1,  1,    a,    file1
-x,   v1,  1,    b,    file1
-y,   v1,  2,    a,    file2
-y,   v1,  2,    b,    file2</pre>
-</div></div>
-<p>More complex parameter examples can combine values with template, as following:</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>foo=    item1 , item2
-bar=    ${foo}, item3
-number= 123</pre>
-</div></div>
-<p>Here, variable <em>bar</em> has two values of variable <em>foo</em>.</p>
 <p>The example protocols has the following listings:</p>
-<p>In the header of protocols, we specify inputs with flags <em>#string</em> for variables with a single value
-and <em>#list</em> for variables with multiple values.</p>
 <p>In our example variables <em>date</em> and <em>wf</em> are defined in
 an additional parameters file <code>workflow.defaults.csv</code>.</p>
 <div class="literalblock">
@@ -9037,7 +8979,7 @@ myFirstWorkflow,today</pre>
 <p>To generate actual workflow jobs, run the next command-line</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv</pre>
+<pre>sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv --defaults myfirst_workflow/workflow.defaults.csv</pre>
 </div></div>
 <p>The directory <code>rundir</code> is created.</p>
 <div class="literalblock">
@@ -9096,16 +9038,10 @@ in the generated for the <em>step2</em> script as it was. However, the <em>wf</e
 <div class="content monospaced">
 <pre>#string wf
 #string date
-#list strings</pre>
-</div></div>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>echo "Workflow name: myFirstWorkflow"
-echo "Created: today"</pre>
-</div></div>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>echo "Result of step1.sh:"
+#list strings
+echo "Workflow name: myFirstWorkflow"
+echo "Created: today"
+echo "Result of step1.sh:"
 for s in "${strings[@]}"
 do
     echo ${s}
@@ -9117,16 +9053,10 @@ done</pre>
 <div class="content monospaced">
 <pre>#string wf
 #string date
-#list strings</pre>
-</div></div>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>echo "Workflow name: myFirstWorkflow"
-echo "Created: today"</pre>
-</div></div>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>echo "Result of step1.sh:"
+#list strings
+echo "Workflow name: myFirstWorkflow"
+echo "Created: today"
+echo "Result of step1.sh:"
 for s in "hello" "bye"
 do
     echo ${s}
@@ -9151,6 +9081,19 @@ step1_0.env                   step1_1.env                     step2_0.env       
 step1_0.sh                    step1_1.sh                      step2_0.sh                      user.env</pre>
 </div></div>
 <p><code>.started</code> and <code>.finished</code> files are created, when certain jobs are started and finished respectively.</p>
+<p>In our example, <em>strings</em> variable from <em>step2</em> requires run-time values produced in <em>step1</em>. These values are taken from
+<code>step1_X.env</code> files. For example:</p>
+<p><code>step1_0.env</code></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>step1__has__out[0]=hello_hasBeenInStep1</pre>
+</div></div>
+<p>In the workflow file, it is specified with a simple <em>.</em></p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>strings=step1.out</pre>
+</div></div>
+<p>and substituted with <em><em>has</em></em> in generated script files.</p>
 </section>
 <section id="command_line_options">
   <div class="page-header">
@@ -9242,6 +9185,71 @@ compute configuration and discuss further.</p>
   <div class="page-header">
     <h1>5. Advanced Compute Features</h1>
   </div>
+<h2 id="advanced_parameter_formats">Advanced parameter formats</h2>
+<p>More parameters can be specified using the next format</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>parameter1, parameter2
+value11,    value21
+value12,    value22
+value13,    value23</pre>
+</div></div>
+<p>Alternatively, parameters can be specified in the <code>.properties</code> style. The parameters file also should have
+the <code>.properties</code> extension.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>parameter1 = value11, value12, value13
+parameter2 = value21, value22, value23</pre>
+</div></div>
+<p>Values for the workflow to iterate over can be passed as CSV file with parameter names in the header (a-zA-Z0-9 and underscore, starting with a-zA-Z) and parameter values in each row. Use quotes to escape commas, e.g. "a,b".</p>
+<p>Each value is one of the following:</p>
+<ol>
+<li>
+a string
+</li>
+<li>
+a Freemarker template <a id="X11"></a><a href="http://freemarker.org/">Freemarker</a>
+</li>
+<li>
+a series i..j (where i and j are two integers), meaning from i to j including i and j
+</li>
+<li>
+a list of <em>;</em> separated values (may contain templates)
+</li>
+</ol>
+<p>You can combine multiple parameter files: the values will be <em>natural joined</em> based on overlapping columns.</p>
+<p>Example with two parameter files:</p>
+<p>molgenis -w path/to/workflow -p f1.csv -p f2.csv</p>
+<p>Example f1.csv (white space will be trimmed):</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>p0,  p2
+x,   1
+y,   2</pre>
+</div></div>
+<p>Example f2.csv (white space will be trimmed):</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>p1,  p2,    p3,     p4
+v1,  1..2,  a;b,    file${p2}</pre>
+</div></div>
+<p>Merged and expanded result for f1.csv + f2.csv:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>p0,  p1,  p2,   p3,   p4
+x,   v1,  1,    a,    file1
+x,   v1,  1,    b,    file1
+y,   v1,  2,    a,    file2
+y,   v1,  2,    b,    file2</pre>
+</div></div>
+<p>More complex parameter examples can combine values with template, as following:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>foo=    item1 , item2
+bar=    ${foo}, item3
+number= 123</pre>
+</div></div>
+<p>Here, variable <em>bar</em> has two values of variable <em>foo</em>.</p>
 <h2 id="script_generation_for_pbs_cluster_and_other_back_ends">Script generation for PBS cluster and other back-ends</h2>
 <p>When generating script for computational clusters or grid, some additional parameters, such as execution wall-time, memory requirement, etc. should be
 specified.</p>
@@ -9249,7 +9257,7 @@ specified.</p>
 <div class="literalblock">
 <div class="content monospaced">
 <pre>workflowName,creationDate,queue,mem,walltime,nodes,ppn
-myFirstWorkflow,today,short_queue,4,05:59:00,1,1</pre>
+myFirstWorkflow,today,short_queue,4GB,05:59:00,1,1</pre>
 </div></div>
 <div class="literalblock">
 <div class="content monospaced">
@@ -9270,6 +9278,10 @@ ppn - number of cores needed</pre>
 out=${in}_hasBeenInStep1</pre>
 </div></div>
 <p>The specification in protocols has priority over specification in parameter files.</p>
+<h2 id="starting_with_a_new_workflow">Starting with a new workflow</h2>
+<p>It is very advisable to start working with a new workflow with running</p>
+<p>sh molgenis_compute.sh --clear</p>
+<p>This command clears the <code>.compute.properties file</code> , which contains previous generation and running options.</p>
 </section>
 <section id="database_usage">
   <div class="page-header">
