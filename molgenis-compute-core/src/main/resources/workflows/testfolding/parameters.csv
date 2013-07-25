@@ -1,6 +1,6 @@
-chr,chunk
-1,a
-1,b
-1,c
-2,a
-2,b
+chr,chunk,concat
+1,a,prefix_${chr}_${chunk}
+1,b,prefix_${chr}_${chunk}
+1,c,prefix_${chr}_${chunk}
+2,a,prefix_${chr}_${chunk}
+2,b,prefix_${chr}_${chunk}
