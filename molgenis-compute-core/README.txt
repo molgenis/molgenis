@@ -364,17 +364,24 @@ Each value is one of the following:
 
 You can combine multiple parameter files: the values will be 'natural joined' based on overlapping columns.
 
-Example with two parameter files:
+Example with two or more parameter files:
 
-molgenis -w path/to/workflow -p f1.csv -p f2.csv
+  molgenis --path path/to/workflow -p f1.csv -p f2.csv -p f3.csv
 
-Example f1.csv (white space will be trimmed):
+However, in this case, parameter called 'workflow' should be present in one of parameter files:
+
++f3.csv+
+
+  workflow
+  workflow.csv
+
++f1.csv+ (white space will be trimmed):
 
   p0,  p2
   x,   1
   y,   2
   
-Example f2.csv (white space will be trimmed):
++f2.csv+ (white space will be trimmed):
 
   p1,  p2,    p3,     p4
   v1,  1..2,  a;b,    file${p2}
@@ -397,6 +404,10 @@ Here, variable 'bar' has two values of variable 'foo'.
 
 Script generation for PBS cluster and other back-ends
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To generate for pbs, the next options should be added to the command line
+
+--backend pbs
 
 When generating script for computational clusters or grid, some additional parameters, such as execution wall-time, memory requirement, etc. should be 
 specified.
