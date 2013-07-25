@@ -16,6 +16,7 @@ public class WorkflowCsvParser
 	private Vector<String> stepNames = new Vector();
 	private ProtocolParser parser = new ProtocolParser();
 
+	public static final String WORKFLOW_COMMENT_SIGN = "#";
 
 	public Workflow parse(String workflowFile) throws IOException
 	{
@@ -36,6 +37,10 @@ public class WorkflowCsvParser
 							"' is missing in row " + row);
 
 				String stepName = row.getString(Parameters.STEP_HEADING_IN_WORKFLOW);
+
+				if(stepName.startsWith(WORKFLOW_COMMENT_SIGN))
+					continue;
+
 				Step step = new Step(stepName);
 				stepNames.add(stepName);
 				File workflowDir = new File(workflowFile).getParentFile();

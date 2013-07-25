@@ -431,7 +431,18 @@ It is very advisable to start working with a new workflow with running
 
 sh molgenis_compute.sh --clear
 
-This command clears the +.compute.properties file+ , which contains previous generation and running options.
+This command clears the +.compute.properties+ file, which contains previous generation and running options.
+
+Commenting in workflow specification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+User can want to run only one or several steps of the workflow, when the rest of workflow can be commented out using '#' sign. In this example
+'step2' is commented out.
+
+  step,protocol,dependencies
+  step1,protocols/step1.sh,
+  #step2,protocols/step2.sh,step1
+
 
 Database usage
 --------------
