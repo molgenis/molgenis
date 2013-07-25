@@ -9281,7 +9281,16 @@ out=${in}_hasBeenInStep1</pre>
 <h2 id="starting_with_a_new_workflow">Starting with a new workflow</h2>
 <p>It is very advisable to start working with a new workflow with running</p>
 <p>sh molgenis_compute.sh --clear</p>
-<p>This command clears the <code>.compute.properties file</code> , which contains previous generation and running options.</p>
+<p>This command clears the <code>.compute.properties</code> file, which contains previous generation and running options.</p>
+<h2 id="commenting_in_workflow_specification">Commenting in workflow specification</h2>
+<p>User can want to run only one or several steps of the workflow, when the rest of workflow can be commented out using <em>#</em> sign. In this example
+<em>step2</em> is commented out.</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>step,protocol,dependencies
+step1,protocols/step1.sh,
+#step2,protocols/step2.sh,step1</pre>
+</div></div>
 </section>
 <section id="database_usage">
   <div class="page-header">
