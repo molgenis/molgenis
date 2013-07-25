@@ -658,6 +658,73 @@ public class ComputeCommandLineTest
 	}
 
 	@Test
+	public void testRunLocally5_2parametersFiles() throws Exception
+	{
+		System.out.println("--- Start TestRunLocally ---");
+
+		File f = new File(outputDir);
+		FileUtils.deleteDirectory(f);
+		Assert.assertFalse(f.exists());
+
+		f = new File(".compute.properties");
+		FileUtils.deleteQuietly(f);
+		Assert.assertFalse(f.exists());
+
+		ComputeCommandLine.main(new String[]{
+				"--generate",
+				"--run",
+				"--workflow",
+				"src/main/resources/workflows/benchmark.5.1/workflow.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark.5.1/workflow.defaults.csv",
+				"--parameters",
+				"src/main/resources/workflows/benchmark.5.1/parameters.csv",
+				"--rundir",
+				"target/test/benchmark/run"
+
+		});
+
+		System.out.println("--- Test Created Files ---");
+
+		File file = new File(outputDir + "/step1_0.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step1_1.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step2_0.sh.started");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.started is not generated");
+		}
+
+		file = new File(outputDir + "/step1_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step1_0.sh.finished is not generated");
+		}
+
+		file = new File(outputDir + "/step1_1.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step1_1.sh.finished is not generated");
+		}
+
+		file = new File(outputDir + "/step2_0.sh.finished");
+		if (!file.exists())
+		{
+			Assert.fail("step2_0.sh.finished is not generated");
+		}
+	}
+
+
+	@Test
 	public void testOverwriteParameters() throws Exception
 	{
 
