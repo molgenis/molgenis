@@ -152,7 +152,6 @@ public class TupleUtils
 			{
 				String key = entry.getKey();
 				String value = entry.getValue();
-				//map.put(key, value);
 				for(WritableTuple tuple: map)
 				{
 					tuple.set(key, value);
@@ -165,40 +164,10 @@ public class TupleUtils
 	/** Convert a tuple into a map. Columns with a '_' in them will be nested submaps. */
 	public static Map<String, Object> toMap(Tuple t)
 	{
-		// TODO: can we not make Tuple extend Map???
 		Map<String, Object> result = new LinkedHashMap<String, Object>();
 		for (String key : t.getColNames())
 		{
-			if (key.contains(Parameters.STEP_PARAM_SEP))
-			{
-				// nested maps using '_'!
-				// FIXME: Gaat dit goed?
-				String[] els = key.split("\\" + Parameters.STEP_PARAM_SEP);
-
-				Map<String, Object> map = result;
-				for (String el : els)
-				{
-					// if last, simply put value
-					if (el.equals(els[els.length - 1]))
-					{
-						map.put(el, t.get(key));
-					}
-					// nest map
-					else
-					{
-						// create map if needed
-						if (!map.containsKey(el))
-						{
-							map.put(el, new LinkedHashMap<String, Object>());
-						}
-						map = (Map<String, Object>) map.get(el);
-					}
-				}
-			}
-			else
-			{
 				result.put(key, t.get(key));
-			}
 		}
 		return result;
 	}

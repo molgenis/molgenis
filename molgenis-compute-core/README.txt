@@ -93,7 +93,7 @@ In this case, we need to map these names in our example +workflow.csv+ file
 
   in=input
 
-does the trick. In the same way, we can map outputs of one step to the inputs of the next steps. In our example, 'strings' in the 'step2', 
+This does the trick. In the same way, we can map outputs of one step to the inputs of the next steps. In our example, 'strings' in the 'step2', 
 which has protocol 
 
 +step2.ftl+ 

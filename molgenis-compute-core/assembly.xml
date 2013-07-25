@@ -19,8 +19,8 @@
 	</files>
 	<fileSets>
 		<fileSet>
-			<directory>src/main/resources/workflows/myworklfow</directory>
-			<outputDirectory>workflows/myworklfow</outputDirectory>
+            <directory>src/main/resources/workflows</directory>
+            <outputDirectory>workflows</outputDirectory>
 		</fileSet>
     </fileSets>
     <dependencySets>
