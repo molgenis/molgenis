@@ -141,6 +141,11 @@ To generate actual workflow jobs, run the next command-line
 
   sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv --defaults myfirst_workflow/workflow.defaults.csv
 
+or with a short command-line version
+
+  sh molgenis_compute.sh -g -p myfirst_workflow/parameters.csv -w myfirst_workflow/workflow.csv -defaults myfirst_workflow/workflow.defaults.csv
+
+
 The directory +rundir+ is created.
 
   ls rundir/
@@ -366,14 +371,7 @@ You can combine multiple parameter files: the values will be 'natural joined' ba
 
 Example with two or more parameter files:
 
-  molgenis --path path/to/workflow -p f1.csv -p f2.csv -p f3.csv
-
-However, in this case, parameter called 'workflow' should be present in one of parameter files:
-
-+f3.csv+
-
-  workflow
-  workflow.csv
+  molgenis --path path/to/workflow -p f1.csv -p f2.csv -w workflow.csv
 
 +f1.csv+ (white space will be trimmed):
 
@@ -454,6 +452,14 @@ User can want to run only one or several steps of the workflow, when the rest of
   step1,protocols/step1.sh,
   #step2,protocols/step2.sh,step1
 
+Specifying workflow in parameters file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively to specifying workflow in the command-line using '-w' or '--workflow', workflow can be present as a parameter in 
++parameters.csv+ file:
+
+  workflow, parameter1, parameter2
+  workflow.csv, value1, value2
 
 Database usage
 --------------

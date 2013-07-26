@@ -8981,6 +8981,11 @@ myFirstWorkflow,today</pre>
 <div class="content monospaced">
 <pre>sh molgenis_compute.sh --generate --parameters myfirst_workflow/parameters.csv --workflow myfirst_workflow/workflow.csv --defaults myfirst_workflow/workflow.defaults.csv</pre>
 </div></div>
+<p>or with a short command-line version</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>sh molgenis_compute.sh -g -p myfirst_workflow/parameters.csv -w myfirst_workflow/workflow.csv -defaults myfirst_workflow/workflow.defaults.csv</pre>
+</div></div>
 <p>The directory <code>rundir</code> is created.</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -9221,14 +9226,7 @@ a list of <em>;</em> separated values (may contain templates)
 <p>Example with two or more parameter files:</p>
 <div class="literalblock">
 <div class="content monospaced">
-<pre>molgenis --path path/to/workflow -p f1.csv -p f2.csv -p f3.csv</pre>
-</div></div>
-<p>However, in this case, parameter called <em>workflow</em> should be present in one of parameter files:</p>
-<p><code>f3.csv</code></p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>workflow
-workflow.csv</pre>
+<pre>molgenis --path path/to/workflow -p f1.csv -p f2.csv -w workflow.csv</pre>
 </div></div>
 <p><code>f1.csv</code> (white space will be trimmed):</p>
 <div class="literalblock">
@@ -9302,6 +9300,14 @@ out=${in}_hasBeenInStep1</pre>
 <pre>step,protocol,dependencies
 step1,protocols/step1.sh,
 #step2,protocols/step2.sh,step1</pre>
+</div></div>
+<h2 id="specifying_workflow_in_parameters_file">Specifying workflow in parameters file</h2>
+<p>Alternatively to specifying workflow in the command-line using <em>-w</em> or <em>--workflow</em>, workflow can be present as a parameter in
+<code>parameters.csv</code> file:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>workflow, parameter1, parameter2
+workflow.csv, value1, value2</pre>
 </div></div>
 </section>
 <section id="database_usage">
