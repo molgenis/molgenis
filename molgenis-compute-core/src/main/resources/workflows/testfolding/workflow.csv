@@ -4,4 +4,4 @@ test2,protocols/test2.sh,
 test3,protocols/test3.sh,
 test4,protocols/test_concat.sh,
 test5,protocols/test5.sh,local_chr=chr
-#test6,protocols/test6.sh,runtime_concat=test1.outputLALA
+test6,protocols/test6.sh,runtime_concat=test1.outputLALA
