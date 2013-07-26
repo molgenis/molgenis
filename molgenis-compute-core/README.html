@@ -8866,7 +8866,11 @@ Unzip the archive and the command-line version is ready to use.</p>
 <pre>unzip molgenis-compute-core-0.0.1-SNAPSHOT-distribution.zip
 cd molgenis-compute-core-0.0.1-SNAPSHOT</pre>
 </div></div>
-<h2 id="create_workflow">Create workflow</h2>
+</section>
+<section id="create_workflow">
+  <div class="page-header">
+    <h1>3. Create workflow</h1>
+  </div>
 <p>Now u can create your first workflow by executing the following command</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -8975,7 +8979,11 @@ an additional parameters file <code>workflow.defaults.csv</code>.</p>
 myFirstWorkflow,today</pre>
 </div></div>
 <p>In this way, the parameters can be divided in several groups and re-used in different workflows.</p>
-<h2 id="generate_workflow">Generate workflow</h2>
+</section>
+<section id="generate_workflow">
+  <div class="page-header">
+    <h1>4. Generate workflow</h1>
+  </div>
 <p>To generate actual workflow jobs, run the next command-line</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -9070,7 +9078,11 @@ done</pre>
 <p>In the currect implementation, values are first taken from parameter files. If they are not present, then compute looks,
 if these values can be known at run-time, by analysing all previous steps of the protocol, where values are unknown.
 If values cannot be known at run-time, compute will give a generation error.</p>
-<h2 id="execute_workflow">Execute workflow</h2>
+</section>
+<section id="execute_workflow">
+  <div class="page-header">
+    <h1>5. Execute workflow</h1>
+  </div>
 <p>The workflow can be executed with the command</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -9102,7 +9114,7 @@ step1_0.sh                    step1_1.sh                      step2_0.sh        
 </section>
 <section id="command_line_options">
   <div class="page-header">
-    <h1>3. Command-line options</h1>
+    <h1>6. Command-line options</h1>
   </div>
 <p>Molgenis Compute has the following command-line options:</p>
 <div class="literalblock">
@@ -9164,7 +9176,7 @@ usage: sh molgenis-compute.sh -p parameters.csv
 </section>
 <section id="reserved_words">
   <div class="page-header">
-    <h1>4. Reserved words</h1>
+    <h1>7. Reserved words</h1>
   </div>
 <p>Molgenis Compute has a list of reserved words, which cannot be used in compute to name
 parameters, workflow steps, etc. These words are listed below:</p>
@@ -9186,11 +9198,10 @@ autoid</pre>
 <p>The reserved words are used in the compute.properties file. This file is created to save the latest
 compute configuration and discuss further.</p>
 </section>
-<section id="advanced_compute_features">
+<section id="advanced_parameter_formats">
   <div class="page-header">
-    <h1>5. Advanced Compute Features</h1>
+    <h1>8. Advanced parameter formats</h1>
   </div>
-<h2 id="advanced_parameter_formats">Advanced parameter formats</h2>
 <p>More parameters can be specified using the next format</p>
 <div class="literalblock">
 <div class="content monospaced">
@@ -9258,7 +9269,19 @@ bar=    ${foo}, item3
 number= 123</pre>
 </div></div>
 <p>Here, variable <em>bar</em> has two values of variable <em>foo</em>.</p>
-<h2 id="script_generation_for_pbs_cluster_and_other_back_ends">Script generation for PBS cluster and other back-ends</h2>
+<h2 id="specifying_workflow_in_parameters_file">Specifying workflow in parameters file</h2>
+<p>Alternatively to specifying workflow in the command-line using <em>-w</em> or <em>--workflow</em>, workflow can be present as a parameter in
+<code>parameters.csv</code> file:</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>workflow, parameter1, parameter2
+workflow.csv, value1, value2</pre>
+</div></div>
+</section>
+<section id="script_generation_for_pbs_cluster_and_other_back_ends">
+  <div class="page-header">
+    <h1>9. Script generation for PBS cluster and other back-ends</h1>
+  </div>
 <p>To generate for pbs, the next options should be added to the command line</p>
 <p>--backend pbs</p>
 <p>When generating script for computational clusters or grid, some additional parameters, such as execution wall-time, memory requirement, etc. should be
@@ -9288,11 +9311,19 @@ ppn - number of cores needed</pre>
 out=${in}_hasBeenInStep1</pre>
 </div></div>
 <p>The specification in protocols has priority over specification in parameter files.</p>
-<h2 id="starting_with_a_new_workflow">Starting with a new workflow</h2>
+</section>
+<section id="starting_with_a_new_workflow">
+  <div class="page-header">
+    <h1>10. Starting with a new workflow</h1>
+  </div>
 <p>It is very advisable to start working with a new workflow with running</p>
 <p>sh molgenis_compute.sh --clear</p>
 <p>This command clears the <code>.compute.properties</code> file, which contains previous generation and running options.</p>
-<h2 id="commenting_in_workflow_specification">Commenting in workflow specification</h2>
+</section>
+<section id="commenting_in_workflow_specification">
+  <div class="page-header">
+    <h1>11. Commenting in workflow specification</h1>
+  </div>
 <p>User can want to run only one or several steps of the workflow, when the rest of workflow can be commented out using <em>#</em> sign. In this example
 <em>step2</em> is commented out.</p>
 <div class="literalblock">
@@ -9301,28 +9332,20 @@ out=${in}_hasBeenInStep1</pre>
 step1,protocols/step1.sh,
 #step2,protocols/step2.sh,step1</pre>
 </div></div>
-<h2 id="specifying_workflow_in_parameters_file">Specifying workflow in parameters file</h2>
-<p>Alternatively to specifying workflow in the command-line using <em>-w</em> or <em>--workflow</em>, workflow can be present as a parameter in
-<code>parameters.csv</code> file:</p>
-<div class="literalblock">
-<div class="content monospaced">
-<pre>workflow, parameter1, parameter2
-workflow.csv, value1, value2</pre>
-</div></div>
 </section>
 <section id="database_usage">
   <div class="page-header">
-    <h1>6. Database usage</h1>
+    <h1>12. Database usage</h1>
   </div>
 </section>
 <section id="advanced_a_imputation_workflow_example">
   <div class="page-header">
-    <h1>7. Advanced A: Imputation workflow example</h1>
+    <h1>13. Advanced A: Imputation workflow example</h1>
   </div>
 </section>
 <section id="advanced_b_ngs_alignment_workflow_example">
   <div class="page-header">
-    <h1>8. Advanced B: NGS Alignment workflow example</h1>
+    <h1>14. Advanced B: NGS Alignment workflow example</h1>
   </div>
 </section>
         </div>
