@@ -183,7 +183,7 @@ public class EnvironmentGenerator
 					if(value.equalsIgnoreCase(parameterName))
 					{
 						isRunTimeVariable = true;
-						continue;
+						break;
 					}
 				}
 			}

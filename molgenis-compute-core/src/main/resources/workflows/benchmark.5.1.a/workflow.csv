@@ -1,0 +1,3 @@
+step,protocol,dependencies
+step1,protocols/step1.sh,gu=guest;hap=happening
+step2,protocols/step2.sh,strings=step1.out1;strings2=step1.out2
