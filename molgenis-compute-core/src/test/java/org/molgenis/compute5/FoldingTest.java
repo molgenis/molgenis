@@ -32,6 +32,7 @@ public class FoldingTest
 
 		ComputeCommandLine.main(new String[]{
 				"--generate",
+				"--run",
 				"--workflow",
 				"src/main/resources/workflows/testfolding/workflow.csv",
 				"--parameters",
@@ -100,6 +101,18 @@ public class FoldingTest
 		if (file.exists())
 		{
 			Assert.fail("test5_2.sh should not be generated");
+		}
+
+		file = new File(outputDir + "/test6_1.sh");
+		if (!file.exists())
+		{
+			Assert.fail("test6_1.sh is not generated");
+		}
+
+		file = new File(outputDir + "/test6_2.sh");
+		if (file.exists())
+		{
+			Assert.fail("test6_2.sh should not be generated");
 		}
 
 
@@ -179,6 +192,32 @@ public class FoldingTest
 		if(!t.contains(test_weaving_2_1))
 		{
 			Assert.fail("weaving is broken");
+		}
+
+		System.out.println("Test concatination with run-time parameters");
+
+		String test_6_0_list1 = "runtime_concat[0]=${test1__has__outputLALA[0]}";
+		String test_6_0_list2 = "runtime_concat[1]=${test1__has__outputLALA[1]}";
+		String test_6_0_list3 = "runtime_concat[2]=${test1__has__outputLALA[2]}";
+		String test_6_1_list1 = "runtime_concat[0]=${test1__has__outputLALA[3]}";
+		String test_6_1_list2 = "runtime_concat[1]=${test1__has__outputLALA[4]}";
+		String test_6_list = "for s in \"${runtime_concat[@]}\"";
+
+		t = ComputeCommandLineTest.getFileAsString(outputDir + "/test6_0.sh");
+		if(!t.contains(test_6_0_list1) ||
+				!t.contains(test_6_0_list2) ||
+				!t.contains(test_6_0_list3) ||
+				!t.contains(test_6_list))
+		{
+			Assert.fail("concatination of run-time parameters is broken");
+		}
+
+		t = ComputeCommandLineTest.getFileAsString(outputDir + "/test6_1.sh");
+		if(!t.contains(test_6_1_list1) ||
+				!t.contains(test_6_1_list2) ||
+				!t.contains(test_6_list))
+		{
+			Assert.fail("concatination of run-time parameters is broken");
 		}
 
 
