@@ -29,7 +29,7 @@ Unzip the archive and the command-line version is ready to use.
   cd molgenis-compute-core-0.0.1-SNAPSHOT
 
 Create workflow
-~~~~~~~~~~~~~~~
+---------------
 
 Now u can create your first workflow by executing the following command
 
@@ -135,7 +135,7 @@ In this way, the parameters can be divided in several groups and re-used in diff
 
 
 Generate workflow
-~~~~~~~~~~~~~~~~~
+-----------------
 
 To generate actual workflow jobs, run the next command-line
 
@@ -228,7 +228,7 @@ if these values can be known at run-time, by analysing all previous steps of the
 If values cannot be known at run-time, compute will give a generation error.
 
 Execute workflow
-~~~~~~~~~~~~~~~~
+----------------
 
 The workflow can be executed with the command
 
@@ -339,11 +339,8 @@ parameters, workflow steps, etc. These words are listed below:
 The reserved words are used in the compute.properties file. This file is created to save the latest
 compute configuration and discuss further.
 
-Advanced Compute Features
--------------------------
-
 Advanced parameter formats
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 More parameters can be specified using the next format
 
@@ -400,8 +397,18 @@ More complex parameter examples can combine values with template, as following:
 
 Here, variable 'bar' has two values of variable 'foo'.
 
+Specifying workflow in parameters file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively to specifying workflow in the command-line using '-w' or '--workflow', workflow can be present as a parameter in 
++parameters.csv+ file:
+
+  workflow, parameter1, parameter2
+  workflow.csv, value1, value2
+
+
 Script generation for PBS cluster and other back-ends
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
 
 To generate for pbs, the next options should be added to the command line
 
@@ -434,7 +441,7 @@ Or also it can be specified in the molgenis header in protocols
 The specification in protocols has priority over specification in parameter files.
 
 Starting with a new workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 It is very advisable to start working with a new workflow with running 
 
@@ -443,7 +450,7 @@ sh molgenis_compute.sh --clear
 This command clears the +.compute.properties+ file, which contains previous generation and running options.
 
 Commenting in workflow specification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 User can want to run only one or several steps of the workflow, when the rest of workflow can be commented out using '#' sign. In this example
 'step2' is commented out.
@@ -451,15 +458,6 @@ User can want to run only one or several steps of the workflow, when the rest of
   step,protocol,dependencies
   step1,protocols/step1.sh,
   #step2,protocols/step2.sh,step1
-
-Specifying workflow in parameters file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Alternatively to specifying workflow in the command-line using '-w' or '--workflow', workflow can be present as a parameter in 
-+parameters.csv+ file:
-
-  workflow, parameter1, parameter2
-  workflow.csv, value1, value2
 
 Database usage
 --------------
