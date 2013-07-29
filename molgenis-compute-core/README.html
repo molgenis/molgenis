@@ -8978,7 +8978,8 @@ an additional parameters file <code>workflow.defaults.csv</code>.</p>
 <pre>workflowName,creationDate
 myFirstWorkflow,today</pre>
 </div></div>
-<p>In this way, the parameters can be divided in several groups and re-used in different workflows.</p>
+<p>In this way, the parameters can be divided in several groups and re-used in different workflows. If user does not like to map
+parameters, he/she should use the same names in protocols and parameters files. This makes parameters a kind of global.</p>
 </section>
 <section id="generate_workflow">
   <div class="page-header">
@@ -9337,6 +9338,39 @@ step1,protocols/step1.sh,
   <div class="page-header">
     <h1>12. Database usage</h1>
   </div>
+<p>Molgenis web server should be available for database usage. The <code>molgenis-app-compute-db-0.0.1-SNAPSHOT.war</code> can be build by
+ <a id="X12"></a><a href="http://github.com/molgenis/molgenis/tree/master/molgenis-app-compute-db">Molgenis application: molgenis-app-compute-db</a>.</p>
+<p>After installing the application in the maven project, the libraries from</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>target/molgenis-app-compute-db-0.0.1-SNAPSHOT/WEB-INF/lib/</pre>
+</div></div>
+<p>should be placed into</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>lib</pre>
+</div></div>
+<p>directory of your compute distribution. The script to run the database version can be found
+ <a id="X13"></a><a href="http://github.com/molgenis/molgenis/blob/master/molgenis-app-compute-db/src/main/resources/scripts/molgenis_compute.sh">here</a></p>
+<p>Use this scripts instead of standard <code>molgenis_compute.sh</code> It contains more library dependencies to the work with web-server (database)
+from the command-line.</p>
+<p>To insert new compute runs into database, use the command-line like</p>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>sh molgenis_compute.sh \
+--generate \
+--workflow myfirst_workflow/workflow.csv \
+--defaults myfirst_workflow/workflow.defaults.csv \
+--parameters myfirst_workflow/parameters.csv \
+--rundir run \
+--runid demo1 \
+--database &lt;db-ip-address&gt; \
+-mu &lt;db-username&gt; -mpass &lt;db-password&gt; \
+-b &lt;back-end&gt; \
+-bu &lt;back-end-username&gt; -bp &lt;back-end-password&gt;</pre>
+</div></div>
+<p>After this your compute run will appear at the <em>Jobs Dashboard</em>. It will look like in the image below:</p>
+<img src="images/dashboard1.png" alt="some_text">
 </section>
 <section id="advanced_a_imputation_workflow_example">
   <div class="page-header">
