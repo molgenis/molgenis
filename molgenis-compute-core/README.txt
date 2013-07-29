@@ -131,7 +131,8 @@ an additional parameters file +workflow.defaults.csv+.
   workflowName,creationDate
   myFirstWorkflow,today
 
-In this way, the parameters can be divided in several groups and re-used in different workflows.
+In this way, the parameters can be divided in several groups and re-used in different workflows. If user does not like to map 
+parameters, he/she should use the same names in protocols and parameters files. This makes parameters a kind of global.
 
 
 Generate workflow
@@ -461,6 +462,41 @@ User can want to run only one or several steps of the workflow, when the rest of
 
 Database usage
 --------------
+
+Molgenis web server should be available for database usage. The +molgenis-app-compute-db-0.0.1-SNAPSHOT.war+ can be build by 
+ [[X12]]http://github.com/molgenis/molgenis/tree/master/molgenis-app-compute-db[Molgenis application: molgenis-app-compute-db].
+
+After installing the application in the maven project, the libraries from 
+
+  target/molgenis-app-compute-db-0.0.1-SNAPSHOT/WEB-INF/lib/
+
+should be placed into
+
+  lib
+
+directory of your compute distribution. The script to run the database version can be found 
+ [[X13]]http://github.com/molgenis/molgenis/blob/master/molgenis-app-compute-db/src/main/resources/scripts/molgenis_compute.sh[here]
+
+Use this scripts instead of standard +molgenis_compute.sh+ It contains more library dependencies to the work with web-server (database)
+from the command-line.
+
+To insert new compute runs into database, use the command-line like
+
+  sh molgenis_compute.sh \
+  --generate \
+  --workflow myfirst_workflow/workflow.csv \
+  --defaults myfirst_workflow/workflow.defaults.csv \
+  --parameters myfirst_workflow/parameters.csv \
+  --rundir run \
+  --runid demo1 \
+  --database <db-ip-address> \
+  -mu <db-username> -mpass <db-password> \
+  -b <back-end> \
+  -bu <back-end-username> -bp <back-end-password>
+
+After this your compute run will appear at the 'Jobs Dashboard'. It will look like in the image below: 
+
+  image::dashboard1.png[LALA]
 
 Advanced A: Imputation workflow example
 ---------------------------------------
