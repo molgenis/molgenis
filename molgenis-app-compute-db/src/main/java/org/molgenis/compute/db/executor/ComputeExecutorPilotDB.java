@@ -1,6 +1,8 @@
 package org.molgenis.compute.db.executor;
 
 import java.io.*;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
@@ -81,7 +83,9 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
                     Hashtable<String, String> values = new Hashtable<String, String>();
 
                     values.put("pilotid", pilotID);
-                    values.put("SERVER", "SERVER");
+
+					String serverIP = getServerIP();
+                    values.put("SERVER", serverIP);
 
                     String command = weaveFreemarker(comTemplate, values);
                     String jdl = weaveFreemarker(jdlTemplate, values);
@@ -121,6 +125,20 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 
 			IOUtils.closeQuietly(database);
 		}
+	}
+
+	private String getServerIP()
+	{
+		String result = null;
+		try
+		{
+			result = Inet4Address.getLocalHost().getHostAddress();
+		}
+		catch (UnknownHostException e)
+		{
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	private void submitPilotLocalhost(String command)
