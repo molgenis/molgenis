@@ -68,10 +68,11 @@ public class PilotService implements MolgenisService
 			List<Pilot> pilots = ApplicationUtil.getDatabase().query(Pilot.class).eq(Pilot.VALUE, pilotID)
 					.and().eq(Pilot.STATUS, PILOT_SUBMITTED).find();
 
+			Pilot pilot = null;
 			if(pilots.size() > 0)
 			{
 				LOG.info("Pilot value is correct");
-				Pilot pilot = pilots.get(0);
+				pilot = pilots.get(0);
 				pilot.setStatus(PILOT_USED);
 				ApplicationUtil.getDatabase().update(pilot);
 			}
@@ -83,19 +84,19 @@ public class PilotService implements MolgenisService
 
 			String backend = request.getString("backend");
 
-            List<ComputeBackend> computeBackends = ApplicationUtil.getDatabase().query(ComputeBackend.class)
-                    .equals(ComputeBackend.NAME, backend).find();
+			List<ComputeRun> computeRuns = ApplicationUtil.getDatabase().query(ComputeRun.class)
+					.equals(ComputeBackend.NAME, pilot.getComputeRun()).find();
 
-            if(computeBackends.size() > 0)
+			if(computeRuns.size() > 0)
             {
-                ComputeBackend computeBackend = computeBackends.get(0);
-                int pilotsStarted = computeBackend.getPilotsStarted();
-                computeBackend.setPilotsStarted(pilotsStarted + 1);
-                ApplicationUtil.getDatabase().update(computeBackend);
+                ComputeRun computeRun = computeRuns.get(0);
+                int pilotsStarted = computeRun.getPilotsStarted();
+                computeRun.setPilotsStarted(pilotsStarted + 1);
+                ApplicationUtil.getDatabase().update(computeRun);
             }
             else
             {
-                LOG.error("No backend found for BACKENDNAME [" + backend + "]");
+                LOG.error("No ComputeRun found for [" + pilot.getComputeRun().getName() + "]");
             }
 
             LOG.info("Looking for task to execute for host [" + backend + "]");

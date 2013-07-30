@@ -52,12 +52,15 @@
             <field name="isSubmittingPilots" type="boolean" nillable="false" default="false" label="flag, if pilots are submitting for this run"/>
             <field name="isDone" type="boolean" nillable="false" default="false" label="flag, showing that run is completed"/>
             <field name="owner" type="xref" xref_entity="MolgenisUser" nillable="false" />
+            <field name="pilotsSubmitted" type="int" nillable="false" label="number of pilots submitted to backend" default="0"/>
+            <field name="pilotsStarted" type="int" nillable="false" label="number of pilots started at backend" default="0"/>
             <unique fields="name" />
       	</entity>
         <entity name="Pilot" implements="Autoid" description="the unique pilot-job id, that expire in specified time">
             <field name="value" type="text" nillable="false" />
             <field name="owner" type="xref" xref_entity="MolgenisUser" nillable="false" />
             <field name="backend" type="xref" xref_entity="ComputeBackend" nillable="false" />
+            <field name="computeRun" type="xref" xref_entity="ComputeRun" nillable="false" />
             <field name="cteationTime" type="datetime" auto="true" description="time when pilot was submitted" />
             <field name="lifeTerm" type="int" nillable="false" default="120" description="term after which pilot id expires in minutes" />
             <field name="status" type="enum" nillable="false" enum_options="[submitted,used,expired,failed,done]"/>
@@ -66,8 +69,6 @@
             <field name="backendUrl" type="string" nillable="false" label="Backend url" description="Backend host" />
       		<field name="hostType" type="enum" nillable="false" label="Host type" enum_options="[CLUSTER,GRID,LOCALHOST]" description="type of the host" />
       		<field name="command" nillable="false" label="Command" description="Command to be executed" />
-            <field name="pilotsSubmitted" type="int" nillable="false" label="number of pilots submitted to backend" default="0"/>
-            <field name="pilotsStarted" type="int" nillable="false" label="number of pilots started at backend" default="0"/>
             <unique fields="name" />
         </entity>
 	</module>
