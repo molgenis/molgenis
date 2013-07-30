@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.apache.poi.util.IOUtils;
 import org.molgenis.compute.db.pilot.PilotService;
 import org.molgenis.compute.runtime.ComputeBackend;
+import org.molgenis.compute.runtime.ComputeRun;
 import org.molgenis.compute.runtime.ComputeTask;
 import org.molgenis.compute.runtime.Pilot;
 import org.molgenis.framework.db.Database;
@@ -32,7 +33,7 @@ public class ExecutionHost extends Ssh
 		LOG.info("... " + host + " is started");
 	}
 
-	public void submitPilot(ComputeBackend computeBackend, String command,
+	public void submitPilot(ComputeRun computeRun, String command,
                             String pilotID, String sh, String jdl, MolgenisUser owner) throws IOException
 	{
 
@@ -45,6 +46,8 @@ public class ExecutionHost extends Ssh
         uploadStringToFile(sh, "$HOME/maverick/maverick" + pilotID +".sh");
 
         LOG.info("Executing command [" + command + "] ...");
+
+		ComputeBackend computeBackend = computeRun.getComputeBackend();
 
         boolean success = false;
 
@@ -74,8 +77,8 @@ public class ExecutionHost extends Ssh
                     if(computeBackends.size() > 0)
                     {
                         backend = computeBackends.get(0);
-                        int numberOfSubmittedPilots = backend.getPilotsSubmitted();
-                        backend.setPilotsSubmitted(numberOfSubmittedPilots + 1);
+                        int numberOfSubmittedPilots = computeRun.getPilotsSubmitted();
+						computeRun.setPilotsSubmitted(numberOfSubmittedPilots + 1);
                         database.update(backend);
                     }
                     else
@@ -96,6 +99,7 @@ public class ExecutionHost extends Ssh
                     pilot.setBackend(backend);
                     pilot.setStatus(PilotService.PILOT_SUBMITTED);
                     pilot.setOwner(owners.get(0));
+					//pilot.setComputeRun(computeRun);
 
                     database.add(pilot);
                     database.commitTx();

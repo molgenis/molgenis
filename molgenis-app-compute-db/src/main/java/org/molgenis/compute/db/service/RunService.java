@@ -395,10 +395,8 @@ public class RunService
 			int failed = getTaskStatusCount(run.getId(), PilotService.TASK_FAILED);
 			int done = getTaskStatusCount(run.getId(), PilotService.TASK_DONE);
 
-            ComputeBackend backend = run.getComputeBackend();
-            int submitted = backend.getPilotsSubmitted();
-            int started = backend.getPilotsStarted();
-
+            int submitted = run.getPilotsSubmitted();
+            int started = run.getPilotsStarted();
 
             boolean status = false;
 

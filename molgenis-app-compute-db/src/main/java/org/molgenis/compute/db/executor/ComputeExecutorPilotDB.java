@@ -91,7 +91,7 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
                     String jdl = weaveFreemarker(jdlTemplate, values);
                     String sh = weaveFreemarker(shTemplate, values);
 
-					executionHost.submitPilot(computeRun.getComputeBackend(),
+					executionHost.submitPilot(computeRun,
                                                 command, pilotID, sh, jdl, computeRun.getOwner());
 				}
 

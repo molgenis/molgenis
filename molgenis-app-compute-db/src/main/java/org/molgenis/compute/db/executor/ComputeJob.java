@@ -5,7 +5,6 @@ import org.molgenis.compute.runtime.ComputeRun;
 public class ComputeJob implements Runnable
 {
 	private final ComputeExecutor executor;
-	private final PilotManager pilotManager = new PilotManager();
 	private final ComputeRun computeRun;
 	private final String username;
 	private final String password;
