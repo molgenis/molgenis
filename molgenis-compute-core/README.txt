@@ -496,7 +496,28 @@ To insert new compute runs into database, use the command-line like
 
 After this your compute run will appear at the 'Jobs Dashboard'. It will look like in the image below: 
 
-  image::dashboard1.png[LALA]
+
+LALA1
+
+
+User can submit jobs entering the user name and password for computational backend.
+
+
+LALA2
+
+
+Jobs will be submitted for execution.
+
+
+LALA3
+
+When all jobs are finished, compute run will get status 'complete'.
+
+
+LALA4
+
+Jobs also can be submitted and monitored from the command-line using '--run' flag. 
+However, this functionality is not fully tested yet and submission via web-user interface is more stable.
 
 Advanced A: Imputation workflow example
 ---------------------------------------
