@@ -99,7 +99,7 @@ public class ExecutionHost extends Ssh
                     pilot.setBackend(backend);
                     pilot.setStatus(PilotService.PILOT_SUBMITTED);
                     pilot.setOwner(owners.get(0));
-					//pilot.setComputeRun(computeRun);
+					pilot.setComputeRun(computeRun);
 
                     database.add(pilot);
                     database.commitTx();
