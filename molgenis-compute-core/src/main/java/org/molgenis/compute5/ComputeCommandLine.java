@@ -11,10 +11,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.molgenis.compute5.db.api.*;
-import org.molgenis.compute5.generators.CreateWorkflowGenerator;
-import org.molgenis.compute5.generators.DocTotalParametersCsvGenerator;
-import org.molgenis.compute5.generators.EnvironmentGenerator;
-import org.molgenis.compute5.generators.TaskGenerator;
+import org.molgenis.compute5.generators.*;
 import org.molgenis.compute5.generators.local.LocalBackend;
 import org.molgenis.compute5.generators.pbs.PbsBackend;
 import org.molgenis.compute5.model.Compute;
@@ -273,7 +270,7 @@ public class ComputeCommandLine
 			new LocalBackend(computeProperties).generate(compute.getTasks(), dir);
 		}
 
-		// generate documentation
+//TODO:	FIX	generate documentation
 //		new DocTotalParametersCsvGenerator().generate(new File(computeProperties.runDir + "/doc/outputs.csv"),
 //				compute.getParameters());
 //		new DocWorkflowDiagramGenerator().generate(new File(computeProperties.runDir + "/doc"), compute.getWorkflow());
