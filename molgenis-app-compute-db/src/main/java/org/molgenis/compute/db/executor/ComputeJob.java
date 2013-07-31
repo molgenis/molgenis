@@ -24,5 +24,4 @@ public class ComputeJob implements Runnable
 		computeRun.setIsSubmittingPilots(true);
 		executor.executeTasks(computeRun, username, password);
 	}
-
 }

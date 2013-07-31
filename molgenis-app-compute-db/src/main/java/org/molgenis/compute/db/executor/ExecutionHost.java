@@ -69,25 +69,28 @@ public class ExecutionHost extends Ssh
                 try
                 {
                     database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
-                    List<ComputeBackend> computeBackends = database.query(ComputeBackend.class)
-                            .equals(ComputeBackend.NAME, computeBackend.getName()).find();
 
-                    ComputeBackend backend = null;
+					List<ComputeBackend> computeBackends = database.query(ComputeBackend.class).equals(ComputeBackend.NAME, computeBackend.getName()).find();
 
-                    if(computeBackends.size() > 0)
-                    {
-                        backend = computeBackends.get(0);
-                        int numberOfSubmittedPilots = computeRun.getPilotsSubmitted();
-						computeRun.setPilotsSubmitted(numberOfSubmittedPilots + 1);
-                        database.update(backend);
-                    }
-                    else
-                    {
-                        LOG.error("No backend found for BACKENDNAME [" + computeBackend.getName() + "]");
-                    }
+                    if(computeBackends.size() == 0)
+						LOG.error("No backend found for BACKENDNAME [" + computeBackend.getName() + "]");
 
-                    List<MolgenisUser> owners = database.query(MolgenisUser.class).eq(MolgenisUser.NAME,
-                            owner.getName()).find();
+					List<ComputeRun> computeRuns = database.query(ComputeRun.class).equals(ComputeRun.NAME, computeRun.getName()).find();
+					System.out.println("RUN NAME1:" + computeRun.getName());
+
+					ComputeRun run = null;
+					if(computeRuns.size() == 1)
+					{
+						run = computeRuns.get(0);
+						System.out.println("RUN NAME2:" + run.getName());
+						int numberOfSubmittedPilots = run.getPilotsSubmitted();
+						run.setPilotsSubmitted(numberOfSubmittedPilots + 1);
+						database.update(run);
+					}
+					else
+						LOG.error("No compute run found [" + computeRun.getName() + "] to submit pilot job");
+
+					List<MolgenisUser> owners = database.query(MolgenisUser.class).eq(MolgenisUser.NAME, owner.getName()).find();
 
                     if(owners.size() == 0)
                         LOG.error("No molgenis user found [" + database.getLogin().getUserName() + "] to submit pilot job");
@@ -96,10 +99,10 @@ public class ExecutionHost extends Ssh
 
                     Pilot pilot = new Pilot();
                     pilot.setValue(pilotID);
-                    pilot.setBackend(backend);
+                    pilot.setBackend(computeBackends.get(0));
                     pilot.setStatus(PilotService.PILOT_SUBMITTED);
                     pilot.setOwner(owners.get(0));
-					pilot.setComputeRun(computeRun);
+					pilot.setComputeRun(run);
 
                     database.add(pilot);
                     database.commitTx();
@@ -107,7 +110,7 @@ public class ExecutionHost extends Ssh
                 }
                 catch (DatabaseException e)
                 {
-                   LOG.error("No backend found for BACKENDNAME [" + computeBackend.getName() + "]");
+                   //LOG.error("No backend found for BACKENDNAME [" + computeBackend.getName() + "]");
                    e.printStackTrace();
                 }
                 finally
@@ -115,6 +118,17 @@ public class ExecutionHost extends Ssh
                     IOUtils.closeQuietly(database);
                 }
             }
+			else
+			{
+				try
+				{
+					Thread.sleep(2000);
+				}
+				catch (InterruptedException e)
+				{
+					LOG.error("Interrupted exception while sleeping", e);
+				}
+			}
         }
 
         LOG.info("Removing maverick" + pilotID + ".jdl ...");
