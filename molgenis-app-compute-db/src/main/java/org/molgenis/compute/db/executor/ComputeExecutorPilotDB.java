@@ -32,11 +32,12 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 	@Override
 	public void executeTasks(ComputeRun computeRun, String username, String password)
 	{
-		if (computeRun == null) throw new IllegalArgumentException("ComputRun is null");
+		if (computeRun == null)
+			throw new IllegalArgumentException("ComputRun is null");
 
 		Database database = null;
-
 		ExecutionHost executionHost = null;
+
 		try
 		{
 			database = ApplicationUtil.getUnauthorizedPrototypeDatabase();
@@ -56,55 +57,46 @@ public class ComputeExecutorPilotDB implements ComputeExecutor
 				LOG.info("Task ready: [" + task.getName() + "]");
 			}
 
-			for (int i = 0; i < readyTasks.size(); i++)
-			{
-				if (computeRun.getComputeBackend().getHostType().equalsIgnoreCase("localhost"))
+			if(computeRun.getIsSubmittingPilots())
+				for (int i = 0; i < readyTasks.size(); i++)
 				{
-					submitPilotLocalhost(computeRun.getComputeBackend().getCommand());
-				}
-				else
-				{
-					LOG.info("Executing command [" + computeRun.getComputeBackend().getCommand() + "] on backend ["
-							+ computeRun.getComputeBackend().getBackendUrl() + "]");
-
-					if (executionHost == null)
+					if (computeRun.getComputeBackend().getHostType().equalsIgnoreCase("localhost"))
 					{
-						executionHost = new ExecutionHost(computeRun.getComputeBackend().getBackendUrl(), username,
-								password, SSH_PORT);
+						submitPilotLocalhost(computeRun.getComputeBackend().getCommand());
 					}
+					else
+					{
+						LOG.info("Executing command [" + computeRun.getComputeBackend().getCommand() + "] on backend ["
+								+ computeRun.getComputeBackend().getBackendUrl() + "]");
 
-                    //generate unique pilot and its submission command
-                    String pilotID = String.valueOf(UUID.randomUUID());
+						if (executionHost == null)
+						{
+							executionHost = new ExecutionHost(computeRun.getComputeBackend().getBackendUrl(), username,
+									password, SSH_PORT);
+						}
 
-                    String jdlTemplate = getFileAsString("src/main/resources/templates/maverick.jdl.ftl");
-                    String shTemplate = getFileAsString("src/main/resources/templates/maverick.sh.ftl");
-                    String comTemplate = computeRun.getComputeBackend().getCommand();
+						//generate unique pilot and its submission command
+						String pilotID = String.valueOf(UUID.randomUUID());
 
-                    Hashtable<String, String> values = new Hashtable<String, String>();
+						String jdlTemplate = getFileAsString("src/main/resources/templates/maverick.jdl.ftl");
+						String shTemplate = getFileAsString("src/main/resources/templates/maverick.sh.ftl");
+						String comTemplate = computeRun.getComputeBackend().getCommand();
 
-                    values.put("pilotid", pilotID);
+						Hashtable<String, String> values = new Hashtable<String, String>();
 
-					String serverIP = getServerIP();
-                    values.put("SERVER", serverIP);
+						values.put("pilotid", pilotID);
 
-                    String command = weaveFreemarker(comTemplate, values);
-                    String jdl = weaveFreemarker(jdlTemplate, values);
-                    String sh = weaveFreemarker(shTemplate, values);
+						String serverIP = getServerIP();
+						values.put("SERVER", serverIP);
 
-					executionHost.submitPilot(computeRun,
-                                                command, pilotID, sh, jdl, computeRun.getOwner());
+						String command = weaveFreemarker(comTemplate, values);
+						String jdl = weaveFreemarker(jdlTemplate, values);
+						String sh = weaveFreemarker(shTemplate, values);
+
+						executionHost.submitPilot(computeRun,
+													command, pilotID, sh, jdl, computeRun.getOwner());
+					}
 				}
-
-				try
-				{
-					Thread.sleep(2000);
-				}
-				catch (InterruptedException e)
-				{
-					LOG.error("Interrupted exception while sleeping", e);
-				}
-			}
-
 		}
 		catch (DatabaseException e)
 		{
