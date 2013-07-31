@@ -88,7 +88,7 @@ check_process(){
 #</#noparse>
 SERVER=${SERVER}
 
-curl  -s -S -u api:api -F pilotid=${pilotid} -F status=started -F backend=ui.grid.sara.nl http://$SERVER:8080/api/pilot > script.sh
+curl  -s -S -u api:api -F pilotid=${pilotid} -F host=`hostname` -F status=started -F backend=ui.grid.sara.nl http://$SERVER:8080/api/pilot > script.sh
 bash -l script.sh 2>&1 | tee -a log.log &
 
 #to give some time to start the process

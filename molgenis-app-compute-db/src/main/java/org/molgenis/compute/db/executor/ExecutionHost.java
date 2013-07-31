@@ -51,12 +51,13 @@ public class ExecutionHost extends Ssh
 
         boolean success = false;
 
-		while (!success)
+		//while (!success)
         {
             SshResult result = executeCommand(command);
             if (!"".equals(result.getStdErr()))
             {
-                System.out.println(result.getStdErr());
+				System.out.println(">>>>>>>>>>>>>>>>>> PILOT_ID: " + pilotID);
+				System.out.println(result.getStdErr());
             }
 
             String sOut = result.getStdOut();
@@ -76,13 +77,11 @@ public class ExecutionHost extends Ssh
 						LOG.error("No backend found for BACKENDNAME [" + computeBackend.getName() + "]");
 
 					List<ComputeRun> computeRuns = database.query(ComputeRun.class).equals(ComputeRun.NAME, computeRun.getName()).find();
-					System.out.println("RUN NAME1:" + computeRun.getName());
 
 					ComputeRun run = null;
 					if(computeRuns.size() == 1)
 					{
 						run = computeRuns.get(0);
-						System.out.println("RUN NAME2:" + run.getName());
 						int numberOfSubmittedPilots = run.getPilotsSubmitted();
 						run.setPilotsSubmitted(numberOfSubmittedPilots + 1);
 						database.update(run);

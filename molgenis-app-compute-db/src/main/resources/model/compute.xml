@@ -61,6 +61,7 @@
             <field name="owner" type="xref" xref_entity="MolgenisUser" nillable="false" />
             <field name="backend" type="xref" xref_entity="ComputeBackend" nillable="false" />
             <field name="computeRun" type="xref" xref_entity="ComputeRun" nillable="false" />
+            <field name="computeTask" type="xref" xref_entity="ComputeTask" nillable="true" />
             <field name="cteationTime" type="datetime" auto="true" description="time when pilot was submitted" />
             <field name="lifeTerm" type="int" nillable="false" default="120" description="term after which pilot id expires in minutes" />
             <field name="status" type="enum" nillable="false" enum_options="[submitted,used,expired,failed,done]"/>
