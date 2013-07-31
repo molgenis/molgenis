@@ -11,5 +11,4 @@ do
     echo ${s}
 done
 
-
 echo "(FOR TESTING PURPOSES: your runid is ${runid})"

@@ -68,6 +68,8 @@ public class PilotService implements MolgenisService
 			List<Pilot> pilots = ApplicationUtil.getDatabase().query(Pilot.class).eq(Pilot.VALUE, pilotID)
 					.and().eq(Pilot.STATUS, PILOT_SUBMITTED).find();
 
+			System.out.println(">>>>>>>>>>>>>>>>>>>> " + pilotID + " @ " + request.getString("host"));
+
 			Pilot pilot = null;
 			if(pilots.size() > 0)
 			{
@@ -85,7 +87,7 @@ public class PilotService implements MolgenisService
 			String backend = request.getString("backend");
 
 			List<ComputeRun> computeRuns = ApplicationUtil.getDatabase().query(ComputeRun.class)
-					.equals(ComputeBackend.NAME, pilot.getComputeRun()).find();
+					.equals(ComputeBackend.NAME, pilot.getComputeRun().getName()).find();
 
 			if(computeRuns.size() > 0)
             {
@@ -106,33 +108,38 @@ public class PilotService implements MolgenisService
 			if (tasks.isEmpty())
 			{
 				LOG.info("No tasks to start for host [" + backend + "]");
-				return;
 			}
-
-			ComputeTask task = tasks.get(0);
-
-			// we add task id to the run listing to identify task when
-			// it is done
-			ScriptBuilder sb = ApplicationContextProvider.getApplicationContext().getBean(ScriptBuilder.class);
-			String taskScript = sb.build(task, request.getAppLocation(), request.getServicePath(), pilotID);
-
-			LOG.info("Script for task [" + task.getName() + "] of run [ " + task.getComputeRun().getName() + "]:\n"
-					+ taskScript);
-
-			// change status to running
-			task.setStatusCode(PilotService.TASK_RUNNING);
-			ApplicationUtil.getDatabase().update(task);
-
-			// send response
-			PrintWriter pw = response.getResponse().getWriter();
-			try
+			else
 			{
-				pw.write(taskScript);
-				pw.flush();
-			}
-			finally
-			{
-				IOUtils.closeQuietly(pw);
+				ComputeTask task = tasks.get(0);
+
+				// we add task id to the run listing to identify task when
+				// it is done
+				ScriptBuilder sb = ApplicationContextProvider.getApplicationContext().getBean(ScriptBuilder.class);
+				String taskScript = sb.build(task, request.getAppLocation(), request.getServicePath(), pilotID);
+
+				LOG.info("Script for task [" + task.getName() + "] of run [ " + task.getComputeRun().getName() + "]:\n"
+						+ taskScript);
+
+				// change status to running
+				task.setStatusCode(PilotService.TASK_RUNNING);
+				ApplicationUtil.getDatabase().update(task);
+
+				pilot.setComputeTask(task);
+				ApplicationUtil.getDatabase().update(pilot);
+
+				// send response
+				PrintWriter pw = response.getResponse().getWriter();
+				try
+				{
+					pw.write(taskScript);
+					pw.flush();
+				}
+				finally
+				{
+					IOUtils.closeQuietly(pw);
+				}
+
 			}
 
 		}
@@ -185,9 +192,20 @@ public class PilotService implements MolgenisService
 
 			if ("done".equals(request.getString("status")))
 			{
-				Pilot pilot = pilots.get(0);
-				pilot.setStatus(PILOT_DONE);
-				ApplicationUtil.getDatabase().update(pilot);
+
+				List<Pilot> pilotList = ApplicationUtil.getDatabase().query(Pilot.class).eq(Pilot.COMPUTETASK, task).find();
+				Pilot pilot = null;
+				if(pilotList.size() > 0)
+				{
+					pilot = pilots.get(0);
+					pilot.setStatus(PILOT_DONE);
+					ApplicationUtil.getDatabase().update(pilot);
+				}
+				else
+				{
+					LOG.warn("There is no pilot, which got TASK [" + task.getName() + "] of RUN [" + task.getComputeRun().getName() + "]");
+				}
+
 
 				LOG.info(">>> task [" + taskName + "] of run [" + runName + "] is finished");
 				if (task.getStatusCode().equalsIgnoreCase(TASK_RUNNING))
