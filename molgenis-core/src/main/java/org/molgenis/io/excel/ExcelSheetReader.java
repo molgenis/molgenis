@@ -135,7 +135,7 @@ public class ExcelSheetReader implements TupleReader
             {
                 final int row = headerRow.getRowNum();
                 final String column = CellReference.convertNumToColString(i);
-                throw new IllegalStateException("Invalid value at [" + sheet.getSheetName() + "] " + column + row, ex);
+                throw new IllegalStateException("Invalid value at [" + sheet.getSheetName() + "] " + column + row + 1, ex);
             }
 		}
 		return columnIdx;
