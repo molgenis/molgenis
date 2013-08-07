@@ -44,6 +44,20 @@ public class GenericLayerResourceManagerService
 {
 	private static final Logger LOG = Logger.getLogger(GenericLayerResourceManagerService.class);
 
+	private static final JAXBContext JAXB_CONTEXT_ATOM;
+
+	static
+	{
+		try
+		{
+			JAXB_CONTEXT_ATOM = JAXBContext.newInstance("org.molgenis.atom");
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+	
 	private final HttpClient httpClient;
 	private final String resourceManagerServiceUrl;
 	private final GenericLayerDataBinder genericLayerDataBinder;
@@ -231,8 +245,7 @@ public class GenericLayerResourceManagerService
 
 	private FeedType getFeed(String uri) throws JAXBException, IOException
 	{
-		JAXBContext jaxbContext = JAXBContext.newInstance("org.molgenis.atom");
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		Unmarshaller jaxbUnmarshaller = JAXB_CONTEXT_ATOM.createUnmarshaller();
 
 		HttpGet httpGet = new HttpGet(resourceManagerServiceUrl + uri);
 		InputStream xmlStream = null;

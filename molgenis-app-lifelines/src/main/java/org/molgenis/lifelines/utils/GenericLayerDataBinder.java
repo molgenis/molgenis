@@ -10,6 +10,20 @@ import org.molgenis.hl7.POQMMT000001UVQualityMeasureDocument;
 
 public class GenericLayerDataBinder
 {
+	private static final JAXBContext JAXB_CONTEXT_QUALITY_MEASURE_DOCUMENT;
+
+	static
+	{
+		try
+		{
+			JAXB_CONTEXT_QUALITY_MEASURE_DOCUMENT = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	private final Schema eMeasureSchema;
 
 	public GenericLayerDataBinder(Schema eMeasureSchema)
@@ -20,16 +34,14 @@ public class GenericLayerDataBinder
 
 	public Marshaller createQualityMeasureDocumentMarshaller() throws JAXBException
 	{
-		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
-		Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+		Marshaller jaxbMarshaller = JAXB_CONTEXT_QUALITY_MEASURE_DOCUMENT.createMarshaller();
 		jaxbMarshaller.setSchema(eMeasureSchema);
 		return jaxbMarshaller;
 	}
 
 	public Unmarshaller createQualityMeasureDocumentUnmarshaller() throws JAXBException
 	{
-		JAXBContext jaxbContext = JAXBContext.newInstance(POQMMT000001UVQualityMeasureDocument.class);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		Unmarshaller jaxbUnmarshaller = JAXB_CONTEXT_QUALITY_MEASURE_DOCUMENT.createUnmarshaller();
 		jaxbUnmarshaller.setSchema(eMeasureSchema);
 		return jaxbUnmarshaller;
 	}
