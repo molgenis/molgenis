@@ -53,6 +53,20 @@ public class GenericLayerDataQueryService
 {
 	private static final Logger logger = Logger.getLogger(GenericLayerResourceManagerService.class);
 
+	private static final JAXBContext JAXB_CONTEXT_ACT_CATEGORY;
+
+	static
+	{
+		try
+		{
+			JAXB_CONTEXT_ACT_CATEGORY = JAXBContext.newInstance(REPCMT000400UV01ActCategory.class);
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+	
 	@Autowired
 	private HttpClient httpClient;
 	@Autowired
@@ -99,8 +113,7 @@ public class GenericLayerDataQueryService
 				if (statusCode < 200 || statusCode > 299) throw new IOException(
 						"Error persisting study definition (statuscode " + statusCode + ")");
 				xmlStream = response.getEntity().getContent();
-				JAXBContext jaxbContext = JAXBContext.newInstance(REPCMT000400UV01ActCategory.class);
-				actCategory = jaxbContext.createUnmarshaller()
+				actCategory = JAXB_CONTEXT_ACT_CATEGORY.createUnmarshaller()
 						.unmarshal(new StreamSource(xmlStream), REPCMT000400UV01ActCategory.class).getValue();
 			}
 			catch (RuntimeException e)
