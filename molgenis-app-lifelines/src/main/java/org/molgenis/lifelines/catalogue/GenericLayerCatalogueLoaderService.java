@@ -46,6 +46,22 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 {
 	private static final Logger logger = Logger.getLogger(GenericLayerCatalogueLoaderService.class);
 
+	private static final JAXBContext JAXB_CONTEXT_VALUESETS;
+	private static final JAXBContext JAXB_CONTEXT_ORGANIZER;
+
+	static
+	{
+		try
+		{
+			JAXB_CONTEXT_VALUESETS = JAXBContext.newInstance(ValueSets.class);
+			JAXB_CONTEXT_ORGANIZER = JAXBContext.newInstance(REPCMT000100UV01Organizer.class);
+		}
+		catch (JAXBException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
 	private final Database database;
 	private final GenericLayerCatalogService genericLayerCatalogService;
 	private final GenericLayerResourceManagerService resourceManagerService;
@@ -168,8 +184,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		ValueSets valueSets;
 		try
 		{
-			JAXBContext jaxbContext = JAXBContext.newInstance(ValueSets.class);
-			Unmarshaller um = jaxbContext.createUnmarshaller();
+			Unmarshaller um = JAXB_CONTEXT_VALUESETS.createUnmarshaller();
 			valueSets = um.unmarshal((Node) valueSetsResult.getAny(), ValueSets.class).getValue();
 		}
 		catch (JAXBException e)
@@ -226,8 +241,7 @@ public class GenericLayerCatalogueLoaderService implements CatalogLoaderService
 		REPCMT000100UV01Organizer catalog;
 		try
 		{
-			JAXBContext jaxbContext = JAXBContext.newInstance(REPCMT000100UV01Organizer.class);
-			Unmarshaller um = jaxbContext.createUnmarshaller();
+			Unmarshaller um = JAXB_CONTEXT_ORGANIZER.createUnmarshaller();
 			catalog = um.unmarshal((Node) catalogResult.getAny(), REPCMT000100UV01Organizer.class).getValue();
 		}
 		catch (JAXBException e)
