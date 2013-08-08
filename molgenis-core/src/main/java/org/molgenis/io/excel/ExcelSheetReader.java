@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellReference;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.processor.AbstractCellProcessor;
 import org.molgenis.io.processor.CellProcessor;
@@ -125,8 +126,17 @@ public class ExcelSheetReader implements TupleReader
 		int i = 0;
 		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();)
 		{
-			String header = AbstractCellProcessor.processCell(it.next().getStringCellValue(), true, cellProcessors);
-			columnIdx.put(header, i++);
+            try
+            {
+                String header = AbstractCellProcessor.processCell(it.next().getStringCellValue(), true, cellProcessors);
+                columnIdx.put(header, i++);
+            }
+            catch (final IllegalStateException ex)
+            {
+                final int row = headerRow.getRowNum();
+                final String column = CellReference.convertNumToColString(i);
+                throw new IllegalStateException("Invalid value at [" + sheet.getSheetName() + "] " + column + row + 1, ex);
+            }
 		}
 		return columnIdx;
 	}
