@@ -53,7 +53,6 @@
 					<a id="delete-button" class="btn">Delete</a>
 				</div>
 			</div>
-		</div>	
-		<div class="feedback-dialog"></div>			
+		</div>		
 	</body>
 </html>
