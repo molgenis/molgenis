@@ -1,3 +1,0 @@
-step,protocol,dependencies
-step1,protocols/step1.sh,
-step2,protocols/step2.c.sh,step1

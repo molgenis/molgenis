@@ -1,3 +1,0 @@
-step,protocol,parameterMapping
-fruitMachine,protocols/fruitMachine.sh,round=user_round;payout=user_payout
-collect,protocols/collect.sh,payout=user_payout;profit=fruitMachine_profit
