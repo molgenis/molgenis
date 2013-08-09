@@ -1,4 +1,0 @@
-step,protocol,parameters
-stepA,stepA.sh,experiment=user_experiment;sample=user_sample
-stepB,stepB.sh,descriptiveSampleNames=stepA_descriptiveSampleNamesOUT
-stepC,stepC.sh,nSamples=stepA_nSamples

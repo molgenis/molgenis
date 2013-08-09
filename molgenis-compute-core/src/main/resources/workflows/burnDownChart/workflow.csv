@@ -1,2 +1,0 @@
-step,protocol,parameterMapping
-CreateChartPDF,CreateChartPDF.sh,points=user_points;day=user_day;month=user_month;dayName=user_dayName;team=user_team;sprint=user_sprint
