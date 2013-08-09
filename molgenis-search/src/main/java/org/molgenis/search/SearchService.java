@@ -55,4 +55,12 @@ public interface SearchService
 	 * @return
 	 */
 	long count(String documentType, List<QueryRule> queryRules);
+	
+	/**
+	 * delete documentType from index
+	 * 
+	 * @param indexname
+	 * @return boolean succeeded
+	 */
+	void deleteDocumentsByType(String documentType);
 }
