@@ -201,7 +201,8 @@ public class ElasticSearchService implements SearchService
 		{ indexName }, documentTypeSantized)).actionGet().exists();
 	}
 
-	private void deleteDocumentsByType(String documentType)
+	@Override
+	public void deleteDocumentsByType(String documentType)
 	{
 		LOG.info("Going to delete all documents of type [" + documentType + "]");
 
