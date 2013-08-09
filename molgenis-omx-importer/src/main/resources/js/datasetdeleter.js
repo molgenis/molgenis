@@ -34,7 +34,7 @@
 		    },
 		    error:function (xhr, ajaxOptions, thrownError){ 
 		    	parent.hideSpinner();
-		    	$('.container-fluid').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>an <strong>Error</strong> occurred while deleting the dataset</div>'));  
+		    	$('.container-fluid').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>An error occurred while deleting the dataset</div>'));  
 		 } 
 	});
 };
