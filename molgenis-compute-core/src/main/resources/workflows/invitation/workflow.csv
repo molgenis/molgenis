@@ -1,3 +1,0 @@
-step,protocol,parameters
-guests,GuestInvitation.ftl,guest=user.guest;party=user.party
-organizers,OrganizerInvitation.ftl,group=guests.group;guests=user.guest;organizer=user.organizer

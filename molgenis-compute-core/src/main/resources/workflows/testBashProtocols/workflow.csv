@@ -1,4 +1,0 @@
-step,protocol,parameters
-stepA,stepA.ftl,in0=user_input;constant=user_constant
-stepB,stepB.ftl,in1=user_input
-stepC,stepC.ftl,in2=stepB_out1
