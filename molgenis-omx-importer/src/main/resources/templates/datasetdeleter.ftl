@@ -34,22 +34,23 @@
 					e.stopPropagation();
 					form.submit();
 				});
-			});
-			
+			});		
 		</script>
-
 	</head>
 	<body>
 		<div class="container-fluid">
 			<div class="row-fluid">
 				<div class="span9">
-					<form id="deletedataset-form" enctype="multipart/form-data">
+					<h4>Delete dataset:</h4>
+					<div class="well" style="width: 400px; max-height:400px; overflow:auto">
+						<form id="deletedataset-form" enctype="multipart/form-data">
 						<label class="control-label" for="dataset-select">Choose a dataset:</label>
 						<select data-placeholder="Choose a Dataset to delete" id="dataset-select" name="dataset">
 						</select><br>
 						<input type="checkbox" name="deletemetadata" checked> Delete the metadata of this dataset.
 					</form>
-					<a id="delete-button" class="btn">Delete Dataset</a>
+					</div>
+					<a id="delete-button" class="btn">Delete</a>
 				</div>
 			</div>
 		</div>	
