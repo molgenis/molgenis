@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
@@ -58,6 +59,7 @@ public class DataExplorerController
 	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
 	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
+    private static final String[] runtimeProperties = {"app.href.logo", "app.href.css"};
 
 	@Autowired
 	private Database database;
@@ -83,6 +85,15 @@ public class DataExplorerController
 				"/js/MultiObservationSetTable.js");
 
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
+
+        for (final String property : runtimeProperties)
+        {
+            final String value = molgenisSettings.getProperty(property);
+            if (StringUtils.isNotBlank(value))
+            {
+                model.addAttribute(property.replaceAll("\\.", "_"), value);
+            }
+        }
 
 		return "dataexplorer";
 	}
