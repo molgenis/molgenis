@@ -6,6 +6,9 @@
 		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<#if app_href_css??>
+			<link rel="stylesheet" href="${app_href_css}" type="text/css">
+        </#if>
 		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
 		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
 		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
