@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToDecimalValueConverter implements TupleToValueConverter<DecimalValue, Double>
@@ -28,8 +30,8 @@ public class TupleToDecimalValueConverter implements TupleToValueConverter<Decim
 	}
 
 	@Override
-	public Double extractValue(Value value)
+	public Cell<Double> toCell(Value value)
 	{
-		return ((DecimalValue) value).getValue();
+		return new ValueCell<Double>(((DecimalValue) value).getValue());
 	}
 }

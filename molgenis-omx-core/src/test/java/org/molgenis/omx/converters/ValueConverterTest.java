@@ -24,17 +24,17 @@ public class ValueConverterTest
 	}
 
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell() throws ValueConverterException
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
-		assertEquals(new ValueConverter(database).extractValue(value), Boolean.TRUE);
+		assertEquals(new ValueConverter(database).toCell(value).getValue(), Boolean.TRUE);
 	}
 
 	@Test(expectedExceptions = ValueConverterException.class)
 	public void extractValue_UnsupportValue() throws ValueConverterException
 	{
-		new ValueConverter(database).extractValue(new Value());
+		new ValueConverter(database).toCell(new Value());
 	}
 
 	@Test

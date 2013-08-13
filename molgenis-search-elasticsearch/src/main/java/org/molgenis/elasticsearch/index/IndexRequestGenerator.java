@@ -1,11 +1,9 @@
 package org.molgenis.elasticsearch.index;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,6 +17,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.Entity;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 /**
@@ -104,11 +103,12 @@ public class IndexRequestGenerator
 	private Iterator<BulkRequestBuilder> indexRequestIterator(final String documentName, final TupleTable tupleTable)
 			throws TableException
 	{
-		final Set<String> xrefColumns = new HashSet<String>();
+		final Set<String> xrefAndMrefColumns = new HashSet<String>();
 		for (Field field : tupleTable.getColumns())
 		{
-			boolean isXref = field.getType().getEnumType().equals(FieldTypeEnum.XREF);
-			if (isXref) xrefColumns.add(field.getName());
+			FieldTypeEnum fieldType = field.getType().getEnumType();
+			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
+			if (isXrefOrMref) xrefAndMrefColumns.add(field.getName());
 		}
 
 		return new Iterator<BulkRequestBuilder>()
@@ -125,6 +125,7 @@ public class IndexRequestGenerator
 				return it.hasNext();
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public BulkRequestBuilder next()
 			{
@@ -141,6 +142,11 @@ public class IndexRequestGenerator
 						// list
 						// fields
 						Object value = tuple.get(columnName);
+						if (value instanceof Cell)
+						{
+							Cell<?> cell = (Cell<?>) value;
+							value = cell.getValue();
+						}
 						if (value instanceof Collection)
 						{
 							value = Joiner.on(" , ").join((Collection<?>) value);
@@ -149,13 +155,30 @@ public class IndexRequestGenerator
 						doc.put(columnName, value);
 					}
 
-					List<Object> xrefValues = new ArrayList<Object>();
+					Set<String> xrefAndMrefValues = new HashSet<String>();
 					for (String columnName : tuple.getColNames())
 					{
-						if (xrefColumns.contains(columnName)) xrefValues.add(tuple.get(columnName));
-
+						if (xrefAndMrefColumns.contains(columnName))
+						{
+							Object value = tuple.get(columnName);
+							if (value instanceof Cell)
+							{
+								Cell<?> cell = (Cell<?>) value;
+								if (cell.getValue() instanceof Collection<?>)
+								{
+									for (Cell<?> mrefCell : (Collection<Cell<?>>) cell.getValue())
+									{
+										xrefAndMrefValues.add(mrefCell.getKey());
+									}
+								}
+								else
+								{
+									xrefAndMrefValues.add(cell.getKey());
+								}
+							}
+						}
 					}
-					doc.put("_xrefvalue", xrefValues);
+					doc.put("_xrefvalue", xrefAndMrefValues);
 
 					IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
 

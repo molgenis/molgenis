@@ -23,6 +23,7 @@ import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 /**
@@ -79,7 +80,7 @@ public class ValueConverter
 		return converter.fromTuple(tuple, colName, feature);
 	}
 
-	public Object extractValue(Value value) throws ValueConverterException
+	public Cell<?> toCell(Value value) throws ValueConverterException
 	{
 		if (value == null) return null;
 
@@ -93,7 +94,7 @@ public class ValueConverter
 		{
 			throw new ValueConverterException("unsupported value type [" + value.getClass().getSimpleName() + "]");
 		}
-		return valueConverter.extractValue(value);
+		return valueConverter.toCell(value);
 	}
 
 	private TupleToValueConverter<? extends Value, ?> getTupleConverter(FieldTypeEnum fieldTypeEnum)
