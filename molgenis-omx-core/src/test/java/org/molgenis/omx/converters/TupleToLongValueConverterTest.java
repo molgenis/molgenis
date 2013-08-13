@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToLongValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		LongValue value = new LongValue();
 		value.setValue(1234l);
-		assertEquals(new TupleToLongValueConverter().extractValue(value), Long.valueOf(1234l));
+		assertEquals(new TupleToLongValueConverter().toCell(value).getValue(), Long.valueOf(1234l));
 	}
 
 	@Test

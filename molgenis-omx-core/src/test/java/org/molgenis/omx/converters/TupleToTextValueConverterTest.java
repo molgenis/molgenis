@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToTextValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		TextValue value = new TextValue();
 		value.setValue("value");
-		assertEquals(new TupleToTextValueConverter().extractValue(value), "value");
+		assertEquals(new TupleToTextValueConverter().toCell(value).getValue(), "value");
 	}
 
 	@Test

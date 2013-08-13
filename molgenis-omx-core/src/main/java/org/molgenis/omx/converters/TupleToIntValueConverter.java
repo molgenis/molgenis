@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToIntValueConverter implements TupleToValueConverter<IntValue, Integer>
@@ -27,8 +29,8 @@ public class TupleToIntValueConverter implements TupleToValueConverter<IntValue,
 	}
 
 	@Override
-	public Integer extractValue(Value value)
+	public Cell<Integer> toCell(Value value)
 	{
-		return ((IntValue) value).getValue();
+		return new ValueCell<Integer>(((IntValue) value).getValue());
 	}
 }

@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToBoolValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
-		assertEquals(new TupleToBoolValueConverter().extractValue(value), Boolean.TRUE);
+		assertEquals(new TupleToBoolValueConverter().toCell(value).getValue(), Boolean.TRUE);
 	}
 
 	@Test

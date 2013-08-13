@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToEmailValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		EmailValue value = new EmailValue();
 		value.setValue("a@b.org");
-		assertEquals(new TupleToEmailValueConverter().extractValue(value), "a@b.org");
+		assertEquals(new TupleToEmailValueConverter().toCell(value).getValue(), "a@b.org");
 	}
 
 	@Test
