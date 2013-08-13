@@ -12,12 +12,12 @@ public class TupleToDateValueConverterTest
 {
 
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		Date date = new Date(1371420000000l);
 		DateValue value = new DateValue();
 		value.setValue(date);
-		assertEquals(new TupleToDateValueConverter().extractValue(value), "2013-06-17");
+		assertEquals(new TupleToDateValueConverter().toCell(value).getValue(), "2013-06-17");
 	}
 
 	@Test

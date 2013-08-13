@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.EmailValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToEmailValueConverter implements TupleToValueConverter<EmailValue, String>
@@ -19,8 +21,8 @@ public class TupleToEmailValueConverter implements TupleToValueConverter<EmailVa
 	}
 
 	@Override
-	public String extractValue(Value value)
+	public Cell<String> toCell(Value value)
 	{
-		return ((EmailValue) value).getValue();
+		return new ValueCell<String>(((EmailValue) value).getValue());
 	}
 }

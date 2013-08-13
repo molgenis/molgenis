@@ -12,12 +12,12 @@ public class TupleToDateTimeValueConverterTest
 {
 
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		Date date = new Date(1371447949000l);
 		DateTimeValue value = new DateTimeValue();
 		value.setValue(date);
-		assertEquals(new TupleToDateTimeValueConverter().extractValue(value), "2013-06-17T07:45:49+0200");
+		assertEquals(new TupleToDateTimeValueConverter().toCell(value).getValue(), "2013-06-17T07:45:49+0200");
 	}
 
 	@Test
