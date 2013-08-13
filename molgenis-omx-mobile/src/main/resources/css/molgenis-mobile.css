@@ -1,0 +1,18 @@
+#logo {
+  text-align: center;
+  margin:0 auto;
+}
+
+#login-form {
+	margin-top: 20px;
+}
+
+.ui-submit {
+	margin-top:60px;
+}
+
+label.error {
+	color: red;
+	padding-top: .5em;
+	vertical-align: top;
+}
