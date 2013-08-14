@@ -1,10 +1,13 @@
 var MolgenisMobileConfig = {
-		startPage : '#catalogue-page'
+		startPage : '#catalogue-page',
+		featureCount : 10
 };
 
 $(document).bind("mobileinit", function() {
-	$(document).on('pagebeforeshow', '#login-page', window.top.molgenis.onLoginPageBeforeShow);
-
+	var ns = window.top.molgenis;
+	
+	$(document).on('pagebeforeshow', '#login-page', ns.onLoginPageBeforeShow);
+	$(document).on('click', '.logout', ns.logout);
 });
 
 (function($, w) {
@@ -55,6 +58,16 @@ $(document).bind("mobileinit", function() {
 					$.mobile.hidePageLoadingMsg(); 
 					alert(response.errorMessage);
 				}
+			}
+		});
+	}
+	
+	ns.logout = function() {
+		$.mobile.showPageLoadingMsg(); 
+		$.ajax({
+			url : '/mobile/logout',
+			success : function() {
+				$.mobile.changePage("#login-page", {transition: "flip", reverse: true});
 			}
 		});
 	}

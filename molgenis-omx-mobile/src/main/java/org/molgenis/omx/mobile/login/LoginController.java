@@ -10,10 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/mobile/login")
+@RequestMapping("/mobile")
 public class LoginController
 {
 	private final Database database;
@@ -34,13 +35,12 @@ public class LoginController
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/login", method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<LoginResponse> login(@RequestBody
 	LoginRequest request) throws Exception
 	{
 		String errorMessage = null;
-
 		boolean success = database.getLogin().login(database, request.getUsername(), request.getPassword());
 		if (!success)
 		{
@@ -48,5 +48,13 @@ public class LoginController
 		}
 
 		return new ResponseEntity<LoginResponse>(new LoginResponse(errorMessage), HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	@ResponseBody
+	public void logout() throws Exception
+	{
+		database.getLogin().logout(database);
+		database.getLogin().reload(database);
 	}
 }

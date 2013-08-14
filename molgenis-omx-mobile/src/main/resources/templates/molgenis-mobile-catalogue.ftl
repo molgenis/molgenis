@@ -17,7 +17,9 @@
 	<script src="/js/jquery.validate.min.js"></script>
 	<script src="/js/molgenis-all.js"></script>
 	<script src="/js/molgenis-mobile-login.js"></script>
+	<script src="/js/molgenis-mobile-data-items.js"></script>
  	<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+ 	
 </head> 
 
 <body> 
@@ -37,11 +39,11 @@
 	
 	<div id="catalogue-page" data-role="page">
 		<div data-role="header" data-position="fixed">
-			<h1>Data items</h1>
-			<a href="#" data-icon="gear" class="ui-btn-right sign-out">Sign out</a>
+			<h1><span id="feature-count"></span> Data items</h1>
+			<a href="#" class="ui-btn-right logout">Logout</a>
 		</div>
 		<div data-role="content">
-			<ul id="protocols" data-inset="true" data-role="listview"></ul>
+			<ul id="features" data-inset="true" data-role="listview"></ul>
 		</div>
 	</div>	
 	
