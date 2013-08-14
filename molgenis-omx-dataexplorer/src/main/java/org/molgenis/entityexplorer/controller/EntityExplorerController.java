@@ -36,6 +36,8 @@ public class EntityExplorerController
 {
 	private static final Logger logger = Logger.getLogger(EntityExplorerController.class);
 
+	private static final String KEY_APP_HREF_CSS = "app.href.css";
+
 	public static final String URI = "/plugin/entityexplorer";
 
 	@Autowired
@@ -45,16 +47,18 @@ public class EntityExplorerController
 	private MolgenisSettings molgenisSettings;
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView init(@RequestParam(required = false) String entity,
-			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query)
-			throws Exception
+	public ModelAndView init(@RequestParam(required = false)
+	String entity, @RequestParam(required = false)
+	String identifier, @RequestParam(required = false)
+	String query) throws Exception
 	{
 		// select all characteristic entities
 		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(database.getEntityClasses(),
 				new Predicate<Class<? extends Entity>>()
 				{
 					@Override
-					public boolean apply(@Nullable Class<? extends Entity> clazz)
+					public boolean apply(@Nullable
+					Class<? extends Entity> clazz)
 					{
 						return clazz != null && Characteristic.class.isAssignableFrom(clazz)
 								&& !clazz.equals(Characteristic.class);
@@ -63,7 +67,9 @@ public class EntityExplorerController
 
 		Map<String, Class<? extends Characteristic>> clazzMap = new LinkedHashMap<String, Class<? extends Characteristic>>();
 		for (Class<? extends Entity> clazz : entityClazzes)
-			clazzMap.put(clazz.getSimpleName(), (Class<? extends Characteristic>) clazz);
+		{
+			if (database.count(clazz) > 0) clazzMap.put(clazz.getSimpleName(), (Class<? extends Characteristic>) clazz);
+		}
 
 		// select initial entity
 		Class<? extends Characteristic> selectedClazz = clazzMap.get(entity);
@@ -95,7 +101,8 @@ public class EntityExplorerController
 				{
 					@Override
 					@Nullable
-					public String apply(@Nullable Characteristic characteristic)
+					public String apply(@Nullable
+					Characteristic characteristic)
 					{
 						return characteristic != null ? characteristic.getIdentifier() : null;
 					}
@@ -107,6 +114,10 @@ public class EntityExplorerController
 				.get(0);
 
 		ModelAndView model = new ModelAndView("entityexplorer");
+
+		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
+		if (appHrefCss != null) model.addObject(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
+
 		model.addObject("entities", new ArrayList<String>(clazzMap.keySet()));
 		model.addObject("selectedEntity", selectedClazz.getSimpleName());
 		model.addObject("entityInstances", characteristics);
