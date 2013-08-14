@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToHyperlinkValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		HyperlinkValue value = new HyperlinkValue();
 		value.setValue("http://www.a.org/");
-		assertEquals(new TupleToHyperlinkValueConverter().extractValue(value), "http://www.a.org/");
+		assertEquals(new TupleToHyperlinkValueConverter().toCell(value).getValue(), "http://www.a.org/");
 	}
 
 	@Test

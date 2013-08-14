@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.HtmlValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToHtmlValueConverter implements TupleToValueConverter<HtmlValue, String>
@@ -19,8 +21,8 @@ public class TupleToHtmlValueConverter implements TupleToValueConverter<HtmlValu
 	}
 
 	@Override
-	public String extractValue(Value value)
+	public Cell<String> toCell(Value value)
 	{
-		return ((HtmlValue) value).getValue();
+		return new ValueCell<String>(((HtmlValue) value).getValue());
 	}
 }

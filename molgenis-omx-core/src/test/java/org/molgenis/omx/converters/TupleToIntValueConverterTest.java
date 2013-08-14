@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToIntValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell()
 	{
 		IntValue value = new IntValue();
 		value.setValue(123);
-		assertEquals(new TupleToIntValueConverter().extractValue(value), Integer.valueOf(123));
+		assertEquals(new TupleToIntValueConverter().toCell(value).getValue(), Integer.valueOf(123));
 	}
 
 	@Test

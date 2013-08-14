@@ -15,6 +15,7 @@ import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.Value;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
@@ -72,8 +73,8 @@ public class DataSetTableIterator implements Iterator<Tuple>
 					.in(ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames)).find())
 			{
 				ObservableFeature feature = v.getFeature();
-				Object value = valueConverter.extractValue(v.getValue());
-				tuple.set(feature.getIdentifier(), value);
+				Value value = v.getValue();
+				tuple.set(feature.getIdentifier(), valueConverter.toCell(value));
 			}
 		}
 		catch (DatabaseException e)
@@ -93,7 +94,6 @@ public class DataSetTableIterator implements Iterator<Tuple>
 	@Override
 	public void remove()
 	{
-
 		throw new UnsupportedOperationException("remove not supported");
 	}
 

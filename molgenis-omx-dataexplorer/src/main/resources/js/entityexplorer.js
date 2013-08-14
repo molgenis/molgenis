@@ -7,7 +7,7 @@
 	var searchApi = new ns.SearchClient();
 
 	ns.onEntityChange = function(name) {
-		restApi.getAsync('/api/v1/' + name, null, function(entities) {
+		restApi.getAsync('/api/v1/' + name, null, null, function(entities) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(entities.items, function(key, val) {
@@ -22,7 +22,7 @@
 	};
 
 	ns.onEntitySelectionChange = function(entityUrl) {
-		restApi.getAsync(entityUrl, null, function(entity) {
+		restApi.getAsync(entityUrl, null, null, function(entity) {
 			ns.updateEntityTable(entity);
 			ns.updateEntitySearchResults(entity);
 		});
