@@ -1,9 +1,11 @@
 package org.molgenis.elasticsearch.index;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -139,19 +141,36 @@ public class IndexRequestGenerator
 					for (String columnName : tuple.getColNames())
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on
-						// list
-						// fields
+						// list fields
+						Object key = null;
 						Object value = tuple.get(columnName);
 						if (value instanceof Cell)
 						{
 							Cell<?> cell = (Cell<?>) value;
+							key = cell.getKey();
 							value = cell.getValue();
 						}
 						if (value instanceof Collection)
 						{
+							Collection<?> values = (Collection<?>) value;
+							if (values != null && !values.isEmpty() && values.iterator().next() instanceof Cell)
+							{
+								List<String> mrefKeys = null;
+								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
+								{
+									String cellKey = it.next().getKey();
+									if (cellKey != null)
+									{
+										if (mrefKeys == null) mrefKeys = new ArrayList<String>();
+										mrefKeys.add(cellKey);
+									}
+								}
+								if (mrefKeys != null) key = mrefKeys;
+							}
 							value = Joiner.on(" , ").join((Collection<?>) value);
 						}
 
+						if (key != null) doc.put("key-" + columnName, key);
 						doc.put(columnName, value);
 					}
 
