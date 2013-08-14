@@ -10,6 +10,7 @@
 	var treePrevState = null;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
+	var allSelectedFeatures = null;
 	
 	ns.selectDataSet = function(id) {
 		restApi.getAsync('/api/v1/dataset/' + id, null, null, function(dataSet) {
@@ -202,6 +203,10 @@
 		});
 		return features;
 	};
+	
+	ns.getSelectedFeatures = function() {
+		return allSelectedFeatures;
+	}
 	
 	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
@@ -616,7 +621,7 @@
 		var container = $('#feature-selection').empty();
 		if (tree === null) {
 			container.append("<p>No variables selected</p>");
-			updateShoppingCart(null);
+			updateSelectedFeatures(null);
 			return;
 		}
 		
@@ -646,7 +651,7 @@
 		}
 		if (nodes === null || nodes.length === 0) {
 			container.append("<p>No variables selected</p>");
-			updateShoppingCart(null);
+			updateSelectedFeatures(null);
 			return;
 		}
 
@@ -681,7 +686,7 @@
 				features.push({feature: featureId[featureId.length - 1]});
 			}
 		});
-		updateShoppingCart(features);
+		updateSelectedFeatures(features);
 	}
 	
 	function getDescription(feature){
@@ -705,6 +710,11 @@
 			});
 		}
 	}
+	
+	function updateSelectedFeatures(features){
+		allSelectedFeatures = features;
+		updateShoppingCart(features);
+	}
 
 	// on document ready
 	$(function() {
@@ -713,7 +723,8 @@
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 			$('#orderdata-href-btn').removeClass('disabled');
 			$('#ordersview-href-btn').removeClass('disabled');
-			updateShoppingCart(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
+			updateSelectedFeatures(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
+			all
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			var uri = ns.getSelectedDataSet().href;
