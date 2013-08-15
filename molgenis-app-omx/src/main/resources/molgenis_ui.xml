@@ -45,6 +45,6 @@
 			<plugin label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.plugins.DataSetDeleterPlugin"/>
 		
 		</menu> <!-- admin panels -->	
-		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Login" />
+		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Account" />
 	</menu>
 </molgenis>
