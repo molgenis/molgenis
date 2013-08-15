@@ -159,6 +159,10 @@ a.accordion-toggle:hover, a.accordion-toggle:focus, a.accordion-toggle:active {
 	border-style: none;
 }
 
+ul.dynatree-container img:hover {
+	cursor: pointer;
+}
+
 .ui-widget { 
 	font-family: inherit;
 }
