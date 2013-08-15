@@ -41,7 +41,9 @@ public class DataSetDeleterController {
 			"app.href.css" };
 	private static final Logger logger = Logger
 			.getLogger(DataSetDeleterController.class);
-
+	
+	int teller = 0;
+	
 	@Autowired
 	private Database database;
 
@@ -52,10 +54,13 @@ public class DataSetDeleterController {
 	private SearchService searchService;
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws Exception {
-		for (final String property : runtimeProperties) {
+	public String init(Model model) throws Exception 
+	{
+		for (final String property : runtimeProperties) 
+		{
 			final String value = molgenisSettings.getProperty(property);
-			if (StringUtils.isNotBlank(value)) {
+			if (StringUtils.isNotBlank(value)) 
+			{
 				model.addAttribute(property.replaceAll("\\.", "_"), value);
 			}
 		}
@@ -110,8 +115,21 @@ public class DataSetDeleterController {
 				ObservationSet.class,
 				new QueryRule(ObservationSet.PARTOFDATASET, Operator.EQUALS,
 						dataset.getIdValue()));
-		for (ObservationSet observationSet : observationSets) {
-			deleteObservedValues(observationSet);
+		List<ObservedValue> observedValues = new ArrayList<ObservedValue>();
+		for (ObservationSet observationSet : observationSets) 
+		{
+			observedValues.addAll(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID,
+					Operator.EQUALS, observationSet.getIdValue())));
+			if (teller % 20 == 0)
+			{
+				database.remove(observedValues);
+				observedValues = new ArrayList<ObservedValue>();
+			}
+			teller++;
+		}
+		if (observedValues.size() != 0)
+		{
+			database.remove(observedValues);
 		}
 		database.remove(observationSets);
 	}
@@ -195,16 +213,21 @@ public class DataSetDeleterController {
 		database.remove(removableFeatures);
 	}
 
-	protected void deleteCategories(List<Category> categories)
-			throws DatabaseException {
-		for (Category category : categories) {
-			List<CategoricalValue> values = database.find(
-					CategoricalValue.class,
-					new QueryRule(CategoricalValue.VALUE, Operator.EQUALS,
-							category.getIdValue()));
-			database.remove(values);
+	private void deleteCategories(List<Category> categories) throws DatabaseException
+	{
+		for (Category category : categories)
+		{
+			List<CategoricalValue> categoricalValues = database.find(CategoricalValue.class, new QueryRule(
+					CategoricalValue.VALUE, Operator.EQUALS, category.getIdValue()));
+			for (CategoricalValue cat : categoricalValues)
+			{
+				System.out.println("REMOVING categoricalvalue: " + cat.getId());
+				database.remove(cat);
+			}
+			// database.remove(categoricalValues);
+			System.out.println("REMOVING categoricalvalue: " + category.getId());
+			database.remove(category);
 		}
-		database.remove(categories);
 	}
 
 	/**
