@@ -37,6 +37,7 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 import org.molgenis.util.EntityPager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @SuppressWarnings("unused")
+@Lazy
 @Controller
 @RequestMapping("/api/v1/${entity.name?lower_case}")
 public class ${entity.name}Controller
