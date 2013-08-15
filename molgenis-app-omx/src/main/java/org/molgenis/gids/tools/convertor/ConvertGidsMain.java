@@ -15,7 +15,8 @@ public class ConvertGidsMain
 
 		if (args.length != 3)
 		{
-			System.err.println("To run this script it needs 3 arguments; \n1) directory\n2) an outputdirectory\n"
+			System.err.println("To run this script it needs 3 arguments; \n" + "1) directory\n"
+					+ "2) an outputdirectory\n"
 					+ "3) a projectname\nThe project name should be the same name as the inputfile name e.g.\n"
 					+ "args[0] /Users/Roan/Work/GIDS_8_May/Cohorts/Bloodbank/\nargs[1] Converted/\n"
 					+ "args[2] Bloodbank");
