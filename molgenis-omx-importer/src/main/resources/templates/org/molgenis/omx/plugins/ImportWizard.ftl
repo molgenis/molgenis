@@ -47,7 +47,7 @@
 	   	$('.pager').css({"width" : "491px"});//Pager bar with previous/next buttons
 	   	
 	   //Add Cancel button
-	   	$('<li role="button" class="cancel" ><a href="#">Cancel</a></li>').css({"margin-left" : "230px"}).insertBefore('.next').click(function(){
+	   	$('<li role="button" class="cancel" ><a href="#">Restart</a></li>').css({"margin-left" : "230px"}).insertBefore('.next').click(function(){
 	   		performAction(this, 'cancel');
 	   	});
 	 
