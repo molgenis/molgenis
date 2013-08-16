@@ -254,6 +254,7 @@
 							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
 								<resourcesAsCSV>${basedir}/src/main/webapp,${basedir}/target/generated-sources/molgenis/doc</resourcesAsCSV>
 							</baseResource>
+							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|spring-[^/]*\.jar$</webInfIncludeJarPattern>
 						</webAppConfig>
 					</configuration>
 					<!-- use jetty to run integration tests  -->

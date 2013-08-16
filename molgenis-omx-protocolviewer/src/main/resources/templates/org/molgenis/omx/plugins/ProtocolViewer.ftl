@@ -114,13 +114,16 @@
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
  						var uri = molgenis.getSelectedDataSet().href;
- 						$.fileDownload('molgenis.do?__target=${screen.name}&__action=download_xls', { 
- 							httpMethod : "POST",
- 							data: {
- 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
- 								features : $.map(molgenis.getSelectedVariables(), function(obj){return obj.feature}).join(',')
- 							}
- 						});
+ 						var features = molgenis.getSelectedFeatures();
+ 						if(features!=null){
+	 						$.fileDownload('molgenis.do?__target=${screen.name}&__action=download_xls', { 
+	 							httpMethod : "POST",
+	 							data: {
+	 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
+	 								features : $.map(features, function(obj){return obj.feature}).join(',')
+	 							}
+	 						});
+ 						}
  					});
  					
  					// on ready
