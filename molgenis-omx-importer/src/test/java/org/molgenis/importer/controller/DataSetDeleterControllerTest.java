@@ -54,6 +54,7 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	private static List<ObservableFeature> features1;
 	private static ObservableFeature feature1;
 	private static ObservableFeature feature0;
+	private static Category category0;
 	private static List<ObservationSet> observationSets0;
 
 	@Autowired
@@ -73,10 +74,6 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	@SuppressWarnings("deprecation")
 	@Captor
 	private ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
-
-	@SuppressWarnings("deprecation")
-	@Captor
-	private ArgumentCaptor<Category> captorCategories = new ArgumentCaptor<Category>();
 
 	@Configuration
 	static class Config
@@ -200,10 +197,10 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 		observationSets0 = new ArrayList<ObservationSet>();
 		observationSets0.add(observationSet0);
 
-		Category category = new Category();
-		category.setId(0);
-		category.setIdentifier("category" + 0);
-		categories.add(category);
+		category0 = new Category();
+		category0.setId(0);
+		category0.setIdentifier("category" + 0);
+		categories.add(category0);
 
 		List<DataSet> datasets = new ArrayList<DataSet>();
 		datasets.add(dataset);
@@ -256,8 +253,7 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	public void deleteCategories() throws DatabaseException
 	{
 		dataSetDeleterController.deleteCategories(categories);
-		verify(database, Mockito.atLeastOnce()).remove(captorCategories.capture());
-		assertEquals("category0", captorCategories.getValue().getIdentifier());
+		verify(database).remove(category0);
 	}
 
 	@Test
