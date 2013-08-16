@@ -35,15 +35,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
-public class DataSetDeleterController {
+public class DataSetDeleterController
+{
 	public static final String URI = "/plugin/datasetdeleter";
-	private static final String[] runtimeProperties = { "app.href.logo",
-			"app.href.css" };
-	private static final Logger logger = Logger
-			.getLogger(DataSetDeleterController.class);
-	
+	private static final String[] runtimeProperties =
+	{ "app.href.logo", "app.href.css" };
+	private static final Logger logger = Logger.getLogger(DataSetDeleterController.class);
+
 	int teller = 0;
-	
+
 	@Autowired
 	private Database database;
 
@@ -54,12 +54,12 @@ public class DataSetDeleterController {
 	private SearchService searchService;
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws Exception 
+	public String init(Model model) throws Exception
 	{
-		for (final String property : runtimeProperties) 
+		for (final String property : runtimeProperties)
 		{
 			final String value = molgenisSettings.getProperty(property);
-			if (StringUtils.isNotBlank(value)) 
+			if (StringUtils.isNotBlank(value))
 			{
 				model.addAttribute(property.replaceAll("\\.", "_"), value);
 			}
@@ -69,24 +69,27 @@ public class DataSetDeleterController {
 
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
 	public @ResponseBody
-	String delete(@RequestParam("dataset") String datasetIdentifier,
-			org.springframework.web.context.request.WebRequest webRequest)
-			throws HandleRequestDelegationException, Exception {
+	String delete(@RequestParam("dataset")
+	String datasetIdentifier, org.springframework.web.context.request.WebRequest webRequest)
+			throws HandleRequestDelegationException, Exception
+	{
 		database.beginTx();
 		boolean deletemetadata = webRequest.getParameter("deletemetadata") != null;
 		String dataSetName = delete(datasetIdentifier, deletemetadata);
 		return dataSetName;
 	}
 
-	public String delete(String datasetIdentifier, boolean deletemetadata)
-			throws DatabaseException, IOException {
+	public String delete(String datasetIdentifier, boolean deletemetadata) throws DatabaseException, IOException
+	{
 		DataSet dataSet = database.find(DataSet.class, new QueryRule("Id", Operator.EQUALS, datasetIdentifier)).get(0);
 		// list used to check if Features and SubProtocols are used by different
 		String dataSetName = dataSet.getName();
-		try {
+		try
+		{
 			// datasets
 			deleteData(dataSet);
-			if (deletemetadata) {
+			if (deletemetadata)
+			{
 				List<Protocol> allProtocols = database.find(Protocol.class);
 				Protocol protocolUsed = dataSet.getProtocolUsed();
 				database.remove(dataSet);
@@ -94,10 +97,14 @@ public class DataSetDeleterController {
 			}
 			searchService.deleteDocumentsByType(dataSet.getIdentifier());
 			database.commitTx();
-		} catch (DatabaseException e) {
+		}
+		catch (DatabaseException e)
+		{
 			database.rollbackTx();
 			throw e;
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			database.rollbackTx();
 			throw new IOException(e);
 		}
@@ -110,13 +117,12 @@ public class DataSetDeleterController {
 	 * @param the
 	 *            DataSet from which the data should be deleted
 	 */
-	protected void deleteData(DataSet dataset) throws DatabaseException {
-		List<ObservationSet> observationSets = database.find(
-				ObservationSet.class,
-				new QueryRule(ObservationSet.PARTOFDATASET, Operator.EQUALS,
-						dataset.getIdValue()));
+	protected void deleteData(DataSet dataset) throws DatabaseException
+	{
+		List<ObservationSet> observationSets = database.find(ObservationSet.class, new QueryRule(
+				ObservationSet.PARTOFDATASET, Operator.EQUALS, dataset.getIdValue()));
 		List<ObservedValue> observedValues = new ArrayList<ObservedValue>();
-		for (ObservationSet observationSet : observationSets) 
+		for (ObservationSet observationSet : observationSets)
 		{
 			observedValues.addAll(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID,
 					Operator.EQUALS, observationSet.getIdValue())));
@@ -140,46 +146,48 @@ public class DataSetDeleterController {
 	 * @param the
 	 *            observationSet from which the values should be deleted
 	 */
-	protected void deleteObservedValues(ObservationSet observationSet)
-			throws DatabaseException {
-		List<ObservedValue> observedValues = database.find(ObservedValue.class,
-				new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS,
-						observationSet.getIdValue()));
+	protected void deleteObservedValues(ObservationSet observationSet) throws DatabaseException
+	{
+		List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
+				ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, observationSet.getIdValue()));
 		database.remove(observedValues);
 	}
 
 	/**
-	 * Deletes all subprotocols which do not have multiple Protocols referencing
-	 * them
+	 * Deletes all subprotocols which do not have multiple Protocols referencing them
 	 * 
 	 * @param the
 	 *            protocols that should be deleted
 	 */
-	protected List<Protocol> deleteProtocol(Protocol protocol,
-			List<Protocol> allProtocols) throws DatabaseException {
+	protected List<Protocol> deleteProtocol(Protocol protocol, List<Protocol> allProtocols) throws DatabaseException
+	{
 		boolean deleteInBatch = true;
 		List<Protocol> subprotocols = protocol.getSubprotocols();
 		// check if any of the subprotocols had subprotocols of its own
-		for (Protocol subprotocol : subprotocols) {
-			if (subprotocol.getSubprotocols().size() > 0)
-				deleteInBatch = false;
+		for (Protocol subprotocol : subprotocols)
+		{
+			if (subprotocol.getSubprotocols().size() > 0) deleteInBatch = false;
 		}
-		for (Protocol subprotocol : subprotocols) {
-			int superprotocolcount = countReferringProtocols(subprotocol,
-					allProtocols);
+		for (Protocol subprotocol : subprotocols)
+		{
+			int superprotocolcount = countReferringProtocols(subprotocol, allProtocols);
 			// only delete if there is only one parent protocol
-			if (superprotocolcount <= 1) {
-				if (!deleteInBatch) {
+			if (superprotocolcount <= 1)
+			{
+				if (!deleteInBatch)
+				{
 					allProtocols = deleteProtocol(subprotocol, allProtocols);
-				} else {
-					List<ObservableFeature> features = subprotocol
-							.getFeatures();
+				}
+				else
+				{
+					List<ObservableFeature> features = subprotocol.getFeatures();
 					deleteFeatures(features, allProtocols);
 				}
 			}
 		}
 		List<ObservableFeature> features = protocol.getFeatures();
-		if (deleteInBatch) {
+		if (deleteInBatch)
+		{
 			database.remove(subprotocols);
 			allProtocols.removeAll(subprotocols);
 		}
@@ -190,30 +198,31 @@ public class DataSetDeleterController {
 	}
 
 	/**
-	 * Deletes all features which do not have multiple Protocols referencing
-	 * them
+	 * Deletes all features which do not have multiple Protocols referencing them
 	 * 
 	 * @param the
 	 *            features that should be deleted
 	 */
-	protected void deleteFeatures(List<ObservableFeature> features,
-			List<Protocol> allProtocols) throws DatabaseException {
+	protected void deleteFeatures(List<ObservableFeature> features, List<Protocol> allProtocols)
+			throws DatabaseException
+	{
 		List<ObservableFeature> removableFeatures = new ArrayList<ObservableFeature>();
 
-		for (ObservableFeature feature : features) {
-			List<Category> categories = database.find(Category.class,
-					new QueryRule(Category.OBSERVABLEFEATURE, Operator.EQUALS,
-							feature.getIdValue()));
+		for (ObservableFeature feature : features)
+		{
+			List<Category> categories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
+					Operator.EQUALS, feature.getIdValue()));
 			deleteCategories(categories);
 			int protocolcount = countReferringProtocols(feature, allProtocols);
-			if (protocolcount <= 1) {
+			if (protocolcount <= 1)
+			{
 				removableFeatures.add(feature);
 			}
 		}
 		database.remove(removableFeatures);
 	}
 
-	private void deleteCategories(List<Category> categories) throws DatabaseException
+	protected void deleteCategories(List<Category> categories) throws DatabaseException
 	{
 		for (Category category : categories)
 		{
@@ -231,23 +240,22 @@ public class DataSetDeleterController {
 	}
 
 	/**
-	 * Count the number of times a protocol of feature is referred to from a(n
-	 * other) protocol
+	 * Count the number of times a protocol of feature is referred to from a(n other) protocol
 	 * 
 	 * @param the
 	 *            feature of protocol that is referred to
 	 * 
 	 * @return the number of referring protocols
 	 */
-	protected int countReferringProtocols(Characteristic characteristic,
-			List<Protocol> allProtocols) {
+	protected int countReferringProtocols(Characteristic characteristic, List<Protocol> allProtocols)
+	{
 		int protocolcount = 0;
 		Class<? extends Characteristic> clazz = characteristic.getClass();
-		for (Protocol p : allProtocols) {
-			if ((clazz.equals(ObservableFeature.class)
-					&& p.getFeatures_Id().contains(characteristic.getId()) || (clazz
-					.equals(Protocol.class) && p.getSubprotocols_Id().contains(
-					characteristic.getId())))) {
+		for (Protocol p : allProtocols)
+		{
+			if ((clazz.equals(ObservableFeature.class) && p.getFeatures_Id().contains(characteristic.getId()) || (clazz
+					.equals(Protocol.class) && p.getSubprotocols_Id().contains(characteristic.getId()))))
+			{
 				System.out.println(p.getIdentifier());
 				protocolcount++;
 			}
@@ -256,7 +264,8 @@ public class DataSetDeleterController {
 	}
 
 	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated() {
+	public String handleNotAuthenticated()
+	{
 		return "redirect:/";
 	}
 }
