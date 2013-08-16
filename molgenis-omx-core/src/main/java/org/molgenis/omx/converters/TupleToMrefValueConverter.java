@@ -47,10 +47,10 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 		}
 		else
 		{
-			for (String e : xrefIdentifiersPreTrim)
+			for (String identifier : xrefIdentifiersPreTrim)
 			{
 
-				xrefIdentifiers.add(e.trim());
+				xrefIdentifiers.add(identifier.trim());
 			}
 		}
 
