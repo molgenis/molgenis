@@ -1,5 +1,6 @@
 package org.molgenis.omx.converters;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
@@ -28,16 +29,30 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 	public MrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
 		// get identifiers
-		List<String> xrefIdentifiers;
+		List<String> xrefIdentifiers = new ArrayList<String>();
+		List<String> xrefIdentifiersPreTrim;
+
 		try
 		{
-			xrefIdentifiers = tuple.getList(colName);
+			xrefIdentifiersPreTrim = tuple.getList(colName);
 		}
 		catch (RuntimeException e)
 		{
 			throw new ValueConverterException(e);
 		}
-		if (xrefIdentifiers == null || xrefIdentifiers.isEmpty()) return null;
+
+		if (xrefIdentifiersPreTrim == null || xrefIdentifiersPreTrim.isEmpty())
+		{
+			return null;
+		}
+		else
+		{
+			for (String identifier : xrefIdentifiersPreTrim)
+			{
+
+				xrefIdentifiers.add(identifier.trim());
+			}
+		}
 
 		// get characteristics for identifiers
 		MrefValue mrefValue = new MrefValue();
