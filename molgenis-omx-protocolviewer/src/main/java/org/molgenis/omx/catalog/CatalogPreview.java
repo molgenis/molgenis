@@ -9,6 +9,7 @@ public class CatalogPreview
 	private String title;
 	private String description;
 	private String version;
+	private List<String> authors;
 	private CatalogPreviewNode root;
 
 	public String getTitle()
@@ -39,6 +40,16 @@ public class CatalogPreview
 	public void setVersion(String version)
 	{
 		this.version = version;
+	}
+
+	public List<String> getAuthors()
+	{
+		return authors;
+	}
+
+	public void setAuthors(List<String> authors)
+	{
+		this.authors = authors;
 	}
 
 	public CatalogPreviewNode getRoot()
