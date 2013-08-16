@@ -31,6 +31,7 @@ import java.util.TreeMap;
 </#list>
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
@@ -249,7 +250,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 		for(${JavaName(entity)} o: ${name(entity)}List) <#if f.type == "mref">for(${JavaType(f.xrefLabels[0])} xref_label: o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}())</#if>
 		{
 			if(<#if f.type == "mref">xref_label<#else>o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}()</#if> != null) 
-				${name(f)}Keymap.put(<#if f.type == "mref">xref_label<#else>o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}()</#if>, null);
+				${name(f)}Keymap.put(<#if f.type == "mref">xref_label.trim()<#else>o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}()</#if>, null);
 		}
 		
 		if(${name(f)}Keymap.size() > 0) 
@@ -315,6 +316,9 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 						</#list>
 						<#else>	
 						${JavaType(f.xrefLabels[0])} key = o.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}().get(i);
+							<#if JavaType(f.xrefLabels[0]) == 'String'>
+							key = key.trim();				
+							</#if>						
 						</#if>
 						if(${name(f)}Keymap.get(key) == null){
 							<#if entity.name == f.getXrefEntityName()>
