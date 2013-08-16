@@ -149,8 +149,8 @@
 						node.remove();
 						node.parent.addChild(nextFeatureNodes);
 					}
-					
-					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
+					// target type null is filter icon
+					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon" || node.getEventTargetType(event) === null) && !node.data.isFolder)
 						ns.openFeatureFilterDialog(node.data.key);
 				},
 				onSelect : function(select, node) {

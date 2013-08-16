@@ -42,10 +42,26 @@ public interface CatalogLoaderService
 	public void loadCatalog(String id) throws UnknownCatalogException;
 
 	/**
+	 * Removes a catalog from the database
+	 * 
+	 * @param id
+	 * @throws UnknownCatalogException
+	 */
+	public void unloadCatalog(String id) throws UnknownCatalogException;
+
+	/**
 	 * Retrieves a catalog of a study definition and store it in the database
 	 * 
 	 * @param id
 	 * @throws UnknownCatalogException
 	 */
 	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException;
+
+	/**
+	 * Retrieves a catalog of a study definition from the database
+	 * 
+	 * @param id
+	 * @throws UnknownCatalogException
+	 */
+	public void unloadCatalogOfStudyDefinition(String id) throws UnknownCatalogException;
 }
