@@ -34,6 +34,10 @@ public class UploadWizardPage extends WizardPage
 	@Override
 	public void handleRequest(Database db, MolgenisRequest request)
 	{
+		String entityImportOption = request.getString("entity_option");
+		ImportWizard importWizard = getWizard();
+		importWizard.setEntityImportOption(entityImportOption);
+
 		File file = request.getFile("upload");
 
 		if (file == null)
