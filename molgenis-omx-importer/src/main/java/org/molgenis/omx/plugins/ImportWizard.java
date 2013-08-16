@@ -32,13 +32,13 @@ public class ImportWizard
 	private Map<String, Collection<String>> fieldsUnknown;
 	private Map<String, Collection<String>> fieldsRequired;
 	private Map<String, Collection<String>> fieldsAvailable;
+	private String entityImportOption;
 
 	public ImportWizard()
 	{
 		super();
 		addPage(new UploadWizardPage());
 		addPage(new ValidationResultWizardPage());
-		addPage(new ImportFileWizardPage());
 		addPage(new ImportResultsWizardPage());
 	}
 
@@ -208,6 +208,16 @@ public class ImportWizard
 	public void setPages(List<WizardPage> pages)
 	{
 		this.pages = pages;
+	}
+
+	public String getEntityImportOption()
+	{
+		return entityImportOption;
+	}
+
+	public void setEntityImportOption(String entityImportOption)
+	{
+		this.entityImportOption = entityImportOption;
 	}
 
 }

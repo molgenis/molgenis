@@ -1,0 +1,16 @@
+.accordion-group {
+	background-color: transparent;
+}
+
+.accordion-toggle {
+	color: 007acc;
+}
+
+a.accordion-toggle:hover, a.accordion-toggle:focus, a.accordion-toggle:active {
+	color: 007acc;
+	text-decoration: none;
+}
+	
+.accordion-body {
+	background-color: white;
+}
