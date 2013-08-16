@@ -229,12 +229,9 @@ public class DataSetDeleterController
 			List<CategoricalValue> categoricalValues = database.find(CategoricalValue.class, new QueryRule(
 					CategoricalValue.VALUE, Operator.EQUALS, category.getIdValue()));
 			for (CategoricalValue cat : categoricalValues)
-			{
-				System.out.println("REMOVING categoricalvalue: " + cat.getId());
+			{	
 				database.remove(cat);
-			}
-			// database.remove(categoricalValues);
-			System.out.println("REMOVING categoricalvalue: " + category.getId());
+			}			
 			database.remove(category);
 		}
 	}

@@ -34,9 +34,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration
-public class DataSetDeleterControllerTest extends
-		AbstractTestNGSpringContextTests {
-	
+public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTests
+{
+
 	private static List<Category> categories;
 	private static DataSet dataset;
 	private static Protocol protocolUsed;
@@ -55,74 +55,80 @@ public class DataSetDeleterControllerTest extends
 	private static ObservableFeature feature1;
 	private static ObservableFeature feature0;
 	private static List<ObservationSet> observationSets0;
-	
+
 	@Autowired
 	private DataSetDeleterController dataSetDeleterController;
-	
+
 	@Autowired
 	private Database database;
-	
-	@SuppressWarnings("deprecation")
-	@Captor
-    private ArgumentCaptor<ArrayList<ObservableFeature>> captorFeatures = new ArgumentCaptor<ArrayList<ObservableFeature>>();
-	
-	@SuppressWarnings("deprecation")
-	@Captor
-    private ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSets = new ArgumentCaptor<ArrayList<ObservationSet>>();
 
 	@SuppressWarnings("deprecation")
 	@Captor
-    private ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
+	private ArgumentCaptor<ArrayList<ObservableFeature>> captorFeatures = new ArgumentCaptor<ArrayList<ObservableFeature>>();
 
 	@SuppressWarnings("deprecation")
 	@Captor
-    private ArgumentCaptor<ArrayList<Category>> captorCategories = new ArgumentCaptor<ArrayList<Category>>();
-	
+	private ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSets = new ArgumentCaptor<ArrayList<ObservationSet>>();
+
+	@SuppressWarnings("deprecation")
+	@Captor
+	private ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
+
+	@SuppressWarnings("deprecation")
+	@Captor
+	private ArgumentCaptor<Category> captorCategories = new ArgumentCaptor<Category>();
+
 	@Configuration
-	static class Config {
+	static class Config
+	{
 		@Bean
-		public DataSetDeleterController dataSetDeleterController() {
+		public DataSetDeleterController dataSetDeleterController()
+		{
 			return new DataSetDeleterController();
 		}
 
 		@Bean
-		public Database database() throws Exception {
+		public Database database() throws Exception
+		{
 			Database database = mock(Database.class);
 			setUp(database);
 			return database;
 		}
 
 		@Bean
-		public MolgenisSettings molgenisSettings() {
+		public MolgenisSettings molgenisSettings()
+		{
 			return mock(MolgenisSettings.class);
 		}
 
 		@Bean
-		public SearchService searchService() {
+		public SearchService searchService()
+		{
 			return mock(SearchService.class);
 		}
 	}
-	
-	public static void setUp(Database database) throws Exception {
-		features0  = new ArrayList<ObservableFeature>();
-		features1  = new ArrayList<ObservableFeature>();
-		allProtocols  = new ArrayList<Protocol>();
-		subProtocols  = new ArrayList<Protocol>();
+
+	public static void setUp(Database database) throws Exception
+	{
+		features0 = new ArrayList<ObservableFeature>();
+		features1 = new ArrayList<ObservableFeature>();
+		allProtocols = new ArrayList<Protocol>();
+		subProtocols = new ArrayList<Protocol>();
 		categories = new ArrayList<Category>();
-		
+
 		feature0 = new ObservableFeature();
 		feature0.setId(0);
-		feature0.setName("featureName"+0);
-		feature0.setIdentifier("feature"+0);
-		
+		feature0.setName("featureName" + 0);
+		feature0.setIdentifier("feature" + 0);
+
 		feature1 = new ObservableFeature();
 		feature1.setId(1);
-		feature1.setName("featureName"+1);
-		feature1.setIdentifier("feature"+1);
-		
+		feature1.setName("featureName" + 1);
+		feature1.setIdentifier("feature" + 1);
+
 		features0.add(feature0);
 		features1.add(feature1);
-		
+
 		protocol0 = new Protocol();
 		protocol0.setDescription("description0");
 		protocol0.setIdentifier("identifier0");
@@ -143,129 +149,130 @@ public class DataSetDeleterControllerTest extends
 		protocol3.setIdentifier("identifier3");
 		protocol3.setSubprotocols(protocol1);
 		protocol3.setId(3);
-		
+
 		allProtocols.add(protocol0);
 		allProtocols.add(protocol1);
 		allProtocols.add(protocol2);
 		allProtocols.add(protocol3);
-		
+
 		subProtocols.add(protocol0);
-		
+
 		protocolUsed = new Protocol();
 		protocolUsed.setDescription("protocolUsed_description");
 		protocolUsed.setIdentifier("protocolUsed_identifier");
 		protocolUsed.setId(100);
 		protocolUsed.setSubprotocols(subProtocols);
 		allProtocols.add(protocolUsed);
-		
-			
+
 		dataset = new DataSet();
 		dataset.setId(0);
-		dataset.setIdentifier("dataset"+0);
-		dataset.setName("datasetname"+0);
+		dataset.setIdentifier("dataset" + 0);
+		dataset.setName("datasetname" + 0);
 		dataset.setProtocolUsed(protocolUsed);
 
 		observationSet0 = new ObservationSet();
 		observationSet0.setId(0);
 		observationSet0.setPartOfDataSet(dataset);
-		
+
 		observationSet1 = new ObservationSet();
 		observationSet1.setId(1);
-		
+
 		ObservedValue observedValue0 = new ObservedValue();
 		observedValue0.setId(0);
 		observedValue0.setObservationSet(0);
 		observedValue0.setValue_Id(0);
 		observedValue0.setFeature_Id(0);
-		observedValue0.setFeature_Identifier("feature"+0);
+		observedValue0.setFeature_Identifier("feature" + 0);
 		observedValue0.setObservationSet(0);
 		observedValues0 = new ArrayList<ObservedValue>();
 		observedValues0.add(observedValue0);
-		
+
 		ObservedValue observedValue1 = new ObservedValue();
 		observedValue1.setId(1);
 		observedValue1.setObservationSet(1);
 		observedValue1.setValue_Id(1);
 		observedValue1.setFeature_Id(1);
-		observedValue1.setFeature_Identifier("feature"+1);
+		observedValue1.setFeature_Identifier("feature" + 1);
 		observedValue1.setObservationSet(1);
 		observedValues1 = new ArrayList<ObservedValue>();
 		observedValues1.add(observedValue1);
-		
+
 		observationSets0 = new ArrayList<ObservationSet>();
 		observationSets0.add(observationSet0);
-		
+
 		Category category = new Category();
 		category.setId(0);
-		category.setIdentifier("category"+0);
+		category.setIdentifier("category" + 0);
 		categories.add(category);
-		
+
 		List<DataSet> datasets = new ArrayList<DataSet>();
 		datasets.add(dataset);
 		when(database.find(DataSet.class, new QueryRule("Id", Operator.EQUALS, "dataset1"))).thenReturn(datasets);
-		
-		when(database.find(ObservedValue.class,
-				new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS,
-						0))).thenReturn(observedValues0);
-		
-		when(database.find(
-				ObservationSet.class,
-				new QueryRule(ObservationSet.PARTOFDATASET, Operator.EQUALS,
-						0))).thenReturn(observationSets0);
-		
+
+		when(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, 0)))
+				.thenReturn(observedValues0);
+
+		when(database.find(ObservationSet.class, new QueryRule(ObservationSet.PARTOFDATASET, Operator.EQUALS, 0)))
+				.thenReturn(observationSets0);
+
 	}
-	
+
 	@BeforeMethod
-	public void beforeTest() throws Exception{
+	public void beforeTest() throws Exception
+	{
 		reset(database);
 		setUp(database);
 	}
 
 	@Test
-	public void countReferringProtocolsSingleReferences() {
-		int result = dataSetDeleterController
-				.countReferringProtocols(protocol0, allProtocols);
+	public void countReferringProtocolsSingleReferences()
+	{
+		int result = dataSetDeleterController.countReferringProtocols(protocol0, allProtocols);
 		assertEquals(1, result);
 	}
-	
+
 	@Test
-	public void countReferringProtocolMultipleReferences() {
-		int result = dataSetDeleterController
-				.countReferringProtocols(protocol1, allProtocols);
+	public void countReferringProtocolMultipleReferences()
+	{
+		int result = dataSetDeleterController.countReferringProtocols(protocol1, allProtocols);
 		assertEquals(2, result);
 	}
 
 	@Test
-	public void delete() throws DatabaseException, IOException {
+	public void delete() throws DatabaseException, IOException
+	{
 		dataSetDeleterController.delete("dataset1", true);
 		verify(database).remove(dataset);
 	}
-	
+
 	@Test
-	public void deleteNoMetadata() throws DatabaseException, IOException {
+	public void deleteNoMetadata() throws DatabaseException, IOException
+	{
 		dataSetDeleterController.delete("dataset1", false);
 		verify(database, Mockito.times(0)).remove(dataset);
 	}
 
 	@Test
-	public void deleteCategories() throws DatabaseException {
+	public void deleteCategories() throws DatabaseException
+	{
 		dataSetDeleterController.deleteCategories(categories);
 		verify(database, Mockito.atLeastOnce()).remove(captorCategories.capture());
-		assertEquals(new Integer(0), captorCategories.getValue().get(0).getId());
-		assertEquals(1, captorCategories.getValue().size());	
+		assertEquals("category0", captorCategories.getValue().getIdentifier());
 	}
 
 	@Test
-	public void deleteData() throws DatabaseException {
+	public void deleteData() throws DatabaseException
+	{
 		dataSetDeleterController.deleteData(dataset);
-		//verify that only observationsets and abservedvalues belonging to the dataset are removed
+		// verify that only observationsets and abservedvalues belonging to the dataset are removed
 		verify(database, Mockito.atLeastOnce()).remove(captorObservationSets.capture());
 		assertEquals(new Integer(0), captorObservationSets.getValue().get(0).getId());
 		assertEquals(1, captorObservationSets.getValue().size());
 	}
 
 	@Test
-	public void deleteFeatures() throws DatabaseException {
+	public void deleteFeatures() throws DatabaseException
+	{
 		dataSetDeleterController.deleteFeatures(features0, allProtocols);
 		verify(database, Mockito.atLeastOnce()).remove(captorFeatures.capture());
 		assertEquals("feature0", captorFeatures.getValue().get(0).getIdentifier());
@@ -273,7 +280,8 @@ public class DataSetDeleterControllerTest extends
 	}
 
 	@Test
-	public void deleteObservedValues() throws DatabaseException {
+	public void deleteObservedValues() throws DatabaseException
+	{
 		dataSetDeleterController.deleteObservedValues(observationSet0);
 		verify(database, Mockito.atLeastOnce()).remove(captorObservedValues.capture());
 		assertEquals(new Integer(0), captorObservedValues.getValue().get(0).getId());
@@ -281,7 +289,8 @@ public class DataSetDeleterControllerTest extends
 	}
 
 	@Test
-	public void deleteProtocol() throws DatabaseException {
+	public void deleteProtocol() throws DatabaseException
+	{
 		dataSetDeleterController.deleteProtocol(protocolUsed, allProtocols);
 		verify(database).remove(protocolUsed);
 		verify(database).remove(subProtocols);
