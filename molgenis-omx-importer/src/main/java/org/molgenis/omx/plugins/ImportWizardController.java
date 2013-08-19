@@ -42,6 +42,7 @@ public class ImportWizardController extends PluginModel<Entity>
 	{
 		StringBuilder s = new StringBuilder();
 		s.append("<link rel=\"stylesheet\" href=\"css/bwizard.min.css\" type=\"text/css\" />");
+		s.append("<link rel=\"stylesheet\" href=\"css/importer.css\" type=\"text/css\" />");
 		s.append("<script type=\"text/javascript\" src=\"js/bwizard.min.js\"></script>");
 		return s.toString();
 	}
