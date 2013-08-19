@@ -45,7 +45,20 @@
 	<script type="text/javascript">
 		$("#wizard").bwizard({activeIndex: ${wizard.currentPageIndex}});
 	   	$('.pager').css({"width" : "491px"});//Pager bar with previous/next buttons
-	   	
+	   	$(window).load(function() {
+			var headerHeight = $("#header").height();
+			var viewportHeight = $(window).height();
+			var otherHeight = 358;//plugin title + menu + padding/progress bar etc of the wizard + footer
+			var preferredImporterHeight = (viewportHeight - headerHeight - otherHeight);
+	   		
+			//TODO:isn't there a way to select those by wildcard? "step*" 
+	   		$("#step1").height(preferredImporterHeight);
+ 			$("#step1").css({"overflow" : "scroll"});
+ 			$("#step2").height(preferredImporterHeight);
+ 			$("#step2").css({"overflow" : "scroll"});
+ 			$("#step3").height(preferredImporterHeight);
+ 			$("#step3").css({"overflow" : "scroll"});
+	    });
 	   //Add Cancel button
 	   	$('<li role="button" class="cancel" ><a href="#">Restart</a></li>').css({"margin-left" : "230px"}).insertBefore('.next').click(function(){
 	   		performAction(this, 'cancel');
