@@ -1,3 +1,0 @@
-#
-## My own custom header
-#

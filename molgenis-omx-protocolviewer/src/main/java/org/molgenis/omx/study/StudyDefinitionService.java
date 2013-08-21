@@ -23,6 +23,7 @@ public interface StudyDefinitionService
 	 * Retrieve a study definition and save it in the database
 	 * 
 	 * @param id
+	 * @throws UnknownStudyDefinitionException
 	 */
 	public void loadStudyDefinition(String id) throws UnknownStudyDefinitionException;
 

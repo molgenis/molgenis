@@ -2,6 +2,7 @@ package org.molgenis.omx.converters;
 
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public interface TupleToValueConverter<S extends Value, T>
@@ -20,5 +21,5 @@ public interface TupleToValueConverter<S extends Value, T>
 	 * @param value
 	 * @return
 	 */
-	public T extractValue(Value value);
+	public Cell<T> toCell(Value value);
 }

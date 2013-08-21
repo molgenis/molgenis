@@ -1,6 +1,7 @@
 package org.molgenis.elasticsearch.util;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
@@ -16,5 +17,6 @@ public class MapperTypeSanitizerTest
 		assertEquals(MapperTypeSanitizer.sanitizeMapperType("#Hello#dude#"), "Hellodude");
 		assertEquals(MapperTypeSanitizer.sanitizeMapperType(".Hello.dude."), "Hellodude");
 		assertEquals(MapperTypeSanitizer.sanitizeMapperType("_xx..xx#xx.##,xx"), "xxxxxxxx");
+		assertNull(MapperTypeSanitizer.sanitizeMapperType(null));
 	}
 }

@@ -12,24 +12,6 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 
-	// fill dataset select
-	ns.fillDataSetSelect = function(callback) {
-		var maxNrOfDataSets = 500;
-		
-		restApi.getAsync('/api/v1/dataset', null, {num: maxNrOfDataSets}, function(datasets) {
-			var items = [];
-			
-			$.each(datasets.items, function(key, val) {
-				items.push('<option value="' + val.href + '">' + val.name + '</option>');
-			});
-			$('#dataset-select').html(items.join(''));
-			$('#dataset-select').change(function() {
-				ns.onDataSetSelectionChange($(this).val());
-			});
-			callback();
-		});
-	};
-
 	ns.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -167,8 +149,8 @@
 						node.remove();
 						node.parent.addChild(nextFeatureNodes);
 					}
-					
-					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
+					// target type null is filter icon
+					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon" || node.getEventTargetType(event) === null) && !node.data.isFolder)
 						ns.openFeatureFilterDialog(node.data.key);
 				},
 				onSelect : function(select, node) {
@@ -774,6 +756,12 @@
 	
 	// on document ready
 	$(function() {
+		// use chosen plugin for data set select
+		$('#dataset-select').chosen();
+		$('#dataset-select').change(function() {
+			ns.onDataSetSelectionChange($(this).val());
+		});
+		
 		resultsTable = new ns.ResultsTable();
 
 		$("#observationset-search").focus();
@@ -791,5 +779,7 @@
 			ns.download();
 		});
 		
+		// fire event handler
+		$('#dataset-select').change();
 	});
 }($, window.top));

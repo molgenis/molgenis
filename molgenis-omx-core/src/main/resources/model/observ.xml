@@ -137,7 +137,7 @@
 			<field name="observableFeature" type="xref" xref_entity="ObservableFeature"
 				description="The Measurement these permitted values are part of." />
 			<field name="valueCode" type="string"
-				description="The value used to store this category in ObservedValue. For example '1', '2'." />
+				description="The value used to store this category in ObservedValue. For example '1', '2'." nillable="true"/>
 			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The category that is being measured in a specific way." nillable="true" />
 			<field name="isMissing" type="bool" default="false"
 				description="whether this value should be treated as missing value." />
