@@ -519,6 +519,7 @@
 		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
+		<module>molgenis-omx-mobile</module>
 		<module>molgenis-app-omx</module>
 		<module>molgenis-app-ngs</module>
 		<module>molgenis-search</module>
