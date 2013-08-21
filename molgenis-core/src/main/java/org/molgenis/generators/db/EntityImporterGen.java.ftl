@@ -164,10 +164,16 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 
 			if (iterationCount++ > 100)
 			{
+			String identifier = "";
+			String name = "";
+				for(${JavaName(entity)} blaat : ${name(entity)}sMissingRefs){
+					identifier = blaat.getValues().get("Identifier").toString();
+					name = blaat.getValues().get("Name").toString();
+				}
 				throw new Exception(
-						"Import of '${name(entity)}' objects failed: attempting to resolve in-list references,"
-								+ "but after 100 iterations there are still ${name(entity)}s referring to Individuals that are neither in the database nor in the list of to-be imported ${name(entity)}s."
-								+ "Maybe there is a cyclic reference somewhere ?");
+						"Import of '${name(entity)}' entity failed:"
+								+ "This is probably caused by a(n) '${name(entity)}' that has a reference but that does not exist."
+								+"(identifier:"+identifier+", name:"+name+")");		
 			}
 		}
 		while (${name(entity)}sMissingRefs.size() > 0);
@@ -331,7 +337,8 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 								</#if>
 							<#else>
 							logger.error("Import of '${entity.name}' objects failed: "+o);
-							throw new Exception("Import of '${entity.name}' objects failed: cannot find <#list f.xrefLabelNames as label><#if label_index &gt; 0> and </#if>${name(f)}_${label}='"+(o.get${JavaName(f)}_${JavaName(label)}() != null && i < o.get${JavaName(f)}_${JavaName(label)}().size() ? o.get${JavaName(f)}_${JavaName(label)}().get(i) : "null")+"'</#list>");
+							throw new Exception("Import of '${entity.name}' objects failed:" 
+							+"cannot find <#list f.xrefLabelNames as label><#if label_index &gt; 0> and </#if>${name(f)}_${label}='"+(o.get${JavaName(f)}_${JavaName(label)}() != null && i < o.get${JavaName(f)}_${JavaName(label)}().size() ? o.get${JavaName(f)}_${JavaName(label)}().get(i) : "null")+"'</#list>");
 							</#if>
 						}
 						mrefs.add(${name(f)}Keymap.get(key));

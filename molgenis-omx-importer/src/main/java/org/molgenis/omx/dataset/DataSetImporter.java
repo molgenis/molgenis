@@ -16,6 +16,7 @@ import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
 import org.molgenis.omx.converters.ValueConverter;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -89,7 +90,10 @@ public class DataSetImporter
 				if (feature == null)
 				{
 					throw new DatabaseException(ObservableFeature.class.getSimpleName() + " with identifier '"
-							+ featureIdentifier + "' does not exist");
+							+ featureIdentifier
+							+ "' does not exist. This is probably due to the fact that the feature is in the dataset_"
+							+ identifier + " but is not annotated in the observablefeature entity");
+
 				}
 				featureMap.put(featureIdentifier, feature);
 			}
@@ -100,25 +104,26 @@ public class DataSetImporter
 		int rownr = 0;
 		int transactionRows = Math.max(1, 5000 / featureMap.size());
 		db.beginTx();
-		try
+
+		for (Tuple row : sheetReader)
 		{
-			for (Tuple row : sheetReader)
+			// Skip empty rows
+			if (!row.isEmpty())
 			{
-				// Skip empty rows
-				if (!row.isEmpty())
+				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
+				Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
+
+				// create observation set
+				ObservationSet observationSet = new ObservationSet();
+				observationSet.setPartOfDataSet(dataSet);
+				db.add(observationSet);
+
+				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
-					List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
-					Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
-
-					// create observation set
-					ObservationSet observationSet = new ObservationSet();
-					observationSet.setPartOfDataSet(dataSet);
-					db.add(observationSet);
-
-					for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
+					Value value;
+					try
 					{
-						Value value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
-
+						value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
 						if (value != null)
 						{
 							// create observed value
@@ -137,33 +142,30 @@ public class DataSetImporter
 							obsValueList.add(observedValue);
 						}
 					}
-					db.add(obsValueList);
-					for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
-						db.add(entry.getValue());
-				}
+					catch (ValueConverterException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
-				if (++rownr % transactionRows == 0)
-				{
-					db.getEntityManager().flush();
-					db.getEntityManager().clear();
 				}
+				db.add(obsValueList);
+				for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
+					db.add(entry.getValue());
 			}
-			if (rownr % transactionRows != 0)
+
+			if (++rownr % transactionRows == 0)
 			{
 				db.getEntityManager().flush();
 				db.getEntityManager().clear();
 			}
-			db.commitTx();
 		}
-		catch (DatabaseException e)
+		if (rownr % transactionRows != 0)
 		{
-			db.rollbackTx();
-			throw e;
+			db.getEntityManager().flush();
+			db.getEntityManager().clear();
 		}
-		catch (Exception e)
-		{
-			db.rollbackTx();
-			throw new IOException(e);
-		}
+		db.commitTx();
+
 	}
 }
