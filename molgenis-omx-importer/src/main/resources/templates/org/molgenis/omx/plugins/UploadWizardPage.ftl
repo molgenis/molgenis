@@ -1,9 +1,13 @@
-<div style="padding-top: 25px">
+<div  style="padding-top: 25px">
+<div>
 	Upload <a href="generated-doc/fileformat.html" target="_blank">Observ-OMX</a> data file<br /><br />
 	<input type="file" name="upload"style="height:25px" />
 </div>
 <div style="padding-top: 25px">
-<div class="accordion" id="accordion"><div class="accordion-group"><div class="accordion-heading"><a class="accordion-toggle" data-toggle="collapse" href="#collapse1">Advanced options</a>
+<div class="accordion" id="accordion">
+<div class="accordion-group">
+<div class="accordion-heading">
+<a class="accordion-toggle" data-toggle="collapse" href="#collapse1">Advanced options</a>
 </div>
 <div id="collapse1" class="accordion-body collapse' in>
 <div class="accordion-inner">
@@ -54,6 +58,8 @@
 		<td>Importer updates existing entities or skips if entity does not exist</td>
 	</tr>
 </table>
+</div>
+</div>
 </div>
 </div>
 </div>
