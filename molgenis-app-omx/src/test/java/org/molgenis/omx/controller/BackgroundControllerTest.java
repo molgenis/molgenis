@@ -43,7 +43,7 @@ public class BackgroundControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void init() throws Exception
 	{
-		mockMvc.perform(get(NewsController.URI)).andExpect(status().isOk());
+		mockMvc.perform(get(BackgroundController.URI)).andExpect(status().isOk());
 	}
 
 	@Configuration
