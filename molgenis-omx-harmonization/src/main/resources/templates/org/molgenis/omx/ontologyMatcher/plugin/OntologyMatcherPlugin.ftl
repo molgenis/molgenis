@@ -5,7 +5,13 @@
 			$('#protocol-id').change(function(){
 				molgenis.changeDataSet($(this).val());
 			});
+			molgenis.setUrl('${model.url}');
 			molgenis.changeDataSet($('#protocol-id').val());
+			
+			$('#downloadButton').click(function(){
+				molgenis.downloadMappings();
+				return false;
+			});
 		});
 	</script>
 <form method="post" id="harmonizationIndexer-form" name="${screen.name}" enctype="multipart/form-data" action="molgenis.do">
@@ -69,6 +75,7 @@
 										<ul></ul>
 									</div>
 								</div>
+								<button id="downloadButton" class="btn">Download</button>
 							</div>
 						</div>
 					</div>

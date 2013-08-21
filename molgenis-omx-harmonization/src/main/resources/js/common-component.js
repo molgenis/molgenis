@@ -68,7 +68,7 @@
 		}
 	};
 	
-	molgenis.Pagination.prototype.createSearchRequest = function (selectedDataSet) {
+	molgenis.Pagination.prototype.createSearchRequest = function (documentType, query) {
 		var queryRules = [];
 		//todo: how to unlimit the search result
 		queryRules.push({
@@ -79,12 +79,10 @@
 			operator : 'OFFSET',
 			value : (this.currentPage - 1) * this.pager
 		});
-		queryRules.push({
-			operator : 'SEARCH',
-			value : 'observablefeature'
-		});
+		if(query !== undefined && query !== null)
+			queryRules.push(query);
 		var searchRequest = {
-			documentType : 'protocolTree-' + selectedDataSet,
+			documentType : documentType,
 			queryRules : queryRules
 		};
 		return searchRequest;

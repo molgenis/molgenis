@@ -15,7 +15,12 @@
 	};
 	
 	ns.createMatrixForDataItems = function() {
-		searchApi.search(pagination.createSearchRequest(getSelectedDataSet()), function(searchResponse) {
+		var documentType = 'protocolTree-' + getSelectedDataSet();
+		var query = {
+			operator : 'SEARCH',
+			value : 'observablefeature'
+		};
+		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
 			createTableHeader();
 			var searchHits = searchResponse.searchHits;
 			$.each(searchHits, function(){

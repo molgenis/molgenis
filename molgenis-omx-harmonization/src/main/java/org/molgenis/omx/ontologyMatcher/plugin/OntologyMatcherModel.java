@@ -11,6 +11,8 @@ public class OntologyMatcherModel
 
 	DataSet selectedDataSet = null;
 
+	private String url = null;
+
 	public DataSet getSelectedDataSet()
 	{
 		return selectedDataSet;
@@ -29,5 +31,15 @@ public class OntologyMatcherModel
 	public void setDataSets(List<DataSet> dataSets)
 	{
 		this.dataSets = dataSets;
+	}
+
+	public void setUrl(String url)
+	{
+		this.url = url;
+	}
+
+	public String getUrl()
+	{
+		return this.url;
 	}
 }

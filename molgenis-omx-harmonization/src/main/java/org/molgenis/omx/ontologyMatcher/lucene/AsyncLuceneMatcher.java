@@ -22,6 +22,7 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.XrefValue;
+import org.molgenis.omx.ontologyIndexer.table.StoreMappingTable;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -70,6 +71,11 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 	{
 		System.out.println("Total number of variables is " + totalNumber + ". The number of finished variables is "
 				+ finishedNumber);
+	}
+
+	public void deleteDocumentByIds(String documentType, List<String> documentIds)
+	{
+		searchService.deleteDocumentByIds(documentType, documentIds);
 	}
 
 	@Async
@@ -171,6 +177,15 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 
 			db.add(listOfNewObservationSets);
 			db.add(listOfNewObservedValues);
+
+			for (Integer catalogueId : dataSetsToMatch)
+			{
+				StringBuilder dataSetIdentifier = new StringBuilder();
+				dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
+				searchService.indexTupleTable(dataSetIdentifier.toString(),
+						new StoreMappingTable(dataSetIdentifier.toString(), db));
+			}
+
 			db.commitTx();
 		}
 		catch (Exception e)
@@ -180,10 +195,10 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		}
 		finally
 		{
-			DatabaseUtil.closeQuietly(db);
 			runningProcesses.decrementAndGet();
 			totalNumber = 0;
 			finishedNumber = 0;
+			DatabaseUtil.closeQuietly(db);
 		}
 	}
 
