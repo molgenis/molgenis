@@ -31,6 +31,23 @@ public interface SearchService
 	void updateIndex(String documentType, Iterable<? extends Entity> entities);
 
 	/**
+	 * delete documents by Ids
+	 * 
+	 * @param documentType
+	 * @param documentId
+	 */
+	void deleteDocumentByIds(String documentType, List<String> documentIds);
+
+	/**
+	 * update document by Id
+	 * 
+	 * @param documentType
+	 * @param documentId
+	 * @param updateScript
+	 */
+	void updateDocumentById(String documentType, String documentId, String updateScript);
+
+	/**
 	 * Index a TupleTable
 	 * 
 	 * @param documentType
