@@ -1,10 +1,25 @@
 var MolgenisMobileConfig = {
-		startPage : '#catalogue-page',
-		featureCount : 10
+	startPage : '#catalogue-page',
+	featureCount : 25
 };
-
+ 
 $(document).bind("mobileinit", function() {
 	var ns = window.top.molgenis;
+	
+	//Configure JQM to have a longer list before skipping transitions
+	 $.mobile.getMaxScrollForTransition = function () { return 65536; } 
+
+	//Show spinner and overlay when doing a ajax request
+	$(document).on({
+	    ajaxStart: function() { 
+	    	$('body').mask();
+			$.mobile.showPageLoadingMsg();
+	    },
+	    ajaxStop: function() { 
+	    	$.mobile.hidePageLoadingMsg(); 
+			$('body').unmask();
+	    }    
+	});
 	
 	$(document).on('pagebeforeshow', '#login-page', ns.onLoginPageBeforeShow);
 	$(document).on('click', '.logout', ns.logout);
@@ -13,6 +28,20 @@ $(document).bind("mobileinit", function() {
 (function($, w) {
 	"use strict";
 	var ns = w.molgenis = w.molgenis || {};
+	
+	ns.isUserAuthenticated = function(callback) {
+		$.ajax({
+			url : '/mobile/authenticated',
+			async:false,
+			success : function(authenticated) {
+				if (authenticated && $.isFunction(callback.authenticated)) {
+					callback.authenticated();
+				} else if (!authenticated && $.isFunction(callback.unAuthenticated)){
+					callback.unAuthenticated();
+				}
+			}
+		});
+	}
 	
 	ns.onLoginPageBeforeShow = function() {
 		$('#username').val('');
@@ -42,7 +71,6 @@ $(document).bind("mobileinit", function() {
 	}
 	
 	ns.login = function() {	
-		$.mobile.showPageLoadingMsg(); 
 		$.ajax({
 			type : 'POST',
 			url : '/mobile/login',
@@ -50,12 +78,12 @@ $(document).bind("mobileinit", function() {
 				username: $('#username').val(),
 				password: $('#password').val()
 			}),
+			async:false,
 			contentType : 'application/json',
 			success : function(response) {
 				if (response.success) {
 					$.mobile.changePage(MolgenisMobileConfig.startPage, {transition: "flip"});
 				} else {
-					$.mobile.hidePageLoadingMsg(); 
 					alert(response.errorMessage);
 				}
 			}
@@ -63,10 +91,10 @@ $(document).bind("mobileinit", function() {
 	}
 	
 	ns.logout = function() {
-		$.mobile.showPageLoadingMsg(); 
 		$.ajax({
 			url : '/mobile/logout',
 			success : function() {
+				$('#features').html('').listview('refresh');
 				$.mobile.changePage("#login-page", {transition: "flip", reverse: true});
 			}
 		});

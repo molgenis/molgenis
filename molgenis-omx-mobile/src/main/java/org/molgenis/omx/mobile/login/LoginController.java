@@ -1,16 +1,17 @@
 package org.molgenis.omx.mobile.login;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.security.Login;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -42,6 +43,9 @@ public class LoginController
 	{
 		String errorMessage = null;
 		boolean success = database.getLogin().login(database, request.getUsername(), request.getPassword());
+
+		System.out.println("LOGIN:" + success);
+
 		if (!success)
 		{
 			errorMessage = "Invalid password or username";
@@ -50,7 +54,17 @@ public class LoginController
 		return new ResponseEntity<LoginResponse>(new LoginResponse(errorMessage), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	@RequestMapping(value = "/authenticated", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<Boolean> isUserAuthenticated()
+	{
+		Login login = database.getLogin();
+		boolean loggedIn = (login != null) && login.isAuthenticated();
+
+		return new ResponseEntity<Boolean>(loggedIn, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/logout", method = GET)
 	@ResponseBody
 	public void logout() throws Exception
 	{

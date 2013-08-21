@@ -1,59 +1,94 @@
 $(document).bind("mobileinit", function() {
-	$(document).on('pagebeforeshow', '#catalogue-page', window.top.molgenis.onCataloguePageBeforeShow);
-	$(document).on('pagebeforehide', '#catalogue-page', window.top.molgenis.onCataloguePageBeforeHide);
+	$(document).on('pageshow', '#catalogue-page', window.top.molgenis.onCataloguePageShow);
+});
+
+$(document).ready(function() {
+	$("#search-features").on('change', window.top.molgenis.onSearchFieldChange);
 });
 
 (function($, w) {
 	"use strict";
 	var ns = w.molgenis = w.molgenis || {};
 	var restApi = new ns.RestClient();
-	var features = null;
 	var loading = false;
+	var nextHref = null;
+	var prevHref = null;
 	
-	ns.onCataloguePageBeforeShow = function() {
-		$(document).on('scroll', function() {
-			if (!loading && (features != null) && features.nextHref && ns.elementInView('#features li:last')) {
-				ns.showFeatures(features.nextHref);
-			}
-		});
+	ns.onSearchFieldChange = function(event) {
+		var searchText = $(this).val();
 		
-		ns.showFeatures('/api/v1/observablefeature?num=' + MolgenisMobileConfig.featureCount);
+		$('#search-features').blur();//Hide keyboard
+		var q = 'q[1].operator=LIKE&q[1].field=name&q[1].value=' + encodeURIComponent(searchText);
+		ns.showFeatures('/api/v1/observablefeature?num=' + MolgenisMobileConfig.featureCount + '&' + q);
 	}
 	
-	ns.onCataloguePageBeforeHide = function() {
-		features = null;
-		$(document).unbind('scroll');
-		$('#features').html('').listview('refresh');
+	ns.onCataloguePageShow = function(event, ui) {
+		ns.isUserAuthenticated({
+			authenticated: function() {
+				if (!ui.prevPage || ui.prevPage.attr('id') != 'feature-page') {
+					ns.clearSearch();
+				}
+				
+				if ($("#features").children().length == 0) {
+					ns.showFeatures('/api/v1/observablefeature?num=' + MolgenisMobileConfig.featureCount);
+				}
+			},
+			unAuthenticated: function() {
+				window.location.href = '/mobile/catalogue';
+			}
+		});
 	}
 	
 	ns.showFeatures = function(href) {
 		loading = true;
-		$.mobile.showPageLoadingMsg();
 		
 		//Sort on name
 		var sortQueryRule = 'q[0].operator=SORTASC&q[0].value=name';
-		features = restApi.get(href + '&' + sortQueryRule);
+		restApi.getAsync(href + '&' + sortQueryRule, null, null, function(features) {
+			var items = [];
 		
-		var items = [];
-		if ((features != null) && features.num > 0) {
-			$.each(features.items, function() {
-				items.push('<li><a href="#" data-href="' + this.href + '" >' + this.name + '</a></li>');
+			nextHref = features.nextHref;
+			prevHref = features.prevHref;
+		
+			if ((features != null) && features.num > 0) {
+				if (prevHref) {
+					items.push('<li data-theme="b"><a href="#" id="prev">Previous items...</a></li>');
+				}
+			
+				$.each(features.items, function() {
+					items.push('<li><a href="#feature-page" data-href="' + this.href + '" class="feature">' + this.name + '</a></li>');
+				});
+			
+				if (nextHref) {
+					items.push('<li data-theme="b"><a href="#" id="next" >Next items...</a></li>');
+				}
+			}
+		
+			$('#feature-count').html(features.total);
+			$('#features').html(items.join(''));
+		
+			$('#prev').on('click', function() {
+				ns.showFeatures(prevHref);
 			});
-		}
 		
-		$('#feature-count').html(features.total);
-		$('#features').append($(items.join(''))).listview('refresh');
-		$.mobile.hidePageLoadingMsg(); 
+			$('a.feature').on('click',  function() { 
+				selectedFeatureHref = $(this).attr('data-href');
+				$.mobile.changePage('#feature-page', {transition: 'slide'});
+			});
 		
-		loading = false;
+			$('#next').on('click', function() {
+				ns.showFeatures(nextHref);
+			});
+		
+			$('#features').listview('refresh');
+		
+			loading = false;
+		});
 	}
 	
-	ns.elementInView = function(elem) {
-	    var docViewTop = $(window).scrollTop();
-	    var docViewBottom = docViewTop + $(window).height();
-	    var elemTop = $(elem).offset().top;
-	 
-	   
-	    return ((elemTop <= docViewBottom) && (elemTop >= docViewTop));
+	ns.clearSearch = function() {
+		$("#search-features").val('');
+		$('#features').empty();
 	}
+	
 }($, window.top));
