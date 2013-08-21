@@ -1,0 +1,39 @@
+#logo {
+  text-align: center;
+  margin:0 auto;
+}
+
+#login-form {
+	margin-top: 20px;
+}
+
+.ui-submit {
+	margin-top:60px;
+}
+
+label.error {
+	color: red;
+	padding-top: .5em;
+	vertical-align: top;
+}
+
+.feature-detail-label {
+	display: inline-block;
+	margin: 0 2% 0 0;
+    width: 200px;
+}
+
+.feature-detail-value {
+	display: inline-block;
+	font-weight: normal;
+}
+
+h3 {
+	text-align: center;
+	margin: 0;
+	font-family:	Helvetica, Arial, sans-serif;
+	font-size:	15px;
+	font-weight:	bold;
+	font-style:	normal;
+	color:	#222222;
+}
