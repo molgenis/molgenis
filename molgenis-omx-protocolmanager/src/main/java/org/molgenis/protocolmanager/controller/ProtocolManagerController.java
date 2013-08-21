@@ -4,42 +4,38 @@ import static org.molgenis.protocolmanager.controller.ProtocolManagerController.
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.converters.ValueConverter;
+import org.molgenis.omx.converters.ValueConverterException;
+import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
+import org.molgenis.omx.observ.ObservationSet;
+import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.observ.value.Value;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.ValueTuple;
+import org.molgenis.util.tuple.KeyValueTuple;
+import org.molgenis.util.tuple.WritableTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Controller class for the data explorer.
@@ -57,7 +53,6 @@ public class ProtocolManagerController
 {
 	public static final String URI = "/plugin/protocolmanager";
 	private static final Logger logger = Logger.getLogger(ProtocolManagerController.class);
-	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
 
 	@Autowired
 	private Database database;
@@ -87,85 +82,49 @@ public class ProtocolManagerController
 		return "protocolmanager";
 	}
 
-	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	@RequestMapping(value = "/save", method = POST)
+	public void save(@RequestBody
+	ProtocolManagerRequest protocolManagerRequest, HttpServletResponse response) throws IOException, DatabaseException,
+			TableException, ValueConverterException
 	{
-		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
-		logger.info("Download request: [" + searchRequest + "]");
 
-		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-		request.getQueryRules().add(new QueryRule(Operator.LIMIT, DOWNLOAD_SEARCH_LIMIT));
+		Protocol p = Protocol.findByIdentifier(database, protocolManagerRequest.getProtocolIdentifier());
 
-		QueryRule offsetRule = new QueryRule(Operator.OFFSET, 0);
-		request.getQueryRules().add(offsetRule);
-
-		response.setContentType("text/csv");
-		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
-
-		TupleWriter tupleWriter = null;
-		try
+		if (p == null)
 		{
-			tupleWriter = new CsvWriter(response.getWriter());
-
-			// The fieldsToReturn contain identifiers, we need the names
-			tupleWriter.write(getFeatureNames(request.getFieldsToReturn()));
-
-			int count = 0;
-			SearchResult searchResult;
-
-			do
+			throw new DatabaseException("There is no protocol with identifier: "
+					+ protocolManagerRequest.getProtocolIdentifier().toString());
+		}
+		else
+		{
+			for (Map<String, String> m : protocolManagerRequest.getProtocolManagerRequest())
 			{
-				offsetRule.setValue(count);
-				searchResult = searchService.search(request);
-
-				for (Hit hit : searchResult.getSearchHits())
+				WritableTuple tuple = new KeyValueTuple();
+				for (Entry<String, String> entry : m.entrySet())
 				{
-					List<Object> values = new ArrayList<Object>();
-					for (String field : request.getFieldsToReturn())
+					ObservationSet obs = new ObservationSet();
+					List<DataSet> allDataSets = database.find(DataSet.class);
+					obs.setPartOfDataSet(allDataSets.get(0));
+					database.add(obs);
+					for (ObservableFeature obsF : p.getFeatures())
 					{
-						values.add(hit.getColumnValueMap().get(field));
+						tuple.set(entry.getKey(), entry.getValue());
+						if (obsF.getName().equals(entry.getKey()))
+						{
+
+							ValueConverter val = new ValueConverter(database);
+							Value a = val.fromTuple(tuple, entry.getKey(), obsF);
+							database.add(a);
+							ObservedValue observedValue = new ObservedValue();
+							observedValue.setValue(a);
+							observedValue.setFeature(obsF);
+							observedValue.setObservationSet(obs);
+							database.add(observedValue);
+						}
 					}
-
-					tupleWriter.write(new ValueTuple(values));
 				}
-
-				count += searchResult.getSearchHits().size();
 			}
-			while (count < searchResult.getTotalHitCount());
 		}
-		finally
-		{
-			IOUtils.closeQuietly(tupleWriter);
-		}
-
-	}
-
-	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
-	{
-		List<ObservableFeature> features = database.query(ObservableFeature.class)
-				.in(ObservableFeature.IDENTIFIER, identifiers).find();
-
-		// Keep order the same
-		Map<String, String> nameByIdentifier = new HashMap<String, String>();
-		for (ObservableFeature feature : features)
-		{
-			nameByIdentifier.put(feature.getIdentifier(), feature.getName());
-		}
-
-		List<String> names = new ArrayList<String>();
-		for (String identifier : identifiers)
-		{
-			names.add(nameByIdentifier.get(identifier));
-		}
-
-		return new ValueTuple(names);
-	}
-
-	private String getCsvFileName(String dataSetName)
-	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 
 	/**
@@ -178,5 +137,36 @@ public class ProtocolManagerController
 	public String handleNotAuthenticated()
 	{
 		return "redirect:/";
+	}
+
+	private static class ProtocolManagerRequest
+	{
+		@NotNull
+		@Size(min = 1)
+		private List<Map<String, String>> protocolManagerRequest;
+		@NotNull
+		private String protocolIdentifier;
+
+		public List<Map<String, String>> getProtocolManagerRequest()
+		{
+			return protocolManagerRequest;
+
+		}
+
+		@SuppressWarnings("unused")
+		public void setMapOfValuesList(List<Map<String, String>> protocolManagerRequest)
+		{
+			this.protocolManagerRequest = protocolManagerRequest;
+		}
+
+		public String getProtocolIdentifier()
+		{
+			return protocolIdentifier;
+		}
+
+		public void setProtocolIdentifier(String protocolIdentifier)
+		{
+			this.protocolIdentifier = protocolIdentifier;
+		}
 	}
 }
