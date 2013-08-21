@@ -80,7 +80,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 			{
 				StringBuilder pathBuilder = new StringBuilder();
 				if (!protocolPath.isEmpty()) pathBuilder.append(protocolPath).append('.');
-				String name = p.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
+				String name = p.getName();
 				final String path = pathBuilder.append(p.getId()).toString();
 				String description = p.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(p.getDescription())
 						.replaceAll("[^a-zA-Z0-9 ]", " ");
@@ -101,7 +101,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 			for (ObservableFeature feature : protocol.getFeatures())
 			{
 				StringBuilder pathBuilder = new StringBuilder();
-				String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
+				String name = feature.getName();
 				String description = feature.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(
 						feature.getDescription()).replaceAll("[^a-zA-Z0-9 ]", " ");
 				String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
