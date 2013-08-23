@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="ngs">
-	<plugin name="ngs_header" type="org.molgenis.ngs.plugins.header.Header" />
-	
 	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
 	
 	<menu name="main">
-		<plugin name="Home" type="org.molgenis.ngs.plugins.home.Home" label="Home" />
+		<plugin name="Home" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
 		
 		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
 		
@@ -16,9 +14,7 @@
 		<form name="FlowcellRuns" entity="Flowcell">
 			<form name="FlowcellLanes" entity="FlowcellLane" label="Samples in Lanes" viewtype="list" />
 		</form>
-		
 		<plugin name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
-
 		<menu name="Configuration" >
 			<form name="Users" entity="NgsUser" label="User" />
 			<form name="Flowcells" entity="Flowcell" label="Flowcell"/>
