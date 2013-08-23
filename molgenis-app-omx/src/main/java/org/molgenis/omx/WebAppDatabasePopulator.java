@@ -19,11 +19,11 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.ContactPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
-import org.molgenis.ui.ProtocolViewerControllerPlugin;
 import org.molgenis.ui.ReferencesPluginPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Value;
+//import org.molgenis.ui.ProtocolViewerControllerPlugin;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {
@@ -90,7 +90,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		createPermission(database, ContactPluginPlugin.class, groupName, "read");
 		createPermission(database, ReferencesPluginPlugin.class, groupName, "read");
 		createPermission(database, DataExplorerPluginPlugin.class, groupName, "read");
-		createPermission(database, ProtocolViewerControllerPlugin.class, groupName, "read");
+		// TODO createPermission(database, ProtocolViewerControllerPlugin.class, groupName, "read");
 
 	}
 
