@@ -69,7 +69,7 @@ public class ProtocolViewerController
 				DEFAULT_KEY_ACTION_ORDER));
 		model.addAttribute("model", protocolViewer);
 
-		return "protocol-viewer";
+		return "view-protocolviewer";
 	}
 
 	@RequestMapping(value = "/download", method = POST)
