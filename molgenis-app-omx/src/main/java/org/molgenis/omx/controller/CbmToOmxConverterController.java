@@ -1,4 +1,6 @@
-package org.molgenis.cbm;
+package org.molgenis.omx.controller;
+
+import static org.molgenis.omx.controller.CbmToOmxConverterController.URI;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -15,63 +17,78 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
+
 import org.apache.commons.io.IOUtils;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.framework.ui.EasyPluginController;
-import org.molgenis.framework.ui.PluginModel;
-import org.molgenis.framework.ui.ScreenController;
+import org.apache.log4j.Logger;
+import org.molgenis.cbm.CbmXmlParser;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.jaxb.CbmNode;
 import org.molgenis.jaxb.CollectionProtocol;
 import org.molgenis.jaxb.Diagnosis;
 import org.molgenis.jaxb.ParticipantCollectionSummary;
 import org.molgenis.jaxb.Race;
-import org.molgenis.util.Entity;
+import org.molgenis.servlet.MolgenisContextListener;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-public class CbmToOmxConverter extends PluginModel<Entity>
+
+/**
+ * Controller that handles home page requests
+ */
+@Controller
+@RequestMapping(URI)
+public class CbmToOmxConverterController
 {
+	private static final Logger logger = Logger.getLogger(MolgenisContextListener.class);
+	
+	public static final String URI = "/plugin/cbmToOmxConverter";
+	private final MolgenisSettings molgenisSettings;
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
 	private final File outputDir = new File(System.getProperty("java.io.tmpdir"));
 	private final List<String> listFiles = Arrays.asList("dataset.csv", "dataset_cbm.csv", "protocol.csv",
 			"observablefeature.csv");
-
-	public CbmToOmxConverter(String name, ScreenController<?> parent)
+	
+	@Autowired
+	private FileStore fileStore;
+	
+	@Autowired
+	public CbmToOmxConverterController(MolgenisSettings molgenisSettings)
 	{
-		super(name, parent);
+		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
+		this.molgenisSettings = molgenisSettings;
 	}
 
-	@Override
-	public String getViewName()
+	@RequestMapping(method = RequestMethod.GET)
+	public String init(Model model)
 	{
-		return CbmToOmxConverter.class.getSimpleName();
+		return "view-CbmToOmxConverter";
 	}
-
-	@Override
-	public String getViewTemplate()
+	
+	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
+	public void convert(@RequestParam
+			Part cbmFile, HttpServletRequest request ,HttpServletResponse response) throws Exception
 	{
-		return "templates/" + CbmToOmxConverter.class.getName().replace('.', '/') + ".ftl";
-	}
+		File file = fileStore.store(cbmFile.getInputStream(), cbmFile.getName());
 
-	@SuppressWarnings("resource")
-	@Override
-	public void handleRequest(Database db, MolgenisRequest request) throws Exception
-	{
-		if (request.getString("__action").equals("upload"))
-		{
-			// get uploaded file and do checks
-			File file = request.getFile("upload");
-
-			if (file == null)
+	    if (file == null)
 			{
 				throw new Exception("No file selected.");
 			}
-			else if (!file.getName().endsWith(".xml"))
+			else if (!cbmFile.getContentType().equals("text/xml"))
 			{
-				throw new Exception("File does not end with '.xml', other formats are not supported.");
+				throw new Exception("File does not of the xml type, other formats are not supported.");
 			}
 			// Create the files needed
 			CsvWriter dataCBM = new CsvWriter(new File(outputDir, "dataset_cbm.csv"));
@@ -81,7 +98,6 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 			try
 			{
-
 				// DATASET PART
 				dataSet.writeColNames(Arrays.asList("identifier", "name", "protocolused_identifier"));
 				KeyValueTuple kvtdataSet = new KeyValueTuple();
@@ -352,6 +368,8 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 
 				IOUtils.closeQuietly(dataSet);
 				IOUtils.closeQuietly(observableFeature);
+				
+				file.delete();
 			}
 
 			File zipFile = new File(outputDir, "cbm.zip");
@@ -366,7 +384,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			for (File f : sourceFiles)
 			{
 
-				System.out.println("Adding " + f.getAbsolutePath());
+				logger.info("Adding " + f.getAbsolutePath());
 				FileInputStream fin = new FileInputStream(f);
 				zout.putNextEntry(new ZipEntry(f.getName()));
 				byte[] b = new byte[1024];
@@ -385,18 +403,18 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			URLConnection conn = localURL.openConnection();
 			InputStream in = new BufferedInputStream(conn.getInputStream());
 
-			String mimetype = request.getRequest().getServletContext().getMimeType(zipFile.getName());
-			if (mimetype != null) request.getResponse().setContentType(mimetype);
+			String mimetype = request.getServletContext().getMimeType(zipFile.getName());
+			if (mimetype != null) response.setContentType(mimetype);
 
-			request.getResponse()
+			response
 					.setHeader("Content-disposition", "attachment; filename=\"" + zipFile.getName() + "\"");
 
 			if (zipFile.length() > Integer.MAX_VALUE)
 			{
 				throw new Exception("Zip file too big to be handled by webserver");
 			}
-			request.getResponse().setContentLength((int) zipFile.length());
-			OutputStream out = request.getResponse().getOutputStream();
+			response.setContentLength((int) zipFile.length());
+			OutputStream out = response.getOutputStream();
 
 			byte[] buffer = new byte[1024];
 			for (;;)
@@ -410,11 +428,7 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 			IOUtils.closeQuietly(out);
 			IOUtils.closeQuietly(in);
 
-			logger.info("serving " + request.getRequest().getRequestURI());
-
-			// FIXME: This is a hack, fix asap
-			EasyPluginController.HTML_WAS_ALREADY_SERVED = true;
-		}
+			logger.info("serving " + request.getRequestURI());
 	}
 
 	private void setCurrentFile(File file)
@@ -422,19 +436,14 @@ public class CbmToOmxConverter extends PluginModel<Entity>
 		this.currentFile = file;
 	}
 
-	@Override
-	public void reload(Database db)
-	{
-
-	}
-
 	public File getOutputDir()
 	{
 		return outputDir;
 	}
-
+	
 	public List<String> getListFiles()
 	{
 		return listFiles;
 	}
+
 }
