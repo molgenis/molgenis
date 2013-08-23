@@ -3,7 +3,7 @@
 	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
 	<menu name="main">
 		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin" groupRead="anonymous,AllUsers"/>
-		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
+		<plugin label="Catalogue" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
 		<plugin label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
