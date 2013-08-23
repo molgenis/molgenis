@@ -1,36 +1,37 @@
-<#macro ProtocolViewer screen>
-<#assign model = screen.myModel>
-<#assign url_base = "molgenis.do?__target=${screen.name}">
-<!-- normally you make one big form for the whole plugin-->
-<form method="post" enctype="multipart/form-data" name="${screen.name}" action="">
-	<!--needed in every form: to redirect the request to the right screen-->
-	<input type="hidden" name="__target" value="${screen.name}">
-	<!--needed in every form: to define the action. This can be set by the submit button-->
-	<input type="hidden" name="__action" id="test" value="">
-
-	<div class="formscreen">
-		<div class="form_header" id="${screen.name}">
-			${screen.label}
-		</div>
-	<#-- optional: mechanism to show messages -->
-	<#list screen.getMessages() as message>
-		<#if message.success>
-		<p class="successmessage">${message.text}</p>
-		<#else>
-		<p class="errormessage">${message.text}</p>
-		</#if>
-	</#list>
-	<#if (model.dataSets?size > 0)>
-		<#if !model.authenticated>
-			<div id="login-modal-container"></div>
-			<div class="alert">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  		<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection. (your current selection will be discarded)
-			</div>
-		</#if>
-	</#if>
-		<div class="screenbody" id="container-plugin">
-			<div class="screenpadding">
+<html>
+	<head>
+		<title>Catalogue</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/ui.dynatree.css" type="text/css">
+		<link rel="stylesheet" href="/css/chosen.css" type="text/css">
+        <link rel="stylesheet" href="/css/protocolviewer.css" type="text/css">
+        
+		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+		<script type="text/javascript" src="/js/chosen.jquery.min.js"></script>
+		<script type="text/javascript" src="/js/molgenis-all.js"></script>
+		<script type="text/javascript" src="/js/protocolviewer.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.fileDownload-min.js"></script>
+		<script type="text/javascript" src="/js/jquery.validate.min.js"></script>
+	</head>
+	<body>
+		
+		<div class="container-fluid" id="plugin-container">
+			<#if (model.dataSets?size > 0)>
+				<#if !model.authenticated>
+					<div id="login-modal-container"></div>
+					<div class="alert">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+		  				<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection. (your current selection will be discarded)
+					</div>
+				</#if>
+			</#if>
+			
+			
 			<#if (model.dataSets?size == 0)>
 				<span>No available catalogs</span>
 			<#else>
@@ -92,7 +93,7 @@
  				<script type="text/javascript">
  					<#-- create event handlers -->
  					$('#dataset-select').change(function() {
- 						molgenis.selectDataSet($(this).val());
+ 						window.top.molgenis.selectDataSet($(this).val());
 					});
  					
  					$("#search-text").keyup(function(e){
@@ -103,20 +104,20 @@
  					
  					$('#search-button').click(function(e) {
  						e.preventDefault();
- 						molgenis.search($('#search-text').val());
+ 						window.top.molgenis.search($('#search-text').val());
  					});
  					
  					$('#search-clear-button').click(function(e) {
  						e.preventDefault();
- 						molgenis.clearSearch();
+ 						window.top.molgenis.clearSearch();
  					});
  					
  					$('#download-xls-button').click(function(e) {
  						e.preventDefault();
- 						var uri = molgenis.getSelectedDataSet().href;
- 						var features = molgenis.getSelectedFeatures();
+ 						var uri = window.top.molgenis.getSelectedDataSet().href;
+ 						var features = window.top.molgenis.getSelectedFeatures();
  						if(features!=null){
-	 						$.fileDownload('molgenis.do?__target=${screen.name}&__action=download_xls', { 
+	 						$.fileDownload('/plugin/protocolviewer/download', { 
 	 							httpMethod : "POST",
 	 							data: {
 	 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
@@ -152,10 +153,10 @@
 						$('#dataset-select').chosen().change();
 					</#if>
 					});
+					
  				</script>
  			</#if>
-			</div>
 		</div>
-	</div>
-</form>
-</#macro>
+		
+	</body>
+</html>

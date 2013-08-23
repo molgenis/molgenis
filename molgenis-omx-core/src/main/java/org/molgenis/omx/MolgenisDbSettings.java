@@ -67,4 +67,28 @@ public class MolgenisDbSettings implements MolgenisSettings
 			throw new RuntimeException(e);
 		}
 	}
+
+	@Override
+	public Boolean getBooleanProperty(String key)
+	{
+		String value = getProperty(key);
+		if (value == null)
+		{
+			return null;
+		}
+
+		return Boolean.valueOf(value);
+	}
+
+	@Override
+	public boolean getBooleanProperty(String key, boolean defaultValue)
+	{
+		Boolean value = getBooleanProperty(key);
+		if (value == null)
+		{
+			return defaultValue;
+		}
+
+		return value;
+	}
 }
