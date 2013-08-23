@@ -1,4 +1,4 @@
-package org.molgenis.omx.plugins;
+package org.molgenis.omx.protocolviewer;
 
 import java.io.Serializable;
 import java.util.Collections;
