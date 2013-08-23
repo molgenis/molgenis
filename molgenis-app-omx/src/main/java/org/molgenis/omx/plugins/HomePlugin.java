@@ -1,29 +1,12 @@
 package org.molgenis.omx.plugins;
 
-import java.io.Serializable;
-
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.PluginModel;
+import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.Entity;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.molgenis.omx.controller.HomeController;
 
-public class HomePlugin extends PluginModel<Entity>
+public class HomePlugin extends IframePlugin
 {
 	private static final long serialVersionUID = 1L;
-
-	private static final String DEFAULT_KEY_APP_HOME_HTML = "<p>Welcome to Molgenis!</p>";
-	private static final String KEY_APP_HOME_HTML = "app.home.html";
-
-	private HomeModel homeModel;
-
-	public HomeModel getMyModel()
-	{
-		return homeModel;
-	}
 
 	public HomePlugin(String name, ScreenController<?> parent)
 	{
@@ -31,65 +14,8 @@ public class HomePlugin extends PluginModel<Entity>
 	}
 
 	@Override
-	public String getViewName()
+	public String getIframeSrc()
 	{
-		return HomePlugin.class.getSimpleName();
-	}
-
-	@Override
-	public String getViewTemplate()
-	{
-		return "templates/" + HomePlugin.class.getName().replace('.', '/') + ".ftl";
-	}
-
-	@Override
-	public void handleRequest(Database db, MolgenisRequest request)
-	{
-
-	}
-
-	@Override
-	public void reload(Database db)
-	{
-		homeModel = new HomeModel();
-		homeModel.setHomeHtml(getMolgenisSetting(KEY_APP_HOME_HTML, DEFAULT_KEY_APP_HOME_HTML));
-	}
-
-	@Override
-	public boolean isVisible()
-	{
-		return true;
-	}
-
-	private String getMolgenisSetting(String key, String defaultValue)
-	{
-		try
-		{
-			MolgenisSettings molgenisSettings = ApplicationContextProvider.getApplicationContext().getBean(
-					MolgenisSettings.class);
-			return molgenisSettings.getProperty(key, defaultValue);
-		}
-		catch (NoSuchBeanDefinitionException e)
-		{
-			logger.warn(e);
-			return defaultValue;
-		}
-	}
-
-	public static class HomeModel implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private String homeHtml;
-
-		public String getHomeHtml()
-		{
-			return homeHtml;
-		}
-
-		public void setHomeHtml(String homeHtml)
-		{
-			this.homeHtml = homeHtml;
-		}
+		return HomeController.URI;
 	}
 }

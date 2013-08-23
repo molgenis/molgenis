@@ -2,7 +2,7 @@
 <molgenis name="omx" label="Molgenis">
 	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
 	<menu name="main">
-		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
+		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin" groupRead="anonymous,AllUsers"/>
 		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
 		<menu name="BiobankConnect" label="BiobankConnect">
 			<plugin label="OntologyIndexer" name="OntologyIndexer" type="org.molgenis.omx.ontologyIndexer.plugin.OntologyIndexerPlugin"/>
