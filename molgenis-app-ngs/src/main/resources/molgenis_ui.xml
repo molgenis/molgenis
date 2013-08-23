@@ -18,7 +18,7 @@
 		</form>
 		
 		<plugin name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
-		
+
 		<menu name="Configuration" >
 			<form name="Users" entity="NgsUser" label="User" />
 			<form name="Flowcells" entity="Flowcell" label="Flowcell"/>
@@ -57,6 +57,8 @@
 			</menu>	
 		</menu> 
 		-->
+		
+		<plugin name="Barcode" label="Barcode selector"  type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
 		
 	</menu>
 	
