@@ -2,9 +2,9 @@ package org.molgenis.framework.server;
 
 public interface MolgenisPermissionService
 {
-	boolean hasReadPermissionOnPlugin(String pluginClassName);
+	boolean hasReadPermissionOnPlugin(String pluginName);
 
-	boolean hasWritePermissionOnPlugin(String pluginClassName);
+	boolean hasWritePermissionOnPlugin(String pluginName);
 
 	boolean hasReadPermissionOnEntity(String entityName);
 
