@@ -1,4 +1,4 @@
-package org.molgenis.omx.plugins;
+package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,16 +10,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.util.ApplicationUtil;
+import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.tuple.Tuple;
 
 public class UploadWizardPage extends WizardPage
@@ -32,29 +35,35 @@ public class UploadWizardPage extends WizardPage
 	}
 
 	@Override
-	public void handleRequest(Database db, MolgenisRequest request)
+	public void handleRequest(Database db, HttpServletRequest request)
 	{
-		String entityImportOption = request.getString("entity_option");
+		String entityImportOption = request.getParameter("entity_option");
+
 		ImportWizard importWizard = getWizard();
 		importWizard.setEntityImportOption(entityImportOption);
 
-		File file = request.getFile("upload");
+		try
+		{
+			File file = null;
+			Part part = request.getPart("upload");
+			if (part != null)
+			{
+				file = FileUploadUtils.saveToTempFile(part);
+			}
 
-		if (file == null)
-		{
-			getWizard().setErrorMessage("No file selected");
-		}
-		else
-		{
-			try
+			if (file == null)
+			{
+				getWizard().setErrorMessage("No file selected");
+			}
+			else
 			{
 				validateInput(db, file);
 			}
-			catch (Exception e)
-			{
-				getWizard().setErrorMessage("Error validating import file: " + e.getMessage());
-				logger.error("Exception validating import file", e);
-			}
+		}
+		catch (Exception e)
+		{
+			getWizard().setErrorMessage("Error validating import file: " + e.getMessage());
+			logger.error("Exception validating import file", e);
 		}
 	}
 
@@ -174,4 +183,5 @@ public class UploadWizardPage extends WizardPage
 			tableReader.close();
 		}
 	}
+
 }

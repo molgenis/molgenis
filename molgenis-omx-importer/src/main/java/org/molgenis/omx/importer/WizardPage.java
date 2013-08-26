@@ -1,14 +1,15 @@
-package org.molgenis.omx.plugins;
+package org.molgenis.omx.importer;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.server.MolgenisRequest;
 
 public class WizardPage
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
-	private String title;
+	private final String title;
 	private ImportWizard wizard;
 
 	public WizardPage(String title)
@@ -37,7 +38,7 @@ public class WizardPage
 		return this.getClass().getSimpleName() + ".ftl";
 	}
 
-	public void handleRequest(Database db, MolgenisRequest request)
+	public void handleRequest(Database db, HttpServletRequest request)
 	{
 
 	}

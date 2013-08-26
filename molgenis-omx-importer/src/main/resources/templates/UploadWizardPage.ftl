@@ -1,7 +1,9 @@
+<form method="post" name="importWizardForm" enctype="multipart/form-data" action="">
+		
 <div  style="padding-top: 25px">
 <div>
 	Upload <a href="generated-doc/fileformat.html" target="_blank">Observ-OMX</a> data file<br /><br />
-	<input type="file" name="upload"style="height:25px" />
+	<input type="file" name="upload" style="height:25px" >
 </div>
 <div style="padding-top: 25px">
 <div class="accordion" id="accordion">
@@ -9,7 +11,7 @@
 <div class="accordion-heading">
 <a class="accordion-toggle" data-toggle="collapse" href="#collapse1">Advanced options</a>
 </div>
-<div id="collapse1" class="accordion-body collapse' in>
+<div id="collapse1" class="accordion-body collapse">
 <div class="accordion-inner">
 <table style="width: 75%;">
 	<tr>
@@ -63,7 +65,8 @@
 </div>
 </div>
 </div>
+</form>
+
 <script>
-document.forms.${form}.__show.value = true;
 $('#collapse1').collapse("hide");
 </script>
