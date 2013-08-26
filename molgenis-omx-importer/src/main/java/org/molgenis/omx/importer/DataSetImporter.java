@@ -1,4 +1,4 @@
-package org.molgenis.omx.dataset;
+package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;

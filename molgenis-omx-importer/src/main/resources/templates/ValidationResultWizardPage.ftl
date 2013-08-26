@@ -1,3 +1,5 @@
+<form method="post" name="importWizardForm" action="">
+		
 <div>
 <#if wizard.dataImportable??>
 	<table class="table table-bordered table-condensed pull-left" style="width: 25%;">
@@ -122,3 +124,5 @@
 	</#list>
 </table>
 </#if>
+
+</form>
