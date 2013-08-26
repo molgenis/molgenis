@@ -1,18 +1,22 @@
-<#macro ImportWizard screen>
-	<#assign wizard = screen.wizard>
-	<#assign form = screen.name>
-	
-	<form method="post" enctype="multipart/form-data" name="${form}" action="">
-		<!--needed in every form: to redirect the request to the right screen-->
-		<input type="hidden" name="__target" value="${screen.name}">
-		<!--needed in every form: to define the action. This can be set by the submit button-->
-		<input type="hidden" name="__action">
-		<!--need to be set to "true" in order to force a download-->
-		<input type="hidden" name="__show">
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dataset deletion plugin</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bwizard.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/importer.css" type="text/css">
 		
-		<div class="formscreen"">
-			<div class="form_header" id="${screen.getName()}">${screen.label}</div>
-
+		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+		<script type="text/javascript" src="/js/molgenis-all.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/bwizard.min.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			
 			<div id="wizard" style="padding:16px">
 				<ol>
 					<#list wizard.pages as wizardPage>
@@ -22,17 +26,17 @@
 				
 				<#list wizard.pages as wizardPage>
 					<div style="min-height: 180px">
-						<p>		
-							<#if wizard.errorMessage! != "" >
-								<div class="alert alert-block alert-error">${wizard.errorMessage!}</div>
-							</#if>	
-							<#if wizard.validationMessage! != "" >
-								<div class="alert alert-block alert-error">${wizard.validationMessage!}</div>
-							</#if>	
-							<#if wizard.successMessage! != "" >
-								<div class="alert alert-block alert-success">${wizard.successMessage!}</div>
-							</#if>	
+						<p>			
 							<#if wizardPage == wizard.currentPage && wizardPage.viewTemplate! != "">
+								<#if wizard.errorMessage! != "" >
+									<div class="alert alert-block alert-error">${wizard.errorMessage!}</div>
+								</#if>	
+								<#if wizard.validationMessage! != "" >
+									<div class="alert alert-block alert-error">${wizard.validationMessage!}</div>
+								</#if>	
+								<#if wizard.successMessage! != "" >
+									<div class="alert alert-block alert-success">${wizard.successMessage!}</div>
+								</#if>
 								<#include wizardPage.viewTemplate />
 							</#if>
 						</p>
@@ -40,8 +44,9 @@
 				</#list>
 				
 			</div>
+		
 		</div>
-	</form>
+		
 	<script type="text/javascript">
 		$("#wizard").bwizard({activeIndex: ${wizard.currentPageIndex}});
 	   	$('.pager').css({"width" : "491px"});//Pager bar with previous/next buttons
@@ -61,25 +66,25 @@
 	    });
 	   //Add Cancel button
 	   	$('<li role="button" class="cancel" ><a href="#">Restart</a></li>').css({"margin-left" : "230px"}).insertBefore('.next').click(function(){
-	   		performAction(this, 'cancel');
+	   		performAction(this, '/plugin/importwizard');
 	   	});
 	 
 	   	//Remove bwizard default eventhandlers and add our own eventhandlers	
 	   	
 	   	$('.next').unbind('click').click(function(){
 	   		<#if wizard.lastPage > 
-	   			performAction(this, 'finish');
+	   			performAction(this, '/plugin/importwizard');
 	   		<#else>
-	   			performAction(this, 'next');
+	   			performAction(this, '/plugin/importwizard/next');
 	   		</#if>
 	   	});
 	   	
 	   	$('.previous').unbind('click').click(function(){
-	   		performAction(this, 'previous');
+	   		performAction(this, '/plugin/importwizard/previous');
 	   	});
 	   	
 	   	<#if wizard.lastPage > 
-	    	$('.next a').html('Finish');
+	    	$('.next a').html('finish');
 	    </#if>
 	    
 	   	<#if wizard.validationMessage! == "">
@@ -103,10 +108,13 @@
 	   			<#if wizard.currentPageIndex == 2>
 	   				$('#spinner').modal('show');
 	   			</#if>
-	   			document.forms.${form}.__action.value = action;
-	   			document.forms.${form}.submit();
+	   			
+	   			document.forms.importWizardForm.action = action;
+	   			document.forms.importWizardForm.submit();
 	   		}
 	   	}
 	</script>
-	
-</#macro>
+			
+		
+	</body>
+</html>

@@ -1,4 +1,4 @@
-package org.molgenis.omx.plugins;
+package org.molgenis.omx.datasetdeleter;
 
 import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;

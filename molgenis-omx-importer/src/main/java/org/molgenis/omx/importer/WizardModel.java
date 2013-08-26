@@ -1,4 +1,4 @@
-package org.molgenis.omx.plugins;
+package org.molgenis.omx.importer;
 
 public abstract class WizardModel
 {

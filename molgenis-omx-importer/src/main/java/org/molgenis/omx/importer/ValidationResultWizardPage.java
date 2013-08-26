@@ -1,4 +1,4 @@
-package org.molgenis.omx.plugins;
+package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.framework.db.Database.DatabaseAction;
-import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.omx.dataset.DataSetImporter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ApplicationUtil;
@@ -26,10 +26,11 @@ public class ValidationResultWizardPage extends WizardPage
 	}
 
 	@Override
-	public void handleRequest(Database db, MolgenisRequest request)
+	public void handleRequest(Database db, HttpServletRequest request)
 	{
 		ImportWizard importWizard = getWizard();
 		String entityImportOption = importWizard.getEntityImportOption();
+		System.out.println("entityImportOption=" + entityImportOption);
 
 		if (entityImportOption != null)
 		{
@@ -111,5 +112,5 @@ public class ValidationResultWizardPage extends WizardPage
 
 		return dbAction;
 	}
-	
+
 }
