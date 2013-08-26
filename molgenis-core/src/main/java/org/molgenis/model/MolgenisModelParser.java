@@ -1328,7 +1328,7 @@ public class MolgenisModelParser
 			{
 				if (element.getAttribute("type") != null && element.getAttribute("type").isEmpty())
 				{
-					throw new MolgenisModelException("plugin has no name");
+					throw new MolgenisModelException("plugin has no type");
 				}
 				Plugin plugin = new Plugin(name, parent, element.getAttribute("type"));
 				plugin.setLabel(label);
