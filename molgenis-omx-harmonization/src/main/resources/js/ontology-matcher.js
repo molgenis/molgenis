@@ -125,7 +125,9 @@
 						var feature = mapping[storeMappingFeature];
 						var storeMappedFeature = mapping[storeMappingMappedFeature];
 						var observationSet = mapping['observation_set'];
-						var confirmed = mappingConfirmMap[observationSet].value;
+						var confirmed = false;
+						if(mappingConfirmMap[observationSet])
+							confirmed = mappingConfirmMap[observationSet].value;
 						if(!tuple[feature])
 							tuple[feature] = [];
 						tuple[feature].push({

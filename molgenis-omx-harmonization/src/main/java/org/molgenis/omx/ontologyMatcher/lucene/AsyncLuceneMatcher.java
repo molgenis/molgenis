@@ -99,8 +99,6 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 			SearchRequest request = new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, queryRules, null);
 			SearchResult result = searchService.search(request);
 
-			List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
-			List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 			for (Integer catalogueId : dataSetsToMatch)
 			{
 				StringBuilder dataSetIdentifier = new StringBuilder();
@@ -113,6 +111,9 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 			List<Hit> listOfHits = result.getSearchHits();
 
 			totalNumber = listOfHits.size();
+
+			List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
+			List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
 
 			for (Hit hit : listOfHits)
 			{
@@ -185,7 +186,6 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 				searchService.indexTupleTable(dataSetIdentifier.toString(),
 						new StoreMappingTable(dataSetIdentifier.toString(), db));
 			}
-
 			db.commitTx();
 		}
 		catch (Exception e)
