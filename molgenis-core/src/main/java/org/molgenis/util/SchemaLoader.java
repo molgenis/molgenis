@@ -51,6 +51,21 @@ public class SchemaLoader implements LSResourceResolver
 		}
 	}
 
+	public SchemaLoader(InputStream is)
+	{
+		try
+		{
+			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			schemaFactory.setResourceResolver(this);
+
+			schema = schemaFactory.newSchema(new StreamSource(is));
+		}
+		catch (SAXException e)
+		{
+			throw new RuntimeException("Could not load schemas", e);
+		}
+	}
+
 	public Schema getSchema()
 	{
 		return schema;
