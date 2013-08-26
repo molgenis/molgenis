@@ -1,4 +1,4 @@
-package org.molgenis.importer.controller;
+package org.molgenis.omx.datasetdeleter;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -65,15 +65,15 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 
 	@SuppressWarnings("deprecation")
 	@Captor
-	private ArgumentCaptor<ArrayList<ObservableFeature>> captorFeatures = new ArgumentCaptor<ArrayList<ObservableFeature>>();
+	private final ArgumentCaptor<ArrayList<ObservableFeature>> captorFeatures = new ArgumentCaptor<ArrayList<ObservableFeature>>();
 
 	@SuppressWarnings("deprecation")
 	@Captor
-	private ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSets = new ArgumentCaptor<ArrayList<ObservationSet>>();
+	private final ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSets = new ArgumentCaptor<ArrayList<ObservationSet>>();
 
 	@SuppressWarnings("deprecation")
 	@Captor
-	private ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
+	private final ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
 
 	@Configuration
 	static class Config
@@ -204,7 +204,8 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 
 		List<DataSet> datasets = new ArrayList<DataSet>();
 		datasets.add(dataset);
-		when(database.find(DataSet.class, new QueryRule("Id", Operator.EQUALS, "dataset1"))).thenReturn(datasets);
+		when(database.find(DataSet.class, new QueryRule("identifier", Operator.EQUALS, "dataset1"))).thenReturn(
+				datasets);
 
 		when(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, 0)))
 				.thenReturn(observedValues0);

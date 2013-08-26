@@ -1,13 +1,12 @@
-package org.molgenis.importer.controller;
+package org.molgenis.omx.datasetdeleter;
 
-import static org.molgenis.importer.controller.DataSetDeleterController.URI;
+import static org.molgenis.omx.datasetdeleter.DataSetDeleterController.URI;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
@@ -40,7 +39,6 @@ public class DataSetDeleterController
 	public static final String URI = "/plugin/datasetdeleter";
 	private static final String[] runtimeProperties =
 	{ "app.href.logo", "app.href.css" };
-	private static final Logger logger = Logger.getLogger(DataSetDeleterController.class);
 
 	int teller = 0;
 
@@ -64,7 +62,7 @@ public class DataSetDeleterController
 				model.addAttribute(property.replaceAll("\\.", "_"), value);
 			}
 		}
-		return "datasetdeleter";
+		return "view-datasetdeleter";
 	}
 
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
@@ -81,7 +79,8 @@ public class DataSetDeleterController
 
 	public String delete(String datasetIdentifier, boolean deletemetadata) throws DatabaseException, IOException
 	{
-		DataSet dataSet = database.find(DataSet.class, new QueryRule("Id", Operator.EQUALS, datasetIdentifier)).get(0);
+		DataSet dataSet = database.find(DataSet.class, new QueryRule("identifier", Operator.EQUALS, datasetIdentifier))
+				.get(0);
 		// list used to check if Features and SubProtocols are used by different
 		String dataSetName = dataSet.getName();
 		try
@@ -229,9 +228,9 @@ public class DataSetDeleterController
 			List<CategoricalValue> categoricalValues = database.find(CategoricalValue.class, new QueryRule(
 					CategoricalValue.VALUE, Operator.EQUALS, category.getIdValue()));
 			for (CategoricalValue cat : categoricalValues)
-			{	
+			{
 				database.remove(cat);
-			}			
+			}
 			database.remove(category);
 		}
 	}
