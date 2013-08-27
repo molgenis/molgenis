@@ -3,6 +3,7 @@ package org.molgenis.omx.controller;
 import static org.molgenis.omx.controller.ReferencesController.URI;
 
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class ReferencesController
+public class ReferencesController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/references";
 
@@ -26,6 +27,7 @@ public class ReferencesController
 	@Autowired
 	public ReferencesController(MolgenisSettings molgenisSettings)
 	{
+		super(URI);
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
 		this.molgenisSettings = molgenisSettings;
 	}

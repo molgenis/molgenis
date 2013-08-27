@@ -24,6 +24,7 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(URI)
-public class ProtocolViewerController
+public class ProtocolViewerController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/protocolviewer";
 
@@ -47,6 +48,7 @@ public class ProtocolViewerController
 	@Autowired
 	public ProtocolViewerController(Database database, MolgenisSettings molgenisSettings)
 	{
+		super(URI);
 		if (database == null) throw new IllegalArgumentException("Database is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
 		this.database = database;

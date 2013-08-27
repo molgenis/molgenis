@@ -7,6 +7,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -72,9 +73,9 @@ public class XmlMolgenisUiPluginTest
 	public void isAuthorized()
 	{
 		String type = "type";
-		when(molgenisPermissionService.hasReadPermissionOnPlugin(type)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnPlugin(type, Permission.READ)).thenReturn(true);
 		PluginType pluginType = new PluginType();
-		pluginType.setType(type);
+		pluginType.setName(type);
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(molgenisPermissionService, pluginType);
 		assertTrue(xmlMolgenisUiPlugin.isAuthorized());
 	}
@@ -83,7 +84,7 @@ public class XmlMolgenisUiPluginTest
 	public void isAuthorized_notAuthorized()
 	{
 		PluginType pluginType = new PluginType();
-		pluginType.setType("type_notauthorized");
+		pluginType.setName("type_notauthorized");
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(molgenisPermissionService, new PluginType());
 		assertFalse(xmlMolgenisUiPlugin.isAuthorized());
 	}

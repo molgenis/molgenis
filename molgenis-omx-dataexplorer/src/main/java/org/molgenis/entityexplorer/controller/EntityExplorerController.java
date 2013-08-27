@@ -16,23 +16,22 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
-public class EntityExplorerController
+public class EntityExplorerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(EntityExplorerController.class);
 
@@ -46,11 +45,17 @@ public class EntityExplorerController
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+	public EntityExplorerController()
+	{
+		super(URI);
+	}
+
+	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView init(@RequestParam(required = false)
+	public String init(@RequestParam(required = false)
 	String entity, @RequestParam(required = false)
 	String identifier, @RequestParam(required = false)
-	String query) throws Exception
+	String query, Model model) throws Exception
 	{
 		// select all characteristic entities
 		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(database.getEntityClasses(),
@@ -73,58 +78,46 @@ public class EntityExplorerController
 
 		// select initial entity
 		Class<? extends Characteristic> selectedClazz = clazzMap.get(entity);
-		if (selectedClazz == null) selectedClazz = clazzMap.entrySet().iterator().next().getValue();
+		if (selectedClazz == null)
+		{
+			if (!clazzMap.isEmpty()) selectedClazz = clazzMap.entrySet().iterator().next().getValue();
+		}
+
+		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
+		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
+		model.addAttribute("selectedQuery", query);
+		model.addAttribute("entities", new ArrayList<String>(clazzMap.keySet()));
 
 		// determine instances for selected entity
-		List<? extends Characteristic> characteristics = database.find(selectedClazz);
-		Characteristic selectedCharacteristic = null;
-		if (identifier != null)
+		if (selectedClazz != null)
 		{
-			List<? extends Characteristic> selectedCharacteristics = database.find(selectedClazz, new QueryRule(
-					Characteristic.IDENTIFIER, Operator.EQUALS, identifier));
-			if (selectedCharacteristics != null && !selectedCharacteristics.isEmpty())
+			List<? extends Characteristic> characteristics = database.find(selectedClazz);
+			Characteristic selectedCharacteristic = null;
+			if (identifier != null)
 			{
-				selectedCharacteristic = selectedCharacteristics.get(0);
+				List<? extends Characteristic> selectedCharacteristics = database.find(selectedClazz, new QueryRule(
+						Characteristic.IDENTIFIER, Operator.EQUALS, identifier));
+				if (selectedCharacteristics != null && !selectedCharacteristics.isEmpty())
+				{
+					selectedCharacteristic = selectedCharacteristics.get(0);
+				}
+				else
+				{
+					logger.warn(selectedClazz.getSimpleName() + " with identifier " + identifier + " does not exist");
+				}
 			}
 			else
 			{
-				logger.warn(selectedClazz.getSimpleName() + " with identifier " + identifier + " does not exist");
+				if (characteristics != null && !characteristics.isEmpty()) selectedCharacteristic = characteristics
+						.get(0);
 			}
+
+			model.addAttribute("selectedEntity", selectedClazz.getSimpleName());
+			model.addAttribute("entityInstances", characteristics);
+			model.addAttribute("selectedEntityInstance", selectedCharacteristic);
 		}
-		else
-		{
-			if (characteristics != null && !characteristics.isEmpty()) selectedCharacteristic = characteristics.get(0);
-		}
 
-		List<String> characteristicIdentifiers = Lists.transform(characteristics,
-				new Function<Characteristic, String>()
-				{
-					@Override
-					@Nullable
-					public String apply(@Nullable
-					Characteristic characteristic)
-					{
-						return characteristic != null ? characteristic.getIdentifier() : null;
-					}
-				});
-
-		// select initial instance
-		String selectedIdentifier = characteristicIdentifiers.contains(identifier) ? identifier : null;
-		if (selectedIdentifier == null && !characteristicIdentifiers.isEmpty()) selectedIdentifier = characteristicIdentifiers
-				.get(0);
-
-		ModelAndView model = new ModelAndView("entityexplorer");
-
-		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
-		if (appHrefCss != null) model.addObject(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
-
-		model.addObject("entities", new ArrayList<String>(clazzMap.keySet()));
-		model.addObject("selectedEntity", selectedClazz.getSimpleName());
-		model.addObject("entityInstances", characteristics);
-		model.addObject("selectedEntityInstance", selectedCharacteristic);
-		model.addObject("selectedQuery", query);
-
-		return model;
+		return "view-entityexplorer";
 	}
 
 	@ExceptionHandler(DatabaseAccessException.class)
