@@ -1,3 +1,36 @@
+<#if enable_spring_ui>
+<#include "molgenis-header.ftl">
+<#include "molgenis-footer.ftl">
+<#assign css=["chosen.css", "protocolmanager.css"]>
+<#assign js=["chosen.jquery.min.js", "protocolmanager.js", "${resultsTableJavascriptFile}"]>
+<@header css js/>
+		<script type="text/javascript">
+			$(function() {
+				window.top.molgenis.fillWorkflowSelect(function() {
+					<#-- select first dataset -->
+					$('#workflow-select option:first').val();
+					<#-- fire event handler -->
+					$('#workflow-select').change();
+					<#-- use chosen plugin for dataset select -->
+					$('#workflow-select').chosen();
+				});
+			});
+		</script>
+		<div class="row-fluid">
+			<div id="modals"></div>
+			<div class="span9">
+				<div id="workflow-select-container" class="control-group form-horizontal">
+					<div class="controls pull-right">
+						<label class="control-label" for="workflow-select">Choose a workflow:</label>
+						<select data-placeholder="Choose a workflow" id="workflow-select">
+						</select>
+					</div>
+				</div>
+				<a id="next-button" class="btn" href="#">Next</a>	
+			</div>
+		</div>
+<@footer/>
+<#else>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -52,3 +85,4 @@
 		
 	</body>
 </html>
+</#if>
