@@ -7,143 +7,71 @@
 	var allFeatureNames = [];
 	var currentPage = 1;
 	var counter = 1;
-	var protocolCounter = 0; 
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
-	var workflowUri = null;
+	var protocolUri = null;
 	var selectedProtocol = null;
-	var bool = "false";
-	var hrefje ="";
 	
 		
 	// fill dataset select
-	ns.fillWorkflowSelect = function(callback) {
+	ns.fillProtocolSelect = function(callback) {
 		restApi.getAsync('/api/v1/protocol', null, null, function(protocols) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(protocols.items, function(key, val) {
-				if(val.name.indexOf("Workflow")!=-1){
-					items.push('<option value="' + val.href + '">' + val.name + '</option>');
-				}
+				items.push('<option value="' + val.href + '">' + val.name + '</option>');
 			});
 			
-			$('#workflow-select').html(items.join(''));
-			$('#workflow-select').change(function() {
-				workflowUri = $(this).val();
+			$('#protocol-select').html(items.join(''));
+			$('#protocol-select').change(function() {
+				protocolUri = $(this).val();
+				ns.onProtocolSelectionChange();
 			});
 			callback();
 		});
 	};
 
-	
-	//SUBPROTOCOLS
-	ns.firstStep = function() {
-		var items = [];
-		var subprotocols = restApi.get(workflowUri + '/subprotocols');	
-			$.each(subprotocols.items, function() {			
-				if(this.href!=null){
-					hrefje=this.href;
-					while(bool=='false'){				
-						ns.getAllSubprotocols(hrefje);
-					}
+	ns.onProtocolSelectionChange = function() {
+		allFeatureNames = [];
+		restApi.getAsync(protocolUri,["features"],null,function(protocol){
+			var features = protocol.features;
+			selectedProtocol = protocol;
+			$('#protocol_data-table').empty();
+			var items = [];
+			items.push('<tr>');
+			$.each(features.items, function(key, feature) {	
+				allFeatureNames.push(feature.name);
+			items.push('<td>'+feature.name+'</td>');		
+			});
+			var value = "";
+			//Make first row
+			items.push('</tr><tr>');
+			$.each(features.items, function(key, feature) {
+				
+				var dataType = feature.dataType;
+				var idFeature = feature.name+"_"+counter;
+				if(dataType == "string" || dataType == "categorical"|| dataType == "email"|| dataType == "html"|| dataType == "hyperlink") {
+					items.push('<td><input type="text" style="margin:0px;width:75px" id="'+idFeature+'"/></td>');
+				}  else if (dataType == 'bool') {
+					items.push('<td><input type="checkbox"/></td>');
 					
-				};
-			});
-			alert(protocolCounter);
-			$("#wizard").bwizard({activeIndex: ${wizard.currentPageIndex}});
-		   	$('.pager').css({"width" : "491px"});//Pager bar with previous/next buttons
-		   	$(window).load(function() {
-				var headerHeight = $("#header").height();
-				var viewportHeight = $(window).height();
-				var otherHeight = 358;//plugin title + menu + padding/progress bar etc of the wizard + footer
-				var preferredImporterHeight = (viewportHeight - headerHeight - otherHeight);
-		   		
-				//TODO:isn't there a way to select those by wildcard? "step*" 
-				for(x=1;x<=protocolCounter;x++){
-					$("#step1").height(preferredImporterHeight);
-		 			$("#step1").css({"overflow" : "scroll"});
+				} else if (dataType == 'date') {
+					items.push('<td><input type="date"/></td>');
+				
+				} else if (dataType == 'datetime') {
+					items.push('<td><input type="datetime"/></td>');
+					
+				} 
+				else{
+					items.push('<td><input type="text" style="margin:0px;width:75px" id="'+idFeature+'"></td>');
 				}
-		   		
-			
-			
-			$.ajax({
-				type : 'POST',
-				url : '/plugin/protocolmanager/protocolAmount',
-				data : JSON.stringify({
-					'protocolAmount' : protocolCounter
-					}),
-			 	success: function () {
-	            	$(document).trigger('savedRowsSuccessfully', 'Counting done');
-	            	
-				 },
-				contentType : 'application/json'
-			});
-		
-	};
-	
-	ns.getAllSubprotocols = function(href){
-		
-		var protocols = restApi.get(href + '/subprotocols');
-		protocolCounter++;
-		$.each(protocols.items, function(item) {
-			hrefje=this.href;
+				});
+			$('#protocol_data-table').append(items+'</tr>');
 		});
-		if(protocols.items.length==0){
-			bool='true';
-		}
-		
 	};
-	
-	//FEATURES
-//	ns.onWorkflowSelectionChange = function() {
-//		allFeatureNames = [];
-//		restApi.getAsync(protocolUri,["features"],null,function(protocol){
-//			var features = protocol.features;
-//			selectedProtocol = protocol;
-//			$('#protocol_data-table').empty();
-//			var items = [];
-//			items.push('<tr>');
-//			$.each(features.items, function(key, feature) {	
-//				allFeatureNames.push(feature.name);
-//			items.push('<td>'+feature.name+'</td>');		
-//			});
-//			var value = "";
-//			//Make first row
-//			items.push('</tr><tr>');
-//			$.each(features.items, function(key, feature) {
-//				
-//				var dataType = feature.dataType;
-//				var idFeature = feature.name+"_"+counter;
-//				if(dataType == "string" || dataType == "categorical"|| dataType == "email"|| dataType == "html"|| dataType == "hyperlink") {
-//					items.push('<td><input type="text" style="margin:0px;width:75px" id="'+idFeature+'"/></td>');
-//				}  else if (dataType == 'bool') {
-//					items.push('<td><input type="checkbox"/></td>');
-//					
-//				} else if (dataType == 'date') {
-//					items.push('<td><input type="date"/></td>');
-//				
-//				} else if (dataType == 'datetime') {
-//					items.push('<td><input type="datetime"/></td>');
-//					
-//				} 
-//				else{
-//					items.push('<td><input type="text" style="margin:0px;width:75px" id="'+idFeature+'"></td>');
-//				}
-//				});
-//			$('#protocol_data-table').append(items+'</tr>');
-//		});
-//	};
-	
-	
-	
 	
 	ns.htmlEscape = function (text) {
 		return $('<div/>').text(text).html(); 
-	};
-	
-	
-	ns.next = function(){
-		ns.firstStep();
 	};
 	
 	ns.addRow = function(){
@@ -215,9 +143,6 @@
 		
 		$('#save-button').click(function() {
 			ns.save();
-		});
-		$('#next-button').click(function() {
-			ns.next();
 		});
 		
 		$(document).on('savedRowsSuccessfully', function(e, msg) {

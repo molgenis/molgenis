@@ -93,7 +93,6 @@ public class ProtocolManagerController extends MolgenisPluginController
 	ProtocolAmount protAmount, HttpServletResponse response)
 	{
 
-		System.out.println("WAAAA " + protAmount.getProtocolAmount());
 	}
 
 	@RequestMapping(value = "/save", method = POST)
