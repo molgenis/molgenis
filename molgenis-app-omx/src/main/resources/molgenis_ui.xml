@@ -7,7 +7,7 @@
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
 		<plugin label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
+		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.importer.ImportWizardPlugin" />
 		<plugin label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
 		<plugin label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
 		<plugin label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
