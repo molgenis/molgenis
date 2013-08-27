@@ -44,11 +44,7 @@
 			<plugin id="FIXME" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
 			<plugin id="FIXME" label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
 		
-		</menu> <!-- admin panels -->	
-<<<<<<< HEAD
-		<plugin id="FIXME" name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Account" />
-=======
-		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.AccountPlugin" label="Account" />
->>>>>>> 02485fab0a3aeade64a23307bf8efba24fc53999
+		</menu> <!-- admin panels -->
+		<plugin id="account" name="UserLogin" type="org.molgenis.omx.auth.ui.AccountPlugin" label="Account" />
 	</menu>
 </molgenis>
