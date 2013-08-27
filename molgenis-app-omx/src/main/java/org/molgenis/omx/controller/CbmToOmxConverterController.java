@@ -33,7 +33,7 @@ import org.molgenis.jaxb.ParticipantCollectionSummary;
 import org.molgenis.jaxb.Race;
 import org.molgenis.servlet.MolgenisContextListener;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.util.FileStore;
+import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -51,8 +51,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(MolgenisContextListener.class);
 
-	public static final String URI = "/plugin/cbmToOmxConverter";
-	private final MolgenisSettings molgenisSettings;
+	public static final String URI = "/plugin/cbmtoomxconverter";
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
@@ -61,14 +60,9 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			"observablefeature.csv");
 
 	@Autowired
-	private FileStore fileStore;
-
-	@Autowired
-	public CbmToOmxConverterController(MolgenisSettings molgenisSettings)
+	public CbmToOmxConverterController()
 	{
 		super(URI);
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -81,7 +75,12 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 	public void convert(@RequestParam
 	Part cbmFile, HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
-		File file = fileStore.store(cbmFile.getInputStream(), cbmFile.getName());
+		File file = null;
+		Part part = request.getPart("upload");
+		if (part != null)
+		{
+			file = FileUploadUtils.saveToTempFile(part);
+		}
 
 		if (file == null)
 		{
