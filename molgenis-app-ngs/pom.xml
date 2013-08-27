@@ -17,7 +17,6 @@
 					<exclude>**molgenis.properties</exclude>
 					<exclude>**git.properties</exclude>
 					<exclude>**/model/*.xml</exclude>
-					<exclude>**ui.xml</exclude>
 				</excludes>
 			</resource>
 		</resources>

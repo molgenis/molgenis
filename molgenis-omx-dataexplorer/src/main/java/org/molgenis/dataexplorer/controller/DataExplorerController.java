@@ -31,6 +31,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.ValueTuple;
@@ -54,13 +55,13 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(URI)
-public class DataExplorerController
+public class DataExplorerController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
 	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
 
-	private static final String DEFAULT_KEY_TABLE_TYPE = "/js/MultiObservationSetTable.js";
+	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
 	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
@@ -72,6 +73,11 @@ public class DataExplorerController
 
 	@Autowired
 	private SearchService searchService;
+
+	public DataExplorerController()
+	{
+		super(URI);
+	}
 
 	/**
 	 * Show the explorer page
@@ -119,7 +125,7 @@ public class DataExplorerController
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
 
-		return "dataexplorer";
+		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/download", method = POST)

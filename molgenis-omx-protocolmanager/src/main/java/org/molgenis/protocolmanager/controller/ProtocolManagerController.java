@@ -27,6 +27,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.search.SearchService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.WritableTuple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class ProtocolManagerController
+public class ProtocolManagerController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/protocolmanager";
 	private static final Logger logger = Logger.getLogger(ProtocolManagerController.class);
@@ -63,6 +64,11 @@ public class ProtocolManagerController
 	@Autowired
 	private SearchService searchService;
 
+	public ProtocolManagerController()
+	{
+		super(URI);
+	}
+
 	/**
 	 * Show the explorer page
 	 * 
@@ -75,11 +81,11 @@ public class ProtocolManagerController
 	{
 
 		String resultsTableJavascriptFile = molgenisSettings.getProperty("protocolmanager.resultstable.js",
-				"/js/MultiObservationSetTable.js");
+				"MultiObservationSetTable.js");
 
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
 
-		return "protocolmanager";
+		return "view-protocolmanager";
 	}
 
 	@RequestMapping(value = "/save", method = POST)

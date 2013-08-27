@@ -2,18 +2,18 @@
 <molgenis name="omx" label="Molgenis">
 	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
 	<menu name="main">
-		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin" groupRead="anonymous,AllUsers"/>
-		<plugin label="Catalogue" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
-		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
-		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
-		<plugin label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.importer.ImportWizardPlugin" />
-		<plugin label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
-		<plugin label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
-		<plugin label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
-		<plugin label="Contact" name="ContactPlugin" type="org.molgenis.omx.plugins.ContactPlugin"/>
+		<plugin id="home" label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
+		<plugin id="protocolviewer" label="Catalogue" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
+		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
+		<plugin id="entityexplorer" label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
+		<plugin id="protocolmanager" label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
+		<plugin id="importwizard" label="Upload" name="UploadWizard" type="org.molgenis.omx.importer.ImportWizardPlugin" />
+		<plugin id="news" label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
+		<plugin id="background" label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
+		<plugin id="references" label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
+		<plugin id="contact" label="Contact" name="ContactPlugin" type="org.molgenis.omx.plugins.ContactPlugin"/>
 		<menu name="Converters">
-			<plugin label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
+			<plugin id="cbmToOmxConverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
 		</menu>
         <menu name="Admin">
 	        <menu name ="Entities">
@@ -33,18 +33,18 @@
 					<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
 					<form name="MolgenisPermission" entity="MolgenisPermission" />
 				</menu>
-				<plugin label="My permissions" name="PermissionManagementPlugin"
+				<plugin id="FIXME" label="My permissions" name="PermissionManagementPlugin"
 					type="org.molgenis.omx.auth.service.permissionmanagement.PermissionManagementPlugin" />
-				<plugin label="Upgrade person to user" name="UserToPersonPlugin"
+				<plugin id="FIXME" label="Upgrade person to user" name="UserToPersonPlugin"
 					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
-				<plugin label="Security tokens" name="TokenManagerPlugin"
+				<plugin id="FIXME" label="Security tokens" name="TokenManagerPlugin"
 					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
 			</menu>	
 			
-			<plugin label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
-			<plugin label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
+			<plugin id="FIXME" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
+			<plugin id="FIXME" label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
 		
-		</menu> <!-- admin panels -->	
-		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.AccountPlugin" label="Account" />
+		</menu> <!-- admin panels -->
+		<plugin id="account" name="UserLogin" type="org.molgenis.omx.auth.ui.AccountPlugin" label="Account" />
 	</menu>
 </molgenis>
