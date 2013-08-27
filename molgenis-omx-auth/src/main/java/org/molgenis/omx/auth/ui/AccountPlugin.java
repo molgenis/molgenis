@@ -3,11 +3,11 @@ package org.molgenis.omx.auth.ui;
 import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;
 
-public class SimpleUserLogin extends IframePlugin
+public class AccountPlugin extends IframePlugin
 {
 	private static final long serialVersionUID = -3084964114182861171L;
 	
-	public SimpleUserLogin(String name, ScreenController<?> parent)
+	public AccountPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}
@@ -25,13 +25,12 @@ public class SimpleUserLogin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return "/account/loginform";
+		return "/account";
 	}
-	
+
 	@Override
-	public boolean isVisible(){
-		return true;
+	public boolean isVisible()
+	{
+		return getLogin().isAuthenticated();
 	}
-
-
 }
