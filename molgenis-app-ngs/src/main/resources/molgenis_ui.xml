@@ -44,12 +44,6 @@
 					<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
 					<form name="MolgenisPermission" entity="MolgenisPermission" />
 				</menu>
-				<plugin label="My permissions" name="PermissionManagementPlugin"
-					type="org.molgenis.omx.auth.service.permissionmanagement.PermissionManagementPlugin" />
-				<plugin label="Upgrade person to user" name="UserToPersonPlugin"
-					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
-				<plugin label="Security tokens" name="TokenManagerPlugin"
-					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
 			</menu>	
 		</menu> 
 		-->
