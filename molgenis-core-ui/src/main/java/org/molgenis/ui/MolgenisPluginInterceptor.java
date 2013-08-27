@@ -1,5 +1,9 @@
 package org.molgenis.ui;
 
+import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_AUTHENTICATED;
+import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_MOLGENIS_UI;
+import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_PLUGIN_ID;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,10 +15,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
-	static final String KEY_PLUGIN_ID = "plugin_id";
-	static final String KEY_MOLGENIS_UI = "molgenis_ui";
-	static final String KEY_AUTHENTICATED = "authenticated";
-
 	private final Login login;
 	private final MolgenisUi molgenisUi;
 
@@ -31,21 +31,23 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception
 	{
-		if (!(handler instanceof HandlerMethod))
+		if (modelAndView != null)
 		{
-			throw new RuntimeException("handler is not of type " + HandlerMethod.class.getSimpleName());
+			if (!(handler instanceof HandlerMethod))
+			{
+				throw new RuntimeException("handler is not of type " + HandlerMethod.class.getSimpleName());
+			}
+			Object bean = ((HandlerMethod) handler).getBean();
+			if (!(bean instanceof MolgenisPluginController))
+			{
+				throw new RuntimeException("controller does not implement "
+						+ MolgenisPluginController.class.getSimpleName());
+			}
+			modelAndView.addObject(KEY_PLUGIN_ID, ((MolgenisPluginController) bean).getId());
+			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
+			modelAndView.addObject(KEY_AUTHENTICATED, login.isAuthenticated());
+			// TODO remove flag after removing molgenis UI framework
+			modelAndView.addObject("enable_spring_ui", MolgenisRootController.USE_SPRING_UI);
 		}
-		Object bean = ((HandlerMethod) handler).getBean();
-		if (!(bean instanceof MolgenisPluginController))
-		{
-			throw new RuntimeException("controller does not implement "
-					+ MolgenisPluginController.class.getSimpleName());
-		}
-		;
-		modelAndView.addObject(KEY_PLUGIN_ID, ((MolgenisPluginController) bean).getId());
-		modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
-		modelAndView.addObject(KEY_AUTHENTICATED, login.isAuthenticated());
-		// TODO remove flag after removing molgenis UI framework
-		modelAndView.addObject("enable_spring_ui", MolgenisRootController.USE_SPRING_UI);
 	}
 }

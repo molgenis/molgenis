@@ -40,9 +40,9 @@ public class MolgenisPluginInterceptorTest
 		{
 		});
 		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
-		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.KEY_PLUGIN_ID), "test");
-		assertNotNull(modelAndView.getModel().get(MolgenisPluginInterceptor.KEY_MOLGENIS_UI));
-		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.KEY_AUTHENTICATED), false);
+		assertEquals(modelAndView.getModel().get(MolgenisHeaderAttributes.KEY_PLUGIN_ID), "test");
+		assertNotNull(modelAndView.getModel().get(MolgenisHeaderAttributes.KEY_MOLGENIS_UI));
+		assertEquals(modelAndView.getModel().get(MolgenisHeaderAttributes.KEY_AUTHENTICATED), false);
 	}
 
 	@Test
@@ -57,8 +57,8 @@ public class MolgenisPluginInterceptorTest
 		{
 		});
 		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
-		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.KEY_PLUGIN_ID), "test");
-		assertNotNull(modelAndView.getModel().get(MolgenisPluginInterceptor.KEY_MOLGENIS_UI));
-		assertEquals(modelAndView.getModel().get(MolgenisPluginInterceptor.KEY_AUTHENTICATED), true);
+		assertEquals(modelAndView.getModel().get(MolgenisHeaderAttributes.KEY_PLUGIN_ID), "test");
+		assertNotNull(modelAndView.getModel().get(MolgenisHeaderAttributes.KEY_MOLGENIS_UI));
+		assertEquals(modelAndView.getModel().get(MolgenisHeaderAttributes.KEY_AUTHENTICATED), true);
 	}
 }
