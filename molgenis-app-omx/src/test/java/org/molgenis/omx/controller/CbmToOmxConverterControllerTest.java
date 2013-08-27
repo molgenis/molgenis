@@ -45,7 +45,7 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 	public static class Config
 	{
 		@Bean
-		public CbmToOmxConverterController backgroundController()
+		public CbmToOmxConverterController cbmToOmxConverterController()
 		{
 			return new CbmToOmxConverterController();
 		}
