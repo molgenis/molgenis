@@ -14,17 +14,19 @@ import org.testng.annotations.Test;
 public class XmlMolgenisUiFormTest
 {
 	private MolgenisPermissionService molgenisPermissionService;
+	private MolgenisUiMenu molgenisUiMenu;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		molgenisPermissionService = mock(MolgenisPermissionService.class);
+		molgenisUiMenu = mock(MolgenisUiMenu.class);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void XmlMolgenisUiForm()
 	{
-		new XmlMolgenisUiForm(null, null);
+		new XmlMolgenisUiForm(null, null, molgenisUiMenu);
 	}
 
 	@Test
@@ -34,7 +36,7 @@ public class XmlMolgenisUiFormTest
 		FormType formType = new FormType();
 		formType.setName(formId);
 
-		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType);
+		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType, molgenisUiMenu);
 		assertEquals(xmlMolgenisUiForm.getId(), formId);
 	}
 
@@ -47,7 +49,7 @@ public class XmlMolgenisUiFormTest
 		formType.setName(formId);
 		formType.setLabel(formName);
 
-		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType);
+		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType, molgenisUiMenu);
 		assertEquals(xmlMolgenisUiForm.getName(), formName);
 	}
 
@@ -58,15 +60,23 @@ public class XmlMolgenisUiFormTest
 		FormType formType = new FormType();
 		formType.setName(formId);
 
-		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType);
+		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType, molgenisUiMenu);
 		assertEquals(xmlMolgenisUiForm.getName(), formId);
 	}
 
 	@Test
 	public void getType()
 	{
-		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, new FormType());
+		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, new FormType(),
+				molgenisUiMenu);
 		assertEquals(xmlMolgenisUiForm.getType(), MolgenisUiMenuItemType.FORM);
+	}
+
+	@Test
+	public void getParentMenu()
+	{
+		assertEquals(new XmlMolgenisUiForm(molgenisPermissionService, new FormType(), molgenisUiMenu).getParentMenu(),
+				molgenisUiMenu);
 	}
 
 	@Test
@@ -76,7 +86,7 @@ public class XmlMolgenisUiFormTest
 		when(molgenisPermissionService.hasPermissionOnEntity(formEntity, Permission.READ)).thenReturn(true);
 		FormType formType = new FormType();
 		formType.setEntity(formEntity);
-		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType);
+		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType, molgenisUiMenu);
 		assertTrue(xmlMolgenisUiForm.isAuthorized());
 	}
 
@@ -85,7 +95,8 @@ public class XmlMolgenisUiFormTest
 	{
 		FormType formType = new FormType();
 		formType.setEntity("entity_notauthorized");
-		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, new FormType());
+		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, new FormType(),
+				molgenisUiMenu);
 		assertFalse(xmlMolgenisUiForm.isAuthorized());
 	}
 }

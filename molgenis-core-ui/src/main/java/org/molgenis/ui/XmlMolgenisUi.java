@@ -63,4 +63,27 @@ public class XmlMolgenisUi implements MolgenisUi
 		}
 		throw new RuntimeException("missing required menu item");
 	}
+
+	@Override
+	public MolgenisUiMenu getMenu(String menuId)
+	{
+		MolgenisUiMenu menu = getMenuRecursive(getMenu(), menuId);
+		if (menu == null) throw new RuntimeException("unknown menu or menu with no (accessible) items: " + menuId);
+		return menu;
+	}
+
+	private MolgenisUiMenu getMenuRecursive(MolgenisUiMenu menu, String menuId)
+	{
+		if (menu.getId().equals(menuId)) return menu;
+
+		for (MolgenisUiMenuItem menuItem : menu.getItems())
+		{
+			if (menuItem.getType() == MolgenisUiMenuItemType.MENU)
+			{
+				MolgenisUiMenu requestedMenu = getMenuRecursive((MolgenisUiMenu) menuItem, menuId);
+				if (requestedMenu != null) return requestedMenu;
+			}
+		}
+		return null;
+	}
 }

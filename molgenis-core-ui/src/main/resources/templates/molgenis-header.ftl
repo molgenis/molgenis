@@ -34,41 +34,29 @@
 			<div class="row-fluid">
 				<div id="login-modal-container-header"></div>
 				<div class="pull-right">
-				<#if !authenticated>
-					<a class="modal-href" href="/account/login" data-target="login-modal-container-header">login/register</a>
-				<#else>
+				<#if authenticated?? && authenticated>
 					<a href="/account/logout">logout</a>
+				<#else>
+					<a class="modal-href" href="/account/login" data-target="login-modal-container-header">login/register</a>
 				</#if>
 				</div>
-	<#assign breadcrumb = [molgenis_ui.menu]>
-	<@molgenis_menu molgenis_ui.menu plugin_id breadcrumb/>
+		<#if menu_id??>
+			<#if !(plugin_id??)>
+				<#assign plugin_id="NULL">
+			</#if>
+			<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
+		</#if>
 			</div>
 </#macro>
 
-<#macro molgenis_menu menu plugin_id breadcrumb>
-	<#list menu.items as item>
-		<#if item.type != "MENU" && item.id == plugin_id>
-			<@build_menu menu plugin_id breadcrumb/>
-			<#return>
-		</#if>
-	</#list>
-	<#list menu.items as item>
-		<#if item.type == "MENU">
-			<#assign sub_menu = item>
-			<#assign breadcrumb_new = breadcrumb + [sub_menu] />
-			<@molgenis_menu sub_menu plugin_id breadcrumb_new/>
-		</#if>
-	</#list>
-</#macro>
-
-<#macro build_menu menu plugin_id breadcrumb>
+<#macro molgenis_menu menu plugin_id>
 				<ul class="nav nav-tabs">
 	<#list menu.items as item>
 		<#if item.type != "MENU">
 			<#if item.id == plugin_id>
 					<li class="active"><a href="#">${item.name?html}</a></li>
 			<#else>
-					<li><a href="/plugin/${item.id?html}">${item.name?html}</a></li>
+					<li><a href="/menu/${menu.id}/${item.id?html}">${item.name?html}</a></li>
 			</#if>
 		<#elseif item.type == "MENU">
 			<#assign sub_menu = item>
@@ -77,9 +65,9 @@
 						<ul class="dropdown-menu">
 			<#list sub_menu.items as item>
 				<#if item.type != "MENU">
-							<li><a href="/plugin/${item.id?html}">${item.name?html}</a></li>
+							<li><a href="/menu/${sub_menu.id}/${item.id?html}">${item.name?html}</a></li>
 				<#elseif item.type == "MENU">
-							<li><a href="/plugin/${item.activeItem.id?html}">${item.name?html}</a></li>
+							<li><a href="/menu/${sub_menu.id}">${item.name?html}</a></li>
 				</#if>
 			</#list>
 						</ul>
@@ -87,15 +75,12 @@
 		</#if>
 	</#list>
 				</ul>
-	<#if breadcrumb?size != 1>				
+	<#assign breadcrumb = menu.breadcrumb>
+	<#if (breadcrumb?size > 1)>
 				<ul class="breadcrumb">
 		<#list breadcrumb as menu>
 			<#if menu_has_next>
-				<#if menu.activeItem??>
-					<li><a href="/plugin/${menu.activeItem.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
-				<#else>
-					<li>${menu.name?html} <span class="divider">/</span></li>
-				</#if>
+					<li><a href="/menu/${menu.id}">${menu.name?html}</a> <span class="divider">/</span></li>
 			<#else>
 					<li class="active">${menu.name?html}</li>
 			</#if>	
