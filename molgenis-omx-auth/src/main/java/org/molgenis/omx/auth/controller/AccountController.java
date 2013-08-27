@@ -66,8 +66,8 @@ public class AccountController
 	@Autowired
 	private CaptchaService captchaService;
 
-	@RequestMapping(method = GET)
-	public String init(Model model) throws DatabaseException
+	@RequestMapping(value = "/account", method = RequestMethod.GET)
+	public String showAccount(Model model) throws DatabaseException
 	{	
 		model.addAttribute("user", getCurrentUser());
 
