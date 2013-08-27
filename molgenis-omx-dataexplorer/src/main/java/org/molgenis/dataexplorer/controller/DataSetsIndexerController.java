@@ -14,7 +14,6 @@ import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,6 +44,9 @@ public class DataSetsIndexerController
 	@Autowired
 	private Database database;
 
+	@Autowired
+	private DataSetsIndexer dataSetsIndexer;
+
 	/**
 	 * Show the explorer page
 	 * 
@@ -72,7 +74,7 @@ public class DataSetsIndexerController
 			return new DataSetIndexResponse(false, "Please select a dataset");
 		}
 
-		if (getDataSetsIndexer().isIndexingRunning())
+		if (dataSetsIndexer.isIndexingRunning())
 		{
 			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
 		}
@@ -86,18 +88,9 @@ public class DataSetsIndexerController
 				ids.add(Integer.parseInt(dataSetId));
 			}
 		}
-		getDataSetsIndexer().index(ids);
+		dataSetsIndexer.index(ids);
 
 		return new DataSetIndexResponse(true, "Indexing started");
-	}
-
-	/*
-	 * Get the DataSetsIndexer bean from the spring context
-	 */
-	private DataSetsIndexer getDataSetsIndexer()
-	{
-		return ApplicationContextProvider.getApplicationContext().getBean(DataSetsIndexer.class);
-
 	}
 
 	@ExceptionHandler(DatabaseAccessException.class)
