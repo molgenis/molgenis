@@ -7,7 +7,7 @@
 		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
 		<plugin label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.importer.ImportWizardPlugin" />
+		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
 		<plugin label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
 		<plugin label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
 		<plugin label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
@@ -42,9 +42,9 @@
 			</menu>	
 			
 			<plugin label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
-			<plugin label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
+			<plugin label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.plugins.DataSetDeleterPlugin"/>
 		
 		</menu> <!-- admin panels -->	
-		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Account" />
+		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.AccountPlugin" label="Account" />
 	</menu>
 </molgenis>
