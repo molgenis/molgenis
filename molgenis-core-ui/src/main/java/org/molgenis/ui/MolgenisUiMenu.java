@@ -7,4 +7,6 @@ public interface MolgenisUiMenu extends MolgenisUiMenuItem
 	List<MolgenisUiMenuItem> getItems();
 
 	MolgenisUiMenuItem getActiveItem();
+
+	List<MolgenisUiMenu> getBreadcrumb();
 }

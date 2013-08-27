@@ -1,5 +1,9 @@
 package org.molgenis.ui;
 
+import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_AUTHENTICATED;
+import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_MOLGENIS_UI;
+import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_PLUGIN_ID;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,10 +15,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
-	static final String KEY_PLUGIN_ID = "plugin_id";
-	static final String KEY_MOLGENIS_UI = "molgenis_ui";
-	static final String KEY_AUTHENTICATED = "authenticated";
-
 	private final Login login;
 	private final MolgenisUi molgenisUi;
 
