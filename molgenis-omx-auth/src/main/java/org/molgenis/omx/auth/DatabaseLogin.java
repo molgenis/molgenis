@@ -324,9 +324,6 @@ public class DatabaseLogin implements Login, Serializable
 	@Override
 	public QueryRule getRowlevelSecurityFilters(Class<? extends Entity> klazz)
 	{
-		// this.user.getAllowedToView();
-
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -336,10 +333,6 @@ public class DatabaseLogin implements Login, Serializable
 	@Override
 	public boolean canRead(Class<? extends Entity> entityClass) throws DatabaseException
 	{
-		// System.out.println("User name >>>>>>>>>>>>>" + this.user);
-		// System.out.println("Screen name >>>>>>>>>>>>>" +
-		// entityClass.getName() + "Classname >>>>>>>>>> " +
-		// this.readMap.containsKey(entityClass.getName()));
 		if (this.isAuthenticated() && this.user.getSuperuser()) return true;
 
 		String className = entityClass.getName();
@@ -400,11 +393,6 @@ public class DatabaseLogin implements Login, Serializable
 	@Override
 	public boolean canRead(Entity entity) throws DatabaseException
 	{
-		// System.out.println("User name >>>>>>>>>>>>>" + this.user);
-		// System.out.println("Screen name >>>>>>>>>>>>>" +
-		// entity.getClass().getName() + "Classname >>>>>>>>>> " +
-		// this.readMap.containsKey(entity.getClass()));
-
 		if (this.isAuthenticated() && this.user.getSuperuser()) return true;
 
 		if (this.isImplementing(entity, "org.molgenis.omx.auth.Authorizable"))
@@ -495,25 +483,6 @@ public class DatabaseLogin implements Login, Serializable
 	{
 		return canReadScreenController((Class<? extends ScreenController<?>>) screen.getClass());
 	}
-
-	// /**
-	// * {@inheritDoc}
-	// */
-	// @Override
-	// public boolean canRead(org.molgenis.framework.ui.ScreenModel model)
-	// {
-	// if (this.isAuthenticated() && this.user.getSuperuser())
-	// return true;
-	//
-	// String className = model.getClass().getName();
-	//
-	// //if (className.equals("app.ui.UserLoginPlugin"))
-	// // return true;
-	// if (this.readMap.containsKey(className))
-	// return true;
-	//
-	// return false;
-	// }
 
 	@Override
 	public String getRedirect()
