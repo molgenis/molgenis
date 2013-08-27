@@ -88,6 +88,13 @@ public class ProtocolManagerController extends MolgenisPluginController
 		return "view-protocolmanager";
 	}
 
+	@RequestMapping(value = "/protocolAmount", method = POST)
+	public void protocolAmount(@RequestBody
+	ProtocolAmount protAmount, HttpServletResponse response)
+	{
+
+	}
+
 	@RequestMapping(value = "/save", method = POST)
 	public void save(@RequestBody
 	ProtocolManagerRequest protocolManagerRequest, HttpServletResponse response) throws IOException, DatabaseException,
@@ -143,6 +150,22 @@ public class ProtocolManagerController extends MolgenisPluginController
 	public String handleNotAuthenticated()
 	{
 		return "redirect:/";
+	}
+
+	public static class ProtocolAmount
+	{
+		private Integer protocolAmount;
+
+		public Integer getProtocolAmount()
+		{
+			return protocolAmount;
+		}
+
+		public void setProtocolAmount(Integer protocolAmount)
+		{
+			this.protocolAmount = protocolAmount;
+		}
+
 	}
 
 	private static class ProtocolManagerRequest
