@@ -38,7 +38,7 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CbmToOmxConverterController()
 	{
-		new CbmToOmxConverterController(null);
+		new CbmToOmxConverterController();
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 		@Bean
 		public CbmToOmxConverterController backgroundController()
 		{
-			return new CbmToOmxConverterController(molgenisSettings());
+			return new CbmToOmxConverterController();
 		}
 
 		@Bean
