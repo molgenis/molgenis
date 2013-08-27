@@ -35,12 +35,6 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 				.build();
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void CbmToOmxConverterController()
-	{
-		new CbmToOmxConverterController();
-	}
-
 	@Test
 	public void init() throws Exception
 	{
