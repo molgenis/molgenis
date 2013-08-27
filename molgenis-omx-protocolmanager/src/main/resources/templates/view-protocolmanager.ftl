@@ -1,28 +1,3 @@
-<#if enable_spring_ui>
-<#include "molgenis-header.ftl">
-<#include "molgenis-footer.ftl">
-<#assign css=["chosen.css", "protocolmanager.css"]>
-<#assign js=["chosen.jquery.min.js", "protocolmanager.js", "${resultsTableJavascriptFile}"]>
-<@header css js/>
-		<div class="row-fluid">
-		<div id="modals"></div>
-		<div class="span9">
-			<div id="protocol-select-container" class="control-group form-horizontal">
-				<div id="data-table-header" class="pull-left"></div>
-				<div class="controls pull-right">
-					<label class="control-label" for="protocol-select">Choose a protocol:</label>
-					<select data-placeholder="Choose a Protocol" id="protocol-select">
-					</select>
-				</div>
-			</div>
-			<table id="protocol_data-table" class="table table-striped table-condensed">
-			</table>
-		</div>
-		<a id="save-button" class="btn" href="#">Save</a>
-		<a id="add-button" class="btn" href="#">Add row</a>
-		<div class="feature-filter-dialog"></div>
-<@footer/>
-<#else>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -41,44 +16,39 @@
 		<script type="text/javascript" src="/js/molgenis-all.js"></script>
 		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="/js/protocolmanager.js"></script>
-		<script type="text/javascript" src="/js/${resultsTableJavascriptFile}"></script>
+		<script type="text/javascript" src="${resultsTableJavascriptFile}"></script>
 		<script type="text/javascript" src="/js/jquery.dynatree.min.js"></script>
 		<script type="text/javascript" src="/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
-				window.top.molgenis.fillProtocolSelect(function() {
+				window.top.molgenis.fillWorkflowSelect(function() {
 					<#-- select first dataset -->
-					$('#protocol-select option:first').val();
+					$('#workflow-select option:first').val();
 					<#-- fire event handler -->
-					$('#protocol-select').change();
+					$('#workflow-select').change();
 					<#-- use chosen plugin for dataset select -->
-					$('#protocol-select').chosen();
+					$('#workflow-select').chosen();
 				});
 			});
-			
 		</script>
+		
 	</head>
 	<body>
 		<div class="container-fluid">
 			<div class="row-fluid">
-			<div id="modals"></div>
-			<div class="span9">
-				<div id="protocol-select-container" class="control-group form-horizontal">
-					<div id="data-table-header" class="pull-left"></div>
-					<div class="controls pull-right">
-						<label class="control-label" for="protocol-select">Choose a protocol:</label>
-						<select data-placeholder="Choose a Protocol" id="protocol-select">
-						</select>
+				<div id="modals"></div>
+				<div class="span9">
+					<div id="workflow-select-container" class="control-group form-horizontal">
+						<div class="controls pull-right">
+							<label class="control-label" for="workflow-select">Choose a workflow:</label>
+							<select data-placeholder="Choose a workflow" id="workflow-select">
+							</select>
+						</div>
 					</div>
+					<a id="next-button" class="btn" href="#">Next</a>	
 				</div>
-				<table id="protocol_data-table" class="table table-striped table-condensed">
-				</table>
 			</div>
-		</div>
-		<a id="save-button" class="btn" href="#">Save</a>
-		<a id="add-button" class="btn" href="#">Add row</a>
-		<div class="feature-filter-dialog"></div>
+		</div>		
 		
 	</body>
 </html>
-</#if>
