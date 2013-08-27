@@ -2,10 +2,10 @@
 
 <html>
 <head>
-		<link rel="stylesheet" href="css/jquery-ui-1.9.2.custom.min.css" type="text/css">
-		<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-		<link rel="stylesheet" href="css/molgenis-colors.css" type="text/css">
-		<link rel="stylesheet" href="css/molgenis-data.css" type="text/css">
+		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/molgenis-colors.css" type="text/css">
+		<link rel="stylesheet" href="/css/molgenis-data.css" type="text/css">
     <title>Account</title>
 </head>
 
