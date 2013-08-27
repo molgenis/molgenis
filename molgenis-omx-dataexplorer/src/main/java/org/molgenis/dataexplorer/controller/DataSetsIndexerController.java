@@ -14,6 +14,7 @@ import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,8 +38,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(URI)
-public class DataSetsIndexerController
+public class DataSetsIndexerController extends MolgenisPluginController
 {
+	public DataSetsIndexerController()
+	{
+		super(URI);
+	}
+
 	public static final String URI = "/plugin/dataindexer";
 
 	@Autowired
