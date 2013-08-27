@@ -43,7 +43,6 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 				throw new RuntimeException("controller does not implement "
 						+ MolgenisPluginController.class.getSimpleName());
 			}
-			;
 			modelAndView.addObject(KEY_PLUGIN_ID, ((MolgenisPluginController) bean).getId());
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, login.isAuthenticated());
