@@ -3,6 +3,7 @@ package org.molgenis.ngs.controller;
 import static org.molgenis.ngs.controller.HomeController.URI;
 
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class HomeController
+public class HomeController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/home";
 
@@ -26,6 +27,7 @@ public class HomeController
 	@Autowired
 	public HomeController(MolgenisSettings molgenisSettings)
 	{
+		super(URI);
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
 		this.molgenisSettings = molgenisSettings;
 	}
