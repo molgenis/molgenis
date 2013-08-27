@@ -25,7 +25,7 @@ public class AccountPlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return "/account";
+		return "/account/account";
 	}
 
 	@Override

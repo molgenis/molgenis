@@ -24,7 +24,6 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.cbm.CbmXmlParser;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.jaxb.CbmNode;
 import org.molgenis.jaxb.CollectionProtocol;
@@ -33,9 +32,8 @@ import org.molgenis.jaxb.ParticipantCollectionSummary;
 import org.molgenis.jaxb.Race;
 import org.molgenis.servlet.MolgenisContextListener;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.util.FileStore;
+import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.tuple.KeyValueTuple;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,8 +49,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(MolgenisContextListener.class);
 
-	public static final String URI = "/plugin/cbmToOmxConverter";
-	private final MolgenisSettings molgenisSettings;
+	public static final String URI = "/plugin/cbmtoomxconverter";
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
@@ -60,15 +57,9 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 	private final List<String> listFiles = Arrays.asList("dataset.csv", "dataset_cbm.csv", "protocol.csv",
 			"observablefeature.csv");
 
-	@Autowired
-	private FileStore fileStore;
-
-	@Autowired
-	public CbmToOmxConverterController(MolgenisSettings molgenisSettings)
+	public CbmToOmxConverterController()
 	{
 		super(URI);
-		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
-		this.molgenisSettings = molgenisSettings;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -79,15 +70,20 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public void convert(@RequestParam
-	Part cbmFile, HttpServletRequest request, HttpServletResponse response) throws Exception
+	Part upload, HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
-		File file = fileStore.store(cbmFile.getInputStream(), cbmFile.getName());
+		File file = null;
+		Part part = request.getPart("upload");
+		if (part != null)
+		{
+			file = FileUploadUtils.saveToTempFile(part);
+		}
 
 		if (file == null)
 		{
 			throw new Exception("No file selected.");
 		}
-		else if (!cbmFile.getContentType().equals("text/xml"))
+		else if (!upload.getContentType().equals("text/xml"))
 		{
 			throw new Exception("File does not of the xml type, other formats are not supported.");
 		}
