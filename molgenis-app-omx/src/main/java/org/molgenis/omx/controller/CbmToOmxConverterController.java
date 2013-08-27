@@ -70,7 +70,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public void convert(@RequestParam
-	Part cbmFile, HttpServletRequest request, HttpServletResponse response) throws Exception
+	Part upload, HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		File file = null;
 		Part part = request.getPart("upload");
@@ -83,7 +83,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 		{
 			throw new Exception("No file selected.");
 		}
-		else if (!cbmFile.getContentType().equals("text/xml"))
+		else if (!upload.getContentType().equals("text/xml"))
 		{
 			throw new Exception("File does not of the xml type, other formats are not supported.");
 		}
