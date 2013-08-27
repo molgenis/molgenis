@@ -25,11 +25,7 @@ public class SimpleUserLogin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		if(getLogin().isAuthenticated()){
-			return "/account";
-		}else{
-			return "/account/loginform";
-		}
+		return "/account/loginform";
 	}
 	
 	@Override
