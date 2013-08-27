@@ -51,7 +51,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(MolgenisContextListener.class);
 
-	public static final String URI = "/plugin/cbmToOmxConverter";
+	public static final String URI = "/plugin/cbmtoomxconverter";
 	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
