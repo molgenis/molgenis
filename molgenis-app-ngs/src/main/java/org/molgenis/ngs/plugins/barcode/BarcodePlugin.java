@@ -1,20 +1,21 @@
 package org.molgenis.ngs.plugins.barcode;
 
-import org.elasticsearch.common.mvel2.optimizers.impl.refl.nodes.ArrayLength;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
+import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.Entity;
 import org.molgenis.util.HandleRequestDelegationException;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-
-import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.tuple.Tuple;
 
 /**

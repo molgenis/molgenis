@@ -24,6 +24,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.cbm.CbmXmlParser;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.jaxb.CbmNode;
 import org.molgenis.jaxb.CollectionProtocol;
@@ -31,7 +32,6 @@ import org.molgenis.jaxb.Diagnosis;
 import org.molgenis.jaxb.ParticipantCollectionSummary;
 import org.molgenis.jaxb.Race;
 import org.molgenis.servlet.MolgenisContextListener;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.stereotype.Controller;
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(URI)
-public class CbmToOmxConverterController extends MolgenisPluginController
+public class CbmToOmxConverterController extends MolgenisPlugin
 {
 	private static final Logger logger = Logger.getLogger(MolgenisContextListener.class);
 
