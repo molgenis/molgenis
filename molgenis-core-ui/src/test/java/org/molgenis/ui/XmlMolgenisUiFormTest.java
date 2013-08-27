@@ -7,6 +7,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -72,7 +73,7 @@ public class XmlMolgenisUiFormTest
 	public void isAuthorized()
 	{
 		String formEntity = "entity";
-		when(molgenisPermissionService.hasReadPermissionOnEntity(formEntity)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntity(formEntity, Permission.READ)).thenReturn(true);
 		FormType formType = new FormType();
 		formType.setEntity(formEntity);
 		XmlMolgenisUiForm xmlMolgenisUiForm = new XmlMolgenisUiForm(molgenisPermissionService, formType);
