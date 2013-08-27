@@ -22,6 +22,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.search.SearchService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -34,8 +35,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
-public class DataSetDeleterController
+public class DataSetDeleterController extends MolgenisPluginController
 {
+	public DataSetDeleterController()
+	{
+		super(URI);
+		// TODO Auto-generated constructor stub
+	}
+
 	public static final String URI = "/plugin/datasetdeleter";
 	private static final String[] runtimeProperties =
 	{ "app.href.logo", "app.href.css" };
@@ -153,7 +160,8 @@ public class DataSetDeleterController
 	}
 
 	/**
-	 * Deletes all subprotocols which do not have multiple Protocols referencing them
+	 * Deletes all subprotocols which do not have multiple Protocols referencing
+	 * them
 	 * 
 	 * @param the
 	 *            protocols that should be deleted
@@ -197,7 +205,8 @@ public class DataSetDeleterController
 	}
 
 	/**
-	 * Deletes all features which do not have multiple Protocols referencing them
+	 * Deletes all features which do not have multiple Protocols referencing
+	 * them
 	 * 
 	 * @param the
 	 *            features that should be deleted
@@ -236,7 +245,8 @@ public class DataSetDeleterController
 	}
 
 	/**
-	 * Count the number of times a protocol of feature is referred to from a(n other) protocol
+	 * Count the number of times a protocol of feature is referred to from a(n
+	 * other) protocol
 	 * 
 	 * @param the
 	 *            feature of protocol that is referred to
