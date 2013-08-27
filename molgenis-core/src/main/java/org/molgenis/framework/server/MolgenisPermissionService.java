@@ -2,11 +2,16 @@ package org.molgenis.framework.server;
 
 public interface MolgenisPermissionService
 {
-	boolean hasReadPermissionOnPlugin(String pluginClassName);
+	public enum Permission
+	{
+		READ, WRITE, OWN;
+	};
 
-	boolean hasWritePermissionOnPlugin(String pluginClassName);
+	boolean hasPermissionOnPlugin(String pluginName, Permission permission);
 
-	boolean hasReadPermissionOnEntity(String entityName);
+	boolean hasPermissionOnEntity(String entityName, Permission permission);
 
-	boolean hasWritePermissionOnEntity(String entityName);
+	// void setPermissionOnPlugin(String pluginName, Permission permission, Integer roleId);
+
+	// void setPermissionOnEntity(String entityName, Permission permission, Integer roleId);
 }

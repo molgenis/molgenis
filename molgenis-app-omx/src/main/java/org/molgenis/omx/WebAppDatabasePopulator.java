@@ -19,10 +19,12 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.ContactPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
+import org.molgenis.ui.HomePluginPlugin;
 import org.molgenis.ui.ReferencesPluginPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Value;
+
 //import org.molgenis.ui.ProtocolViewerControllerPlugin;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
@@ -37,7 +39,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 		runtimePropertyMap.put(GuiService.KEY_APP_NAME, "OMX");
-		runtimePropertyMap.put("app.href.logo", "img/logo_molgenis_letterbox.png");
+		runtimePropertyMap.put("app.href.logo", "/img/logo_molgenis_letterbox.png");
 		runtimePropertyMap.put("app.home.html", "Welcome to Molgenis!");
 		runtimePropertyMap.put("app.background", "There is no background information");
 		runtimePropertyMap.put("app.news", "There is no news ");
@@ -64,6 +66,10 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 
 		MolgenisGroup readUsersGroup = createGroup(database, "readUsers");
 		MolgenisGroup readWriteUsersGroup = createGroup(database, "readWriteUsers");
+
+		// Allow anonymous user to see Home plugin
+		MolgenisUser anonymousUser = MolgenisUser.findByName(database, Login.USER_ANONYMOUS_NAME);
+		createPermission(database, HomePluginPlugin.class, anonymousUser, "read");
 
 		// Set write permissions that a user can edit own account
 		createPermission(database, MolgenisUser.class, listMolgenisGroup.get(0), "write");

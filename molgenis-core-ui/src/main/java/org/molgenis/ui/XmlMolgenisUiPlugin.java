@@ -1,6 +1,7 @@
 package org.molgenis.ui;
 
 import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 
 public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 {
@@ -37,6 +38,6 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	@Override
 	public boolean isAuthorized()
 	{
-		return molgenisPermissionService.hasReadPermissionOnPlugin(pluginType.getType());
+		return molgenisPermissionService.hasPermissionOnPlugin(pluginType.getName(), Permission.READ);
 	}
 }

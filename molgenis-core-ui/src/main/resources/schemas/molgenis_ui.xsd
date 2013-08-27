@@ -23,7 +23,8 @@
 		</xs:choice>
 		<xs:attribute name="name" type="xs:string" use="required"/>
 		<xs:attribute name="label" type="xs:string"/>
-		<xs:attribute name="view" type="xs:string"/>
+		<xs:attribute name="view" type="xs:string"/><!-- TODO decide whether to use view or viewtype -->
+		<xs:attribute name="viewtype" type="xs:string"/><!-- TODO decide whether to use view or viewtype -->
 		<xs:attribute name="entity" type="xs:string"/>
 	</xs:complexType>
 
