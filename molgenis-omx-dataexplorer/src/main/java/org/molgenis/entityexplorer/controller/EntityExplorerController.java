@@ -15,8 +15,8 @@ import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.observ.Characteristic;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,7 +31,7 @@ import com.google.common.collect.Iterables;
 
 @Controller
 @RequestMapping(URI)
-public class EntityExplorerController extends MolgenisPluginController
+public class EntityExplorerController extends MolgenisPlugin
 {
 	private static final Logger logger = Logger.getLogger(EntityExplorerController.class);
 

@@ -13,6 +13,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -34,8 +35,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
-public class DataSetDeleterController
+public class DataSetDeleterController extends MolgenisPlugin
 {
+	public DataSetDeleterController()
+	{
+		super(URI);
+		// TODO Auto-generated constructor stub
+	}
+
 	public static final String URI = "/plugin/datasetdeleter";
 	private static final String[] runtimeProperties =
 	{ "app.href.logo", "app.href.css" };
@@ -67,9 +74,9 @@ public class DataSetDeleterController
 
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
 	public @ResponseBody
-	String delete(@RequestParam("dataset")
-	String datasetIdentifier, org.springframework.web.context.request.WebRequest webRequest)
-			throws HandleRequestDelegationException, Exception
+	String delete(@RequestParam("dataset") String datasetIdentifier,
+			org.springframework.web.context.request.WebRequest webRequest) throws HandleRequestDelegationException,
+			Exception
 	{
 		database.beginTx();
 		boolean deletemetadata = webRequest.getParameter("deletemetadata") != null;

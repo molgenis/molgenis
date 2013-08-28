@@ -18,18 +18,21 @@
 		<plugin id="references" label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
 		<plugin id="contact" label="Contact" name="ContactPlugin" type="org.molgenis.omx.plugins.ContactPlugin"/>
 		<menu name="Converters">
-			<plugin id="cbmToOmxConverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
+			<plugin id="cbmtoomxconverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
 		</menu>
         <menu name="Admin">
+        	<plugin id="form/ObservableFeature" label="ObservableFeature" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		
+        
 	        <menu name ="Entities">
-	            <form name="DataSet" entity="DataSet" />
+	        	<form name="DataSet" entity="DataSet" />
 	            <form name="Protocol" entity="Protocol" />
 	            <form name="Feature" entity="ObservableFeature" />
 	            <form name="Category" entity="Category" />
 	            <form name="Value" entity="ObservedValue" />
 	            <form name="StudyDataRequest" entity="StudyDataRequest" />
 	            <form name="RuntimeProperty" entity="RuntimeProperty" />
-	       	</menu>
+	        </menu>
 	        <menu name="Auth" label="Users and permissions">
 				<menu label="Basic management" name="Management">
 					<form name="MolgenisUser" entity="MolgenisUser" />
@@ -38,12 +41,6 @@
 					<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
 					<form name="MolgenisPermission" entity="MolgenisPermission" />
 				</menu>
-				<plugin id="FIXME" label="My permissions" name="PermissionManagementPlugin"
-					type="org.molgenis.omx.auth.service.permissionmanagement.PermissionManagementPlugin" />
-				<plugin id="FIXME" label="Upgrade person to user" name="UserToPersonPlugin"
-					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
-				<plugin id="FIXME" label="Security tokens" name="TokenManagerPlugin"
-					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
 			</menu>	
 			
 			<plugin id="FIXME" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>

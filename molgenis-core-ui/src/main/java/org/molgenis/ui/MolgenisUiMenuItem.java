@@ -1,5 +1,6 @@
 package org.molgenis.ui;
 
+
 public interface MolgenisUiMenuItem
 {
 	String getId();
@@ -7,6 +8,8 @@ public interface MolgenisUiMenuItem
 	String getName();
 
 	MolgenisUiMenuItemType getType();
+
+	MolgenisUiMenu getParentMenu();
 
 	boolean isAuthorized();
 }

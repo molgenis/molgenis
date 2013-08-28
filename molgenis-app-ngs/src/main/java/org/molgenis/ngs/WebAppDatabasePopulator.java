@@ -1,8 +1,7 @@
 package org.molgenis.ngs;
 
-import org.molgenis.framework.db.Database;
-
 import org.molgenis.MolgenisDatabasePopulator;
+import org.molgenis.framework.db.Database;
 
 public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 {

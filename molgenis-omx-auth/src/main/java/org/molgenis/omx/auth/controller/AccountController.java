@@ -169,7 +169,7 @@ public class AccountController
 		if (molgenisUsers != null && !molgenisUsers.isEmpty()) accountService.resetPassword(molgenisUsers.get(0));
 	}
 
-	@RequestMapping(value = "/uppdateuser", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@RequestMapping(value = "/updateuser", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void ChgUser(HttpServletRequest request) throws Exception
 	{

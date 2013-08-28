@@ -7,6 +7,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.molgenis.framework.server.MolgenisPermissionService;
@@ -180,6 +181,27 @@ public class XmlMolgenisUiMenuTest
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
 		assertNull(xmlMolgenisUiMenu.getActiveItem());
+	}
+
+	@Test
+	public void getParentMenu()
+	{
+		assertNull(new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType()).getParentMenu());
+		MolgenisUiMenu parentMenu = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType());
+		assertEquals(new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType(), parentMenu).getParentMenu(),
+				parentMenu);
+	}
+
+	@Test
+	public void getBreadcrumb()
+	{
+		MolgenisUiMenu menu1 = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType());
+		MolgenisUiMenu menu2 = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType(), menu1);
+		MolgenisUiMenu menu3 = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType(), menu2);
+
+		assertEquals(menu1.getBreadcrumb(), Arrays.asList(menu1));
+		assertEquals(menu2.getBreadcrumb(), Arrays.asList(menu1, menu2));
+		assertEquals(menu3.getBreadcrumb(), Arrays.asList(menu1, menu2, menu3));
 	}
 
 	@Test

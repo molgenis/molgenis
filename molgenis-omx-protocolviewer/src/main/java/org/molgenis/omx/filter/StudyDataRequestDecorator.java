@@ -12,7 +12,6 @@ import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
-import org.molgenis.omx.filter.StudyDataRequest;
 
 /**
  * decorator for DataSetFilter, Checks for every read, update and delete operation if the user requesting the operation
