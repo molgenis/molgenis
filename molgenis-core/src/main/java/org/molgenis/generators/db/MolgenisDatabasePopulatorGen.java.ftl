@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
@@ -22,8 +23,10 @@ import org.molgenis.omx.auth.MolgenisPermission;
 import org.molgenis.omx.core.MolgenisEntity;
 
 import org.molgenis.framework.db.DatabaseException;
-import javax.persistence.EntityManager;
 import org.molgenis.framework.security.Login;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +37,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 <#if metaData>	
 	private static final Logger logger = Logger.getLogger(MolgenisDatabasePopulator.class);
 	
+	// FIXME close database
 	@Autowired
 	@Qualifier("unauthorizedPrototypeDatabase")
 	private Database database;
@@ -170,7 +174,8 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 			// add MolgenisEntity entities to database so we can assign permissions
 			database.add(createEntities(ENTITY_VALUES));
 			database.add(createEntities(UI_VALUES));
-
+			database.add(createPluginEntities(MolgenisPluginRegistry.getInstance()));
+			
 			// set permissions for UI components as specified in molgenis-ui.xml
 	<#assign schema = model.userinterface>		
 	<#list schema.allChildren as screen>
@@ -236,20 +241,6 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		
 		database.setLogin(login); // restore login
 	}
-		
-	public void createPermission(Database database, Class<?> clazz, MolgenisRole role, String permissionString)
-	throws DatabaseException
-	{
-		database.beginTx();
-		MolgenisPermission permission = new MolgenisPermission();
-		permission.setEntity(MolgenisEntity.findByClassName(database, clazz.getName()));
-		permission.setName(role.getName() + "_" + clazz.getSimpleName() + "_Permission");
-		permission.setIdentifier(UUID.randomUUID().toString());
-		permission.setPermission(permissionString);
-		permission.setRole(role);		
-		database.add(permission);
-		database.commitTx();
-	}
 
 	public MolgenisUser createUser(Database database, String userName, String firstName, String lastName, String email,
 			String password, boolean superUser) throws DatabaseException
@@ -287,6 +278,18 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		database.commitTx();
 		return group;
 		
+	}
+
+	private static List<MolgenisEntity> createPluginEntities(MolgenisPluginRegistry pluginRegistry) {
+		List<MolgenisEntity> entities = new ArrayList<MolgenisEntity>();
+		for(Class<? extends MolgenisPlugin> pluginClazz : pluginRegistry.getPluginClasses()) {
+			MolgenisEntity entity = new MolgenisEntity();
+			entity.setName(pluginClazz.getSimpleName());
+			entity.setClassName(pluginClazz.getName());
+			entity.setType("PLUGIN");
+			entities.add(entity); 
+		}
+		return entities;
 	}
 		
 	public static List<MolgenisEntity> createEntities(String[][] entityValues) {

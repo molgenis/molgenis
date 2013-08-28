@@ -7,7 +7,11 @@ import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_PLUGIN_ID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.security.Login;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,14 +20,26 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final Login login;
+	private final MolgenisPermissionService permissionService;
 	private final MolgenisUi molgenisUi;
 
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
+	{
+		MolgenisPlugin molgenisPlugin = validateHandler(handler);
+		boolean permission = permissionService.hasPermissionOnPlugin(molgenisPlugin.getClass(), Permission.READ);
+		if (!permission) throw new DatabaseAccessException("access denied to " + request.getRequestURI());
+		return true;
+	}
+
 	@Autowired
-	public MolgenisPluginInterceptor(Login login, MolgenisUi molgenisUi)
+	public MolgenisPluginInterceptor(Login login, MolgenisPermissionService permissionService, MolgenisUi molgenisUi)
 	{
 		if (login == null) throw new IllegalArgumentException("login is null");
+		if (permissionService == null) throw new IllegalArgumentException("permission service is null");
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenis ui is null");
 		this.login = login;
+		this.permissionService = permissionService;
 		this.molgenisUi = molgenisUi;
 	}
 
@@ -33,21 +49,26 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	{
 		if (modelAndView != null)
 		{
-			if (!(handler instanceof HandlerMethod))
-			{
-				throw new RuntimeException("handler is not of type " + HandlerMethod.class.getSimpleName());
-			}
-			Object bean = ((HandlerMethod) handler).getBean();
-			if (!(bean instanceof MolgenisPluginController))
-			{
-				throw new RuntimeException("controller does not implement "
-						+ MolgenisPluginController.class.getSimpleName());
-			}
-			modelAndView.addObject(KEY_PLUGIN_ID, ((MolgenisPluginController) bean).getId());
+			MolgenisPlugin molgenisPlugin = validateHandler(handler);
+			modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, login.isAuthenticated());
 			// TODO remove flag after removing molgenis UI framework
 			modelAndView.addObject("enable_spring_ui", MolgenisRootController.USE_SPRING_UI);
 		}
+	}
+
+	public MolgenisPlugin validateHandler(Object handler)
+	{
+		if (!(handler instanceof HandlerMethod))
+		{
+			throw new RuntimeException("handler is not of type " + HandlerMethod.class.getSimpleName());
+		}
+		Object bean = ((HandlerMethod) handler).getBean();
+		if (!(bean instanceof MolgenisPlugin))
+		{
+			throw new RuntimeException("controller does not implement " + MolgenisPlugin.class.getSimpleName());
+		}
+		return (MolgenisPlugin) bean;
 	}
 }

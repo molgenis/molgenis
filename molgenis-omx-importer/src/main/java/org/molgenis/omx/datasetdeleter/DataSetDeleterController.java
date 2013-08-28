@@ -13,6 +13,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -22,7 +23,6 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.search.SearchService;
-import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
-public class DataSetDeleterController extends MolgenisPluginController
+public class DataSetDeleterController extends MolgenisPlugin
 {
 	public DataSetDeleterController()
 	{
@@ -74,9 +74,9 @@ public class DataSetDeleterController extends MolgenisPluginController
 
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
 	public @ResponseBody
-	String delete(@RequestParam("dataset")
-	String datasetIdentifier, org.springframework.web.context.request.WebRequest webRequest)
-			throws HandleRequestDelegationException, Exception
+	String delete(@RequestParam("dataset") String datasetIdentifier,
+			org.springframework.web.context.request.WebRequest webRequest) throws HandleRequestDelegationException,
+			Exception
 	{
 		database.beginTx();
 		boolean deletemetadata = webRequest.getParameter("deletemetadata") != null;
@@ -160,8 +160,7 @@ public class DataSetDeleterController extends MolgenisPluginController
 	}
 
 	/**
-	 * Deletes all subprotocols which do not have multiple Protocols referencing
-	 * them
+	 * Deletes all subprotocols which do not have multiple Protocols referencing them
 	 * 
 	 * @param the
 	 *            protocols that should be deleted
@@ -205,8 +204,7 @@ public class DataSetDeleterController extends MolgenisPluginController
 	}
 
 	/**
-	 * Deletes all features which do not have multiple Protocols referencing
-	 * them
+	 * Deletes all features which do not have multiple Protocols referencing them
 	 * 
 	 * @param the
 	 *            features that should be deleted
@@ -245,8 +243,7 @@ public class DataSetDeleterController extends MolgenisPluginController
 	}
 
 	/**
-	 * Count the number of times a protocol of feature is referred to from a(n
-	 * other) protocol
+	 * Count the number of times a protocol of feature is referred to from a(n other) protocol
 	 * 
 	 * @param the
 	 *            feature of protocol that is referred to

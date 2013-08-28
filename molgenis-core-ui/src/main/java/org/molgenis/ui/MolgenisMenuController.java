@@ -6,6 +6,7 @@ import static org.molgenis.ui.MolgenisMenuController.URI;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -78,7 +79,7 @@ public class MolgenisMenuController
 	private String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		strBuilder.append(MolgenisPluginController.PLUGIN_URI_PREFIX);
+		strBuilder.append(MolgenisPlugin.PLUGIN_URI_PREFIX);
 		strBuilder.append(pluginId);
 		if (pathRemainder != null) strBuilder.append('/').append(pathRemainder);
 		return strBuilder.toString();

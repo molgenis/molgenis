@@ -13,8 +13,8 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,18 +27,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * Controller class for the data explorer.
  * 
- * The implementation javascript file for the resultstable is defined in a
- * MolgenisSettings property named 'dataexplorer.resultstable.js' possible
- * values are '/js/SingleObservationSetTable.js' or
- * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as
- * the default
+ * The implementation javascript file for the resultstable is defined in a MolgenisSettings property named
+ * 'dataexplorer.resultstable.js' possible values are '/js/SingleObservationSetTable.js' or
+ * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as the default
  * 
  * @author erwin
  * 
  */
 @Controller
 @RequestMapping(URI)
-public class DataSetsIndexerController extends MolgenisPluginController
+public class DataSetsIndexerController extends MolgenisPlugin
 {
 	public DataSetsIndexerController()
 	{
@@ -71,8 +69,8 @@ public class DataSetsIndexerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public DataSetIndexResponse index(@RequestBody
-	DataSetIndexRequest request) throws UnsupportedEncodingException, TableException
+	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException,
+			TableException
 	{
 		List<String> dataSetIds = request.getSelectedDataSets();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())
@@ -127,8 +125,8 @@ public class DataSetsIndexerController extends MolgenisPluginController
 
 	class DataSetIndexResponse
 	{
-		private boolean isRunning;
-		private String message;
+		private final boolean isRunning;
+		private final String message;
 
 		public DataSetIndexResponse(boolean isRunning, String message)
 		{

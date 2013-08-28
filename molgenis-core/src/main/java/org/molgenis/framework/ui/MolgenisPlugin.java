@@ -1,16 +1,16 @@
-package org.molgenis.ui;
+package org.molgenis.framework.ui;
 
 /**
  * Abstract base class for all MOLGENIS plugin controllers
  */
-public abstract class MolgenisPluginController
+public abstract class MolgenisPlugin
 {
 	public static final String PLUGIN_URI_PREFIX = "/plugin/";
 
 	/** Base URI for a plugin */
 	private final String uri;
 
-	public MolgenisPluginController(String uri)
+	public MolgenisPlugin(String uri)
 	{
 		if (uri == null) throw new IllegalArgumentException("uri is null");
 		if (!uri.startsWith(PLUGIN_URI_PREFIX))
@@ -18,6 +18,9 @@ public abstract class MolgenisPluginController
 			throw new IllegalArgumentException("uri does not start with " + PLUGIN_URI_PREFIX);
 		}
 		this.uri = uri;
+
+		// register all plugins
+		MolgenisPluginRegistry.getInstance().register(this);
 	}
 
 	/**
