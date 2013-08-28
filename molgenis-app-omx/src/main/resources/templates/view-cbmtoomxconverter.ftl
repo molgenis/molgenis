@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 	<div class="row-fluid"
-		<form method="post" enctype="multipart/form-data" name="cbmToOmxConverter" action="/plugin/cbmtoomxconverter/convert">
+		<form method="post" enctype="multipart/form-data" name="cbmToOmxConverter" action="${context_url}/convert">
 		
 		<div class="formscreen">
 			<div class="screenbody">
@@ -33,7 +33,7 @@
 	</head>
 	<body>
 	
-	<form method="post" enctype="multipart/form-data" name="cbmToOmxConverter" action="/plugin/cbmtoomxconverter/convert">
+	<form method="post" enctype="multipart/form-data" name="cbmToOmxConverter" action="${context_url}/convert">
 	
 	<div class="formscreen">
 		<div class="screenbody">
