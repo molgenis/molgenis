@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="ngs">
 	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
-	
+	<plugin name="HeaderPlugin" type="org.molgenis.ngs.plugins.HeaderPlugin" />
 	<menu name="main">
 		<plugin name="Home" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
-		
-		<plugin name="SimpleUserLogin" type="org.molgenis.omx.auth.ui.SimpleUserLogin" label="Login" />
-		
+		<plugin id="useraccount" name="UserAccountPlugin" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />	
 		<form name="Projects" entity="Project" label="Projects" viewtype="list">
 			<form name="Samples1" entity="Sample" label="Samples" viewtype="list" />
 		</form>

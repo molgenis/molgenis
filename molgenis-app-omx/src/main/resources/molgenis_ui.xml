@@ -16,9 +16,6 @@
 			<plugin id="cbmtoomxconverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
 		</menu>
         <menu name="Admin">
-        	<plugin id="form/ObservableFeature" label="ObservableFeature" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        		
-        
 	        <menu name ="Entities">
 	        	<form name="DataSet" entity="DataSet" />
 	            <form name="Protocol" entity="Protocol" />
@@ -38,10 +35,10 @@
 				</menu>
 			</menu>	
 			
-			<plugin id="FIXME" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
-			<plugin id="FIXME" label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
+			<plugin id="dataindexer" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
+			<plugin id="datasetdeleter" label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
 		
-		</menu> <!-- admin panels -->
-		<plugin id="account" name="UserLogin" type="org.molgenis.omx.auth.ui.AccountPlugin" label="Account" />
+		</menu>
+		<plugin id="useraccount" name="UserAccountPlugin" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />
 	</menu>
 </molgenis>

@@ -38,12 +38,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataSetsIndexerController extends MolgenisPlugin
 {
+	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "/dataindexer";
+
 	public DataSetsIndexerController()
 	{
 		super(URI);
 	}
-
-	public static final String URI = "/plugin/dataindexer";
 
 	@Autowired
 	private Database database;
@@ -64,7 +64,7 @@ public class DataSetsIndexerController extends MolgenisPlugin
 		// add data sets to model
 		List<DataSet> dataSets = database.find(DataSet.class);
 		model.addAttribute("dataSets", dataSets);
-		return "DataSetsIndexerPlugin";
+		return "view-datasetsindexer";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
