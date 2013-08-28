@@ -22,7 +22,7 @@
   		modal.on('shown', function () {
 	  		$.ajax({
 				type : 'GET',
-				url : '/plugin/orders',
+				url : '/plugin/study/orders',
 				success : function(data) {
 					var container = $('#order-list-container');
 					var items = [];
@@ -39,7 +39,7 @@
 							items.push('<tr class=' + clazz + '>');	
 							items.push('<div id="' + containerId + '"></div>')
 							items.push('<td>' + order.id +'</td><td>' + order.name + '</td><td>' + order.orderDate + '</td><td>' + order.orderStatus + '</td>');
-							items.push('<td><a class="modal-href" href="/plugin/orders/' + order.id + '/view" data-target="'+containerId+'">view</a></td>');
+							items.push('<td><a class="modal-href" href="/plugin/study/orders/' + order.id + '/view" data-target="'+containerId+'">view</a></td>');
 							items.push('</tr>');
 						});
 						items.push('</tbody></table>');

@@ -147,7 +147,7 @@
 		function order() {
 			$.ajax({
 			    type: 'POST',
-			    url: '/plugin/order',
+			    url: '/plugin/study/order',
 			    data: new FormData($('#orderdata-form')[0]),
 			    cache: false,
 			    contentType: false,
