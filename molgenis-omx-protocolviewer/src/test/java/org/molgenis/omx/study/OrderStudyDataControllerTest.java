@@ -15,8 +15,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.filter.StudyDataRequest;
-import org.molgenis.omx.study.OrderStudyDataController;
-import org.molgenis.omx.study.OrderStudyDataService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -56,13 +54,14 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void getOrderDataForm() throws Exception
 	{
-		this.mockMvc.perform(get("/plugin/order")).andExpect(status().isOk()).andExpect(view().name("orderdata-modal"));
+		this.mockMvc.perform(get(OrderStudyDataController.URI + "/order")).andExpect(status().isOk())
+				.andExpect(view().name("orderdata-modal"));
 	}
 
 	@Test
 	public void getOrdersForm() throws Exception
 	{
-		this.mockMvc.perform(get("/plugin/orders/view")).andExpect(status().isOk())
+		this.mockMvc.perform(get(OrderStudyDataController.URI + "/orders/view")).andExpect(status().isOk())
 				.andExpect(view().name("orderlist-modal"));
 	}
 
@@ -70,7 +69,7 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 	public void getOrders() throws Exception
 	{
 		this.mockMvc
-				.perform(get("/plugin/orders"))
+				.perform(get(OrderStudyDataController.URI + "/orders"))
 				.andExpect(status().isOk())
 				.andExpect(
 						content()
