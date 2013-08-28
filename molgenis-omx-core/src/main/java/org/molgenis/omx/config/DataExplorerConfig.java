@@ -1,10 +1,10 @@
-package org.molgenis.dataexplorer.config;
+package org.molgenis.omx.config;
 
-import org.molgenis.dataexplorer.search.AsyncDataSetsIndexer;
-import org.molgenis.dataexplorer.search.DataSetsIndexer;
-import org.molgenis.dataexplorer.search.IndexingEventListener;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.omx.search.AsyncDataSetsIndexer;
+import org.molgenis.omx.search.DataSetsIndexer;
+import org.molgenis.omx.search.IndexingEventListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;

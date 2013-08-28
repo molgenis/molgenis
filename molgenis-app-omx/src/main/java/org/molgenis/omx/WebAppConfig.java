@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import org.molgenis.DatabaseConfig;
-import org.molgenis.dataexplorer.config.DataExplorerConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.security.Login;
@@ -13,6 +11,7 @@ import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.auth.OmxPermissionService;
+import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.harmonization.config.HarmonizationConfig;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.ui.MolgenisPluginInterceptor;

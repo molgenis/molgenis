@@ -40,7 +40,6 @@ public class DataSetDeleterController extends MolgenisPlugin
 	public DataSetDeleterController()
 	{
 		super(URI);
-		// TODO Auto-generated constructor stub
 	}
 
 	public static final String URI = "/plugin/datasetdeleter";
