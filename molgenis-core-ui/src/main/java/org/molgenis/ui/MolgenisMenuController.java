@@ -1,8 +1,10 @@
 package org.molgenis.ui;
 
-import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisMenuController.URI;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.HandlerMapping;
 
 @Controller
 @RequestMapping(URI)
@@ -60,18 +63,15 @@ public class MolgenisMenuController
 		return getForwardPluginUri(activeItem.getId(), null);
 	}
 
-	@RequestMapping("/{menuId}/{pluginId}")
-	public String forwardMenuPlugin(@Valid @NotNull @PathVariable String menuId,
+	@RequestMapping("/{menuId}/{pluginId}/**")
+	public String forwardMenuPlugin(HttpServletRequest request, @Valid @NotNull @PathVariable String menuId,
 			@Valid @NotNull @PathVariable String pluginId, Model model)
 	{
-		model.addAttribute(KEY_MENU_ID, menuId);
-		return getForwardPluginUri(pluginId, null);
-	}
+		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
+		String mappingUri = (String) (request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		String remainder = mappingUri.substring(contextUri.length());
 
-	@RequestMapping("/{menuId}/{pluginId}/{remainder:.+}")
-	public String forwardMenuPlugin(@Valid @NotNull @PathVariable String menuId,
-			@Valid @NotNull @PathVariable String pluginId, @PathVariable String remainder, Model model)
-	{
+		model.addAttribute(KEY_CONTEXT_URL, contextUri);
 		model.addAttribute(KEY_MENU_ID, menuId);
 		return getForwardPluginUri(pluginId, remainder);
 	}
@@ -81,7 +81,7 @@ public class MolgenisMenuController
 		StringBuilder strBuilder = new StringBuilder("forward:");
 		strBuilder.append(MolgenisPlugin.PLUGIN_URI_PREFIX);
 		strBuilder.append(pluginId);
-		if (pathRemainder != null) strBuilder.append('/').append(pathRemainder);
+		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
 	}
 }

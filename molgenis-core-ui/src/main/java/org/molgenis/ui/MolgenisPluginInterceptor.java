@@ -1,8 +1,8 @@
 package org.molgenis.ui;
 
-import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_AUTHENTICATED;
-import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_MOLGENIS_UI;
-import static org.molgenis.ui.MolgenisHeaderAttributes.KEY_PLUGIN_ID;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_AUTHENTICATED;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,8 +27,18 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
 	{
 		MolgenisPlugin molgenisPlugin = validateHandler(handler);
+
+		// determine is access to plugin is allowed
 		boolean permission = permissionService.hasPermissionOnPlugin(molgenisPlugin.getClass(), Permission.READ);
 		if (!permission) throw new DatabaseAccessException("access denied to " + request.getRequestURI());
+
+		// determine context url for this plugin if no context exists
+		String contextUrl = (String) request.getAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL);
+		if (contextUrl == null)
+		{
+			request.setAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL, molgenisPlugin.getUri());
+		}
+
 		return true;
 	}
 

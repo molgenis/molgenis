@@ -53,21 +53,21 @@
 	    });
 	   //Add Cancel button
 	   	$('<li role="button" class="cancel" ><a href="#">Restart</a></li>').css({"margin-left" : "230px"}).insertBefore('.next').click(function(){
-	   		performAction(this, '/plugin/importwizard');
+	   		performAction(this, '${context_url}');
 	   	});
 	 
 	   	//Remove bwizard default eventhandlers and add our own eventhandlers	
 	   	
 	   	$('.next').unbind('click').click(function(){
 	   		<#if wizard.lastPage > 
-	   			performAction(this, '/plugin/importwizard');
+	   			performAction(this, '${context_url}');
 	   		<#else>
-	   			performAction(this, '/plugin/importwizard/next');
+	   			performAction(this, '${context_url}/next');
 	   		</#if>
 	   	});
 	   	
 	   	$('.previous').unbind('click').click(function(){
-	   		performAction(this, '/plugin/importwizard/previous');
+	   		performAction(this, '${context_url}/previous');
 	   	});
 	   	
 	   	<#if wizard.lastPage > 
@@ -172,21 +172,21 @@
 	    });
 	   //Add Cancel button
 	   	$('<li role="button" class="cancel" ><a href="#">Restart</a></li>').css({"margin-left" : "230px"}).insertBefore('.next').click(function(){
-	   		performAction(this, '/plugin/importwizard');
+	   		performAction(this, '${context_url}');
 	   	});
 	 
 	   	//Remove bwizard default eventhandlers and add our own eventhandlers	
 	   	
 	   	$('.next').unbind('click').click(function(){
 	   		<#if wizard.lastPage > 
-	   			performAction(this, '/plugin/importwizard');
+	   			performAction(this, '${context_url}');
 	   		<#else>
-	   			performAction(this, '/plugin/importwizard/next');
+	   			performAction(this, '${context_url}/next');
 	   		</#if>
 	   	});
 	   	
 	   	$('.previous').unbind('click').click(function(){
-	   		performAction(this, '/plugin/importwizard/previous');
+	   		performAction(this, '${context_url}/previous');
 	   	});
 	   	
 	   	<#if wizard.lastPage > 

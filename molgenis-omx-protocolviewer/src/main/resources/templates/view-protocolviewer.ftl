@@ -66,8 +66,8 @@
 								<div id="orderdata-modal-container"></div>
 								<div id="ordersview-modal-container"></div>
 								<div class="btn-group pull-right">
-									<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
-									<a class="modal-href btn btn-primary<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
+									<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/study/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+									<a class="modal-href btn btn-primary<#if !model.authenticated> disabled</#if>" href="/plugin/study/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
 								</div>
 							</#if>
 							</div>
@@ -101,7 +101,7 @@
  						var uri = window.top.molgenis.getSelectedDataSet().href;
  						var features = window.top.molgenis.getSelectedFeatures();
  						if(features!=null){
-	 						$.fileDownload('/plugin/protocolviewer/download', { 
+	 						$.fileDownload('${context_url}/download', { 
 	 							httpMethod : "POST",
 	 							data: {
 	 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
@@ -227,8 +227,8 @@
 								<div id="orderdata-modal-container"></div>
 								<div id="ordersview-modal-container"></div>
 								<div class="btn-group pull-right">
-									<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
-									<a class="modal-href btn btn-primary<#if !model.authenticated> disabled</#if>" href="/plugin/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
+									<a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/study/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+									<a class="modal-href btn btn-primary<#if !model.authenticated> disabled</#if>" href="/plugin/study/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
 								</div>
 							</#if>
 							</div>
@@ -262,7 +262,7 @@
  						var uri = window.top.molgenis.getSelectedDataSet().href;
  						var features = window.top.molgenis.getSelectedFeatures();
  						if(features!=null){
-	 						$.fileDownload('/plugin/protocolviewer/download', { 
+	 						$.fileDownload('${context_url}}/download', { 
 	 							httpMethod : "POST",
 	 							data: {
 	 								datasetid : uri.substring(uri.lastIndexOf('/') + 1),
