@@ -133,6 +133,11 @@ $(function() {
 
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands, q) {
 		var qs = "";
+		if (resourceUri.indexOf('?') != -1) {
+			var uriParts = resourceUri.split('?');
+			resourceUri = uriParts[0];
+			qs = '?' + uriParts[1];
+		}
 		if(expands) qs += (qs.length == 0 ? '?' : '&') + 'expand=' + expands.join(',');
 		if(q) qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
