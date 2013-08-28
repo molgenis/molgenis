@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 <#assign css=["chosen.css", "entityexplorer.css"]>
 <#assign js=["chosen.jquery.min.js", "entityexplorer.js"]>
-<@header/>
+<@header css js/>
 	<div class="row-fluid">
 		<div class="well">
 				<div class="row-fluid">

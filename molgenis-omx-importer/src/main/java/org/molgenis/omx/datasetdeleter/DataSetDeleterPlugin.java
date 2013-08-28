@@ -15,7 +15,7 @@ public class DataSetDeleterPlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return "/plugin/datasetdeleter";
+		return DataSetDeleterController.URI;
 	}
 
 }
