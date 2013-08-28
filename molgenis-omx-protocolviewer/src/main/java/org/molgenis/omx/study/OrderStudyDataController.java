@@ -1,5 +1,7 @@
 package org.molgenis.omx.study;
 
+import static org.molgenis.omx.study.OrderStudyDataController.URI;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -12,6 +14,7 @@ import javax.validation.constraints.NotNull;
 
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.ShoppingCart;
@@ -32,9 +35,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Controller
-@RequestMapping("/plugin")
-public class OrderStudyDataController
+@RequestMapping(URI)
+public class OrderStudyDataController extends MolgenisPlugin
 {
+	public static final String URI = "/plugin/study";
+
 	@Autowired
 	private Login login;
 
@@ -43,6 +48,11 @@ public class OrderStudyDataController
 
 	@Autowired
 	private ShoppingCart shoppingCart;
+
+	public OrderStudyDataController()
+	{
+		super(URI);
+	}
 
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
 	public String getOrderDataForm() throws DatabaseException
@@ -54,9 +64,8 @@ public class OrderStudyDataController
 	// ModelAttribute
 	@RequestMapping(value = "/order", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void orderData(@RequestParam
-	String name, @RequestParam
-	Part file) throws DatabaseException, IOException, MessagingException
+	public void orderData(@RequestParam String name, @RequestParam Part file) throws DatabaseException, IOException,
+			MessagingException
 	{
 		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart(), login.getUserId());
 		shoppingCart.emptyCart();
@@ -71,8 +80,7 @@ public class OrderStudyDataController
 				{
 					@Override
 					@Nullable
-					public OrderResponse apply(@Nullable
-					StudyDataRequest studyDataRequest)
+					public OrderResponse apply(@Nullable StudyDataRequest studyDataRequest)
 					{
 						return studyDataRequest != null ? new OrderResponse(studyDataRequest) : null;
 					}
@@ -87,10 +95,7 @@ public class OrderStudyDataController
 	}
 
 	@RequestMapping(value = "/orders/{orderId}/view", method = RequestMethod.GET)
-	public ModelAndView getOrderDetailsForm(@Valid
-	@NotNull
-	@PathVariable
-	Integer orderId) throws DatabaseException
+	public ModelAndView getOrderDetailsForm(@Valid @NotNull @PathVariable Integer orderId) throws DatabaseException
 	{
 		StudyDataRequest studyDataRequest = orderStudyDataService.getOrder(orderId);
 		if (studyDataRequest == null) throw new DatabaseException("invalid order id");
@@ -103,7 +108,7 @@ public class OrderStudyDataController
 
 	private static class OrdersResponse
 	{
-		private List<OrderResponse> orders;
+		private final List<OrderResponse> orders;
 
 		public OrdersResponse(List<OrderResponse> orders)
 		{
@@ -119,10 +124,10 @@ public class OrderStudyDataController
 
 	private static class OrderResponse
 	{
-		private Integer id;
-		private String name;
-		private String orderDate;
-		private String orderStatus;
+		private final Integer id;
+		private final String name;
+		private final String orderDate;
+		private final String orderStatus;
 
 		public OrderResponse(StudyDataRequest studyDataRequest)
 		{

@@ -37,7 +37,7 @@
 					};
 					$.ajax({
 						type : 'POST',
-						url : '/plugin/dataindexer/index',
+						url : '${context_url}/index',
 						async : false,
 						data : JSON.stringify(indexRequest),
 						contentType : 'application/json',

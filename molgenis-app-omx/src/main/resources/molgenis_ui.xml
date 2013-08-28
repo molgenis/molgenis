@@ -13,7 +13,7 @@
 		<plugin id="references" label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
 		<plugin id="contact" label="Contact" name="ContactPlugin" type="org.molgenis.omx.plugins.ContactPlugin"/>
 		<menu name="Converters">
-			<plugin id="cbmToOmxConverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
+			<plugin id="cbmtoomxconverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
 		</menu>
         <menu name="Admin">
 	        <menu name ="Entities">
