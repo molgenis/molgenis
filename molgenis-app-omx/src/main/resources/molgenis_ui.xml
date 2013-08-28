@@ -16,15 +16,18 @@
 			<plugin id="cbmtoomxconverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
 		</menu>
         <menu name="Admin">
+        	<plugin id="form/ObservableFeature" label="ObservableFeature" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		
+        
 	        <menu name ="Entities">
-	            <form name="DataSet" entity="DataSet" />
+	        	<form name="DataSet" entity="DataSet" />
 	            <form name="Protocol" entity="Protocol" />
 	            <form name="Feature" entity="ObservableFeature" />
 	            <form name="Category" entity="Category" />
 	            <form name="Value" entity="ObservedValue" />
 	            <form name="StudyDataRequest" entity="StudyDataRequest" />
 	            <form name="RuntimeProperty" entity="RuntimeProperty" />
-	       	</menu>
+	        </menu>
 	        <menu name="Auth" label="Users and permissions">
 				<menu label="Basic management" name="Management">
 					<form name="MolgenisUser" entity="MolgenisUser" />
