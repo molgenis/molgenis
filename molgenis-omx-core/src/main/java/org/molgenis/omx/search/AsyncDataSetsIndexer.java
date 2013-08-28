@@ -1,10 +1,12 @@
-package org.molgenis.dataexplorer.search;
+package org.molgenis.omx.search;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
+import org.molgenis.omx.search.AsyncDataSetsIndexer;
+import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;

@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.search;
+package org.molgenis.omx.search;
 
 import java.util.List;
 

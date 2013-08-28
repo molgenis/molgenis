@@ -1,8 +1,8 @@
-package org.molgenis.dataexplorer.plugin;
+package org.molgenis.omx.plugin;
 
-import org.molgenis.dataexplorer.controller.DataSetsIndexerController;
 import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;
+import org.molgenis.omx.controller.DataSetsIndexerController;
 
 public class DataSetsIndexerPlugin extends IframePlugin
 {

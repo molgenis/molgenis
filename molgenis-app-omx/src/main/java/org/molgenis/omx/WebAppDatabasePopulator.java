@@ -20,6 +20,7 @@ import org.molgenis.omx.auth.MolgenisRole;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.OmxPermissionService;
 import org.molgenis.omx.controller.ContactController;
+import org.molgenis.omx.controller.DataSetsIndexerController;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.controller.ReferencesController;
 import org.molgenis.omx.core.RuntimeProperty;
@@ -27,6 +28,7 @@ import org.molgenis.omx.importer.ImportWizardController;
 import org.molgenis.servlet.GuiService;
 import org.molgenis.ui.ContactPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
+import org.molgenis.ui.DataSetsIndexerPluginPlugin;
 import org.molgenis.ui.HomePluginPlugin;
 import org.molgenis.ui.ReferencesPluginPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
@@ -115,12 +117,19 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		// Set plugin permissions
 		// TODO
 		// // TODO remove next three lines after removing molgenis UI framework
+		permissionService.setPermissionOnPlugin(HomePluginPlugin.class.getSimpleName(), groupName.getId(),
+				Permission.READ);
 		permissionService.setPermissionOnPlugin(ContactPluginPlugin.class.getSimpleName(), groupName.getId(),
 				Permission.READ);
 		permissionService.setPermissionOnPlugin(ReferencesPluginPlugin.class.getSimpleName(), groupName.getId(),
 				Permission.READ);
 		permissionService.setPermissionOnPlugin(DataExplorerPluginPlugin.class.getSimpleName(), groupName.getId(),
 				Permission.READ);
+		permissionService.setPermissionOnPlugin(DataSetsIndexerPluginPlugin.class.getSimpleName(), groupName.getId(),
+				Permission.READ);
+		permissionService.setPermissionOnPlugin(DataSetsIndexerController.class, groupName.getId(), Permission.READ);
+		
+		permissionService.setPermissionOnPlugin(HomeController.class, groupName.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(ContactController.class, groupName.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(ReferencesController.class, groupName.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(DataExplorerController.class, groupName.getId(), Permission.READ);
