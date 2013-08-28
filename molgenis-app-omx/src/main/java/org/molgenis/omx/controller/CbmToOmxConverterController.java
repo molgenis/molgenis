@@ -50,7 +50,6 @@ public class CbmToOmxConverterController extends MolgenisPlugin
 	private static final Logger logger = Logger.getLogger(MolgenisContextListener.class);
 
 	public static final String URI = "/plugin/cbmtoomxconverter";
-	private static final long serialVersionUID = 1L;
 
 	private File currentFile;
 	private final File outputDir = new File(System.getProperty("java.io.tmpdir"));
@@ -65,12 +64,12 @@ public class CbmToOmxConverterController extends MolgenisPlugin
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		return "view-CbmToOmxConverter";
+		return "view-cbmtoomxconverter";
 	}
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public void convert(@RequestParam
-	Part upload, HttpServletRequest request, HttpServletResponse response) throws Exception
+	public void convert(@RequestParam Part upload, HttpServletRequest request, HttpServletResponse response)
+			throws Exception
 	{
 		File file = null;
 		Part part = request.getPart("upload");
