@@ -18,18 +18,16 @@ import org.molgenis.framework.server.MolgenisResponse;
 import org.molgenis.framework.server.MolgenisService;
 
 /**
- * Serve files from tmp dir. TODO: create best version for this type of service
- * and use it everywhere. Though this one works OK. How it should really look:
- * /molgenis_apps/modules/webserver/core/servlets/Servlet.java
- * serveFile(HttpServletRequest req, HttpServletResponse res, boolean headOnly,
- * File file)
+ * Serve files from tmp dir. TODO: create best version for this type of service and use it everywhere. Though this one
+ * works OK. How it should really look: /molgenis_apps/modules/webserver/core/servlets/Servlet.java
+ * serveFile(HttpServletRequest req, HttpServletResponse res, boolean headOnly, File file)
  */
 public class MolgenisTmpFileService implements MolgenisService
 {
-	Logger logger = Logger.getLogger(MolgenisRapiService.class);
+	Logger logger = Logger.getLogger(MolgenisTmpFileService.class);
 	Hashtable<String, Object> restParams;
 
-	private MolgenisContext mc;
+	private final MolgenisContext mc;
 
 	public MolgenisTmpFileService(MolgenisContext mc)
 	{
