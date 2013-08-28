@@ -1,6 +1,6 @@
-package org.molgenis.dataexplorer.controller;
+package org.molgenis.omx.controller;
 
-import static org.molgenis.dataexplorer.controller.DataSetsIndexerController.URI;
+import static org.molgenis.omx.controller.DataSetsIndexerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.UnsupportedEncodingException;
@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.dataexplorer.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataSetsIndexerController extends MolgenisPlugin
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "/dataindexer";
+	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "dataindexer";
 
 	public DataSetsIndexerController()
 	{

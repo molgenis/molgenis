@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.controller;
+package org.molgenis.omx.controller;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,9 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.molgenis.dataexplorer.controller.DataSetsIndexerControllerTest.Config;
-import org.molgenis.dataexplorer.search.DataSetsIndexer;
 import org.molgenis.framework.db.Database;
+import org.molgenis.omx.controller.DataSetsIndexerController;
+import org.molgenis.omx.controller.DataSetsIndexerControllerTest.Config;
+import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

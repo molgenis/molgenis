@@ -35,7 +35,7 @@
 				</menu>
 			</menu>	
 			
-			<plugin id="dataindexer" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
+			<plugin id="dataindexer" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.omx.plugin.DataSetsIndexerPlugin"/>
 			<plugin id="datasetdeleter" label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
 		
 		</menu>
