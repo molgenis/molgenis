@@ -75,8 +75,12 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 	}
 
 	@Override
-	public Cell<List<Cell<String>>> toCell(Value value)
+	public Cell<List<Cell<String>>> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof MrefValue))
+		{
+			throw new ValueConverterException("value is not a " + MrefValue.class.getSimpleName());
+		}
 		List<Cell<String>> mrefList = Lists.transform(((MrefValue) value).getValue(),
 				new Function<Characteristic, Cell<String>>()
 				{
