@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class MolgenisRootController
 {
 	// TODO remove flag after removing molgenis UI framework
-	public static final boolean USE_SPRING_UI = true;
+	public static final boolean USE_SPRING_UI = false;
 
 	@RequestMapping(method =
 	{ RequestMethod.GET, RequestMethod.POST })
