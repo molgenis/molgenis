@@ -3,6 +3,8 @@ package org.molgenis.entityexplorer.controller;
 import static org.molgenis.entityexplorer.controller.EntityExplorerController.URI;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,18 +54,16 @@ public class EntityExplorerController extends MolgenisPlugin
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(required = false)
-	String entity, @RequestParam(required = false)
-	String identifier, @RequestParam(required = false)
-	String query, Model model) throws Exception
+	public String init(@RequestParam(required = false) String entity,
+			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
+			throws Exception
 	{
 		// select all characteristic entities
 		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(database.getEntityClasses(),
 				new Predicate<Class<? extends Entity>>()
 				{
 					@Override
-					public boolean apply(@Nullable
-					Class<? extends Entity> clazz)
+					public boolean apply(@Nullable Class<? extends Entity> clazz)
 					{
 						return clazz != null && Characteristic.class.isAssignableFrom(clazz)
 								&& !clazz.equals(Characteristic.class);
@@ -86,12 +86,24 @@ public class EntityExplorerController extends MolgenisPlugin
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
 		model.addAttribute("selectedQuery", query);
-		model.addAttribute("entities", new ArrayList<String>(clazzMap.keySet()));
+		ArrayList<String> entities = new ArrayList<String>(clazzMap.keySet());
+		Collections.sort(entities);
+		model.addAttribute("entities", entities);
 
 		// determine instances for selected entity
 		if (selectedClazz != null)
 		{
 			List<? extends Characteristic> characteristics = database.find(selectedClazz);
+			Collections.sort(characteristics, new Comparator<Characteristic>()
+			{
+				@Override
+				public int compare(Characteristic o1, Characteristic o2)
+				{
+					return o1.getName().compareTo(o2.getName());
+				}
+
+			});
+
 			Characteristic selectedCharacteristic = null;
 			if (identifier != null)
 			{
