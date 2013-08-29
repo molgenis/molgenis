@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToHtmlValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		HtmlValue value = new HtmlValue();
 		value.setValue("value");

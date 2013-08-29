@@ -21,5 +21,5 @@ public interface TupleToValueConverter<S extends Value, T>
 	 * @param value
 	 * @return
 	 */
-	public Cell<T> toCell(Value value);
+	public Cell<T> toCell(Value value) throws ValueConverterException;
 }

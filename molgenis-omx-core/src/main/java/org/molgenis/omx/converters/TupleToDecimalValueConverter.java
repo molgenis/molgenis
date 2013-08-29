@@ -30,8 +30,12 @@ public class TupleToDecimalValueConverter implements TupleToValueConverter<Decim
 	}
 
 	@Override
-	public Cell<Double> toCell(Value value)
+	public Cell<Double> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof DecimalValue))
+		{
+			throw new ValueConverterException("value is not a " + DecimalValue.class.getSimpleName());
+		}
 		return new ValueCell<Double>(((DecimalValue) value).getValue());
 	}
 }

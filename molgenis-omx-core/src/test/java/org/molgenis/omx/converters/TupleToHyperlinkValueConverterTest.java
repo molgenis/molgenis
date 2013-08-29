@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToHyperlinkValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		HyperlinkValue value = new HyperlinkValue();
 		value.setValue("http://www.a.org/");
