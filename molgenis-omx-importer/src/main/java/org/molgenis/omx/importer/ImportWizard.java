@@ -15,7 +15,8 @@ import org.molgenis.framework.db.EntityImportReport;
  */
 public class ImportWizard implements Serializable
 {
-	private static final long serialVersionUID = -7515049941782370532L;
+	private static final long serialVersionUID = 1L;
+
 	private List<WizardPage> pages = new ArrayList<WizardPage>();
 	private int currentPageIndex = 0;
 	private String errorMessage;// Error messages are shown in red and if

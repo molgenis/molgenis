@@ -116,7 +116,7 @@ public class IndexRequestGenerator
 		return new Iterator<BulkRequestBuilder>()
 		{
 			private final int rows = tupleTable.getCount();
-			private final int docsPerBulk = 1000;
+			private static final int docsPerBulk = 1000;
 			private final Iterator<Tuple> it = tupleTable.iterator();
 
 			private int row = 0;

@@ -2,7 +2,10 @@ package org.molgenis.gids.tools.compare;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,24 +18,15 @@ import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.util.tuple.Tuple;
 
 /**
- * This script is created to compare 2 excelfiles. The files are given via the
- * arguments
+ * This script is created to compare 2 excelfiles. The files are given via the arguments
  */
 
 public class ValidationChecker
 {
-
-	/**
-	 * @param args
-	 * @throws IOException
-	 * 
-	 */
-	public BufferedWriter logger = null;
 	private final static String IDENTIFIER = "id_sample";
 
 	public void check(String file1, String file2, BufferedWriter logger) throws IOException
 	{
-		this.logger = logger;
 		LinkedHashMap<String, String> hashCheckedValues = new LinkedHashMap<String, String>();
 
 		// Make Object Reference
@@ -192,5 +186,40 @@ public class ValidationChecker
 
 		}
 
+	}
+
+	/**
+	 * @param args
+	 * @throws FileNotFoundException
+	 */
+	public static void main(String[] args) throws FileNotFoundException
+	{
+		if (args.length != 3)
+		{
+			System.err
+					.println("To run this script it needs 3 arguments; \n1) An excelfile\n2) a csvfile\n"
+							+ "3) a path for the logfile\n"
+							+ "e.g.\n"
+							+ "args[0] /Users/Roan/Work/GIDS_8_may/Cohorts/Bloodbank/Export_Gids1_Bloodbank.xls\n"
+							+ "args[1] /Users/Roan/Work/GIDS_8_may/Cohorts/Bloodbank/Export_Gids2_Bloodbank_dataset125_2013-05-08.csv/\n"
+							+ "args[2] /Users/Roan/logger.txt");
+			return;
+		}
+		ValidationChecker vc = new ValidationChecker();
+		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2])));
+		try
+		{
+			logger.write("file1: " + args[0] + "\nfile2: " + args[1]);
+			vc.check(args[0], args[1], logger);
+			logger.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			IOUtils.closeQuietly(logger);
+		}
 	}
 }

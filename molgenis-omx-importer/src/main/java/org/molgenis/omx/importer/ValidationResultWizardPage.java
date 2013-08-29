@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.DatabaseException;
@@ -19,6 +20,8 @@ import org.molgenis.util.DataSetImportedEvent;
 
 public class ValidationResultWizardPage extends WizardPage
 {
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
 
 	public ValidationResultWizardPage()
 	{

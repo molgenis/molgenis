@@ -1,13 +1,14 @@
 package org.molgenis.omx.importer;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 
-public class WizardPage
+public class WizardPage implements Serializable
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+	private static final long serialVersionUID = 1L;
 
 	private final String title;
 	private ImportWizard wizard;

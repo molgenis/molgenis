@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -27,6 +28,9 @@ import org.molgenis.util.tuple.Tuple;
 
 public class UploadWizardPage extends WizardPage
 {
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
+
 	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
 
 	public UploadWizardPage()

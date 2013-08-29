@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 
 import org.molgenis.framework.db.Database;
-import org.molgenis.omx.controller.DataSetsIndexerController;
+import org.molgenis.omx.controller.DataSetsIndexerController.DataSetIndexRequest;
 import org.molgenis.omx.controller.DataSetsIndexerControllerTest.Config;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -49,8 +49,8 @@ public class DataSetsIndexerControllerTest extends AbstractTestNGSpringContextTe
 	{
 		mockMvc.perform(
 				post(DataSetsIndexerController.URI + "/index", "json").contentType(MediaType.APPLICATION_JSON).content(
-						new Gson().toJson(dataSetsIndexerController.new DataSetIndexRequest(Arrays.asList("1", "2")))
-								.getBytes())).andExpect(status().isOk());
+						new Gson().toJson(new DataSetIndexRequest(Arrays.asList("1", "2"))).getBytes())).andExpect(
+				status().isOk());
 	}
 
 	@Test
