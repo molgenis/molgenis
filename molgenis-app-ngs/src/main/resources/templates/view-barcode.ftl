@@ -1,4 +1,4 @@
-#if enable_spring_ui>
+<#if enable_spring_ui>
 	<#include "molgenis-header.ftl">
 	<#include "molgenis-footer.ftl">
 	<@header/>
@@ -186,3 +186,4 @@
 		</form>
 	</body>
 </html>
+</#if>
