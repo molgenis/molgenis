@@ -1,6 +1,6 @@
 package org.molgenis.ngs.plugins.barcode;
 
-import org.molgenis.ngs.controller.BarCodeController;
+import org.molgenis.ngs.controller.BarcodeController;
 /**
  *
  */
@@ -22,6 +22,6 @@ public class BarcodePlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return BarCodeController.URI;
+		return BarcodeController.URI;
 	}
 }
