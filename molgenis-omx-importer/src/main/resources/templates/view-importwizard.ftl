@@ -92,7 +92,7 @@
 	   	 	
 	   	function performAction(btn, action) {
 	   		if (!$(btn).hasClass('disabled')) {
-	   			<#if wizard.currentPageIndex == 2>
+	   			<#if wizard.currentPageIndex == 1>
 	   				$('#spinner').modal('show');
 	   			</#if>
 	   			
