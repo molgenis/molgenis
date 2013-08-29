@@ -1,6 +1,6 @@
 package org.molgenis.ngs.controller;
 
-import static org.molgenis.ngs.controller.BarCodeController.URI;
+import static org.molgenis.ngs.controller.BarcodeController.URI;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -30,11 +30,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @Controller
 @RequestMapping(URI)
-public class BarCodeController extends MolgenisPlugin
+public class BarcodeController extends MolgenisPlugin
 {
 	public static final String URI = "/plugin/barcode";
 
-	private static final Logger logger = Logger.getLogger(BarCodeController.class);
+	private static final Logger logger = Logger.getLogger(BarcodeController.class);
 
 	private List<Tuple> barcodeTuples = new ArrayList<Tuple>();
 	private Set<String> barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
@@ -51,7 +51,7 @@ public class BarCodeController extends MolgenisPlugin
 
 	private boolean isException = false;
 
-	public BarCodeController()
+	public BarcodeController()
 	{
 		super(URI);
 	}
@@ -137,7 +137,7 @@ public class BarCodeController extends MolgenisPlugin
 			else
 			{ // we have to do the work ourselves
 
-				// determine inter-barcode distances
+				// determine inter-barcode distances in terms of SNPs
 				int[][] dist = getDistance(barcodeTypeList);
 
 				List<List<Integer>> indices = getCombinations(barcodeTypeList.size(), this.currentNumber);
@@ -146,6 +146,7 @@ public class BarCodeController extends MolgenisPlugin
 				List<Integer> sumDistance = new ArrayList<Integer>();
 				Integer maximumOfMinima = Integer.MIN_VALUE;
 
+				// For each given set of barcodes (= element of indices), determine the pair wise distance between each pair in this set
 				Integer d;
 				for (int i = 0; i < indices.size(); i++)
 				{
@@ -275,6 +276,9 @@ public class BarCodeController extends MolgenisPlugin
 		return dist;
 	}
 
+	/*
+	 * For future use: This function may be implemented if we want to return the default barcode sets in the same way as we do with the calculated sets... Currently we just show a hard coded html table in this case... 
+	 */
 	private List<List<Tuple>> defaultBarcodeSets(String currentType2, Integer currentNumber2)
 	{
 		return null;
