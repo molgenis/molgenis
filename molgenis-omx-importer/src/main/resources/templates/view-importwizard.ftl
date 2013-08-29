@@ -71,7 +71,7 @@
 	   	});
 	   	
 	   	<#if wizard.lastPage > 
-	    	$('.next a').html('finish');
+	    	$('.next a').html('Finish');
 	    </#if>
 	    
 	   	<#if wizard.validationMessage! == "">
@@ -190,7 +190,7 @@
 	   	});
 	   	
 	   	<#if wizard.lastPage > 
-	    	$('.next a').html('finish');
+	    	$('.next a').html('Finish');
 	    </#if>
 	    
 	   	<#if wizard.validationMessage! == "">
