@@ -72,11 +72,6 @@ public class ValueConverter
 		}
 
 		TupleToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
-		if (converter == null)
-		{
-			throw new IllegalArgumentException("unsupported field type [" + fieldType.getEnumType() + "]");
-		}
-
 		return converter.fromTuple(tuple, colName, feature);
 	}
 
@@ -90,10 +85,6 @@ public class ValueConverter
 			throw new ValueConverterException("unknown value type [" + value.getClass().getSimpleName() + "]");
 		}
 		TupleToValueConverter<? extends Value, ?> valueConverter = getTupleConverter(fieldTypeEnum);
-		if (valueConverter == null)
-		{
-			throw new ValueConverterException("unsupported value type [" + value.getClass().getSimpleName() + "]");
-		}
 		return valueConverter.toCell(value);
 	}
 
