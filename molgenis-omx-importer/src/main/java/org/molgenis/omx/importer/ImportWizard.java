@@ -1,7 +1,6 @@
 package org.molgenis.omx.importer;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,9 +12,8 @@ import org.molgenis.framework.db.EntityImportReport;
 /**
  * Import wizard model
  */
-public class ImportWizard implements Serializable
+public class ImportWizard
 {
-	private static final long serialVersionUID = -7515049941782370532L;
 	private List<WizardPage> pages = new ArrayList<WizardPage>();
 	private int currentPageIndex = 0;
 	private String errorMessage;// Error messages are shown in red and if
