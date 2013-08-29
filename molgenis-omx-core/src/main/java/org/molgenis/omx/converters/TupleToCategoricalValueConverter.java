@@ -52,8 +52,12 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof CategoricalValue))
+		{
+			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
+		}
 		Category category = ((CategoricalValue) value).getValue();
 		return new ValueCell<String>(category.getIdentifier(), category.getName());
 	}

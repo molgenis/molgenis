@@ -29,8 +29,12 @@ public class TupleToIntValueConverter implements TupleToValueConverter<IntValue,
 	}
 
 	@Override
-	public Cell<Integer> toCell(Value value)
+	public Cell<Integer> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof IntValue))
+		{
+			throw new ValueConverterException("value is not a " + IntValue.class.getSimpleName());
+		}
 		return new ValueCell<Integer>(((IntValue) value).getValue());
 	}
 }

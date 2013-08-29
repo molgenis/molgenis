@@ -153,7 +153,7 @@ public class IndexRequestGenerator
 						if (value instanceof Collection)
 						{
 							Collection<?> values = (Collection<?>) value;
-							if (values != null && !values.isEmpty() && values.iterator().next() instanceof Cell)
+							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
 							{
 								List<String> mrefKeys = null;
 								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)

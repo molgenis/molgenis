@@ -21,8 +21,12 @@ public class TupleToBoolValueConverter implements TupleToValueConverter<BoolValu
 	}
 
 	@Override
-	public Cell<Boolean> toCell(Value value)
+	public Cell<Boolean> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof BoolValue))
+		{
+			throw new ValueConverterException("value is not a " + BoolValue.class.getSimpleName());
+		}
 		return new ValueCell<Boolean>(((BoolValue) value).getValue());
 	}
 }

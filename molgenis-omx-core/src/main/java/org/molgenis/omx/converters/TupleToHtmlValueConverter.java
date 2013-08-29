@@ -21,8 +21,12 @@ public class TupleToHtmlValueConverter implements TupleToValueConverter<HtmlValu
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof HtmlValue))
+		{
+			throw new ValueConverterException("value is not a " + HtmlValue.class.getSimpleName());
+		}
 		return new ValueCell<String>(((HtmlValue) value).getValue());
 	}
 }

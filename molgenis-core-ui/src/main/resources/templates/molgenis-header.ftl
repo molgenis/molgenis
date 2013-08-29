@@ -20,6 +20,9 @@
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/jquery.validate.min.js"></script>
 		<script src="/js/molgenis-all.js"></script>
+		<!--[if lt IE 9]>
+			<script src="/js/molgenis-ie8.js"></script>
+		<![endif]-->
 	<#list js as js_file_name>
 		<script src="/js/${js_file_name?html}"></script>
 	</#list>		
