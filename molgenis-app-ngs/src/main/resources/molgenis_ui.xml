@@ -3,7 +3,7 @@
 	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
 	<plugin name="HeaderPlugin" type="org.molgenis.ngs.plugins.HeaderPlugin" />
 	<menu name="main">
-		<plugin name="Home" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
+		<plugin id="home" name="Home" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
 		<plugin id="useraccount" name="UserAccountPlugin" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />	
 		<form name="Projects" entity="Project" label="Projects" viewtype="list">
 			<form name="Samples1" entity="Sample" label="Samples" viewtype="list" />
@@ -12,7 +12,7 @@
 		<form name="FlowcellRuns" entity="Flowcell">
 			<form name="FlowcellLanes" entity="FlowcellLane" label="Samples in Lanes" viewtype="list" />
 		</form>
-		<plugin name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
+		<plugin id="worksheet" name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
 		<menu name="Configuration" >
 			<form name="Users" entity="NgsUser" label="User" />
 			<form name="Flowcells" entity="Flowcell" label="Flowcell"/>
@@ -46,7 +46,7 @@
 		</menu> 
 		-->
 		
-		<plugin name="Barcode" label="Barcode selector"  type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
+		<plugin id="barcode" name="Barcode" label="Barcode selector"  type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
 		
 	</menu>
 	

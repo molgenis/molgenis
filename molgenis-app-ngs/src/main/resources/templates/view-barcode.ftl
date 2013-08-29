@@ -95,7 +95,12 @@
 
 <!DOCTYPE html>
 <html>
-	<head>
+	<head>		
+		<title>Barcode selector</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">        
+		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 	</head>
 	<body>
 		<form method="post" CLASS="form-horizontal" enctype="multipart/form-data" action="/plugin/barcode/calculate">
