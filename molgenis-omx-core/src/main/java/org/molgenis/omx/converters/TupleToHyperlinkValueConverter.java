@@ -22,8 +22,12 @@ public class TupleToHyperlinkValueConverter implements TupleToValueConverter<Hyp
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof HyperlinkValue))
+		{
+			throw new ValueConverterException("value is not a " + HyperlinkValue.class.getSimpleName());
+		}
 		return new ValueCell<String>(((HyperlinkValue) value).getValue());
 	}
 }

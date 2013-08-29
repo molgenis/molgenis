@@ -45,8 +45,12 @@ public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValu
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof XrefValue))
+		{
+			throw new ValueConverterException("value is not a " + XrefValue.class.getSimpleName());
+		}
 		Characteristic xrefCharacteristic = ((XrefValue) value).getValue();
 		return new ValueCell<String>(xrefCharacteristic.getIdentifier(), xrefCharacteristic.getName());
 	}

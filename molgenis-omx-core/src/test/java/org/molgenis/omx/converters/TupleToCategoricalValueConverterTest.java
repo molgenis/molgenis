@@ -21,7 +21,7 @@ public class TupleToCategoricalValueConverterTest
 {
 
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		Database database = mock(Database.class);
 		String catIdentifier = "category1";

@@ -29,8 +29,12 @@ public class TupleToLongValueConverter implements TupleToValueConverter<LongValu
 	}
 
 	@Override
-	public Cell<Long> toCell(Value value)
+	public Cell<Long> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof LongValue))
+		{
+			throw new ValueConverterException("value is not a " + LongValue.class.getSimpleName());
+		}
 		return new ValueCell<Long>(((LongValue) value).getValue());
 	}
 }

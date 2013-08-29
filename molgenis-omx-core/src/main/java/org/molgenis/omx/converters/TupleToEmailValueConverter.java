@@ -21,8 +21,12 @@ public class TupleToEmailValueConverter implements TupleToValueConverter<EmailVa
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof EmailValue))
+		{
+			throw new ValueConverterException("value is not a " + EmailValue.class.getSimpleName());
+		}
 		return new ValueCell<String>(((EmailValue) value).getValue());
 	}
 }

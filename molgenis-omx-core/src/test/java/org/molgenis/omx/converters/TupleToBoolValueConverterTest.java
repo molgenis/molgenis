@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToBoolValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);

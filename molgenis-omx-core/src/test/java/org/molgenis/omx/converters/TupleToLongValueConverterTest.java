@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToLongValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		LongValue value = new LongValue();
 		value.setValue(1234l);
