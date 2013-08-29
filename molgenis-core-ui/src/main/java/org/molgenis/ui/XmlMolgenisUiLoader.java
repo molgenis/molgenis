@@ -21,25 +21,31 @@ public class XmlMolgenisUiLoader
 	{
 		InputStream xsdStream = this.getClass().getResourceAsStream(UI_XSD);
 		if (xsdStream == null) throw new IOException("unable to find " + UI_XSD);
-		InputStream xmlStream = this.getClass().getResourceAsStream(UI_XML);
-		if (xmlStream == null) throw new IOException("unable to find " + UI_XML);
 		try
 		{
-			SchemaLoader schemaLoader = new SchemaLoader(xsdStream);
-			Schema molgenisUiSchema = schemaLoader.getSchema();
+			InputStream xmlStream = this.getClass().getResourceAsStream(UI_XML);
+			if (xmlStream == null) throw new IOException("unable to find " + UI_XML);
+			try
+			{
+				SchemaLoader schemaLoader = new SchemaLoader(xsdStream);
+				Schema molgenisUiSchema = schemaLoader.getSchema();
 
-			JAXBContext jaxbContext = JAXBContext.newInstance(Molgenis.class);
-			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			unmarshaller.setSchema(molgenisUiSchema);
-			return unmarshaller.unmarshal(new StreamSource(xmlStream), Molgenis.class).getValue();
-		}
-		catch (JAXBException e)
-		{
-			throw new IOException(e);
+				JAXBContext jaxbContext = JAXBContext.newInstance(Molgenis.class);
+				Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+				unmarshaller.setSchema(molgenisUiSchema);
+				return unmarshaller.unmarshal(new StreamSource(xmlStream), Molgenis.class).getValue();
+			}
+			catch (JAXBException e)
+			{
+				throw new IOException(e);
+			}
+			finally
+			{
+				IOUtils.closeQuietly(xmlStream);
+			}
 		}
 		finally
 		{
-			IOUtils.closeQuietly(xmlStream);
 			IOUtils.closeQuietly(xsdStream);
 		}
 	}
