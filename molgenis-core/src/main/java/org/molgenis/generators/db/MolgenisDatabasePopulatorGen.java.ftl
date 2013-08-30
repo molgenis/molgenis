@@ -5,7 +5,6 @@ import org.molgenis.framework.db.Database;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import java.security.NoSuchAlgorithmException;
 <#if metaData>
 import java.util.ArrayList;
 import java.util.List;
@@ -249,15 +248,7 @@ public abstract class MolgenisDatabasePopulator implements ApplicationListener<C
 		MolgenisUser user = new MolgenisUser();
 		user.setName(userName);
 		user.setIdentifier(UUID.randomUUID().toString());
-		try
-		{
-			user.setPassword(new PasswordHasher().toMD5(password));
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		user.setPassword(new PasswordHasher().toMD5(password));
 		user.setEmail(email);
 		user.setFirstName(firstName);
 		user.setLastName(lastName);
