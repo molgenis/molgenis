@@ -9,7 +9,7 @@
 		<meta charset="utf-8">
 		<link rel="shortcut icon" type="image/x-icon" href="/img/molgenis.ico">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
-		<link rel="stylesheet" href="/css/molgenis-main.css" type="text/css">
+		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
 	<#list css as css_file_name>
 		<link rel="stylesheet" href="/css/${css_file_name?html}" type="text/css">
 	</#list>
