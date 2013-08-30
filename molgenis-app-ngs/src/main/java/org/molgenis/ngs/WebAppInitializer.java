@@ -48,7 +48,6 @@ public class WebAppInitializer implements WebApplicationInitializer
 			frontControllerServlet.setLoadOnStartup(2);
 			frontControllerServlet.addMapping("/molgenis.do");
 			frontControllerServlet.addMapping("/xref/find"); // org.molgenis.framework.server.services.MolgenisXrefService
-			frontControllerServlet.addMapping("/captchaImg"); // org.molgenis.auth.service.MolgenisCaptchaService
 			frontControllerServlet.addMapping("/tmpfile"); // org.molgenis.framework.server.services.MolgenisTmpFileService
 		}
 

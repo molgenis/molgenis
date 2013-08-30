@@ -7,15 +7,17 @@ import java.security.NoSuchAlgorithmException;
 
 public class PasswordHasher
 {
-	private static MessageDigest m;
-
-	public PasswordHasher() throws NoSuchAlgorithmException
-	{
-		m = MessageDigest.getInstance("MD5");
-	}
-
 	public String toMD5(String input)
 	{
+		MessageDigest m;
+		try
+		{
+			m = MessageDigest.getInstance("MD5");
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
 		m.reset();
 		m.update(input.getBytes(Charset.forName("UTF-8")));
 		byte[] digest = m.digest();

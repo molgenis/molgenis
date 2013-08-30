@@ -66,7 +66,7 @@ public class UserAccountController extends MolgenisPlugin
 
 	@RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void ChgUser(HttpServletRequest request) throws Exception
+	public void updateAccount(HttpServletRequest request) throws Exception
 	{
 		MolgenisUserService userService = MolgenisUserService.getInstance(database);
 

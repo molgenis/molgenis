@@ -9,6 +9,7 @@ import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.model.elements.Entity;
+import org.molgenis.ui.MolgenisPluginAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class MolgenisEntityFormPluginController extends MolgenisPlugin
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "/form";
+	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "form";
 	private static final String VIEW_NAME_LIST = "view-form-list";
 
 	@Autowired
@@ -34,8 +35,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	}
 
 	@RequestMapping(method = GET, value = "/{entityName}")
-	public String list(@PathVariable("entityName")
-	String entityName, Model model) throws DatabaseException
+	public String list(@PathVariable("entityName") String entityName, Model model) throws DatabaseException
 	{
 		Entity entity = database.getMetaData().getEntity(entityName);
 		if (entity == null)
@@ -48,6 +48,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 			throw new MolgenisEntityFormSecurityException();
 		}
 
+		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getId() + '/' + entityName);
 		model.addAttribute("form", new EntityForm(entity));
 
 		return VIEW_NAME_LIST;

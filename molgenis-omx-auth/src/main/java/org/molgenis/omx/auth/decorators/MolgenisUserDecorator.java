@@ -1,6 +1,5 @@
 package org.molgenis.omx.auth.decorators;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
@@ -79,15 +78,8 @@ public class MolgenisUserDecorator<E extends MolgenisUser> extends MapperDecorat
 		// if password already encrypted, nothing changed -> return
 		if (StringUtils.startsWith(user.getPassword(), "md5_")) return;
 
-		try
-		{
-			PasswordHasher md5 = new PasswordHasher();
-			String newPassword = md5.toMD5(user.getPassword());
-			user.setPassword(newPassword);
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			throw new RuntimeException(e);
-		}
+		PasswordHasher md5 = new PasswordHasher();
+		String newPassword = md5.toMD5(user.getPassword());
+		user.setPassword(newPassword);
 	}
 }

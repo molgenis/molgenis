@@ -60,7 +60,12 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		if (modelAndView != null)
 		{
 			MolgenisPlugin molgenisPlugin = validateHandler(handler);
-			modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
+
+			// allow controllers that handle multiple plugins to set their plugin id
+			if (!modelAndView.getModel().containsKey(KEY_PLUGIN_ID))
+			{
+				modelAndView.addObject(KEY_PLUGIN_ID, molgenisPlugin.getId());
+			}
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, login.isAuthenticated());
 			// TODO remove flag after removing molgenis UI framework
