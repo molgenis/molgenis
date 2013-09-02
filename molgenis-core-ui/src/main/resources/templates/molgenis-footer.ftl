@@ -1,4 +1,5 @@
 <#macro footer>
+			</div><#-- close plugin container-fluid -->
 		</div><#-- close container-fluid -->
 		<div id="footer"> 
 			<i>This database was generated using the open source <a href="http://www.molgenis.org">MOLGENIS database generator</a> version 4.0.0-testing. <br>
