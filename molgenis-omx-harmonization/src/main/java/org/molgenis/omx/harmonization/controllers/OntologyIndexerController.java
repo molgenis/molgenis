@@ -55,7 +55,7 @@ public class OntologyIndexerController extends MolgenisPlugin
 			File uploadFile = fileStore.store(file.getInputStream(), ontologyName);
 			List<File> uploadedFiles = ZipFileUtil.unzip(uploadFile);
 			if (uploadedFiles.size() > 0) ontologyIndexer.index(ontologyName, uploadedFiles.get(0));
-			model.addAttribute("message", "Index has started please presh reload button!");
+			model.addAttribute("isIndexRunning", true);
 		}
 		catch (Exception e)
 		{

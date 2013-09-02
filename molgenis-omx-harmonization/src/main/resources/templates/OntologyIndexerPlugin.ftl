@@ -28,13 +28,9 @@
 					</#if>
 					molgenis.searchAvailableIndices(ontologyUri);
 					
-					var isRunningIndex = false;
 					<#if isIndexRunning ?? && isIndexRunning>
-						isRunningIndex = true;
-					</#if>
-					if(isRunningIndex){
 						$('#index-button').attr('disabled','disabled');
-					}
+					</#if>
 				});
 			});
 		</script>
@@ -57,11 +53,6 @@
 					<div class="alert alert-error">
 						<button type="button" class="close" data-dismiss="alert">&times;</button>
 				  		<p class="text-error"><strong>Message : </strong> ${message}</p>
-					</div>
-				<#elseif message??>
-					<div class="alert">
-						<button type="button" class="close" data-dismiss="alert">&times;</button>
-				  		<strong>Message : </strong> ${message}
 					</div>
 				</#if>
 				</div>
