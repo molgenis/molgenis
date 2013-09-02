@@ -70,17 +70,19 @@
 			if(ontologyName == null || ontologyName == ''){
 				ns.showAlertMessage('Please define the name of ontology!');
 			}else if($('#uploadedOntology').val() !== ''){
-				$('input[name="__action"]').val("indexOntology");
-				$('#harmonizationIndexer-form').submit();
+				$('#ontologyindexer-form').attr({
+					'action' : '/plugin/ontologyindexer/index',
+					'method' : 'POST'
+				}).submit();
 			}else{
 				ns.showAlertMessage('Please upload a file in OWL or OBO format!');
 			}
 		});
 		$('#refresh-button').click(function(){
-			$('#harmonizationIndexer-form').submit();
-		});
-		$('#match-catalogue').click(function(){
-			
+			$('#ontologyindexer-form').attr({
+				'action' : '/plugin/ontologyindexer',
+				'method' : 'GET'
+			}).submit();
 		});
 	});
 }($, window.top));

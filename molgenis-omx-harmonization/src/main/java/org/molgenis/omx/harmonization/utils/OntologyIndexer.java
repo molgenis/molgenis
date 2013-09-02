@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyIndexer.plugin;
+package org.molgenis.omx.harmonization.utils;
 
 import java.io.File;
 
