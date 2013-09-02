@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import org.molgenis.DatabaseConfig;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.security.Login;
