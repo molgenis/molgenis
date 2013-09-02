@@ -51,10 +51,11 @@
 			<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
 		</#if>
 			</div>
+			<div id="plugin-container" class="container-fluid">
 </#macro>
 
 <#macro molgenis_menu menu plugin_id>
-				<ul class="nav nav-tabs">
+				<ul id="molgenis-menu" class="nav nav-tabs">
 	<#list menu.items as item>
 		<#if item.type != "MENU">
 			<#if item.id == plugin_id>

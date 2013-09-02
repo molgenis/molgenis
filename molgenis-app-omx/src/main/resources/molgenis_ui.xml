@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="omx" label="Molgenis">
 	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
-	<menu name="main">
+	<menu label="Home" name="main">
 		<plugin id="home" label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
 		<plugin id="protocolviewer" label="Catalogue" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
 		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
