@@ -21,8 +21,12 @@ public class TupleToStringValueConverter implements TupleToValueConverter<String
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof StringValue))
+		{
+			throw new ValueConverterException("value is not a " + StringValue.class.getSimpleName());
+		}
 		return new ValueCell<String>(((StringValue) value).getValue());
 	}
 }

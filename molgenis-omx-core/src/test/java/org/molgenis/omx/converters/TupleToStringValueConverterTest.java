@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class TupleToStringValueConverterTest
 {
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		StringValue value = new StringValue();
 		value.setValue("value");

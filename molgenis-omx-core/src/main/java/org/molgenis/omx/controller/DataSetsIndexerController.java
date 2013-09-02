@@ -103,7 +103,7 @@ public class DataSetsIndexerController extends MolgenisPlugin
 		return "redirect:/";
 	}
 
-	class DataSetIndexRequest
+	static class DataSetIndexRequest
 	{
 		private List<String> selectedDataSets;
 
@@ -123,7 +123,7 @@ public class DataSetsIndexerController extends MolgenisPlugin
 		}
 	}
 
-	class DataSetIndexResponse
+	static class DataSetIndexResponse
 	{
 		private final boolean isRunning;
 		private final String message;

@@ -30,6 +30,7 @@ import org.molgenis.ui.ContactPluginPlugin;
 import org.molgenis.ui.DataExplorerPluginPlugin;
 import org.molgenis.ui.DataSetsIndexerPluginPlugin;
 import org.molgenis.ui.HomePluginPlugin;
+import org.molgenis.ui.MolgenisMenuController.VoidPluginController;
 import org.molgenis.ui.ReferencesPluginPlugin;
 import org.molgenis.ui.UploadWizardPlugin;
 import org.molgenis.util.Entity;
@@ -83,6 +84,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		// // TODO remove next line after removing molgenis UI framework
 		permissionService.setPermissionOnPlugin(HomePluginPlugin.class.getSimpleName(), anonymousUser.getId(),
 				Permission.READ);
+		permissionService.setPermissionOnPlugin(VoidPluginController.class, anonymousUser.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(HomeController.class, anonymousUser.getId(), Permission.READ);
 
 		// Set write permissions that a user can edit own account
@@ -128,7 +130,8 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		permissionService.setPermissionOnPlugin(DataSetsIndexerPluginPlugin.class.getSimpleName(), groupName.getId(),
 				Permission.READ);
 		permissionService.setPermissionOnPlugin(DataSetsIndexerController.class, groupName.getId(), Permission.READ);
-		
+
+		permissionService.setPermissionOnPlugin(VoidPluginController.class, groupName.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(HomeController.class, groupName.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(ContactController.class, groupName.getId(), Permission.READ);
 		permissionService.setPermissionOnPlugin(ReferencesController.class, groupName.getId(), Permission.READ);

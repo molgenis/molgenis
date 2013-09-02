@@ -104,14 +104,16 @@ public class ProtocolViewerController extends MolgenisPlugin
 		{
 			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
 			sheetWriter.writeColNames(header);
-
-			for (ObservableFeature feature : features)
+			if (features != null)
 			{
-				KeyValueTuple tuple = new KeyValueTuple();
-				tuple.set(header.get(0), feature.getIdentifier());
-				tuple.set(header.get(1), feature.getName());
-				tuple.set(header.get(2), feature.getDescription());
-				sheetWriter.write(tuple);
+				for (ObservableFeature feature : features)
+				{
+					KeyValueTuple tuple = new KeyValueTuple();
+					tuple.set(header.get(0), feature.getIdentifier());
+					tuple.set(header.get(1), feature.getName());
+					tuple.set(header.get(2), feature.getDescription());
+					sheetWriter.write(tuple);
+				}
 			}
 		}
 		finally

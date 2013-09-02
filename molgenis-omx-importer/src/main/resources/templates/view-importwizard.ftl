@@ -71,7 +71,7 @@
 	   	});
 	   	
 	   	<#if wizard.lastPage > 
-	    	$('.next a').html('finish');
+	    	$('.next a').html('Finish');
 	    </#if>
 	    
 	   	<#if wizard.validationMessage! == "">
@@ -92,7 +92,7 @@
 	   	 	
 	   	function performAction(btn, action) {
 	   		if (!$(btn).hasClass('disabled')) {
-	   			<#if wizard.currentPageIndex == 2>
+	   			<#if wizard.currentPageIndex == 1>
 	   				$('#spinner').modal('show');
 	   			</#if>
 	   			
@@ -190,7 +190,7 @@
 	   	});
 	   	
 	   	<#if wizard.lastPage > 
-	    	$('.next a').html('finish');
+	    	$('.next a').html('Finish');
 	    </#if>
 	    
 	   	<#if wizard.validationMessage! == "">

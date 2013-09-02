@@ -12,7 +12,7 @@ public class TupleToDateTimeValueConverterTest
 {
 
 	@Test
-	public void toCell()
+	public void toCell() throws ValueConverterException
 	{
 		Date date = new Date(1371447949000l);
 		DateTimeValue value = new DateTimeValue();

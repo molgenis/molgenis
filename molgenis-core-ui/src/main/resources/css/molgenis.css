@@ -1,0 +1,21 @@
+#molgenis-menu.nav li.active a {
+	background-color: #3079C2;
+	color: white;
+}
+
+#footer, #push {
+	margin: 0;
+	height: 50px; /* .push must be the same height as .footer */
+	width: 100%;
+	text-align: center;
+	font: menu;
+}
+
+#spinner {
+	width: 180px;
+	margin:150px 100px 0px -100px;
+}
+
+.alert {
+	margin-bottom: 0px;
+}

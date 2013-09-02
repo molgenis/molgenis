@@ -2,7 +2,6 @@ package org.molgenis.ui;
 
 import static org.molgenis.ui.MolgenisMenuController.URI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -54,13 +53,9 @@ public class MolgenisMenuController
 		model.addAttribute(KEY_MENU_ID, menuId);
 
 		MolgenisUiMenuItem activeItem = menu.getActiveItem();
-		if (activeItem == null)
-		{
-			model.addAttribute(KEY_MOLGENIS_UI, molgenisUi);
-			return "view-empty";
-		}
+		String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
 
-		return getForwardPluginUri(activeItem.getId(), null);
+		return getForwardPluginUri(pluginId, null);
 	}
 
 	@RequestMapping("/{menuId}/{pluginId}/**")
@@ -79,9 +74,30 @@ public class MolgenisMenuController
 	private String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		strBuilder.append(MolgenisPlugin.PLUGIN_URI_PREFIX);
-		strBuilder.append(pluginId);
+		strBuilder.append(MolgenisPlugin.PLUGIN_URI_PREFIX).append(pluginId);
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
+	}
+
+	/**
+	 * Plugin without content
+	 */
+	@Controller
+	@RequestMapping(VoidPluginController.URI)
+	public static class VoidPluginController extends MolgenisPlugin
+	{
+		public static final String ID = "void";
+		public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + ID;
+
+		public VoidPluginController()
+		{
+			super(URI);
+		}
+
+		@RequestMapping
+		public String init()
+		{
+			return "view-void";
+		}
 	}
 }

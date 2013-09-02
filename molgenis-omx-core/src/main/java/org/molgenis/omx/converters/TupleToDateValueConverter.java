@@ -34,8 +34,12 @@ public class TupleToDateValueConverter implements TupleToValueConverter<DateValu
 	}
 
 	@Override
-	public Cell<String> toCell(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof DateValue))
+		{
+			throw new ValueConverterException("value is not a " + DateValue.class.getSimpleName());
+		}
 		SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(DATEFORMAT_DATE);
 		return new ValueCell<String>(iso8601DateFormat.format(((DateValue) value).getValue()));
 	}

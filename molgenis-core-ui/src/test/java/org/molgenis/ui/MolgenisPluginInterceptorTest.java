@@ -88,6 +88,24 @@ public class MolgenisPluginInterceptorTest
 	}
 
 	@Test
+	public void postHandle_pluginIdExists() throws Exception
+	{
+		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(login, permissionService,
+				molgenisUi);
+		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.addObject(MolgenisPluginAttributes.KEY_PLUGIN_ID, "plugin_id");
+		HandlerMethod handlerMethod = mock(HandlerMethod.class);
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPlugin(uri)
+		{
+		});
+		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
+		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_PLUGIN_ID), "plugin_id");
+		assertNotNull(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_MOLGENIS_UI));
+		assertEquals(modelAndView.getModel().get(MolgenisPluginAttributes.KEY_AUTHENTICATED), false);
+	}
+
+	@Test
 	public void postHandle_authenticated() throws Exception
 	{
 		when(login.isAuthenticated()).thenReturn(true);
