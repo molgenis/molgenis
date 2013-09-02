@@ -152,7 +152,7 @@
 					isFolder : true,
 					isLazy : true,
 					children : createChildren(protocol.href, {
-						select : true
+						select : false
 					}, {})
 				} ],
 				onLazyRead : function(node) {
@@ -276,7 +276,7 @@
 			$.each(searchHits, function(){
 				var object = $(this)[0]["columnValueMap"];
 				var nodes = object["path"].split(".");
-				//collect all features and their ancesters using restapi first.
+				//collect all features and their ancestors using REST API first.
 				for(var i = 0; i < nodes.length; i++){
 					if(nodes[i].indexOf("F") === 0) features[nodes[i].substring(1)] = null;
 					else protocols[nodes[i]] = null;
