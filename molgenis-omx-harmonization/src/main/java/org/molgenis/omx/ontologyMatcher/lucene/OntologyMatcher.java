@@ -1,15 +1,14 @@
 package org.molgenis.omx.ontologyMatcher.lucene;
 
 import java.util.List;
-import java.util.Set;
 
 import org.molgenis.framework.db.DatabaseException;
 
-public interface LuceneMatcher
+public interface OntologyMatcher
 {
 	void deleteDocumentByIds(String documentType, List<String> documentIds);
 
-	void match(Integer selectedCatalogue, Set<Integer> cataloguesToMatch) throws DatabaseException;
+	void match(Integer selectedCatalogue, List<Integer> cataloguesToMatch) throws DatabaseException;
 
 	void matchPercentage();
 

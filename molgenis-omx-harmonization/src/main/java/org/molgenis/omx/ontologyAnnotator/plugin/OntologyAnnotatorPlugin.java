@@ -1,8 +1,8 @@
 package org.molgenis.omx.ontologyAnnotator.plugin;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -10,7 +10,7 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.ontologyMatcher.lucene.LuceneMatcher;
+import org.molgenis.omx.ontologyMatcher.lucene.OntologyMatcher;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 
@@ -86,7 +86,7 @@ public class OntologyAnnotatorPlugin extends PluginModel<Entity>
 				System.out.println("The catalogue to match is : " + selectedCatalogues.keySet());
 				System.out.println("The selected catalogue is : " + selectedDataSetId);
 
-				Set<Integer> dataSetsToMatch = new HashSet<Integer>();
+				List<Integer> dataSetsToMatch = new ArrayList<Integer>();
 
 				for (String id : selectedCatalogues.keySet())
 				{
@@ -118,9 +118,9 @@ public class OntologyAnnotatorPlugin extends PluginModel<Entity>
 		}
 	}
 
-	private LuceneMatcher getLuceneMatcher()
+	private OntologyMatcher getLuceneMatcher()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(LuceneMatcher.class);
+		return ApplicationContextProvider.getApplicationContext().getBean(OntologyMatcher.class);
 	}
 
 	private OntologyAnnotator getOntologyAnnotator()

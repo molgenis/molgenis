@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.framework.db.Database;
@@ -33,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.tartarus.snowball.ext.PorterStemmer;
 
-public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
+public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 {
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
@@ -79,7 +78,7 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 	}
 
 	@Async
-	public void match(Integer selectedDataSet, Set<Integer> dataSetsToMatch) throws DatabaseException
+	public void match(Integer selectedDataSet, List<Integer> dataSetsToMatch) throws DatabaseException
 	{
 		runningProcesses.incrementAndGet();
 		Database db = DatabaseUtil.createDatabase();
@@ -314,7 +313,7 @@ public class AsyncLuceneMatcher implements LuceneMatcher, InitializingBean
 		}
 	}
 
-	private void createMappingStore(Integer selectedDataSet, Set<Integer> dataSetsToMatch, Database db)
+	private void createMappingStore(Integer selectedDataSet, List<Integer> dataSetsToMatch, Database db)
 			throws DatabaseException
 	{
 		boolean isFeatureExists = db.find(ObservableFeature.class,

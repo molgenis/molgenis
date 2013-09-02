@@ -240,8 +240,25 @@
 	};
 	
 	ns.annotateDataItems = function() {
-		$('input[name="__action"]').val("annotateDataItems");
-		$('#harmonizationIndexer-form').submit();
+		var request = {
+			'dataSetId' : selectedDataSet
+		};
+		$.ajax({
+			type : 'POST',
+			url : '/plugin/ontologyannotator/annotate',
+			data : JSON.stringify(request),
+			contentType : 'application/json',
+			async : false,
+			success : function(status) {
+				var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+				content += '<p><strong>Message : </strong> Please refresh the page to see result!</p>';
+				$('#alert-message').append(content).addClass('alert');
+				$(document).scrollTop(0);	
+			},
+			error : function(status) {
+				alert('error');
+			}
+		});
 	};
 	
 	ns.searchOntologyTerms = function (field, query, response){
@@ -328,26 +345,43 @@
 				
 			},{'select' : select, 'table' : table}));
 			
-			
 			var footer = $('<div class="modal-footer"></div>');
 			var matchButton = $('<button id="start-match" class="btn btn-primary">Start match</button>');
 			var cancel = $('<button id="cancel-match" class="btn btn-primary" data-dismiss="modal">Cancel</button>');
 			footer.append(matchButton).append(cancel);
-			matchButton.click($.proxy(function(){
-				var selectedStudies = {};
-				this.table.find('tr:gt(0)').each(function(){
-					selectedStudies[$(this).data('dataSet')] =$(this).data('dataSet');
+			matchButton.click(function(){
+				var selectedStudies = [];
+				table.find('tr:gt(0)').each(function(){
+					selectedStudies.push($(this).data('dataSet'));
 				});
-				$('input[name=\"selectedStudiesToMatch\"]').val(JSON.stringify(selectedStudies));
-				$('input[name="__action"]').val("ontologyMatch");
-				$('#harmonizationIndexer-form').submit();
-			},{'table' : table}));
+				var request = {
+					'dataSetId' : selectedDataSet,
+					'selectedDataSets' : selectedStudies
+				}
+				$.ajax({
+					type : 'POST',
+					url : '/plugin/ontologyannotator/match',
+					data : JSON.stringify(request),
+					contentType : 'application/json',
+					async : false,
+					success : function(status) {
+						var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+						content += '<p><strong>Message : </strong> Please refresh the page to see result!</p>';
+						$('#alert-message').append(content).addClass('alert');
+						$(document).scrollTop(0);
+						container.remove();
+					},
+					error : function(status) {
+						alert('error');
+					}
+				});				
+			});
 			cancel.click(function(){
 				container.remove();
 			});
 			
 			container.append(header).append(body).append(footer);
-			$('#harmonizationIndexer-form').append(container);
+			$('body').append(container);
 			container.modal('backdrop', true);
 			container.show();
 		}

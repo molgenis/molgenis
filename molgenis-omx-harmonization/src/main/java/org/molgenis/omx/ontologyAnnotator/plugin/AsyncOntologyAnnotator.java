@@ -43,7 +43,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	}
 
 	@Async
-	public void annotate(Integer protocolId) throws DatabaseException
+	public void annotate(Integer protocolId)
 	{
 		Database db = DatabaseUtil.createDatabase();
 

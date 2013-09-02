@@ -7,7 +7,7 @@
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap-datetimepicker.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/bootstrap-fileupload.min.css" type="text/css">
-		<link rel="stylesheet" href="/css/ontology-annotator.css" type="text/css">
+		<link rel="stylesheet" href="/css/ontology-indexer.css" type="text/css">
         <#if app_href_css??>
             <link rel="stylesheet" href="${app_href_css}" type="text/css">
         </#if>

@@ -11,7 +11,7 @@ import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.PluginModel;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.ontologyMatcher.lucene.LuceneMatcher;
+import org.molgenis.omx.ontologyMatcher.lucene.OntologyMatcher;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.Entity;
 
@@ -119,8 +119,8 @@ public class OntologyMatcherPlugin extends PluginModel<Entity>
 		}
 	}
 
-	private LuceneMatcher getLuceneMatcher()
+	private OntologyMatcher getLuceneMatcher()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(LuceneMatcher.class);
+		return ApplicationContextProvider.getApplicationContext().getBean(OntologyMatcher.class);
 	}
 }

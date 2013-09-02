@@ -1,6 +1,6 @@
-package org.molgenis.omx.ontologyMatcher.lucene;
+package org.molgenis.omx.harmonization.controllers;
 
-import static org.molgenis.omx.ontologyMatcher.lucene.LuceneMatcherController.URI;
+import static org.molgenis.omx.harmonization.controllers.OntologyMatcherController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
@@ -25,6 +25,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.ontologyMatcher.lucene.OntologyMatcherDeleteRequest;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -43,11 +44,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class LuceneMatcherController implements InitializingBean
+public class OntologyMatcherController implements InitializingBean
 {
 
 	public static final String URI = "/matcher";
-	private static final Logger logger = Logger.getLogger(LuceneMatcherController.class);
+	private static final Logger logger = Logger.getLogger(OntologyMatcherController.class);
 	private static final String FEATURE_NAME = "name";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
