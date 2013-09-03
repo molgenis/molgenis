@@ -51,7 +51,8 @@
 			<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
 		</#if>
 			</div>
-			<div id="plugin-container" class="container-fluid">
+			<div class="row-fluid">
+				<div id="plugin-container" class="container-fluid">
 </#macro>
 
 <#macro molgenis_menu menu plugin_id>
