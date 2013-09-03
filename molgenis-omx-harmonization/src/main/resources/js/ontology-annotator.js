@@ -253,6 +253,9 @@
 				var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
 				content += '<p><strong>Message : </strong> Please refresh the page to see result!</p>';
 				$('#alert-message').append(content).addClass('alert');
+				w.setTimeout(function(){
+					$('#alert-message').fadeOut(1000).remove();
+				}, 10000);
 				$(document).scrollTop(0);	
 			},
 			error : function(status) {

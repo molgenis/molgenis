@@ -26,6 +26,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
@@ -35,6 +36,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	private Database db;
 	private final String dataSetIdentifier;
 	private static final String OBSERVATION_SET = "observation_set";
+	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
 	private DataSet dataSet;
@@ -71,8 +73,15 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 				Integer observationId = ov.getObservationSet_Id();
 				if (storeMapping.containsKey(observationId)) tuple = storeMapping.get(observationId);
 				else tuple = new KeyValueTuple();
-				System.out.println();
-				tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
+				if (ov.getFeature_Identifier().equals(STORE_MAPPING_CONFIRM_MAPPING))
+				{
+					tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
+				}
+				else
+				{
+					Characteristic xrefCharacteristic = ((XrefValue) ov.getValue()).getValue();
+					tuple.set(ov.getFeature_Identifier(), xrefCharacteristic.getId());
+				}
 				if (tuple.get(OBSERVATION_SET) == null) tuple.set(OBSERVATION_SET, observationId);
 				storeMapping.put(observationId, tuple);
 			}

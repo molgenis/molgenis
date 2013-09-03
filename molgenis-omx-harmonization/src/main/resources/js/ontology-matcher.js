@@ -45,7 +45,7 @@
 				queryRules.push({
 					field : storeMappingFeature,
 					operator : 'EQUALS',
-					value : hitInfo.name
+					value : '' + hitInfo.id
 				});
 				queryRules.push({
 					operator : 'OR'
@@ -56,7 +56,10 @@
 				'operator' : 'LIMIT',
 				'value' : 100000 
 			});
+			
+			var count = 0;
 			var mappingPerStudy = {};
+			var cachedFeatures = {};
 			var involedDataSets = [];
 			$.each(dataSets, function(index, dataSet){
 				var tuple = {};
@@ -66,100 +69,107 @@
 					documentType : dataSet.identifier,
 					queryRules :queryRules
 				};	
-				var count = 0;
 				searchApi.search(searchRequest, function(searchResponse) {
 					var searchHits = searchResponse.searchHits;	
-					var confirmedMappingIds = [];
-					var observationIds = [];
-					$.each(searchHits, function(index, hit){
-						var mapping = hit.columnValueMap;
-						var observationSet = mapping['observation_set'];
-						observationIds.push(observationSet);
-					});
-					
-					var valuesObject = restApi.get('/api/v1/observedvalue', ['observationSet',  'value'], {
-						q : [{
-							field : 'feature_identifier',
-							operator : 'EQUALS',
-							value : storeMappingConfirmMapping
-						},{
-							field : 'observationSet',
-							operator : 'IN',
-							value : observationIds
-						}],
-						num : 500
-					});
-					var mappingConfirmMap = {};
-					var boolValueIds = [];
-					var boolValueObjects = {};
-					if(valuesObject !== undefined && valuesObject.items.length > 0){
-						$.each(valuesObject.items, function(index, ov){
-							boolValueIds.push(hrefToId(ov.value.href));
+					if(searchHits.length > 0){
+						var confirmedMappingIds = [];
+						var observationIds = [];
+						
+						$.each(searchHits, function(index, hit){
+							var mapping = hit.columnValueMap;
+							var observationSet = mapping['observation_set'];
+							observationIds.push(observationSet);
 						});
-						restApi.get('/api/v1/boolvalue', null, {
+						
+						var valuesObject = restApi.get('/api/v1/observedvalue', ['observationSet',  'value'], {
 							q : [{
-								field : 'id',
+								field : 'feature_identifier',
+								operator : 'EQUALS',
+								value : storeMappingConfirmMapping
+							},{
+								field : 'observationSet',
 								operator : 'IN',
-								value : boolValueIds
+								value : observationIds
 							}],
 							num : 500
 						});
 						
-						$.each(valuesObject.items, function(index, ov){
-							mappingConfirmMap[hrefToId(ov.observationSet.href)] = restApi.get('/api/v1/boolvalue/' + hrefToId(ov.value.href));
+						var mappingConfirmMap = {};
+						var boolValueIds = [];
+						if(valuesObject !== undefined && valuesObject.items.length > 0){
+							$.each(valuesObject.items, function(index, ov){
+								boolValueIds.push(hrefToId(ov.value.href));
+							});
+							restApi.get('/api/v1/boolvalue', null, {
+								q : [{
+									field : 'id',
+									operator : 'IN',
+									value : boolValueIds
+								}],
+								num : 500
+							});
+							
+							$.each(valuesObject.items, function(index, ov){
+								mappingConfirmMap[hrefToId(ov.observationSet.href)] = restApi.get('/api/v1/boolvalue/' + hrefToId(ov.value.href));
+							});
+						}
+						
+						$.each(searchHits, function(index, hit){
+							var mapping = hit['columnValueMap'];
+							var documentId = hit['id'];
+							var featureId = mapping[storeMappingFeature];
+							if(featureId === "FR02_100C2"){
+								console.log();
+							}
+							var storeMappedFeatureId = mapping[storeMappingMappedFeature];
+							var observationSet = mapping['observation_set'];
+							var confirmed = false;
+							if(mappingConfirmMap[observationSet])
+								confirmed = mappingConfirmMap[observationSet].value;
+							if(!tuple[featureId])
+								tuple[featureId] = [];
+							tuple[featureId].push({
+								'mappedFeature' : storeMappedFeatureId,
+								'confirmed' : confirmed,
+								'observationSet' : observationSet,
+								'documentId' : documentId
+							});
+							//Put pre-load feature in the array and to be loaded via restApi
+							if($.inArray(featureId, featureCollections) === -1) featureCollections.push(featureId);
+							allFeatureCollection.push(featureId);
+							allFeatureCollection.push(storeMappedFeatureId);
+							if(featureId === 1001 || storeMappedFeatureId === 1001){
+								console.log();
+							}
+						});
+						$.each(displayFeatures, function(index, hit){
+							var hitInfo = hit.columnValueMap;
+							if($.inArray(hitInfo.id, featureCollections) === -1){
+								tuple[hitInfo.id] = null;
+								allFeatureCollection.push(hitInfo.id);
+							}
+						});
+						var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
+							q : [{
+								field : 'id',
+								operator : 'IN',
+								value : allFeatureCollection
+							}],
+							num : 500
+						});
+						$.each(listOfFeatures.items, function(index, element){
+							cachedFeatures[(hrefToId(element.href))] = element;
 						});
 					}
-					var count = 0;
-					$.each(searchHits, function(index, hit){
-						var mapping = hit['columnValueMap'];
-						var documentId = hit['id'];
-						var feature = mapping[storeMappingFeature];
-						var storeMappedFeature = mapping[storeMappingMappedFeature];
-						var observationSet = mapping['observation_set'];
-						var confirmed = false;
-						if(mappingConfirmMap[observationSet])
-							confirmed = mappingConfirmMap[observationSet].value;
-						if(!tuple[feature])
-							tuple[feature] = [];
-						tuple[feature].push({
-							'mappedFeature' : storeMappedFeature,
-							'confirmed' : confirmed,
-							'observationSet' : observationSet,
-							'documentId' : documentId
-						});
-						//Put pre-load feature in the array and to be loaded via restApi
-						if($.inArray(feature, featureCollections) === -1) featureCollections.push(feature);
-						allFeatureCollection.push(feature);
-						allFeatureCollection.push(storeMappedFeature);
-					});
-					$.each(displayFeatures, function(index, hit){
-						var hitInfo = hit.columnValueMap;
-						if($.inArray(hitInfo.name, featureCollections) === -1){
-							tuple[hitInfo.name] = null;
-							allFeatureCollection.push(hitInfo.name);
-						}
-					});
-					var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
-						q : [{
-							field : 'name',
-							operator : 'IN',
-							value : allFeatureCollection
-						}],
-						num : 500
-					});
-					var cachedFeatures = {};
-					$.each(listOfFeatures.items, function(index, element){
-						cachedFeatures[element.name] = element;
-					});
 					var dataSetIdArray = dataSet.identifier.split('-');
 					mappingPerStudy[dataSetIdArray[1]] = tuple;
 					count++;
-					if(count === dataSets.length) createTable(mappingPerStudy, dataSets, totalHitCount, cachedFeatures);
+					if(count === dataSets.length) createTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures);
 				});
 			});
 		}
 		
-		function createTable(mappingPerStudy, dataSets, totalHitCount, cachedFeatures){
+		function createTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures){
 			//create table header
 			var involedDataSets = [];
 			$.each(dataSets, function(index, dataSet){
@@ -168,19 +178,15 @@
 				involedDataSets.push(mappedDataSet.name);
 			});
 			createDynamicTableHeader(involedDataSets);
-			$.each(dataSets, function(index, dataSet){
-				var dataSetIdArray = dataSet.identifier.split('-');
-				var mappedDataSet = restApi.get('/api/v1/dataset/' + dataSetIdArray[1]);
-				$.each(mappingPerStudy[dataSetIdArray[1]], function(featureName, mappedFeatures){
-					var feature = cachedFeatures[featureName];
-					var row = $('<tr />');
-					var popover = $('<span />').html(feature.name + ' : ' + feature.description).addClass('show-popover');
-					popover.popover({
-						content : feature.description,
-						trigger : 'hover',
-						placement : 'right'
-					});
-					$('<td />').addClass('add-border').append(popover).appendTo(row);
+			
+			$.each(displayFeatures, function(index, featureFromIndex){
+				var row = $('<tr />');
+				var featureId = featureFromIndex.columnValueMap.id;
+				var feature = cachedFeatures[featureId];
+				$.each(dataSets, function(index, dataSet){
+					var mappedDataSetId = dataSet.identifier.split('-')[1];
+					var mapping = mappingPerStudy[mappedDataSetId];
+					var mappedFeatures = mapping[featureId];
 					if(mappedFeatures){
 						var displayTerm = '';
 						var description = '';
@@ -188,16 +194,18 @@
 						var confirmed = false;
 						var selectedMappings = [];
 						$.each(mappedFeatures, function(index, eachValue){
-							eachValue.mappedFeature = cachedFeatures[eachValue.mappedFeature];
-							if(count === 0){
-								displayTerm = eachValue.mappedFeature.name;
-								description = eachValue.mappedFeature.description;
+							if(eachValue.mappedFeature !== undefined){
+								var mappedFeatureEntity = cachedFeatures[eachValue.mappedFeature];
+								if(count === 0){
+									displayTerm = mappedFeatureEntity.name;
+									description = mappedFeatureEntity.description;
+								}
+								if(eachValue.confirmed === true){
+									selectedMappings.push(mappedFeatureEntity.name);
+									confirmed = true;
+								}
+								count++;
 							}
-							if(eachValue.confirmed === true){
-								selectedMappings.push(eachValue.mappedFeature.name);
-								confirmed = true;
-							}
-							count++;
 						});
 						displayTerm = selectedMappings.length > 0 ? selectedMappings.join(' , ') : displayTerm;
 						var removeIcon = $('<i />').addClass('icon-trash show-popover').css({
@@ -234,7 +242,7 @@
 							float : 'right'
 						}).click(function(){
 							standardModal.createModalCallback('Candidate mappings', function(modal){
-								createMappingTable(feature, mappedFeatures, mappedDataSet, modal);
+								createMappingTable(feature, mappedFeatures, restApi.get('/api/v1/dataset/' + mappedDataSetId), modal);
 							});
 							standardModal.modal.css({
 								'width' : 950,
@@ -306,7 +314,8 @@
 			var header = $('<tr><th>Name</th><th>Description</th><th>Select</th></tr>');
 			mappingTable.append(header);
 			$.each(mappedFeatures, function(index, eachMapping){
-				var mappedFeature = eachMapping.mappedFeature;
+				var mappedFeatureId = eachMapping.mappedFeature;
+				var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureId);
 				var row = $('<tr />');
 				var checkBox = $('<input type="checkbox">');
 				if(eachMapping.confirmed){

@@ -137,7 +137,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				uniqueTerms.add(eachTerm);
 			}
 		}
-		uniqueTerms.removeAll(STOPWORDSLIST);
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		queryRules.add(new QueryRule(Operator.LIMIT, 100));
 		for (String term : uniqueTerms)
