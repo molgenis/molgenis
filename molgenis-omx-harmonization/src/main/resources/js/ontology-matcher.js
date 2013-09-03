@@ -183,6 +183,13 @@
 				var row = $('<tr />');
 				var featureId = featureFromIndex.columnValueMap.id;
 				var feature = cachedFeatures[featureId];
+				var popover = $('<span />').html(feature.name + ' : ' + feature.description).addClass('show-popover');
+				popover.popover({
+					content : feature.description,
+					trigger : 'hover',
+					placement : 'right'
+				});
+				$('<td />').addClass('add-border').append(popover).appendTo(row);
 				$.each(dataSets, function(index, dataSet){
 					var mappedDataSetId = dataSet.identifier.split('-')[1];
 					var mapping = mappingPerStudy[mappedDataSetId];
