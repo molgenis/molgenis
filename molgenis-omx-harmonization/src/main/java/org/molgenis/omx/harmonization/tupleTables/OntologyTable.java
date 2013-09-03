@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyIndexer.table;
+package org.molgenis.omx.harmonization.tupleTables;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,6 +9,7 @@ import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
 import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
+import org.molgenis.omx.harmonization.utils.OntologyLoader;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 

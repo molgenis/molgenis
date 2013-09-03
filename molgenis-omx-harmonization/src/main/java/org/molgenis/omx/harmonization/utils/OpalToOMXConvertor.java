@@ -1,4 +1,4 @@
-package org.molgenis.omx.opalToOmxConvertor;
+package org.molgenis.omx.harmonization.utils;
 
 import java.io.File;
 import java.io.IOException;

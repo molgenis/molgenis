@@ -8,7 +8,7 @@ import java.util.List;
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.omx.harmonization.utils.OntologyIndexer;
+import org.molgenis.omx.harmonization.ontologyindexer.OntologyIndexer;
 import org.molgenis.omx.harmonization.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;

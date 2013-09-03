@@ -2,7 +2,6 @@
 	
 	"use strict";
 	var ns = w.molgenis = w.molgenis || {};
-	var url = '';
 	var pagination = new ns.Pagination();
 	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
@@ -11,14 +10,6 @@
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
-	
-	ns.setUrl = function(url){
-		this.url = url;
-	};
-	
-	ns.getUrl = function(){
-		return this.url;
-	};
 	
 	ns.changeDataSet = function(selectedDataSet){
 		pagination.reset();
@@ -224,7 +215,7 @@
 							};
 							$.ajax({
 								type : 'POST',
-								url : '/matcher/delete',
+								url : '/plugin/ontologymatcher/delete',
 								async : false,
 								data : JSON.stringify(deleteRequest),
 								contentType : 'application/json',
@@ -402,7 +393,7 @@
 					};
 					$.ajax({
 						type : 'POST',
-						url : '/matcher/update',
+						url : '/plugin/ontologymatcher/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json',
@@ -601,7 +592,7 @@
 			});
 			$('<thead />').append(row).appendTo(table);
 		}
-	}
+	};
 	
 	ns.downloadMappings = function(){
 		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
@@ -609,7 +600,7 @@
 			'dataSetId' : selectedDataSet,
 			'documentType' : dataSet.identifier
 		};
-		$.download('/matcher/download',{request :  JSON.stringify(deleteRequest)});
+		$.download('/plugin/ontologymatcher/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
 	ns.updateSelectedDataset = function(dataSet) {

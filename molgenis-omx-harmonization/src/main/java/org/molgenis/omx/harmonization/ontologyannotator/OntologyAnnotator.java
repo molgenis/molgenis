@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyAnnotator.plugin;
+package org.molgenis.omx.harmonization.ontologyannotator;
 
 
 public interface OntologyAnnotator

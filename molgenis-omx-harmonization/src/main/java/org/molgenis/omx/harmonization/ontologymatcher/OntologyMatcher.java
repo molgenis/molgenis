@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyMatcher.lucene;
+package org.molgenis.omx.harmonization.ontologymatcher;
 
 import java.util.List;
 

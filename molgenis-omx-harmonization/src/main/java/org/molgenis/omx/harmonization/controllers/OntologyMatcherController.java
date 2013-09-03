@@ -22,20 +22,21 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcherDeleteRequest;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.ontologyMatcher.lucene.OntologyMatcherDeleteRequest;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.tuple.ValueTuple;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,12 +45,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class OntologyMatcherController implements InitializingBean
+public class OntologyMatcherController extends MolgenisPlugin
 {
-
-	public static final String URI = "/matcher";
+	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "ontologymatcher";
 	private static final Logger logger = Logger.getLogger(OntologyMatcherController.class);
 	private static final String FEATURE_NAME = "name";
+	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
@@ -59,10 +60,22 @@ public class OntologyMatcherController implements InitializingBean
 	@Autowired
 	private Database database;
 
-	@Override
-	public void afterPropertiesSet() throws Exception
+	public OntologyMatcherController()
 	{
-		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
+		super(URI);
+	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String init(Model model) throws DatabaseException
+	{
+		List<DataSet> dataSets = new ArrayList<DataSet>();
+		for (DataSet dataSet : database.find(DataSet.class))
+		{
+			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+		}
+		model.addAttribute("dataSets", dataSets);
+
+		return "OntologyMatcherPlugin";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/delete", consumes = APPLICATION_JSON_VALUE)

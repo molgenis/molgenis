@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyIndexer.table;
+package org.molgenis.omx.harmonization.tupleTables;
 
 import java.util.ArrayList;
 import java.util.Collections;

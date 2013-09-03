@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyMatcher.lucene;
+package org.molgenis.omx.harmonization.ontologymatcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.harmonization.tupleTables.StoreMappingTable;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -21,7 +22,6 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.XrefValue;
-import org.molgenis.omx.ontologyIndexer.table.StoreMappingTable;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;

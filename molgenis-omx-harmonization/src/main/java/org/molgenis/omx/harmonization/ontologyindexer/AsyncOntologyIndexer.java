@@ -1,13 +1,13 @@
-package org.molgenis.omx.harmonization.utils;
+package org.molgenis.omx.harmonization.ontologyindexer;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
-import org.molgenis.omx.ontologyIndexer.table.OntologyLoader;
-import org.molgenis.omx.ontologyIndexer.table.OntologyTable;
-import org.molgenis.omx.ontologyIndexer.table.OntologyTermTable;
+import org.molgenis.omx.harmonization.tupleTables.OntologyTable;
+import org.molgenis.omx.harmonization.tupleTables.OntologyTermTable;
+import org.molgenis.omx.harmonization.utils.OntologyLoader;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.DatabaseUtil;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

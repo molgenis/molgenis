@@ -1,27 +1,40 @@
-<#macro OntologyMatcherPlugin screen>
-<#assign model = screen.myModel>
-	<script>
-		$(function(){
-			$('#protocol-id').change(function(){
-				molgenis.changeDataSet($(this).val());
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Data indexer plugin</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="/css/jquery-ui-1.9.2.custom.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap-datetimepicker.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/bootstrap-fileupload.min.css" type="text/css">
+		<link rel="stylesheet" href="/css/ontology-matcher.css" type="text/css">
+        <#if app_href_css??>
+            <link rel="stylesheet" href="${app_href_css}" type="text/css">
+        </#if>
+		<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+		<script type="text/javascript" src="/js/molgenis-all.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/common-component.js"></script>
+		<script type="text/javascript" src="/js/bootstrap-fileupload.min.js"></script>
+		<script type="text/javascript" src="/js/ontology-matcher.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				var molgenis = window.top.molgenis;
+				$('#protocol-id').change(function(){
+					molgenis.changeDataSet($(this).val());
+				});
+				molgenis.changeDataSet($('#protocol-id').val());
+				$('#downloadButton').click(function(){
+					molgenis.downloadMappings();
+					return false;
+				});
 			});
-			molgenis.setUrl('${model.url}');
-			molgenis.changeDataSet($('#protocol-id').val());
-			
-			$('#downloadButton').click(function(){
-				molgenis.downloadMappings();
-				return false;
-			});
-		});
-	</script>
-<form method="post" id="harmonizationIndexer-form" name="${screen.name}" enctype="multipart/form-data" action="molgenis.do">
-	<!--needed in every form: to redirect the request to the right screen-->
-	<input type="hidden" name="__target" value="${screen.name}">
-	<input type="hidden" name="__action">
-	<div class="formscreen">
+		</script>
+	</head>
+	<body>
 		<div id="alertMessage">
 		</div>
-		<div class="screenbody">
 			<div class="container-fluid">
 				<div>
 					<h1>Matching result</h1>
@@ -31,7 +44,7 @@
 						<div class="row-fluid">
 							<div class="span3">
 								<select id="protocol-id" name="selectedDataSet">
-									<#list model.dataSets as dataset>
+									<#list dataSets as dataset>
 											<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
 									</#list>
 								</select>
@@ -82,6 +95,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
-</form>
-</#macro>
+	</body>
+</html>

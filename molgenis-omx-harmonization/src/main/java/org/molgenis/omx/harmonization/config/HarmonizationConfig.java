@@ -1,11 +1,11 @@
 package org.molgenis.omx.harmonization.config;
 
-import org.molgenis.omx.harmonization.utils.AsyncOntologyIndexer;
-import org.molgenis.omx.harmonization.utils.OntologyIndexer;
-import org.molgenis.omx.ontologyAnnotator.plugin.AsyncOntologyAnnotator;
-import org.molgenis.omx.ontologyAnnotator.plugin.OntologyAnnotator;
-import org.molgenis.omx.ontologyMatcher.lucene.AsyncOntologyMatcher;
-import org.molgenis.omx.ontologyMatcher.lucene.OntologyMatcher;
+import org.molgenis.omx.harmonization.ontologyannotator.AsyncOntologyAnnotator;
+import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
+import org.molgenis.omx.harmonization.ontologyindexer.AsyncOntologyIndexer;
+import org.molgenis.omx.harmonization.ontologyindexer.OntologyIndexer;
+import org.molgenis.omx.harmonization.ontologymatcher.AsyncOntologyMatcher;
+import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;

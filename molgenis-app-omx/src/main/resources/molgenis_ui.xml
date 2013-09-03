@@ -7,7 +7,7 @@
 		<menu name="BiobankConnect" label="BiobankConnect">
 			<plugin label="OntologyIndexer" name="OntologyIndexer" type="org.molgenis.omx.harmonization.plugins.OntologyIndexerPlugin"/>
 			<plugin label="OntologyAnnotator" name="OntologyAnnotator" type="org.molgenis.omx.harmonization.plugins.OntologyAnnotatorPlugin"/>
-			<plugin label="OntologyMatcher" name="OntologyMatcher" type="org.molgenis.omx.ontologyMatcher.plugin.OntologyMatcherPlugin"/>
+			<plugin label="OntologyMatcher" name="OntologyMatcher" type="org.molgenis.omx.harmonization.plugins.OntologyMatcherPlugin"/>
 		</menu>
 		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin id="entityexplorer" label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
