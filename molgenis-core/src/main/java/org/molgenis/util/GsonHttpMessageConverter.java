@@ -48,7 +48,6 @@ import com.google.gson.JsonSyntaxException;
 public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 {
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-	private static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssz";
 	private static final Logger LOG = Logger.getLogger(GsonHttpMessageConverter.class);
 	private final Gson gson;
 	private Type type = null;
@@ -61,7 +60,8 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	{
 		super(new MediaType("application", "json", DEFAULT_CHARSET));
 
-		GsonBuilder builder = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).disableHtmlEscaping();
+		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
+				.disableHtmlEscaping();
 		if (LOG.isDebugEnabled())
 		{
 			builder = builder.setPrettyPrinting();

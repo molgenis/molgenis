@@ -142,6 +142,12 @@ $(function() {
 		if(q) qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
+	
+	molgenis.RestClient.prototype.getPrimaryKeyFromHref = function(href) {
+		var uriParts = href.split("/");
+		return uriParts[uriParts.length - 1];
+	};
+	
 }($, window.top));
 
 // molgenis search API client

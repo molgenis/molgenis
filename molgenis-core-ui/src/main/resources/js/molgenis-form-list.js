@@ -4,12 +4,12 @@
 	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
-	var NR_ROWS_PER_PAGE = 5;
+	var NR_ROWS_PER_PAGE = 10;
 	var currentPage = 1;
 	
 	ns.buildTableBody = function() {
 		var expands = null;
-		$.each(meta.fields, function(index, field) {
+		$.each(form.meta.fields, function(index, field) {
 			if (field.xref || field.mref) {
 				if (!expands) {
 					expands = [];
@@ -17,43 +17,63 @@
 				expands.push(field.name);
 			}
 		});
-		var uri = '/api/v1/' + meta.name.toLowerCase() + '?num=' + NR_ROWS_PER_PAGE + '&start=' + (currentPage-1) * NR_ROWS_PER_PAGE;
+		
+		var uri = '/api/v1/' + form.meta.name.toLowerCase() + '?num=' + NR_ROWS_PER_PAGE + '&start=' + (currentPage-1) * NR_ROWS_PER_PAGE;
 		
 		restApi.getAsync(uri, expands, null, function(entities) {
 			var items = [];
 			
 			$.each(entities.items, function(index, entity) {
-				items.push('<tr>');
+				var id = 'entity-' + index;
+				items.push('<tr id="' + id + '">');
 				
-				$.each(meta.fields, function(index, field) {
+				var editPageUrl = CONTEXT_URL + '/' + form.meta.name + '/' + restApi.getPrimaryKeyFromHref(entity.href);
+				
+				if (form.hasWritePermission) {
+					items.push('<td><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
+				}
+				
+				$.each(form.meta.fields, function(index, field) {
 					var fieldName = field.name;
 					var value = '';
 					
-					if (entity[fieldName]) {
+					if (entity.hasOwnProperty(fieldName)) {
 						//TODO support deeper nesting of xref fields
-						 if (field.mref) {
+						if (field.mref) {
 							
 							$.each(entity[fieldName]['items'], function(index, mrefEntity) {
-								 value += mrefEntity[field.xrefLabelName] + ', ';
+								if (index > 0) {
+									value += ', ';
+								}
+								value += mrefEntity[field.xrefLabelName];
 							});
 							 
-						 }else if (field.xref) {
+						} else if (field.xref) {
 							value = entity[fieldName][field.xrefLabelName];
-							
+						
+						} else if (field.type == 'BOOL') {
+							value = entity[fieldName] ? 'yes' : 'no';
+						
 						} else {
 							value =  entity[fieldName];
 						}
-					}
+					} 
 					
-					items.push('<td>' + value + '</td>');
+					items.push('<td>' + $('#entity-table-body').text(value).html() + '</td>');//Html escape value
 				});
 				
 				items.push('</tr>');
+				
+				if (form.hasWritePermission) {
+					$(document).on('click', '#' + id, function() {
+						document.location.href = editPageUrl;
+					});
+				}
 			});
 			
 			$('#entity-table-body').html(items.join(''));
 		
-			
+			$('#entity-count').html(entities.total);
 			ns.updatePager(entities.total, NR_ROWS_PER_PAGE);
 		});
 	}
@@ -117,8 +137,7 @@
 		}
 
 		pager.append($('</ul>'));
-	};
-
+	}
 	
 	$(function() {
 		ns.buildTableBody();
