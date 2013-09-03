@@ -9,13 +9,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -27,6 +28,7 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcherDeleteRequest;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -49,6 +51,7 @@ public class OntologyMatcherController extends MolgenisPlugin
 {
 	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "ontologymatcher";
 	private static final Logger logger = Logger.getLogger(OntologyMatcherController.class);
+	private static final String FEATURE_ID = "id";
 	private static final String FEATURE_NAME = "name";
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
@@ -124,6 +127,7 @@ public class OntologyMatcherController extends MolgenisPlugin
 		TupleWriter tupleWriter = null;
 		try
 		{
+			Set<Integer> featureIds = new HashSet<Integer>();
 			tupleWriter = new CsvWriter(response.getWriter());
 			Integer dataSetId = request.getDataSetId();
 			DataSet mappingDataSet = database.findById(DataSet.class, dataSetId);
@@ -131,7 +135,7 @@ public class OntologyMatcherController extends MolgenisPlugin
 					Operator.LIKE, "" + dataSetId));
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(mappingDataSet.getName());
-			Map<Integer, Map<String, MappingClass>> dataSetMappings = new HashMap<Integer, Map<String, MappingClass>>();
+			Map<Integer, Map<Integer, MappingClass>> dataSetMappings = new HashMap<Integer, Map<Integer, MappingClass>>();
 			for (DataSet dataSet : storeMappingDataSet)
 			{
 				Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[1]);
@@ -143,21 +147,32 @@ public class OntologyMatcherController extends MolgenisPlugin
 					rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
 					SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(), rules, null);
 					SearchResult result = searchService.search(searchRequest);
-					Map<String, MappingClass> storeMappings = new HashMap<String, MappingClass>();
+					Map<Integer, MappingClass> storeMappings = new HashMap<Integer, MappingClass>();
 					for (Hit hit : result.getSearchHits())
 					{
 						Map<String, Object> map = hit.getColumnValueMap();
-						String storeMappingFeature = map.get(STORE_MAPPING_FEATURE).toString();
-						String storeMappingMappedFeature = map.get(STORE_MAPPING_MAPPED_FEATURE).toString();
+						Integer storeMappingFeatureId = Integer.parseInt(map.get(STORE_MAPPING_FEATURE).toString());
+						Integer storeMappingMappedFeatureId = Integer.parseInt(map.get(STORE_MAPPING_MAPPED_FEATURE)
+								.toString());
 						boolean confirmation = (Boolean) map.get(STORE_MAPPING_CONFIRM_MAPPING);
-						if (!storeMappings.containsKey(storeMappingFeature)) storeMappings.put(storeMappingFeature,
+						if (!storeMappings.containsKey(storeMappingFeatureId)) storeMappings.put(storeMappingFeatureId,
 								new MappingClass());
-						storeMappings.get(storeMappingFeature).addMapping(storeMappingFeature,
-								storeMappingMappedFeature, confirmation);
+						storeMappings.get(storeMappingFeatureId).addMapping(storeMappingFeatureId,
+								storeMappingMappedFeatureId, confirmation);
+						featureIds.add(storeMappingFeatureId);
+						featureIds.add(storeMappingMappedFeatureId);
 					}
 					dataSetMappings.put(mappedDataSetId, storeMappings);
 				}
 			}
+
+			Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
+			for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
+					Operator.IN, new ArrayList<Integer>(featureIds))))
+			{
+				featureMap.put(feature.getId(), feature);
+			}
+
 			tupleWriter.write(new ValueTuple(dataSetNames));
 
 			List<QueryRule> rules = new ArrayList<QueryRule>();
@@ -169,21 +184,31 @@ public class OntologyMatcherController extends MolgenisPlugin
 				List<String> values = new ArrayList<String>();
 				Map<String, Object> map = hit.getColumnValueMap();
 				String featureName = map.get(FEATURE_NAME).toString();
+				Integer featureId = Integer.parseInt(map.get(FEATURE_ID).toString());
 				values.add(featureName);
 				for (DataSet dataSet : storeMappingDataSet)
 				{
 					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[1]);
 					if (!mappedDataSetId.equals(dataSetId))
 					{
-						String value = null;
-						Map<String, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
-						if (storeMappings.containsKey(featureName))
+						StringBuilder value = new StringBuilder();
+						Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
+						if (storeMappings.containsKey(featureId))
 						{
-							MappingClass mappingClass = storeMappings.get(featureName);
-							if (mappingClass.isConfirmation()) value = mappingClass.getFinalizedMapping();
-							else value = StringUtils.join(mappingClass.getCandidateMappings(), " , ");
+							List<Integer> candidateIds = null;
+							MappingClass mappingClass = storeMappings.get(featureId);
+							if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
+							else candidateIds = mappingClass.getCandidateMappings();
+							for (Integer id : candidateIds)
+							{
+								if (featureMap.containsKey(id))
+								{
+									value.append(featureMap.get(id).getName());
+									value.append(',');
+								}
+							}
 						}
-						values.add(value);
+						values.add(value.toString());
 					}
 				}
 				tupleWriter.write(new ValueTuple(values));
@@ -203,24 +228,24 @@ public class OntologyMatcherController extends MolgenisPlugin
 
 	class MappingClass
 	{
-		private String featureName = null;
+		private Integer featureId = null;
 		private boolean confirmation = false;
-		private List<String> finalizedMapping = null;
-		private List<String> candidateMappings = null;
+		private List<Integer> finalizedMapping = null;
+		private List<Integer> candidateMappings = null;
 
-		public void addMapping(String featureName, String singleMappedFeature, boolean confirmation)
+		public void addMapping(Integer featureId, Integer singleMappedFeatureId, boolean confirmation)
 		{
-			if (this.featureName == null) this.featureName = featureName;
-			if (this.finalizedMapping == null) this.finalizedMapping = new ArrayList<String>();
-			if (this.candidateMappings == null) this.candidateMappings = new ArrayList<String>();
+			if (this.featureId == null) this.featureId = featureId;
+			if (this.finalizedMapping == null) this.finalizedMapping = new ArrayList<Integer>();
+			if (this.candidateMappings == null) this.candidateMappings = new ArrayList<Integer>();
 			this.confirmation = confirmation;
-			this.candidateMappings.add(singleMappedFeature);
-			if (confirmation) finalizedMapping.add(singleMappedFeature);
+			this.candidateMappings.add(singleMappedFeatureId);
+			if (confirmation) finalizedMapping.add(singleMappedFeatureId);
 		}
 
-		public String getFeatureName()
+		public Integer getFeatureId()
 		{
-			return featureName;
+			return featureId;
 		}
 
 		public boolean isConfirmation()
@@ -228,12 +253,12 @@ public class OntologyMatcherController extends MolgenisPlugin
 			return confirmation;
 		}
 
-		public String getFinalizedMapping()
+		public List<Integer> getFinalizedMapping()
 		{
-			return StringUtils.join(finalizedMapping, " , ");
+			return finalizedMapping;
 		}
 
-		public List<String> getCandidateMappings()
+		public List<Integer> getCandidateMappings()
 		{
 			return candidateMappings;
 		}

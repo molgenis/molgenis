@@ -119,10 +119,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID.toString())
 						.toString());
 				String name = hit.getColumnValueMap().get(ObservableFeature.NAME.toLowerCase()).toString();
-				if (name.toLowerCase().equalsIgnoreCase("FR02_100C2"))
-				{
-					System.out.println();
-				}
 				String description = hit.getColumnValueMap().get(ObservableFeature.DESCRIPTION.toLowerCase())
 						.toString();
 				ObservableFeature feature = db.findById(ObservableFeature.class, featureId);
