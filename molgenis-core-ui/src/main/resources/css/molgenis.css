@@ -3,6 +3,10 @@
 	color: white;
 }
 
+#plugin-container {
+	background: #F8FAFB;	
+}
+
 #footer, #push {
 	margin: 0;
 	height: 50px; /* .push must be the same height as .footer */
