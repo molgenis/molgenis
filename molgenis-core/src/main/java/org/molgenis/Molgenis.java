@@ -229,9 +229,16 @@ public class Molgenis
 		// DOCUMENTATION
 		if (options.generate_doc)
 		{
-			generators.add(new DotDocGen());
 			generators.add(new FileFormatDocGen());
-			generators.add(new DotDocMinimalGen());
+			//check if dot is available to prevent error lists in the build logs
+			try{
+				Runtime.getRuntime().exec("dot -?");
+				generators.add(new DotDocGen());
+				generators.add(new DotDocMinimalGen());
+			}
+			catch(Exception e){
+				//dot not available
+			}
 			generators.add(new ObjectModelDocGen());
 			generators.add(new DotDocModuleDependencyGen());
 		}
