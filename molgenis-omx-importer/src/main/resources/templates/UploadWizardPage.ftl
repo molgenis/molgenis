@@ -2,7 +2,7 @@
 		
 <div  style="padding-top: 25px">
 <div>
-	Upload <a href="generated-doc/fileformat.html" target="_blank">Observ-OMX</a> data file<br /><br />
+	Upload <a href="/generated-doc/fileformat.html" target="_blank">Observ-OMX</a> data file<br /><br />
 	<input type="file" name="upload" style="height:25px" >
 </div>
 <div style="padding-top: 25px">
