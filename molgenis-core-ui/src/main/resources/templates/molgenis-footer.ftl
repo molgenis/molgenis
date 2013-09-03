@@ -1,4 +1,5 @@
 <#macro footer>
+				</div>
 			</div><#-- close plugin container-fluid -->
 		</div><#-- close container-fluid -->
 		<div id="footer"> 
