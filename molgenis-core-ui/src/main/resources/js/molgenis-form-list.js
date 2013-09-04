@@ -27,7 +27,7 @@
 				items.push('<tr>');
 				
 				var id = restApi.getPrimaryKeyFromHref(entity.href);
-				var editPageUrl = CONTEXT_URL + '/' + form.meta.name + '/' + id;
+				var editPageUrl = CONTEXT_URL + '/' + id;
 				var deleteApiUrl = '/api/v1/' + form.meta.name.toLowerCase() + '/' +  id;
 				
 				if (form.hasWritePermission) {
