@@ -75,6 +75,7 @@ public class OrderStudyDataService
 		String fileName = appName + "-request_" + timestamp + ".doc";
 		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
 
+		logger.debug("creating study data request: " + studyName);
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
 		studyDataRequest.setName(studyName);
@@ -84,13 +85,15 @@ public class OrderStudyDataService
 		studyDataRequest.setRequestStatus("pending");
 		studyDataRequest.setRequestForm(orderFile.getPath());
 
-		logger.debug("create study data request: " + studyName);
-		database.add(studyDataRequest);
-
 		if (studyDefinitionService != null)
 		{
-			studyDefinitionService.persistStudyDefinition(new OmxStudyDefinition(studyDataRequest));
+			StudyDefinition studyDefinition = studyDefinitionService.persistStudyDefinition(new OmxStudyDefinition(
+					studyDataRequest));
+			studyDataRequest.setIdentifier(studyDefinition.getId());
 		}
+
+		database.add(studyDataRequest);
+		logger.debug("created study data request: " + studyName);
 
 		// create excel attachment for study data request
 		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
