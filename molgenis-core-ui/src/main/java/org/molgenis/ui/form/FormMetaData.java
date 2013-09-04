@@ -8,5 +8,10 @@ public interface FormMetaData
 {
 	String getName();
 
+	/**
+	 * All non system fields without the primarykey field
+	 * 
+	 * @return
+	 */
 	List<Field> getFields();
 }

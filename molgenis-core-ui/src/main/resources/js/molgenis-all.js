@@ -142,6 +142,23 @@ $(function() {
 		if(q) qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
+	
+	molgenis.RestClient.prototype.getPrimaryKeyFromHref = function(href) {
+		var uriParts = href.split("/");
+		return uriParts[uriParts.length - 1];
+	};
+	
+	molgenis.RestClient.prototype.remove = function(href, callback) {
+		$.ajax({
+			type: 'POST',
+			url: href,
+			data: '_method=DELETE',
+			async: false,
+			success: callback.success,
+			error:callback.error
+		});
+	};
+	
 }($, window.top));
 
 // molgenis search API client
