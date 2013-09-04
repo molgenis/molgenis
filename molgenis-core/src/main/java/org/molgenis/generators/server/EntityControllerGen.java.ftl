@@ -2,8 +2,11 @@
 <#assign fields=allFields(entity)>
 package org.molgenis.controller;
 
+import java.beans.PropertyEditorSupport;
+import java.text.ParseException;
 import java.lang.RuntimeException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +38,7 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 </#if>
 </#list>
 import org.molgenis.util.EntityPager;
+import org.molgenis.util.MolgenisDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -42,7 +46,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -119,6 +125,34 @@ public class ${entity.name}Controller
 	public ${entity.name}Response retrieve${entity.name}Json(@PathVariable ${type(entity.primaryKey)} id, @RequestParam(value="expand", required=false) String... expandFields) throws DatabaseException
 	{
 		return _retrieve${entity.name}(id, expandFields);
+	}
+
+	@InitBinder
+	public void binder(WebDataBinder binder)
+	{
+
+		binder.registerCustomEditor(Date.class, new PropertyEditorSupport()
+		{
+			@Override
+			public void setAsText(String value)
+			{
+				try
+				{
+					setValue(MolgenisDateFormat.getDateFormat().parse(value));
+				}
+				catch (ParseException e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public String getAsText()
+			{
+				return MolgenisDateFormat.getDateFormat().format((Date) getValue());
+			}
+
+		});
 	}
 
 	private ${entity.name}Response _retrieve${entity.name}(${type(entity.primaryKey)} id, String... expandFieldsStr) throws DatabaseException
@@ -348,6 +382,8 @@ public class ${entity.name}Controller
 			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		private java.util.List<${type(field.xrefEntity.primaryKey)}> ${field.name?uncap_first};
 			</#if>
+		<#elseif field.type == "bool">
+		private ${type(field)} ${field.name?uncap_first} = false;	
 		<#else>
 		private ${type(field)} ${field.name?uncap_first};
 		</#if>
