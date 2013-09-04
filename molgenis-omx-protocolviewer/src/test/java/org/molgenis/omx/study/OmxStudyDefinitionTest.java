@@ -45,13 +45,13 @@ public class OmxStudyDefinitionTest
 	@Test
 	public void getAuthor()
 	{
-		assertEquals(new OmxStudyDefinition(studyDataRequest).getAuthor().getEmail(), "a@b.c");
+		assertEquals(new OmxStudyDefinition(studyDataRequest).getAuthorEmail(), "a@b.c");
 	}
 
 	@Test
 	public void getFeatures()
 	{
-		Iterator<ObservableFeature> features = new OmxStudyDefinition(studyDataRequest).getFeatures().iterator();
+		Iterator<ObservableFeature> features = new OmxStudyDefinition(studyDataRequest).getItems().iterator();
 		assertTrue(features.hasNext());
 		assertEquals(features.next().getIdentifier(), "feature1");
 		assertTrue(features.hasNext());
