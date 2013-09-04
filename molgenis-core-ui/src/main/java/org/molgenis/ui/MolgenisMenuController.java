@@ -55,6 +55,8 @@ public class MolgenisMenuController
 		MolgenisUiMenuItem activeItem = menu.getActiveItem();
 		String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
 
+		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
+		model.addAttribute(KEY_CONTEXT_URL, contextUri);
 		return getForwardPluginUri(pluginId, null);
 	}
 
