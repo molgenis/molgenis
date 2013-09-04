@@ -68,8 +68,6 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			}
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, login.isAuthenticated());
-			// TODO remove flag after removing molgenis UI framework
-			modelAndView.addObject("enable_spring_ui", MolgenisRootController.USE_SPRING_UI);
 		}
 	}
 
