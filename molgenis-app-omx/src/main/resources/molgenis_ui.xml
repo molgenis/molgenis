@@ -17,13 +17,12 @@
 		</menu>
         <menu name="Admin">
 	        <menu name ="Entities">
-	        	<form name="DataSet" entity="DataSet" />
-	            <form name="Protocol" entity="Protocol" />
-	            <form name="Feature" entity="ObservableFeature" />
-	            <form name="Category" entity="Category" />
-	            <form name="Value" entity="ObservedValue" />
-	            <form name="StudyDataRequest" entity="StudyDataRequest" />
-	            <form name="RuntimeProperty" entity="RuntimeProperty" />
+	      		<plugin id="form/ObservableFeature" label="ObservableFeature" name="ObservableFeatureFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/Protocol" label="Protocol" name="ProtocolFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/DataSet" label="Dataset" name="DataSetFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/Category" label="Category" name="CategoryFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/StudyDataRequest" label="Studydata request" name="StudyDataRequestFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/RuntimeProperty" label="Runtimeproperty" name="RuntimePropertyFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 	        </menu>
 	        <menu name="Auth" label="Users and permissions">
 				<menu label="Basic management" name="Management">
