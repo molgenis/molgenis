@@ -1,15 +1,24 @@
 package org.molgenis.omx.study;
 
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.ObservableFeature;
+import java.util.List;
 
 public interface StudyDefinition
 {
-	public String getId();
+	String getId();
 
-	public String getName();
+	void setId(String id);
 
-	public Iterable<ObservableFeature> getFeatures();
+	String getName();
 
-	public MolgenisUser getAuthor();
+	String getDescription();
+
+	String getCatalogVersion();
+
+	Iterable<StudyDefinitionItem> getItems();
+
+	boolean containsItem(StudyDefinitionItem item);
+
+	List<String> getAuthors();
+
+	String getAuthorEmail();
 }

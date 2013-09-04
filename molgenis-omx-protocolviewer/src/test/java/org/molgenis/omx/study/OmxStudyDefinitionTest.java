@@ -3,11 +3,8 @@ package org.molgenis.omx.study;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.filter.StudyDataRequest;
@@ -45,18 +42,7 @@ public class OmxStudyDefinitionTest
 	@Test
 	public void getAuthor()
 	{
-		assertEquals(new OmxStudyDefinition(studyDataRequest).getAuthor().getEmail(), "a@b.c");
-	}
-
-	@Test
-	public void getFeatures()
-	{
-		Iterator<ObservableFeature> features = new OmxStudyDefinition(studyDataRequest).getFeatures().iterator();
-		assertTrue(features.hasNext());
-		assertEquals(features.next().getIdentifier(), "feature1");
-		assertTrue(features.hasNext());
-		assertEquals(features.next().getIdentifier(), "feature2");
-		assertFalse(features.hasNext());
+		assertEquals(new OmxStudyDefinition(studyDataRequest).getAuthorEmail(), "a@b.c");
 	}
 
 	@Test
