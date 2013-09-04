@@ -382,6 +382,8 @@ public class ${entity.name}Controller
 			<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
 		private java.util.List<${type(field.xrefEntity.primaryKey)}> ${field.name?uncap_first};
 			</#if>
+		<#elseif field.type == "bool">
+		private ${type(field)} ${field.name?uncap_first} = false;	
 		<#else>
 		private ${type(field)} ${field.name?uncap_first};
 		</#if>

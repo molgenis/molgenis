@@ -9,16 +9,23 @@
 		ns.hideAlerts();
 		console.log($('#entity-form').serialize());
 		
+		var action = $('#entity-form').attr('action');
+		
 		$.ajax({
 			type: 'POST',
-			url: $('#entity-form').attr('action'),
+			url: action,
 			data: $('#entity-form').serialize(),
 			contentType: 'application/x-www-form-urlencoded',
 			async: false,
-			success: function() {
+			success: function(data, textStatus, response) {
+				var location = response.getResponseHeader('Location');//Api returns new resource location when creating a new entity
+				if (location) {
+					var id = restApi.getPrimaryKeyFromHref(location);
+					$('#entity-form').attr('action', action + '/' + id);//Create update url, so user can immediately update the created entity by pressing Save 
+				}
 				$('#success-message').show();
 			},
-			error: function(jqXHR, textStatus, errorThrown) {
+			error: function(request, textStatus, errorThrown) {
 				$('#error-message-content').html(errorThrown);
 				$('#error-message').show();
 			}
@@ -34,6 +41,14 @@
 		$('#entity-form').on('submit', function() {
 			ns.onFormSubmit();
 			return false;
+		});
+		
+		$('#success-message .close').on('click', function() {
+			$('#success-message').hide();
+		});
+		
+		$('#error-message .close').on('click', function() {
+			$('#error-message').hide();
 		});
 	});
 	

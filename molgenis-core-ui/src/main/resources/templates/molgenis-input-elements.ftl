@@ -1,4 +1,4 @@
-<#macro render field entity>
+<#macro render field entity=''>
 
 	<#assign fieldName=field.name?uncap_first/>
 	
@@ -9,10 +9,10 @@
     	<div class="controls">
     		
 			<#if field.type.enumType == 'BOOL'>
-			<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity.get(fieldName)!?string("true", "false") == "true">checked</#if>  <#if field.readOnly>disabled="disabled"</#if> >
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)!?string("true", "false") == "true">checked</#if>  <#if field.readOnly>disabled="disabled"</#if> >
 	
 			<#elseif field.type.enumType == 'TEXT' || field.type.enumType =='HTML'>
-				<textarea name="${fieldName}" id="${fieldName}" <#if field.readOnly>disabled="disabled"</#if>>${entity.get(fieldName)!}</textarea>
+				<textarea name="${fieldName}" id="${fieldName}" <#if field.readOnly>disabled="disabled"</#if>><#if entity!=''>${entity.get(fieldName)!}</#if></textarea>
 	
 			<#elseif field.type.enumType == 'XREF'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}">
@@ -42,7 +42,7 @@
 								});
 							},
 							initSelection: function (element, callback) {
-								<#if entity.get(fieldName)??>
+								<#if entity!='' && entity.get(fieldName)??>
 									callback({id:'${entity.get(fieldName).idValue}', text: '${entity.get(fieldName).get(field.xrefLabelNames[0])!}'});
 								<#else>
 									callback({id:'', text: ''});
@@ -50,7 +50,7 @@
 							}
 						});
 						
-						<#if entity.get(fieldName)??>
+						<#if entity!='' && entity.get(fieldName)??>
 							$('#${fieldName}').select2('val', '${entity.get(fieldName).idValue}');
 						</#if>
 						
@@ -65,7 +65,7 @@
 				<script>
 					$(document).ready(function() {
 						var xrefs = [];
-						<#if entity.get(fieldName)??>
+						<#if entity!='' && entity.get(fieldName)??>
 							<#list entity.get(fieldName) as xrefEntity>
 								xrefs.push({id:'${xrefEntity.idValue}', text:'${xrefEntity.get(field.xrefLabelNames[0])!}'});
 							</#list>
@@ -110,10 +110,10 @@
 				</script>
 				
 			<#elseif field.type.enumType == 'DATE_TIME' || field.type.enumType == 'DATE'>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}">
+				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if> >
 	
 			<#else>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> value="${entity.get(fieldName)!?string}">
+				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string}"</#if> >
 	
 			</#if>
 		</div>

@@ -24,13 +24,15 @@
 			var items = [];
 			
 			$.each(entities.items, function(index, entity) {
-				var id = 'entity-' + index;
-				items.push('<tr id="' + id + '">');
+				items.push('<tr>');
 				
-				var editPageUrl = CONTEXT_URL + '/' + form.meta.name + '/' + restApi.getPrimaryKeyFromHref(entity.href);
+				var id = restApi.getPrimaryKeyFromHref(entity.href);
+				var editPageUrl = CONTEXT_URL + '/' + form.meta.name + '/' + id;
+				var deleteApiUrl = '/api/v1/' + form.meta.name.toLowerCase() + '/' +  id;
 				
 				if (form.hasWritePermission) {
 					items.push('<td><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
+					items.push('<td><a href="#" class="delete-entity" data-href="' + deleteApiUrl + '"><img src="/img/delete.png"></a></td>');
 				}
 				
 				$.each(form.meta.fields, function(index, field) {
@@ -63,19 +65,41 @@
 				});
 				
 				items.push('</tr>');
-				
-				if (form.hasWritePermission) {
-					$(document).on('click', '#' + id, function() {
-						document.location.href = editPageUrl;
-					});
-				}
 			});
 			
 			$('#entity-table-body').html(items.join(''));
-		
+			
+			$('.delete-entity').on('click', function(e) {
+				e.preventDefault();
+				ns.deleteEntity($(this).attr('data-href'));
+				return false;
+			});
+			
 			$('#entity-count').html(entities.total);
 			ns.updatePager(entities.total, NR_ROWS_PER_PAGE);
 		});
+	}
+	
+	ns.deleteEntity = function(uri) {
+		ns.hideAlerts();
+		
+		if (confirm('Delete this ' + form.title + '?')) {
+			restApi.remove(uri, {
+				success: function() {
+					//Refresh table
+					ns.buildTableBody();
+					$('#success-message').show();
+				},
+				error: function() {
+					$('#error-message').show();
+				}
+			});
+		}
+	}
+	
+	ns.hideAlerts = function() {
+		$('#success-message').hide();
+		$('#error-message').hide();
 	}
 	
 	//TODO make general pager also for dataexplorer
@@ -140,6 +164,15 @@
 	}
 	
 	$(function() {
+
+		$('#success-message .close').on('click', function() {
+			$('#success-message').hide();
+		});
+		
+		$('#error-message .close').on('click', function() {
+			$('#error-message').hide();
+		});
+		
 		ns.buildTableBody();
 	});
 	

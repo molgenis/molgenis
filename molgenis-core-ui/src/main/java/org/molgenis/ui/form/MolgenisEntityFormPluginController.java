@@ -42,8 +42,8 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	public String list(@PathVariable("entityName")
 	String entityName, Model model) throws DatabaseException
 	{
-		Entity entity = database.getMetaData().getEntity(entityName);
-		if (entity == null)
+		Entity entityMetaData = database.getMetaData().getEntity(entityName);
+		if (entityMetaData == null)
 		{
 			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 		}
@@ -54,7 +54,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		}
 
 		boolean hasWritePermission = permissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
-		model.addAttribute("form", new EntityForm(entity, hasWritePermission));
+		model.addAttribute("form", new EntityForm(entityMetaData, hasWritePermission));
 		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_LIST;
@@ -65,9 +65,9 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	String entityName, @PathVariable("id")
 	String id, Model model) throws DatabaseException, MolgenisModelException, ParseException
 	{
-		Entity meta = database.getMetaData().getEntity(entityName);
+		Entity entityMetaData = database.getMetaData().getEntity(entityName);
 
-		if (meta == null)
+		if (entityMetaData == null)
 		{
 			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 		}
@@ -78,14 +78,35 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		}
 
 		Class<? extends org.molgenis.util.Entity> entityClass = database.getClassForName(entityName);
-		Object entityId = meta.getPrimaryKey().getType().getTypedValue(id);
+		Object entityId = entityMetaData.getPrimaryKey().getType().getTypedValue(id);
 		org.molgenis.util.Entity entity = database.findById(entityClass, entityId);
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Unknown entity [" + entityName + "] with id [" + id + "]");
 		}
 
-		model.addAttribute("form", new EntityForm(meta, entity, id, true));
+		model.addAttribute("form", new EntityForm(entityMetaData, entity, id, true));
+		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
+
+		return VIEW_NAME_EDIT;
+	}
+
+	@RequestMapping(method = GET, value = "/{entityName}/create")
+	public String create(@PathVariable("entityName")
+	String entityName, Model model) throws DatabaseException
+	{
+		Entity entityMetaData = database.getMetaData().getEntity(entityName);
+		if (entityMetaData == null)
+		{
+			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		}
+
+		if (!permissionService.hasPermissionOnEntity(entityName, Permission.WRITE))
+		{
+			throw new MolgenisEntityFormSecurityException();
+		}
+
+		model.addAttribute("form", new EntityForm(entityMetaData, true));
 		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_EDIT;

@@ -148,6 +148,17 @@ $(function() {
 		return uriParts[uriParts.length - 1];
 	};
 	
+	molgenis.RestClient.prototype.remove = function(href, callback) {
+		$.ajax({
+			type: 'POST',
+			url: href,
+			data: '_method=DELETE',
+			async: false,
+			success: callback.success,
+			error:callback.error
+		});
+	};
+	
 }($, window.top));
 
 // molgenis search API client

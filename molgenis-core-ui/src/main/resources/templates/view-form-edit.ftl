@@ -7,7 +7,7 @@
 
 <@header css js/>
 
-<form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}/${form.primaryKey}">
+<form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??>/${form.primaryKey}</#if>">
 	<a href="${context_url}/${form.metaData.name}" class="pull-left">
 		<div id="back">
 			<div class="nav-icon-prev pull-left"></div>
@@ -21,7 +21,7 @@
 		<div id="success-message" class="control-group" style="display: none">
     		<div class="controls">
 				<div class="alert alert-success">
-  					<button type="button" class="close" data-dismiss="alert">&times;</button>
+  					<button type="button" class="close">&times;</button>
   					<strong>${form.title} saved.</strong>
 				</div>
 			</div>
@@ -30,7 +30,7 @@
 		<div id="error-message" class="control-group" style="display: none">
     		<div class="controls">
 				<div class="alert alert-error">
-  					<button type="button" class="close" data-dismiss="alert">&times;</button>
+  					<button type="button" class="close">&times;</button>
   					<strong>Error saving ${form.title}</strong>: <span id="error-message-content"></span>
 				</div>
 			</div>
@@ -39,12 +39,16 @@
 		<input type="hidden" name="_method" value="PUT" />
 		
 		<#list form.metaData.fields as field>
-			<@input.render field form.entity />
+			<#if form.entity??>
+				<@input.render field form.entity />
+			<#else>
+				<@input.render field />
+			</#if>
     	</#list>
     	
     	<div class="control-group">
     		<div class="controls">
-      			<button type="submit" class="btn btn-large">Save</button>
+      			<button type="submit" class="btn btn-large pull-right">Save</button>
     		</div>
   		</div>
   		
