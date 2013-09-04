@@ -11,14 +11,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/")
 public class MolgenisRootController
 {
-	// TODO remove flag after removing molgenis UI framework
-	public static final boolean USE_SPRING_UI = true;
-
 	@RequestMapping(method =
 	{ RequestMethod.GET, RequestMethod.POST })
 	public String index()
 	{
-		if (USE_SPRING_UI) return "forward:" + MolgenisMenuController.URI;
-		else return "redirect:molgenis.do?__target=main&select=Home";
+		return "forward:" + MolgenisMenuController.URI;
 	}
 }
