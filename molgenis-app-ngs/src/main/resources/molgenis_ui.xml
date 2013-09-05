@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="ngs">
 	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
-	<plugin name="HeaderPlugin" type="org.molgenis.ngs.plugins.HeaderPlugin" />
-	<menu name="Home">
+	<menu label="Home" name="main">
 		<plugin id="home" name="Home" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
 		<plugin id="useraccount" name="UserAccountPlugin" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />
 		<!--  TODO Sample should be a detail of master Project -->
@@ -11,7 +10,7 @@
 		<!--  TODO FlowcellLane should be a detail of master Flowcell -->
 		<plugin id="form/Flowcell" label="FlowcellRuns" name="FlowcellFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 		<plugin id="form/FlowcellLane" label="FlowcellLanes" name="FlowcellLaneFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-		<plugin id="worksheet" name="Worksheet" type="org.molgenis.ngs.plugins.worksheet.Worksheet"/>
+		<plugin id="worksheet" name="Worksheet" type="org.molgenis.ngs.plugins.WorksheetPlugin"/>
 		<menu name="Configuration" >
 			<plugin id="form/NgsUser" label="Users" name="NgsUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 			<!-- TODO add FlowCell form plugin -->
