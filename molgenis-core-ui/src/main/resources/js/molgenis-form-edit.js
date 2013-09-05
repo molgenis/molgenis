@@ -38,10 +38,16 @@
 	}
 	
 	$(function() {
-		$('#entity-form').on('submit', function() {
-			ns.onFormSubmit();
-			return false;
+		
+		//If validation succeeds call onFormSubmit
+		$.validator.setDefaults({
+			submitHandler: function() {
+				ns.onFormSubmit();
+			}
 		});
+		
+		//Validate occurs on form submit
+		$("#entity-form").validate();
 		
 		$('#success-message .close').on('click', function() {
 			$('#success-message').hide();
