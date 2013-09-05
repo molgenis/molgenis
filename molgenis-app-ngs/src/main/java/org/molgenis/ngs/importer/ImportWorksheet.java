@@ -238,51 +238,6 @@ public class ImportWorksheet
 					users.put(u.getUserName(), u);
 				}
 
-//				// TODO: SampleBarcodeType
-//				if (!row.isNull("barcodeType"))
-//				{
-//					SampleBarcodeType sbt = new SampleBarcodeType();
-//
-//					if (row.getString("barcodeType") != null)
-//					{
-//						if (!row.getString("barcodeType").toLowerCase().trim().equals("none")
-//								&& !row.getString("barcodeType").toLowerCase().trim().contains("error"))
-//						{
-//							sbt.setSampleBarcodeTypeName(row.getString("barcodeType").toUpperCase().trim());
-//
-//							sampleBarcodeTypes.put(sbt.getSampleBarcodeTypeName(), sbt);
-//						}
-//					}
-//				}
-
-//				// TODO: SampleBarcode
-//				if (row.getString("barcodeMenu") != null) // GAF 01 ACTGTC
-//				{
-//					SampleBarcode sb = new SampleBarcode();
-//
-//					String[] bmp = row.getString("barcodeMenu").split(" ");
-//
-//					if (bmp.length == 3) // Valid data
-//					{
-//						if (!bmp[0].equalsIgnoreCase(""))
-//						{
-//							sb.setSampleBarcodeType_SampleBarcodeTypeName(bmp[0].toUpperCase().trim());
-//						}
-//						if (!bmp[1].equalsIgnoreCase(""))
-//						{
-//							sb.setSampleBarcodeNr(bmp[1]);
-//						}
-//						if (!bmp[2].equalsIgnoreCase(""))
-//						{
-//							sb.setSampleBarcodeSequence(bmp[2].toUpperCase().trim());
-//						}
-//
-//						sb.setSampleBarcodeName(row.getString("barcodeMenu"));
-//
-//						sampleBarcodes.put(sb.getSampleBarcodeName(), sb);
-//					}
-//				}
-
 				// CapturingKit
 				if (!row.isNull("capturingKit"))
 				{
