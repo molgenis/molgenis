@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="omx" label="Molgenis">
-	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
 	<menu label="Home" name="main">
 		<plugin id="home" label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
 		<plugin id="protocolviewer" label="Catalogue" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
@@ -22,21 +21,20 @@
 		</menu>
         <menu name="Admin">
 	        <menu name ="Entities">
-	        	<form name="DataSet" entity="DataSet" />
-	            <form name="Protocol" entity="Protocol" />
-	            <form name="Feature" entity="ObservableFeature" />
-	            <form name="Category" entity="Category" />
-	            <form name="Value" entity="ObservedValue" />
-	            <form name="StudyDataRequest" entity="StudyDataRequest" />
-	            <form name="RuntimeProperty" entity="RuntimeProperty" />
+	      		<plugin id="form/ObservableFeature" label="ObservableFeature" name="ObservableFeatureFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/Protocol" label="Protocol" name="ProtocolFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/DataSet" label="Dataset" name="DataSetFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/Category" label="Category" name="CategoryFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/StudyDataRequest" label="Studydata request" name="StudyDataRequestFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/RuntimeProperty" label="Runtimeproperty" name="RuntimePropertyFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 	        </menu>
 	        <menu name="Auth" label="Users and permissions">
 				<menu label="Basic management" name="Management">
-					<form name="MolgenisUser" entity="MolgenisUser" />
-					<form name="MolgenisGroup" entity="MolgenisGroup" />
-					<form name="MolgenisRoleGroupLink" entity="MolgenisRoleGroupLink" />
-					<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
-					<form name="MolgenisPermission" entity="MolgenisPermission" />
+					<plugin id="form/MolgenisUser" label="MolgenisUser" name="MolgenisUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form/MolgenisGroup" label="MolgenisGroup" name="MolgenisGroupFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form/MolgenisRoleGroupLink" label="MolgenisRoleGroupLink" name="MolgenisRoleGroupLinkFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form/MolgenisEntity" label="MolgenisEntity" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form/MolgenisPermission" label="MolgenisPermission" name="MolgenisPermissionFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 				</menu>
 			</menu>	
 			

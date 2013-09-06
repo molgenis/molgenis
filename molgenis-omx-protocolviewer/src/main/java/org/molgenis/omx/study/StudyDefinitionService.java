@@ -2,8 +2,6 @@ package org.molgenis.omx.study;
 
 import java.util.List;
 
-import org.springframework.scheduling.annotation.Async;
-
 /**
  * Find, retrieve and persist study definitions
  * 
@@ -12,6 +10,13 @@ import org.springframework.scheduling.annotation.Async;
  */
 public interface StudyDefinitionService
 {
+	/**
+	 * Find the study definition with the given id
+	 * 
+	 * @return
+	 */
+	public StudyDefinition getStudyDefinition(String id);
+
 	/**
 	 * Find all study definitions
 	 * 
@@ -28,10 +33,18 @@ public interface StudyDefinitionService
 	public void loadStudyDefinition(String id) throws UnknownStudyDefinitionException;
 
 	/**
+	 * Updates an existing study definition
+	 * 
+	 * @param studyDefinition
+	 * @throws UnknownStudyDefinitionException
+	 */
+	// public void updateStudyDefinition(StudyDefinition studyDefinition) throws UnknownStudyDefinitionException;
+
+	/**
 	 * Persist a study definition
 	 * 
 	 * @param studyDefinition
+	 * @return study definition with id
 	 */
-	@Async
-	public void persistStudyDefinition(StudyDefinition studyDefinition);
+	public StudyDefinition persistStudyDefinition(StudyDefinition studyDefinition);
 }
