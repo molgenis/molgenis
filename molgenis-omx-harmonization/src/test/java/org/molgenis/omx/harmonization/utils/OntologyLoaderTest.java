@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyIndexer.table;
+package org.molgenis.omx.harmonization.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

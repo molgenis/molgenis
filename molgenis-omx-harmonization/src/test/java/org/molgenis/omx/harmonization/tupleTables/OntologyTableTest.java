@@ -1,4 +1,4 @@
-package org.molgenis.omx.ontologyIndexer.table;
+package org.molgenis.omx.harmonization.tupleTables;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
