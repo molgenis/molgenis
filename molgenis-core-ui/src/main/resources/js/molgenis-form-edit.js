@@ -38,9 +38,20 @@
 	}
 	
 	$(function() {
-		$('#entity-form').on('submit', function() {
-			ns.onFormSubmit();
-			return false;
+		
+		//If validation succeeds call onFormSubmit
+		$.validator.setDefaults({
+			submitHandler: function() {
+				ns.onFormSubmit();
+			}
+		});
+		
+		
+		//Validate occurs on form submit
+		$("#entity-form").validate({
+			ignore: null, //Needed for validation of xref,mref.  To validate hidden fields
+			rules: remoteRules,
+			messages: remoteMessages
 		});
 		
 		$('#success-message .close').on('click', function() {

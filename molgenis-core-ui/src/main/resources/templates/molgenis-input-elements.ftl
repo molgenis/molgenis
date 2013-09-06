@@ -5,24 +5,24 @@
 	<#-- ${field.type.enumType} -->
 	
 	<div class="control-group">
-    	<label class="control-label" for="${fieldName}">${field.label} <#if field.nillable?string == 'false'>*</#if></label>
+    	<label class="control-label" for="${fieldName}">${field.label} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
     	<div class="controls">
     		
-			<#if field.type.enumType == 'BOOL'>
-				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)!?string("true", "false") == "true">checked</#if>  <#if field.readOnly>disabled="disabled"</#if> >
+    		<#if field.type.enumType == 'BOOL'>
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)!?string("true", "false") == "true">checked</#if>  <#if field.readOnly>disabled="disabled"</#if>  >
 	
 			<#elseif field.type.enumType == 'TEXT' || field.type.enumType =='HTML'>
-				<textarea name="${fieldName}" id="${fieldName}" <#if field.readOnly>disabled="disabled"</#if>><#if entity!=''>${entity.get(fieldName)!}</#if></textarea>
+				<textarea name="${fieldName}" id="${fieldName}" <#if field.readOnly>disabled="disabled"</#if> <@validationOptions field /> ><#if entity!=''>${entity.get(fieldName)!?html}</#if></textarea>
 	
 			<#elseif field.type.enumType == 'XREF'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}">
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
 				<script>
 					$(document).ready(function() {
 						$('#${fieldName}').select2({
 							placeholder: 'Select ${field.xrefEntity.label!}',
-							allowClear: true,
+							allowClear: ${field.nillable?string('true', 'false')},
 							query: function (query) {
-								var queryResult = {more:false, results:[{id:'', text:''}]};
+								var queryResult = {more:false, results:[<#if field.nillable?string('true', 'false') == 'true'>{id:'', text:''}</#if>]};
 								
 								//Get posible xref values
 								var restApi = new window.top.molgenis.RestClient(); 
@@ -41,13 +41,11 @@
 									query.callback(queryResult);
 								});
 							},
+							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-								<#if entity!='' && entity.get(fieldName)??>
-									callback({id:'${entity.get(fieldName).idValue}', text: '${entity.get(fieldName).get(field.xrefLabelNames[0])!}'});
-								<#else>
-									callback({id:'', text: ''});
-								</#if>
+									callback({id:'${entity.get(fieldName).idValue}', text: '${entity.get(fieldName).get(field.xrefLabelNames[0])!?html}'});
 							}
+							</#if>
 						});
 						
 						<#if entity!='' && entity.get(fieldName)??>
@@ -61,19 +59,19 @@
 					
 				</script>
 			<#elseif field.type.enumType == 'MREF'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}">
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
 				<script>
 					$(document).ready(function() {
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
 							<#list entity.get(fieldName) as xrefEntity>
-								xrefs.push({id:'${xrefEntity.idValue}', text:'${xrefEntity.get(field.xrefLabelNames[0])!}'});
+								xrefs.push({id:'${xrefEntity.idValue}', text:'${xrefEntity.get(field.xrefLabelNames[0])!?html}'});
 							</#list>
 						</#if>
 								
 						$('#${fieldName}').select2({
 							placeholder: 'Select ${field.xrefEntity.label!}',
-							allowClear: true,
+							allowClear: ${field.nillable?string('true', 'false')},
 							multiple: true,
 							query: function (query) {
 								var queryResult = {more:false, results:[{id:'', text:''}]};
@@ -110,13 +108,41 @@
 				</script>
 				
 			<#elseif field.type.enumType == 'DATE_TIME' || field.type.enumType == 'DATE'>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if> >
+				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if> <@validationOptions field /> >
 	
 			<#else>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string}"</#if> >
+				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly>disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
 	
 			</#if>
 		</div>
 	</div>
 	
+</#macro>
+
+<#macro validationOptions field>
+	<#assign validations = []>
+    
+    <#if field.nillable?string('true', 'false') == 'false'>
+    	<#assign validations = validations + ['required']>
+    </#if>
+    
+    <#if field.type.enumType == 'INT' || field.type.enumType == 'LONG'>
+    	<#assign validations = validations + ['digits']>
+    </#if>
+    
+    <#if field.type.enumType == 'DECIMAL'>
+    	<#assign validations = validations + ['number']>
+    </#if>
+    
+    <#if field.type.enumType == 'EMAIL'>
+    	<#assign validations = validations + ['email']>
+    </#if>
+    
+    <#if field.type.enumType == 'HYPERLINK'>
+    	<#assign validations = validations + ['url']>
+    </#if>
+    
+    <#if validations?size &gt; 0>
+    	class="<#list validations as validation>${validation} </#list>"
+   	</#if>
 </#macro>
