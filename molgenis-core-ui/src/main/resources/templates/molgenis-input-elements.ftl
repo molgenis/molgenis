@@ -41,13 +41,11 @@
 									query.callback(queryResult);
 								});
 							},
+							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-								<#if entity!='' && entity.get(fieldName)??>
 									callback({id:'${entity.get(fieldName).idValue}', text: '${entity.get(fieldName).get(field.xrefLabelNames[0])!?html}'});
-								<#elseif field.nillable?string('true', 'false') == 'true'>
-									callback({id:'', text: ''});
-								</#if>
 							}
+							</#if>
 						});
 						
 						<#if entity!='' && entity.get(fieldName)??>

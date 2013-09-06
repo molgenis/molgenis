@@ -1,3 +1,10 @@
+// Add endsWith function to the string class
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
 $(function() {
 	// disable all ajax request caching
 	$.ajaxSetup({

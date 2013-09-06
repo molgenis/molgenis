@@ -46,8 +46,13 @@
 			}
 		});
 		
+		
 		//Validate occurs on form submit
-		$("#entity-form").validate();
+		$("#entity-form").validate({
+			ignore: null, //Needed for validation of xref,mref.  To validate hidden fields
+			rules: remoteRules,
+			messages: remoteMessages
+		});
 		
 		$('#success-message .close').on('click', function() {
 			$('#success-message').hide();
