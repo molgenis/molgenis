@@ -1,4 +1,4 @@
-package org.molgenis.omx.catalog;
+package org.molgenis.catalog;
 
 public class UnknownCatalogException extends Exception
 {
