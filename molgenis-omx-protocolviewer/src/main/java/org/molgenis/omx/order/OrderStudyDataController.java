@@ -1,6 +1,6 @@
-package org.molgenis.omx.study;
+package org.molgenis.omx.order;
 
-import static org.molgenis.omx.study.OrderStudyDataController.URI;
+import static org.molgenis.omx.order.OrderStudyDataController.URI;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
