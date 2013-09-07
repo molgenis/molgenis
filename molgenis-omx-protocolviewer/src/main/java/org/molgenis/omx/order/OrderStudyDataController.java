@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.omx.filter.StudyDataRequest;
+import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;

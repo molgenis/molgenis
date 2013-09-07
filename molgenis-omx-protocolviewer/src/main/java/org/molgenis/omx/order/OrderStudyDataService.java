@@ -25,8 +25,8 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
-import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.studymanager.OmxStudyDefinition;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.studymanager.StudyManagerService;
@@ -56,7 +56,7 @@ public class OrderStudyDataService
 	private FileStore fileStore;
 
 	@Autowired
-	private StudyManagerService studyDefinitionService;
+	private StudyManagerService studyManagerService;
 
 	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds, Integer userId)
 			throws DatabaseException, MessagingException, IOException
@@ -88,7 +88,7 @@ public class OrderStudyDataService
 		studyDataRequest.setRequestStatus("pending");
 		studyDataRequest.setRequestForm(orderFile.getPath());
 
-		StudyDefinition studyDefinition = studyDefinitionService.persistStudyDefinition(new OmxStudyDefinition(
+		StudyDefinition studyDefinition = studyManagerService.persistStudyDefinition(new OmxStudyDefinition(
 				studyDataRequest));
 		studyDataRequest.setIdentifier(studyDefinition.getId());
 
