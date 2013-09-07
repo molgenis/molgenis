@@ -25,9 +25,10 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.study.OrderStudyDataService;
+import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.study.StudyDefinition;
+import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -116,10 +117,19 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 			when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 			return javaMailSender;
 		}
+
+		@Bean
+		public StudyManagerService studyManagerService()
+		{
+			return mock(StudyManagerService.class);
+		}
 	}
 
 	@Autowired
 	private OrderStudyDataService orderStudyDataService;
+
+	@Autowired
+	private StudyManagerService studyManagerService;
 
 	@Autowired
 	private Database database;
@@ -130,6 +140,9 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void orderStudyData() throws DatabaseException, MessagingException, IOException
 	{
+		StudyDefinition studyDefinition = when(mock(StudyDefinition.class).getId()).thenReturn("1").getMock();
+		when(studyManagerService.persistStudyDefinition((StudyDefinition) any())).thenReturn(studyDefinition);
+
 		Part requestForm = mock(Part.class);
 		when(requestForm.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]
 		{ 0, 1, 2 }));

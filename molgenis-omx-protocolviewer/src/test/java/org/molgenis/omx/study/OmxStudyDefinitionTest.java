@@ -7,8 +7,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.studymanager.OmxStudyDefinition;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
