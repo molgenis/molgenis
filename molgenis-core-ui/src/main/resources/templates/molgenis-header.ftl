@@ -32,7 +32,7 @@
 	</head>
 	<body>
 		<div class="container-fluid">
-			<div class="row-fluid">
+			<div id="molgenis-header" class="row-fluid">
 				<a href="/"><img src="${molgenis_ui.hrefLogo?html}"></a>
 			</div>
 			<div class="row-fluid">
@@ -83,7 +83,7 @@
 				</ul>
 	<#assign breadcrumb = menu.breadcrumb>
 	<#if (breadcrumb?size > 1)>
-				<ul class="breadcrumb">
+				<ul id="molgenis-breadcrumb" class="breadcrumb">
 		<#list breadcrumb as menu>
 			<#if menu_has_next>
 					<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
