@@ -1,4 +1,4 @@
-package org.molgenis.omx.study;
+package org.molgenis.omx.order;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +27,9 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.studymanager.OmxStudyDefinition;
+import org.molgenis.study.StudyDefinition;
+import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +55,8 @@ public class OrderStudyDataService
 	@Autowired
 	private FileStore fileStore;
 
-	@Autowired(required = false)
-	private StudyDefinitionService studyDefinitionService;
+	@Autowired
+	private StudyManagerService studyDefinitionService;
 
 	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds, Integer userId)
 			throws DatabaseException, MessagingException, IOException
@@ -85,12 +88,9 @@ public class OrderStudyDataService
 		studyDataRequest.setRequestStatus("pending");
 		studyDataRequest.setRequestForm(orderFile.getPath());
 
-		if (studyDefinitionService != null)
-		{
-			StudyDefinition studyDefinition = studyDefinitionService.persistStudyDefinition(new OmxStudyDefinition(
-					studyDataRequest));
-			studyDataRequest.setIdentifier(studyDefinition.getId());
-		}
+		StudyDefinition studyDefinition = studyDefinitionService.persistStudyDefinition(new OmxStudyDefinition(
+				studyDataRequest));
+		studyDataRequest.setIdentifier(studyDefinition.getId());
 
 		database.add(studyDataRequest);
 		logger.debug("created study data request: " + studyName);
