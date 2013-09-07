@@ -2,7 +2,7 @@
 <molgenis name="omx" label="Molgenis">
 	<menu label="Home" name="main">
 		<plugin id="home" label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
-		<plugin id="protocolviewer" label="Catalogue" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
+		<plugin id="protocolviewer" label="Catalog" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
 		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin id="entityexplorer" label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
 		<plugin id="protocolmanager" label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
@@ -11,31 +11,29 @@
 		<plugin id="background" label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
 		<plugin id="references" label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
 		<plugin id="contact" label="Contact" name="ContactPlugin" type="org.molgenis.omx.plugins.ContactPlugin"/>
-		<menu name="Converters">
+		<menu label="Converters" name="converters">
 			<plugin id="cbmtoomxconverter" label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverterPlugin" />
 		</menu>
-        <menu name="Admin">
-	        <menu name ="Entities">
+        <menu label="Admin" name="admin">
+        	<plugin id="catalogmanager" label="Catalog Manager" name="CatalogManagerPlugin" type="org.molgenis.catalogmanager.CatalogManagerPlugin" />
+			<plugin id="studymanager" label="Study Manager" name="StudyManagerPlugin" type="org.molgenis.studymanager.StudyManagerPlugin" />
+	        <menu label="Entities" name ="entities">
 	      		<plugin id="form/ObservableFeature" label="ObservableFeature" name="ObservableFeatureFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
         		<plugin id="form/Protocol" label="Protocol" name="ProtocolFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        		<plugin id="form/DataSet" label="Dataset" name="DataSetFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form/DataSet" label="Data set" name="DataSetFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
         		<plugin id="form/Category" label="Category" name="CategoryFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
         		<plugin id="form/StudyDataRequest" label="Studydata request" name="StudyDataRequestFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
         		<plugin id="form/RuntimeProperty" label="Runtimeproperty" name="RuntimePropertyFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 	        </menu>
-	        <menu name="Auth" label="Users and permissions">
-				<menu label="Basic management" name="Management">
-					<plugin id="form/MolgenisUser" label="MolgenisUser" name="MolgenisUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisGroup" label="MolgenisGroup" name="MolgenisGroupFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisRoleGroupLink" label="MolgenisRoleGroupLink" name="MolgenisRoleGroupLinkFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisEntity" label="MolgenisEntity" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisPermission" label="MolgenisPermission" name="MolgenisPermissionFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-				</menu>
+	        <menu label="Users and permissions" name="security">
+				<plugin id="form/MolgenisUser" label="MolgenisUser" name="MolgenisUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		        <plugin id="form/MolgenisGroup" label="MolgenisGroup" name="MolgenisGroupFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		        <plugin id="form/MolgenisRoleGroupLink" label="MolgenisRoleGroupLink" name="MolgenisRoleGroupLinkFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		        <plugin id="form/MolgenisEntity" label="MolgenisEntity" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		        <plugin id="form/MolgenisPermission" label="MolgenisPermission" name="MolgenisPermissionFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 			</menu>	
-			
-			<plugin id="dataindexer" label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.omx.plugin.DataSetsIndexerPlugin"/>
-			<plugin id="datasetdeleter" label="Delete DataSet" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
-		
+			<plugin id="dataindexer" label="Index data sets" name="DataSetsIndexerPlugin" type="org.molgenis.omx.plugin.DataSetsIndexerPlugin"/>
+			<plugin id="datasetdeleter" label="Delete Data set" name="DataSetDeleterPlugin" type="org.molgenis.omx.datasetdeleter.DataSetDeleterPlugin"/>
 		</menu>
 		<plugin id="useraccount" name="UserAccountPlugin" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />
 	</menu>
