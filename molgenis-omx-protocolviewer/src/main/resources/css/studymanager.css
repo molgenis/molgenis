@@ -1,0 +1,43 @@
+#loader-title {
+	text-align: center;
+}
+
+.box-title {
+	font-size: 10pt;
+	font-weight: bold;
+	padding: 2px;
+	background-color: #BDCDDA;
+}
+
+.well {
+	padding-bottom: 40px;
+}
+
+.listEntryRadio {
+	width: 20px;
+	color: #468847;
+	font-family: Consolas,"Liberation Mono",Courier,monospace;
+}
+
+.listEntryId {
+	width: 30px;
+}
+
+#resultsTable {
+	max-height: 450px;
+	overflow: auto;
+}
+
+#catalog-preview, #study-definition-viewer, #study-definition-editor-container {
+	max-height: 450px;
+	overflow: auto;
+	margin: 10px 0px;
+}
+
+#catalog-preview-info, #study-definition-viewer-info, #study-definition-editor-info {
+	font-size: 10px;
+}
+
+.table-borderless th, .table-borderless td {
+	border-top: none;
+}
