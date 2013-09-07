@@ -1,4 +1,4 @@
-package org.molgenis.omx.catalog;
+package org.molgenis.catalog;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @author erwin
  */
-public class CatalogInfo
+public class CatalogMeta
 {
 	private final String id;
 	private final String name;
@@ -15,7 +15,7 @@ public class CatalogInfo
 	private String version;
 	private List<String> authors;
 
-	public CatalogInfo(String id, String name)
+	public CatalogMeta(String id, String name)
 	{
 		if (id == null) throw new IllegalArgumentException("Id is null");
 		if (name == null) throw new IllegalArgumentException("Name is null");
