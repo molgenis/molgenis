@@ -1,10 +1,29 @@
+#molgenis-header {
+	margin-bottom: 10px;
+}
+
+#molgenis-menu.nav {
+	margin-bottom: 10px;
+}
+
 #molgenis-menu.nav li.active a {
 	background-color: #3079C2;
 	color: white;
 }
 
+#molgenis-menu.nav-tabs>li>a {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+#molgenis-breadcrumb {
+	margin-bottom: 10px;	
+}
+
 #plugin-container {
-	background: #F8FAFB;	
+	background: #F8FAFB;
+	padding: 10px;
+	margin-bottom: 10px;
 }
 
 #footer, #push {
@@ -21,5 +40,5 @@
 }
 
 .alert {
-	margin-bottom: 0px;
+	margin-bottom: 10px;
 }
