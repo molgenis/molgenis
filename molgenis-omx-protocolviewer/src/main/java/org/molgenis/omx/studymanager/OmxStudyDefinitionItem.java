@@ -1,9 +1,10 @@
-package org.molgenis.omx.study;
+package org.molgenis.omx.studymanager;
 
+import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.target.OntologyTerm;
 
-public class OmxStudyDefinitionItem implements StudyDefinitionItem
+public class OmxStudyDefinitionItem implements CatalogItem
 {
 	private final ObservableFeature observableFeature;
 

@@ -1,14 +1,16 @@
-package org.molgenis.omx.study;
+package org.molgenis.omx.studymanager;
 
 import java.util.Collections;
 import java.util.List;
 
+import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.study.StudyDefinition;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class OmxStudyDefinition implements StudyDefinition
 {
@@ -41,27 +43,26 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public String getDescription()
 	{
-		throw new UnsupportedOperationException();
+		return null; // FIXME
 	}
 
 	@Override
 	public String getCatalogVersion()
 	{
-		throw new UnsupportedOperationException();
+		return null; // FIXME
 	}
 
 	@Override
-	public Iterable<StudyDefinitionItem> getItems()
+	public List<CatalogItem> getItems()
 	{
-		return Iterables.transform(studyDataRequest.getFeatures(),
-				new Function<ObservableFeature, StudyDefinitionItem>()
-				{
-					@Override
-					public StudyDefinitionItem apply(ObservableFeature observableFeature)
-					{
-						return new OmxStudyDefinitionItem(observableFeature);
-					}
-				});
+		return Lists.transform(studyDataRequest.getFeatures(), new Function<ObservableFeature, CatalogItem>()
+		{
+			@Override
+			public CatalogItem apply(ObservableFeature observableFeature)
+			{
+				return new OmxStudyDefinitionItem(observableFeature);
+			}
+		});
 	}
 
 	@Override
@@ -78,10 +79,10 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public boolean containsItem(StudyDefinitionItem anItem)
+	public boolean containsItem(CatalogItem anItem)
 	{
 		boolean contains = false;
-		for (StudyDefinitionItem item : getItems())
+		for (CatalogItem item : getItems())
 		{
 			if (item.getId().equals(anItem.getId()))
 			{
