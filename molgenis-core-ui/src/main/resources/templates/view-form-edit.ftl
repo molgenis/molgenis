@@ -3,7 +3,7 @@
 <#import "molgenis-input-elements.ftl" as input>
 
 <#assign css=['select2.css', 'molgenis-form.css']>
-<#assign js=['select2.min.js', 'molgenis-form-edit.js']>
+<#assign js=['jquery.validate.min.js', 'select2.min.js', 'molgenis-form-edit.js']>
 
 <@header css js/>
 

@@ -14,6 +14,16 @@ h2 {
 }
 
 /* edit form */
+label.error {
+	color: red;
+	padding-top: .5em;
+	vertical-align: top;
+}
+
+input.error {
+	border: 1px solid red;
+}
+
 .controls input[type=text],
 .select2-choice {
 	width: 500px;
