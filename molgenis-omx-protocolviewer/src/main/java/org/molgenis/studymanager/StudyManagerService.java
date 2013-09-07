@@ -1,6 +1,10 @@
-package org.molgenis.omx.study;
+package org.molgenis.studymanager;
 
 import java.util.List;
+
+import org.molgenis.study.StudyDefinition;
+import org.molgenis.study.StudyDefinitionMeta;
+import org.molgenis.study.UnknownStudyDefinitionException;
 
 /**
  * Find, retrieve and persist study definitions
@@ -8,21 +12,23 @@ import java.util.List;
  * @author erwin
  * 
  */
-public interface StudyDefinitionService
+public interface StudyManagerService
 {
-	/**
-	 * Find the study definition with the given id
-	 * 
-	 * @return
-	 */
-	public StudyDefinition getStudyDefinition(String id);
-
 	/**
 	 * Find all study definitions
 	 * 
 	 * @return
 	 */
-	public List<StudyDefinitionInfo> findStudyDefinitions();
+	List<StudyDefinitionMeta> getStudyDefinitions();
+
+	/**
+	 * Find the study definition with the given id
+	 * 
+	 * @param id
+	 * @return
+	 * @throws UnknownStudyDefinitionException
+	 */
+	StudyDefinition getStudyDefinition(String id) throws UnknownStudyDefinitionException;
 
 	/**
 	 * Retrieve a study definition and save it in the database
@@ -30,7 +36,16 @@ public interface StudyDefinitionService
 	 * @param id
 	 * @throws UnknownStudyDefinitionException
 	 */
-	public void loadStudyDefinition(String id) throws UnknownStudyDefinitionException;
+	void loadStudyData(String id) throws UnknownStudyDefinitionException;
+
+	/**
+	 * Returns whether study definition data is loaded
+	 * 
+	 * @param id
+	 * @return
+	 * @throws UnknownStudyDefinitionException
+	 */
+	boolean isStudyDataLoaded(String id) throws UnknownStudyDefinitionException;
 
 	/**
 	 * Updates an existing study definition
@@ -38,7 +53,7 @@ public interface StudyDefinitionService
 	 * @param studyDefinition
 	 * @throws UnknownStudyDefinitionException
 	 */
-	// public void updateStudyDefinition(StudyDefinition studyDefinition) throws UnknownStudyDefinitionException;
+	void updateStudyDefinition(StudyDefinition studyDefinition) throws UnknownStudyDefinitionException;
 
 	/**
 	 * Persist a study definition
@@ -46,5 +61,5 @@ public interface StudyDefinitionService
 	 * @param studyDefinition
 	 * @return study definition with id
 	 */
-	public StudyDefinition persistStudyDefinition(StudyDefinition studyDefinition);
+	StudyDefinition persistStudyDefinition(StudyDefinition studyDefinition);
 }

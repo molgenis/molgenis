@@ -1,4 +1,4 @@
-package org.molgenis.omx.study;
+package org.molgenis.study;
 
 public class UnknownStudyDefinitionException extends Exception
 {

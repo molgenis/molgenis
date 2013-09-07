@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.filter.StudyDataRequest;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.StudyDefinition;
 
 import com.google.common.base.Function;

@@ -1,6 +1,8 @@
-package org.molgenis.omx.study;
+package org.molgenis.study;
 
 import java.util.List;
+
+import org.molgenis.catalog.CatalogItem;
 
 public interface StudyDefinition
 {
@@ -14,9 +16,9 @@ public interface StudyDefinition
 
 	String getCatalogVersion();
 
-	Iterable<StudyDefinitionItem> getItems();
+	List<CatalogItem> getItems();
 
-	boolean containsItem(StudyDefinitionItem item);
+	boolean containsItem(CatalogItem item);
 
 	List<String> getAuthors();
 
