@@ -32,10 +32,14 @@
 		}
 		
 		$('#catalogForm input[type="radio"]').change(function() {
-			if($(this).data('loaded'))
-				$('#loadButton').attr('disabled', 'disabled');
-			else
-				$('#loadButton').removeAttr('disabled');
+			if($(this).data('loaded')) {
+				$('#loadButton').attr('name', 'unload');
+				$('#loadButton').val('Unload');
+			}
+			else {
+				$('#loadButton').attr('name', 'load');
+				$('#loadButton').val('Load');
+			}
 			
 			// clear previous tree
 			if (treeContainer.children('ul').length > 0)
@@ -57,7 +61,7 @@
 				
 				// create new tree
 				treeContainer.empty();
-				treeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog)});
+				treeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'debugLevel': 0});
 			});
 		});
 		$('#catalogForm input[type="radio"]:checked').change();

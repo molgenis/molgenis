@@ -48,7 +48,7 @@
 												<label for="catalog_${catalog.id}">${catalog.id}</label>
 											</td>
 											<td>
-												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.loaded><input type="submit" name="unload" class="btn btn-small pull-right" value="Unload" /></#if></label>
+												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.loaded><p class="text-success pull-right">Loaded</p></#if></label>
 											</td>
 										</tr>
 									</#list>
