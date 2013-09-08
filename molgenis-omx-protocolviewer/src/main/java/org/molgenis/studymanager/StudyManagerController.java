@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
 @RequestMapping(StudyManagerController.URI)
 public class StudyManagerController extends MolgenisPlugin
 {
-	private static final Logger LOG = Logger.getLogger(StudyManagerController.class);
+	private static final Logger logger = Logger.getLogger(StudyManagerController.class);
 
 	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "studymanager";
 	public static final String LOAD_LIST_URI = "/load-list";
@@ -75,7 +75,7 @@ public class StudyManagerController extends MolgenisPlugin
 	public String getStudyDefinitions(Model model) throws DatabaseException
 	{
 		List<StudyDefinitionMeta> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions();
-		LOG.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
+		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
 		List<StudyDefinitionMetaModel> models = Lists.transform(studyDefinitions,
 				new Function<StudyDefinitionMeta, StudyDefinitionMetaModel>()
@@ -174,7 +174,7 @@ public class StudyManagerController extends MolgenisPlugin
 			{
 				studyDefinitionManagerService.loadStudyData(id);
 				model.addAttribute("successMessage", "Studydefinition loaded");
-				LOG.info("Loaded studydefinition with id [" + id + "]");
+				logger.info("Loaded studydefinition with id [" + id + "]");
 			}
 			else
 			{
@@ -205,12 +205,22 @@ public class StudyManagerController extends MolgenisPlugin
 		}
 	}
 
-	@ExceptionHandler(
-	{ Exception.class, RuntimeException.class })
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
+	{
+		logger.error(e);
+		return Collections.singletonMap("errorMessage",
+				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+	}
+
+	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, String> handleRuntimeException(Exception e)
+	public Map<String, String> handleException(Exception e)
 	{
+		logger.debug(e);
 		return Collections.singletonMap("errorMessage", e.getMessage());
 	}
 }
