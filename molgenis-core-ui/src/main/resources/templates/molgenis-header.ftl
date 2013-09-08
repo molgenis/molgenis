@@ -7,7 +7,7 @@
 	<head>
 		<title>${molgenis_ui.title?html}</title>
 		<meta charset="utf-8">
-		<link rel="shortcut icon" type="image/x-icon" href="/img/molgenis.ico">
+		<link rel="shortcut icon" href="/img/molgenis.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
 	<#list css as css_file_name>
