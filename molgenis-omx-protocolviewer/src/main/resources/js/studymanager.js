@@ -136,7 +136,7 @@
 				}),
 				contentType : 'application/json',
 				success : function(entities) {
-					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Successfully updated study definition [' + studyDefinitionId + ']</div>');
+					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Updated study definition [' + studyDefinitionId + ']</div>');
 				}
 			});
 		});
