@@ -36,20 +36,22 @@
 				<a href="/"><img src="${molgenis_ui.hrefLogo?html}"></a>
 			</div>
 			<div class="row-fluid">
-				<div id="login-modal-container-header"></div>
-				<div class="pull-right">
-				<#if authenticated?? && authenticated>
-					<a href="/account/logout">logout</a>
-				<#else>
-					<a class="modal-href" href="/account/login" data-target="login-modal-container-header">login/register</a>
+				<div class="span11">
+			<#if menu_id??>
+				<#if !(plugin_id??)>
+					<#assign plugin_id="NULL">
 				</#if>
+				<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
+			</#if>			
 				</div>
-		<#if menu_id??>
-			<#if !(plugin_id??)>
-				<#assign plugin_id="NULL">
-			</#if>
-			<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
-		</#if>
+				<div class="span1 pull-right">
+					<div id="login-modal-container-header"></div>
+					<#if authenticated?? && authenticated>
+						<a href="/account/logout"><button class="btn btn-link">Sign out</button></a>
+					<#else>
+						<a class="modal-href" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
+					</#if>
+				</div>
 			</div>
 			<div class="row-fluid">
 				<div id="plugin-container" class="container-fluid">
