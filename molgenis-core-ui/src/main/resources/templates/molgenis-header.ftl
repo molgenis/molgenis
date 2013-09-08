@@ -44,12 +44,12 @@
 				<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
 			</#if>			
 				</div>
-				<div class="span1 pull-right">
+				<div class="span1">
 					<div id="login-modal-container-header"></div>
 					<#if authenticated?? && authenticated>
-						<a href="/account/logout"><button class="btn btn-link">Sign out</button></a>
+						<a class="pull-right" href="/account/logout"><button class="btn btn-link">Sign out</button></a>
 					<#else>
-						<a class="modal-href" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
+						<a class="modal-href pull-right" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
 					</#if>
 				</div>
 			</div>
