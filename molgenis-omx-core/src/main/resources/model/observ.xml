@@ -164,7 +164,7 @@
 		</entity>
 		<entity name="DataSet" extends="Characteristic">
 			<description>Container for one or more observations that are measured
-				using the same protocol and by the same performer(s). The dataset
+				using the same protocol and by the same performer(s). The data set
 				may be a file (having the same
 				identifier) but in most cases it is a
 				data table consisting of rows (Observation).
@@ -178,6 +178,7 @@
 				description="time when the protocol started." />
 			<field auto="true" name="endTime" type="datetime" nillable="true"
 				description="(Optional) time when the protocol ended." />
+			<field name="active" type="bool" default="true" description="whether this data set is considered active/inactive"/>
 		</entity>
 		<entity name="ObservationSet" implements="Autoid">
 			<description>In practice: Observation is one row within a DataSet.
