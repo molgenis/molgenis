@@ -58,7 +58,7 @@ public class ProtocolViewerController extends MolgenisPlugin
 	@RequestMapping(method = GET)
 	public String init(Model model) throws DatabaseException
 	{
-		List<DataSet> dataSets = database.query(DataSet.class).find();
+		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 
 		// create new model
 		ProtocolViewer protocolViewer = new ProtocolViewer();

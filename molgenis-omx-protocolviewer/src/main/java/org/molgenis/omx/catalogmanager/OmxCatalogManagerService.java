@@ -55,59 +55,87 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	@Override
 	public Catalog getCatalog(String id) throws UnknownCatalogException
 	{
-		DataSet dataSet;
-		try
-		{
-			dataSet = DataSet.findByIdentifier(database, id);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		DataSet dataSet = getDataSet(id);
 		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return new OmxCatalog(dataSet);
-	}
-
-	@Override
-	public Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException
-	{
-		StudyDataRequest studyDataRequest;
-		try
-		{
-			studyDataRequest = StudyDataRequest.findByIdentifier(database, id);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
-				+ "] does not exist");
-
-		// get catalog for this study definition
-		DataSet dataSet = studyDataRequest.getDataSet();
-		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
 		return new OmxCatalog(dataSet);
 	}
 
 	@Override
 	public void loadCatalog(String id) throws UnknownCatalogException
 	{
-		// TODO decide how to implement
+		DataSet dataSet = getDataSet(id);
+		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setDataSetActive(dataSet, true);
 	}
 
 	@Override
 	public void unloadCatalog(String id) throws UnknownCatalogException
 	{
-		// TODO decide how to implement
+		DataSet dataSet = getDataSet(id);
+		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setDataSetActive(dataSet, false);
 	}
 
 	@Override
 	public boolean isCatalogLoaded(String id) throws UnknownCatalogException
 	{
+		DataSet dataSet = getDataSet(id);
+		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		return dataSet.getActive();
+	}
+
+	@Override
+	public Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
+	{
+		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
+		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
+				+ "] does not exist");
+		DataSet dataSet = studyDataRequest.getDataSet();
+		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		return new OmxCatalog(dataSet);
+	}
+
+	@Override
+	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException
+	{
+		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
+		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
+				+ "] does not exist");
+		DataSet dataSet = studyDataRequest.getDataSet();
+		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		setDataSetActive(dataSet, true);
+	}
+
+	@Override
+	public void unloadCatalogOfStudyDefinition(String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
+	{
+		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
+		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
+				+ "] does not exist");
+		DataSet dataSet = studyDataRequest.getDataSet();
+		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		setDataSetActive(dataSet, false);
+	}
+
+	@Override
+	public boolean isCatalogOfStudyDefinitionLoaded(String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
+	{
+		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
+		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
+				+ "] does not exist");
+		DataSet dataSet = studyDataRequest.getDataSet();
+		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		return dataSet.getActive();
+	}
+
+	private DataSet getDataSet(String dataSetIdentifier)
+	{
 		try
 		{
-			return DataSet.findByIdentifier(database, id) != null;
+			return DataSet.findByIdentifier(database, dataSetIdentifier);
 		}
 		catch (DatabaseException e)
 		{
@@ -115,32 +143,24 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		}
 	}
 
-	@Override
-	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException
+	private void setDataSetActive(DataSet dataSet, boolean active)
 	{
-		// TODO decide how to implement
+		dataSet.setActive(active);
+		try
+		{
+			database.update(dataSet);
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
-	@Override
-	public void unloadCatalogOfStudyDefinition(String id) throws UnknownCatalogException
-	{
-		// TODO decide how to implement
-	}
-
-	@Override
-	public boolean isCatalogOfStudyDefinitionLoaded(String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException
+	private StudyDataRequest getStudyDataRequest(String studyDataRequestIdentifier)
 	{
 		try
 		{
-			// get study definition
-			StudyDataRequest studyDataRequest = StudyDataRequest.findByIdentifier(database, id);
-			if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
-					+ "] does not exist");
-
-			// get catalog of study definition
-			List<DataSet> dataSets = database.find(DataSet.class);
-			return dataSets != null && dataSets.size() == 1;
+			return StudyDataRequest.findByIdentifier(database, studyDataRequestIdentifier);
 		}
 		catch (DatabaseException e)
 		{

@@ -31,15 +31,6 @@ public interface CatalogManagerService
 	Catalog getCatalog(String id) throws UnknownCatalogException;
 
 	/**
-	 * Returns the catalog for the study definition with the given id
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 */
-	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
-
-	/**
 	 * Retrieves a catalog and store it in the database
 	 * 
 	 * @param id
@@ -65,10 +56,21 @@ public interface CatalogManagerService
 	boolean isCatalogLoaded(String id) throws UnknownCatalogException;
 
 	/**
+	 * Returns the catalog for the study definition with the given id
+	 * 
+	 * @param id
+	 * @return
+	 * @throws UnknownCatalogException
+	 * @throws UnknownStudyDefinitionException
+	 */
+	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
+
+	/**
 	 * Retrieves a catalog of a study definition and store it in the database
 	 * 
 	 * @param id
 	 * @throws UnknownCatalogException
+	 * @throws UnknownStudyDefinitionException
 	 */
 	void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 
@@ -77,9 +79,9 @@ public interface CatalogManagerService
 	 * 
 	 * @param id
 	 * @throws UnknownCatalogException
+	 * @throws UnknownStudyDefinitionException
 	 */
-	public void unloadCatalogOfStudyDefinition(String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException;
+	void unloadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 
 	/**
 	 * Returns whether the catalog for the study definition with the given id is loaded
@@ -87,7 +89,7 @@ public interface CatalogManagerService
 	 * @param id
 	 * @return
 	 * @throws UnknownCatalogException
+	 * @throws UnknownStudyDefinitionException
 	 */
-	public boolean isCatalogOfStudyDefinitionLoaded(String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException;
+	boolean isCatalogOfStudyDefinitionLoaded(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 }

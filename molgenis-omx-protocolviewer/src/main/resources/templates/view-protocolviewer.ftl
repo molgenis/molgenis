@@ -3,21 +3,19 @@
 <#assign css=["ui.dynatree.css", "chosen.css", "protocolviewer.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "protocolviewer.js", "jquery.dynatree.min.js", "jquery.fileDownload-min.js", "jquery.validate.min.js"]>
 <@header css js/>
-	<div class="row-fluid">
-				<#if (model.dataSets?size > 0)>
-				<#if !model.authenticated>
-					<div id="login-modal-container"></div>
-					<div class="alert">
-						<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  				<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection. (your current selection will be discarded)
-					</div>
-				</#if>
-			</#if>
-			
-			
+	<div class="row-fluid">			
 			<#if (model.dataSets?size == 0)>
-				<span>No available catalogs</span>
+				<span>No active catalogs</span>
 			<#else>
+				<#if (model.dataSets?size > 0)>
+					<#if !model.authenticated>
+						<div id="login-modal-container"></div>
+						<div class="alert">
+							<button type="button" class="close" data-dismiss="alert">&times;</button>
+			  				<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection. (your current selection will be discarded)
+						</div>
+					</#if>
+				</#if>
 				<div class="row-fluid grid">
 					<div id="dataset-select-container" class="control-group form-horizontal pull-right">
 						<label class="control-label" for="dataset-select">Choose a dataset:</label>
