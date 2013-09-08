@@ -25,6 +25,7 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.MolgenisUserService;
+import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.studymanager.OmxStudyDefinition;
@@ -58,8 +59,8 @@ public class OrderStudyDataService
 	@Autowired
 	private StudyManagerService studyManagerService;
 
-	public void orderStudyData(String studyName, Part requestForm, List<Integer> featureIds, Integer userId)
-			throws DatabaseException, MessagingException, IOException
+	public void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds,
+			Integer userId) throws DatabaseException, MessagingException, IOException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
 		if (requestForm == null) throw new IllegalArgumentException("request form is null");
@@ -70,6 +71,7 @@ public class OrderStudyDataService
 				Operator.IN, featureIds));
 		if (features == null || features.isEmpty()) throw new DatabaseException("requested features do not exist");
 
+		DataSet dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
 		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, userId);
 
 		String appName = getAppName();
@@ -82,6 +84,7 @@ public class OrderStudyDataService
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
 		studyDataRequest.setName(studyName);
+		studyDataRequest.setDataSet(dataSet);
 		studyDataRequest.setFeatures(features);
 		studyDataRequest.setMolgenisUser(molgenisUser);
 		studyDataRequest.setRequestDate(new Date());

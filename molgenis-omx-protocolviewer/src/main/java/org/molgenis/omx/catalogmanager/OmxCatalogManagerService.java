@@ -84,24 +84,10 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
 
-		// TODO get data set for this study data request
-
-		// get MOLGENIS catalog
-		List<DataSet> dataSets;
-		try
-		{
-			dataSets = database.find(DataSet.class);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		if (dataSets == null || dataSets.isEmpty()) throw new RuntimeException("Database contains no catalogs");
-		if (dataSets.size() > 1) throw new RuntimeException(
-				"Can't determine catalog for study definition, because database contains multiple catalogs");
-
-		return new OmxCatalog(dataSets.get(0));
+		// get catalog for this study definition
+		DataSet dataSet = studyDataRequest.getDataSet();
+		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		return new OmxCatalog(dataSet);
 	}
 
 	@Override

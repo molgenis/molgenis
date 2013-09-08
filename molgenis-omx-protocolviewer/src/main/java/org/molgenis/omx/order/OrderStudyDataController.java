@@ -64,11 +64,11 @@ public class OrderStudyDataController extends MolgenisPlugin
 	// ModelAttribute
 	@RequestMapping(value = "/order", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void orderData(@RequestParam String name, @RequestParam Part file) throws DatabaseException, IOException,
-			MessagingException
+	public void orderData(@RequestParam String dataSetIdentifier, @RequestParam String name, @RequestParam Part file)
+			throws DatabaseException, IOException, MessagingException
 	{
 		// TODO we need to know the version of catalog
-		orderStudyDataService.orderStudyData(name, file, shoppingCart.getCart(), login.getUserId());
+		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart(), login.getUserId());
 		shoppingCart.emptyCart();
 	}
 
