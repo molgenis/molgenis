@@ -5,7 +5,6 @@
 		<plugin id="protocolviewer" label="Catalog" name="ProtocolViewerPlugin" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
 		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin id="entityexplorer" label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
-		<plugin id="protocolmanager" label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
 		<plugin id="importwizard" label="Upload" name="UploadWizard" type="org.molgenis.omx.importer.ImportWizardPlugin" />
 		<plugin id="news" label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
 		<plugin id="background" label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
