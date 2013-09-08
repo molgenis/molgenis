@@ -8,11 +8,11 @@
 				<span>No active catalogs</span>
 			<#else>
 				<#if (model.dataSets?size > 0)>
-					<#if !model.authenticated>
+					<#if !authenticated>
 						<div id="login-modal-container"></div>
 						<div class="alert">
 							<button type="button" class="close" data-dismiss="alert">&times;</button>
-			  				<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">login</a> to save your variable selection. (your current selection will be discarded)
+			  				<strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">sign in</a> to save your variable selection. (your current selection will be discarded)
 						</div>
 					</#if>
 				</#if>
