@@ -59,8 +59,6 @@ import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.EntityServiceGen;
-import org.molgenis.generators.server.FrontControllerGen;
-import org.molgenis.generators.server.MolgenisContextListenerGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
@@ -329,13 +327,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping R interface ....");
-		}
-
-		if (options.generate_frontcontroller)
-		{
-			generators.add(new FrontControllerGen());
-			// also generate context
-			generators.add(new MolgenisContextListenerGen());
 		}
 
 		// HTML
