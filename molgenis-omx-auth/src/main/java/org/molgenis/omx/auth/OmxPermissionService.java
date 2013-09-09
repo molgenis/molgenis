@@ -44,7 +44,6 @@ public class OmxPermissionService implements MolgenisPermissionService
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginName, Permission permission)
 	{
-		pluginName = pluginName + "Plugin"; // TODO remove line after removing molgenis UI framework
 		try
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByNameType(database, pluginName,
