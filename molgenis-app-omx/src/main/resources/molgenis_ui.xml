@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="omx" label="Molgenis">
+<molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" label="Home" name="HomeController" type="org.molgenis.omx.plugins.HomePlugin"/>
 		<plugin id="protocolviewer" label="Catalog" name="ProtocolViewerController" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin" />
