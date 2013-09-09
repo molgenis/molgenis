@@ -67,7 +67,6 @@ public class OrderStudyDataController extends MolgenisPlugin
 	public void orderData(@RequestParam String dataSetIdentifier, @RequestParam String name, @RequestParam Part file)
 			throws DatabaseException, IOException, MessagingException
 	{
-		// TODO we need to know the version of catalog
 		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart(), login.getUserId());
 		shoppingCart.emptyCart();
 	}

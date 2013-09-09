@@ -33,8 +33,14 @@
 			return dynaNodes;
 		}
 		
-		function updateStudyDefinitionList() {
-			
+		function createCatalogInfo(catalog) {
+			var items= [];
+			items.push('<table class="table table-condensed table-borderless">');
+			items.push('<tr><td>Version</td><td>' + (catalog.version ? catalog.version : '') + '</td></tr>');
+			items.push('<tr><td>Description</td><td>' + (catalog.description ? catalog.description : '') + '</td></tr>');
+			items.push('<tr><td>Authors</td><td>' + (catalog.authors ? catalog.authors.join(', ') : '') + '</td></tr>');
+			items.push('</table>');
+			return items.join('');
 		}
 		
 		function updateStudyDefinitionViewer() {
@@ -50,15 +56,8 @@
 			$.ajax({
 				type : 'GET',
 				url : '/plugin/studymanager/view/' + studyDefinitionId,
-				success : function(catalog) {				
-					var items= [];
-					items.push('<table class="table table-condensed table-borderless">');
-					items.push('<tr><td>Version</td><td>' + catalog.version + '</td></tr>');
-					items.push('<tr><td>Description</td><td>' + catalog.description + '</td></tr>');
-					items.push('<tr><td>Authors</td><td>' + catalog.authors.join(', ') + '</td></tr>');
-					items.push('</table>');
-					viewInfoContainer.html(items.join(''));
-					
+				success : function(catalog) {
+					viewInfoContainer.html(createCatalogInfo(catalog));
 					viewTreeContainer.empty();
 					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
@@ -81,14 +80,7 @@
 			// create new tree
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			$.get('/plugin/studymanager/edit/' + studyDefinitionId, function(catalog) {
-				var items= [];
-				items.push('<table class="table table-condensed table-borderless">');
-				items.push('<tr><td>Version</td><td>' + catalog.version + '</td></tr>');
-				items.push('<tr><td>Description</td><td>' + catalog.description + '</td></tr>');
-				items.push('<tr><td>Authors</td><td>' + catalog.authors.join(', ') + '</td></tr>');
-				items.push('</table>');
-				editInfoContainer.html(items.join(''));
-				
+				editInfoContainer.html(createCatalogInfo(catalog));
 				editTreeContainer.empty();
 				editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
 			}).fail(function() { alert("error"); });
