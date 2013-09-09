@@ -5,20 +5,20 @@
 		<plugin id="home" name="HomeController" type="org.molgenis.ngs.plugins.HomePlugin" label="Home"/>
 		<plugin id="useraccount" name="UserAccountController" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account"/>
 		<!--  TODO Sample should be a detail of master Project -->
-		<plugin id="form/Project" label="Projects" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-		<plugin id="form/Sample" label="Samples" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+		<plugin id="form.Project" label="Projects" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+		<plugin id="form.Sample" label="Samples" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 		<!--  TODO FlowcellLane should be a detail of master Flowcell -->
-		<plugin id="form/Flowcell" label="FlowcellRuns" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-		<plugin id="form/FlowcellLane" label="FlowcellLanes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+		<plugin id="form.Flowcell" label="FlowcellRuns" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+		<plugin id="form.FlowcellLane" label="FlowcellLanes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 		<plugin id="worksheet" label="Worksheet" name="WorksheetController" type="org.molgenis.ngs.plugins.WorksheetPlugin"/>
 		<menu name="Configuration" >
-			<plugin id="form/NgsUser" label="Users" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.NgsUser" label="Users" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 			<!-- TODO add FlowCell form plugin -->
-			<plugin id="form/SampleBarcodeType" label="SampleBarcodeTypes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<plugin id="form/SampleBarcode" label="SampleBarcodes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<plugin id="form/CapturingKit" label="CapturingKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<plugin id="form/PrepKit" label="PrepKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<plugin id="form/Machine" label="Sequencers" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.SampleBarcodeType" label="SampleBarcodeTypes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.SampleBarcode" label="SampleBarcodes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.CapturingKit" label="CapturingKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.PrepKit" label="PrepKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.Machine" label="Sequencers" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 			<!-- TODO add Sample form plugin -->
 		</menu>
 		<plugin id="barcode" label="Barcode selector" name="BarcodeController" type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
