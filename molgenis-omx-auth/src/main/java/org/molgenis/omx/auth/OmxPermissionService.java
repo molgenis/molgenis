@@ -49,8 +49,8 @@ public class OmxPermissionService implements MolgenisPermissionService
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByNameType(database, pluginName,
 					EntityType.PLUGIN.toString());
-			if (molgenisEntity == null) throw new RuntimeException(pluginName + " is not a " + MolgenisEntity.class
-					+ " of type " + EntityType.PLUGIN);
+			if (molgenisEntity == null) throw new RuntimeException(pluginName + " is not a "
+					+ MolgenisEntity.class.getSimpleName() + " of type " + EntityType.PLUGIN);
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -66,7 +66,7 @@ public class OmxPermissionService implements MolgenisPermissionService
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByClassName(database, pluginClazz.getName());
 			if (molgenisEntity == null) throw new RuntimeException(pluginClazz.getName() + " is not a "
-					+ MolgenisEntity.class);
+					+ MolgenisEntity.class.getSimpleName());
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -94,8 +94,8 @@ public class OmxPermissionService implements MolgenisPermissionService
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByNameType(database, entityName,
 					EntityType.ENTITY.toString());
-			if (molgenisEntity == null) throw new RuntimeException(entityName + " is not a " + MolgenisEntity.class
-					+ " of type " + EntityType.ENTITY);
+			if (molgenisEntity == null) throw new RuntimeException(entityName + " is not a "
+					+ MolgenisEntity.class.getSimpleName() + " of type " + EntityType.ENTITY);
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -111,7 +111,7 @@ public class OmxPermissionService implements MolgenisPermissionService
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByClassName(database, entityClazz.getName());
 			if (molgenisEntity == null) throw new RuntimeException(entityClazz.getName() + " is not a "
-					+ MolgenisEntity.class);
+					+ MolgenisEntity.class.getSimpleName());
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
