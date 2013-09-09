@@ -16,7 +16,7 @@
 		</div>
 		
 		<div class="span4" style="height: 78px;">
-			<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px"><a href="${context_url}/${form.metaData.name}/create"><img src="/img/new.png" /></a></div>
+			<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px"><a href="${context_url}/create"><img src="/img/new.png" /></a></div>
 		</div>
 	</div>
 			
