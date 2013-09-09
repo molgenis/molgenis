@@ -89,38 +89,22 @@ public class XmlMolgenisUiMenuTest
 		PluginType plugin3Type = new PluginType();
 		plugin3Type.setId("plugin3");
 		plugin3Type.setName("plugin3");
-		FormType form1Type = new FormType();
-		form1Type.setName("form1");
-		form1Type.setEntity("form1");
-		FormType form2Type = new FormType();
-		form2Type.setName("form2");
-		form2Type.setEntity("form2");
-		FormType form3Type = new FormType();
-		form3Type.setName("form3");
-		form3Type.setEntity("form3");
 		MenuType menu1Type = new MenuType();
 		menu1Type.setName("menu1");
-		menu1Type.getFormOrMenuOrPlugin().add(plugin3Type);
-		menu1Type.getFormOrMenuOrPlugin().add(form3Type);
+		menu1Type.getMenuOrPlugin().add(plugin3Type);
 
-		menuType.getFormOrMenuOrPlugin().add(plugin1Type);
-		menuType.getFormOrMenuOrPlugin().add(plugin2Type);
-		menuType.getFormOrMenuOrPlugin().add(form1Type);
-		menuType.getFormOrMenuOrPlugin().add(form2Type);
-		menuType.getFormOrMenuOrPlugin().add(menu1Type);
+		menuType.getMenuOrPlugin().add(plugin1Type);
+		menuType.getMenuOrPlugin().add(plugin2Type);
+		menuType.getMenuOrPlugin().add(menu1Type);
 
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.READ)).thenReturn(true);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.READ)).thenReturn(false);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.READ)).thenReturn(true);
-		when(molgenisPermissionService.hasPermissionOnEntity("form1", Permission.READ)).thenReturn(true);
-		when(molgenisPermissionService.hasPermissionOnEntity("form2", Permission.READ)).thenReturn(false);
-		when(molgenisPermissionService.hasPermissionOnEntity("form3", Permission.READ)).thenReturn(false);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
 		Iterator<MolgenisUiMenuItem> it = xmlMolgenisUiMenu.getItems().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "plugin1");
-		assertEquals(it.next().getName(), "form1");
 		assertEquals(it.next().getName(), "menu1");
 	}
 
@@ -142,11 +126,11 @@ public class XmlMolgenisUiMenuTest
 		plugin3Type.setName("plugin3");
 		MenuType menu1Type = new MenuType();
 		menu1Type.setName("menu1");
-		menu1Type.getFormOrMenuOrPlugin().add(plugin3Type);
+		menu1Type.getMenuOrPlugin().add(plugin3Type);
 
-		menuType.getFormOrMenuOrPlugin().add(plugin1Type);
-		menuType.getFormOrMenuOrPlugin().add(menu1Type);
-		menuType.getFormOrMenuOrPlugin().add(plugin2Type);
+		menuType.getMenuOrPlugin().add(plugin1Type);
+		menuType.getMenuOrPlugin().add(menu1Type);
+		menuType.getMenuOrPlugin().add(plugin2Type);
 
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.READ)).thenReturn(false);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.READ)).thenReturn(true);
@@ -171,10 +155,10 @@ public class XmlMolgenisUiMenuTest
 		plugin3Type.setName("plugin3");
 		MenuType menu1Type = new MenuType();
 		menu1Type.setName("menu1");
-		menu1Type.getFormOrMenuOrPlugin().add(plugin3Type);
+		menu1Type.getMenuOrPlugin().add(plugin3Type);
 
-		menuType.getFormOrMenuOrPlugin().add(plugin1Type);
-		menuType.getFormOrMenuOrPlugin().add(menu1Type);
+		menuType.getMenuOrPlugin().add(plugin1Type);
+		menuType.getMenuOrPlugin().add(menu1Type);
 
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.READ)).thenReturn(false);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.READ)).thenReturn(true);
@@ -213,7 +197,7 @@ public class XmlMolgenisUiMenuTest
 		when(molgenisPermissionService.hasPermissionOnPlugin(pluginName, Permission.READ)).thenReturn(true);
 
 		MenuType menuType = new MenuType();
-		menuType.getFormOrMenuOrPlugin().add(pluginType);
+		menuType.getMenuOrPlugin().add(pluginType);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
 		assertTrue(xmlMolgenisUiMenu.isAuthorized());
@@ -233,8 +217,8 @@ public class XmlMolgenisUiMenuTest
 		when(molgenisPermissionService.hasPermissionOnPlugin(plugin2Name, Permission.READ)).thenReturn(true);
 
 		MenuType menuType = new MenuType();
-		menuType.getFormOrMenuOrPlugin().add(plugin1Type);
-		menuType.getFormOrMenuOrPlugin().add(plugin2Type);
+		menuType.getMenuOrPlugin().add(plugin1Type);
+		menuType.getMenuOrPlugin().add(plugin2Type);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
 		assertTrue(xmlMolgenisUiMenu.isAuthorized());
@@ -248,7 +232,7 @@ public class XmlMolgenisUiMenuTest
 		when(molgenisPermissionService.hasPermissionOnPlugin("type", Permission.READ)).thenReturn(false);
 
 		MenuType menuType = new MenuType();
-		menuType.getFormOrMenuOrPlugin().add(pluginType);
+		menuType.getMenuOrPlugin().add(pluginType);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
 		assertFalse(xmlMolgenisUiMenu.isAuthorized());
