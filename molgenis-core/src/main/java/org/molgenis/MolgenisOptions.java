@@ -287,9 +287,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "authorizable", param = Option.Param.COLLECTION, type = Option.Type.OPTIONAL_ARGUMENT, usage = "For use in molgenis_apps! Tells the generator on which entities to append an implements='Authorizable'. Default: new ArrayList<String>()")
 	public ArrayList<String> authorizable = new ArrayList<String>();
 
-	@Option(name = "services", param = Option.Param.COLLECTION, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Register services to the FrontController. (replaces webserver mappings and MolgenisServlet) Default: new ArrayList<String>()")
-	public ArrayList<String> services = new ArrayList<String>();
-
 	@Option(name = "disable_decorators", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "disables all decorators for generated test")
 	public boolean disable_decorators = false;
 
