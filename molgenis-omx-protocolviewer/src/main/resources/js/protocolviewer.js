@@ -206,7 +206,7 @@
 	
 	ns.getSelectedFeatures = function() {
 		return allSelectedFeatures;
-	}
+	};
 	
 	ns.searchAndUpdateTree = function(query, protocolUri) {
 		
@@ -724,13 +724,15 @@
 			$('#orderdata-href-btn').removeClass('disabled');
 			$('#ordersview-href-btn').removeClass('disabled');
 			updateSelectedFeatures(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
-			all
+		});
+		$(document).on('click', '#orderdata-href-btn', function() {
+			$('#orderdata-modal-container').data("data-set", ns.getSelectedDataSet());
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			var uri = ns.getSelectedDataSet().href;
 			ns.selectDataSet(uri.substring(uri.lastIndexOf('/') + 1)); // reset catalogue
 			$('#dataset-browser').dynatree('getRoot').select(false);
-			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 			search = false;
 			updatedNodes = null;
 			treePrevState = null;

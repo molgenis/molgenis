@@ -87,11 +87,10 @@ public class DataExplorerController extends MolgenisPlugin
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
+			throws Exception
 	{
-		// add data sets to model
-		List<DataSet> dataSets = database.find(DataSet.class);
+		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 		model.addAttribute("dataSets", dataSets);
 
 		if (dataSets != null && !dataSets.isEmpty())
@@ -129,8 +128,8 @@ public class DataExplorerController extends MolgenisPlugin
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
+			throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");

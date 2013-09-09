@@ -1,5 +1,6 @@
 package org.molgenis.omx.auth;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -167,9 +168,21 @@ public class OmxPermissionService implements MolgenisPermissionService
 		MolgenisUser user = database.findById(MolgenisUser.class, userAndRoleId);
 		if (user.getSuperuser()) return true;
 
+		// get roles for this user (user and user groups)
+		List<MolgenisRole> roles = new ArrayList<MolgenisRole>();
+		roles.add(user);
+
+		List<MolgenisRoleGroupLink> roleGroupLinks = database.find(MolgenisRoleGroupLink.class, new QueryRule(
+				MolgenisRoleGroupLink.ROLE_, Operator.EQUALS, userAndRoleId));
+		if (roleGroupLinks != null)
+		{
+			for (MolgenisRoleGroupLink roleGroupLink : roleGroupLinks)
+				roles.add(roleGroupLink.getGroup());
+		}
+
 		// get role permissions
 		List<MolgenisPermission> permissions = database.find(MolgenisPermission.class, new QueryRule(
-				MolgenisPermission.ROLE_, Operator.EQUALS, userAndRoleId), new QueryRule(MolgenisPermission.ENTITY,
+				MolgenisPermission.ROLE_, Operator.IN, roles), new QueryRule(MolgenisPermission.ENTITY,
 				Operator.EQUALS, molgenisEntity));
 
 		if (permissions != null)

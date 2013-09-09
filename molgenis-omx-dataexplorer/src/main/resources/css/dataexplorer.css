@@ -1,14 +1,8 @@
-.container-fluid {
-	padding-top: 10px;
-	padding-left: 10px;
-	padding-right: 10px;	
-}
-
 .well {
 	padding: 10px;
 }
 
-.row-fluid {
+.data-table-container {
 	margin-bottom: 20px;
 }
 
