@@ -15,34 +15,34 @@
 		</menu>
         <menu label="Admin" name="admin">
 	        <menu label="Entities" name ="entities">
-        		<plugin id="form/DataSet" label="DataSet" name="DataSetFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        		<plugin id="form/Protocol" label="Protocol" name="ProtocolFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-	      		<plugin id="form/ObservableFeature" label="ObservableFeature" name="ObservableFeatureFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        		<plugin id="form/Category" label="Category" name="CategoryFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form.DataSet" label="DataSet" name="DataSetFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form.Protocol" label="Protocol" name="ProtocolFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+	      		<plugin id="form.ObservableFeature" label="ObservableFeature" name="ObservableFeatureFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form.Category" label="Category" name="CategoryFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
         		<menu label="Values" name="values">
-        			<plugin id="form/BoolValue" label="BoolValue" name="BoolValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/CategoricalValue" label="CategoricalValue" name="CategoricalValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/DateValue" label="DateValue" name="DateValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/DateTimeValue" label="DateTimeValue" name="DateTimeValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/DecimalValue" label="DecimalValue" name="DecimalValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/EmailValue" label="EmailValue" name="EmailValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/HtmlValue" label="HtmlValue" name="HtmlValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/HyperlinkValue" label="HyperlinkValue" name="HyperlinkValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/IntValue" label="IntValue" name="IntValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/LongValue" label="LongValue" name="LongValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/MrefValue" label="MrefValue" name="MrefValueValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/StringValue" label="StringValue" name="StringValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/TextValue" label="TextValue" name="TextValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        			<plugin id="form/XrefValue" label="XrefValue" name="XrefValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.BoolValue" label="BoolValue" name="BoolValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.CategoricalValue" label="CategoricalValue" name="CategoricalValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.DateValue" label="DateValue" name="DateValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.DateTimeValue" label="DateTimeValue" name="DateTimeValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.DecimalValue" label="DecimalValue" name="DecimalValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.EmailValue" label="EmailValue" name="EmailValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.HtmlValue" label="HtmlValue" name="HtmlValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.HyperlinkValue" label="HyperlinkValue" name="HyperlinkValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.IntValue" label="IntValue" name="IntValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.LongValue" label="LongValue" name="LongValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.MrefValue" label="MrefValue" name="MrefValueValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.StringValue" label="StringValue" name="StringValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.TextValue" label="TextValue" name="TextValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        			<plugin id="form.XrefValue" label="XrefValue" name="XrefValueFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
         		</menu>
-        		<plugin id="form/StudyDataRequest" label="StudyDataRequest" name="StudyDataRequestFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-        		<plugin id="form/RuntimeProperty" label="RuntimeProperty" name="RuntimePropertyFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form.StudyDataRequest" label="StudyDataRequest" name="StudyDataRequestFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form.RuntimeProperty" label="RuntimeProperty" name="RuntimePropertyFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 		        <menu label="Users and Permissions" name="security">
-					<plugin id="form/MolgenisUser" label="MolgenisUser" name="MolgenisUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisGroup" label="MolgenisGroup" name="MolgenisGroupFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisRoleGroupLink" label="MolgenisRoleGroupLink" name="MolgenisRoleGroupLinkFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisEntity" label="MolgenisEntity" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			        <plugin id="form/MolgenisPermission" label="MolgenisPermission" name="MolgenisPermissionFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+					<plugin id="form.MolgenisUser" label="MolgenisUser" name="MolgenisUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form.MolgenisGroup" label="MolgenisGroup" name="MolgenisGroupFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form.MolgenisRoleGroupLink" label="MolgenisRoleGroupLink" name="MolgenisRoleGroupLinkFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form.MolgenisEntity" label="MolgenisEntity" name="MolgenisEntityFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			        <plugin id="form.MolgenisPermission" label="MolgenisPermission" name="MolgenisPermissionFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 				</menu>	
 	        </menu>
         	<plugin id="catalogmanager" label="Catalog Manager" name="CatalogManagerPlugin" type="org.molgenis.catalogmanager.CatalogManagerPlugin" />

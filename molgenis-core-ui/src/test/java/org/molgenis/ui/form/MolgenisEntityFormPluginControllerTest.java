@@ -51,7 +51,7 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		when(model.getEntity("Test")).thenReturn(null);
 		when(database.getMetaData()).thenReturn(model);
 
-		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "/Test")).andExpect(status().is(404));
+		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + ".Test")).andExpect(status().is(404));
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		when(database.getMetaData()).thenReturn(model);
 		when(permissionService.hasPermissionOnEntity("Test", Permission.READ)).thenReturn(false);
 
-		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "/Test")).andExpect(status().is(401));
+		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + ".Test")).andExpect(status().is(401));
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		when(database.getMetaData()).thenReturn(model);
 		when(permissionService.hasPermissionOnEntity("Test", Permission.READ)).thenReturn(true);
 
-		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "/Test")).andExpect(status().is(200))
+		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + ".Test")).andExpect(status().is(200))
 				.andExpect(model().attributeExists("form"));
 	}
 
