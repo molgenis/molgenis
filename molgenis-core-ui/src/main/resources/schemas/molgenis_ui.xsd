@@ -1,36 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-	<xs:element name="molgenis"><!-- TODO require exactly one menu item when we switch to Spring UI controllers -->
+	<xs:element name="molgenis">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:element name="form" type="formType"/>
-					<xs:element name="menu" type="menuType"/>
-					<xs:element name="plugin" type="pluginType"/>
-				</xs:choice>
+				<xs:element name="menu" type="menuType"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="label" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 
-	<xs:complexType name="formType">
-		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="form" type="formType" minOccurs="0" maxOccurs="unbounded"/>
-			<xs:element name="menu" type="menuType" minOccurs="0" maxOccurs="unbounded"/>
-			<xs:element name="plugin" type="pluginType" minOccurs="0" maxOccurs="unbounded"/>
-		</xs:choice>
-		<xs:attribute name="name" type="xs:string" use="required"/>
-		<xs:attribute name="label" type="xs:string"/>
-		<xs:attribute name="view" type="xs:string"/><!-- TODO decide whether to use view or viewtype -->
-		<xs:attribute name="viewtype" type="xs:string"/><!-- TODO decide whether to use view or viewtype -->
-		<xs:attribute name="entity" type="xs:string"/>
-	</xs:complexType>
-
 	<xs:complexType name="menuType">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="form" type="formType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="menu" type="menuType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="plugin" type="pluginType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:choice>
@@ -40,14 +22,10 @@
 
 	<xs:complexType name="pluginType">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="form" type="formType" minOccurs="0"
-				maxOccurs="unbounded"/>
-			<xs:element name="menu" type="menuType" minOccurs="0"
-				maxOccurs="unbounded"/>
-			<xs:element name="plugin" type="pluginType" minOccurs="0"
-				maxOccurs="unbounded"/>
+			<xs:element name="menu" type="menuType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="plugin" type="pluginType" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:choice>
-		<xs:attribute name="id" type="xs:string"/><!-- TODO make required when we switch to Spring UI controllers -->
+		<xs:attribute name="id" type="xs:string" use="required"/>
 		<xs:attribute name="name" type="xs:string" use="required"/>
 		<xs:attribute name="label" type="xs:string"/>
 		<xs:attribute name="type" type="xs:string"/>

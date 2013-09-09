@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -101,7 +100,7 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		String menuId = "menu1";
 		MenuType menuType = new MenuType();
 		menuType.setName(menuId);
-		when(molgenis.getFormOrMenuOrPlugin()).thenReturn(Arrays.<Object> asList(menuType));
+		when(molgenis.getMenu()).thenReturn(menuType);
 		MolgenisUiMenu menu = xmlMolgenisUi.getMenu();
 		assertEquals(menu.getId(), menuId);
 	}
