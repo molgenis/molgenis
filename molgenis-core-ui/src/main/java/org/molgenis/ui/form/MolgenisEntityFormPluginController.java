@@ -11,7 +11,6 @@ import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
-import org.molgenis.ui.MolgenisPluginAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,7 +44,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
 		boolean hasWritePermission = permissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, hasWritePermission));
-		// model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_LIST;
 	}
@@ -58,7 +56,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
 		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, true));
-		// model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_EDIT;
 	}
@@ -69,7 +66,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	{
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, true));
-		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_EDIT;
 	}
@@ -83,7 +79,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
 		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, true));
-		// model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_EDIT;
 	}
@@ -120,8 +115,4 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		return entityMetaData;
 	}
 
-	private String getPluginId(String entityName)
-	{
-		return getId() + '/' + entityName;
-	}
 }
