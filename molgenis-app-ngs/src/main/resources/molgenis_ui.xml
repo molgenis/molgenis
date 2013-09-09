@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="ngs">
+<molgenis label="NGS" name="ngs">
 	<!-- (1) Projects scherm met subscherm samples en subscherm experiments; (2) Experiments scherm met subscherm flowcell/lanes -->
 	<menu label="Home" name="main">
-		<plugin id="home" name="Home" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
-		<plugin id="useraccount" name="UserAccountPlugin" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />
+		<plugin id="home" name="HomeController" type="org.molgenis.ngs.plugins.HomePlugin" label="Home" />
+		<plugin id="useraccount" name="UserAccountController" type="org.molgenis.omx.auth.ui.UserAccountPlugin" label="Account" />
 		<!--  TODO Sample should be a detail of master Project -->
-		<plugin id="form/Project" label="Projects" name="ProjectFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-		<plugin id="form/Sample" label="Samples" name="SampleFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		<plugin id="form/Project" label="Projects" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		<plugin id="form/Sample" label="Samples" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 		<!--  TODO FlowcellLane should be a detail of master Flowcell -->
-		<plugin id="form/Flowcell" label="FlowcellRuns" name="FlowcellFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-		<plugin id="form/FlowcellLane" label="FlowcellLanes" name="FlowcellLaneFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-		<plugin id="worksheet" name="Worksheet" type="org.molgenis.ngs.plugins.WorksheetPlugin"/>
+		<plugin id="form/Flowcell" label="FlowcellRuns" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		<plugin id="form/FlowcellLane" label="FlowcellLanes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+		<plugin id="worksheet" label="Worksheet" name="WorksheetController" type="org.molgenis.ngs.plugins.WorksheetPlugin"/>
 		<menu name="Configuration" >
-			<plugin id="form/NgsUser" label="Users" name="NgsUserFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			<plugin id="form/NgsUser" label="Users" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 			<!-- TODO add FlowCell form plugin -->
-			<plugin id="form/SampleBarcodeType" label="SampleBarcodeTypes" name="SampleBarcodeTypeFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			<plugin id="form/SampleBarcode" label="SampleBarcodes" name="SampleBarcodeFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			<plugin id="form/CapturingKit" label="CapturingKits" name="CapturingKitFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			<plugin id="form/PrepKit" label="PrepKits" name="PrepKitFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
-			<plugin id="form/Machine" label="Sequencers" name="MachineFormPlugin" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			<plugin id="form/SampleBarcodeType" label="SampleBarcodeTypes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			<plugin id="form/SampleBarcode" label="SampleBarcodes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			<plugin id="form/CapturingKit" label="CapturingKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			<plugin id="form/PrepKit" label="PrepKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+			<plugin id="form/Machine" label="Sequencers" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
 			<!-- TODO add Sample form plugin -->
 		</menu>
-		<plugin id="barcode" name="Barcode" label="Barcode selector"  type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
+		<plugin id="barcode" label="Barcode selector" name="BarcodeController" type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
 	</menu>
 </molgenis>
