@@ -121,12 +121,12 @@ public class OmxPermissionService implements MolgenisPermissionService
 		switch (permission)
 		{
 			case OWN:
+				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.READ));
+			case READ:
 				return hasPermission(molgenisEntity,
 						Arrays.<Permission> asList(Permission.READ, Permission.WRITE, Permission.OWN));
-			case READ:
-				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.READ));
 			case WRITE:
-				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.READ, Permission.WRITE));
+				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.WRITE, Permission.OWN));
 			default:
 				throw new RuntimeException("unknown permission: " + permission);
 		}
