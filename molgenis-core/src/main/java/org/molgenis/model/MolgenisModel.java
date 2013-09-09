@@ -78,17 +78,10 @@ public class MolgenisModel
 			logger.info("read model");
 			if (logger.isTraceEnabled()) logger.trace(model);
 
-			// if (!options.exclude_system) Model.createSystemTables(model);
+			logger.debug("validating model ...");
 			MolgenisModelValidator.validate(model, options);
-
-			logger.info("parsing ui-schema");
-			model = MolgenisModelParser.parseUiSchema(options.path + options.model_userinterface, model);
-			// if (options.force_molgenis_package == true)
-			// model.setName("molgenis");
-
-			MolgenisModelValidator.validateUI(model, options);
-
 			logger.info("validated model");
+
 			if (logger.isTraceEnabled()) logger.trace(model);
 		}
 		catch (MolgenisModelException e)
