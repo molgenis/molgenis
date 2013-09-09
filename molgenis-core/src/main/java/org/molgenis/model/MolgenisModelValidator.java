@@ -754,7 +754,7 @@ public class MolgenisModelValidator
 				try
 				{
 					Field pkeyField = null;
-					if (iface.getKeyFields(Entity.PRIMARY_KEY).size() == 1)
+					if (iface.getKeys().size() == 1)
 					{
 						pkeyField = iface.getKeyFields(Entity.PRIMARY_KEY).get(0);
 						// if not already exists

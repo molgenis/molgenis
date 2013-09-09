@@ -53,15 +53,7 @@ public class XmlMolgenisUi implements MolgenisUi
 	@Override
 	public MolgenisUiMenu getMenu()
 	{
-		// TODO skip any forms and plugins in the root, see molgenis_ui.xsd for proposed changes
-		for (Object menuItem : molgenisUi.getFormOrMenuOrPlugin())
-		{
-			if (menuItem instanceof MenuType)
-			{
-				return new XmlMolgenisUiMenu(molgenisPermissionService, (MenuType) menuItem);
-			}
-		}
-		throw new RuntimeException("missing required menu item");
+		return new XmlMolgenisUiMenu(molgenisPermissionService, molgenisUi.getMenu());
 	}
 
 	@Override

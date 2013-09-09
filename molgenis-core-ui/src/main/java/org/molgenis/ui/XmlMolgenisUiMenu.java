@@ -51,7 +51,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	@Override
 	public boolean isAuthorized()
 	{
-		for (Object menuItem : menuType.getFormOrMenuOrPlugin())
+		for (Object menuItem : menuType.getMenuOrPlugin())
 		{
 			MolgenisUiMenuItem pluginMenuItem = toMenuItem(menuItem);
 			if (pluginMenuItem.isAuthorized()) return true;
@@ -63,7 +63,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	public List<MolgenisUiMenuItem> getItems()
 	{
 		List<MolgenisUiMenuItem> pluginMenuItems = new ArrayList<MolgenisUiMenuItem>();
-		for (Object menuItem : menuType.getFormOrMenuOrPlugin())
+		for (Object menuItem : menuType.getMenuOrPlugin())
 		{
 			MolgenisUiMenuItem pluginMenuItem = toMenuItem(menuItem);
 			if (pluginMenuItem.isAuthorized()) pluginMenuItems.add(pluginMenuItem);
@@ -75,7 +75,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	public MolgenisUiMenuItem getActiveItem()
 	{
 		MolgenisUiMenuItem activeMenuItem = null;
-		for (Object menuItem : menuType.getFormOrMenuOrPlugin())
+		for (Object menuItem : menuType.getMenuOrPlugin())
 		{
 			MolgenisUiMenuItem pluginMenuItem = toMenuItem(menuItem);
 			if (pluginMenuItem.getType() != MolgenisUiMenuItemType.MENU && pluginMenuItem.isAuthorized())
@@ -106,11 +106,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 
 	private MolgenisUiMenuItem toMenuItem(Object menuItem)
 	{
-		if (menuItem instanceof FormType)
-		{
-			return new XmlMolgenisUiForm(molgenisPermissionService, (FormType) menuItem, this);
-		}
-		else if (menuItem instanceof MenuType)
+		if (menuItem instanceof MenuType)
 		{
 			return new XmlMolgenisUiMenu(molgenisPermissionService, (MenuType) menuItem, this);
 		}
