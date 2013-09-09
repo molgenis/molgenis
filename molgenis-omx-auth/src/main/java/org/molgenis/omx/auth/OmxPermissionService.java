@@ -44,12 +44,12 @@ public class OmxPermissionService implements MolgenisPermissionService
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginName, Permission permission)
 	{
-		pluginName = pluginName + "Plugin"; // TODO remove line after removing molgenis UI framework
 		try
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByNameType(database, pluginName,
 					EntityType.PLUGIN.toString());
-			if (molgenisEntity == null) throw new RuntimeException(pluginName + " is not a plugin");
+			if (molgenisEntity == null) throw new RuntimeException(pluginName + " is not a "
+					+ MolgenisEntity.class.getSimpleName() + " of type " + EntityType.PLUGIN);
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -64,7 +64,8 @@ public class OmxPermissionService implements MolgenisPermissionService
 		try
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByClassName(database, pluginClazz.getName());
-			if (molgenisEntity == null) throw new RuntimeException(pluginClazz.getName() + " is not a plugin");
+			if (molgenisEntity == null) throw new RuntimeException(pluginClazz.getName() + " is not a "
+					+ MolgenisEntity.class.getSimpleName());
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -92,7 +93,8 @@ public class OmxPermissionService implements MolgenisPermissionService
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByNameType(database, entityName,
 					EntityType.ENTITY.toString());
-			if (molgenisEntity == null) throw new RuntimeException(entityName + " is not an entity");
+			if (molgenisEntity == null) throw new RuntimeException(entityName + " is not a "
+					+ MolgenisEntity.class.getSimpleName() + " of type " + EntityType.ENTITY);
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -107,7 +109,8 @@ public class OmxPermissionService implements MolgenisPermissionService
 		try
 		{
 			MolgenisEntity molgenisEntity = MolgenisEntity.findByClassName(database, entityClazz.getName());
-			if (molgenisEntity == null) throw new RuntimeException(entityClazz.getName() + " is not an entity");
+			if (molgenisEntity == null) throw new RuntimeException(entityClazz.getName() + " is not a "
+					+ MolgenisEntity.class.getSimpleName());
 			return hasPermission(molgenisEntity, permission);
 		}
 		catch (DatabaseException e)
@@ -121,12 +124,12 @@ public class OmxPermissionService implements MolgenisPermissionService
 		switch (permission)
 		{
 			case OWN:
+				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.READ));
+			case READ:
 				return hasPermission(molgenisEntity,
 						Arrays.<Permission> asList(Permission.READ, Permission.WRITE, Permission.OWN));
-			case READ:
-				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.READ));
 			case WRITE:
-				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.READ, Permission.WRITE));
+				return hasPermission(molgenisEntity, Arrays.<Permission> asList(Permission.WRITE, Permission.OWN));
 			default:
 				throw new RuntimeException("unknown permission: " + permission);
 		}

@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class MolgenisEntityFormPluginController extends MolgenisPlugin
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "form";
+	public static final String PLUGIN_NAME_PREFIX = "form.";
+	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + PLUGIN_NAME_PREFIX;
 	public static final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private static final String VIEW_NAME_LIST = "view-form-list";
 	private static final String VIEW_NAME_EDIT = "view-form-edit";
@@ -37,19 +38,19 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		super(URI);
 	}
 
-	@RequestMapping(method = GET, value = URI + ".{entityName}")
+	@RequestMapping(method = GET, value = URI + "{entityName}")
 	public String list(@PathVariable("entityName")
 	String entityName, Model model) throws DatabaseException
 	{
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
 		boolean hasWritePermission = permissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, hasWritePermission));
-		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
+		// model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_LIST;
 	}
 
-	@RequestMapping(method = GET, value = URI + ".{entityName}/{id}")
+	@RequestMapping(method = GET, value = URI + "{entityName}/{id}")
 	public String edit(@PathVariable("entityName")
 	String entityName, @PathVariable("id")
 	String id, Model model) throws DatabaseException, MolgenisModelException, ParseException
@@ -57,18 +58,32 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
 		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, true));
-		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
+		// model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_EDIT;
 	}
 
-	@RequestMapping(method = GET, value = URI + ".{entityName}/create")
+	@RequestMapping(method = GET, value = URI + "{entityName}/create")
 	public String create(@PathVariable("entityName")
 	String entityName, Model model) throws DatabaseException
 	{
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, true));
 		model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
+
+		return VIEW_NAME_EDIT;
+	}
+
+	@RequestMapping(method = GET, value = URI + "{entityName}/{id}/{subEntityName}")
+	public String editWithSubForm(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	String id, @PathVariable("subEntityName")
+	String subEntityName, Model model) throws DatabaseException, MolgenisModelException, ParseException
+	{
+		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
+		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, true));
+		// model.addAttribute(MolgenisPluginAttributes.KEY_PLUGIN_ID, getPluginId(entityName));
 
 		return VIEW_NAME_EDIT;
 	}
