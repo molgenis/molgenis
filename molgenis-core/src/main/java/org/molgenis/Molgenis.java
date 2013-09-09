@@ -59,9 +59,6 @@ import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.EntityServiceGen;
-import org.molgenis.generators.server.FrontControllerGen;
-import org.molgenis.generators.server.MolgenisContextListenerGen;
-import org.molgenis.generators.server.MolgenisGuiServiceGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
@@ -230,14 +227,16 @@ public class Molgenis
 		if (options.generate_doc)
 		{
 			generators.add(new FileFormatDocGen());
-			//check if dot is available to prevent error lists in the build logs
-			try{
+			// check if dot is available to prevent error lists in the build logs
+			try
+			{
 				Runtime.getRuntime().exec("dot -?");
 				generators.add(new DotDocGen());
 				generators.add(new DotDocMinimalGen());
 			}
-			catch(Exception e){
-				//dot not available
+			catch (Exception e)
+			{
+				// dot not available
 			}
 			generators.add(new ObjectModelDocGen());
 			generators.add(new DotDocModuleDependencyGen());
@@ -328,19 +327,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping R interface ....");
-		}
-
-		if (options.generate_frontcontroller)
-		{
-			generators.add(new FrontControllerGen());
-			// also generate context
-			generators.add(new MolgenisContextListenerGen());
-		}
-
-		// optional: the GUI
-		if (options.generate_gui)
-		{
-			generators.add(new MolgenisGuiServiceGen());
 		}
 
 		// HTML
