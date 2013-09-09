@@ -97,7 +97,7 @@ public class OmxStudyManagerService implements StudyManagerService
 				+ "] does not exist");
 
 		studyDataRequest.setName(studyDataRequest.getName());
-		studyDataRequest.setFeatures(Lists.transform(studyDefinition.getItems(),
+		studyDataRequest.setFeatures(Lists.newArrayList(Lists.transform(studyDefinition.getItems(),
 				new Function<CatalogItem, ObservableFeature>()
 				{
 
@@ -120,7 +120,7 @@ public class OmxStudyManagerService implements StudyManagerService
 						}
 						return feature;
 					}
-				}));
+				})));
 		try
 		{
 			database.update(studyDataRequest); // FIXME Duplicate entry '...' for key 'PRIMARY' exceptions
