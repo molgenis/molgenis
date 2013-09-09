@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,8 @@ import org.springframework.web.servlet.HandlerMapping;
 @RequestMapping(URI)
 public class MolgenisMenuController
 {
+	private static final Logger logger = Logger.getLogger(MolgenisMenuController.class);
+
 	public static final String URI = "/menu";
 
 	static final String KEY_MENU_ID = "menu_id";
@@ -37,12 +40,16 @@ public class MolgenisMenuController
 	{
 		MolgenisUiMenu menu = molgenisUi.getMenu();
 		if (menu == null) throw new RuntimeException("main menu does not exist");
-		model.addAttribute(KEY_MENU_ID, menu.getId());
+		String menuId = menu.getId();
+		model.addAttribute(KEY_MENU_ID, menuId);
 
 		MolgenisUiMenuItem activeItem = menu.getActiveItem();
-		if (activeItem == null) throw new RuntimeException("Warning! Main menu does not contain any (accessible) items");
+		if (activeItem == null) logger.warn("main menu does not contain any (accessible) items");
+		String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
 
-		return getForwardPluginUri(activeItem.getId(), null);
+		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
+		model.addAttribute(KEY_CONTEXT_URL, contextUri);
+		return getForwardPluginUri(pluginId, null);
 	}
 
 	@RequestMapping("/{menuId}")

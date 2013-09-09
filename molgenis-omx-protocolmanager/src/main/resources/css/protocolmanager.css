@@ -1,4 +1,4 @@
-.container-fluid {
+#plugin-container .container-fluid {
 	padding-top: 10px;
 	padding-left: 10px;
 	padding-right: 10px;	
@@ -8,7 +8,7 @@
 	padding: 10px;
 }
 
-.row-fluid {
+#plugin-container .row-fluid {
 	margin-bottom: 20px;
 }
 

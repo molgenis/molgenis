@@ -2,7 +2,7 @@
 <div id="login-modal" class="modal hide" tabindex="-1">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Login</h3>
+    <h3>Sign in</h3>
   </div>
   <div class="modal-body">
 	<#-- login form -->
@@ -27,7 +27,7 @@
 	</form>
 	<#-- links to other modals -->
 	<div id="register-modal-container"></div>
-	<p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Register</small></a></p>
+	<p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Sign up</small></a></p>
 	<div id="resetpassword-modal-container"></div>
 	<p><a class="modal-href" href="/account/password/reset" data-target="resetpassword-modal-container"><small>Forgot password?</small></a></p>
   </div>
