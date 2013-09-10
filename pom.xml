@@ -36,7 +36,7 @@
 	<repositories>
 	  <repository>
 	    <id>enonic</id>
-	    <url>http://repo.enonic.com/artifactory/public/</url>
+	    <url>http://repo.enonic.com/public/</url>
 	  </repository>
 	</repositories>
 
