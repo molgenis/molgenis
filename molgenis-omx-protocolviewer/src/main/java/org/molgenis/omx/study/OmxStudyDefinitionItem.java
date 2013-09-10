@@ -1,5 +1,7 @@
 package org.molgenis.omx.study;
 
+import java.util.List;
+
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.target.OntologyTerm;
 
@@ -34,14 +36,15 @@ public class OmxStudyDefinitionItem implements StudyDefinitionItem
 	@Override
 	public String getCode()
 	{
-		OntologyTerm ontologyTerm = observableFeature.getDefinition();
-		return ontologyTerm != null ? ontologyTerm.getTermAccession() : null;
+		List<OntologyTerm> ontologyTerm = observableFeature.getDefinition();
+		return ontologyTerm != null && ontologyTerm.size() > 0 ? ontologyTerm.get(0).getTermAccession() : null;
 	}
 
 	@Override
 	public String getCodeSystem()
 	{
-		OntologyTerm ontologyTerm = observableFeature.getDefinition();
-		return ontologyTerm != null ? ontologyTerm.getOntology().getOntologyAccession() : null;
+		List<OntologyTerm> ontologyTerm = observableFeature.getDefinition();
+		return ontologyTerm != null && ontologyTerm.size() > 0 ? ontologyTerm.get(0).getOntology()
+				.getOntologyAccession() : null;
 	}
 }
