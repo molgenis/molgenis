@@ -2,7 +2,7 @@
 <div id="register-modal" class="modal hide" tabindex="-1">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="#register-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    <h3>Register</h3>
+    <h3>Sign up</h3>
   </div>
   <div class="modal-body">
   	<#-- register form -->
@@ -137,7 +137,7 @@
   </div>
   <div class="modal-footer">
     <a href="#" id="register-btn-close" class="btn" aria-hidden="true">Close</a>
-    <a href="#" id="register-btn" class="btn btn-primary" aria-hidden="true">Register</a>
+    <a href="#" id="register-btn" class="btn btn-primary" aria-hidden="true">Sign up</a>
   </div>
 </div>
 <script type="text/javascript">

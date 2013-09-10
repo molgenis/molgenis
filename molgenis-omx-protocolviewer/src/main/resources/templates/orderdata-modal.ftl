@@ -30,11 +30,20 @@
   </div>
 </div>
 <script type="text/javascript">
-	$(function() {
+	$(function() {	 
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
   		var form = $('#orderdata-form');
+  		
+  		<#-- set current selected data set -->
+		if($('#orderdata-modal-container')) {
+			var dataSet = $('#orderdata-modal-container').data('data-set');
+			if(dataSet) {
+				$('#orderdata-form').prepend('<input type="hidden" name="dataSetIdentifier" value="' + dataSet.identifier + '">');
+			}	
+		}
+  		
   		form.validate();
 
   		<#-- modal events -->

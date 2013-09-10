@@ -7,7 +7,7 @@
 	<head>
 		<title>${molgenis_ui.title?html}</title>
 		<meta charset="utf-8">
-		<link rel="shortcut icon" type="image/x-icon" href="/img/molgenis.ico">
+		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
 	<#list css as css_file_name>
@@ -32,24 +32,26 @@
 	</head>
 	<body>
 		<div class="container-fluid">
-			<div class="row-fluid">
+			<div id="molgenis-header" class="row-fluid">
 				<a href="/"><img src="${molgenis_ui.hrefLogo?html}"></a>
 			</div>
 			<div class="row-fluid">
-				<div id="login-modal-container-header"></div>
-				<div class="pull-right">
-				<#if authenticated?? && authenticated>
-					<a href="/account/logout">logout</a>
-				<#else>
-					<a class="modal-href" href="/account/login" data-target="login-modal-container-header">login/register</a>
+				<div class="span11">
+			<#if menu_id??>
+				<#if !(plugin_id??)>
+					<#assign plugin_id="NULL">
 				</#if>
+				<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
+			</#if>			
 				</div>
-		<#if menu_id??>
-			<#if !(plugin_id??)>
-				<#assign plugin_id="NULL">
-			</#if>
-			<@molgenis_menu molgenis_ui.getMenu(menu_id) plugin_id/>
-		</#if>
+				<div class="span1">
+					<div id="login-modal-container-header"></div>
+					<#if authenticated?? && authenticated>
+						<a class="pull-right" href="/account/logout"><button class="btn btn-link">Sign out</button></a>
+					<#else>
+						<a class="modal-href pull-right" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
+					</#if>
+				</div>
 			</div>
 			<div class="row-fluid">
 				<div id="plugin-container" class="container-fluid">
@@ -83,7 +85,7 @@
 				</ul>
 	<#assign breadcrumb = menu.breadcrumb>
 	<#if (breadcrumb?size > 1)>
-				<ul class="breadcrumb">
+				<ul id="molgenis-breadcrumb" class="breadcrumb">
 		<#list breadcrumb as menu>
 			<#if menu_has_next>
 					<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>

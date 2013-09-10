@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.molgenis.DatabaseConfig;
+import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.security.Login;
@@ -12,9 +13,12 @@ import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.auth.OmxPermissionService;
+import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.harmonization.config.HarmonizationConfig;
+import org.molgenis.omx.studymanager.OmxStudyManagerService;
 import org.molgenis.search.SearchSecurityConfig;
+import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisPluginInterceptor;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.XmlMolgenisUi;
@@ -57,6 +61,10 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 		DataExplorerConfig.class, SearchSecurityConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
+	@Autowired
+	@Qualifier("database")
+	private Database database;
+
 	@Autowired
 	@Qualifier("unauthorizedDatabase")
 	private Database unauthorizedDatabase;
@@ -223,5 +231,17 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisPermissionService molgenisPermissionService()
 	{
 		return new OmxPermissionService(unauthorizedDatabase, login);
+	}
+
+	@Bean
+	public CatalogManagerService catalogManagerService()
+	{
+		return new OmxCatalogManagerService(database);
+	}
+
+	@Bean
+	public StudyManagerService studyDefinitionManagerService()
+	{
+		return new OmxStudyManagerService(database);
 	}
 }

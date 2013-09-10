@@ -25,9 +25,11 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.filter.StudyDataRequest;
+import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.study.OrderStudyDataService;
+import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.study.StudyDefinition;
+import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -116,10 +118,19 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 			when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 			return javaMailSender;
 		}
+
+		@Bean
+		public StudyManagerService studyManagerService()
+		{
+			return mock(StudyManagerService.class);
+		}
 	}
 
 	@Autowired
 	private OrderStudyDataService orderStudyDataService;
+
+	@Autowired
+	private StudyManagerService studyManagerService;
 
 	@Autowired
 	private Database database;
@@ -130,10 +141,18 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void orderStudyData() throws DatabaseException, MessagingException, IOException
 	{
+		StudyDefinition studyDefinition = when(mock(StudyDefinition.class).getId()).thenReturn("1").getMock();
+		when(studyManagerService.persistStudyDefinition((StudyDefinition) any())).thenReturn(studyDefinition);
+
+		DataSet dataSet = mock(DataSet.class);
+		@SuppressWarnings("unchecked")
+		Query<DataSet> q = mock(Query.class);
+		when(q.find()).thenReturn(Collections.singletonList(dataSet));
+		when(database.query(DataSet.class)).thenReturn(q);
 		Part requestForm = mock(Part.class);
 		when(requestForm.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]
 		{ 0, 1, 2 }));
-		orderStudyDataService.orderStudyData("study #1", requestForm,
+		orderStudyDataService.orderStudyData("study #1", requestForm, "1",
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), 1);
 
 		// TODO improve test
@@ -144,33 +163,33 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noStudyName() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData(null, mock(Part.class),
+		orderStudyDataService.orderStudyData(null, mock(Part.class), "1",
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), 1);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noRequestForm() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService
-				.orderStudyData("study #1", null, Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), 1);
+		orderStudyDataService.orderStudyData("study #1", null, "1",
+				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), 1);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noFeatures() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), null, 1);
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", null, 1);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_emptyFeatures() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), Collections.<Integer> emptyList(), 1);
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", Collections.<Integer> emptyList(), 1);
 	}
 
 	@Test(expectedExceptions = DatabaseException.class)
 	public void orderStudyData_invalidFeatures() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class),
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1",
 				Arrays.asList(Integer.valueOf(-2), Integer.valueOf(-1)), 1);
 	}
 

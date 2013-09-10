@@ -4,9 +4,11 @@
 <#assign js=["chosen.jquery.min.js", "entityexplorer.js"]>
 <@header css js/>
 	<div class="row-fluid">
-		<div class="well">
+		<div class="span2"></div>
+		<div class="span8">
+			<div class="well">
 				<div class="row-fluid">
-					<div class="span3">
+					<div class="span6">
 						<label class="control-label" for="entity-select">Entity class:</label>
 						<div class="controls">
 							<select data-placeholder="Please Select" id="entity-select">
@@ -16,7 +18,7 @@
 				      		</select>
 						</div>
 			      	</div>
-			      	<div class="span3">
+			      	<div class="span6">
 				      	<label class="control-label" for="entity-instance-select">Entity instance:</label>
 						<div class="controls">
 							<select data-placeholder="Please Select" id="entity-instance-select">
@@ -36,13 +38,15 @@
 					</div>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div id="entity-search-results-header" class="pull-left">
-				</div>
-			</div>
-			<div class="row-fluid">
-				<div id="entity-search-results">
-				</div>
-			</div>	
+		</div>
+		<div class="span2"></div>
+	</div>	
+	<div class="row-fluid">
+		<div id="entity-search-results-header" class="pull-left">
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div id="entity-search-results">
+		</div>
 	</div>
 <@footer/>

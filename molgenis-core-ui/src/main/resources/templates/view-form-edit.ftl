@@ -3,12 +3,12 @@
 <#import "molgenis-input-elements.ftl" as input>
 
 <#assign css=['select2.css', 'molgenis-form.css']>
-<#assign js=['select2.min.js', 'molgenis-form-edit.js']>
+<#assign js=['jquery.validate.min.js', 'select2.min.js', 'molgenis-form-edit.js']>
 
 <@header css js/>
 
 <form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??>/${form.primaryKey}</#if>">
-	<a href="${context_url}/${form.metaData.name}" class="pull-left">
+	<a href="${context_url}" class="pull-left">
 		<div id="back">
 			<div class="nav-icon-prev pull-left"></div>
 			<div class="nav-icon-prev pull-left"></div>

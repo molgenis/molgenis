@@ -28,13 +28,13 @@
 		    url: '/plugin/datasetdeleter/delete',
 		    data: form.serialize(),
 		    success: function (msg) {
-		    	$('.container-fluid').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
+		    	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
 		    	ns.fillDataSetSelect();
 		    	parent.hideSpinner();
 		    },
 		    error:function (xhr, ajaxOptions, thrownError){ 
 		    	parent.hideSpinner();
-		    	$('.container-fluid').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>An error occurred while deleting the dataset</div>'));  
+		    	$('#plugin-container').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>An error occurred while deleting the dataset</div>'));  
 		 } 
 	});
 };
