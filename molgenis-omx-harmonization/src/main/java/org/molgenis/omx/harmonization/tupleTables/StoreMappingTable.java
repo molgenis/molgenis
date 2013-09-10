@@ -34,7 +34,6 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 {
 
 	private Database db;
-	private final String dataSetIdentifier;
 	private static final String OBSERVATION_SET = "observation_set";
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private final ValueConverter valueConverter;
@@ -46,7 +45,6 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	{
 		this.dataSet = db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSetIdentifier))
 				.get(0);
-		this.dataSetIdentifier = dataSetIdentifier;
 		this.valueConverter = new ValueConverter(db);
 		setDb(db);
 	}
@@ -61,7 +59,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 			Map<Integer, KeyValueTuple> storeMapping = new HashMap<Integer, KeyValueTuple>();
 
 			for (ObservationSet observation : db.find(ObservationSet.class, new QueryRule(
-					ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, this.dataSetIdentifier)))
+					ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSet.getIdentifier())))
 			{
 				observationSetIds.add(observation.getId());
 			}
@@ -187,7 +185,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 			try
 			{
 				List<ObservationSet> observationSets = db.find(ObservationSet.class, new QueryRule(
-						ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, this.dataSetIdentifier));
+						ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSet.getIdentifier()));
 				numberOfRows = observationSets.size();
 			}
 			catch (Exception e)
