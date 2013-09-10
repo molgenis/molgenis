@@ -79,16 +79,23 @@
 			
 			// create new tree
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
-			$.get('/plugin/studymanager/edit/' + studyDefinitionId, function(catalog) {
-				editInfoContainer.html(createCatalogInfo(catalog));
-				editTreeContainer.empty();
-				editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
-			}).fail(function() { alert("error"); });
+			$.ajax({
+				type : 'GET',
+				url : '/plugin/studymanager/edit/' + studyDefinitionId,
+				success : function(catalog) {
+					editInfoContainer.html(createCatalogInfo(catalog));
+					editTreeContainer.empty();
+					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				    viewEditContainer.empty();
+					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				}
+			});
 		}
 		
 		$('#studyDefinitionForm input[type="radio"]').change(function() {
-			$('#plugin-container .alert').remove();
-			
 			if($('#study-definition-viewer').is(':visible'))
 				updateStudyDefinitionViewer();
 			if($('#study-definition-editor').is(':visible'))
@@ -129,6 +136,10 @@
 				contentType : 'application/json',
 				success : function(entities) {
 					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Updated study definition [' + studyDefinitionId + ']</div>');
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 				}
 			});
 		});
