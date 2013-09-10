@@ -70,14 +70,17 @@ public class OmxStudyManagerService implements StudyManagerService
 	@Override
 	public void loadStudyData(String id) throws UnknownStudyDefinitionException
 	{
-		// TODO decide how to implement
+		// FIXME implement load study data operation
+		throw new UnknownStudyDefinitionException(
+				"Load operation not implemented, see http://www.molgenis.org/ticket/2072");
 	}
 
 	@Override
 	public boolean isStudyDataLoaded(String id) throws UnknownStudyDefinitionException
 	{
-		// TODO decide how to implement
+		// FIXME implement
 		return false;
+
 	}
 
 	@Override
