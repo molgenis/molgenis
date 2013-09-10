@@ -7,7 +7,7 @@
 	<div class="span8">
 	<#if errorMessage??>
 		<div class="alert alert-error">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> 
 			${errorMessage}
 		</div>
 	</#if>
