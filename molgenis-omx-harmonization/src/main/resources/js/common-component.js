@@ -68,7 +68,7 @@
 		}
 	};
 	
-	molgenis.Pagination.prototype.createSearchRequest = function (documentType, query) {
+	molgenis.Pagination.prototype.createSearchRequest = function (documentType, queryArrays) {
 		var queryRules = [];
 		//todo: how to unlimit the search result
 		queryRules.push({
@@ -79,8 +79,11 @@
 			operator : 'OFFSET',
 			value : (this.currentPage - 1) * this.pager
 		});
-		if(query !== undefined && query !== null)
-			queryRules.push(query);
+		if(queryArrays !== undefined && queryArrays !== null){
+			$.each(queryArrays, function(index, query){
+				queryRules.push(query);
+			});
+		}
 		var searchRequest = {
 			documentType : documentType,
 			queryRules : queryRules

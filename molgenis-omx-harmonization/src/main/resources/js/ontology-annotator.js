@@ -7,19 +7,79 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
+	var CONTEXT_URL = null;
 	
-	ns.changeDataSet = function(selectedDataSet){
-		pagination.reset();
-		ns.updateSelectedDataset(selectedDataSet);
-		ns.createMatrixForDataItems();
+	ns.setContextURL = function(CONTEXT_URL){
+		this.CONTEXT_URL = CONTEXT_URL;
 	};
 	
-	ns.createMatrixForDataItems = function() {
+	ns.getContextURL = function() {
+		return this.CONTEXT_URL;
+	};
+	
+	ns.changeDataSet = function(selectedDataSet){
+		var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+		var request = {
+			documentType : 'protocolTree-' + hrefToId(dataSetEntity.href),
+			queryRules : [{
+				field : 'type',
+				operator : 'EQUALS',
+				value : 'observablefeature'
+			}]
+		};
+		searchApi.search(request, function(searchResponse){
+			$('#catalogue-name').empty().append(dataSetEntity.name);
+			$('#dataitem-number').empty().append(searchResponse.totalHitCount);
+			pagination.reset();
+			ns.updateSelectedDataset(selectedDataSet);
+			ns.createMatrixForDataItems();
+			initSearchDataItems(dataSetEntity);
+		});
+		
+		function hrefToId (href){
+			return href.substring(href.lastIndexOf('/') + 1); 
+		};
+		
+		function initSearchDataItems (dataSet) {
+			$('#search-dataitem').typeahead({
+				source: function(query, process) {
+					ns.dataItemsTypeahead('observablefeature', hrefToId(dataSet.href), query, process);
+				},
+				minLength : 3,
+				items : 20
+			});
+			
+			$('#search-button').click(function(){
+				ns.createMatrixForDataItems();
+			});
+			
+			$('#clear-button').click(function(){
+				$('#search-dataitem').val('');
+				ns.createMatrixForDataItems();
+			});
+		};
+	};
+	
+	ns.createMatrixForDataItems = function(queryRule) {
 		var documentType = 'protocolTree-' + getSelectedDataSet();
-		var query = {
+		var query = [{
+			field : 'type',
 			operator : 'SEARCH',
 			value : 'observablefeature'
-		};
+		}];
+		
+		var queryText = $('#search-dataitem').val();
+		if(queryText !== ''){
+			query.push({
+				operator : 'AND'
+			});
+			query.push({
+				operator : 'SEARCH',
+				value : queryText
+			});
+			pagination.reset();
+		}
+		
 		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
 			createTableHeader();
 			var searchHits = searchResponse.searchHits;
@@ -43,7 +103,7 @@
 					var featureId = $(this).data('feature').id;
 					restApi.getAsync('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null, function(feature){
 						var components = [];
-						components.push(featureTable(feature));
+						components.push(createFeatureTable(feature));
 						components.push(createSearchDiv(feature));
 						standardModal.createModal('Annotate data item', components);
 					});
@@ -78,7 +138,7 @@
 			addTermButton.appendTo(searchGroup);
 			searchField.typeahead({
 				source: function(query, process) {
-					ns.searchOntologyTerms('ontologyTermSynonym', query, process);
+					ns.ontologyTermTypeahead('ontologyTermSynonym', query, process);
 				},
 				minLength : 3,
 				items : 20
@@ -112,7 +172,7 @@
 					$('#annotation-modal').modal('hide');
 					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 						var components = [];
-						components.push(featureTable(updatedFeature));
+						components.push(createFeatureTable(updatedFeature));
 						components.push(createSearchDiv(updatedFeature));
 						standardModal.createModal('Annotate data item', components);
 						ns.createMatrixForDataItems();
@@ -188,7 +248,7 @@
 			return ontologyTermId;
 		}
 		
-		function featureTable(feature){
+		function createFeatureTable(feature){
 			var table = $('<table class="table table-bordered"></table>'); 
 			if(feature.description === undefined) feature.description = '';
 			if(feature.description.indexOf('{') !== 0){
@@ -211,7 +271,7 @@
 						$('#annotation-modal').modal('hide');
 						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 							var components = [];
-							components.push(featureTable(updatedFeature));
+							components.push(createFeatureTable(updatedFeature));
 							components.push(createSearchDiv(updatedFeature));
 							standardModal.createModal('Annotate data item', components);
 							ns.createMatrixForDataItems();
@@ -239,32 +299,52 @@
 		selectedDataSet = dataSet;
 	};
 	
-	ns.annotateDataItems = function() {
-		var request = {
-			'dataSetId' : selectedDataSet
+	ns.showMessageDialog = function(message){
+		var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+		content += '<p><strong>Message : </strong> ' + message + '</p>';
+		$('#alert-message').append(content).addClass('alert alert-info').show();
+		w.setTimeout(function(){
+			$('#alert-message').fadeOut().empty();
+		}, 5000);
+		$(document).scrollTop(0);	
+	};
+	
+	ns.dataItemsTypeahead = function (type, dataSetId, query, response){
+		var queryRules = [{
+			field : 'type',
+			operator : 'EQUALS',
+			value : type,
+		},{
+			operator : 'AND'
+		},{
+			operator : 'SEARCH',
+			value : query
+		},{
+			operator : 'LIMIT',
+			value : 20
+		}];
+		var searchRequest = {
+			documentType : 'protocolTree-' + dataSetId,
+			queryRules : queryRules
 		};
-		$.ajax({
-			type : 'POST',
-			url : '/plugin/ontologyannotator/annotate',
-			data : JSON.stringify(request),
-			contentType : 'application/json',
-			async : false,
-			success : function(status) {
-				var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
-				content += '<p><strong>Message : </strong> Please refresh the page to see result!</p>';
-				$('#alert-message').append(content).addClass('alert');
-				w.setTimeout(function(){
-					$('#alert-message').fadeOut(1000).remove();
-				}, 10000);
-				$(document).scrollTop(0);	
-			},
-			error : function(status) {
-				alert('error');
-			}
+		
+		searchApi.search(searchRequest, function(searchReponse){
+			var result = [];
+			var dataMap = {};
+			$.each(searchReponse.searchHits, function(index, hit){
+				var value = hit.columnValueMap.ontologyTerm;
+				if($.inArray(value, result) === -1){
+					var name = hit.columnValueMap.name;
+					result.push(name);
+					dataMap[name] = hit.columnValueMap;
+				}
+			});
+			$(document).data('dataMap', dataMap);
+			response(result);
 		});
 	};
 	
-	ns.searchOntologyTerms = function (field, query, response){
+	ns.ontologyTermTypeahead = function (field, query, response){
 		var queryRules = [{
 			field : field,
 			operator : 'EQUALS',
@@ -295,100 +375,100 @@
 		});
 	};
 	
-	ns.selectCatalogue = function(){
-		var protocol_identifier = "store_mapping";
-		var dataSets = restApi.get('/api/v1/dataset/', ['protocolUsed']);
-		var catalogueIds = [];
-		if(dataSets.items.length > 0){
-			$.each(dataSets.items, function(index, item){
-				var href = item.href;
-				if(getSelectedDataSet() !== href.substring(href.lastIndexOf('/') + 1) && item.protocolUsed.identifier !== protocol_identifier){
-					catalogueIds.push(item);
-				}
-			});
-		}
-		createSelectModal(catalogueIds);
-		
-		function createSelectModal (catalogueIds){
-			
-			var container = $('<div />');
-			container.addClass('modal hide fade in');
-			container.attr({
-				'tabindex' : -1,
-				'role' : 'dialog',
-				'aria-hidden' : true
-			});
-			
-			var header = $('<div class="modal-header"></div>');
-			header.append('<strong>Select catalogue(s) to match</strong></br>');
-			
-			var body = $('<div class="modal-body"></div>');
-			var select = $('<select name="listOfCohortStudies" style="width:185px;"></select>');
-			var addNewIcon = $('<i class="icon-plus" style="cursor:pointer;margin-left:2px;" title="add studies"></i>');
-			var table = $('<table class="table table-striped table-bordered"></table>');
-			$('<tr />').append('<th style="width:60%;">Selected catalogue</th>').append('<th style="width:40%;">Remove</th>').appendTo(table);
-			body.append(select).append(addNewIcon).append(table).append('<input name="selectedStudiesToMatch" type="hidden"/>');
-			
-			$.each(catalogueIds, function(index, item){
-				var href = item.href;
-				select.append('<option value="' + href.substring(href.lastIndexOf('/') + 1) + '">' + item.name + '</option>');
-			});
-			
-			addNewIcon.click($.proxy(function(){
-				var removeIcon = $('<i class=\"icon-remove\" style=\"cursor:pointer;\"></i>');
-				var newCell = $('<td />').append(removeIcon);
-				var row = $('<tr />').append('<td>' + this.select.find('option:selected').text() + '</td>').append(newCell).appendTo(this.table);
-				var selectedOption = this.select.find('option:selected').remove();
-				row.data('dataSet', selectedOption.val());
-				
-				removeIcon.click($.proxy(function(){
-					this.select.append(this.selectedOption);
-					this.removeIcon.parents('tr:eq(0)').remove();
-				},{'select' : this.select, 'table' : this.table, 'removeIcon' : removeIcon, 'selectedOption' : selectedOption}));
-				
-			},{'select' : select, 'table' : table}));
-			
-			var footer = $('<div class="modal-footer"></div>');
-			var matchButton = $('<button id="start-match" class="btn btn-primary">Start match</button>');
-			var cancel = $('<button id="cancel-match" class="btn btn-primary" data-dismiss="modal">Cancel</button>');
-			footer.append(matchButton).append(cancel);
-			matchButton.click(function(){
-				var selectedStudies = [];
-				table.find('tr:gt(0)').each(function(){
-					selectedStudies.push($(this).data('dataSet'));
-				});
-				var request = {
-					'dataSetId' : selectedDataSet,
-					'selectedDataSets' : selectedStudies
-				}
-				$.ajax({
-					type : 'POST',
-					url : '/plugin/ontologyannotator/match',
-					data : JSON.stringify(request),
-					contentType : 'application/json',
-					async : false,
-					success : function(status) {
-						var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
-						content += '<p><strong>Message : </strong> Please refresh the page to see result!</p>';
-						$('#alert-message').append(content).addClass('alert');
-						$(document).scrollTop(0);
-						container.remove();
-					},
-					error : function(status) {
-						alert('error');
-					}
-				});				
-			});
-			cancel.click(function(){
-				container.remove();
-			});
-			
-			container.append(header).append(body).append(footer);
-			$('body').append(container);
-			container.modal('backdrop', true);
-			container.show();
-		}
-	};
+//	ns.selectCatalogue = function(){
+//		var protocol_identifier = "store_mapping";
+//		var dataSets = restApi.get('/api/v1/dataset/', ['protocolUsed']);
+//		var catalogueIds = [];
+//		if(dataSets.items.length > 0){
+//			$.each(dataSets.items, function(index, item){
+//				var href = item.href;
+//				if(getSelectedDataSet() !== href.substring(href.lastIndexOf('/') + 1) && item.protocolUsed.identifier !== protocol_identifier){
+//					catalogueIds.push(item);
+//				}
+//			});
+//		}
+//		createSelectModal(catalogueIds);
+//		
+//		function createSelectModal (catalogueIds){
+//			
+//			var container = $('<div />');
+//			container.addClass('modal hide fade in');
+//			container.attr({
+//				'tabindex' : -1,
+//				'role' : 'dialog',
+//				'aria-hidden' : true
+//			});
+//			
+//			var header = $('<div class="modal-header"></div>');
+//			header.append('<strong>Select catalogue(s) to match</strong></br>');
+//			
+//			var body = $('<div class="modal-body"></div>');
+//			var select = $('<select name="listOfCohortStudies" style="width:185px;"></select>');
+//			var addNewIcon = $('<i class="icon-plus" style="cursor:pointer;margin-left:2px;" title="add studies"></i>');
+//			var table = $('<table class="table table-striped table-bordered"></table>');
+//			$('<tr />').append('<th style="width:60%;">Selected catalogue</th>').append('<th style="width:40%;">Remove</th>').appendTo(table);
+//			body.append(select).append(addNewIcon).append(table).append('<input name="selectedStudiesToMatch" type="hidden"/>');
+//			
+//			$.each(catalogueIds, function(index, item){
+//				var href = item.href;
+//				select.append('<option value="' + href.substring(href.lastIndexOf('/') + 1) + '">' + item.name + '</option>');
+//			});
+//			
+//			addNewIcon.click($.proxy(function(){
+//				if(this.select.find('option').length > 0){
+//					var removeIcon = $('<i class=\"icon-remove\" style=\"cursor:pointer;\"></i>');
+//					var newCell = $('<td />').append(removeIcon);
+//					var row = $('<tr />').append('<td>' + this.select.find('option:selected').text() + '</td>').append(newCell).appendTo(this.table);
+//					var selectedOption = this.select.find('option:selected').remove();
+//					row.data('dataSet', selectedOption.val());
+//					removeIcon.click($.proxy(function(){
+//						this.select.append(this.selectedOption);
+//						this.removeIcon.parents('tr:eq(0)').remove();
+//					},{'select' : this.select, 'table' : this.table, 'removeIcon' : removeIcon, 'selectedOption' : selectedOption}));
+//				}
+//			},{'select' : select, 'table' : table}));
+//			
+//			var footer = $('<div class="modal-footer"></div>');
+//			var matchButton = $('<button id="start-match" class="btn btn-primary">Start match</button>');
+//			var cancel = $('<button id="cancel-match" class="btn btn-primary" data-dismiss="modal">Cancel</button>');
+//			footer.append(matchButton).append(cancel);
+//			matchButton.click(function(){
+//				var selectedStudies = [];
+//				table.find('tr:gt(0)').each(function(){
+//					selectedStudies.push($(this).data('dataSet'));
+//				});
+//				var request = {
+//					'dataSetId' : selectedDataSet,
+//					'selectedDataSets' : selectedStudies
+//				}
+//				$.ajax({
+//					type : 'POST',
+//					url : '/plugin/ontologyannotator/match',
+//					data : JSON.stringify(request),
+//					contentType : 'application/json',
+//					async : false,
+//					success : function(status) {
+//						var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+//						content += '<p><strong>Message : </strong> Please refresh the page to see result!</p>';
+//						$('#alert-message').append(content).addClass('alert alert-info');
+//						$(document).scrollTop(0);
+//						container.remove();
+//					},
+//					error : function(status) {
+//						alert('error');
+//					}
+//				});				
+//			});
+//			cancel.click(function(){
+//				container.remove();
+//			});
+//			
+//			container.append(header).append(body).append(footer);
+//			$('body').append(container);
+//			container.modal('backdrop', true);
+//			container.show();
+//		}
+//	};
 	
 	function getSelectedDataSet(){
 		return selectedDataSet;
@@ -404,14 +484,22 @@
 			}
 		});
 		$('#refresh-button').click(function(){
-			$('#harmonizationIndexer-form').submit();
+			$('#ontologyannotator-form').attr({
+				'action' : ns.getContextURL(),
+				'method' : 'GET'
+			}).submit();
 		});
-		$('#match-catalogue').click(function(){
-			ns.selectCatalogue();
-			return false;
-		});
+
 		$('#annotate-dataitems').click(function(){
-			ns.annotateDataItems();
+			$('#ontologyannotator-form').attr({
+				'action' : ns.getContextURL() + '/annotate',
+				'method' : 'POST'
+			}).submit();
 		});
+		
+//		$('#match-catalogue').click(function(){
+//			ns.selectCatalogue();
+//			return false;
+//		});
 	});
 }($, window.top));

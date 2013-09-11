@@ -1,7 +1,6 @@
 package org.molgenis.omx.harmonization.controllers;
 
 import static org.molgenis.omx.harmonization.controllers.OntologyAnnotatorController.URI;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +12,11 @@ import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(URI)
@@ -44,55 +41,73 @@ public class OntologyAnnotatorController extends MolgenisPlugin
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws Exception
+	public String init(@RequestParam(value = "selectedDataSet", required = false)
+	String selectedDataSetId, Model model) throws Exception
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : database.find(DataSet.class))
 		{
 			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
+		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("dataSets", dataSets);
+		model.addAttribute("isRunning", ontologyAnnotator.isRunning());
 
 		return "OntologyAnnotatorPlugin";
 	}
 
-	@RequestMapping(value = "/annotate", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void annotate(@RequestBody
-	OntologyAnnotatorRequest request)
+	@RequestMapping(value = "/annotate", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
+	public String annotate(@RequestParam(value = "selectedDataSet", required = true)
+	String selectedDataSetId, Model model) throws DatabaseException
 	{
-		ontologyAnnotator.annotate(request.getDataSetId());
+		ontologyAnnotator.annotate(Integer.parseInt(selectedDataSetId));
+		List<DataSet> dataSets = new ArrayList<DataSet>();
+		for (DataSet dataSet : database.find(DataSet.class))
+		{
+			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+		}
+		model.addAttribute("selectedDataSet", selectedDataSetId);
+		model.addAttribute("dataSets", dataSets);
+		model.addAttribute("isRunning", ontologyAnnotator.isRunning());
+		model.addAttribute("message", "Please refresh the page to see result!");
+
+		return "OntologyAnnotatorPlugin";
 	}
 
-	@RequestMapping(value = "/match", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void match(@RequestBody
-	OntologyAnnotatorRequest request) throws DatabaseException
-	{
-		System.out.println("The catalogue to match is : " + request.getSelectedDataSets());
-		System.out.println("The selected catalogue is : " + request.getDataSetId());
-		ontologyMatcher.match(request.getDataSetId(), request.getSelectedDataSets());
-	}
-
-	class OntologyAnnotatorRequest
-	{
-		private Integer dataSetId;
-		private List<Integer> selectedDataSets;
-
-		public OntologyAnnotatorRequest(Integer dataSetId, List<Integer> selectedDataSets)
-		{
-			this.dataSetId = dataSetId;
-			this.selectedDataSets = selectedDataSets;
-		}
-
-		public Integer getDataSetId()
-		{
-			return dataSetId;
-		}
-
-		public List<Integer> getSelectedDataSets()
-		{
-			return selectedDataSets;
-		}
-	}
+	// @RequestMapping(value = "/match", method = RequestMethod.POST, consumes =
+	// APPLICATION_JSON_VALUE)
+	// @ResponseStatus(HttpStatus.NO_CONTENT)
+	// public void match(@RequestBody
+	// OntologyAnnotatorRequest request) throws DatabaseException
+	// {
+	// System.out.println("The catalogue to match is : " +
+	// request.getSelectedDataSets());
+	// System.out.println("The selected catalogue is : " +
+	// request.getDataSetId());
+	// ontologyMatcher.match(request.getDataSetId(),
+	// request.getSelectedDataSets());
+	// }
+	//
+	// class OntologyAnnotatorRequest
+	// {
+	// private Integer dataSetId;
+	// private List<Integer> selectedDataSets;
+	//
+	// public OntologyAnnotatorRequest(Integer dataSetId, List<Integer>
+	// selectedDataSets)
+	// {
+	// this.dataSetId = dataSetId;
+	// this.selectedDataSets = selectedDataSets;
+	// }
+	//
+	// public Integer getDataSetId()
+	// {
+	// return dataSetId;
+	// }
+	//
+	// public List<Integer> getSelectedDataSets()
+	// {
+	// return selectedDataSets;
+	// }
+	// }
 }

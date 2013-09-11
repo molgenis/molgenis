@@ -1,15 +1,10 @@
-.container-fluid {
-	margin-top: 10px;
-}
-
 .accordion-group {
-	margin-top : 40px;
-	height : 300px;
+	height : 320px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
-	height : 200px;
+	height : 250px;
 	background-color: white;
 }
 
@@ -19,43 +14,39 @@
 
 .accordion-heading h5{
 	color : white;
-}
-
-.justify-text {
-	padding : 10px;
-	text-align : justify;
-}
-
-h5 {
 	padding-left : 10px;
 }
 
-.data-table-container {
-	overflow: auto;
-	white-space: nowrap;
+#alert-message {
+	height : 40px;
+	margin-top : 10px;
 }
 
-td.add-border {
-	border:2px solid #5B82A4;
+#div-search {
+	margin-bottom : 10px;
 }
 
-table thead th {
+div.data-table-container {
+	height : 400px;
+}
+
+table#dataitem-table {
+	 border : 1px solid #5B82A4;
+}
+
+table thead th {	
     background-color: #5B82A4; 
     border:2px solid #5B82A4;
     color: white;
 }
 
-.table#dataitem-table {
-	 border: 1px solid #5B82A4;
+h3 {
+	color : #3079C2;
 }
 
 .show-popover {
 	cursor: hand; 
 	cursor: pointer;
-}
-
-.modal-body {
-	overflow-y: visible;
 }
 
 .popover-content{
@@ -68,4 +59,17 @@ table thead th {
 	right:20px;
 	cursor: hand; 
 	cursor: pointer;
+}
+
+.modal-body {
+	overflow-y: visible;
+}
+
+.justify-text {
+	padding : 10px;
+	text-align : justify;
+}
+
+ol.action-list, ol.action-list li{
+	padding : 5px;
 }
