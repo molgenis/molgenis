@@ -268,8 +268,8 @@ public class BarcodeController extends MolgenisPlugin
 		{
 			for (int j = i + 1; j < n_barcodes; j++)
 			{
-				String bc_i = barcodeTypeList.get(i).getString(BARCODE);
-				String bc_j = barcodeTypeList.get(j).getString(BARCODE);
+				String bc_i = barcodeTypeList.get(i).getString("BARCODE");
+				String bc_j = barcodeTypeList.get(j).getString("BARCODE");
 				Integer n_nucl = bc_i.length();
 
 				dist[i][j] = 0;
@@ -297,7 +297,7 @@ public class BarcodeController extends MolgenisPlugin
 
 		for (Tuple t : tuples)
 		{
-			if (type.equalsIgnoreCase(t.getString(TYPE)))
+			if (type.equalsIgnoreCase(t.getString("TYPE")))
 			{
 				typeList.add(t);
 			}
@@ -306,7 +306,7 @@ public class BarcodeController extends MolgenisPlugin
 		return typeList;
 	}
 
-	public void getBarcodes() throws DatabaseException
+	public void collectBarcodes() throws DatabaseException
 	{
 		this.barcodeTuples = new ArrayList<Tuple>();
 		this.barcodeTypes = new HashSet<String>();
@@ -331,7 +331,7 @@ public class BarcodeController extends MolgenisPlugin
 			}
 			catch (Exception e)
 			{
-				throw new DatabaseException("Retreiving advised target database failed: " + e.getMessage());
+				throw new DatabaseException("Retrieving advised target database failed: " + e.getMessage());
 			}
 			
 			List<Tuple> currentRows = jpaDb.sql(barcodeQuery, "TYPE", "ID", "BARCODE");
@@ -341,7 +341,7 @@ public class BarcodeController extends MolgenisPlugin
 				this.barcodeTuples.add(row);
 				this.barcodeTypes.add(row.getString("TYPE"));
 			}
-			System.out.println();
+			
 		}
 		catch (Exception e)
 		{
@@ -401,9 +401,9 @@ public class BarcodeController extends MolgenisPlugin
 			for (Tuple t : combi)
 			{ // for each barcode in the solution
 				List<String> barcode = new ArrayList<String>();
-				barcode.add(t.getString(TYPE));
-				barcode.add(t.getString(ID));
-				barcode.add(t.getString(BARCODE));
+				barcode.add(t.getString("TYPE"));
+				barcode.add(t.getString("ID"));
+				barcode.add(t.getString("BARCODE"));
 				solution.add(barcode); // add barcode to the solution
 			}
 			resultList.add(solution);
@@ -419,7 +419,7 @@ public class BarcodeController extends MolgenisPlugin
 		try
 		{
 			//parse("src/main/resources/templates/barcode/barcodes.csv");
-			getBarcodes();
+			collectBarcodes();
 		}
 		catch (DatabaseException e)
 		//catch (IOException e)
