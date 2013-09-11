@@ -1,32 +1,32 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["bootstrap-fileupload.min.css", "ontology-indexer.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "common-component.js", "ontology-indexer.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js","common-component.js", "ontology-indexer.js"]>
 <@header css js/>
-	<div class="row-fluid">
-		<div id="alertMessage">
-		<#if isCorrectOntology?? && !isCorrectOntology> 
-			<div class="alert alert-error">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
-			</div>
-		<#elseif isIndexRunning?? && isIndexRunning>
-			<div class="alert">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
-			</div>
-		<#elseif isCorrectZipFile?? && !isCorrectZipFile>
-			<div class="alert alert-error">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-		  		<p class="text-error"><strong>Message : </strong> ${message}</p>
-			</div>
-		</#if>
+	<div id="alertMessage">
+	<#if isCorrectOntology?? && !isCorrectOntology> 
+		<div class="alert alert-error">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+	  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
 		</div>
+	<#elseif isIndexRunning?? && isIndexRunning>
+		<div class="alert">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+	  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
+		</div>
+	<#elseif isCorrectZipFile?? && !isCorrectZipFile>
+		<div class="alert alert-error">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+	  		<p class="text-error"><strong>Message : </strong> ${message}</p>
+		</div>
+	</#if>
+	</div>
+	<div class="row-fluid">
 		<div class="span12">
 			<div class="span6">
 				<div class="row-fluid">
 					<div class="span12">
-						<h1>Ontologies</h1>
+						<h3>Index ontologies</h3>
 						<table id="ontology-table" class="table table-striped table-bordered">
 							<tr>
 								<th>
@@ -45,7 +45,7 @@
 				<div class="row-fluid">
 					<div class="span12">
 						<form id="ontologyindexer-form" class="form-horizontal" enctype="multipart/form-data">
-							<h1>Index new ontologies</h1>
+							<h4>Add a new ontology</h4>
 							<div>
 								<p><strong>1. Please name the ontology</strong></p>
 								<input id="ontologyName" name="ontologyName" type="text" /> 
