@@ -58,6 +58,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -138,7 +140,10 @@ public class ${entity.name}Controller
 			{
 				try
 				{
-					setValue(MolgenisDateFormat.getDateFormat().parse(value));
+					if (StringUtils.isNotBlank(value))
+					{
+						setValue(MolgenisDateFormat.getDateFormat().parse(value));
+					}
 				}
 				catch (ParseException e)
 				{
@@ -149,6 +154,11 @@ public class ${entity.name}Controller
 			@Override
 			public String getAsText()
 			{
+				if (getValue() == null)
+				{
+					return null;
+				}
+				
 				return MolgenisDateFormat.getDateFormat().format((Date) getValue());
 			}
 
