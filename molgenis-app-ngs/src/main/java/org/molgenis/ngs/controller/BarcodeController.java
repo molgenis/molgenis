@@ -2,9 +2,6 @@ package org.molgenis.ngs.controller;
 
 import static org.molgenis.ngs.controller.BarcodeController.URI;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,10 +11,15 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.tuple.Tuple;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,6 +38,8 @@ public class BarcodeController extends MolgenisPlugin
 
 	private static final Logger logger = Logger.getLogger(BarcodeController.class);
 
+	private final Database database;
+	
 	private List<Tuple> barcodeTuples = new ArrayList<Tuple>();
 	private Set<String> barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
 
@@ -51,9 +55,12 @@ public class BarcodeController extends MolgenisPlugin
 
 	private boolean isException = false;
 
-	public BarcodeController()
+	@Autowired
+	public BarcodeController(Database database)
 	{
 		super(URI);
+		if (database == null) throw new IllegalArgumentException("database is null");
+		this.database = database;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -299,35 +306,78 @@ public class BarcodeController extends MolgenisPlugin
 		return typeList;
 	}
 
-	public void parse(String barcodeFile) throws IOException
+	public void getBarcodes() throws DatabaseException
 	{
 		this.barcodeTuples = new ArrayList<Tuple>();
 		this.barcodeTypes = new HashSet<String>();
-
+		
 		try
 		{
-			@SuppressWarnings("resource")
-			CsvReader reader = new CsvReader(new BufferedReader(new FileReader(barcodeFile)));
-
-			for (Tuple row : reader)
+			// get barcodes
+			String barcodeQuery = "SELECT st.SampleBarcodeTypeName as TYPE, sb.SampleBarcodeNr as ID, sb.SampleBarcodeSequence as BARCODE FROM SampleBarcode sb, SampleBarcodeType st WHERE sb.SampleBarcodeType = st.id;"; 
+			
+			JpaDatabase jpaDb = null;
+			try
 			{
-				// check value
-				if (row.isNull(TYPE)) throw new IOException("required column '" + TYPE + "' is missing in row " + row);
-				if (row.isNull(ID)) throw new IOException("required column '" + ID + "' is missing in row " + row);
-				if (row.isNull(BARCODE)) throw new IOException("required column '" + BARCODE + "' is missing in row "
-						+ row);
-
-				this.barcodeTuples.add(row);
-				this.barcodeTypes.add(row.getString(TYPE));
+				if (AopUtils.isAopProxy(database) && database instanceof Advised)
+				{
+					Object target = ((Advised) database).getTargetSource().getTarget();
+					jpaDb = (JpaDatabase) target;
+				}
+				else
+				{
+					jpaDb = (JpaDatabase) database;
+				}
 			}
-
+			catch (Exception e)
+			{
+				throw new DatabaseException("Retreiving advised target database failed: " + e.getMessage());
+			}
+			
+			List<Tuple> currentRows = jpaDb.sql(barcodeQuery, "TYPE", "ID", "BARCODE");
+			
+			for (Tuple row : currentRows)
+			{
+				this.barcodeTuples.add(row);
+				this.barcodeTypes.add(row.getString("TYPE"));
+			}
+			System.out.println();
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
-			throw new IOException("Parsing of barcode file failed: " + e.getMessage()
-					+ ".\nThe barcode csv requires columns " + TYPE + "," + ID + "," + BARCODE + ".");
+			throw new RuntimeException("Retreiving barcodes from database failed: " + e.getMessage());
 		}
 	}
+	
+//	public void parse(String barcodeFile) throws IOException
+//	{
+//		this.barcodeTuples = new ArrayList<Tuple>();
+//		this.barcodeTypes = new HashSet<String>();
+//
+//		try
+//		{
+//			@SuppressWarnings("resource")
+//			CsvReader reader = new CsvReader(new BufferedReader(new FileReader(barcodeFile)));
+//
+//			for (Tuple row : reader)
+//			{
+//				// check value
+//				if (row.isNull(TYPE)) throw new IOException("required column '" + TYPE + "' is missing in row " + row);
+//				if (row.isNull(ID)) throw new IOException("required column '" + ID + "' is missing in row " + row);
+//				if (row.isNull(BARCODE)) throw new IOException("required column '" + BARCODE + "' is missing in row "
+//						+ row);
+//
+//				this.barcodeTuples.add(row);
+//				this.barcodeTypes.add(row.getString(TYPE));
+//			}
+//
+//		}
+//		catch (IOException e)
+//		{
+//			throw new IOException("Parsing of barcode file failed: " + e.getMessage()
+//					+ ".\nThe barcode csv requires columns " + TYPE + "," + ID + "," + BARCODE + ".");
+//		}
+//	}
 
 	public List<String> getBarcodeTypes()
 	{
@@ -368,9 +418,11 @@ public class BarcodeController extends MolgenisPlugin
 		barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
 		try
 		{
-			parse("src/main/resources/templates/barcode/barcodes.csv");
+			//parse("src/main/resources/templates/barcode/barcodes.csv");
+			getBarcodes();
 		}
-		catch (IOException e)
+		catch (DatabaseException e)
+		//catch (IOException e)
 		{
 			logger.error(e.getMessage());
 		}

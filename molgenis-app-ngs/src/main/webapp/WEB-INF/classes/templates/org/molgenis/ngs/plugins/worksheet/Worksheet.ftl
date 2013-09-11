@@ -10,7 +10,7 @@
 	<div class="formscreen">
 		
 		${screen.myModel.table}
-		
+			
 	</div>
 	
 </form>
