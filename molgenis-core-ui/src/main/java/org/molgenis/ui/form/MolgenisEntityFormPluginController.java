@@ -91,18 +91,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 				SubEntityForm subEntityForm = new SubEntityForm(subEntityMetaData, hasWritePermissionSubEntity,
 						xrefFieldName);
 				form.addSubForm(subEntityForm);
-
-				/*
-				 * Field field = entityMetaData.getField(fieldName); if ((field == null) || !field.isMRef()) { throw new
-				 * UnknownEntityException(fieldName + " is not an mref field of " + entityName); }
-				 * 
-				 * Entity subEntityMetaData = createAndValidateEntity(field.getXrefEntityName(), Permission.READ);
-				 * boolean hasWritePermissionSubEntity = permissionService.hasPermissionOnEntity(
-				 * field.getXrefEntityName(), Permission.WRITE);
-				 * 
-				 * SubEntityForm subForm = new SubEntityForm(subEntityMetaData, hasWritePermissionSubEntity, fieldName);
-				 * form.addSubForm(subForm);
-				 */
 			}
 
 		}
