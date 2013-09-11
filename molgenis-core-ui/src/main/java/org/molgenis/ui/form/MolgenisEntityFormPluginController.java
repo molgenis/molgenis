@@ -4,8 +4,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.text.ParseException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisPermissionService;
@@ -14,7 +12,6 @@ import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
-import org.molgenis.ui.MolgenisUi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,9 +33,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 
 	@Autowired
 	private MolgenisPermissionService permissionService;
-
-	@Autowired
-	private MolgenisUi molgenisUi;
 
 	public MolgenisEntityFormPluginController()
 	{
@@ -101,8 +95,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	@RequestMapping(method = GET, value = URI + "{entityName}/{id}")
 	public String edit(@PathVariable("entityName")
 	String entityName, @PathVariable("id")
-	String id, Model model, HttpServletRequest request) throws DatabaseException, MolgenisModelException,
-			ParseException
+	String id, Model model) throws DatabaseException, MolgenisModelException, ParseException
 	{
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
 		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
