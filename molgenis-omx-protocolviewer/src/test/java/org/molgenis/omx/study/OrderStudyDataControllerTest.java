@@ -14,7 +14,9 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.filter.StudyDataRequest;
+import org.molgenis.omx.order.OrderStudyDataController;
+import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -109,6 +111,12 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 			when(orderStudyDataService.getOrders(0)).thenReturn(Arrays.asList(request0));
 			when(orderStudyDataService.getOrders(1)).thenReturn(Arrays.asList(request1));
 			return orderStudyDataService;
+		}
+
+		@Bean
+		public StudyManagerService studyManagerService()
+		{
+			return mock(StudyManagerService.class);
 		}
 
 		@Bean

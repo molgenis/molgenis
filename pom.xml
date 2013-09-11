@@ -34,10 +34,10 @@
 	</properties>
 
 	<repositories>
-	  <repository>
-	    <id>enonic</id>
-	    <url>http://repo.enonic.com/artifactory/public/</url>
-	  </repository>
+		<repository>
+			<id>enonic</id>
+			<url>http://repo.enonic.com/public/</url>
+		</repository>
 	</repositories>
 
 	<build>
@@ -254,7 +254,7 @@
 							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
 								<resourcesAsCSV>${basedir}/src/main/webapp,${basedir}/target/generated-sources/molgenis/doc</resourcesAsCSV>
 							</baseResource>
-							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|spring-[^/]*\.jar$</webInfIncludeJarPattern>
+							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$</webInfIncludeJarPattern>
 						</webAppConfig>
 					</configuration>
 					<!-- use jetty to run integration tests  -->

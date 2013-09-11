@@ -1,10 +1,10 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["bwizard.min.css", "importer.css"]>
+<#assign css=["bwizard.min.css", "importwizard.css"]>
 <#assign js=["bwizard.min.js"]>
 <@header css js/>
 	<div class="row-fluid">
-				<div id="wizard" style="padding:16px">
+				<div id="wizard">
 				<ol>
 					<#list wizard.pages as wizardPage>
 						<li>${wizardPage.title}</li>
