@@ -1,14 +1,19 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#import "molgenis-input-elements.ftl" as input>
+<#import "form-macros.ftl" as f>
 
 <#assign css=['select2.css', 'molgenis-form.css']>
 <#assign js=['jquery.validate.min.js', 'select2.min.js', 'molgenis-form-edit.js']>
 
 <@header css js/>
 
+<script>
+	var forms = [];
+</script>
+
 <form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??>/${form.primaryKey}</#if>">
-	<a href="${context_url}" class="pull-left">
+	<a href="javascript:history.go(-1)" class="pull-left">
 		<div id="back">
 			<div class="nav-icon-prev pull-left"></div>
 			<div class="nav-icon-prev pull-left"></div>
@@ -36,26 +41,32 @@
 			</div>
 		</div>
 		
-		<input type="hidden" name="_method" value="PUT" />
+		<#if form.primaryKey??>
+			<input type="hidden" name="_method" value="PUT" >
+		<#else>
+			<input type="hidden" name="_method" value="" >
+		</#if>
 		
 		<#list form.metaData.fields as field>
 			<#if form.entity??>
-				<@input.render field form.entity />
+				<@input.render field form.hasWritePermission form.entity />
 			<#else>
-				<@input.render field />
+				<@input.render field form.hasWritePermission />
 			</#if>
     	</#list>
     	
-    	<div class="control-group">
-    		<div class="controls">
-      			<button type="submit" class="btn btn-large pull-right">Save</button>
-    		</div>
-  		</div>
+    	<#if form.hasWritePermission>
+    		<div class="control-group">
+    			<div class="controls">
+      				<button type="submit" class="btn btn-large pull-right">Save</button>
+    			</div>
+  			</div>
+  		</#if>
   		
 	</div>
 	
 </form>
 
-<#include "view-form-meta.ftl">
+<@f.remoteValidationRules form />
 
 <@footer/>

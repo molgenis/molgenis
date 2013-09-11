@@ -52,7 +52,7 @@ $(function() {
 					contentType : 'application/json',
 					async : false,
 					success : function(resource) {
-						_this._cachePut(resourceUri, resource, expands);
+						if (_this.cache) _this._cachePut(resourceUri, resource, expands);
 						cachedResource = resource;	
 					}
 				});
@@ -63,7 +63,7 @@ $(function() {
 					cache: true,
 					async : false,
 					success : function(resource) {
-						_this._cachePut(resourceUri, resource, expands);
+						if (_this.cache) _this._cachePut(resourceUri, resource, expands);
 						cachedResource = resource;
 					}
 				});
