@@ -1,61 +1,33 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
+<#import "form-macros.ftl" as f>
+
 <#assign css=['molgenis-form.css']>
 <#assign js=['molgenis-form-list.js']>
 
 <@header css js/>
 
-<div class="row-fluid">
-	<div class="row-fluid">
-		<div class="span4" style="height: 80px">
-			<h2>${form.title} (<span id="entity-count"></span>)</h2>
-		</div>
-				
-		<div class="data-table-pager-container span4" style="height: 80px">
-			<div id="data-table-pager" class="pagination pagination-centered"></div>
-		</div>
-		
-		<div class="span4" style="height: 78px;">
-			<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px"><a href="${context_url}/create"><img src="/img/new.png" /></a></div>
-		</div>
-	</div>
-			
-	<div id="success-message" class="control-group" style="display: none">
-    	<div class="controls">
-			<div class="alert alert-success">
-  				<button type="button" class="close">&times;</button>
-  				<strong>${form.title} deleted.</strong>
-			</div>
-		</div>
-	</div>
-		
-	<div id="error-message" class="control-group" style="display: none">
-    	<div class="controls">
-			<div class="alert alert-error">
-  				<button type="button" class="close">&times;</button>
-  				<strong>Could not delete ${form.title}</strong>
-			</div>
-		</div>
-	</div>
-		
-	<table class="table table-striped table-bordered table-hover">
-		<thead>
-			<tr>
-				<#if form.hasWritePermission>
-					<th class="edit-icon-holder">&nbsp;</th>
-					<th class="edit-icon-holder">&nbsp;</th>
-				</#if>
-				<#list form.metaData.fields as field>
-					<th>${field.label}</th>
-				</#list>
-			</tr>
-		</thead>
-		<tbody id="entity-table-body">
-		</tbody>
-	</table>
-	
+<script>
+	var forms = [];
+</script>
+
+<div id="success-message" class="alert alert-success" style="display: none">
+ 	<button type="button" class="close">&times;</button>
+  	<strong id="success-message-content"></strong>
 </div>
 
-<#include "view-form-meta.ftl">
+<div id="error-message" class="alert alert-error" style="display: none">
+	<button type="button" class="close">&times;</button>
+  	<strong id="error-message-content"></strong>
+</div>
+			
+<@f.renderList form 0 />
+<@f.meta form 0 />
+
+<#list form.subForms as subForm>
+	<@f.renderList subForm subForm_index+1 />
+	<@f.meta subForm subForm_index+1 />
+</#list>
+
 	
 <@footer/>

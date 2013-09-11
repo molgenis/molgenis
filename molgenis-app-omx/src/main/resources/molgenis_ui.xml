@@ -15,9 +15,9 @@
 		</menu>
         <menu label="Admin" name="admin">
 	        <menu label="Entities" name ="entities">
-        		<plugin id="form.DataSet" label="DataSet" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-        		<plugin id="form.Protocol" label="Protocol" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-	      		<plugin id="form.ObservableFeature" label="ObservableFeature" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+        		<plugin id="form.DataSet" label="DataSet" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+        		<plugin id="form.Protocol?subForms=DataSet.ProtocolUsed" label="Protocol" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin" />
+	      		<plugin id="form.ObservableFeature?subForms=Category.observableFeature" label="ObservableFeature" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
         		<plugin id="form.Category" label="Category" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
         		<menu label="Values" name="values">
         			<plugin id="form.BoolValue" label="BoolValue" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>

@@ -7,7 +7,6 @@
 	
 	ns.onFormSubmit = function() {
 		ns.hideAlerts();
-		console.log($('#entity-form').serialize());
 		
 		var action = $('#entity-form').attr('action');
 		
@@ -22,6 +21,7 @@
 				if (location) {
 					var id = restApi.getPrimaryKeyFromHref(location);
 					$('#entity-form').attr('action', action + '/' + id);//Create update url, so user can immediately update the created entity by pressing Save 
+					$('input[name=_method]').val('PUT');
 				}
 				$('#success-message').show();
 			},
