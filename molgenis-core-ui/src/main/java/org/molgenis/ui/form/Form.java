@@ -11,4 +11,7 @@ public interface Form
 	FormMetaData getMetaData();
 
 	org.molgenis.util.Entity getEntity();
+
+	String getBaseUri(String contextUrl);
+
 }
