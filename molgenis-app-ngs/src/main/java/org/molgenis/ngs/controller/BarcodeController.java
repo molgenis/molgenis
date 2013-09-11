@@ -49,10 +49,6 @@ public class BarcodeController extends MolgenisPlugin
 	private Integer minimumDistance = Integer.MIN_VALUE;
 	private Double averageDistance = new Double(0);
 
-	private final String TYPE = "type";
-	private final String ID = "id";
-	private final String BARCODE = "barcode";
-
 	private boolean isException = false;
 
 	@Autowired
@@ -348,36 +344,6 @@ public class BarcodeController extends MolgenisPlugin
 			throw new RuntimeException("Retreiving barcodes from database failed: " + e.getMessage());
 		}
 	}
-	
-//	public void parse(String barcodeFile) throws IOException
-//	{
-//		this.barcodeTuples = new ArrayList<Tuple>();
-//		this.barcodeTypes = new HashSet<String>();
-//
-//		try
-//		{
-//			@SuppressWarnings("resource")
-//			CsvReader reader = new CsvReader(new BufferedReader(new FileReader(barcodeFile)));
-//
-//			for (Tuple row : reader)
-//			{
-//				// check value
-//				if (row.isNull(TYPE)) throw new IOException("required column '" + TYPE + "' is missing in row " + row);
-//				if (row.isNull(ID)) throw new IOException("required column '" + ID + "' is missing in row " + row);
-//				if (row.isNull(BARCODE)) throw new IOException("required column '" + BARCODE + "' is missing in row "
-//						+ row);
-//
-//				this.barcodeTuples.add(row);
-//				this.barcodeTypes.add(row.getString(TYPE));
-//			}
-//
-//		}
-//		catch (IOException e)
-//		{
-//			throw new IOException("Parsing of barcode file failed: " + e.getMessage()
-//					+ ".\nThe barcode csv requires columns " + TYPE + "," + ID + "," + BARCODE + ".");
-//		}
-//	}
 
 	public List<String> getBarcodeTypes()
 	{
@@ -418,11 +384,9 @@ public class BarcodeController extends MolgenisPlugin
 		barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
 		try
 		{
-			//parse("src/main/resources/templates/barcode/barcodes.csv");
 			collectBarcodes();
 		}
 		catch (DatabaseException e)
-		//catch (IOException e)
 		{
 			logger.error(e.getMessage());
 		}
