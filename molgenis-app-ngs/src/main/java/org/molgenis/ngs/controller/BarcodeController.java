@@ -37,20 +37,26 @@ public class BarcodeController extends MolgenisPlugin
 	public static final String URI = "/plugin/barcode";
 
 	private static final Logger logger = Logger.getLogger(BarcodeController.class);
-
 	private final Database database;
 	
 	private List<Tuple> barcodeTuples = new ArrayList<Tuple>();
 	private Set<String> barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
-
+	private List<Tuple> barcodeTypeList = new ArrayList<Tuple>();
+	
 	private String currentType = "";
 	private Integer currentNumber = 0;
 	private List<List<Tuple>> optimalCombinations = new ArrayList<List<Tuple>>();
 	private Integer minimumDistance = Integer.MIN_VALUE;
 	private Double averageDistance = new Double(0);
-
+		
 	private boolean isException = false;
 
+	private final String RPI = "RPI";
+	private final String ACTIVE = "ACTIVE";
+	private final String TYPE = "TYPE";
+	private final String ID = "ID";
+	private final String BARCODE = "BARCODE";
+	
 	@Autowired
 	public BarcodeController(Database database)
 	{
@@ -63,13 +69,14 @@ public class BarcodeController extends MolgenisPlugin
 	public String init(Model model)
 	{
 		reset();
-		
 		model.addAttribute("barcodes", getBarcodeTypes());
+		model.addAttribute("barcodeTuples", getBarcodeTuples());
 		model.addAttribute("isException", this.isException);
 		model.addAttribute("optimalCombinations", getOptimalCombinations());
 		model.addAttribute("currentNumber", this.currentNumber);
 		model.addAttribute("averageDistance", this.averageDistance);
 		model.addAttribute("minimumDistance", this.minimumDistance);
+		model.addAttribute("barcodeTypeList", getSelectedTypeBarcodeList());
 		return "view-barcode";
 	}
 
@@ -80,6 +87,7 @@ public class BarcodeController extends MolgenisPlugin
 		reset();
 		this.currentType = request.getParameter("type");
 		String currentNumberString = request.getParameter("number");
+		
 		try
 		{
 			this.currentNumber = Integer.parseInt(currentNumberString);
@@ -99,7 +107,7 @@ public class BarcodeController extends MolgenisPlugin
 			if (null != this.currentType && this.currentNumber != null && 0 < this.currentNumber
 					&& this.barcodeTypes.contains(this.currentType))
 			{
-				if (this.currentType.equalsIgnoreCase("RPI") && this.currentNumber <= 4)
+				if (this.currentType.equalsIgnoreCase(RPI) && this.currentNumber <= 4)
 				{
 					this.isException = true;
 				}
@@ -110,18 +118,21 @@ public class BarcodeController extends MolgenisPlugin
 				}
 			}
 		}
+		
 		model.addAttribute("barcodes", getBarcodeTypes());
+		model.addAttribute("barcodeTuples", getBarcodeTuples());
 		model.addAttribute("isException", this.isException);
 		model.addAttribute("optimalCombinations", getOptimalCombinations());
 		model.addAttribute("currentNumber", this.currentNumber);
 		model.addAttribute("averageDistance", this.averageDistance);
 		model.addAttribute("minimumDistance", this.minimumDistance);
+		model.addAttribute("barcodeTypeList", getSelectedTypeBarcodeList());
 		return "view-barcode";
 	}
-
+	
 	public void calcBarcodeSet()
 	{
-		List<Tuple> barcodeTypeList = getBarcodeTypeList(this.barcodeTuples, this.currentType);
+		barcodeTypeList = getBarcodeTypeList(this.barcodeTuples, this.currentType);
 
 		this.optimalCombinations = new ArrayList<List<Tuple>>();
 
@@ -264,8 +275,8 @@ public class BarcodeController extends MolgenisPlugin
 		{
 			for (int j = i + 1; j < n_barcodes; j++)
 			{
-				String bc_i = barcodeTypeList.get(i).getString("BARCODE");
-				String bc_j = barcodeTypeList.get(j).getString("BARCODE");
+				String bc_i = barcodeTypeList.get(i).getString(BARCODE);
+				String bc_j = barcodeTypeList.get(j).getString(BARCODE);
 				Integer n_nucl = bc_i.length();
 
 				dist[i][j] = 0;
@@ -293,7 +304,7 @@ public class BarcodeController extends MolgenisPlugin
 
 		for (Tuple t : tuples)
 		{
-			if (type.equalsIgnoreCase(t.getString("TYPE")))
+			if (type.equalsIgnoreCase(t.getString(TYPE)) && t.getBoolean(ACTIVE))
 			{
 				typeList.add(t);
 			}
@@ -310,7 +321,7 @@ public class BarcodeController extends MolgenisPlugin
 		try
 		{
 			// get barcodes
-			String barcodeQuery = "SELECT st.SampleBarcodeTypeName as TYPE, sb.SampleBarcodeNr as ID, sb.SampleBarcodeSequence as BARCODE FROM SampleBarcode sb, SampleBarcodeType st WHERE sb.SampleBarcodeType = st.id;"; 
+			String barcodeQuery = "SELECT sb.Active as ACTIVE, st.SampleBarcodeTypeName as TYPE, sb.SampleBarcodeNr as ID, sb.SampleBarcodeSequence as BARCODE FROM SampleBarcode sb, SampleBarcodeType st WHERE sb.SampleBarcodeType = st.id;"; 
 			
 			JpaDatabase jpaDb = null;
 			try
@@ -330,14 +341,13 @@ public class BarcodeController extends MolgenisPlugin
 				throw new DatabaseException("Retrieving advised target database failed: " + e.getMessage());
 			}
 			
-			List<Tuple> currentRows = jpaDb.sql(barcodeQuery, "TYPE", "ID", "BARCODE");
+			List<Tuple> currentRows = jpaDb.sql(barcodeQuery, ACTIVE, TYPE, ID, BARCODE);
 			
 			for (Tuple row : currentRows)
 			{
 				this.barcodeTuples.add(row);
-				this.barcodeTypes.add(row.getString("TYPE"));
+				this.barcodeTypes.add(row.getString(TYPE));
 			}
-			
 		}
 		catch (Exception e)
 		{
@@ -348,11 +358,52 @@ public class BarcodeController extends MolgenisPlugin
 	public List<String> getBarcodeTypes()
 	{
 		List<String> lst = new ArrayList<String>();
-		lst.addAll(barcodeTypes);
-		Collections.sort(lst); // to ensure the same order each time page is loaded
+		
+		try
+		{
+			lst.addAll(barcodeTypes);
+			Collections.sort(lst); // to ensure the same order each time page is loaded
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		
 		return lst;
 	}
-
+	
+	public List<Tuple> getBarcodeTuples()
+	{
+		List<Tuple> lst = new ArrayList<Tuple>();
+		
+		try
+		{
+			lst.addAll(barcodeTuples);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		
+		return lst;
+	}
+	
+	public List<Tuple> getSelectedTypeBarcodeList()
+	{
+		List<Tuple> lst = new ArrayList<Tuple>();
+		
+		try
+		{
+			lst = getBarcodeTypeList(this.barcodeTuples, this.currentType);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		
+		return lst;
+	}
+	
 	/**
 	 * 
 	 * @return three nested list. From inside to outside the lists are: - barcode type, id, barcode - a solution - list
@@ -367,9 +418,9 @@ public class BarcodeController extends MolgenisPlugin
 			for (Tuple t : combi)
 			{ // for each barcode in the solution
 				List<String> barcode = new ArrayList<String>();
-				barcode.add(t.getString("TYPE"));
-				barcode.add(t.getString("ID"));
-				barcode.add(t.getString("BARCODE"));
+				barcode.add(t.getString(TYPE));
+				barcode.add(t.getString(ID));
+				barcode.add(t.getString(BARCODE));
 				solution.add(barcode); // add barcode to the solution
 			}
 			resultList.add(solution);
