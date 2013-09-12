@@ -1,5 +1,6 @@
 package org.molgenis.omx.harmonization.ontologymatcher;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,10 +67,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	@Override
-	public void matchPercentage()
+	public Double matchPercentage()
 	{
-		System.out.println("Total number of variables is " + totalNumber + ". The number of finished variables is "
-				+ finishedNumber);
+		DecimalFormat df = new DecimalFormat("#.##");
+		Double percentage = totalNumber == 0 ? new Double(0) : ((double) finishedNumber) / totalNumber;
+		return Double.parseDouble(df.format(percentage * 100));
 	}
 
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
@@ -118,18 +120,19 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			{
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID.toString())
 						.toString());
-				String name = hit.getColumnValueMap().get(ObservableFeature.NAME.toLowerCase()).toString();
+				// String name =
+				// hit.getColumnValueMap().get(ObservableFeature.NAME.toLowerCase()).toString();
 				String description = hit.getColumnValueMap().get(ObservableFeature.DESCRIPTION.toLowerCase())
 						.toString();
 				ObservableFeature feature = db.findById(ObservableFeature.class, featureId);
-
 				if (feature != null)
 				{
 					List<QueryRule> rules = new ArrayList<QueryRule>();
-					rules.add(makeQueryForOntologyTerms(createQueryRules(name, feature.getDefinition(), stemmer)));
-					rules.add(makeQueryForOntologyTerms(createQueryRules(description, feature.getDefinition(), stemmer)));
-					rules.add(makeQueryForName(name.toLowerCase()));
-					rules.add(makeQueryForName(description.toLowerCase()));
+					if (feature.getDefinition() != null && feature.getDefinition().size() > 0) rules
+							.add(makeQueryForOntologyTerms(createQueryRules(description, feature.getDefinition(),
+									stemmer)));
+					else rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH,
+							description));
 					QueryRule finalQuery = new QueryRule(rules);
 					finalQuery.setOperator(Operator.DIS_MAX);
 
@@ -200,16 +203,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 	}
 
-	private QueryRule makeQueryForName(String name)
-	{
-		List<QueryRule> rules = new ArrayList<QueryRule>();
-		rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(), Operator.SEARCH, name));
-		rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, name));
-		QueryRule finalQuery = new QueryRule(rules);
-		finalQuery.setOperator(Operator.DIS_MAX);
-		return finalQuery;
-	}
-
 	private QueryRule makeQueryForOntologyTerms(Map<Integer, List<String>> nameTokens)
 	{
 		List<QueryRule> subQueries = new ArrayList<QueryRule>();
@@ -218,7 +211,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			List<QueryRule> rules = new ArrayList<QueryRule>();
 			for (String term : terms)
 			{
-				rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(), Operator.SEARCH, term));
+				// rules.add(new QueryRule(ObservableFeature.NAME.toLowerCase(),
+				// Operator.SEARCH, term));
 				rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, term));
 			}
 			QueryRule queryRule = new QueryRule(rules);
@@ -309,6 +303,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					ObservedValue.OBSERVATIONSET_ID, Operator.IN, listOfObservationIds));
 			if (listOfObservedValues.size() > 0) db.remove(listOfObservedValues);
 			db.remove(listOfObservationSets);
+
+			searchService.deleteDocumentsByType(dataSetIdentifier);
 		}
 	}
 
@@ -374,5 +370,14 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				db.add(dataSet);
 			}
 		}
+	}
+
+	@Override
+	public boolean checkExistingMappings(String dataSetIdentifier, Database db) throws DatabaseException
+	{
+		List<ObservationSet> listOfObservationSets = db.find(ObservationSet.class, new QueryRule(
+				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSetIdentifier));
+		if (listOfObservationSets.size() > 0) return true;
+		return false;
 	}
 }

@@ -4,17 +4,21 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "common-component.js", "ontology-annotator.js"]>
 <@header css js/>
 	<div class="row-fluid">
-				<div class="span3">
+		<div class="span12">
+			<div class="row-fluid">
+				<div class="span4">
 					<h3>Step1 : Annotate data items</h3>
 				</div>
-				<div id="alert-message" class="offset1 span8">
+				<div id="alert-message" class="offset1 span7">
 				</div>
 			</div>
+		</div>
+	</div>
 	<div class="row-fluid">
 		<div class="span12">
 			<form id="ontologyannotator-form" class="form-horizontal" enctype="multipart/form-data">
 				<div class="row-fluid">
-					<div class="well span8">
+					<div id="div-inputinfo" class="well span8">
 						<div class="row-fluid">
 							<div class="span12">
 								<div class="row-fluid">
@@ -56,42 +60,44 @@
 						</div>
 					</div>
 				</div>
-				<div id="div-info" class="row-fluid well">
-					<div id="div-search" class="row-fluid">
-						<div>Search data items :</div>
-						<div class="input-append">
-							<input id="search-dataitem" type="text" title="Enter your search term" />
-							<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
-							<button class="btn" type="button" id="clear-button"><i class="icon-large icon-trash"></i></button>
-						</div>
-					</div>
-					<div class="row-fluid">
-						<div class="span8">
-							<div class="row-fluid data-table-container">
-								<table id="dataitem-table" class="table table-striped table-condensed">
-								</table>
-								<div class="pagination pagination-centered">
-									<ul></ul>
-								</div>
+				<div class="row-fluid">
+					<div id="div-info" class="span12 well">	
+						<div id="div-search" class="row-fluid">
+							<div>Search data items :</div>
+							<div class="input-append">
+								<input id="search-dataitem" type="text" title="Enter your search term" />
+								<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+								<button class="btn" type="button" id="clear-button"><i class="icon-large icon-trash"></i></button>
 							</div>
 						</div>
-						<div class="span4">
-							<div class="accordion-group">
-							    <div class="accordion-heading">
-									<h5 class="text-left text-info">Actions</h5>	
+						<div class="row-fluid">
+							<div class="span8">
+								<div class="row-fluid data-table-container">
+									<table id="dataitem-table" class="table table-striped table-condensed">
+									</table>
+									<div class="pagination pagination-centered">
+										<ul></ul>
+									</div>
 								</div>
-								<div class="accordion-body in">
-									<ol class="action-list">
-										<li>
-											<strong>Automatical annotation</strong> <br> click on <strong>'Annotate'</strong> button, BiobankConnect will annotate potential ontology terms to data items.
-										</li>
-										<li>
-											<strong>Manual annotation</strong> <br> click on <strong>'Name'</strong> of data items, a popup window will show up where you can add ontology terms by hand.
-										</li>
-										<li>
-											<strong>Hint</strong> <br> Ontology term annotation is not neccessary for the rest of steps.
-										</li>
-									</ol>
+							</div>
+							<div class="span4">
+								<div class="accordion-group">
+								    <div class="accordion-heading">
+										<h5 class="text-left text-info">Actions</h5>	
+									</div>
+									<div class="accordion-body in">
+										<ol class="action-list">
+											<li>
+												<strong>Automatical annotation</strong> <br> click on <strong>'Annotate'</strong> button, BiobankConnect will annotate potential ontology terms to data items.
+											</li>
+											<li>
+												<strong>Manual annotation</strong> <br> click on <strong>'Name'</strong> of data items, a popup window will show up where you can add ontology terms by hand.
+											</li>
+											<li>
+												<strong>Hint</strong> <br> Ontology term annotation is not neccessary for the rest of steps.
+											</li>
+										</ol>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -105,6 +111,7 @@
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
 			<#if isRunning?? && isRunning>
+				molgenis.showMessageDialog('Annotation is running...');
 				$('#annotate-dataitems').attr('disabled', 'disabled');
 			</#if>
 			<#if message??>

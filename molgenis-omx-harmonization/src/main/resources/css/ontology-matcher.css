@@ -1,14 +1,10 @@
-.container-fluid {
-	margin-top: 10px;
-}
-
 .accordion-group {
-	margin-top : -50px;
-	margin-bottom : -30px;
+	height : 360px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
+	height : 300px;
 	background-color: white;
 }
 
@@ -18,6 +14,20 @@
 
 .accordion-heading h5{
 	color : white;
+	padding-left : 10px;
+}
+
+div#alert-message {
+	height : 40px;
+	margin-top : 10px;
+}
+
+div.div-inputinfo{
+	height : 200px;
+}
+
+h3 {
+	color : #3079C2;
 }
 
 .justify-text {
@@ -25,26 +35,18 @@
 	text-align : justify;
 }
 
-h5 {
-	padding-left : 10px;
+ol.action-list, ol.action-list li{
+	padding : 5px;
 }
 
-.show-popover {
-	cursor: hand; 
-	cursor: pointer;
+dl{
+	font-size : 16px;
 }
 
-td.add-border {
-	border:2px solid #5B82A4;
+dt {
+	padding-bottom : 5px;
 }
 
-table thead th {
-    background-color: #5B82A4; 
-    border:2px solid #5B82A4;
-    color: white;
-}
-
-.float-right {
-	float : right;
-	margin-right : 10px;
+dd {
+	padding-bottom : 10px;
 }

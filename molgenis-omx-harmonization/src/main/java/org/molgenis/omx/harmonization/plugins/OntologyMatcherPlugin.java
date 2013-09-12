@@ -2,7 +2,7 @@ package org.molgenis.omx.harmonization.plugins;
 
 import org.molgenis.framework.ui.IframePlugin;
 import org.molgenis.framework.ui.ScreenController;
-import org.molgenis.omx.harmonization.controllers.OntologyMatcherController;
+import org.molgenis.omx.harmonization.controllers.MappingManagerController;
 
 public class OntologyMatcherPlugin extends IframePlugin
 {
@@ -16,6 +16,6 @@ public class OntologyMatcherPlugin extends IframePlugin
 	@Override
 	public String getIframeSrc()
 	{
-		return OntologyMatcherController.URI;
+		return MappingManagerController.URI;
 	}
 }

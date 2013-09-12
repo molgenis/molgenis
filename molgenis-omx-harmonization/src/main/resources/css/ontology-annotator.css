@@ -17,13 +17,17 @@
 	padding-left : 10px;
 }
 
-#alert-message {
+div#alert-message {
 	height : 40px;
 	margin-top : 10px;
 }
 
-#div-search {
+div#div-search {
 	margin-bottom : 10px;
+}
+
+div#div-inputinfo{
+	height : 150px;
 }
 
 div.data-table-container {
@@ -38,10 +42,6 @@ table thead th {
     background-color: #5B82A4; 
     border:2px solid #5B82A4;
     color: white;
-}
-
-h3 {
-	color : #3079C2;
 }
 
 .show-popover {
@@ -65,11 +65,20 @@ h3 {
 	overflow-y: visible;
 }
 
-.justify-text {
-	padding : 10px;
-	text-align : justify;
-}
-
 ol.action-list, ol.action-list li{
 	padding : 5px;
+}
+
+dl{
+	font-size : 16px;
+	margin-top : -5px;
+}
+
+dt,dd{
+	padding-bottom : 5px;
+}
+
+
+h3 {
+	color : #3079C2;
 }

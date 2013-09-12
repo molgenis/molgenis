@@ -4,9 +4,10 @@
 		<plugin id="home" label="Home" name="HomeController" type="org.molgenis.omx.plugins.HomePlugin"/>
 		<plugin id="protocolviewer" label="Catalog" name="ProtocolViewerController" type="org.molgenis.omx.protocolviewer.ProtocolViewerPlugin"/>
 		<menu name="biobankConnect" label="BiobankConnect">
-			<plugin id="ontologyindexer" label="OntologyIndexer" name="OntologyIndexerController" type="org.molgenis.omx.harmonization.plugins.OntologyIndexerPlugin"/>
-			<plugin id="ontologyannotator" label="OntologyAnnotator" name="OntologyAnnotatorController" type="org.molgenis.omx.harmonization.plugins.OntologyAnnotatorPlugin"/>
-			<plugin id="ontologymatcher" label="OntologyMatcher" name="OntologyMatcherController" type="org.molgenis.omx.harmonization.plugins.OntologyMatcherPlugin"/>
+			<plugin id="ontologyindexer" label="Step0 (optional) : Index ontology" name="OntologyIndexerController" type="org.molgenis.omx.harmonization.plugins.OntologyIndexerPlugin"/>
+			<plugin id="ontologyannotator" label="Step1 : Annotate data items" name="OntologyAnnotatorController" type="org.molgenis.omx.harmonization.plugins.OntologyAnnotatorPlugin"/>
+			<plugin id="ontologymatcher" label="Step2 : Match biobanks" name="OntologyMatcherController" type="org.molgenis.omx.harmonization.plugins.OntologyMatcherPlugin"/>
+			<plugin id="mappingmanager" label="Step3 : View and select mappings" name="MappingManagerController" type="org.molgenis.omx.harmonization.plugins.MappingManagerPlugin"/>
 		</menu>
 		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerController" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin id="entityexplorer" label="Entity Explorer" name="EntityExplorerController" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>

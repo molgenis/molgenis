@@ -73,41 +73,4 @@ public class OntologyAnnotatorController extends MolgenisPlugin
 
 		return "OntologyAnnotatorPlugin";
 	}
-
-	// @RequestMapping(value = "/match", method = RequestMethod.POST, consumes =
-	// APPLICATION_JSON_VALUE)
-	// @ResponseStatus(HttpStatus.NO_CONTENT)
-	// public void match(@RequestBody
-	// OntologyAnnotatorRequest request) throws DatabaseException
-	// {
-	// System.out.println("The catalogue to match is : " +
-	// request.getSelectedDataSets());
-	// System.out.println("The selected catalogue is : " +
-	// request.getDataSetId());
-	// ontologyMatcher.match(request.getDataSetId(),
-	// request.getSelectedDataSets());
-	// }
-	//
-	// class OntologyAnnotatorRequest
-	// {
-	// private Integer dataSetId;
-	// private List<Integer> selectedDataSets;
-	//
-	// public OntologyAnnotatorRequest(Integer dataSetId, List<Integer>
-	// selectedDataSets)
-	// {
-	// this.dataSetId = dataSetId;
-	// this.selectedDataSets = selectedDataSets;
-	// }
-	//
-	// public Integer getDataSetId()
-	// {
-	// return dataSetId;
-	// }
-	//
-	// public List<Integer> getSelectedDataSets()
-	// {
-	// return selectedDataSets;
-	// }
-	// }
 }

@@ -1,15 +1,10 @@
-.container-fluid {
-	margin-top: 10px;
-}
-
 .accordion-group {
-	margin-left : 50px;
-	margin-top : 60px;
-	height : 200px;
+	height : 320px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
+	height : 250px;
 	background-color: white;
 }
 
@@ -19,11 +14,24 @@
 
 .accordion-heading h5{
 	color : white;
+	padding-left : 10px;
 }
 
-.justify-text {
-	padding : 10px;
-	text-align : justify;
+div#alert-message {
+	height : 40px;
+	margin-top : 10px;
+}
+
+div#div-index-ontology {
+	min-height : 350px;
+}
+
+div#div-new-ontology {
+	margin-top : 30px;
+}
+
+ol li{
+	margin : 10px;
 }
 
 h5 {

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -33,6 +34,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	// TODO : solve this guy
 	public static final Set<String> STOPWORDSLIST;
+	private final AtomicInteger runningProcesses = new AtomicInteger();
 
 	static
 	{
@@ -65,9 +67,16 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
+	public boolean isRunning()
+	{
+		if (runningProcesses.get() == 0) return false;
+		return true;
+	}
+
 	@Async
 	public void annotate(Integer protocolId)
 	{
+		runningProcesses.incrementAndGet();
 		Database db = DatabaseUtil.createDatabase();
 
 		try
@@ -111,6 +120,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		finally
 		{
 			DatabaseUtil.closeQuietly(db);
+			runningProcesses.decrementAndGet();
 		}
 	}
 
