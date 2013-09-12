@@ -13,14 +13,16 @@
 </script>
 
 <form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??>/${form.primaryKey}</#if>">
-	<a href="javascript:history.go(-1)" class="pull-left">
-		<div id="back">
-			<div class="nav-icon-prev pull-left"></div>
-			<div class="nav-icon-prev pull-left"></div>
-			<div class="back-text pull-left">Back to list</div>
-		</div>
-		<div class="clearfix"></div>
-	</a>
+	<#if back??>
+		<a href="${back}" class="pull-left">
+			<div id="back">
+				<div class="nav-icon-prev pull-left"></div>
+				<div class="nav-icon-prev pull-left"></div>
+				<div class="back-text pull-left">Back to list</div>
+			</div>
+			<div class="clearfix"></div>
+		</a>
+	</#if>
 	
 	<div class="pull-left">
 		<div id="success-message" class="control-group" style="display: none">

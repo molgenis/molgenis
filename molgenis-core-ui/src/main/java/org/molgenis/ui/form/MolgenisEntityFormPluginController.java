@@ -18,6 +18,7 @@ import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
+import org.molgenis.ui.MolgenisUiUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
@@ -56,6 +57,8 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	String entityName, @RequestParam(value = "subForms", required = false)
 	String[] subForms, Model model) throws DatabaseException, MolgenisModelException
 	{
+		model.addAttribute("current_uri", MolgenisUiUtils.getCurrentUri());
+
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
 		boolean hasWritePermission = permissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 
@@ -107,8 +110,14 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	@RequestMapping(method = GET, value = URI + "{entityName}/{id}")
 	public String edit(@PathVariable("entityName")
 	String entityName, @PathVariable("id")
-	String id, Model model) throws DatabaseException, MolgenisModelException, ParseException
+	String id, @RequestParam(value = "back", required = false)
+	String back, Model model) throws DatabaseException, MolgenisModelException, ParseException
 	{
+		if (StringUtils.isNotBlank(back))
+		{
+			model.addAttribute("back", back);
+		}
+
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
 		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
 		boolean hasWritePermission = permissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
@@ -119,8 +128,14 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 
 	@RequestMapping(method = GET, value = URI + "{entityName}/create")
 	public String create(@PathVariable("entityName")
-	String entityName, HttpServletRequest request, Model model) throws Exception
+	String entityName, HttpServletRequest request, @RequestParam(value = "back", required = false)
+	String back, Model model) throws Exception
 	{
+		if (StringUtils.isNotBlank(back))
+		{
+			model.addAttribute("back", back);
+		}
+
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
 
 		// Requestparameters are used to prefill the form (for example in case of subform)

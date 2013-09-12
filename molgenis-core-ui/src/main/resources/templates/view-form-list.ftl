@@ -9,6 +9,7 @@
 
 <script>
 	var forms = [];
+	var CURRENT_URI = '${current_uri}';
 </script>
 
 <div id="success-message" class="alert alert-success" style="display: none">
@@ -21,6 +22,7 @@
   	<strong id="error-message-content"></strong>
 </div>
 			
+
 <@f.renderList form 0 />
 <@f.meta form 0 />
 

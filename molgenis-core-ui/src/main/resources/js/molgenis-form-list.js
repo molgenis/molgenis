@@ -4,7 +4,7 @@
 	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient(false);
-	var NR_ROWS_PER_PAGE = 5;
+	var NR_ROWS_PER_PAGE = 10;
 	var currentPages = [];
 	var selectedEntityId = null;//Id of the selected entity in the master list
 	
@@ -30,7 +30,7 @@
 			
 		$.each(entities.items, function(index, entity) {
 			var id = restApi.getPrimaryKeyFromHref(entity.href);
-			var editPageUrl = forms[formIndex].baseUri + '/' + id;
+			var editPageUrl = forms[formIndex].baseUri + '/' + id + '?back=' + encodeURIComponent(CURRENT_URI);
 			var deleteApiUrl = '/api/v1/' + forms[formIndex].meta.name + '/' +  id;
 				
 			//Select first row when table is shown and we have master/detail
