@@ -608,46 +608,7 @@
 		});
 	};
 
-	ns.formatValue = function(value, dataType) {
-		if (dataType == "hyperlink") {
-			value = '<a target="_blank" href="' + value + '">' + ns.htmlEscape(value) + '</a>';
-			
-		} else if (dataType == "email") {
-			value = '<a href="mailto:' + value + '">' + ns.htmlEscape(value) + '</a>';
-		
-		} else if (dataType == 'bool') {
-			var checked = (value == true);
-			value = '<input type="checkbox" disabled="disabled" ';
-			if (checked) {
-				value = value + 'checked ';
-			}
-			
-			value = value + '/>';
-			
-		} else if (dataType == 'date') {
-			value = '<input type="date" value="' + value + '" />';
-		
-		} else if (dataType == 'datetime') {
-			value = '<input type="datetime" value="' + value + '" />';
-			
-		} else if (dataType != 'html'){
-			
-			if (value.length > 50) {
-				var abbr = ns.htmlEscape(value.substr(0, 47)) + '...';
-				value = '<span class="show-popover"  data-content="' + value + '" data-toggle="popover">' + abbr + "</span>";
-			} else {
-				value = ns.htmlEscape(value);
-			}
-			
-		}
-			
-		return value;
-	};
 
-	ns.htmlEscape = function (text) {
-		return $('<div/>').text(text).html(); 
-	};
-	
 	ns.search = function(callback) {
 		searchApi.search(ns.createSearchRequest(true), callback);
 	};
