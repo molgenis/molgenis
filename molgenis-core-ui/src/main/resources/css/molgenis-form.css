@@ -8,9 +8,13 @@ h2 {
 	padding-left: 20px;
 }
 
+.form-list-holder {
+	width:100%; 
+	overflow:auto;
+}
+
 .edit-icon-holder {
 	width: 22px;
-	height: 22px;
 }
 
 /* edit form */

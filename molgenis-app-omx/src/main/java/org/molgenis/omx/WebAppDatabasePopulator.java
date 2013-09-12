@@ -48,6 +48,7 @@ public class WebAppDatabasePopulator extends MolgenisDatabasePopulator
 		runtimePropertyMap.put("app.href.css", "");
 		runtimePropertyMap.put("app.references", "There are no references");
 		runtimePropertyMap.put("app.contact", "There is no contact information");
+		runtimePropertyMap.put("app.name", "Molgenis");
 
 		Login login = database.getLogin();
 		database.setLogin(null);
