@@ -11,26 +11,33 @@
 		
 		<div class="span4" style="height: 78px;">
 			<#if form.hasWritePermission>
-				<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px"><a href="${form.getBaseUri(context_url)}/create"><img src="/img/new.png" /></a></div>
+				<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px">
+					<a id="create-${index}" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
+						<img src="/img/new.png" />
+					</a>
+				</div>
 			</#if>
 		</div>
+		
 	</div>
-			
-	<table class="table table-striped table-bordered table-hover">
-		<thead>
-			<tr>
-				<th class="edit-icon-holder">&nbsp;</th>
-				<#if form.hasWritePermission>
-					<th class="edit-icon-holder">&nbsp;</th>
-				</#if>
-				<#list form.metaData.fields as field>
-					<th>${field.label}</th>
-				</#list>
-			</tr>
-		</thead>
-		<tbody id="entity-table-body-${index}">
-		</tbody>
-	</table>
+	
+	<div class="form-list-holder">
+		<table class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><#-- Non breaking spaces are for fixing very annoying display error in chrome -->
+					<#if form.hasWritePermission>
+						<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+					</#if>
+					<#list form.metaData.fields as field>
+						<th>${field.label}</th>
+					</#list>
+				</tr>
+			</thead>
+			<tbody id="entity-table-body-${index}">
+			</tbody>
+		</table>
+	</div>
 </div>
 </#macro>
 
