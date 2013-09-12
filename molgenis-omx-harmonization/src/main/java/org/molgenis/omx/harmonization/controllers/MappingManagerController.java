@@ -72,7 +72,8 @@ public class MappingManagerController extends MolgenisPlugin
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws DatabaseException
+	public String init(@RequestParam(value = "selectedDataSet", required = false)
+	String selectedDataSetId, Model model) throws DatabaseException
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : database.find(DataSet.class))
@@ -80,6 +81,7 @@ public class MappingManagerController extends MolgenisPlugin
 			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
 		model.addAttribute("dataSets", dataSets);
+		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
 
 		return "MappingManagerPlugin";

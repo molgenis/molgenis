@@ -10,11 +10,34 @@
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
+	var CONTEXT_URL = null;
+	
+	ns.setContextURL = function(CONTEXT_URL){
+		this.CONTEXT_URL = CONTEXT_URL;
+	};
+	
+	ns.getContextURL = function() {
+		return this.CONTEXT_URL;
+	};
 	
 	ns.changeDataSet = function(selectedDataSet){
-		pagination.reset();
-		ns.updateSelectedDataset(selectedDataSet);
-		ns.createMatrixForDataItems();
+		var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+		var request = {
+			documentType : 'protocolTree-' + hrefToId(dataSetEntity.href),
+			queryRules : [{
+				field : 'type',
+				operator : 'EQUALS',
+				value : 'observablefeature'
+			}]
+		};
+		searchApi.search(request, function(searchResponse){
+			$('#catalogue-name').empty().append(dataSetEntity.name);
+			$('#dataitem-number').empty().append(searchResponse.totalHitCount);
+			ns.initAccordion();
+			pagination.reset();
+			ns.updateSelectedDataset(selectedDataSet);
+			ns.createMatrixForDataItems();
+		});
 	};
 	
 	ns.createMatrixForDataItems = function() {
@@ -34,6 +57,11 @@
 			searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
 				createMappingFromIndex(dataSetMapping.items, searchResponse);
 			});
+		}else{
+			$('#dataitem-table').empty();
+			$('#table-papger').empty();
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + getSelectedDataSet());
+			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.name + '</strong> catalogue');
 		}
 		
 		function createMappingFromIndex(dataSets, searchResponse){
@@ -425,9 +453,10 @@
 		}
 		
 		function showMessage(alertClass, message){
+			$('#alert-message').empty();
 			var messageAlert = $('<div />').addClass(alertClass).append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
 			$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
-			messageAlert.appendTo('#alertMessage');
+			messageAlert.appendTo('#alert-message');
 			w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
 		}
 		
@@ -610,6 +639,22 @@
 			});
 			$('<thead />').append(row).appendTo(table);
 		}
+	};
+	
+	ns.initAccordion = function(){
+		$('#accordion-icon-meaning-content').hide();
+		$('#accordion-action-click').click(function(){
+			$('.accordion ul li').removeClass('active');
+			$(this).addClass('active');
+			$('#accordion-icon-meaning-content').hide();
+			$('#accordion-action-content').show();
+		});
+		$('#accordion-icon-meaning-click').click(function(){
+			$('.accordion ul li').removeClass('active');
+			$(this).addClass('active');
+			$('#accordion-icon-meaning-content').show();
+			$('#accordion-action-content').hide();
+		});
 	};
 	
 	ns.downloadMappings = function(){

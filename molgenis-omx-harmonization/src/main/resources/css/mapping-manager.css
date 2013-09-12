@@ -1,23 +1,6 @@
-.container-fluid {
-	margin-top: 10px;
-}
 
-.accordion-group {
-	margin-top : -50px;
-	margin-bottom : -30px;
-	background-color: #5B82A4;
-}
-
-.accordion-body {
-	background-color: white;
-}
-
-.accordion-toggle {
-	color: white;
-}
-
-.accordion-heading h5{
-	color : white;
+.upper-header {
+	height : 150px;
 }
 
 .justify-text {
@@ -25,8 +8,24 @@
 	text-align : justify;
 }
 
-h5 {
-	padding-left : 10px;
+div#alert-message {
+	height : 40px;
+	margin-top : 10px;
+}
+
+div.data-table-container {
+	height : 400px;
+}
+
+.nav-pills {
+	margin-top : 5px;
+	margin-left : 10px;
+	margin-bottom : 5px;
+}
+
+.accordion-icon {
+	margin-left : 20px;
+	margin-top : -5px;
 }
 
 .show-popover {
@@ -47,4 +46,21 @@ table thead th {
 .float-right {
 	float : right;
 	margin-right : 10px;
+}
+
+h3 {
+	color : #3079C2;
+}
+
+h5 {
+	padding-left : 10px;
+}
+
+dl{
+	font-size : 16px;
+	margin-top : -5px;
+}
+
+dt,dd{
+	padding-bottom : 5px;
 }
