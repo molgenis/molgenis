@@ -50,9 +50,12 @@ public class OntologyMatcherController extends MolgenisPlugin
 		}
 
 		if (sourceDataSetId != null) model.addAttribute("selectedSourceDataSetId", sourceDataSetId);
+		model.addAttribute("isComplete", ontologyMatcher.isComplete());
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
 		model.addAttribute("percentage", ontologyMatcher.matchPercentage());
 		model.addAttribute("dataSets", dataSets);
+		ontologyMatcher.initCompleteState();
+
 		return "OntologyMatcherPlugin";
 	}
 
@@ -78,7 +81,7 @@ public class OntologyMatcherController extends MolgenisPlugin
 			{
 				match(request);
 				isRunning = true;
-				message = "Matching started running!";
+				message = "Matching started running! Please click on 'Reset' button to check result!";
 			}
 		}
 		OntologyMatcherResponse response = new OntologyMatcherResponse(isRunning, message);
@@ -93,7 +96,8 @@ public class OntologyMatcherController extends MolgenisPlugin
 		Integer sourceDataSetId = request.getSourceDataSetId();
 		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
 		ontologyMatcher.match(sourceDataSetId, selectedDataSetIds);
-		OntologyMatcherResponse response = new OntologyMatcherResponse(true, "Matching started running!");
+		OntologyMatcherResponse response = new OntologyMatcherResponse(true,
+				"Matching started running! Please click refresh button to check the status of matching...");
 		return response;
 	}
 

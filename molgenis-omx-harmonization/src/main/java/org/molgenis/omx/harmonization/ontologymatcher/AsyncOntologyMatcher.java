@@ -43,9 +43,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
 	private static final String ONTOLOGY_IRI = "ontologyTermIRI";
 	private static final String ENTITY_TYPE = "type";
-	private final AtomicInteger runningProcesses = new AtomicInteger();
-	private int totalNumber = 0;
-	private int finishedNumber = 0;
+	private static final AtomicInteger runningProcesses = new AtomicInteger();
+	private static boolean complete = false;
+	private static int totalNumber = 0;
+	private static int finishedNumber = 0;
 
 	private SearchService searchService;
 
@@ -64,6 +65,16 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		if (runningProcesses.get() == 0) return false;
 		return true;
+	}
+
+	public boolean isComplete()
+	{
+		return complete;
+	}
+
+	public void initCompleteState()
+	{
+		complete = false;
 	}
 
 	@Override
@@ -197,6 +208,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		finally
 		{
 			runningProcesses.decrementAndGet();
+			complete = true;
 			totalNumber = 0;
 			finishedNumber = 0;
 			DatabaseUtil.closeQuietly(db);

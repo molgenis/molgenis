@@ -15,5 +15,9 @@ public interface OntologyMatcher
 
 	boolean isRunning();
 
+	boolean isComplete();
+
+	void initCompleteState();
+
 	boolean checkExistingMappings(String dataSetIdentifier, Database db) throws DatabaseException;
 }

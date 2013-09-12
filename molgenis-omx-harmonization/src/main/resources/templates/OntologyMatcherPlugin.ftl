@@ -115,9 +115,13 @@
 			<#if isRunning?? && isRunning>
 				<#if percentage == 0.0>
 					molgenis.showMessageDialog('Deleting existing mappings...');
+				<#elseif percentage == 100.0>
+					molgenis.showMessageDialog('Indexing matching result...');
 				<#else>
 					molgenis.showMessageDialog('Matching is running...' + ${percentage} + '% has completed!');
 				</#if>
+			<#elseif isComplete?? && isComplete>
+					molgenis.showMessageDialog('Matching has finished!');
 			</#if>
 		});
 	</script>

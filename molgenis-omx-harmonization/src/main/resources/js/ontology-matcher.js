@@ -119,7 +119,11 @@
 				existingMappings += mappedDataSet.name + ' , ';
 			});
 			existingMappings = existingMappings.substring(0, existingMappings.length - 2);
-			var newRow = $('<dt>&nbsp;&nbsp;Existing mappings :</dt>').css('margin-top', 30).after('<dd>' + existingMappings + '</dd>');
+			
+			if($('.list-existing-mappings').length > 0) {
+				$('.list-existing-mappings').remove();
+			}
+			var newRow = $('<dt class="list-existing-mappings">&nbsp;&nbsp;Existing mappings :</dt>').css('margin-top', 30).after('<dd class="list-existing-mappings">' + existingMappings + '</dd>');
 			$('#div-existing-mapping dl:eq(0)').append(newRow);
 		}
 	};
@@ -144,8 +148,10 @@
 		}).hide();
 		
 		$('#select-source-dataset').click(function(){
-			ns.changeSourceDataSet();
-			ns.getExistingMappings($('#sourceDataSet').val());
+			if($('#sourceDataSet').val() !== ''){
+				ns.changeSourceDataSet();
+				ns.getExistingMappings($('#sourceDataSet').val());
+			}
 			return false;
 		});
 		
