@@ -11,9 +11,14 @@
 		
 		<div class="span4" style="height: 78px;">
 			<#if form.hasWritePermission>
-				<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px"><a href="${form.getBaseUri(context_url)}/create"><img src="/img/new.png" /></a></div>
+				<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px">
+					<a id="create-${index}" href="${form.getBaseUri(context_url)}/create">
+						<img src="/img/new.png" />
+					</a>
+				</div>
 			</#if>
 		</div>
+		
 	</div>
 			
 	<table class="table table-striped table-bordered table-hover">

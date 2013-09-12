@@ -44,9 +44,9 @@
 				items.push('<tr data-id="' + id + '">');
 			}
 				
-			items.push('<td><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
+			items.push('<td class="edit-entity"><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
 			if (forms[formIndex].hasWritePermission) {
-				items.push('<td><a href="#" class="delete-entity" data-href="' + deleteApiUrl + '"><img src="/img/delete.png"></a></td>');
+				items.push('<td class="delete-entity"><a href="#" class="delete-entity-' + formIndex + '" data-href="' + deleteApiUrl + '"><img src="/img/delete.png"></a></td>');
 			}
 				
 			$.each(forms[formIndex].meta.fields, function(index, field) {
@@ -85,21 +85,22 @@
 			
 		//Add master row click handler
 		if ((forms.length > 1) && (formIndex == 0)) {
-			$('#entity-table-body-' + formIndex + ' tr').on('click', function() {
-				//Color selected row
-				$('#entity-table-body-' + formIndex + ' tr').removeClass('info');
-				$(this).addClass('info');
+			$('#entity-table-body-' + formIndex + ' td').not($('td.edit-entity')).not('td.delete-entity').on('click', function() {
+				//Remove old selection
+				$('#entity-table-body-' + formIndex).find('tr.info').removeClass('info');
+				
+				//Color row
+				var tr = $(this).parent();
+				tr.addClass('info');
 					
 				//Update subforms
-				selectedEntityId = $(this).attr('data-id');
-				for (var i = 1; i < forms.length; i++) {
-					currentPages[i] = 1;
-					ns.buildTableBody(i);
-				}
+				selectedEntityId = tr.attr('data-id');
+				ns.updateSubForms();
+				return false;
 			});
 		}
 			
-		$('.delete-entity').on('click', function(e) {
+		$('a.delete-entity-' + formIndex).on('click', function(e) {
 			e.preventDefault();
 			ns.deleteEntity($(this).attr('data-href'), formIndex);
 			return false;
@@ -125,6 +126,17 @@
 					$('#error-message').show();
 				}
 			});
+		}
+	}
+	
+	ns.updateSubForms = function() {
+		for (var i = 1; i < forms.length; i++) {
+			currentPages[i] = 1;
+			ns.buildTableBody(i);
+			
+			//Update url of create buttons of subforms so xref dropdown is preselected
+			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId;
+			$('#create-' + i).attr('href', href);
 		}
 	}
 	
@@ -204,9 +216,13 @@
 			$('#error-message').hide();
 		});
 		
-		for (var i = 0; i < forms.length; i++) {
-			currentPages[i] = 1;
-			ns.buildTableBody(i);
+		//Build master tables
+		currentPages[0] = 1;
+		ns.buildTableBody(0);
+		
+		//Build subforms if available
+		if (forms.length > 1) {
+			ns.updateSubForms();
 		}
 	});
 	

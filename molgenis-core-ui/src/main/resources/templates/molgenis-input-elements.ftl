@@ -9,10 +9,10 @@
     	<div class="controls">
     		
     		<#if field.type.enumType == 'BOOL'>
-				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)!?string("true", "false") == "true">checked</#if>  <#if field.readOnly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readOnly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
 	
 			<#elseif field.type.enumType == 'TEXT' || field.type.enumType =='HTML'>
-				<textarea name="${fieldName}" id="${fieldName}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!=''>${entity.get(fieldName)!?html}</#if></textarea>
+				<textarea name="${fieldName}" id="${fieldName}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
 	
 			<#elseif field.type.enumType == 'XREF'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
@@ -108,7 +108,7 @@
 				</script>
 				
 			<#elseif field.type.enumType == 'DATE_TIME' || field.type.enumType == 'DATE'>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if> <@validationOptions field /> >
+				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if> <@validationOptions field /> >
 	
 			<#else>
 				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
