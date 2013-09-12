@@ -77,7 +77,7 @@
 					<div class="span4">
 						<div class="accordion-group">
 						    <div class="accordion-heading">
-								<h5 class="text-left text-info">Help!</h5>	
+								<h5 class="text-left text-info">Actions</h5>	
 							</div>
 							<div class="accordion-body collapse in">
 								<ol class="action-list">
