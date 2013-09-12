@@ -20,6 +20,13 @@ public class EntityForm implements Form
 		this.hasWritePermission = hasWritePermission;
 	}
 
+	public EntityForm(Entity entityMetaData, boolean hasWritePermission, org.molgenis.util.Entity entity)
+	{
+		this.entityMetaData = entityMetaData;
+		this.hasWritePermission = hasWritePermission;
+		this.entity = entity;
+	}
+
 	public EntityForm(Entity entityMetaData, org.molgenis.util.Entity entity, String primaryKey,
 			boolean hasWritePermission)
 	{

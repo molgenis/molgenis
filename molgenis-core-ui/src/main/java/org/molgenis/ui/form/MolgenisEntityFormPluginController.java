@@ -3,7 +3,13 @@ package org.molgenis.ui.form;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisPermissionService;
@@ -12,9 +18,14 @@ import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.DataBinder;
+import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +38,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 	public static final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private static final String VIEW_NAME_LIST = "view-form-list";
 	private static final String VIEW_NAME_EDIT = "view-form-edit";
+	private static final Logger logger = Logger.getLogger(MolgenisEntityFormPluginController.class);
 
 	@Autowired
 	private Database database;
@@ -107,10 +119,58 @@ public class MolgenisEntityFormPluginController extends MolgenisPlugin
 
 	@RequestMapping(method = GET, value = URI + "{entityName}/create")
 	public String create(@PathVariable("entityName")
-	String entityName, Model model) throws DatabaseException
+	String entityName, HttpServletRequest request, Model model) throws Exception
 	{
 		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, true));
+
+		// Requestparameters are used to prefill the form (for example in case of subform)
+		// Create an entity of the correct type and set the field values from the request params
+		Class<? extends org.molgenis.util.Entity> entityClass = database.getClassForName(entityName);
+		org.molgenis.util.Entity entity = BeanUtils.instantiateClass(entityClass);
+
+		Map<String, String[]> parameterMap = request.getParameterMap();
+		if (!parameterMap.isEmpty())
+		{
+			MutablePropertyValues pvs = new ServletRequestParameterPropertyValues(request);
+			DataBinder binder = new DataBinder(entity);
+			binder.bind(pvs);
+
+			// Resolve xrefs TODO mref
+			for (String fieldName : parameterMap.keySet())
+			{
+				String value = request.getParameter(fieldName);
+
+				if (StringUtils.isNotBlank(value))
+				{
+					Field field = entityMetaData.getAllField(fieldName);
+					if ((field != null) && field.isXRef() && !field.isMRef())
+					{
+						List<? extends org.molgenis.util.Entity> results = null;
+						String pkFieldName = field.getXrefEntity().getPrimaryKey().getName();
+						Class<? extends org.molgenis.util.Entity> xrefEntityClass = database.getClassForName(field
+								.getXrefEntityName());
+						try
+						{
+							results = database.query(xrefEntityClass).equals(pkFieldName, value).find();
+						}
+						catch (Exception e)
+						{
+							// Probably pk is of wrong type, could be that user entered an invalid value
+							logger.debug("Exception getting entity [" + xrefEntityClass
+									+ "] by primarykey with value [" + value + "]", e);
+						}
+
+						if ((results != null) && !results.isEmpty())
+						{
+							new BeanWrapperImpl(entity).setPropertyValue(fieldName, results.get(0));
+						}
+					}
+
+				}
+			}
+		}
+
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, true, entity));
 
 		return VIEW_NAME_EDIT;
 	}
