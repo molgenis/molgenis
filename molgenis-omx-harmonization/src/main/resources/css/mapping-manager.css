@@ -1,0 +1,50 @@
+.container-fluid {
+	margin-top: 10px;
+}
+
+.accordion-group {
+	margin-top : -50px;
+	margin-bottom : -30px;
+	background-color: #5B82A4;
+}
+
+.accordion-body {
+	background-color: white;
+}
+
+.accordion-toggle {
+	color: white;
+}
+
+.accordion-heading h5{
+	color : white;
+}
+
+.justify-text {
+	padding : 10px;
+	text-align : justify;
+}
+
+h5 {
+	padding-left : 10px;
+}
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
+}
+
+td.add-border {
+	border:2px solid #5B82A4;
+}
+
+table thead th {
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
+    color: white;
+}
+
+.float-right {
+	float : right;
+	margin-right : 10px;
+}
