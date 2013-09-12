@@ -208,6 +208,7 @@ input[type=number] {
 
 #date-feature-from, #date-feature-to {
 	width:240px;
+	font-size: 12px;
 }
 
 #applybutton-holder {
