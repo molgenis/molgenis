@@ -7,4 +7,8 @@ public interface OntologyAnnotator
 	float finishedPercentage();
 
 	boolean isRunning();
+
+	boolean isComplete();
+
+	void initComplete();
 }

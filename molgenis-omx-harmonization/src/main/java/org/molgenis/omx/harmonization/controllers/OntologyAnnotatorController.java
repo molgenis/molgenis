@@ -9,7 +9,6 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
-import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,9 +25,6 @@ public class OntologyAnnotatorController extends MolgenisPlugin
 
 	@Autowired
 	private OntologyAnnotator ontologyAnnotator;
-
-	@Autowired
-	private OntologyMatcher ontologyMatcher;
 
 	@Autowired
 	private Database database;
@@ -50,8 +46,10 @@ public class OntologyAnnotatorController extends MolgenisPlugin
 			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
 		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
+		model.addAttribute("isComplete", ontologyAnnotator.isComplete());
 		model.addAttribute("dataSets", dataSets);
 		model.addAttribute("isRunning", ontologyAnnotator.isRunning());
+		ontologyAnnotator.initComplete();
 
 		return "OntologyAnnotatorPlugin";
 	}
@@ -69,7 +67,6 @@ public class OntologyAnnotatorController extends MolgenisPlugin
 		model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("dataSets", dataSets);
 		model.addAttribute("isRunning", ontologyAnnotator.isRunning());
-		model.addAttribute("message", "Please refresh the page to see result!");
 
 		return "OntologyAnnotatorPlugin";
 	}

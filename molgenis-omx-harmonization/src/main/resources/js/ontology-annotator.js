@@ -402,10 +402,5 @@
 				'method' : 'POST'
 			}).submit();
 		});
-		
-//		$('#match-catalogue').click(function(){
-//			ns.selectCatalogue();
-//			return false;
-//		});
 	});
 }($, window.top));

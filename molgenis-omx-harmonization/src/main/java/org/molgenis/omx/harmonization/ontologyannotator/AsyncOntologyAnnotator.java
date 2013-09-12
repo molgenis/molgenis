@@ -34,7 +34,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	// TODO : solve this guy
 	public static final Set<String> STOPWORDSLIST;
-	private final AtomicInteger runningProcesses = new AtomicInteger();
+	private static final AtomicInteger runningProcesses = new AtomicInteger();
+	private static boolean complete = false;
 
 	static
 	{
@@ -71,6 +72,16 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	{
 		if (runningProcesses.get() == 0) return false;
 		return true;
+	}
+
+	public boolean isComplete()
+	{
+		return complete;
+	}
+
+	public void initComplete()
+	{
+		complete = false;
 	}
 
 	@Async
@@ -121,6 +132,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		{
 			DatabaseUtil.closeQuietly(db);
 			runningProcesses.decrementAndGet();
+			complete = true;
 		}
 	}
 

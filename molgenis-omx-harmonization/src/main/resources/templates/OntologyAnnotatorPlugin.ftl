@@ -25,9 +25,9 @@
 									<div class="span3">
 										<dl>
 											<dt>Selected catalogue :</dt>
-											<dd id="catalogue-name"></dd>
+											<dd id="catalogue-name">Nothing selected</dd>
 											<dt>Number of data items :</dt>
-											<dd id="dataitem-number"></dd>
+											<dd id="dataitem-number">Nothing selected</dd>
 										</dl>
 									</div>
 									<div class="offset5 span4">
@@ -49,7 +49,7 @@
 											<dt>Action :</dt>
 											<dd>
 												<div class="btn-group">
-													<button id="annotate-dataitems" class="btn">Annotate</button>
+													<button id="annotate-dataitems" class="btn btn-primary">Annotate</button>
 													<button id="refresh-button" class="btn">Refresh</button>
 												</div>
 											</dd>
@@ -111,11 +111,10 @@
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
 			<#if isRunning?? && isRunning>
-				molgenis.showMessageDialog('Annotation is running...');
+				molgenis.showMessageDialog('Annotation is running. Please refresh the page to see result!');
 				$('#annotate-dataitems').attr('disabled', 'disabled');
-			</#if>
-			<#if message??>
-				molgenis.showMessageDialog('${message}');
+			<#elseif isComplete?? && isComplete>
+				molgenis.showMessageDialog('Matching has finished!');
 			</#if>
 			$('#selectedDataSet').change(function(){
 				molgenis.changeDataSet($(this).val());
