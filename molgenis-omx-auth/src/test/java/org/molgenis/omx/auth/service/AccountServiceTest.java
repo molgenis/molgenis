@@ -12,6 +12,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 
 import javax.mail.internet.MimeMessage;
@@ -19,12 +20,12 @@ import javax.mail.internet.MimeMessage;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
@@ -47,8 +48,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		@Qualifier("unauthorizedDatabase")
-		public Database unauthorizedDatabase() throws DatabaseException
+		public Database database() throws DatabaseException
 		{
 			return mock(Database.class);
 		}
@@ -73,8 +73,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	private AccountService accountService;
 
 	@Autowired
-	@Qualifier("unauthorizedDatabase")
-	private Database unauthorizedDatabase;
+	private Database database;
 
 	@Autowired
 	private JavaMailSender javaMailSender;
@@ -82,16 +81,14 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void setUp() throws DatabaseException
 	{
-		reset(unauthorizedDatabase);
+		reset(database);
 		when(
-				unauthorizedDatabase.find(MolgenisUser.class,
-						new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(
-								MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "123"))).thenReturn(
+				database.find(MolgenisUser.class, new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS, false),
+						new QueryRule(MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "123"))).thenReturn(
 				Collections.<MolgenisUser> singletonList(new MolgenisUser()));
 		when(
-				unauthorizedDatabase.find(MolgenisUser.class,
-						new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(
-								MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "456"))).thenReturn(
+				database.find(MolgenisUser.class, new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS, false),
+						new QueryRule(MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "456"))).thenReturn(
 				Collections.<MolgenisUser> emptyList());
 
 		reset(javaMailSender);
@@ -105,7 +102,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		accountService.activateUser("123");
 
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(unauthorizedDatabase).update(argument.capture());
+		verify(database).update(argument.capture());
 		assertTrue(argument.getValue().getActive());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
@@ -116,8 +113,8 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	public void activateUser_invalidActivationCode() throws DatabaseException
 	{
 		accountService.activateUser("invalid");
-		verify(unauthorizedDatabase).find(any(Class.class), any(QueryRule.class), any(QueryRule.class));
-		verifyNoMoreInteractions(unauthorizedDatabase);
+		verify(database).find(any(Class.class), any(QueryRule.class), any(QueryRule.class));
+		verifyNoMoreInteractions(database);
 		verifyNoMoreInteractions(javaMailSender);
 	}
 
@@ -126,8 +123,8 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	public void activateUser_alreadyActivated() throws DatabaseException
 	{
 		accountService.activateUser("456");
-		verify(unauthorizedDatabase).find(any(Class.class), any(QueryRule.class), any(QueryRule.class));
-		verifyNoMoreInteractions(unauthorizedDatabase);
+		verify(database).find(any(Class.class), any(QueryRule.class), any(QueryRule.class));
+		verifyNoMoreInteractions(database);
 		verifyNoMoreInteractions(javaMailSender);
 	}
 
@@ -138,7 +135,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		molgenisUser.setEmail("user@molgenis.org");
 		accountService.createUser(molgenisUser, new URI("http://molgenis.org/activate"));
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(unauthorizedDatabase).add(argument.capture());
+		verify(database).add(argument.capture());
 		assertFalse(argument.getValue().getActive());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
@@ -147,9 +144,17 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resetPassword() throws DatabaseException
 	{
-		accountService.resetPassword(new MolgenisUser());
+		@SuppressWarnings("unchecked")
+		Query<MolgenisUser> query = mock(Query.class);
+		when(query.eq(MolgenisUser.EMAIL, "user@molgenis.org")).thenReturn(query);
+		MolgenisUser molgenisUser = mock(MolgenisUser.class);
+		when(molgenisUser.getPassword()).thenReturn("password");
+		when(query.find()).thenReturn(Arrays.asList(molgenisUser));
+		when(database.query(MolgenisUser.class)).thenReturn(query);
+
+		accountService.resetPassword("user@molgenis.org");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(unauthorizedDatabase).update(argument.capture());
+		verify(database).update(argument.capture());
 		assertNotNull(argument.getValue().getPassword());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test

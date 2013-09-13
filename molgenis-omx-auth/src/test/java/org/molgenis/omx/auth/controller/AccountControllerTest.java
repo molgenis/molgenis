@@ -1,6 +1,5 @@
 package org.molgenis.omx.auth.controller;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -166,7 +165,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		this.mockMvc.perform(
 				post("/account/password/reset").param("email", "admin@molgenis.org").contentType(
 						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
-		verify(accountService).resetPassword(any(MolgenisUser.class));
+		verify(accountService).resetPassword("admin@molgenis.org");
 	}
 
 	@Test
