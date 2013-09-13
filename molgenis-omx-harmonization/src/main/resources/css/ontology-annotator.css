@@ -26,12 +26,13 @@ div#div-search {
 	margin-bottom : 10px;
 }
 
-div#div-inputinfo{
-	height : 150px;
+div.upper-header{
+	height : 170px;
 }
 
 div.data-table-container {
-	height : 400px;
+	height : 350px;
+	overflow : auto;
 }
 
 table#dataitem-table {
@@ -42,6 +43,24 @@ table thead th {
     background-color: #5B82A4; 
     border:2px solid #5B82A4;
     color: white;
+}
+
+th.feature-detail-th {
+	width : 30%;
+}
+
+td.feature-detail-td {
+	width : 70%;
+}
+
+.float-right {
+	float : right;
+	margin-right : 5px;
+}
+
+.float-right a{
+	cursor: hand; 
+	cursor: pointer;
 }
 
 .show-popover {
@@ -55,8 +74,8 @@ table thead th {
 }
 
 .icon-remove{
-	position: absolute;
-	right:20px;
+	float : right;
+	right : 20px;
 	cursor: hand; 
 	cursor: pointer;
 }
@@ -75,7 +94,7 @@ dl{
 }
 
 dt,dd{
-	padding-bottom : 5px;
+	padding-bottom : 8px;
 }
 
 

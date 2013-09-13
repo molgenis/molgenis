@@ -69,9 +69,9 @@
 									</div>
 									<div>
 										<div class="btn-group">
-											<button id="start-match" class="btn btn-info" type="button">Start matching</button>
+											<button id="start-match" class="btn btn-primary" type="button">Start matching</button>
 											<button id="confirm-match" class="btn btn-warning" type="button">Confirm matching</button>
-											<button id="reset-selection" class="btn" type="button">Reset</button>
+											<button id="reset-selection" class="btn" type="button">Refresh</button>
 										</div>
 									</div>
 								</div>
@@ -94,7 +94,7 @@
 										button to add catalogues that are to match with source catalogue. 
 									</li>
 									<li>
-										Start match <br> click on '<strong>Start matching</strong>' button.click on '<strong>Reset</strong>' to remove all selections
+										Start match <br> click on '<strong>Start matching</strong>' button.click on '<strong>Refresh</strong>' to remove all selections
 									</li>
 									<li>
 										<strong>Hint</strong> <br> If mapping between any two biobanks already exists, existing mappings 

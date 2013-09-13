@@ -56,6 +56,7 @@
 			if($.inArray(targetDataSetId, selectedOptions) === -1){
 				selectedOptions.push(targetDataSetId);
 				$('#target-catalogue').data('selectedOptions', selectedOptions);
+				switchOptions();
 			}
 			var displayText = '';
 			$.each(selectedOptions, function(index, targetDataSetId){
@@ -64,6 +65,18 @@
 			});
 			$('#target-catalogue').empty().append(displayText.substring(0, displayText.length - 2));
 			$('#start-match').removeAttr('disabled');
+		}
+		
+		function switchOptions(){
+			var index = 0;
+			var options = $('#targetDataSets option');
+			options.attr('selected',false).each(function(){
+				if(targetDataSet.val() !== $(this).val()){
+					index++;
+				}else return false;
+			});
+			index = index === options.length - 1 ? 0 : index + 1;
+			$(options[index]).attr('selected', true);
 		}
 	};
 	

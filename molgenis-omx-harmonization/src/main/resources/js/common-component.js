@@ -23,10 +23,14 @@
 	};
 	
 	molgenis.Pagination.prototype.updateMatrixPagination = function(pageElement, callback) {
-		if(this.totalPage !== 0){
-			pageElement.empty();
+		pageElement.empty();
+		if(this.totalPage > 0){
 			pageElement.append('<li><a href="#">Prev</a></li>');
-			var displayedPage = (this.totalPage < 10 ? this.totalPage : 9) + this.offSet; 
+			var displayedPage = this.totalPage < this.pager ? this.totalPage : this.pager + this.offSet - 1; 
+			if(this.offSet > 2){
+				pageElement.append('<li><a href="#">' + 1 + ' </a></li>');
+				pageElement.append('<li class="active"><a href="#">...</a></li>');
+			}
 			for(var i = this.offSet; i <= displayedPage ; i++){
 				var element = $('<li />');
 				if(i == this.currentPage)
@@ -34,8 +38,8 @@
 				element.append('<a href="/">' + i + '</a>');
 				pageElement.append(element);
 			}
-			var lastPage = this.totalPage + 1 > 10 ? this.totalPage + 1 : 10;
-			if(this.totalPage - this.offSet > 9){
+			var lastPage = this.totalPage > 10 ? this.totalPage : 10;
+			if(this.totalPage - this.offSet > this.pager){
 				pageElement.append('<li class="active"><a href="#">...</a></li>');
 				pageElement.append('<li><a href="#">' + lastPage + ' </a></li>');
 			}
@@ -45,21 +49,27 @@
 				$(this).click($.proxy(function(){
 					var pageNumber = this.clickElement.find('a').html();
 					if(pageNumber === "Prev"){
-						if(this.data.currentPage > this.data.offSet) this.data.currentPage--;
-						else if(this.data.offSet > 1) {
-							this.data.offSet--;
-							this.data.currentPage--;	
+						if(this.data.currentPage > 1){
+							this.data.currentPage--;
+							if(this.data.offSet > 1 && this.data.currentPage <= this.data.offSet)
+								this.data.offSet--;
 						}
 					}else if(pageNumber === "Next"){
-						if(this.data.currentPage <= this.data.totalPage) {
+						if(this.data.currentPage < this.data.totalPage) {
 							this.data.currentPage++;
-							if(this.data.currentPage >= this.data.offSet + 9) this.data.offSet++;
+							if(this.data.currentPage !== this.data.totalPage 
+									&& this.data.currentPage >= this.data.offSet + this.data.pager - 1) this.data.offSet++;
 						}
 					}else if(pageNumber !== "..."){
 						this.data.currentPage = parseInt(pageNumber);
-						if(this.data.currentPage > this.data.offSet + 9){
-							this.data.offSet = this.data.currentPage - 9;
-						} 
+						if(this.data.currentPage >= this.data.offSet + this.data.pager - 1){
+							this.data.offSet = this.data.currentPage - this.data.pager + 2;
+							if(this.data.currentPage === this.data.totalPage) this.data.offSet--;
+						}else if(this.data.currentPage <= this.data.offSet + 1){
+								this.data.offSet = this.data.currentPage - 1;
+								if(this.data.currentPage === 1) this.data.offSet++;
+						}
+						
 					}
 					callback();
 					return false;
@@ -113,8 +123,11 @@
 		return this.modal.find('.modal-header :eq(0)');
 	}
 	
-	molgenis.StandardModal.prototype.createModal = function(title, bodyComponents){
+	molgenis.StandardModal.prototype.createModal = function(title, bodyComponents, style){
 		this.modal = $('<div />');
+		if(style !== undefined && style !== null){
+			this.modal.css(style);
+		}
 		if($('#annotation-modal').length != 0){
 			this.modal = $('#annotation-modal');
 			this.modal.empty();
@@ -123,7 +136,6 @@
 		}
 		this.modal.addClass('modal hide');
 		this.modal.attr('id', 'annotation-modal');
-		this.modal.attr('data-backdrop', false);
 		
 		var header = $('<div />');
 		header.addClass('modal-header');
@@ -132,7 +144,7 @@
 		
 		var body = $('<div />');
 		body.addClass('modal-body');
-		if(bodyComponents !== null){
+		if(bodyComponents!== undefined && bodyComponents !== null){
 			body.append(bodyComponents);
 		}
 		var footer = $('<div />');
@@ -142,9 +154,14 @@
 		this.modal.append(header);
 		this.modal.append(body);
 		this.modal.append(footer);
-		this.modal.modal('show');
+		
 		$('button[name="annotation-btn-close"]').click(function(){
 			$('#annotation-modal').modal('hide');
+		});
+		
+		this.modal.modal({
+			'backdrop' : false,
+			'show' : true
 		});
 	};
 	

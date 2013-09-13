@@ -18,23 +18,29 @@
 	};
 	
 	ns.changeDataSet = function(selectedDataSet){
-		var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
-		var request = {
-			documentType : 'protocolTree-' + hrefToId(dataSetEntity.href),
-			queryRules : [{
-				field : 'type',
-				operator : 'EQUALS',
-				value : 'observablefeature'
-			}]
-		};
-		searchApi.search(request, function(searchResponse){
-			$('#catalogue-name').empty().append(dataSetEntity.name);
-			$('#dataitem-number').empty().append(searchResponse.totalHitCount);
-			pagination.reset();
-			ns.updateSelectedDataset(selectedDataSet);
-			ns.createMatrixForDataItems();
-			initSearchDataItems(dataSetEntity);
-		});
+		
+		if(selectedDataSet !== ''){
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+			var request = {
+				documentType : 'protocolTree-' + hrefToId(dataSetEntity.href),
+				queryRules : [{
+					field : 'type',
+					operator : 'EQUALS',
+					value : 'observablefeature'
+				}]
+			};
+			searchApi.search(request, function(searchResponse){
+				$('#catalogue-name').empty().append(dataSetEntity.name);
+				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
+				pagination.reset();
+				ns.updateSelectedDataset(selectedDataSet);
+				ns.createMatrixForDataItems();
+				initSearchDataItems(dataSetEntity);
+			});
+		}else{
+			$('#catalogue-name').empty().append('Nothing selected');
+			$('#dataitem-number').empty().append('Nothing selected');
+		}
 		
 		function hrefToId (href){
 			return href.substring(href.lastIndexOf('/') + 1); 
@@ -81,53 +87,88 @@
 		}
 		
 		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
-			createTableHeader();
+			
 			var searchHits = searchResponse.searchHits;
+			var tableObject = $('#dataitem-table');
+			var tableBody = $('<tbody />');
+			
 			$.each(searchHits, function(){
-				var feature = $(this)[0]["columnValueMap"];
-				var description = feature.description;
-				var isPopOver = description.length < 50;
-				var popover = $('<span />');
-				popover.html(isPopOver ? description : description.substring(0, 50) + '...');
-				if(!isPopOver){
-					popover.addClass('show-popover');
-					popover.popover({
-						content : description,
-						trigger : 'hover',
-						placement : 'bottom'
-					});
-				}
-				var clickFeature = $('<span class="text-info show-popover">' + feature.name + '</span>');
-				clickFeature.data('feature', feature);
-				clickFeature.click(function(){
-					var featureId = $(this).data('feature').id;
-					restApi.getAsync('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null, function(feature){
-						var components = [];
-						components.push(createFeatureTable(feature));
-						components.push(createSearchDiv(feature));
-						standardModal.createModal('Annotate data item', components);
-					});
-				});
-				
-				var row = $('<tr />');
-				$('<td />').append(clickFeature).appendTo(row);
-				$('<td />').append(popover).appendTo(row);
-				var annotation = $('<td />');
-				var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definition"]);
-				if(featureEntity.definition.items !== 0){
-					var annotationText = '';
-					$.each(featureEntity.definition.items, function(index, ontologyTerm){
-						annotationText += ontologyTerm.name + ' , ';
-					});
-					annotation.append(annotationText.substring(0, annotationText.length - 3));
-				}
-				
-				annotation.appendTo(row);
-				$(row).appendTo($('#dataitem-table'));
+				$(createTableRow($(this)[0]["columnValueMap"])).appendTo(tableBody);
 			});
-			pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()) - 1);
+			
+			tableObject.empty().append(createTableHeader()).append(tableBody);
+			pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
 			pagination.updateMatrixPagination($('.pagination ul'), ns.createMatrixForDataItems);
 		});
+		
+		function createTableRow(feature){
+			
+			var row = $('<tr />');
+			
+			var description = feature.description;
+			var isPopOver = description.length < 40;
+			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 40) + '...');
+			if(!isPopOver){
+				popover.addClass('show-popover');
+				popover.popover({
+					content : description,
+					trigger : 'hover',
+					placement : 'bottom'
+				});
+			}
+			
+			var clickFeature = $('<span class="text-info show-popover">' + feature.name + '</span>').
+				data('feature', feature).click(function()
+			{
+				var featureId = $(this).data('feature').id;
+				restApi.getAsync('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null, function(feature){
+					var components = [];
+					components.push(createFeatureTable(feature));
+					components.push(createSearchDiv(feature));
+					var modalStyle = {
+						'width' : 650, 
+						'margin-left' : -350,
+						'margin-top' : 100
+					};
+					standardModal.createModal('Annotate data item', components, modalStyle);
+				});
+			});
+			
+			var annotationDiv = $('<div />');
+			var annotationText = '';
+			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definition"]);
+			if(featureEntity.definition.items !== 0){
+				var moreToShow = featureEntity.definition.items.length;
+				$.each(featureEntity.definition.items, function(index, ontologyTerm){
+					var newAnnotationText = annotationText + ontologyTerm.name + ' , ';
+					if(newAnnotationText.length > 50) {
+						annotationText = annotationText.substring(0, annotationText.length - 3) + ' , ';
+					}else{
+						moreToShow--;
+						annotationText += ontologyTerm.name + ' , ';
+					}
+				});
+				annotationDiv.append($('<span>' + annotationText.substring(0, annotationText.length - 3) + '</span>'));
+				if(moreToShow !== 0){
+					$('<span />').addClass('float-right').append('<a>...' + moreToShow + ' to show</a>').click(function(){
+						clickFeature.click();
+					}).appendTo(annotationDiv);
+				}
+			}
+			
+			$('<td />').append(clickFeature).appendTo(row);
+			$('<td />').append(popover).appendTo(row);
+			$('<td />').append(annotationDiv).appendTo(row);
+			return row;
+		}
+		
+		function createTableHeader(){
+			var headerRow = $('<tr />');
+			$('<th>Name</th>').css('width', '15%').appendTo(headerRow);
+			$('<th>Description</th>').css('width', '25%').appendTo(headerRow);
+			$('<th>Annotation</th>').css('width', '40%').appendTo(headerRow);
+			return $('<thead />').append(headerRow);
+		}
 		
 		function createSearchDiv(feature){
 			var searchDiv = $('<div class="row-fluid"></div>');
@@ -169,12 +210,17 @@
 					}
 					if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
 					if(ontologyTermId != null) updateAnnotation(restApi.get(this.feature.href), ontologyTermId, true);
-					$('#annotation-modal').modal('hide');
+					
 					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 						var components = [];
 						components.push(createFeatureTable(updatedFeature));
 						components.push(createSearchDiv(updatedFeature));
-						standardModal.createModal('Annotate data item', components);
+						var modalStyle = {
+							'width' : 650, 
+							'margin-left' : -350,
+							'margin-top' : 100
+						};
+						standardModal.createModal('Annotate data item', components, modalStyle);
 						ns.createMatrixForDataItems();
 					});
 				},{'feature' : this.feature}));
@@ -249,51 +295,57 @@
 		}
 		
 		function createFeatureTable(feature){
-			var table = $('<table class="table table-bordered"></table>'); 
+			
+			var table = $('<table />').addClass('table table-bordered').attr('id', 'test-table'); 
+			$('<tr><th class="feature-detail-th">ID : </th><td class="feature-detail-td">' + ns.hrefToId(feature.href) + '</td></tr>').appendTo(table);
+			$('<tr><th>Name : </th><td>' + feature.name + '</td></tr>').appendTo(table);
+			$('<tr><th>Description : </th><td>' + i18nDescription(feature).en + '</td></tr>').appendTo(table);
+			
+			if(feature.definition.items.length !== 0){
+				var ontologyTermAnnotations = $('<ul />');
+				$.each(feature.definition.items, function(index, ontologyTerm){
+					var ontologyTermLink = $('<a href="' + ontologyTerm.termAccession + '" target="_blank">' + ontologyTerm.name + '</a>');
+					var removeIcon = $('<i class="icon-remove"></i>').click($.proxy(function(){
+						var ontologyTermId = this.ontologyTermHref.substring(this.ontologyTermHref.lastIndexOf('/') + 1)
+						updateAnnotation(this.feature, ontologyTermId, false);
+						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
+							var components = [];
+							var featureTableContainer = createFeatureTable(updatedFeature);
+							components.push(featureTableContainer);
+							components.push(createSearchDiv(updatedFeature));
+							var modalStyle = {
+								'width' : 650, 
+								'margin-left' : -350,
+								'margin-top' : 100
+							};
+							standardModal.createModal('Annotate data item', components, modalStyle);
+							ns.createMatrixForDataItems();
+							featureTableContainer.scrollTop(components[0].height());
+						});
+					}, {'feature' : feature, 'ontologyTermHref' : ontologyTerm.href}));
+					
+					$('<li />').append(ontologyTermLink).append(removeIcon).appendTo(ontologyTermAnnotations);
+				});
+				$('<tr />').append('<th>Annotation : </th>').append($('<td />').append(ontologyTermAnnotations)).appendTo(table);
+			}else{
+				table.append('<tr><th>Annotation : </th><td>Not available</td></tr>');
+			}
+			
+			return $('<div />').css({'max-height' : 350, 'overflow' : 'auto'}).append(table);
+		}
+		
+		function i18nDescription(feature){
 			if(feature.description === undefined) feature.description = '';
 			if(feature.description.indexOf('{') !== 0){
 				feature.description = '{"en":"' + (feature.description === null ? '' : feature.description) +'"}';
 			}
-			var description = eval('(' + feature.description + ')');
-			table.append('<tr><th>ID : </th><td>' + feature.href.substring(feature.href.lastIndexOf('/') + 1) + '</td></tr>');
-			table.append('<tr><th>Name : </th><td>' + feature.name + '</td></tr>');
-			table.append('<tr><th>Description : </th><td>' + (description === undefined ? '' : description.en) + '</td></tr>');
-			if(feature.definition.items.length !== 0){
-				var ontologyTermAnnotations = $('<ul />');
-				$.each(feature.definition.items, function(index, ontologyTerm){
-					var uri = ontologyTerm.termAccession;
-					var linkOut = $('<a href="' + uri + '" target="_blank">' + ontologyTerm.name + '</a>');
-					var removeIcon = $('<i class="icon-remove"></i>');
-					$('<li />').append(linkOut).append(removeIcon).appendTo(ontologyTermAnnotations);
-					removeIcon.click($.proxy(function(){
-						var ontologyTermId = this.ontologyTermHref.substring(this.ontologyTermHref.lastIndexOf('/') + 1)
-						updateAnnotation(this.feature, ontologyTermId, false);
-						$('#annotation-modal').modal('hide');
-						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
-							var components = [];
-							components.push(createFeatureTable(updatedFeature));
-							components.push(createSearchDiv(updatedFeature));
-							standardModal.createModal('Annotate data item', components);
-							ns.createMatrixForDataItems();
-						});
-					}, {'feature' : feature, 'ontologyTermHref' : ontologyTerm.href}));
-				});
-				var annotationRow = $('<tr />');
-				annotationRow.append('<th>Annotation : </th>');
-				annotationRow.append($('<td />').append(ontologyTermAnnotations));
-				table.append(annotationRow);
-			}else{
-				table.append('<tr><th>Annotation : </th><td>Not available</td></tr>');
-			}
-			return table;
-		}
-		
-		function createTableHeader(){
-			$('#dataitem-table').empty();
-			$('#dataitem-table').append('<thead><tr><th>Name</th><th>Description</th><th>Annotation</th></tr></thead>');
+			return eval('(' + feature.description + ')');
 		}
 	};
 	
+	ns.hrefToId = function(href){
+		return href.substring(href.lastIndexOf('/') + 1); 
+	}
 	
 	ns.updateSelectedDataset = function(dataSet) {
 		selectedDataSet = dataSet;
@@ -380,7 +432,7 @@
 		return selectedDataSet;
 	}
 	
-	$(function() {
+	$(document).ready(function(){
 		$('#index-button').click(function(){
 			if($('#uploadedOntology').val() !== ''){
 				$('input[name="__action"]').val("indexOntology");

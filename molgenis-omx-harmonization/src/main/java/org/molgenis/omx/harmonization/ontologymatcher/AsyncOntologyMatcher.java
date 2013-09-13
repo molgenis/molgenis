@@ -240,8 +240,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		List<Integer> featureIds = new ArrayList<Integer>();
 		List<QueryRule> finalQuery = new ArrayList<QueryRule>();
-		finalQuery.add(new QueryRule(Operator.LIMIT, 50));
+		finalQuery.add(new QueryRule(ENTITY_TYPE, Operator.EQUALS, ObservableFeature.class.getSimpleName()
+				.toLowerCase()));
+		finalQuery.add(new QueryRule(Operator.AND));
 		finalQuery.add(disMaxQuery);
+		finalQuery.add(new QueryRule(Operator.LIMIT, 50));
 		SearchRequest request = new SearchRequest(documentType, finalQuery, null);
 		SearchResult result = searchService.search(request);
 		Iterator<Hit> iterator = result.iterator();

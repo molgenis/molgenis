@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["bootstrap-fileupload.min.css", "ontology-indexer.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js","common-component.js", "ontology-indexer.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "ontology-indexer.js"]>
 <@header css js/>
 	<div class="row-fluid">
 		<div class="span3">
@@ -69,8 +69,10 @@
 										<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
 									</div>
 								</div>
-								<button class="btn btn-primary" id="index-button" type="button">Start index</button>
-								<button class="btn" id="refresh-button" type="button">Refresh</button>
+								<div class="btn-group">
+									<button class="btn btn-primary" id="index-button" type="button">Start index</button>
+									<button class="btn" id="refresh-button" type="button">Refresh</button>
+								</div>
 							</div>
 						</div>
 					</div>

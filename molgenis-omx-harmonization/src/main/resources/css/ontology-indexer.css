@@ -1,5 +1,5 @@
 .accordion-group {
-	height : 320px;
+	height : 280px;
 	background-color: #5B82A4;
 }
 
@@ -23,11 +23,19 @@ div#alert-message {
 }
 
 div#div-index-ontology {
-	min-height : 350px;
+	min-height : 400px;
 }
 
 div#div-new-ontology {
 	margin-top : 30px;
+}
+
+div.btn-group {
+	margin-top : 30px;	
+}
+
+input#ontologyName {
+	margin-bottom : 20px;
 }
 
 ol li{

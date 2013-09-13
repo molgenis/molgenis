@@ -18,16 +18,16 @@
 		<div class="span12">
 			<form id="ontologyannotator-form" class="form-horizontal" enctype="multipart/form-data">
 				<div class="row-fluid">
-					<div id="div-inputinfo" class="well span8">
+					<div class="well span8 upper-header">
 						<div class="row-fluid">
 							<div class="span12">
 								<div class="row-fluid">
 									<div class="span3">
 										<dl>
 											<dt>Selected catalogue :</dt>
-											<dd id="catalogue-name">Nothing selected</dd>
+											<dd id="catalogue-name"><br></dd>
 											<dt>Number of data items :</dt>
-											<dd id="dataitem-number">Nothing selected</dd>
+											<dd id="dataitem-number"><br></dd>
 										</dl>
 									</div>
 									<div class="offset5 span4">
@@ -72,12 +72,12 @@
 						</div>
 						<div class="row-fluid">
 							<div class="span8">
-								<div class="row-fluid data-table-container">
+								<div class="data-table-container">
 									<table id="dataitem-table" class="table table-striped table-condensed">
 									</table>
-									<div class="pagination pagination-centered">
-										<ul></ul>
-									</div>
+								</div>
+								<div class="pagination pagination-centered">
+									<ul></ul>
 								</div>
 							</div>
 							<div class="span4">
@@ -88,7 +88,10 @@
 									<div class="accordion-body in">
 										<ol class="action-list">
 											<li>
-												<strong>Automatical annotation</strong> <br> click on <strong>'Annotate'</strong> button, BiobankConnect will annotate potential ontology terms to data items.
+												<strong>Choose a catalogue</strong> <br> select catalogue from 'dropdown' to annotate.
+											</li>
+											<li>
+												<strong>Automatic annotation</strong> <br> click on <strong>'Annotate'</strong> button, BiobankConnect will annotate potential ontology terms to data items.
 											</li>
 											<li>
 												<strong>Manual annotation</strong> <br> click on <strong>'Name'</strong> of data items, a popup window will show up where you can add ontology terms by hand.
@@ -110,6 +113,7 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
+			molgenis.changeDataSet($('#selectedDataSet').val());
 			<#if isRunning?? && isRunning>
 				molgenis.showMessageDialog('Annotation is running. Please refresh the page to see result!');
 				$('#annotate-dataitems').attr('disabled', 'disabled');
@@ -119,7 +123,6 @@
 			$('#selectedDataSet').change(function(){
 				molgenis.changeDataSet($(this).val());
 			});
-			molgenis.changeDataSet($('#selectedDataSet').val());
 		});
 	</script>
 <@footer/>

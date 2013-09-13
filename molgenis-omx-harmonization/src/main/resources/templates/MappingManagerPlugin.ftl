@@ -26,9 +26,9 @@
 									<div class="span3">
 										<dl>
 											<dt>Selected catalogue :</dt>
-											<dd id="catalogue-name"></dd>
+											<dd id="catalogue-name"><br></dd>
 											<dt>Number of data items :</dt>
-											<dd id="dataitem-number"></dd>
+											<dd id="dataitem-number"><br></dd>
 										</dl>
 									</div>
 									<div class="offset5 span4">
@@ -118,9 +118,9 @@
 						<div id="data-table-container" class="row-fluid data-table-container">
 							<table id="dataitem-table" class="table table-striped table-condensed show-border">
 							</table>
-							<div class="pagination pagination-centered">
-								<ul id="table-papger"></ul>
-							</div>
+						</div>
+						<div class="pagination pagination-centered">
+							<ul id="table-papger"></ul>
 						</div>
 					</div>
 				</div>
@@ -130,10 +130,10 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
+			molgenis.changeDataSet($('#selectedDataSet').val());
 			$('#selectedDataSet').change(function(){
 				molgenis.changeDataSet($(this).val());
 			});
-			molgenis.changeDataSet($('#selectedDataSet').val());
 			$('#downloadButton').click(function(){
 				molgenis.downloadMappings();
 				return false;
