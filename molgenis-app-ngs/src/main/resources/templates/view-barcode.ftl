@@ -2,19 +2,6 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 
-<!--
-<script>
-$(function(){
-	$('#combobox').change(function(){
-	alert( $(this).val());
-	var x = $(this).val();
-	
-	});
-});
-
-</script>
--->
-
 <div class="row-fluid">
 	<form method="post" CLASS="form-horizontal" enctype="multipart/form-data" action="/menu/main/barcode/calculate">
 		<div class="formscreen">
