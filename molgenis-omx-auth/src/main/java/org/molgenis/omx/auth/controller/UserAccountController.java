@@ -2,26 +2,20 @@ package org.molgenis.omx.auth.controller;
 
 import static org.molgenis.omx.auth.controller.UserAccountController.URI;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.omx.auth.Institute;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
 import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
 import org.molgenis.omx.auth.service.MolgenisUserException;
 import org.molgenis.omx.auth.service.MolgenisUserService;
-import org.molgenis.omx.observ.target.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -117,66 +111,12 @@ public class UserAccountController extends MolgenisPlugin
 		if (StringUtils.isNotEmpty(request.getString("title"))) user.setTitle(request.getString("title"));
 		if (StringUtils.isNotEmpty(request.getString("lastname"))) user.setLastName(request.getString("lastname"));
 		if (StringUtils.isNotEmpty(request.getString("firstname"))) user.setFirstName(request.getString("firstname"));
-		if (StringUtils.isNotEmpty(request.getString("institute"))) user.setAffiliation_Id(getInstitute(
-				request.getString("institute"), database));
 		if (StringUtils.isNotEmpty(request.getString("department"))) user
 				.setDepartment(request.getString("department"));
-		if (StringUtils.isNotEmpty(request.getString("position"))) user.setRoles_Id(getRole(
-				request.getString("position"), database));
 		if (StringUtils.isNotEmpty(request.getString("city"))) user.setCity(request.getString("city"));
 		if (StringUtils.isNotEmpty(request.getString("country"))) user.setCountry(request.getString("country"));
 
 		return user;
-	}
-
-	private Integer getInstitute(String instName, Database db) throws DatabaseException
-	{
-		if (instName != null && !instName.isEmpty())
-		{
-			List<Institute> institutes = db.find(Institute.class, new QueryRule(Institute.NAME, Operator.EQUALS,
-					instName));
-			if (institutes.size() == 0)
-			{
-				Institute newInst = new Institute();
-				newInst.setName(instName);
-				db.add(newInst);
-				return newInst.getId();
-			}
-			else if (institutes.size() == 1)
-			{
-				return institutes.get(0).getId();
-			}
-			else
-			{
-				throw new DatabaseException("Multiple institutes named '" + instName + "' found");
-			}
-		}
-		return null;
-	}
-
-	private Integer getRole(String roleName, Database db) throws DatabaseException
-	{
-		if (roleName != null && !roleName.isEmpty())
-		{
-			List<OntologyTerm> roles = db.find(OntologyTerm.class, new QueryRule(OntologyTerm.NAME, Operator.EQUALS,
-					roleName));
-			if (roles.size() == 0)
-			{
-				OntologyTerm newRole = new OntologyTerm();
-				newRole.setName(roleName);
-				db.add(newRole);
-				return newRole.getId();
-			}
-			else if (roles.size() == 1)
-			{
-				return roles.get(0).getId();
-			}
-			else
-			{
-				throw new DatabaseException("Multiple ontologyTerms for role '" + roleName + "' found");
-			}
-		}
-		return null;
 	}
 
 	private MolgenisUser getCurrentUser() throws DatabaseException

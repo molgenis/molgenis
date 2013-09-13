@@ -112,8 +112,7 @@ public class DatabaseLogin implements Login, Serializable
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * Note: Anonymous is automatically logged in but does not count as being
-	 * authenticated
+	 * Note: Anonymous is automatically logged in but does not count as being authenticated
 	 */
 	@Override
 	public boolean isAuthenticated()
@@ -205,8 +204,7 @@ public class DatabaseLogin implements Login, Serializable
 	/**
 	 * Reloads all permission settings for this user from database.
 	 * 
-	 * If user is null, anonymous is logged in. Note: calling reload refreshes
-	 * the permissions cache map.
+	 * If user is null, anonymous is logged in. Note: calling reload refreshes the permissions cache map.
 	 * 
 	 * @throws Exception
 	 * 
@@ -248,8 +246,7 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Reload the permissions map which contains all permissions, for the logged
-	 * in user.
+	 * Reload the permissions map which contains all permissions, for the logged in user.
 	 * 
 	 * @param db
 	 *            database to load permissions from
@@ -260,31 +257,32 @@ public class DatabaseLogin implements Login, Serializable
 	 */
 	private void loadPermissions(Database db, MolgenisRole role) throws DatabaseException, ParseException
 	{
-		MolgenisUserService service = MolgenisUserService.getInstance(db);
-
-		List<Integer> roleIdList = service.findGroupIds(role);
-		// System.out.println(">>>> roleIdList==" +roleIdList.toString());
-		List<MolgenisPermission> permissions = db.query(MolgenisPermission.class)
-				.in(MolgenisPermission.ROLE_, roleIdList).find();
-
-		for (MolgenisPermission permission : permissions)
-		{
-			// System.out.println(">>> permission==" + permission + ", role==" +
-			// role);
-			if ("read".equals(permission.getPermission())) this.readMap.put(permission.getEntity_ClassName(),
-					Permission.read);
-			else if ("write".equals(permission.getPermission()))
-			{
-				this.readMap.put(permission.getEntity_ClassName(), Permission.read);
-				this.writeMap.put(permission.getEntity_ClassName(), Permission.write);
-			}
-			else if ("own".equals(permission.getPermission()))
-			{
-				this.readMap.put(permission.getEntity_ClassName(), Permission.read);
-				this.writeMap.put(permission.getEntity_ClassName(), Permission.write);
-				this.ownMap.put(permission.getEntity_ClassName(), Permission.own);
-			}
-		}
+		throw new UnsupportedOperationException();
+		// MolgenisUserService service = MolgenisUserService.getInstance(db);
+		//
+		// List<Integer> roleIdList = service.findGroupIds(role);
+		// // System.out.println(">>>> roleIdList==" +roleIdList.toString());
+		// List<MolgenisPermission> permissions = db.query(MolgenisPermission.class)
+		// .in(MolgenisPermission.ROLE_, roleIdList).find();
+		//
+		// for (MolgenisPermission permission : permissions)
+		// {
+		// // System.out.println(">>> permission==" + permission + ", role==" +
+		// // role);
+		// if ("read".equals(permission.getPermission())) this.readMap.put(permission.getEntity_ClassName(),
+		// Permission.read);
+		// else if ("write".equals(permission.getPermission()))
+		// {
+		// this.readMap.put(permission.getEntity_ClassName(), Permission.read);
+		// this.writeMap.put(permission.getEntity_ClassName(), Permission.write);
+		// }
+		// else if ("own".equals(permission.getPermission()))
+		// {
+		// this.readMap.put(permission.getEntity_ClassName(), Permission.read);
+		// this.writeMap.put(permission.getEntity_ClassName(), Permission.write);
+		// this.ownMap.put(permission.getEntity_ClassName(), Permission.own);
+		// }
+		// }
 	}
 
 	/**
@@ -380,9 +378,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Indicates whether the user has permissions to read data from this entity.
-	 * Note: if row-level security is activated, only rows for which the user
-	 * has been given permission will display.
+	 * Indicates whether the user has permissions to read data from this entity. Note: if row-level security is
+	 * activated, only rows for which the user has been given permission will display.
 	 * 
 	 * @param Entity
 	 *            the entity to get permission from
@@ -412,9 +409,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Indicates whether the user has permissions to write (and read) data from
-	 * this entity. Note: if row-level security is activated, only rows for
-	 * which the user has been given permission will display as editable.
+	 * Indicates whether the user has permissions to write (and read) data from this entity. Note: if row-level security
+	 * is activated, only rows for which the user has been given permission will display as editable.
 	 * 
 	 * @param Entity
 	 *            the entity to get permission from
@@ -491,8 +487,8 @@ public class DatabaseLogin implements Login, Serializable
 	}
 
 	/**
-	 * Helper method to check if an entity is implementing the authorizable
-	 * interface, i.e. to check if we should implement row-level security.
+	 * Helper method to check if an entity is implementing the authorizable interface, i.e. to check if we should
+	 * implement row-level security.
 	 * 
 	 * @param entity
 	 * @param interfaceName

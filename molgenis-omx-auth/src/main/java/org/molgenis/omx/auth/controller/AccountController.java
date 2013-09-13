@@ -12,9 +12,7 @@ import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.omx.auth.Institute;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.PersonRole;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
 import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
@@ -65,8 +63,6 @@ public class AccountController
 	public ModelAndView getRegisterForm() throws DatabaseException
 	{
 		ModelAndView model = new ModelAndView("register-modal");
-		model.addObject("institutes", unauthorizedDatabase.find(Institute.class));
-		model.addObject("personroles", unauthorizedDatabase.find(PersonRole.class));
 		model.addObject("countries", CountryCodes.get());
 		return model;
 	}
@@ -159,9 +155,7 @@ public class AccountController
 		user.setTitle(request.getTitle());
 		user.setLastName(request.getLastname());
 		user.setFirstName(request.getFirstname());
-		user.setAffiliation_Id(request.getInstitute());
 		user.setDepartment(request.getDepartment());
-		user.setRoles_Id(request.getPosition());
 		user.setCity(request.getCity());
 		user.setCountry(CountryCodes.get(request.getCountry()));
 		return user;

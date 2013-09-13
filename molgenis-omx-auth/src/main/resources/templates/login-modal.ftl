@@ -77,7 +77,7 @@
 	    		$('.text-error', form).remove();
 		        $.ajax({
 		            type: 'POST',
-		            url:  '/account/login',
+		            url:  '/login',
 		            data: form.serialize(),
 		            success: function () {
 		            	$(document).trigger('molgenis-login', 'Welcome to MOLGENIS!');

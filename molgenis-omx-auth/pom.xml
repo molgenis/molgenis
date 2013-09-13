@@ -55,11 +55,6 @@
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-omx-core</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-		<dependency>
 			<groupId>nl.captcha</groupId>
 			<artifactId>simplecaptcha</artifactId>
 			<version>1.2.1</version>
@@ -73,6 +68,16 @@
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context-support</artifactId>
 		    <version>3.2.3.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>3.2.0.RC1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>3.2.0.RC1</version>
 		</dependency>
 	</dependencies>
 </project>

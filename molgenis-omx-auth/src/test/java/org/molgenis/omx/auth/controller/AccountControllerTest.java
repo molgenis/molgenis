@@ -88,8 +88,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	public void getRegisterForm() throws Exception
 	{
 		this.mockMvc.perform(get("/account/register")).andExpect(status().isOk())
-				.andExpect(view().name("register-modal"))
-				.andExpect(model().attributeExists("institutes", "personroles", "countries"));
+				.andExpect(view().name("register-modal")).andExpect(model().attributeExists("countries"));
 	}
 
 	@Test

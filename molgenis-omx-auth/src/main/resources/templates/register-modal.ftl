@@ -70,28 +70,6 @@
 	    </div>
 	  </div>
 	  <div class="control-group">
-	    <label class="control-label" for="reg-position">Position</label>
-	    <div class="controls">
-	      <select id="reg-position" name="position">
-	      	<option value="" disabled selected>Please Select</option>
-		<#list personroles as personrole>
-			<option value="${personrole.id?c}">${personrole.name}</option>
-		</#list>
-	      </select>
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-institute">Institute</label>
-	    <div class="controls">
-	      <select id="reg-institute" name="institute">
-	      	<option value="" disabled selected>Please Select</option>
-		<#list institutes as institute>
-			<option value="${institute.id?c}">${institute.name}</option>
-		</#list>
-	      </select>
-	    </div>
-	  </div>
-	  <div class="control-group">
 	    <label class="control-label" for="reg-department">Department</label>
 	    <div class="controls">
 	      <input type="text" id="reg-department" name="department">
