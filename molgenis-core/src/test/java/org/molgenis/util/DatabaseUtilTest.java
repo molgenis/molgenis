@@ -50,7 +50,7 @@ public class DatabaseUtilTest
 	{
 		Database database = mock(Database.class);
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
-		when(applicationContext.getBean("unauthorizedPrototypeDatabase", Database.class)).thenReturn(database);
+		when(applicationContext.getBean("database", Database.class)).thenReturn(database);
 		new ApplicationContextProvider().setApplicationContext(applicationContext);
 		assertNotNull(DatabaseUtil.createDatabase());
 	}
