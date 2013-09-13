@@ -2,7 +2,6 @@ package org.molgenis.omx;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -11,7 +10,11 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
 import org.molgenis.omx.auth.Authority;
+import org.molgenis.omx.auth.GroupAuthority;
+import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.auth.util.PasswordHasher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,8 +49,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"please configure the admin.password property in your molgenis-server.properties");
 
 		MolgenisUser userAdmin = new MolgenisUser();
-		userAdmin.setName(Login.USER_ADMIN_NAME);
-		userAdmin.setIdentifier(UUID.randomUUID().toString());
+		userAdmin.setUsername(Login.USER_ADMIN_NAME);
 		userAdmin.setPassword(new PasswordHasher().toMD5(adminPassword)); // FIXME add user through service class
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setFirstName(Login.USER_ADMIN_NAME);
@@ -55,41 +57,86 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
 
-		Authority suAuthority = new Authority();
+		UserAuthority suAuthority = new UserAuthority();
 		suAuthority.setMolgenisUser(userAdmin);
 		suAuthority.setRole("ROLE_SU");
 
 		database.add(userAdmin);
 		database.add(suAuthority);
 
-		MolgenisUser user = new MolgenisUser();
-		user.setName("user");
-		user.setIdentifier(UUID.randomUUID().toString());
-		user.setPassword(new PasswordHasher().toMD5("user")); // FIXME add user through service class
-		user.setEmail("user@email.com");
-		user.setFirstName("user");
-		user.setLastName("user");
-		user.setActive(true);
-		user.setSuperuser(false);
+		MolgenisUser user1 = new MolgenisUser();
+		user1.setUsername("user1");
+		user1.setPassword(new PasswordHasher().toMD5("user")); // FIXME add user through service class
+		user1.setEmail("user1@email.com");
+		user1.setFirstName("user");
+		user1.setLastName("user");
+		user1.setActive(true);
+		user1.setSuperuser(false);
 
-		List<Authority> userAuthorities = new ArrayList<Authority>();
-		Authority userAuthority = new Authority();
-		userAuthority.setMolgenisUser(user);
-		userAuthority.setRole("ROLE_USER");
-		userAuthorities.add(userAuthority);
+		List<Authority> user1Authorities = new ArrayList<Authority>();
+		UserAuthority user1Authority = new UserAuthority();
+		user1Authority.setMolgenisUser(user1);
+		user1Authority.setRole("ROLE_USER");
+		user1Authorities.add(user1Authority);
 
-		Authority userVoidAuthority = new Authority();
-		userVoidAuthority.setMolgenisUser(user);
-		userVoidAuthority.setRole("ROLE_PLUGIN_VOID_READ_USER");
-		userAuthorities.add(userVoidAuthority);
+		UserAuthority user1VoidAuthority = new UserAuthority();
+		user1VoidAuthority.setMolgenisUser(user1);
+		user1VoidAuthority.setRole("ROLE_PLUGIN_VOID_READ_USER");
+		user1Authorities.add(user1VoidAuthority);
 
-		Authority userHomeAuthority = new Authority();
-		userHomeAuthority.setMolgenisUser(user);
-		userHomeAuthority.setRole("ROLE_PLUGIN_HOME_READ_USER");
-		userAuthorities.add(userHomeAuthority);
+		UserAuthority user1HomeAuthority = new UserAuthority();
+		user1HomeAuthority.setMolgenisUser(user1);
+		user1HomeAuthority.setRole("ROLE_PLUGIN_HOME_WRITE_USER");
+		user1Authorities.add(user1HomeAuthority);
 
-		database.add(user);
-		database.add(userAuthorities);
+		MolgenisUser user2 = new MolgenisUser();
+		user2.setUsername("user2");
+		user2.setPassword(new PasswordHasher().toMD5("user")); // FIXME add user through service class
+		user2.setEmail("user2@email.com");
+		user2.setFirstName("user");
+		user2.setLastName("user");
+		user2.setActive(true);
+		user2.setSuperuser(false);
+
+		List<Authority> user2Authorities = new ArrayList<Authority>();
+		UserAuthority user2Authority = new UserAuthority();
+		user2Authority.setMolgenisUser(user1);
+		user2Authority.setRole("ROLE_USER");
+		user2Authorities.add(user2Authority);
+
+		UserAuthority user2VoidAuthority = new UserAuthority();
+		user2VoidAuthority.setMolgenisUser(user2);
+		user2VoidAuthority.setRole("ROLE_PLUGIN_PROTOCOLVIEWER_WRITE_USER");
+		user2Authorities.add(user2VoidAuthority);
+
+		UserAuthority user2HomeAuthority = new UserAuthority();
+		user2HomeAuthority.setMolgenisUser(user2);
+		user2HomeAuthority.setRole("ROLE_PLUGIN_HOME_NONE_USER");
+		user2Authorities.add(user2HomeAuthority);
+
+		MolgenisGroup usersGroup = new MolgenisGroup();
+		usersGroup.setName("All Users");
+
+		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
+		molgenisGroupMember1.setMolgenisGroup(usersGroup);
+		molgenisGroupMember1.setMolgenisUser(user1);
+
+		MolgenisGroupMember molgenisGroupMember2 = new MolgenisGroupMember();
+		molgenisGroupMember2.setMolgenisGroup(usersGroup);
+		molgenisGroupMember2.setMolgenisUser(user2);
+
+		GroupAuthority usersGroupAuthority = new GroupAuthority();
+		usersGroupAuthority.setMolgenisGroup(usersGroup);
+		usersGroupAuthority.setRole("ROLE_PLUGIN_PROTOCOLVIEWER_READ_USER");
+
+		database.add(user1);
+		database.add(user1Authorities);
+		database.add(user2);
+		database.add(user2Authorities);
+		database.add(usersGroup);
+		database.add(usersGroupAuthority);
+		database.add(molgenisGroupMember1);
+		database.add(molgenisGroupMember2);
 	}
 
 	@Override

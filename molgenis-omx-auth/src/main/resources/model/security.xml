@@ -1,136 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- TODO clean up -->
 <molgenis name="org.molgenis.omx">
 	<module name="auth">
-		<entity name="Autoid_" abstract="true" system="true">
-			<description>This interface assigns an automatic 'id'.
-			</description>
-			<field name="id" type="autoid" hidden="true"
-				description="automatically generated internal id, only for internal use." />
-		</entity>
-		<entity name="Identifiable_" implements="Autoid_" abstract="true"
-			system="true" xref_label="Identifier">
-			<description>This interface assigns an automatic 'id', globally
-				unique identifier
-				'identifier' field, and possibly not unique 'name'
-				to all entities that implement it.
-			</description>
-			<field name="Identifier" type="string"
-				description="user supplied or automatically assigned (using a decorator) unique and short identifier, e.g. MA1234" />
-			<field name="Name" type="string"
-				description="human readible name, not necessary unique." />
-			<unique fields="Identifier" />
-		</entity>
-		<entity name="MolgenisRole" system="true" implements="Identifiable_" xref_label="Name" >
-			<field name="Name" unique="true" />
-		</entity>
-
-		<entity name="MolgenisGroup" extends="MolgenisRole" system="true">
-			<!--
-			<field name="members" type="mref" xref_field="MolgenisUser.id" xref_label="Name" />
-			-->
-		</entity>
-
-		<entity name="MolgenisRoleGroupLink" system="true" implements="Identifiable_">
-			<field name="group_" type="xref" xref_field="MolgenisGroup.id" xref_label="Name" />
-			<field name="role_" type="xref" xref_field="MolgenisRole.id" xref_label="Name" />
-			<unique fields="group_,role_"/>
-		</entity>
-		
-		<entity name="Contact" abstract="true">
-			<description> A contact is either a person or an organization. Copied
-				from FuGE::Contact.</description>
-			<field name="Address" type="text" nillable="true"
-				description="The address of the Contact." />
-			<field name="Phone" nillable="true"
-				description="The telephone number of the Contact including the suitable area codes." />
-			<field name="Email" nillable="true"
-				description="The email address of the Contact." />
-			<field name="Fax" nillable="true" type="varchar"
-				description="The fax number of the Contact." />
-			<field name="tollFreePhone" nillable="true" type="string"
-				description="A toll free phone number for the Contact, including suitable area codes." />		
-			<field name="City" type="string" nillable="true"
-				description="Added from the old definition of MolgenisUser. City of this contact." />/>
-			<field name="Country" type="string" nillable="true" 
-				description="Added from the old definition of MolgenisUser. Country of this contact." />	
-		</entity>
-		
-		<entity name="PersonContact" abstract="true">
-			<field name="FirstName" label="First Name" nillable="true" />
-			<field name="MidInitials" label="Mid Initials" nillable="true" />
-			<field name="LastName" label="Last Name" nillable="true"/>
-			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD" />
-			<!--<field name="Affiliation" type="xref" xref_entity="Institute" nillable="true" /> -->
-			<field name="Department" type="string" nillable="true" 
-				description="Added from the old definition of MolgenisUser. Department of this contact." />	
-			<!--<field name="Roles" type="xref" xref_field="PersonRole.id"
-				nillable="true" description="Indicate role of the contact, e.g. lab worker or PI. Changed from mref to xref in oct 2011." />-->
-		</entity>
-		<!--
-		<entity name="Person" extends="Characteristic_" implements="Contact,PersonContact" xref_label="Name">
-			<description>
-				Person represents one or more people involved with an Investigation.
-				This may include authors on a paper, lab personnel or PIs. Person
-				has last name, firstname, mid initial, address, contact and email. A
-				Person role is included to represent how a Person is involved with
-				an investigation. For submission to repository purposes an allowed
-				value is 'submitter' and the term is present in the MGED Ontology,
-				an alternative use could represent job title. An Example from
-				ArrayExpress is E-MTAB-506
-				<a
-					href="ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt">
-					ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt.
-				</a>
-				.
-				<br />
-				The FUGE equivalent to Person is FuGE::Person.
-			</description>
-			<unique fields="Email" />
-		</entity>
-		  -->
-<!--
-		<entity name="PersonRole" extends="OntologyTerm">
-		<entity name="PersonRole">
-		<description>Seperate type of ontologyTerm to administrate roles.</description>
-		</entity>
-		
-		<entity name="Institute" extends="Characteristic_" implements="Contact" xref_label="Name">
-			<description> A contact is either a person or an organization. Copied
-				from FuGE::Contact.</description>
-				<field name="Name" unique="true"/>
-		</entity>
--->
-		<entity name="MolgenisUser" extends="MolgenisRole" implements="Contact,PersonContact" system="true">
+		<entity name="MolgenisUser" system="true">
 			<description>Anyone who can login</description>
-			<field name="password_" type="string" default="secret" description="big fixme: password type" />
-			<field name="activationCode" type="string"
-				description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."
-				nillable="true" />
-			<field name="active" type="bool" default="false"
-				description="Boolean to indicate if this account can be used to login" />
-			<field name="superuser" type="bool" default="false" />
-			<unique fields="Email" />
-			<!-- todo: profile: picture, field, address, zip, timezone, flag to set public email, website, other details -->
+			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
+			<field name="username" type="string"/>
+			<field name="password_" type="string" default="secret" description="big fixme: password type"/>
+			<field name="activationCode" type="string" nillable="true" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
+			<field name="active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
+			<field name="superuser" type="bool" default="false"/>
+			<field name="FirstName" label="First Name" nillable="true"/>
+			<field name="MidInitials" label="Mid Initials" nillable="true"/>
+			<field name="LastName" label="Last Name" nillable="true"/>
+			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD"/>
+			<field name="Affiliation" type="string" nillable="true"/>
+			<field name="Department" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Department of this contact."/>	
+			<field name="Role" type="string" nillable="true" description="Indicate role of the contact, e.g. lab worker or PI."/>
+			<field name="Address" type="text" nillable="true" description="The address of the Contact."/>
+			<field name="Phone" nillable="true" description="The telephone number of the Contact including the suitable area codes."/>
+			<field name="Email" nillable="true" description="The email address of the Contact."/>
+			<field name="Fax" nillable="true" type="varchar" description="The fax number of the Contact."/>
+			<field name="tollFreePhone" nillable="true" type="string" description="A toll free phone number for the Contact, including suitable area codes."/>
+			<field name="City" type="string" nillable="true" description="Added from the old definition of MolgenisUser. City of this contact."/>
+			<field name="Country" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Country of this contact."/>
+			<unique fields="Email"/>
+			<unique fields="username"/>
 		</entity>
-		<entity name="Authority">
-			<field name="id" type="autoid"/>
+		<entity name="MolgenisGroup" system="true">
+			<field name="id" type="autoid" hidden="true"/>
+			<field name="name" type="string"/>
+		</entity>
+		<entity name="MolgenisGroupMember" system="true">
+			<field name="id" type="autoid" hidden="true"/>	
 			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
+			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
+		</entity>
+		<entity name="Authority" abstract="true" system="true">
 			<field name="role" type="string"/>
 		</entity>
-		<!--
-		<entity name="MolgenisPermission" system="true" implements="Identifiable_">
-			<field name="role_" type="xref" xref_field="MolgenisRole.id" xref_label="Name"/>
-			<field name="entity" type="xref" xref_field="MolgenisEntity.id" />
-			<field name="permission" type="enum" enum_options="[read,write,own]"/>
-			<unique fields="role_,entity,permission"/>
+		<entity name="UserAuthority" implements="Authority" system="true">
+			<field name="id" type="autoid" hidden="true"/>
+			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
 		</entity>
-		  -->
-		<entity name="Authorizable" abstract="true" decorator="org.molgenis.omx.auth.decorators.AuthorizableDecorator">
-			<description>Interface for row level security</description>
-			<field name="canRead" type="xref" xref_entity="MolgenisRole" xref_field="id" xref_label="Name" nillable="true" />
-			<field name="canWrite" type="xref" xref_entity="MolgenisRole" xref_field="id" xref_label="Name" nillable="true"/>
-			<field name="owns" nillable="false" type="xref" xref_entity="MolgenisRole" xref_field="id" xref_label="Name" default="2"/>
+		<entity name="GroupAuthority" implements="Authority" system="true">
+			<field name="id" type="autoid" hidden="true"/>
+			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
 		</entity>
 	</module>
 </molgenis>

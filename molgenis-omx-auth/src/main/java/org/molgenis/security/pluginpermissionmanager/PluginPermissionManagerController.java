@@ -13,7 +13,9 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.Authority;
+import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,18 +66,130 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 						return superuser == null || !superuser;
 					}
 				})));
+		model.addAttribute("groups", pluginPermissionManagerService.getGroups());
 		return "view-pluginpermissionmanager";
+	}
+
+	@RequestMapping(value = "/group/{groupId}", method = RequestMethod.GET)
+	@ResponseBody
+	public PluginPermissions getGroupPermissions(@PathVariable Integer groupId) throws DatabaseException
+	{
+		List<GroupAuthority> authorities = pluginPermissionManagerService.getGroupPluginPermissions(groupId);
+		return createGroupPluginPermissions(authorities);
 	}
 
 	@RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
 	@ResponseBody
-	public UserPluginPermissions getPermissions(@PathVariable Integer userId, Model model) throws DatabaseException
+	public PluginPermissions getUserPermissions(@PathVariable Integer userId) throws DatabaseException
 	{
-		List<Authority> authorities = pluginPermissionManagerService.getPluginPermissions(userId);
+		List<? extends Authority> authorities = pluginPermissionManagerService.getUserPluginPermissions(userId);
+		return createUserPluginPermissions(authorities);
+	}
 
-		UserPluginPermissions userPluginPermissions = new UserPluginPermissions();
-		userPluginPermissions.setUserId(userId);
+	@RequestMapping(value = "/update/group", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateGroupPluginPermissions(@RequestParam Integer groupId, WebRequest webRequest)
+			throws DatabaseException
+	{
+		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
+		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
+		{
+			String param = "radio-" + pluginId;
+			String value = webRequest.getParameter(param);
+			if (value.equals("read") || value.equals("write"))
+			{
+				GroupAuthority authority = new GroupAuthority();
+				authority.setRole("ROLE_PLUGIN_" + pluginId.toUpperCase() + "_" + value.toUpperCase() + "_USER");
+				authorities.add(authority);
+			}
+			else if (!value.equals("none"))
+			{
+				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
+			}
+		}
+		pluginPermissionManagerService.updateGroupPluginPermissions(authorities, groupId);
+	}
 
+	@RequestMapping(value = "/update/user", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateUserPluginPermissions(@RequestParam Integer userId, WebRequest webRequest)
+			throws DatabaseException
+	{
+		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
+		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
+		{
+			String param = "radio-" + pluginId;
+			String value = webRequest.getParameter(param);
+			if (value.equals("read") || value.equals("write"))
+			{
+				UserAuthority authority = new UserAuthority();
+				authority.setRole("ROLE_PLUGIN_" + pluginId.toUpperCase() + "_" + value.toUpperCase() + "_USER");
+				authorities.add(authority);
+			}
+			else if (!value.equals("none"))
+			{
+				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
+			}
+		}
+		pluginPermissionManagerService.updateUserPluginPermissions(authorities, userId);
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
+	{
+		logger.error(e);
+		return Collections.singletonMap("errorMessage",
+				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+	}
+
+	private PluginPermissions createGroupPluginPermissions(List<GroupAuthority> authorities)
+	{
+		PluginPermissions pluginPermissions = new PluginPermissions();
+		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
+		{
+			PluginPermission pluginPermission = new PluginPermission();
+			boolean canRead = false;
+			boolean canWrite = false;
+			for (GroupAuthority authority : authorities)
+			{
+				String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
+				// TODO use SecurityUtil constants
+				if (role.endsWith("_USER"))
+				{
+					role = role.substring(0, role.length() - "_USER".length());
+					if (role.indexOf('_') != -1 && !role.endsWith("_"))
+					{
+						String plugin = role.substring(0, role.indexOf('_'));
+						if (plugin.toLowerCase().equals(pluginId))
+						{
+							String permission = role.substring(role.indexOf('_') + 1);
+							if (permission.equals("READ")) canRead = true;
+							if (permission.equals("WRITE")) canWrite = true;
+						}
+					}
+				}
+			}
+			pluginPermission.setPluginId(pluginId);
+			pluginPermission.setCanRead(canRead);
+			pluginPermission.setCanWrite(canWrite);
+			pluginPermissions.addPermission(pluginPermission);
+		}
+		Collections.sort(pluginPermissions.getPermissions(), new Comparator<PluginPermission>()
+		{
+			@Override
+			public int compare(PluginPermission o1, PluginPermission o2)
+			{
+				return o1.getPluginId().compareTo(o2.getPluginId());
+			}
+		});
+		return pluginPermissions;
+	}
+
+	private PluginPermissions createUserPluginPermissions(List<? extends Authority> authorities)
+	{
+		PluginPermissions pluginPermissions = new PluginPermissions();
 		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
 		{
 			PluginPermission pluginPermission = new PluginPermission();
@@ -103,9 +217,9 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 			pluginPermission.setPluginId(pluginId);
 			pluginPermission.setCanRead(canRead);
 			pluginPermission.setCanWrite(canWrite);
-			userPluginPermissions.addPermission(pluginPermission);
+			pluginPermissions.addPermission(pluginPermission);
 		}
-		Collections.sort(userPluginPermissions.getPermissions(), new Comparator<PluginPermission>()
+		Collections.sort(pluginPermissions.getPermissions(), new Comparator<PluginPermission>()
 		{
 			@Override
 			public int compare(PluginPermission o1, PluginPermission o2)
@@ -113,43 +227,10 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 				return o1.getPluginId().compareTo(o2.getPluginId());
 			}
 		});
-		return userPluginPermissions;
+		return pluginPermissions;
 	}
 
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public void updatePluginPermissions(@RequestParam Integer userId, WebRequest webRequest) throws DatabaseException
-	{
-		List<Authority> authorities = new ArrayList<Authority>();
-		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
-		{
-			String param = "radio-" + pluginId;
-			String value = webRequest.getParameter(param);
-			if (value.equals("read") || value.equals("write"))
-			{
-				Authority authority = new Authority();
-				authority.setRole("ROLE_PLUGIN_" + pluginId.toUpperCase() + "_" + value.toUpperCase() + "_USER");
-				authorities.add(authority);
-			}
-			else if (!value.equals("none"))
-			{
-				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
-			}
-		}
-		pluginPermissionManagerService.updatePluginPermissions(authorities, userId);
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
-	{
-		logger.error(e);
-		return Collections.singletonMap("errorMessage",
-				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
-	}
-
-	public static class UserPluginPermissions
+	public static class PluginPermissions
 	{
 		private Integer userId;
 		private List<PluginPermission> pluginPermissions;

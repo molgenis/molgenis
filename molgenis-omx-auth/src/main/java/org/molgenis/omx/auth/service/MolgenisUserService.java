@@ -1,7 +1,6 @@
 package org.molgenis.omx.auth.service;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
-import org.molgenis.omx.auth.MolgenisRole;
-import org.molgenis.omx.auth.MolgenisRoleGroupLink;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.util.PasswordHasher;
 import org.molgenis.omx.auth.vo.MolgenisUserSearchCriteriaVO;
@@ -70,22 +67,23 @@ public class MolgenisUserService
 	 * @return list of group ids
 	 * @throws DatabaseException
 	 */
-	public List<Integer> findGroupIds(MolgenisRole role) throws DatabaseException
-	{
-		List<Integer> roleIdList = new ArrayList<Integer>();
-		roleIdList.add(role.getId());
-
-		List<MolgenisRoleGroupLink> links = this.db.query(MolgenisRoleGroupLink.class)
-				.equals(MolgenisRoleGroupLink.ROLE_, role.getId()).find();
-
-		for (MolgenisRoleGroupLink link : links)
-		{
-			// roleIdList.add(link.getGroup_Id());
-			roleIdList.addAll(findGroupIds(db.findById(MolgenisRole.class, link.getGroup_Id())));
-		}
-
-		return roleIdList;
-	}
+	// public List<Integer> findGroupIds(MolgenisRole role) throws DatabaseException
+	// {
+	// throw new UnsupportedOperationException();
+	// List<Integer> roleIdList = new ArrayList<Integer>();
+	// roleIdList.add(role.getId());
+	//
+	// List<MolgenisRoleGroupLink> links = this.db.query(MolgenisRoleGroupLink.class)
+	// .equals(MolgenisRoleGroupLink.ROLE_, role.getId()).find();
+	//
+	// for (MolgenisRoleGroupLink link : links)
+	// {
+	// // roleIdList.add(link.getGroup_Id());
+	// roleIdList.addAll(findGroupIds(db.findById(MolgenisRole.class, link.getGroup_Id())));
+	// }
+	//
+	// return roleIdList;
+	// }
 
 	public void insert(MolgenisUser user) throws DatabaseException
 	{
@@ -124,7 +122,7 @@ public class MolgenisUserService
 
 		if (!StringUtils.equals(newPwd1, newPwd2)) throw new MolgenisUserException("Passwords do not match");
 
-		List<MolgenisUser> users = this.db.query(MolgenisUser.class).equals(MolgenisUser.NAME, userName).find();
+		List<MolgenisUser> users = this.db.query(MolgenisUser.class).equals(MolgenisUser.USERNAME, userName).find();
 
 		if (users.size() != 1) throw new MolgenisUserException("User not found");
 

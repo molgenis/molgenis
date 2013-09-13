@@ -51,7 +51,7 @@ public class AccountService
 			case USER:
 				activationEmailAddress = molgenisUser.getEmail();
 				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new DatabaseException(
-						"User '" + molgenisUser.getName() + "' is missing required email address");
+						"User '" + molgenisUser.getUsername() + "' is missing required email address");
 				break;
 			default:
 				throw new RuntimeException("unknown activation mode: " + getActivationMode());
@@ -61,7 +61,7 @@ public class AccountService
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
 		database.add(molgenisUser);
-		logger.debug("created user " + molgenisUser.getName());
+		logger.debug("created user " + molgenisUser.getUsername());
 
 		// send activation email
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
@@ -71,7 +71,7 @@ public class AccountService
 		mailMessage.setSubject("User registration for " + getAppName());
 		mailMessage.setText(createActivationEmailText(molgenisUser, activationUri));
 		mailSender.send(mailMessage);
-		logger.debug("send activation email for user " + molgenisUser.getName() + " to " + activationEmailAddress);
+		logger.debug("send activation email for user " + molgenisUser.getUsername() + " to " + activationEmailAddress);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class AccountService
 	{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("User registration for ").append(getAppName()).append('\n');
-		strBuilder.append("User name: ").append(user.getName()).append(" Full name: ").append(user.getFirstName());
+		strBuilder.append("User name: ").append(user.getUsername()).append(" Full name: ").append(user.getFirstName());
 		strBuilder.append(' ').append(user.getLastName()).append('\n');
 		strBuilder.append("In order to activate the user visit the following URL:").append('\n');
 		strBuilder.append(activationUri).append('\n').append('\n');

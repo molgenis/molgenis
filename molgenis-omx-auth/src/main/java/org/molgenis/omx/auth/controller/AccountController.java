@@ -1,7 +1,6 @@
 package org.molgenis.omx.auth.controller;
 
 import java.net.URI;
-import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -111,8 +110,7 @@ public class AccountController
 	private MolgenisUser toMolgenisUser(RegisterRequest request)
 	{
 		MolgenisUser user = new MolgenisUser();
-		user.setName(request.getUsername());
-		user.setIdentifier(UUID.randomUUID().toString());
+		user.setUsername(request.getUsername());
 		user.setPassword(request.getPassword());
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
