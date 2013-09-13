@@ -12,7 +12,6 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class AccountService
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
 
 	@Autowired
-	@Qualifier("unauthorizedDatabase")
 	private Database database;
 
 	@Autowired
@@ -101,19 +99,23 @@ public class AccountService
 		}
 	}
 
-	public void resetPassword(MolgenisUser molgenisUser) throws DatabaseException
+	public void resetPassword(String userEmail) throws DatabaseException
 	{
-		// TODO: make this mandatory (password that was sent is valid only once)
-		String newPassword = UUID.randomUUID().toString().substring(0, 8);
-		molgenisUser.setPassword(newPassword);
-		database.update(molgenisUser);
+		MolgenisUser molgenisUser = MolgenisUser.findByEmail(database, userEmail);
+		if (molgenisUser != null)
+		{
+			// TODO: make this mandatory (password that was sent is valid only once)
+			String newPassword = UUID.randomUUID().toString().substring(0, 8);
+			molgenisUser.setPassword(newPassword);
+			database.update(molgenisUser);
 
-		// send password reseted email to user
-		SimpleMailMessage mailMessage = new SimpleMailMessage();
-		mailMessage.setTo(molgenisUser.getEmail());
-		mailMessage.setSubject("Your new password request");
-		mailMessage.setText(createPasswordResettedEmailText(newPassword));
-		mailSender.send(mailMessage);
+			// send password reseted email to user
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(molgenisUser.getEmail());
+			mailMessage.setSubject("Your new password request");
+			mailMessage.setText(createPasswordResettedEmailText(newPassword));
+			mailSender.send(mailMessage);
+		}
 	}
 
 	private ActivationMode getActivationMode()

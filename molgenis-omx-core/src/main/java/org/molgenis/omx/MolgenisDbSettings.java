@@ -10,14 +10,12 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
 
 	@Autowired
-	@Qualifier("unauthorizedDatabase")
 	private Database database;
 
 	@Override

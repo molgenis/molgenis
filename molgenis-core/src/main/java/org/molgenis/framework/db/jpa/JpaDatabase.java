@@ -5,21 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.molgenis.framework.db.AbstractDatabase;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
 
 /**
- * Java Persistence API (JPA) implementation of Database to query relational
- * databases.
+ * Java Persistence API (JPA) implementation of Database to query relational databases.
  * <p>
- * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be
- * added for each {@link org.molgenis.framework.util.Entity} E that can be
- * queried. These mappers take care of the interaction with a database.
+ * In order to function, {@link org.molgenis.framework.db.JpaMapper} must be added for each
+ * {@link org.molgenis.framework.util.Entity} E that can be queried. These mappers take care of the interaction with a
+ * database.
  * 
  * @author Morris Swertz
  * @author Joris Lops
@@ -28,17 +27,16 @@ public class JpaDatabase extends AbstractDatabase
 {
 	public static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
 
-	private final EntityManager em;
+	@PersistenceContext
+	private EntityManager em;
 
-	public JpaDatabase(EntityManager em)
+	public JpaDatabase()
 	{
-		this(em, null);
+		this(null);
 	}
 
-	public JpaDatabase(EntityManager em, Model model)
+	public JpaDatabase(Model model)
 	{
-		if (em == null) throw new IllegalArgumentException("entity manager is null");
-		this.em = em;
 		this.model = model;
 	}
 
@@ -46,60 +44,6 @@ public class JpaDatabase extends AbstractDatabase
 	public EntityManager getEntityManager()
 	{
 		return em;
-	}
-
-	@Override
-	public void beginTx() throws DatabaseException
-	{
-		try
-		{
-			if (em.getTransaction() != null && !em.getTransaction().isActive())
-			{
-				em.getTransaction().begin();
-			}
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
-	}
-
-	@Override
-	public boolean inTx()
-	{
-		return em.getTransaction().isActive();
-	}
-
-	@Override
-	public void commitTx() throws DatabaseException
-	{
-		try
-		{
-			if (em.getTransaction() != null && em.getTransaction().isActive())
-			{
-				em.getTransaction().commit();
-			}
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
-	}
-
-	@Override
-	public void rollbackTx() throws DatabaseException
-	{
-		try
-		{
-			if (em.getTransaction().isActive())
-			{
-				em.getTransaction().rollback();
-			}
-		}
-		catch (Exception e)
-		{
-			throw new DatabaseException(e);
-		}
 	}
 
 	@Override

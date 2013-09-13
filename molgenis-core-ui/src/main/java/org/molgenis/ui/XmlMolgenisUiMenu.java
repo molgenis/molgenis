@@ -4,27 +4,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
+import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
 
 import com.google.common.collect.Lists;
 
 public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator;
 	private final MenuType menuType;
 	private final MolgenisUiMenu parentMenu;
 
-	public XmlMolgenisUiMenu(MolgenisPermissionService molgenisPermissionService, MenuType menuType)
+	public XmlMolgenisUiMenu(WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator, MenuType menuType)
 	{
-		this(molgenisPermissionService, menuType, null);
+		this(webInvocationPrivilegeEvaluator, menuType, null);
 	}
 
-	public XmlMolgenisUiMenu(MolgenisPermissionService molgenisPermissionService, MenuType menuType,
+	public XmlMolgenisUiMenu(WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator, MenuType menuType,
 			MolgenisUiMenu parentMenu)
 	{
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenis permission service is null");
+		if (webInvocationPrivilegeEvaluator == null) throw new IllegalArgumentException(
+				"molgenis permission service is null");
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.webInvocationPrivilegeEvaluator = webInvocationPrivilegeEvaluator;
 		this.menuType = menuType;
 		this.parentMenu = parentMenu;
 	}
@@ -108,11 +109,11 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	{
 		if (menuItem instanceof MenuType)
 		{
-			return new XmlMolgenisUiMenu(molgenisPermissionService, (MenuType) menuItem, this);
+			return new XmlMolgenisUiMenu(webInvocationPrivilegeEvaluator, (MenuType) menuItem, this);
 		}
 		else if (menuItem instanceof PluginType)
 		{
-			return new XmlMolgenisUiPlugin(molgenisPermissionService, (PluginType) menuItem, this);
+			return new XmlMolgenisUiPlugin(webInvocationPrivilegeEvaluator, (PluginType) menuItem, this);
 		}
 		else throw new RuntimeException("unknown menu item type");
 	}

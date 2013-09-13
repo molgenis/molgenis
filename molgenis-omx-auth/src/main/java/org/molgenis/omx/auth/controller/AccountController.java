@@ -1,17 +1,13 @@
 package org.molgenis.omx.auth.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
@@ -20,9 +16,7 @@ import org.molgenis.omx.auth.vo.CaptchaRequest;
 import org.molgenis.omx.auth.vo.PasswordResetRequest;
 import org.molgenis.omx.auth.vo.RegisterRequest;
 import org.molgenis.util.CountryCodes;
-import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
@@ -31,7 +25,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -40,13 +33,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping("/account")
 public class AccountController
 {
-	@Autowired
-	private Database database;
-
-	@Autowired
-	@Qualifier("unauthorizedDatabase")
-	private Database unauthorizedDatabase;
-
 	@Autowired
 	private AccountService accountService;
 
@@ -71,23 +57,6 @@ public class AccountController
 	public String getPasswordResetForm()
 	{
 		return "resetpassword-modal";
-	}
-
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void loginUser(@RequestParam("username") String username, @RequestParam("password") String password)
-			throws HandleRequestDelegationException, Exception
-	{
-		boolean ok = database.getLogin().login(database, username, password);
-		if (!ok) throw new DatabaseAccessException("Login failed: username or password unknown");
-	}
-
-	@RequestMapping(value = "/logout", method = RequestMethod.GET)
-	public String logoutUser() throws Exception
-	{
-		database.getLogin().logout(database);
-		database.getLogin().reload(database);
-		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
@@ -124,9 +93,7 @@ public class AccountController
 	public void resetPassword(@Valid @ModelAttribute PasswordResetRequest passwordResetRequest)
 			throws DatabaseException
 	{
-		List<MolgenisUser> molgenisUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.EMAIL,
-				Operator.EQUALS, passwordResetRequest.getEmail()));
-		if (molgenisUsers != null && !molgenisUsers.isEmpty()) accountService.resetPassword(molgenisUsers.get(0));
+		accountService.resetPassword(passwordResetRequest.getEmail());
 	}
 
 	@ExceptionHandler(DatabaseAccessException.class)

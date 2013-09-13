@@ -9,7 +9,6 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -24,7 +23,6 @@ import com.google.common.collect.Lists;
 public class MolgenisUserDetailsService implements UserDetailsService
 {
 	@Autowired
-	@Qualifier("unauthorizedPrototypeDatabase")
 	protected Database database;
 	protected final PasswordEncoder passwordEncoder;
 

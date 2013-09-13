@@ -26,12 +26,12 @@ public class ApplicationUtil
 
 	public static Database getUnauthorizedDatabase()
 	{
-		return getApplicationContext().getBean("unauthorizedDatabase", Database.class);
+		return getDatabase();
 	}
 
 	public static Database getUnauthorizedPrototypeDatabase()
 	{
-		return getApplicationContext().getBean("unauthorizedPrototypeDatabase", Database.class);
+		return getDatabase();
 	}
 
 	public static EntityManagerFactory getEntityManagerFactory()
@@ -53,7 +53,6 @@ public class ApplicationUtil
 	{
 		return getApplicationContext().getBean("molgenisSettings", MolgenisSettings.class);
 	}
-
 
 	public static EntitiesImporter getEntitiesImporter()
 	{

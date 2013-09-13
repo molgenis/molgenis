@@ -42,6 +42,16 @@ public class SecurityUtils
 		return false;
 	}
 
+	public static boolean currentUserIsAuthenticated()
+	{
+		String username;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof UserDetails) username = ((UserDetails) principal).getUsername();
+		else username = principal.toString();
+		return authentication.isAuthenticated() && !username.equals("anonymousUser");
+	}
+
 	public static String[] defaultPluginAuthorities(String pluginId)
 	{
 		return new String[]

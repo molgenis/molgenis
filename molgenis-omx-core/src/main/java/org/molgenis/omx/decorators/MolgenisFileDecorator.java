@@ -5,20 +5,18 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.omx.core.MolgenisFile;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.core.MolgenisFile;
 
 /**
- * Generic decorator for MOLGENIS files. These files are coupled to entities and
- * stored in a user defined, verified place. The 'FileType' denotes the final
- * placement folder. So for example, the storage location has been set to
- * '/data/xgap', the deploy name is 'tomatodb', and an image is uploaded; it is
- * stored as /data/xgap/tomatodb/myImg'. Note that the extension is stripped off
- * the filename. This is stored as part of the MolgenisFile object, and used to
+ * Generic decorator for MOLGENIS files. These files are coupled to entities and stored in a user defined, verified
+ * place. The 'FileType' denotes the final placement folder. So for example, the storage location has been set to
+ * '/data/xgap', the deploy name is 'tomatodb', and an image is uploaded; it is stored as /data/xgap/tomatodb/myImg'.
+ * Note that the extension is stripped off the filename. This is stored as part of the MolgenisFile object, and used to
  * serve out the file with the correct MIME type, obtained at runtime.
  * 
  * @author joerivandervelde
@@ -127,7 +125,7 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 	@Override
 	public int update(List<E> entities) throws DatabaseException
 	{
-		boolean dbAlreadyInTx = this.getDatabase().inTx();
+		// boolean dbAlreadyInTx = this.getDatabase().inTx();
 
 		genericAddUpdateChecks(entities);
 
@@ -200,10 +198,10 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 						// skip rest of the function
 					}
 
-					if (!dbAlreadyInTx)
-					{
-						this.getDatabase().beginTx();
-					}
+					// if (!dbAlreadyInTx)
+					// {
+					// this.getDatabase().beginTx();
+					// }
 
 					if (oldFile != null)
 					{
@@ -234,21 +232,21 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 					// update record for just this file
 					super.update(entities.subList(count, count + 1));
 
-					// commit and count
-					if (!dbAlreadyInTx)
-					{
-						this.getDatabase().commitTx();
-					}
+					// // commit and count
+					// if (!dbAlreadyInTx)
+					// {
+					// this.getDatabase().commitTx();
+					// }
 
 					count++;
 
 				}
 				catch (Exception e)
 				{
-					if (!dbAlreadyInTx)
-					{
-						this.getDatabase().rollbackTx();
-					}
+					// if (!dbAlreadyInTx)
+					// {
+					// this.getDatabase().rollbackTx();
+					// }
 					throw new DatabaseException(e.getMessage());
 				}
 			}
@@ -260,17 +258,17 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 	@Override
 	public int remove(List<E> entities) throws DatabaseException
 	{
-		boolean dbAlreadyInTx = this.getDatabase().inTx();
+		// boolean dbAlreadyInTx = this.getDatabase().inTx();
 
 		// find backend file, and if exists, delete
 		int count = 0;
 		for (MolgenisFile mf : entities)
 		{
 
-			if (!dbAlreadyInTx)
-			{
-				this.getDatabase().beginTx();
-			}
+			// if (!dbAlreadyInTx)
+			// {
+			// this.getDatabase().beginTx();
+			// }
 
 			try
 			{
@@ -300,20 +298,20 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 				super.remove(entities.subList(count, count + 1));
 
 				// commit and count
-				if (!dbAlreadyInTx)
-				{
-					this.getDatabase().commitTx();
-				}
+				// if (!dbAlreadyInTx)
+				// {
+				// this.getDatabase().commitTx();
+				// }
 
 				count++;
 
 			}
 			catch (Exception e)
 			{
-				if (!dbAlreadyInTx)
-				{
-					this.getDatabase().rollbackTx();
-				}
+				// if (!dbAlreadyInTx)
+				// {
+				// this.getDatabase().rollbackTx();
+				// }
 				throw new DatabaseException(e.getMessage());
 			}
 		}

@@ -38,6 +38,7 @@
         		<plugin id="form.StudyDataRequest" label="StudyDataRequest" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
         		<plugin id="form.RuntimeProperty" label="RuntimeProperty" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 	        </menu>
+	        <plugin id="pluginpermissionmanager" label="Plugin Permission Manager" name="PluginPermissionManagerController" type="org.molgenis.security.pluginpermissionmanager.PluginPermissionManagerController"/>
         	<plugin id="catalogmanager" label="Catalog Manager" name="CatalogManagerController" type="org.molgenis.catalogmanager.CatalogManagerPlugin"/>
 			<plugin id="studymanager" label="Study Manager" name="StudyManagerController" type="org.molgenis.studymanager.StudyManagerPlugin"/>
 			<plugin id="dataindexer" label="Data Set Indexer" name="DataSetsIndexerController" type="org.molgenis.omx.plugin.DataSetsIndexerPlugin"/>

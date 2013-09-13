@@ -17,7 +17,6 @@ import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
 import org.molgenis.omx.auth.service.MolgenisUserException;
 import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,10 +33,6 @@ public class UserAccountController extends MolgenisPlugin
 
 	@Autowired
 	private Database database;
-
-	@Autowired
-	@Qualifier("unauthorizedDatabase")
-	private Database unauthorizedDatabase;
 
 	@Autowired
 	private AccountService accountService;

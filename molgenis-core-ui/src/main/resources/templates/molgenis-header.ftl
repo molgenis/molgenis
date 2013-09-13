@@ -47,7 +47,9 @@
 				<div class="span1">
 					<div id="login-modal-container-header"></div>
 					<#if authenticated?? && authenticated>
-						<a class="pull-right" href="/account/logout"><button class="btn btn-link">Sign out</button></a>
+						<form method="post" action="/logout">
+							<button class="btn btn-link pull-right" type="submit">Sign out</button>
+						</form>
 					<#else>
 						<a class="modal-href pull-right" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
 					</#if>

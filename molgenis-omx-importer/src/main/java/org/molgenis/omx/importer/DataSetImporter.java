@@ -23,6 +23,7 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.util.tuple.Tuple;
+import org.springframework.transaction.annotation.Transactional;
 
 public class DataSetImporter
 {
@@ -38,6 +39,8 @@ public class DataSetImporter
 		this.valueConverter = new ValueConverter(db);
 	}
 
+	@Transactional(rollbackFor =
+	{ IOException.class, DatabaseException.class })
 	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, DatabaseException
 	{
 		TableReader tableReader = TableReaderFactory.create(file);
@@ -103,7 +106,6 @@ public class DataSetImporter
 
 		int rownr = 0;
 		int transactionRows = Math.max(1, 5000 / featureMap.size());
-		db.beginTx();
 
 		for (Tuple row : sheetReader)
 		{
@@ -165,7 +167,5 @@ public class DataSetImporter
 			db.getEntityManager().flush();
 			db.getEntityManager().clear();
 		}
-		db.commitTx();
-
 	}
 }

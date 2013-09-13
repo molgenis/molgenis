@@ -56,6 +56,11 @@
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-omx-auth</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>3.2.3.RELEASE</version>
