@@ -40,6 +40,7 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<MolgenisUser> getUsers() throws DatabaseException
 	{
@@ -47,6 +48,7 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<MolgenisGroup> getGroups() throws DatabaseException
 	{
@@ -54,6 +56,7 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<GroupAuthority> getGroupPluginPermissions(Integer groupId) throws DatabaseException
 	{
@@ -63,6 +66,7 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<? extends Authority> getUserPluginPermissions(Integer userId) throws DatabaseException
 	{
@@ -95,16 +99,28 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
 	@Transactional(rollbackFor = DatabaseException.class)
-	public void updateGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
+	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
 			throws DatabaseException
 	{
-		throw new UnsupportedOperationException("implement me");
+		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
+		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+
+		// inject user
+		for (GroupAuthority pluginAuthority : pluginAuthorities)
+			pluginAuthority.setMolgenisGroup(molgenisGroup);
+
+		// delete old plugin authorities
+		List<GroupAuthority> oldPluginAuthorities = getGroupPluginPermissions(molgenisGroup);
+		if (oldPluginAuthorities != null && !oldPluginAuthorities.isEmpty()) database.remove(oldPluginAuthorities);
+
+		// insert new plugin authorities
+		if (!pluginAuthorities.isEmpty()) database.add(pluginAuthorities);
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
 	@Transactional(rollbackFor = DatabaseException.class)
-	public void updateUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
+	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
 			throws DatabaseException
 	{
 		MolgenisUser molgenisUser = MolgenisUser.findById(database, userId);

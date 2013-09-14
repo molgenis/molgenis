@@ -15,7 +15,7 @@
 					<div class="tab-content">
 					    <div class="tab-pane active" id="group-plugin-permission-manager">
 							<form class="form-horizontal" id="group-plugin-permission-form" method="post" action="${context_url}/update/group">
-								<label class="control-label" for="group-select">Select Group</label>
+								<label class="control-label" for="group-select">Select Group:</label>
 				    			<div class="controls">
 									<select name="groupId" id="group-select">
 								<#list groups as group>
@@ -40,7 +40,7 @@
 					    </div>
 					    <div class="tab-pane" id="user-plugin-permission-manager">
 							<form class="form-horizontal" id="user-plugin-permission-form" method="post" action="${context_url}/update/user">
-								<label class="control-label" for="user-select">Select User</label>
+								<label class="control-label" for="user-select">Select User:</label>
 				    			<div class="controls">
 									<select name="userId" id="user-select">
 								<#list users as user>
@@ -55,6 +55,7 @@
 						  					<th>Write</th>
 						  					<th>Read</th>
 						  					<th>None</th>
+						  					<th>Group</th>
 						  				</tr>
 						  			</thead>
 						  			<tbody>

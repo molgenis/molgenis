@@ -19,7 +19,7 @@ public interface PluginPermissionManagerService
 
 	List<? extends Authority> getUserPluginPermissions(Integer userId) throws DatabaseException;
 
-	void updateGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId) throws DatabaseException;
+	void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId) throws DatabaseException;
 
-	void updateUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId) throws DatabaseException;
+	void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId) throws DatabaseException;
 }

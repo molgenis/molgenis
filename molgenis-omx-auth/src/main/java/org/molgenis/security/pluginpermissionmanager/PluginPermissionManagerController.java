@@ -5,6 +5,7 @@ import static org.molgenis.security.pluginpermissionmanager.PluginPermissionMana
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +76,10 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 	public PluginPermissions getGroupPermissions(@PathVariable Integer groupId) throws DatabaseException
 	{
 		List<GroupAuthority> authorities = pluginPermissionManagerService.getGroupPluginPermissions(groupId);
-		return createGroupPluginPermissions(authorities);
+		PluginPermissions pluginPermissions = createPluginPermissions(authorities);
+		pluginPermissions.setGroupId(groupId);
+		pluginPermissions.sort();
+		return pluginPermissions;
 	}
 
 	@RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
@@ -83,7 +87,11 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 	public PluginPermissions getUserPermissions(@PathVariable Integer userId) throws DatabaseException
 	{
 		List<? extends Authority> authorities = pluginPermissionManagerService.getUserPluginPermissions(userId);
-		return createUserPluginPermissions(authorities);
+
+		PluginPermissions pluginPermissions = createPluginPermissions(authorities);
+		pluginPermissions.setUserId(userId);
+		pluginPermissions.sort();
+		return pluginPermissions;
 	}
 
 	@RequestMapping(value = "/update/group", method = RequestMethod.POST)
@@ -107,7 +115,7 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
 		}
-		pluginPermissionManagerService.updateGroupPluginPermissions(authorities, groupId);
+		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, groupId);
 	}
 
 	@RequestMapping(value = "/update/user", method = RequestMethod.POST)
@@ -131,7 +139,7 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
 		}
-		pluginPermissionManagerService.updateUserPluginPermissions(authorities, userId);
+		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, userId);
 	}
 
 	@ExceptionHandler(RuntimeException.class)
@@ -139,101 +147,57 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(e);
+		logger.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 
-	private PluginPermissions createGroupPluginPermissions(List<GroupAuthority> authorities)
+	private PluginPermissions createPluginPermissions(List<? extends Authority> pluginAuthorities)
 	{
 		PluginPermissions pluginPermissions = new PluginPermissions();
-		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
+		pluginPermissions.setPluginIds(new ArrayList<String>(MolgenisPluginRegistry.getInstance().getPluginIds()));
+		for (Authority authority : pluginAuthorities)
 		{
 			PluginPermission pluginPermission = new PluginPermission();
-			boolean canRead = false;
-			boolean canWrite = false;
-			for (GroupAuthority authority : authorities)
+
+			String authorityPluginId = getAuthorityPluginId(authority);
+			String authorityType = getAuthorityType(authority);
+			pluginPermission.setType(authorityType);
+			if (authority instanceof GroupAuthority)
 			{
-				String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
-				// TODO use SecurityUtil constants
-				if (role.endsWith("_USER"))
-				{
-					role = role.substring(0, role.length() - "_USER".length());
-					if (role.indexOf('_') != -1 && !role.endsWith("_"))
-					{
-						String plugin = role.substring(0, role.indexOf('_'));
-						if (plugin.toLowerCase().equals(pluginId))
-						{
-							String permission = role.substring(role.indexOf('_') + 1);
-							if (permission.equals("READ")) canRead = true;
-							if (permission.equals("WRITE")) canWrite = true;
-						}
-					}
-				}
+				pluginPermission.setGroup(((GroupAuthority) authority).getMolgenisGroup().getName());
+				pluginPermissions.addGroupPluginPermission(authorityPluginId, pluginPermission);
 			}
-			pluginPermission.setPluginId(pluginId);
-			pluginPermission.setCanRead(canRead);
-			pluginPermission.setCanWrite(canWrite);
-			pluginPermissions.addPermission(pluginPermission);
+			else
+			{
+				pluginPermissions.addUserPluginPermission(authorityPluginId, pluginPermission);
+			}
+
 		}
-		Collections.sort(pluginPermissions.getPermissions(), new Comparator<PluginPermission>()
-		{
-			@Override
-			public int compare(PluginPermission o1, PluginPermission o2)
-			{
-				return o1.getPluginId().compareTo(o2.getPluginId());
-			}
-		});
 		return pluginPermissions;
 	}
 
-	private PluginPermissions createUserPluginPermissions(List<? extends Authority> authorities)
+	private String getAuthorityPluginId(Authority authority)
 	{
-		PluginPermissions pluginPermissions = new PluginPermissions();
-		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
-		{
-			PluginPermission pluginPermission = new PluginPermission();
-			boolean canRead = false;
-			boolean canWrite = false;
-			for (Authority authority : authorities)
-			{
-				String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
-				// TODO use SecurityUtil constants
-				if (role.endsWith("_USER"))
-				{
-					role = role.substring(0, role.length() - "_USER".length());
-					if (role.indexOf('_') != -1 && !role.endsWith("_"))
-					{
-						String plugin = role.substring(0, role.indexOf('_'));
-						if (plugin.toLowerCase().equals(pluginId))
-						{
-							String permission = role.substring(role.indexOf('_') + 1);
-							if (permission.equals("READ")) canRead = true;
-							if (permission.equals("WRITE")) canWrite = true;
-						}
-					}
-				}
-			}
-			pluginPermission.setPluginId(pluginId);
-			pluginPermission.setCanRead(canRead);
-			pluginPermission.setCanWrite(canWrite);
-			pluginPermissions.addPermission(pluginPermission);
-		}
-		Collections.sort(pluginPermissions.getPermissions(), new Comparator<PluginPermission>()
-		{
-			@Override
-			public int compare(PluginPermission o1, PluginPermission o2)
-			{
-				return o1.getPluginId().compareTo(o2.getPluginId());
-			}
-		});
-		return pluginPermissions;
+		String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
+		role = role.substring(0, role.length() - "_USER".length());
+		return role.substring(0, role.indexOf('_')).toLowerCase();
+	}
+
+	private String getAuthorityType(Authority authority)
+	{
+		String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
+		role = role.substring(0, role.length() - "_USER".length());
+		return role.substring(role.indexOf('_') + 1).toLowerCase();
 	}
 
 	public static class PluginPermissions
 	{
 		private Integer userId;
-		private List<PluginPermission> pluginPermissions;
+		private Integer groupId;
+		private List<String> pluginIds;
+		private Map<String, List<PluginPermission>> userPluginPermissionMap;
+		private Map<String, List<PluginPermission>> groupPluginPermissionMap;
 
 		public Integer getUserId()
 		{
@@ -245,52 +209,135 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 			this.userId = userId;
 		}
 
-		public List<PluginPermission> getPermissions()
+		public Integer getGroupId()
 		{
-			return pluginPermissions != null ? pluginPermissions : Collections.<PluginPermission> emptyList();
+			return groupId;
 		}
 
-		public void addPermission(PluginPermission userPermission)
+		public void setGroupId(Integer groupId)
 		{
-			if (pluginPermissions == null) pluginPermissions = new ArrayList<PluginPermissionManagerController.PluginPermission>();
-			this.pluginPermissions.add(userPermission);
+			this.groupId = groupId;
+		}
+
+		public List<String> getPluginIds()
+		{
+			return pluginIds;
+		}
+
+		public void setPluginIds(List<String> pluginIds)
+		{
+			this.pluginIds = pluginIds;
+		}
+
+		public Map<String, List<PluginPermission>> getUserPluginPermissions()
+		{
+			return userPluginPermissionMap != null ? userPluginPermissionMap : Collections
+					.<String, List<PluginPermission>> emptyMap();
+		}
+
+		public void addUserPluginPermission(String pluginId, PluginPermission pluginPermission)
+		{
+			if (userPluginPermissionMap == null) userPluginPermissionMap = new HashMap<String, List<PluginPermission>>();
+			List<PluginPermission> pluginPermissions = userPluginPermissionMap.get(pluginId);
+			if (pluginPermissions == null)
+			{
+				pluginPermissions = new ArrayList<PluginPermission>();
+				userPluginPermissionMap.put(pluginId, pluginPermissions);
+			}
+			pluginPermissions.add(pluginPermission);
+		}
+
+		public Map<String, List<PluginPermission>> getGroupPluginPermissions()
+		{
+			return groupPluginPermissionMap != null ? groupPluginPermissionMap : Collections
+					.<String, List<PluginPermission>> emptyMap();
+		}
+
+		public void addGroupPluginPermission(String pluginId, PluginPermission pluginPermission)
+		{
+			if (groupPluginPermissionMap == null) groupPluginPermissionMap = new HashMap<String, List<PluginPermission>>();
+			List<PluginPermission> pluginPermissions = groupPluginPermissionMap.get(pluginId);
+			if (pluginPermissions == null)
+			{
+				pluginPermissions = new ArrayList<PluginPermission>();
+				groupPluginPermissionMap.put(pluginId, pluginPermissions);
+			}
+			pluginPermissions.add(pluginPermission);
+		}
+
+		public void sort()
+		{
+			Collections.sort(pluginIds);
+			if (userPluginPermissionMap != null)
+			{
+				for (List<PluginPermission> pluginPermissions : userPluginPermissionMap.values())
+				{
+					if (pluginPermissions.size() > 1)
+					{
+						Collections.sort(pluginPermissions, new Comparator<PluginPermission>()
+						{
+							@Override
+							public int compare(PluginPermission o1, PluginPermission o2)
+							{
+								String group1 = o1.getGroup();
+								String group2 = o2.getGroup();
+								if (group1 == null && group2 == null) return 0;
+								else if (group1 != null && group2 == null) return 1;
+								else if (group1 == null && group2 != null) return -1;
+								else return group1.compareTo(group2);
+							}
+						});
+					}
+				}
+			}
+			if (groupPluginPermissionMap != null)
+			{
+				for (List<PluginPermission> pluginPermissions : groupPluginPermissionMap.values())
+				{
+					if (pluginPermissions.size() > 1)
+					{
+						Collections.sort(pluginPermissions, new Comparator<PluginPermission>()
+						{
+							@Override
+							public int compare(PluginPermission o1, PluginPermission o2)
+							{
+								String group1 = o1.getGroup();
+								String group2 = o2.getGroup();
+								if (group1 == null && group2 == null) return 0;
+								else if (group1 != null && group2 == null) return 1;
+								else if (group1 == null && group2 != null) return -1;
+								else return group1.compareTo(group2);
+							}
+						});
+					}
+				}
+			}
 		}
 	}
 
 	public static class PluginPermission
 	{
-		private String pluginId;
-		private boolean canRead;
-		private boolean canWrite;
+		private String type;
+		private String group;
 
-		public String getPluginId()
+		public String getType()
 		{
-			return pluginId;
+			return type;
 		}
 
-		public void setPluginId(String id)
+		public void setType(String type)
 		{
-			this.pluginId = id;
+			this.type = type;
 		}
 
-		public boolean isCanRead()
+		public String getGroup()
 		{
-			return canRead;
+			return group;
 		}
 
-		public void setCanRead(boolean canRead)
+		public void setGroup(String group)
 		{
-			this.canRead = canRead;
-		}
-
-		public boolean isCanWrite()
-		{
-			return canWrite;
-		}
-
-		public void setCanWrite(boolean canWrite)
-		{
-			this.canWrite = canWrite;
+			this.group = group;
 		}
 	}
 }
