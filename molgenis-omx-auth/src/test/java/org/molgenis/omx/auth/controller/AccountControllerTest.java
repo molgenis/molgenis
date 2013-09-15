@@ -3,7 +3,6 @@ package org.molgenis.omx.auth.controller;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -91,32 +90,10 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void loginUser() throws Exception
-	{
-		this.mockMvc.perform(
-				post("/account/login").param("username", "admin").param("password", "adminpw")
-						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
-	}
-
-	@Test
-	public void loginUser_unauthorized() throws Exception
-	{
-		this.mockMvc.perform(
-				post("/account/login").param("username", "admin").param("password", "adminpw-invalid")
-						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isUnauthorized());
-	}
-
-	@Test
 	public void activateUser() throws Exception
 	{
 		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("redirect:http://localhost"));
 		verify(accountService).activateUser("123");
-	}
-
-	@Test
-	public void logoutUser() throws Exception
-	{
-		this.mockMvc.perform(get("/account/logout")).andExpect(view().name("redirect:http://localhost"));
 	}
 
 	@Test
@@ -166,15 +143,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				post("/account/password/reset").param("email", "admin@molgenis.org").contentType(
 						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 		verify(accountService).resetPassword("admin@molgenis.org");
-	}
-
-	@Test
-	public void resetPassword_invalidUser() throws Exception
-	{
-		this.mockMvc.perform(
-				post("/account/password/reset").param("email", "invalidUser@molgenis.org").contentType(
-						MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
-		verifyZeroInteractions(accountService);
 	}
 
 	// @Test
