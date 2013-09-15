@@ -1,6 +1,7 @@
 package org.molgenis.security.login;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -8,10 +9,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/login")
 public class MolgenisLoginController
 {
-	// FIXME show login dialog
 	@RequestMapping(method = RequestMethod.GET)
-	public String init()
+	public String getLoginPage()
 	{
-		return "forward:/";
+		return "view-login";
+	}
+
+	@RequestMapping(method = RequestMethod.GET, params = "error")
+	public String getLoginErrorPage(Model model)
+	{
+		model.addAttribute("errorMessage", "The username or password you entered is incorrect.");
+		return "view-login";
 	}
 }
