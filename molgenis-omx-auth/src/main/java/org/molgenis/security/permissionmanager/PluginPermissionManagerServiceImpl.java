@@ -3,13 +3,17 @@ package org.molgenis.security.permissionmanager;
 import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
 import static org.molgenis.framework.db.QueryRule.Operator.IN;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.model.elements.Entity;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
@@ -57,12 +61,40 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	public List<String> getPluginIds() throws DatabaseException
+	{
+		return new ArrayList<String>(MolgenisPluginRegistry.getInstance().getPluginIds());
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	public List<String> getEntityClassIds() throws DatabaseException
+	{
+		Vector<Entity> entities = database.getMetaData().getEntities(false, false);
+		List<String> entityIds = new ArrayList<String>(entities.size());
+		for (Entity entity : entities)
+			entityIds.add(entity.getName());
+		return entityIds;
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<GroupAuthority> getGroupPluginPermissions(Integer groupId) throws DatabaseException
 	{
 		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
-		return getGroupPluginPermissions(molgenisGroup);
+		return getGroupPermissions(molgenisGroup, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	public List<GroupAuthority> getGroupEntityClassPermissions(Integer groupId) throws DatabaseException
+	{
+		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
+		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+		return getGroupPermissions(molgenisGroup, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
 	@Override
@@ -70,9 +102,23 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<? extends Authority> getUserPluginPermissions(Integer userId) throws DatabaseException
 	{
+		return getUserPermissions(userId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	public List<? extends Authority> getUserEntityClassPermissions(Integer userId) throws DatabaseException
+	{
+		return getUserPermissions(userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+	}
+
+	private List<? extends Authority> getUserPermissions(Integer userId, String authorityPrefix)
+			throws DatabaseException
+	{
 		MolgenisUser molgenisUser = MolgenisUser.findById(database, userId);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
-		List<Authority> pluginPermissions = getUserPluginPermissions(molgenisUser);
+		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 		List<MolgenisGroupMember> groupMembers = database.find(MolgenisGroupMember.class, new QueryRule(
 				MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser));
 		if (groupMembers != null && !groupMembers.isEmpty())
@@ -89,11 +135,11 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 
 			List<GroupAuthority> groupAuthorities = database.find(GroupAuthority.class, new QueryRule(
 					GroupAuthority.MOLGENISGROUP, Operator.IN, molgenisGroups));
-			if (groupAuthorities != null && !groupAuthorities.isEmpty()) pluginPermissions.addAll(groupAuthorities);
+			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 
 		}
 
-		return pluginPermissions;
+		return userPermissions;
 	}
 
 	@Override
@@ -102,19 +148,34 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
 			throws DatabaseException
 	{
+		replaceGroupPermissions(pluginAuthorities, groupId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
+	@Transactional(rollbackFor = DatabaseException.class)
+	public void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId)
+			throws DatabaseException
+	{
+		replaceGroupPermissions(entityAuthorities, groupId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+	}
+
+	private void replaceGroupPermissions(List<GroupAuthority> entityAuthorities, Integer groupId, String authorityPrefix)
+			throws DatabaseException
+	{
 		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 
 		// inject user
-		for (GroupAuthority pluginAuthority : pluginAuthorities)
-			pluginAuthority.setMolgenisGroup(molgenisGroup);
+		for (GroupAuthority entityAuthority : entityAuthorities)
+			entityAuthority.setMolgenisGroup(molgenisGroup);
 
 		// delete old plugin authorities
-		List<GroupAuthority> oldPluginAuthorities = getGroupPluginPermissions(molgenisGroup);
-		if (oldPluginAuthorities != null && !oldPluginAuthorities.isEmpty()) database.remove(oldPluginAuthorities);
+		List<GroupAuthority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix);
+		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) database.remove(oldEntityAuthorities);
 
 		// insert new plugin authorities
-		if (!pluginAuthorities.isEmpty()) database.add(pluginAuthorities);
+		if (!entityAuthorities.isEmpty()) database.add(entityAuthorities);
 	}
 
 	@Override
@@ -123,22 +184,38 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
 			throws DatabaseException
 	{
+		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
+	@Transactional(rollbackFor = DatabaseException.class)
+	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
+			throws DatabaseException
+	{
+		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+	}
+
+	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, Integer userId, String authorityType)
+			throws DatabaseException
+	{
 		MolgenisUser molgenisUser = MolgenisUser.findById(database, userId);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 
 		// inject user
-		for (UserAuthority pluginAuthority : pluginAuthorities)
-			pluginAuthority.setMolgenisUser(molgenisUser);
+		for (UserAuthority entityAuthority : entityAuthorities)
+			entityAuthority.setMolgenisUser(molgenisUser);
 
 		// delete old plugin authorities
-		List<? extends Authority> oldPluginAuthorities = getUserPluginPermissions(molgenisUser);
-		if (oldPluginAuthorities != null && !oldPluginAuthorities.isEmpty()) database.remove(oldPluginAuthorities);
+		List<? extends Authority> oldEntityAuthorities = getUserPermissions(molgenisUser, authorityType);
+		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) database.remove(oldEntityAuthorities);
 
 		// insert new plugin authorities
-		if (!pluginAuthorities.isEmpty()) database.add(pluginAuthorities);
+		if (!entityAuthorities.isEmpty()) database.add(entityAuthorities);
 	}
 
-	private List<Authority> getUserPluginPermissions(MolgenisUser molgenisUser) throws DatabaseException
+	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
+			throws DatabaseException
 	{
 		List<UserAuthority> authorities = database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER,
 				EQUALS, molgenisUser));
@@ -148,17 +225,19 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 			@Override
 			public boolean apply(UserAuthority authority)
 			{
-				return authority.getRole().startsWith(SecurityUtils.PLUGIN_AUTHORITY_PREFIX);
+				return authority.getRole().startsWith(authorityPrefix);
 			}
 		}));
 	}
 
-	private List<GroupAuthority> getGroupPluginPermissions(MolgenisGroup molgenisGroup) throws DatabaseException
+	private List<GroupAuthority> getGroupPermissions(MolgenisGroup molgenisGroup, String authorityPrefix)
+			throws DatabaseException
 	{
-		return getGroupPluginPermissions(Arrays.asList(molgenisGroup));
+		return getGroupPermissions(Arrays.asList(molgenisGroup), authorityPrefix);
 	}
 
-	private List<GroupAuthority> getGroupPluginPermissions(List<MolgenisGroup> molgenisGroups) throws DatabaseException
+	private List<GroupAuthority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
+			throws DatabaseException
 	{
 		List<GroupAuthority> authorities = database.find(GroupAuthority.class, new QueryRule(
 				GroupAuthority.MOLGENISGROUP, IN, molgenisGroups));
@@ -167,7 +246,7 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 			@Override
 			public boolean apply(GroupAuthority authority)
 			{
-				return authority.getRole().startsWith(SecurityUtils.PLUGIN_AUTHORITY_PREFIX);
+				return authority.getRole().startsWith(authorityPrefix);
 			}
 		}));
 	}

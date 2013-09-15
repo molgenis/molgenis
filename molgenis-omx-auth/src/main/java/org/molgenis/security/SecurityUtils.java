@@ -10,9 +10,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class SecurityUtils
 {
-	public static final String PLUGIN_AUTHORITY_PREFIX = "ROLE_PLUGIN_";
-	public static final String PLUGIN_AUTHORITY_READ_POSTFIX = "_READ_USER";
-	public static final String PLUGIN_AUTHORITY_WRITE_POSTFIX = "_WRITE_USER";
+	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
+	public static final String AUTHORITY_ENTITY_PREFIX = "ROLE_ENTITY_";
+	public static final String AUTHORITY_READ_POSTFIX = "_READ_USER";
+	public static final String AUTHORITY_WRITE_POSTFIX = "_WRITE_USER";
 
 	public static final GrantedAuthority GRANTED_AUTHORITY_SU = new SimpleGrantedAuthority("ROLE_SU");
 
@@ -60,11 +61,11 @@ public class SecurityUtils
 
 	private static String getPluginReadAuthority(String pluginId)
 	{
-		return PLUGIN_AUTHORITY_PREFIX + pluginId.toUpperCase() + PLUGIN_AUTHORITY_READ_POSTFIX;
+		return AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + AUTHORITY_READ_POSTFIX;
 	}
 
 	private static String getPluginWriteAuthority(String pluginId)
 	{
-		return PLUGIN_AUTHORITY_PREFIX + pluginId.toUpperCase() + PLUGIN_AUTHORITY_WRITE_POSTFIX;
+		return AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + AUTHORITY_WRITE_POSTFIX;
 	}
 }

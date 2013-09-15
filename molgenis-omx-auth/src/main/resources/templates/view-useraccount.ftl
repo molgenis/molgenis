@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 	<div class="row-fluid">
-        Logged in as <b>${user.name}</b>
+        Logged in as <b>${user.username}</b>
 		<form action="${context_url}/update" method="post">
 	        <h4>Login information</h4>
 	

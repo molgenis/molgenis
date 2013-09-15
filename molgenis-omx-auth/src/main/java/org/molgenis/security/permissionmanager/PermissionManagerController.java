@@ -41,7 +41,7 @@ public class PermissionManagerController extends MolgenisPlugin
 {
 	private static final Logger logger = Logger.getLogger(PermissionManagerController.class);
 
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "pluginpermissionmanager";
+	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "permissionmanager";
 
 	private final PluginPermissionManagerService pluginPermissionManagerService;
 
@@ -71,30 +71,51 @@ public class PermissionManagerController extends MolgenisPlugin
 		return "view-permissionmanager";
 	}
 
-	@RequestMapping(value = "/group/{groupId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/plugin/group/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
-	public PluginPermissions getGroupPermissions(@PathVariable Integer groupId) throws DatabaseException
+	public Permissions getGroupPluginPermissions(@PathVariable Integer groupId) throws DatabaseException
 	{
 		List<GroupAuthority> authorities = pluginPermissionManagerService.getGroupPluginPermissions(groupId);
-		PluginPermissions pluginPermissions = createPluginPermissions(authorities);
-		pluginPermissions.setGroupId(groupId);
-		pluginPermissions.sort();
-		return pluginPermissions;
+		Permissions permissions = createPermissions(authorities, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		permissions.setGroupId(groupId);
+		permissions.sort();
+		return permissions;
 	}
 
-	@RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/entityclass/group/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
-	public PluginPermissions getUserPermissions(@PathVariable Integer userId) throws DatabaseException
+	public Permissions getGroupEntityClassPermissions(@PathVariable Integer groupId) throws DatabaseException
+	{
+		List<GroupAuthority> authorities = pluginPermissionManagerService.getGroupEntityClassPermissions(groupId);
+		Permissions permissions = createPermissions(authorities, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		permissions.setGroupId(groupId);
+		permissions.sort();
+		return permissions;
+	}
+
+	@RequestMapping(value = "/plugin/user/{userId}", method = RequestMethod.GET)
+	@ResponseBody
+	public Permissions getUserPluginPermissions(@PathVariable Integer userId) throws DatabaseException
 	{
 		List<? extends Authority> authorities = pluginPermissionManagerService.getUserPluginPermissions(userId);
-
-		PluginPermissions pluginPermissions = createPluginPermissions(authorities);
-		pluginPermissions.setUserId(userId);
-		pluginPermissions.sort();
-		return pluginPermissions;
+		Permissions permissions = createPermissions(authorities, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		permissions.setUserId(userId);
+		permissions.sort();
+		return permissions;
 	}
 
-	@RequestMapping(value = "/update/group", method = RequestMethod.POST)
+	@RequestMapping(value = "/entityclass/user/{userId}", method = RequestMethod.GET)
+	@ResponseBody
+	public Permissions getUserEntityClassPermissions(@PathVariable Integer userId) throws DatabaseException
+	{
+		List<? extends Authority> authorities = pluginPermissionManagerService.getUserEntityClassPermissions(userId);
+		Permissions permissions = createPermissions(authorities, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		permissions.setUserId(userId);
+		permissions.sort();
+		return permissions;
+	}
+
+	@RequestMapping(value = "/update/plugin/group", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupPluginPermissions(@RequestParam Integer groupId, WebRequest webRequest)
 			throws DatabaseException
@@ -107,7 +128,8 @@ public class PermissionManagerController extends MolgenisPlugin
 			if (value.equals("read") || value.equals("write"))
 			{
 				GroupAuthority authority = new GroupAuthority();
-				authority.setRole("ROLE_PLUGIN_" + pluginId.toUpperCase() + "_" + value.toUpperCase() + "_USER");
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + "_"
+						+ value.toUpperCase() + "_USER");
 				authorities.add(authority);
 			}
 			else if (!value.equals("none"))
@@ -118,7 +140,15 @@ public class PermissionManagerController extends MolgenisPlugin
 		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, groupId);
 	}
 
-	@RequestMapping(value = "/update/user", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/entityclass/group", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateGroupEntityClassPermissions(@RequestParam Integer groupId, WebRequest webRequest)
+			throws DatabaseException
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@RequestMapping(value = "/update/plugin/user", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserPluginPermissions(@RequestParam Integer userId, WebRequest webRequest)
 			throws DatabaseException
@@ -131,7 +161,8 @@ public class PermissionManagerController extends MolgenisPlugin
 			if (value.equals("read") || value.equals("write"))
 			{
 				UserAuthority authority = new UserAuthority();
-				authority.setRole("ROLE_PLUGIN_" + pluginId.toUpperCase() + "_" + value.toUpperCase() + "_USER");
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + "_"
+						+ value.toUpperCase() + "_USER");
 				authorities.add(authority);
 			}
 			else if (!value.equals("none"))
@@ -140,6 +171,14 @@ public class PermissionManagerController extends MolgenisPlugin
 			}
 		}
 		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, userId);
+	}
+
+	@RequestMapping(value = "/update/entityclass/user", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateUserEntityClassPermissions(@RequestParam Integer userId, WebRequest webRequest)
+			throws DatabaseException
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@ExceptionHandler(RuntimeException.class)
@@ -152,52 +191,62 @@ public class PermissionManagerController extends MolgenisPlugin
 				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 
-	private PluginPermissions createPluginPermissions(List<? extends Authority> pluginAuthorities)
+	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)
+			throws DatabaseException
 	{
-		PluginPermissions pluginPermissions = new PluginPermissions();
-		pluginPermissions.setPluginIds(new ArrayList<String>(MolgenisPluginRegistry.getInstance().getPluginIds()));
-		for (Authority authority : pluginAuthorities)
+		Permissions permissions = new Permissions();
+		if (authorityPrefix.equals(SecurityUtils.AUTHORITY_PLUGIN_PREFIX))
 		{
-			PluginPermission pluginPermission = new PluginPermission();
+			permissions.setEntityIds(pluginPermissionManagerService.getPluginIds());
+		}
+		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
+		{
+			permissions.setEntityIds(pluginPermissionManagerService.getEntityClassIds());
+		}
+		else throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 
-			String authorityPluginId = getAuthorityPluginId(authority);
-			String authorityType = getAuthorityType(authority);
-			pluginPermission.setType(authorityType);
+		for (Authority authority : entityAuthorities)
+		{
+			Permission permission = new Permission();
+
+			String authorityPluginId = getAuthorityEntityId(authority, authorityPrefix);
+			String authorityType = getAuthorityType(authority, authorityPrefix);
+			permission.setType(authorityType);
 			if (authority instanceof GroupAuthority)
 			{
-				pluginPermission.setGroup(((GroupAuthority) authority).getMolgenisGroup().getName());
-				pluginPermissions.addGroupPluginPermission(authorityPluginId, pluginPermission);
+				permission.setGroup(((GroupAuthority) authority).getMolgenisGroup().getName());
+				permissions.addGroupPermission(authorityPluginId, permission);
 			}
 			else
 			{
-				pluginPermissions.addUserPluginPermission(authorityPluginId, pluginPermission);
+				permissions.addUserPermission(authorityPluginId, permission);
 			}
 
 		}
-		return pluginPermissions;
+		return permissions;
 	}
 
-	private String getAuthorityPluginId(Authority authority)
+	private String getAuthorityEntityId(Authority authority, String authorityPrefix)
 	{
-		String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
+		String role = authority.getRole().substring(authorityPrefix.length());
 		role = role.substring(0, role.length() - "_USER".length());
 		return role.substring(0, role.indexOf('_')).toLowerCase();
 	}
 
-	private String getAuthorityType(Authority authority)
+	private String getAuthorityType(Authority authority, String authorityPrefix)
 	{
-		String role = authority.getRole().substring(SecurityUtils.PLUGIN_AUTHORITY_PREFIX.length());
+		String role = authority.getRole().substring(authorityPrefix.length());
 		role = role.substring(0, role.length() - "_USER".length());
 		return role.substring(role.indexOf('_') + 1).toLowerCase();
 	}
 
-	public static class PluginPermissions
+	public static class Permissions
 	{
 		private Integer userId;
 		private Integer groupId;
-		private List<String> pluginIds;
-		private Map<String, List<PluginPermission>> userPluginPermissionMap;
-		private Map<String, List<PluginPermission>> groupPluginPermissionMap;
+		private List<String> entityIds;
+		private Map<String, List<Permission>> userPermissionMap;
+		private Map<String, List<Permission>> groupPermissionMap;
 
 		public Integer getUserId()
 		{
@@ -219,65 +268,63 @@ public class PermissionManagerController extends MolgenisPlugin
 			this.groupId = groupId;
 		}
 
-		public List<String> getPluginIds()
+		public List<String> getEntityIds()
 		{
-			return pluginIds;
+			return entityIds;
 		}
 
-		public void setPluginIds(List<String> pluginIds)
+		public void setEntityIds(List<String> entityIds)
 		{
-			this.pluginIds = pluginIds;
+			this.entityIds = entityIds;
 		}
 
-		public Map<String, List<PluginPermission>> getUserPluginPermissions()
+		public Map<String, List<Permission>> getUserPermissions()
 		{
-			return userPluginPermissionMap != null ? userPluginPermissionMap : Collections
-					.<String, List<PluginPermission>> emptyMap();
+			return userPermissionMap != null ? userPermissionMap : Collections.<String, List<Permission>> emptyMap();
 		}
 
-		public void addUserPluginPermission(String pluginId, PluginPermission pluginPermission)
+		public void addUserPermission(String pluginId, Permission pluginPermission)
 		{
-			if (userPluginPermissionMap == null) userPluginPermissionMap = new HashMap<String, List<PluginPermission>>();
-			List<PluginPermission> pluginPermissions = userPluginPermissionMap.get(pluginId);
+			if (userPermissionMap == null) userPermissionMap = new HashMap<String, List<Permission>>();
+			List<Permission> pluginPermissions = userPermissionMap.get(pluginId);
 			if (pluginPermissions == null)
 			{
-				pluginPermissions = new ArrayList<PluginPermission>();
-				userPluginPermissionMap.put(pluginId, pluginPermissions);
+				pluginPermissions = new ArrayList<Permission>();
+				userPermissionMap.put(pluginId, pluginPermissions);
 			}
 			pluginPermissions.add(pluginPermission);
 		}
 
-		public Map<String, List<PluginPermission>> getGroupPluginPermissions()
+		public Map<String, List<Permission>> getGroupPermissions()
 		{
-			return groupPluginPermissionMap != null ? groupPluginPermissionMap : Collections
-					.<String, List<PluginPermission>> emptyMap();
+			return groupPermissionMap != null ? groupPermissionMap : Collections.<String, List<Permission>> emptyMap();
 		}
 
-		public void addGroupPluginPermission(String pluginId, PluginPermission pluginPermission)
+		public void addGroupPermission(String pluginId, Permission pluginPermission)
 		{
-			if (groupPluginPermissionMap == null) groupPluginPermissionMap = new HashMap<String, List<PluginPermission>>();
-			List<PluginPermission> pluginPermissions = groupPluginPermissionMap.get(pluginId);
+			if (groupPermissionMap == null) groupPermissionMap = new HashMap<String, List<Permission>>();
+			List<Permission> pluginPermissions = groupPermissionMap.get(pluginId);
 			if (pluginPermissions == null)
 			{
-				pluginPermissions = new ArrayList<PluginPermission>();
-				groupPluginPermissionMap.put(pluginId, pluginPermissions);
+				pluginPermissions = new ArrayList<Permission>();
+				groupPermissionMap.put(pluginId, pluginPermissions);
 			}
 			pluginPermissions.add(pluginPermission);
 		}
 
 		public void sort()
 		{
-			Collections.sort(pluginIds);
-			if (userPluginPermissionMap != null)
+			Collections.sort(entityIds);
+			if (userPermissionMap != null)
 			{
-				for (List<PluginPermission> pluginPermissions : userPluginPermissionMap.values())
+				for (List<Permission> pluginPermissions : userPermissionMap.values())
 				{
 					if (pluginPermissions.size() > 1)
 					{
-						Collections.sort(pluginPermissions, new Comparator<PluginPermission>()
+						Collections.sort(pluginPermissions, new Comparator<Permission>()
 						{
 							@Override
-							public int compare(PluginPermission o1, PluginPermission o2)
+							public int compare(Permission o1, Permission o2)
 							{
 								String group1 = o1.getGroup();
 								String group2 = o2.getGroup();
@@ -290,16 +337,16 @@ public class PermissionManagerController extends MolgenisPlugin
 					}
 				}
 			}
-			if (groupPluginPermissionMap != null)
+			if (groupPermissionMap != null)
 			{
-				for (List<PluginPermission> pluginPermissions : groupPluginPermissionMap.values())
+				for (List<Permission> pluginPermissions : groupPermissionMap.values())
 				{
 					if (pluginPermissions.size() > 1)
 					{
-						Collections.sort(pluginPermissions, new Comparator<PluginPermission>()
+						Collections.sort(pluginPermissions, new Comparator<Permission>()
 						{
 							@Override
-							public int compare(PluginPermission o1, PluginPermission o2)
+							public int compare(Permission o1, Permission o2)
 							{
 								String group1 = o1.getGroup();
 								String group2 = o2.getGroup();
@@ -315,7 +362,7 @@ public class PermissionManagerController extends MolgenisPlugin
 		}
 	}
 
-	public static class PluginPermission
+	public static class Permission
 	{
 		private String type;
 		private String group;
