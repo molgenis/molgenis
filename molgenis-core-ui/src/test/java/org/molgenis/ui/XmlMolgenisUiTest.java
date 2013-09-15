@@ -9,12 +9,12 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.ui.XmlMolgenisUiTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -30,7 +30,7 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public XmlMolgenisUi xmlMolgenisUi() throws IOException
 		{
-			return new XmlMolgenisUi(xmlMolgenisUiLoader(), molgenisSettings(), molgenisPermissionService());
+			return new XmlMolgenisUi(xmlMolgenisUiLoader(), molgenisSettings(), webInvocationPrivilegeEvaluator());
 		}
 
 		@Bean
@@ -52,9 +52,9 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisPermissionService molgenisPermissionService()
+		public WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator()
 		{
-			return mock(MolgenisPermissionService.class);
+			return mock(WebInvocationPrivilegeEvaluator.class);
 		}
 	}
 
@@ -65,16 +65,12 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 	private MolgenisSettings molgenisSettings;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
-
-	@Autowired
 	private Molgenis molgenis;
 
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
 		reset(molgenisSettings);
-		reset(molgenisPermissionService);
 	}
 
 	@Test
