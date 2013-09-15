@@ -57,10 +57,12 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	/**
 	 * Deletes the data from a given dataSet
 	 * 
+	 * Note: package-private for testability
+	 * 
 	 * @param the
 	 *            DataSet from which the data should be deleted
 	 */
-	private void deleteData(DataSet dataset) throws DatabaseException
+	void deleteData(DataSet dataset) throws DatabaseException
 	{
 		int count = 0;
 		List<ObservationSet> observationSets = database.find(ObservationSet.class, new QueryRule(
@@ -87,10 +89,12 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	/**
 	 * Deletes all subprotocols which do not have multiple Protocols referencing them
 	 * 
+	 * Note: package-private for testability
+	 * 
 	 * @param the
 	 *            protocols that should be deleted
 	 */
-	private List<Protocol> deleteProtocol(Protocol protocol, List<Protocol> allProtocols) throws DatabaseException
+	List<Protocol> deleteProtocol(Protocol protocol, List<Protocol> allProtocols) throws DatabaseException
 	{
 		boolean deleteInBatch = true;
 		List<Protocol> subprotocols = protocol.getSubprotocols();
@@ -131,10 +135,12 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	/**
 	 * Deletes all features which do not have multiple Protocols referencing them
 	 * 
+	 * Note: package-private for testability
+	 * 
 	 * @param the
 	 *            features that should be deleted
 	 */
-	private void deleteFeatures(List<ObservableFeature> features, List<Protocol> allProtocols) throws DatabaseException
+	void deleteFeatures(List<ObservableFeature> features, List<Protocol> allProtocols) throws DatabaseException
 	{
 		List<ObservableFeature> removableFeatures = new ArrayList<ObservableFeature>();
 
@@ -152,7 +158,13 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		database.remove(removableFeatures);
 	}
 
-	private void deleteCategories(List<Category> categories) throws DatabaseException
+	/**
+	 * Note: package-private for testability
+	 * 
+	 * @param categories
+	 * @throws DatabaseException
+	 */
+	void deleteCategories(List<Category> categories) throws DatabaseException
 	{
 		for (Category category : categories)
 		{
@@ -169,12 +181,14 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	/**
 	 * Count the number of times a protocol of feature is referred to from a(n other) protocol
 	 * 
+	 * Note: package-private for testability
+	 * 
 	 * @param the
 	 *            feature of protocol that is referred to
 	 * 
 	 * @return the number of referring protocols
 	 */
-	private int countReferringProtocols(Characteristic characteristic, List<Protocol> allProtocols)
+	int countReferringProtocols(Characteristic characteristic, List<Protocol> allProtocols)
 	{
 		int protocolcount = 0;
 		Class<? extends Characteristic> clazz = characteristic.getClass();
