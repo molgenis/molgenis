@@ -1,4 +1,4 @@
-package org.molgenis.security.pluginpermissionmanager;
+package org.molgenis.security.permissionmanager;
 
 import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
 import static org.molgenis.framework.db.QueryRule.Operator.IN;

@@ -1,6 +1,6 @@
-package org.molgenis.security.pluginpermissionmanager;
+package org.molgenis.security.permissionmanager;
 
-import static org.molgenis.security.pluginpermissionmanager.PluginPermissionManagerController.URI;
+import static org.molgenis.security.permissionmanager.PermissionManagerController.URI;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,16 +37,16 @@ import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
-public class PluginPermissionManagerController extends MolgenisPlugin
+public class PermissionManagerController extends MolgenisPlugin
 {
-	private static final Logger logger = Logger.getLogger(PluginPermissionManagerController.class);
+	private static final Logger logger = Logger.getLogger(PermissionManagerController.class);
 
 	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "pluginpermissionmanager";
 
 	private final PluginPermissionManagerService pluginPermissionManagerService;
 
 	@Autowired
-	public PluginPermissionManagerController(PluginPermissionManagerService pluginPermissionManagerService)
+	public PermissionManagerController(PluginPermissionManagerService pluginPermissionManagerService)
 	{
 		super(URI);
 		if (pluginPermissionManagerService == null) throw new IllegalArgumentException(
@@ -68,7 +68,7 @@ public class PluginPermissionManagerController extends MolgenisPlugin
 					}
 				})));
 		model.addAttribute("groups", pluginPermissionManagerService.getGroups());
-		return "view-pluginpermissionmanager";
+		return "view-permissionmanager";
 	}
 
 	@RequestMapping(value = "/group/{groupId}", method = RequestMethod.GET)
