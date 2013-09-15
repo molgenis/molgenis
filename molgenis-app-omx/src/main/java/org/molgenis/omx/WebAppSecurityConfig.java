@@ -72,28 +72,27 @@ public class WebAppSecurityConfig extends WebSecurityConfigurerAdapter
 
 		.antMatchers("/plugin/form.**").hasAnyAuthority(defaultPluginAuthorities("form"))
 
-		.antMatchers("/plugin/pluginpermissionmanager/**")
-				.hasAnyAuthority(defaultPluginAuthorities("pluginpermissionmanager"))
+		.antMatchers("/plugin/permissionmanager/**").hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
 
-				.antMatchers("/plugin/catalogmanager/**").hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
+		.antMatchers("/plugin/catalogmanager/**").hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
 
-				.antMatchers("/plugin/studymanager/**").hasAnyAuthority(defaultPluginAuthorities("studymanager"))
+		.antMatchers("/plugin/studymanager/**").hasAnyAuthority(defaultPluginAuthorities("studymanager"))
 
-				.antMatchers("/plugin/dataindexer/**").hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
+		.antMatchers("/plugin/dataindexer/**").hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
 
-				.antMatchers("/plugin/datasetdeleter/**").hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"))
+		.antMatchers("/plugin/datasetdeleter/**").hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"))
 
-				.antMatchers("/plugin/useraccount/**").hasAnyAuthority(defaultPluginAuthorities("useraccount"))
+		.antMatchers("/plugin/useraccount/**").hasAnyAuthority(defaultPluginAuthorities("useraccount"))
 
-				.antMatchers("/plugin/**").denyAll()
+		.antMatchers("/plugin/**").denyAll()
 
-				.anyRequest().authenticated().and()
+		.anyRequest().authenticated().and()
 
-				.formLogin().loginPage("/login").and()
+		.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().logoutSuccessUrl("/").and()
+		.logout().logoutSuccessUrl("/").and()
 
-				.csrf().disable(); // FIXME enable
+		.csrf().disable(); // FIXME enable
 	}
 
 	@Bean

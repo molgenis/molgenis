@@ -1,6 +1,7 @@
 package org.molgenis.framework.ui;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MolgenisPluginRegistry
@@ -24,8 +25,19 @@ public class MolgenisPluginRegistry
 		molgenisPluginMap.put(molgenisPlugin.getId(), molgenisPlugin.getClass());
 	}
 
+	public Set<String> getPluginIds()
+	{
+		return molgenisPluginMap.keySet();
+	}
+
 	public Iterable<Class<? extends MolgenisPlugin>> getPluginClasses()
 	{
 		return molgenisPluginMap.values();
 	}
+
+	public Class<? extends MolgenisPlugin> getPlugin(String id)
+	{
+		return molgenisPluginMap.get(id);
+	}
+
 }
