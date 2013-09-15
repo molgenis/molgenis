@@ -8,6 +8,7 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.mockito.ArgumentCaptor;
@@ -15,6 +16,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -34,9 +36,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration
-public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTests
+public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTests
 {
-
 	private static List<Category> categories;
 	private static DataSet dataset;
 	private static Protocol protocolUsed;
@@ -58,7 +59,7 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	private static List<ObservationSet> observationSets0;
 
 	@Autowired
-	private DataSetDeleterController dataSetDeleterController;
+	private DataSetDeleterServiceImpl dataSetDeleterServiceImpl;
 
 	@Autowired
 	private Database database;
@@ -79,9 +80,9 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	static class Config
 	{
 		@Bean
-		public DataSetDeleterController dataSetDeleterController()
+		public DataSetDeleterServiceImpl dataSetDeleterServiceImpl() throws Exception
 		{
-			return new DataSetDeleterController();
+			return new DataSetDeleterServiceImpl(database(), searchService());
 		}
 
 		@Bean
@@ -204,8 +205,12 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 
 		List<DataSet> datasets = new ArrayList<DataSet>();
 		datasets.add(dataset);
-		when(database.find(DataSet.class, new QueryRule("identifier", Operator.EQUALS, "dataset1"))).thenReturn(
-				datasets);
+
+		@SuppressWarnings("unchecked")
+		Query<DataSet> query = mock(Query.class);
+		when(query.equals(DataSet.IDENTIFIER, "dataset1")).thenReturn(query);
+		when(query.find()).thenReturn(Arrays.asList(dataset));
+		when(database.query(DataSet.class)).thenReturn(query);
 
 		when(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, 0)))
 				.thenReturn(observedValues0);
@@ -225,42 +230,42 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void countReferringProtocolsSingleReferences()
 	{
-		int result = dataSetDeleterController.countReferringProtocols(protocol0, allProtocols);
+		int result = dataSetDeleterServiceImpl.countReferringProtocols(protocol0, allProtocols);
 		assertEquals(1, result);
 	}
 
 	@Test
 	public void countReferringProtocolMultipleReferences()
 	{
-		int result = dataSetDeleterController.countReferringProtocols(protocol1, allProtocols);
+		int result = dataSetDeleterServiceImpl.countReferringProtocols(protocol1, allProtocols);
 		assertEquals(2, result);
 	}
 
 	@Test
 	public void delete() throws DatabaseException, IOException
 	{
-		dataSetDeleterController.delete("dataset1", true);
+		dataSetDeleterServiceImpl.delete("dataset1", true);
 		verify(database).remove(dataset);
 	}
 
 	@Test
 	public void deleteNoMetadata() throws DatabaseException, IOException
 	{
-		dataSetDeleterController.delete("dataset1", false);
+		dataSetDeleterServiceImpl.delete("dataset1", false);
 		verify(database, Mockito.times(0)).remove(dataset);
 	}
 
 	@Test
 	public void deleteCategories() throws DatabaseException
 	{
-		dataSetDeleterController.deleteCategories(categories);
+		dataSetDeleterServiceImpl.deleteCategories(categories);
 		verify(database).remove(category0);
 	}
 
 	@Test
 	public void deleteData() throws DatabaseException
 	{
-		dataSetDeleterController.deleteData(dataset);
+		dataSetDeleterServiceImpl.deleteData(dataset);
 		// verify that only observationsets and abservedvalues belonging to the dataset are removed
 		verify(database, Mockito.atLeastOnce()).remove(captorObservationSets.capture());
 		assertEquals(new Integer(0), captorObservationSets.getValue().get(0).getId());
@@ -270,25 +275,16 @@ public class DataSetDeleterControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void deleteFeatures() throws DatabaseException
 	{
-		dataSetDeleterController.deleteFeatures(features0, allProtocols);
+		dataSetDeleterServiceImpl.deleteFeatures(features0, allProtocols);
 		verify(database, Mockito.atLeastOnce()).remove(captorFeatures.capture());
 		assertEquals("feature0", captorFeatures.getValue().get(0).getIdentifier());
 		assertEquals(1, captorFeatures.getValue().size());
 	}
 
 	@Test
-	public void deleteObservedValues() throws DatabaseException
-	{
-		dataSetDeleterController.deleteObservedValues(observationSet0);
-		verify(database, Mockito.atLeastOnce()).remove(captorObservedValues.capture());
-		assertEquals(new Integer(0), captorObservedValues.getValue().get(0).getId());
-		assertEquals(1, captorObservedValues.getValue().size());
-	}
-
-	@Test
 	public void deleteProtocol() throws DatabaseException
 	{
-		dataSetDeleterController.deleteProtocol(protocolUsed, allProtocols);
+		dataSetDeleterServiceImpl.deleteProtocol(protocolUsed, allProtocols);
 		verify(database).remove(protocolUsed);
 		verify(database).remove(subProtocols);
 		verify(database, Mockito.times(0)).remove(protocol1);
