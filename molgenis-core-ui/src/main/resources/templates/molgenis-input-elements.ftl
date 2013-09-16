@@ -41,13 +41,13 @@
 							},
 							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-									callback({id:'${entity.get(fieldName).idValue}', text: '${entity.get(fieldName).get(field.xrefLabelNames[0])!?html}'});
+								callback({id:'<@formatValue field.xrefEntity.primaryKey.type.enumType entity.get(fieldName).idValue />', text: '${entity.get(fieldName).get(field.xrefLabelNames[0])!?html}'});
 							}
 							</#if>
 						});
 						
 						<#if entity!='' && entity.get(fieldName)??>
-							$('#${fieldName}').select2('val', '${entity.get(fieldName).idValue}');
+							$('#${fieldName}').select2('val', '<@formatValue field.xrefEntity.primaryKey.type.enumType entity.get(fieldName).idValue />');
 						</#if>
 						
 						<#if field.readOnly || hasWritePermission?string("true", "false") == "false">
@@ -63,7 +63,7 @@
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
 							<#list entity.get(fieldName) as xrefEntity>
-								xrefs.push({id:'${xrefEntity.idValue}', text:'${xrefEntity.get(field.xrefLabelNames[0])!?html}'});
+								xrefs.push({id:'<@formatValue field.xrefEntity.primaryKey.type.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.xrefLabelNames[0])!?html}'});
 							</#list>
 						</#if>
 								
@@ -149,4 +149,14 @@
     <#if validations?size &gt; 0>
     	class="<#list validations as validation>${validation} </#list>"
    	</#if>
+</#macro>
+
+<#macro formatValue fieldEnumType value>
+<#compress>
+	<#if fieldEnumType == 'INT' ||  fieldEnumType == 'LONG'>
+		${value?c}
+	<#else>
+		${value}
+	</#if>
+</#compress>
 </#macro>
