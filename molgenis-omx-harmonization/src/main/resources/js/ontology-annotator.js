@@ -18,7 +18,6 @@
 	};
 	
 	ns.changeDataSet = function(selectedDataSet){
-		
 		if(selectedDataSet !== ''){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
 			var request = {
@@ -453,6 +452,19 @@
 				'action' : ns.getContextURL() + '/annotate',
 				'method' : 'POST'
 			}).submit();
+		});
+		
+		$('#search-dataitem').on('keydown', function(e){
+		    if (e.which == 13) {
+		    	$('#search-button').click();
+		    	return false;
+		    }
+		});
+		
+		$('#search-dataitem').on('keyup', function(e){
+			if($(this).val() === ''){
+				$('#clear-button').click();
+		    }
 		});
 	});
 }($, window.top));

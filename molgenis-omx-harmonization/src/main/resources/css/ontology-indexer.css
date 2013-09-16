@@ -1,15 +1,13 @@
 .accordion-group {
-	height : 280px;
+	min-height : 270px;
+	max-height : 350px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
-	height : 250px;
+	min-height : 220px;
+	max-height : 270px;
 	background-color: white;
-}
-
-.accordion-toggle {
-	color: white;
 }
 
 .accordion-heading h5{
@@ -38,18 +36,14 @@ input#ontologyName {
 	margin-bottom : 20px;
 }
 
-ol li{
-	margin : 10px;
+table {
+	font-size : 16px;
 }
 
-h5 {
-	padding-left : 10px;
+ol.action-list, ol.action-list li{
+	padding : 3px;
+	padding-left : 5px;
 }
-
 h3 {
-	color : #3079C2;
-}
-
-h4 {
 	color : #3079C2;
 }

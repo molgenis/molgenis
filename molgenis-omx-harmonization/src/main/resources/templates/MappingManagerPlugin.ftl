@@ -7,9 +7,9 @@
 		<div class="span12">
 			<div class="row-fluid">
 				<div class="span4">
-					<h3>Step3 : View and select mappings</h3>
+					<h3>Step3 : View / select mappings</h3>
 				</div>
-				<div id="alert-message" class="offset1 span7">
+				<div id="alert-message" class="span8">
 				</div>
 			</div>
 		</div>
@@ -21,9 +21,9 @@
 				<div class="row-fluid">
 					<div class="span12">
 						<div class="row-fluid">
-							<div id="div-index-ontology" class="span8 well upper-header">
+							<div id="div-index-ontology" class="span7 well upper-header">
 								<div class="row-fluid">
-									<div class="span3">
+									<div class="span4">
 										<dl>
 											<dt>Selected catalogue :</dt>
 											<dd id="catalogue-name"><br></dd>
@@ -31,7 +31,7 @@
 											<dd id="dataitem-number"><br></dd>
 										</dl>
 									</div>
-									<div class="offset5 span4">
+									<div class="offset3 span5">
 										<dl>
 											<dt>Choose a catalogue :</dt>
 											<dd>
@@ -58,7 +58,7 @@
 									</div>
 								</div>
 							</div>
-							<div class="span4">
+							<div class="span5">
 								<div class="accordion">
 									<div class="accordion-group upper-header">
 									    <div class="accordion-heading">
@@ -76,8 +76,8 @@
 												<div id="accordion-action-content">
 													<ol class="action-list">
 														<li>
-															Select catalogue from <strong>'dropdown'</strong> to view its mappings. 
-															<br>All mappings to other catalogues are shown in the table.
+															Select catalogue from <strong>'dropdown'</strong> to view its mappings
+															 to other catalogues.
 														</li>
 														<li>
 															Edit, update and delete mappings. See details in <strong>'Icon meanings'</strong>.

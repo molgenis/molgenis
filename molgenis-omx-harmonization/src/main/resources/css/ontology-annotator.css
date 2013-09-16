@@ -1,10 +1,8 @@
 .accordion-group {
-	height : 320px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
-	height : 250px;
 	background-color: white;
 }
 
@@ -36,7 +34,7 @@ div.data-table-container {
 }
 
 table#dataitem-table {
-	 border : 1px solid #5B82A4;
+	border : 1px solid #5B82A4;
 }
 
 table thead th {	
@@ -85,7 +83,8 @@ td.feature-detail-td {
 }
 
 ol.action-list, ol.action-list li{
-	padding : 5px;
+	padding : 3px;
+	padding-left : 5px;
 }
 
 dl{

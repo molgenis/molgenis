@@ -86,15 +86,15 @@
 							<div class="accordion-body in">
 								<ol class="action-list">
 									<li>
-										Choose a <strong>source</strong> biobank catalogue <br> click on ' <i class="icon-ok"></i> '
+										Choose a <strong>'source'</strong> biobank catalogue <br> click on ' <i class="icon-ok"></i> '
 										button to choose a catalogue for which data items will be matched.
 									</li>
 									<li>
-										Choose <strong>target</strong> biobank catalogues <br> click on ' <i class="icon-plus"></i> ' 
+										Choose <strong>'target'</strong> biobank catalogues <br> click on ' <i class="icon-plus"></i> ' 
 										button to add catalogues that are to match with source catalogue. 
 									</li>
 									<li>
-										Start match <br> click on '<strong>Start matching</strong>' button.click on '<strong>Refresh</strong>' to remove all selections
+										Start match <br> click on <strong>'Start matching'</strong> button.click on <strong>'Refresh'</strong> to remove all selections
 									</li>
 									<li>
 										<strong>Hint</strong> <br> If mapping between any two biobanks already exists, existing mappings 

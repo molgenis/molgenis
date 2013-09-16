@@ -4,17 +4,17 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "ontology-indexer.js"]>
 <@header css js/>
 	<div class="row-fluid">
-		<div class="span3">
-			<h3>Step0 : Index ontology</h3>
+		<div class="span4">
+			<h3>Step0 (optional) : Index ontology</h3>
 		</div>
-		<div id="alert-message" class="offset1 span8">
+		<div id="alert-message" class="span8">
 		<#if isCorrectOntology?? && !isCorrectOntology> 
 			<div class="alert alert-error">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
 			</div>
 		<#elseif isIndexRunning?? && isIndexRunning>
-			<div class="alert">
+			<div class="alert alert-info">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
 			</div>
@@ -72,6 +72,7 @@
 								<div class="btn-group">
 									<button class="btn btn-primary" id="index-button" type="button">Start index</button>
 									<button class="btn" id="refresh-button" type="button">Refresh</button>
+									<a href="/menu/biobankConnect/ontologyannotator" class="btn" id="next-step-button" type="button">Next step</a>
 								</div>
 							</div>
 						</div>
@@ -81,7 +82,7 @@
 						    <div class="accordion-heading">
 								<h5 class="text-left text-info">Actions</h5>	
 							</div>
-							<div class="accordion-body collapse in">
+							<div class="accordion-body in">
 								<ol class="action-list">
 									<li>
 										Table <strong>above</strong> shows all avaiable indexed ontologies in BiobankConnect.
@@ -93,13 +94,16 @@
 										Uplaod ontology <strong>zip</strong> file (OWL/OBO).
 									</li>
 									<li>
-										Click on '<strong>Start index</strong>' to start indexing.
+										Click on <strong>'Start index'</strong> to start indexing.
 									</li>
 									<li>
-										Click on '<strong>Refresh</strong>' to check state of indexing.
+										Click on <strong>'Refresh'</strong> to check state of indexing.
 									</li>
 									<li>
 										<strong>Hint</strong> : the size of uploaded file cannot exceed <strong>25MB.</strong>
+									</li>
+									<li>
+										Click on <strong>'Next step'</strong> button or choose step <strong>'from top menu'</strong>
 									</li>
 								</ol>
 							</div>

@@ -33,6 +33,11 @@ div.data-table-container {
 	margin-right : 5px;
 }
 
+table#dataitem-table {
+	border : 1px solid #5B82A4;
+}
+
+
 table thead th {
     background-color: #5B82A4; 
     border:2px solid #5B82A4;
@@ -58,7 +63,7 @@ dt,dd{
 }
 
 ol li{
-	padding-bottom : 5px;
+	padding-bottom : 7px;
 }
 
 h3 {

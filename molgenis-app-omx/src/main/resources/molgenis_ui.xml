@@ -7,7 +7,7 @@
 			<plugin id="ontologyindexer" label="Step0 (optional) : Index ontology" name="OntologyIndexerController" type="org.molgenis.omx.harmonization.plugins.OntologyIndexerPlugin"/>
 			<plugin id="ontologyannotator" label="Step1 : Annotate data items" name="OntologyAnnotatorController" type="org.molgenis.omx.harmonization.plugins.OntologyAnnotatorPlugin"/>
 			<plugin id="ontologymatcher" label="Step2 : Match biobanks" name="OntologyMatcherController" type="org.molgenis.omx.harmonization.plugins.OntologyMatcherPlugin"/>
-			<plugin id="mappingmanager" label="Step3 : View and select mappings" name="MappingManagerController" type="org.molgenis.omx.harmonization.plugins.MappingManagerPlugin"/>
+			<plugin id="mappingmanager" label="Step3 : View / select mappings" name="MappingManagerController" type="org.molgenis.omx.harmonization.plugins.MappingManagerPlugin"/>
 		</menu>
 		<plugin id="dataexplorer" label="Data Explorer" name="DataExplorerController" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
 		<plugin id="entityexplorer" label="Entity Explorer" name="EntityExplorerController" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>

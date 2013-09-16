@@ -18,7 +18,7 @@
 		<div class="span12">
 			<form id="ontologyannotator-form" class="form-horizontal" enctype="multipart/form-data">
 				<div class="row-fluid">
-					<div class="well span8 upper-header">
+					<div class="well span7 upper-header">
 						<div class="row-fluid">
 							<div class="span12">
 								<div class="row-fluid">
@@ -51,6 +51,7 @@
 												<div class="btn-group">
 													<button id="annotate-dataitems" class="btn btn-primary">Annotate</button>
 													<button id="refresh-button" class="btn">Refresh</button>
+													<a href="/menu/biobankConnect/ontologymatcher" class="btn" id="next-step-button" type="button">Next step</a>
 												</div>
 											</dd>
 										</dl>
@@ -88,16 +89,19 @@
 									<div class="accordion-body in">
 										<ol class="action-list">
 											<li>
-												<strong>Choose a catalogue</strong> <br> select catalogue from 'dropdown' to annotate.
+												<strong>Choose a catalogue</strong> : select a catalogue from 'dropdown' to annotate with.
 											</li>
 											<li>
-												<strong>Automatic annotation</strong> <br> click on <strong>'Annotate'</strong> button, BiobankConnect will annotate potential ontology terms to data items.
+												<strong>Automatic annotation</strong> : click on <strong>'Annotate'</strong> button, BiobankConnect will annotate potential ontology terms to data items.
 											</li>
 											<li>
-												<strong>Manual annotation</strong> <br> click on <strong>'Name'</strong> of data items, a popup window will show up where you can add ontology terms by hand.
+												<strong>Manual annotation</strong> : click on <strong>'Name'</strong> of data items, a popup window will show up where you can add ontology terms by hand.
 											</li>
 											<li>
-												<strong>Hint</strong> <br> Ontology term annotation is not neccessary for the rest of steps.
+												<strong>Hint</strong> : ontology term annotation is not neccessary for the rest of steps.
+											</li>
+											<li>
+												Click on <strong>'Next step'</strong> button or choose step <strong>'from top menu'</strong>
 											</li>
 										</ol>
 									</div>

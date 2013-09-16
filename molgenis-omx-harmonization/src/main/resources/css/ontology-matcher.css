@@ -1,10 +1,10 @@
 .accordion-group {
-	height : 360px;
+	max-height : 400px;
 	background-color: #5B82A4;
 }
 
 .accordion-body {
-	height : 300px;
+	max-height : 350px;
 	background-color: white;
 }
 
@@ -36,7 +36,8 @@ h3 {
 }
 
 ol.action-list, ol.action-list li{
-	padding : 5px;
+	padding : 4px;
+	padding-left : 5px;
 }
 
 dl{
