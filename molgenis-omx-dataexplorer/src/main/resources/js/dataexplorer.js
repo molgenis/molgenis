@@ -290,22 +290,6 @@
 		pager.append($('</ul>'));
 	};
 
-	 ns.pad = function(number, length) {
-		 var str = "" + number;
-		 while (str.length < length) {
-			 str = '0' + str;
-		 }
-
-		 return str;
-	};
-
-	 ns.timezoneOffset = function() {
-		 var offset = new Date().getTimezoneOffset();
-		 offset = ((offset<0? '+':'-') + ns.pad(parseInt(Math.abs(offset/60)), 2) + ns.pad(Math.abs(offset%60), 2));
-		          
-		 return offset;
-	};
-
 	ns.openFeatureFilterDialog = function(featureUri) {
 		console.log("openFeatureFilterDialog: " + featureUri);
 		restApi.getAsync(featureUri, null, null, function(feature) {
@@ -558,7 +542,7 @@
 				});
 			} else if (feature.dataType == 'datetime') {
 				$('.date').datetimepicker({
-					format: "yyyy-MM-dd'T'hh:mm:ss" + ns.timezoneOffset(),
+					format: "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
 					language: 'en',
 				    pickTime: true
 				});

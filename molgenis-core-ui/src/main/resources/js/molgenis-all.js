@@ -5,6 +5,22 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
+function padNumber(number, length) {
+	 var str = "" + number;
+	 while (str.length < length) {
+		 str = '0' + str;
+	 }
+
+	 return str;
+};
+
+function getCurrentTimezoneOffset() {
+	 var offset = new Date().getTimezoneOffset();
+	 offset = ((offset < 0 ? '+' : '-') + padNumber(parseInt(Math.abs(offset/60)), 2) + padNumber(Math.abs(offset%60), 2));
+	          
+	 return offset;
+};
+
 function htmlEscape(text) {
 	return $('<div/>').text(text).html(); 
 }

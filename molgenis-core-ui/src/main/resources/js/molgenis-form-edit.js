@@ -5,8 +5,20 @@
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
 	
+	ns.quoteIsoDateT = function() {
+		$('.date input').each(function() {
+			var d = $(this).val();
+			$(this).val(d.replace(/T/,"'T'"));//Put quotes around T
+		});
+	}
+	
 	ns.onFormSubmit = function() {
 		ns.hideAlerts();
+		
+		$('.date input').each(function() {
+			var d = $(this).val();
+			$(this).val(d.replace(/'/g,''));//Remove quotes from isodateformat
+		});
 		
 		var action = $('#entity-form').attr('action');
 		
@@ -17,6 +29,9 @@
 			contentType: 'application/x-www-form-urlencoded',
 			async: false,
 			success: function(data, textStatus, response) {
+				//Add quotes to dateformat again
+				ns.quoteIsoDateT();
+				
 				var location = response.getResponseHeader('Location');//Api returns new resource location when creating a new entity
 				if (location) {
 					var id = restApi.getPrimaryKeyFromHref(location);
@@ -26,10 +41,13 @@
 				$('#success-message').show();
 			},
 			error: function(request, textStatus, errorThrown) {
+				ns.quoteIsoDateT();
+				
 				$('#error-message-content').html(errorThrown);
 				$('#error-message').show();
 			}
 		});
+		
 	}
 	
 	ns.hideAlerts = function() {
@@ -38,6 +56,12 @@
 	}
 	
 	$(function() {
+		//Enable datepickers
+		$('.date').datetimepicker({
+			format: "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
+			language: 'en',
+		    pickTime: true
+		});
 		
 		//If validation succeeds call onFormSubmit
 		$.validator.setDefaults({
@@ -61,6 +85,12 @@
 		$('#error-message .close').on('click', function() {
 			$('#error-message').hide();
 		});
+		
+		
+		$('.empty-date-input').on('click', function() {
+			$(this).parent().parent().children('input').val('');
+		});
+		
 	});
 	
 }($, window.top));

@@ -2,8 +2,6 @@
 
 	<#assign fieldName=field.name?uncap_first/>
 	
-	<#-- ${field.type.enumType} -->
-	
 	<div class="control-group">
     	<label class="control-label" for="${fieldName}">${field.label} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
     	<div class="controls">
@@ -108,10 +106,16 @@
 				</script>
 				
 			<#elseif field.type.enumType == 'DATE_TIME' || field.type.enumType == 'DATE'>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if> <@validationOptions field /> >
+				<div class="input-append date">
+					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.nillable>class="nillable"</#if> <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'''T'''HH:mm:ssZ")}"</#if> <@validationOptions field /> >
+					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
+				</div>
+				
+			<#elseif field.type.enumType =='INT' || field.type.enumType = 'LONG'>
+				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)}"</#if> <@validationOptions field /> >
 	
 			<#else>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!=''>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
+				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.label}" <#if field.readOnly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
 	
 			</#if>
 		</div>
