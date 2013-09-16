@@ -28,7 +28,6 @@ public class SecurityUtils
 		}
 
 		Object principal = authentication.getPrincipal();
-		System.out.println(principal);
 		if (!(principal instanceof UserDetails))
 		{
 			return new User(principal.toString(), "", Collections.<GrantedAuthority> emptyList());
@@ -40,7 +39,6 @@ public class SecurityUtils
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Object principal = authentication.getPrincipal();
-		System.out.println(principal);
 		if (!(principal instanceof UserDetails)) return ((UserDetails) principal).getUsername();
 		else return principal.toString();
 	}

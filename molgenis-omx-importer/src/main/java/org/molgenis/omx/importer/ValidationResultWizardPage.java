@@ -77,7 +77,8 @@ public class ValidationResultWizardPage extends WizardPage
 				for (Entry<String, Boolean> entry : importWizard.getDataImportable().entrySet())
 					if (entry.getValue() == true) dataSetSheetNames.add("dataset_" + entry.getKey());
 
-				new DataSetImporter(db).importDataSet(file, dataSetSheetNames);
+				ApplicationContextProvider.getApplicationContext().getBean(DataSetImporterService.class)
+						.importDataSet(file, dataSetSheetNames);
 			}
 
 			importWizard.setSuccessMessage("File successfully imported.");
