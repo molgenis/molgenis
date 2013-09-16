@@ -2,9 +2,6 @@ package org.molgenis.ngs.controller;
 
 import static org.molgenis.ngs.controller.BarcodeController.URI;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,10 +11,15 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.io.csv.CsvReader;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.tuple.Tuple;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,38 +37,46 @@ public class BarcodeController extends MolgenisPlugin
 	public static final String URI = "/plugin/barcode";
 
 	private static final Logger logger = Logger.getLogger(BarcodeController.class);
-
+	private final Database database;
+	
 	private List<Tuple> barcodeTuples = new ArrayList<Tuple>();
 	private Set<String> barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
-
+	private List<Tuple> barcodeTypeList = new ArrayList<Tuple>();
+	
 	private String currentType = "";
 	private Integer currentNumber = 0;
 	private List<List<Tuple>> optimalCombinations = new ArrayList<List<Tuple>>();
 	private Integer minimumDistance = Integer.MIN_VALUE;
 	private Double averageDistance = new Double(0);
-
-	private final String TYPE = "type";
-	private final String ID = "id";
-	private final String BARCODE = "barcode";
-
+		
 	private boolean isException = false;
 
-	public BarcodeController()
+	private final String RPI = "RPI";
+	private final String ACTIVE = "ACTIVE";
+	private final String TYPE = "TYPE";
+	private final String ID = "ID";
+	private final String BARCODE = "BARCODE";
+	
+	@Autowired
+	public BarcodeController(Database database)
 	{
 		super(URI);
+		if (database == null) throw new IllegalArgumentException("database is null");
+		this.database = database;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
 		reset();
-		
 		model.addAttribute("barcodes", getBarcodeTypes());
+		model.addAttribute("barcodeTuples", getBarcodeTuples());
 		model.addAttribute("isException", this.isException);
 		model.addAttribute("optimalCombinations", getOptimalCombinations());
 		model.addAttribute("currentNumber", this.currentNumber);
 		model.addAttribute("averageDistance", this.averageDistance);
 		model.addAttribute("minimumDistance", this.minimumDistance);
+		model.addAttribute("barcodeTypeList", getSelectedTypeBarcodeList());
 		return "view-barcode";
 	}
 
@@ -77,6 +87,7 @@ public class BarcodeController extends MolgenisPlugin
 		reset();
 		this.currentType = request.getParameter("type");
 		String currentNumberString = request.getParameter("number");
+		
 		try
 		{
 			this.currentNumber = Integer.parseInt(currentNumberString);
@@ -96,7 +107,7 @@ public class BarcodeController extends MolgenisPlugin
 			if (null != this.currentType && this.currentNumber != null && 0 < this.currentNumber
 					&& this.barcodeTypes.contains(this.currentType))
 			{
-				if (this.currentType.equalsIgnoreCase("RPI") && this.currentNumber <= 4)
+				if (this.currentType.equalsIgnoreCase(RPI) && this.currentNumber <= 4)
 				{
 					this.isException = true;
 				}
@@ -107,18 +118,21 @@ public class BarcodeController extends MolgenisPlugin
 				}
 			}
 		}
+		
 		model.addAttribute("barcodes", getBarcodeTypes());
+		model.addAttribute("barcodeTuples", getBarcodeTuples());
 		model.addAttribute("isException", this.isException);
 		model.addAttribute("optimalCombinations", getOptimalCombinations());
 		model.addAttribute("currentNumber", this.currentNumber);
 		model.addAttribute("averageDistance", this.averageDistance);
 		model.addAttribute("minimumDistance", this.minimumDistance);
+		model.addAttribute("barcodeTypeList", getSelectedTypeBarcodeList());
 		return "view-barcode";
 	}
-
+	
 	public void calcBarcodeSet()
 	{
-		List<Tuple> barcodeTypeList = getBarcodeTypeList(this.barcodeTuples, this.currentType);
+		barcodeTypeList = getBarcodeTypeList(this.barcodeTuples, this.currentType);
 
 		this.optimalCombinations = new ArrayList<List<Tuple>>();
 
@@ -290,7 +304,7 @@ public class BarcodeController extends MolgenisPlugin
 
 		for (Tuple t : tuples)
 		{
-			if (type.equalsIgnoreCase(t.getString(TYPE)))
+			if (type.equalsIgnoreCase(t.getString(TYPE)) && t.getBoolean(ACTIVE))
 			{
 				typeList.add(t);
 			}
@@ -299,44 +313,97 @@ public class BarcodeController extends MolgenisPlugin
 		return typeList;
 	}
 
-	public void parse(String barcodeFile) throws IOException
+	public void collectBarcodes() throws DatabaseException
 	{
 		this.barcodeTuples = new ArrayList<Tuple>();
 		this.barcodeTypes = new HashSet<String>();
-
+		
 		try
 		{
-			@SuppressWarnings("resource")
-			CsvReader reader = new CsvReader(new BufferedReader(new FileReader(barcodeFile)));
-
-			for (Tuple row : reader)
+			// get barcodes
+			String barcodeQuery = "SELECT sb.Active as ACTIVE, st.SampleBarcodeTypeName as TYPE, sb.SampleBarcodeNr as ID, sb.SampleBarcodeSequence as BARCODE FROM SampleBarcode sb, SampleBarcodeType st WHERE sb.SampleBarcodeType = st.id;"; 
+			
+			JpaDatabase jpaDb = null;
+			try
 			{
-				// check value
-				if (row.isNull(TYPE)) throw new IOException("required column '" + TYPE + "' is missing in row " + row);
-				if (row.isNull(ID)) throw new IOException("required column '" + ID + "' is missing in row " + row);
-				if (row.isNull(BARCODE)) throw new IOException("required column '" + BARCODE + "' is missing in row "
-						+ row);
-
+				if (AopUtils.isAopProxy(database) && database instanceof Advised)
+				{
+					Object target = ((Advised) database).getTargetSource().getTarget();
+					jpaDb = (JpaDatabase) target;
+				}
+				else
+				{
+					jpaDb = (JpaDatabase) database;
+				}
+			}
+			catch (Exception e)
+			{
+				throw new DatabaseException("Retrieving advised target database failed: " + e.getMessage());
+			}
+			
+			List<Tuple> currentRows = jpaDb.sql(barcodeQuery, ACTIVE, TYPE, ID, BARCODE);
+			
+			for (Tuple row : currentRows)
+			{
 				this.barcodeTuples.add(row);
 				this.barcodeTypes.add(row.getString(TYPE));
 			}
-
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
-			throw new IOException("Parsing of barcode file failed: " + e.getMessage()
-					+ ".\nThe barcode csv requires columns " + TYPE + "," + ID + "," + BARCODE + ".");
+			throw new RuntimeException("Retreiving barcodes from database failed: " + e.getMessage());
 		}
 	}
 
 	public List<String> getBarcodeTypes()
 	{
 		List<String> lst = new ArrayList<String>();
-		lst.addAll(barcodeTypes);
-		Collections.sort(lst); // to ensure the same order each time page is loaded
+		
+		try
+		{
+			lst.addAll(barcodeTypes);
+			Collections.sort(lst); // to ensure the same order each time page is loaded
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		
 		return lst;
 	}
-
+	
+	public List<Tuple> getBarcodeTuples()
+	{
+		List<Tuple> lst = new ArrayList<Tuple>();
+		
+		try
+		{
+			lst.addAll(barcodeTuples);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		
+		return lst;
+	}
+	
+	public List<Tuple> getSelectedTypeBarcodeList()
+	{
+		List<Tuple> lst = new ArrayList<Tuple>();
+		
+		try
+		{
+			lst = getBarcodeTypeList(this.barcodeTuples, this.currentType);
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		
+		return lst;
+	}
+	
 	/**
 	 * 
 	 * @return three nested list. From inside to outside the lists are: - barcode type, id, barcode - a solution - list
@@ -368,9 +435,9 @@ public class BarcodeController extends MolgenisPlugin
 		barcodeTypes = new HashSet<String>(); // holds all types available (e.g. RPI, GAF, ...)
 		try
 		{
-			parse("src/main/resources/templates/barcode/barcodes.csv");
+			collectBarcodes();
 		}
-		catch (IOException e)
+		catch (DatabaseException e)
 		{
 			logger.error(e.getMessage());
 		}
