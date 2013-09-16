@@ -5,6 +5,61 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
+function padNumber(number, length) {
+	 var str = "" + number;
+	 while (str.length < length) {
+		 str = '0' + str;
+	 }
+
+	 return str;
+};
+
+function getCurrentTimezoneOffset() {
+	 var offset = new Date().getTimezoneOffset();
+	 offset = ((offset < 0 ? '+' : '-') + padNumber(parseInt(Math.abs(offset/60)), 2) + padNumber(Math.abs(offset%60), 2));
+	          
+	 return offset;
+};
+
+function htmlEscape(text) {
+	return $('<div/>').text(text).html(); 
+}
+
+/*
+ * Create a table cell to show data of a certain type
+ * Is used by the dataexplorer and the forms plugin 
+ */
+function formatTableCellValue(value, dataType) {
+	
+	if (dataType.toLowerCase() == "hyperlink") {
+		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value) + '</a>';
+		
+	} else if (dataType.toLowerCase() == "email") {
+		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
+	
+	} else if (dataType.toLowerCase() == 'bool') {
+		var checked = (value == true);
+		value = '<input type="checkbox" disabled="disabled" ';
+		if (checked) {
+			value = value + 'checked ';
+		}
+		
+		value = value + '/>';
+			
+	} else if (dataType.toLowerCase() != 'html'){
+		
+		if (value.length > 50) {
+			var abbr = htmlEscape(value.substr(0, 47)) + '...';
+			value = '<span class="show-popover"  data-content="' + value + '" data-toggle="popover">' + abbr + "</span>";
+		} else {
+			value = htmlEscape(value);
+		}
+		
+	}
+		
+	return value;
+};
+
 $(function() {
 	// disable all ajax request caching
 	$.ajaxSetup({

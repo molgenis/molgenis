@@ -66,22 +66,20 @@
 							 
 					} else if (field.xref) {
 						value =  entity[fieldName][field.xrefLabelName];
-						
-					} else if (field.type == 'BOOL') {
-						value = entity[fieldName] ? 'yes' : 'no';
-						
+							
 					} else {
 						value =  entity[fieldName];
 					}
 				} 
 				
-				items.push('<td>' + $('#entity-table-body-' + formIndex).text(value).html() + '</td>');//Html escape value
+				items.push('<td>' + formatTableCellValue(value, field.type) + '</td>');
 			});
 				
 			items.push('</tr>');
 		});
-			
+		
 		$('#entity-table-body-' + formIndex).html(items.join(''));
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 			
 		//Add master row click handler
 		if ((forms.length > 1) && (formIndex == 0)) {
@@ -135,7 +133,7 @@
 			ns.buildTableBody(i);
 			
 			//Update url of create buttons of subforms so xref dropdown is preselected
-			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId;
+			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId + '&back=' + encodeURIComponent(CURRENT_URI);
 			$('#create-' + i).attr('href', href);
 		}
 	}

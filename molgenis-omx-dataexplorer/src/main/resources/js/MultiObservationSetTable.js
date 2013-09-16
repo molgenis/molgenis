@@ -55,7 +55,7 @@
 				var feature = restApi.get(this);
 				var value = columnValueMap[feature.identifier];
 				if ((value != null) && (value != undefined)) {
-					items.push('<td class="multi-os-datacell">' + molgenis.formatValue(value, feature.dataType) + '</td>');
+					items.push('<td class="multi-os-datacell">' + formatTableCellValue(value, feature.dataType) + '</td>');
 				} else {
 					items.push('<td></td>');
 				}
