@@ -1,36 +1,35 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <@header/>
+
 <div class="row-fluid">
-	<form method="post" CLASS="form-horizontal" enctype="multipart/form-data" action="/plugin/barcode/calculate">
+	<form method="post" CLASS="form-horizontal" enctype="multipart/form-data" action="/menu/main/barcode/calculate">
 		<div class="formscreen">
-			<div class="form_header" id="BarcodePlugin"><i class="icon-barcode icon-white"></i> Barcode selector</div>
+			<div class="form_header" id="BarcodePlugin"><i class="icon-barcode icon-white"></i></div>
 			<DIV style="padding:16px">
-				<P>This page calculates the most optimal set of barcodes to analyze your samples with.</P>
+				<P STYLE="color:brown">The barcode selector on this page calculates the most optimal set of barcodes to analyze your samples with.</P>
 				<div class="control-group">
-				    <label class="control-label" for="type">Please select a barcode type</label>
+				    <label class="control-label" for="type">Select a barcode type</label>
 				    <div class="controls">
-						<SELECT NAME="type" CLASS="span1">
+						<select name="type" id="combobox" class="span1">
 							<#list barcodes as t>
 							  <OPTION VALUE="${t}">${t}</OPTION>
 							</#list>
 						</SELECT>
 				    </div>
 				</div>
-
 				<div class="control-group">
 				    <label class="control-label" for="type">How many samples?</label>
 				    <div class="controls">
-						<INPUT TYPE="text" NAME="number" CLASS="span1">
+						<INPUT TYPE="text" NAME="number" CLASS="span1"/>
 				    </div>
 				</div>
-
 				<div class="control-group">
 				    <div class="controls">
-						<BUTTON TYPE="submit" CLASS="btn btn-primary"><i class="icon-barcode icon-white"></i> Get optimal set</BUTTON> (may take a while)
+						<BUTTON TYPE="submit" CLASS="btn btn-primary"><i class="icon-barcode icon-white"></i>Get optimal set</BUTTON> (may take a while)
 				    </div>
 				</div>
-				
+					
 				<#if isException>
 					<TABLE CLASS="table" STYLE="border:  1px solid #ddd;">
 					<THEAD>
