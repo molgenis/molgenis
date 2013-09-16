@@ -9,16 +9,18 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
+import org.molgenis.SecuredJpaDatabase;
+import org.molgenis.UnsecuredJpaDatabase;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +41,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 /**
  * Database configuration
  */
@@ -46,6 +49,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 @EnableTransactionManagement
 public class DatabaseConfig implements TransactionManagementConfigurer
 {
+	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
+
 	@Value("${r"${db_driver:@null}"}")
 	private String dbDriverClass;
 	@Value("${r"${db_uri:@null}"}")
@@ -58,9 +63,22 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	@Bean
 	public Database database() throws DatabaseException
 	{
-		return new ${package}.JpaDatabase();
+		return new SecuredJpaDatabase(jdbcMetaDatabase());
 	}
 
+	@Bean
+	@Qualifier("unsecuredDatabase")
+	public Database unsecuredDatabase() throws DatabaseException
+	{
+		return new UnsecuredJpaDatabase(jdbcMetaDatabase());
+	}
+	
+	@Bean
+	public JDBCMetaDatabase jdbcMetaDatabase() throws DatabaseException
+	{
+		return new JDBCMetaDatabase();
+	}
+	
 	@Bean
 	public DataSource dataSource()
 	{
@@ -106,7 +124,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	public FactoryBean<EntityManagerFactory> localEntityManagerFactoryBean()
 	{
 		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-		entityManagerFactoryBean.setPersistenceUnitName(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME);
+		entityManagerFactoryBean.setPersistenceUnitName(DEFAULT_PERSISTENCE_UNIT_NAME);
 		entityManagerFactoryBean.setDataSource(dataSource());
 		entityManagerFactoryBean.setJpaDialect(jpaDialect());
 		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter());
@@ -242,5 +260,4 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	{
 		return new TokenFactory();
 	}
-	
 }

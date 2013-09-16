@@ -25,8 +25,6 @@ import org.molgenis.util.tuple.WritableTuple;
  */
 public class JpaDatabase extends AbstractDatabase
 {
-	public static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
-
 	@PersistenceContext
 	private EntityManager em;
 
@@ -75,11 +73,6 @@ public class JpaDatabase extends AbstractDatabase
 	public <T> List<T> executeSQLQuery(String sqlQuery, Class<T> resultClass)
 	{
 		return em.createNativeQuery(sqlQuery, resultClass).getResultList();
-	}
-
-	public String getPersistenceUnitName()
-	{
-		return DEFAULT_PERSISTENCE_UNIT_NAME;
 	}
 
 	public List<Tuple> sql(String sql, String... columnNames)

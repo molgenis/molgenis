@@ -4,6 +4,7 @@ import static org.molgenis.security.SecurityUtils.defaultPluginAuthorities;
 
 import javax.sql.DataSource;
 
+import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.omx.auth.OmxPermissionService;
 import org.molgenis.security.MolgenisPasswordEncoder;
@@ -26,6 +27,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
+	@Autowired
+	private Database unsecuredDatabase;
+
 	@Autowired
 	private DataSource dataSource;
 
@@ -104,7 +108,7 @@ public class WebAppSecurityConfig extends WebSecurityConfigurerAdapter
 	@Override
 	protected UserDetailsService userDetailsService()
 	{
-		return new MolgenisUserDetailsService(passwordEncoder());
+		return new MolgenisUserDetailsService(unsecuredDatabase, passwordEncoder());
 	}
 
 	@Override

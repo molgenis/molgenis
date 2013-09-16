@@ -23,22 +23,32 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.util.tuple.Tuple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-public class DataSetImporter
+@Service
+public class DataSetImporterServiceImpl implements DataSetImporterService
 {
-	private static final Logger LOG = Logger.getLogger(DataSetImporter.class);
+	private static final Logger LOG = Logger.getLogger(DataSetImporterServiceImpl.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
-	private final Database db;
+	private final Database database;
 	private final ValueConverter valueConverter;
 
-	public DataSetImporter(Database db)
+	@Autowired
+	public DataSetImporterServiceImpl(Database database)
 	{
-		if (db == null) throw new IllegalArgumentException();
-		this.db = db;
-		this.valueConverter = new ValueConverter(db);
+		if (database == null) throw new IllegalArgumentException();
+		this.database = database;
+		this.valueConverter = new ValueConverter(database);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.omx.importer.DataSetImporter#importDataSet(java.io.File, java.util.List)
+	 */
+	@Override
 	@Transactional(rollbackFor =
 	{ IOException.class, DatabaseException.class })
 	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, DatabaseException
@@ -73,7 +83,7 @@ public class DataSetImporter
 	{
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
-		DataSet dataSet = DataSet.findByIdentifier(db, identifier);
+		DataSet dataSet = DataSet.findByIdentifier(database, identifier);
 		if (dataSet == null)
 		{
 			throw new DatabaseException("dataset '" + identifier + "' does not exist in db");
@@ -89,7 +99,7 @@ public class DataSetImporter
 			String featureIdentifier = colIt.next();
 			if (featureIdentifier != null && !featureIdentifier.isEmpty())
 			{
-				ObservableFeature feature = ObservableFeature.findByIdentifier(db, featureIdentifier);
+				ObservableFeature feature = ObservableFeature.findByIdentifier(database, featureIdentifier);
 				if (feature == null)
 				{
 					throw new DatabaseException(ObservableFeature.class.getSimpleName() + " with identifier '"
@@ -118,7 +128,7 @@ public class DataSetImporter
 				// create observation set
 				ObservationSet observationSet = new ObservationSet();
 				observationSet.setPartOfDataSet(dataSet);
-				db.add(observationSet);
+				database.add(observationSet);
 
 				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
@@ -151,21 +161,21 @@ public class DataSetImporter
 					}
 
 				}
-				db.add(obsValueList);
+				database.add(obsValueList);
 				for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
-					db.add(entry.getValue());
+					database.add(entry.getValue());
 			}
 
 			if (++rownr % transactionRows == 0)
 			{
-				db.getEntityManager().flush();
-				db.getEntityManager().clear();
+				database.getEntityManager().flush();
+				database.getEntityManager().clear();
 			}
 		}
 		if (rownr % transactionRows != 0)
 		{
-			db.getEntityManager().flush();
-			db.getEntityManager().clear();
+			database.getEntityManager().flush();
+			database.getEntityManager().clear();
 		}
 	}
 }

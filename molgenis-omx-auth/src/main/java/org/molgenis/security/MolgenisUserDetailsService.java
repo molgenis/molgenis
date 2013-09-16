@@ -28,14 +28,16 @@ import com.google.common.collect.Lists;
 
 public class MolgenisUserDetailsService implements UserDetailsService
 {
-	@Autowired
-	protected Database database;
+	protected final Database unsecuredDatabase;
 	protected final PasswordEncoder passwordEncoder;
 
-	public MolgenisUserDetailsService(PasswordEncoder passwordEncoder)
+	@Autowired
+	public MolgenisUserDetailsService(Database unsecuredDatabase, PasswordEncoder passwordEncoder)
 	{
+		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
 		if (passwordEncoder == null) throw new IllegalArgumentException("Password encoder is null");
 		this.passwordEncoder = passwordEncoder;
+		this.unsecuredDatabase = unsecuredDatabase;
 	}
 
 	@Override
@@ -43,7 +45,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 	{
 		try
 		{
-			MolgenisUser user = MolgenisUser.findByUsername(database, username);
+			MolgenisUser user = MolgenisUser.findByUsername(unsecuredDatabase, username);
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
 			// user authorities
@@ -85,13 +87,13 @@ public class MolgenisUserDetailsService implements UserDetailsService
 
 	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser) throws DatabaseException
 	{
-		return database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, Operator.EQUALS,
+		return unsecuredDatabase.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, Operator.EQUALS,
 				molgenisUser));
 	}
 
 	private List<GroupAuthority> getGroupAuthorities(MolgenisUser molgenisUser) throws DatabaseException
 	{
-		List<MolgenisGroupMember> groupMembers = database.find(MolgenisGroupMember.class, new QueryRule(
+		List<MolgenisGroupMember> groupMembers = unsecuredDatabase.find(MolgenisGroupMember.class, new QueryRule(
 				MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser));
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
@@ -105,8 +107,8 @@ public class MolgenisUserDetailsService implements UserDetailsService
 						}
 					});
 
-			return database.find(GroupAuthority.class, new QueryRule(GroupAuthority.MOLGENISGROUP, Operator.IN,
-					molgenisGroups));
+			return unsecuredDatabase.find(GroupAuthority.class, new QueryRule(GroupAuthority.MOLGENISGROUP,
+					Operator.IN, molgenisGroups));
 		}
 		return null;
 	}

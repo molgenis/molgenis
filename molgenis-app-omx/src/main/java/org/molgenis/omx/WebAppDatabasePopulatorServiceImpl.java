@@ -27,7 +27,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@PersistenceContext
 	private EntityManager em;
 
-	private final Database database;
+	private final Database unsecuredDatabase;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -35,10 +35,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private String adminEmail;
 
 	@Autowired
-	public WebAppDatabasePopulatorServiceImpl(Database database)
+	public WebAppDatabasePopulatorServiceImpl(Database unsecuredDatabase)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
+		this.unsecuredDatabase = unsecuredDatabase;
 	}
 
 	@Override
@@ -61,8 +61,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		suAuthority.setMolgenisUser(userAdmin);
 		suAuthority.setRole("ROLE_SU");
 
-		database.add(userAdmin);
-		database.add(suAuthority);
+		unsecuredDatabase.add(userAdmin);
+		unsecuredDatabase.add(suAuthority);
 
 		MolgenisUser user1 = new MolgenisUser();
 		user1.setUsername("user1");
@@ -129,20 +129,20 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		usersGroupAuthority.setMolgenisGroup(usersGroup);
 		usersGroupAuthority.setRole("ROLE_PLUGIN_PROTOCOLVIEWER_READ_USER");
 
-		database.add(user1);
-		database.add(user1Authorities);
-		database.add(user2);
-		database.add(user2Authorities);
-		database.add(usersGroup);
-		database.add(usersGroupAuthority);
-		database.add(molgenisGroupMember1);
-		database.add(molgenisGroupMember2);
+		unsecuredDatabase.add(user1);
+		unsecuredDatabase.add(user1Authorities);
+		unsecuredDatabase.add(user2);
+		unsecuredDatabase.add(user2Authorities);
+		unsecuredDatabase.add(usersGroup);
+		unsecuredDatabase.add(usersGroupAuthority);
+		unsecuredDatabase.add(molgenisGroupMember1);
+		unsecuredDatabase.add(molgenisGroupMember2);
 	}
 
 	@Override
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public boolean isDatabasePopulated() throws DatabaseException
 	{
-		return database.count(MolgenisUser.class) > 0;
+		return unsecuredDatabase.count(MolgenisUser.class) > 0;
 	}
 }

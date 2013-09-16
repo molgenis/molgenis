@@ -67,6 +67,8 @@ public class MapperSecurityDecoratorGen extends ForEachEntityGenerator
 
 				File targetFile = new File(targetDir + "/" + shortKlazzName + ".java");
 
+				templateArgs.put("securityName", GeneratorHelper.getJavaName(entity.getName()).toUpperCase());
+
 				templateArgs.put("entityClass",
 						entity.getNamespace() + "." + GeneratorHelper.getJavaName(entity.getName()));
 
