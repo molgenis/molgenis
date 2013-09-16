@@ -12,7 +12,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -43,10 +42,10 @@ public class PermissionManagerController extends MolgenisPlugin
 
 	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "permissionmanager";
 
-	private final PluginPermissionManagerService pluginPermissionManagerService;
+	private final PermissionManagerService pluginPermissionManagerService;
 
 	@Autowired
-	public PermissionManagerController(PluginPermissionManagerService pluginPermissionManagerService)
+	public PermissionManagerController(PermissionManagerService pluginPermissionManagerService)
 	{
 		super(URI);
 		if (pluginPermissionManagerService == null) throw new IllegalArgumentException(
@@ -121,7 +120,7 @@ public class PermissionManagerController extends MolgenisPlugin
 			throws DatabaseException
 	{
 		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
-		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
+		for (String pluginId : pluginPermissionManagerService.getPluginIds())
 		{
 			String param = "radio-" + pluginId;
 			String value = webRequest.getParameter(param);
@@ -145,7 +144,24 @@ public class PermissionManagerController extends MolgenisPlugin
 	public void updateGroupEntityClassPermissions(@RequestParam Integer groupId, WebRequest webRequest)
 			throws DatabaseException
 	{
-		throw new UnsupportedOperationException();
+		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
+		for (String entityClassId : pluginPermissionManagerService.getEntityClassIds())
+		{
+			String param = "radio-" + entityClassId;
+			String value = webRequest.getParameter(param);
+			if (value.equals("read") || value.equals("write"))
+			{
+				GroupAuthority authority = new GroupAuthority();
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + entityClassId.toUpperCase() + "_"
+						+ value.toUpperCase() + "_USER");
+				authorities.add(authority);
+			}
+			else if (!value.equals("none"))
+			{
+				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
+			}
+		}
+		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, groupId);
 	}
 
 	@RequestMapping(value = "/update/plugin/user", method = RequestMethod.POST)
@@ -154,7 +170,7 @@ public class PermissionManagerController extends MolgenisPlugin
 			throws DatabaseException
 	{
 		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
-		for (String pluginId : MolgenisPluginRegistry.getInstance().getPluginIds())
+		for (String pluginId : pluginPermissionManagerService.getPluginIds())
 		{
 			String param = "radio-" + pluginId;
 			String value = webRequest.getParameter(param);

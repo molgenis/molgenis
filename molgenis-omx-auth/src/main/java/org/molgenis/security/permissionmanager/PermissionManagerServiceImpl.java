@@ -32,12 +32,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
-public class PluginPermissionManagerServiceImpl implements PluginPermissionManagerService
+public class PermissionManagerServiceImpl implements PermissionManagerService
 {
 	private final Database database;
 
 	@Autowired
-	public PluginPermissionManagerServiceImpl(Database database)
+	public PermissionManagerServiceImpl(Database database)
 	{
 		if (database == null) throw new IllegalArgumentException("Database is null");
 		this.database = database;
@@ -132,9 +132,7 @@ public class PluginPermissionManagerServiceImpl implements PluginPermissionManag
 							return molgenisGroupMember.getMolgenisGroup();
 						}
 					});
-
-			List<GroupAuthority> groupAuthorities = database.find(GroupAuthority.class, new QueryRule(
-					GroupAuthority.MOLGENISGROUP, Operator.IN, molgenisGroups));
+			List<GroupAuthority> groupAuthorities = getGroupPermissions(molgenisGroups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
 
 		}

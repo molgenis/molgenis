@@ -9,7 +9,7 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
 
-public interface PluginPermissionManagerService
+public interface PermissionManagerService
 {
 	List<MolgenisUser> getUsers() throws DatabaseException;
 
