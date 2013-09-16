@@ -5,8 +5,8 @@
 		function createGroupPermissionTable(data) {
 			var items = [];
 			$.each(data.entityIds, function(idx, entityId) {
-				if(data.groupPermissionMap && data.groupPermissionMap[entityId]) {
-					$.each(data.groupPermissionMap[entityId], function(idx, perm) {
+				if(data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
+					$.each(data.groupPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
 						items.push('<td>' + (idx == 0 ? entityId : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
@@ -30,14 +30,13 @@
 			console.log(data);
 			var items = [];
 			$.each(data.entityIds, function(idx, entityId) {
-				if(data.userPermissionMap && data.userPermissionMap[entityId]) {
-					$.each(data.userPermissionMap[entityId], function(idx, perm) {
+				if(data.userPermissionMap && data.userPermissionMap[entityId.toLowerCase()]) {
+					$.each(data.userPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
 						items.push('<td>' + (idx == 0 ? entityId : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
-						items.push('<td></td>');
 					});
 				} else {
 					items.push('<tr>');
@@ -45,17 +44,15 @@
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
-					items.push('<td></td>');
 					items.push('</tr>');
 				}
-				if(data.groupPermissionMap && data.groupPermissionMap[entityId]) {
-					$.each(data.groupPermissionMap[entityId], function(idx, perm) {
+				if(data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
+					$.each(data.groupPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
-						items.push('<td></td>');
+						items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
-						items.push('<td>' + perm.group + '</td>');
 						items.push('</tr>');						
 					});
 				}

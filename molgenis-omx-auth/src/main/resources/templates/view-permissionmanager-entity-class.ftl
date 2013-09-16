@@ -49,7 +49,6 @@
 							  					<th>Write</th>
 							  					<th>Read</th>
 							  					<th>None</th>
-							  					<th>Group</th>
 							  				</tr>
 							  			</thead>
 							  			<tbody>

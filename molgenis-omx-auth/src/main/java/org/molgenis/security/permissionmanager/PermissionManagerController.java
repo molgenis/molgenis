@@ -16,6 +16,8 @@ import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.security.EntityClassPermission;
+import org.molgenis.security.PluginPermission;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,14 +126,14 @@ public class PermissionManagerController extends MolgenisPlugin
 		{
 			String param = "radio-" + pluginId;
 			String value = webRequest.getParameter(param);
-			if (value.equals("read") || value.equals("write"))
+			if (value.equals(PluginPermission.READ.toString()) || value.equals(PluginPermission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + "_"
 						+ value.toUpperCase() + "_USER");
 				authorities.add(authority);
 			}
-			else if (!value.equals("none"))
+			else if (!value.equals(PluginPermission.NONE.toString()))
 			{
 				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
@@ -149,14 +151,15 @@ public class PermissionManagerController extends MolgenisPlugin
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equals("read") || value.equals("write"))
+			if (value.equals(EntityClassPermission.READ.toString())
+					|| value.equals(EntityClassPermission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + entityClassId.toUpperCase() + "_"
 						+ value.toUpperCase() + "_USER");
 				authorities.add(authority);
 			}
-			else if (!value.equals("none"))
+			else if (!value.equals(EntityClassPermission.NONE.toString()))
 			{
 				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
@@ -174,14 +177,14 @@ public class PermissionManagerController extends MolgenisPlugin
 		{
 			String param = "radio-" + pluginId;
 			String value = webRequest.getParameter(param);
-			if (value.equals("read") || value.equals("write"))
+			if (value.equals(PluginPermission.READ.toString()) || value.equals(PluginPermission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + "_"
 						+ value.toUpperCase() + "_USER");
 				authorities.add(authority);
 			}
-			else if (!value.equals("none"))
+			else if (!value.equals(PluginPermission.NONE.toString()))
 			{
 				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
@@ -194,7 +197,25 @@ public class PermissionManagerController extends MolgenisPlugin
 	public void updateUserEntityClassPermissions(@RequestParam Integer userId, WebRequest webRequest)
 			throws DatabaseException
 	{
-		throw new UnsupportedOperationException();
+		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
+		for (String entityClassId : pluginPermissionManagerService.getEntityClassIds())
+		{
+			String param = "radio-" + entityClassId;
+			String value = webRequest.getParameter(param);
+			if (value.equals(EntityClassPermission.READ.toString())
+					|| value.equals(EntityClassPermission.WRITE.toString()))
+			{
+				UserAuthority authority = new UserAuthority();
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + entityClassId.toUpperCase() + "_"
+						+ value.toUpperCase() + "_USER");
+				authorities.add(authority);
+			}
+			else if (!value.equals(EntityClassPermission.NONE.toString()))
+			{
+				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
+			}
+		}
+		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, userId);
 	}
 
 	@ExceptionHandler(RuntimeException.class)

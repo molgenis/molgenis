@@ -3,3 +3,8 @@
   overflow-y: scroll;
   margin-bottom: 20px;
 }
+
+.inherited-permission {
+	font-style: italic;
+	padding-left: 20px;
+}
