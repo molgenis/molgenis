@@ -84,6 +84,7 @@
 			<field name="SampleBarcodeSequence" type="string" description="The nucleotide sequence which forms the barcode" label="Barcode" />
 			<field name="SampleBarcodeType" type="xref" xref_entity="SampleBarcodeType" nillable="true" label="Type" />
 			<field name="SampleBarcodeName" type="string" unique="true" nillable="true" description="A concatenated value of Type, Nr and Sequence" label="Value" />
+			<field name="Active" type="boolean" nillable="true" description="Indication if barcode can be used." />
 			<unique fields="SampleBarcodeType,SampleBarcodeNr,SampleBarcodeSequence" description="The combination BarcodeType and SampleBarcodeName is unique." />
 		</entity>
 				

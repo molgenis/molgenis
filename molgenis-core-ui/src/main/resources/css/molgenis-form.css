@@ -35,6 +35,22 @@ input.error {
 	font-size: 18px;
 }
 
+.date input[type=text] {
+	width: 476px;	
+}
+
+.date input[type=text].nillable {
+	width: 450px;
+}
+
+.date .add-on {
+	height: 30px;
+}
+
+.date .add-on i {
+	margin-top: 7px;
+}
+
 .controls input[type=checkbox] {
 	width: 24px;
 	height: 24px;
@@ -70,4 +86,34 @@ input.error {
 
 #data-table-pager {
 	margin-bottom: 8px;
+}
+
+/* Duplicate bootstrap css because datepicker just makes all ad-on buttons a calendar button and allso want a delete button */
+.add-on-workaround {
+	margin-left:-1px;
+	border-bottom-left-radius:0;
+  	border-bottom-right-radius:0;
+  	border-top-left-radius:0;
+  	border-top-right-radius:0;
+  	vertical-align:top;
+  	background-color:#EEEEEE;
+  	border:1px solid #CCCCCC;
+  	display:inline-block;
+  	font-size:14px;
+ 	font-weight:normal;
+  	height:30px;
+  	line-height:20px;
+  	min-width:16px;
+ 	padding:4px 5px;
+  	text-align:center;
+  	text-shadow:#FFFFFF 0 1px 0;
+  	width:auto;
+}
+
+.add-on-workaround i {
+	margin-top: 7px;
+	cursor:pointer;
+  	display:block;
+  	height:16px;
+ 	 width:16px;
 }
