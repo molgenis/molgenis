@@ -34,6 +34,7 @@
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
+  		var cancelBtn = $('#orderdata-btn-close');
   		var form = $('#orderdata-form');
   		
   		<#-- set current selected data set -->
@@ -48,6 +49,8 @@
 
   		<#-- modal events -->
   		modal.on('show', function () {
+  			submitBtn.attr("disabled", false);
+			cancelBtn.attr("disabled", false);
   			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
@@ -154,6 +157,8 @@
 		});
 		
 		function order() {
+			submitBtn.attr("disabled", true);
+			cancelBtn.attr("disabled", true);
 			$.ajax({
 			    type: 'POST',
 			    url: '/plugin/study/order',
