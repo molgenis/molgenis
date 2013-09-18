@@ -2,7 +2,7 @@ package org.molgenis.security.permission;
 
 import static org.molgenis.security.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
 import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
-import static org.molgenis.security.SecurityUtils.GRANTED_AUTHORITY_SU;
+import static org.molgenis.security.SecurityUtils.AUTHORITY_SU;
 
 import java.util.Collection;
 
@@ -37,7 +37,7 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 			for (GrantedAuthority grantedAuthority : grantedAuthorities)
 			{
 				String authority = grantedAuthority.getAuthority();
-				if (authority.equals(GRANTED_AUTHORITY_SU.getAuthority()) || authority.equals(pluginAuthority)) return true;
+				if (authority.equals(AUTHORITY_SU) || authority.equals(pluginAuthority)) return true;
 			}
 		}
 		return false;

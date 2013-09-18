@@ -3,6 +3,7 @@ package org.molgenis.security.login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -37,14 +38,14 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void getLoginPage() throws Exception
 	{
-		this.mockMvc.perform(get("/login")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("view-login"));
 	}
 
 	@Test
 	public void getLoginErrorPage() throws Exception
 	{
 		this.mockMvc.perform(get("/login").param("error", "")).andExpect(status().isOk())
-				.andExpect(model().attributeExists("errorMessage"));
+				.andExpect(view().name("view-login")).andExpect(model().attributeExists("errorMessage"));
 	}
 
 	@Configuration
