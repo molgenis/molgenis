@@ -1,11 +1,11 @@
-package org.molgenis.omx.auth.vo;
+package org.molgenis.security.account;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Email;
 
-public class RegisterRequest
+class RegisterRequest
 {
 	@NotNull
 	private String username;

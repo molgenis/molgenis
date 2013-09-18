@@ -1,4 +1,4 @@
-package org.molgenis.security.permissionmanager;
+package org.molgenis.security.permission;
 
 import java.util.List;
 

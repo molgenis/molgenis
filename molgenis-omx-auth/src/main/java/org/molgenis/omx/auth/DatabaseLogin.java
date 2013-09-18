@@ -18,6 +18,7 @@ import org.molgenis.framework.security.Login;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
 
+@Deprecated
 public class DatabaseLogin implements Login, Serializable
 {
 

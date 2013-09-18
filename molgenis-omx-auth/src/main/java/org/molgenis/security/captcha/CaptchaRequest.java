@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.vo;
+package org.molgenis.security.captcha;
 
 import javax.validation.constraints.NotNull;
 

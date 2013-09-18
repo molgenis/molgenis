@@ -3,6 +3,7 @@ package org.molgenis.security;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,11 +14,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class SecurityUtils
 {
 	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
-	public static final String AUTHORITY_PLUGIN_READ_PREFIX = "ROLE_PLUGIN_READ_";
-	public static final String AUTHORITY_PLUGIN_WRITE_PREFIX = "ROLE_PLUGIN_WRITE_";
+	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
+	public static final String AUTHORITY_PLUGIN_WRITE_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_";
 	public static final String AUTHORITY_ENTITY_PREFIX = "ROLE_ENTITY_";
-	public static final String AUTHORITY_ENTITY_READ_PREFIX = "ROLE_ENTITY_READ_";
-	public static final String AUTHORITY_ENTITY_WRITE_PREFIX = "ROLE_ENTITY_WRITE_";
+	public static final String AUTHORITY_ENTITY_READ_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.READ + "_";;
+	public static final String AUTHORITY_ENTITY_WRITE_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.READ + "_";;
 
 	public static final GrantedAuthority GRANTED_AUTHORITY_SU = new SimpleGrantedAuthority("ROLE_SU");
 

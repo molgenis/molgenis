@@ -1,10 +1,10 @@
-package org.molgenis.omx.auth.vo;
+package org.molgenis.security.account;
 
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Email;
 
-public class PasswordResetRequest
+class PasswordResetRequest
 {
 	@NotNull
 	@Email

@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.service;
+package org.molgenis.security.captcha;
 
 import java.awt.image.BufferedImage;
 
@@ -33,15 +33,5 @@ public class CaptchaService
 		Captcha captcha = (Captcha) session.getAttribute(Captcha.NAME);
 		if (captcha == null) throw new CaptchaException("no captcha to validate");
 		return captcha.isCorrect(captchaAnswer);
-	}
-
-	public static class CaptchaException extends Exception
-	{
-		private static final long serialVersionUID = 1L;
-
-		public CaptchaException(String message)
-		{
-			super(message);
-		}
 	}
 }

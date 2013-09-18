@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.service;
+package org.molgenis.security.user;
 
 public class MolgenisUserException extends RuntimeException
 {

@@ -1,6 +1,6 @@
-package org.molgenis.security.permissionmanager;
+package org.molgenis.security.permission;
 
-import static org.molgenis.security.permissionmanager.PermissionManagerController.URI;
+import static org.molgenis.security.permission.PermissionManagerController.URI;
 
 import java.util.ArrayList;
 import java.util.Collections;

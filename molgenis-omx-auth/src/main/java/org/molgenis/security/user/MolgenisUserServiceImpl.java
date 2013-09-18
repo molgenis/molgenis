@@ -9,7 +9,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.MolgenisUserException;
 import org.molgenis.security.MolgenisPasswordEncoder;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;

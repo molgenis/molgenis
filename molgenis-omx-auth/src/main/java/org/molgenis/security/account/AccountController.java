@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.controller;
+package org.molgenis.security.account;
 
 import java.net.URI;
 
@@ -8,12 +8,9 @@ import javax.validation.constraints.NotNull;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.AccountService;
-import org.molgenis.omx.auth.service.CaptchaService;
-import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
-import org.molgenis.omx.auth.vo.CaptchaRequest;
-import org.molgenis.omx.auth.vo.PasswordResetRequest;
-import org.molgenis.omx.auth.vo.RegisterRequest;
+import org.molgenis.security.captcha.CaptchaException;
+import org.molgenis.security.captcha.CaptchaRequest;
+import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.util.CountryCodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

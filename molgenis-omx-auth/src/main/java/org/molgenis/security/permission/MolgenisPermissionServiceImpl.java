@@ -1,4 +1,4 @@
-package org.molgenis.security;
+package org.molgenis.security.permission;
 
 import static org.molgenis.security.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
 import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;

@@ -1,4 +1,4 @@
-package org.molgenis.security.permissionmanager;
+package org.molgenis.security.permission;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -29,7 +29,8 @@ import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.SecurityUtils;
-import org.molgenis.security.permissionmanager.PermissionManagerServiceImplTest.Config;
+import org.molgenis.security.permission.PermissionManagerServiceImpl;
+import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

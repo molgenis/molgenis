@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.controller;
+package org.molgenis.security.captcha;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,8 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.awt.image.BufferedImage;
 
-import org.molgenis.omx.auth.service.CaptchaService;
-import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
+import org.molgenis.security.captcha.CaptchaController;
+import org.molgenis.security.captcha.CaptchaException;
+import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;

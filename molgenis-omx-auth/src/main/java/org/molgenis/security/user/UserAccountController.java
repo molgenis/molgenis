@@ -1,6 +1,6 @@
-package org.molgenis.omx.auth.controller;
+package org.molgenis.security.user;
 
-import static org.molgenis.omx.auth.controller.UserAccountController.URI;
+import static org.molgenis.security.user.UserAccountController.URI;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,11 +11,10 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.AccountService;
-import org.molgenis.omx.auth.service.CaptchaService;
-import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
-import org.molgenis.omx.auth.service.MolgenisUserException;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.account.AccountService;
+import org.molgenis.security.captcha.CaptchaException;
+import org.molgenis.security.captcha.CaptchaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -67,10 +66,10 @@ public class UserAccountController extends MolgenisPluginController
 			String newPwd1 = request.getParameter("newpwd");
 			String newPwd2 = request.getParameter("newpwd2");
 
-			molgenisUserService.checkPassword(database.getLogin().getUserName(), oldPwd, newPwd1, newPwd2);
+			molgenisUserService.checkPassword(SecurityUtils.getCurrentUsername(), oldPwd, newPwd1, newPwd2);
 		}
 
-		MolgenisUser user = molgenisUserService.findById(database.getLogin().getUserId());
+		MolgenisUser user = MolgenisUser.findByUsername(database, SecurityUtils.getCurrentUsername());
 		MolgenisRequest molgenisRequest = new MolgenisRequest(request);
 		this.updateMolgenisUser(user, molgenisRequest);
 		molgenisUserService.update(user);

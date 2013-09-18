@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.controller;
+package org.molgenis.security.account;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -19,8 +19,9 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.AccountService;
-import org.molgenis.omx.auth.service.CaptchaService;
+import org.molgenis.security.account.AccountController;
+import org.molgenis.security.account.AccountService;
+import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;

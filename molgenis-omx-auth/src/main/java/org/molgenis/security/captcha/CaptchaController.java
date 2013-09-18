@@ -1,12 +1,9 @@
-package org.molgenis.omx.auth.controller;
+package org.molgenis.security.captcha;
 
 import java.awt.image.BufferedImage;
 
 import javax.validation.Valid;
 
-import org.molgenis.omx.auth.service.CaptchaService;
-import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
-import org.molgenis.omx.auth.vo.CaptchaRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -16,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@RequestMapping("/captcha")
 public class CaptchaController
 {
 	private static final int CAPTCHA_WIDTH = 220;
@@ -24,14 +22,14 @@ public class CaptchaController
 	@Autowired
 	private CaptchaService captchaService;
 
-	@RequestMapping(value = "/captcha", method = RequestMethod.GET, produces = "image/jpeg")
+	@RequestMapping(method = RequestMethod.GET, produces = "image/jpeg")
 	@ResponseBody
 	public BufferedImage getCaptcha()
 	{
 		return captchaService.createCaptcha(CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
 	}
 
-	@RequestMapping(value = "/captcha", method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
 	public Boolean validateCaptcha(@Valid @RequestBody CaptchaRequest captchaRequest) throws CaptchaException
 	{
@@ -39,7 +37,7 @@ public class CaptchaController
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
-	@RequestMapping(value = "/captcha", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@RequestMapping(method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Boolean validateCaptchaFromForm(@Valid @ModelAttribute CaptchaRequest captchaRequest)
 			throws CaptchaException

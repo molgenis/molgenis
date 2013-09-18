@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.service;
+package org.molgenis.security.account;
 
 import java.net.URI;
 import java.util.Arrays;

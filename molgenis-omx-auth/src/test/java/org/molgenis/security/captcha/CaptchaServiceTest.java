@@ -1,4 +1,4 @@
-package org.molgenis.omx.auth.service;
+package org.molgenis.security.captcha;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -15,7 +15,8 @@ import javax.servlet.http.HttpSession;
 
 import nl.captcha.Captcha;
 
-import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
+import org.molgenis.security.captcha.CaptchaException;
+import org.molgenis.security.captcha.CaptchaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

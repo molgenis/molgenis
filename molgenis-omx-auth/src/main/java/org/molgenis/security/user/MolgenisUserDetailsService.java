@@ -1,4 +1,4 @@
-package org.molgenis.security;
+package org.molgenis.security.user;
 
 import java.util.HashSet;
 import java.util.List;
