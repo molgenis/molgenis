@@ -13,10 +13,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,9 +39,6 @@ import com.google.common.collect.Lists;
 public class OrderStudyDataController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/study";
-
-	@Autowired
-	private Login login;
 
 	@Autowired
 	private OrderStudyDataService orderStudyDataService;
@@ -67,7 +64,8 @@ public class OrderStudyDataController extends MolgenisPluginController
 	public void orderData(@RequestParam String dataSetIdentifier, @RequestParam String name, @RequestParam Part file)
 			throws DatabaseException, IOException, MessagingException
 	{
-		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart(), login.getUserId());
+		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart(),
+				SecurityUtils.getCurrentUsername());
 		shoppingCart.emptyCart();
 	}
 
@@ -76,7 +74,8 @@ public class OrderStudyDataController extends MolgenisPluginController
 	public OrdersResponse getOrders() throws DatabaseException
 	{
 		Iterable<OrderResponse> ordersIterable = Iterables.transform(
-				orderStudyDataService.getOrders(login.getUserId()), new Function<StudyDataRequest, OrderResponse>()
+				orderStudyDataService.getOrders(SecurityUtils.getCurrentUsername()),
+				new Function<StudyDataRequest, OrderResponse>()
 				{
 					@Override
 					@Nullable

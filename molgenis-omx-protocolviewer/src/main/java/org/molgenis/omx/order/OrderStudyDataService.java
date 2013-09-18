@@ -62,7 +62,7 @@ public class OrderStudyDataService
 	private org.molgenis.security.user.MolgenisUserService molgenisUserService;
 
 	public void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds,
-			Integer userId) throws DatabaseException, MessagingException, IOException
+			String username) throws DatabaseException, MessagingException, IOException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
 		if (requestForm == null) throw new IllegalArgumentException("request form is null");
@@ -74,7 +74,7 @@ public class OrderStudyDataService
 		if (features == null || features.isEmpty()) throw new DatabaseException("requested features do not exist");
 
 		DataSet dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
-		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, userId);
+		MolgenisUser molgenisUser = MolgenisUser.findByUsername(database, username);
 
 		String appName = getAppName();
 
@@ -129,10 +129,11 @@ public class OrderStudyDataService
 		return StudyDataRequest.findById(database, orderId);
 	}
 
-	public List<StudyDataRequest> getOrders(Integer userId) throws DatabaseException
+	public List<StudyDataRequest> getOrders(String username) throws DatabaseException
 	{
+		MolgenisUser molgenisUser = MolgenisUser.findByUsername(database, username);
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class, new QueryRule(
-				StudyDataRequest.MOLGENISUSER, Operator.EQUALS, userId));
+				StudyDataRequest.MOLGENISUSER, Operator.EQUALS, molgenisUser));
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 

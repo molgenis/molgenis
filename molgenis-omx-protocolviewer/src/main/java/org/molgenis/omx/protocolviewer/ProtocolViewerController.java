@@ -25,6 +25,7 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -62,7 +63,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 		// create new model
 		ProtocolViewer protocolViewer = new ProtocolViewer();
-		protocolViewer.setAuthenticated(database.getLogin() != null ? database.getLogin().isAuthenticated() : false);
+		protocolViewer.setAuthenticated(SecurityUtils.currentUserIsAuthenticated());
 		protocolViewer.setDataSets(dataSets);
 
 		protocolViewer.setEnableDownloadAction(molgenisSettings.getBooleanProperty(KEY_ACTION_DOWNLOAD,

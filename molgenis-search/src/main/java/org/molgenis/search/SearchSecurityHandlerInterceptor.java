@@ -4,15 +4,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
- * HandlerInterceptor returns SC_UNAUTHORIZED if no Login object is present in the session or the user is not
- * authenticated and login is required.
+ * HandlerInterceptor returns SC_UNAUTHORIZED if the user is not authenticated and login is required.
  * 
  * Does not check entity level security or roles. Just checks if the user is authenticated
  * 
@@ -29,8 +28,7 @@ public class SearchSecurityHandlerInterceptor extends HandlerInterceptorAdapter
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
 	{
-		Login login = ApplicationContextProvider.getApplicationContext().getBean(Login.class);
-		if (isAllowAnonymousSearch() || (login != null && login.isAuthenticated()))
+		if (isAllowAnonymousSearch() || SecurityUtils.currentUserIsAuthenticated())
 		{
 			return true;
 		}

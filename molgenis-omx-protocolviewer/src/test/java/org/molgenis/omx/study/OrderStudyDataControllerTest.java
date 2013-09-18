@@ -12,7 +12,6 @@ import java.util.Date;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.order.OrderStudyDataController;
 import org.molgenis.omx.order.OrderStudyDataService;
@@ -124,14 +123,6 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		public Database database()
 		{
 			return mock(Database.class);
-		}
-
-		@Bean
-		public Login login()
-		{
-			Login login = mock(Login.class);
-			when(login.getUserId()).thenReturn(0);
-			return login;
 		}
 
 		@Bean
