@@ -1,28 +1,43 @@
 <#macro renderList form index=0>
-<div class="row-fluid">
-	<div class="row-fluid">
-		<div class="span4" style="height: 80px">
-			<h2>${form.title} (<span id="entity-count-${index}"></span>)</h2>
+<div id="list-holder" class="row-fluid">
+	<div id="list-navigation">
+		<div class="span4">
+			<h3 class="pull-left">${form.title} (<span id="entity-count-${index}"></span>)</h3>
+			<#if form.hasWritePermission>
+				<a id="create-${index}" style="margin:30px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
+					<img src="/img/new.png" />
+				</a>
+			</#if>
 		</div>
 				
-		<div class="data-table-pager-container span4" style="height: 80px">
+		<div class="data-table-pager-container span4">
 			<div id="data-table-pager-${index}" class="pagination pagination-centered"></div>
 		</div>
 		
-		<div class="span4" style="height: 78px;">
-			<#if form.hasWritePermission>
-				<div class="pull-right" style="vertical-align: bottom; height:78px;line-height:78px">
-					<a id="create-${index}" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
-						<img src="/img/new.png" />
-					</a>
-				</div>
-			</#if>
-		</div>
-		
+		<#if index==0>
+			<form class="form-search text-center pull-right" method="get" action="#">
+				<select id="query-fields">
+					<#list form.metaData.fields as field>
+						<#if field.type.enumType == 'STRING'>
+							<option id="${field.name}">${field.label}</option>
+						</#if>
+					</#list>
+				</select>
+				<select id="operators">
+					<option id="EQUALS">EQUALS</option>
+					<option id="NOT">NOT EQUALS</option>
+					<option id="LIKE">LIKE</option>
+				</select>
+				<div class="input-append">
+    				<input type="search" class="span8 search-query" name="q" placeholder="SEARCH">
+    				<button type="submit" class="btn"><i class="icon-search icon-large"></i> </button>
+  				</div>
+			</form>
+		</#if>				
 	</div>
 	
 	<div class="form-list-holder">
-		<table class="table table-striped table-bordered table-hover">
+		<table class="table table-striped table-bordered table-hover table-condensed">
 			<thead>
 				<tr>
 					<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><#-- Non breaking spaces are for fixing very annoying display error in chrome -->
@@ -38,6 +53,7 @@
 			</tbody>
 		</table>
 	</div>
+	
 </div>
 </#macro>
 
