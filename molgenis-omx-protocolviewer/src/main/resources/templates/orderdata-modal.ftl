@@ -157,6 +157,7 @@
 		});
 		
 		function order() {
+			showSpinner();
 			submitBtn.attr("disabled", true);
 			cancelBtn.attr("disabled", true);
 			$.ajax({
@@ -167,11 +168,13 @@
 			    contentType: false,
 			    processData: false,
 			    success: function () {
+					hideSpinner();
 					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
 					modal.modal('hide');
 			    },
 			    error: function() {
-			      alert("error"); // TODO display error message
+			    	hideSpinner();
+			      	alert("error"); // TODO display error message
 			    }
 			});
 		}
