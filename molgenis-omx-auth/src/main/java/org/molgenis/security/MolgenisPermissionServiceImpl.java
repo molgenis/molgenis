@@ -1,5 +1,7 @@
 package org.molgenis.security;
 
+import static org.molgenis.security.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
+import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
 import static org.molgenis.security.SecurityUtils.GRANTED_AUTHORITY_SU;
 
 import java.util.Collection;
@@ -14,13 +16,13 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 	@Override
 	public boolean hasPermissionOnPlugin(String pluginId, Permission permission)
 	{
-		return hasPermission(pluginId, permission, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		return hasPermission(pluginId, permission, AUTHORITY_PLUGIN_PREFIX);
 	}
 
 	@Override
 	public boolean hasPermissionOnEntity(String entityName, Permission permission)
 	{
-		return hasPermission(entityName, permission, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		return hasPermission(entityName, permission, AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private boolean hasPermission(String authorityId, Permission permission, String authorityPrefix)

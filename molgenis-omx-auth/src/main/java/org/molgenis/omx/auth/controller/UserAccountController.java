@@ -15,7 +15,7 @@ import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
 import org.molgenis.omx.auth.service.CaptchaService.CaptchaException;
 import org.molgenis.omx.auth.service.MolgenisUserException;
-import org.molgenis.omx.auth.service.MolgenisUserService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -40,6 +40,9 @@ public class UserAccountController extends MolgenisPluginController
 	@Autowired
 	private CaptchaService captchaService;
 
+	@Autowired
+	private MolgenisUserService molgenisUserService;
+
 	public UserAccountController()
 	{
 		super(URI);
@@ -48,8 +51,7 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String showAccount(Model model) throws DatabaseException
 	{
-		model.addAttribute("user", getCurrentUser());
-
+		model.addAttribute("user", molgenisUserService.getCurrentUser());
 		return "view-useraccount";
 	}
 
@@ -57,8 +59,6 @@ public class UserAccountController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateAccount(HttpServletRequest request) throws Exception
 	{
-		MolgenisUserService userService = MolgenisUserService.getInstance(database);
-
 		if (StringUtils.isNotEmpty(request.getParameter("oldpwd"))
 				|| StringUtils.isNotEmpty(request.getParameter("newpwd"))
 				|| StringUtils.isNotEmpty(request.getParameter("newpwd2")))
@@ -67,13 +67,13 @@ public class UserAccountController extends MolgenisPluginController
 			String newPwd1 = request.getParameter("newpwd");
 			String newPwd2 = request.getParameter("newpwd2");
 
-			userService.checkPassword(database.getLogin().getUserName(), oldPwd, newPwd1, newPwd2);
+			molgenisUserService.checkPassword(database.getLogin().getUserName(), oldPwd, newPwd1, newPwd2);
 		}
 
-		MolgenisUser user = userService.findById(database.getLogin().getUserId());
+		MolgenisUser user = molgenisUserService.findById(database.getLogin().getUserId());
 		MolgenisRequest molgenisRequest = new MolgenisRequest(request);
 		this.updateMolgenisUser(user, molgenisRequest);
-		userService.update(user);
+		molgenisUserService.update(user);
 	}
 
 	@ExceptionHandler(DatabaseAccessException.class)
@@ -112,15 +112,5 @@ public class UserAccountController extends MolgenisPluginController
 		if (StringUtils.isNotEmpty(request.getString("country"))) user.setCountry(request.getString("country"));
 
 		return user;
-	}
-
-	private MolgenisUser getCurrentUser() throws DatabaseException
-	{
-		return getMolgenisUserService().findById(database.getLogin().getUserId());
-	}
-
-	private MolgenisUserService getMolgenisUserService()
-	{
-		return MolgenisUserService.getInstance(database);
 	}
 }

@@ -1,9 +1,11 @@
 package org.molgenis.omx.auth.service;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -11,6 +13,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -36,22 +39,26 @@ public class AccountService
 	@Autowired
 	private JavaMailSender mailSender;
 
+	@Autowired
+	private MolgenisUserService molgenisUserService;
+
 	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
 	{
 		// collect activation info
 		String activationCode = UUID.randomUUID().toString();
-		String activationEmailAddress;
+		List<String> activationEmailAddresses;
 		switch (getActivationMode())
 		{
 			case ADMIN:
-				activationEmailAddress = MolgenisUserService.getInstance(database).findAdminEmail();
-				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new DatabaseException(
+				activationEmailAddresses = molgenisUserService.getSuEmailAddresses();
+				if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new DatabaseException(
 						"Administrator account is missing required email address");
 				break;
 			case USER:
-				activationEmailAddress = molgenisUser.getEmail();
+				String activationEmailAddress = molgenisUser.getEmail();
 				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new DatabaseException(
 						"User '" + molgenisUser.getUsername() + "' is missing required email address");
+				activationEmailAddresses = Arrays.asList(activationEmailAddress);
 				break;
 			default:
 				throw new RuntimeException("unknown activation mode: " + getActivationMode());
@@ -67,11 +74,13 @@ public class AccountService
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
 
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
-		mailMessage.setTo(activationEmailAddress);
+		mailMessage.setTo(activationEmailAddresses.toArray(new String[]
+		{}));
 		mailMessage.setSubject("User registration for " + getAppName());
 		mailMessage.setText(createActivationEmailText(molgenisUser, activationUri));
 		mailSender.send(mailMessage);
-		logger.debug("send activation email for user " + molgenisUser.getUsername() + " to " + activationEmailAddress);
+		logger.debug("send activation email for user " + molgenisUser.getUsername() + " to "
+				+ StringUtils.join(activationEmailAddresses, ','));
 	}
 
 	/**

@@ -42,7 +42,7 @@ public class SecurityUtils
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Object principal = authentication.getPrincipal();
 		if (!(principal instanceof UserDetails)) return ((UserDetails) principal).getUsername();
-		else return principal.toString();
+		else return ((UserDetails) principal).getUsername();
 	}
 
 	public static boolean isUserInRole(String... roles)

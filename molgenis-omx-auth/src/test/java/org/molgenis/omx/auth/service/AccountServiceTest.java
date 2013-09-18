@@ -25,6 +25,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,6 +67,12 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
 		}
 	}
 

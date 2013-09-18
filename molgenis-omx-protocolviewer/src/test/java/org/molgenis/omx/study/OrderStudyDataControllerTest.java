@@ -16,6 +16,7 @@ import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.order.OrderStudyDataController;
 import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -157,6 +158,12 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 			ShoppingCart shoppingCart = mock(ShoppingCart.class);
 			when(shoppingCart.getCart()).thenReturn(Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 			return shoppingCart;
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
 		}
 	}
 }

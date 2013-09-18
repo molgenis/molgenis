@@ -11,7 +11,10 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.MolgenisUserService;
+import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextException;
 
 /**
  * decorator for DataSetFilter, Checks for every read, update and delete operation if the user requesting the operation
@@ -19,9 +22,6 @@ import org.molgenis.omx.auth.service.MolgenisUserService;
  */
 public class StudyDataRequestDecorator<E extends StudyDataRequest> extends MapperDecorator<E>
 {
-
-	private MolgenisUserService userService;
-
 	public StudyDataRequestDecorator(Mapper<E> generatedMapper)
 	{
 		super(generatedMapper);
@@ -88,25 +88,6 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 		return entity;
 	}
 
-	private MolgenisUser getCurrentUser() throws DatabaseException
-	{
-		return getMolgenisUserService().findById(getDatabase().getLogin().getUserId());
-	}
-
-	public MolgenisUserService getMolgenisUserService()
-	{
-		if (userService == null)
-		{
-			userService = MolgenisUserService.getInstance(getDatabase());
-		}
-		return userService;
-	}
-
-	public void setMolgenisUserService(MolgenisUserService service)
-	{
-		this.userService = service;
-	}
-
 	public QueryRule[] addUserRule(QueryRule[] array) throws DatabaseException
 	{
 		MolgenisUser user = getCurrentUser();
@@ -151,6 +132,21 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 			return false;
 		}
 		return true;
+	}
+
+	private MolgenisUser getCurrentUser() throws DatabaseException
+	{
+		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+		if (applicationContext == null)
+		{
+			throw new RuntimeException(new ApplicationContextException("missing required application context"));
+		}
+		MolgenisUserService molgenisUserService = applicationContext.getBean(MolgenisUserService.class);
+		if (molgenisUserService == null)
+		{
+			throw new RuntimeException(new ApplicationContextException("missing required MolgenisUserService bean"));
+		}
+		return molgenisUserService.getCurrentUser();
 	}
 
 	@Override

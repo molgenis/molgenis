@@ -24,7 +24,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
@@ -58,6 +57,9 @@ public class OrderStudyDataService
 
 	@Autowired
 	private StudyManagerService studyManagerService;
+
+	@Autowired
+	private org.molgenis.security.user.MolgenisUserService molgenisUserService;
 
 	public void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds,
 			Integer userId) throws DatabaseException, MessagingException, IOException
@@ -107,7 +109,8 @@ public class OrderStudyDataService
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
-		helper.setBcc(MolgenisUserService.getInstance(database).findAdminEmail());
+		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
+		{}));
 		helper.setSubject("Order confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(studyDataRequest, appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));

@@ -28,6 +28,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
@@ -123,6 +124,12 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		public StudyManagerService studyManagerService()
 		{
 			return mock(StudyManagerService.class);
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
 		}
 	}
 

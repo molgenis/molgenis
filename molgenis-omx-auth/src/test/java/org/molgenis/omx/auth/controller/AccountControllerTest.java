@@ -21,6 +21,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -203,6 +204,12 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public CaptchaService captchaService()
 		{
 			return mock(CaptchaService.class);
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
 		}
 	}
 }

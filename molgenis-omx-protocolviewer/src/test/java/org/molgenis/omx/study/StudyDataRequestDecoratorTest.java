@@ -12,12 +12,13 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.security.Login;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.MolgenisUserService;
+import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.HandleRequestDelegationException;
+import org.springframework.context.ApplicationContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,12 +39,12 @@ public class StudyDataRequestDecoratorTest
 	private List<StudyDataRequest> userEntities;
 	private StudyDataRequest adminStudyDataRequest;
 	private StudyDataRequest userStudyDataRequest;
-	private Login login;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
+
 		allEntities = new ArrayList<StudyDataRequest>();
 		adminEntities = new ArrayList<StudyDataRequest>();
 		userEntities = new ArrayList<StudyDataRequest>();
@@ -54,12 +55,10 @@ public class StudyDataRequestDecoratorTest
 		when(mapper.findById(123)).thenReturn(adminStudyDataRequest);
 		when(mapper.findById(456)).thenReturn(userStudyDataRequest);
 		decorator = new StudyDataRequestDecorator<StudyDataRequest>(mapper);
-		login = mock(Login.class);
 		Database database = mock(Database.class);
 		userService = mock(MolgenisUserService.class);
 
 		when(mapper.getDatabase()).thenReturn(database);
-		when(database.getLogin()).thenReturn(login);
 		when(userService.findById(1)).thenReturn(admin);
 		when(admin.getSuperuser()).thenReturn(true);
 		when(admin.getId()).thenReturn(1);
@@ -67,7 +66,6 @@ public class StudyDataRequestDecoratorTest
 		when(user.getSuperuser()).thenReturn(false);
 		when(user.getId()).thenReturn(2);
 
-		decorator.setMolgenisUserService(userService);
 		// initially the set of query rules is empty
 		initialRules = new QueryRule[0];
 		// for user that are not superusers, a queryrule checking for the user is added
@@ -81,12 +79,17 @@ public class StudyDataRequestDecoratorTest
 		userEntities.add(userStudyDataRequest);
 		allEntities.add(adminStudyDataRequest);
 		allEntities.add(userStudyDataRequest);
+
+		ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getBean(org.molgenis.security.user.MolgenisUserService.class)).thenReturn(userService);
+		new ApplicationContextProvider().setApplicationContext(ctx);
 	}
 
 	@Test
 	public void findAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
+		// when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.find(initialRules);
 		verify(mapper).find(initialRules);
@@ -95,7 +98,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void find() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.find(initialRules);
 		verify(mapper).find(expectedUserRules);
@@ -104,7 +107,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void countAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.find(initialRules);
 		verify(mapper).find(initialRules);
@@ -113,7 +116,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void count() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.find(initialRules);
 		verify(mapper).find(expectedUserRules);
@@ -122,7 +125,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findWithWriterAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.find(writer, initialRules);
 		verify(mapper).find(writer, initialRules);
@@ -131,7 +134,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findWithWriter() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.find(writer, initialRules);
 		verify(mapper).find(writer, expectedUserRules);
@@ -140,7 +143,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void createFindSqlInclRulesAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.createFindSqlInclRules(initialRules);
 		verify(mapper).createFindSqlInclRules(initialRules);
@@ -149,7 +152,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void createFindSqlInclRules() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.createFindSqlInclRules(initialRules);
 		verify(mapper).createFindSqlInclRules(expectedUserRules);
@@ -158,7 +161,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findWithExportAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.find(writer, fieldsToExport, initialRules);
 		verify(mapper).find(writer, fieldsToExport, initialRules);
@@ -167,7 +170,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findWithExport() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.find(writer, fieldsToExport, initialRules);
 		verify(mapper).find(writer, fieldsToExport, expectedUserRules);
@@ -177,7 +180,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateOwnAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.update(adminEntities);
 	}
@@ -185,7 +188,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateOwn() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.update(userEntities);
 	}
@@ -193,7 +196,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void removeOwnAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.remove(adminEntities);
 	}
@@ -201,7 +204,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void removeOwn() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.remove(userEntities);
 	}
@@ -209,7 +212,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void ownFindByIdAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.findById(123);
 	}
@@ -217,7 +220,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void ownFindById() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.findById(456);
 	}
@@ -225,7 +228,7 @@ public class StudyDataRequestDecoratorTest
 	@Test()
 	public void updateOtherAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.update(userEntities);
 	}
@@ -233,7 +236,7 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseException.class)
 	public void updateOther() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.update(adminEntities);
 	}
@@ -241,7 +244,7 @@ public class StudyDataRequestDecoratorTest
 	@Test()
 	public void removeOtherAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.remove(userEntities);
 	}
@@ -249,7 +252,7 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseException.class)
 	public void removeOther() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.remove(adminEntities);
 	}
@@ -257,7 +260,7 @@ public class StudyDataRequestDecoratorTest
 	@Test()
 	public void otherFindByIdAdmin() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(1);
+		when(userService.getCurrentUser()).thenReturn(admin);
 
 		decorator.findById(456);
 	}
@@ -265,7 +268,7 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseException.class)
 	public void otherFindById() throws DatabaseException
 	{
-		when(login.getUserId()).thenReturn(2);
+		when(userService.getCurrentUser()).thenReturn(user);
 
 		decorator.findById(123);
 	}
