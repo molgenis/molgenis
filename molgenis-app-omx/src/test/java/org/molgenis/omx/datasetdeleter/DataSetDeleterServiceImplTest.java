@@ -207,10 +207,12 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		datasets.add(dataset);
 
 		@SuppressWarnings("unchecked")
-		Query<DataSet> query = mock(Query.class);
-		when(query.equals(DataSet.IDENTIFIER, "dataset1")).thenReturn(query);
-		when(query.find()).thenReturn(Arrays.asList(dataset));
-		when(database.query(DataSet.class)).thenReturn(query);
+		Query<DataSet> q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<DataSet> queryFound = mock(Query.class);
+		when(database.query(DataSet.class)).thenReturn(q);
+		when(q.eq(DataSet.IDENTIFIER, "dataset1")).thenReturn(queryFound);
+		when(queryFound.find()).thenReturn(Arrays.asList(dataset));
 
 		when(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, 0)))
 				.thenReturn(observedValues0);

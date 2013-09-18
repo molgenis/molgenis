@@ -23,7 +23,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.observ.DataSet;
@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(URI)
-public class DataExplorerController extends MolgenisPlugin
+public class DataExplorerController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);

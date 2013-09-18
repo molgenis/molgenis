@@ -8,8 +8,10 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
@@ -17,6 +19,7 @@ import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisPluginInterceptor;
 import org.molgenis.ui.MolgenisUi;
+import org.molgenis.ui.MolgenisUiPluginRegistry;
 import org.molgenis.ui.XmlMolgenisUi;
 import org.molgenis.ui.XmlMolgenisUiLoader;
 import org.molgenis.util.ApplicationContextProvider;
@@ -67,6 +70,9 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	private MolgenisSettings molgenisSettings;
 
 	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
 	private WebAppDatabasePopulatorService webAppDatabasePopulatorService;
 
 	@Override
@@ -89,7 +95,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		String pluginInterceptPattern = MolgenisPlugin.PLUGIN_URI_PREFIX + "**";
+		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 	}
 
@@ -213,12 +219,18 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		try
 		{
-			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, webInvocationPrivilegeEvaluator);
+			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
 		}
 		catch (IOException e)
 		{
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Bean
+	public MolgenisPluginRegistry molgenisPluginRegistry()
+	{
+		return new MolgenisUiPluginRegistry(molgenisUi());
 	}
 
 	@Bean

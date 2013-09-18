@@ -1,25 +1,23 @@
 package org.molgenis.ui;
 
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 
 public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 {
-	private final WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator;
 	private final PluginType pluginType;
 	private final MolgenisUiMenu parentMenu;
+	private final MolgenisPermissionService molgenisPermissionService;
 
-	public XmlMolgenisUiPlugin(WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator, PluginType pluginType,
-			MolgenisUiMenu parentMenu)
+	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu,
+			MolgenisPermissionService molgenisPermissionService)
 	{
-		if (webInvocationPrivilegeEvaluator == null) throw new IllegalArgumentException(
-				"WebInvocationPrivilegeEvaluator is null");
 		if (pluginType == null) throw new IllegalArgumentException("plugin type is null");
 		if (parentMenu == null) throw new IllegalArgumentException("parent menu is null");
-		this.webInvocationPrivilegeEvaluator = webInvocationPrivilegeEvaluator;
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.pluginType = pluginType;
 		this.parentMenu = parentMenu;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
@@ -31,8 +29,13 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	@Override
 	public String getName()
 	{
-		String label = pluginType.getLabel();
-		return label != null ? label : getId();
+		return pluginType.getName();
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return pluginType.getUrl();
 	}
 
 	@Override
@@ -44,8 +47,7 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	@Override
 	public boolean isAuthorized()
 	{
-		return webInvocationPrivilegeEvaluator.isAllowed(MolgenisPlugin.PLUGIN_URI_PREFIX + pluginType.getId(),
-				SecurityContextHolder.getContext().getAuthentication());
+		return molgenisPermissionService.hasPermissionOnPlugin(getId(), Permission.READ);
 	}
 
 	@Override

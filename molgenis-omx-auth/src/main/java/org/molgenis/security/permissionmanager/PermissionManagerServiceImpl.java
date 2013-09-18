@@ -12,6 +12,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.omx.auth.Authority;
@@ -35,16 +36,19 @@ import com.google.common.collect.Lists;
 public class PermissionManagerServiceImpl implements PermissionManagerService
 {
 	private final Database database;
+	private final MolgenisPluginRegistry molgenisPluginRegistry;
 
 	@Autowired
-	public PermissionManagerServiceImpl(Database database)
+	public PermissionManagerServiceImpl(Database database, MolgenisPluginRegistry molgenisPluginRegistry)
 	{
 		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("Molgenis plugin registry is null");
 		this.database = database;
+		this.molgenisPluginRegistry = molgenisPluginRegistry;
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<MolgenisUser> getUsers() throws DatabaseException
 	{
@@ -52,7 +56,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<MolgenisGroup> getGroups() throws DatabaseException
 	{
@@ -60,14 +64,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
-	public List<String> getPluginIds() throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
+	public List<MolgenisPlugin> getPlugins() throws DatabaseException
 	{
-		return new ArrayList<String>(MolgenisPluginRegistry.getInstance().getPluginIds());
+		return new ArrayList<MolgenisPlugin>(molgenisPluginRegistry.getPlugins());
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	public List<String> getEntityClassIds() throws DatabaseException
 	{
 		Vector<Entity> entities = database.getMetaData().getEntities(false, false);
@@ -78,7 +82,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<GroupAuthority> getGroupPluginPermissions(Integer groupId) throws DatabaseException
 	{
@@ -88,7 +92,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<GroupAuthority> getGroupEntityClassPermissions(Integer groupId) throws DatabaseException
 	{
@@ -98,7 +102,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<? extends Authority> getUserPluginPermissions(Integer userId) throws DatabaseException
 	{
@@ -106,7 +110,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_READ_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public List<? extends Authority> getUserEntityClassPermissions(Integer userId) throws DatabaseException
 	{
@@ -141,7 +145,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
 	@Transactional(rollbackFor = DatabaseException.class)
 	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
 			throws DatabaseException
@@ -150,7 +154,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
 	@Transactional(rollbackFor = DatabaseException.class)
 	public void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId)
 			throws DatabaseException
@@ -177,7 +181,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
 	@Transactional(rollbackFor = DatabaseException.class)
 	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
 			throws DatabaseException
@@ -186,7 +190,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_PLUGINPERMISSIONMANAGER_WRITE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
 	@Transactional(rollbackFor = DatabaseException.class)
 	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
 			throws DatabaseException

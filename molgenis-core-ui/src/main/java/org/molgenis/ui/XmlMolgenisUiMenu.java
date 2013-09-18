@@ -4,30 +4,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
+import org.molgenis.framework.server.MolgenisPermissionService;
 
 import com.google.common.collect.Lists;
 
 public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
-	private final WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator;
 	private final MenuType menuType;
 	private final MolgenisUiMenu parentMenu;
+	private final MolgenisPermissionService molgenisPermissionService;
 
-	public XmlMolgenisUiMenu(WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator, MenuType menuType)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisPermissionService molgenisPermissionService)
 	{
-		this(webInvocationPrivilegeEvaluator, menuType, null);
+		this(menuType, null, molgenisPermissionService);
 	}
 
-	public XmlMolgenisUiMenu(WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator, MenuType menuType,
-			MolgenisUiMenu parentMenu)
+	public XmlMolgenisUiMenu(MenuType menuType, MolgenisUiMenu parentMenu,
+			MolgenisPermissionService molgenisPermissionService)
 	{
-		if (webInvocationPrivilegeEvaluator == null) throw new IllegalArgumentException(
-				"molgenis permission service is null");
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
-		this.webInvocationPrivilegeEvaluator = webInvocationPrivilegeEvaluator;
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.menuType = menuType;
 		this.parentMenu = parentMenu;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
@@ -41,6 +40,12 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	{
 		String label = menuType.getLabel();
 		return label != null ? label : getId();
+	}
+
+	@Override
+	public String getUrl()
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -109,11 +114,11 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	{
 		if (menuItem instanceof MenuType)
 		{
-			return new XmlMolgenisUiMenu(webInvocationPrivilegeEvaluator, (MenuType) menuItem, this);
+			return new XmlMolgenisUiMenu((MenuType) menuItem, this, molgenisPermissionService);
 		}
 		else if (menuItem instanceof PluginType)
 		{
-			return new XmlMolgenisUiPlugin(webInvocationPrivilegeEvaluator, (PluginType) menuItem, this);
+			return new XmlMolgenisUiPlugin((PluginType) menuItem, this, molgenisPermissionService);
 		}
 		else throw new RuntimeException("unknown menu item type");
 	}

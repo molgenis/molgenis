@@ -4,8 +4,8 @@
 <#assign js=["permissionmanager.js"]>
 <@header css js/>
 	<div class="row-fluid">
-		<div class="span2"></div>
-		<div class="span8">
+		<div class="span1"></div>
+		<div class="span10">
 			<div class="row-fluid">
 				<div class="tabbable tabs-left">
 					<ul class="nav nav-tabs">
@@ -27,6 +27,6 @@
 				</div>
 			</div>
 		</div>
-		<div class="span2"></div>
+		<div class="span1"></div>
 	</div>
 <@footer/>

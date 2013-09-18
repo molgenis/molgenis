@@ -9,7 +9,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisRequest;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.service.AccountService;
 import org.molgenis.omx.auth.service.CaptchaService;
@@ -27,9 +27,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class UserAccountController extends MolgenisPlugin
+public class UserAccountController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "useraccount";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "useraccount";
 
 	@Autowired
 	private Database database;

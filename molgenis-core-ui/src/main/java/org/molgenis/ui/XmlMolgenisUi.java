@@ -2,15 +2,12 @@ package org.molgenis.ui;
 
 import java.io.IOException;
 
+import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
 
 public class XmlMolgenisUi implements MolgenisUi
 {
-	@Autowired
-	private final WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator;
-
 	static final String DEFAULT_APP_HREF_LOGO = "/img/logo_molgenis_letterbox.png";
 	static final String KEY_APP_NAME = "app.name";
 	static final String KEY_APP_HREF_LOGO = "app.href.logo";
@@ -18,18 +15,18 @@ public class XmlMolgenisUi implements MolgenisUi
 
 	private final Molgenis molgenisUi;
 	private final MolgenisSettings molgenisSettings;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, MolgenisSettings molgenisSettings,
-			WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator) throws IOException
+			MolgenisPermissionService molgenisPermissionService) throws IOException
 	{
 		if (xmlMolgenisUiLoader == null) throw new IllegalArgumentException("XmlMolgenisUiLoader is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
-		if (webInvocationPrivilegeEvaluator == null) throw new IllegalArgumentException(
-				"WebInvocationPrivilegeEvaluator is null");
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.molgenisUi = xmlMolgenisUiLoader.load();
 		this.molgenisSettings = molgenisSettings;
-		this.webInvocationPrivilegeEvaluator = webInvocationPrivilegeEvaluator;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
@@ -56,7 +53,7 @@ public class XmlMolgenisUi implements MolgenisUi
 	@Override
 	public MolgenisUiMenu getMenu()
 	{
-		return new XmlMolgenisUiMenu(webInvocationPrivilegeEvaluator, molgenisUi.getMenu());
+		return new XmlMolgenisUiMenu(molgenisUi.getMenu(), molgenisPermissionService);
 	}
 
 	@Override

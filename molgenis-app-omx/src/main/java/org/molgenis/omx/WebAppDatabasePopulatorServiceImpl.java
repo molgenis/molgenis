@@ -2,28 +2,33 @@ package org.molgenis.omx;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.security.Login;
+import org.molgenis.model.elements.Entity;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.omx.auth.util.PasswordHasher;
+import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService
 {
+	private static final String USERNAME_ADMIN = "admin";
+	private static final String USERNAME_USER = "user";
+
 	@PersistenceContext
 	private EntityManager em;
 
@@ -33,6 +38,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private String adminPassword;
 	@Value("${admin.email:molgenis+admin@gmail.com}")
 	private String adminEmail;
+	@Value("${user.password:@null}")
+	private String userPassword;
+	@Value("${user.email:molgenis+user@gmail.com}")
+	private String userEmail;
 
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(Database unsecuredDatabase)
@@ -47,13 +56,14 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	{
 		if (adminPassword == null) throw new RuntimeException(
 				"please configure the admin.password property in your molgenis-server.properties");
+		if (userPassword == null) throw new RuntimeException(
+				"please configure the user.password property in your molgenis-server.properties");
 
 		MolgenisUser userAdmin = new MolgenisUser();
-		userAdmin.setUsername(Login.USER_ADMIN_NAME);
-		userAdmin.setPassword(new PasswordHasher().toMD5(adminPassword)); // FIXME add user through service class
+		userAdmin.setUsername(USERNAME_ADMIN);
+		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword)); // FIXME add user through service
+																					// class
 		userAdmin.setEmail(adminEmail);
-		userAdmin.setFirstName(Login.USER_ADMIN_NAME);
-		userAdmin.setLastName(Login.USER_ADMIN_NAME);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
 
@@ -65,38 +75,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		unsecuredDatabase.add(suAuthority);
 
 		MolgenisUser user1 = new MolgenisUser();
-		user1.setUsername("user1");
-		user1.setPassword(new PasswordHasher().toMD5("user")); // FIXME add user through service class
-		user1.setEmail("user1@email.com");
-		user1.setFirstName("user");
-		user1.setLastName("user");
+		user1.setUsername(USERNAME_USER);
+		user1.setPassword(new BCryptPasswordEncoder().encode(userPassword)); // FIXME add user through service class
+		user1.setEmail(userEmail);
 		user1.setActive(true);
 		user1.setSuperuser(false);
-
-		List<Authority> user1Authorities = new ArrayList<Authority>();
-		UserAuthority user1Authority = new UserAuthority();
-		user1Authority.setMolgenisUser(user1);
-		user1Authority.setRole("ROLE_USER");
-		user1Authorities.add(user1Authority);
-
-		UserAuthority user1VoidAuthority = new UserAuthority();
-		user1VoidAuthority.setMolgenisUser(user1);
-		user1VoidAuthority.setRole("ROLE_PLUGIN_VOID_READ_USER");
-		user1Authorities.add(user1VoidAuthority);
-
-		UserAuthority user1HomeAuthority = new UserAuthority();
-		user1HomeAuthority.setMolgenisUser(user1);
-		user1HomeAuthority.setRole("ROLE_PLUGIN_HOME_WRITE_USER");
-		user1Authorities.add(user1HomeAuthority);
-
-		MolgenisUser user2 = new MolgenisUser();
-		user2.setUsername("user2");
-		user2.setPassword(new PasswordHasher().toMD5("user")); // FIXME add user through service class
-		user2.setEmail("user2@email.com");
-		user2.setFirstName("user");
-		user2.setLastName("user");
-		user2.setActive(true);
-		user2.setSuperuser(false);
 
 		List<Authority> user2Authorities = new ArrayList<Authority>();
 		UserAuthority user2Authority = new UserAuthority();
@@ -104,15 +87,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		user2Authority.setRole("ROLE_USER");
 		user2Authorities.add(user2Authority);
 
-		UserAuthority user2VoidAuthority = new UserAuthority();
-		user2VoidAuthority.setMolgenisUser(user2);
-		user2VoidAuthority.setRole("ROLE_PLUGIN_PROTOCOLVIEWER_WRITE_USER");
-		user2Authorities.add(user2VoidAuthority);
-
-		UserAuthority user2HomeAuthority = new UserAuthority();
-		user2HomeAuthority.setMolgenisUser(user2);
-		user2HomeAuthority.setRole("ROLE_PLUGIN_HOME_NONE_USER");
-		user2Authorities.add(user2HomeAuthority);
+		unsecuredDatabase.add(user1);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
 		usersGroup.setName("All Users");
@@ -121,22 +96,17 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		molgenisGroupMember1.setMolgenisGroup(usersGroup);
 		molgenisGroupMember1.setMolgenisUser(user1);
 
-		MolgenisGroupMember molgenisGroupMember2 = new MolgenisGroupMember();
-		molgenisGroupMember2.setMolgenisGroup(usersGroup);
-		molgenisGroupMember2.setMolgenisUser(user2);
-
-		GroupAuthority usersGroupAuthority = new GroupAuthority();
-		usersGroupAuthority.setMolgenisGroup(usersGroup);
-		usersGroupAuthority.setRole("ROLE_PLUGIN_PROTOCOLVIEWER_READ_USER");
-
-		unsecuredDatabase.add(user1);
-		unsecuredDatabase.add(user1Authorities);
-		unsecuredDatabase.add(user2);
-		unsecuredDatabase.add(user2Authorities);
 		unsecuredDatabase.add(usersGroup);
-		unsecuredDatabase.add(usersGroupAuthority);
 		unsecuredDatabase.add(molgenisGroupMember1);
-		unsecuredDatabase.add(molgenisGroupMember2);
+
+		Vector<Entity> entities = unsecuredDatabase.getMetaData().getEntities();
+		for (Entity entity : entities)
+		{
+			GroupAuthority entityAuthority = new GroupAuthority();
+			entityAuthority.setMolgenisGroup(usersGroup);
+			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entity.getName().toUpperCase());
+			unsecuredDatabase.add(entityAuthority);
+		}
 	}
 
 	@Override

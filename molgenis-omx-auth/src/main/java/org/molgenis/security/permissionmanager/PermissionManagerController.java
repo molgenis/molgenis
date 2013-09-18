@@ -6,18 +6,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.EntityClassPermission;
-import org.molgenis.security.PluginPermission;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,11 +40,11 @@ import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
-public class PermissionManagerController extends MolgenisPlugin
+public class PermissionManagerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(PermissionManagerController.class);
 
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "permissionmanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "permissionmanager";
 
 	private final PermissionManagerService pluginPermissionManagerService;
 
@@ -122,20 +124,18 @@ public class PermissionManagerController extends MolgenisPlugin
 			throws DatabaseException
 	{
 		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
-		for (String pluginId : pluginPermissionManagerService.getPluginIds())
+		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
 		{
-			String param = "radio-" + pluginId;
+			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equals(PluginPermission.READ.toString()) || value.equals(PluginPermission.WRITE.toString()))
+			if (value.equals(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equals(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
-				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + "_"
-						+ value.toUpperCase() + "_USER");
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
+						+ plugin.getId().toUpperCase());
+				System.out.println(authority.getRole());
 				authorities.add(authority);
-			}
-			else if (!value.equals(PluginPermission.NONE.toString()))
-			{
-				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
 		}
 		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, groupId);
@@ -151,17 +151,13 @@ public class PermissionManagerController extends MolgenisPlugin
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equals(EntityClassPermission.READ.toString())
-					|| value.equals(EntityClassPermission.WRITE.toString()))
+			if (value.equals(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equals(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + entityClassId.toUpperCase() + "_"
-						+ value.toUpperCase() + "_USER");
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
+						+ entityClassId.toUpperCase());
 				authorities.add(authority);
-			}
-			else if (!value.equals(EntityClassPermission.NONE.toString()))
-			{
-				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
 		}
 		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, groupId);
@@ -173,20 +169,17 @@ public class PermissionManagerController extends MolgenisPlugin
 			throws DatabaseException
 	{
 		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
-		for (String pluginId : pluginPermissionManagerService.getPluginIds())
+		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
 		{
-			String param = "radio-" + pluginId;
+			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equals(PluginPermission.READ.toString()) || value.equals(PluginPermission.WRITE.toString()))
+			if (value.equals(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equals(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
-				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + pluginId.toUpperCase() + "_"
-						+ value.toUpperCase() + "_USER");
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
+						+ plugin.getId().toUpperCase());
 				authorities.add(authority);
-			}
-			else if (!value.equals(PluginPermission.NONE.toString()))
-			{
-				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
 		}
 		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, userId);
@@ -202,17 +195,13 @@ public class PermissionManagerController extends MolgenisPlugin
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equals(EntityClassPermission.READ.toString())
-					|| value.equals(EntityClassPermission.WRITE.toString()))
+			if (value.equals(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equals(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + entityClassId.toUpperCase() + "_"
-						+ value.toUpperCase() + "_USER");
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
+						+ entityClassId.toUpperCase());
 				authorities.add(authority);
-			}
-			else if (!value.equals(EntityClassPermission.NONE.toString()))
-			{
-				throw new RuntimeException("Invalid value for paramater " + param + " value [" + value + "]");
 			}
 		}
 		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, userId);
@@ -234,11 +223,33 @@ public class PermissionManagerController extends MolgenisPlugin
 		Permissions permissions = new Permissions();
 		if (authorityPrefix.equals(SecurityUtils.AUTHORITY_PLUGIN_PREFIX))
 		{
-			permissions.setEntityIds(pluginPermissionManagerService.getPluginIds());
+			List<MolgenisPlugin> plugins = pluginPermissionManagerService.getPlugins();
+			if (plugins != null)
+			{
+				Collections.sort(plugins, new Comparator<MolgenisPlugin>()
+				{
+					@Override
+					public int compare(MolgenisPlugin o1, MolgenisPlugin o2)
+					{
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
+				Map<String, String> pluginMap = new LinkedHashMap<String, String>();
+				for (MolgenisPlugin plugin : plugins)
+					pluginMap.put(plugin.getId(), plugin.getName());
+				permissions.setEntityIds(pluginMap);
+			}
 		}
 		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
 		{
-			permissions.setEntityIds(pluginPermissionManagerService.getEntityClassIds());
+			List<String> entityClassIds = pluginPermissionManagerService.getEntityClassIds();
+			if (entityClassIds != null)
+			{
+				Map<String, String> entityClassMap = new TreeMap<String, String>();
+				for (String entityClassId : entityClassIds)
+					entityClassMap.put(entityClassId, entityClassId);
+				permissions.setEntityIds(entityClassMap);
+			}
 		}
 		else throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
 
@@ -266,22 +277,20 @@ public class PermissionManagerController extends MolgenisPlugin
 	private String getAuthorityEntityId(Authority authority, String authorityPrefix)
 	{
 		String role = authority.getRole().substring(authorityPrefix.length());
-		role = role.substring(0, role.length() - "_USER".length());
-		return role.substring(0, role.indexOf('_')).toLowerCase();
+		return role.substring(role.indexOf('_') + 1).toLowerCase();
 	}
 
 	private String getAuthorityType(Authority authority, String authorityPrefix)
 	{
 		String role = authority.getRole().substring(authorityPrefix.length());
-		role = role.substring(0, role.length() - "_USER".length());
-		return role.substring(role.indexOf('_') + 1).toLowerCase();
+		return role.substring(0, role.indexOf('_')).toLowerCase();
 	}
 
 	public static class Permissions
 	{
 		private Integer userId;
 		private Integer groupId;
-		private List<String> entityIds;
+		private Map<String, String> entityIds;
 		private Map<String, List<Permission>> userPermissionMap;
 		private Map<String, List<Permission>> groupPermissionMap;
 
@@ -305,12 +314,12 @@ public class PermissionManagerController extends MolgenisPlugin
 			this.groupId = groupId;
 		}
 
-		public List<String> getEntityIds()
+		public Map<String, String> getEntityIds()
 		{
 			return entityIds;
 		}
 
-		public void setEntityIds(List<String> entityIds)
+		public void setEntityIds(Map<String, String> entityIds)
 		{
 			this.entityIds = entityIds;
 		}
@@ -351,7 +360,6 @@ public class PermissionManagerController extends MolgenisPlugin
 
 		public void sort()
 		{
-			Collections.sort(entityIds);
 			if (userPermissionMap != null)
 			{
 				for (List<Permission> pluginPermissions : userPermissionMap.values())

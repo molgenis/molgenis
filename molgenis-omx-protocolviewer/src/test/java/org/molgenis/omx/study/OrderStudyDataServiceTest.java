@@ -144,11 +144,14 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		StudyDefinition studyDefinition = when(mock(StudyDefinition.class).getId()).thenReturn("1").getMock();
 		when(studyManagerService.persistStudyDefinition((StudyDefinition) any())).thenReturn(studyDefinition);
 
-		DataSet dataSet = mock(DataSet.class);
 		@SuppressWarnings("unchecked")
 		Query<DataSet> q = mock(Query.class);
-		when(q.find()).thenReturn(Collections.singletonList(dataSet));
+		@SuppressWarnings("unchecked")
+		Query<DataSet> qFound = mock(Query.class);
+		DataSet dataSet = mock(DataSet.class);
 		when(database.query(DataSet.class)).thenReturn(q);
+		when(q.eq(DataSet.IDENTIFIER, "1")).thenReturn(qFound);
+		when(qFound.find()).thenReturn(Collections.singletonList(dataSet));
 		Part requestForm = mock(Part.class);
 		when(requestForm.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]
 		{ 0, 1, 2 }));

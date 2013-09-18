@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.jpa.JpaDatabase;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.tuple.Tuple;
 import org.springframework.aop.framework.Advised;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @Controller
 @RequestMapping(URI)
-public class BarcodeController extends MolgenisPlugin
+public class BarcodeController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/barcode";
 

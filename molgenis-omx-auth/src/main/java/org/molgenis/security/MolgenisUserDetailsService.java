@@ -17,6 +17,7 @@ import org.molgenis.omx.auth.UserAuthority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,14 +31,17 @@ public class MolgenisUserDetailsService implements UserDetailsService
 {
 	protected final Database unsecuredDatabase;
 	protected final PasswordEncoder passwordEncoder;
+	protected final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public MolgenisUserDetailsService(Database unsecuredDatabase, PasswordEncoder passwordEncoder)
+	public MolgenisUserDetailsService(Database unsecuredDatabase, PasswordEncoder passwordEncoder,
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
 		if (passwordEncoder == null) throw new IllegalArgumentException("Password encoder is null");
 		this.passwordEncoder = passwordEncoder;
 		this.unsecuredDatabase = unsecuredDatabase;
+		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
 	}
 
 	@Override
@@ -76,8 +80,8 @@ public class MolgenisUserDetailsService implements UserDetailsService
 			Set<GrantedAuthority> allGrantedAuthorities = new HashSet<GrantedAuthority>();
 			if (grantedAuthorities != null) allGrantedAuthorities.addAll(grantedAuthorities);
 			if (grantedGroupAuthorities != null) allGrantedAuthorities.addAll(grantedGroupAuthorities);
-
-			return new User(user.getUsername(), user.getPassword(), allGrantedAuthorities);
+			return new User(user.getUsername(), user.getPassword(),
+					grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities));
 		}
 		catch (DatabaseException e)
 		{

@@ -7,7 +7,7 @@ import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
@@ -21,7 +21,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
 	{
-		MolgenisPlugin molgenisPlugin = validateHandler(handler);
+		MolgenisPluginController molgenisPlugin = validateHandler(handler);
 
 		// determine context url for this plugin if no context exists
 		String contextUrl = (String) request.getAttribute(MolgenisPluginAttributes.KEY_CONTEXT_URL);
@@ -46,7 +46,7 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	{
 		if (modelAndView != null)
 		{
-			MolgenisPlugin molgenisPlugin = validateHandler(handler);
+			MolgenisPluginController molgenisPlugin = validateHandler(handler);
 
 			// allow controllers that handle multiple plugins to set their plugin id
 			if (!modelAndView.getModel().containsKey(KEY_PLUGIN_ID))
@@ -58,17 +58,17 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		}
 	}
 
-	public MolgenisPlugin validateHandler(Object handler)
+	public MolgenisPluginController validateHandler(Object handler)
 	{
 		if (!(handler instanceof HandlerMethod))
 		{
 			throw new RuntimeException("handler is not of type " + HandlerMethod.class.getSimpleName());
 		}
 		Object bean = ((HandlerMethod) handler).getBean();
-		if (!(bean instanceof MolgenisPlugin))
+		if (!(bean instanceof MolgenisPluginController))
 		{
-			throw new RuntimeException("controller does not implement " + MolgenisPlugin.class.getSimpleName());
+			throw new RuntimeException("controller does not implement " + MolgenisPluginController.class.getSimpleName());
 		}
-		return (MolgenisPlugin) bean;
+		return (MolgenisPluginController) bean;
 	}
 }

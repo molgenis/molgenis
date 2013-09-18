@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.security.Login;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.ShoppingCart;
@@ -36,7 +36,7 @@ import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
-public class OrderStudyDataController extends MolgenisPlugin
+public class OrderStudyDataController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/study";
 

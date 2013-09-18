@@ -48,13 +48,19 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(database());
+			return new PermissionManagerServiceImpl(database(), molgenisPluginRegistry());
 		}
 
 		@Bean
 		public Database database()
 		{
 			return mock(Database.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
 		}
 	}
 
@@ -63,6 +69,9 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 	@Autowired
 	private Database database;
+
+	@Autowired
+	private MolgenisPluginRegistry molgenisPluginRegistry;
 
 	private GroupAuthority groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority;
 	private UserAuthority userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority;
@@ -148,15 +157,13 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		MolgenisPlugin plugin1 = when(mock(MolgenisPlugin.class).getId()).thenReturn("1").getMock();
 		MolgenisPlugin plugin2 = when(mock(MolgenisPlugin.class).getId()).thenReturn("2").getMock();
 		MolgenisPlugin plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
-		MolgenisPluginRegistry.getInstance().register(plugin1);
-		MolgenisPluginRegistry.getInstance().register(plugin2);
-		MolgenisPluginRegistry.getInstance().register(plugin3);
+		when(molgenisPluginRegistry.getPlugins()).thenReturn(Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void PluginPermissionManagerServiceImpl()
 	{
-		new PermissionManagerServiceImpl(null);
+		new PermissionManagerServiceImpl(null, null);
 	}
 
 	@Test
@@ -180,10 +187,10 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getPluginIds() throws DatabaseException
 	{
-		List<String> pluginIds = pluginPermissionManagerService.getPluginIds();
-		assertTrue(pluginIds.contains("1"));
-		assertTrue(pluginIds.contains("2"));
-		assertTrue(pluginIds.contains("3"));
+		List<MolgenisPlugin> pluginIds = pluginPermissionManagerService.getPlugins();
+		assertEquals(pluginIds.get(0).getId(), "1");
+		assertEquals(pluginIds.get(1).getId(), "2");
+		assertEquals(pluginIds.get(2).getId(), "3");
 		assertEquals(pluginIds.size(), 3);
 	}
 

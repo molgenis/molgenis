@@ -4,11 +4,11 @@
 	$(function() {
 		function createGroupPermissionTable(data) {
 			var items = [];
-			$.each(data.entityIds, function(idx, entityId) {
+			$.each(data.entityIds, function(entityId, entityName) {
 				if(data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
 					$.each(data.groupPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
-						items.push('<td>' + (idx == 0 ? entityId : '') + '</td>');
+						items.push('<td>' + (idx == 0 ? entityName : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
@@ -16,7 +16,7 @@
 					});
 				} else {
 					items.push('<tr>');
-					items.push('<td>' + entityId + '</td>');
+					items.push('<td>' + entityName + '</td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
@@ -29,18 +29,18 @@
 		function createUserPermissionTable(data) {
 			console.log(data);
 			var items = [];
-			$.each(data.entityIds, function(idx, entityId) {
+			$.each(data.entityIds, function(entityId, entityName) {
 				if(data.userPermissionMap && data.userPermissionMap[entityId.toLowerCase()]) {
 					$.each(data.userPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
-						items.push('<td>' + (idx == 0 ? entityId : '') + '</td>');
+						items.push('<td>' + (idx == 0 ? entityName : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
 					});
 				} else {
 					items.push('<tr>');
-					items.push('<td>' + entityId + '</td>');
+					items.push('<td>' + entityName + '</td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');

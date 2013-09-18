@@ -3,6 +3,7 @@ package org.molgenis.security.permissionmanager;
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
@@ -18,7 +19,7 @@ public interface PermissionManagerService
 
 	List<MolgenisGroup> getGroups() throws DatabaseException;
 
-	List<String> getPluginIds() throws DatabaseException;
+	List<MolgenisPlugin> getPlugins() throws DatabaseException;
 
 	List<String> getEntityClassIds() throws DatabaseException;
 

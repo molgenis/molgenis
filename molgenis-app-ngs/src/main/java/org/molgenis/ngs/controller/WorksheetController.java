@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.jpa.JpaDatabase;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.html.TupleTable;
 import org.molgenis.util.tuple.Tuple;
 import org.springframework.aop.framework.Advised;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class WorksheetController extends MolgenisPlugin
+public class WorksheetController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/worksheet";
 

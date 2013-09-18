@@ -6,7 +6,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,8 +38,8 @@ public class MolgenisPluginInterceptorTest
 	@Test
 	public void preHandle() throws Exception
 	{
-		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
-		MolgenisPlugin molgenisPlugin = new MolgenisPlugin(uri)
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
+		MolgenisPluginController molgenisPlugin = new MolgenisPluginController(uri)
 		{
 		};
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -54,8 +54,8 @@ public class MolgenisPluginInterceptorTest
 	@Test
 	public void preHandle_hasContextUrl() throws Exception
 	{
-		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
-		MolgenisPlugin molgenisPlugin = new MolgenisPlugin(uri)
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
+		MolgenisPluginController molgenisPlugin = new MolgenisPluginController(uri)
 		{
 		};
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -73,10 +73,10 @@ public class MolgenisPluginInterceptorTest
 	public void postHandle() throws Exception
 	{
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
-		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
-		when(handlerMethod.getBean()).thenReturn(new MolgenisPlugin(uri)
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPluginController(uri)
 		{
 		});
 		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
@@ -89,11 +89,11 @@ public class MolgenisPluginInterceptorTest
 	public void postHandle_pluginIdExists() throws Exception
 	{
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
-		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject(MolgenisPluginAttributes.KEY_PLUGIN_ID, "plugin_id");
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
-		when(handlerMethod.getBean()).thenReturn(new MolgenisPlugin(uri)
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPluginController(uri)
 		{
 		});
 		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
@@ -109,10 +109,10 @@ public class MolgenisPluginInterceptorTest
 		when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
-		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
-		when(handlerMethod.getBean()).thenReturn(new MolgenisPlugin(uri)
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPluginController(uri)
 		{
 		});
 		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
@@ -128,10 +128,10 @@ public class MolgenisPluginInterceptorTest
 		when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
 		MolgenisPluginInterceptor molgenisPluginInterceptor = new MolgenisPluginInterceptor(molgenisUi);
-		String uri = MolgenisPlugin.PLUGIN_URI_PREFIX + "test";
+		String uri = MolgenisPluginController.PLUGIN_URI_PREFIX + "test";
 		ModelAndView modelAndView = new ModelAndView();
 		HandlerMethod handlerMethod = mock(HandlerMethod.class);
-		when(handlerMethod.getBean()).thenReturn(new MolgenisPlugin(uri)
+		when(handlerMethod.getBean()).thenReturn(new MolgenisPluginController(uri)
 		{
 		});
 		molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);

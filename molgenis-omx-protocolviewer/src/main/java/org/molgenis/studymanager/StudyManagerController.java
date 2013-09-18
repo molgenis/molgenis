@@ -15,7 +15,7 @@ import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
 import org.molgenis.study.StudyDefinitionMeta;
@@ -38,11 +38,11 @@ import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(StudyManagerController.URI)
-public class StudyManagerController extends MolgenisPlugin
+public class StudyManagerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(StudyManagerController.class);
 
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "studymanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "studymanager";
 	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String VIEW_NAME = "view-studymanager";
 
@@ -210,7 +210,7 @@ public class StudyManagerController extends MolgenisPlugin
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(e);
+		logger.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
@@ -220,7 +220,7 @@ public class StudyManagerController extends MolgenisPlugin
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, String> handleException(Exception e)
 	{
-		logger.debug(e);
+		logger.debug(null, e);
 		return Collections.singletonMap("errorMessage", e.getMessage());
 	}
 }

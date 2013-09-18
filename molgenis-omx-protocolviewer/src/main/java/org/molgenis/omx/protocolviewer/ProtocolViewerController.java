@@ -20,7 +20,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.observ.DataSet;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(URI)
-public class ProtocolViewerController extends MolgenisPlugin
+public class ProtocolViewerController extends MolgenisPluginController
 {
 	public static final String URI = PLUGIN_URI_PREFIX + "protocolviewer";
 

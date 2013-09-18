@@ -11,7 +11,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.omx.auth.OmxPermissionService;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
@@ -91,7 +91,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		String pluginInterceptPattern = MolgenisPlugin.PLUGIN_URI_PREFIX + "**";
+		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 	}
 
