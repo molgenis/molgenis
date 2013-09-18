@@ -20,7 +20,26 @@ public class MolgenisEntityFormPluginInterceptor extends HandlerInterceptorAdapt
 	{
 		Map<String, Object> model = modelAndView.getModel();
 		EntityForm entityForm = (EntityForm) model.get(MolgenisEntityFormPluginController.ENTITY_FORM_MODEL_ATTRIBUTE);
-		String pluginId = MolgenisEntityFormPluginController.PLUGIN_NAME_PREFIX + entityForm.getMetaData().getName();
-		model.put(MolgenisPluginAttributes.KEY_PLUGIN_ID, pluginId);
+		StringBuilder pluginId = new StringBuilder(MolgenisEntityFormPluginController.PLUGIN_NAME_PREFIX
+				+ entityForm.getMetaData().getName());
+
+		if (request.getParameter("subForms") != null)
+		{
+			String[] subForms = request.getParameterValues("subForms");
+			for (int i = 0; i < subForms.length; i++)
+			{
+				if (i == 0)
+				{
+					pluginId.append("?");
+				}
+				else
+				{
+					pluginId.append("&");
+				}
+				pluginId.append("subForms=").append(subForms[i]);
+			}
+		}
+
+		model.put(MolgenisPluginAttributes.KEY_PLUGIN_ID, pluginId.toString());
 	}
 }
