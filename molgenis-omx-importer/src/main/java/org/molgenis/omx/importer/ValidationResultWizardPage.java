@@ -35,7 +35,6 @@ public class ValidationResultWizardPage extends WizardPage
 	{
 		ImportWizard importWizard = getWizard();
 		String entityImportOption = importWizard.getEntityImportOption();
-		System.out.println("entityImportOption=" + entityImportOption);
 
 		if (entityImportOption != null)
 		{

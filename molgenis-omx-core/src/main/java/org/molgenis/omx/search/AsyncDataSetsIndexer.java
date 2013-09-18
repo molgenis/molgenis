@@ -12,7 +12,6 @@ import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.protocol.ProtocolTable;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -95,10 +94,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	{
 		List<Integer> dataSetIds = new ArrayList<Integer>();
 
-		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
-			for (DataSet dataSet : unauthorizedDatabase.find(DataSet.class))
+			for (DataSet dataSet : unsecuredDatabase.find(DataSet.class))
 			{
 				if (!searchService.documentTypeExists(dataSet.getIdentifier()))
 				{
@@ -109,10 +107,6 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		catch (Exception e)
 		{
 			LOG.error("Exception index()", e);
-		}
-		finally
-		{
-			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 		}
 
 		if (!dataSetIds.isEmpty())
@@ -138,16 +132,15 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 
 		runningIndexProcesses.incrementAndGet();
-		Database unauthorizedDatabase = DatabaseUtil.createDatabase();
 		try
 		{
-			List<DataSet> dataSets = unauthorizedDatabase.query(DataSet.class).in(DataSet.ID, dataSetIds).find();
+			List<DataSet> dataSets = unsecuredDatabase.query(DataSet.class).in(DataSet.ID, dataSetIds).find();
 
 			for (DataSet dataSet : dataSets)
 			{
-				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unauthorizedDatabase));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unsecuredDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-						new ProtocolTable(dataSet.getProtocolUsed(), unauthorizedDatabase));
+						new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
 			}
 		}
 		catch (Exception e)
@@ -156,7 +149,6 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 		finally
 		{
-			DatabaseUtil.closeQuietly(unauthorizedDatabase);
 			runningIndexProcesses.decrementAndGet();
 		}
 	}
