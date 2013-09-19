@@ -94,7 +94,6 @@
 		            	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Your account has been updated.</div>'));
 		            },
 		           error:function (xhr, ajaxOptions, thrownError){ 
-		    			console.log(thrownError);
 		    			$('#plugin-container').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>An error occurred while updating your account.</div>'));  	 
 		        	}
 		        });
