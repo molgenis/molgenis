@@ -18,7 +18,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	protected void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac)
 	{
-		euac.antMatchers("/plugin/home/**").hasAnyAuthority(defaultPluginAuthorities("home"))
+		euac.antMatchers("/").permitAll()
+
+		.antMatchers("/plugin/home/**").hasAnyAuthority(defaultPluginAuthorities("home"))
 
 		.antMatchers("/plugin/protocolviewer/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 

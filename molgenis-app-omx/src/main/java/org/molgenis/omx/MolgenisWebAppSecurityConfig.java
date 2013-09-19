@@ -5,8 +5,8 @@ import javax.sql.DataSource;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.security.MolgenisPasswordEncoder;
-import org.molgenis.security.MolgenisPermissionServiceImpl;
-import org.molgenis.security.MolgenisUserDetailsService;
+import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -38,9 +38,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac = http.authorizeRequests();
 		configureUrlAuthorization(euac);
 
-		euac.antMatchers("/").permitAll()
-
-		.antMatchers("/login").permitAll()
+		euac.antMatchers("/login").permitAll()
 
 		.antMatchers("/account/**").permitAll()
 
