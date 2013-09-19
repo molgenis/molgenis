@@ -236,6 +236,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public StudyManagerService studyDefinitionManagerService()
 	{
-		return new OmxStudyManagerService(database);
+		return new OmxCatalogManagerService(database);
 	}
 }

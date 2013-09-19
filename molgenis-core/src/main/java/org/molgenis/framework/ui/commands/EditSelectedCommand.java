@@ -23,8 +23,7 @@ import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.WritableTuple;
 
 /**
- * This command shows a dialog to edit in batch It therefor uses a custom
- * template
+ * This command shows a dialog to edit in batch It therefor uses a custom template
  */
 public class EditSelectedCommand extends SimpleCommand
 {
@@ -83,7 +82,7 @@ public class EditSelectedCommand extends SimpleCommand
 						view.create().getIdField(), idList);
 				List<? extends Entity> entities = q.find();
 
-				db.beginTx();
+				// db.beginTx();
 				for (Entity e : entities)
 				{
 					row++;
@@ -91,21 +90,21 @@ public class EditSelectedCommand extends SimpleCommand
 					e.set(tuple, false);
 					db.update(e);
 				}
-				db.commitTx();
+				// db.commitTx();
 				msg = new ScreenMessage("MASS UPDATE SUCCESS: updated " + entities.size() + " rows", null, true);
 			}
 
 			catch (Exception e)
 			{
-				try
-				{
-					db.rollbackTx();
-				}
-				catch (DatabaseException e1)
-				{
-					logger.error("doMassUpdate() Should never happen: " + e1);
-					e1.printStackTrace();
-				}
+				// try
+				// {
+				// db.rollbackTx();
+				// }
+				// catch (DatabaseException e1)
+				// {
+				// logger.error("doMassUpdate() Should never happen: " + e1);
+				// e1.printStackTrace();
+				// }
 				msg = new ScreenMessage("MASS UPDATE FAILED on item '" + row + "': " + e, null, false);
 			}
 
