@@ -23,8 +23,7 @@ import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.WritableTuple;
 
 /**
- * This command shows a dialog to edit in batch It therefor uses a custom
- * template
+ * This command shows a dialog to edit in batch It therefor uses a custom template
  */
 public class EditSelectedCommand extends SimpleCommand
 {

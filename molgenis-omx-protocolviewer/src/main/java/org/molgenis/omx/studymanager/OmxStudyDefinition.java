@@ -25,19 +25,19 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public String getId()
 	{
-		return studyDataRequest.getIdentifier();
+		return getStudyDataRequest().getIdentifier();
 	}
 
 	@Override
 	public void setId(String id)
 	{
-		studyDataRequest.setIdentifier(id);
+		getStudyDataRequest().setIdentifier(id);
 	}
 
 	@Override
 	public String getName()
 	{
-		return studyDataRequest.getName();
+		return getStudyDataRequest().getName();
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public List<CatalogItem> getItems()
 	{
-		return Lists.transform(studyDataRequest.getFeatures(), new Function<ObservableFeature, CatalogItem>()
+		return Lists.transform(getStudyDataRequest().getFeatures(), new Function<ObservableFeature, CatalogItem>()
 		{
 			@Override
 			public CatalogItem apply(ObservableFeature observableFeature)
@@ -68,14 +68,14 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public List<String> getAuthors()
 	{
-		MolgenisUser molgenisUser = studyDataRequest.getMolgenisUser();
+		MolgenisUser molgenisUser = getStudyDataRequest().getMolgenisUser();
 		return Collections.singletonList(molgenisUser.getFirstName() + ' ' + molgenisUser.getLastName());
 	}
 
 	@Override
 	public String getAuthorEmail()
 	{
-		return studyDataRequest.getMolgenisUser().getEmail();
+		return getStudyDataRequest().getMolgenisUser().getEmail();
 	}
 
 	@Override
@@ -91,5 +91,10 @@ public class OmxStudyDefinition implements StudyDefinition
 			}
 		}
 		return contains;
+	}
+
+	public StudyDataRequest getStudyDataRequest()
+	{
+		return studyDataRequest;
 	}
 }
