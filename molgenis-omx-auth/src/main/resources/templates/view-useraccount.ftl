@@ -3,7 +3,7 @@
 <@header/>
 	<div class="row-fluid">
         Logged in as <b>${user.name}</b>
-		<form action="${context_url}/update" method="post">
+		<form id="account-form" action="${context_url}/update" method="post">
 	        <h4>Login information</h4>
 	
 	        <div style="clear:both; display:block" id="divoldpwd">
@@ -76,7 +76,48 @@
 	
 	        <div style="clear:both; display:block" id="divcountry">
 	            <label style="width:16em;float:left;" for="country">Country</label><input type="text" id="country" class="" name="country"  value="<#if user.country??>${user.country}</#if>">
-	        </div><button type="submit" class="btn btn-small" id="ChgUser">Apply changes</button>
-		</form>	
+	        </div>
+	        <a id="submit-button" class="btn">Apply changes</a>
+	   </form>	
 	</div>
+	<script type="text/javascript">
+  	$(function() {
+  		var submitBtn = $('#submit-button');
+  		var form = $('#account-form');
+  		form.validate();
+	    
+  		<#-- form events -->
+  		form.submit(function(e) {
+	    	e.preventDefault();
+	    	e.stopPropagation();
+	    	if(form.valid()) {
+	    		$('.text-error', form).remove();
+		        $.ajax({
+		            type: 'POST',
+		            url:  '${context_url}/update',
+		            data: form.serialize(),
+		            success: function () {
+		            	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Your account has been updated.</div>'));
+		            },
+		           error:function (xhr, ajaxOptions, thrownError){ 
+		    			console.log(thrownError);
+		    			$('#plugin-container').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>An error occurred while updating your account.</div>'));  	 
+		        	}
+		        });
+	        }
+	    });
+	    submitBtn.click(function(e) {
+	    	e.preventDefault();
+	    	e.stopPropagation();
+	    	form.submit();
+	    });
+		$('input', form).add(submitBtn).keydown(function(e) { <#-- use keydown, because keypress doesn't work cross-browser -->
+			if(e.which == 13) {
+	    		e.preventDefault();
+			    e.stopPropagation();
+				form.submit();
+	    	}
+		});
+    });
+</script>
 <@footer/>
