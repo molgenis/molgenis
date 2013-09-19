@@ -3,8 +3,8 @@ package org.molgenis.framework.ui.commands;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
@@ -82,7 +82,7 @@ public class EditSelectedCommand extends SimpleCommand
 						view.create().getIdField(), idList);
 				List<? extends Entity> entities = q.find();
 
-				// db.beginTx();
+				db.beginTx();
 				for (Entity e : entities)
 				{
 					row++;
@@ -90,21 +90,21 @@ public class EditSelectedCommand extends SimpleCommand
 					e.set(tuple, false);
 					db.update(e);
 				}
-				// db.commitTx();
+				db.commitTx();
 				msg = new ScreenMessage("MASS UPDATE SUCCESS: updated " + entities.size() + " rows", null, true);
 			}
 
 			catch (Exception e)
 			{
-				// try
-				// {
-				// db.rollbackTx();
-				// }
-				// catch (DatabaseException e1)
-				// {
-				// logger.error("doMassUpdate() Should never happen: " + e1);
-				// e1.printStackTrace();
-				// }
+				try
+				{
+					db.rollbackTx();
+				}
+				catch (DatabaseException e1)
+				{
+					logger.error("doMassUpdate() Should never happen: " + e1);
+					e1.printStackTrace();
+				}
 				msg = new ScreenMessage("MASS UPDATE FAILED on item '" + row + "': " + e, null, false);
 			}
 

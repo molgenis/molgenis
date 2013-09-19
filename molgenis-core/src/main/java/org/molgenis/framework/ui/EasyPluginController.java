@@ -70,53 +70,61 @@ public abstract class EasyPluginController<M extends ScreenModel> extends Simple
 			throws HandleRequestDelegationException
 	{
 
-		// try/catch for method calling
+		// try/catch for db.rollbackTx
 		try
 		{
-			// db.beginTx();
-			logger.debug("trying to use reflection to call " + this.getClass().getName() + "." + action);
-			Method m = this.getClass().getMethod(action, Database.class, MolgenisRequest.class);
-			m.invoke(this, db, request);
-			logger.debug("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
-					+ " completed");
-			// if (db.inTx()) db.commitTx();
-		}
-		catch (NoSuchMethodException e1)
-		{
-			if (out != null)
+			// try/catch for method calling
+			try
 			{
-				try
+				db.beginTx();
+				logger.debug("trying to use reflection to call " + this.getClass().getName() + "." + action);
+				Method m = this.getClass().getMethod(action, Database.class, MolgenisRequest.class);
+				m.invoke(this, db, request);
+				logger.debug("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
+						+ " completed");
+				if (db.inTx()) db.commitTx();
+			}
+			catch (NoSuchMethodException e1)
+			{
+				if (out != null)
 				{
-					// db.beginTx();
-					logger.debug("trying to use reflection to call " + this.getClass().getName() + "." + action);
-					Method m = this.getClass().getMethod(action, Database.class, MolgenisRequest.class,
-							OutputStream.class);
-					m.invoke(this, db, request, out);
-					logger.debug("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
-							+ " completed");
-					// if (db.inTx()) db.commitTx();
+					try
+					{
+						// db.beginTx();
+						logger.debug("trying to use reflection to call " + this.getClass().getName() + "." + action);
+						Method m = this.getClass().getMethod(action, Database.class, MolgenisRequest.class,
+								OutputStream.class);
+						m.invoke(this, db, request, out);
+						logger.debug("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
+								+ " completed");
+						if (db.inTx()) db.commitTx();
+					}
+					catch (Exception e)
+					{
+						this.getModel().setMessages(new ScreenMessage("Unknown action: " + action, false));
+						logger.error("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
+								+ "(db,tuple) failed: " + e1.getMessage());
+						e.printStackTrace();
+						db.rollbackTx();
+					}
 				}
-				catch (Exception e)
+				else
 				{
-					this.getModel().setMessages(new ScreenMessage("Unknown action: " + action, false));
-					logger.error("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
-							+ "(db,tuple) failed: " + e1.getMessage());
-					e.printStackTrace();
-					// db.rollbackTx();
+					logger.error(e1);
 				}
 			}
-			else
+			catch (Exception e)
 			{
-				logger.error(e1);
+				logger.error("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
+						+ " failed: " + e.getMessage());
+				e.printStackTrace();
+				this.getModel().setMessages(new ScreenMessage(e.getCause().getMessage(), false));
+				db.rollbackTx();
 			}
 		}
-		catch (Exception e)
+		catch (DatabaseException e)
 		{
-			logger.error("call of " + this.getClass().getName() + "(name=" + this.getName() + ")." + action
-					+ " failed: " + e.getMessage());
 			e.printStackTrace();
-			this.getModel().setMessages(new ScreenMessage(e.getCause().getMessage(), false));
-			// db.rollbackTx();
 		}
 	}
 

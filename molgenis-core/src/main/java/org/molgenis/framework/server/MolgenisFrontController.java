@@ -9,21 +9,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.RollingFileAppender;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.util.DatabaseUtil;
 
 public abstract class MolgenisFrontController extends HttpServlet implements MolgenisService
 {
@@ -58,7 +48,7 @@ public abstract class MolgenisFrontController extends HttpServlet implements Mol
 
 			// wrap request and response
 			MolgenisRequest req = new MolgenisRequest(request, response);
-			// req.setDatabase(DatabaseUtil.getDatabase());
+			req.setDatabase(DatabaseUtil.getDatabase());
 
 			// TODO: Bad, but needed for redirection. DISCUSS.
 			MolgenisResponse res = new MolgenisResponse(response);

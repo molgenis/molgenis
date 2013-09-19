@@ -19,9 +19,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -469,7 +468,7 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 
 		try
 		{
-			// db.beginTx();
+			db.beginTx();
 			entity.set(request, false);
 			int updatedRows = 0;
 			if (request.get(FormModel.INPUT_BATCHADD) != null && request.getInt(FormModel.INPUT_BATCHADD) > 1)
@@ -486,7 +485,7 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 				updatedRows = db.add(entity);
 
 			}
-			// db.commitTx();
+			db.commitTx();
 			msg = new ScreenMessage("ADD SUCCESS: affected " + updatedRows, null, true);
 			result = true;
 			// navigate to newly added record
@@ -495,7 +494,7 @@ public abstract class FormController<E extends Entity> extends SimpleScreenContr
 		}
 		catch (Exception e)
 		{
-			// db.rollbackTx();
+			db.rollbackTx();
 			msg = new ScreenMessage("ADD FAILED: " + e.getMessage(), null, false);
 			result = false;
 		}

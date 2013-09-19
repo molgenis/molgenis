@@ -123,17 +123,17 @@ public class AddXrefCommand<E extends Entity> extends AddCommand<E>
 			ScreenMessage msg = null;
 			try
 			{
-				// db.beginTx();
+				db.beginTx();
 				xrefEntity.set(request);
 				int updatedRows = db.add(xrefEntity);
-				// db.commitTx();
+				db.commitTx();
 				msg = new ScreenMessage("ADD SUCCESS: affected " + updatedRows, null, true);
 			}
 			catch (Exception e)
 			{
 				msg = new ScreenMessage("ADD FAILED: " + e.getMessage(), null, false);
 				e.printStackTrace();
-				// if (db.inTx()) db.rollbackTx();
+				if (db.inTx()) db.rollbackTx();
 			}
 			((FormController<?>) this.getController()).getModel().getMessages().add(msg);
 		}
