@@ -38,8 +38,8 @@ public abstract class EasyPluginController<M extends ScreenModel> extends Simple
 	}
 
 	/**
-	 * If a user sends a request it can be handled here. Default, it will be
-	 * automatically mapped to methods based request.getAction();
+	 * If a user sends a request it can be handled here. Default, it will be automatically mapped to methods based
+	 * request.getAction();
 	 * 
 	 * @throws HandleRequestDelegationException
 	 */

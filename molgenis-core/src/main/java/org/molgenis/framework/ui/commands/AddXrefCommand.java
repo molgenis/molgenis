@@ -79,10 +79,10 @@ public class AddXrefCommand<E extends Entity> extends AddCommand<E>
 						.get(i)
 						.setJavaScriptAction(
 								"if( validateForm(document.forms[0],molgenis_required) ) { if( window.opener.name == '' ){ window.opener.name = 'molgenis'+new Date().getTime();} var entity = postData(document.forms[0].entity_name.value); window.opener.setXrefOption(document.forms[0].__action.value, document.forms[0].id_field.value, document.forms[0].label_field.value, entity); window.close();} else return false;");
-				else
-					actions.get(i)
-							.setJavaScriptAction(
-									"if( $(this.form).valid() && validateForm(document.forms[0],molgenis_required) ) { if( window.opener.name == '' ){ window.opener.name = 'molgenis'+new Date().getTime();} var entity = postData(document.forms[0].entity_name.value); window.opener.setXrefOption(document.forms[0].__action.value, document.forms[0].id_field.value, document.forms[0].label_field.value, entity); ;window.close();} return false;");
+				else actions
+						.get(i)
+						.setJavaScriptAction(
+								"if( $(this.form).valid() && validateForm(document.forms[0],molgenis_required) ) { if( window.opener.name == '' ){ window.opener.name = 'molgenis'+new Date().getTime();} var entity = postData(document.forms[0].entity_name.value); window.opener.setXrefOption(document.forms[0].__action.value, document.forms[0].id_field.value, document.forms[0].label_field.value, entity); ;window.close();} return false;");
 			}
 		}
 		return actions;
