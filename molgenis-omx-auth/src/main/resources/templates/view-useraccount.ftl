@@ -7,21 +7,15 @@
 	        <h4>Login information</h4>
 	
 	        <div style="clear:both; display:block" id="divoldpwd">
-	            <label style="width:16em;float:left;" for="oldpwd">Old password</label><input type="password" class="text ui-widget-content ui-corner-all " id="oldpwd" name="oldpwd" value=""><script type="text/javascript">
-	$('#oldpwd').autoGrowInput({comfortZone: 16, minWidth:512, maxWidth: 4080});
-	            </script>
+	            <label style="width:16em;float:left;" for="oldpwd">Old password</label><input type="password" class="text ui-widget-content ui-corner-all " id="oldpwd" name="oldpwd" value="">
 	        </div>
 	
 	        <div style="clear:both; display:block" id="divnewpwd">
-	            <label style="width:16em;float:left;" for="newpwd">New password</label><input type="password" class="text ui-widget-content ui-corner-all " id="newpwd" name="newpwd" value=""><script type="text/javascript">
-	$('#newpwd').autoGrowInput({comfortZone: 16, minWidth:512, maxWidth: 4080});
-	            </script>
+	            <label style="width:16em;float:left;" for="newpwd">New password</label><input type="password" class="text ui-widget-content ui-corner-all " id="newpwd" name="newpwd" value="">
 	        </div>
 	
 	        <div style="clear:both; display:block" id="divnewpwd2">
-	            <label style="width:16em;float:left;" for="newpwd2">Repeat new password</label><input type="password" class="text ui-widget-content ui-corner-all " id="newpwd2" name="newpwd2" value=""><script type="text/javascript">
-	$('#newpwd2').autoGrowInput({comfortZone: 16, minWidth:512, maxWidth: 4080});
-	            </script>
+	            <label style="width:16em;float:left;" for="newpwd2">Repeat new password</label><input type="password" class="text ui-widget-content ui-corner-all " id="newpwd2" name="newpwd2" value="">
 	        </div>
 	
 	        <h4>Personal information</h4>
