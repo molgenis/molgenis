@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class OntologyMatcherDeleteRequest
+public class UpdateIndexRequest
 {
 	private Integer dataSetId;
 	private String documentType;
 	private List<String> documentIds;
 	private String updateScript;
 
-	public OntologyMatcherDeleteRequest(Integer dataSetId, String documentType, List<String> documentIds,
+	public UpdateIndexRequest(Integer dataSetId, String documentType, List<String> documentIds,
 			String updateScript)
 	{
 		this.dataSetId = dataSetId;

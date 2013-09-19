@@ -32,8 +32,9 @@ public class OntologyLoader
 	private OWLOntologyManager manager = null;
 	private Set<String> synonymsProperties;
 	{
-		synonymsProperties = new HashSet<String>(
-				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"));
+		synonymsProperties = new HashSet<String>(Arrays.asList(
+				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN",
+				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90"));
 	}
 
 	public OntologyLoader(String ontologyName, File ontologyFile) throws OWLOntologyCreationException

@@ -53,7 +53,17 @@ public class DisMaxQueryGenerator extends AbstractQueryRulePartGenerator
 		}
 		else
 		{
-			return new QueryStringQueryBuilder(LuceneQueryStringBuilder.buildQueryString(Arrays.asList(query)));
+			String value = query.getValue().toString();
+			boolean boost = false;
+			if (value.contains("(^3)"))
+			{
+				query.setValue(value.substring(0, value.length() - 4));
+				boost = true;
+			}
+			QueryStringQueryBuilder builder = new QueryStringQueryBuilder(
+					LuceneQueryStringBuilder.buildQueryString(Arrays.asList(query)));
+			if (boost) builder.boost((float) 3.0);
+			return builder;
 		}
 	}
 }

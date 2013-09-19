@@ -217,8 +217,8 @@ public class OpalToOMXConvertor
 	 */
 	public static void main(String[] args) throws IOException
 	{
-		new OpalToOMXConvertor("KORA",
-				"/Users/chaopang/Documents/Chao_Work/HarmonizationTestDataset/converted-OMX/KORA-OPAL.xlsx");
+		new OpalToOMXConvertor("Healthy Obese Project",
+				"/Users/chaopang/Documents/Chao_Work/HarmonizationTestDataset/converted-OMX/HOP-dictionary.xlsx");
 	}
 
 	class UniqueVariable

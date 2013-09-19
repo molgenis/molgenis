@@ -20,7 +20,10 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 
 	private OntologyLoader loader;
 	private Database db;
+	private final String ontologyIRI;
 	private final String NODE_PATH = "nodePath";
+	private final String BOOST = "boost";
+	private final String ONTOLOGY_IRI = "ontologyIRI";
 	private final String ONTOLOGY_TERM = "ontologyTerm";
 	private final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	private final String SYNONYMS = "ontologyTermSynonym";
@@ -30,6 +33,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	public OntologyTermTable(OntologyLoader loader, Database db)
 	{
 		this.loader = loader;
+		this.ontologyIRI = this.loader.getOntologyIRI();
 		setDb(db);
 	}
 
@@ -61,6 +65,8 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		{
 			KeyValueTuple tuple = new KeyValueTuple();
 			tuple.set(NODE_PATH, termPath);
+			tuple.set(BOOST, false);
+			tuple.set(ONTOLOGY_IRI, ontologyIRI);
 			tuple.set(ONTOLOGY_TERM, label);
 			tuple.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
 			tuple.set(ONTOLOGY_LABEL, model.getOntologyName());
@@ -99,6 +105,8 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	{
 		List<Field> columns = new ArrayList<Field>();
 		columns.add(new Field(NODE_PATH));
+		columns.add(new Field(BOOST));
+		columns.add(new Field(ONTOLOGY_IRI));
 		columns.add(new Field(ONTOLOGY_TERM));
 		columns.add(new Field(ONTOLOGY_TERM_IRI));
 		columns.add(new Field(ONTOLOGY_LABEL));

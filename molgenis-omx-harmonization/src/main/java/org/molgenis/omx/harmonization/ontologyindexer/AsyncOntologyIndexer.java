@@ -52,8 +52,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		{
 			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexTupleTable("ontology" + ontologyUri, new OntologyTable(model, db));
-			searchService.indexTupleTable("ontologyTerm" + ontologyUri, new OntologyTermTable(model, db));
+			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model, db));
+			searchService.indexTupleTable("ontologyTerm-" + ontologyUri, new OntologyTermTable(model, db));
 		}
 		catch (OWLOntologyCreationException e)
 		{

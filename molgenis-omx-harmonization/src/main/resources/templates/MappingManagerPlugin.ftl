@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["mapping-manager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "common-component.js", "mapping-manager.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "common-component.js", "mapping-manager.js", "jstat-1.0.0.min.js", "simple_statistics.js"]>
 <@header css js/>
 	<div class="row-fluid">
 		<div class="span12">

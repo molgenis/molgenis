@@ -27,7 +27,7 @@ import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
-import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcherDeleteRequest;
+import org.molgenis.omx.harmonization.ontologymatcher.UpdateIndexRequest;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -90,7 +90,7 @@ public class MappingManagerController extends MolgenisPlugin
 	@RequestMapping(method = RequestMethod.POST, value = "/delete", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteDocuments(@RequestBody
-	OntologyMatcherDeleteRequest request)
+	UpdateIndexRequest request)
 	{
 		try
 		{
@@ -105,7 +105,7 @@ public class MappingManagerController extends MolgenisPlugin
 	@RequestMapping(method = RequestMethod.POST, value = "/update", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateDocument(@RequestBody
-	OntologyMatcherDeleteRequest request)
+	UpdateIndexRequest request)
 	{
 		try
 		{
@@ -125,8 +125,8 @@ public class MappingManagerController extends MolgenisPlugin
 		requestString = URLDecoder.decode(requestString, "UTF-8");
 		logger.info("Download request: [" + requestString + "]");
 
-		OntologyMatcherDeleteRequest request = new GsonHttpMessageConverter().getGson().fromJson(requestString,
-				OntologyMatcherDeleteRequest.class);
+		UpdateIndexRequest request = new GsonHttpMessageConverter().getGson().fromJson(requestString,
+				UpdateIndexRequest.class);
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
 

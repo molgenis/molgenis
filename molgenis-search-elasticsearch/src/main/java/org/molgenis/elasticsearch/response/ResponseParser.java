@@ -65,6 +65,7 @@ public class ResponseParser
 				{
 					columnValueMap.put(entry.getKey(), entry.getValue());
 				}
+				columnValueMap.put("score", hit.getScore());
 			}
 
 			searchHits.add(new Hit(hit.id(), hit.type(), createHref(hit.id(), hit.type()), columnValueMap));

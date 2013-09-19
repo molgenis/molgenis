@@ -4,9 +4,7 @@ import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapper
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticSearchException;
@@ -252,8 +250,6 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentId);
 
 		String documentTypeSantized = sanitizeMapperType(documentType);
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("store_mapping_confirm_mapping", true);
 		UpdateResponse updateResponse = client.prepareUpdate(indexName, documentTypeSantized, documentId)
 				.setScript("ctx._source." + updateScript).execute().actionGet();
 

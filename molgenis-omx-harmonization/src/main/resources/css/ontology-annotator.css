@@ -71,7 +71,7 @@ td.feature-detail-td {
     overflow-y: auto;
 }
 
-.icon-remove{
+.float-right{
 	float : right;
 	right : 20px;
 	cursor: hand; 

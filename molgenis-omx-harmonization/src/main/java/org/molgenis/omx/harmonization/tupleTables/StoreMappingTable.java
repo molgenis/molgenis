@@ -1,6 +1,7 @@
 package org.molgenis.omx.harmonization.tupleTables;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,6 +37,10 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	private Database db;
 	private static final String OBSERVATION_SET = "observation_set";
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
+	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
+	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
+	private static final List<String> NON_XREF_FIELDS = Arrays.asList(STORE_MAPPING_ABSOLUTE_SCORE,
+			STORE_MAPPING_SCORE, STORE_MAPPING_CONFIRM_MAPPING);
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
 	private DataSet dataSet;
@@ -71,7 +76,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 				Integer observationId = ov.getObservationSet_Id();
 				if (storeMapping.containsKey(observationId)) tuple = storeMapping.get(observationId);
 				else tuple = new KeyValueTuple();
-				if (ov.getFeature_Identifier().equals(STORE_MAPPING_CONFIRM_MAPPING))
+				if (NON_XREF_FIELDS.contains(ov.getFeature_Identifier()))
 				{
 					tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
 				}
