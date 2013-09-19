@@ -1,13 +1,55 @@
 package org.molgenis.omx;
 
 import java.io.IOException;
-import java.nio.file.FileStore;
 import java.util.List;
 import java.util.Properties;
 
-import javax.annotation.Resource;
-
 import org.molgenis.DatabaseConfig;
+import org.molgenis.catalogmanager.CatalogManagerService;
+import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.security.Login;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.omx.auth.OmxPermissionService;
+import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
+import org.molgenis.omx.config.DataExplorerConfig;
+import org.molgenis.omx.studymanager.OmxStudyManagerService;
+import org.molgenis.search.SearchSecurityConfig;
+import org.molgenis.studymanager.StudyManagerService;
+import org.molgenis.ui.MolgenisPluginInterceptor;
+import org.molgenis.ui.MolgenisUi;
+import org.molgenis.ui.XmlMolgenisUi;
+import org.molgenis.ui.XmlMolgenisUiLoader;
+import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.AsyncJavaMailSender;
+import org.molgenis.util.FileStore;
+import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @Configuration
 @EnableWebMvc
