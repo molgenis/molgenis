@@ -56,7 +56,7 @@ input.error {
 
 .controls input[type=text],
 .select2-choice {
-	width: 500px;
+	min-width: 500px !important; 
 	height: 30px !important;/* for select2 */
 	font-size: 18px;
 }
