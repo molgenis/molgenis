@@ -189,6 +189,7 @@
 					updateFeatureSelection(node.tree);
 				},
 			});
+			container.find(".dynatree-checkbox").first().hide();
 		});
 	};
 	
