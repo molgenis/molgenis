@@ -15,7 +15,6 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.ui.html.render.LinkoutRenderDecorator;
 import org.molgenis.util.cmdline.CmdLineException;
 import org.molgenis.util.cmdline.CmdLineParser;
 import org.molgenis.util.cmdline.Option;
@@ -215,9 +214,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_BOT", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should BOT be generated. Default: false.")
 	public boolean generate_BOT = false;
-
-	@Option(name = "render_decorator", param = Option.Param.CLASS, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Applies an custom decoration of the HTML. Default: LinkoutRenderDecorator with linkouts for popular identifier to online databases")
-	public String render_decorator = LinkoutRenderDecorator.class.getName();
 
 	@Option(name = "generate_doc", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should documentation be generated. Default: true.")
 	public boolean generate_doc = true;

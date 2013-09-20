@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.framework.ui.html.HtmlWidget;
 import org.molgenis.util.ZipUtils;
 import org.molgenis.util.ZipUtils.DirectoryStructure;
 
