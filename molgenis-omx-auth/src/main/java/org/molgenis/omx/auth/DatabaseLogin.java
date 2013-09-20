@@ -15,7 +15,6 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.security.Login;
-import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
 
 @Deprecated
@@ -80,21 +79,6 @@ public class DatabaseLogin implements Login, Serializable
 
 	@Override
 	public boolean canRead(Entity entity) throws DatabaseException
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean canRead(ScreenController<?> screen) throws DatabaseException
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
-			throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;

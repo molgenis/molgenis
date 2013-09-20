@@ -16,7 +16,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
-import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -202,19 +201,6 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 
 			@Override
 			public boolean canRead(Entity entity) throws DatabaseException
-			{
-				return true;
-			}
-
-			@Override
-			public boolean canRead(ScreenController<?> screen) throws DatabaseException
-			{
-				return true;
-			}
-
-			@Override
-			public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
-					throws DatabaseException
 			{
 				return true;
 			}

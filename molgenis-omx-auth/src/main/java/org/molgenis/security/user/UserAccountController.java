@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.server.MolgenisRequest;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
@@ -69,9 +68,8 @@ public class UserAccountController extends MolgenisPluginController
 			molgenisUserService.checkPassword(SecurityUtils.getCurrentUsername(), oldPwd, newPwd1, newPwd2);
 		}
 
-		MolgenisUser user = MolgenisUser.findByUsername(database, SecurityUtils.getCurrentUsername());
-		MolgenisRequest molgenisRequest = new MolgenisRequest(request);
-		this.updateMolgenisUser(user, molgenisRequest);
+		MolgenisUser user = molgenisUserService.findById(database.getLogin().getUserId());
+		this.updateMolgenisUser(user, request);
 		molgenisUserService.update(user);
 	}
 
@@ -87,29 +85,30 @@ public class UserAccountController extends MolgenisPluginController
 	{
 	}
 
-	private MolgenisUser updateMolgenisUser(MolgenisUser user, MolgenisRequest request) throws MolgenisUserException,
-			DatabaseException
+	private MolgenisUser updateMolgenisUser(MolgenisUser user, HttpServletRequest request)
+			throws MolgenisUserException, DatabaseException
 	{
-		if (!StringUtils.equals(request.getString("newpwd"), request.getString("newpwd2"))) throw new MolgenisUserException(
+		if (!StringUtils.equals(request.getParameter("newpwd"), request.getParameter("newpwd2"))) throw new MolgenisUserException(
 				"Passwords do not match.");
+		if (StringUtils.isNotEmpty(request.getParameter("newpwd"))) user.setPassword(request.getParameter("newpwd"));
+		if (StringUtils.isNotEmpty(request.getParameter("emailaddress"))) user.setEmail(request
+				.getParameter("emailaddress"));
 
-		if (StringUtils.isNotEmpty(request.getString("newpwd"))) user.setPassword(request.getString("newpwd"));
-		if (StringUtils.isNotEmpty(request.getString("emailaddress"))) user.setEmail(request.getString("emailaddress"));
+		if (StringUtils.isNotEmpty(request.getParameter("phone"))) user.setPhone(request.getParameter("phone"));
+		if (StringUtils.isNotEmpty(request.getParameter("fax"))) user.setFax(request.getParameter("fax"));
+		if (StringUtils.isNotEmpty(request.getParameter("tollFreePhone"))) user.setTollFreePhone(request
+				.getParameter("tollFreePhone"));
+		if (StringUtils.isNotEmpty(request.getParameter("address"))) user.setAddress(request.getParameter("address"));
 
-		if (StringUtils.isNotEmpty(request.getString("phone"))) user.setPhone(request.getString("phone"));
-		if (StringUtils.isNotEmpty(request.getString("fax"))) user.setFax(request.getString("fax"));
-		if (StringUtils.isNotEmpty(request.getString("tollFreePhone"))) user.setTollFreePhone(request
-				.getString("tollFreePhone"));
-		if (StringUtils.isNotEmpty(request.getString("address"))) user.setAddress(request.getString("address"));
-
-		if (StringUtils.isNotEmpty(request.getString("title"))) user.setTitle(request.getString("title"));
-		if (StringUtils.isNotEmpty(request.getString("lastname"))) user.setLastName(request.getString("lastname"));
-		if (StringUtils.isNotEmpty(request.getString("firstname"))) user.setFirstName(request.getString("firstname"));
-		if (StringUtils.isNotEmpty(request.getString("department"))) user
-				.setDepartment(request.getString("department"));
-		if (StringUtils.isNotEmpty(request.getString("city"))) user.setCity(request.getString("city"));
-		if (StringUtils.isNotEmpty(request.getString("country"))) user.setCountry(request.getString("country"));
-
+		if (StringUtils.isNotEmpty(request.getParameter("title"))) user.setTitle(request.getParameter("title"));
+		if (StringUtils.isNotEmpty(request.getParameter("lastname"))) user
+				.setLastName(request.getParameter("lastname"));
+		if (StringUtils.isNotEmpty(request.getParameter("firstname"))) user.setFirstName(request
+				.getParameter("firstname"));
+		if (StringUtils.isNotEmpty(request.getParameter("department"))) user.setDepartment(request
+				.getParameter("department"));
+		if (StringUtils.isNotEmpty(request.getParameter("city"))) user.setCity(request.getParameter("city"));
+		if (StringUtils.isNotEmpty(request.getParameter("country"))) user.setCountry(request.getParameter("country"));
 		return user;
 	}
 }

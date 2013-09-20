@@ -11,7 +11,7 @@
 
 package ${package};
 
-import static org.molgenis.security.SecurityUtils.isUserInRole;
+import static org.molgenis.security.SecurityUtils.currentUserHasRole;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int add(List<E> entities) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -50,7 +50,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int update(List<E> entities) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -60,7 +60,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int remove(List<E> entities) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -70,7 +70,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int add(TupleReader reader, TupleWriter writer) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -80,7 +80,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int count(QueryRule... rules) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
 			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
@@ -90,7 +90,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public List<E> find(QueryRule ...rules) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
 			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
@@ -100,7 +100,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public void find(TupleWriter writer, QueryRule ...rules) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
 			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
@@ -110,7 +110,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public E findById(Object id) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
 			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
@@ -120,7 +120,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int remove(TupleReader reader) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -130,7 +130,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int update(TupleReader reader) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_WRITED_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_WRITED_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -140,7 +140,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -150,7 +150,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int executeAdd(List<? extends E> entities) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -160,7 +160,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int executeUpdate(List<? extends E> entities) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -170,7 +170,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int executeRemove(List<? extends E> entities) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -180,7 +180,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public void resolveForeignKeys(List<E> entities) throws ParseException, DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -190,7 +190,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public List<E> toList(TupleReader reader, int limit) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
@@ -200,7 +200,7 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public String createFindSqlInclRules(QueryRule[] rules) throws DatabaseException
 	{
-		if (!isUserInRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
 			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}	

@@ -63,11 +63,6 @@ import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.generators.sql.CountPerEntityGen;
 import org.molgenis.generators.sql.CountPerTableGen;
-import org.molgenis.generators.ui.EasyPluginControllerGen;
-import org.molgenis.generators.ui.FormControllerGen;
-import org.molgenis.generators.ui.HtmlFormGen;
-import org.molgenis.generators.ui.MenuControllerGen;
-import org.molgenis.generators.ui.PluginControllerGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
 
@@ -323,31 +318,6 @@ public class Molgenis
 		{
 			logger.info("Skipping R interface ....");
 		}
-
-		// HTML
-		if (options.generate_html)
-		{
-			generators.add(new HtmlFormGen());
-			generators.add(new FormControllerGen());
-			generators.add(new MenuControllerGen());
-		}
-		else
-		{
-			logger.info("Skipping HTML (HTML,Form,Menu,Tree) ....");
-		}
-
-		// SCREEN PLUGIN
-		if (options.generate_plugins)
-		{
-			generators.add(new EasyPluginControllerGen());
-		}
-		else
-		{
-			logger.info("Skipping generation of plugins ....");
-		}
-
-		// plugin controllers - always need these to map plugins in the GUI
-		generators.add(new PluginControllerGen());
 
 		// SOAP
 		if (options.generate_soap)
