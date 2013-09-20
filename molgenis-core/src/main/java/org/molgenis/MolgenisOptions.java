@@ -15,7 +15,6 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.ui.html.render.LinkoutRenderDecorator;
 import org.molgenis.util.cmdline.CmdLineException;
 import org.molgenis.util.cmdline.CmdLineParser;
 import org.molgenis.util.cmdline.Option;
@@ -216,9 +215,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_BOT", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should BOT be generated. Default: false.")
 	public boolean generate_BOT = false;
 
-	@Option(name = "render_decorator", param = Option.Param.CLASS, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Applies an custom decoration of the HTML. Default: LinkoutRenderDecorator with linkouts for popular identifier to online databases")
-	public String render_decorator = LinkoutRenderDecorator.class.getName();
-
 	@Option(name = "generate_doc", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should documentation be generated. Default: true.")
 	public boolean generate_doc = true;
 
@@ -246,9 +242,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_sql", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_sql = true;
 
-	@Option(name = "generate_html", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate HTML. Default: true")
-	public boolean generate_html = true;
-
 	@Option(name = "generate_rdf", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the RDF API. Default: true")
 	public boolean generate_rdf = true;
 
@@ -257,9 +250,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_soap", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the SOAP API. Default: true")
 	public boolean generate_soap = true;
-
-	@Option(name = "generate_plugins", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the Molgenis plugin API. Default: true")
-	public boolean generate_plugins = true;
 
 	@Option(name = "generate_mobile", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the Molgenis mobile GUI. Default: true")
 	public boolean generate_mobile = false;

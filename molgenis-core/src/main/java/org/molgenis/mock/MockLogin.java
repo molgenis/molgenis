@@ -7,7 +7,6 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.security.Login;
-import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Entity;
 import org.molgenis.util.HandleRequestDelegationException;
 
@@ -90,12 +89,6 @@ public class MockLogin implements Login
 	}
 
 	@Override
-	public boolean canRead(ScreenController<?> screen) throws DatabaseException
-	{
-		return false;
-	}
-
-	@Override
 	public boolean canWrite(Class<? extends Entity> entityClass) throws DatabaseException
 	{
 		return false;
@@ -128,12 +121,5 @@ public class MockLogin implements Login
 	@Override
 	public void setRedirect(String redirect)
 	{
-	}
-
-	@Override
-	public boolean canReadScreenController(Class<? extends ScreenController<?>> screenControllerClass)
-			throws DatabaseException
-	{
-		return false;
 	}
 }

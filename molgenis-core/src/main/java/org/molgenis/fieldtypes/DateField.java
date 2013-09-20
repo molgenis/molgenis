@@ -7,9 +7,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.DateInput;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 
 public class DateField extends FieldType
@@ -33,8 +30,7 @@ public class DateField extends FieldType
 	public String getJavaPropertyDefault()
 	{
 		if (f.isAuto()) return "new java.sql.Date(new java.util.Date().getTime())";
-		else
-			return getJavaAssignment(f.getDefaultValue());
+		else return getJavaAssignment(f.getDefaultValue());
 	}
 
 	@Override
@@ -71,12 +67,6 @@ public class DateField extends FieldType
 	public String getFormatString()
 	{
 		return "%s";
-	}
-
-	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassName) throws HtmlInputException
-	{
-		return new DateInput(name);
 	}
 
 	@Override

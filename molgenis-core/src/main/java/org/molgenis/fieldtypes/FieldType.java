@@ -6,23 +6,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 
 /**
- * Definition of a MOLGENIS field type. For example <field name="x"
- * type="string" would relate to type StringField
+ * Definition of a MOLGENIS field type. For example <field name="x" type="string" would relate to type StringField
  */
 public abstract class FieldType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * For xref purposes we sometimes need a handle of the field this type was
-	 * defined as part of.
+	 * For xref purposes we sometimes need a handle of the field this type was defined as part of.
 	 */
 	protected Field f;
 
@@ -39,8 +35,7 @@ public abstract class FieldType implements Serializable
 	}
 
 	/**
-	 * Get an entity from the field type (only works if the field type is linked
-	 * to a Field instance).
+	 * Get an entity from the field type (only works if the field type is linked to a Field instance).
 	 * 
 	 * @param name
 	 * @return
@@ -77,8 +72,8 @@ public abstract class FieldType implements Serializable
 	abstract public String getCppPropertyType() throws MolgenisModelException;
 
 	/**
-	 * Produce a valid Java snippet to set the default of a field, using the
-	 * 'getDefault' function of that field. Default: "\""+f.getDefault()+"\"".
+	 * Produce a valid Java snippet to set the default of a field, using the 'getDefault' function of that field.
+	 * Default: "\""+f.getDefault()+"\"".
 	 * 
 	 * @return default in java code
 	 * @throws MolgenisModelException
@@ -160,16 +155,6 @@ public abstract class FieldType implements Serializable
 	{
 		return this.getClass().getSimpleName().replace("Field", "").toLowerCase();
 	}
-
-	public HtmlInput<?> createInput(String name) throws HtmlInputException
-	{
-		return this.createInput(name, null);
-	}
-
-	public abstract HtmlInput<?> createInput(String name, String xrefEntityClassNames) throws HtmlInputException;
-
-	// public abstract HtmlInput<?> createInput(String name, Class<? extends
-	// Entity> xrefClass ) throws HtmlInputException;
 
 	public abstract String getCppJavaPropertyType() throws MolgenisModelException;
 
