@@ -242,9 +242,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_sql", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_sql = true;
 
-	@Option(name = "generate_html", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate HTML. Default: true")
-	public boolean generate_html = true;
-
 	@Option(name = "generate_rdf", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the RDF API. Default: true")
 	public boolean generate_rdf = true;
 
@@ -253,9 +250,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_soap", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the SOAP API. Default: true")
 	public boolean generate_soap = true;
-
-	@Option(name = "generate_plugins", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the Molgenis plugin API. Default: true")
-	public boolean generate_plugins = true;
 
 	@Option(name = "generate_mobile", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the Molgenis mobile GUI. Default: true")
 	public boolean generate_mobile = false;
