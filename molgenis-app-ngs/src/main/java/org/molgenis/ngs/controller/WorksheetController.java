@@ -7,7 +7,6 @@ import java.util.List;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.jpa.JpaDatabase;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.html.TupleTable;
 import org.molgenis.util.tuple.Tuple;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -68,8 +67,37 @@ public class WorksheetController extends MolgenisPlugin
 				"TargetDateShipment", "DataShippedDate", "DataShippedTo", "DataShippedBy", "Comments", "barcode",
 				"barcodeType");
 
-		model.addAttribute("table", new TupleTable("worksheet", currentRows));
+		model.addAttribute("table", toHtmlTable("worksheet", currentRows));
 
 		return "view-worksheet";
+	}
+
+	private String toHtmlTable(String tableName, List<Tuple> tuples)
+	{
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append("<div><table id=\"").append(tableName).append("\"><thead><tr>");
+
+		// header
+		if (!tuples.isEmpty()) for (String name : tuples.get(0).getColNames())
+		{
+			strBuilder.append("<th>").append(name).append("</th>");
+		}
+		strBuilder.append("</tr></thead><tbody>");
+
+		// body
+		for (Tuple t : tuples)
+		{
+			strBuilder.append("<tr>");
+
+			for (String name : t.getColNames())
+				strBuilder.append("<td>").append(t.isNull(name) ? "" : t.getString(name)).append("</td>");
+
+			strBuilder.append("</tr>");
+		}
+		strBuilder.append("</tbody></table><script>$('#");
+		strBuilder.append(tableName);
+		strBuilder
+				.append("').dataTable({'sDom': 'T<\"clear\">lfrtip','bJQueryUI': true,'sPaginationType': 'full_numbers','sScrollX': '100%','bScrollCollapse': true, 'oTableTools': {'sSwfPath': 'js/copy_csv_xls_pdf.swf'}});</script></div>");
+		return strBuilder.toString();
 	}
 }
