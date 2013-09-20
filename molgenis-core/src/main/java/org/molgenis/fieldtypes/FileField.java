@@ -4,9 +4,6 @@ import java.io.File;
 import java.text.ParseException;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.FileInput;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 
 public class FileField extends FieldType
@@ -60,12 +57,6 @@ public class FileField extends FieldType
 	public String getFormatString()
 	{
 		return "%s";
-	}
-
-	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassName) throws HtmlInputException
-	{
-		return new FileInput(name);
 	}
 
 	@Override

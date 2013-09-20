@@ -3,9 +3,6 @@ package org.molgenis.fieldtypes;
 import java.text.ParseException;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.EnumInput;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 
 public class EnumField extends FieldType
@@ -59,12 +56,6 @@ public class EnumField extends FieldType
 	public String getFormatString()
 	{
 		return "%s";
-	}
-
-	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassName) throws HtmlInputException
-	{
-		return new EnumInput(name);
 	}
 
 	@Override
