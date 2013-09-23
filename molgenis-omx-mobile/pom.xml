@@ -15,7 +15,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-omx-auth</artifactId>
+            <artifactId>molgenis-security</artifactId>
             <version>0.0.3-SNAPSHOT</version>
         </dependency>
 	</dependencies>
