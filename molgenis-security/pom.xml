@@ -5,7 +5,7 @@
 		<artifactId>molgenis</artifactId>
 		<version>0.0.3-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-omx-auth</artifactId>
+	<artifactId>molgenis-security</artifactId>
 	<packaging>jar</packaging>
 
 	<repositories>
