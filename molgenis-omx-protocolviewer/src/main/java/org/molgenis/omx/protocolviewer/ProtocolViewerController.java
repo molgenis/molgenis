@@ -20,11 +20,12 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(URI)
-public class ProtocolViewerController extends MolgenisPlugin
+public class ProtocolViewerController extends MolgenisPluginController
 {
 	public static final String URI = PLUGIN_URI_PREFIX + "protocolviewer";
 
@@ -62,7 +63,7 @@ public class ProtocolViewerController extends MolgenisPlugin
 
 		// create new model
 		ProtocolViewer protocolViewer = new ProtocolViewer();
-		protocolViewer.setAuthenticated(database.getLogin() != null ? database.getLogin().isAuthenticated() : false);
+		protocolViewer.setAuthenticated(SecurityUtils.currentUserIsAuthenticated());
 		protocolViewer.setDataSets(dataSets);
 
 		protocolViewer.setEnableDownloadAction(molgenisSettings.getBooleanProperty(KEY_ACTION_DOWNLOAD,

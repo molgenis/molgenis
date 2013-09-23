@@ -263,9 +263,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_options", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate use molgenis options. Default: true")
 	public boolean generate_options = true;
 
-	@Option(name = "generate_metadata", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate meta data. Default: true")
-	public boolean generate_metadata = true;
-
 	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
 	public boolean generate_db = true;
 

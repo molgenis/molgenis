@@ -42,6 +42,7 @@ import ${entity.namespace}.db.${JavaName(entity)}EntityImporter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class EntitiesImporterImpl implements EntitiesImporter
@@ -69,12 +70,14 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	}
 	
 	@Override
+	@Transactional(rollbackFor = {IOException.class, DatabaseException.class})
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException
 	{
 		return importEntities(TableReaderFactory.create(file), dbAction);
 	}
 
 	@Override
+	@Transactional(rollbackFor = {IOException.class, DatabaseException.class})
 	public EntityImportReport importEntities(List<File> files, DatabaseAction dbAction) throws IOException,
 			DatabaseException
 	{
@@ -82,6 +85,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	}
 	
 	@Override
+	@Transactional(rollbackFor = {IOException.class, DatabaseException.class})
 	public EntityImportReport importEntities(TupleReader tupleReader, String entityName, DatabaseAction dbAction) throws IOException, DatabaseException
 	{
 		final TupleReader reader = tupleReader;
@@ -114,13 +118,13 @@ public class EntitiesImporterImpl implements EntitiesImporter
 		}, dbAction);
 	}
 		
-	@Override	
+	@Override
+	@Transactional(rollbackFor = {IOException.class, DatabaseException.class})
 	public EntityImportReport importEntities(TableReader tableReader, DatabaseAction dbAction) throws IOException,
 			DatabaseException
 	{
 		EntityImportReport importReport = new EntityImportReport();
 
-		boolean doTx = !database.inTx();
 		try
 		{
 			// map entity names on tuple readers
@@ -129,8 +133,6 @@ public class EntitiesImporterImpl implements EntitiesImporter
 			{
 				tupleReaderMap.put(tableName.toLowerCase(), tableReader.getTupleReader(tableName));
 			}
-
-			if (doTx) database.beginTx();
 
 			// import entities in order defined by entities map
 			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
@@ -147,17 +149,6 @@ public class EntitiesImporterImpl implements EntitiesImporter
 					}
 				}
 			}
-			if (doTx) database.commitTx();
-		}
-		catch (IOException e)
-		{
-			if (doTx) database.rollbackTx();
-			throw e;
-		}
-		catch (DatabaseException e)
-		{
-			if (doTx) database.rollbackTx();
-			throw e;
 		}
 		finally
 		{

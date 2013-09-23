@@ -97,7 +97,7 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		@Bean
 		public MolgenisEntityFormPluginController molgenisEntityFormPluginController()
 		{
-			return new MolgenisEntityFormPluginController();
+			return new MolgenisEntityFormPluginController(database(), permissionService());
 		}
 	}
 }

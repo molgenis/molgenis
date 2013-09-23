@@ -1,87 +1,146 @@
 package ${package};
 
+import java.beans.PropertyVetoException;
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.List;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.sql.DataSource;
 
+import org.molgenis.SecuredJpaDatabase;
+import org.molgenis.UnsecuredJpaDatabase;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.jpa.JpaDatabase;
-import org.molgenis.framework.security.Login;
+import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.server.TokenFactory;
+import org.molgenis.util.Entity;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.EnableLoadTimeWeaving;
+import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.orm.jpa.JpaDialect;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
+import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.TransactionManagementConfigurer;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+/**
+ * Database configuration
+ */
 @Configuration
-public class DatabaseConfig
+@EnableTransactionManagement
+public class DatabaseConfig implements TransactionManagementConfigurer
 {
-	/**
-	 * Entitymanager-per-HTTP-request pattern in a multi-user client/server application authenticated for current user
-	 * 
-	 * @return
-	 * @throws DatabaseException
-	 */
-	@Bean(destroyMethod = "close")
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "request")
+	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
+
+	@Value("${r"${db_driver:@null}"}")
+	private String dbDriverClass;
+	@Value("${r"${db_uri:@null}"}")
+	private String dbJdbcUri;
+	@Value("${r"${db_user:@null}"}")
+	private String dbUser;
+	@Value("${r"${db_password:@null}"}")
+	private String dbPassword;
+		
+	@Bean
 	public Database database() throws DatabaseException
 	{
-		Database db = new ${package}.JpaDatabase(entityManagerFactory());
-		Login login = login();
-		// login with anonymous user if not logged in
-		if (login.getUserName() == null)
+		return new SecuredJpaDatabase(jdbcMetaDatabase());
+	}
+
+	@Bean
+	@Qualifier("unsecuredDatabase")
+	public Database unsecuredDatabase() throws DatabaseException
+	{
+		return new UnsecuredJpaDatabase(jdbcMetaDatabase());
+	}
+	
+	@Bean
+	public JDBCMetaDatabase jdbcMetaDatabase() throws DatabaseException
+	{
+		return new JDBCMetaDatabase();
+	}
+	
+	@Bean
+	public DataSource dataSource()
+	{
+		if(dbDriverClass == null) throw new IllegalArgumentException("db_driver is null");
+		if(dbJdbcUri == null) throw new IllegalArgumentException("db_uri is null");
+		if(dbUser == null) throw new IllegalArgumentException("db_user is null");
+		if(dbPassword == null) throw new IllegalArgumentException("db_password is null");
+		
+		ComboPooledDataSource dataSource = new ComboPooledDataSource();
+		try
 		{
-			try
-			{
-				login.login(db, Login.USER_ANONYMOUS_NAME, Login.USER_ANONYMOUS_PASSWORD);
-			}
-			catch (Exception e)
-			{
-				throw new DatabaseException(e);
-			}
+			dataSource.setDriverClass(dbDriverClass);
 		}
-		db.setLogin(login);
-		return db;
-	}
-
-	/**
-	 * Entitymanager-per-HTTP-request pattern in a multi-user client/server application authenticated for system user
-	 * 
-	 * @return
-	 * @throws DatabaseException
-	 */
-	@Bean(destroyMethod = "close")
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "request")
-	public Database unauthorizedDatabase() throws DatabaseException
-	{
-		return new ${package}.JpaDatabase(entityManagerFactory());
-	}
-	
-	/**
-	 * Entitymanager-per-bean-request pattern in a standalone application
-	 * Important: User is responsible for closing the Database instance
-	 * 
-	 * @return
-	 * @throws DatabaseException
-	 */
-	@Bean
-	@Scope("prototype")
-	public Database unauthorizedPrototypeDatabase() throws DatabaseException
-	{
-		return new ${package}.JpaDatabase(entityManagerFactory());
-	}
-	
-	@Bean(destroyMethod = "close")
-	public EntityManagerFactory entityManagerFactory()
-	{
-		return Persistence.createEntityManagerFactory(JpaDatabase.DEFAULT_PERSISTENCE_UNIT_NAME);
+		catch (PropertyVetoException e)
+		{
+			throw new RuntimeException(e);
+		}
+		dataSource
+				.setJdbcUrl(dbJdbcUri);
+		dataSource.setUser(dbUser);
+		dataSource.setPassword(dbPassword);
+		dataSource.setMinPoolSize(5);
+		dataSource.setMaxPoolSize(200);
+		dataSource.setTestConnectionOnCheckin(true);
+		dataSource.setIdleConnectionTestPeriod(120);
+		return dataSource;
 	}
 
 	@Bean
-	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "session")
-	public Login login()
+	public JpaDialect jpaDialect()
 	{
-		return new ${auth_loginclass}(tokenFactory());
+		return new EclipseLinkJpaDialect();
+	}
+
+	@Bean
+	public JpaVendorAdapter jpaVendorAdapter()
+	{
+		EclipseLinkJpaVendorAdapter eclipseLinkJpaVendorAdapter = new EclipseLinkJpaVendorAdapter();
+		return eclipseLinkJpaVendorAdapter;
+	}
+
+	@Bean
+	public FactoryBean<EntityManagerFactory> localEntityManagerFactoryBean()
+	{
+		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+		entityManagerFactoryBean.setPersistenceUnitName(DEFAULT_PERSISTENCE_UNIT_NAME);
+		entityManagerFactoryBean.setDataSource(dataSource());
+		entityManagerFactoryBean.setJpaDialect(jpaDialect());
+		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter());
+		entityManagerFactoryBean.setJpaPropertyMap(Collections.singletonMap("eclipselink.weaving", "false")); // TODO use load time weaving
+		// entityManagerFactoryBean.setLoadTimeWeaver(loadTimeWeaver); // TODO use load time weaving
+		return entityManagerFactoryBean;
+	}
+	
+	@Bean
+	public PlatformTransactionManager transactionManager()
+	{
+		return new JpaTransactionManager();
+	}
+	
+	@Override
+	public PlatformTransactionManager annotationDrivenTransactionManager()
+	{
+		return transactionManager();
 	}
 
 	@Bean

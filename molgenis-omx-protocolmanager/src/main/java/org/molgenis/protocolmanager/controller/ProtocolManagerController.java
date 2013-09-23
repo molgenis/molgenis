@@ -18,7 +18,7 @@ import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class ProtocolManagerController extends MolgenisPlugin
+public class ProtocolManagerController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/protocolmanager";
 	private static final Logger logger = Logger.getLogger(ProtocolManagerController.class);

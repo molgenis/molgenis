@@ -11,7 +11,7 @@ import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogModel;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -26,11 +26,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(CatalogManagerController.URI)
-public class CatalogManagerController extends MolgenisPlugin
+public class CatalogManagerController extends MolgenisPluginController
 {
 	private static final Logger LOG = Logger.getLogger(CatalogManagerController.class);
 
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "catalogmanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "catalogmanager";
 	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String VIEW_NAME = "view-catalogmanager";
 

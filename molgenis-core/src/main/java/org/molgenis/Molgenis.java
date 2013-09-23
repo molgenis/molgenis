@@ -48,7 +48,6 @@ import org.molgenis.generators.db.JpaDatabaseGen;
 import org.molgenis.generators.db.JpaMapperGen;
 import org.molgenis.generators.db.MapperDecoratorGen;
 import org.molgenis.generators.db.MapperSecurityDecoratorGen;
-import org.molgenis.generators.db.MolgenisDatabasePopulatorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
@@ -272,10 +271,6 @@ public class Molgenis
 				generators.add(new CountPerTableGen());
 			}
 
-			if (options.generate_metadata)
-			{
-				generators.add(new MolgenisDatabasePopulatorGen());
-			}
 			// authorization
 			if (!options.auth_loginclass.endsWith("SimpleLogin"))
 			{

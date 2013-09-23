@@ -6,7 +6,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 @RequestMapping(URI)
 @SessionAttributes(
 { "wizard" })
-public class ImportWizardController extends MolgenisPlugin
+public class ImportWizardController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/importwizard";
 	private static final String VIEW_NAME = "view-importwizard";

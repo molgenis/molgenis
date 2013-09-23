@@ -24,7 +24,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.MolgenisUserService;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
@@ -59,8 +58,11 @@ public class OrderStudyDataService
 	@Autowired
 	private StudyManagerService studyManagerService;
 
+	@Autowired
+	private org.molgenis.security.user.MolgenisUserService molgenisUserService;
+
 	public void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds,
-			Integer userId) throws DatabaseException, MessagingException, IOException
+			String username) throws DatabaseException, MessagingException, IOException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
 		if (requestForm == null) throw new IllegalArgumentException("request form is null");
@@ -72,7 +74,7 @@ public class OrderStudyDataService
 		if (features == null || features.isEmpty()) throw new DatabaseException("requested features do not exist");
 
 		DataSet dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
-		MolgenisUser molgenisUser = database.findById(MolgenisUser.class, userId);
+		MolgenisUser molgenisUser = MolgenisUser.findByUsername(database, username);
 
 		String appName = getAppName();
 
@@ -107,7 +109,8 @@ public class OrderStudyDataService
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
-		helper.setBcc(MolgenisUserService.getInstance(database).findAdminEmail());
+		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
+		{}));
 		helper.setSubject("Order confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(studyDataRequest, appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
@@ -126,10 +129,11 @@ public class OrderStudyDataService
 		return StudyDataRequest.findById(database, orderId);
 	}
 
-	public List<StudyDataRequest> getOrders(Integer userId) throws DatabaseException
+	public List<StudyDataRequest> getOrders(String username) throws DatabaseException
 	{
+		MolgenisUser molgenisUser = MolgenisUser.findByUsername(database, username);
 		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class, new QueryRule(
-				StudyDataRequest.MOLGENISUSER, Operator.EQUALS, userId));
+				StudyDataRequest.MOLGENISUSER, Operator.EQUALS, molgenisUser));
 		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
 	}
 

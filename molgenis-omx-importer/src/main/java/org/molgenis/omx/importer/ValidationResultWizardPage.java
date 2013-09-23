@@ -17,6 +17,7 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ApplicationUtil;
 import org.molgenis.util.DataSetImportedEvent;
+import org.springframework.transaction.annotation.Transactional;
 
 public class ValidationResultWizardPage extends WizardPage
 {
@@ -29,27 +30,36 @@ public class ValidationResultWizardPage extends WizardPage
 	}
 
 	@Override
+	@Transactional
 	public void handleRequest(Database db, HttpServletRequest request)
 	{
 		ImportWizard importWizard = getWizard();
 		String entityImportOption = importWizard.getEntityImportOption();
-		System.out.println("entityImportOption=" + entityImportOption);
 
 		if (entityImportOption != null)
 		{
-			doImport(db, entityImportOption);
+			try
+			{
+				doImport(db, entityImportOption);
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+			catch (DatabaseException e)
+			{
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
-	private void doImport(Database db, String entityAction)
+	private void doImport(Database db, String entityAction) throws IOException, DatabaseException
 	{
 		ImportWizard importWizard = getWizard();
 
 		File file = importWizard.getFile();
 		try
 		{
-			db.beginTx();
-
 			// convert input to database action
 			DatabaseAction entityDbAction = toDatabaseAction(entityAction);
 			if (entityDbAction == null) throw new IOException("unknown database action: " + entityAction);
@@ -66,26 +76,23 @@ public class ValidationResultWizardPage extends WizardPage
 				for (Entry<String, Boolean> entry : importWizard.getDataImportable().entrySet())
 					if (entry.getValue() == true) dataSetSheetNames.add("dataset_" + entry.getKey());
 
-				new DataSetImporter(db).importDataSet(file, dataSetSheetNames);
+				ApplicationContextProvider.getApplicationContext().getBean(DataSetImporterService.class)
+						.importDataSet(file, dataSetSheetNames);
 			}
 
 			importWizard.setSuccessMessage("File successfully imported.");
-
-			db.commitTx();
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			try
-			{
-				db.rollbackTx();
-			}
-			catch (DatabaseException e1)
-			{
-				logger.error("Exception rolling back transaction", e1);
-			}
-
 			logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityAction + "]", e);
 			importWizard.setValidationMessage("<b>Your import failed:</b><br />" + e.getMessage());
+			throw e;
+		}
+		catch (DatabaseException e)
+		{
+			logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityAction + "]", e);
+			importWizard.setValidationMessage("<b>Your import failed:</b><br />" + e.getMessage());
+			throw e;
 		}
 
 		// publish dataset imported event(s)
@@ -98,6 +105,7 @@ public class ValidationResultWizardPage extends WizardPage
 		catch (DatabaseException e)
 		{
 			logger.error("Error publishing " + DataSet.class.getSimpleName() + " imported event(s)");
+			throw e;
 		}
 	}
 

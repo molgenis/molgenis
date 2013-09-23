@@ -13,15 +13,14 @@ import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.SubQueryRule;
-import org.molgenis.framework.security.Login;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
 
 /**
- * Mock Database implementation for use in unittests. Use setEntities for define
- * entities to be returned by the query and find methods
+ * Mock Database implementation for use in unittests. Use setEntities for define entities to be returned by the query
+ * and find methods
  * 
  * Implement more methods if you need them.
  * 
@@ -33,8 +32,6 @@ public class MockDatabase implements Database
 	@SuppressWarnings("rawtypes")
 	private List entities;
 	private Model metaData;
-	private boolean inTransaction = false;
-	private Login login;
 
 	public MockDatabase()
 	{
@@ -45,8 +42,7 @@ public class MockDatabase implements Database
 	 * @param entities
 	 *            , to be returned by the find and query methods
 	 */
-	public MockDatabase(@SuppressWarnings("rawtypes")
-	List entities)
+	public MockDatabase(@SuppressWarnings("rawtypes") List entities)
 	{
 		super();
 		this.entities = entities;
@@ -77,30 +73,6 @@ public class MockDatabase implements Database
 	public Model getMetaData() throws DatabaseException
 	{
 		return metaData;
-	}
-
-	@Override
-	public void beginTx() throws DatabaseException
-	{
-		inTransaction = true;
-	}
-
-	@Override
-	public boolean inTx()
-	{
-		return inTransaction;
-	}
-
-	@Override
-	public void commitTx() throws DatabaseException
-	{
-		inTransaction = false;
-	}
-
-	@Override
-	public void rollbackTx() throws DatabaseException
-	{
-		inTransaction = false;
 	}
 
 	@Override
@@ -462,18 +434,6 @@ public class MockDatabase implements Database
 			throws DatabaseException
 	{
 		return entities;
-	}
-
-	@Override
-	public Login getLogin()
-	{
-		return login;
-	}
-
-	@Override
-	public void setLogin(Login login)
-	{
-		this.login = login;
 	}
 
 	@Override

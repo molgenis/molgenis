@@ -24,7 +24,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.cbm.CbmXmlParser;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.jaxb.CbmNode;
 import org.molgenis.jaxb.CollectionProtocol;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(URI)
-public class CbmToOmxConverterController extends MolgenisPlugin
+public class CbmToOmxConverterController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(CbmToOmxConverterController.class);
 
