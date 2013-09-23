@@ -125,8 +125,6 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 	@Override
 	public int update(List<E> entities) throws DatabaseException
 	{
-		// boolean dbAlreadyInTx = this.getDatabase().inTx();
-
 		genericAddUpdateChecks(entities);
 
 		// make sure the names within the imported list are allowed in
@@ -198,11 +196,6 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 						// skip rest of the function
 					}
 
-					// if (!dbAlreadyInTx)
-					// {
-					// this.getDatabase().beginTx();
-					// }
-
 					if (oldFile != null)
 					{
 
@@ -258,18 +251,10 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 	@Override
 	public int remove(List<E> entities) throws DatabaseException
 	{
-		// boolean dbAlreadyInTx = this.getDatabase().inTx();
-
 		// find backend file, and if exists, delete
 		int count = 0;
 		for (MolgenisFile mf : entities)
 		{
-
-			// if (!dbAlreadyInTx)
-			// {
-			// this.getDatabase().beginTx();
-			// }
-
 			try
 			{
 				try
@@ -277,8 +262,6 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 					// attempt delete, only catch FileNotFound (this is okay)
 					MolgenisFileHandler mfh = new MolgenisFileHandler(this.getDatabase());
 					mfh.deleteFile(mf, this.getDatabase());
-					// System.out.println("Deleted MolgenisFile: " +
-					// mf.toString());
 				}
 				catch (FileNotFoundException fnfe)
 				{
@@ -296,22 +279,11 @@ public class MolgenisFileDecorator<E extends MolgenisFile> extends MapperDecorat
 
 				// update record for just this file
 				super.remove(entities.subList(count, count + 1));
-
-				// commit and count
-				// if (!dbAlreadyInTx)
-				// {
-				// this.getDatabase().commitTx();
-				// }
-
 				count++;
 
 			}
 			catch (Exception e)
 			{
-				// if (!dbAlreadyInTx)
-				// {
-				// this.getDatabase().rollbackTx();
-				// }
 				throw new DatabaseException(e.getMessage());
 			}
 		}

@@ -13,7 +13,6 @@ import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.SubQueryRule;
-import org.molgenis.framework.security.Login;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
@@ -33,7 +32,6 @@ public class MockDatabase implements Database
 	@SuppressWarnings("rawtypes")
 	private List entities;
 	private Model metaData;
-	private Login login;
 
 	public MockDatabase()
 	{
@@ -436,18 +434,6 @@ public class MockDatabase implements Database
 			throws DatabaseException
 	{
 		return entities;
-	}
-
-	@Override
-	public Login getLogin()
-	{
-		return login;
-	}
-
-	@Override
-	public void setLogin(Login login)
-	{
-		this.login = login;
 	}
 
 	@Override

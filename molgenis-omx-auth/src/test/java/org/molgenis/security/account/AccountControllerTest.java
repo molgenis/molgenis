@@ -16,11 +16,8 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.account.AccountController;
-import org.molgenis.security.account.AccountService;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -64,9 +61,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		freeMarkerViewResolver.setSuffix(".ftl");
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
 				.setMessageConverters(new FormHttpMessageConverter()).build();
-		Login login = mock(Login.class);
-		when(login.login(database, "admin", "adminpw")).thenReturn(true);
-		when(database.getLogin()).thenReturn(login);
+
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
 	}

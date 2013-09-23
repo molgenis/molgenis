@@ -21,7 +21,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.io.TupleReader;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.io.TupleWriter;

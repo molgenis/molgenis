@@ -22,7 +22,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.molgenis.framework.security.Login;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
@@ -356,20 +355,6 @@ public interface Database extends Closeable
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public <E extends Entity> List<E> toList(Class<E> klazz, TupleReader reader, int noEntities)
 			throws DatabaseException;
-
-	/**
-	 * Return the security strategy object that takes care of authorization in this Database.
-	 * 
-	 * Deprecated, use getLogin() instead
-	 */
-	public Login getLogin();
-
-	/**
-	 * Set the Login.
-	 * 
-	 * @param login
-	 */
-	public void setLogin(Login login);
 
 	/**
 	 * Retrieve the full class object for an entity name. For example: "Experiment" may produce a

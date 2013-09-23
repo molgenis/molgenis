@@ -14,7 +14,6 @@ import org.molgenis.UnsecuredJpaDatabase;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.TokenFactory;
 import org.molgenis.util.Entity;
 import org.springframework.beans.factory.FactoryBean;
@@ -142,103 +141,6 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	public PlatformTransactionManager annotationDrivenTransactionManager()
 	{
 		return transactionManager();
-	}
-	
-	@Bean
-	public Login login()
-	{
-		return new Login()
-		{
-
-			private String name;
-
-			@Override
-			public boolean login(Database db, String name, String password) throws Exception
-			{
-				this.name = name;
-				return true;
-			}
-
-			@Override
-			public void logout(Database db) throws Exception
-			{
-			}
-
-			@Override
-			public void reload(Database db) throws DatabaseException, ParseException, Exception
-			{
-			}
-
-			@Override
-			public boolean isAuthenticated()
-			{
-				return true;
-			}
-
-			@Override
-			public String getUserName()
-			{
-				return name;
-			}
-
-			@Override
-			public Integer getUserId()
-			{
-				return null;
-			}
-
-			@Override
-			public boolean isLoginRequired()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean canRead(Class<? extends Entity> entityClass) throws DatabaseException
-			{
-				return true;
-			}
-
-			@Override
-			public boolean canRead(Entity entity) throws DatabaseException
-			{
-				return true;
-			}
-
-			@Override
-			public boolean canWrite(Class<? extends Entity> entityClass) throws DatabaseException
-			{
-				return true;
-			}
-
-			@Override
-			public boolean canWrite(Entity entity) throws DatabaseException
-			{
-				return true;
-			}
-
-			@Override
-			public QueryRule getRowlevelSecurityFilters(Class<? extends Entity> klazz)
-			{
-				return null;
-			}
-
-			@Override
-			public String getRedirect()
-			{
-				return null;
-			}
-
-			@Override
-			public void setAdmin(List<? extends Entity> entities, Database db) throws DatabaseException
-			{
-			}
-
-			@Override
-			public void setRedirect(String redirect)
-			{
-			}
-		};
 	}
 
 	@Bean

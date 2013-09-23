@@ -68,7 +68,7 @@ public class UserAccountController extends MolgenisPluginController
 			molgenisUserService.checkPassword(SecurityUtils.getCurrentUsername(), oldPwd, newPwd1, newPwd2);
 		}
 
-		MolgenisUser user = molgenisUserService.findById(database.getLogin().getUserId());
+		MolgenisUser user = MolgenisUser.findByUsername(database, SecurityUtils.getCurrentUsername());
 		this.updateMolgenisUser(user, request);
 		molgenisUserService.update(user);
 	}
