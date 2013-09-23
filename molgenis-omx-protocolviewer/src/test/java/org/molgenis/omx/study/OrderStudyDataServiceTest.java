@@ -234,6 +234,7 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(orders.get(1).getId(), Integer.valueOf(1));
 	}
 
+	// FIXME mockito does not work, enable test after mockito update
 	// @Test
 	// public void getOrdersString() throws DatabaseException
 	// {
