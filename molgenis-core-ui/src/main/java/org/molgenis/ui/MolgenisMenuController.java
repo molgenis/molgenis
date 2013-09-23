@@ -8,7 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,7 +83,7 @@ public class MolgenisMenuController
 	private String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		strBuilder.append(MolgenisPlugin.PLUGIN_URI_PREFIX).append(pluginId);
+		strBuilder.append(MolgenisPluginController.PLUGIN_URI_PREFIX).append(pluginId);
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
 	}
@@ -93,10 +93,10 @@ public class MolgenisMenuController
 	 */
 	@Controller
 	@RequestMapping(VoidPluginController.URI)
-	public static class VoidPluginController extends MolgenisPlugin
+	public static class VoidPluginController extends MolgenisPluginController
 	{
 		public static final String ID = "void";
-		public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + ID;
+		public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 		public VoidPluginController()
 		{

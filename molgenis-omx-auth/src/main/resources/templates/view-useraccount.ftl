@@ -2,8 +2,8 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 	<div class="row-fluid">
-        Logged in as <b>${user.name}</b>
-		<form id="account-form" action="${context_url}/update" method="post">
+        Logged in as <b>${user.username}</b>
+		<form id="account-form"action="${context_url}/update" method="post">
 	        <h4>Login information</h4>
 	
 	        <div style="clear:both; display:block" id="divoldpwd">

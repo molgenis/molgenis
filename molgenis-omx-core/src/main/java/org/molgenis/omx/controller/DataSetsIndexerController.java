@@ -12,7 +12,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(URI)
-public class DataSetsIndexerController extends MolgenisPlugin
+public class DataSetsIndexerController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "dataindexer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "dataindexer";
 
 	public DataSetsIndexerController()
 	{

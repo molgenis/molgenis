@@ -29,13 +29,13 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 	static class Config
 	{
 		@Bean
-		public MolgenisDbSettings molgenisDbSettings()
+		public MolgenisDbSettings molgenisDbSettings() throws DatabaseException
 		{
-			return new MolgenisDbSettings();
+			return new MolgenisDbSettings(unsecuredDatabase());
 		}
 
 		@Bean
-		public Database unauthorizedDatabase() throws DatabaseException
+		public Database unsecuredDatabase() throws DatabaseException
 		{
 			Database database = mock(Database.class);
 

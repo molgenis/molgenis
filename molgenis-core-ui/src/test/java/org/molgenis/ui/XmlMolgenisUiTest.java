@@ -65,16 +65,12 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 	private MolgenisSettings molgenisSettings;
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
-
-	@Autowired
 	private Molgenis molgenis;
 
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
 		reset(molgenisSettings);
-		reset(molgenisPermissionService);
 	}
 
 	@Test

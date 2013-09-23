@@ -47,7 +47,9 @@
 				<div class="span1">
 					<div id="login-modal-container-header"></div>
 					<#if authenticated?? && authenticated>
-						<a class="pull-right" href="/account/logout"><button class="btn btn-link">Sign out</button></a>
+						<form method="post" action="/logout">
+							<button class="btn btn-link pull-right" type="submit">Sign out</button>
+						</form>
 					<#else>
 						<a class="modal-href pull-right" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
 					</#if>
@@ -64,7 +66,7 @@
 			<#if item.id == plugin_id>
 					<li class="active"><a href="#">${item.name?html}</a></li>
 			<#else>
-					<li><a href="/menu/${menu.id?html}/${item.id?html}">${item.name?html}</a></li>
+					<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
 			</#if>
 		<#elseif item.type == "MENU">
 			<#assign sub_menu = item>
@@ -73,7 +75,7 @@
 						<ul class="dropdown-menu">
 			<#list sub_menu.items as item>
 				<#if item.type != "MENU">
-							<li><a href="/menu/${sub_menu.id?html}/${item.id?html}">${item.name?html}</a></li>
+							<li><a href="/menu/${sub_menu.id?html}/${item.url?html}">${item.name?html}</a></li>
 				<#elseif item.type == "MENU">
 							<li><a href="/menu/${item.id?html}">${item.name?html}</a></li>
 				</#if>

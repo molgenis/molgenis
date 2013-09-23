@@ -414,13 +414,8 @@ function hideSpinner()
     }
     return 0;
 }
- $(function() {
-	$(document).on('molgenis-login', function(e, msg) {
-		location.reload(true);
-	});
- });
-
- $(function() {
+ 
+$(function() {
 	 /**
 	 * Add download functionality to JQuery.
 	 * data can be string of parameters or array/object
@@ -449,4 +444,4 @@ function hideSpinner()
 		 //send request and remove form from dom
 		 $('<form action="' + url +'" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
 	 }; 
- });
+});

@@ -5,19 +5,19 @@ import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 
 public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 {
-	private final MolgenisPermissionService molgenisPermissionService;
 	private final PluginType pluginType;
 	private final MolgenisUiMenu parentMenu;
+	private final MolgenisPermissionService molgenisPermissionService;
 
-	public XmlMolgenisUiPlugin(MolgenisPermissionService molgenisPermissionService, PluginType pluginType,
-			MolgenisUiMenu parentMenu)
+	public XmlMolgenisUiPlugin(PluginType pluginType, MolgenisUiMenu parentMenu,
+			MolgenisPermissionService molgenisPermissionService)
 	{
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenis permission service is null");
 		if (pluginType == null) throw new IllegalArgumentException("plugin type is null");
 		if (parentMenu == null) throw new IllegalArgumentException("parent menu is null");
-		this.molgenisPermissionService = molgenisPermissionService;
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.pluginType = pluginType;
 		this.parentMenu = parentMenu;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Override
@@ -29,8 +29,13 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	@Override
 	public String getName()
 	{
-		String label = pluginType.getLabel();
-		return label != null ? label : getId();
+		return pluginType.getName();
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return pluginType.getUrl();
 	}
 
 	@Override
@@ -42,7 +47,7 @@ public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 	@Override
 	public boolean isAuthorized()
 	{
-		return molgenisPermissionService.hasPermissionOnPlugin(pluginType.getName(), Permission.READ);
+		return molgenisPermissionService.hasPermissionOnPlugin(getId(), Permission.READ);
 	}
 
 	@Override

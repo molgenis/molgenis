@@ -143,13 +143,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 		// count rows updated
 		int updatedRows = 0;
 
-		// create a transaction unless already in it
-		boolean privateTx = !getDatabase().inTx();
-
 		try
 		{
-			if (privateTx) getDatabase().beginTx();
-
 			// prepare all file attachments
 			this.prepareFileAttachements(entities, getDatabase().getFilesource());
 
@@ -173,16 +168,12 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 				this.update(entities);
 			}
 
-			// commit all batches
-			if (privateTx) getDatabase().commitTx();
-
 			logger.debug(updatedRows + " " + this.create().getClass().getSimpleName() + " objects added");
 			return updatedRows;
 		}
 		catch (Exception sqle)
 		{
 			sqle.printStackTrace();
-			if (privateTx) getDatabase().rollbackTx();
 			logger.error("ADD failed on " + this.create().getClass().getSimpleName() + ": " + sqle.getMessage());
 			throw new DatabaseException(sqle);
 		}
@@ -194,13 +185,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 		// count affected rows
 		int rowsAffected = 0;
 
-		// start private tx
-		boolean privateTx = !getDatabase().inTx();
-
 		try
 		{
-			if (privateTx) getDatabase().beginTx();
-
 			List<E> entities = toList(reader, BATCH_SIZE);
 
 			if (writer != null) writer.writeColNames(new EntityTuple(entities.get(0)).getColNames());
@@ -219,12 +205,9 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 				}
 				entities = toList(reader, BATCH_SIZE);
 			}
-
-			if (privateTx) getDatabase().commitTx();
 		}
 		catch (Exception e)
 		{
-			if (privateTx) getDatabase().rollbackTx();
 			throw new DatabaseException("add(" + create().getClass().getSimpleName() + ") failed: " + e.getMessage(), e);
 		}
 		return rowsAffected;
@@ -243,14 +226,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 		// count rows affected
 		int updatedRows = 0;
 
-		// privateTx
-		boolean privateTx = !getDatabase().inTx();
-
 		try
 		{
-			// start anonymous transaction for the batched update
-			if (privateTx) getDatabase().beginTx();
-
 			// prepare file attachments
 			this.prepareFileAttachements(entities, getDatabase().getFilesource());
 
@@ -271,15 +248,11 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 
 			this.storeMrefs(entities);
 
-			if (privateTx) getDatabase().commitTx();
-
 			logger.info(updatedRows + " " + this.create().getClass().getSimpleName() + " objects updated");
 			return updatedRows;
 		}
 		catch (Exception sqle)
 		{
-			if (privateTx) getDatabase().rollbackTx();
-
 			throw new DatabaseException("Update(" + create().getClass().getSimpleName() + ") failed: "
 					+ sqle.getMessage(), sqle);
 		}
@@ -291,13 +264,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 		// count rows affected
 		int rowsAffected = 0;
 
-		// privateTx
-		boolean privateTx = !getDatabase().inTx();
-
 		try
 		{
-			if (privateTx) getDatabase().beginTx();
-
 			List<E> entities = toList(reader, BATCH_SIZE);
 			while (entities.size() > 0)
 			{
@@ -308,12 +276,9 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 				rowsAffected += getDatabase().update(entities);
 				entities = toList(reader, BATCH_SIZE);
 			}
-
-			if (privateTx) getDatabase().commitTx();
 		}
 		catch (Exception e)
 		{
-			if (privateTx) getDatabase().rollbackTx();
 			throw new DatabaseException(
 					"update(" + create().getClass().getSimpleName() + ") failed: " + e.getMessage(), e);
 		}
@@ -331,12 +296,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 	public int remove(List<E> entities) throws DatabaseException
 	{
 		int updatedRows = 0;
-		boolean privateTx = !getDatabase().inTx();
 		try
 		{
-			// start anonymous transaction for the batched remove
-			if (privateTx) getDatabase().beginTx();
-
 			// prepare file attachments
 			this.prepareFileAttachements(entities, getDatabase().getFilesource());
 
@@ -355,15 +316,12 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 				getDatabase().flush();
 			}
 			getDatabase().flush();
-			if (privateTx) getDatabase().commitTx();
 
 			logger.info(updatedRows + " " + this.create().getClass().getSimpleName() + " objects removed");
 			return updatedRows;
 		}
 		catch (Exception sqle)
 		{
-			if (privateTx) getDatabase().rollbackTx();
-
 			logger.error("remove failed on " + this.create().getClass().getSimpleName() + ": " + sqle.getMessage());
 			sqle.printStackTrace();
 			throw new DatabaseException("remove(" + create().getClass().getSimpleName() + ") failed: "
@@ -375,11 +333,8 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 	public int remove(TupleReader reader) throws DatabaseException
 	{
 		int rowsAffected = 0;
-		boolean privateTx = !getDatabase().inTx();
 		try
 		{
-			if (privateTx) getDatabase().beginTx();
-
 			List<E> entities = toList(reader, BATCH_SIZE);
 			while (entities.size() > 0)
 			{
@@ -390,12 +345,9 @@ public abstract class AbstractMapper<E extends Entity> implements Mapper<E>
 				rowsAffected += getDatabase().remove(entities);
 				entities = toList(reader, BATCH_SIZE);
 			}
-
-			if (privateTx) getDatabase().commitTx();
 		}
 		catch (Exception e)
 		{
-			if (privateTx) getDatabase().rollbackTx();
 			throw new DatabaseException(
 					"remove(" + create().getClass().getSimpleName() + ") failed: " + e.getMessage(), e);
 		}

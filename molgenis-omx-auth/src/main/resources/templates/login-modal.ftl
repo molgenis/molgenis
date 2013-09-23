@@ -6,7 +6,7 @@
   </div>
   <div class="modal-body">
 	<#-- login form -->
-	<form id="login-form" class="form-horizontal">
+	<form id="login-form" class="form-horizontal" method="POST" action="/login">
 	  <div class="control-group">
 	    <label class="control-label" for="loginUsername">Username</label>
 	    <div class="controls">
@@ -71,23 +71,10 @@
 	    
   		<#-- form events -->
   		form.submit(function(e) {
-	    	e.preventDefault();
-	    	e.stopPropagation();
-	    	if(form.valid()) {
-	    		$('.text-error', form).remove();
-		        $.ajax({
-		            type: 'POST',
-		            url:  '/account/login',
-		            data: form.serialize(),
-		            success: function () {
-		            	$(document).trigger('molgenis-login', 'Welcome to MOLGENIS!');
-	            		modal.modal('hide');
-		            },
-		            error: function() {
-		            	$('#loginPassword').after($('<p class="text-error">The username or password you entered is incorrect.</p>'));
-		            }
-		        });
-	        }
+	    	if(!form.valid()) {
+	    		e.preventDefault();
+	    		e.stopPropagation();
+	    	}
 	    });
 	    submitBtn.click(function(e) {
 	    	e.preventDefault();

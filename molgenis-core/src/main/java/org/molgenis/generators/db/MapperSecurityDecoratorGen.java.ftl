@@ -11,10 +11,8 @@
 
 package ${package};
 
-<#if authorizable??>
-import java.util.ArrayList;
-import java.util.Collections;
-</#if>
+import static org.molgenis.security.SecurityUtils.currentUserHasRole;
+
 import java.util.List;
 
 import java.text.ParseException;
@@ -23,13 +21,9 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.io.TupleReader;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.io.TupleWriter;
-<#if authorizable??>
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.service.MolgenisUserService;
-</#if>
 
 /**
  * TODO add column level security filters
@@ -44,25 +38,20 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int add(List<E> entities) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
+		
 		return super.add(entities);
 	}
 
 	@Override
 	public int update(List<E> entities) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
-
-<#if authorizable??>
-			this.addRowLevelSecurityFilters(entities);
-</#if>
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.update(entities);
 	}
@@ -70,14 +59,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int remove(List<E> entities) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
-				
-<#if authorizable??>
-			this.addRowLevelSecurityFilters(entities);
-</#if>
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.remove(entities);
 	}
@@ -85,10 +69,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int add(TupleReader reader, TupleWriter writer) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.add(reader, writer);
 	}
@@ -96,14 +79,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int count(QueryRule... rules) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				throw new DatabaseAccessException("No read permission on ${entityClass}");
-
-<#if authorizable??>
-			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
-</#if>
+			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
 		return super.count(rules);
 	}
@@ -111,57 +89,39 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public List<E> find(QueryRule ...rules) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				throw new DatabaseAccessException("No read permission on ${entityClass}");
-
-<#if authorizable??>
-			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
-</#if>
+			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
-
-		List<E> result = super.find(rules);
-		return result;
+		return super.find(rules);
 	}
 
 	@Override
 	public void find(TupleWriter writer, QueryRule ...rules) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				throw new DatabaseAccessException("No read permission on ${entityClass}");
-
-<#if authorizable??>
-			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
-</#if>
+			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
-
 		super.find(writer, rules);
 	}
 
 	@Override
 	public E findById(Object id) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				throw new DatabaseAccessException("No read permission on ${entityClass}");
+			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
-		
 		return super.findById(id);
 	}
 	
 	@Override
 	public int remove(TupleReader reader) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
-
-			//TODO: Add row level security filters
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.remove(reader);
 	}
@@ -169,12 +129,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int update(TupleReader reader) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_WRITED_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
-
-			//TODO: Add row level security filters
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.update(reader);
 	}
@@ -182,62 +139,19 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				throw new DatabaseAccessException("No read permission on ${entityClass}");
-
-<#if authorizable??>
-			rules = this.addRowLevelSecurityFilters(${entityClass}.CANREAD, rules);
-</#if>
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
-
 		super.find(writer, fieldsToExport, rules);
 	}
 
-<#if authorizable??>
-	//TODO: Move this to Login interface
-	private QueryRule[] addRowLevelSecurityFilters(String permission, QueryRule ...rules) throws DatabaseException
-	{
-		if (this.getDatabase().getLogin().isAuthenticated() && this.getDatabase().getLogin().getUserName().equals(Login.USER_ADMIN_NAME))
-			return rules;
-
-		MolgenisUserService service = MolgenisUserService.getInstance(this.getDatabase());
-		MolgenisUser user = service.findById(this.getDatabase().getLogin().getUserId());
-		
-		List<Integer> roleIdList = service.findGroupIds(user);
-		
-		List<QueryRule> rulesList = new ArrayList<QueryRule>();
-		Collections.addAll(rulesList, rules);
-		if (permission.equals(${entityClass}.CANREAD))
-		{
-			QueryRule rule1 = new QueryRule(${entityClass}.CANWRITE, org.molgenis.framework.db.QueryRule.Operator.IN, roleIdList);
-			QueryRule rule2 = new QueryRule(${entityClass}.CANREAD, org.molgenis.framework.db.QueryRule.Operator.IN, roleIdList);
-			QueryRule rule4 = new QueryRule(${entityClass}.OWNS, org.molgenis.framework.db.QueryRule.Operator.IN, roleIdList);
-			QueryRule rule3 = new QueryRule(org.molgenis.framework.db.QueryRule.Operator.OR);
-			rulesList.add(new QueryRule(rule1, rule3, rule2, rule3, rule4));
-		}
-		return rulesList.toArray(new QueryRule[0]);
-	}
-	
-	private void addRowLevelSecurityFilters(List<E> entities) throws DatabaseException
-	{
-		for (E entity : entities)
-		{
-			if (!(this.getDatabase().getLogin().canWrite(entity) || entity.getOwns().equals(this.getDatabase().getLogin().getUserId())))
-			{
-				throw new DatabaseAccessException("No row level write permission on ${entityClass}");
-			}
-		}
-	}
-</#if>
 	@Override
 	public int executeAdd(List<? extends E> entities) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.executeAdd(entities);
 	}
@@ -245,10 +159,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int executeUpdate(List<? extends E> entities) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.executeUpdate(entities);
 	}
@@ -256,10 +169,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public int executeRemove(List<? extends E> entities) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.executeRemove(entities);
 	}
@@ -267,10 +179,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public void resolveForeignKeys(List<E> entities) throws ParseException, DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-					throw new DatabaseAccessException("No write permission on ${entityClass}");
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		super.resolveForeignKeys(entities);
 	}
@@ -278,12 +189,9 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public List<E> toList(TupleReader reader, int limit) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canWrite(${entityClass}.class))
-				throw new DatabaseAccessException("No write permission on ${entityClass}");
-
-			//TODO: Add row level security filters
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
 		}
 		return super.toList(reader, limit);
 	}
@@ -291,15 +199,10 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	@Override
 	public String createFindSqlInclRules(QueryRule[] rules) throws DatabaseException
 	{
-		if (this.getDatabase().getLogin() != null && !(this.getDatabase().getLogin() instanceof SimpleLogin))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			if (!this.getDatabase().getLogin().canRead(${entityClass}.class))
-				throw new DatabaseAccessException("No read permission on ${entityClass}");
-		}
-		
+			throw new DatabaseAccessException("No write permission on ${entityClass}");
+		}	
 		return super.createFindSqlInclRules(rules);
 	}
-
-	
-	
 }

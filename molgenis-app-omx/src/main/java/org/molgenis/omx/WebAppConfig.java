@@ -8,11 +8,10 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.omx.auth.OmxPermissionService;
+import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
@@ -20,6 +19,7 @@ import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisPluginInterceptor;
 import org.molgenis.ui.MolgenisUi;
+import org.molgenis.ui.MolgenisUiPluginRegistry;
 import org.molgenis.ui.XmlMolgenisUi;
 import org.molgenis.ui.XmlMolgenisUiLoader;
 import org.molgenis.util.ApplicationContextProvider;
@@ -27,7 +27,6 @@ import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -35,12 +34,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -52,27 +54,26 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @Configuration
+@EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class, DataExplorerConfig.class,
-		SearchSecurityConfig.class })
+{ WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
+		DataExplorerConfig.class, SearchSecurityConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
-	@Qualifier("database")
 	private Database database;
 
 	@Autowired
-	@Qualifier("unauthorizedDatabase")
-	private Database unauthorizedDatabase;
-
-	@Autowired
-	private Login login;
-
-	@Autowired
 	private MolgenisSettings molgenisSettings;
+
+	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
+	private WebAppDatabasePopulatorService webAppDatabasePopulatorService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -94,28 +95,29 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		String pluginInterceptPattern = MolgenisPlugin.PLUGIN_URI_PREFIX + "**";
+		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 	}
 
 	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(login, molgenisPermissionService(), molgenisUi());
+		return new MolgenisPluginInterceptor(molgenisUi());
 	}
 
 	@Bean
 	public ApplicationListener<?> databasePopulator()
 	{
-		return new WebAppDatabasePopulator();
+		return new WebAppDatabasePopulator(webAppDatabasePopulatorService);
 	}
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new FileSystemResource[]
-		{ new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties") };
+		Resource[] resources = new Resource[]
+		{ new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties"),
+				new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
@@ -200,6 +202,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		result.setTemplateLoaderPath("classpath:/templates/");
 
 		return result;
+
 	}
 
 	@Bean
@@ -208,12 +211,15 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		return new StandardServletMultipartResolver();
 	}
 
+	@Autowired
+	private WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator;
+
 	@Bean
 	public MolgenisUi molgenisUi()
 	{
 		try
 		{
-			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService());
+			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
 		}
 		catch (IOException e)
 		{
@@ -222,9 +228,9 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
-	public MolgenisPermissionService molgenisPermissionService()
+	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
-		return new OmxPermissionService(unauthorizedDatabase, login);
+		return new MolgenisUiPluginRegistry(molgenisUi());
 	}
 
 	@Bean

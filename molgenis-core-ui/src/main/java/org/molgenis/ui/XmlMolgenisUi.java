@@ -14,16 +14,16 @@ public class XmlMolgenisUi implements MolgenisUi
 	static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	private final Molgenis molgenisUi;
-	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisSettings molgenisSettings;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, MolgenisSettings molgenisSettings,
 			MolgenisPermissionService molgenisPermissionService) throws IOException
 	{
 		if (xmlMolgenisUiLoader == null) throw new IllegalArgumentException("XmlMolgenisUiLoader is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.molgenisUi = xmlMolgenisUiLoader.load();
 		this.molgenisSettings = molgenisSettings;
 		this.molgenisPermissionService = molgenisPermissionService;
@@ -53,7 +53,7 @@ public class XmlMolgenisUi implements MolgenisUi
 	@Override
 	public MolgenisUiMenu getMenu()
 	{
-		return new XmlMolgenisUiMenu(molgenisPermissionService, molgenisUi.getMenu());
+		return new XmlMolgenisUiMenu(molgenisUi.getMenu(), molgenisPermissionService);
 	}
 
 	@Override

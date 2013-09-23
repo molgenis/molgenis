@@ -12,10 +12,10 @@ import java.util.Date;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.security.Login;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.order.OrderStudyDataController;
 import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -26,6 +26,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -45,12 +48,16 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 	private OrderStudyDataService orderStudyDataService;
 
 	private MockMvc mockMvc;
+	private Authentication authentication;
 
 	@BeforeMethod
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(orderStudyDataController)
 				.setMessageConverters(new GsonHttpMessageConverter(), new FormHttpMessageConverter()).build();
+
+		authentication = mock(Authentication.class);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
 	@Test
@@ -70,6 +77,10 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void getOrders() throws Exception
 	{
+		when(authentication.isAuthenticated()).thenReturn(true);
+		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("user0").getMock();
+		when(authentication.getPrincipal()).thenReturn(userDetails);
+
 		this.mockMvc
 				.perform(get(OrderStudyDataController.URI + "/orders"))
 				.andExpect(status().isOk())
@@ -108,8 +119,8 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 			when(request1.getRequestStatus()).thenReturn("rejected");
 			when(request1.getName()).thenReturn("request #1");
 			OrderStudyDataService orderStudyDataService = mock(OrderStudyDataService.class);
-			when(orderStudyDataService.getOrders(0)).thenReturn(Arrays.asList(request0));
-			when(orderStudyDataService.getOrders(1)).thenReturn(Arrays.asList(request1));
+			when(orderStudyDataService.getOrders("user0")).thenReturn(Arrays.asList(request0));
+			when(orderStudyDataService.getOrders("user1")).thenReturn(Arrays.asList(request1));
 			return orderStudyDataService;
 		}
 
@@ -123,14 +134,6 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		public Database database()
 		{
 			return mock(Database.class);
-		}
-
-		@Bean
-		public Login login()
-		{
-			Login login = mock(Login.class);
-			when(login.getUserId()).thenReturn(0);
-			return login;
 		}
 
 		@Bean
@@ -157,6 +160,12 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 			ShoppingCart shoppingCart = mock(ShoppingCart.class);
 			when(shoppingCart.getCart()).thenReturn(Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 			return shoppingCart;
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
 		}
 	}
 }
