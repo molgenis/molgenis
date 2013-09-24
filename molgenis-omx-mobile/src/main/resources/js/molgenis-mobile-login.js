@@ -70,18 +70,20 @@ $(document).bind("mobileinit", function() {
 		});
 	}
 	
-	ns.login = function() {	
+	ns.login = function() {
 		$.ajax({
-			type: $(this).attr('method'),
-			url: $(this).attr('action'),
-			data: $(this).serialize(),
+			type: $('#login-form').attr('method'),
+			url: $('#login-form').attr('action'),
+			data: $('#login-form').serialize(),
 			async:false,
 			success : function(response) {
-				if (response.success) {
-					$.mobile.changePage(MolgenisMobileConfig.startPage, {transition: "flip"});
+				$.mobile.changePage(MolgenisMobileConfig.startPage, {transition: "flip"});
 				} else {
 					alert(response.errorMessage);
 				}
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				alert(errorThrown)
 			}
 		});
 	}
