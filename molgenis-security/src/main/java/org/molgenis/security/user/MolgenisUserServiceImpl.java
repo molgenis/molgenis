@@ -9,9 +9,9 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.MolgenisPasswordEncoder;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
@@ -21,15 +21,15 @@ import com.google.common.collect.Lists;
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
 	private final Database database;
-	private final MolgenisPasswordEncoder molgenisPasswordEncoder;
+	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public MolgenisUserServiceImpl(Database database, MolgenisPasswordEncoder molgenisPasswordEncoder)
+	public MolgenisUserServiceImpl(Database database, PasswordEncoder passwordEncoder)
 	{
 		if (database == null) throw new IllegalArgumentException("Database is null");
-		if (molgenisPasswordEncoder == null) throw new IllegalArgumentException("MolgenisPasswordEncoder is null");
+		if (passwordEncoder == null) throw new IllegalArgumentException("MolgenisPasswordEncoder is null");
 		this.database = database;
-		this.molgenisPasswordEncoder = molgenisPasswordEncoder;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 		{
 			throw new RuntimeException("User does not exist [" + userName + "]");
 		}
-		if (!molgenisPasswordEncoder.matches(oldPwd, user.getPassword()))
+		if (!passwordEncoder.matches(oldPwd, user.getPassword()))
 		{
 			throw new MolgenisUserException("Wrong password");
 		}

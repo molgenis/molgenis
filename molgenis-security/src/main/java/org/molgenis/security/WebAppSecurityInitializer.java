@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.security;
 
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
