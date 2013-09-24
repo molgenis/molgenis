@@ -78,9 +78,6 @@ $(document).bind("mobileinit", function() {
 			async:false,
 			success : function(response) {
 				$.mobile.changePage(MolgenisMobileConfig.startPage, {transition: "flip"});
-				} else {
-					alert(response.errorMessage);
-				}
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				alert(errorThrown)
