@@ -8,6 +8,8 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.WebAppDatabasePopulator;
+import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -41,7 +43,6 @@ import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
@@ -175,7 +176,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	public ApplicationContextProvider applicationContextProvider()
 	{
 		return new ApplicationContextProvider();
-
 	}
 
 	/**
@@ -210,9 +210,6 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		return new StandardServletMultipartResolver();
 	}
-
-	@Autowired
-	private WebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator;
 
 	@Bean
 	public MolgenisUi molgenisUi()

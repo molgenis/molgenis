@@ -74,6 +74,19 @@ public class StudyManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String getStudyDefinitions(Model model) throws DatabaseException
 	{
+		return VIEW_NAME;
+	}
+
+	/**
+	 * Returns a list of meta data for each study definition
+	 * 
+	 * @return
+	 * @throws DatabaseException
+	 */
+	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	@ResponseBody
+	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta() throws DatabaseException
+	{
 		List<StudyDefinitionMeta> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions();
 		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
@@ -98,9 +111,9 @@ public class StudyManagerController extends MolgenisPluginController
 					}
 				});
 
-		model.addAttribute("studyDefinitions", models);
-
-		return VIEW_NAME;
+		StudyDefinitionsMetaResponse studyDefinitionsResponse = new StudyDefinitionsMetaResponse();
+		studyDefinitionsResponse.setStudyDefinitions(models);
+		return studyDefinitionsResponse;
 	}
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
@@ -202,6 +215,21 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setCatalogItemIds(List<String> catalogItemIds)
 		{
 			this.catalogItemIds = catalogItemIds;
+		}
+	}
+
+	public static class StudyDefinitionsMetaResponse
+	{
+		private List<StudyDefinitionMetaModel> studyDefinitions;
+
+		public List<StudyDefinitionMetaModel> getStudyDefinitions()
+		{
+			return studyDefinitions;
+		}
+
+		public void setStudyDefinitions(List<StudyDefinitionMetaModel> studyDefinitions)
+		{
+			this.studyDefinitions = studyDefinitions;
 		}
 	}
 

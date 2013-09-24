@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.framework.db;
 
 import org.molgenis.framework.db.DatabaseException;
 
