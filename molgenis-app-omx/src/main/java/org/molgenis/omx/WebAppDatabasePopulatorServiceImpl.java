@@ -1,7 +1,5 @@
 package org.molgenis.omx;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 import javax.persistence.EntityManager;
@@ -9,8 +7,8 @@ import javax.persistence.PersistenceContext;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.model.elements.Entity;
-import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
@@ -59,44 +57,35 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		if (userPassword == null) throw new RuntimeException(
 				"please configure the user.password property in your molgenis-server.properties");
 
+		// FIXME create users and groups through service class
 		MolgenisUser userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
-		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword)); // FIXME add user through service
-																					// class
+		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
+		unsecuredDatabase.add(userAdmin);
 
 		UserAuthority suAuthority = new UserAuthority();
 		suAuthority.setMolgenisUser(userAdmin);
 		suAuthority.setRole("ROLE_SU");
-
-		unsecuredDatabase.add(userAdmin);
 		unsecuredDatabase.add(suAuthority);
 
-		MolgenisUser user1 = new MolgenisUser();
-		user1.setUsername(USERNAME_USER);
-		user1.setPassword(new BCryptPasswordEncoder().encode(userPassword)); // FIXME add user through service class
-		user1.setEmail(userEmail);
-		user1.setActive(true);
-		user1.setSuperuser(false);
-
-		List<Authority> user2Authorities = new ArrayList<Authority>();
-		UserAuthority user2Authority = new UserAuthority();
-		user2Authority.setMolgenisUser(user1);
-		user2Authority.setRole("ROLE_USER");
-		user2Authorities.add(user2Authority);
-
-		unsecuredDatabase.add(user1);
+		MolgenisUser userUser = new MolgenisUser();
+		userUser.setUsername(USERNAME_USER);
+		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
+		userUser.setEmail(userEmail);
+		userUser.setActive(true);
+		userUser.setSuperuser(false);
+		unsecuredDatabase.add(userUser);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
 		usersGroup.setName("All Users");
+		unsecuredDatabase.add(usersGroup);
 
 		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
 		molgenisGroupMember1.setMolgenisGroup(usersGroup);
-		molgenisGroupMember1.setMolgenisUser(user1);
-
-		unsecuredDatabase.add(usersGroup);
+		molgenisGroupMember1.setMolgenisUser(userUser);
 		unsecuredDatabase.add(molgenisGroupMember1);
 
 		Vector<Entity> entities = unsecuredDatabase.getMetaData().getEntities();
