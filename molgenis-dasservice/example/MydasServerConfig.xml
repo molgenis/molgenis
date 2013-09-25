@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2007 Philip Jones, EMBL-European Bioinformatics Institute
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~
+  ~ For further details of the mydas project, including source code,
+  ~ downloads and documentation, please see:
+  ~
+  ~ http://code.google.com/p/mydas/
+  ~
+  -->
+
+<mydasserver xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://mydas.googlecode.com/svn/trunk/mydas/server_core/src/main/resources/mydasserverconfig.xsd">
+    <!-- The global element holds details of configuration common to the entire server. -->
+    <global>
+        
+        <!-- The URL of the DAS server up to and including /das/ (e.g. http://www.ebi.ac.uk/das-srv/uniprot/das/)
+        This should be the external URL.  (Allows correct access to the service through reverse-proxies etc.)-->
+        <baseurl>http://localhost:8080/das/</baseurl>
+        
+        <!-- A boolean switch indicating if the output from the DAS server should be compressed or not.
+
+         Note that compression does not work with jetty, hence this is set to false here, but you are
+         advised to set this to true for deploying your DAS source on a full featured web server. -->
+        <gzipped>false</gzipped>
+
+        <!-- If set to true, then if the browser points to /das or /das/ then
+            the output of the sources command should be displayed.  This is
+            useful for creating a home page based upon the data source
+            details.-->
+        <slash-das-points-to-dsn>true</slash-das-points-to-dsn>
+        
+        <!-- The name of the default DAS stylesheet to be used for all of the defined datasources.
+        This can be overridden for individual datasources by including a stylesheet element for them. -->
+        <default-stylesheet>TEST.style</default-stylesheet>
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+            to present the dsn command response in a human-readable format.
+            Optional - the processing instruction will only be included if this
+            element is present.
+            README: Please change images, styles and scripts paths in dsn.html and sortable.js -->
+        <!--dsn-xslt-url>/xslt/dsn.xsl</dsn-xslt-url-->
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+            to present the sources command response in a human-readable format.
+            Optional - the processing instruction will only be included if this
+            element is present.
+            Note: The XSL provided can display more than one coordinate system however
+            it does not look "nice" yet. 
+            It takes test-ranges as default values for sequence and features commands and
+            1-100 as default rows for entry_points command.
+            README: Please change images, styles and scripts paths in dsn.html and sortable.js -->
+        <!--sources-xslt-url>/xslt/sources.xsl</sources-xslt-url-->
+
+        <!-- NOTE - THE XSLTs LISTED BELOW (COMMENTED OUT) ARE UNDER DEVELOPMENT, SO NOT
+        CURRENTLY AVAILABLE.  You can of course substitute your own XSLT and provide a link
+        to it here. -->
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+            to present the dna command response in a human-readable format.
+            Optional - the processing instruction will only be included if this
+            element is present. -->
+        <!--<dna-xslt-url>/xslt/dna.xsl</dna-xslt-url>-->
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+            to present the entry-points command response in a human-readable format.
+            Optional - the processing instruction will only be included if this
+            element is present.-->
+        <!--<entry-points-xslt-url>/xslt/entry-point.xsl</entry-points-xslt-url>-->
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+          to present the sequence command response in a human-readable format.
+          Optional - the processing instruction will only be included if this
+          element is present. -->
+        <!--<sequence-xslt-url>/xslt/sequence.xsl</sequence-xslt-url>-->
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+            to present the features command response in a human-readable format.
+            Optional - the processing instruction will only be included if this
+            element is present. -->
+        <!--<features-xslt-url>/xslt/features.xsl</features-xslt-url>-->
+
+        <!-- Gives the URI of an XSLT transformation that can be used by the browser
+            to present the types command response in a human-readable format.
+            Optional - the processing instruction will only be included if this
+            element is present. -->
+        <!--<types-xslt-url>/xslt/types.xsl</types-xslt-url>-->
+
+        <!-- These global properties are made available to all the plugin classes
+        through the DataSource interface, so the plugin author can
+        add arbitrary additional configuration to their data source. -->
+    </global>
+    <!-- The enclosing element for one or more datasource definitions. -->
+    <datasources>
+        <!-- Configuration for a single data source. All the information annotated in this
+        element will be available to the DataSource class.
+        Attributes:
+        uri: The uri (required) attribute uniquely identifies the group of sources, and must be globally unique, as provided in the /DASDSN/DSN/SOURCE element of the XML returned by the DAS source command.
+        title: The title (required) attribute is a short text label suitable for display.
+        description: description (required) attribute is a longer text description.
+        doc_href: The doc_href (optional) attribute is a URL location where more information about the data is available.
+        mapmaster: The mapmaster attribute is a URL location pointing to the 'reference source' for the coordinate system.
+        max_entry_points: The max_entry_points (optional) attribute is a integer defining the maximum number of entry points
+                          that a data source commits to retrieve when entry_points command is used
+        -->
+        <datasource uri="template"
+                    title="template"
+                    description="Template Annotation Data Source"
+                    doc_href="http://code.google.com/p/mydas/"
+                    mapmaster="http://mapmaster_template.com">
+			<!-- The maintainer tag identifies the contact person for the source.
+			Attributes:
+			email: The email (required) attribute is a properly formatted email address.
+			-->
+			<maintainer email="template@template.com" />
+			<!--
+			This tag represents one independent version of a data source. Usually there is only one VERSION per SOURCE but there may be more where, for example, the data is annotated onto a different version of an assembly. 
+			This mechanism exist to allow servers to signal to clients that there is a later version of a set of data without affecting those reliant on the old set.
+			Attributes:
+			uri: The uri (required) attribute is a global unique identifier for this version of the data source. This is the DSN (data source name) that is referred inside MyDas
+			created: The created (required) attribute is the publish date.
+			-->
+			<version uri="template" created="2010-03-17">
+	            <!-- The fully qualified class name of the DataSource. -->
+	            <class>uk.ac.ebi.mydas.template.TemplateAnnotationDataSource</class>
+				<!--
+				This tag identifies a reference coordinate system  supported by the source. Could be more than one.
+				Attributes:
+				uri: The uri (required) attribute is a globally unique identifier for the coordinate system. It should be a fully resolvable URL providing more information about the coordinate system.
+				source: The source (required) attribute is the type of reference object (e.g. "Chromosome" or "Protein Sequence").
+				authority: The authority (required) attribute is the project or organisation responsible for defining the coordinate system (e.g. NCBI or UniProt).
+				taxid: The taxid (optional) attribute is the NCBI taxonomy ID for the species, where a coordinate system is restricted to only one species.
+				version: The version (optional) attribute is used to indicate the version of a coordinate system as a whole. It is used to differentiate between coordinate systems that change infrequently but are fundamentally incompatible between releases. Typically these are genomic.
+				test_range:  The test_range (required) attribute is an example segment that may be used to test the source's capabilities. It should be a segment for which the source has data.
+				-->
+				<coordinates 	uri="http://uritocoordinatesystem.com"
+								source="typeOfReference"
+								authority="organisationResponsible"
+								test_range="P00280">UniProt,Protein Sequence</coordinates>
+
+                <coordinates 	uri="http://uri2.com"
+								source="typeOfReference 2"
+								authority="organisation 2"
+								test_range="Other">Other</coordinates>
+				<!--
+				This tag describes the commands and other capabilities supported by the data source. Put as many of this tags as capabilities your source supports.
+				Attributes:
+				type: The type (required) attribute is a formatted string of the format: das1:capability_name For example: "das1:entry_points" or "das1:feature-by-id".
+				query_uri: The query_uri (optional) attribute is the actual DAS URL used to execute a command. It does not apply to capabilities that are not commands (e.g. "feature-by-id").
+				-->
+				<capability type="das1:capability_name"     query_uri="http://actualDASURLusedtoexecuteacommand.com" />
+                <!-- These properties are made available to the plugin class
+                through the DataSource interface, so the plugin author can
+                add arbitrary additional configuration to their data source.-->
+                <property key="templateexamplekey" value="templateexamplevalue" />
+                <property key="prop_key" value="value_key"/>
+			</version>
+
+            <!-- The optional name of the DAS stylesheet to be used for this datasource.
+            This will override the default stylesheet defined in the global settings section. -->
+            <stylesheet>TEST.style</stylesheet>
+            <!-- This setting indicates if the dna command is enabled or not for this data source.
+            Clearly this may be set to false for servers that serve only protein sequence and
+            annotation.  Note that the mydas DAS server makes no attempt to check that a
+            valid DNA, RNA or protein sequence is being served by the sequence command - this
+            is the responsibility of the data source itself. -->
+            <dna-command-enabled>true</dna-command-enabled>
+            <!-- If 'true' then if no feature label is provided by the data source, the feature id will
+            automatically be reported as the feature label.  (Of course, if a feature label is 
+            provided, this will override the feature id.) -->
+            <use-feature-id-for-feature-label>true</use-feature-id-for-feature-label>
+            <!--
+            If include-types-with-zero-count='true' then all of the types present in the data source
+            will be listed by the types command even if they do not appear for the requested segment.
+            If 'false', if the types command includes 'segment' arguments, only the feature types
+            actually annotated on the requested segments will be listed.-->
+            <include-types-with-zero-count>true</include-types-with-zero-count>
+        </datasource>
+		
+		<!-- Configuration of the data source example. It loads the feature from a GFF2 file-->
+        <datasource uri="examplegff"
+                    title="fickett-tss"
+                    description="GFF2 Example Annotation Data Source"
+                    doc_href="http://mydas.googlecode.com/svn/trunk/mydas/MyDasTemplate/src/main/resources/fickett-tss.gff"
+                    mapmaster="http://mapmaster_examplegff.com">
+			<maintainer email="gsalazar@ebi.ac.uk" />
+
+			<version uri="examplegff" created="2010-03-19">
+	            <class>uk.ac.ebi.mydas.gff.GFFFileDataSource</class>
+				<coordinates 	uri="http://www.notARealCoordinateSystem.com"
+								source="-"
+								authority="unknown"
+								taxid="0000"
+								test_range="L47615.1">TEST INFO</coordinates>
+				<capability type="das1:sources"		 	query_uri="http://localhost:8080/das/examplegff" />
+				<capability type="das1:types"			query_uri="http://localhost:8080/das/examplegff/types" />
+				<capability type="das1:features"		query_uri="http://localhost:8080/das/examplegff/features" />
+				<capability type="das1:feature-by-id"	query_uri="http://localhost:8080/das/examplegff/features" />
+				<capability type="das1:stylesheet"		query_uri="http://localhost:8080/das/examplegff/stylesheet" />
+                <capability type="das1:entry_points"		query_uri="http://localhost:8080/das/examplegff/entry_points" />
+				<capability type="das1:unknown-feature"	/>
+                <property key="gff_file" value="fickett-tss.gff" visibility="false"/>
+			</version>
+
+            <dna-command-enabled>true</dna-command-enabled>
+            <use-feature-id-for-feature-label>true</use-feature-id-for-feature-label>
+            <include-types-with-zero-count>true</include-types-with-zero-count>
+        </datasource>   
+    </datasources>
+</mydasserver>
+

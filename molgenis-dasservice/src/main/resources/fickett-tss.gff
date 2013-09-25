@@ -1,0 +1,44 @@
+##gff-version 2
+##date 2000-09-13
+##sequence-region U29912.1 1 565
+##sequence-region U30245.1 1 1093
+##sequence-region U75286.1 1 1984
+##sequence-region U54701.1 1 5663
+##sequence-region Y10100.1 1 1066
+##sequence-region X94563.1 1 2692
+##sequence-region X75410.1 1 926
+##sequence-region L47615.1 1 3221
+##sequence-region AF107208.1 1 2313
+##sequence-region U49855.1 1 682
+##sequence-region U80601.1 1 632
+##sequence-region U24240.1 1 1728
+##sequence-region D86218.1 1 2191
+##sequence-region U52432.1 1 1604
+##sequence-region AF223952.1 1 7502
+##sequence-region Z49978.1 1 1352
+##sequence-region U10577.1 1 831
+##sequence-region U69634.1 1 1515
+L47615.1	hand_built	TSS	2097	2097	.	+	0
+L47615.1	hand_built	TSS	2108	2108	.	+	0
+U54701.1	hand_built	TSS	935	935	.	+	0
+U54701.1	hand_built	TSS	2002	2002	.	+	0
+AF107208.1	hand_built	TSS	1483	1554	.	+	0
+AF107208.1	hand_built	TSS	1756	1783	.	+	0
+U10577.1	hand_built	TSS	1169	1171	.	+	0
+U30245.1	hand_built	TSS	850	951	.	+	0
+U69634.1	hand_built	TSS	1450	1450	.	+	0
+U29912.1	hand_built	TSS	143	166	.	+	0
+Y10100.1	hand_built	TSS	1018	1033	.	+	0
+D86218.1	hand_built	TSS	1793	1812	.	+	0
+U75286.1	hand_built	TSS	1416	1480	.	+	0
+U52432.1	hand_built	TSS	1521	1523	.	+	0
+U80601.1	hand_built	TSS	317	400	.	+	0
+X94563.1	hand_built	TSS	1163	1200	.	+	0
+Z49978.1	hand_built	TSS	855	855	.	+	0
+Z49978.1	hand_built	TSS	1020	1020	.	+	0
+Z49978.1	hand_built	TSS	1150	1150	.	+	0
+U49855.1	hand_built	TSS	28	51	.	+	0
+X75410.1	hand_built	TSS	815	836	.	+	0
+U24240.1	hand_built	TSS	1480	1480	.	+	0
+AF223952.1	hand_built	TSS	1805	1820	.	+	0
+AF223952.1	hand_built	TSS	5528	5543	.	+	0

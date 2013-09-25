@@ -1,0 +1,152 @@
+<html>
+
+<!--
+/**
+ * HTML template to represent DAS SOURCES response.
+ * Based on dsn.hmtl on MyDas distribution (Antony Quinn)
+ * @author Leyla Garcia
+ * @version $Id$
+ * @since   1.0
+ */
+ -->
+<head>
+    <title>MyDas: Data Sources</title>
+    <!--Using absolute URL's avoid weird behaviours when there is a / at the end of the request -->
+    <link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="http://localhost:8080/xslt/styles/common.css"/>
+    <script type="text/javascript">
+        //README: This variable must be also set up in sortable.js (otherwise it will be resolved as a relative URL )
+        //var image_path = "http://localhost:8080/xslt/images/";
+        function init(){
+            document.getElementById('sources').style.display = 'block';
+            document.getElementById('xml').style.display='none';
+        }
+    </script>
+    <script type="text/javascript" src="http://localhost:8080/xslt/scripts/main.js"></script>
+    <script type="text/javascript" src="http://localhost:8080/xslt/scripts/sortable.js"></script>
+</head>
+
+<body onload="init()">
+
+    <div class="header">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="banner">
+                    <a href="http://code.google.com/p/mydas/">
+                        <img src="http://localhost:8080/xslt/images/mydas_logo_small.png" alt="MyDas Distributed Annotation Server"/>
+                    </a>
+                </td>
+                <td class="banner" align="right">
+                    <span style="font-size:170%; color:white;">
+                        coordinate systems
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <div><p></p></div>
+
+    <div id="mainbody">
+          <p>Format:
+            <input type="radio" name="format" onclick="document.getElementById('sources').style.display='block';document.getElementById('xml').style.display='none';" value="Table" checked="checked"/>Table
+            <input type="radio" name="format" onclick="document.getElementById('xml').style.display='block';document.getElementById('sources').style.display='none';" value="XML"/>XML
+          </p>
+    </div>
+
+    <div><p></p></div>
+
+    <div id="sources" class="sources">
+        <table id="coordinated-systems"
+               class="sortable"
+               cellpadding="0"
+               cellspacing="0"
+               width="100%">
+            <!-- Column headings -->
+            <tr class="head">
+                <th>URI</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Reference</th>
+                <th>Capabilities</th>
+                <th class="unsortable">
+                    <!--Coordinate System <br/>
+                    <ul id="navlist">
+                        <li>URI</li>
+                        <li>Source</li>
+                        <li>Authority</li>
+                        <li>Test</li>
+                    </ul-->
+                    <!--table border="1" width="100%">
+                        <tr>
+                            <td colspan="5" align="center">Coordinate System</td>
+                        </tr>
+                        <tr>
+                            <td width="40%">URI</td>
+                            <td width="20%">Source</td>
+                            <td width="20%">Authority</td>
+                            <td width="10%">Test</td>
+                        </tr>
+                    </table-->
+                    Coordinate System <br/>
+                    <div id="container" style="border: 1px solid black;">
+                        <div id="row">
+                            <div class="oddColumn" style="width: 40%">URI</div>
+                            <div class="evenColumn" style="width: 20%">Source</div>
+                            <div class="oddColumn" style="width: 20%">Authority</div>
+                            <div class="evenColumn" style="width: 20%">Test</div>
+                        </div>
+                    </div>                    
+                </th>
+                <th>Contact</th>
+            </tr>
+            <!-- Row template -->
+            <tr class="template">
+                <td class="version-uri">uniprot</td><!--version-uri-->
+                <td class="short-name">UniProt</td> <!--title-->
+                <td class="description"> <!--description-->
+                    UniProt (Universal Protein Resource) is the world's most comprehensive catalog of
+                    information on proteins. It is a central repository of protein sequence and function
+                    created by joining the information contained in Swiss-Prot, TrEMBL, and PIR.
+                </td>
+                <td class="doc-href">UniProt</td> <!--doc-href-->
+                <td class="capabilities"> <!--capabilities-->
+                    <a href="http://www.ebi.ac.uk/tc-test/das-srv/uniprot/das/uniprot/entry_points">
+                        das1:entry_points
+                    </a><br/>
+                    <a href="http://www.ebi.ac.uk/tc-test/das-srv/uniprot/das/uniprot/sequence?segment=P99999">
+                        das1:sequence
+                    </a><br/>
+                    <a href="http://www.ebi.ac.uk/tc-test/das-srv/uniprot/das/uniprot/features?segment=P99999">
+                        das1:features
+                    </a>
+                </td>
+                <td class="coordinate">
+                    <table border="1">
+                        <tr>
+                            <td width="40%">http://www.dasregistry.org/dasregistry/coordsys/CS_DS6</td>
+                            <td width="20%">Protein sequence</td>
+                            <td width="20%">UniProt</td>
+                            <td width="10%">12345</td>
+                            <td width="10%">12345</td>
+                        </tr>
+                    </table>
+                </td> <!--coordinate system-->
+                <td class="maintainer">mail@mail.com</td> <!--maintainer-->
+            </tr>
+        </table>
+    </div>
+
+    <div><p></p></div>
+    
+    <div id="xml" style="font-family:courier;display:none;">
+    <p><div class="xml" style="font-family:courier;display:none;"></div></p>
+    </div>
+
+    <div><p></p></div>
+    
+    <div class="footer" align="right">
+        European Bioinformatics Institute &#169; 2007. All rights reserved.
+    </div>
+
+</body>
+</html>

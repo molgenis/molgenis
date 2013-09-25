@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * List of URLs for bioinformatics databases such as UniProt and ChEBI.
+ *
+ * @author  Antony Quinn
+ * @version $Id$
+ *
+-->
+
+<!--
+    idvar             string we replace in URLs where embedded="true"
+    version-separator string we look for in IDs where remove-version="true"
+-->
+<urls idvar="${id}" version-separator=".">
+
+    <!-- === ID as last parameter (type="") === -->
+    <!-- Note: we need type="" so urls.xsl can work properly (this would be better done using a default value in DTD or XMLSchema) -->
+    <url database="OLS"     type="">http://www.ebi.ac.uk/ontology-lookup/?termId=</url>
+    <url database="ISBN"    type="">http://isbn.nu/</url>
+    <url database="MeSH"    type="">http://www.nlm.nih.gov/cgi/mesh/2005/MB_cgi?field=uid&amp;term=</url>
+    <url database="PubMed"  type="">http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&amp;externalId=</url>
+    <url database="RefSeq"  type="">http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=protein&amp;cmd=search&amp;term=</url>
+    <url database="nrdb"    type="">http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?db=protein&amp;val=</url>
+    <url database="NEWT"    type="">http://www.ebi.ac.uk/newt/display?search=</url>
+    <url database="ChEBI"   type="">http://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:</url>
+    <url database="UniProt" type="">http://www.ebi.uniprot.org/uniprot-srv/uniProtView.do?proteinAc=</url>
+    <url database="Enzyme"  type="">http://www.expasy.ch/enzyme/</url>
+    <!-- Remove version number when building URL -->
+    <url database="IPI" remove-version="true" type="">
+        http://www.ebi.ac.uk/integr8/QuickSearch.do?pageContext=201&amp;action=doGeneSearch&amp;organismName=&amp;searchScope=geneSearchAll&amp;geneName=
+    </url>
+    <!-- Embedded ID (replaces ${id} with ID) -->
+    <url database="DrugBank" embedded="true" type="">
+        http://redpoll.pharmacy.ualberta.ca/drugbank/cgi-bin/getCard.cgi?CARD=${id}.txt
+    </url>
+
+    <!-- === Text as last parameter (type="text") === -->
+    <url database="DrugBank" type="text">http://redpoll.pharmacy.ualberta.ca/drugbank/cgi-bin/webglimpse_060201.cgi?ID=20&amp;cache=yes&amp;whole=ON&amp;errors=0&amp;maxfiles=200&amp;maxlines=200&amp;query=</url>
+    <url database="Enzyme"   type="text">http://www.expasy.org/cgi-bin/enzyme-search-ful?</url>
+    <url database="UniProt"  type="text">http://www.ebi.uniprot.org/uniprot-srv/search/quickTextSearch.do?quickQueryText=</url>
+    <url database="ChEBI"    type="text">http://www.ebi.ac.uk/chebi/searchFreeText.do?searchString=</url>
+    <!-- Embedded text (replaces ${id} with text) -->
+    <url database="chemical" embedded="true" type="text">
+        http://www.ebi.ac.uk/chebi/searchFreeText.do?searchString=%25${id}%25
+    </url>
+
+</urls>

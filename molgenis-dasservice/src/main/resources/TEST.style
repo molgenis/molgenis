@@ -1,0 +1,440 @@
+<?xml version="1.0" standalone="yes"?>
+<DASSTYLE>
+  <STYLESHEET>
+    <CATEGORY id="default">
+      <TYPE id="default">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#666666</FGCOLOR>
+	            <BGCOLOR>#CCCCCC</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="ACT_SITE">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#000000</FGCOLOR>
+	            <BGCOLOR>#111111</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="BINDING">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#584858</FGCOLOR>
+	            <BGCOLOR>#8B7B8B</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="CA_BIND">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CCCC00</FGCOLOR>
+	            <BGCOLOR>#ffff00</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="CARBOHYD">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#581456</FGCOLOR>
+	            <BGCOLOR>#8B4789</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="CHAIN">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CC7200</FGCOLOR>
+	            <BGCOLOR>#FFA500</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="component">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#0000CC</FGCOLOR>
+	            <BGCOLOR>#3333ff</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="CONFLICT">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#1A1A1A</FGCOLOR>
+	            <BGCOLOR>#4D4D4D</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="CROSSLINK">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#9A520C</FGCOLOR>
+	            <BGCOLOR>#CD853F</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="DISULFID">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#00CC00</FGCOLOR>
+	            <BGCOLOR>#00FF00</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="DNA_BIND">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#58002F</FGCOLOR>
+	            <BGCOLOR>#8B1C62</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="DOMAIN">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#9A3300</FGCOLOR>
+	            <BGCOLOR>#CD6600</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="HELIX">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#005800</FGCOLOR>
+	            <BGCOLOR>#008B00</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="INIT_MET">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#0000CC</FGCOLOR>
+	            <BGCOLOR>#0000FF</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="LIPID">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#BBBB00</FGCOLOR>
+	            <BGCOLOR>#EEEE00</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="METAL">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#033158</FGCOLOR>
+	            <BGCOLOR>#36648B</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="MOD_RES">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#37279A</FGCOLOR>
+	            <BGCOLOR>#6A5ACD</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="MUTAGEN">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CC8D98</FGCOLOR>
+	            <BGCOLOR>#FFC0CB</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="NON_CONS">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#003100</FGCOLOR>
+	            <BGCOLOR>#006400</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="NON_TER">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#000058</FGCOLOR>
+	            <BGCOLOR>#00008B</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="NP_BIND">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#580300</FGCOLOR>
+	            <BGCOLOR>#8B3626</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="PEPTIDE">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#475858</FGCOLOR>
+	            <BGCOLOR>#7A8B8B</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="Pfam">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#3300CC</FGCOLOR>
+	            <BGCOLOR>#6633ff</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="PIR">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CC0000</FGCOLOR>
+	            <BGCOLOR>#ff3300</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="PRINTS">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#009900</FGCOLOR>
+	            <BGCOLOR>#33cc33</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="ProDom">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#3366CC</FGCOLOR>
+	            <BGCOLOR>#6699ff</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="PROPEP">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#BB3774</FGCOLOR>
+	            <BGCOLOR>#EE6AA7</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="PROSITE">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CC6600</FGCOLOR>
+	            <BGCOLOR>#ff9933</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="REPEAT">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#580000</FGCOLOR>
+	            <BGCOLOR>#8B1A1A</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="Scop">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#666600</FGCOLOR>
+	            <BGCOLOR>#999900</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="SE_CYS">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CC00CC</FGCOLOR>
+	            <BGCOLOR>#FF00FF</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="SIGNAL">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#BB7BBB</FGCOLOR>
+	            <BGCOLOR>#EEAEEE</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="SIMILAR">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#36269A</FGCOLOR>
+	            <BGCOLOR>#6959CD</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="SITE">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#005858</FGCOLOR>
+	            <BGCOLOR>#008B8B</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="Smart">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#9B0000</FGCOLOR>
+	            <BGCOLOR>#ce0031</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="STRAND">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#BB8181</FGCOLOR>
+	            <BGCOLOR>#EEB4B4</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="THIOETH">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#000066</FGCOLOR>
+	            <BGCOLOR>#000099</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="THIOLEST">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#000066</FGCOLOR>
+	            <BGCOLOR>#333399</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="TIGRFAMs">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#330000</FGCOLOR>
+	            <BGCOLOR>#660033</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="TRANSIT">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#9A520C</FGCOLOR>
+	            <BGCOLOR>#CD853F</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="TRANSMEM">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#365836</FGCOLOR>
+	            <BGCOLOR>#698B69</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="TURN">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#5E00BB</FGCOLOR>
+	            <BGCOLOR>#912CEE</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="UNSURE">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#333333</FGCOLOR>
+	            <BGCOLOR>#000000</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="VARIANT">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#330000</FGCOLOR>
+	            <BGCOLOR>#660033</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="VARSPLIC">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#BB4FBB</FGCOLOR>
+	            <BGCOLOR>#EE82EE</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="ZN_FING">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#CC00CC</FGCOLOR>
+	            <BGCOLOR>#FF00FF</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="SMART">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#9B0000</FGCOLOR>
+	            <BGCOLOR>#ce0031</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+     <TYPE id="ISOFORM">
+        <GLYPH>
+	        <BOX>
+	            <LINEWIDTH>1</LINEWIDTH>
+				<FGCOLOR>#BB4FBB</FGCOLOR>
+	            <BGCOLOR>#EE82EE</BGCOLOR>
+	        </BOX>
+	    </GLYPH>
+     </TYPE>
+
+   </CATEGORY>
+  </STYLESHEET>
+</DASSTYLE>

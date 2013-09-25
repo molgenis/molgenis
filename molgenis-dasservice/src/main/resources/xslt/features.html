@@ -1,0 +1,262 @@
+<html>
+<!--
+  ~ Copyright 2007 Antony Quinn, EMBL-European Bioinformatics Institute
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~
+  ~ For further details of the mydas project, including source code,
+  ~ downloads and documentation, please see:
+  ~
+  ~ http://code.google.com/p/mydas/
+  ~
+  -->
+
+<!--
+/**
+ * HTML template to represent DAS features response.
+ *
+ * @author  Antony Quinn
+ * @version $Id$
+ * @since   1.0
+ */
+ -->
+<head>
+    <title>MyDas: Features</title>
+    <link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="styles/common.css"/>
+    <script type="text/javascript">
+        var image_path = "images/";
+    </script>
+    <script type="text/javascript" src="scripts/main.js"></script>
+    <script type="text/javascript" src="scripts/sortable.js"></script>
+</head>
+
+<body>
+
+    <div class="header">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="banner">
+                    <a href="http://code.google.com/p/mydas/">
+                        <img src="images/mydas_logo_small.png" alt="MyDas Distributed Annotation Server"/>
+                    </a>
+                </td>
+                <td class="banner" align="right">
+                    <span style="font-size:170%; color:white;">
+                        features
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div><p/></div>
+
+    <!-- Invisible by default - only displayed if DAS servers returns ERRORSEGMENT or UNKNOWNSEGMENT -->
+    <div id="error-segment" class="hide">
+        Could not find '<span class="error-segment-id">BAD_SEGMENT_ID</span>'
+        (<span class="segment-type">ERRORSEGMENT</span>).
+    </div>
+
+    <div class="features">
+
+        <!-- Summary information -->
+        <h3><span class="switch" id="summary-switch" onclick="toggle('summary')">[-]</span>Summary</h3>
+        <div id="summary-mutiple-segments">
+            <table id="summary-mutiple"
+                   class="sortable"
+                   cellpadding="0"
+                   cellspacing="0"
+                   width="100%">
+                <!-- Column headings -->
+                <tr class="head">
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Length</th>
+                    <th>Version</th>
+                </tr>
+                <!-- Row template -->
+                <tr class="template">
+                    <td class="segment-id">P12345</td>
+                    <td class="segment-description">Sample protein</td>
+                    <td class="sequence-length">123</td>
+                    <td class="sequence-version">f40f752dedf675e2f7c99142ebb2607a</td>
+                </tr>
+                <!-- Sample data (will be ignored by XSLT) -->
+                <tr class="ignore">
+                    <td class="ignore">P54321</td>
+                    <td class="ignore">Sample protein 2</td>
+                    <td class="sequence-length">321</td>
+                    <td class="ignore">a40f752dedf675e2f7c99142ebb2607a</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Positional features -->
+        <h3>
+            <span class="switch" id="positional-features-switch" onclick="toggle('positional-features')">[-]</span>
+            Positional features
+        </h3>
+        <table id="positional-features"
+               class="sortable"
+               cellpadding="0"
+               cellspacing="0"
+               width="100%">
+            <!-- Column headings -->
+            <tr class="head">
+                <th class="feature-segment-id">ID</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Method</th>                
+                <th>Feature</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Score</th>
+                <th>Notes</th>
+                <th>Links</th>                
+                <th></th>
+                <!--th>Orientation</th>
+                <th>Phase</th>
+                <th>Target</th>
+                <th>Group</th-->
+            </tr>
+            <!-- Row template -->
+            <tr class="template">
+                <td class="feature-segment-id">P12345</td>
+                <td class="category">Molecule Processing</td>
+                <td class="type">HELIX</td>
+                <td class="method">UNIPROT</td>
+                <td class="feature">BRCA1_HUMAN_HELIX_3_50</td>
+                <td class="start">3</td>
+                <td class="end">50</td>
+                <td class="score">0</td>
+                <td class="notes">Sample notes</td>
+                <td class="links">Sample links</td>
+                <td class="graphic">
+                    <span class="graphic-padding" style="width: 0.322%;"></span>
+                    <span class="graphic" style="width:5.4%; background-color:red; border-color:maroon;"></span>
+                </td>
+                <!--td class="orientation" align="right">0</td>
+                <td class="phase" align="center">-</td>
+                <td class="target">Sample target</td>
+                <td class="group">Sample group</td-->
+            </tr>
+            <!-- Sample data (will be ignored by XSLT) -->
+            <tr class="ignore">
+                <td class="feature-segment-id">P12345</td>
+                <td class="ignore">ignore</td>
+                <td class="ignore">STRAND</td>
+                <td class="ignore">UNIPROT</td>
+                <td class="ignore">BRCA1_HUMAN_STRAND_52_70</td>
+                <td class="ignore" align="right">52</td>
+                <td class="ignore" align="right">70</td>
+                <td class="ignore" align="right">0</td>
+                <td class="ignore"></td>
+                <td class="ignore"></td>
+                <td class="ignore">
+                    <span class="graphic-line" style="width: 5%;"></span>
+                    <span class="graphic" style="width:3%; background-color:blue; border-color:navy;"></span>
+                    <span class="graphic-line" style="width: 10%;"></span>
+                    <span class="graphic" style="width:22%; background-color:blue; border-color:navy;"></span>
+                    <span class="graphic-line" style="width: 58%;"></span>
+                </td>
+                <!--td class="ignore" align="center">0</td>
+                <td class="ignore" align="center">-</td>
+                <td class="ignore">Sample target</td>
+                <td class="ignore">Sample group</td-->
+            </tr>
+        </table>
+
+        <!-- Non-positional features -->
+        <h3>
+            <span class="switch" id="non-positional-features-switch" onclick="toggle('non-positional-features')">[-]</span>
+            Non-positional features
+        </h3>
+        <table id="non-positional-features"
+               class="sortable"
+               cellpadding="0"
+               cellspacing="0"
+               width="100%">
+            <!-- Column headings -->
+            <tr class="head">
+                <th class="feature-segment-id">ID</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Method</th>
+                <th>Feature</th>
+                <th>Score</th>
+                <th>Notes</th>
+                <th>Links</th>
+                <!--th>Orientation</th>
+                <th>Phase</th>
+                <th>Target</th>
+                <th>Group</th-->
+            </tr>
+            <!-- Row template -->
+            <tr class="template">
+                <td class="feature-segment-id">P12345</td>
+                <td class="category"></td>                
+                <td class="type">reference</td>
+                <td class="method">reference</td>
+                <td class="feature">
+                    <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=PubMed&amp;cmd=Retrieve&amp;dopt=Citation&amp;list_uids=9760198">
+                        pubmed:9760198
+                    </a>
+                </td>
+                <td class="score">-</td>
+                <td class="notes">
+                    Dong J., Chang-Claude J., Wu Y., Schumacher V., Debatin I., Tonin P., Royer-Pokora B. (1998).
+                    "A high proportion of mutations in the BRCA1 gene in German breast/ovarian cancer families with
+                    clustering of mutations in the 3' third of the gene.", Hum. Genet. 103:154-161
+                </td>
+                <td class="links"></td>
+                <!--td class="orientation" align="right">0</td>
+                <td class="phase" align="center">-</td>
+                <td class="target">Sample target</td>
+                <td class="group">Sample group</td-->
+            </tr>
+            <!-- Sample data (will ignored by XSLT) -->
+            <tr class="ignore">
+                <td class="feature-segment-id">Sample ID</td>
+                <td class="ignore">Sample category</td>
+                <td class="ignore">Sample type</td>
+                <td class="ignore">Sample method</td>
+                <td class="ignore">
+                    <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=PubMed&amp;cmd=Retrieve&amp;dopt=Citation&amp;list_uids=10500182">
+                        pubmed:10500182
+                    </a>
+                </td>
+                <td class="ignore" align="right">3.3</td>
+                <td class="ignore">
+                    Lorick K.L., Jensen J.P., Fang S., Ong A.M., Hatakeyama S., Weissman A.M. (1999).
+                    "RING fingers mediate ubiquitin-conjugating enzyme (E2)-dependent ubiquitination.",
+                    Proc. Natl. Acad. Sci. U.S.A. 96:11364-11369
+                </td>
+                <td class="ignore"></td>
+                <!--td class="ignore" align="center">0</td>
+                <td class="ignore" align="center">-</td>
+                <td class="ignore">Sample target</td>
+                <td class="ignore">Sample group</td-->
+            </tr>
+        </table>
+
+    </div>
+
+    <div><p/></div>
+
+    <div class="footer" align="right">
+        European Bioinformatics Institute &#169; 2007. All rights reserved.
+    </div>
+
+</body>
+</html>

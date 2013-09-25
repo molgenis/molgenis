@@ -1,0 +1,336 @@
+2013-09-23 14:52:30,505 DEBUG MolgenisOptions - parsed properties file.
+2013-09-23 14:52:30,518 INFO Molgenis - 
+MOLGENIS version 4.0.0-testing
+2013-09-23 14:52:30,519 INFO Molgenis - working dir: /Users/charbonb/git/molgenis/molgenis-dasservice
+2013-09-23 14:52:30,524 INFO Molgenis - Skipping documentation ....
+2013-09-23 14:52:30,524 INFO Molgenis - SEVERE: Skipping ALL SQL ....
+2013-09-23 14:52:30,527 INFO Molgenis - Skipping Python interface ....
+2013-09-23 14:52:30,527 INFO Molgenis - Skipping R interface ....
+2013-09-23 14:52:30,527 INFO Molgenis - Skipping SOAP API ....
+2013-09-23 14:52:30,527 INFO Molgenis - Skipping SOAP API ....
+2013-09-23 14:52:30,527 INFO Molgenis - Skipping SOAP API ....
+2013-09-23 14:52:30,535 DEBUG Molgenis - 
+Using generators:
+generators.server.UsedMolgenisOptionsGen #Generates a Java class with a HashMap containing all used MolgenisOptions to be used at runtime.
+generators.db.EntityImporterGen          #Generates importer for each entity
+
+2013-09-23 14:52:30,538 INFO MolgenisModel - parsing db-schema from []
+2013-09-23 14:52:30,880 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:52:30,882 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=username, type=string[0], auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,882 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=password_, type=string[0], auto=false, nillable=false, readonly=false, default=secret)
+2013-09-23 14:52:30,882 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=activationCode, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,883 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=active, type=bool, auto=false, nillable=false, readonly=false, default=false)
+2013-09-23 14:52:30,883 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=superuser, type=bool, auto=false, nillable=false, readonly=false, default=false)
+2013-09-23 14:52:30,883 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=FirstName, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,883 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=MidInitials, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,883 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=LastName, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,883 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Title, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,884 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Affiliation, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,884 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Department, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,884 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Role, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,885 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Address, type=text, auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,885 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Phone, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,885 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Email, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,885 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Fax, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,885 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=tollFreePhone, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,886 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=City, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,886 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Country, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:52:30,886 DEBUG MolgenisModelParser - read: MolgenisUser
+2013-09-23 14:52:30,886 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroup, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:52:30,886 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroup, name=name, type=string[0], auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,887 DEBUG MolgenisModelParser - read: MolgenisGroup
+2013-09-23 14:52:30,887 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroupMember, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:52:30,890 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroupMember, name=molgenisUser, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,890 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroupMember, name=molgenisGroup, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,890 DEBUG MolgenisModelParser - read: MolgenisGroupMember
+2013-09-23 14:52:30,890 DEBUG MolgenisModelParser - read: Field(entity=Authority, name=role, type=string[0], auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,890 DEBUG MolgenisModelParser - read: Authority
+2013-09-23 14:52:30,891 DEBUG MolgenisModelParser - read: Field(entity=UserAuthority, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:52:30,891 DEBUG MolgenisModelParser - read: Field(entity=UserAuthority, name=molgenisUser, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,891 DEBUG MolgenisModelParser - read: UserAuthority
+2013-09-23 14:52:30,891 DEBUG MolgenisModelParser - read: Field(entity=GroupAuthority, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:52:30,891 DEBUG MolgenisModelParser - read: Field(entity=GroupAuthority, name=molgenisGroup, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:52:30,891 DEBUG MolgenisModelParser - read: GroupAuthority
+2013-09-23 14:52:30,894 DEBUG MolgenisModelValidator - validating model and adding defaults:
+2013-09-23 14:52:30,894 DEBUG MolgenisModelValidator - check for JAVA and SQL reserved words...
+2013-09-23 14:52:30,896 DEBUG MolgenisModelValidator - validate 'extends' and 'implements' relationships...
+2013-09-23 14:52:30,896 DEBUG MolgenisModelValidator - add a 'type' field in subclasses to enable instanceof at database level...
+2013-09-23 14:52:30,897 DEBUG MolgenisModelValidator - validate the fields used in 'unique' constraints...
+2013-09-23 14:52:30,898 DEBUG MolgenisModelValidator - added default xref_label=null to entity=Authority
+2013-09-23 14:52:30,898 DEBUG MolgenisModelValidator - validate xref_field and xref_label references...
+2013-09-23 14:52:30,899 DEBUG MolgenisModelValidator - automatically set MolgenisGroupMember.molgenisUser xref_field=id
+2013-09-23 14:52:30,899 DEBUG MolgenisModelValidator - automatically set MolgenisGroupMember.molgenisGroup xref_field=id
+2013-09-23 14:52:30,900 DEBUG MolgenisModelValidator - automatically set UserAuthority.molgenisUser xref_field=id
+2013-09-23 14:52:30,901 DEBUG MolgenisModelValidator - automatically set GroupAuthority.molgenisGroup xref_field=id
+2013-09-23 14:52:30,902 DEBUG MolgenisModelValidator - correct case of names in xrefs...
+2013-09-23 14:52:30,903 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:52:30,903 DEBUG MolgenisModelValidator - add linktable entities for mrefs...
+2013-09-23 14:52:30,904 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field MolgenisGroupMember.molgenisGroup
+2013-09-23 14:52:30,904 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field GroupAuthority.molgenisGroup
+2013-09-23 14:52:30,904 DEBUG MolgenisModelValidator - copying decorators to subclasses...
+2013-09-23 14:52:30,904 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:52:30,905 INFO MolgenisModel - read model
+2013-09-23 14:52:30,905 DEBUG MolgenisModel - validating model ...
+2013-09-23 14:52:30,905 DEBUG MolgenisModelValidator - validating model and adding defaults:
+2013-09-23 14:52:30,905 DEBUG MolgenisModelValidator - check for JAVA and SQL reserved words...
+2013-09-23 14:52:30,906 DEBUG MolgenisModelValidator - validate 'extends' and 'implements' relationships...
+2013-09-23 14:52:30,907 DEBUG MolgenisModelValidator - add a 'type' field in subclasses to enable instanceof at database level...
+2013-09-23 14:52:30,907 DEBUG MolgenisModelValidator - validate the fields used in 'unique' constraints...
+2013-09-23 14:52:30,908 DEBUG MolgenisModelValidator - added default xref_label=null to entity=Authority
+2013-09-23 14:52:30,908 DEBUG MolgenisModelValidator - validate xref_field and xref_label references...
+2013-09-23 14:52:30,909 DEBUG MolgenisModelValidator - correct case of names in xrefs...
+2013-09-23 14:52:30,910 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:52:30,910 DEBUG MolgenisModelValidator - add linktable entities for mrefs...
+2013-09-23 14:52:30,910 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field MolgenisGroupMember.molgenisGroup
+2013-09-23 14:52:30,910 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field GroupAuthority.molgenisGroup
+2013-09-23 14:52:30,911 DEBUG MolgenisModelValidator - copying decorators to subclasses...
+2013-09-23 14:52:30,911 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:52:30,911 INFO MolgenisModel - validated model
+2013-09-23 14:52:30,911 INFO Molgenis - generating ....
+2013-09-23 14:52:30,916 INFO Molgenis - 
+Using options:
+model_database              = []                                                                                                         #File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()
+import_model_database       = [model/security.xml]                                                                                       #File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()
+example_data_dir            = data                                                                                                       #Directory where example data lives. Default: 'data'
+output_dir                  = generated                                                                                                  #Directory where all generated code is stored
+output_python               = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/generated/python/  #Output-directory for the generated Python classes. Default: 'generated/python'
+output_src                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/java/              #Output-directory for the generated Java classes. Default: 'generated/java'
+output_hand                 = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/src/main/java/     #Source directory for handwritten java. Default: 'handwritten/java'
+output_sql                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/sql/               #Output-directory for the generated sql files. Default: 'generated/sql'
+output_doc                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/doc/generated-doc/ #Output-directory for the generated documentation. Default: 'WebContent/generated-doc'
+output_web                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/webapp/            #Output-directory for any generated web resources. Default: 'WebContent'
+db_driver                   = com.mysql.jdbc.Driver                                                                                      #Driver of database. Any JDBC compatible driver should work. Default: 'com.mysql.jdbc.Driver'
+db_user                     = molgenis                                                                                                   #Username for the database. Default: ''
+decorator_overriders        =                                                                                                            #Points to an application package with overriding classes for entity decorators, mapped by name. Default: ''
+db_password                 = xxxxxx                                                                                                     #Password for database. Default: ''
+db_uri                      = jdbc:mysql://localhost/omx?innodb_autoinc_lock_mode=2&amp;rewriteBatchedStatements=true                    #Uri of the database. Default: 'jdbc:mysql://localhost/molgenis?innodb_autoinc_lock_mode=2'
+db_filepath                 = omx/                                                                                                       #Path where the database should store file attachements. Default: 'data'
+db_test_user                = molgenis                                                                                                   #Username for the database. Default: ''
+db_test_password            = xxxxxx                                                                                                     #Password for database. Default: ''
+db_test_uri                 = jdbc:mysql://localhost/molgenis_test?innodb_autoinc_lock_mode=2                                            #Uri of the database. Default: 'jdbc:mysql://localhost/molgenis?innodb_autoinc_lock_mode=2'
+db_jndiname                 = molgenis_jndi                                                                                              #Used to create a JDBC database resource for the application. Default: 'molgenis_jndi'
+object_relational_mapping   = subclass_per_table                                                                                         #Expert option: Choosing OR strategy. Either 'class_per_table', 'subclass_per_table', 'hierarchy_per_table'. Default: SUBCLASS_PER_TABLE
+mapper_implementation       = JPA                                                                                                        #Expert option: Choosing wether multiquery is used instead of prepared statements. Default: MULTIQUERY
+generate_persistence        = molgenis                                                                                                   #Expert option: Choosing the JPA persistence unit name from the persistence.xml that is used by molgenis. Default: molgenis
+generate_persistence        = true                                                                                                       #Expert option: Choosing whether persistence.xml is generated by molgenis (true) or supplied by user (false). Default: true
+hibernate_dialect           = MySQL5InnoDBDialect                                                                                        #Expert option: Choosing the JPA dialect for persistence.xml. Default: MySQL5Dialect
+jpa_use_sequence            = false                                                                                                      #Expert option: Choosing whether sequence are used to generate primary key (true) or auto (false: default)
+exclude_system              = false                                                                                                      #Expert option: Whether system tables should be excluded from generation. Default: true
+auth_loginclass             = org.molgenis.omx.auth.DatabaseLogin                                                                        #Expert option. Set the class used for login. Default: org.molgenis.framework.security.SimpleLogin
+auth_use_dialog             = true                                                                                                       #Indicate the use of the bootstrap modal dialog for login. Default: false
+auth_redirect               =                                                                                                            #Get name of form/plugin to redirect to after login. Default: ''
+mail_smtp_from              =                                                                                                            #Sets the email adress used to send emails from. Default: ''
+mail_smtp_protocol          = smtps                                                                                                      #Sets the email protocol, either smtp, smtps or null. Default: 'smtps'
+mail_smtp_hostname          = smtp.gmail.com                                                                                             #SMTP host server. Default: 'smtp.gmail.com'
+mail_smtp_port              = 465                                                                                                        #SMTP host server port. Default: 465
+mail_smtp_user              =                                                                                                            #SMTP user for authenticated emailing. Default: ''
+mail_smtp_au                =                                                                                                            #SMTP auth. Default: ''
+generate_R                  = false                                                                                                      #Should R-interface be generated. Default: true.
+generate_BOT                = false                                                                                                      #Should BOT be generated. Default: false.
+generate_doc                = false                                                                                                      #Should documentation be generated. Default: true.
+generate_entityio           = false                                                                                                      #Should entity importers and exporters be generated. Default: true.
+generate_Python             = false                                                                                                      #Should Python-interface be generated. Default: false.
+generate_tests              = true                                                                                                       #Should test code for generated code be generated. Default: false.
+db_mode                     = standalone                                                                                                 #Which mode should the molgenisServlet use when contacting the dabase. Default: 'servlet'
+output_cpp                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/generated/cpp/     #Output-directory for the generated CPP classes. Default: 'generated/cpp'
+generate_cpp                = false                                                                                                      #Generate CPP. Default: false
+generate_model              = true                                                                                                       #Generate any SQL related classes. Default: true
+generate_sql                = false                                                                                                      #Generate any SQL related classes. Default: true
+generate_rdf                = false                                                                                                      #generate the RDF API. Default: true
+generate_rest               = false                                                                                                      #generate the REST API. Default: true
+generate_soap               = false                                                                                                      #generate the SOAP API. Default: true
+generate_mobile             = false                                                                                                      #generate the Molgenis mobile GUI. Default: true
+generate_decorators         = false                                                                                                      #generate decorator templates. Default: true
+generate_frontcontroller    = true                                                                                                       #generate front controller. Default: true
+generate_options            = true                                                                                                       #generate use molgenis options. Default: true
+generate_db                 = true                                                                                                       #generate database. Default: true
+delete_generated_folder     = true                                                                                                       #delete generated Folder before generators are executed. Default: true
+authorizable                = []                                                                                                         #For use in molgenis_apps! Tells the generator on which entities to append an implements='Authorizable'. Default: new ArrayList<String>()
+disable_decorators          = false                                                                                                      #disables all decorators for generated test
+log4j_properties_uri        =                                                                                                            #specify the location of the log4j.properties file that Molgenis should use, if not specified than log_level and log_target properties are used instead
+log_level                   = INFO                                                                                                       #Use this log level to initialize log4j. Default: debug
+log_target                  = CONSOLE                                                                                                    #Use this log target to initialize log4j. Default: console
+hibernate_search_index_base = /tmp/lucene                                                                                                #Directory where the full text index is created. Default: /tmp/lucene
+block_webspiders            = false                                                                                                      #Expert option: Block webcrawler user agents in FrontController
+
+2013-09-23 14:52:30,926 INFO Molgenis - Generation completed at Mon Sep 23 14:52:30 CEST 2013
+2013-09-23 14:53:17,075 DEBUG MolgenisOptions - parsed properties file.
+2013-09-23 14:53:17,087 INFO Molgenis - 
+MOLGENIS version 4.0.0-testing
+2013-09-23 14:53:17,090 INFO Molgenis - working dir: /Users/charbonb/git/molgenis/molgenis-dasservice
+2013-09-23 14:53:17,094 INFO Molgenis - Skipping documentation ....
+2013-09-23 14:53:17,094 INFO Molgenis - SEVERE: Skipping ALL SQL ....
+2013-09-23 14:53:17,096 INFO Molgenis - Skipping Python interface ....
+2013-09-23 14:53:17,096 INFO Molgenis - Skipping R interface ....
+2013-09-23 14:53:17,096 INFO Molgenis - Skipping SOAP API ....
+2013-09-23 14:53:17,096 INFO Molgenis - Skipping SOAP API ....
+2013-09-23 14:53:17,096 INFO Molgenis - Skipping SOAP API ....
+2013-09-23 14:53:17,103 DEBUG Molgenis - 
+Using generators:
+generators.server.UsedMolgenisOptionsGen #Generates a Java class with a HashMap containing all used MolgenisOptions to be used at runtime.
+generators.db.EntityImporterGen          #Generates importer for each entity
+
+2013-09-23 14:53:17,106 INFO MolgenisModel - parsing db-schema from []
+2013-09-23 14:53:17,460 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:53:17,462 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=username, type=string[0], auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,462 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=password_, type=string[0], auto=false, nillable=false, readonly=false, default=secret)
+2013-09-23 14:53:17,462 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=activationCode, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,462 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=active, type=bool, auto=false, nillable=false, readonly=false, default=false)
+2013-09-23 14:53:17,462 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=superuser, type=bool, auto=false, nillable=false, readonly=false, default=false)
+2013-09-23 14:53:17,463 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=FirstName, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,463 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=MidInitials, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,463 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=LastName, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,463 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Title, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,464 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Affiliation, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,464 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Department, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,464 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Role, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,464 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Address, type=text, auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,464 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Phone, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,464 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Email, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,465 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Fax, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,465 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=tollFreePhone, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,465 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=City, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,465 DEBUG MolgenisModelParser - read: Field(entity=MolgenisUser, name=Country, type=string[0], auto=false, nillable=true, readonly=false, default=)
+2013-09-23 14:53:17,465 DEBUG MolgenisModelParser - read: MolgenisUser
+2013-09-23 14:53:17,465 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroup, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:53:17,466 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroup, name=name, type=string[0], auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,466 DEBUG MolgenisModelParser - read: MolgenisGroup
+2013-09-23 14:53:17,466 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroupMember, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:53:17,468 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroupMember, name=molgenisUser, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,468 DEBUG MolgenisModelParser - read: Field(entity=MolgenisGroupMember, name=molgenisGroup, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,468 DEBUG MolgenisModelParser - read: MolgenisGroupMember
+2013-09-23 14:53:17,468 DEBUG MolgenisModelParser - read: Field(entity=Authority, name=role, type=string[0], auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,468 DEBUG MolgenisModelParser - read: Authority
+2013-09-23 14:53:17,468 DEBUG MolgenisModelParser - read: Field(entity=UserAuthority, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:53:17,469 DEBUG MolgenisModelParser - read: Field(entity=UserAuthority, name=molgenisUser, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,469 DEBUG MolgenisModelParser - read: UserAuthority
+2013-09-23 14:53:17,469 DEBUG MolgenisModelParser - read: Field(entity=GroupAuthority, name=id, type=int, auto=true, nillable=false, readonly=true, default=)
+2013-09-23 14:53:17,469 DEBUG MolgenisModelParser - read: Field(entity=GroupAuthority, name=molgenisGroup, type=xref[.], xref_label=, auto=false, nillable=false, readonly=false, default=)
+2013-09-23 14:53:17,469 DEBUG MolgenisModelParser - read: GroupAuthority
+2013-09-23 14:53:17,472 DEBUG MolgenisModelValidator - validating model and adding defaults:
+2013-09-23 14:53:17,472 DEBUG MolgenisModelValidator - check for JAVA and SQL reserved words...
+2013-09-23 14:53:17,474 DEBUG MolgenisModelValidator - validate 'extends' and 'implements' relationships...
+2013-09-23 14:53:17,474 DEBUG MolgenisModelValidator - add a 'type' field in subclasses to enable instanceof at database level...
+2013-09-23 14:53:17,475 DEBUG MolgenisModelValidator - validate the fields used in 'unique' constraints...
+2013-09-23 14:53:17,476 DEBUG MolgenisModelValidator - added default xref_label=null to entity=Authority
+2013-09-23 14:53:17,476 DEBUG MolgenisModelValidator - validate xref_field and xref_label references...
+2013-09-23 14:53:17,477 DEBUG MolgenisModelValidator - automatically set MolgenisGroupMember.molgenisUser xref_field=id
+2013-09-23 14:53:17,478 DEBUG MolgenisModelValidator - automatically set MolgenisGroupMember.molgenisGroup xref_field=id
+2013-09-23 14:53:17,478 DEBUG MolgenisModelValidator - automatically set UserAuthority.molgenisUser xref_field=id
+2013-09-23 14:53:17,479 DEBUG MolgenisModelValidator - automatically set GroupAuthority.molgenisGroup xref_field=id
+2013-09-23 14:53:17,480 DEBUG MolgenisModelValidator - correct case of names in xrefs...
+2013-09-23 14:53:17,482 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:53:17,482 DEBUG MolgenisModelValidator - add linktable entities for mrefs...
+2013-09-23 14:53:17,482 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field MolgenisGroupMember.molgenisGroup
+2013-09-23 14:53:17,482 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field GroupAuthority.molgenisGroup
+2013-09-23 14:53:17,482 DEBUG MolgenisModelValidator - copying decorators to subclasses...
+2013-09-23 14:53:17,483 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:53:17,483 INFO MolgenisModel - read model
+2013-09-23 14:53:17,483 DEBUG MolgenisModel - validating model ...
+2013-09-23 14:53:17,483 DEBUG MolgenisModelValidator - validating model and adding defaults:
+2013-09-23 14:53:17,483 DEBUG MolgenisModelValidator - check for JAVA and SQL reserved words...
+2013-09-23 14:53:17,485 DEBUG MolgenisModelValidator - validate 'extends' and 'implements' relationships...
+2013-09-23 14:53:17,485 DEBUG MolgenisModelValidator - add a 'type' field in subclasses to enable instanceof at database level...
+2013-09-23 14:53:17,485 DEBUG MolgenisModelValidator - validate the fields used in 'unique' constraints...
+2013-09-23 14:53:17,486 DEBUG MolgenisModelValidator - added default xref_label=null to entity=Authority
+2013-09-23 14:53:17,486 DEBUG MolgenisModelValidator - validate xref_field and xref_label references...
+2013-09-23 14:53:17,487 DEBUG MolgenisModelValidator - correct case of names in xrefs...
+2013-09-23 14:53:17,488 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:53:17,488 DEBUG MolgenisModelValidator - add linktable entities for mrefs...
+2013-09-23 14:53:17,489 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field MolgenisGroupMember.molgenisGroup
+2013-09-23 14:53:17,489 DEBUG MolgenisModelValidator - copying xref_label [id] from MolgenisGroup to field GroupAuthority.molgenisGroup
+2013-09-23 14:53:17,489 DEBUG MolgenisModelValidator - copying decorators to subclasses...
+2013-09-23 14:53:17,489 DEBUG MolgenisModelValidator - copy fields to subclass for constrain checking...
+2013-09-23 14:53:17,490 INFO MolgenisModel - validated model
+2013-09-23 14:53:17,490 INFO Molgenis - generating ....
+2013-09-23 14:53:17,496 INFO Molgenis - 
+Using options:
+model_database              = []                                                                                                                #File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()
+import_model_database       = [model/security.xml]                                                                                              #File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()
+example_data_dir            = data                                                                                                              #Directory where example data lives. Default: 'data'
+output_dir                  = generated                                                                                                         #Directory where all generated code is stored
+output_python               = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/generated/python/         #Output-directory for the generated Python classes. Default: 'generated/python'
+output_src                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/java/                     #Output-directory for the generated Java classes. Default: 'generated/java'
+output_hand                 = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/src/main/java/            #Source directory for handwritten java. Default: 'handwritten/java'
+output_sql                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/sql/                      #Output-directory for the generated sql files. Default: 'generated/sql'
+output_doc                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/WebContent/generated-doc/ #Output-directory for the generated documentation. Default: 'WebContent/generated-doc'
+output_web                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/webapp/                   #Output-directory for any generated web resources. Default: 'WebContent'
+db_driver                   = com.mysql.jdbc.Driver                                                                                             #Driver of database. Any JDBC compatible driver should work. Default: 'com.mysql.jdbc.Driver'
+db_user                     = molgenis                                                                                                          #Username for the database. Default: ''
+decorator_overriders        =                                                                                                                   #Points to an application package with overriding classes for entity decorators, mapped by name. Default: ''
+db_password                 = xxxxxx                                                                                                            #Password for database. Default: ''
+db_uri                      = jdbc:mysql://localhost/omx?innodb_autoinc_lock_mode=2&amp;rewriteBatchedStatements=true                           #Uri of the database. Default: 'jdbc:mysql://localhost/molgenis?innodb_autoinc_lock_mode=2'
+db_filepath                 = omx/                                                                                                              #Path where the database should store file attachements. Default: 'data'
+db_test_user                = molgenis                                                                                                          #Username for the database. Default: ''
+db_test_password            = xxxxxx                                                                                                            #Password for database. Default: ''
+db_test_uri                 = jdbc:mysql://localhost/molgenis_test?innodb_autoinc_lock_mode=2                                                   #Uri of the database. Default: 'jdbc:mysql://localhost/molgenis?innodb_autoinc_lock_mode=2'
+db_jndiname                 = molgenis_jndi                                                                                                     #Used to create a JDBC database resource for the application. Default: 'molgenis_jndi'
+object_relational_mapping   = subclass_per_table                                                                                                #Expert option: Choosing OR strategy. Either 'class_per_table', 'subclass_per_table', 'hierarchy_per_table'. Default: SUBCLASS_PER_TABLE
+mapper_implementation       = JPA                                                                                                               #Expert option: Choosing wether multiquery is used instead of prepared statements. Default: MULTIQUERY
+generate_persistence        = molgenis                                                                                                          #Expert option: Choosing the JPA persistence unit name from the persistence.xml that is used by molgenis. Default: molgenis
+generate_persistence        = true                                                                                                              #Expert option: Choosing whether persistence.xml is generated by molgenis (true) or supplied by user (false). Default: true
+hibernate_dialect           = MySQL5InnoDBDialect                                                                                               #Expert option: Choosing the JPA dialect for persistence.xml. Default: MySQL5Dialect
+jpa_use_sequence            = false                                                                                                             #Expert option: Choosing whether sequence are used to generate primary key (true) or auto (false: default)
+exclude_system              = false                                                                                                             #Expert option: Whether system tables should be excluded from generation. Default: true
+auth_loginclass             = org.molgenis.omx.auth.DatabaseLogin                                                                               #Expert option. Set the class used for login. Default: org.molgenis.framework.security.SimpleLogin
+auth_use_dialog             = true                                                                                                              #Indicate the use of the bootstrap modal dialog for login. Default: false
+auth_redirect               =                                                                                                                   #Get name of form/plugin to redirect to after login. Default: ''
+mail_smtp_from              =                                                                                                                   #Sets the email adress used to send emails from. Default: ''
+mail_smtp_protocol          = smtps                                                                                                             #Sets the email protocol, either smtp, smtps or null. Default: 'smtps'
+mail_smtp_hostname          = smtp.gmail.com                                                                                                    #SMTP host server. Default: 'smtp.gmail.com'
+mail_smtp_port              = 465                                                                                                               #SMTP host server port. Default: 465
+mail_smtp_user              =                                                                                                                   #SMTP user for authenticated emailing. Default: ''
+mail_smtp_au                =                                                                                                                   #SMTP auth. Default: ''
+generate_R                  = false                                                                                                             #Should R-interface be generated. Default: true.
+generate_BOT                = false                                                                                                             #Should BOT be generated. Default: false.
+generate_doc                = false                                                                                                             #Should documentation be generated. Default: true.
+generate_entityio           = false                                                                                                             #Should entity importers and exporters be generated. Default: true.
+generate_Python             = false                                                                                                             #Should Python-interface be generated. Default: false.
+generate_tests              = true                                                                                                              #Should test code for generated code be generated. Default: false.
+db_mode                     = standalone                                                                                                        #Which mode should the molgenisServlet use when contacting the dabase. Default: 'servlet'
+output_cpp                  = /Users/charbonb/git/molgenis/molgenis-dasservice/target/generated-test-sources/molgenis/generated/cpp/            #Output-directory for the generated CPP classes. Default: 'generated/cpp'
+generate_cpp                = false                                                                                                             #Generate CPP. Default: false
+generate_model              = true                                                                                                              #Generate any SQL related classes. Default: true
+generate_sql                = false                                                                                                             #Generate any SQL related classes. Default: true
+generate_rdf                = false                                                                                                             #generate the RDF API. Default: true
+generate_rest               = false                                                                                                             #generate the REST API. Default: true
+generate_soap               = false                                                                                                             #generate the SOAP API. Default: true
+generate_mobile             = false                                                                                                             #generate the Molgenis mobile GUI. Default: true
+generate_decorators         = false                                                                                                             #generate decorator templates. Default: true
+generate_frontcontroller    = true                                                                                                              #generate front controller. Default: true
+generate_options            = true                                                                                                              #generate use molgenis options. Default: true
+generate_db                 = true                                                                                                              #generate database. Default: true
+delete_generated_folder     = true                                                                                                              #delete generated Folder before generators are executed. Default: true
+authorizable                = []                                                                                                                #For use in molgenis_apps! Tells the generator on which entities to append an implements='Authorizable'. Default: new ArrayList<String>()
+disable_decorators          = false                                                                                                             #disables all decorators for generated test
+log4j_properties_uri        =                                                                                                                   #specify the location of the log4j.properties file that Molgenis should use, if not specified than log_level and log_target properties are used instead
+log_level                   = INFO                                                                                                              #Use this log level to initialize log4j. Default: debug
+log_target                  = CONSOLE                                                                                                           #Use this log target to initialize log4j. Default: console
+hibernate_search_index_base = /tmp/lucene                                                                                                       #Directory where the full text index is created. Default: /tmp/lucene
+block_webspiders            = false                                                                                                             #Expert option: Block webcrawler user agents in FrontController
+
+2013-09-23 14:53:17,505 INFO Molgenis - Generation completed at Mon Sep 23 14:53:17 CEST 2013
+2013-09-23 14:56:33,436 DEBUG Config - OSCache: Config called
+2013-09-23 14:56:33,437 INFO Config - OSCache: Getting properties from URL file:/Users/charbonb/git/molgenis/molgenis-dasservice/target/classes/oscache.properties for the default configuration
+2013-09-23 14:56:33,437 INFO Config - OSCache: Properties read {cache.algorithm=com.opensymphony.oscache.base.algorithm.LRUCache, cache.persistence.class=com.opensymphony.oscache.plugins.diskpersistence.DiskPersistenceListener, cache.path=/tmp/, cache.persistence.overflow.only=true, cache.capacity=100, cache.key=mydas_cache, cache.unlimited.disk=true}
+2013-09-23 14:56:33,438 DEBUG AbstractCacheAdministrator - Constructed AbstractCacheAdministrator()
+2013-09-23 14:56:33,438 INFO GeneralCacheAdministrator - Constructed GeneralCacheAdministrator()
+2013-09-23 14:56:33,438 INFO GeneralCacheAdministrator - Creating new cache
+2013-09-23 14:56:33,682 DEBUG DataSourceConfiguration - New DataSourceConfiguration instantiated: 
+DataSourceConfiguration: id: 'template' name: 'template' version: '2010-03-17' description: 'Template Annotation Data Source' dna command enabled :'true' use feature id for feature label: 'true' include types with zero count: 'true
+2013-09-23 14:56:33,682 DEBUG DataSourceConfiguration - New DataSourceConfiguration instantiated: 
+DataSourceConfiguration: id: 'examplegff' name: 'fickett-tss' version: '2010-03-19' description: 'GFF2 Example Annotation Data Source' dna command enabled :'true' use feature id for feature label: 'true' include types with zero count: 'true
+2013-09-23 14:56:33,706 DEBUG MydasServlet - RequestURI: '/das'
+2013-09-23 14:56:33,706 DEBUG MydasServlet - Query String2: 'null'
+2013-09-23 15:02:19,912 DEBUG Config - OSCache: Config called
+2013-09-23 15:02:19,913 INFO Config - OSCache: Getting properties from URL file:/Users/charbonb/git/molgenis/molgenis-dasservice/target/classes/oscache.properties for the default configuration
+2013-09-23 15:02:19,913 INFO Config - OSCache: Properties read {cache.algorithm=com.opensymphony.oscache.base.algorithm.LRUCache, cache.persistence.class=com.opensymphony.oscache.plugins.diskpersistence.DiskPersistenceListener, cache.path=/tmp/, cache.persistence.overflow.only=true, cache.capacity=100, cache.key=mydas_cache, cache.unlimited.disk=true}
+2013-09-23 15:02:19,914 DEBUG AbstractCacheAdministrator - Constructed AbstractCacheAdministrator()
+2013-09-23 15:02:19,914 INFO GeneralCacheAdministrator - Constructed GeneralCacheAdministrator()
+2013-09-23 15:02:19,914 INFO GeneralCacheAdministrator - Creating new cache
+2013-09-23 15:02:20,131 DEBUG DataSourceConfiguration - New DataSourceConfiguration instantiated: 
+DataSourceConfiguration: id: 'template' name: 'template' version: '2010-03-17' description: 'Template Annotation Data Source' dna command enabled :'true' use feature id for feature label: 'true' include types with zero count: 'true
+2013-09-23 15:02:20,131 DEBUG DataSourceConfiguration - New DataSourceConfiguration instantiated: 
+DataSourceConfiguration: id: 'examplegff' name: 'fickett-tss' version: '2010-03-19' description: 'GFF2 Example Annotation Data Source' dna command enabled :'true' use feature id for feature label: 'true' include types with zero count: 'true
+2013-09-23 15:02:20,156 DEBUG MydasServlet - RequestURI: '/das'
+2013-09-23 15:02:20,156 DEBUG MydasServlet - Query String2: 'null'
