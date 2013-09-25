@@ -6,9 +6,9 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.omx.harmonization.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -62,7 +62,9 @@ public class OntologyLoaderTest
 	public void getSynonyms()
 	{
 		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getTopClasses());
-		assertEquals(loader.getSynonyms(topClasses.get(0)).get(0), "People");
+		Iterator<String> iterator = loader.getSynonyms(topClasses.get(0)).iterator();
+		if (iterator.hasNext()) assertEquals(iterator.next(), "People");
+
 	}
 
 	@Test

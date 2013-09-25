@@ -65,11 +65,11 @@ public class OntologyTermTableTest
 
 		assertTrue(it.hasNext());
 		Tuple tuple2 = it.next();
-		assertEquals(tuple2.get("ontologyTerm"), "Child");
+		assertEquals(tuple2.get("ontologyTermSynonym"), "Strange childhood");
 
 		assertTrue(it.hasNext());
 		Tuple tuple3 = it.next();
-		assertEquals(tuple3.get("ontologyTermSynonym"), "Strange childhood");
+		assertEquals(tuple3.get("ontologyTerm"), "Child");
 
 		assertTrue(it.hasNext());
 		Tuple tuple4 = it.next();
@@ -85,11 +85,11 @@ public class OntologyTermTableTest
 
 		assertTrue(it.hasNext());
 		Tuple tuple7 = it.next();
-		assertEquals(tuple7.get("ontologyTermSynonym"), "Father");
+		assertEquals(tuple7.get("ontologyTermSynonym"), "Dad");
 
 		assertTrue(it.hasNext());
 		Tuple tuple8 = it.next();
-		assertEquals(tuple8.get("ontologyTermSynonym"), "Papa");
+		assertEquals(tuple8.get("ontologyTermSynonym"), "Father");
 		assertEquals(tuple8.get("ontologyTermIRI"), "http://harmonization/test/owl/1.0.0#Father");
 	}
 }

@@ -18,6 +18,7 @@
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
 			var searchHits = searchResponse.searchHits;
 			if(searchHits.length > 0){
+				var table = $('#ontology-table');
 				$.each(searchHits, function(){
 					var ontologyInfo = $(this)[0]["columnValueMap"];
 					var ontologyUri = ontologyInfo.url;
@@ -26,7 +27,20 @@
 					if(runningIndexUri !== null && ontologyUri === runningIndexUri){
 						status = "Being indexed ...";
 					}
-					$('#ontology-table').append('<tr><td>' + ontologyName + '</td><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
+					var eachRow = $('<tr />');
+					$('<td />').append(ontologyName).appendTo(eachRow);
+					$('<td />').append('<a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a>').appendTo(eachRow);
+					$('<td />').append(status).appendTo(eachRow);
+					var removeIcon = $('<i class="icon-remove"></i>').click(function(){
+						$('input[name="ontologyUri"]').val(ontologyUri);
+						$('#ontologyindexer-form').attr({
+							'action' : ns.getContextURL() + '/remove',
+							'method' : 'POST'
+						}).submit();
+					});
+					$('<td />').append(removeIcon).appendTo(eachRow);
+					eachRow.appendTo(table);
+//					$('#ontology-table').append('<tr><td>' + ontologyName + '</td><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
 				});
 			}
 		});

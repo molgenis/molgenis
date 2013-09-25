@@ -68,6 +68,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		}
 	}
 
+	@Override
+	public void removeOntology(String ontologyURI)
+	{
+		searchService.deleteDocumentsByType("ontology-" + ontologyURI);
+		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyURI);
+	}
+
 	public String getOntologyUri()
 	{
 		return ontologyUri;

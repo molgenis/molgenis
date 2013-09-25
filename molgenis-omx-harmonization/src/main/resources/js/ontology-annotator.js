@@ -121,17 +121,16 @@
 				data('feature', feature).click(function()
 			{
 				var featureId = $(this).data('feature').id;
-				restApi.getAsync('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null, function(feature){
-					var components = [];
-					components.push(createFeatureTable(feature));
-					components.push(createSearchDiv(feature));
-					var modalStyle = {
-						'width' : 650, 
-						'margin-left' : -350,
-						'margin-top' : 100
-					};
-					standardModal.createModal('Annotate data item', components, modalStyle);
-				});
+				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null);
+				var components = [];
+				components.push(createFeatureTable(restApiFeature));
+				components.push(createSearchDiv(restApiFeature));
+				var modalStyle = {
+					'width' : 650, 
+					'margin-left' : -350,
+					'margin-top' : 100
+				};
+				standardModal.createModal('Annotate data item', components, modalStyle);
 			});
 			
 			var annotationDiv = $('<div />');
@@ -210,7 +209,6 @@
 					}
 					if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
 					if(ontologyTermId != null) updateAnnotation(restApi.get(this.feature.href), ontologyTermId, true);
-					
 					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
 						var components = [];
 						components.push(createFeatureTable(updatedFeature));
@@ -229,6 +227,7 @@
 
 		function updateAnnotation(feature, ontologyTermId, add){
 			var data = {};
+			feature.description = i18nDescription(feature).en;
 			$.map(feature, function(value, key){
 				if(key !== 'href'){
 					if(key === 'unit')
@@ -322,17 +321,22 @@
 							featureTableContainer.scrollTop(components[0].height());
 						});
 					}, {'feature' : feature, 'ontologyTermHref' : ontologyTerm.href}));
-					var selectBoostIcon = $('<i class="icon-star-empty float-right"></i>').click(function(){
-						if($(this).hasClass('icon-star-empty')){
-							ns.updateIndex(ontologyTerm.termAccession, true);
-							$(this).removeClass('icon-star-empty').addClass('icon-star');
-						}
-						else {
-							ns.updateIndex(ontologyTerm.termAccession, false);
-							$(this).removeClass('icon-star').addClass('icon-star-empty');
-						}
+					
+					ns.searchOntologyTermByUri(ontologyTermIRI, ontologyTerm.termAccession, function(boosted){
+						var selectBoostIcon = $('<i class="icon-star-empty float-right"></i>');
+						if(boosted) selectBoostIcon.removeClass('icon-star-empty').addClass('icon-star');
+						selectBoostIcon.click(function(){
+							if($(this).hasClass('icon-star-empty')){
+								ns.updateIndex(ontologyTerm.termAccession, true);
+								$(this).removeClass('icon-star-empty').addClass('icon-star');
+							}
+							else {
+								ns.updateIndex(ontologyTerm.termAccession, false);
+								$(this).removeClass('icon-star').addClass('icon-star-empty');
+							}
+						});
+						$('<li />').append(ontologyTermLink).append(removeIcon).append(selectBoostIcon).appendTo(ontologyTermAnnotations);
 					});
-					$('<li />').append(ontologyTermLink).append(removeIcon).append(selectBoostIcon).appendTo(ontologyTermAnnotations);
 				});
 				$('<tr />').append('<th>Annotation : </th>').append($('<td />').append(ontologyTermAnnotations)).appendTo(table);
 			}else{
@@ -415,6 +419,26 @@
 			});
 			$(document).data('dataMap', dataMap);
 			response(result);
+		});
+	};
+	
+	ns.searchOntologyTermByUri = function(field, query, callback){
+		var queryRules = [{
+			field : field,
+			operator : 'EQUALS',
+			value : query,
+		}];
+		var searchRequest = {
+			documentType : null,
+			queryRules : queryRules
+		};
+		searchApi.search(searchRequest, function(searchReponse){
+			var boosted = false;
+			$.each(searchReponse.searchHits, function(index, hit){
+				boosted = hit.columnValueMap.boost;
+				return false;
+			});
+			callback(boosted);
 		});
 	};
 	

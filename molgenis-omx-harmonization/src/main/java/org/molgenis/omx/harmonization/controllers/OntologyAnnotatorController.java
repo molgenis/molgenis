@@ -34,7 +34,6 @@ public class OntologyAnnotatorController extends MolgenisPlugin
 {
 	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "ontologyannotator";
 	private static final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
-	private static final String SYNONYMS = "ontologyTermSynonym";
 	private static final Logger logger = Logger.getLogger(OntologyAnnotatorController.class);
 	@Autowired
 	private OntologyAnnotator ontologyAnnotator;

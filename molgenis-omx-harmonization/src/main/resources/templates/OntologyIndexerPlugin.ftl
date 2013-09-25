@@ -23,12 +23,18 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Message : </strong> ${message}</p>
 			</div>
+		<#elseif removeSuccess??>
+			<div <#if removeSuccess>class="alert alert-info"<#else>class="alert alert-error</#if>">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+		  		<p><strong>Message : </strong> ${message}</p>
+			</div>
 		</#if>
 		</div>
 	</div>
 	<div class="row-fluid">
 		<div class="span12">
 			<form id="ontologyindexer-form" class="form-horizontal" enctype="multipart/form-data">
+				<input type="hidden" name="ontologyUri" />
 				<div class="row-fluid">
 					<div id="div-index-ontology" class="span8 well">
 						<div class="row-fluid">
@@ -43,6 +49,9 @@
 										</th>
 										<th>
 											Status
+										</th>
+										<th>
+											Remove
 										</th>
 									</tr>
 								</table>
@@ -83,10 +92,8 @@
 								<h5 class="text-left text-info">Actions</h5>	
 							</div>
 							<div class="accordion-body in">
+								<div class="align-list">Table <strong>above</strong> shows all avaiable indexed ontologies in BiobankConnect.</div>
 								<ol class="action-list">
-									<li>
-										Table <strong>above</strong> shows all avaiable indexed ontologies in BiobankConnect.
-									</li>
 									<li>
 										Enter <strong>name</strong> of ontology (compulsory).
 									</li>

@@ -1,6 +1,7 @@
 package org.molgenis.omx.harmonization.tupleTables;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	private void recursiveAddTuple(String termPath, OWLClass cls, OntologyLoader model, List<Tuple> tuples)
 	{
 		String label = model.getLabel(cls).replaceAll("[^a-zA-Z0-9 ]", " ");
-		List<String> synonyms = new ArrayList<String>();
+		Set<String> synonyms = new HashSet<String>();
 		synonyms.add(label);
 		synonyms.addAll(model.getSynonyms(cls));
 		for (String synonym : synonyms)
@@ -76,6 +77,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		}
 
 		Set<OWLClass> listOfChildren = model.getChildClass(cls);
+		listOfChildren.addAll(model.getAssociatedClasses(cls));
 		if (listOfChildren.size() > 0)
 		{
 			int i = 0;

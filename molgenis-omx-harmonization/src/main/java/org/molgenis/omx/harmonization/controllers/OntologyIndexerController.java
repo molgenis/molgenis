@@ -64,4 +64,22 @@ public class OntologyIndexerController extends MolgenisPlugin
 		}
 		return "OntologyIndexerPlugin";
 	}
+
+	@RequestMapping(value = "/remove", method = RequestMethod.POST)
+	public String removeOntology(@RequestParam
+	String ontologyUri, Model model)
+	{
+		try
+		{
+			ontologyIndexer.removeOntology(ontologyUri);
+			model.addAttribute("removeSuccess", true);
+			model.addAttribute("message", "The ontology has been removed!");
+		}
+		catch (Exception e)
+		{
+			model.addAttribute("message", "It failed to remove this ontology");
+			model.addAttribute("removeSuccess", false);
+		}
+		return "OntologyIndexerPlugin";
+	}
 }

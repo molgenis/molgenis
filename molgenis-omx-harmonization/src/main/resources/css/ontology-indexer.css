@@ -36,6 +36,11 @@ input#ontologyName {
 	margin-bottom : 20px;
 }
 
+.icon-remove {
+	cursor: hand; 
+	cursor: pointer;
+}
+
 table {
 	font-size : 16px;
 }
@@ -44,6 +49,12 @@ ol.action-list, ol.action-list li{
 	padding : 3px;
 	padding-left : 5px;
 }
+
+.align-list {
+	padding-left : 10px;
+	padding-top : 10px;
+}
+
 h3 {
 	color : #3079C2;
 }

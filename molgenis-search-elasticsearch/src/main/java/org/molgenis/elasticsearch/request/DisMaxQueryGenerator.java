@@ -11,7 +11,6 @@ import org.elasticsearch.index.query.BaseQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 
@@ -48,22 +47,14 @@ public class DisMaxQueryGenerator extends AbstractQueryRulePartGenerator
 			{
 				builder.add(buildQueryString(subQuery));
 			}
-			builder.tieBreaker(0);
+			builder.tieBreaker((float) 0.0);
 			return builder;
 		}
 		else
 		{
-			String value = query.getValue().toString();
-			boolean boost = false;
-			if (value.contains("(^3)"))
-			{
-				query.setValue(value.substring(0, value.length() - 4));
-				boost = true;
-			}
-			QueryStringQueryBuilder builder = new QueryStringQueryBuilder(
-					LuceneQueryStringBuilder.buildQueryString(Arrays.asList(query)));
-			if (boost) builder.boost((float) 3.0);
-			return builder;
+			return QueryBuilders.fieldQuery(query.getField(), query.getValue());
+			// return QueryBuilders.queryString(query.getField() + ":" +
+			// query.getValue());
 		}
 	}
 }
