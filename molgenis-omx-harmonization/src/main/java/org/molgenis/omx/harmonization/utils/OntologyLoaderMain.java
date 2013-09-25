@@ -1,24 +1,45 @@
 package org.molgenis.omx.harmonization.utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.semanticweb.owlapi.model.OWLClass;
+import javax.xml.bind.JAXBException;
+
+import org.molgenis.io.csv.CsvReader;
+import org.molgenis.util.tuple.Tuple;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
-import uk.ac.ebi.ontocat.OntologyServiceException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 public class OntologyLoaderMain
 {
-	public static void main(String[] args) throws OWLOntologyCreationException, OntologyServiceException
+	public static void main(String[] args) throws OWLOntologyCreationException, FileNotFoundException, IOException,
+			OWLOntologyStorageException, JAXBException
 	{
-		System.out.println("start loading");
-		OntologyLoader loader = new OntologyLoader("MESH", new File(
-				"/Users/chaopang/Desktop/Ontologies/NCITNCBO_v13.07e.owl"));
-		System.out.println("finish loading");
-
-		for (OWLClass cls : loader.getTopClasses())
+		if (args.length > 1)
 		{
-			loader.getSynonyms(cls);
+			String inputFileName = args[0];
+			String variableList = args[1];
+			File file = new File(inputFileName);
+			System.out.println("start loading");
+			OntologyManager manager = new OntologyManager();
+			manager.loadExistingOntology(file);
+
+			Set<String> terms = new HashSet<String>();
+			CsvReader reader = new CsvReader(new File(variableList));
+			Iterator<Tuple> iterator = reader.iterator();
+			while (iterator.hasNext())
+			{
+				terms.add(iterator.next().getString("name"));
+			}
+			reader.close();
+			File outputFile = new File(file.getAbsoluteFile().getParent() + "/" + file.getName() + "_subset.owl");
+			manager.copyOntologyContent(terms);
+			manager.saveOntology(outputFile);
+			System.out.println("finish loading");
 		}
 	}
 }
