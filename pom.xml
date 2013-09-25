@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -34,10 +34,15 @@
 	</properties>
 
 	<repositories>
-	  <repository>
-	    <id>enonic</id>
-	    <url>http://repo.enonic.com/artifactory/public/</url>
-	  </repository>
+		<repository>
+			<id>enonic</id>
+			<url>http://repo.enonic.com/public/</url>
+		</repository>
+		<repository>
+			<id>repository.springsource.milestone</id>
+			<name>SpringSource Milestone Repository</name>
+			<url>http://repo.springsource.org/milestone</url>
+		</repository>
 	</repositories>
 
 	<build>
@@ -76,7 +81,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.3</version>
+					<version>2.4</version>
 					<configuration>
 						<failOnMissingWebXml>false</failOnMissingWebXml>
 					</configuration>
@@ -226,7 +231,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.2</version>
+					<version>3.3</version>
 				</plugin>
 				<!-- specify plugin version -->
 				<plugin>
@@ -244,7 +249,7 @@
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<version>8.1.11.v20130520</version>
+					<version>8.1.12.v20130726</version>
 					<configuration>
 						<stopPort>9999</stopPort>
 						<stopKey>jetty-stop</stopKey>
@@ -254,6 +259,7 @@
 							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
 								<resourcesAsCSV>${basedir}/src/main/webapp,${basedir}/target/generated-sources/molgenis/doc</resourcesAsCSV>
 							</baseResource>
+							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$</webInfIncludeJarPattern>
 						</webAppConfig>
 					</configuration>
 					<!-- use jetty to run integration tests  -->
@@ -456,7 +462,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.6</version>
+				<version>2.7</version>
 				<configuration>
 					<!-- improve report generation performance -->
 					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -471,7 +477,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.2</version>
+			<version>1.7.5</version>
 			<scope>compile</scope>
 		</dependency>
 		<!-- scope: test -->
@@ -511,20 +517,16 @@
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
-		<module>molgenis-omx-auth</module>
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-dataexplorer</module>
 		<module>molgenis-omx-protocolmanager</module>
-		<module>molgenis-omx-filemanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
+		<module>molgenis-omx-mobile</module>
 		<module>molgenis-app-omx</module>
 		<module>molgenis-app-ngs</module>
-		<module>molgenis-app-omicsconnect</module>
-		<module>molgenis-app-lifelines</module>
-		<module>molgenis-compute-core</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
-		<module>molgenis-app-compute-db</module>
+		<module>molgenis-security</module>
 	</modules>
 </project>

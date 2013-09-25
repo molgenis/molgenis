@@ -1,0 +1,46 @@
+#molgenis-header {
+	margin-bottom: 10px;
+}
+
+#molgenis-menu.nav {
+	margin-bottom: 10px;
+}
+
+#molgenis-menu.nav li.active a {
+	background-color: #3079C2;
+	color: white;
+}
+
+#molgenis-menu.nav-tabs>li>a {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-right: 8px;
+	padding-left: 8px;
+}
+
+#molgenis-breadcrumb {
+	margin-bottom: 10px;	
+}
+
+#plugin-container {
+	background: #F8FAFB;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+#footer, #push {
+	margin: 0;
+	height: 50px; /* .push must be the same height as .footer */
+	width: 100%;
+	text-align: center;
+	font: menu;
+}
+
+#spinner {
+	width: 180px;
+	margin:150px 100px 0px -100px;
+}
+
+.alert {
+	margin-bottom: 10px;
+}

@@ -10,6 +10,7 @@
 	var treePrevState = null;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
+	var allSelectedFeatures = null;
 	
 	ns.selectDataSet = function(id) {
 		restApi.getAsync('/api/v1/dataset/' + id, null, null, function(dataSet) {
@@ -151,7 +152,7 @@
 					isFolder : true,
 					isLazy : true,
 					children : createChildren(protocol.href, {
-						select : true
+						select : false
 					}, {})
 				} ],
 				onLazyRead : function(node) {
@@ -188,6 +189,7 @@
 					updateFeatureSelection(node.tree);
 				},
 			});
+			container.find(".dynatree-checkbox").first().hide();
 		});
 	};
 	
@@ -201,6 +203,10 @@
 			return null;
 		});
 		return features;
+	};
+	
+	ns.getSelectedFeatures = function() {
+		return allSelectedFeatures;
 	};
 	
 	ns.searchAndUpdateTree = function(query, protocolUri) {
@@ -244,9 +250,49 @@
 		function selectedNodeIds(selectedNodes){
 			var selectedIds = new Array ();
 			$.each(selectedNodes, function(index, element){
-				selectedIds.push(element.data.key);
+				selectedIds.push(hrefToId(element.data.key));
 			});
 			return selectedIds;
+		}
+		
+		function findAllParents(selectedFeatureIds, callback){
+			var selectedFeaturesToLoad = [];
+			if(selectedFeatureIds.length > 0){
+				var queryRules = [];
+				$.each(selectedFeatureIds, function(index, featureId){
+					if(queryRules.length !== 0){
+						queryRules.push({
+							operator : 'OR'
+						});
+					}
+					queryRules.push({
+						field : 'id',
+						operator : 'EQUALS',
+						value : featureId
+					});
+				});
+				queryRules.push({
+					operator : 'LIMIT',
+					value : 10000
+				})
+				var dataSet = ns.getSelectedDataSet();
+				var searchRequest = {
+					documentType : 'protocolTree-' + hrefToId(dataSet.href),
+					queryRules : queryRules
+				};
+				searchApi.search(searchRequest, function(searchResponse){
+					$.each(searchResponse.searchHits, function(index, hit){
+						selectedFeaturesToLoad.push(hit);
+					});
+					callback(selectedFeaturesToLoad);
+				});
+			}else{
+				callback(selectedFeaturesToLoad);
+			}
+		}
+		
+		function hrefToId (href){
+			return href.substring(href.lastIndexOf('/') + 1); 
 		}
 		
 		searchQuery = $.trim(query);
@@ -264,101 +310,134 @@
 					selectedAllNodes[node.data.key] = node;
 				});
 			}
-			var searchHits = searchResponse["searchHits"];
 			
-			var protocols = {};
-			var features = {};
-			$.each(searchHits, function(){
-				var object = $(this)[0]["columnValueMap"];
-				var nodes = object["path"].split(".");
-				//collect all features and their ancesters using restapi first.
-				for(var i = 0; i < nodes.length; i++){
-					if(nodes[i].indexOf("F") === 0) features[nodes[i].substring(1)] = null;
-					else protocols[nodes[i]] = null;
-				}
-			});
-			
-			preloadEntities(Object.keys(protocols), Object.keys(features), function(){
-				var cachedNode = {};
-				var topNodes = new Array();
+			findAllParents(selectedFeatureIds, function(hitsToHide){
+				var searchHits = searchResponse["searchHits"];
+				var protocols = {};
+				var features = {};
 				$.each(searchHits, function(){
 					var object = $(this)[0]["columnValueMap"];
 					var nodes = object["path"].split(".");
-					var entityId = object["id"];
-					//split the path to get all ancestors;
-					for(var i = 0; i < nodes.length; i++) {
-						var isFeature = nodes[i].indexOf("F") === 0;
-						if(isFeature) nodes[i] = nodes[i].substring(1);
-						if(!cachedNode[nodes[i]]){
-							var entityInfo = null;
-							var options = null;
-							//this is the last node and check if this is a feature
-							if(isFeature){
-								entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i]);
-								options = {
-									isFolder : false,
-								};
-							}else{
-								entityInfo = restApi.get('/api/v1/protocol/' + nodes[i]);
-								options = {
-									isFolder : true,
-									isLazy : true,
-									expand : true,
-									children : []
-								};
-								//check if the last node is protocol if so recursively adding all subNodes
-								if(i === nodes.length - 1) {
-									options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
-									$.each(options.children, function(index, child){
-										var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
-										if(!cachedNode[nodeId]){
-											if(child.isFolder) child.children = [];
-											cachedNode[nodeId] = child;
-										}
-									});
-								}
-							}
-							options = $.extend({
-								key : entityInfo.href,
-								title : entityInfo.name,
-								tooltip : getDescription(entityInfo).en
-							}, options);
-							
-							if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
-								options["select"] = true;
-							}
-							//locate the node in dynatree and otherwise create the node and insert it
-							if(i != 0){
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode.expand = true;
-								parentNode["children"].push(options);
-								cachedNode[nodes[i-1]] = parentNode;
-							}
-							else
-								topNodes.push(options);
-							cachedNode[nodes[i]] = options;
-						}else{
-							if (nodes[i] === entityId.toString() && i != 0) {
-								var parentNode = cachedNode[nodes[i-1]];
-								parentNode.expand = true;
-								var childNode = cachedNode[nodes[i]];
-								if($.inArray(childNode, parentNode.children) === -1){ 
-									parentNode.children.push(cachedNode[nodes[i]]);
-									cachedNode[nodes[i-1]] = parentNode;
-								}
-							}
-						} 
+					//collect all features and their ancestors using REST API first.
+					for(var i = 0; i < nodes.length; i++){
+						if(nodes[i].indexOf("F") === 0) features[nodes[i].substring(1)] = null;
+						else protocols[nodes[i]] = null;
 					}
 				});
-				sortNodes(topNodes);
-				rootNode.removeChildren();
-				rootNode.addChild(topNodes);
 				
-				if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
-				if(topNodes.length === 0) {
-					$('#dataset-browser').hide();
-					$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
-				} else $('#dataset-browser').show();
+				preloadEntities(Object.keys(protocols), Object.keys(features), function(){
+					var cachedNode = {};
+					var topNodes = new Array();
+					$.each(searchHits, function(){
+						var object = $(this)[0]["columnValueMap"];
+						var nodes = object["path"].split(".");
+						var entityId = object["id"];
+						//split the path to get all ancestors;
+						for(var i = 0; i < nodes.length; i++) {
+							var isFeature = nodes[i].indexOf("F") === 0;
+							if(isFeature) nodes[i] = nodes[i].substring(1);
+							if(!cachedNode[nodes[i]]){
+								var entityInfo = null;
+								var options = null;
+								//this is the last node and check if this is a feature
+								if(isFeature){
+									entityInfo = restApi.get('/api/v1/observablefeature/' + nodes[i]);
+									options = {
+										isFolder : false,
+									};
+								}else{
+									entityInfo = restApi.get('/api/v1/protocol/' + nodes[i]);
+									options = {
+										isFolder : true,
+										isLazy : true,
+										expand : true,
+										children : []
+									};
+									//check if the last node is protocol if so recursively adding all subNodes
+									if(i === nodes.length - 1) {
+										options.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
+										$.each(options.children, function(index, child){
+											var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
+											if(!cachedNode[nodeId]){
+												if(child.isFolder) child.children = [];
+												cachedNode[nodeId] = child;
+											}
+										});
+									}
+								}
+								options = $.extend({
+									key : entityInfo.href,
+									title : entityInfo.name,
+									tooltip : getDescription(entityInfo).en
+								}, options);
+								
+								if($.inArray(entityInfo.href, selectedFeatureIds) !== -1){
+									options["select"] = true;
+								}
+								//locate the node in dynatree and otherwise create the node and insert it
+								if(i != 0){
+									var parentNode = cachedNode[nodes[i-1]];
+									parentNode.expand = true;
+									parentNode["children"].push(options);
+									cachedNode[nodes[i-1]] = parentNode;
+								}
+								else
+									topNodes.push(options);
+								cachedNode[nodes[i]] = options;
+							}else{
+								if (nodes[i] === entityId.toString() && i != 0) {
+									var parentNode = cachedNode[nodes[i-1]];
+									parentNode.expand = true;
+									var childNode = cachedNode[nodes[i]];
+									if($.inArray(childNode, parentNode.children) === -1){ 
+										parentNode.children.push(cachedNode[nodes[i]]);
+										cachedNode[nodes[i-1]] = parentNode;
+									}
+								}
+							} 
+						}
+					});
+					
+					var nodesToHide = [];
+					$.each(hitsToHide, function(index, hit){
+						var object = hit.columnValueMap;
+						var nodes = object["path"].split(".");
+						var entityId = object["id"];
+						//split the path to get all ancestors;
+						for(var i = 0; i < nodes.length; i++) {
+							var isFeature = nodes[i].indexOf("F") === 0;
+							if(isFeature) nodes[i] = nodes[i].substring(1);
+							if(cachedNode[nodes[i]] && i !== 0){
+								if(isFeature) cachedNode[nodes[i]].select = true;
+								else {
+									var currentNode = cachedNode[nodes[i]];
+									if(currentNode.children.length === 0){
+										currentNode.children = createChildren('/api/v1/protocol/' + nodes[i], null, {expand : false});
+										cachedNode[nodes[i]] = currentNode;
+										
+										$.each(currentNode.children, function(index, child){
+											var nodeId = child.key.substring(child.key.lastIndexOf('/') + 1);
+											if(!cachedNode[nodeId]){
+												if(child.isFolder) child.children = [];
+												cachedNode[nodeId] = child;
+											}
+										});
+									}
+								}
+							}
+						}
+					});
+					
+					sortNodes(topNodes);
+					rootNode.removeChildren();
+					rootNode.addChild(topNodes);
+					
+					if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
+					if(topNodes.length === 0) {
+						$('#dataset-browser').hide();
+						$('#dataset-browser').after('<div id="match-message">No data items were matched!</div>');
+					} else $('#dataset-browser').show();
+				});
 			});
 		});
 	};
@@ -616,7 +695,7 @@
 		var container = $('#feature-selection').empty();
 		if (tree === null) {
 			container.append("<p>No variables selected</p>");
-			updateShoppingCart(null);
+			updateSelectedFeatures(null);
 			return;
 		}
 		
@@ -646,7 +725,7 @@
 		}
 		if (nodes === null || nodes.length === 0) {
 			container.append("<p>No variables selected</p>");
-			updateShoppingCart(null);
+			updateSelectedFeatures(null);
 			return;
 		}
 
@@ -681,7 +760,7 @@
 				features.push({feature: featureId[featureId.length - 1]});
 			}
 		});
-		updateShoppingCart(features);
+		updateSelectedFeatures(features);
 	}
 	
 	function getDescription(feature){
@@ -705,6 +784,11 @@
 			});
 		}
 	}
+	
+	function updateSelectedFeatures(features){
+		allSelectedFeatures = features;
+		updateShoppingCart(features);
+	}
 
 	// on document ready
 	$(function() {
@@ -713,13 +797,15 @@
 			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 			$('#orderdata-href-btn').removeClass('disabled');
 			$('#ordersview-href-btn').removeClass('disabled');
-			updateShoppingCart(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
+			updateSelectedFeatures(ns.getSelectedVariables()); // session changed, update shoppingcart for already selected items
+		});
+		$(document).on('click', '#orderdata-href-btn', function() {
+			$('#orderdata-modal-container').data("data-set", ns.getSelectedDataSet());
 		});
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			var uri = ns.getSelectedDataSet().href;
 			ns.selectDataSet(uri.substring(uri.lastIndexOf('/') + 1)); // reset catalogue
-			$('#dataset-browser').dynatree('getRoot').select(false);
-			$('.form_header').after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 			search = false;
 			updatedNodes = null;
 			treePrevState = null;

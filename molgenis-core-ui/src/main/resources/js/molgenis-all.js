@@ -1,3 +1,65 @@
+// Add endsWith function to the string class
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
+function padNumber(number, length) {
+	 var str = "" + number;
+	 while (str.length < length) {
+		 str = '0' + str;
+	 }
+
+	 return str;
+};
+
+function getCurrentTimezoneOffset() {
+	 var offset = new Date().getTimezoneOffset();
+	 offset = ((offset < 0 ? '+' : '-') + padNumber(parseInt(Math.abs(offset/60)), 2) + padNumber(Math.abs(offset%60), 2));
+	          
+	 return offset;
+};
+
+function htmlEscape(text) {
+	return $('<div/>').text(text).html(); 
+}
+
+/*
+ * Create a table cell to show data of a certain type
+ * Is used by the dataexplorer and the forms plugin 
+ */
+function formatTableCellValue(value, dataType) {
+	
+	if (dataType.toLowerCase() == "hyperlink") {
+		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value) + '</a>';
+		
+	} else if (dataType.toLowerCase() == "email") {
+		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
+	
+	} else if (dataType.toLowerCase() == 'bool') {
+		var checked = (value == true);
+		value = '<input type="checkbox" disabled="disabled" ';
+		if (checked) {
+			value = value + 'checked ';
+		}
+		
+		value = value + '/>';
+			
+	} else if (dataType.toLowerCase() != 'html'){
+		
+		if (value.length > 50) {
+			var abbr = htmlEscape(value.substr(0, 47)) + '...';
+			value = '<span class="show-popover"  data-content="' + value + '" data-toggle="popover">' + abbr + "</span>";
+		} else {
+			value = htmlEscape(value);
+		}
+		
+	}
+		
+	return value;
+};
+
 $(function() {
 	// disable all ajax request caching
 	$.ajaxSetup({
@@ -45,7 +107,7 @@ $(function() {
 					contentType : 'application/json',
 					async : false,
 					success : function(resource) {
-						_this._cachePut(resourceUri, resource, expands);
+						if (_this.cache) _this._cachePut(resourceUri, resource, expands);
 						cachedResource = resource;	
 					}
 				});
@@ -56,7 +118,7 @@ $(function() {
 					cache: true,
 					async : false,
 					success : function(resource) {
-						_this._cachePut(resourceUri, resource, expands);
+						if (_this.cache) _this._cachePut(resourceUri, resource, expands);
 						cachedResource = resource;
 					}
 				});
@@ -133,10 +195,32 @@ $(function() {
 
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands, q) {
 		var qs = "";
+		if (resourceUri.indexOf('?') != -1) {
+			var uriParts = resourceUri.split('?');
+			resourceUri = uriParts[0];
+			qs = '?' + uriParts[1];
+		}
 		if(expands) qs += (qs.length == 0 ? '?' : '&') + 'expand=' + expands.join(',');
 		if(q) qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
+	
+	molgenis.RestClient.prototype.getPrimaryKeyFromHref = function(href) {
+		var uriParts = href.split("/");
+		return uriParts[uriParts.length - 1];
+	};
+	
+	molgenis.RestClient.prototype.remove = function(href, callback) {
+		$.ajax({
+			type: 'POST',
+			url: href,
+			data: '_method=DELETE',
+			async: false,
+			success: callback.success,
+			error:callback.error
+		});
+	};
+	
 }($, window.top));
 
 // molgenis search API client
@@ -330,13 +414,8 @@ function hideSpinner()
     }
     return 0;
 }
- $(function() {
-	$(document).on('molgenis-login', function(e, msg) {
-		window.location.href=window.location.href;
-	});
- });
-
- $(function() {
+ 
+$(function() {
 	 /**
 	 * Add download functionality to JQuery.
 	 * data can be string of parameters or array/object
@@ -365,4 +444,4 @@ function hideSpinner()
 		 //send request and remove form from dom
 		 $('<form action="' + url +'" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
 	 }; 
- });
+});

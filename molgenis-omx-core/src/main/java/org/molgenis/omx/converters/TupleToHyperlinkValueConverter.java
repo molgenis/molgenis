@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.HyperlinkValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToHyperlinkValueConverter implements TupleToValueConverter<HyperlinkValue, String>
@@ -20,8 +22,12 @@ public class TupleToHyperlinkValueConverter implements TupleToValueConverter<Hyp
 	}
 
 	@Override
-	public String extractValue(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
-		return ((HyperlinkValue) value).getValue();
+		if (!(value instanceof HyperlinkValue))
+		{
+			throw new ValueConverterException("value is not a " + HyperlinkValue.class.getSimpleName());
+		}
+		return new ValueCell<String>(((HyperlinkValue) value).getValue());
 	}
 }

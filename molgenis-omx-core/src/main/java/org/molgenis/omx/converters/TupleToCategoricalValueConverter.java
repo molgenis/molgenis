@@ -10,6 +10,8 @@ import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToCategoricalValueConverter implements TupleToValueConverter<CategoricalValue, String>
@@ -50,8 +52,13 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 	}
 
 	@Override
-	public String extractValue(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
-		return ((CategoricalValue) value).getValue().getName(); // TODO name or value code or maybe even identifier?
+		if (!(value instanceof CategoricalValue))
+		{
+			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
+		}
+		Category category = ((CategoricalValue) value).getValue();
+		return new ValueCell<String>(category.getIdentifier(), category.getName());
 	}
 }

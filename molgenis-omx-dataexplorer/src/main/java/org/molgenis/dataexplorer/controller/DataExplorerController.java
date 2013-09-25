@@ -23,8 +23,10 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -53,11 +55,15 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(URI)
-public class DataExplorerController
+public class DataExplorerController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
 	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
+
+	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
+	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
+	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	@Autowired
 	private Database database;
@@ -68,6 +74,11 @@ public class DataExplorerController
 	@Autowired
 	private SearchService searchService;
 
+	public DataExplorerController()
+	{
+		super(URI);
+	}
+
 	/**
 	 * Show the explorer page
 	 * 
@@ -76,20 +87,49 @@ public class DataExplorerController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
+			throws Exception
 	{
+		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
+		model.addAttribute("dataSets", dataSets);
 
-		String resultsTableJavascriptFile = molgenisSettings.getProperty("dataexplorer.resultstable.js",
-				"/js/MultiObservationSetTable.js");
+		if (dataSets != null && !dataSets.isEmpty())
+		{
+			// determine selected data set and add to model
+			DataSet selectedDataSet = null;
+			if (selectedDataSetIdentifier != null)
+			{
+				for (DataSet dataSet : dataSets)
+				{
+					if (dataSet.getIdentifier().equals(selectedDataSetIdentifier))
+					{
+						selectedDataSet = dataSet;
+						break;
+					}
+				}
+				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
+						+ " is not a valid data set identifier");
+			}
+			else
+			{
+				// select first data set by default
+				selectedDataSet = dataSets.iterator().next();
+			}
+			model.addAttribute("selectedDataSet", selectedDataSet);
+		}
 
+		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
 
-		return "dataexplorer";
+		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
+		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
+
+		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
+			throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");

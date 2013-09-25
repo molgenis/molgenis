@@ -48,7 +48,6 @@ import org.molgenis.generators.db.JpaDatabaseGen;
 import org.molgenis.generators.db.JpaMapperGen;
 import org.molgenis.generators.db.MapperDecoratorGen;
 import org.molgenis.generators.db.MapperSecurityDecoratorGen;
-import org.molgenis.generators.db.MolgenisDatabasePopulatorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
@@ -59,19 +58,11 @@ import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.EntityServiceGen;
-import org.molgenis.generators.server.FrontControllerGen;
-import org.molgenis.generators.server.MolgenisContextListenerGen;
-import org.molgenis.generators.server.MolgenisGuiServiceGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.generators.sql.CountPerEntityGen;
 import org.molgenis.generators.sql.CountPerTableGen;
-import org.molgenis.generators.ui.EasyPluginControllerGen;
-import org.molgenis.generators.ui.FormControllerGen;
-import org.molgenis.generators.ui.HtmlFormGen;
-import org.molgenis.generators.ui.MenuControllerGen;
-import org.molgenis.generators.ui.PluginControllerGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
 
@@ -229,9 +220,18 @@ public class Molgenis
 		// DOCUMENTATION
 		if (options.generate_doc)
 		{
-			generators.add(new DotDocGen());
 			generators.add(new FileFormatDocGen());
-			generators.add(new DotDocMinimalGen());
+			// check if dot is available to prevent error lists in the build logs
+			try
+			{
+				Runtime.getRuntime().exec("dot -?");
+				generators.add(new DotDocGen());
+				generators.add(new DotDocMinimalGen());
+			}
+			catch (Exception e)
+			{
+				// dot not available
+			}
 			generators.add(new ObjectModelDocGen());
 			generators.add(new DotDocModuleDependencyGen());
 		}
@@ -271,10 +271,6 @@ public class Molgenis
 				generators.add(new CountPerTableGen());
 			}
 
-			if (options.generate_metadata)
-			{
-				generators.add(new MolgenisDatabasePopulatorGen());
-			}
 			// authorization
 			if (!options.auth_loginclass.endsWith("SimpleLogin"))
 			{
@@ -322,44 +318,6 @@ public class Molgenis
 		{
 			logger.info("Skipping R interface ....");
 		}
-
-		if (options.generate_frontcontroller)
-		{
-			generators.add(new FrontControllerGen());
-			// also generate context
-			generators.add(new MolgenisContextListenerGen());
-		}
-
-		// optional: the GUI
-		if (options.generate_gui)
-		{
-			generators.add(new MolgenisGuiServiceGen());
-		}
-
-		// HTML
-		if (options.generate_html)
-		{
-			generators.add(new HtmlFormGen());
-			generators.add(new FormControllerGen());
-			generators.add(new MenuControllerGen());
-		}
-		else
-		{
-			logger.info("Skipping HTML (HTML,Form,Menu,Tree) ....");
-		}
-
-		// SCREEN PLUGIN
-		if (options.generate_plugins)
-		{
-			generators.add(new EasyPluginControllerGen());
-		}
-		else
-		{
-			logger.info("Skipping generation of plugins ....");
-		}
-
-		// plugin controllers - always need these to map plugins in the GUI
-		generators.add(new PluginControllerGen());
 
 		// SOAP
 		if (options.generate_soap)

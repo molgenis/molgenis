@@ -1,3 +1,0 @@
-step,protocol,parameters
-step1,assessRisk.sh,sample=user_sample;glucose=user_glucose
-step2,report.sh,dis=user_disease;risk=step1_risk

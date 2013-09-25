@@ -6,7 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
-import org.molgenis.servlet.FrontController;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -35,21 +34,6 @@ public class WebAppInitializer implements WebApplicationInitializer
 			dispatcherServlet.addMapping("/");
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
-		}
-
-		// molgenis
-		Dynamic frontControllerServlet = servletContext.addServlet("front-controller", new FrontController());
-		if (frontControllerServlet == null)
-		{
-			logger.warn("ServletContext already contains a complete ServletRegistration for servlet 'front-controller'");
-		}
-		else
-		{
-			frontControllerServlet.setLoadOnStartup(2);
-			frontControllerServlet.addMapping("/molgenis.do");
-			frontControllerServlet.addMapping("/xref/find"); // org.molgenis.framework.server.services.MolgenisXrefService
-			frontControllerServlet.addMapping("/captchaImg"); // org.molgenis.auth.service.MolgenisCaptchaService
-			frontControllerServlet.addMapping("/tmpfile"); // org.molgenis.framework.server.services.MolgenisTmpFileService
 		}
 
 		// enable use of request scoped beans in FrontController

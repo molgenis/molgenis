@@ -5,6 +5,8 @@ import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValue, String>
@@ -43,8 +45,13 @@ public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValu
 	}
 
 	@Override
-	public String extractValue(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
-		return ((XrefValue) value).getValue().getName();
+		if (!(value instanceof XrefValue))
+		{
+			throw new ValueConverterException("value is not a " + XrefValue.class.getSimpleName());
+		}
+		Characteristic xrefCharacteristic = ((XrefValue) value).getValue();
+		return new ValueCell<String>(xrefCharacteristic.getIdentifier(), xrefCharacteristic.getName());
 	}
 }

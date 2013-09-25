@@ -20,6 +20,6 @@ public class MapperTypeSanitizer
 
 	public static String sanitizeMapperType(String documentTypeName)
 	{
-		return PATTERN.matcher(documentTypeName).replaceAll(REPLACEMENT_STRING);
+		return documentTypeName != null ? PATTERN.matcher(documentTypeName).replaceAll(REPLACEMENT_STRING) : null;
 	}
 }

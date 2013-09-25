@@ -39,36 +39,36 @@ public class ImportWorksheet
 	{
 		boolean debug = false;
 
-		if (args.length != 4)
+		if (args.length != 5)
 		{
 			System.err
-					.println("Usage: <GAF SequencingSampleDetails csv file> <GAF SequencingProjects csv file> <GAF NgsUsers csv file> <Empty database? (yes/no)>");
+					.println("Usage: <GAF SequencingSampleDetails csv file> <GAF Barcode csv file> <GAF SequencingProjects csv file> <GAF NgsUsers csv file> <Empty database? (yes/no)>");
 			return;
 		}
 
-		if ((args.length == 4))
+		if ((args.length == 5))
 		{
 			// Debug in eclipse
-			args[3] = "yes";
+			args[4] = "yes";
 
-			if (args[3] != "yes" && args[3] != "no")
+			if (args[4] != "yes" && args[4] != "no")
 			{
 				System.err.println("Use yes or no");
 				return;
 			}
 			else
 			{
-				if (args[3].equalsIgnoreCase("yes"))
+				if (args[4].equalsIgnoreCase("yes"))
 				{
 					debug = true;
 				}
 
 				// GAFsheet NgsUsers fixed names
-				ngsUserFile = new File(args[2]);
+				ngsUserFile = new File(args[3]);
 
 				// GAFsheet SequencingSampleDetails and GAFsheet
 				// SequencingProjects
-				importSequencingSampleDetails(new File(args[0]), new File(args[1]), debug);
+				importSequencingSampleDetails(new File(args[0]), new File(args[1]), new File(args[2]), debug);
 				// In case a new dataset contains different or new names show
 				// the original names and the missing names.
 				showOriginalUserNames(originalUserNames, userNamesNotDetected, debug);
@@ -109,7 +109,7 @@ public class ImportWorksheet
 		}
 	}
 
-	private static void importSequencingSampleDetails(File csvs, File csvp, boolean debug) throws Exception
+	private static void importSequencingSampleDetails(File csvs, File csvb, File csvp, boolean debug) throws Exception
 	{
 		// Declare collections to hold collected variables
 		Map<String, NgsUser> users = new LinkedHashMap<String, NgsUser>();
@@ -124,7 +124,7 @@ public class ImportWorksheet
 		Map<String, FlowcellLane> flowcellLanesTmp = new LinkedHashMap<String, FlowcellLane>();
 		Map<String, FlowcellLane> flowcellLanes = new LinkedHashMap<String, FlowcellLane>();
 
-		// Import sheets
+		// Get projects
 		TupleReader readerp = null;
 		try
 		{
@@ -149,6 +149,54 @@ public class ImportWorksheet
 			if (readerp != null) readerp.close();
 		}
 
+		// Get BarcodeTypes and Barcodes
+		TupleReader readerb = null;
+		try
+		{
+			readerb = new CsvReader(csvb);
+			for (Tuple rowb : readerb)
+			{
+				// SampleBarcodeTypes
+				if (!rowb.isNull("type"))
+				{
+					if (rowb.getString("type") != null)
+					{
+						SampleBarcodeType sbt = new SampleBarcodeType();
+						
+						if (rowb.getString("type") != null)
+						{
+							sbt.setSampleBarcodeTypeName(rowb.getString("type").toUpperCase().trim());
+
+							sampleBarcodeTypes.put(sbt.getSampleBarcodeTypeName(), sbt);
+						}
+					}
+				}
+				
+				// SampleBarcodes
+				if (rowb.getString("type") != null && rowb.getString("id") != null && rowb.getString("barcode") != null)
+				{
+					String barcodeTypeName = rowb.getString("type").toUpperCase().trim();
+					String barcodeNr = rowb.getString("id");
+					String barcodeSequence = rowb.getString("barcode").toUpperCase().trim();
+					
+					SampleBarcode sb = new SampleBarcode();
+				
+					sb.setSampleBarcodeType_SampleBarcodeTypeName(barcodeTypeName);
+					sb.setSampleBarcodeNr(barcodeNr);
+					sb.setSampleBarcodeSequence(barcodeSequence);
+					String barcodeName = barcodeTypeName + " " + barcodeNr + " " + barcodeSequence;
+					sb.setSampleBarcodeName(barcodeName);
+					sb.setActive(true);
+
+					sampleBarcodes.put(sb.getSampleBarcodeName(), sb);
+				}
+			}
+		}
+		finally
+		{
+			if (readerb != null) readerb.close();
+		}
+		
 		TupleReader readers = null;
 		try
 		{
@@ -189,51 +237,6 @@ public class ImportWorksheet
 					String[] dataShippedByParts = row.getString("DataShippedBy").split("<");
 					NgsUser u = fixNgsUser(dataShippedByParts[0].toLowerCase().trim(), ngsUserFile);
 					users.put(u.getUserName(), u);
-				}
-
-				// SampleBarcodeType
-				if (!row.isNull("barcodeType"))
-				{
-					SampleBarcodeType sbt = new SampleBarcodeType();
-
-					if (row.getString("barcodeType") != null)
-					{
-						if (!row.getString("barcodeType").toLowerCase().trim().equals("none")
-								&& !row.getString("barcodeType").toLowerCase().trim().contains("error"))
-						{
-							sbt.setSampleBarcodeTypeName(row.getString("barcodeType").toUpperCase().trim());
-
-							sampleBarcodeTypes.put(sbt.getSampleBarcodeTypeName(), sbt);
-						}
-					}
-				}
-
-				// SampleBarcode
-				if (row.getString("barcodeMenu") != null) // GAF 01 ACTGTC
-				{
-					SampleBarcode sb = new SampleBarcode();
-
-					String[] bmp = row.getString("barcodeMenu").split(" ");
-
-					if (bmp.length == 3) // Valid data
-					{
-						if (!bmp[0].equalsIgnoreCase(""))
-						{
-							sb.setSampleBarcodeType_SampleBarcodeTypeName(bmp[0].toUpperCase().trim());
-						}
-						if (!bmp[1].equalsIgnoreCase(""))
-						{
-							sb.setSampleBarcodeNr(bmp[1]);
-						}
-						if (!bmp[2].equalsIgnoreCase(""))
-						{
-							sb.setSampleBarcodeSequence(bmp[2].toUpperCase().trim());
-						}
-
-						sb.setSampleBarcodeName(row.getString("barcodeMenu"));
-
-						sampleBarcodes.put(sb.getSampleBarcodeName(), sb);
-					}
 				}
 
 				// CapturingKit

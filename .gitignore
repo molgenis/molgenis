@@ -5,6 +5,7 @@ target/
 *.iml
 *.ipr
 *.iws
+*.DS_Store
 git.properties
 compute.properties
 .compute.properties

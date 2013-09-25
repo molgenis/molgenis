@@ -1,7 +1,3 @@
-.container-fluid {
-	padding-top: 10px;	
-}
-
 #entity-select {
 	margin-bottom: 10px;
 }
@@ -10,7 +6,50 @@
 	margin-bottom: 10px;
 }
 
+#entity-table {
+    width: auto;
+}
+#entity-table td {
+	border-top: none;
+}
+
+#entity-table td.first {
+	font-weight: bold;
+}
+
+#entity-search-results-header {
+	font-style: italic;
+	margin-bottom: 8px;
+}
+
 .table thead th {
 	background-color: #5B82A4;
 	color: white;
+}
+
+.table-protocol td {
+    border-top: none;
+    border-left: 1px solid #ddd;
+}
+
+.table-protocol td.first {
+    border-left: none;
+    font-weight: bold;
+}
+
+.accordion-group {
+	background-color: #5B82A4;
+}
+
+.accordion-toggle {
+	color: white;
+}
+
+a.accordion-toggle:hover, a.accordion-toggle:focus, a.accordion-toggle:active {
+	color: white;
+	text-decoration: none;
+}
+	
+.accordion-body {
+	background-color: white;
 }

@@ -30,15 +30,27 @@
   </div>
 </div>
 <script type="text/javascript">
-	$(function() {
+	$(function() {	 
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
+  		var cancelBtn = $('#orderdata-btn-close');
   		var form = $('#orderdata-form');
+  		
+  		<#-- set current selected data set -->
+		if($('#orderdata-modal-container')) {
+			var dataSet = $('#orderdata-modal-container').data('data-set');
+			if(dataSet) {
+				$('#orderdata-form').prepend('<input type="hidden" name="dataSetIdentifier" value="' + dataSet.identifier + '">');
+			}	
+		}
+  		
   		form.validate();
 
   		<#-- modal events -->
   		modal.on('show', function () {
+  			submitBtn.attr("disabled", false);
+			cancelBtn.attr("disabled", false);
   			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
@@ -145,19 +157,24 @@
 		});
 		
 		function order() {
+			showSpinner();
+			submitBtn.attr("disabled", true);
+			cancelBtn.attr("disabled", true);
 			$.ajax({
 			    type: 'POST',
-			    url: '/plugin/order',
+			    url: '/plugin/study/order',
 			    data: new FormData($('#orderdata-form')[0]),
 			    cache: false,
 			    contentType: false,
 			    processData: false,
 			    success: function () {
+					hideSpinner();
 					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
 					modal.modal('hide');
 			    },
 			    error: function() {
-			      alert("error"); // TODO display error message
+			    	hideSpinner();
+			      	alert("error"); // TODO display error message
 			    }
 			});
 		}

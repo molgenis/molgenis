@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="omx" label="Molgenis">
-	<plugin name="HeaderPlugin" type="org.molgenis.omx.plugins.HeaderPlugin" />
-	<menu name="main">
-		<plugin label="Home" name="HomePlugin" type="org.molgenis.omx.plugins.HomePlugin"/>
-		<plugin label="Catalogue" name="ProtocolViewerController" type="org.molgenis.omx.plugins.ProtocolViewerController" />
-		<plugin label="Data Explorer" name="DataExplorerPlugin" type="org.molgenis.dataexplorer.plugin.DataExplorerPlugin"/>
-		<plugin label="Entity Explorer" name="EntityExplorerPlugin" type="org.molgenis.entityexplorer.plugin.EntityExplorerPlugin"/>
-		<plugin label="Protocol Manager" name="ProtocolManagerPlugin" type="org.molgenis.protocolmanager.plugin.ProtocolManagerPlugin"/>
-		<plugin label="Upload" name="UploadWizard" type="org.molgenis.omx.plugins.ImportWizardController" />
-		<plugin label="News" name="NewsPlugin" type="org.molgenis.omx.plugins.NewsPlugin"/>
-		<plugin label="Background" name="BackgroundPlugin" type="org.molgenis.omx.plugins.BackgroundPlugin"/>
-		<plugin label="References" name="ReferencesPlugin" type="org.molgenis.omx.plugins.ReferencesPlugin"/>
-		<plugin label="Contact" name="ContactPlugin" type="org.molgenis.omx.plugins.ContactPlugin"/>
-		<menu name="Converters">
-			<plugin label="CBM converter" name="ConvertXmlData" type="org.molgenis.cbm.CbmToOmxConverter" />
+<molgenis label="OMX" name="omx">
+	<menu label="Home" name="main">
+		<plugin id="home" name="Home" url="home"/>
+		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
+		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
+		<plugin id="importwizard" name="Upload" url="importwizard"/>
+		<plugin id="news" name="News" url="news"/>
+		<plugin id="background" name="Background" url="background"/>
+		<plugin id="references" name="References" url="references"/>
+		<plugin id="contact" name="Contact" url="contact"/>
+		<menu label="Converters" name="converters">
+			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
 		</menu>
-        <menu name="Admin">
-	        <menu name ="Entities">
-	            <form name="DataSet" entity="DataSet" />
-	            <form name="Protocol" entity="Protocol" />
-	            <form name="Feature" entity="ObservableFeature" />
-	            <form name="Category" entity="Category" />
-	            <form name="Value" entity="ObservedValue" />
-	            <form name="StudyDataRequest" entity="StudyDataRequest" />
-	            <form name="RuntimeProperty" entity="RuntimeProperty" />
-	       	</menu>
-	        <menu name="Auth" label="Users and permissions">
-				<menu label="Basic management" name="Management">
-					<form name="MolgenisUser" entity="MolgenisUser" />
-					<form name="MolgenisGroup" entity="MolgenisGroup" />
-					<form name="MolgenisRoleGroupLink" entity="MolgenisRoleGroupLink" />
-					<form name="MolgenisEntity" entity="MolgenisEntity" view="list" label="Entities" />
-					<form name="MolgenisPermission" entity="MolgenisPermission" />
-				</menu>
-				<plugin label="My permissions" name="PermissionManagementPlugin"
-					type="org.molgenis.omx.auth.service.permissionmanagement.PermissionManagementPlugin" />
-				<plugin label="Upgrade person to user" name="UserToPersonPlugin"
-					type="org.molgenis.omx.auth.service.persontouser.PersonToUser" />
-				<plugin label="Security tokens" name="TokenManagerPlugin"
-					type="org.molgenis.omx.auth.service.tokenmanager.TokenManager" />
-			</menu>	
-			
-			<plugin label="Index datasets" name="DataSetsIndexerPlugin" type="org.molgenis.dataexplorer.plugin.DataSetsIndexerPlugin"/>
-			
-		</menu> <!-- admin panels -->	
-		<plugin name="UserLogin" type="org.molgenis.omx.auth.ui.UserLogin" label="Login" />
+        <menu label="Admin" name="admin">
+	        <menu label="Entities" name ="entities">
+        		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>
+        		<plugin id="form.Protocol" name="Protocol" url="form.Protocol?subForms=DataSet.ProtocolUsed"/>
+        		<plugin id="form.ObservableFeature" name="ObservableFeature" url="form.ObservableFeature?subForms=Category.observableFeature"/>
+        		<plugin id="form.Category" name="Category" url="form.Category"/>
+        		<menu label="Values" name="values">
+        			<plugin id="form.BoolValue" name="BoolValue" url="form.BoolValue"/>
+        			<plugin id="form.CategoricalValue" name="CategoricalValue" url="form.CategoricalValue"/>
+        			<plugin id="form.DateValue" name="DateValue" url="form.DateValue"/>
+        			<plugin id="form.DateTimeValue" name="DateTimeValue" url="form.DateTimeValue"/>
+        			<plugin id="form.DecimalValue" name="DecimalValue" url="form.DecimalValue"/>
+        			<plugin id="form.EmailValue" name="EmailValue" url="form.EmailValue"/>
+        			<plugin id="form.HtmlValue" name="HtmlValue" url="form.HtmlValue"/>
+        			<plugin id="form.HyperlinkValue" name="HyperlinkValue" url="form.HyperlinkValue"/>
+        			<plugin id="form.IntValue" name="IntValue" url="form.IntValue"/>
+        			<plugin id="form.LongValue" name="LongValue" url="form.LongValue"/>
+        			<plugin id="form.MrefValue" name="MrefValue" url="form.MrefValue"/>
+        			<plugin id="form.StringValue" name="StringValue" url="form.StringValue"/>
+        			<plugin id="form.TextValue" name="TextValue" url="form.TextValue"/>
+        			<plugin id="form.XrefValue" name="XrefValue" url="form.XrefValue"/>
+        		</menu>
+        		<plugin id="form.StudyDataRequest" name="StudyDataRequest" url="form.StudyDataRequest"/>
+        		<plugin id="form.RuntimeProperty" name="RuntimeProperty" url="form.RuntimeProperty"/>
+	        </menu>
+	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
+        	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
+			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
+			<plugin id="datasetindexer" name="Data Set Indexer" url="dataindexer"/>
+			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
+		</menu>
+		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>
 </molgenis>

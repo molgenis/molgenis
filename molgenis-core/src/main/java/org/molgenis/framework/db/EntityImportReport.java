@@ -1,12 +1,15 @@
 package org.molgenis.framework.db;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EntityImportReport
+public class EntityImportReport implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private List<String> progressLog;
 	private Map<String, String> messages;
 	private String errorItem;

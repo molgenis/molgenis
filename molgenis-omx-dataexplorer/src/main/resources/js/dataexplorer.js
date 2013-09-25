@@ -12,24 +12,6 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 
-	// fill dataset select
-	ns.fillDataSetSelect = function(callback) {
-		var maxNrOfDataSets = 500;
-		
-		restApi.getAsync('/api/v1/dataset', null, {num: maxNrOfDataSets}, function(datasets) {
-			var items = [];
-			
-			$.each(datasets.items, function(key, val) {
-				items.push('<option value="' + val.href + '">' + val.name + '</option>');
-			});
-			$('#dataset-select').html(items.join(''));
-			$('#dataset-select').change(function() {
-				ns.onDataSetSelectionChange($(this).val());
-			});
-			callback();
-		});
-	};
-
 	ns.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -167,8 +149,8 @@
 						node.remove();
 						node.parent.addChild(nextFeatureNodes);
 					}
-					
-					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon") && !node.data.isFolder)
+					// target type null is filter icon
+					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon" || node.getEventTargetType(event) === null) && !node.data.isFolder)
 						ns.openFeatureFilterDialog(node.data.key);
 				},
 				onSelect : function(select, node) {
@@ -306,22 +288,6 @@
 		}
 
 		pager.append($('</ul>'));
-	};
-
-	 ns.pad = function(number, length) {
-		 var str = "" + number;
-		 while (str.length < length) {
-			 str = '0' + str;
-		 }
-
-		 return str;
-	};
-
-	 ns.timezoneOffset = function() {
-		 var offset = new Date().getTimezoneOffset();
-		 offset = ((offset<0? '+':'-') + ns.pad(parseInt(Math.abs(offset/60)), 2) + ns.pad(Math.abs(offset%60), 2));
-		          
-		 return offset;
 	};
 
 	ns.openFeatureFilterDialog = function(featureUri) {
@@ -576,7 +542,7 @@
 				});
 			} else if (feature.dataType == 'datetime') {
 				$('.date').datetimepicker({
-					format: "yyyy-MM-dd'T'hh:mm:ss" + ns.timezoneOffset(),
+					format: "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
 					language: 'en',
 				    pickTime: true
 				});
@@ -626,46 +592,7 @@
 		});
 	};
 
-	ns.formatValue = function(value, dataType) {
-		if (dataType == "hyperlink") {
-			value = '<a target="_blank" href="' + value + '">' + ns.htmlEscape(value) + '</a>';
-			
-		} else if (dataType == "email") {
-			value = '<a href="mailto:' + value + '">' + ns.htmlEscape(value) + '</a>';
-		
-		} else if (dataType == 'bool') {
-			var checked = (value == true);
-			value = '<input type="checkbox" disabled="disabled" ';
-			if (checked) {
-				value = value + 'checked ';
-			}
-			
-			value = value + '/>';
-			
-		} else if (dataType == 'date') {
-			value = '<input type="date" value="' + value + '" />';
-		
-		} else if (dataType == 'datetime') {
-			value = '<input type="datetime" value="' + value + '" />';
-			
-		} else if (dataType != 'html'){
-			
-			if (value.length > 50) {
-				var abbr = ns.htmlEscape(value.substr(0, 47)) + '...';
-				value = '<span class="show-popover"  data-content="' + value + '" data-toggle="popover">' + abbr + "</span>";
-			} else {
-				value = ns.htmlEscape(value);
-			}
-			
-		}
-			
-		return value;
-	};
 
-	ns.htmlEscape = function (text) {
-		return $('<div/>').text(text).html(); 
-	};
-	
 	ns.search = function(callback) {
 		searchApi.search(ns.createSearchRequest(true), callback);
 	};
@@ -774,6 +701,12 @@
 	
 	// on document ready
 	$(function() {
+		// use chosen plugin for data set select
+		$('#dataset-select').chosen();
+		$('#dataset-select').change(function() {
+			ns.onDataSetSelectionChange($(this).val());
+		});
+		
 		resultsTable = new ns.ResultsTable();
 
 		$("#observationset-search").focus();
@@ -791,5 +724,7 @@
 			ns.download();
 		});
 		
+		// fire event handler
+		$('#dataset-select').change();
 	});
 }($, window.top));

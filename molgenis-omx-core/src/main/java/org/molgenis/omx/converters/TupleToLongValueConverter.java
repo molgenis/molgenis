@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.LongValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToLongValueConverter implements TupleToValueConverter<LongValue, Long>
@@ -27,8 +29,12 @@ public class TupleToLongValueConverter implements TupleToValueConverter<LongValu
 	}
 
 	@Override
-	public Long extractValue(Value value)
+	public Cell<Long> toCell(Value value) throws ValueConverterException
 	{
-		return ((LongValue) value).getValue();
+		if (!(value instanceof LongValue))
+		{
+			throw new ValueConverterException("value is not a " + LongValue.class.getSimpleName());
+		}
+		return new ValueCell<Long>(((LongValue) value).getValue());
 	}
 }

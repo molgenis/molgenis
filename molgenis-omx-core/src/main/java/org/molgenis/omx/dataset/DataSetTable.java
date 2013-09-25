@@ -3,8 +3,6 @@ package org.molgenis.omx.dataset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -18,9 +16,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
 import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
-import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -28,7 +24,6 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.util.tuple.Tuple;
 
 /**
  * DataSetTable
@@ -43,7 +38,6 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	private DataSet dataSet;
 	private Database db;
 	private List<Field> columns;
-	private ValueConverter valueConverter;
 
 	public DataSetTable(DataSet set, Database db) throws TableException
 	{
@@ -64,7 +58,6 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 	public void setDb(Database db)
 	{
 		this.db = db;
-		this.valueConverter = new ValueConverter(db);
 	}
 
 	public DataSet getDataSet()
@@ -191,71 +184,6 @@ public class DataSetTable extends AbstractFilterableTupleTable implements Databa
 			throw new TableException(e);
 		}
 
-	}
-
-	public void add(TupleTable table) throws TableException
-	{
-		try
-		{
-			getDb().beginTx();
-
-			// validate features
-			Map<String, ObservableFeature> featureMap = new TreeMap<String, ObservableFeature>();
-			for (Field f : table.getAllColumns())
-			{
-				try
-				{
-					ObservableFeature feature = ObservableFeature.findByIdentifier(getDb(), f.getName());
-					if (feature == null)
-					{
-						throw new TableException("add failed: " + f.getName() + " not known ObservableFeature");
-					}
-					else
-					{
-						featureMap.put(f.getName(), feature);
-					}
-				}
-				catch (DatabaseException e)
-				{
-					throw new TableException(e);
-				}
-			}
-
-			// load values
-			for (Tuple t : table)
-			{
-				ObservationSet es = new ObservationSet();
-				es.setPartOfDataSet(dataSet.getId());
-				getDb().add(es);
-
-				List<ObservedValue> values = new ArrayList<ObservedValue>();
-				for (String name : t.getColNames())
-				{
-					ObservableFeature feature = featureMap.get(name);
-
-					ObservedValue v = new ObservedValue();
-					v.setObservationSet(es.getId());
-					v.setFeature(feature);
-					v.setValue(valueConverter.fromTuple(t, name, feature));
-					values.add(v);
-				}
-				getDb().add(values);
-			}
-
-			getDb().commitTx();
-
-		}
-		catch (Exception e)
-		{
-			try
-			{
-				getDb().rollbackTx();
-			}
-			catch (DatabaseException e1)
-			{
-			}
-			throw new TableException(e);
-		}
 	}
 
 	// Creates the query based on the provided filters

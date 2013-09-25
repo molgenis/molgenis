@@ -21,8 +21,9 @@
           <property name="eclipselink.target-database" value="MySQL" />
           <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
           <property name="eclipselink.jdbc.batch-writing.size" value="1000"/>
-          <property name="eclipselink.ddl-generation" value="create-tables"/>
+          <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
 		  <property name="eclipselink.ddl-generation.output-mode" value="database"/>
+		  <property name="eclipselink.ddl-generation.table-creation-suffix" value="engine=InnoDB"/>
 		  <property name="eclipselink.logging.level" value="OFF"/>
 		  <property name="eclipselink.cache.shared.default" value="false"/>
 		  <property name="eclipselink.ddl-generation.index-foreign-keys" value="true"/>

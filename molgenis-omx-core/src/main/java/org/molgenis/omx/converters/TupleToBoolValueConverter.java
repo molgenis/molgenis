@@ -3,6 +3,8 @@ package org.molgenis.omx.converters;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToBoolValueConverter implements TupleToValueConverter<BoolValue, Boolean>
@@ -19,8 +21,12 @@ public class TupleToBoolValueConverter implements TupleToValueConverter<BoolValu
 	}
 
 	@Override
-	public Boolean extractValue(Value value)
+	public Cell<Boolean> toCell(Value value) throws ValueConverterException
 	{
-		return ((BoolValue) value).getValue();
+		if (!(value instanceof BoolValue))
+		{
+			throw new ValueConverterException("value is not a " + BoolValue.class.getSimpleName());
+		}
+		return new ValueCell<Boolean>(((BoolValue) value).getValue());
 	}
 }

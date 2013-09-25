@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToDecimalValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell() throws ValueConverterException
 	{
 		DecimalValue value = new DecimalValue();
 		value.setValue(1.23);
-		assertEquals(new TupleToDecimalValueConverter().extractValue(value), Double.valueOf(1.23));
+		assertEquals(new TupleToDecimalValueConverter().toCell(value).getValue(), Double.valueOf(1.23));
 	}
 
 	@Test

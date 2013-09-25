@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 public class TupleToHtmlValueConverterTest
 {
 	@Test
-	public void extractValue() throws ValueConverterException
+	public void toCell() throws ValueConverterException
 	{
 		HtmlValue value = new HtmlValue();
 		value.setValue("value");
-		assertEquals(new TupleToHtmlValueConverter().extractValue(value), "value");
+		assertEquals(new TupleToHtmlValueConverter().toCell(value).getValue(), "value");
 	}
 
 	@Test

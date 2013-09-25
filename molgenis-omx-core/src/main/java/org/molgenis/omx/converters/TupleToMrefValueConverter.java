@@ -1,5 +1,6 @@
 package org.molgenis.omx.converters;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
@@ -7,12 +8,14 @@ import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.MrefValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValue, List<String>>
+public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValue, List<Cell<String>>>
 {
 	private final CharacteristicLoadingCache characteristicLoader;
 
@@ -26,16 +29,30 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 	public MrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
 		// get identifiers
-		List<String> xrefIdentifiers;
+		List<String> xrefIdentifiers = new ArrayList<String>();
+		List<String> xrefIdentifiersPreTrim;
+
 		try
 		{
-			xrefIdentifiers = tuple.getList(colName);
+			xrefIdentifiersPreTrim = tuple.getList(colName);
 		}
 		catch (RuntimeException e)
 		{
 			throw new ValueConverterException(e);
 		}
-		if (xrefIdentifiers == null || xrefIdentifiers.isEmpty()) return null;
+
+		if (xrefIdentifiersPreTrim == null || xrefIdentifiersPreTrim.isEmpty())
+		{
+			return null;
+		}
+		else
+		{
+			for (String identifier : xrefIdentifiersPreTrim)
+			{
+
+				xrefIdentifiers.add(identifier.trim());
+			}
+		}
 
 		// get characteristics for identifiers
 		MrefValue mrefValue = new MrefValue();
@@ -58,15 +75,21 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 	}
 
 	@Override
-	public List<String> extractValue(Value value)
+	public Cell<List<Cell<String>>> toCell(Value value) throws ValueConverterException
 	{
-		return Lists.transform(((MrefValue) value).getValue(), new Function<Characteristic, String>()
+		if (!(value instanceof MrefValue))
 		{
-			@Override
-			public String apply(Characteristic characteristic)
-			{
-				return characteristic.getName();
-			}
-		});
+			throw new ValueConverterException("value is not a " + MrefValue.class.getSimpleName());
+		}
+		List<Cell<String>> mrefList = Lists.transform(((MrefValue) value).getValue(),
+				new Function<Characteristic, Cell<String>>()
+				{
+					@Override
+					public Cell<String> apply(Characteristic characteristic)
+					{
+						return new ValueCell<String>(characteristic.getIdentifier(), characteristic.getName());
+					}
+				});
+		return new ValueCell<List<Cell<String>>>(mrefList);
 	}
 }

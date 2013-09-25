@@ -137,7 +137,7 @@
 			<field name="observableFeature" type="xref" xref_entity="ObservableFeature"
 				description="The Measurement these permitted values are part of." />
 			<field name="valueCode" type="string"
-				description="The value used to store this category in ObservedValue. For example '1', '2'." />
+				description="The value used to store this category in ObservedValue. For example '1', '2'." nillable="true"/>
 			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The category that is being measured in a specific way." nillable="true" />
 			<field name="isMissing" type="bool" default="false"
 				description="whether this value should be treated as missing value." />
@@ -164,7 +164,7 @@
 		</entity>
 		<entity name="DataSet" extends="Characteristic">
 			<description>Container for one or more observations that are measured
-				using the same protocol and by the same performer(s). The dataset
+				using the same protocol and by the same performer(s). The data set
 				may be a file (having the same
 				identifier) but in most cases it is a
 				data table consisting of rows (Observation).
@@ -178,6 +178,7 @@
 				description="time when the protocol started." />
 			<field auto="true" name="endTime" type="datetime" nillable="true"
 				description="(Optional) time when the protocol ended." />
+			<field name="active" type="bool" default="true" description="whether this data set is considered active/inactive"/>
 		</entity>
 		<entity name="ObservationSet" implements="Autoid">
 			<description>In practice: Observation is one row within a DataSet.
@@ -324,6 +325,82 @@
 				An external identifier for an annotation. For example:
 				name='R13H8.1', ontology='ensembl' or name='WBgene00000912',
 				ontology='wormbase'.
+			</description>
+		</entity>
+	</module>
+	<module name="auth">
+		<entity name="ContactInterface" abstract="true">
+			<description> A contact is either a person or an organization. Copied
+				from FuGE::Contact.</description>
+			<field name="Address" type="text" nillable="true"
+				description="The address of the Contact." />
+			<field name="Phone" nillable="true"
+				description="The telephone number of the Contact including the suitable area codes." />
+			<field name="Email" nillable="true"
+				description="The email address of the Contact." />
+			<field name="Fax" nillable="true" type="varchar"
+				description="The fax number of the Contact." />
+			<field name="tollFreePhone" nillable="true" type="string"
+				description="A toll free phone number for the Contact, including suitable area codes." />		
+			<field name="City" type="string" nillable="true"
+				description="Added from the old definition of MolgenisUser. City of this contact." />/>
+			<field name="Country" type="string" nillable="true" 
+				description="Added from the old definition of MolgenisUser. Country of this contact." />	
+		</entity>
+		<entity name="Institute" extends="Characteristic" implements="ContactInterface" xref_label="Name">
+			<description> A contact is either a person or an organization. Copied
+				from FuGE::Contact.</description>
+				<field name="Name" unique="true"/>
+		</entity>
+		<entity name="PersonInterface" abstract="true">
+			<description> A contact is either a person or an organization. Copied
+				from FuGE::Contact.</description>
+			<field name="Address" type="text" nillable="true"
+				description="The address of the Contact." />
+			<field name="Phone" nillable="true"
+				description="The telephone number of the Contact including the suitable area codes." />
+			<field name="Email" nillable="true"
+				description="The email address of the Contact." />
+			<field name="Fax" nillable="true" type="varchar"
+				description="The fax number of the Contact." />
+			<field name="tollFreePhone" nillable="true" type="string"
+				description="A toll free phone number for the Contact, including suitable area codes." />		
+			<field name="City" type="string" nillable="true"
+				description="Added from the old definition of MolgenisUser. City of this contact." />/>
+			<field name="Country" type="string" nillable="true" 
+				description="Added from the old definition of MolgenisUser. Country of this contact." />
+							<field name="FirstName" label="First Name" nillable="true" />
+			<field name="MidInitials" label="Mid Initials" nillable="true" />
+			<field name="LastName" label="Last Name" nillable="true"/>
+			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD" />
+			<field name="Affiliation" type="xref" xref_entity="Institute" nillable="true" />
+			<field name="Department" type="string" nillable="true" 
+				description="Added from the old definition of MolgenisUser. Department of this contact." />	
+			<field name="Roles" type="xref" xref_field="PersonRole.id"
+				nillable="true" description="Indicate role of the contact, e.g. lab worker or PI. Changed from mref to xref in oct 2011." />
+		</entity>
+		<entity name="Person" extends="Characteristic" implements="PersonInterface" xref_label="Name">
+			<description>
+				Person represents one or more people involved with an Investigation.
+				This may include authors on a paper, lab personnel or PIs. Person
+				has last name, firstname, mid initial, address, contact and email. A
+				Person role is included to represent how a Person is involved with
+				an investigation. For submission to repository purposes an allowed
+				value is 'submitter' and the term is present in the MGED Ontology,
+				an alternative use could represent job title. An Example from
+				ArrayExpress is E-MTAB-506
+				<a
+					href="ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt">
+					ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/experiment/TABM/E-TABM-506/E-TABM-506.idf.txt.
+				</a>
+				.
+				<br />
+				The FUGE equivalent to Person is FuGE::Person.
+			</description>
+			<unique fields="Email" />
+		</entity>
+		<entity name="PersonRole" extends="OntologyTerm">
+			<description>Seperate type of ontologyTerm to administrate roles.
 			</description>
 		</entity>
 	</module>

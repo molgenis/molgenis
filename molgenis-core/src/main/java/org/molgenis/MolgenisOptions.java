@@ -15,7 +15,6 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.ui.html.render.LinkoutRenderDecorator;
 import org.molgenis.util.cmdline.CmdLineException;
 import org.molgenis.util.cmdline.CmdLineParser;
 import org.molgenis.util.cmdline.Option;
@@ -72,10 +71,6 @@ public class MolgenisOptions implements Serializable
 	 */
 	@Option(name = "import_model_database", param = Option.Param.COLLECTION, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()")
 	public ArrayList<String> import_model_database = new ArrayList<String>();
-
-	/** relative path to the ui.xml file */
-	@Option(name = "model_userinterface", param = Option.Param.FILEPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with user interface specification (in MOLGENIS DSL). Can be same file as model_database. Default: ''")
-	public String model_userinterface = "";
 
 	/** directory where example data lives (used for test and documentation) */
 	@Option(name = "example_data_dir", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Directory where example data lives. Default: 'data'")
@@ -180,10 +175,13 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "auth_loginclass", param = Option.Param.CLASS, type = Option.Type.REQUIRED_ARGUMENT, usage = "Expert option. Set the class used for login. Default: org.molgenis.framework.security.SimpleLogin")
 	public String auth_loginclass = "org.molgenis.framework.security.SimpleLogin";
 
-	/** Option to indicate the use of the bootstrap modal dialog for login, if so, then the login tab should be hidden when not logged in */
+	/**
+	 * Option to indicate the use of the bootstrap modal dialog for login, if so, then the login tab should be hidden
+	 * when not logged in
+	 */
 	@Option(name = "auth_use_dialog", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Indicate the use of the bootstrap modal dialog for login. Default: false")
-	public boolean auth_use_dialog =  false;
-	
+	public boolean auth_use_dialog = false;
+
 	/** Name of form/plugin to redirect to after login */
 	@Option(name = "auth_redirect", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Get name of form/plugin to redirect to after login. Default: ''")
 	public String auth_redirect = "";
@@ -217,9 +215,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_BOT", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should BOT be generated. Default: false.")
 	public boolean generate_BOT = false;
 
-	@Option(name = "render_decorator", param = Option.Param.CLASS, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Applies an custom decoration of the HTML. Default: LinkoutRenderDecorator with linkouts for popular identifier to online databases")
-	public String render_decorator = LinkoutRenderDecorator.class.getName();
-
 	@Option(name = "generate_doc", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should documentation be generated. Default: true.")
 	public boolean generate_doc = true;
 
@@ -231,9 +226,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should test code for generated code be generated. Default: false.")
 	public boolean generate_tests = false;
-
-	@Option(name = "generate_gui", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should the GUI service be generated. Default: true.")
-	public boolean generate_gui = true;
 
 	@Option(name = "db_mode", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Which mode should the molgenisServlet use when contacting the dabase. Default: 'servlet'")
 	public String db_mode = "servlet";
@@ -250,9 +242,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_sql", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_sql = true;
 
-	@Option(name = "generate_html", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate HTML. Default: true")
-	public boolean generate_html = true;
-
 	@Option(name = "generate_rdf", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the RDF API. Default: true")
 	public boolean generate_rdf = true;
 
@@ -261,9 +250,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_soap", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the SOAP API. Default: true")
 	public boolean generate_soap = true;
-
-	@Option(name = "generate_plugins", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the Molgenis plugin API. Default: true")
-	public boolean generate_plugins = true;
 
 	@Option(name = "generate_mobile", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate the Molgenis mobile GUI. Default: true")
 	public boolean generate_mobile = false;
@@ -277,9 +263,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_options", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate use molgenis options. Default: true")
 	public boolean generate_options = true;
 
-	@Option(name = "generate_metadata", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate meta data. Default: true")
-	public boolean generate_metadata = true;
-
 	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
 	public boolean generate_db = true;
 
@@ -290,9 +273,6 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "authorizable", param = Option.Param.COLLECTION, type = Option.Type.OPTIONAL_ARGUMENT, usage = "For use in molgenis_apps! Tells the generator on which entities to append an implements='Authorizable'. Default: new ArrayList<String>()")
 	public ArrayList<String> authorizable = new ArrayList<String>();
-
-	@Option(name = "services", param = Option.Param.COLLECTION, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Register services to the FrontController. (replaces webserver mappings and MolgenisServlet) Default: new ArrayList<String>()")
-	public ArrayList<String> services = new ArrayList<String>();
 
 	@Option(name = "disable_decorators", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "disables all decorators for generated test")
 	public boolean disable_decorators = false;
@@ -514,16 +494,6 @@ public class MolgenisOptions implements Serializable
 		this.model_database = v;
 	}
 
-	public String getModelUserinterface()
-	{
-		return model_userinterface;
-	}
-
-	public void setModelUserinterface(String model_userinterface)
-	{
-		this.model_userinterface = model_userinterface;
-	}
-
 	public String getOutputSrc()
 	{
 		return output_src;
@@ -668,7 +638,7 @@ public class MolgenisOptions implements Serializable
 	{
 		return auth_loginclass;
 	}
-	
+
 	public boolean getAuthUseDialog()
 	{
 		return auth_use_dialog;

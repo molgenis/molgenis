@@ -19,6 +19,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.Entity;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 /**
@@ -104,17 +105,18 @@ public class IndexRequestGenerator
 	private Iterator<BulkRequestBuilder> indexRequestIterator(final String documentName, final TupleTable tupleTable)
 			throws TableException
 	{
-		final Set<String> xrefColumns = new HashSet<String>();
+		final Set<String> xrefAndMrefColumns = new HashSet<String>();
 		for (Field field : tupleTable.getColumns())
 		{
-			boolean isXref = field.getType().getEnumType().equals(FieldTypeEnum.XREF);
-			if (isXref) xrefColumns.add(field.getName());
+			FieldTypeEnum fieldType = field.getType().getEnumType();
+			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
+			if (isXrefOrMref) xrefAndMrefColumns.add(field.getName());
 		}
 
 		return new Iterator<BulkRequestBuilder>()
 		{
 			private final int rows = tupleTable.getCount();
-			private final int docsPerBulk = 1000;
+			private static final int docsPerBulk = 1000;
 			private final Iterator<Tuple> it = tupleTable.iterator();
 
 			private int row = 0;
@@ -125,6 +127,7 @@ public class IndexRequestGenerator
 				return it.hasNext();
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public BulkRequestBuilder next()
 			{
@@ -138,24 +141,63 @@ public class IndexRequestGenerator
 					for (String columnName : tuple.getColNames())
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on
-						// list
-						// fields
+						// list fields
+						Object key = null;
 						Object value = tuple.get(columnName);
+						if (value instanceof Cell)
+						{
+							Cell<?> cell = (Cell<?>) value;
+							key = cell.getKey();
+							value = cell.getValue();
+						}
 						if (value instanceof Collection)
 						{
+							Collection<?> values = (Collection<?>) value;
+							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
+							{
+								List<String> mrefKeys = null;
+								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
+								{
+									String cellKey = it.next().getKey();
+									if (cellKey != null)
+									{
+										if (mrefKeys == null) mrefKeys = new ArrayList<String>();
+										mrefKeys.add(cellKey);
+									}
+								}
+								if (mrefKeys != null) key = mrefKeys;
+							}
 							value = Joiner.on(" , ").join((Collection<?>) value);
 						}
 
+						if (key != null) doc.put("key-" + columnName, key);
 						doc.put(columnName, value);
 					}
 
-					List<Object> xrefValues = new ArrayList<Object>();
+					Set<String> xrefAndMrefValues = new HashSet<String>();
 					for (String columnName : tuple.getColNames())
 					{
-						if (xrefColumns.contains(columnName)) xrefValues.add(tuple.get(columnName));
-
+						if (xrefAndMrefColumns.contains(columnName))
+						{
+							Object value = tuple.get(columnName);
+							if (value instanceof Cell)
+							{
+								Cell<?> cell = (Cell<?>) value;
+								if (cell.getValue() instanceof Collection<?>)
+								{
+									for (Cell<?> mrefCell : (Collection<Cell<?>>) cell.getValue())
+									{
+										xrefAndMrefValues.add(mrefCell.getKey());
+									}
+								}
+								else
+								{
+									xrefAndMrefValues.add(cell.getKey());
+								}
+							}
+						}
 					}
-					doc.put("_xrefvalue", xrefValues);
+					doc.put("_xrefvalue", xrefAndMrefValues);
 
 					IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
 

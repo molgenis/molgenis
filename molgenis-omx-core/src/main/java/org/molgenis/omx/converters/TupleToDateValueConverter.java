@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DateValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 public class TupleToDateValueConverter implements TupleToValueConverter<DateValue, String>
@@ -32,9 +34,13 @@ public class TupleToDateValueConverter implements TupleToValueConverter<DateValu
 	}
 
 	@Override
-	public String extractValue(Value value)
+	public Cell<String> toCell(Value value) throws ValueConverterException
 	{
+		if (!(value instanceof DateValue))
+		{
+			throw new ValueConverterException("value is not a " + DateValue.class.getSimpleName());
+		}
 		SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(DATEFORMAT_DATE);
-		return iso8601DateFormat.format(((DateValue) value).getValue());
+		return new ValueCell<String>(iso8601DateFormat.format(((DateValue) value).getValue()));
 	}
 }
