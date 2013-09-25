@@ -12,6 +12,32 @@ public class DescriptorRecord
 
 	ConceptList conceptList;
 
+	TreeNumberList treeNumberList = new TreeNumberList();
+
+	String annotation;
+
+	public String getAnnotation()
+	{
+		return annotation;
+	}
+
+	@XmlElement(name = "Annotation")
+	public void setAnnotation(String annotation)
+	{
+		this.annotation = annotation;
+	}
+
+	public TreeNumberList getTreeNumberList()
+	{
+		return treeNumberList;
+	}
+
+	@XmlElement(name = "TreeNumberList")
+	public void setTreeNumberList(TreeNumberList treeNumberList)
+	{
+		this.treeNumberList = treeNumberList;
+	}
+
 	public ConceptList getConceptList()
 	{
 		return conceptList;
