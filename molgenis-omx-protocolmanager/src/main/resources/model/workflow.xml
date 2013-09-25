@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="workflow">
+		<description>
+			
+		</description>
+		<entity name="ProtocolFlow" implements="Autoid" >
+			<field name="input" type="xref" xref_entity="ObservableFeature" description="" />
+			<field name="output" type="xref" xref_entity="ObservableFeature" description="" />
+			<field name="source" type="xref" xref_entity="Protocol" description="" />
+			<field name="destination" type="xref" xref_entity="Protocol" description="" />
+		</entity>
+	</module>
+</molgenis>
