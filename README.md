@@ -75,26 +75,36 @@ Give create a database with permissions to molgenis user:
 
 Create a file called molgenis-server.properties in your home folder (so ~/molgenis-server.properties)
 
-Add a property "admin.password" to this file, so the content becomes "admin.password=admin"
+Add two properties to this file:
 
-If the property is not present the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
+	"admin.password=admin"
+	"user.password=admin"
+
+If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
 
 ## 8. Run the OMX app (example)
 
 Right click 'molgenis-app-omx' -> Run as ... -> Maven build ...
 
 In the 'goals' box type in 'jetty:start'
+Before running, go the the 'JRE' tab and add the the following VM arguments:
 
-Choose Run. Now Jetty will be started.
+ 	-XX:MaxPermSize=512M
+    -Xmx2g
+
+Now go back to the previous tab and Choose Run. Jetty will be started.
 
 Open your browser at http://localhost:8080/
 
 You should see the application. Login as 'admin', 'admin' to be able to upload and view data, create users, etc etc.
 
-It is advised to add a bit more memory to run the application. Under 'Run Configurations', select the Maven Build that starts the application. Go to the 'JRE' tab, and add some VM arguments:
+To increase memory for every run do the following:
 
-    -XX:MaxPermSize=512M
+Under 'Run Configurations', select the Maven Build that starts the application. Go to the 'JRE' tab, and add the following VM arguments:
+
+	-XX:MaxPermSize=512M
     -Xmx2g
+   
 
 ## 9. Keep your code up to date
 
