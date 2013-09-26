@@ -77,8 +77,8 @@ Create a file called molgenis-server.properties in your home folder (so ~/molgen
 
 Add two properties to this file:
 
-"admin.password=admin"
-"user.password=admin"
+	"admin.password=admin"
+	"user.password=admin"
 
 If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
 
