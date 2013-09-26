@@ -87,6 +87,7 @@ If these properties are not present, the MolgenisDatabasePopulator will fail (Ru
 Right click 'molgenis-app-omx' -> Run as ... -> Maven build ...
 
 In the 'goals' box type in 'jetty:start'
+
 Before running, go the the 'JRE' tab and add the the following VM arguments:
 
  	-XX:MaxPermSize=512M
