@@ -7,7 +7,7 @@
 	  <artifactId>molgenis</artifactId>
 	  <version>0.0.3-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-das</artifactId>
+	<artifactId>molgenis-omx-das</artifactId>
 	<packaging>jar</packaging>
 
 	<repositories>
@@ -71,30 +71,5 @@
 		</exclusion>
 	       	</exclusions>
 		</dependency>
-
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-
-            <!-- The jetty plugin allows testing of the DAS service within the Maven build.
-             (Run using mvn jetty:run-war) -->
-            <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
-                <configuration>
-                    <contextPath>/</contextPath>
-                </configuration>
-            </plugin>
-        </plugins>
-        <finalName>MyDasTemplate</finalName>
-    </build>
 </project>
