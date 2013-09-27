@@ -19,7 +19,7 @@
 	</#if>
 		<div class="row-fluid">	
 			<div class="well">
-				<p id="loader-title" class="box-title">Choose a study definition to load</p>
+				<p id="loader-title" class="box-title">Choose a study definition to manage</p>
 				<form id="studyDefinitionForm" name="studyDefinitionForm" method="post" action="${context_url}/load" onsubmit="parent.showSpinner(); return true;">
 					<div class="row-fluid">
 						<div class="span6">
@@ -36,7 +36,9 @@
 									</tbody>
 								</table>
 							</div>
+						<#if dataLoadingEnabled>
 							<input type="submit" class="btn pull-right" value="Load" />
+						</#if>
 						</div>
 						<div class="span6" id="study-definition-info">
 							<ul class="nav nav-tabs">

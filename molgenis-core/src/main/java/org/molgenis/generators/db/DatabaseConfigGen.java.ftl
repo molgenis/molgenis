@@ -1,34 +1,19 @@
 package ${package};
 
 import java.beans.PropertyVetoException;
-import java.text.ParseException;
 import java.util.Collections;
-import java.util.List;
 
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
-import org.molgenis.SecuredJpaDatabase;
-import org.molgenis.UnsecuredJpaDatabase;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.server.TokenFactory;
-import org.molgenis.util.Entity;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.AdviceMode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.EnableLoadTimeWeaving;
-import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -38,6 +23,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
