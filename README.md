@@ -93,19 +93,13 @@ Before running, go the the 'JRE' tab and add the the following VM arguments:
  	-XX:MaxPermSize=512M
     -Xmx2g
 
+This will add memory for the application to use.
+
 Now go back to the previous tab and Choose Run. Jetty will be started.
 
 Open your browser at http://localhost:8080/
 
 You should see the application. Login as 'admin', 'admin' to be able to upload and view data, create users, etc etc.
-
-To increase memory for every run do the following:
-
-Under 'Run Configurations', select the Maven Build that starts the application. Go to the 'JRE' tab, and add the following VM arguments:
-
-	-XX:MaxPermSize=512M
-    -Xmx2g
-   
 
 ## 9. Keep your code up to date
 
