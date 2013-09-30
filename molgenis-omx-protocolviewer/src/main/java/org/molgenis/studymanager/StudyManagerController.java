@@ -43,7 +43,6 @@ public class StudyManagerController extends MolgenisPluginController
 	private static final Logger logger = Logger.getLogger(StudyManagerController.class);
 
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "studymanager";
-	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String VIEW_NAME = "view-studymanager";
 
 	private final StudyManagerService studyDefinitionManagerService;
@@ -74,6 +73,7 @@ public class StudyManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String getStudyDefinitions(Model model) throws DatabaseException
 	{
+		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
 		return VIEW_NAME;
 	}
 
