@@ -94,7 +94,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Override
 	protected UserDetailsService userDetailsService()
 	{
-		return new MolgenisUserDetailsService(unsecuredDatabase, passwordEncoder(), roleHierarchyAuthoritiesMapper());
+		return new MolgenisUserDetailsService(unsecuredDatabase, roleHierarchyAuthoritiesMapper());
 	}
 
 	@Override
