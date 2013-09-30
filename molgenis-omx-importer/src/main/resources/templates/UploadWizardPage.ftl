@@ -1,5 +1,4 @@
-<form method="post" name="importWizardForm" enctype="multipart/form-data" action="">
-		
+<form method="post" id="wizardForm" name="wizardForm" enctype="multipart/form-data" action="">
 <div  style="padding-top: 25px">
 <div>
 	Upload <a href="/generated-doc/fileformat.html" target="_blank">Observ-OMX</a> data file<br /><br />

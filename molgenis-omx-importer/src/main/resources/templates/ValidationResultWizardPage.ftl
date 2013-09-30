@@ -1,5 +1,13 @@
-<form method="post" name="importWizardForm" action="">
-		
+<#if wizard.validationMessage??>
+	<script>
+		$(function() {
+			$('.bwizard-steps').after($('<div class="alert alert-block alert-error">${wizard.validationMessage}</div>'));
+			$('.pager .next').addClass('disabled');
+		});
+	</script>
+</#if>
+			
+<form method="post" id="wizardForm" name="wizardForm" action="">		
 <div>
 <#if wizard.dataImportable??>
 	<table class="table table-bordered table-condensed pull-left" style="width: 25%;">
