@@ -1,74 +1,43 @@
 package org.molgenis.omx.importer;
 
 import static org.molgenis.omx.importer.ImportWizardController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.wizard.AbstractWizardController;
+import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
 @RequestMapping(URI)
-@SessionAttributes(
-{ "wizard" })
-public class ImportWizardController extends MolgenisPluginController
+public class ImportWizardController extends AbstractWizardController
 {
 	public static final String URI = "/plugin/importwizard";
-	private static final String VIEW_NAME = "view-importwizard";
-	private final Database database;
+	private final UploadWizardPage uploadWizardPage;
+	private final ValidationResultWizardPage validationResultWizardPage;
+	private final ImportResultsWizardPage importResultsWizardPage;
 
 	@Autowired
-	public ImportWizardController(Database database)
+	public ImportWizardController(UploadWizardPage uploadWizardPage,
+			ValidationResultWizardPage validationResultWizardPage, ImportResultsWizardPage importResultsWizardPage)
 	{
-		super(URI);
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		super(URI, "importWizard");
+		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
+		if (validationResultWizardPage == null) throw new IllegalArgumentException("ValidationResultWizardPage is null");
+		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
+		this.uploadWizardPage = uploadWizardPage;
+		this.validationResultWizardPage = validationResultWizardPage;
+		this.importResultsWizardPage = importResultsWizardPage;
 	}
 
-	@RequestMapping
-	public String init(Model model)
+	@Override
+	protected Wizard createWizard()
 	{
-		model.addAttribute("wizard", new ImportWizard());
-		return VIEW_NAME;
+		Wizard wizard = new ImportWizard();
+		wizard.addPage(uploadWizardPage);
+		wizard.addPage(validationResultWizardPage);
+		wizard.addPage(importResultsWizardPage);
+
+		return wizard;
 	}
-
-	@RequestMapping(value = "/next", method = POST)
-	public String next(@ModelAttribute("wizard")
-	ImportWizard importWizard, HttpServletRequest request) throws Exception
-	{
-
-		importWizard.setErrorMessage(null);
-		importWizard.setValidationMessage(null);
-		importWizard.setSuccessMessage(null);
-
-		importWizard.getCurrentPage().handleRequest(database, request);
-
-		if (importWizard.getErrorMessage() == null)
-		{
-			importWizard.next();
-		}
-
-		return VIEW_NAME;
-	}
-
-	@RequestMapping("/previous")
-	public String next(@ModelAttribute("wizard")
-	ImportWizard importWizard)
-	{
-		importWizard.setErrorMessage(null);
-		importWizard.setValidationMessage(null);
-		importWizard.setSuccessMessage(null);
-
-		importWizard.previous();
-
-		return VIEW_NAME;
-	}
-
 }
