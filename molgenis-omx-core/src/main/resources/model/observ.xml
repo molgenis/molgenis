@@ -142,7 +142,6 @@
 			<field name="partOfDataSet" type="xref" xref_entity="DataSet"
 				description="DataSet this ValueSet is part of." />
 			<field name="Time" type="datetime" description="Time of this observationSet" nillable="true" />
-			<field name="Protocol" type="xref"  />
 			<unique fields="partOfDataSet,Time" description="No single secondary key" />
 		</entity>
 		<entity name="ObservedValue" implements="Autoid">
