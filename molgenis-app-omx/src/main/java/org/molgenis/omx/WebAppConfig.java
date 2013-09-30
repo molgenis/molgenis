@@ -84,6 +84,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
+		registry.addResourceHandler("/myDas/**").addResourceLocations("/myDas/", "classpath:/myDas/");
 	}
 
 	@Override

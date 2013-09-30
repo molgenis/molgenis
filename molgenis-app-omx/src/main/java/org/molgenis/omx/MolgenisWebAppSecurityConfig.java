@@ -49,7 +49,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.antMatchers("/js/**").permitAll()
 
 		.antMatchers("/html/**").permitAll()
-
+		
+		//TEMPORARY FOR TESTNG PURPOSES
+		.antMatchers("/das/**").permitAll()
+		.antMatchers("/myDas/**").permitAll()
+		//-----------------------------
+		
 		.antMatchers("/plugin/void/**").permitAll()
 
 		.antMatchers("/plugin/**").denyAll()

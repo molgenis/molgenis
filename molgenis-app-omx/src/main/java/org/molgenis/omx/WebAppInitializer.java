@@ -39,6 +39,17 @@ public class WebAppInitializer implements WebApplicationInitializer
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
+		
+		Dynamic dasServlet = servletContext.addServlet("dasServlet", new uk.ac.ebi.mydas.controller.MydasServlet());
+		if (dasServlet == null)
+		{
+			logger.warn("ServletContext already contains a complete ServletRegistration for servlet 'dasServlet'");
+		}
+		else
+		{
+			dasServlet.setLoadOnStartup(2);
+			dasServlet.addMapping("/das/*");
+		}
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
