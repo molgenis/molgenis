@@ -4,10 +4,6 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "ontology-indexer.js"]>
 <@header css js/>
 	<div class="row-fluid">
-		<div class="span4">
-			<h3>Step0 (optional) : Index ontology</h3>
-		</div>
-		<div id="alert-message" class="span8">
 		<#if isCorrectOntology?? && !isCorrectOntology> 
 			<div class="alert alert-error">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -33,8 +29,13 @@
 	</div>
 	<div class="row-fluid">
 		<div class="span12">
+			<legend>Add new ontologies</legend>
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="span12">
 			<form id="ontologyindexer-form" class="form-horizontal" enctype="multipart/form-data">
-				<input type="hidden" name="ontologyUri" />
+				<input type="hidden" name="ontologyUri"/>
 				<div class="row-fluid">
 					<div id="div-index-ontology" class="span8 well">
 						<div class="row-fluid">
@@ -81,7 +82,6 @@
 								<div class="btn-group">
 									<button class="btn btn-primary" id="index-button" type="button">Start index</button>
 									<button class="btn" id="refresh-button" type="button">Refresh</button>
-									<a href="/menu/biobankConnect/ontologyannotator" class="btn" id="next-step-button" type="button">Next step</a>
 								</div>
 							</div>
 						</div>
@@ -108,9 +108,6 @@
 									</li>
 									<li>
 										<strong>Hint</strong> : the size of uploaded file cannot exceed <strong>25MB.</strong>
-									</li>
-									<li>
-										Click on <strong>'Next step'</strong> button or choose step <strong>'from top menu'</strong>
 									</li>
 								</ol>
 							</div>
