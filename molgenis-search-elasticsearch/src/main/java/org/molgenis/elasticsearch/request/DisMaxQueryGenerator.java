@@ -53,8 +53,6 @@ public class DisMaxQueryGenerator extends AbstractQueryRulePartGenerator
 		else
 		{
 			return QueryBuilders.fieldQuery(query.getField(), query.getValue());
-			// return QueryBuilders.queryString(query.getField() + ":" +
-			// query.getValue());
 		}
 	}
 }

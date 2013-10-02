@@ -14,12 +14,14 @@
 	color : white;
 	padding-left : 10px;
 }
+
 div#div-search {
+	margin-top : -10px;
 	margin-bottom : 10px;
 }
 
 div.upper-header{
-	height : 170px;
+	height : 100px;
 }
 
 table#dataitem-table {
@@ -55,11 +57,6 @@ td.feature-detail-td {
 	cursor: pointer;
 }
 
-.popover-content{
-	max-height: 500px;
-    overflow-y: auto;
-}
-
 .float-right{
 	float : right;
 	right : 20px;
@@ -86,7 +83,10 @@ dd {
 	padding-left : 2px;
 }
 
-
-h3 {
+h3.catalogue-chooser-header {
 	color : #3079C2;
+}
+
+legend.legend {
+	margin-top : -10px;
 }

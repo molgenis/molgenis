@@ -217,8 +217,7 @@ public class OpalToOMXConvertor
 	 */
 	public static void main(String[] args) throws IOException
 	{
-		new OpalToOMXConvertor("Healthy Obese Project",
-				"/Users/chaopang/Documents/Chao_Work/HarmonizationTestDataset/converted-OMX/HOP-dictionary.xlsx");
+		new OpalToOMXConvertor(args[0], args[1]);
 	}
 
 	class UniqueVariable

@@ -22,12 +22,13 @@ div#alert-message {
 	margin-top : 10px;
 }
 
-div.div-inputinfo{
-	height : 200px;
+div#catalogue-container{
+	display : none;
 }
 
-h3 {
-	color : #3079C2;
+.float-right {
+	float : right;
+	margin-right : 5px;
 }
 
 .justify-text {
@@ -50,4 +51,9 @@ dt {
 
 dd {
 	padding-bottom : 10px;
+}
+
+legend.ontology-matcher-legend {
+	margin-top : -16px;
+	font-size : 18px;
 }

@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.ontologymatcher;
+package org.molgenis.omx.harmonization.ontologyannotator;
 
 import java.util.List;
 

@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -25,7 +26,6 @@ import org.molgenis.search.SearchService;
 import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBean
@@ -35,6 +35,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	// TODO : solve this guy
 	public static final Set<String> STOPWORDSLIST;
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
+	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
+
 	private static boolean complete = false;
 
 	static
@@ -84,7 +86,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		complete = false;
 	}
 
-	@Async
 	public void annotate(Integer protocolId)
 	{
 		runningProcesses.incrementAndGet();
@@ -133,6 +134,22 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			DatabaseUtil.closeQuietly(db);
 			runningProcesses.decrementAndGet();
 			complete = true;
+		}
+	}
+
+	@Override
+	public void updateIndex(UpdateIndexRequest request)
+	{
+		try
+		{
+			for (String documentId : request.getDocumentIds())
+			{
+				searchService.updateDocumentById(request.getDocumentType(), documentId, request.getUpdateScript());
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Exception calling searchservice for request [" + request + "]", e);
 		}
 	}
 
@@ -186,7 +203,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		Set<String> positionFilter = new HashSet<String>();
 		Set<String> addedCandidates = new HashSet<String>();
 		Map<String, Map<String, Object>> mapUriTerm = new HashMap<String, Map<String, Object>>();
-		// List<Hit> hitSecondChoice = new ArrayList<Hit>();
+
 		for (TermComparison termComparision : listOfHits)
 		{
 			Hit hit = termComparision.getHit();
@@ -201,25 +218,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 					addedCandidates.add(ontologyTermSynonym);
 				}
 			}
-			// else hitSecondChoice.add(hit);
 		}
-
-		// positionFilter.clear();
-		//
-		// for (Hit hit : hitSecondChoice)
-		// {
-		// Map<String, Object> data = hit.getColumnValueMap();
-		// String ontologyTermSynonym =
-		// data.get("ontologyTermSynonym").toString().toLowerCase();
-		// if (!mapUriTerm.containsValue(ontologyTermSynonym))
-		// {
-		// if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer,
-		// positionFilter)
-		// && !addedCandidates.contains(ontologyTermSynonym))
-		// mapUriTerm.put(data.get("ontologyTermIRI")
-		// .toString(), data);
-		// }
-		// }
 
 		List<String> identifiers = new ArrayList<String>();
 		if (feature.getDefinition_Identifier() != null) identifiers.addAll(feature.getDefinition_Identifier());

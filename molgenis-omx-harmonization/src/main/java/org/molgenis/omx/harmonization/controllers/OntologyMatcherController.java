@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class OntologyMatcherController extends MolgenisPlugin
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "ontologymatcher";
+	public static final String URI = BiobankConnectController.URI + "/ontologymatcher";
 
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
@@ -50,11 +50,11 @@ public class OntologyMatcherController extends MolgenisPlugin
 		}
 
 		if (sourceDataSetId != null) model.addAttribute("selectedSourceDataSetId", sourceDataSetId);
-		model.addAttribute("isComplete", ontologyMatcher.isComplete());
+		// model.addAttribute("isComplete", ontologyMatcher.isComplete());
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
 		model.addAttribute("percentage", ontologyMatcher.matchPercentage());
 		model.addAttribute("dataSets", dataSets);
-		ontologyMatcher.initCompleteState();
+		// ontologyMatcher.initCompleteState();
 
 		return "OntologyMatcherPlugin";
 	}

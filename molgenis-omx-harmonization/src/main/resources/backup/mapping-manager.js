@@ -12,6 +12,15 @@
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
 	var scoreMappingAbsoluteScore = "store_mapping_absolute_score";
+	var CONTEXT_URL = null;
+	
+	ns.setContextURL = function(CONTEXT_URL){
+		this.CONTEXT_URL = CONTEXT_URL;
+	};
+	
+	ns.getContextURL = function() {
+		return this.CONTEXT_URL;
+	};
 	
 	ns.changeDataSet = function(selectedDataSet){
 		ns.initAccordion();
@@ -223,18 +232,15 @@
 		
 		function createDynamicTableHeader(involedDataSets){
 			var headerRow = $('<tr />');
-			var dataSetRow = $('<tr />');
 			var columnWidth = 60 / (involedDataSets.length - 1);
 			for(var i = 0; i < involedDataSets.length; i++){
 				var width = columnWidth + '%';
 				if(i === 0){
 					width = '40%';
 				}
-				$('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', width).appendTo(dataSetRow);
+				$('<th>' + involedDataSets[i] + '</th>').css('width', width).appendTo(headerRow);
 			}
-			$('<th class="text-align-center">Desired cataogue</th>').width('width', '40%').appendTo(headerRow);
-			$('<th class="text-align-center" colspan="' + involedDataSets.length + '">Target cataogue</th>').width('width', '60%').appendTo(headerRow);
-			return $('<thead />').append(headerRow).append(dataSetRow);
+			return $('<thead />').append(headerRow);
 		}	
 		
 		function createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures){
@@ -730,6 +736,10 @@
 	ns.updateSelectedDataset = function(dataSet) {
 		selectedDataSet = dataSet;
 	};
+	
+	ns.hrefToId = function(href){
+		return href.substring(href.lastIndexOf('/') + 1); 
+	}
 	
 	ns.getSelectedDataSet = function (){
 		return selectedDataSet;

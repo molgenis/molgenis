@@ -56,7 +56,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String LUCENE_SCORE = "score";
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
-	private static boolean complete = false;
 	private static long totalNumber = 0;
 	private static int finishedNumber = 0;
 
@@ -79,22 +78,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return true;
 	}
 
-	public boolean isComplete()
-	{
-		return complete;
-	}
-
-	public void initCompleteState()
-	{
-		complete = false;
-	}
-
 	@Override
-	public Double matchPercentage()
+	public Integer matchPercentage()
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
 		Double percentage = totalNumber == 0 ? new Double(0) : ((double) finishedNumber) / totalNumber;
-		return Double.parseDouble(df.format(percentage * 100));
+		percentage = Double.parseDouble(df.format(percentage * 100));
+		return percentage.intValue();
 	}
 
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
@@ -229,7 +219,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		finally
 		{
 			runningProcesses.decrementAndGet();
-			complete = true;
 			totalNumber = 0;
 			finishedNumber = 0;
 			DatabaseUtil.closeQuietly(db);
@@ -397,7 +386,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 		for (Entry<String, Boolean> entry : allPaths.entrySet())
 		{
-			String nodePath = entry.getKey();
+			String parentNodePath = entry.getKey();
 			Boolean boost = entry.getValue();
 			Integer finalIndexPosition = -1;
 
@@ -408,6 +397,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			SearchResult result = searchService.search(new SearchRequest(null, queryRules, null));
 			Iterator<Hit> iterator = result.iterator();
 
+			Set<String> existingPaths = new HashSet<String>();
 			Set<String> terms = new HashSet<String>();
 			Pattern pattern = Pattern.compile("[0-9]+");
 			Matcher matcher = null;
@@ -416,36 +406,53 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			{
 				Hit hit = iterator.next();
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				// TODO : fix the score!
-				if (columnValueMap.get(NODE_PATH).toString().startsWith(nodePath + ".")
-						|| columnValueMap.get(NODE_PATH).toString().equals(nodePath))
+				String nodePath = columnValueMap.get(NODE_PATH).toString();
+				if (!existingPaths.contains(nodePath))
 				{
-					String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
-							.toLowerCase();
-					matcher = pattern.matcher(ontologyTermSynonym);
-					if (!matcher.find() && !ontologyTermSynonym.equals(""))
+					existingPaths.add(nodePath);
+					// TODO : fix the score!
+					if (nodePath.startsWith(parentNodePath + ".") || nodePath.equals(parentNodePath))
 					{
-						String boostNumber = "^3";
-						if (boost && pathToSynonyms.containsKey(nodePath)) boostNumber = "^6";
-
-						List<String> listOfSynonyms = new ArrayList<String>(pathToSynonyms.get(nodePath));
-						Collections.sort(listOfSynonyms, new MyComparator());
-
-						for (String boostedTerm : listOfSynonyms)
+						String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
+								.toLowerCase();
+						matcher = pattern.matcher(ontologyTermSynonym);
+						if (!matcher.find() && !ontologyTermSynonym.equals(""))
 						{
-							if (ontologyTermSynonym.contains(boostedTerm))
+							String boostNumber = "^3";
+							if (boost && pathToSynonyms.containsKey(parentNodePath)) boostNumber = "^6";
+
+							List<String> listOfSynonyms = new ArrayList<String>(pathToSynonyms.get(parentNodePath));
+							Collections.sort(listOfSynonyms, new MyComparator());
+
+							for (String boostedTerm : listOfSynonyms)
 							{
-								String orignalTerm = ontologyTermSynonym;
-								String replacement = boostedTerm + boostNumber;
-								if (boostedTerm.split(" +").length > 0)
+								if (ontologyTermSynonym.contains(boostedTerm))
 								{
-									replacement = "\"" + boostedTerm + "\"" + boostNumber;
+									String orignalTerm = ontologyTermSynonym;
+									String replacement = boostedTerm + boostNumber;
+									if (boostedTerm.split(" +").length > 1)
+									{
+										replacement = "\"" + boostedTerm + "\"" + boostNumber;
+									}
+									terms.add(orignalTerm.replaceAll(boostedTerm, replacement));
+									break;
 								}
-								terms.add(orignalTerm.replaceAll(boostedTerm, replacement));
-								break;
 							}
+							// if (boost)
+							// {
+							// StringBuilder boostedString = new
+							// StringBuilder();
+							// for (String token :
+							// ontologyTermSynonym.split(" +"))
+							// {
+							// boostedString.append(token).append("^6").append(' ');
+							// }
+							// boostedString.delete(boostedString.length() - 1,
+							// boostedString.length());
+							// terms.add(boostedString.toString());
+							// }
+							if (!ontologyTermSynonym.toString().equals("")) terms.add(ontologyTermSynonym);
 						}
-						if (!ontologyTermSynonym.toString().equals("")) terms.add(ontologyTermSynonym);
 					}
 				}
 			}

@@ -1,17 +1,3 @@
-div.upper-header {
-	height : 170px;
-}
-
-div#alert-message {
-	height : 40px;
-	margin-top : 10px;
-}
-
-div.data-table-container {
-	height : 350px;
-	overflow : auto;
-}
-
 .nav-pills {
 	margin-top : 5px;
 	margin-left : 10px;
@@ -37,11 +23,9 @@ table#dataitem-table {
 	border : 1px solid #5B82A4;
 }
 
-
-table thead th {
-    background-color: #5B82A4; 
-    border:2px solid #5B82A4;
-    color: white;
+th.text-align-center{
+	border:2px solid white;
+	text-align:center;
 }
 
 td.add-border {
@@ -51,6 +35,10 @@ td.add-border {
 .float-right {
 	float : right;
 	margin-right : 10px;
+}
+
+#downloadButton {
+	margin-bottom : 10px;
 }
 
 dl{

@@ -2,76 +2,58 @@
 	
 	"use strict";
 	var ns = w.molgenis = w.molgenis || {};
+	var pagination = new ns.Pagination();
+	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
-	var CONTEXT_URL = null;
+	var selectedDataSet = null;
 	
-	ns.setContextURL = function(CONTEXT_URL){
-		this.CONTEXT_URL = CONTEXT_URL;
-	};
-	
-	ns.getContextURL = function() {
-		return this.CONTEXT_URL;
-	};
-	
-	ns.disableSecondStep = function() {		
-		$('#add-target-dataset').attr('disabled', 'disabled');
-		$('#targetDataSets').attr('disabled', 'disabled');
-		$('#start-match').attr('disabled', 'disabled');
-		$('#div-select-target-catalogue').css('opacity', 0.8);
-	};
-	
-	ns.enableSecondStep = function() {		
-		$('#add-target-dataset').removeAttr('disabled');
-		$('#targetDataSets').removeAttr('disabled');
-		$('#div-select-target-catalogue').css('opacity', 1.0);
-	};
-	
-	ns.changeSourceDataSet = function() {
-		var sourceDataSet = $('#sourceDataSet option:selected');
-		if(sourceDataSet !== null){
-			$('#source-catalogue').empty().append(sourceDataSet.text());
-			ns.copySelectOptions();
-			ns.enableSecondStep();
-		}
-	};
-	
-	ns.copySelectOptions = function() {
-		$('#targetDataSets').empty();
-		$('#target-catalogue').removeData('selectedOptions');
-		ns.disableSecondStep();
-		$('#sourceDataSet option').each(function(){
-			if(!$(this).attr('selected')){
-				var option = $('<option />').attr('value', $(this).val()).text($(this).text());
-				$('#targetDataSets').append(option);
-			}
-		});
-	};
-	
-	ns.addTargetDataSet = function() {
-		var targetDataSet = $('#targetDataSets option:selected');
-		if(targetDataSet !== null){
-			var targetDataSetId = $(targetDataSet).val();
-			var selectedOptions = $('#target-catalogue').data('selectedOptions') === undefined ? [] : $('#target-catalogue').data('selectedOptions');
+	ns.addTargetDataSet = function(targetDataSetId) {
+		var selectedOptions = $('#target-catalogue').data('selectedOptions') === undefined ? [] : $('#target-catalogue').data('selectedOptions');
+		if(targetDataSetId !== null && targetDataSetId !== undefined){
 			if($.inArray(targetDataSetId, selectedOptions) === -1){
 				selectedOptions.push(targetDataSetId);
 				$('#target-catalogue').data('selectedOptions', selectedOptions);
 				switchOptions();
 			}
-			var displayText = '';
+		}
+		$('#selectedTargetDataSets').val(selectedOptions);
+		renderOptions();
+		function renderOptions(){
+			var targetCatalogues = $('#target-catalogue');
+			var dataSetDiv = $('<div />').addClass('span10');
+			targetCatalogues.css('margin-top', '20px').empty().append(dataSetDiv);
 			$.each(selectedOptions, function(index, targetDataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + targetDataSetId);
-				displayText += dataSet.name + ' , ';
+				var nameDiv = $('<div />').addClass('span4').append(dataSet.name);
+				var controlDiv = $('<div />').addClass('offset4 span4');
+				var viewCatalogue = $('<button type="btn" class="btn btn-link">View</button>').click(function(){
+					changeDataSet(targetDataSetId);
+					$('#catalogue-container').show();
+					return false;
+				});
+				var hideCatalogue = $('<button type="btn" class="btn btn-link">Hide</button>').click(function(){
+					$('#catalogue-container').hide().find('table').empty();
+					return false;
+				});
+				var removeCatalogue = $('<button type="btn" class="btn btn-link">Remove</button>').click(function(){
+					var index = selectedOptions.indexOf(targetDataSetId);
+					selectedOptions.splice(index, 1);
+					$('#target-catalogue').data('selectedOptions', selectedOptions);
+					renderOptions();
+					$('#catalogue-container').hide().find('table').empty();
+					return false;
+				});
+				$('<div />').addClass('btn-group').append(viewCatalogue).append(hideCatalogue).append(removeCatalogue).appendTo(controlDiv);
+				$('<div />').addClass('row-fluid').append(nameDiv).append(controlDiv).appendTo(dataSetDiv);
 			});
-			$('#target-catalogue').empty().append(displayText.substring(0, displayText.length - 2));
-			$('#start-match').removeAttr('disabled');
 		}
 		
 		function switchOptions(){
 			var index = 0;
 			var options = $('#targetDataSets option');
 			options.attr('selected',false).each(function(){
-				if(targetDataSet.val() !== $(this).val()){
+				if(targetDataSetId !== $(this).val()){
 					index++;
 				}else return false;
 			});
@@ -95,19 +77,18 @@
 		}
 		$.ajax({
 			type : 'POST',
-			url : ns.getContextURL() + '/' + action,
+			url : ns.getContextURL() + '/ontologymatcher/' + action,
 			data : JSON.stringify(request),
 			contentType : 'application/json',
 			async : false,
 			success : function(response) {
-				ns.showMessageDialog(response.message);
-				if(response.isRunning){ 
-					$('#start-match').attr('disabled', 'disabled');
-					$('#confirm-match').hide();
-				} else {
-					$('#confirm-match').show();
-					$('#start-match').attr('disabled', 'disabled');
-				}
+//				if(response.isRunning){ 
+//					$('#start-match').attr('disabled', 'disabled');
+//					$('#confirm-match').hide();
+//				} else {
+//					$('#confirm-match').show();
+//					$('#start-match').attr('disabled', 'disabled');
+//				}
 			},
 			error : function(status) {
 				alert('error');
@@ -115,81 +96,156 @@
 		});	
 	};
 	
-	ns.getExistingMappings = function(dataSetId){
-		var mappedDataSets = restApi.get('/api/v1/dataset', null, {
-			q : [{
-				field : 'identifier',
-				operator : 'LIKE',
-				value : dataSetId + '-'
-			}]
-		})
-		if(mappedDataSets.items.length > 0){
-			var existingMappings = '';
-			$.each(mappedDataSets.items, function(index, dataSet){
-				var identifier = dataSet.identifier;
-				var mappedDataSetId = identifier.split('-')[1];
-				var mappedDataSet = restApi.get('/api/v1/dataset/' + mappedDataSetId);
-				existingMappings += mappedDataSet.name + ' , ';
+	function changeDataSet (selectedDataSetId){
+		if(selectedDataSetId !== ''){
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
+			$('#selected-catalogue').empty().append(dataSetEntity.name);
+			var request = {
+				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
+				queryRules : [{
+					field : 'type',
+					operator : 'EQUALS',
+					value : 'observablefeature'
+				}]
+			};
+			searchApi.search(request, function(searchResponse){
+				pagination.reset();
+				updateSelectedDataset(selectedDataSetId);
+				createMatrixForDataItems();
+				initSearchDataItems(dataSetEntity);
 			});
-			existingMappings = existingMappings.substring(0, existingMappings.length - 2);
-			
-			if($('.list-existing-mappings').length > 0) {
-				$('.list-existing-mappings').remove();
-			}
-			var newRow = $('<dt class="list-existing-mappings">&nbsp;&nbsp;Existing mappings :</dt>').css('margin-top', 30).after('<dd class="list-existing-mappings">' + existingMappings + '</dd>');
-			$('#div-existing-mapping dl:eq(0)').append(newRow);
+		}
+		
+		function initSearchDataItems (dataSet) {
+			$('#search-dataitem')
+			.on('keydown', function(e){
+			    if (e.which == 13) {
+			    	$('#search-button').click();
+			    	return false;
+			    }
+			}).on('keyup', function(e){
+				if($(this).val() === ''){
+					createMatrixForDataItems();
+			    }
+			});
+			$('#search-button').click(function(){
+				createMatrixForDataItems();
+			});
 		}
 	};
 	
-	ns.showMessageDialog = function(message){
-		$('#alert-message').hide().empty();
-		var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
-		content += '<p><strong>Message : </strong> ' + message + '</p>';
-		$('#alert-message').append(content).addClass('alert alert-info').show();
-		w.setTimeout(function(){
-			$('#alert-message').fadeOut().empty();
-		}, 10000);
-		$(document).scrollTop(0);	
+	function createMatrixForDataItems () {
+		var documentType = 'protocolTree-' + getSelectedDataSet();
+		var query = [{
+			field : 'type',
+			operator : 'SEARCH',
+			value : 'observablefeature'
+		}];
+		
+		var queryText = $('#search-dataitem').val();
+		if(queryText !== ''){
+			query.push({
+				operator : 'AND'
+			});
+			query.push({
+				operator : 'SEARCH',
+				value : queryText
+			});
+			pagination.reset();
+		}
+		
+		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
+			var searchHits = searchResponse.searchHits;
+			var tableObject = $('#dataitem-table');
+			var tableBody = $('<tbody />');
+			$.each(searchHits, function(){
+				$(createTableRow($(this)[0]["columnValueMap"])).appendTo(tableBody);
+			});
+			
+			tableObject.empty().append(createTableHeader()).append(tableBody);
+			pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
+			pagination.updateMatrixPagination($('.pagination ul'), createMatrixForDataItems);
+		});
+		
+		function createTableRow(feature){
+			var row = $('<tr />');
+			var description = feature.description;
+			var isPopOver = description.length < 120;
+			var descriptionSpan = $('<span />').html(isPopOver ? description : description.substring(0, 120) + '...');
+			if(!isPopOver){
+				descriptionSpan.addClass('show-popover');
+				descriptionSpan.popover({
+					content : description,
+					trigger : 'hover',
+					placement : 'bottom'
+				});
+			}
+			var featureNameSpan = $('<span>' + feature.name + '</span>');
+			$('<td />').append(featureNameSpan).appendTo(row);
+			$('<td />').append(descriptionSpan).appendTo(row);
+			return row;
+		}
+		
+		function createTableHeader(){
+			var headerRow = $('<tr />');
+			$('<th>Name</th>').css('width', '30%').appendTo(headerRow);
+			$('<th>Description</th>').css('width', '70%').appendTo(headerRow);
+			return $('<thead />').append(headerRow);
+		}
+		
+		function getSelectedDataSet(){
+			return selectedDataSet;
+		}
 	};
+	
+	function updateSelectedDataset (dataSet) {
+		selectedDataSet = dataSet;
+	}
+	
+	function addAllDataSets(){
+		var selectedOptions = [];
+		$('#targetDataSets option').each(function(){
+			selectedOptions.push($(this).val());
+		});
+		$('#target-catalogue').data('selectedOptions', selectedOptions);
+		ns.addTargetDataSet();
+	}
+	
+	function removeAllSelectedDataSets(){
+		var selectedOptions = [];
+		$('#target-catalogue').data('selectedOptions', selectedOptions);
+		ns.addTargetDataSet();
+		$('#catalogue-container').hide().find('table').empty();
+	}
 	
 	$(document).ready(function(){
 		
-		ns.disableSecondStep();
+		$('#add-target-dataset').click(function(){
+			var targetDataSet = $('#targetDataSets option:selected');
+			ns.addTargetDataSet(targetDataSet.val());
+			return false;
+		});
+		
+		$('#remove-target-all-datasets').click(function(){
+			removeAllSelectedDataSets();
+			return false;
+		});
+		
+		$('#add-target-all-datasets').click(function(){
+			addAllDataSets();
+			return false;
+		}).trigger('click');
 		
 		$('#confirm-match').click(function(){
 			ns.selectCatalogue('match');
 		}).hide();
 		
-		$('#select-source-dataset').click(function(){
-			if($('#sourceDataSet').val() !== ''){
-				ns.changeSourceDataSet();
-				ns.getExistingMappings($('#sourceDataSet').val());
-			}
-			return false;
-		});
-		
-		$('#add-target-dataset').click(function(){
-			ns.addTargetDataSet();
-			return false;
-		});
-		
-		$('#sourceDataSet').change(function(){
-			$('#ontologymatcher-form').attr({
-				'action' : ns.getContextURL(),
-				'method' : 'GET'
-			}).submit();
-		});
-		
-		$('#reset-selection').click(function(){
-			$('#ontologymatcher-form').attr({
-				'action' : ns.getContextURL(),
-				'method' : 'GET'
-			}).submit();
+		$('#next-button').click(function(){
+			ns.selectCatalogue('check');
 		});
 		
 		$('#start-match').click(function(){
 			ns.selectCatalogue('check');
 		});
 	});
-	
 }($, window.top));

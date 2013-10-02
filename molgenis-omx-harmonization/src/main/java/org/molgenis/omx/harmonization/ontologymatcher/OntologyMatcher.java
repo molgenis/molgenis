@@ -11,13 +11,9 @@ public interface OntologyMatcher
 
 	void match(Integer selectedCatalogue, List<Integer> cataloguesToMatch) throws DatabaseException;
 
-	Double matchPercentage();
+	Integer matchPercentage();
 
 	boolean isRunning();
-
-	boolean isComplete();
-
-	void initCompleteState();
 
 	boolean checkExistingMappings(String dataSetIdentifier, Database db) throws DatabaseException;
 }
