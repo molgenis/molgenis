@@ -219,7 +219,6 @@
 	}
 	
 	$(document).ready(function(){
-		
 		$('#add-target-dataset').click(function(){
 			var targetDataSet = $('#targetDataSets option:selected');
 			ns.addTargetDataSet(targetDataSet.val());

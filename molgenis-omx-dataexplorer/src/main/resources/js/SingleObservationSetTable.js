@@ -40,7 +40,7 @@
 			items.push('<tr>');
 			items.push('<td>' + feature.name + '</td>');
 			if ((value != null) && (value != undefined)) {
-				items.push('<td>' + molgenis.formatValue(value, feature.dataType) + '</td>');
+				items.push('<td>' + formatTableCellValue(value, feature.dataType) + '</td>');
 			} else {
 				items.push('<td></td>');
 			}

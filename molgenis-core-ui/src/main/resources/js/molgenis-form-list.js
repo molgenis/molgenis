@@ -7,6 +7,7 @@
 	var NR_ROWS_PER_PAGE = 10;
 	var currentPages = [];
 	var selectedEntityId = null;//Id of the selected entity in the master list
+	var search = null;
 	
 	ns.buildTableBody = function(formIndex) {
 		var currentPage = currentPages[formIndex];
@@ -21,13 +22,25 @@
 		});
 		
 		var uri = '/api/v1/' + forms[formIndex].meta.name + '?num=' + NR_ROWS_PER_PAGE + '&start=' + (currentPage-1) * NR_ROWS_PER_PAGE;
+		
+		if ((formIndex == 0) && (search != null) && (search.value != '')) {
+			uri += '&q[0].field=' + search.field + '&q[0].operator=' + search.operator + '&q[0].value=' + encodeURIComponent(search.value);
+		}
+		
 		if ((formIndex > 0) && (selectedEntityId != null)) {
 			uri += '&q[0].field=' + forms[formIndex].xrefFieldName + '&q[0].operator=EQUALS&q[0].value=' + selectedEntityId;
 		} 
 		
-		var entities = restApi.get(uri, expands, null);
+		var entities = {};
+		if ((formIndex > 0) && (selectedEntityId == null)) {
+			//No selected master item, don't bother calling the api
+			entities.items = [];
+			entities.total = 0;
+		} else {
+			entities = restApi.get(uri, expands, null);
+		}
+		
 		var items = [];
-			
 		$.each(entities.items, function(index, entity) {
 			var id = restApi.getPrimaryKeyFromHref(entity.href);
 			var editPageUrl = forms[formIndex].baseUri + '/' + id + '?back=' + encodeURIComponent(CURRENT_URI);
@@ -66,22 +79,20 @@
 							 
 					} else if (field.xref) {
 						value =  entity[fieldName][field.xrefLabelName];
-						
-					} else if (field.type == 'BOOL') {
-						value = entity[fieldName] ? 'yes' : 'no';
-						
+							
 					} else {
 						value =  entity[fieldName];
 					}
 				} 
 				
-				items.push('<td>' + $('#entity-table-body-' + formIndex).text(value).html() + '</td>');//Html escape value
+				items.push('<td>' + formatTableCellValue(value, field.type) + '</td>');
 			});
 				
 			items.push('</tr>');
 		});
-			
+		
 		$('#entity-table-body-' + formIndex).html(items.join(''));
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 			
 		//Add master row click handler
 		if ((forms.length > 1) && (formIndex == 0)) {
@@ -135,7 +146,7 @@
 			ns.buildTableBody(i);
 			
 			//Update url of create buttons of subforms so xref dropdown is preselected
-			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId;
+			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId + '&back=' + encodeURIComponent(CURRENT_URI);
 			$('#create-' + i).attr('href', href);
 		}
 	}
@@ -206,6 +217,17 @@
 		pager.append($('</ul>'));
 	}
 	
+	ns.refresh = function() {
+		//Build master tables
+		currentPages[0] = 1;
+		ns.buildTableBody(0);
+		
+		//Build subforms if available
+		if (forms.length > 1) {
+			ns.updateSubForms();
+		}
+	}
+	
 	$(function() {
 
 		$('#success-message .close').on('click', function() {
@@ -216,14 +238,21 @@
 			$('#error-message').hide();
 		});
 		
-		//Build master tables
-		currentPages[0] = 1;
-		ns.buildTableBody(0);
+		ns.refresh();
 		
-		//Build subforms if available
-		if (forms.length > 1) {
-			ns.updateSubForms();
-		}
+		$('form.form-search').on('submit', function() {
+			search = {
+				field: $('#query-fields option:selected').attr('id'),
+				operator: $('#operators option:selected').attr('id'),
+				value: $('input[type=search]').val()
+			};
+			
+			//Build master tables
+			selectedEntityId = null;
+			ns.refresh();
+			
+			return false;
+		});
 	});
 	
 }($, window.top));

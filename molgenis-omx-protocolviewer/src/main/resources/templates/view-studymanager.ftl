@@ -16,19 +16,15 @@
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			${successMessage}
 		</div>
-	</#if>		
-	<#if studyDefinitions??>
+	</#if>
 		<div class="row-fluid">	
 			<div class="well">
-				<p id="loader-title" class="box-title">Choose a study definition to load</p>
-			<#if studyDefinitions?size == 0>
-				<p>No studydefinitions found</p>
-			<#else>
+				<p id="loader-title" class="box-title">Choose a study definition to manage</p>
 				<form id="studyDefinitionForm" name="studyDefinitionForm" method="post" action="${context_url}/load" onsubmit="parent.showSpinner(); return true;">
 					<div class="row-fluid">
 						<div class="span6">
 							<div id="resultsTable">
-								<table class="table table-striped table-hover listtable selection-table">
+								<table id="studyDefinitionList" class="table table-striped table-hover listtable selection-table">
 									<thead>
 										<tr>
 											<th></th>
@@ -36,36 +32,18 @@
 											<th>Name</th>
 										</tr>
 									</thead>
-									<#assign foundStudyDefinition = false>
 									<tbody>
-									<#list studyDefinitions as studyDefinition>
-										<tr>
-											<td class="listEntryRadio">
-											<#if studyDefinition.loaded>
-												LOADED
-											<#else>
-												<input id="catalog_${studyDefinition.id}" type="radio" name="id" value="${studyDefinition.id}" <#if !foundStudyDefinition>checked<#assign foundStudyDefinition = true></#if> >
-											</#if>
-											</td>
-											<td class="listEntryId">
-												<label for="catalog_${studyDefinition.id}">${studyDefinition.id}</label>
-											</td>
-											<td>
-												<label for="catalog_${studyDefinition.id}">${studyDefinition.name}</label>
-											</td>
-										</tr>
-									</#list>
 									</tbody>
 								</table>
 							</div>
-						<#if foundStudyDefinition>
+						<#if dataLoadingEnabled>
 							<input type="submit" class="btn pull-right" value="Load" />
 						</#if>
 						</div>
 						<div class="span6" id="study-definition-info">
 							<ul class="nav nav-tabs">
-								<li class="active"><a href="#study-definition-viewer" class="active" data-toggle="tab">Details</a></li>
-								<li><a href="#study-definition-editor" class="active" data-toggle="tab">Manage</a></li>
+								<li class="active"><a href="#study-definition-viewer" data-toggle="tab">Details</a></li>
+								<li><a href="#study-definition-editor" data-toggle="tab">Manage</a></li>
 							</ul>
 							<div class="tab-content">
 							    <div class="tab-pane active" id="study-definition-viewer">
@@ -87,10 +65,8 @@
 						</div>
 					</div>
 				</form>
-			</#if>
 			</div>
 		</div>
-	</#if>
 	</div>
 	<div class="span2"></div>
 <@footer/>

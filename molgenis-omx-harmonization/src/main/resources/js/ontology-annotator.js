@@ -7,15 +7,15 @@
 	var restApi = new ns.RestClient();
 	var ontologyTermIRI = "ontologyTermIRI"
 	var searchApi = new ns.SearchClient();
-	var selectedDataSet = null;
+	var selectedDataSetId = null;
 	
 	ns.OntologyAnnotator = function OntologyAnnotator(){
 		
 	};
 	
-	ns.OntologyAnnotator.prototype.changeDataSet = function(selectedDataSet){
-		if(selectedDataSet !== ''){
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+	ns.OntologyAnnotator.prototype.changeDataSet = function(selectedDataSetId){
+		if(selectedDataSetId !== ''){
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
 				queryRules : [{
@@ -28,7 +28,7 @@
 				$('#catalogue-name').empty().append(dataSetEntity.name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
-				ns.OntologyAnnotator.prototype.updateSelectedDataset(selectedDataSet);
+				ns.OntologyAnnotator.prototype.updateselectedDataSetId(selectedDataSetId);
 				ns.OntologyAnnotator.prototype.createMatrixForDataItems();
 				initSearchDataItems(dataSetEntity);
 			});
@@ -68,7 +68,7 @@
 	};
 	
 	ns.OntologyAnnotator.prototype.createMatrixForDataItems = function(queryRule) {
-		var documentType = 'protocolTree-' + getSelectedDataSet();
+		var documentType = 'protocolTree-' + getselectedDataSetId();
 		var query = [{
 			field : 'type',
 			operator : 'SEARCH',
@@ -385,8 +385,8 @@
 		});
 	}
 	
-	ns.OntologyAnnotator.prototype.updateSelectedDataset = function(dataSet) {
-		selectedDataSet = dataSet;
+	ns.OntologyAnnotator.prototype.updateselectedDataSetId = function(dataSet) {
+		selectedDataSetId = dataSet;
 	};
 	
 	ns.OntologyAnnotator.prototype.showMessageDialog = function(message){
@@ -486,8 +486,8 @@
 		});
 	};
 	
-	function getSelectedDataSet(){
-		return selectedDataSet;
+	function getselectedDataSetId(){
+		return selectedDataSetId;
 	}
 	
 	$(document).ready(function(){

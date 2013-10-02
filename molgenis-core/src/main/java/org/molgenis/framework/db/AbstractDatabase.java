@@ -10,8 +10,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.security.Login;
-import org.molgenis.framework.security.SimpleLogin;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Field;
@@ -38,15 +36,6 @@ public abstract class AbstractDatabase implements Database
 
 	/** Link to the original Molgenis model */
 	protected Model model;
-
-	/** The security login used */
-	protected Login login;
-
-	/** Default constructor */
-	public AbstractDatabase()
-	{
-		this.login = new SimpleLogin();
-	}
 
 	@Override
 	public Model getMetaData() throws DatabaseException
@@ -555,18 +544,6 @@ public abstract class AbstractDatabase implements Database
 	public File getFilesource()
 	{
 		return fileSource;
-	}
-
-	@Override
-	public Login getLogin()
-	{
-		return login;
-	}
-
-	@Override
-	public void setLogin(Login login)
-	{
-		this.login = login;
 	}
 
 	@SuppressWarnings("unchecked")

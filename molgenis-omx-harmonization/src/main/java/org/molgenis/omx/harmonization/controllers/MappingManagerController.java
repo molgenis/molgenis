@@ -23,7 +23,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.harmonization.ontologyannotator.UpdateIndexRequest;
@@ -48,9 +48,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class MappingManagerController extends MolgenisPlugin
+public class MappingManagerController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "mappingmanager";
+	public static final String URI = "/plugin/mappingmanager";
 	private static final Logger logger = Logger.getLogger(MappingManagerController.class);
 	private static final String FEATURE_ID = "id";
 	private static final String FEATURE_NAME = "name";

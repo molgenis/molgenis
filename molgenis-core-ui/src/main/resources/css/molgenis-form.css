@@ -3,9 +3,9 @@
     color: white;
 }
 
-h2 {
+h3 {
 	color: #5B82A4; 
-	padding-left: 20px;
+	margin: 20px 20px;
 }
 
 .form-list-holder {
@@ -15,6 +15,32 @@ h2 {
 
 .edit-icon-holder {
 	width: 22px;
+}
+
+.form-search {
+	margin:20px 0;
+}
+
+.form-search #query-fields {
+	width: 120px;	
+}
+
+.form-search #operators {
+	width: 110px;	
+}
+
+.form-search .input-append {
+	width: 150px;
+}
+
+#list-holder {
+	margin-bottom: 40px;	
+}
+
+#list-navigation {
+	border: 1px solid #CCCCC; 
+	background-color: #EEEEEE; 
+	height:80px;
 }
 
 /* edit form */
@@ -30,9 +56,25 @@ input.error {
 
 .controls input[type=text],
 .select2-choice {
-	width: 500px;
+	min-width: 500px !important; 
 	height: 30px !important;/* for select2 */
 	font-size: 18px;
+}
+
+.date input[type=text] {
+	width: 476px;	
+}
+
+.date input[type=text].nillable {
+	width: 450px;
+}
+
+.date .add-on {
+	height: 30px;
+}
+
+.date .add-on i {
+	margin-top: 7px;
 }
 
 .controls input[type=checkbox] {
@@ -70,4 +112,34 @@ input.error {
 
 #data-table-pager {
 	margin-bottom: 8px;
+}
+
+/* Duplicate bootstrap css because datepicker just makes all ad-on buttons a calendar button and allso want a delete button */
+.add-on-workaround {
+	margin-left:-1px;
+	border-bottom-left-radius:0;
+  	border-bottom-right-radius:0;
+  	border-top-left-radius:0;
+  	border-top-right-radius:0;
+  	vertical-align:top;
+  	background-color:#EEEEEE;
+  	border:1px solid #CCCCCC;
+  	display:inline-block;
+  	font-size:14px;
+ 	font-weight:normal;
+  	height:30px;
+  	line-height:20px;
+  	min-width:16px;
+ 	padding:4px 5px;
+  	text-align:center;
+  	text-shadow:#FFFFFF 0 1px 0;
+  	width:auto;
+}
+
+.add-on-workaround i {
+	margin-top: 7px;
+	cursor:pointer;
+  	display:block;
+  	height:16px;
+ 	 width:16px;
 }

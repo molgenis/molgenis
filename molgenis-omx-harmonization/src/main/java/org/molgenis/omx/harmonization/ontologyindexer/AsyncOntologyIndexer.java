@@ -9,14 +9,17 @@ import org.molgenis.omx.harmonization.tupleTables.OntologyTable;
 import org.molgenis.omx.harmonization.tupleTables.OntologyTermTable;
 import org.molgenis.omx.harmonization.utils.OntologyLoader;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.DatabaseUtil;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 {
+	@Autowired
+	@Qualifier("unsecuredDatabase")
+	private Database unsecuredDatabase;
 	private SearchService searchService;
 	private String ontologyUri = null;
 	private boolean isCorrectOntology = true;
@@ -46,14 +49,14 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 	{
 		isCorrectOntology = true;
 		runningIndexProcesses.incrementAndGet();
-		Database db = DatabaseUtil.createDatabase();
 
 		try
 		{
 			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model, db));
-			searchService.indexTupleTable("ontologyTerm-" + ontologyUri, new OntologyTermTable(model, db));
+			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model, unsecuredDatabase));
+			searchService.indexTupleTable("ontologyTerm-" + ontologyUri,
+					new OntologyTermTable(model, unsecuredDatabase));
 		}
 		catch (OWLOntologyCreationException e)
 		{
@@ -62,13 +65,11 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		}
 		finally
 		{
-			DatabaseUtil.closeQuietly(db);
 			runningIndexProcesses.decrementAndGet();
 			ontologyUri = null;
 		}
 	}
 
-	@Override
 	public void removeOntology(String ontologyURI)
 	{
 		searchService.deleteDocumentsByType("ontology-" + ontologyURI);

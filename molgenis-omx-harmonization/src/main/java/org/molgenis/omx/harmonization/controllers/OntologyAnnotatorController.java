@@ -11,7 +11,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.Hit;
@@ -30,9 +30,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class OntologyAnnotatorController extends MolgenisPlugin
+public class OntologyAnnotatorController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "ontologyannotator";
+	public static final String URI = "/plugin/ontologyannotator";
 	private static final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	private static final Logger logger = Logger.getLogger(OntologyAnnotatorController.class);
 	@Autowired

@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.Part;
 
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.harmonization.ontologyindexer.OntologyIndexer;
 import org.molgenis.omx.harmonization.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(URI)
-public class OntologyIndexerController extends MolgenisPlugin
+public class OntologyIndexerController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPlugin.PLUGIN_URI_PREFIX + "ontologyindexer";
+	public static final String URI = "/plugin/ontologyindexer";
 
 	@Autowired
 	private FileStore fileStore;

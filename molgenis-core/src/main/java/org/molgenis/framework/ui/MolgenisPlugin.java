@@ -1,41 +1,57 @@
 package org.molgenis.framework.ui;
 
-/**
- * Abstract base class for all MOLGENIS plugin controllers
- */
-public abstract class MolgenisPlugin
+public class MolgenisPlugin
 {
-	public static final String PLUGIN_URI_PREFIX = "/plugin/";
-
-	/** Base URI for a plugin */
+	private final String id;
+	private final String name;
 	private final String uri;
 
-	public MolgenisPlugin(String uri)
+	public MolgenisPlugin(String id, String name, String uri)
 	{
+		if (id == null) throw new IllegalArgumentException("id is null");
+		if (name == null) throw new IllegalArgumentException("name is null");
 		if (uri == null) throw new IllegalArgumentException("uri is null");
-		if (!uri.startsWith(PLUGIN_URI_PREFIX))
-		{
-			throw new IllegalArgumentException("uri does not start with " + PLUGIN_URI_PREFIX);
-		}
+		this.id = id;
+		this.name = name;
 		this.uri = uri;
-
-		// register all plugins
-		MolgenisPluginRegistry.getInstance().register(this);
 	}
 
-	/**
-	 * Returns the base URI of the plugin
-	 * 
-	 * @return
-	 */
-	public String getUri()
+	public String getId()
+	{
+		return id;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public String getUrl()
 	{
 		return uri;
 	}
 
-	/** Returns the unique id of the plugin */
-	public String getId()
+	@Override
+	public int hashCode()
 	{
-		return uri.substring(PLUGIN_URI_PREFIX.length());
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		MolgenisPlugin other = (MolgenisPlugin) obj;
+		if (id == null)
+		{
+			if (other.id != null) return false;
+		}
+		else if (!id.equals(other.id)) return false;
+		return true;
 	}
 }

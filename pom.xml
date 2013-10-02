@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -36,6 +36,11 @@
 		<repository>
 			<id>enonic</id>
 			<url>http://repo.enonic.com/public/</url>
+		</repository>
+		<repository>
+			<id>repository.springsource.milestone</id>
+			<name>SpringSource Milestone Repository</name>
+			<url>http://repo.springsource.org/milestone</url>
 		</repository>
 	</repositories>
 
@@ -511,7 +516,6 @@
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
-		<module>molgenis-omx-auth</module>
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-dataexplorer</module>
 		<module>molgenis-omx-protocolmanager</module>
@@ -522,6 +526,7 @@
 		<module>molgenis-app-ngs</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
-    	<module>molgenis-omx-harmonization</module>
-  	</modules>
+		<module>molgenis-security</module>
+		<module>molgenis-omx-harmonization</module>
+	</modules>
 </project>

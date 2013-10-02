@@ -40,7 +40,7 @@
 					if(response.matchePercentage === 0){
 						var width = $(progressBarElement).width();
 						var parentWidth = $(progressBarElement).offsetParent().width();
-						var percent = 100 * width / parentWidth + 5;
+						var percent = 100 * width / parentWidth + 4;
 						$(progressBarElement).width(percent + '%');
 					}else if(response.matchePercentage === 100){
 						$(progressBarElement).width(response.matchePercentage + '%');
@@ -60,7 +60,7 @@
 				}else {
 					$(progressBarElement).empty().width('100%').parents('div:eq(0)').removeClass('active');
 					$(progressBarElement).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
-					$('#control-container ul.pager li').removeClass('disabled');
+					$('ul.pager li').removeClass('disabled');
 				}
 			},
 			error : function(request, textStatus, error){
@@ -70,32 +70,7 @@
 	};
 	
 	$(document).ready(function(){
-		$('#reset-button').click(function(){
-			if(!$(this).hasClass('disabled')){
-				$('form').attr({
-					'action' : ns.getContextURL() + '/reset',
-					'method' : 'GET'
-				}).submit();
-			}
-			return false;
-		});
-		$('#next-button').click(function(){
-			if(!$(this).hasClass('disabled')){
-				$('form').attr({
-					'action' : ns.getContextURL() + '/next',
-					'method' : 'GET',
-				}).submit();
-			}
-			return false;
-		});
-		$('#prev-button').click(function(){
-			if(!$(this).hasClass('disabled')){
-				$('form').attr({
-					'action' : ns.getContextURL() + '/prev',
-					'method' : 'GET'
-				}).submit();
-			}
-			return false;
-		});
+		$('.wizard-page').removeClass('well');
+		$('#wizard').css('min-height', 300);
 	});
-}($, window.top));
+}($, window.top))

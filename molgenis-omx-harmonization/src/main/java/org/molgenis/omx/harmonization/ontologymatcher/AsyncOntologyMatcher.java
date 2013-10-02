@@ -34,9 +34,9 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
@@ -59,6 +59,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static long totalNumber = 0;
 	private static int finishedNumber = 0;
 
+	@Autowired
+	@Qualifier("unsecuredDatabase")
+	private Database unsecuredDatabase;
 	private SearchService searchService;
 
 	@Autowired
@@ -109,14 +112,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	public void match(Integer selectedDataSet, List<Integer> dataSetsToMatch) throws DatabaseException
 	{
 		runningProcesses.incrementAndGet();
-		Database db = DatabaseUtil.createDatabase();
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
 
 		try
 		{
-			db.beginTx();
-			preprocessing(selectedDataSet, dataSetsToMatch, db);
+			preprocessing(selectedDataSet, dataSetsToMatch, unsecuredDatabase);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			queryRules.add(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
 					.toLowerCase()));
@@ -128,7 +129,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			for (Hit hit : result.getSearchHits())
 			{
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				ObservableFeature feature = db.findById(ObservableFeature.class,
+				ObservableFeature feature = unsecuredDatabase.findById(ObservableFeature.class,
 						columnValueMap.get(ObservableFeature.ID.toString()));
 				if (feature != null)
 				{
@@ -163,7 +164,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							listOfNewObservationSets.add(observation);
 
 							XrefValue xrefForFeature = new XrefValue();
-							xrefForFeature.setValue(db.findById(Characteristic.class, feature.getId()));
+							xrefForFeature.setValue(unsecuredDatabase.findById(Characteristic.class, feature.getId()));
 							ObservedValue valueForFeature = new ObservedValue();
 							valueForFeature.setObservationSet(observation);
 							valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
@@ -171,7 +172,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							listOfNewObservedValues.add(valueForFeature);
 
 							XrefValue xrefForMappedFeature = new XrefValue();
-							xrefForMappedFeature.setValue(db.findById(Characteristic.class, mappedId));
+							xrefForMappedFeature.setValue(unsecuredDatabase.findById(Characteristic.class, mappedId));
 							ObservedValue valueForMappedFeature = new ObservedValue();
 							valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
 							valueForMappedFeature.setObservationSet(observation);
@@ -199,21 +200,19 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				}
 			}
 
-			db.add(listOfNewObservationSets);
-			db.add(listOfNewObservedValues);
+			unsecuredDatabase.add(listOfNewObservationSets);
+			unsecuredDatabase.add(listOfNewObservedValues);
 
 			for (Integer catalogueId : dataSetsToMatch)
 			{
 				StringBuilder dataSetIdentifier = new StringBuilder();
 				dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
 				searchService.indexTupleTable(dataSetIdentifier.toString(),
-						new StoreMappingTable(dataSetIdentifier.toString(), db));
+						new StoreMappingTable(dataSetIdentifier.toString(), unsecuredDatabase));
 			}
-			db.commitTx();
 		}
 		catch (Exception e)
 		{
-			db.rollbackTx();
 			e.printStackTrace();
 		}
 		finally
@@ -221,7 +220,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			runningProcesses.decrementAndGet();
 			totalNumber = 0;
 			finishedNumber = 0;
-			DatabaseUtil.closeQuietly(db);
 		}
 	}
 

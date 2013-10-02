@@ -20,10 +20,6 @@ div#div-search {
 	margin-bottom : 10px;
 }
 
-div.upper-header{
-	height : 100px;
-}
-
 table#dataitem-table {
 	border : 1px solid #5B82A4;
 }
@@ -62,10 +58,6 @@ td.feature-detail-td {
 	right : 20px;
 	cursor: hand; 
 	cursor: pointer;
-}
-
-.modal-body {
-	overflow-y: visible;
 }
 
 ol.action-list, ol.action-list li{

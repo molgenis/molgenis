@@ -1,4 +1,4 @@
-<form method="post" name="importWizardForm" action="">
+<form method="post" id="wizardForm" name="wizardForm" action="">
 <#if wizard.importResult??>
 	<div style="height: 230px; overflow: auto; width: 600px;background-color:white;font-family:Courier New, Courier, monospace" class="well">
 		<ul class="unstyled">

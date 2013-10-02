@@ -31,6 +31,13 @@ public interface StudyManagerService
 	StudyDefinition getStudyDefinition(String id) throws UnknownStudyDefinitionException;
 
 	/**
+	 * Returns whether study data loading is enabled
+	 * 
+	 * @return
+	 */
+	boolean canLoadStudyData();
+
+	/**
 	 * Retrieve a study definition and save it in the database
 	 * 
 	 * @param id

@@ -23,22 +23,24 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.DatabaseUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBean
 {
+	@Autowired
+	@Qualifier("unsecuredDatabase")
+	private Database unsecuredDatabase;
+
 	private SearchService searchService;
 
-	// TODO : solve this guy
-	public static final Set<String> STOPWORDSLIST;
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
-
 	private static boolean complete = false;
-
+	// TODO : solve this guy
+	public static final Set<String> STOPWORDSLIST;
 	static
 	{
 		STOPWORDSLIST = new HashSet<String>(Arrays.asList("a", "you", "about", "above", "after", "again", "against",
@@ -70,27 +72,29 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
+	@Override
 	public boolean isRunning()
 	{
 		if (runningProcesses.get() == 0) return false;
 		return true;
 	}
 
+	@Override
 	public boolean isComplete()
 	{
 		return complete;
 	}
 
+	@Override
 	public void initComplete()
 	{
 		complete = false;
 	}
 
+	@Override
 	public void annotate(Integer protocolId)
 	{
 		runningProcesses.incrementAndGet();
-		Database db = DatabaseUtil.createDatabase();
-
 		try
 		{
 			PorterStemmer stemmer = new PorterStemmer();
@@ -106,14 +110,15 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			{
 				Hit hit = iterator.next();
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get("id").toString());
-				ObservableFeature feature = toObservableFeature(db.findById(ObservableFeature.class, featureId));
+				ObservableFeature feature = toObservableFeature(unsecuredDatabase.findById(ObservableFeature.class,
+						featureId));
 				String name = hit.getColumnValueMap().get("name").toString().toLowerCase()
 						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
 				String description = hit.getColumnValueMap().get("description").toString().toLowerCase()
 						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
 				List<String> definitions = new ArrayList<String>();
-				definitions.addAll(annotateDataItem(db, feature, name, stemmer));
-				definitions.addAll(annotateDataItem(db, feature, description, stemmer));
+				definitions.addAll(annotateDataItem(unsecuredDatabase, feature, name, stemmer));
+				definitions.addAll(annotateDataItem(unsecuredDatabase, feature, description, stemmer));
 
 				if (definitions.size() > 0)
 				{
@@ -123,7 +128,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				featuresToUpdate.add(feature);
 			}
 
-			db.update(featuresToUpdate);
+			unsecuredDatabase.update(featuresToUpdate);
 		}
 		catch (Exception e)
 		{
@@ -131,7 +136,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 		finally
 		{
-			DatabaseUtil.closeQuietly(db);
 			runningProcesses.decrementAndGet();
 			complete = true;
 		}
@@ -282,12 +286,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return nestedQuery;
 	}
 
-	@Override
-	public float finishedPercentage()
-	{
-		return 0;
-	}
-
 	class TermComparison implements Comparable<TermComparison>
 	{
 		private final Hit hit;
@@ -328,5 +326,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			}
 			else return this.synonymLength.compareTo(other.getSynonymLength()) * (-1);
 		}
+	}
+
+	@Override
+	public float finishedPercentage()
+	{
+		return 0;
 	}
 }

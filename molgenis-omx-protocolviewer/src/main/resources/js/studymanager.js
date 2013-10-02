@@ -43,6 +43,39 @@
 			return items.join('');
 		}
 		
+		function updateStudyDefinitionTable() {
+			$.ajax({
+				type : 'GET',
+				url : '/plugin/studymanager/list',
+				success : function(data) {
+					var table = $('#studyDefinitionList tbody');
+					var items = [];
+					var checked = false;
+					$.each(data.studyDefinitions, function(idx, studyDefinition) {
+					    items.push('<tr>');
+					    items.push('<td class="listEntryRadio">');
+					    if(studyDefinition.loaded)
+					    	items.push('LOADED');
+					    else
+					    	items.push('<input id="catalog_' + studyDefinition.id + '" type="radio" name="id" value="' + studyDefinition.id + '">');
+					    items.push('</td>');
+					    items.push('<td class="listEntryId">' + studyDefinition.id + '</td>');
+					    items.push('<td>' + studyDefinition.name + '</td>');
+					    items.push('</tr>');
+					});
+					table.html(items.join(''));
+					
+					var studyDefinitionRadio = $('#studyDefinitionList input[type="radio"]:first');
+					studyDefinitionRadio.attr('checked', 'checked');
+					studyDefinitionRadio.change();
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				}
+			});
+		}
+		
 		function updateStudyDefinitionViewer() {
 			// clear previous tree
 			if (viewTreeContainer.children('ul').length > 0)
@@ -89,13 +122,14 @@
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-				    viewEditContainer.empty();
+					editTreeContainer.empty();
 					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 				}
 			});
 		}
 		
-		$('#studyDefinitionForm input[type="radio"]').change(function() {
+		$('#studyDefinitionForm').on('change', 'input[type="radio"]', function() {
+			console.log("radio change!");
 			if($('#study-definition-viewer').is(':visible'))
 				updateStudyDefinitionViewer();
 			if($('#study-definition-editor').is(':visible'))
@@ -107,8 +141,6 @@
 		$('a[data-toggle="tab"][href="#study-definition-editor"]').on('show', function (e) {
 			updateStudyDefinitionEditor();
 		});
-		
-		$('#studyDefinitionForm input[type="radio"]:checked').change();
 		
 		$('#update-study-definition-btn').click(function() {
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
@@ -143,5 +175,7 @@
 				}
 			});
 		});
+		
+		updateStudyDefinitionTable();
 	});
 }($, window.top));

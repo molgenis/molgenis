@@ -3,8 +3,8 @@
 <#import "molgenis-input-elements.ftl" as input>
 <#import "form-macros.ftl" as f>
 
-<#assign css=['select2.css', 'molgenis-form.css']>
-<#assign js=['jquery.validate.min.js', 'select2.min.js', 'molgenis-form-edit.js']>
+<#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css']>
+<#assign js=['jquery.validate.min.js', 'select2.min.js', 'bootstrap-datetimepicker.min.js', 'molgenis-form-edit.js']>
 
 <@header css js/>
 

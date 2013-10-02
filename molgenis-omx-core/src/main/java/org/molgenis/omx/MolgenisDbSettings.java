@@ -10,15 +10,19 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
 
+	private final Database unsecuredDatabase;
+
 	@Autowired
-	@Qualifier("unauthorizedDatabase")
-	private Database database;
+	public MolgenisDbSettings(Database unsecuredDatabase)
+	{
+		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
+		this.unsecuredDatabase = unsecuredDatabase;
+	}
 
 	@Override
 	public String getProperty(String key)
@@ -34,7 +38,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		List<RuntimeProperty> properties;
 		try
 		{
-			properties = database.find(RuntimeProperty.class, propertyRule);
+			properties = unsecuredDatabase.find(RuntimeProperty.class, propertyRule);
 		}
 		catch (DatabaseException e)
 		{
@@ -60,7 +64,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		property.setValue(value);
 		try
 		{
-			database.add(property);
+			unsecuredDatabase.add(property);
 		}
 		catch (DatabaseException e)
 		{

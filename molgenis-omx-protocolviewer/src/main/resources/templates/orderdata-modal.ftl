@@ -34,6 +34,7 @@
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
+  		var cancelBtn = $('#orderdata-btn-close');
   		var form = $('#orderdata-form');
   		
   		<#-- set current selected data set -->
@@ -48,6 +49,8 @@
 
   		<#-- modal events -->
   		modal.on('show', function () {
+  			submitBtn.attr("disabled", false);
+			cancelBtn.attr("disabled", false);
   			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
@@ -154,6 +157,9 @@
 		});
 		
 		function order() {
+			showSpinner();
+			submitBtn.attr("disabled", true);
+			cancelBtn.attr("disabled", true);
 			$.ajax({
 			    type: 'POST',
 			    url: '/plugin/study/order',
@@ -162,11 +168,13 @@
 			    contentType: false,
 			    processData: false,
 			    success: function () {
+					hideSpinner();
 					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
 					modal.modal('hide');
 			    },
 			    error: function() {
-			      alert("error"); // TODO display error message
+			    	hideSpinner();
+			      	alert("error"); // TODO display error message
 			    }
 			});
 		}

@@ -186,6 +186,7 @@ public class ImportWorksheet
 					sb.setSampleBarcodeSequence(barcodeSequence);
 					String barcodeName = barcodeTypeName + " " + barcodeNr + " " + barcodeSequence;
 					sb.setSampleBarcodeName(barcodeName);
+					sb.setActive(true);
 
 					sampleBarcodes.put(sb.getSampleBarcodeName(), sb);
 				}

@@ -3,7 +3,7 @@ package org.molgenis.omx.controller;
 import static org.molgenis.omx.controller.HomeController.URI;
 
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class HomeController extends MolgenisPlugin
+public class HomeController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/home";
 

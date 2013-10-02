@@ -9,13 +9,10 @@
 		<plugin id="worksheet" label="Worksheet" name="WorksheetController" type="org.molgenis.ngs.plugins.WorksheetPlugin"/>
 		<menu name="Configuration" >
 			<plugin id="form.NgsUser" label="Users" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<!-- TODO add FlowCell form plugin -->
-			<plugin id="form.SampleBarcodeType" label="SampleBarcodeTypes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<plugin id="form.SampleBarcode" label="SampleBarcodes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
+			<plugin id="form.SampleBarcodeType?subForms=SampleBarcode.SampleBarcodeType" label="SampleBarcodes" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 			<plugin id="form.CapturingKit" label="CapturingKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 			<plugin id="form.PrepKit" label="PrepKits" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
 			<plugin id="form.Machine" label="Sequencers" name="MolgenisEntityFormPluginController" type="org.molgenis.ui.form.MolgenisEntityFormPlugin"/>
-			<!-- TODO add Sample form plugin -->
 		</menu>
 		<plugin id="barcode" label="Barcode selector" name="BarcodeController" type="org.molgenis.ngs.plugins.barcode.BarcodePlugin"/>
 	</menu>

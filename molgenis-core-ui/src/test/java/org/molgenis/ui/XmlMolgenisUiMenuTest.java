@@ -12,17 +12,22 @@ import java.util.Iterator;
 
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class XmlMolgenisUiMenuTest
 {
 	private MolgenisPermissionService molgenisPermissionService;
+	private Authentication authentication;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		molgenisPermissionService = mock(MolgenisPermissionService.class);
+		authentication = mock(Authentication.class);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -38,7 +43,7 @@ public class XmlMolgenisUiMenuTest
 		MenuType menuType = new MenuType();
 		menuType.setName(menuId);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertEquals(xmlMolgenisUiMenu.getId(), menuId);
 	}
 
@@ -51,7 +56,7 @@ public class XmlMolgenisUiMenuTest
 		menuType.setName(menuId);
 		menuType.setLabel(menuName);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertEquals(xmlMolgenisUiMenu.getName(), menuName);
 	}
 
@@ -62,14 +67,14 @@ public class XmlMolgenisUiMenuTest
 		MenuType menuType = new MenuType();
 		menuType.setName(menuId);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertEquals(xmlMolgenisUiMenu.getName(), menuId);
 	}
 
 	@Test
 	public void getType()
 	{
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType());
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(new MenuType(), molgenisPermissionService);
 		assertEquals(xmlMolgenisUiMenu.getType(), MolgenisUiMenuItemType.MENU);
 	}
 
@@ -101,7 +106,7 @@ public class XmlMolgenisUiMenuTest
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.READ)).thenReturn(false);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.READ)).thenReturn(true);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		Iterator<MolgenisUiMenuItem> it = xmlMolgenisUiMenu.getItems().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "plugin1");
@@ -136,7 +141,7 @@ public class XmlMolgenisUiMenuTest
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin2", Permission.READ)).thenReturn(true);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.READ)).thenReturn(true);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertEquals(xmlMolgenisUiMenu.getActiveItem().getName(), "plugin2");
 	}
 
@@ -163,25 +168,25 @@ public class XmlMolgenisUiMenuTest
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin1", Permission.READ)).thenReturn(false);
 		when(molgenisPermissionService.hasPermissionOnPlugin("plugin3", Permission.READ)).thenReturn(true);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertNull(xmlMolgenisUiMenu.getActiveItem());
 	}
 
 	@Test
 	public void getParentMenu()
 	{
-		assertNull(new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType()).getParentMenu());
-		MolgenisUiMenu parentMenu = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType());
-		assertEquals(new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType(), parentMenu).getParentMenu(),
+		assertNull(new XmlMolgenisUiMenu(new MenuType(), molgenisPermissionService).getParentMenu());
+		MolgenisUiMenu parentMenu = new XmlMolgenisUiMenu(new MenuType(), molgenisPermissionService);
+		assertEquals(new XmlMolgenisUiMenu(new MenuType(), parentMenu, molgenisPermissionService).getParentMenu(),
 				parentMenu);
 	}
 
 	@Test
 	public void getBreadcrumb()
 	{
-		MolgenisUiMenu menu1 = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType());
-		MolgenisUiMenu menu2 = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType(), menu1);
-		MolgenisUiMenu menu3 = new XmlMolgenisUiMenu(molgenisPermissionService, new MenuType(), menu2);
+		MolgenisUiMenu menu1 = new XmlMolgenisUiMenu(new MenuType(), molgenisPermissionService);
+		MolgenisUiMenu menu2 = new XmlMolgenisUiMenu(new MenuType(), menu1, molgenisPermissionService);
+		MolgenisUiMenu menu3 = new XmlMolgenisUiMenu(new MenuType(), menu2, molgenisPermissionService);
 
 		assertEquals(menu1.getBreadcrumb(), Arrays.asList(menu1));
 		assertEquals(menu2.getBreadcrumb(), Arrays.asList(menu1, menu2));
@@ -192,14 +197,17 @@ public class XmlMolgenisUiMenuTest
 	public void isAuthorized()
 	{
 		PluginType pluginType = new PluginType();
+		String pluginId = "plugin1";
 		String pluginName = "type";
 		pluginType.setName(pluginName);
-		when(molgenisPermissionService.hasPermissionOnPlugin(pluginName, Permission.READ)).thenReturn(true);
+		pluginType.setId(pluginId);
+
+		when(molgenisPermissionService.hasPermissionOnPlugin(pluginId, Permission.READ)).thenReturn(true);
 
 		MenuType menuType = new MenuType();
 		menuType.getMenuOrPlugin().add(pluginType);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertTrue(xmlMolgenisUiMenu.isAuthorized());
 	}
 
@@ -208,19 +216,23 @@ public class XmlMolgenisUiMenuTest
 	{
 		PluginType plugin1Type = new PluginType();
 		String plugin1Name = "type1";
+		String plugin1Id = "plugin1";
 		plugin1Type.setName(plugin1Name);
+		plugin1Type.setId(plugin1Id);
 		PluginType plugin2Type = new PluginType();
 		String plugin2Name = "type2";
+		String plugin2Id = "plugin2";
 		plugin2Type.setName(plugin2Name);
+		plugin2Type.setId(plugin2Id);
 
-		when(molgenisPermissionService.hasPermissionOnPlugin(plugin1Name, Permission.READ)).thenReturn(false);
-		when(molgenisPermissionService.hasPermissionOnPlugin(plugin2Name, Permission.READ)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnPlugin(plugin1Id, Permission.READ)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnPlugin(plugin2Id, Permission.READ)).thenReturn(true);
 
 		MenuType menuType = new MenuType();
 		menuType.getMenuOrPlugin().add(plugin1Type);
 		menuType.getMenuOrPlugin().add(plugin2Type);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertTrue(xmlMolgenisUiMenu.isAuthorized());
 	}
 
@@ -228,13 +240,12 @@ public class XmlMolgenisUiMenuTest
 	public void isAuthorized_notAuthorized()
 	{
 		PluginType pluginType = new PluginType();
-		pluginType.setType("type");
-		when(molgenisPermissionService.hasPermissionOnPlugin("type", Permission.READ)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnPlugin("something", Permission.READ)).thenReturn(false);
 
 		MenuType menuType = new MenuType();
 		menuType.getMenuOrPlugin().add(pluginType);
 
-		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(molgenisPermissionService, menuType);
+		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, molgenisPermissionService);
 		assertFalse(xmlMolgenisUiMenu.isAuthorized());
 	}
 }

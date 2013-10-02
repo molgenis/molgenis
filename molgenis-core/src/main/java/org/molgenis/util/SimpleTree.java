@@ -84,7 +84,7 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 	}
 
 	@Override
-	public final String getName()
+	public String getName()
 	{
 		return this.name;
 	}
@@ -118,8 +118,7 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 	public final T getParent()
 	{
 		if (parentName != null) return treeElements.get(parentName);
-		else
-			return null;
+		else return null;
 	}
 
 	@Override
