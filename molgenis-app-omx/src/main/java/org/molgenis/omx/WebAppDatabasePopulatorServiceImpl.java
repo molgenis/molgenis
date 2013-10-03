@@ -69,6 +69,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
+		userAdmin.setFirstName(USERNAME_ADMIN);
+		userAdmin.setLastName(USERNAME_ADMIN);
 		unsecuredDatabase.add(userAdmin);
 
 		UserAuthority suAuthority = new UserAuthority();
@@ -82,6 +84,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userUser.setEmail(userEmail);
 		userUser.setActive(true);
 		userUser.setSuperuser(false);
+		userUser.setFirstName(USERNAME_USER);
+		userUser.setLastName(USERNAME_USER);
 		unsecuredDatabase.add(userUser);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
