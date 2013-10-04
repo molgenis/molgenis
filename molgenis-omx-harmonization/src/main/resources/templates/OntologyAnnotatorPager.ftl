@@ -2,17 +2,27 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div class="well span6 upper-header">
-					<div class="span12">
-						<dl>
-							<dt>Action :</dt>
-							<dd>
-								<div class="btn-group">
-									<button id="annotate-all-dataitems" class="btn">Annotate with all</button>
-									<button id="annotate-dataitems" class="btn">Annotate</button>
-								</div>
-							</dd>
-						</dl>
+				<div class="well offset3 span6 upper-header">
+					<div class="row-fluid">
+						<div class="span5">
+							<dt>
+								Ontologies : 
+								<button id="toggle-select" class="btn btn-link select-all">Remove all</button>
+							</dt>
+							<dd id="ontology-list"></dd>
+							<input type="hidden" id="selectedOntologies" name="selectedOntologies" />
+						</div>
+						<div class="offset1 span6">
+							<dl>
+								<dt>Action :</dt>
+								<dd>
+									<div class="btn-group">
+										<button id="annotate-all-dataitems" class="btn btn-primary">Annotate</button>
+										<button id="remove-annotations" class="btn btn-danger">Remove annotation</button>
+									</div>
+								</dd>
+							</dl>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -48,6 +58,31 @@
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
 			molgenis.getOntologyAnnotator().changeDataSet('${wizard.selectedDataSet.id?c}');
+			molgenis.getOntologyAnnotator().searchOntologies();
+			
+			$('#toggle-select').click(function(){
+				if($(this).hasClass('select-all')){
+					$('#ontology-list').find('input').empty().attr('checked', false);
+					$(this).removeClass('select-all').addClass('remove-all').empty().append('Select all');
+				}else{
+					$('#ontology-list').find('input').empty().attr('checked', true);
+					$(this).removeClass('remove-all').addClass('select-all').empty().append('Remove all');
+				}
+				return false;
+			});
+			
+			$('#annotate-all-dataitems').click(function(){
+				$('#spinner').modal();
+				$('#wizardForm').attr({
+					'action' : molgenis.getContextURL() + '/annotate',
+					'method' : 'POST'
+				}).submit();
+			});
+			
+			$('#remove-annotations').click(function(){
+				molgenis.getOntologyAnnotator().confirmation('Confirmation');
+				return false;
+			});
 		});
 	</script>
 </form>

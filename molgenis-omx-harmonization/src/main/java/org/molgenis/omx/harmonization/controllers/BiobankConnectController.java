@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -102,10 +104,34 @@ public class BiobankConnectController extends AbstractWizardController
 		return wizard;
 	}
 
-	@RequestMapping(value = "/annotate", method = RequestMethod.GET)
-	public String annotate() throws Exception
+	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
+	public String annotate(HttpServletRequest request) throws Exception
 	{
-		ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId());
+		if (request.getParameter("selectedOntologies") != null)
+		{
+			List<String> documentTypes = new ArrayList<String>();
+			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
+			{
+				documentTypes.add("ontologyTerm-" + ontologyUri);
+			}
+			ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId(), documentTypes);
+		}
+		return init();
+	}
+
+	@RequestMapping(value = "/annotate/remove", method = RequestMethod.POST)
+	public String removeAnnotations(HttpServletRequest request) throws Exception
+	{
+		if (request.getParameter("selectedOntologies") != null)
+		{
+			List<String> ontologyUris = new ArrayList<String>();
+			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
+			{
+				ontologyUris.add(ontologyUri);
+			}
+			ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId(), ontologyUris);
+		}
+
 		return init();
 	}
 

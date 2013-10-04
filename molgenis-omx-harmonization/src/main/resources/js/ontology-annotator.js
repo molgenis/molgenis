@@ -268,6 +268,8 @@
 		}
 		
 		function createOntologyTerm(data){
+			
+			createOntology(data);
 			var ontologyTermId = null;
 			var query = {};
 			query.name =  data.ontologyLabel + ':' + data.ontologyTerm;
@@ -291,6 +293,36 @@
 				} 
 			});
 			return ontologyTermId;
+		}
+		
+		function createOntology(data){
+			var existingOntology = restApi.get('/api/v1/ontology/', null, {
+				field : 'ontologyIRI',
+				operator : 'EQUALS',
+				value : data.ontologyIRI
+			});
+			if(existingOntology !== undefined && existingOntology !== null){
+				var query = {};
+				query.name = data.ontologyName;
+				query.identifier = data.ontologyIRI;
+				query.ontologyURI = data.ontologyIRI;
+				
+				$.ajax({
+					type : 'POST',
+					dataType : 'json',
+					url : '/api/v1/ontology/',
+					cache: true,
+					data : JSON.stringify(query),
+					contentType : 'application/json',
+					async : false,
+					success : function(data, textStatus, request) {
+						
+					},
+					error : function(request, textStatus, error){
+						console.log(error);
+					} 
+				});
+			}
 		}
 		
 		function createFeatureTable(feature){
@@ -354,6 +386,68 @@
 		}
 	};
 	
+	ns.OntologyAnnotator.prototype.searchOntologies = function (){
+		searchApi.search(createSearchRequest(), function(searchResponse){
+			var ontologyDiv = $('#ontology-list');
+			$.each(searchResponse.searchHits, function(index, hit){
+				var ontologyInfo =hit.columnValueMap;
+				var ontologyUri = ontologyInfo.url;
+				var ontologyName = ontologyInfo.ontologyLabel;
+			    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
+			    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
+			    }).appendTo(ontologyDiv);
+			});
+			$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
+		});
+		
+		function getAllOntologyUris(ontologyDiv){
+			var selectedOntologies = [];
+	    	$(ontologyDiv).find('input').each(function(){
+	    		if($(this).attr("checked")){
+	    			selectedOntologies.push($(this).val());
+	    		}
+	    	});
+	    	return selectedOntologies;
+		}
+		
+		function createSearchRequest() {
+			var queryRules = [];
+			//todo: how to unlimit the search result
+			queryRules.push({
+				operator : 'LIMIT',
+				value : 1000000
+			});
+			queryRules.push({
+				operator : 'SEARCH',
+				value : 'indexedOntology'
+			});
+			
+			var searchRequest = {
+				documentType : null,
+				queryRules : queryRules
+			};
+			return searchRequest;
+		}
+	};
+
+	ns.OntologyAnnotator.prototype.confirmation = function(title){
+		standardModal.createModalCallback(title, function(modal){
+			var confirmButton = $('<button type="btn" class="btn btn-primary">Confirm</button>').click(function(){
+				modal.modal('hide');
+				$('#spinner').modal();
+				$('#wizardForm').attr({
+					'action' : molgenis.getContextURL() + '/annotate/remove',
+					'method' : 'POST'
+				}).submit();
+			});
+			modal.css({
+				'margin-top' : 200
+			});
+			modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove all annotations?</strong></p>');
+			modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
+		});
+	};
+	
 	ns.OntologyAnnotator.prototype.updateIndex = function(ontologyTermIRI, boost){
 		var searchRequest = {
 			documentType : null,
@@ -387,17 +481,6 @@
 	
 	ns.OntologyAnnotator.prototype.updateselectedDataSetId = function(dataSet) {
 		selectedDataSetId = dataSet;
-	};
-	
-	ns.OntologyAnnotator.prototype.showMessageDialog = function(message){
-		$('#alert-message').hide().empty();
-		var content = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
-		content += '<p><strong>Message : </strong> ' + message + '</p>';
-		$('#alert-message').append(content).addClass('alert alert-info').show();
-		w.setTimeout(function(){
-			$('#alert-message').fadeOut().empty();
-		}, 10000);
-		$(document).scrollTop(0);	
 	};
 	
 	ns.OntologyAnnotator.prototype.dataItemsTypeahead = function (type, dataSetId, query, response){
@@ -489,14 +572,4 @@
 	function getselectedDataSetId(){
 		return selectedDataSetId;
 	}
-	
-	$(document).ready(function(){
-		$('#annotate-all-dataitems').click(function(){
-			$('#spinner').modal();
-			$('form').attr({
-				'action' : ns.getContextURL() + '/annotate',
-				'method' : 'GET'
-			}).submit();
-		});
-	});
 }($, window.top));

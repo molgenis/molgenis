@@ -17,7 +17,9 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -92,7 +94,71 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	}
 
 	@Override
-	public void annotate(Integer protocolId)
+	public void removeAnnotations(Integer dataSetId, List<String> documentTypes)
+	{
+		try
+		{
+			DataSet dataSet = unsecuredDatabase.findById(DataSet.class, dataSetId);
+			// Protocol protocol = dataSet.getProtocolUsed();
+			List<QueryRule> queryRules = new ArrayList<QueryRule>();
+			queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
+			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
+			SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), queryRules, null);
+			SearchResult result = searchService.search(request);
+
+			List<Integer> listOfFeatureIds = new ArrayList<Integer>();
+			Iterator<Hit> iterator = result.iterator();
+			while (iterator.hasNext())
+			{
+				Hit hit = iterator.next();
+				Map<String, Object> columnMapValues = hit.getColumnValueMap();
+				Integer featureId = Integer.parseInt(columnMapValues.get("id").toString());
+				listOfFeatureIds.add(featureId);
+			}
+			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
+			for (ObservableFeature feature : unsecuredDatabase.find(ObservableFeature.class, new QueryRule(
+					ObservableFeature.ID, Operator.IN, listOfFeatureIds)))
+			{
+				List<String> ontologyTerms = new ArrayList<String>();
+				List<OntologyTerm> definitions = feature.getDefinition();
+
+				if (definitions != null && definitions.size() > 0)
+				{
+					for (OntologyTerm ontologyTerm : definitions)
+					{
+						if (!documentTypes.contains(ontologyTerm.getOntology().getOntologyURI()))
+						{
+							ontologyTerms.add(ontologyTerm.getIdentifier());
+						}
+					}
+					if (ontologyTerms.size() != definitions.size())
+					{
+						ObservableFeature newFeature = copyObject(feature);
+						newFeature.setDefinition_Identifier(ontologyTerms);
+						featuresToUpdate.add(newFeature);
+					}
+				}
+			}
+			unsecuredDatabase.update(featuresToUpdate);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public ObservableFeature copyObject(ObservableFeature feature) throws Exception
+	{
+		ObservableFeature newFeature = new ObservableFeature();
+		for (String field : feature.getFields())
+		{
+			newFeature.set(field, feature.get(field));
+		}
+		return newFeature;
+	}
+
+	@Override
+	public void annotate(Integer protocolId, List<String> documentTypes)
 	{
 		runningProcesses.incrementAndGet();
 		try
@@ -117,8 +183,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				String description = hit.getColumnValueMap().get("description").toString().toLowerCase()
 						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
 				List<String> definitions = new ArrayList<String>();
-				definitions.addAll(annotateDataItem(unsecuredDatabase, feature, name, stemmer));
-				definitions.addAll(annotateDataItem(unsecuredDatabase, feature, description, stemmer));
+
+				for (String documentType : documentTypes)
+				{
+					definitions.addAll(annotateDataItem(unsecuredDatabase, documentType, feature, name, stemmer));
+					definitions
+							.addAll(annotateDataItem(unsecuredDatabase, documentType, feature, description, stemmer));
+				}
 
 				if (definitions.size() > 0)
 				{
@@ -165,8 +236,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return newFeature;
 	}
 
-	public List<String> annotateDataItem(Database db, ObservableFeature feature, String description,
-			PorterStemmer stemmer) throws DatabaseException
+	public List<String> annotateDataItem(Database db, String documentType, ObservableFeature feature,
+			String description, PorterStemmer stemmer) throws DatabaseException
 	{
 		List<String> uniqueTerms = new ArrayList<String>();
 		for (String eachTerm : Arrays.asList(description.split(" +")))
@@ -193,7 +264,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 		if (queryRules.size() > 0) queryRules.remove(queryRules.size() - 1);
 
-		SearchRequest request = new SearchRequest(null, queryRules, null);
+		SearchRequest request = new SearchRequest(documentType, queryRules, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
 		List<TermComparison> listOfHits = new ArrayList<TermComparison>();
@@ -238,11 +309,17 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 
 		List<OntologyTerm> listOfOntologyTerms = new ArrayList<OntologyTerm>();
+		Map<String, String> ontologyInfo = new HashMap<String, String>();
 
 		for (Entry<String, Map<String, Object>> entry : mapUriTerm.entrySet())
 		{
 			String uri = entry.getKey();
 			Map<String, Object> data = entry.getValue();
+
+			String ontologyUri = data.get("ontologyIRI").toString();
+			String ontologyName = data.get("ontologyName").toString();
+			ontologyInfo.put(ontologyUri, ontologyName);
+
 			String ontologyLabel = data.get("ontologyLabel").toString();
 			String term = ontologyLabel == null ? data.get("ontologyTerm").toString().toLowerCase() : ontologyLabel
 					+ ":" + data.get("ontologyTerm").toString().toLowerCase();
@@ -250,11 +327,42 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			ot.setIdentifier(uri);
 			ot.setTermAccession(uri);
 			ot.setName(term);
+			ot.setOntology_Identifier(ontologyUri);
+
 			listOfOntologyTerms.add(ot);
 		}
+		if (listOfOntologyTerms.size() > 0) addOntologies(ontologyInfo);
 		if (listOfOntologyTerms.size() > 0) db.add(listOfOntologyTerms);
 
 		return identifiers;
+	}
+
+	private void addOntologies(Map<String, String> ontologyInfo) throws DatabaseException
+	{
+		List<String> ontologyUris = new ArrayList<String>();
+		List<Ontology> listOfOntologies = new ArrayList<Ontology>();
+
+		for (Ontology ontology : unsecuredDatabase.find(Ontology.class, new QueryRule(Ontology.ONTOLOGYURI,
+				Operator.IN, new ArrayList<String>(ontologyInfo.keySet()))))
+		{
+			ontologyUris.add(ontology.getOntologyURI());
+		}
+
+		for (Entry<String, String> entry : ontologyInfo.entrySet())
+		{
+			String ontologyUri = entry.getKey();
+			String ontologyName = entry.getValue();
+
+			if (!ontologyUris.contains(ontologyUri))
+			{
+				Ontology ontology = new Ontology();
+				ontology.setName(ontologyName);
+				ontology.setIdentifier(ontologyUri);
+				ontology.setOntologyURI(ontologyUri);
+				listOfOntologies.add(ontology);
+			}
+		}
+		if (listOfOntologies.size() != 0) unsecuredDatabase.add(listOfOntologies);
 	}
 
 	private boolean validateOntologyTerm(List<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,

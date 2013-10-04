@@ -233,7 +233,7 @@
 				$('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', width).appendTo(dataSetRow);
 			}
 			$('<th class="text-align-center">Desired cataogue</th>').width('width', '40%').appendTo(headerRow);
-			$('<th class="text-align-center" colspan="' + involedDataSets.length + '">Target cataogue</th>').width('width', '60%').appendTo(headerRow);
+			$('<th class="text-align-center" colspan="' + involedDataSets.length + '">Match cataogues</th>').width('width', '60%').appendTo(headerRow);
 			return $('<thead />').append(headerRow).append(dataSetRow);
 		}	
 		
@@ -420,6 +420,7 @@
 						checkBox.attr('checked', true);
 						selectedFeatures.push(mappedFeature.name);
 					}
+					eachMapping.mappedFeature = mappedFeature;
 					checkBox.data('eachMapping', eachMapping);
 					row.append('<td>' + mappedFeature.name + '</td><td>' + i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 					row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
@@ -433,7 +434,10 @@
 			});
 			
 			tableDiv.append(mappingTable);
-			var body = modal.find('.modal-body:eq(0)');
+			var body = modal.find('.modal-body:eq(0)').css({
+				'min-height' : 200,
+				'overflow' : 'auto'
+			});
 			$('<div />').append('<div class="span4"></div>').append(tableDiv).appendTo(body);
 			
 			var infoDiv = $('<div />').addClass('span4').css({
@@ -447,14 +451,18 @@
 			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 			var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + selectedFeatures.join(' , ') + '</span>').appendTo(infoDiv);
-			var confirmButton = $('<button class="btn">Confirm</button>');
 			infoDiv.append('<br /><br />');
-			confirmButton.appendTo(infoDiv).click(function(){
+			var header = modal.find('.modal-header:eq(0)');
+			header.append(infoDiv);
+			
+			var confirmButton = $('<button class="btn btn-primary">Confirm</button>');
+			confirmButton.click(function(){
 				updateMappingInfo(feature, mappingTable, mappedDataSet, ns.createMatrixForDataItems);
 				standardModal.closeModal();
 			});
-			var footer = modal.find('.modal-header:eq(0)');
-			footer.append(infoDiv);
+			
+			var footer = modal.find('.modal-footer:eq(0)');
+			footer.prepend(confirmButton);
 			
 			tableDiv.find('input[type="checkbox"]').click(function(){
 				var dataItems = [];
@@ -724,7 +732,7 @@
 			'dataSetId' : selectedDataSet,
 			'documentType' : dataSet.identifier
 		};
-		$.download('/plugin/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+		$.download(ns.getContextURL() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
 	ns.updateSelectedDataset = function(dataSet) {

@@ -1,9 +1,12 @@
 package org.molgenis.omx.harmonization.ontologyannotator;
 
+import java.util.List;
 
 public interface OntologyAnnotator
 {
-	void annotate(Integer protocolId);
+	void annotate(Integer protocolId, List<String> documentTypes);
+
+	void removeAnnotations(Integer protocolId, List<String> documentTypes);
 
 	float finishedPercentage();
 

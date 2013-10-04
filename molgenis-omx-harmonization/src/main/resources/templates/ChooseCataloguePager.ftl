@@ -2,7 +2,7 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div class="span6 well upper-header">
+				<div class="offset3 span6 well upper-header">
 					<div class="row-fluid">
 						<div class="span12">
 							<div class="row-fluid">
@@ -66,7 +66,7 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
-			$('#selectedDataSet').change(function(){
+			$('#selectedDataSetId').change(function(){
 				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
 			});
 		});

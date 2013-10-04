@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class MappingManagerController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/mappingmanager";
+	public static final String URI = BiobankConnectController.URI + "/mappingmanager";
 	private static final Logger logger = Logger.getLogger(MappingManagerController.class);
 	private static final String FEATURE_ID = "id";
 	private static final String FEATURE_NAME = "name";

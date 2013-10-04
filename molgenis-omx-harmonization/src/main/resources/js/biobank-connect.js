@@ -71,6 +71,6 @@
 	
 	$(document).ready(function(){
 		$('.wizard-page').removeClass('well');
-		$('#wizard').css('min-height', 300);
+		$('div.wizard-page').css('min-height', 300);
 	});
 }($, window.top))
