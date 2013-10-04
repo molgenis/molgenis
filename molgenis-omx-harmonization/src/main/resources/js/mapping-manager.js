@@ -32,14 +32,12 @@
 			};
 			searchApi.search(request, function(searchResponse){
 				sortRule = null;
-				$('#catalogue-name').empty().append(dataSetEntity.name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
 				ns.MappingManager.prototype.updateSelectedDataset(selectedDataSet);
 				ns.MappingManager.prototype.createMatrixForDataItems();
 			});
 		}else{
-			$('#catalogue-name').empty().append('Nothing selected');
 			$('#dataitem-number').empty().append('Nothing selected');
 		}
 	};

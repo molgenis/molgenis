@@ -3,8 +3,11 @@
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
-		<plugin id="biobankconnect" name="BiobankConnect" url="biobankconnect"/>
-		<plugin id="ontologyindexer" name="OntologyIndexer" url="ontologyindexer"/>
+		<menu label="BiobankConnect" name="BiobankConnect">
+			<plugin id="BiobankConnectHappyFlows" name="Happy Flows" url="biobankconnect"/>
+			<plugin id="MappingManager" name="MappingManager" url="biobankconnect/mappingmanager"/>
+			<plugin id="ontologyindexer" name="OntologyIndexer" url="ontologyindexer"/>
+		</menu>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
 		<plugin id="importwizard" name="Upload" url="importwizard"/>

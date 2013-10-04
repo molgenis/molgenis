@@ -17,10 +17,22 @@
 .float-right {
 	float : right;
 	margin-right : 5px;
+	cursor: hand; 
+	cursor: pointer;
 }
 
 table#dataitem-table {
 	border : 1px solid #5B82A4;
+}
+
+table#dataitem-table {
+	border : 1px solid #5B82A4;
+}
+
+table thead th {	
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
+    color: white;
 }
 
 th.text-align-center{
@@ -30,11 +42,6 @@ th.text-align-center{
 
 td.add-border {
 	border:2px solid #5B82A4;
-}
-
-.float-right {
-	float : right;
-	margin-right : 10px;
 }
 
 #downloadButton {
