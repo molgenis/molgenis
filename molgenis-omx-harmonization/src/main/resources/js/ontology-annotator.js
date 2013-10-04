@@ -8,6 +8,7 @@
 	var ontologyTermIRI = "ontologyTermIRI"
 	var searchApi = new ns.SearchClient();
 	var selectedDataSetId = null;
+	var sortRule = null;
 	
 	ns.OntologyAnnotator = function OntologyAnnotator(){
 		
@@ -25,6 +26,7 @@
 				}]
 			};
 			searchApi.search(request, function(searchResponse){
+				var sortRule = null;
 				$('#catalogue-name').empty().append(dataSetEntity.name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
@@ -67,7 +69,7 @@
 		};
 	};
 	
-	ns.OntologyAnnotator.prototype.createMatrixForDataItems = function(queryRule) {
+	ns.OntologyAnnotator.prototype.createMatrixForDataItems = function() {
 		var documentType = 'protocolTree-' + getselectedDataSetId();
 		var query = [{
 			field : 'type',
@@ -86,6 +88,7 @@
 			});
 			pagination.reset();
 		}
+		if(sortRule !== null) query.push(sortRule);
 		
 		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
 			
@@ -163,9 +166,35 @@
 		
 		function createTableHeader(){
 			var headerRow = $('<tr />');
-			$('<th>Name</th>').css('width', '15%').appendTo(headerRow);
+			var firstColumn = $('<th>Name</th>').css('width', '15%').appendTo(headerRow);
+			if (sortRule) {
+				if (sortRule.operator == 'SORTASC') {
+					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
+				} else {
+					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
+				}
+			} else {
+				$('<span data-value="Name" class="ui-icon ui-icon-triangle-2-n-s updown float-right"></span>').appendTo(firstColumn);
+			}
 			$('<th>Description</th>').css('width', '25%').appendTo(headerRow);
 			$('<th>Annotation</th>').css('width', '40%').appendTo(headerRow);
+			
+			// Sort click
+			$(firstColumn).find('.ui-icon').click(function() {
+				if (sortRule && sortRule.operator == 'SORTASC') {
+					sortRule = {
+						value : 'name',
+						operator : 'SORTDESC'
+					};
+				} else {
+					sortRule = {
+						value : 'name',
+						operator : 'SORTASC'
+					};
+				}
+				ns.OntologyAnnotator.prototype.createMatrixForDataItems();
+				return false;
+			});
 			return $('<thead />').append(headerRow);
 		}
 		

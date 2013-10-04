@@ -23,9 +23,9 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
-			molgenis.changeDataSet(${wizard.selectedDataSet.id?c});
+			molgenis.getMappingManager().changeDataSet(${wizard.selectedDataSet.id?c});
 			$('#downloadButton').click(function(){
-				molgenis.downloadMappings();
+				molgenis.getMappingManager().downloadMappings();
 				return false;
 			});
 		});

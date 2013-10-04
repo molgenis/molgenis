@@ -155,14 +155,15 @@ public class BiobankConnectController extends AbstractWizardController
 	@ModelAttribute("javascripts")
 	public List<String> getJavascripts()
 	{
-		return Arrays.asList("common-component.js", "catalogue-chooser.js", "ontology-annotator.js",
-				"ontology-matcher.js", "mapping-manager.js", "simple_statistics.js", "biobank-connect.js");
+		return Arrays.asList("jquery-ui-1.9.2.custom.min.js", "common-component.js", "catalogue-chooser.js",
+				"ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js", "simple_statistics.js",
+				"biobank-connect.js");
 	}
 
 	@ModelAttribute("stylesheets")
 	public List<String> getStylesheets()
 	{
-		return Arrays.asList("biobank-connect.css", "catalogue-chooser.css", "ontology-matcher.css",
-				"mapping-manager.css", "ontology-annotator.css");
+		return Arrays.asList("jquery-ui-1.9.2.custom.min.css", "biobank-connect.css", "catalogue-chooser.css",
+				"ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css");
 	}
 }

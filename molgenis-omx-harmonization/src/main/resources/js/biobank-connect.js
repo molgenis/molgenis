@@ -7,6 +7,7 @@
 	var CONTEXT_URL = null;
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
+	var mappingManager = new ns.MappingManager();
 	
 	ns.setContextURL = function(CONTEXT_URL){
 		this.CONTEXT_URL = CONTEXT_URL;
@@ -26,6 +27,10 @@
 	
 	ns.getOntologyAnnotator = function() {
 		return ontologyAnnotator;
+	};
+	
+	ns.getMappingManager = function() {
+		return mappingManager;
 	};
 	
 	ns.checkMatchingStatus = function(prefix, progressBarElement) {

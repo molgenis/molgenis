@@ -7,14 +7,19 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
+	var sortRule = null;
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
 	var scoreMappingAbsoluteScore = "store_mapping_absolute_score";
 	
-	ns.changeDataSet = function(selectedDataSet){
-		ns.initAccordion();
+	ns.MappingManager = function MappingManager(){
+		
+	};
+	
+	ns.MappingManager.prototype.changeDataSet = function(selectedDataSet){
+		ns.MappingManager.prototype.initAccordion();
 		if(selectedDataSet !== ''){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
 			var request = {
@@ -26,11 +31,12 @@
 				}]
 			};
 			searchApi.search(request, function(searchResponse){
+				sortRule = null;
 				$('#catalogue-name').empty().append(dataSetEntity.name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
-				ns.updateSelectedDataset(selectedDataSet);
-				ns.createMatrixForDataItems();
+				ns.MappingManager.prototype.updateSelectedDataset(selectedDataSet);
+				ns.MappingManager.prototype.createMatrixForDataItems();
 			});
 		}else{
 			$('#catalogue-name').empty().append('Nothing selected');
@@ -38,12 +44,12 @@
 		}
 	};
 	
-	ns.createMatrixForDataItems = function() {
+	ns.MappingManager.prototype.createMatrixForDataItems = function() {
 		var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
 			q : [{
 				field : 'identifier',
 				operator : 'LIKE',
-				value : ns.getSelectedDataSet() + '-'
+				value : ns.MappingManager.prototype.getSelectedDataSet() + '-'
 			}],
 		});
 		if(dataSetMapping.items.length > 0){
@@ -52,13 +58,14 @@
 				operator : 'SEARCH',
 				value : 'observablefeature'
 			}];
+			if(sortRule !== null) query.push(sortRule);
 			searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
 				createMappingFromIndex(dataSetMapping.items, searchResponse);
 			});
 		}else{
 			$('#dataitem-table').empty();
 			$('#table-papger').empty();
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + ns.getSelectedDataSet());
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
 			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.name + '</strong> catalogue');
 		}
 		
@@ -201,7 +208,7 @@
 		function renderMappingTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures){
 			//create table header
 			var involedDataSets = [];
-			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.getSelectedDataSet());
+			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
 			involedDataSets.push(selectedDataSet.name);
 			$.each(dataSets, function(index, dataSet){
 				var dataSetIdArray = dataSet.identifier.split('-');
@@ -218,22 +225,51 @@
 			$('#dataitem-table').empty().append(createDynamicTableHeader(involedDataSets)).append(tableBody);
 			
 			pagination.setTotalPage(Math.ceil(totalHitCount / pagination.getPager()));
-			pagination.updateMatrixPagination($('.pagination ul'), ns.createMatrixForDataItems);
+			pagination.updateMatrixPagination($('.pagination ul'), ns.MappingManager.prototype.createMatrixForDataItems);
 		}
 		
 		function createDynamicTableHeader(involedDataSets){
 			var headerRow = $('<tr />');
 			var dataSetRow = $('<tr />');
 			var columnWidth = 60 / (involedDataSets.length - 1);
+			var firstColumn = null;
 			for(var i = 0; i < involedDataSets.length; i++){
-				var width = columnWidth + '%';
 				if(i === 0){
-					width = '40%';
+					firstColumn = $('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', '40%').appendTo(dataSetRow);
+					if (sortRule) {
+						if (sortRule.operator == 'SORTASC') {
+							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
+						} else {
+							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
+						}
+					} else {
+						$('<span data-value="Name" class="ui-icon ui-icon-triangle-2-n-s updown float-right"></span>').appendTo(firstColumn);
+					}
+				}else{
+					$('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', columnWidth + '%').appendTo(dataSetRow);
 				}
-				$('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', width).appendTo(dataSetRow);
 			}
 			$('<th class="text-align-center">Desired cataogue</th>').width('width', '40%').appendTo(headerRow);
 			$('<th class="text-align-center" colspan="' + involedDataSets.length + '">Match cataogues</th>').width('width', '60%').appendTo(headerRow);
+			
+			if(firstColumn !== null){
+				$(firstColumn).find('.ui-icon').click(function() {
+					if (sortRule && sortRule.operator == 'SORTASC') {
+						sortRule = {
+							value : 'name',
+							operator : 'SORTDESC'
+						};
+					} else {
+						sortRule = {
+							value : 'name',
+							operator : 'SORTASC'
+						};
+					}
+					ns.MappingManager.prototype.createMatrixForDataItems();
+					return false;
+				});
+			}
+			
 			return $('<thead />').append(headerRow).append(dataSetRow);
 		}	
 		
@@ -283,23 +319,33 @@
 						position : 'relative',
 						float : 'right'
 					}).click(function(){
-						var documentIds = [];
-						$.each(mappedFeatures, function(index, element){
-							documentIds.push(element.documentId);
+						standardModal.createModalCallback('Confirmation', function(modal){
+							var confirmButton = $('<button type="btn" class="btn btn-primary">Confirm</button>').click(function(){
+								var documentIds = [];
+								$.each(mappedFeatures, function(index, element){
+									documentIds.push(element.documentId);
+								});
+								removeAnnotation(mappedFeatures);
+								var deleteRequest = {
+									'documentType' : dataSet.identifier,
+									'documentIds' : documentIds
+								};
+								$.ajax({
+									type : 'POST',
+									url : ns.getContextURL() + '/mappingmanager/delete',
+									async : false,
+									data : JSON.stringify(deleteRequest),
+									contentType : 'application/json',
+								});
+								modal.remove();
+								ns.MappingManager.prototype.createMatrixForDataItems();
+							});
+							modal.css({
+								'margin-top' : 200
+							});
+							modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove candidate mappings?</strong></p>');
+							modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
 						});
-						removeAnnotation(mappedFeatures);
-						var deleteRequest = {
-							'documentType' : dataSet.identifier,
-							'documentIds' : documentIds
-						};
-						$.ajax({
-							type : 'POST',
-							url : '/plugin/mappingmanager/delete',
-							async : false,
-							data : JSON.stringify(deleteRequest),
-							contentType : 'application/json',
-						});
-						ns.createMatrixForDataItems();
 					});
 					
 					var editIcon = $('<i />');
@@ -446,7 +492,7 @@
 				'margin-top' : 25,
 				'z-index' : 10000
 			});
-			var dataSet = restApi.get('/api/v1/dataset/' + ns.getSelectedDataSet());
+			var dataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
 			$('<div />').append('<h4>' + dataSet.name + '</h4>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
@@ -457,7 +503,7 @@
 			
 			var confirmButton = $('<button class="btn btn-primary">Confirm</button>');
 			confirmButton.click(function(){
-				updateMappingInfo(feature, mappingTable, mappedDataSet, ns.createMatrixForDataItems);
+				updateMappingInfo(feature, mappingTable, mappedDataSet, ns.MappingManager.prototype.createMatrixForDataItems);
 				standardModal.closeModal();
 			});
 			
@@ -516,7 +562,7 @@
 					};
 					$.ajax({
 						type : 'POST',
-						url : '/plugin/mappingmanager/update',
+						url : ns.getContextURL() + '/mappingmanager/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json',
@@ -705,8 +751,7 @@
 		}
 	};
 	
-	ns.initAccordion = function(){
-		
+	ns.MappingManager.prototype.initAccordion = function(){
 		$('#accordion-action-content').show();
 		$('#accordion-icon-meaning-content').hide();
 		$('.accordion ul li').removeClass('active');
@@ -726,7 +771,7 @@
 		});
 	};
 	
-	ns.downloadMappings = function(){
+	ns.MappingManager.prototype.downloadMappings = function(){
 		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
@@ -735,11 +780,11 @@
 		$.download(ns.getContextURL() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
-	ns.updateSelectedDataset = function(dataSet) {
+	ns.MappingManager.prototype.updateSelectedDataset = function(dataSet) {
 		selectedDataSet = dataSet;
 	};
 	
-	ns.getSelectedDataSet = function (){
+	ns.MappingManager.prototype.getSelectedDataSet = function (){
 		return selectedDataSet;
 	}
 	
