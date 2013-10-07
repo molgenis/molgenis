@@ -37,7 +37,7 @@ public interface EntityMetaData
 	AttributeMetaData getLabelAttribute();
 
 	/**
-	 * Get attribute by name (case insensitive)
+	 * Get attribute by name (case insensitive), returns null if not found
 	 */
 	AttributeMetaData getAttribute(String attributeName);
 }
