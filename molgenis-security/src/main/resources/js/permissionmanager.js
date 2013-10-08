@@ -22,6 +22,16 @@
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
 				}
+				if(data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId.toLowerCase()]) {
+					$.each(data.hierarchyPermissionMap[entityId.toLowerCase()], function(idx, perm) {
+						items.push('<tr>');
+						items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
+						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
+						items.push('</tr>');					
+					});
+				}
 			});
 			return items.join('');
 		}
