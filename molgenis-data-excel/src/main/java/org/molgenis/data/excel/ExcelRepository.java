@@ -1,5 +1,6 @@
 package org.molgenis.data.excel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -12,9 +13,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.io.processor.AbstractCellProcessor;
@@ -29,7 +29,7 @@ import org.molgenis.io.processor.CellProcessor;
  * 
  * 
  */
-public class ExcelRepository implements Repository<ExcelEntity>
+public class ExcelRepository extends AbstractRepository<ExcelEntity>
 {
 	private final Sheet sheet;
 
@@ -49,12 +49,6 @@ public class ExcelRepository implements Repository<ExcelEntity>
 		if (sheet == null) throw new IllegalArgumentException("sheet is null");
 		this.sheet = sheet;
 		this.cellProcessors = cellProcessors;
-	}
-
-	@Override
-	public String getName()
-	{
-		return sheet.getSheetName();
 	}
 
 	public int getNrRows()
@@ -106,66 +100,7 @@ public class ExcelRepository implements Repository<ExcelEntity>
 	}
 
 	@Override
-	public String getLabel()
-	{
-		return getEntityMetaData().getLabel();
-	}
-
-	@Override
-	public String getDescription()
-	{
-		return getEntityMetaData().getDescription();
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getAttributes()
-	{
-		return getEntityMetaData().getAttributes();
-	}
-
-	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		return getEntityMetaData().getIdAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		return getEntityMetaData().getLabelAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		return getEntityMetaData().getAttribute(attributeName);
-	}
-
-	private Map<String, Integer> toColNamesMap(Row headerRow)
-	{
-		if (headerRow == null) return null;
-
-		Map<String, Integer> columnIdx = new LinkedHashMap<String, Integer>();
-		int i = 0;
-		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();)
-		{
-			try
-			{
-				String header = AbstractCellProcessor.processCell(it.next().getStringCellValue(), true, cellProcessors);
-				columnIdx.put(header, i++);
-			}
-			catch (final IllegalStateException ex)
-			{
-				final int row = headerRow.getRowNum();
-				final String column = CellReference.convertNumToColString(i);
-				throw new IllegalStateException("Invalid value at [" + sheet.getSheetName() + "] " + column + row + 1,
-						ex);
-			}
-		}
-		return columnIdx;
-	}
-
-	private EntityMetaData getEntityMetaData()
+	protected EntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
 		{
@@ -192,5 +127,35 @@ public class ExcelRepository implements Repository<ExcelEntity>
 		}
 
 		return entityMetaData;
+	}
+
+	private Map<String, Integer> toColNamesMap(Row headerRow)
+	{
+		if (headerRow == null) return null;
+
+		Map<String, Integer> columnIdx = new LinkedHashMap<String, Integer>();
+		int i = 0;
+		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();)
+		{
+			try
+			{
+				String header = AbstractCellProcessor.processCell(it.next().getStringCellValue(), true, cellProcessors);
+				columnIdx.put(header, i++);
+			}
+			catch (final IllegalStateException ex)
+			{
+				final int row = headerRow.getRowNum();
+				final String column = CellReference.convertNumToColString(i);
+				throw new IllegalStateException("Invalid value at [" + sheet.getSheetName() + "] " + column + row + 1,
+						ex);
+			}
+		}
+		return columnIdx;
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		// Nothing
 	}
 }

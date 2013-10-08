@@ -1,5 +1,6 @@
 package org.molgenis.data.excel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,6 +110,12 @@ public class ExcelSheetWriter extends AbstractWritable
 		}
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		// Nothing
 	}
 
 }
