@@ -158,16 +158,18 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	}
 
 	@Override
-	public void annotate(Integer protocolId, List<String> documentTypes)
+	public void annotate(Integer dataSetId, List<String> documentTypes)
 	{
 		runningProcesses.incrementAndGet();
 		try
 		{
+			if (documentTypes == null) documentTypes = searchAllOntologies();
+
 			PorterStemmer stemmer = new PorterStemmer();
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
 			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-			SearchRequest request = new SearchRequest("protocolTree-" + protocolId, queryRules, null);
+			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, queryRules, null);
 			SearchResult result = searchService.search(request);
 			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
 
@@ -210,6 +212,22 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			runningProcesses.decrementAndGet();
 			complete = true;
 		}
+	}
+
+	public List<String> searchAllOntologies()
+	{
+		List<String> ontologyUris = new ArrayList<String>();
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		queryRules.add(new QueryRule("entity_type", Operator.SEARCH, "indexedOntology"));
+		queryRules.add(new QueryRule(Operator.LIMIT, 100000));
+		SearchResult result = searchService.search(new SearchRequest(null, queryRules, null));
+		for (Hit hit : result.getSearchHits())
+		{
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			if (columnValueMap.containsKey("url")) ontologyUris.add("ontologyTerm-"
+					+ columnValueMap.get("url").toString());
+		}
+		return ontologyUris;
 	}
 
 	@Override

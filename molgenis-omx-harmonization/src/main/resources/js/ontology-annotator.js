@@ -297,14 +297,15 @@
 		}
 		
 		function createOntologyTerm(data){
-			
-			createOntology(data);
+			var ontology = createOntology(data);
 			var ontologyTermId = null;
 			var query = {};
 			query.name =  data.ontologyLabel + ':' + data.ontologyTerm;
 			query.identifier = data.ontologyTermIRI;
 			query.termAccession = data.ontologyTermIRI;
 			query.description = data.ontologyTermLabel;
+			query.ontology = ns.hrefToId(ontology.href);
+			
 			$.ajax({
 				type : 'POST',
 				dataType : 'json',
@@ -325,12 +326,15 @@
 		}
 		
 		function createOntology(data){
-			var existingOntology = restApi.get('/api/v1/ontology/', null, {
-				field : 'ontologyIRI',
-				operator : 'EQUALS',
-				value : data.ontologyIRI
-			});
-			if(existingOntology !== undefined && existingOntology !== null){
+			var query = {
+					q : [ {
+						field : 'ontologyURI',
+						operator : 'EQUALS',
+						value : data.ontologyIRI
+					} ],
+			};
+			var existingOntology = restApi.get('/api/v1/ontology/', null, query);
+			if(existingOntology.items.length === 0){
 				var query = {};
 				query.name = data.ontologyName;
 				query.identifier = data.ontologyIRI;
@@ -351,7 +355,9 @@
 						console.log(error);
 					} 
 				});
+				existingOntology = restApi.get('/api/v1/ontology/', null, query);
 			}
+			return existingOntology.items[0];
 		}
 		
 		function createFeatureTable(feature){

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
-		<plugin id="home" name="Home" url="home"/>
+		<plugin id="home" name="Home" url="biobankconnect/home"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<menu label="BiobankConnect" name="BiobankConnect">
-			<plugin id="BiobankConnectHappyFlows" name="Happy Flows" url="biobankconnect"/>
+			<plugin id="BiobankConnectHappyFlows" name="BiobankConnect Wizard" url="biobankconnect"/>
 			<plugin id="MappingManager" name="MappingManager" url="biobankconnect/mappingmanager"/>
 			<plugin id="ontologyindexer" name="OntologyIndexer" url="ontologyindexer"/>
 		</menu>
-		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<plugin id="importwizard" name="Upload" url="importwizard"/>
+		<!--<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
 		<plugin id="importwizard" name="Upload" url="importwizard"/>
 		<plugin id="news" name="News" url="news"/>
@@ -17,7 +18,7 @@
 		<plugin id="contact" name="Contact" url="contact"/>
 		<menu label="Converters" name="converters">
 			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
-		</menu>
+		</menu> 
         <menu label="Admin" name="admin">
 	        <menu label="Entities" name ="entities">
         		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>
@@ -48,7 +49,7 @@
 			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
 			<plugin id="datasetindexer" name="Data Set Indexer" url="dataindexer"/>
 			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
-		</menu>
+		</menu>-->
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>
 </molgenis>

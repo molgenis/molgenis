@@ -36,9 +36,39 @@
 				pagination.reset();
 				ns.MappingManager.prototype.updateSelectedDataset(selectedDataSet);
 				ns.MappingManager.prototype.createMatrixForDataItems();
+				initSearchDataItems(dataSetEntity);
 			});
 		}else{
 			$('#dataitem-number').empty().append('Nothing selected');
+		}
+		
+		function initSearchDataItems (dataSet) {
+			$('#search-dataitem').typeahead({
+				source: function(query, process) {
+					ns.dataItemsTypeahead('observablefeature', ns.hrefToId(dataSet.href), query, process);
+				},
+				minLength : 3,
+				items : 20
+			});
+			
+			$('#search-button').click(function(){
+				ns.MappingManager.prototype.createMatrixForDataItems();
+			});
+			
+
+			$('#search-dataitem').on('keydown', function(e){
+			    if (e.which == 13) {
+			    	$('#search-button').click();
+			    	return false;
+			    }
+			});
+			
+			$('#search-dataitem').on('keyup', function(e){
+				if($(this).val() === ''){
+					$('#search-dataitem').val('');
+					ns.MappingManager.prototype.createMatrixForDataItems();
+			    }
+			});
 		}
 	};
 	
@@ -56,6 +86,17 @@
 				operator : 'SEARCH',
 				value : 'observablefeature'
 			}];
+			var queryText = $('#search-dataitem').val();
+			if(queryText !== ''){
+				query.push({
+					operator : 'AND'
+				});
+				query.push({
+					operator : 'SEARCH',
+					value : queryText
+				});
+				pagination.reset();
+			}
 			if(sortRule !== null) query.push(sortRule);
 			searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
 				createMappingFromIndex(dataSetMapping.items, searchResponse);
@@ -164,7 +205,7 @@
 							tuple[featureId].push({
 								'score' : score,
 								'absoluteScore' : absoluteScore,
-								'mappedFeature' : storeMappedFeatureId,
+								'mappedFeatureId' : storeMappedFeatureId,
 								'confirmed' : confirmed,
 								'observationSet' : observationSet,
 								'documentId' : documentId
@@ -299,8 +340,8 @@
 					var confirmed = false;
 					var selectedMappings = [];
 					$.each(mappedFeatures, function(index, eachValue){
-						if(eachValue.mappedFeature !== undefined){
-							var mappedFeatureEntity = cachedFeatures[eachValue.mappedFeature];
+						if(eachValue.mappedFeatureId !== undefined){
+							var mappedFeatureEntity = cachedFeatures[eachValue.mappedFeatureId];
 							if(count === 0){
 								displayTerm = mappedFeatureEntity.name;
 								description = mappedFeatureEntity.description;
@@ -358,13 +399,16 @@
 					}).click(function(){
 						standardModal.createModalCallback('Candidate mappings', function(modal){
 							createMappingTable(feature, mappedFeatures, restApi.get('/api/v1/dataset/' + mappedDataSetId), modal);
-						});
-						standardModal.modal.css({
-							'width' : 950,
-							'margin-left' : -475
+							modal.css({
+								'width' : 950,
+								'margin-left' : -475
+							});
 						});
 					});
-					$('<td />').addClass('add-border').append('<span>' + displayTerm + '</span>').append(removeIcon).append(editIcon).appendTo(row);
+					var displayTermSpan = $('<span />').addClass('show-popover').append(displayTerm).click(function(){
+						editIcon.click();
+					});
+					$('<td />').addClass('add-border').append(displayTermSpan).append(removeIcon).append(editIcon).appendTo(row);
 				}else{
 					$('<td />').addClass('add-border').append('<i class="icon-ban-circle show-popover" title="Not available"></i>').appendTo(row);
 				}
@@ -454,7 +498,7 @@
 			}
 			
 			$.each(mappedFeatures, function(index, eachMapping){
-				var mappedFeatureId = eachMapping.mappedFeature;
+				var mappedFeatureId = eachMapping.mappedFeatureId;
 				var score = eachMapping.score;
 				var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureId);
 				if(mappedFeature){
@@ -574,10 +618,12 @@
 		}
 		
 		function showMessage(alertClass, message){
-			$('#alert-message').empty();
+			var messageDiv = $('#alert-message');
+			if(messageDiv.length === 0) messageDiv = $('<div id="alert-message"></div>');
 			var messageAlert = $('<div />').addClass(alertClass).append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
 			$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
-			messageAlert.appendTo('#alert-message');
+			messageDiv.empty().append(messageAlert);
+			$('form:eq(-1)').prepend(messageDiv);
 			w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
 		}
 		
@@ -776,6 +822,21 @@
 			'documentType' : dataSet.identifier
 		};
 		$.download(ns.getContextURL() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+	};
+	
+	ns.MappingManager.prototype.createHelpModal = function(){
+		var container = $('<div />');
+		$('<div />').append('<i class="icon-ok"></i><span class="float-right text-success">Mappings have been selected</span>').appendTo(container);
+		$('<div />').append('<i class="icon-pencil"></i><span class="float-right text-info">Select the mappings</span>').appendTo(container);
+		$('<div />').append('<i class="icon-trash"></i><span class="float-right text-warning">Delete all mappings</span>').appendTo(container);
+		$('<div />').append('<i class="icon-ban-circle"></i><span class="float-right text-error">No candidate available</span>').appendTo(container);
+		standardModal.createModalCallback('Icon meanings', function(modal){
+			modal.find('.modal-body:eq(0)').append(container);
+			modal.css({
+				'width' : 600,
+				'margin-top' : 200
+			});
+		});
 	};
 	
 	ns.MappingManager.prototype.updateSelectedDataset = function(dataSet) {

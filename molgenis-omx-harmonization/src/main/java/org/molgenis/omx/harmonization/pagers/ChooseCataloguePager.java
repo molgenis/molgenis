@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.framework.db.Database;
+import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -17,6 +18,9 @@ public class ChooseCataloguePager extends AbstractWizardPage implements Serializ
 {
 	private static final long serialVersionUID = 1L;
 	private final Database database;
+
+	@Autowired
+	private OntologyAnnotator ontologyAnnotator;
 
 	@Autowired
 	public ChooseCataloguePager(Database database)
@@ -42,6 +46,7 @@ public class ChooseCataloguePager extends AbstractWizardPage implements Serializ
 				BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
 				Integer selectedDataSetId = Integer.parseInt(request.getParameter("selectedDataSetId"));
 				biobankConnectWizard.setSelectedDataSet(database.findById(DataSet.class, selectedDataSetId));
+				ontologyAnnotator.annotate(selectedDataSetId, null);
 			}
 			catch (Exception e)
 			{

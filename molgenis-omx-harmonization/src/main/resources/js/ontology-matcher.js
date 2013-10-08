@@ -7,6 +7,7 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
+	var sortRule = null;
 	
 	ns.addTargetDataSet = function(targetDataSetId) {
 		var selectedOptions = $('#target-catalogue').data('selectedOptions') === undefined ? [] : $('#target-catalogue').data('selectedOptions');
@@ -34,12 +35,14 @@
 				});
 				var hideCatalogue = $('<button type="btn" class="btn btn-link">Hide</button>').click(function(){
 					$('#catalogue-container').hide().find('table').empty();
+					sortRule = null;
 					return false;
 				});
 				var removeCatalogue = $('<button type="btn" class="btn btn-link">Remove</button>').click(function(){
 					var index = selectedOptions.indexOf(targetDataSetId);
 					selectedOptions.splice(index, 1);
 					$('#target-catalogue').data('selectedOptions', selectedOptions);
+					sortRule = null;
 					renderOptions();
 					$('#catalogue-container').hide().find('table').empty();
 					return false;
@@ -154,6 +157,8 @@
 			pagination.reset();
 		}
 		
+		if(sortRule !== null) query.push(sortRule);
+		
 		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
 			var searchHits = searchResponse.searchHits;
 			var tableObject = $('#dataitem-table');
@@ -188,8 +193,35 @@
 		
 		function createTableHeader(){
 			var headerRow = $('<tr />');
-			$('<th>Name</th>').css('width', '30%').appendTo(headerRow);
+			var firstColumn = $('<th>Name</th>').css('width', '30%').appendTo(headerRow);
+			if (sortRule) {
+				if (sortRule.operator == 'SORTASC') {
+					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
+				} else {
+					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
+				}
+			} else {
+				$('<span data-value="Name" class="ui-icon ui-icon-triangle-2-n-s updown float-right"></span>').appendTo(firstColumn);
+			}
 			$('<th>Description</th>').css('width', '70%').appendTo(headerRow);
+			
+			// Sort click
+			$(firstColumn).find('.ui-icon').click(function() {
+				if (sortRule && sortRule.operator == 'SORTASC') {
+					sortRule = {
+						value : 'name',
+						operator : 'SORTDESC'
+					};
+				} else {
+					sortRule = {
+						value : 'name',
+						operator : 'SORTASC'
+					};
+				}
+				createMatrixForDataItems();
+				return false;
+			});
+			
 			return $('<thead />').append(headerRow);
 		}
 		

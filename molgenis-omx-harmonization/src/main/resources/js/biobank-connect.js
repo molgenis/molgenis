@@ -74,6 +74,41 @@
 		});
 	};
 	
+	ns.dataItemsTypeahead = function (type, dataSetId, query, response){
+		var queryRules = [{
+			field : 'type',
+			operator : 'EQUALS',
+			value : type,
+		},{
+			operator : 'AND'
+		},{
+			operator : 'SEARCH',
+			value : query
+		},{
+			operator : 'LIMIT',
+			value : 20
+		}];
+		var searchRequest = {
+			documentType : 'protocolTree-' + dataSetId,
+			queryRules : queryRules
+		};
+		
+		searchApi.search(searchRequest, function(searchReponse){
+			var result = [];
+			var dataMap = {};
+			$.each(searchReponse.searchHits, function(index, hit){
+				var value = hit.columnValueMap.ontologyTerm;
+				if($.inArray(value, result) === -1){
+					var name = hit.columnValueMap.name;
+					result.push(name);
+					dataMap[name] = hit.columnValueMap;
+				}
+			});
+			$(document).data('dataMap', dataMap);
+			response(result);
+		});
+	};
+	
 	$(document).ready(function(){
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);

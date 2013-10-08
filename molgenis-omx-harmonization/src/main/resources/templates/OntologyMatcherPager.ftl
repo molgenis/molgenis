@@ -6,7 +6,7 @@
 					<div class="row-fluid">
 						<div class="span12">
 							<legend class="ontology-matcher-legend">
-								Select matching catalogues for desired catalogue : <strong>${wizard.selectedDataSet.name}</strong>
+								Select matching catalogues for : <strong>${wizard.selectedDataSet.name}</strong>
 							</legend>
 							<div class="row-fluid">
 								<div class="span4">

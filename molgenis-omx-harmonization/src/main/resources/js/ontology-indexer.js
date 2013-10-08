@@ -40,7 +40,6 @@
 					});
 					$('<td />').append(removeIcon).appendTo(eachRow);
 					eachRow.appendTo(table);
-//					$('#ontology-table').append('<tr><td>' + ontologyName + '</td><td><a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a></td><td>' + status + '</td></tr>');
 				});
 			}
 		});

@@ -6,24 +6,21 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div class="span4">
-					<h3>	View / select mappings</h3>
-				</div>
-				<div id="alert-message" class="span8">
+				<div class="span12">
+					<legend>View / select mappings</legend>
 				</div>
 			</div>
 		</div>
 	</div>
-	
 	<div class="row-fluid">
 		<div class="span12">
-			<form id="mappingmanager-form" class="form-horizontal" enctype="multipart/form-data">
+			<form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 				<div class="row-fluid">
 					<div class="span12">
 						<div class="row-fluid">
 							<div id="div-index-ontology" class="span5 well upper-header">
 								<div class="row-fluid">
-									<div class="span4">
+									<div class="span12">
 										<dl>
 											<dt>Choose catalogue :</dt>
 											<dd>
@@ -41,16 +38,6 @@
 											</dd>
 											<dt>Number of data items :</dt>
 											<dd id="dataitem-number"><br></dd>
-										</dl>
-									</div>
-									<div class="offset4 span4">
-										<dl>
-											<dt>Action :</dt>
-											<dd>
-												<div class="btn-group">
-													<button id="downloadButton" class="btn btn-primary">Download</button>
-												</div>
-											</dd>
 										</dl>
 									</div>
 								</div>
@@ -111,6 +98,20 @@
 					</div>
 				</div>
 				<div class="row-fluid">
+					<div id="div-search" class="span12">
+						<div><strong>Search data items :</strong></div>
+						<div class="input-append row-fluid">
+							<div class="span3">
+								<input id="search-dataitem" type="text" title="Enter your search term" />
+								<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+							</div>
+							<div class="span2">
+								<button id="downloadButton" class="btn btn-primary">Download</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row-fluid">
 					<div class="span12">
 						<div id="data-table-container" class="row-fluid data-table-container">
 							<table id="dataitem-table" class="table table-striped table-condensed show-border">
@@ -127,12 +128,13 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
+			molgenis.setContextURL('${context_url}');
 			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val());
 			$('#selectedDataSet').change(function(){
 				molgenis.getMappingManager().changeDataSet($(this).val());
 			});
 			$('#downloadButton').click(function(){
-				molgenis.getMappingManager.downloadMappings();
+				molgenis.getMappingManager().downloadMappings();
 				return false;
 			});
 		});

@@ -13,10 +13,12 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			var molgenis = window.top.molgenis;
+			molgenis.checkMatchingStatus('${context_url}', $('#progress-bar-div').find('div.bar:eq(0)'));
 			$('li.cancel').addClass('disabled').click(function(){
 				if(!$(this).hasClass('disabled')){
 					$('form').attr({
-						'action' : ns.getContextURL() + '/reset',
+						'action' : '${context_url}/reset',
 						'method' : 'GET'
 					}).submit();
 				}
@@ -25,7 +27,7 @@
 			$('li.next').addClass('disabled').click(function(){
 				if(!$(this).hasClass('disabled')){
 					$('form').attr({
-						'action' : ns.getContextURL() + '/next',
+						'action' : '${context_url}/next',
 						'method' : 'GET',
 					}).submit();
 				}
@@ -34,14 +36,12 @@
 			$('li.previous').addClass('disabled').click(function(){
 				if(!$(this).hasClass('disabled')){
 					$('form').attr({
-						'action' : ns.getContextURL() + '/prev',
+						'action' : '${context_url}/prev',
 						'method' : 'GET'
 					}).submit();
 				}
 				return false;
 			});
-			var molgenis = window.top.molgenis;
-			molgenis.checkMatchingStatus('${context_url}', $('#progress-bar-div').find('div.bar:eq(0)'));
 		});
 	</script>
 </form>
