@@ -3,11 +3,11 @@ package org.molgenis.data;
 /**
  * Repository that can be extended with more entity instances.
  */
-public interface Writable<E extends Entity>
+public interface Writable
 {
 	/** Add one entity */
-	void add(E entity);
+	void add(Entity entity);
 
 	/** Stream add multiple entities */
-	void add(Iterable<E> entities);
+	void add(Iterable<? extends Entity> entities);
 }
