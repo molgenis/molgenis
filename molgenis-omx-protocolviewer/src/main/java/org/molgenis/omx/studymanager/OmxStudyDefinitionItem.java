@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 
 public class OmxStudyDefinitionItem implements CatalogItem
@@ -45,7 +46,8 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	public String getCodeSystem()
 	{
 		List<OntologyTerm> ontologyTerm = observableFeature.getDefinition();
-		return ontologyTerm != null && ontologyTerm.size() > 0 ? ontologyTerm.get(0).getOntology()
-				.getOntologyAccession() : null;
+		if (ontologyTerm == null || ontologyTerm.size() == 0) return null;
+		Ontology ontology = ontologyTerm.get(0).getOntology();
+		return ontology != null ? ontology.getOntologyAccession() : null;
 	}
 }
