@@ -3,7 +3,7 @@
 <#import "form-macros.ftl" as f>
 
 <#assign css=['molgenis-form.css']>
-<#assign js=['molgenis-form-list.js']>
+<#assign js=['molgenis-form-list.js', 'jquery.bootstrap.pager.js']>
 
 <@header css js/>
 
