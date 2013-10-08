@@ -257,17 +257,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public List<String> annotateDataItem(Database db, String documentType, ObservableFeature feature,
 			String description, PorterStemmer stemmer) throws DatabaseException
 	{
-		List<String> uniqueTerms = new ArrayList<String>();
+		Set<String> uniqueTerms = new HashSet<String>();
 		for (String eachTerm : Arrays.asList(description.split(" +")))
 		{
-			String termLowerCase = eachTerm.toLowerCase();
-			if (!STOPWORDSLIST.contains(termLowerCase) && !uniqueTerms.contains(termLowerCase))
-			{
-				stemmer.setCurrent(termLowerCase);
-				stemmer.stem();
-				eachTerm = stemmer.getCurrent();
-				uniqueTerms.add(eachTerm);
-			}
+			eachTerm = eachTerm.toLowerCase();
+			if (!STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms.add(eachTerm);
 		}
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		queryRules.add(new QueryRule(Operator.LIMIT, 100));
@@ -297,6 +291,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		Set<String> addedCandidates = new HashSet<String>();
 		Map<String, Map<String, Object>> mapUriTerm = new HashMap<String, Map<String, Object>>();
 
+		uniqueTerms = stemMemebers(new ArrayList<String>(uniqueTerms), stemmer);
 		for (TermComparison termComparision : listOfHits)
 		{
 			Hit hit = termComparision.getHit();
@@ -383,17 +378,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (listOfOntologies.size() != 0) unsecuredDatabase.add(listOfOntologies);
 	}
 
-	private boolean validateOntologyTerm(List<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
+	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
 			Set<String> positionFilter)
 	{
-		Set<String> termsFromDescription = new HashSet<String>(Arrays.asList(ontologyTermSynonym.split(" +")));
+		Set<String> termsFromDescription = stemMemebers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
 		Set<String> stemmedWords = new HashSet<String>();
 		for (String eachTerm : termsFromDescription)
 		{
-			stemmer.setCurrent(eachTerm);
-			stemmer.stem();
-			eachTerm = stemmer.getCurrent();
-			stemmedWords.add(eachTerm);
 			if (!uniqueSets.contains(eachTerm)) return false;
 		}
 
@@ -403,6 +394,19 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			else positionFilter.add(eachTerm);
 		}
 		return true;
+	}
+
+	private Set<String> stemMemebers(List<String> originalList, PorterStemmer stemmer)
+	{
+		Set<String> newList = new HashSet<String>();
+		for (String eachTerm : originalList)
+		{
+			stemmer.setCurrent(eachTerm);
+			stemmer.stem();
+			eachTerm = stemmer.getCurrent();
+			newList.add(eachTerm);
+		}
+		return newList;
 	}
 
 	public QueryRule[] toNestedQuery(List<QueryRule> rules)
