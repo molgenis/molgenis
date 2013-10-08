@@ -1,25 +1,33 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["chosen.css"]>
-<#assign js=["chosen.jquery.min.js", "workflowdataentry.js"]>
+<#assign css=["chosen.css", "jquery.bootstrap.wizard.css", "workflowdataentry.css"]>
+<#assign js=["chosen.jquery.min.js", "jquery.bootstrap.wizard.min.js", "workflowdataentry.js"]>
 <@header css js/>
 			<div class="row-fluid">
-				<div class="span3">
-					<div class="control-group">
-						<label class="control-label" for="workflow-select">Choose a workflow:</label>
-						<div class="controls">
-			    			<select id="workflow-select" name="workflowId">
-								<#list workflows as workflow>
-									<option value="${workflow.id}">${workflow.name}</option>
-								</#list>
-			      			</select>
-						</div>
+				<div class="control-group pull-right form-horizontal">
+					<label class="control-label" for="workflow-select">Choose a protocol:</label>
+					<div class="controls">
+		    			<select id="workflow-application-select">
+							<#list workflows as workflow>
+								<option value="${workflow.id}">${workflow.name}</option>
+							</#list>
+		      			</select>
 					</div>
 				</div>
-				<div id="workflow-data-entry-container" class="span9">
-					<ul id="workflow-nav" class="nav nav-tabs">
-					</ul>
-					<div id="workflow-nav-content" class="tab-content">
+			</div>
+			<div class="row-fluid">
+				<div id="workflow-application-container">
+					<div id="workflow-wizard">
+						<ul id="workflow-nav">
+						</ul>
+						<div id="workflow-nav-content" class="tab-content">
+						</div>
+						<ul class="pager wizard">
+							<li class="previous first" style="display:none;"><a href="#">First</a></li>
+							<li class="previous"><a href="#">Previous</a></li>
+							<li class="next last" style="display:none;"><a href="#">Last</a></li>
+						  	<li class="next"><a href="#">Next</a></li>
+						</ul>
 					</div>
 				</div>
 			</div>

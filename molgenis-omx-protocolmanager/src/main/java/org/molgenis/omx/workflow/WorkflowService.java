@@ -2,14 +2,13 @@ package org.molgenis.omx.workflow;
 
 import java.util.List;
 
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.observ.Protocol;
+public interface WorkflowService
+{
+	Workflow getWorkflow(Integer workflowId) throws WorkflowException;
 
-public interface WorkflowService {
+	List<Workflow> getWorkflows();
 
-	List<Protocol> getWorkflows() throws DatabaseException;
+	WorkflowStep getWorkflowStep(Integer workflowStepId) throws WorkflowException;
 
-	List<Protocol> getWorkflowStep(Integer protocolId) throws DatabaseException;
-
-	Protocol getWorkflowProtocol(Integer protocolId) throws DatabaseException;
+	WorkflowStepData getWorkflowStepData(Integer workflowStepId) throws WorkflowException;
 }

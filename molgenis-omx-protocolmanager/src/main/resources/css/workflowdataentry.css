@@ -1,0 +1,25 @@
+th {
+	background-color: #5B82A4;
+	color: white;
+}
+
+th.input-feature {
+	background-color: black;
+}
+
+td.input-feature {
+	background-color: yellow;
+}
+
+td.snug {
+	width: 22px;
+    white-space: nowrap;
+}
+
+#workflow-nav-content {
+	padding-top: 10px;
+}
+
+.tab-pane {
+	min-height: 250px;
+}
