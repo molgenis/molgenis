@@ -14,7 +14,8 @@ public class WorkflowElement
 	private final String name;
 	private final List<WorkflowFeature> features;
 	private final List<WorkflowFeature> inputFeatures;
-	private final List<WorkflowElement> inputWorkflowSteps;
+	private final List<WorkflowFeature> outputFeatures;
+	private final List<WorkflowElement> inputWorkflowElements;
 
 	public WorkflowElement(Protocol protocol)
 	{
@@ -42,10 +43,18 @@ public class WorkflowElement
 				@Override
 				public WorkflowFeature apply(ProtocolFlow protocolFlow)
 				{
-					return new WorkflowFeature(protocolFlow.getInput());
+					return new WorkflowFeature(protocolFlow.getInputFeature());
 				}
 			});
-			this.inputWorkflowSteps = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowElement>()
+			this.outputFeatures = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowFeature>()
+			{
+				@Override
+				public WorkflowFeature apply(ProtocolFlow protocolFlow)
+				{
+					return new WorkflowFeature(protocolFlow.getOutputFeature());
+				}
+			});
+			this.inputWorkflowElements = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowElement>()
 			{
 				@Override
 				public WorkflowElement apply(ProtocolFlow protocolFlow)
@@ -58,7 +67,8 @@ public class WorkflowElement
 		else
 		{
 			this.inputFeatures = null;
-			this.inputWorkflowSteps = null;
+			this.outputFeatures = null;
+			this.inputWorkflowElements = null;
 		}
 	}
 
@@ -82,8 +92,13 @@ public class WorkflowElement
 		return inputFeatures;
 	}
 
-	public List<WorkflowElement> getInputWorkflowSteps()
+	public List<WorkflowFeature> getOutputFeatures()
 	{
-		return inputWorkflowSteps;
+		return outputFeatures;
+	}
+
+	public List<WorkflowElement> getInputWorkflowElements()
+	{
+		return inputWorkflowElements;
 	}
 }

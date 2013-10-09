@@ -96,15 +96,15 @@ public class WorkflowServiceImpl implements WorkflowService
 	}
 
 	@Override
-	public WorkflowElementData getWorkflowElementData(Integer workflowStepId) throws WorkflowException
+	public WorkflowElementData getWorkflowElementData(Integer workflowElementId) throws WorkflowException
 	{
-		WorkflowElement workflowStep = getWorkflowElement(workflowStepId);
+		WorkflowElement workflowStep = getWorkflowElement(workflowElementId);
 
 		Protocol protocol;
 		try
 		{
-			protocol = Protocol.findById(database, workflowStepId);
-			if (protocol == null) throw new WorkflowException("Unknown workflow step [" + workflowStepId + "]");
+			protocol = Protocol.findById(database, workflowElementId);
+			if (protocol == null) throw new WorkflowException("Unknown workflow step [" + workflowElementId + "]");
 		}
 		catch (DatabaseException e)
 		{

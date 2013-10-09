@@ -19,7 +19,7 @@
 	ns.createWorkflowContainer = function(workflow) {
 		$('#workflow-nav').empty();
 		$('#workflow-nav-content').empty();
-		var steps = workflow.workflowSteps;
+		var steps = workflow.workflowElements;
 		if(steps.length > 0) {
 			// create tab menu
 			var items = [];
