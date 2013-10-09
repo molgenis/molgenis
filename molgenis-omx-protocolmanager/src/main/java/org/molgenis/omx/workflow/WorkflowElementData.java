@@ -2,11 +2,11 @@ package org.molgenis.omx.workflow;
 
 import java.util.List;
 
-public class WorkflowStepData
+public class WorkflowElementData
 {
 	private final List<DataRow> dataMatrix;
 
-	public WorkflowStepData(List<DataRow> dataMatrix)
+	public WorkflowElementData(List<DataRow> dataMatrix)
 	{
 		if (dataMatrix == null) throw new IllegalArgumentException("Data matrix is null");
 		this.dataMatrix = dataMatrix;

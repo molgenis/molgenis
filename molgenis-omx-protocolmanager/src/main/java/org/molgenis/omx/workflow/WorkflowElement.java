@@ -8,20 +8,20 @@ import org.molgenis.omx.observ.Protocol;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class WorkflowStep
+public class WorkflowElement
 {
 	private final Integer id;
 	private final String name;
 	private final List<WorkflowFeature> features;
 	private final List<WorkflowFeature> inputFeatures;
-	private final List<WorkflowStep> inputWorkflowSteps;
+	private final List<WorkflowElement> inputWorkflowSteps;
 
-	public WorkflowStep(Protocol protocol)
+	public WorkflowElement(Protocol protocol)
 	{
 		this(protocol, null);
 	}
 
-	public WorkflowStep(Protocol protocol, List<ProtocolFlow> protocolFlows)
+	public WorkflowElement(Protocol protocol, List<ProtocolFlow> protocolFlows)
 	{
 		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
 		this.id = protocol.getId();
@@ -42,16 +42,16 @@ public class WorkflowStep
 				@Override
 				public WorkflowFeature apply(ProtocolFlow protocolFlow)
 				{
-					return new WorkflowFeature(protocolFlow.getFeature());
+					return new WorkflowFeature(protocolFlow.getInput());
 				}
 			});
-			this.inputWorkflowSteps = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowStep>()
+			this.inputWorkflowSteps = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowElement>()
 			{
 				@Override
-				public WorkflowStep apply(ProtocolFlow protocolFlow)
+				public WorkflowElement apply(ProtocolFlow protocolFlow)
 				{
 					List<ProtocolFlow> protocolViews = null;
-					return new WorkflowStep(protocolFlow.getSource(), protocolViews);
+					return new WorkflowElement(protocolFlow.getSource(), protocolViews);
 				}
 			});
 		}
@@ -59,7 +59,6 @@ public class WorkflowStep
 		{
 			this.inputFeatures = null;
 			this.inputWorkflowSteps = null;
-
 		}
 	}
 
@@ -83,7 +82,7 @@ public class WorkflowStep
 		return inputFeatures;
 	}
 
-	public List<WorkflowStep> getInputWorkflowSteps()
+	public List<WorkflowElement> getInputWorkflowSteps()
 	{
 		return inputWorkflowSteps;
 	}

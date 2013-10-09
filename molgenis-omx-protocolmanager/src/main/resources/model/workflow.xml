@@ -5,7 +5,8 @@
 			
 		</description>
 		<entity name="ProtocolFlow" implements="Autoid" >
-			<field name="feature" type="xref" xref_entity="ObservableFeature" description="" />
+			<field name="input" type="xref" xref_entity="ObservableFeature" description="" />
+			<field name="output" type="xref" xref_entity="ObservableFeature" description="" />
 			<field name="source" type="xref" xref_entity="Protocol" description="" />
 			<field name="destination" type="xref" xref_entity="Protocol" description="" />
 		</entity>

@@ -9,15 +9,15 @@ public class Workflow
 {
 	private final Integer id;
 	private final String name;
-	private final List<WorkflowStep> workflowSteps;
+	private final List<WorkflowElement> workflowElements;
 
-	public Workflow(Protocol protocol, List<WorkflowStep> workflowSteps)
+	public Workflow(Protocol protocol, List<WorkflowElement> workflowElements)
 	{
 		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
-		if (workflowSteps == null) throw new IllegalArgumentException("WorkflowSteps is null");
+		if (workflowElements == null) throw new IllegalArgumentException("WorkflowElements is null");
 		this.id = protocol.getId();
 		this.name = protocol.getName();
-		this.workflowSteps = workflowSteps;
+		this.workflowElements = workflowElements;
 	}
 
 	public Integer getId()
@@ -30,8 +30,8 @@ public class Workflow
 		return name;
 	}
 
-	public List<WorkflowStep> getSteps()
+	public List<WorkflowElement> getElements()
 	{
-		return Collections.unmodifiableList(workflowSteps);
+		return Collections.unmodifiableList(workflowElements);
 	}
 }

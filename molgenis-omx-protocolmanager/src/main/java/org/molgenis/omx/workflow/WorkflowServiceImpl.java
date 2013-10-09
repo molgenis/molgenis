@@ -79,7 +79,7 @@ public class WorkflowServiceImpl implements WorkflowService
 	}
 
 	@Override
-	public WorkflowStep getWorkflowStep(Integer workflowStepId) throws WorkflowException
+	public WorkflowElement getWorkflowElement(Integer workflowStepId) throws WorkflowException
 	{
 		Protocol protocol;
 		try
@@ -96,9 +96,9 @@ public class WorkflowServiceImpl implements WorkflowService
 	}
 
 	@Override
-	public WorkflowStepData getWorkflowStepData(Integer workflowStepId) throws WorkflowException
+	public WorkflowElementData getWorkflowElementData(Integer workflowStepId) throws WorkflowException
 	{
-		WorkflowStep workflowStep = getWorkflowStep(workflowStepId);
+		WorkflowElement workflowStep = getWorkflowElement(workflowStepId);
 
 		Protocol protocol;
 		try
@@ -150,7 +150,7 @@ public class WorkflowServiceImpl implements WorkflowService
 			dataMatrix = new ArrayList<DataRow>();
 			try
 			{
-				for (WorkflowStep inputStep : workflowStep.getInputWorkflowSteps())
+				for (WorkflowElement inputStep : workflowStep.getInputWorkflowSteps())
 				{
 					Protocol inputprotocol = Protocol.findById(database, inputStep.getId());
 
@@ -216,7 +216,7 @@ public class WorkflowServiceImpl implements WorkflowService
 			}
 		}
 
-		return new WorkflowStepData(dataMatrix);
+		return new WorkflowElementData(dataMatrix);
 	}
 
 	private DataRow createDataRow(ObservationSet observationSet, List<ObservableFeature> features,
@@ -255,17 +255,17 @@ public class WorkflowServiceImpl implements WorkflowService
 	private Workflow createWorkflow(Protocol protocol)
 	{
 		return new Workflow(protocol, Lists.transform(ProtocolUtils.getProtocolDescendants(protocol, false),
-				new Function<Protocol, WorkflowStep>()
+				new Function<Protocol, WorkflowElement>()
 				{
 					@Override
-					public WorkflowStep apply(Protocol protocol)
+					public WorkflowElement apply(Protocol protocol)
 					{
 						return createWorkflowStep(protocol);
 					}
 				}));
 	}
 
-	private WorkflowStep createWorkflowStep(Protocol protocol)
+	private WorkflowElement createWorkflowStep(Protocol protocol)
 	{
 		List<ProtocolFlow> protocolFlows;
 		try
@@ -277,6 +277,6 @@ public class WorkflowServiceImpl implements WorkflowService
 		{
 			throw new RuntimeException(e);
 		}
-		return new WorkflowStep(protocol, protocolFlows);
+		return new WorkflowElement(protocol, protocolFlows);
 	}
 }
