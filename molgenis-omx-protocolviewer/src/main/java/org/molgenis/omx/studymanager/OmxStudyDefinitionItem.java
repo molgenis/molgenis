@@ -2,6 +2,7 @@ package org.molgenis.omx.studymanager;
 
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 
 public class OmxStudyDefinitionItem implements CatalogItem
@@ -43,6 +44,8 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	public String getCodeSystem()
 	{
 		OntologyTerm ontologyTerm = observableFeature.getDefinition();
-		return ontologyTerm != null ? ontologyTerm.getOntology().getOntologyAccession() : null;
+		if (ontologyTerm == null) return null;
+		Ontology ontology = ontologyTerm.getOntology();
+		return ontology != null ? ontology.getOntologyAccession() : null;
 	}
 }

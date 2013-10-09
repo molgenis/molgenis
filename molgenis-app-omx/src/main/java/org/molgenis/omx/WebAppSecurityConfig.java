@@ -173,6 +173,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_ENTITY_WRITE_STUDYDATAREQUEST").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_READ_PROTOCOLVIEWER > ROLE_ENTITY_READ_STUDYDATAREQUEST").append(' ');
 
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASET > ROLE_ENTITY_WRITE_OBSERVATIONSET").append(' ');
+		hierarchyBuilder.append("ROLE_ENTITY_WRITE_OBSERVATIONSET > ROLE_ENTITY_WRITE_OBSERVEDVALUE").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_READ_DATASET > ROLE_ENTITY_READ_OBSERVATIONSET").append(' ');
+		hierarchyBuilder.append("ROLE_ENTITY_READ_OBSERVATIONSET > ROLE_ENTITY_READ_OBSERVEDVALUE").append(' ');
+
 		RoleHierarchyImpl roleHierarchyImpl = new RoleHierarchyImpl();
 		roleHierarchyImpl.setHierarchy(hierarchyBuilder.toString());
 		return roleHierarchyImpl;
