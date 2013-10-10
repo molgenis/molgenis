@@ -516,6 +516,7 @@
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
+		<module>molgenis-omx-biobankconnect</module>
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-dataexplorer</module>
 		<module>molgenis-omx-protocolmanager</module>
@@ -528,6 +529,5 @@
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
 		<module>molgenis-data</module>
-		<module>molgenis-omx-harmonization</module>
 	</modules>
 </project>

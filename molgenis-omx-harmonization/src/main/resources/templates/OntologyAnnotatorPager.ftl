@@ -2,9 +2,9 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div class="well offset4 span4 upper-header">
+				<div class="well offset3 span6 upper-header">
 					<div class="row-fluid">
-						<div class="span5">
+						<div class="offset1 span4">
 							<dt>Ontologies :</dt>
 							<dd id="ontology-list"></dd>
 							<button id="toggle-select" class="btn btn-link select-all">Deselect all</button>

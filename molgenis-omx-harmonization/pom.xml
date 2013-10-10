@@ -5,7 +5,7 @@
 	    <artifactId>molgenis</artifactId>
 	    <version>0.0.3-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-omx-harmonization</artifactId>
+	<artifactId>molgenis-omx-biobankconnect</artifactId>
 	<packaging>jar</packaging>
   	
   	<dependencies>

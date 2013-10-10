@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
-		<plugin id="home" name="Home" url="biobankconnect/home"/>
+		<plugin id="home" name="Home" url="home"/>
 		<plugin id="BiobankConnectHappyFlows" name="BiobankConnect Wizard" url="biobankconnect"/>
 		<plugin id="MappingManager" name="Curate mappings" url="biobankconnect/mappingmanager"/>
 		<plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
