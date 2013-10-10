@@ -9,8 +9,8 @@ public interface WizardPage
 	String getTitle();
 
 	/**
-	 * Name of the freemarker template (including the ftl) that holds the piece
-	 * of html for this wizard page that is pasted into the wizard html template
+	 * Name of the freemarker template (including the ftl) that holds the piece of html for this wizard page that is
+	 * pasted into the wizard html template
 	 * 
 	 * @return
 	 */
@@ -21,8 +21,7 @@ public interface WizardPage
 	 * 
 	 * If you have an error add it to the BindingResult
 	 * 
-	 * Returns the successmessage, if you don't have a successmessage return
-	 * null
+	 * Returns the successmessage, if you don't have a successmessage return null
 	 * 
 	 * @param request
 	 * @return message to show the user (success message)

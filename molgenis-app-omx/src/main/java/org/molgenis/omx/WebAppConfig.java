@@ -151,10 +151,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 		mailSender.setHost(mailHost);
 		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
-		mailSender.setUsername(mailUsername); // specify in
-												// molgenis-server.properties
-		mailSender.setPassword(mailPassword); // specify in
-												// molgenis-server.properties
+		mailSender.setUsername(mailUsername); // specify in molgenis-server.properties
+		mailSender.setPassword(mailPassword); // specify in molgenis-server.properties
 		Properties javaMailProperties = new Properties();
 		javaMailProperties.setProperty("mail.smtp.auth", mailJavaAuth);
 		javaMailProperties.setProperty("mail.smtp.starttls.enable", mailJavaStartTlsEnable);
@@ -170,8 +168,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is
-	 * not managed by Spring
+	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
 	 * 
 	 * @return
 	 */
@@ -182,8 +179,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Enable spring freemarker viewresolver. All freemarker template names
-	 * should end with '.ftl'
+	 * Enable spring freemarker viewresolver. All freemarker template names should end with '.ftl'
 	 */
 	@Bean
 	public ViewResolver viewResolver()
@@ -196,8 +192,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	/**
-	 * Configure freemarker. All freemarker templates should be on the classpath
-	 * in a package called 'freemarker'
+	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
 	 */
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer()

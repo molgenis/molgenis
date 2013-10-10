@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 <#assign css=['bwizard.min.css', 'molgenis-wizard.css'] + stylesheets>
 <#assign js=['molgenis-wizard.js'] + javascripts>
-<#list wizard.pages as wizardPage></#list>
+
 <@header css js/>
 	<div class="row-fluid">
 		<div id="wizard">

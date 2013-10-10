@@ -31,6 +31,18 @@ public abstract class AbstractWizardController extends MolgenisPluginController
 
 	protected abstract Wizard createWizard();
 
+	@ModelAttribute("javascripts")
+	public List<String> getJavascripts()
+	{
+		return Collections.emptyList();
+	}
+
+	@ModelAttribute("stylesheets")
+	public List<String> getStylesheets()
+	{
+		return Collections.emptyList();
+	}
+
 	@ModelAttribute("wizard")
 	public Wizard wizard(HttpSession session)
 	{
@@ -42,18 +54,6 @@ public abstract class AbstractWizardController extends MolgenisPluginController
 		}
 
 		return wizard;
-	}
-
-	@ModelAttribute("javascripts")
-	public List<String> getJavascripts()
-	{
-		return Collections.emptyList();
-	}
-
-	@ModelAttribute("stylesheets")
-	public List<String> getStylesheets()
-	{
-		return Collections.emptyList();
 	}
 
 	@RequestMapping(value = "/**", method = GET)
