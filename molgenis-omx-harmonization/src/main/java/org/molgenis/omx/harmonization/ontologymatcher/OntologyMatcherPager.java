@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.pagers;
+package org.molgenis.omx.harmonization.ontologymatcher;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.harmonization.biobankconnect.BiobankConnectWizard;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;

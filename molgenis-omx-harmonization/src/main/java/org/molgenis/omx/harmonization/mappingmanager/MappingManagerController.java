@@ -1,6 +1,6 @@
-package org.molgenis.omx.harmonization.controllers;
+package org.molgenis.omx.harmonization.mappingmanager;
 
-import static org.molgenis.omx.harmonization.controllers.MappingManagerController.URI;
+import static org.molgenis.omx.harmonization.mappingmanager.MappingManagerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
@@ -26,6 +26,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.harmonization.biobankconnect.BiobankConnectController;
 import org.molgenis.omx.harmonization.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;

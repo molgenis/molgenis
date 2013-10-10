@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.pagers;
+package org.molgenis.omx.harmonization.mappingmanager;
 
 import java.io.Serializable;
 

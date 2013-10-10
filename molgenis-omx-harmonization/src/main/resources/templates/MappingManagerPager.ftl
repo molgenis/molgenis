@@ -43,7 +43,7 @@
 			});
 			$('#help-button').click(function(){
 				molgenis.getMappingManager().createHelpModal();
-			});
+			}).click();
 		});
 	</script>
 </form>

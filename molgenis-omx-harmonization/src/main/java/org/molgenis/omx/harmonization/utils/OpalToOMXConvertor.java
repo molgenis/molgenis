@@ -18,13 +18,13 @@ import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
-public class OpalToOMXConvertor
+public class OpalToOmxConvertor
 {
 	private Map<String, List<UniqueCategory>> categoryInfo = new LinkedHashMap<String, List<UniqueCategory>>();
 	private Map<String, UniqueVariable> variableInfo = new LinkedHashMap<String, UniqueVariable>();
 	private String studyName = null;
 
-	public OpalToOMXConvertor(String studyName, String filePath) throws IOException
+	public OpalToOmxConvertor(String studyName, String filePath) throws IOException
 	{
 		this.studyName = studyName;
 		start(filePath);
@@ -217,7 +217,7 @@ public class OpalToOMXConvertor
 	 */
 	public static void main(String[] args) throws IOException
 	{
-		new OpalToOMXConvertor(args[0], args[1]);
+		new OpalToOmxConvertor(args[0], args[1]);
 	}
 
 	class UniqueVariable
@@ -314,9 +314,9 @@ public class OpalToOMXConvertor
 			return label;
 		}
 
-		private OpalToOMXConvertor getOuterType()
+		private OpalToOmxConvertor getOuterType()
 		{
-			return OpalToOMXConvertor.this;
+			return OpalToOmxConvertor.this;
 		}
 	}
 }

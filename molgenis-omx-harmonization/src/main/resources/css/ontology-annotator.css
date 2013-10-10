@@ -18,6 +18,10 @@ div#div-search {
 	margin-bottom : 10px;
 }
 
+#toggle-select {
+	margin-top : -20px;
+}
+
 table#dataitem-table {
 	border : 1px solid #5B82A4;
 }

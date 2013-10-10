@@ -107,7 +107,7 @@
 		
 		function createTableRow(feature){
 			
-			var row = $('<tr />').data('feature', feature).click(function()
+			var row = $('<tr />').addClass('show-popover').data('feature', feature).click(function()
 			{
 				var featureId = $(this).data('feature').id;
 				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null);
@@ -124,7 +124,7 @@
 			
 			var description = feature.description;
 			var isPopOver = description.length < 40;
-			var descriptionDiv = $('<div />').addClass('show-popover').html(isPopOver ? description : description.substring(0, 40) + '...');
+			var descriptionDiv = $('<div />').html(isPopOver ? description : description.substring(0, 40) + '...');
 			if(!isPopOver){
 				descriptionDiv.addClass('show-descriptionDiv');
 				descriptionDiv.popover({
@@ -135,7 +135,7 @@
 			}
 			
 			var featureNameDiv = $('<div />').append(feature.name);
-			var annotationDiv = $('<div />').addClass('text-info show-popover');
+			var annotationDiv = $('<div />').addClass('text-info');
 			var annotationText = '';
 			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definition"]);
 			if(featureEntity.definition.items !== 0){
@@ -390,7 +390,11 @@
 					}, {'feature' : feature, 'ontologyTermHref' : ontologyTerm.href}));
 					
 					ns.OntologyAnnotator.prototype.searchOntologyTermByUri(ontologyTermIRI, ontologyTerm.termAccession, function(boosted){
-						var selectBoostIcon = $('<i class="icon-star-empty float-right"></i>');
+						var selectBoostIcon = $('<i class="icon-star-empty float-right"></i>').popover({
+							content : 'Select as key concept and give more weight!',
+							trigger : 'hover',
+							placement : 'bottom'
+						});
 						if(boosted) selectBoostIcon.removeClass('icon-star-empty').addClass('icon-star');
 						selectBoostIcon.click(function(){
 							if($(this).hasClass('icon-star-empty')){
@@ -424,14 +428,16 @@
 	ns.OntologyAnnotator.prototype.searchOntologies = function (){
 		searchApi.search(createSearchRequest(), function(searchResponse){
 			var ontologyDiv = $('#ontology-list');
-			$.each(searchResponse.searchHits, function(index, hit){
-				var ontologyInfo =hit.columnValueMap;
-				var ontologyUri = ontologyInfo.url;
-				var ontologyName = ontologyInfo.ontologyLabel;
-			    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
-			    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
-			    }).appendTo(ontologyDiv);
-			});
+			if(ontologyDiv.find('input').length === 0){
+				$.each(searchResponse.searchHits, function(index, hit){
+					var ontologyInfo =hit.columnValueMap;
+					var ontologyUri = ontologyInfo.url;
+					var ontologyName = ontologyInfo.ontologyLabel;
+				    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
+				    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
+				    }).appendTo(ontologyDiv);
+				});
+			}
 			$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
 		});
 		

@@ -64,18 +64,21 @@
 		return searchRequest;
 	};
 	
-	ns.showAlertMessage = function(message){
-		var messageAlert = $('<div />').addClass('alert alert-error').append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
+	ns.showAlertMessage = function(alertClass, message){
+		var messageDiv = $('#alert-message');
+		if(messageDiv.length === 0) messageDiv = $('<div id="alert-message"></div>');
+		var messageAlert = $('<div />').addClass(alertClass).append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
 		$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
-		$('#alert-message').append(messageAlert);
-		w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
-	}
+		messageDiv.empty().append(messageAlert);
+		$('form:eq(-1)').prepend(messageDiv);
+		w.setTimeout(function(){messageDiv.fadeOut(1000).remove()}, 5000);
+	};
 	
 	$(function() {
 		$('#index-button').click(function(){
 			var ontologyName = $('#ontologyName').val();
 			if(ontologyName == null || ontologyName == ''){
-				ns.showAlertMessage('Please define the name of ontology!');
+				ns.showAlertMessage('alert alert-error','Please define the name of ontology!');
 			}else if($('#uploadedOntology').val() !== ''){
 				$('#ontologyindexer-form').attr({
 					'action' : ns.getContextURL() + '/index',

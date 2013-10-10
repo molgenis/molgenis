@@ -32,7 +32,7 @@ public class HarmonizationConfig
 	}
 
 	@Bean
-	public OntologyMatcher luceneMatcher()
+	public OntologyMatcher ontologyMatcher()
 	{
 		return new AsyncOntologyMatcher();
 	}

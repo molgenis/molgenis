@@ -19,7 +19,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.omx.harmonization.tupleTables.StoreMappingTable;
+import org.molgenis.omx.harmonization.tupletables.StoreMappingTable;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;

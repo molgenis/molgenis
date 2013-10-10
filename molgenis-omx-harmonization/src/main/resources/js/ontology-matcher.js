@@ -28,14 +28,17 @@
 				var dataSet = restApi.get('/api/v1/dataset/' + targetDataSetId);
 				var nameDiv = $('<div />').addClass('span4').append(dataSet.name);
 				var controlDiv = $('<div />').addClass('offset4 span4');
-				var viewCatalogue = $('<button type="btn" class="btn btn-link">View</button>').click(function(){
-					changeDataSet(targetDataSetId);
-					$('#catalogue-container').show();
-					return false;
-				});
-				var hideCatalogue = $('<button type="btn" class="btn btn-link">Hide</button>').click(function(){
-					$('#catalogue-container').hide().find('table').empty();
-					sortRule = null;
+				var viewCatalogue = $('<button type="btn" class="btn btn-link view-button">View</button>').click(function(){
+					if($(this).hasClass('view-button')){
+						changeDataSet(targetDataSetId);
+						$('#catalogue-container').show();
+						$('button.hide-button').empty().append('View').removeClass('hide-button').addClass('view-button');
+						$(this).empty().append('Hide').removeClass('view-button').addClass('hide-button');
+					}else{
+						$('#catalogue-container').hide().find('table').empty();
+						sortRule = null;
+						$(this).empty().append('View').removeClass('hide-button').addClass('view-button');
+					}
 					return false;
 				});
 				var removeCatalogue = $('<button type="btn" class="btn btn-link">Remove</button>').click(function(){
@@ -47,7 +50,7 @@
 					$('#catalogue-container').hide().find('table').empty();
 					return false;
 				});
-				$('<div />').addClass('btn-group').append(viewCatalogue).append(hideCatalogue).append(removeCatalogue).appendTo(controlDiv);
+				$('<div />').addClass('btn-group').append(viewCatalogue).append(removeCatalogue).appendTo(controlDiv);
 				$('<div />').addClass('row-fluid').append(nameDiv).append(controlDiv).appendTo(dataSetDiv);
 			});
 		}

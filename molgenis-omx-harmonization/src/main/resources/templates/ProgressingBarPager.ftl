@@ -5,6 +5,9 @@
 		</div>
 	</div>
 	<div id="progress-bar-div" class="row-fluid">
+		<div class="offset2 span8">
+			When finished, click next!
+		</div>
 		<div class="progress progress-striped active offset2 span8">
 			<div class="bar text-align-center"></div>
 		</div>

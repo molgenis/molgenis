@@ -1,6 +1,6 @@
-package org.molgenis.omx.harmonization.controllers;
+package org.molgenis.omx.harmonization.biobankconnect;
 
-import static org.molgenis.omx.harmonization.controllers.BiobankConnectController.URI;
+import static org.molgenis.omx.harmonization.biobankconnect.BiobankConnectController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
@@ -12,16 +12,15 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.harmonization.choosecatalogue.ChooseCataloguePager;
+import org.molgenis.omx.harmonization.mappingmanager.MappingManagerPager;
 import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
+import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotatorPager;
 import org.molgenis.omx.harmonization.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcherPager;
 import org.molgenis.omx.harmonization.ontologymatcher.OntologyMatcherResponse;
-import org.molgenis.omx.harmonization.pagers.BiobankConnectWizard;
-import org.molgenis.omx.harmonization.pagers.ChooseCataloguePager;
-import org.molgenis.omx.harmonization.pagers.MappingManagerPager;
-import org.molgenis.omx.harmonization.pagers.OntologyAnnotatorPager;
-import org.molgenis.omx.harmonization.pagers.OntologyMatcherPager;
-import org.molgenis.omx.harmonization.pagers.ProgressingBarPager;
+import org.molgenis.omx.harmonization.progressbar.ProgressingBarPager;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
@@ -104,9 +103,11 @@ public class BiobankConnectController extends AbstractWizardController
 		return wizard;
 	}
 
+	// TODO : requestParam
 	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
 	public String annotate(HttpServletRequest request) throws Exception
 	{
+		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
 		if (request.getParameter("selectedOntologies") != null)
 		{
 			List<String> documentTypes = new ArrayList<String>();
@@ -119,19 +120,11 @@ public class BiobankConnectController extends AbstractWizardController
 		return init();
 	}
 
+	// TODO : requestParam
 	@RequestMapping(value = "/annotate/remove", method = RequestMethod.POST)
 	public String removeAnnotations(HttpServletRequest request) throws Exception
 	{
-		if (request.getParameter("selectedOntologies") != null)
-		{
-			List<String> ontologyUris = new ArrayList<String>();
-			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
-			{
-				ontologyUris.add(ontologyUri);
-			}
-			ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId(), ontologyUris);
-		}
-
+		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
 		return init();
 	}
 
@@ -152,6 +145,7 @@ public class BiobankConnectController extends AbstractWizardController
 		return response;
 	}
 
+	// TODO : to template
 	@ModelAttribute("javascripts")
 	public List<String> getJavascripts()
 	{
@@ -160,6 +154,7 @@ public class BiobankConnectController extends AbstractWizardController
 				"biobank-connect.js");
 	}
 
+	// TODO : to template
 	@ModelAttribute("stylesheets")
 	public List<String> getStylesheets()
 	{

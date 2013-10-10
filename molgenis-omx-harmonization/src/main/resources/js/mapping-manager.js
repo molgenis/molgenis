@@ -380,7 +380,8 @@
 								ns.MappingManager.prototype.createMatrixForDataItems();
 							});
 							modal.css({
-								'margin-top' : 200
+								'width' : 600,
+								'margin-top' : 120
 							});
 							modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove candidate mappings?</strong></p>');
 							modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
@@ -624,7 +625,7 @@
 			$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
 			messageDiv.empty().append(messageAlert);
 			$('form:eq(-1)').prepend(messageDiv);
-			w.setTimeout(function(){messageAlert.fadeOut(1000).remove()}, 10000);
+			w.setTimeout(function(){messageDiv.fadeOut(1000).remove()}, 10000);
 		}
 		
 		function i18nDescription(feature){

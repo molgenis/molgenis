@@ -1,6 +1,6 @@
-package org.molgenis.omx.harmonization.controllers;
+package org.molgenis.omx.harmonization.ontologyindexer;
 
-import static org.molgenis.omx.harmonization.controllers.OntologyIndexerController.URI;
+import static org.molgenis.omx.harmonization.ontologyindexer.OntologyIndexerController.URI;
 
 import java.io.File;
 import java.util.List;
@@ -8,7 +8,6 @@ import java.util.List;
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.harmonization.ontologyindexer.OntologyIndexer;
 import org.molgenis.omx.harmonization.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;

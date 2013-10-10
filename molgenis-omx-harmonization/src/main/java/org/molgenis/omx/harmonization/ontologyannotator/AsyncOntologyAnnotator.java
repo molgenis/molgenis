@@ -94,7 +94,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	}
 
 	@Override
-	public void removeAnnotations(Integer dataSetId, List<String> documentTypes)
+	public void removeAnnotations(Integer dataSetId)
 	{
 		try
 		{
@@ -119,24 +119,12 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			for (ObservableFeature feature : unsecuredDatabase.find(ObservableFeature.class, new QueryRule(
 					ObservableFeature.ID, Operator.IN, listOfFeatureIds)))
 			{
-				List<String> ontologyTerms = new ArrayList<String>();
 				List<OntologyTerm> definitions = feature.getDefinition();
-
 				if (definitions != null && definitions.size() > 0)
 				{
-					for (OntologyTerm ontologyTerm : definitions)
-					{
-						if (!documentTypes.contains(ontologyTerm.getOntology().getOntologyURI()))
-						{
-							ontologyTerms.add(ontologyTerm.getIdentifier());
-						}
-					}
-					if (ontologyTerms.size() != definitions.size())
-					{
-						ObservableFeature newFeature = copyObject(feature);
-						newFeature.setDefinition_Identifier(ontologyTerms);
-						featuresToUpdate.add(newFeature);
-					}
+					ObservableFeature newFeature = copyObject(feature);
+					newFeature.setDefinition_Identifier(new ArrayList<String>());
+					featuresToUpdate.add(newFeature);
 				}
 			}
 			unsecuredDatabase.update(featuresToUpdate);

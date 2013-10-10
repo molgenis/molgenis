@@ -1,10 +1,11 @@
-package org.molgenis.omx.harmonization.pagers;
+package org.molgenis.omx.harmonization.choosecatalogue;
 
 import java.io.Serializable;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.framework.db.Database;
+import org.molgenis.omx.harmonization.biobankconnect.BiobankConnectWizard;
 import org.molgenis.omx.harmonization.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.ui.wizard.AbstractWizardPage;

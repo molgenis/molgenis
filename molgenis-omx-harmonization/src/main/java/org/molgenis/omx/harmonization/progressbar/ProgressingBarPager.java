@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.pagers;
+package org.molgenis.omx.harmonization.progressbar;
 
 import java.io.Serializable;
 
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 @Component
-public class OntologyAnnotatorPager extends AbstractWizardPage implements Serializable
+public class ProgressingBarPager extends AbstractWizardPage implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String getTitle()
 	{
-		return "Annotate catalogue";
+		return "Process mapping";
 	}
 
 	@Override

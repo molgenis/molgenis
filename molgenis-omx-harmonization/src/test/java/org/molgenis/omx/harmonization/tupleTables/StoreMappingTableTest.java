@@ -18,6 +18,7 @@ import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.omx.converters.ValueConverterException;
+import org.molgenis.omx.harmonization.tupletables.StoreMappingTable;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;

@@ -6,7 +6,7 @@ public interface OntologyAnnotator
 {
 	void annotate(Integer protocolId, List<String> documentTypes);
 
-	void removeAnnotations(Integer protocolId, List<String> documentTypes);
+	void removeAnnotations(Integer dataSetId);
 
 	float finishedPercentage();
 

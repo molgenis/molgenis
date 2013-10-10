@@ -20,9 +20,9 @@
 									<input type="hidden" id="selectedTargetDataSets" name="selectedTargetDataSets">
 								</div>
 								<div class="btn-group offset2 span3">
-									<button id="add-target-dataset" class="btn" type="btn">Select</button>
+									<button id="add-target-dataset" class="btn btn-info" type="btn">Select</button>
 									<button id="add-target-all-datasets" class="btn btn-primary" type="btn">Select all</button>
-									<button id="remove-target-all-datasets" class="btn btn-danger" type="btn">Remove all</button>
+									<button id="remove-target-all-datasets" class="btn" type="btn">Remove all</button>
 								</div>
 							</div>
 							<div id="target-catalogue" class="row-fluid"></div>

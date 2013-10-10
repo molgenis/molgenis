@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
-import org.molgenis.omx.harmonization.tupleTables.OntologyTable;
-import org.molgenis.omx.harmonization.tupleTables.OntologyTermTable;
+import org.molgenis.omx.harmonization.tupletables.OntologyTable;
+import org.molgenis.omx.harmonization.tupletables.OntologyTermTable;
 import org.molgenis.omx.harmonization.utils.OntologyLoader;
 import org.molgenis.search.SearchService;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

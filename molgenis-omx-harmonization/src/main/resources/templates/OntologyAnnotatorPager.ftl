@@ -2,23 +2,21 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div class="well offset3 span6 upper-header">
+				<div class="well offset4 span4 upper-header">
 					<div class="row-fluid">
 						<div class="span5">
-							<dt>
-								Ontologies : 
-								<button id="toggle-select" class="btn btn-link select-all">Remove all</button>
-							</dt>
+							<dt>Ontologies :</dt>
 							<dd id="ontology-list"></dd>
+							<button id="toggle-select" class="btn btn-link select-all">Deselect all</button>
 							<input type="hidden" id="selectedOntologies" name="selectedOntologies" />
 						</div>
-						<div class="offset1 span6">
+						<div class="span4">
 							<dl>
 								<dt>Action :</dt>
 								<dd>
 									<div class="btn-group">
-										<button id="annotate-all-dataitems" class="btn btn-primary">Annotate</button>
-										<button id="remove-annotations" class="btn btn-danger">Remove annotation</button>
+										<button id="annotate-all-dataitems" class="btn btn-primary">Re-annotate</button>
+										<button id="remove-annotations" class="btn">Remove annotates</button>
 									</div>
 								</dd>
 							</dl>
@@ -66,8 +64,9 @@
 					$(this).removeClass('select-all').addClass('remove-all').empty().append('Select all');
 				}else{
 					$('#ontology-list').find('input').empty().attr('checked', true);
-					$(this).removeClass('remove-all').addClass('select-all').empty().append('Remove all');
+					$(this).removeClass('remove-all').addClass('select-all').empty().append('Deselect all');
 				}
+				molgenis.getOntologyAnnotator().searchOntologies();
 				return false;
 			});
 			

@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.tupleTables;
+package org.molgenis.omx.harmonization.tupletables;
 
 import java.util.ArrayList;
 import java.util.Arrays;

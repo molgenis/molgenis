@@ -110,6 +110,9 @@
 	};
 	
 	$(document).ready(function(){
+		var buttonGroup = $('.bwizard-buttons');
+		$('#wizardForm').prepend(buttonGroup);
+		buttonGroup.before('<legend />');
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);
 	});

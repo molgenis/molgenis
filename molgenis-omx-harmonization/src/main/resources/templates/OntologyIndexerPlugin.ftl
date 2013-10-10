@@ -3,38 +3,43 @@
 <#assign css=["bootstrap-fileupload.min.css", "ontology-indexer.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "ontology-indexer.js"]>
 <@header css js/>
-	<div class="row-fluid">
-		<#if isCorrectOntology?? && !isCorrectOntology> 
+	<#if isCorrectOntology?? && !isCorrectOntology> 
+		<div class="row-fluid">
 			<div class="alert alert-error">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
 			</div>
-		<#elseif isIndexRunning?? && isIndexRunning>
+		</div>
+	<#elseif isIndexRunning?? && isIndexRunning>
+		<div class="row-fluid">
 			<div class="alert alert-info">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
 			</div>
-		<#elseif isCorrectZipFile?? && !isCorrectZipFile>
+		</div>
+	<#elseif isCorrectZipFile?? && !isCorrectZipFile>
+		<div class="row-fluid">
 			<div class="alert alert-error">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Message : </strong> ${message}</p>
 			</div>
-		<#elseif removeSuccess??>
+		</div>
+	<#elseif removeSuccess??>
+		<div class="row-fluid">
 			<div <#if removeSuccess>class="alert alert-info"<#else>class="alert alert-error</#if>">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p><strong>Message : </strong> ${message}</p>
 			</div>
-		</#if>
 		</div>
-	</div>
-	<div class="row-fluid">
-		<div class="span12">
-			<legend>Add new ontologies</legend>
+	</#if>
+	<form id="ontologyindexer-form" class="form-horizontal" enctype="multipart/form-data">
+		<div class="row-fluid">
+			<div class="span12">
+				<legend>Add new ontologies</legend>
+			</div>
 		</div>
-	</div>
-	<div class="row-fluid">
-		<div class="span12">
-			<form id="ontologyindexer-form" class="form-horizontal" enctype="multipart/form-data">
+		<div class="row-fluid">
+			<div class="span12">
 				<input type="hidden" name="ontologyUri"/>
 				<div class="row-fluid">
 					<div id="div-index-ontology" class="span8 well">
@@ -114,9 +119,9 @@
 						</div>
 					</div>
 				</div>
-			</form>
+			</div>
 		</div>
-	</div>
+	</form>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
