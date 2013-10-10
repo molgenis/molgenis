@@ -245,11 +245,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (!entityAuthorities.isEmpty()) database.add(entityAuthorities);
 	}
 
-	private List<Authority> getUserPermissions(MolgenisUser molgenisUser) throws DatabaseException
-	{
-		return getUserPermissions(molgenisUser, null);
-	}
-
 	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
 			throws DatabaseException
 	{

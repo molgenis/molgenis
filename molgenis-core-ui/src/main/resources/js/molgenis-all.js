@@ -30,7 +30,6 @@ function htmlEscape(text) {
  * Is used by the dataexplorer and the forms plugin 
  */
 function formatTableCellValue(value, dataType) {
-	
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value) + '</a>';
 		
@@ -50,13 +49,15 @@ function formatTableCellValue(value, dataType) {
 		
 		if (value.length > 50) {
 			var abbr = htmlEscape(value.substr(0, 47)) + '...';
-			value = '<span class="show-popover"  data-content="' + value + '" data-toggle="popover">' + abbr + "</span>";
+			value = '<span class="show-popover"  data-content="' + htmlEscape(value) + '" data-toggle="popover">' + abbr + "</span>";
 		} else {
 			value = htmlEscape(value);
 		}
 		
+	} else {
+		value = htmlEscape(value);
 	}
-		
+	
 	return value;
 };
 
