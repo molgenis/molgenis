@@ -1,16 +1,22 @@
 package org.molgenis.omx;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
+import org.molgenis.omx.das.DasPatientFilter;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import uk.ac.ebi.mydas.controller.MydasServlet;
 
 public class WebAppInitializer implements WebApplicationInitializer
 {
@@ -40,7 +46,18 @@ public class WebAppInitializer implements WebApplicationInitializer
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
 		
-		Dynamic dasServlet = servletContext.addServlet("dasServlet", new uk.ac.ebi.mydas.controller.MydasServlet());
+		//Filter is needed to alter the urls used to serve patient specific URLs
+		javax.servlet.FilterRegistration.Dynamic filter = servletContext.addFilter("dasFilter", new DasPatientFilter());
+		if (filter == null)
+		{
+			logger.warn("ServletContext already contains a complete FilterRegistration for servlet 'dasFilter'");
+		}
+		else
+		{
+			filter.addMappingForUrlPatterns(EnumSet.of (DispatcherType.REQUEST), true, "/das/*");
+		}
+		
+		Dynamic dasServlet = servletContext.addServlet("dasServlet", new MydasServlet());
 		if (dasServlet == null)
 		{
 			logger.warn("ServletContext already contains a complete ServletRegistration for servlet 'dasServlet'");

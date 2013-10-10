@@ -1618,10 +1618,9 @@ function Browser(opts) {
         opts = {};
     }
 
-	// custom code
+    // custom code
     this.uiPrefix = 'http://localhost:8080/';
     // custom code
-
     this.sources = [];
     this.tiers = [];
 
@@ -6945,6 +6944,7 @@ function rangeOrder(a, b)
 
 var THUB_STANZA_REGEXP = /\n\s*\n/;
 var THUB_PARSE_REGEXP  = /(\w+) +(.+)\n?/;
+var THUB_SUBGROUP_REGEXP = /subGroup[1-9]/;
 
 function TrackHub(url) {
     this.genomes = {};
@@ -6984,7 +6984,28 @@ TrackHubDB.prototype.getTracks = function(callback) {
             var toks = stanzas[s].split(THUB_PARSE_REGEXP);
             var track = new TrackHubTrack();
             for (var l = 0; l < toks.length - 2; l += 3) {
-                track[toks[l+1]] = toks[l+2];
+                var k = toks[l+1], v = toks[l+2];
+                if (k.match(THUB_SUBGROUP_REGEXP)) {
+                    if (!track.subgroups)
+                        track.subgroups = {};
+                    var sgtoks = v.split(/\s/);
+                    var sgtag = sgtoks[0];
+                    var sgrecord = {name: sgtoks[1], tags: [], titles: []};
+                    for (var sgti = 2; sgti < sgtoks.length; ++sgti) {
+                        var grp = sgtoks[sgti].split(/=/);
+                        sgrecord.tags.push(grp[0]);
+                        sgrecord.titles.push(grp[1]);
+                    }
+                    track.subgroups[sgtag] = sgrecord;
+                } else if (k === 'subGroups') {
+                    var sgtoks = v.split(/(\w+)=(\w+)/);
+                    track.sgm = {};
+                    for (var sgti = 0; sgti < sgtoks.length - 2; sgti += 3) {
+                        track.sgm[sgtoks[sgti+1]] = sgtoks[sgti + 2];
+                    }
+                } else {
+                    track[toks[l+1]] = toks[l+2];
+                }
             }
 
             if (track.track && (track.type || track.container)) {
@@ -7802,50 +7823,133 @@ Browser.prototype.showTrackAdder = function(ev) {
         
         for (var gi = 0; gi < groups.length; ++gi) {
             var group = groups[gi];
-            
-            var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
-            var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
-            var idx = 0;
-            
-            for (var i = 0; i < group.children.length; ++i) {
-                var track = group.children[i];
-                var ds = track.toDallianceSource();
-                if (!ds)
-                    continue;
+            var dg = group;
+            if (!dg.dimensions && dg._parent && dg._parent.dimensions)
+                dg = dg._parent;
 
-                var r = makeElement('tr');
-                var bd = makeElement('td');
-                bd.style.textAlign = 'center';
-
-                var b = makeElement('input');
-                b.type = 'checkbox';
-                b.dalliance_track = track;
-                if (__mapping) {
-                    b.dalliance_mapping = __mapping;
+            var dprops = {}
+            if (dg.dimensions) {
+                var dtoks = dg.dimensions.split(/(\w+)=(\w+)/);
+                for (var dti = 0; dti < dtoks.length - 2; dti += 3) {
+                    dprops[dtoks[dti + 1]] = dtoks[dti + 2];
                 }
-                b.checked = thisB.currentlyActive(ds); // FIXME!
-                bd.appendChild(b);
-                addButtons.push(b);
-                b.addEventListener('change', function(ev) {
-                    if (ev.target.checked) {
-                        thisB.addTier(ev.target.dalliance_track.toDallianceSource());
-                    } else {
-                        thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
-                    }
-                });
-
-                r.appendChild(bd);
-                var ld = makeElement('td');
-                ld.appendChild(document.createTextNode(track.shortLabel));
-                if (track.longLabel && track.longLabel.length > 0) {
-                    thisB.makeTooltip(ld, track.longLabel);
-                }
-                r.appendChild(ld);
-                stabBody.appendChild(r);
-                ++idx;
             }
-            ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+
+            if (dprops.dimX && dprops.dimY) {
+                var dimX = dprops.dimX, dimY = dprops.dimY;
+                var sgX = dg.subgroups[dimX];
+                var sgY = dg.subgroups[dimY];
+                
+                var trks = {};
+                for (var ci = 0; ci < group.children.length; ++ci) {
+                    var child = group.children[ci];
+                    var vX = child.sgm[dimX], vY = child.sgm[dimY];
+                    if (!trks[vX])
+                        trks[vX] = {};
+                    trks[vX][vY] = child;
+                }
+                __test_trks = trks;
+
+                var matrix = makeElement('table', null, {className: 'table table-striped table-condensed'});
+                {
+                    var header = makeElement('tr');
+                    header.appendChild(makeElement('td'));   // blank corner element
+                    for (var si = 0; si < sgX.titles.length; ++si) {
+                        var h = makeElement('th', sgX.titles[si], {}, {transform: 'rotate(-45deg)', transformOrigin: '0px 0px', webkitTransform: 'rotate(-45deg)', webkitTransformOrigin: '0px 0px'});
+                        header.appendChild(h);
+                    }
+                    matrix.appendChild(header);
+                }
+
+                var mbody = makeElement('tbody', null, {className: 'table table-striped table-condensed'})
+                for (var yi = 0; yi < sgY.titles.length; ++yi) {
+                    var vY = sgY.tags[yi];
+                    var row = makeElement('tr');
+                    row.appendChild(makeElement('th', sgY.titles[yi]));
+                    
+                    for (var xi = 0; xi < sgX.titles.length; ++xi) {
+                        var vX = sgX.tags[xi];
+                        var cell = makeElement('td');
+                        if (trks[vX] && trks[vX][vY]) {
+                            var track = trks[vX][vY];
+                            var ds = track.toDallianceSource();
+                            if (!ds)
+                                continue;
+                            
+                            var r = makeElement('tr');
+                            var bd = makeElement('td');
+                            bd.style.textAlign = 'center';
+                            
+                            var b = makeElement('input');
+                            b.type = 'checkbox';
+                            b.dalliance_track = track;
+                            if (__mapping) {
+                                b.dalliance_mapping = __mapping;
+                            }
+                            b.checked = thisB.currentlyActive(ds); // FIXME!
+                            cell.appendChild(b);
+                            b.addEventListener('change', function(ev) {
+                                if (ev.target.checked) {
+                                    thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                                } else {
+                                    thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                                }
+                            });
+
+                        }
+                        row.appendChild(cell);
+                    } 
+                    mbody.appendChild(row);
+                }
+                matrix.appendChild(mbody);
+                ttab.appendChild(makeTreeTableSection(group.shortLabel, matrix, gi==0));                
+            } else {
+                var stabBody = makeElement('tbody', null, {className: 'table table-striped table-condensed'});
+                var stab = makeElement('table', stabBody, {className: 'table table-striped table-condensed'}, {width: '100%'}); 
+                var idx = 0;
+            
+                for (var i = 0; i < group.children.length; ++i) {
+                    var track = group.children[i];
+                    var ds = track.toDallianceSource();
+                    if (!ds)
+                        continue;
+
+                    var r = makeElement('tr');
+                    var bd = makeElement('td');
+                    bd.style.textAlign = 'center';
+                    
+                    var b = makeElement('input');
+                    b.type = 'checkbox';
+                    b.dalliance_track = track;
+                    if (__mapping) {
+                        b.dalliance_mapping = __mapping;
+                    }
+                    b.checked = thisB.currentlyActive(ds); // FIXME!
+                    bd.appendChild(b);
+                    addButtons.push(b);
+                    b.addEventListener('change', function(ev) {
+                        if (ev.target.checked) {
+                            thisB.addTier(ev.target.dalliance_track.toDallianceSource());
+                        } else {
+                            thisB.removeTier(ev.target.dalliance_track.toDallianceSource());
+                        }
+                    });
+
+                    r.appendChild(bd);
+                    var ld = makeElement('td');
+                    ld.appendChild(document.createTextNode(track.shortLabel));
+                    if (track.longLabel && track.longLabel.length > 0) {
+                        thisB.makeTooltip(ld, track.longLabel);
+                    }
+                    r.appendChild(ld);
+                    stabBody.appendChild(r);
+                    ++idx;
+                }
+                ttab.appendChild(makeTreeTableSection(group.shortLabel, stab, gi==0));
+                
+            }
         }
+        
         stabHolder.appendChild(ttab);
     };
     
@@ -8043,13 +8147,7 @@ Browser.prototype.showTrackAdder = function(ev) {
                             // FIXME redundant with hub-tab click handler.
                         
                             hub.genomes[thisB.coordSystem.ucscName].getTracks(function(tracks, err) {
-                                var hubTracks = [];
-                                for (var ti = 0; ti < tracks.length; ++ti) {
-                                    var t = tracks[ti].toDallianceSource();
-                                    if (t)
-                                        hubTracks.push(t);
-                                }
-                                makeStab(new Observed(hubTracks));
+                                makeHubStab(tracks);
                             });
                         } else {
                             removeChildren(stabHolder);
@@ -8974,6 +9072,11 @@ VERSION.toString = function() {
 // browser-us.js: standard UI wiring
 //
 
+var molgenisUrl = location.hostname;
+        if(location.port != ""){
+        	molgenisUrl = molgenisUrl+":"+location.port;
+        }
+
 function formatLongInt(n) {
     return (n|0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
@@ -9008,28 +9111,28 @@ Browser.prototype.initUI = function(holder, genomePanel) {
         this.addFeatureListener(function(ev, feature, hit, tier) {
             b.featurePopup(ev, feature, hit, tier);
             
-            // custom code
-			if(hit[0].typeId == "mutation"){ // could also use hit.type?
-				var url = 'http://localhost:8080/plugin/mutation/data/'+ hit[0].id
-				console.log(url);
-				$.ajax({
-					url: url,
-					type: "GET",
-					dataType: "json",
-					success: function(data) {
-						console.log("Data returned : " + data);
-						
-						if (typeof data == 'object') {
-							informationTable(data);
-						}
-					},
-					error: function(jqXHR, textStatus, errorThrown) {
-						console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
-					}
-				});
-			}
-			// custom code
-			
+            //BEGIN custom MOLGENIS code
+            console.log('BEGIN custom MOLGENIS code'+hit[0].id);
+                  if(hit[0].typeId == "mutation"){ // could also use hit.type?
+                    var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/'+ hit[0].id
+                    console.log(url);
+                    $.ajax({
+                      url: url,
+                      type: "GET",
+                      dataType: "json",
+                      success: function(data) {
+                        console.log("Data returned : " + data);
+                        
+                        if (typeof data == 'object') {
+                        	patientMutationTable(data);
+                        }
+                      },
+                      error: function(jqXHR, textStatus, errorThrown) {
+                        console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
+                      }
+                    });
+                  }
+            //END custom MOLGENIS code
         });
     }
 
@@ -9229,27 +9332,27 @@ Browser.prototype.initUI = function(holder, genomePanel) {
        }
 
         b.setLocation(b.defaultChr, b.defaultStart, b.defaultEnd);
+       
+            //BEGIN custom MOLGENIS code
+            var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/';
+            console.log(url);
+            $.ajax({
+              url: url,
+              type: "GET",
+              dataType: "json",
+              success: function(data) {
+                console.log("Data returned : " + data);
+                
+                if (typeof data == 'object') {
+                	patientMutationTable(data);
+                }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                  console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
+                }
+             });
+            //END custom MOLGENIS code
         
-        // custom code
-		var url = 'http://localhost:8080/plugin/mutation/data/'
-		console.log(url);
-		$.ajax({
-			url: url,
-			type: "GET",
-			dataType: "json",
-			success: function(data) {
-				console.log("Data returned : " + data);
-				
-				if (typeof data == 'object') {
-					informationTable(data);
-				}
-				},
-				error: function(jqXHR, textStatus, errorThrown) {
-					console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
-				}
-			});
-		// custom code
-		
     }, false);
     b.makeTooltip(resetBtn, 'Reset to default tracks and view.');
 
@@ -9273,17 +9376,35 @@ Browser.prototype.initUI = function(holder, genomePanel) {
             locField.focus();
         }
     });
-
+    //BEGIN custom MOLGENIS code
+    var url = 'http://'+molgenisUrl+'/plugin/genomebrowser/data/';
+    console.log(url);
+    $.ajax({
+      url: url,
+      type: "GET",
+      dataType: "json",
+      success: function(data) {
+        console.log("Data returned : " + data);
+        
+        if (typeof data == 'object') {
+        	patientMutationTable(data);
+        }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.log("jqXHR : "+jqXHR + " text status : " + textStatus + " error : " + errorThrown);
+        }
+     });
+    //END custom MOLGENIS code
   }
 
 Browser.prototype.toggleHelpPopup = function(ev) {
     if (this.helpPopup && this.helpPopup.displayed) {
         this.removeAllPopups();
     } else {
-    	// custom code
-        var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'css/index.html'}, {width: '490px', height: '500px'});
-        // custom code
-        this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
+    	// BEGIN custom MOLGENIS code
+    	var helpFrame = makeElement('iframe', null, {src: this.uiPrefix + 'css/index.html'}, {width: '490px', height: '500px'});
+    	// END custom MOLGENIS code
+    	this.helpPopup = this.popit(ev, 'Help', helpFrame, {width: 500});
     }
 }
 
@@ -11424,6 +11545,330 @@ function sourceAdapterIsCapable(s, cap) {
     if (!s.capabilities)
         return false;
     else return s.capabilities()[cap];
+}
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2013
+//
+// jbjson.js -- query JBrowse-style REST data stores
+//
+
+function JBrowseStore(base, query) {
+    this.base = base;
+    this.query = query;
+}
+
+var topLevelResp;
+
+JBrowseStore.prototype.features = function(segment, opts, callback) {
+    opts = opts || {};
+
+    url = this.base + '/features/' + segment.name;
+
+    var filters = [];
+    if (this.query) {
+	filters.push(this.query);
+    }
+    if (segment.isBounded) {
+	filters.push('start=' + segment.start);
+	filters.push('end=' + segment.end);
+    }
+    if (filters.length > 0) {
+	url = url + '?' + filters.join('&');
+    }
+
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+		callback(null, 'Error code ' + req.status);
+	    } else {
+		var jf = JSON.parse(req.response)['features'];
+		var features = [];
+		for (fi = 0; fi < jf.length; ++fi) {
+		    var j = jf[fi];
+		    
+		    var f = new DASFeature();
+		    f.segment = segment;
+		    f.min = (j['start'] | 0) + 1;
+		    f.max = j['end'] | 0;
+		    if (j.name) {
+			f.label = j.name;
+		    }
+		    f.type = j.type || 'unknown';
+		    
+		    features.push(f);
+		}
+		callback(features);
+	    }
+	}
+	
+    };
+    
+    req.open('GET', url, true);
+    req.responseType = 'text';
+    req.send('');
+}
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2013
+//
+// ensembljson.js -- query the Ensembl REST API.
+//
+
+function EnsemblFeatureSource(source) {
+    this.source = source;
+    this.base = source.uri || 'http://beta.rest.ensembl.org';
+    this.species = source.species || 'human';
+
+    if (typeof source.type === 'string') {
+        this.type = [source.type];
+    } else {
+        this.type = source.type || ['regulatory'];
+    }
+}
+
+EnsemblFeatureSource.prototype.getStyleSheet = function(callback) {
+    var stylesheet = new DASStylesheet();
+
+    var tsStyle = new DASStyle();
+    tsStyle.glyph = '__NONE';
+    if (this.type.indexOf('exon') >= 0)
+        stylesheet.pushStyle({type: 'transcript'}, null, tsStyle);
+    if (this.type.indexOf('exon') >= 0 || this.type.indexOf('transcript') >= 0)
+        stylesheet.pushStyle({type: 'gene'}, null, tsStyle);
+
+    var cdsStyle = new DASStyle();
+    cdsStyle.glyph = 'BOX';
+    cdsStyle.FGCOLOR = 'black';
+    cdsStyle.BGCOLOR = 'red'
+    cdsStyle.HEIGHT = 8;
+    cdsStyle.BUMP = true;
+    cdsStyle.LABEL = true;
+    cdsStyle.ZINDEX = 10;
+    stylesheet.pushStyle({type: 'cds'}, null, cdsStyle);
+
+    var wigStyle = new DASStyle();
+    wigStyle.glyph = 'BOX';
+    wigStyle.FGCOLOR = 'black';
+    wigStyle.BGCOLOR = 'orange'
+    wigStyle.HEIGHT = 8;
+    wigStyle.BUMP = true;
+    wigStyle.LABEL = true;
+    wigStyle.ZINDEX = 20;
+    stylesheet.pushStyle({type: 'default'}, null, wigStyle);
+
+    return callback(stylesheet);
+}
+
+
+EnsemblFeatureSource.prototype.getScales = function() {
+    return [];
+}
+
+EnsemblFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    url = this.base + '/feature/region/' + this.species + '/' + chr + ':' + min + '-' + max;
+
+    var filters = [];
+    for (var ti = 0; ti < this.type.length; ++ti) {
+        filters.push('feature=' + this.type[ti]);
+    }
+    filters.push('content-type=application/json');
+    url = url + '?' + filters.join(';');
+    
+    console.log(url);
+
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+	if (req.readyState == 4) {
+	    if (req.status >= 300) {
+		callback('Error code ' + req.status, null);
+	    } else {
+		var jf = JSON.parse(req.response);
+		var features = [];
+		for (fi = 0; fi < jf.length; ++fi) {
+		    var j = jf[fi];
+		    
+		    var f = new DASFeature();
+		    f.segment = chr;
+		    f.min = j['start'] | 0;
+		    f.max = j['end'] | 0;
+		    f.type = j.feature_type || 'unknown';
+		    f.id = j.ID;
+
+                    if (j.Parent) {
+                        var grp = new DASGroup();
+                        grp.id = j.Parent;
+                        f.groups = [grp];
+                    }
+
+                    if (j.strand) {
+                        if (j.strand < 0) 
+                            f.orientation = '-';
+                        else if (j.strand > 0) 
+                            f.orientation = '+';
+                    }
+		    
+		    features.push(f);
+		}
+		callback(null, features);
+	    }
+	}
+	
+    };
+    
+    req.open('GET', url, true);
+    req.responseType = 'text';
+    req.send('');
+}
+/* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+// 
+// Dalliance Genome Explorer
+// (c) Thomas Down 2006-2013
+//
+// overlay.js: featuresources composed from multiple underlying sources
+//
+
+function OverlayFeatureSource(sources, opts) {
+    this.sources = sources;
+    this.opts = opts || {};
+
+    if (opts.merge == 'concat') {
+        this.merge = OverlayFeatureSource_merge_concat;
+    } else {
+        this.merge = OverlayFeatureSource_merge_byKey;
+    }
+}
+
+OverlayFeatureSource.prototype.getScales = function() {
+    return this.sources[0].getScales();
+}
+
+OverlayFeatureSource.prototype.getStyleSheet = function(callback) {
+    return this.sources[0].getStyleSheet(callback);
+}
+
+OverlayFeatureSource.prototype.capabilities = function() {
+    var s0 = this.sources[0];
+    if (s0.capabilities) 
+        return s0.capabilities();
+    return {};
+}
+
+OverlayFeatureSource.prototype.fetch = function(chr, min, max, scale, types, pool, callback) {
+    var baton = new OverlayBaton(this, callback, this.sources.length);
+    for (var si = 0; si < this.sources.length; ++si) {
+	this.fetchN(baton, si, chr, min, max, scale, types, pool);
+    }
+}
+
+OverlayFeatureSource.prototype.fetchN = function(baton, si, chr, min, max, scale, types, pool) {
+    this.sources[si].fetch(chr, min, max, scale, types, pool, function(status, features, scale) {
+	return baton.completed(si, status, features, scale);
+    });
+}
+
+OverlayFeatureSource.prototype.quantFindNextFeature = function(chr, pos, dir, threshold, callback) {
+    return this.sources[0].quantFindNextFeature(chr, pos, dir, threshold, callback);
+}
+
+OverlayFeatureSource.prototype.findNextFeature = function(chr, pos, dir, callback) {
+    return this.sources[0].findNextFeature(chr, pos, dir, callback);
+}
+
+function OverlayBaton(source, callback, count) {
+    this.source = source;
+    this.callback = callback;
+    this.count = count;
+
+    this.returnCount = 0;
+    this.statusCount = 0;
+    this.returns = [];
+    this.features = []
+    this.statuses = [];
+    this.scale = null;
+}
+
+OverlayBaton.prototype.completed = function(index, status, features, scale) {
+    if (this.scale == null || index == 0) 
+	this.scale = scale;
+
+    if (this.returns[index])
+	throw 'Multiple returns for source ' + index;
+
+    this.returns[index] = true;
+    this.returnCount++;
+
+    this.features[index] = features;
+
+    if (status) {
+	this.statuses[index] = status;
+	this.statusCount++;
+    }
+
+
+    if (this.returnCount == this.count) {
+	if (this.statusCount > 0) {
+	    var message = '';
+	    for (var si = 0; si < this.count; ++si) {
+		var s = this.statuses[si];
+		if (s != 0) {
+		    if (message.length > 0) 
+			message += ', ';
+		    message += s;
+		}
+	    }
+	    return this.callback(message, null, this.scale);
+	} else {
+	    this.callback(null, this.source.merge(this.features), this.scale);
+	}
+    }
+}
+
+OverlayFeatureSource.prototype.keyForFeature = function(feature) {
+    return '' + feature.min + '..' + feature.max;
+}
+
+function OverlayFeatureSource_merge_byKey(featureSets) {
+    var om = {};
+    var of = featureSets[1];
+    for (var fi = 0; fi < of.length; ++fi) {
+	om[this.keyForFeature(of[fi])] = of[fi];
+    }
+
+    var mf = [];
+    var fl = featureSets[0];
+    for (var fi = 0; fi < fl.length; ++fi) {
+	var f = fl[fi];
+	of = om[this.keyForFeature(f)]
+	if (of) {
+	    if (of.id)
+		f.id = of.id;
+	    if (of.label) 
+		f.label = of.label;
+	}
+	mf.push(f);
+    }
+    return mf;
+}
+
+function OverlayFeatureSource_merge_concat(featureSets) {
+    var features = [];
+    for (var fsi = 0; fsi < featureSets.length; ++fsi) {
+        var fs = featureSets[fsi];
+        var name = this.sources[fsi].name;
+        for (var fi = 0; fi < fs.length; ++fi) {
+            var f = fs[fi];
+            f.method = name;
+            features.push(f);
+        }
+    }
+    return features;
 }
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 

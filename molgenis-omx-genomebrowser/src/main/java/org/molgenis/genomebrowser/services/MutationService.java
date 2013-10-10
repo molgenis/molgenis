@@ -7,71 +7,119 @@ import java.util.List;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.xgap.Patient;
+import org.molgenis.omx.patient.Patient;
+import org.molgenis.omx.xgap.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-/**
- * Controller class for the data explorer.
- * 
- * The implementation javascript file for the resultstable is defined in a MolgenisSettings property named
- * 'dataexplorer.resultstable.js' possible values are '/js/SingleObservationSetTable.js' or
- * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as the default
- * 
- * @author erwin
- * 
- */
-
 @Service
-public class MutationService{
-	
+public class MutationService
+{
 	private Database database;
 
 	@Autowired
-	public MutationService(Database database){
+	public MutationService(Database database)
+	{
 		this.database = database;
 	}
-	
-	public JsonObject getData(String input)
-			throws ParseException, DatabaseException, IOException {
-		List<Patient> result = null;
-		
-		// get id and process data
-		if(!"".equals(input)){
-			String[] id = input.toString().split("_");
-			String mId = id[id.length - 3];
-			System.out.println("mutation id: " + mId); // used for debugging, testing, etc.
-		
-			Query q = database.query(Patient.class);
-			q.addRules(new QueryRule(Patient.MUTATION1, Operator.EQUALS, mId));
-			q.addRules(new QueryRule(Operator.OR));
-			q.addRules(new QueryRule(Patient.MUTATION2, Operator.EQUALS, mId));
-			result = q.find();
-		}else{
-			Query q = database.query(Patient.class);
-			result = q.find();
-		}
-		
+
+	public JsonObject getPatientMutationData(String segmentId, String mutationId) throws ParseException,
+			DatabaseException, IOException
+	{
+		List<Patient> patientQueryResult = null;
 		JsonObject jsonObject = new JsonObject();
 		JsonArray jsonArray = new JsonArray();
-		for (Patient p : result)
+
+		patientQueryResult = queryPatients(segmentId, mutationId);
+
+		for (Patient patient : patientQueryResult)
 		{
-			JsonObject jsonValues = new JsonObject();
-			for (String field : p.getFields())
-			{
-				if (p.get(field) != null) jsonValues.addProperty(field, p.get(field).toString());
-				else jsonValues.addProperty(field, "");
-			}
-			jsonArray.add(jsonValues);
+			createPatientFields(jsonArray, patient);
 		}
-		jsonObject.add("mut", jsonArray);
 		
+		jsonObject.add("variants", jsonArray);
 		return jsonObject;
-		
+
+	}
+
+	private List<Patient> queryPatients(String segmentId, String mutationId) throws DatabaseException
+	{
+		List<Patient> patientQueryResult;
+		if (mutationId != null && !"".equals(mutationId))
+		{
+			patientQueryResult = queryPatientsByMutation(segmentId, mutationId);
+		}
+		else
+		{
+			patientQueryResult = database.query(Patient.class).find();
+		}
+		return patientQueryResult;
+	}
+
+	private void createPatientFields(JsonArray jsonArray, Patient patient)
+	{
+		JsonObject jsonValues = new JsonObject();
+		for (String field : patient.getFields())
+		{
+			if (patient.get(field) != null)
+			{
+				jsonValues.addProperty(field, patient.get(field).toString());
+			}
+			else jsonValues.addProperty(field, "");
+		}
+		createVarientFields(patient, jsonValues);
+		jsonArray.add(jsonValues);
+	}
+
+	private void createVarientFields(Patient patient, JsonObject jsonValues)
+	{
+		createVarientFieldsForAllele(patient, jsonValues, "1");
+		createVarientFieldsForAllele(patient, jsonValues, "2");
+	}
+
+	private void createVarientFieldsForAllele(Patient patient, JsonObject jsonValues, String alleleId)
+	{
+		Variant variant = null;
+		if (patient.get("Allele" + alleleId + "_id") == null)
+		{
+			jsonValues.addProperty("CdnaNotation" + alleleId, "");
+			jsonValues.addProperty("Consequence" + alleleId, "");
+			jsonValues.addProperty("Exon" + alleleId, "");
+		}
+		else
+		{
+			if ("1".equals(alleleId))
+			{
+				variant = (Variant) patient.getAllele1();
+			}
+			else if ("2".equals(alleleId))
+			{
+				variant = (Variant) patient.getAllele2();
+			}
+			for (String allelefield : variant.getFields())
+			{
+				if (variant.get(allelefield) != null)
+				{
+					jsonValues.addProperty(allelefield + alleleId, variant.get(allelefield).toString());
+				}
+				else
+				{
+					jsonValues.addProperty(allelefield, "");
+				}
+			}
+		}
+	}
+
+	private List<Patient> queryPatientsByMutation(String segmentId, String mutationId) throws DatabaseException
+	{
+		Query<Patient> variantQuery = database.query(Patient.class);
+		variantQuery.equals(Patient.ALLELE1, mutationId);
+		variantQuery.or();
+		variantQuery.equals(Patient.ALLELE2, segmentId);
+		List<Patient> patients = variantQuery.find();
+		return patients;
 	}
 }
