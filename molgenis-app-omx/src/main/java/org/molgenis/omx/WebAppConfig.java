@@ -14,9 +14,9 @@ import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.omx.biobankconnect.BiobankConnectConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
-import org.molgenis.omx.harmonization.config.HarmonizationConfig;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.studymanager.StudyManagerService;
@@ -62,7 +62,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 @ComponentScan("org.molgenis")
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
-		DataExplorerConfig.class, SearchSecurityConfig.class, HarmonizationConfig.class })
+		DataExplorerConfig.class, SearchSecurityConfig.class, BiobankConnectConfig.class })
 public class WebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired

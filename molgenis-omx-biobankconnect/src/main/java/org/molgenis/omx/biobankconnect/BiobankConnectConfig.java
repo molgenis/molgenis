@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
 @EnableAsync
-public class HarmonizationConfig
+public class BiobankConnectConfig
 {
 	/**
 	 * Get a reference to a HarmonizationIndexer.
