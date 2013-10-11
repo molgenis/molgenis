@@ -1,9 +1,12 @@
 package org.molgenis.data.excel;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.molgenis.data.EntitySource;
-import org.molgenis.data.EntitySourceFactory;
+import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
 
 /**
@@ -14,9 +17,10 @@ import org.molgenis.data.MolgenisDataException;
  * example: excel://Users/john/Documents/matrix.xls
  * 
  */
-public class ExcelEntitySourceFactory implements EntitySourceFactory
+public class ExcelEntitySourceFactory implements FileBasedEntitySourceFactory
 {
 	public static final String EXCEL_ENTITYSOURCE_URL_PREFIX = "excel://";
+	public static final List<String> FILE_EXTENSIONS = Arrays.asList("xls", "xlsx");
 
 	@Override
 	public String getUrlPrefix()
@@ -38,6 +42,18 @@ public class ExcelEntitySourceFactory implements EntitySourceFactory
 		{
 			throw new MolgenisDataException("Exception creating excel datasource with url [" + url + "]", e);
 		}
+	}
+
+	@Override
+	public List<String> getFileExtensions()
+	{
+		return FILE_EXTENSIONS;
+	}
+
+	@Override
+	public EntitySource create(File file) throws IOException
+	{
+		return new ExcelEntitySource(file);
 	}
 
 }

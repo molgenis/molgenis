@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -11,9 +13,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.EntitySourceFactory;
+import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the DataService interface
@@ -28,6 +34,8 @@ public class DataServiceImpl implements DataService
 
 	// Key: EntitySourceFactory.urlPrefix, value:EntitySource
 	private final Map<String, EntitySourceFactory> entitySourceFactoryByUrlPrefix = new HashMap<String, EntitySourceFactory>();
+
+	private final Map<String, FileBasedEntitySourceFactory> fileBasedEntitySourceFactoryByFileExtension = new HashMap<String, FileBasedEntitySourceFactory>();
 
 	@Override
 	public Iterable<String> getEntityNames()
@@ -73,6 +81,15 @@ public class DataServiceImpl implements DataService
 		}
 
 		entitySourceFactoryByUrlPrefix.put(entitySourceFactory.getUrlPrefix(), entitySourceFactory);
+
+		if (entitySourceFactory instanceof FileBasedEntitySourceFactory)
+		{
+			FileBasedEntitySourceFactory factory = (FileBasedEntitySourceFactory) entitySourceFactory;
+			for (String fileExtension : factory.getFileExtensions())
+			{
+				fileBasedEntitySourceFactoryByFileExtension.put(fileExtension, factory);
+			}
+		}
 	}
 
 	@Override
@@ -99,4 +116,51 @@ public class DataServiceImpl implements DataService
 		}
 	}
 
+	@Override
+	public long count(String entityName, Query q)
+	{
+		return getQueryableRepository(entityName).count(q);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
+	{
+		return this.<E> getQueryableRepository(entityName).findAll(q);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Integer id)
+	{
+		return this.<E> getQueryableRepository(entityName).findOne(id);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <E extends Entity> Queryable<E> getQueryableRepository(String entityName)
+	{
+		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Queryable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
+		}
+
+		return (Queryable<E>) repo;
+	}
+
+	@Override
+	public EntitySource createEntitySource(File file) throws IOException
+	{
+		if (!file.isFile())
+		{
+			throw new MolgenisDataException("File [" + file.getAbsolutePath() + "] is not a file");
+		}
+
+		String extension = StringUtils.getFilenameExtension(file.getName());
+		FileBasedEntitySourceFactory factory = fileBasedEntitySourceFactoryByFileExtension.get(extension);
+		if (factory == null)
+		{
+			throw new MolgenisDataException("Unknown file extension [" + extension + "]");
+		}
+
+		return factory.create(file);
+	}
 }
