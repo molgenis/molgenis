@@ -530,5 +530,6 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
+		<module>molgenis-data</module>
 	</modules>
 </project>

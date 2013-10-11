@@ -22,24 +22,20 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 public class MolgenisUserDetailsService implements UserDetailsService
 {
-	protected final Database unsecuredDatabase;
-	protected final PasswordEncoder passwordEncoder;
-	protected final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+	private final Database unsecuredDatabase;
+	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public MolgenisUserDetailsService(Database unsecuredDatabase, PasswordEncoder passwordEncoder,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
+	public MolgenisUserDetailsService(Database unsecuredDatabase, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
 		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
-		if (passwordEncoder == null) throw new IllegalArgumentException("Password encoder is null");
-		this.passwordEncoder = passwordEncoder;
+		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
 		this.unsecuredDatabase = unsecuredDatabase;
 		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
 	}

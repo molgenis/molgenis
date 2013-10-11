@@ -56,6 +56,12 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@Override
 	public void update(MolgenisUser molgenisUser) throws DatabaseException
 	{
+		MolgenisUser currentMolgenisUser = MolgenisUser.findById(database, molgenisUser.getId());
+		if (!currentMolgenisUser.getPassword().equals(molgenisUser.getPassword()))
+		{
+			String encryptedPassword = passwordEncoder.encode(molgenisUser.getPassword());
+			molgenisUser.setPassword(encryptedPassword);
+		}
 		database.update(molgenisUser);
 	}
 
