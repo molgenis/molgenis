@@ -94,7 +94,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			new RuntimeException(e);
 		}
 		return tuples.iterator();
 	}
@@ -195,7 +195,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				new RuntimeException(e);
 			}
 		}
 		return numberOfRows;

@@ -32,7 +32,7 @@ public class ChooseCataloguePage extends AbstractWizardPage implements Serializa
 	@Override
 	public String getTitle()
 	{
-		return "Choose desired catalogue";
+		return "Choose desired items";
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class ChooseCataloguePage extends AbstractWizardPage implements Serializa
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				new RuntimeException(e);
 			}
 		}
 		return null;

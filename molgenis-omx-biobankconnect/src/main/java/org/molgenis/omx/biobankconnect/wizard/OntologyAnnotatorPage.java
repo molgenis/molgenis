@@ -17,7 +17,7 @@ public class OntologyAnnotatorPage extends AbstractWizardPage implements Seriali
 	@Override
 	public String getTitle()
 	{
-		return "Review annotated catalogue";
+		return "Annotate items";
 	}
 
 	@Override

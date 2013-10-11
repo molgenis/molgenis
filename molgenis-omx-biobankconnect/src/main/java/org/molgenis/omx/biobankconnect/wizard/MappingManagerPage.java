@@ -20,7 +20,7 @@ public class MappingManagerPage extends AbstractWizardPage implements Serializab
 	@Override
 	public String getTitle()
 	{
-		return "Curate Mappings";
+		return "Review candidate mappings";
 	}
 
 	@Override

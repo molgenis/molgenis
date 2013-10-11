@@ -17,6 +17,7 @@
 									</#list>
 								</#if>
 							</select>
+							<button id="import-data-button" class="btn btn-primary" type="btn">Import data</button>
 						</div>
 						<div  id="div-search" class="span3">
 							<div><strong>Search data items :</strong></div>
@@ -52,6 +53,15 @@
 			molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
 			$('#selectedDataSetId').change(function(){
 				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+			});
+			if($('#selectedDataSetId option').length === 0){
+				$('.pager li.next').addClass('disabled');
+			}
+			$('#import-data-button').click(function(){
+				$('#wizardForm').attr({
+					'action' : '/menu/main/importwizard',
+					'method' : 'GET'
+				}).submit();
 			});
 		});
 	</script>

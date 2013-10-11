@@ -17,6 +17,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.target.Ontology;
@@ -27,41 +28,18 @@ import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBean
 {
 	@Autowired
-	@Qualifier("unsecuredDatabase")
-	private Database unsecuredDatabase;
+	private Database database;
 
 	private SearchService searchService;
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
 	private static boolean complete = false;
-	// TODO : solve this guy
-	public static final Set<String> STOPWORDSLIST;
-	static
-	{
-		STOPWORDSLIST = new HashSet<String>(Arrays.asList("a", "you", "about", "above", "after", "again", "against",
-				"all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before",
-				"being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did",
-				"didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from",
-				"further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll",
-				"he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i",
-				"i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself",
-				"let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on",
-				"once", "only", "or", "other", "ought", "our", "ours ", " ourselves", "out", "over", "own", "same",
-				"shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than",
-				"that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these",
-				"they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under",
-				"until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't",
-				"what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom",
-				"why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've",
-				"your", "yours", "yourself", "yourselves", "many", ")", "("));
-	}
 
 	@Autowired
 	public void setSearchService(SearchService searchService)
@@ -98,8 +76,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	{
 		try
 		{
-			DataSet dataSet = unsecuredDatabase.findById(DataSet.class, dataSetId);
-			// Protocol protocol = dataSet.getProtocolUsed();
+			DataSet dataSet = database.findById(DataSet.class, dataSetId);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
 			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
@@ -116,8 +93,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				listOfFeatureIds.add(featureId);
 			}
 			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
-			for (ObservableFeature feature : unsecuredDatabase.find(ObservableFeature.class, new QueryRule(
-					ObservableFeature.ID, Operator.IN, listOfFeatureIds)))
+			for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
+					Operator.IN, listOfFeatureIds)))
 			{
 				List<OntologyTerm> definitions = feature.getDefinition();
 				if (definitions != null && definitions.size() > 0)
@@ -127,7 +104,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 					featuresToUpdate.add(newFeature);
 				}
 			}
-			unsecuredDatabase.update(featuresToUpdate);
+			database.update(featuresToUpdate);
 		}
 		catch (Exception e)
 		{
@@ -166,8 +143,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			{
 				Hit hit = iterator.next();
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get("id").toString());
-				ObservableFeature feature = toObservableFeature(unsecuredDatabase.findById(ObservableFeature.class,
-						featureId));
+				ObservableFeature feature = toObservableFeature(database.findById(ObservableFeature.class, featureId));
 				String name = hit.getColumnValueMap().get("name").toString().toLowerCase()
 						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
 				String description = hit.getColumnValueMap().get("description").toString().toLowerCase()
@@ -176,9 +152,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 				for (String documentType : documentTypes)
 				{
-					definitions.addAll(annotateDataItem(unsecuredDatabase, documentType, feature, name, stemmer));
-					definitions
-							.addAll(annotateDataItem(unsecuredDatabase, documentType, feature, description, stemmer));
+					definitions.addAll(annotateDataItem(database, documentType, feature, name, stemmer));
+					definitions.addAll(annotateDataItem(database, documentType, feature, description, stemmer));
 				}
 
 				if (definitions.size() > 0)
@@ -189,7 +164,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				featuresToUpdate.add(feature);
 			}
 
-			unsecuredDatabase.update(featuresToUpdate);
+			database.update(featuresToUpdate);
 		}
 		catch (Exception e)
 		{
@@ -249,7 +224,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		for (String eachTerm : Arrays.asList(description.split(" +")))
 		{
 			eachTerm = eachTerm.toLowerCase();
-			if (!STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms.add(eachTerm);
+			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms
+					.add(eachTerm);
 		}
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		queryRules.add(new QueryRule(Operator.LIMIT, 100));
@@ -279,7 +255,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		Set<String> addedCandidates = new HashSet<String>();
 		Map<String, Map<String, Object>> mapUriTerm = new HashMap<String, Map<String, Object>>();
 
-		uniqueTerms = stemMemebers(new ArrayList<String>(uniqueTerms), stemmer);
+		uniqueTerms = stemMembers(new ArrayList<String>(uniqueTerms), stemmer);
 		for (TermComparison termComparision : listOfHits)
 		{
 			Hit hit = termComparision.getHit();
@@ -343,8 +319,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		List<String> ontologyUris = new ArrayList<String>();
 		List<Ontology> listOfOntologies = new ArrayList<Ontology>();
 
-		for (Ontology ontology : unsecuredDatabase.find(Ontology.class, new QueryRule(Ontology.ONTOLOGYURI,
-				Operator.IN, new ArrayList<String>(ontologyInfo.keySet()))))
+		for (Ontology ontology : database.find(Ontology.class, new QueryRule(Ontology.ONTOLOGYURI, Operator.IN,
+				new ArrayList<String>(ontologyInfo.keySet()))))
 		{
 			ontologyUris.add(ontology.getOntologyURI());
 		}
@@ -363,13 +339,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				listOfOntologies.add(ontology);
 			}
 		}
-		if (listOfOntologies.size() != 0) unsecuredDatabase.add(listOfOntologies);
+		if (listOfOntologies.size() != 0) database.add(listOfOntologies);
 	}
 
 	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
 			Set<String> positionFilter)
 	{
-		Set<String> termsFromDescription = stemMemebers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
+		Set<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
 		Set<String> stemmedWords = new HashSet<String>();
 		for (String eachTerm : termsFromDescription)
 		{
@@ -384,7 +360,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return true;
 	}
 
-	private Set<String> stemMemebers(List<String> originalList, PorterStemmer stemmer)
+	private Set<String> stemMembers(List<String> originalList, PorterStemmer stemmer)
 	{
 		Set<String> newList = new HashSet<String>();
 		for (String eachTerm : originalList)

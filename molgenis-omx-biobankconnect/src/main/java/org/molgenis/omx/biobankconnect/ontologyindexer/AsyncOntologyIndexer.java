@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.OntologyTable;
@@ -19,10 +20,11 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 {
 	@Autowired
 	@Qualifier("unsecuredDatabase")
-	private Database unsecuredDatabase;
+	private Database database;
 	private SearchService searchService;
 	private String ontologyUri = null;
 	private boolean isCorrectOntology = true;
+	private static final Logger logger = Logger.getLogger(AsyncOntologyIndexer.class);
 
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
@@ -54,14 +56,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		{
 			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model, unsecuredDatabase));
-			searchService.indexTupleTable("ontologyTerm-" + ontologyUri,
-					new OntologyTermTable(model, unsecuredDatabase));
+			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model, database));
+			searchService.indexTupleTable("ontologyTerm-" + ontologyUri, new OntologyTermTable(model, database));
 		}
 		catch (OWLOntologyCreationException e)
 		{
 			isCorrectOntology = false;
-			e.printStackTrace();
+			logger.error("Exception imported file is not a valid ontology", e);
 		}
 		finally
 		{

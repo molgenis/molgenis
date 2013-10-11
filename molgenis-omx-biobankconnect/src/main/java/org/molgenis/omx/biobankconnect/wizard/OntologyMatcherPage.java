@@ -43,7 +43,7 @@ public class OntologyMatcherPage extends AbstractWizardPage implements Serializa
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			new RuntimeException(e);
 		}
 		return null;
 	}

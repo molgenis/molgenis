@@ -13,7 +13,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-public class MeshLoaderMain
+public class MeshLoaderApp
 {
 
 	private static final String PREFIX = "http://www.biobankconnect.org/mesh";

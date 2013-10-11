@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -41,6 +42,7 @@ import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 {
+	private static final Logger logger = Logger.getLogger(AsyncOntologyMatcher.class);
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
@@ -61,7 +63,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 	@Autowired
 	@Qualifier("unsecuredDatabase")
-	private Database unsecuredDatabase;
+	private Database database;
 	private SearchService searchService;
 
 	@Autowired
@@ -117,7 +119,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 		try
 		{
-			preprocessing(selectedDataSet, dataSetsToMatch, unsecuredDatabase);
+			preprocessing(selectedDataSet, dataSetsToMatch, database);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			queryRules.add(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
 					.toLowerCase()));
@@ -129,7 +131,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			for (Hit hit : result.getSearchHits())
 			{
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				ObservableFeature feature = unsecuredDatabase.findById(ObservableFeature.class,
+				ObservableFeature feature = database.findById(ObservableFeature.class,
 						columnValueMap.get(ObservableFeature.ID.toString()));
 				if (feature != null)
 				{
@@ -164,7 +166,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							listOfNewObservationSets.add(observation);
 
 							XrefValue xrefForFeature = new XrefValue();
-							xrefForFeature.setValue(unsecuredDatabase.findById(Characteristic.class, feature.getId()));
+							xrefForFeature.setValue(database.findById(Characteristic.class, feature.getId()));
 							ObservedValue valueForFeature = new ObservedValue();
 							valueForFeature.setObservationSet(observation);
 							valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
@@ -172,7 +174,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							listOfNewObservedValues.add(valueForFeature);
 
 							XrefValue xrefForMappedFeature = new XrefValue();
-							xrefForMappedFeature.setValue(unsecuredDatabase.findById(Characteristic.class, mappedId));
+							xrefForMappedFeature.setValue(database.findById(Characteristic.class, mappedId));
 							ObservedValue valueForMappedFeature = new ObservedValue();
 							valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
 							valueForMappedFeature.setObservationSet(observation);
@@ -200,20 +202,20 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				}
 			}
 
-			unsecuredDatabase.add(listOfNewObservationSets);
-			unsecuredDatabase.add(listOfNewObservedValues);
+			database.add(listOfNewObservationSets);
+			database.add(listOfNewObservedValues);
 
 			for (Integer catalogueId : dataSetsToMatch)
 			{
 				StringBuilder dataSetIdentifier = new StringBuilder();
 				dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
 				searchService.indexTupleTable(dataSetIdentifier.toString(),
-						new StoreMappingTable(dataSetIdentifier.toString(), unsecuredDatabase));
+						new StoreMappingTable(dataSetIdentifier.toString(), database));
 			}
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			logger.error("Exception the matching process has failed!", e);
 		}
 		finally
 		{
@@ -222,79 +224,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			finishedNumber = 0;
 		}
 	}
-
-	// private double calculateSimilarityScore(QueryRule finalQueryRule, Hit
-	// mappedFeatureHit)
-	// {
-	// String description =
-	// mappedFeatureHit.getColumnValueMap().get(ObservableFeature.DESCRIPTION.toLowerCase())
-	// .toString();
-	// double maxScore = 0;
-	// for (String eachQuery : constructSimilarityQuery(finalQueryRule))
-	// {
-	// double score = NGramMatchingModel.stringMatching(eachQuery, description,
-	// true);
-	// maxScore = score > maxScore ? score : maxScore;
-	// if ((int) maxScore == 100) return maxScore;
-	// }
-	// return maxScore;
-	// }
-	//
-	// private Set<String> constructSimilarityQuery(QueryRule finalQuery)
-	// {
-	// Set<String> queries = new HashSet<String>();
-	// if (finalQuery.getOperator().equals(Operator.DIS_MAX))
-	// {
-	// if (finalQuery.getNestedRules() != null)
-	// {
-	// for (QueryRule rule : finalQuery.getNestedRules())
-	// {
-	// queries.addAll(constructSimilarityQuery(rule));
-	// }
-	// }
-	//
-	// }
-	// else if (finalQuery.getOperator().equals(Operator.SHOULD))
-	// {
-	// List<Set<String>> listOfTokens = new ArrayList<Set<String>>();
-	// if (finalQuery.getNestedRules() != null)
-	// {
-	// for (QueryRule rule : finalQuery.getNestedRules())
-	// {
-	// listOfTokens.add(constructSimilarityQuery(rule));
-	// }
-	// }
-	// int count = 0;
-	// StringBuilder combinedToken = new StringBuilder();
-	// while (count < listOfTokens.size())
-	// {
-	// if (count == 0)
-	// {
-	// queries.addAll(listOfTokens.get(count));
-	// }
-	// else
-	// {
-	// Set<String> tempHolders = new HashSet<String>();
-	// for (String newToken : listOfTokens.get(count))
-	// {
-	// for (String oldToken : queries)
-	// {
-	// if (combinedToken.length() > 0) combinedToken.delete(0,
-	// combinedToken.length());
-	// tempHolders.add(combinedToken.append(oldToken).append(' ').append(newToken).toString());
-	// }
-	// }
-	// queries = tempHolders;
-	// }
-	// count++;
-	// }
-	// }
-	// else
-	// {
-	// queries.add(finalQuery.getValue().toString());
-	// }
-	// return queries;
-	// }
 
 	private List<QueryRule> makeQueryForOntologyTerms(Map<Integer, Set<String>> nameTokens)
 	{
@@ -348,6 +277,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		catch (Exception e)
 		{
 			result = new SearchResult(e.getMessage());
+			logger.error("Exception failed to search the request " + result, e);
 		}
 		return result.iterator();
 	}
@@ -408,7 +338,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				if (!existingPaths.contains(nodePath))
 				{
 					existingPaths.add(nodePath);
-					// TODO : fix the score!
 					if (nodePath.startsWith(parentNodePath + ".") || nodePath.equals(parentNodePath))
 					{
 						String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
@@ -436,19 +365,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 									break;
 								}
 							}
-							// if (boost)
-							// {
-							// StringBuilder boostedString = new
-							// StringBuilder();
-							// for (String token :
-							// ontologyTermSynonym.split(" +"))
-							// {
-							// boostedString.append(token).append("^6").append(' ');
-							// }
-							// boostedString.delete(boostedString.length() - 1,
-							// boostedString.length());
-							// terms.add(boostedString.toString());
-							// }
 							if (!ontologyTermSynonym.toString().equals("")) terms.add(ontologyTermSynonym);
 						}
 					}

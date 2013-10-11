@@ -59,17 +59,20 @@ public class MappingManagerController extends MolgenisPluginController
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
+	private final OntologyMatcher ontologyMatcher;
+	private final SearchService searchService;
+	private final Database database;
 
 	@Autowired
-	private OntologyMatcher ontologyMatcher;
-	@Autowired
-	private SearchService searchService;
-	@Autowired
-	private Database database;
-
-	public MappingManagerController()
+	public MappingManagerController(OntologyMatcher ontologyMatcher, SearchService searchService, Database database)
 	{
 		super(URI);
+		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
+		if (database == null) throw new IllegalArgumentException("Database is null");
+		this.ontologyMatcher = ontologyMatcher;
+		this.searchService = searchService;
+		this.database = database;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -233,7 +236,7 @@ public class MappingManagerController extends MolgenisPluginController
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 
-	class MappingClass
+	static class MappingClass
 	{
 		private Integer featureId = null;
 		private boolean confirmation = false;

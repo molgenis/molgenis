@@ -168,7 +168,7 @@ public class OntologyLoader
 		}
 		catch (Exception e)
 		{
-			System.out.println("The annotation is null!");
+			new RuntimeException(e);
 		}
 		return labelValue;
 	}

@@ -14,7 +14,7 @@ import org.molgenis.util.tuple.Tuple;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-public class OntologyLoaderMain
+public class OntologyLoaderApp
 {
 	public static void main(String[] args) throws OWLOntologyCreationException, FileNotFoundException, IOException,
 			OWLOntologyStorageException, JAXBException
@@ -29,13 +29,20 @@ public class OntologyLoaderMain
 			manager.loadExistingOntology(file);
 
 			Set<String> terms = new HashSet<String>();
-			CsvReader reader = new CsvReader(new File(variableList));
-			Iterator<Tuple> iterator = reader.iterator();
-			while (iterator.hasNext())
+			CsvReader reader = null;
+			try
 			{
-				terms.add(iterator.next().getString("name"));
+				reader = new CsvReader(new File(variableList));
+				Iterator<Tuple> iterator = reader.iterator();
+				while (iterator.hasNext())
+				{
+					terms.add(iterator.next().getString("name"));
+				}
 			}
-			reader.close();
+			finally
+			{
+				if (reader != null) reader.close();
+			}
 			File outputFile = new File(file.getAbsoluteFile().getParent() + "/" + file.getName() + "_subset.owl");
 			manager.copyOntologyContent(terms);
 			manager.saveOntology(outputFile);

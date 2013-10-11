@@ -14,7 +14,7 @@
 	};
 	
 	ns.CatalogueChooser.prototype.changeDataSet = function(selectedDataSet){
-		if(selectedDataSet !== ''){
+		if(selectedDataSet !== null && selectedDataSet !== ''){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
 			$('#selected-catalogue').empty().append(dataSetEntity.name);
 			var request = {

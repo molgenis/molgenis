@@ -1,4 +1,4 @@
-package org.molgenis.omx.harmonization.utils;
+package org.molgenis.omx.biobankconnect.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

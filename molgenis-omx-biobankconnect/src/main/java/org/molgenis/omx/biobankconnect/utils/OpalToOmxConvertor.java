@@ -67,73 +67,107 @@ public class OpalToOmxConvertor
 		String protocolIdentifier = studyName + "-protocol";
 		String listOfFeatureIdentifier = "";
 		// Create sheet for investigation
-		ExcelSheetWriter dataSet = (ExcelSheetWriter) writer.createTupleWriter("dataset");
-		dataSet.writeColNames(Arrays.asList("identifier", "name", "protocolUsed_identifier"));
-		KeyValueTuple row = new KeyValueTuple();
-		row.set("identifier", studyName);
-		row.set("name", studyName);
-		row.set("protocolUsed_identifier", protocolIdentifier);
-		dataSet.write(row);
-
-		// Create sheet for category
-		ExcelSheetWriter categorySheet = (ExcelSheetWriter) writer.createTupleWriter("category");
-		categorySheet.writeColNames(Arrays.asList("identifier", "name", "valueCode", "observablefeature_identifier"));
-
-		for (Entry<String, List<UniqueCategory>> entry : categoryInfo.entrySet())
+		ExcelSheetWriter dataSet = null;
+		try
 		{
-			String featureIdentifier = studyName + "-feature-" + entry.getKey();
-			List<UniqueCategory> categoriesPerFeature = entry.getValue();
-			for (UniqueCategory eachCategory : categoriesPerFeature)
+			dataSet = (ExcelSheetWriter) writer.createTupleWriter("dataset");
+			dataSet.writeColNames(Arrays.asList("identifier", "name", "protocolUsed_identifier"));
+			KeyValueTuple row = new KeyValueTuple();
+			row.set("identifier", studyName);
+			row.set("name", studyName);
+			row.set("protocolUsed_identifier", protocolIdentifier);
+			dataSet.write(row);
+		}
+		finally
+		{
+			if (dataSet != null) dataSet.close();
+		}
+		// Create sheet for category
+		ExcelSheetWriter categorySheet = null;
+
+		try
+		{
+			categorySheet = (ExcelSheetWriter) writer.createTupleWriter("category");
+			categorySheet.writeColNames(Arrays
+					.asList("identifier", "name", "valueCode", "observablefeature_identifier"));
+
+			for (Entry<String, List<UniqueCategory>> entry : categoryInfo.entrySet())
 			{
-				KeyValueTuple eachRow = new KeyValueTuple();
-				eachRow.set("identifier", studyName + "-category-" + eachCategory.getName());
-				eachRow.set("name", eachCategory.getLabel());
-				eachRow.set("valueCode", eachCategory.getCode());
-				eachRow.set("observablefeature_identifier", featureIdentifier);
-				categorySheet.write(eachRow);
+				String featureIdentifier = studyName + "-feature-" + entry.getKey();
+				List<UniqueCategory> categoriesPerFeature = entry.getValue();
+				for (UniqueCategory eachCategory : categoriesPerFeature)
+				{
+					KeyValueTuple eachRow = new KeyValueTuple();
+					eachRow.set("identifier", studyName + "-category-" + eachCategory.getName());
+					eachRow.set("name", eachCategory.getLabel());
+					eachRow.set("valueCode", eachCategory.getCode());
+					eachRow.set("observablefeature_identifier", featureIdentifier);
+					categorySheet.write(eachRow);
+				}
 			}
+		}
+		finally
+		{
+			if (categorySheet != null) categorySheet.close();
 		}
 
 		// Create sheet for variable
-		ExcelSheetWriter featureWriter = (ExcelSheetWriter) writer.createTupleWriter("observablefeature");
-		featureWriter.writeColNames(Arrays.asList("identifier", "name", "description", "description", "dataType",
-				"unit_Identifier"));
-		for (UniqueVariable eachVariable : variableInfo.values())
+		ExcelSheetWriter featureWriter = null;
+		try
 		{
-			KeyValueTuple eachRow = new KeyValueTuple();
-			String name = eachVariable.getVariable();
-			String dataType = eachVariable.getDataType();
-			StringBuilder categoriesName = new StringBuilder();
-			if (categoryInfo.containsKey(name))
+			featureWriter = (ExcelSheetWriter) writer.createTupleWriter("observablefeature");
+			featureWriter.writeColNames(Arrays.asList("identifier", "name", "description", "description", "dataType",
+					"unit_Identifier"));
+			for (UniqueVariable eachVariable : variableInfo.values())
 			{
-				for (UniqueCategory eachCategory : categoryInfo.get(name))
+				KeyValueTuple eachRow = new KeyValueTuple();
+				String name = eachVariable.getVariable();
+				String dataType = eachVariable.getDataType();
+				StringBuilder categoriesName = new StringBuilder();
+				if (categoryInfo.containsKey(name))
 				{
-					categoriesName.append(eachCategory.getName()).append(',');
+					for (UniqueCategory eachCategory : categoryInfo.get(name))
+					{
+						categoriesName.append(eachCategory.getName()).append(',');
+					}
+					dataType = "categorical";
 				}
-				dataType = "categorical";
-			}
-			else if (dataType != null && dataType.equals("integer")) dataType = "int";
-			else if (dataType != null && dataType.equals("decimal")) dataType = "decimal";
-			else dataType = "string";
+				else if (dataType != null && dataType.equals("integer")) dataType = "int";
+				else if (dataType != null && dataType.equals("decimal")) dataType = "decimal";
+				else dataType = "string";
 
-			String featureIdentifier = studyName + "-feature-" + name;
-			listOfFeatureIdentifier += featureIdentifier + ",";
-			eachRow.set("identifier", featureIdentifier);
-			eachRow.set("name", name);
-			eachRow.set("description", eachVariable.getLabel());
-			eachRow.set("dataType", dataType);
-			featureWriter.write(eachRow);
+				String featureIdentifier = studyName + "-feature-" + name;
+				listOfFeatureIdentifier += featureIdentifier + ",";
+				eachRow.set("identifier", featureIdentifier);
+				eachRow.set("name", name);
+				eachRow.set("description", eachVariable.getLabel());
+				eachRow.set("dataType", dataType);
+				featureWriter.write(eachRow);
+			}
+		}
+		finally
+		{
+			if (featureWriter != null) featureWriter.close();
 		}
 
 		// Create sheet for protocol
-		ExcelSheetWriter protocolSheet = (ExcelSheetWriter) writer.createTupleWriter("protocol");
-		protocolSheet.writeColNames(Arrays.asList("identifier", "name", "features_identifier",
-				"subprotocols_identifier"));
-		KeyValueTuple protocol = new KeyValueTuple();
-		protocol.set("identifier", protocolIdentifier);
-		protocol.set("name", protocolIdentifier);
-		protocol.set("features_identifier", listOfFeatureIdentifier.substring(0, listOfFeatureIdentifier.length() - 1));
-		protocolSheet.write(protocol);
+		ExcelSheetWriter protocolSheet = null;
+		try
+		{
+			protocolSheet = (ExcelSheetWriter) writer.createTupleWriter("protocol");
+			protocolSheet.writeColNames(Arrays.asList("identifier", "name", "features_identifier",
+					"subprotocols_identifier"));
+			KeyValueTuple protocol = new KeyValueTuple();
+			protocol.set("identifier", protocolIdentifier);
+			protocol.set("name", protocolIdentifier);
+			protocol.set("features_identifier",
+					listOfFeatureIdentifier.substring(0, listOfFeatureIdentifier.length() - 1));
+			protocolSheet.write(protocol);
+		}
+		finally
+		{
+			if (protocolSheet != null) protocolSheet.close();
+		}
 	}
 
 	private void collectVariableInfo(ExcelReader reader) throws IOException

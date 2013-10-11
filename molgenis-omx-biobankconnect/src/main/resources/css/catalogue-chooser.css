@@ -15,7 +15,7 @@
 	padding-left : 10px;
 }
 
-#selectedDataSetId {
+#import-data-button, #selectedDataSetId {
 	margin-left : 30px;
 	margin-top : -5px;
 }

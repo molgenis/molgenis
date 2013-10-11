@@ -37,8 +37,8 @@ public class NGramMatchingModel
 {
 
 	private static int nGrams = 2;
-	private static final Set<String> STOPWORDSLIST;
 	private static PorterStemmer stemmer = new PorterStemmer();
+	public static final Set<String> STOPWORDSLIST;
 	static
 	{
 		STOPWORDSLIST = new HashSet<String>(Arrays.asList("a", "you", "about", "above", "after", "again", "against",
@@ -117,11 +117,5 @@ public class NGramMatchingModel
 		stemmer.setCurrent(originalString.trim());
 		stemmer.stem();
 		return stemmer.getCurrent();
-	}
-
-	public static void main(String args[])
-	{
-		System.out.println(NGramMatchingModel.stringMatching("diastolic blood pressure",
-				"diastolic blood pressure 1st measurement", true));
 	}
 }
