@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.io.processor.CellProcessor;
 
 /**
@@ -168,6 +169,11 @@ public class ExcelEntitySource implements EntitySource
 	public Repository<ExcelEntity> getRepositoryByEntityName(String entityName)
 	{
 		Sheet poiSheet = workbook.getSheet(entityName);
-		return poiSheet != null ? new ExcelRepository(poiSheet, cellProcessors) : null;
+		if (poiSheet == null)
+		{
+			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		}
+
+		return new ExcelRepository(poiSheet, cellProcessors);
 	}
 }
