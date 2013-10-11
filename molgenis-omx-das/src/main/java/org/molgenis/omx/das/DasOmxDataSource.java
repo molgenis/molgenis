@@ -23,6 +23,7 @@ import org.molgenis.util.ApplicationUtil;
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
+import uk.ac.ebi.mydas.examples.EnsemblTestManager;
 import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
@@ -43,7 +44,24 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	private Database database;
 	private DasType mutationType;
 	private DasMethod method;
+	private String dataset;
 
+	public void init(ServletContext servletContext,
+			Map<String, PropertyType> globalParameters,
+			DataSourceConfiguration dataSourceConfig)
+			throws DataSourceException {
+		this.dataset = dataSourceConfig.getDataSourceProperties().get("dataset").getValue();
+		
+	}
+	
+	//for unit test
+	public DasOmxDataSource(Database database, DasType type, DasMethod method)
+	{
+		this.database = database;
+		this.mutationType = type;
+		this.method = method;
+	}
+	
 	public DasOmxDataSource() throws DataSourceException
 	{
 		database = ApplicationUtil.getDatabase();
@@ -127,6 +145,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		variantQuery.greaterOrEqual(Variant.BPSTART, start);
 		variantQuery.lessOrEqual(Variant.BPEND, stop);
 		variantQuery.equals(Variant.CHROMOSOME, chromosome.getId());
+		variantQuery.equals(Variant.TRACK_IDENTIFIER, dataset);
 		if(patientObject!=null){
 			Variant allele1 = patientObject.getAllele1();
 			Variant allele2 = patientObject.getAllele2();
@@ -187,13 +206,6 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	}
 
 	// unimplemented functions
-	@Override
-	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
-			DataSourceConfiguration dataSourceConfig) throws DataSourceException
-	{
-		// Mandatory to override this function, but no destroy needed.
-	}
-
 	@Override
 	public void destroy()
 	{

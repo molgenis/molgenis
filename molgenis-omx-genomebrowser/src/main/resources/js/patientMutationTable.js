@@ -18,7 +18,7 @@ function patientMutationTable(data) {
     
 	$('#patientMutationTableHolder')
 			.html(
-					'<table cellpadding="0" cellspacing="0" border="0" class="display" id="patientData">'+
+					'<table cellpadding="0" cellspacing="0" border="0" class="display" id="patientMutationDataTable">'+
 					'<thead>'
 					+'<tr><th rowspan="2">Add Track</th><th rowspan="2">Patient ID</th><th colspan=3>Allele 1</th><th rowspan="2"/><th colspan=3>Allele 2</th><th rowspan="2">Phenotype</th><th rowspan="2">PubMed ID</th></tr>'
 					+'<tr><th>cDNA change</th><th>Consequence</th><th>Exon/Intron</th><th>cDNA change</th><th>Consequence</th><th>Exon/Intron</th></tr>'+
