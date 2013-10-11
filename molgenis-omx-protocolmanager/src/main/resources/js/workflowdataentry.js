@@ -46,7 +46,7 @@
 	
 	ns.createWorkflowStepContainer = function(workflowId, workflowStepId, container) {
 		$.ajax({
-			url: plugin_uri + '/workflow/' + workflowId + '/step/' + workflowStepId,
+			url: plugin_uri + '/workflow/' + workflowId + '/element/' + workflowStepId,
 			success: function(data) {
 				container.html(data);
 			},

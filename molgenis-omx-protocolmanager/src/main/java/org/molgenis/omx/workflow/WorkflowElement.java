@@ -1,8 +1,15 @@
 package org.molgenis.omx.workflow;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.Protocol;
 
 import com.google.common.base.Function;
@@ -12,17 +19,11 @@ public class WorkflowElement
 {
 	private final Integer id;
 	private final String name;
-	private final List<WorkflowFeature> features;
-	private final List<WorkflowFeature> inputFeatures;
-	private final List<WorkflowFeature> outputFeatures;
-	private final List<WorkflowElement> inputWorkflowElements;
+	private transient final List<WorkflowFeature> features;
+	private transient final List<WorkflowElementConnection> elementConnections;
+	private transient final WorkflowElementData workflowElementData;
 
-	public WorkflowElement(Protocol protocol)
-	{
-		this(protocol, null);
-	}
-
-	public WorkflowElement(Protocol protocol, List<ProtocolFlow> protocolFlows)
+	public WorkflowElement(Protocol protocol, Database database) throws WorkflowException
 	{
 		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
 		this.id = protocol.getId();
@@ -35,41 +36,8 @@ public class WorkflowElement
 				return new WorkflowFeature(feature);
 			}
 		});
-
-		if (protocolFlows != null)
-		{
-			this.inputFeatures = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowFeature>()
-			{
-				@Override
-				public WorkflowFeature apply(ProtocolFlow protocolFlow)
-				{
-					return new WorkflowFeature(protocolFlow.getInputFeature());
-				}
-			});
-			this.outputFeatures = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowFeature>()
-			{
-				@Override
-				public WorkflowFeature apply(ProtocolFlow protocolFlow)
-				{
-					return new WorkflowFeature(protocolFlow.getOutputFeature());
-				}
-			});
-			this.inputWorkflowElements = Lists.transform(protocolFlows, new Function<ProtocolFlow, WorkflowElement>()
-			{
-				@Override
-				public WorkflowElement apply(ProtocolFlow protocolFlow)
-				{
-					List<ProtocolFlow> protocolViews = null;
-					return new WorkflowElement(protocolFlow.getSource(), protocolViews);
-				}
-			});
-		}
-		else
-		{
-			this.inputFeatures = null;
-			this.outputFeatures = null;
-			this.inputWorkflowElements = null;
-		}
+		this.elementConnections = createElementConnections(protocol, database);
+		this.workflowElementData = createWorkflowElementData(protocol, database);
 	}
 
 	public Integer getId()
@@ -87,18 +55,86 @@ public class WorkflowElement
 		return features;
 	}
 
-	public List<WorkflowFeature> getInputFeatures()
+	public List<WorkflowElementConnection> getElementConnections()
 	{
-		return inputFeatures;
+		return elementConnections;
 	}
 
-	public List<WorkflowFeature> getOutputFeatures()
+	public WorkflowElementData getWorkflowElementData()
 	{
-		return outputFeatures;
+		return workflowElementData;
 	}
 
-	public List<WorkflowElement> getInputWorkflowElements()
+	private List<WorkflowElementConnection> createElementConnections(Protocol protocol, final Database database)
 	{
-		return inputWorkflowElements;
+		List<ProtocolFlow> protocolFlows;
+		try
+		{
+			protocolFlows = database.find(ProtocolFlow.class, new QueryRule(ProtocolFlow.DESTINATION_IDENTIFIER,
+					Operator.EQUALS, protocol.getIdentifier()));
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		return protocolFlows != null ? Lists.transform(protocolFlows,
+				new Function<ProtocolFlow, WorkflowElementConnection>()
+				{
+					@Override
+					public WorkflowElementConnection apply(ProtocolFlow protocolFlow)
+					{
+						WorkflowElement inputElement;
+						WorkflowElement outputElement;
+						try
+						{
+							inputElement = new WorkflowElement(protocolFlow.getSource(), database);
+							outputElement = new WorkflowElement(protocolFlow.getDestination(), database);
+						}
+						catch (WorkflowException e)
+						{
+							throw new RuntimeException(e);
+						}
+
+						WorkflowFeature inputFeature = new WorkflowFeature(protocolFlow.getInputFeature());
+						WorkflowFeature outputFeature = new WorkflowFeature(protocolFlow.getOutputFeature());
+						return new WorkflowElementConnection(protocolFlow.getId(), inputElement, inputFeature,
+								outputElement, outputFeature);
+					}
+				}) : null;
+	}
+
+	private WorkflowElementData createWorkflowElementData(Protocol protocol, Database database)
+			throws WorkflowException
+	{
+		List<? extends ObservationSet> observationSets;
+		try
+		{
+			List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED, Operator.EQUALS,
+					protocol));
+			if (dataSets == null || dataSets.size() != 1) throw new RuntimeException(
+					"Workflow step must have exactly one data set");
+			DataSet dataSet = dataSets.get(0);
+
+			observationSets = ObservationSet.find(database, new QueryRule(ObservationSet.PARTOFDATASET,
+					Operator.EQUALS, dataSet));
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		List<WorkflowElementDataRow> dataMatrix = new ArrayList<WorkflowElementDataRow>();
+		try
+		{
+			for (ObservationSet observationSet : observationSets)
+				dataMatrix.add(new WorkflowElementDataRow(observationSet, database));
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		return new WorkflowElementData(dataMatrix);
 	}
 }

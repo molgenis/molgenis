@@ -41,12 +41,11 @@ public class WorkflowDataEntryController extends MolgenisPluginController
 		return workflowService.getWorkflow(workflowId);
 	}
 
-	@RequestMapping(value = "/workflow/{workflowId}/step/{workflowStepId}", method = RequestMethod.GET)
-	public String getWorkflowApplicationStep(@PathVariable Integer workflowId, @PathVariable Integer workflowStepId,
+	@RequestMapping(value = "/workflow/{workflowId}/element/{workflowElementId}", method = RequestMethod.GET)
+	public String getWorkflowApplicationStep(@PathVariable Integer workflowId, @PathVariable Integer workflowElementId,
 			Model model) throws WorkflowException
 	{
-		model.addAttribute("workflowStep", workflowService.getWorkflowElement(workflowStepId));
-		model.addAttribute("workflowStepData", workflowService.getWorkflowElementData(workflowStepId));
+		model.addAttribute("workflowElement", workflowService.getWorkflowElement(workflowElementId));
 		return "view-workflowdataentry-pane";
 	}
 }

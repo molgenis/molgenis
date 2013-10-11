@@ -9,6 +9,4 @@ public interface WorkflowService
 	List<Workflow> getWorkflows();
 
 	WorkflowElement getWorkflowElement(Integer workflowElementId) throws WorkflowException;
-
-	WorkflowElementData getWorkflowElementData(Integer workflowElementId) throws WorkflowException;
 }
