@@ -19,12 +19,17 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the DataService interface
  */
-public class DataServiceImpl implements DataService
+@Component
+public class DataServiceImpl implements DataService, ApplicationContextAware
 {
 	// Key: entity name, value:EntitySourceFactory
 	private final Map<String, EntitySourceFactory> entitySourceFactoryByEntityName = new LinkedHashMap<String, EntitySourceFactory>();
@@ -72,7 +77,9 @@ public class DataServiceImpl implements DataService
 		return entitySources.iterator();
 	}
 
-	@Override
+	/**
+	 * Register a new EntitySourceFactory of an EntitySource implementation
+	 */
 	public void registerFactory(EntitySourceFactory entitySourceFactory)
 	{
 		if (entitySourceFactoryByUrlPrefix.get(entitySourceFactory.getUrlPrefix()) != null)
@@ -123,19 +130,19 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
+	public Iterable<? extends Entity> findAll(String entityName, Query q)
 	{
-		return this.<E> getQueryableRepository(entityName).findAll(q);
+		return getQueryableRepository(entityName).findAll(q);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Integer id)
+	public Entity findOne(String entityName, Integer id)
 	{
-		return this.<E> getQueryableRepository(entityName).findOne(id);
+		return getQueryableRepository(entityName).findOne(id);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <E extends Entity> Queryable<E> getQueryableRepository(String entityName)
+	private Queryable<? extends Entity> getQueryableRepository(String entityName)
 	{
 		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Queryable))
@@ -143,7 +150,7 @@ public class DataServiceImpl implements DataService
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
 		}
 
-		return (Queryable<E>) repo;
+		return (Queryable<? extends Entity>) repo;
 	}
 
 	@Override
@@ -162,5 +169,16 @@ public class DataServiceImpl implements DataService
 		}
 
 		return factory.create(file);
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+	{
+		// Find all EntitySourceFactories and register them
+		Map<String, EntitySourceFactory> factories = applicationContext.getBeansOfType(EntitySourceFactory.class);
+		for (EntitySourceFactory factory : factories.values())
+		{
+			registerFactory(factory);
+		}
 	}
 }

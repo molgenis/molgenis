@@ -3,82 +3,101 @@ package org.molgenis.data.csv;
 import static org.molgenis.data.csv.CsvEntitySourceFactory.CSV_ENTITYSOURCE_URL_PREFIX;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+
+import javax.annotation.Nullable;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.io.processor.CellProcessor;
+
+import com.google.common.collect.Lists;
 
 /**
  * EntitySource implementation for csv.
  * 
- * This should be a zipfile containing csv files.
+ * This should be a zipfile containing csv files or a csv file or a tsv file
+ * 
+ * So this either contains one csv/tsv file or a zip containing multiple files
+ * 
  * 
  * Example url: csv://Users/john/Documents/matrix.zip
  */
 public class CsvEntitySource implements EntitySource
 {
-	private final ZipFile zipFile;
+	private ZipFile zipFile;
+	private File csvFile;
 	private final Map<String, ZipEntry> zipEntryMap = new LinkedHashMap<String, ZipEntry>();
 	private final String url;
+	private final List<CellProcessor> cellProcessors;
 
-	public CsvEntitySource(ZipFile zipFile, String url)
+	protected CsvEntitySource(File file, String url, @Nullable
+	List<CellProcessor> cellProcessors)
 	{
-		if ((zipFile == null) && (url == null)) throw new IllegalArgumentException("Please provide a ZipFile or an Url");
+		if ((file == null) && (url == null)) throw new IllegalArgumentException("Please provide a file or an Url");
 		if ((url != null) && !url.startsWith(CSV_ENTITYSOURCE_URL_PREFIX)) throw new IllegalArgumentException(
 				"CsvEntitySource urls should start with " + CSV_ENTITYSOURCE_URL_PREFIX);
 
 		if (url == null)
 		{
-			url = CSV_ENTITYSOURCE_URL_PREFIX + zipFile.getName();
+			url = CSV_ENTITYSOURCE_URL_PREFIX + file.getAbsolutePath();
 		}
 
-		if (zipFile == null)
+		try
 		{
-			try
+			if (file == null)
 			{
-				zipFile = new ZipFile(new File(url.substring(CSV_ENTITYSOURCE_URL_PREFIX.length())));
+				// Get the file from the url, can be zip or csv, txt, tsv
+				file = new File(url.substring(CSV_ENTITYSOURCE_URL_PREFIX.length()));
 			}
-			catch (ZipException e)
+
+			if (file.getName().endsWith(".zip"))
 			{
-				throw new MolgenisDataException("Exception opening zipfile [" + url + "]", e);
+				// It is a zipfile, get the zip entries
+				zipFile = new ZipFile(file);
+
+				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();)
+				{
+					ZipEntry zipEntry = e.nextElement();
+					zipEntryMap.put(getEntityName(zipEntry.getName()), zipEntry);
+				}
 			}
-			catch (IOException e)
+			else
 			{
-				throw new MolgenisDataException("Exception opening zipfile [" + url + "]", e);
+				csvFile = file;
 			}
+
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException("Exception opening zip [" + url + "]", e);
 		}
 
 		this.url = url;
-		this.zipFile = zipFile;
-
-		// init zipEntryMap
-		for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();)
-		{
-			ZipEntry zipEntry = e.nextElement();
-			zipEntryMap.put(getEntityName(zipEntry), zipEntry);
-		}
+		this.cellProcessors = cellProcessors;
 	}
 
-	public CsvEntitySource(String url)
+	protected CsvEntitySource(String url, List<CellProcessor> cellProcessors)
 	{
-		this(null, url);
+		this(null, url, cellProcessors);
 	}
 
-	public CsvEntitySource(ZipFile zipFile)
+	protected CsvEntitySource(File file, List<CellProcessor> cellProcessors)
 	{
-		this(zipFile, null);
+		this(file, null, cellProcessors);
 	}
 
 	@Override
@@ -90,21 +109,27 @@ public class CsvEntitySource implements EntitySource
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return zipEntryMap.keySet();
+		if (zipFile != null)
+		{
+			return zipEntryMap.keySet();
+		}
+
+		return Lists.newArrayList(getEntityName(csvFile.getName()));
 	}
 
 	@Override
 	public Repository<? extends Entity> getRepositoryByEntityName(String entityName)
 	{
 		ZipEntry zipEntry = zipEntryMap.get(entityName);
-		if (zipEntry == null)
-		{
-			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-		}
 
 		try
 		{
-			return toRepository(zipEntry);
+			if (zipEntry != null)
+			{
+				return toRepository(zipEntry.getName(), zipFile.getInputStream(zipEntry), cellProcessors);
+			}
+
+			return toRepository(csvFile.getName(), new FileInputStream(csvFile), cellProcessors);
 		}
 		catch (IOException e)
 		{
@@ -118,28 +143,28 @@ public class CsvEntitySource implements EntitySource
 		// Nothing
 	}
 
-	private CsvRepository toRepository(ZipEntry zipEntry) throws IOException
+	private CsvRepository toRepository(String fileName, InputStream in, List<CellProcessor> cellProcessors)
+			throws IOException
 	{
-		String name = zipEntry.getName();
-		if (name.endsWith(".csv") || name.endsWith(".txt"))
+		if (fileName.endsWith(".csv") || fileName.endsWith(".txt"))
 		{
-			Reader reader = new InputStreamReader(zipFile.getInputStream(zipEntry), Charset.forName("UTF-8"));
-			return new CsvRepository(reader, getEntityName(zipEntry));
+			Reader reader = new InputStreamReader(in, Charset.forName("UTF-8"));
+			return new CsvRepository(reader, getEntityName(fileName), cellProcessors);
 		}
 
-		if (name.endsWith(".tsv"))
+		if (fileName.endsWith(".tsv"))
 		{
-			Reader reader = new InputStreamReader(zipFile.getInputStream(zipEntry), Charset.forName("UTF-8"));
-			return new CsvRepository(reader, '\t', getEntityName(zipEntry));
+			Reader reader = new InputStreamReader(in, Charset.forName("UTF-8"));
+			return new CsvRepository(reader, '\t', getEntityName(fileName), cellProcessors);
 		}
 
-		throw new MolgenisDataException("unknown file type: [" + name + "] in zipfile [" + url + "]");
+		throw new MolgenisDataException("unknown file type: [" + fileName + "] for csv repository");
 	}
 
-	private String getEntityName(ZipEntry zipEntry)
+	private String getEntityName(String fileName)
 	{
 		// remove extension from filename
-		int pos = zipEntry.getName().lastIndexOf('.');
-		return pos != -1 ? zipEntry.getName().substring(0, pos) : zipEntry.getName();
+		int pos = fileName.lastIndexOf('.');
+		return pos != -1 ? fileName.substring(0, pos) : fileName;
 	}
 }

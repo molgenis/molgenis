@@ -11,11 +11,6 @@ import java.io.IOException;
 public interface DataService extends RepositoryCollection, Iterable<EntitySource>
 {
 	/**
-	 * Register a new EntitySourceFactory of an EntitySource implementation
-	 */
-	void registerFactory(EntitySourceFactory entitySourceFactory);
-
-	/**
 	 * Register a new EntitySource.
 	 * 
 	 * You should first register the EntitySourceFactory for this EntitySource
@@ -30,18 +25,18 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	long count(String entityName, Query q);
 
 	/**
-	 * type-safe find entities that match a query
+	 * Find entities that match a query
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Query q);
+	Iterable<? extends Entity> findAll(String entityName, Query q);
 
 	/**
-	 * type-safe find one entity based on id. Returns null if not exists
+	 * Find one entity based on id. Returns null if not exists
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	<E extends Entity> E findOne(String entityName, Integer id);
+	Entity findOne(String entityName, Integer id);
 
 	/**
 	 * Creates a new file based entity source (like excel, csv)

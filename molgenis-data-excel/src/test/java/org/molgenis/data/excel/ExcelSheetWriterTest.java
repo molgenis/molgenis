@@ -77,7 +77,7 @@ public class ExcelSheetWriterTest
 		EntitySource entitySource = null;
 		try
 		{
-			entitySource = new ExcelEntitySource(new ByteArrayInputStream(bos.toByteArray()));
+			entitySource = new ExcelEntitySource(new ByteArrayInputStream(bos.toByteArray()), null);
 			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("sheet");
 
 			assertNotNull(repo.getAttribute("col1"));
