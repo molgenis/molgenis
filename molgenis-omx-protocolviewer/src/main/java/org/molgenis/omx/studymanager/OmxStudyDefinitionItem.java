@@ -1,5 +1,7 @@
 package org.molgenis.omx.studymanager;
 
+import java.util.List;
+
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.target.Ontology;
@@ -36,16 +38,22 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	@Override
 	public String getCode()
 	{
-		OntologyTerm ontologyTerm = observableFeature.getDefinition();
-		return ontologyTerm != null ? ontologyTerm.getTermAccession() : null;
+		List<OntologyTerm> ontologyTerm = observableFeature.getDefinitions();
+		if (ontologyTerm == null || ontologyTerm.isEmpty()) return null;
+		else if (ontologyTerm.size() > 1) throw new RuntimeException("Multiple ontology terms are not supported");
+		else return ontologyTerm.get(0).getTermAccession();
 	}
 
 	@Override
 	public String getCodeSystem()
 	{
-		OntologyTerm ontologyTerm = observableFeature.getDefinition();
-		if (ontologyTerm == null) return null;
-		Ontology ontology = ontologyTerm.getOntology();
-		return ontology != null ? ontology.getOntologyAccession() : null;
+		List<OntologyTerm> ontologyTerm = observableFeature.getDefinitions();
+		if (ontologyTerm == null || ontologyTerm.isEmpty()) return null;
+		else if (ontologyTerm.size() > 1) throw new RuntimeException("Multiple ontology terms are not supported");
+		else
+		{
+			Ontology ontology = ontologyTerm.get(0).getOntology();
+			return ontology != null ? ontology.getOntologyAccession() : null;
+		}
 	}
 }
