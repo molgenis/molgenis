@@ -12,10 +12,6 @@
 	</#if>
 </#list>
 	    <properties>
-          <property name="javax.persistence.jdbc.url" value="${options.dbUri}"/>
-          <property name="javax.persistence.jdbc.password" value="${options.dbPassword}"/>
-          <property name="javax.persistence.jdbc.driver" value="${options.dbDriver}"/>
-          <property name="javax.persistence.jdbc.user" value="${options.dbUser}"/>
           <property name="javax.persistence.validation.mode" value="none"/>
           
           <property name="eclipselink.target-database" value="MySQL" />
