@@ -17,6 +17,7 @@ import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
@@ -27,6 +28,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	private static final String FIELD_NAME = "name";
 	private static final String FIELD_DESCRIPTION = "description";
 	private static final String FIELD_PATH = "path";
+	private static final String DATA_TYPE = "dataType";
 	private static final String FIELD_CATEGORY = "category";
 
 	private final Protocol protocol;
@@ -78,11 +80,10 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 			{
 				StringBuilder pathBuilder = new StringBuilder();
 				if (!protocolPath.isEmpty()) pathBuilder.append(protocolPath).append('.');
-				String name = p.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
+				String name = p.getName();
 				final String path = pathBuilder.append(p.getId()).toString();
-				String description = p.getDescription() == null ? StringUtils.EMPTY : p.getDescription().replaceAll(
-						"[^a-zA-Z0-9 ]", " ");
-
+				String description = p.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(p.getDescription())
+						.replaceAll("[^a-zA-Z0-9 ]", " ");
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
 				tuple.set(FIELD_ID, p.getId());
@@ -100,9 +101,9 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 			for (ObservableFeature feature : protocol.getFeatures())
 			{
 				StringBuilder pathBuilder = new StringBuilder();
-				String name = feature.getName().replaceAll("[^a-zA-Z0-9 ]", " ");
-				String description = feature.getDescription() == null ? StringUtils.EMPTY : feature.getDescription()
-						.replaceAll("[^a-zA-Z0-9 ]", " ");
+				String name = feature.getName();
+				String description = feature.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(
+						feature.getDescription()).replaceAll("[^a-zA-Z0-9 ]", " ");
 				String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
 				StringBuilder categoryValue = new StringBuilder();
 
@@ -120,6 +121,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, description);
 				tuple.set(FIELD_PATH, path);
+				tuple.set(DATA_TYPE, feature.getDataType());
 				tuple.set(FIELD_CATEGORY, categoryValue.toString());
 				tuples.add(tuple);
 			}
@@ -140,7 +142,8 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	}
 
 	/**
-	 * Count the number of protocols and features of this protocol (excluding this protocol itself)
+	 * Count the number of protocols and features of this protocol (excluding
+	 * this protocol itself)
 	 */
 	@Override
 	public int getCount() throws TableException
