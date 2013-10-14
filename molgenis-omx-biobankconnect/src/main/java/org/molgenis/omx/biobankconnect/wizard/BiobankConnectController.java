@@ -140,7 +140,6 @@ public class BiobankConnectController extends AbstractWizardController
 		return response;
 	}
 
-	// TODO : to template
 	@ModelAttribute("javascripts")
 	public List<String> getJavascripts()
 	{
@@ -149,7 +148,6 @@ public class BiobankConnectController extends AbstractWizardController
 				"biobank-connect.js");
 	}
 
-	// TODO : to template
 	@ModelAttribute("stylesheets")
 	public List<String> getStylesheets()
 	{
