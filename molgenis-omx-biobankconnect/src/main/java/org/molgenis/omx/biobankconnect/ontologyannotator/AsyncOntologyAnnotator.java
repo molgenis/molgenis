@@ -96,11 +96,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
 					Operator.IN, listOfFeatureIds)))
 			{
-				List<OntologyTerm> definitions = feature.getDefinition();
+				List<OntologyTerm> definitions = feature.getDefinitions();
 				if (definitions != null && definitions.size() > 0)
 				{
 					ObservableFeature newFeature = copyObject(feature);
-					newFeature.setDefinition_Identifier(new ArrayList<String>());
+					newFeature.setDefinitions_Identifier(new ArrayList<String>());
 					featuresToUpdate.add(newFeature);
 				}
 			}
@@ -158,8 +158,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 				if (definitions.size() > 0)
 				{
-					definitions.addAll(feature.getDefinition_Identifier());
-					feature.setDefinition_Identifier(definitions);
+					definitions.addAll(feature.getDefinitions_Identifier());
+					feature.setDefinitions_Identifier(definitions);
 				}
 				featuresToUpdate.add(feature);
 			}
@@ -273,10 +273,10 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 
 		List<String> identifiers = new ArrayList<String>();
-		if (feature.getDefinition_Identifier() != null) identifiers.addAll(feature.getDefinition_Identifier());
+		if (feature.getDefinitions_Identifier() != null) identifiers.addAll(feature.getDefinitions_Identifier());
 		for (String uri : mapUriTerm.keySet())
 			if (!identifiers.contains(uri)) identifiers.add(uri);
-		feature.setDefinition_Identifier(identifiers);
+		feature.setDefinitions_Identifier(identifiers);
 
 		if (mapUriTerm.size() > 0)
 		{

@@ -140,9 +140,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					String description = feature.getDescription() == null || feature.getDescription().isEmpty() ? feature
 							.getName() : feature.getDescription();
 					rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, description));
-					if (feature.getDefinition() != null && feature.getDefinition().size() > 0)
+					if (feature.getDefinitions() != null && feature.getDefinitions().size() > 0)
 					{
-						position = createQueryRules(description, feature.getDefinition());
+						position = createQueryRules(description, feature.getDefinitions());
 						rules.addAll(makeQueryForOntologyTerms(position));
 					}
 					QueryRule finalQuery = new QueryRule(rules);

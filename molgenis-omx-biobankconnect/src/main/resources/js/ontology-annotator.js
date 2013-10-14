@@ -110,7 +110,7 @@
 			var row = $('<tr />').addClass('show-popover').data('feature', feature).click(function()
 			{
 				var featureId = $(this).data('feature').id;
-				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, ["unit", "definition"], null);
+				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, ["unit", "definitions"], null);
 				var components = [];
 				components.push(createFeatureTable(restApiFeature));
 				components.push(createSearchDiv(restApiFeature));
@@ -137,10 +137,10 @@
 			var featureNameDiv = $('<div />').append(feature.name);
 			var annotationDiv = $('<div />').addClass('text-info');
 			var annotationText = '';
-			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definition"]);
-			if(featureEntity.definition.items !== 0){
-				var moreToShow = featureEntity.definition.items.length;
-				$.each(featureEntity.definition.items, function(index, ontologyTerm){
+			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definitions"]);
+			if(featureEntity.definitions.items !== 0){
+				var moreToShow = featureEntity.definitions.items.length;
+				$.each(featureEntity.definitions.items, function(index, ontologyTerm){
 					var newAnnotationText = annotationText + ontologyTerm.name + ' , ';
 					if(newAnnotationText.length > 50) {
 						annotationText = annotationText.substring(0, annotationText.length - 3) + ' , ';
@@ -238,7 +238,7 @@
 					}
 					if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
 					if(ontologyTermId != null) updateAnnotation(restApi.get(this.feature.href), ontologyTermId, true);
-					restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
+					restApi.getAsync(this.feature.href, ["unit", "definitions"], null, function(updatedFeature){
 						var components = [];
 						components.push(createFeatureTable(updatedFeature));
 						components.push(createSearchDiv(updatedFeature));
@@ -261,7 +261,7 @@
 				if(key !== 'href'){
 					if(key === 'unit')
 						data[key] = value.href.substring(value.href.lastIndexOf('/') + 1);
-					else if(key === 'definition'){
+					else if(key === 'definitions'){
 						data[key] = [];
 						$.each(value.items, function(index, element){
 							data[key].push(element.href.substring(element.href.lastIndexOf('/') + 1));
@@ -270,10 +270,10 @@
 						data[key] = value;
 				}	
 			});
-			if($.inArray(ontologyTermId, data.definition) === -1 && add) data.definition.push(ontologyTermId);
-			if($.inArray(ontologyTermId, data.definition) !== -1 && !add) {
-				var index = data.definition.indexOf(ontologyTermId);
-				data.definition.splice(index, 1);
+			if($.inArray(ontologyTermId, data.definitions) === -1 && add) data.definitions.push(ontologyTermId);
+			if($.inArray(ontologyTermId, data.definitions) !== -1 && !add) {
+				var index = data.definitions.indexOf(ontologyTermId);
+				data.definitions.splice(index, 1);
 			}
 			updateFeature(feature, data);
 		}
@@ -366,14 +366,14 @@
 			$('<tr><th>Name : </th><td>' + feature.name + '</td></tr>').appendTo(table);
 			$('<tr><th>Description : </th><td>' + i18nDescription(feature).en + '</td></tr>').appendTo(table);
 			
-			if(feature.definition.items.length !== 0){
+			if(feature.definitions.items.length !== 0){
 				var ontologyTermAnnotations = $('<ul />');
-				$.each(feature.definition.items, function(index, ontologyTerm){
+				$.each(feature.definitions.items, function(index, ontologyTerm){
 					var ontologyTermLink = $('<a href="' + ontologyTerm.termAccession + '" target="_blank">' + ontologyTerm.name + '</a>');
 					var removeIcon = $('<i class="icon-remove float-right"></i>').click($.proxy(function(){
 						var ontologyTermId = this.ontologyTermHref.substring(this.ontologyTermHref.lastIndexOf('/') + 1)
 						updateAnnotation(this.feature, ontologyTermId, false);
-						restApi.getAsync(this.feature.href, ["unit", "definition"], null, function(updatedFeature){
+						restApi.getAsync(this.feature.href, ["unit", "definitions"], null, function(updatedFeature){
 							var components = [];
 							var featureTableContainer = createFeatureTable(updatedFeature);
 							components.push(featureTableContainer);

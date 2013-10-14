@@ -38,7 +38,7 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	@Override
 	public String getCode()
 	{
-		List<OntologyTerm> ontologyTerm = observableFeature.getDefinition();
+		List<OntologyTerm> ontologyTerm = observableFeature.getDefinitions();
 		if (ontologyTerm == null || ontologyTerm.isEmpty()) return null;
 		else if (ontologyTerm.size() > 1) throw new RuntimeException("Multiple ontology terms are not supported");
 		else return ontologyTerm.get(0).getTermAccession();
@@ -47,7 +47,7 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	@Override
 	public String getCodeSystem()
 	{
-		List<OntologyTerm> ontologyTerm = observableFeature.getDefinition();
+		List<OntologyTerm> ontologyTerm = observableFeature.getDefinitions();
 		if (ontologyTerm == null || ontologyTerm.isEmpty()) return null;
 		else if (ontologyTerm.size() > 1) throw new RuntimeException("Multiple ontology terms are not supported");
 		else
