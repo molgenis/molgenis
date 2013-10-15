@@ -107,7 +107,7 @@
 				nillable="true"
 				description="(Optional) Reference to the well-defined measurement unit used to observe this feature 
 					(if feature is that concrete). E.g. mmHg" />
-			<field name="definition" type="xref" xref_entity="OntologyTerm" description="The concept that is being measured in a specific way." nillable="true" />
+			<field name="definitions" type="mref" xref_entity="OntologyTerm" description="The concept that is being measured in a specific way." nillable="true" />
 			<field name="dataType" type="enum" default="string"
 				enum_options="[bool,categorical,date,datetime,decimal,email,enum,file,html,hyperlink,image,int,long,mref,string,text,xref]"
 				description="(Optional) Reference to the technical data type. E.g. 'int'" />
