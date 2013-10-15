@@ -17,7 +17,6 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
-import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -111,8 +110,8 @@ public class StoreMappingTableTest
 
 		when(
 				db.find(ObservedValue.class,
-						new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.IN, Arrays.asList(1)))).thenReturn(
-				Arrays.asList(ov1, ov2, ov3));
+						new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, Arrays.asList("1"))))
+				.thenReturn(Arrays.asList(ov1, ov2, ov3));
 
 		Model model = mock(Model.class);
 		Entity entity = mock(Entity.class);
