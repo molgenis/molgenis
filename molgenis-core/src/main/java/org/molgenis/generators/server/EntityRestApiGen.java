@@ -46,7 +46,7 @@ public class EntityRestApiGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract and system entities
-			if (entity.isAbstract() || entity.isSystem()) continue;
+			if (entity.isAbstract()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/controller/" + entity.getName()
@@ -80,7 +80,7 @@ public class EntityRestApiGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract and system entities
-			if (entity.isAbstract() || entity.isSystem()) continue;
+			if (entity.isAbstract()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/controller/" + entity.getName()
