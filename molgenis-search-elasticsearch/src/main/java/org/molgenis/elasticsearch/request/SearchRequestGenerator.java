@@ -17,7 +17,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 public class SearchRequestGenerator
 {
 	private final List<? extends QueryRulePartGenerator> generators = Arrays.asList(new QueryGenerator(),
-			new SortGenerator(), new LimitOffsetGenerator());
+			new SortGenerator(), new LimitOffsetGenerator(), new DisMaxQueryGenerator());
 	private final SearchRequestBuilder searchRequestBuilder;
 
 	public SearchRequestGenerator(SearchRequestBuilder searchRequestBuilder)
