@@ -192,7 +192,7 @@ public class ${entity.name}Controller
 	{
 		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.read(id);
 		if (${entity.name?uncap_first} == null) throw new EntityNotFoundException("${entity.name} " + id.toString() + " not found");
-		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${field.name?cap_first}_${field.xrefEntity.primaryKey.name?cap_first}();
+		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${JavaName(field)}_${field.xrefEntity.primaryKey.name?cap_first}();
 		<#-- 'forward:' prefix does not work with URL query parameters -->
 		String redirectUri = "redirect:/api/v1/${field.xrefEntity.name?lower_case}/" + ${field.xrefEntity.name?uncap_first}Id.toString();
 		StringBuilder qsBuilder = new StringBuilder();
@@ -229,7 +229,7 @@ public class ${entity.name}Controller
 	private static EntityCollectionResponse<${field.xrefEntity.name}Response> _retrieve${entity.name}Mref${field.name?cap_first}(${entity.name} ${entity.name?uncap_first}, EntityCollectionRequest entityCollectionRequest, String... expandFieldsStr) throws DatabaseException
 	{
 		final Set<String> expandFields = expandFieldsStr != null ? new HashSet<String>(Arrays.asList(expandFieldsStr)) : null;
-		java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();
+		java.util.List<${field.xrefEntity.name}> ${field.xrefEntity.name?uncap_first}Collection = ${entity.name?uncap_first}.get${JavaName(field)}();
 		
 		int total = ${field.xrefEntity.name?uncap_first}Collection.size();
 		int toIndex = entityCollectionRequest.getStart() + entityCollectionRequest.getNum();
@@ -408,10 +408,10 @@ public class ${entity.name}Controller
 			<#if field.type == "xref" || field.type == "mref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			${entity.name?uncap_first}.set${field.name?cap_first}_${field.xrefEntity.primaryKey.name?cap_first}(${field.name?uncap_first});
+			${entity.name?uncap_first}.set${JavaName(field)}_${field.xrefEntity.primaryKey.name?cap_first}(${field.name?uncap_first});
 				</#if>
 			<#else>
-			${entity.name?uncap_first}.set${field.name?cap_first}(${field.name?uncap_first});
+			${entity.name?uncap_first}.set${JavaName(field)}(${field.name?uncap_first});
 			</#if>
 		</#if>
 		</#list>
@@ -470,23 +470,23 @@ public class ${entity.name}Controller
 		{
 		<#list fields as field>
 		<#if field.equals(entity.primaryKey)>
-			this.href = "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${field.name?cap_first}();
+			this.href = "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${JavaName(field)}();
 		<#elseif !field.system && !field.hidden && field.name != "__Type">
 			<#if field.type == "xref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${field.name?cap_first}(), null);
-			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${field.name?cap_first}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
+			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${JavaName(field)}() == null ? null : </#if>new ${field.xrefEntity.name}Response(${entity.name?uncap_first}.get${JavaName(field)}(), null);
+			else this.${field.name?uncap_first} = <#if field.nillable>${entity.name?uncap_first}.get${JavaName(field)}() == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
 				</#if>
 			<#elseif field.type == "mref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			<#if field.nillable>java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${field.name?cap_first}();</#if>
+			<#if field.nillable>java.util.List<${field.xrefEntity.name}> ${field.name}Collection = ${entity.name?uncap_first}.get${JavaName(field)}();</#if>
 			if (expandFields != null && expandFields.contains("${field.name?uncap_first}")) this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>_retrieve${entity.name}Mref${field.name?cap_first}(${entity.name?uncap_first}, new EntityCollectionRequest());
 			else this.${field.name?uncap_first} = <#if field.nillable>${field.name}Collection == null ? null : </#if>java.util.Collections.singletonMap("href", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.get${entity.primaryKey.name?cap_first}() + "/${field.name?uncap_first}");
 				</#if>
 			<#else>
-			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${field.name?cap_first}();
+			this.${field.name?uncap_first} = ${entity.name?uncap_first}.get${JavaName(field)}();
 			</#if>
 		</#if>
 		</#list>
