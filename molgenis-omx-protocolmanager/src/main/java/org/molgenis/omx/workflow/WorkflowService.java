@@ -9,4 +9,6 @@ public interface WorkflowService
 	List<Workflow> getWorkflows();
 
 	WorkflowElement getWorkflowElement(Integer workflowElementId) throws WorkflowException;
+
+	void deleteWorkflowElementDataRow(Integer rowId) throws WorkflowException;
 }

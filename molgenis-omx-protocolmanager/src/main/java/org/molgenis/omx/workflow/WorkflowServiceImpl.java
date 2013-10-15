@@ -1,12 +1,20 @@
 package org.molgenis.omx.workflow;
 
 import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
+import static org.molgenis.framework.db.QueryRule.Operator.AND;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.ObservationSet;
+import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.ProtocolUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,13 +75,13 @@ public class WorkflowServiceImpl implements WorkflowService
 	}
 
 	@Override
-	public WorkflowElement getWorkflowElement(Integer workflowStepId) throws WorkflowException
+	public WorkflowElement getWorkflowElement(Integer workflowElementId) throws WorkflowException
 	{
 		Protocol protocol;
 		try
 		{
-			protocol = Protocol.findById(database, workflowStepId);
-			if (protocol == null) throw new WorkflowException("Unknown workflow step [" + workflowStepId + "]");
+			protocol = Protocol.findById(database, workflowElementId);
+			if (protocol == null) throw new WorkflowException("Unknown workflow element [" + workflowElementId + "]");
 		}
 		catch (DatabaseException e)
 		{
@@ -103,235 +111,105 @@ public class WorkflowServiceImpl implements WorkflowService
 				}));
 	}
 
-	// private WorkflowElement createWorkflowElement(Protocol protocol) throws WorkflowException
-	// {
-	// List<ProtocolFlow> protocolFlows;
-	// try
-	// {
-	// protocolFlows = database.find(ProtocolFlow.class, new QueryRule(ProtocolFlow.DESTINATION_IDENTIFIER,
-	// Operator.EQUALS, protocol.getIdentifier()));
-	// }
-	// catch (DatabaseException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// return new WorkflowElement(protocol, database);
-	// }
+	// TODO make transactional
+	@Override
+	public void deleteWorkflowElementDataRow(Integer workflowElementDataRowId) throws WorkflowException
+	{
+		try
+		{
+			ObservationSet observationSet = ObservationSet.findById(database, workflowElementDataRowId);
+			if (observationSet == null)
+			{
+				throw new WorkflowException("Unknown workflow element data row [" + workflowElementDataRowId + "]");
+			}
 
-	// private WorkflowElementData createWorkflowElementData(Protocol protocol) throws WorkflowException
-	// {
-	// try
-	// {
-	// protocol = Protocol.findById(database, protocol.getId());
-	// if (protocol == null) throw new WorkflowException("Unknown workflow step [" + protocol.getId() + "]");
-	// }
-	// catch (DatabaseException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	//
-	// ValueConverter valueConverter = new ValueConverter(database);
-	// List<? extends ObservationSet> observationSets;
-	// try
-	// {
-	// List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED, Operator.EQUALS,
-	// protocol));
-	// if (dataSets == null || dataSets.size() != 1) throw new RuntimeException(
-	// "Workflow step must have exactly one data set");
-	// DataSet dataSet = dataSets.get(0);
-	//
-	// observationSets = ObservationSet.find(database, new QueryRule(ObservationSet.PARTOFDATASET,
-	// Operator.EQUALS, dataSet));
-	// }
-	// catch (DatabaseException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	//
-	// List<WorkflowElementDataRow> dataMatrix = new ArrayList<WorkflowElementDataRow>();
-	// try
-	// {
-	// for (ObservationSet observationSet : observationSets)
-	// {
-	// // get connections for this row
-	// List<ObservationSetFlow> observationSetFlows = database.find(ObservationSetFlow.class, new QueryRule(
-	// ObservationSetFlow.DESTINATION, Operator.EQUALS, observationSet));
-	//
-	// dataMatrix.add(new WorkflowElementDataRow(observationSet, observationSetFlows, database));
-	// }
-	// }
-	// catch (DatabaseException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	//
-	// return new WorkflowElementData(dataMatrix);
-	// }
+			List<ObservationSetFlow> sourceObservationSetFlows = database.find(ObservationSetFlow.class, new QueryRule(
+					ObservationSetFlow.SOURCE, EQUALS, observationSet));
+			if (sourceObservationSetFlows != null && !sourceObservationSetFlows.isEmpty())
+			{
+				// TODO decide if we want to do a recursive delete
+				database.remove(sourceObservationSetFlows);
+			}
 
-	// @Override
-	// public WorkflowElementData getWorkflowElementData(Integer workflowElementId) throws WorkflowException
-	// {
-	// WorkflowElement workflowElement = getWorkflowElement(workflowElementId);
+			List<ObservationSetFlow> destinationObservationSetFlows = database.find(ObservationSetFlow.class,
+					new QueryRule(ObservationSetFlow.DESTINATION, EQUALS, observationSet));
+			if (destinationObservationSetFlows != null && !destinationObservationSetFlows.isEmpty())
+			{
+				database.remove(destinationObservationSetFlows);
+			}
 
-	// Map<Integer, Integer> featureIndex = new HashMap<Integer, Integer>();
-	// int i = 0;
-	// List<ObservableFeature> features = protocol.getFeatures();
-	// for (ObservableFeature workflowFeature : features)
-	// {
-	// featureIndex.put(workflowFeature.getId(), i++);
-	// }
-	//
-	// List<WorkflowDataRow> dataMatrix = null;
-	//
-	// List<WorkflowElementConnection> elementConnections = workflowElement.getElementConnections();
-	// if (elementConnections != null && !elementConnections.isEmpty())
-	// {
-	// Protocol inputprotocol = Protocol.findById(database, inputStep.getId());
-	//
-	// List<DataSet> inputDataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED,
-	// Operator.EQUALS, inputprotocol));
-	// if (inputDataSets == null || inputDataSets.size() != 1) throw new RuntimeException(
-	// "Workflow step must have exactly one data set");
-	// DataSet inputDataSet = inputDataSets.get(0);
-	//
-	// List<ObservationSet> inputObservationSets = database.find(ObservationSet.class, new QueryRule(
-	// ObservationSet.PARTOFDATASET, Operator.EQUALS, inputDataSet));
-	//
-	// for (ObservationSet inputObservationSet : inputObservationSets)
-	// {
-	// // get values for this row
-	// List<ObservedValue> values = database.find(ObservedValue.class, new QueryRule(ObservedValue.FEATURE,
-	// Operator.EQUALS, workflowFeature.getId()), new QueryRule(Operator.AND), new QueryRule(
-	// ObservedValue.OBSERVATIONSET, Operator.EQUALS, inputObservationSet));
-	//
-	// ObservedValue value = values.get(0); // FIXME support multiple values
-	// // get linked rows for this row
-	// List<WorkflowDataRow> linkedDataRows = new ArrayList<WorkflowDataRow>();
-	// List<ObservationSetFlow> observationSetFlows = database.find(ObservationSetFlow.class, new QueryRule(
-	// ObservationSetFlow.SOURCE, Operator.EQUALS, inputObservationSet));
-	// for (ObservationSetFlow observationSetFlow : observationSetFlows)
-	// {
-	// ObservationSet destinationRow = observationSetFlow.getDestination();
-	// linkedDataRows.add(createDataRow(destinationRow, features, featureIndex, valueConverter));
-	// }
-	// try
-	// {
-	// dataMatrix.add(new WorkflowDataRow(Arrays.<Object> asList(valueConverter.toCell(value.getValue())
-	// .getValue())));
-	// }
-	// catch (ValueConverterException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// }
-	//
-	// // case: input features
-	// // create rows with linked rows
-	//
-	// WorkflowFeature workflowFeature = elementConnections.get(0);
-	//
-	// dataMatrix = new ArrayList<WorkflowDataRow>();
-	// try
-	// {
-	// for (WorkflowElement inputStep : workflowElement.getInputWorkflowElements())
-	// {
-	// Protocol inputprotocol = Protocol.findById(database, inputStep.getId());
-	//
-	// List<DataSet> inputDataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED,
-	// Operator.EQUALS, inputprotocol));
-	// if (inputDataSets == null || inputDataSets.size() != 1) throw new RuntimeException(
-	// "Workflow step must have exactly one data set");
-	// DataSet inputDataSet = inputDataSets.get(0);
-	//
-	// List<ObservationSet> inputObservationSets = database.find(ObservationSet.class, new QueryRule(
-	// ObservationSet.PARTOFDATASET, Operator.EQUALS, inputDataSet));
-	//
-	// for (ObservationSet inputObservationSet : inputObservationSets)
-	// {
-	// // get values for this row
-	// List<ObservedValue> values = database.find(ObservedValue.class, new QueryRule(
-	// ObservedValue.FEATURE, Operator.EQUALS, workflowFeature.getId()), new QueryRule(
-	// Operator.AND), new QueryRule(ObservedValue.OBSERVATIONSET, Operator.EQUALS,
-	// inputObservationSet));
-	//
-	// ObservedValue value = values.get(0); // FIXME support multiple values
-	// // get linked rows for this row
-	// List<WorkflowDataRow> linkedDataRows = new ArrayList<WorkflowDataRow>();
-	// List<ObservationSetFlow> observationSetFlows = database.find(ObservationSetFlow.class,
-	// new QueryRule(ObservationSetFlow.SOURCE, Operator.EQUALS, inputObservationSet));
-	// for (ObservationSetFlow observationSetFlow : observationSetFlows)
-	// {
-	// ObservationSet destinationRow = observationSetFlow.getDestination();
-	// linkedDataRows.add(createDataRow(destinationRow, features, featureIndex, valueConverter));
-	// }
-	// try
-	// {
-	// dataMatrix.add(new WorkflowDataRow(Arrays.<Object> asList(valueConverter.toCell(
-	// value.getValue()).getValue())));
-	// }
-	// catch (ValueConverterException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// }
-	// }
-	// }
-	// catch (DatabaseException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// }
-	// else
-	// {
-	// // case: no input features
-	// // create rows without linked rows
-	// if (!features.isEmpty())
-	// {
-	// dataMatrix = new ArrayList<WorkflowDataRow>(observationSets.size());
-	// for (ObservationSet observationSet : observationSets)
-	// {
-	// dataMatrix.add(createDataRow(observationSet, features, featureIndex, valueConverter));
-	// }
-	// }
-	// else
-	// {
-	// dataMatrix = Collections.emptyList();
-	// }
-	// }
+			List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET, EQUALS, observationSet));
+			if (observedValues != null && !observedValues.isEmpty())
+			{
+				// TODO delete values
+				// List<Value> values = new ArrayList<Value>();
+				// for (ObservedValue observedValue : observedValues)
+				// values.add(observedValue.getValue());
 
-	// return new WorkflowElementData(dataMatrix);
-	// }
+				database.remove(observedValues);
+				// database.remove(values);
+			}
+			database.remove(observationSet);
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
 
-	// private WorkflowDataRow createDataRow(ObservationSet observationSet, List<ObservableFeature> features,
-	// Map<Integer, Integer> featureIndex, ValueConverter valueConverter)
-	// {
-	// int nrFeatures = features.size();
-	// List<Object> row = new ArrayList<Object>(nrFeatures);
-	// for (int j = 0; j < nrFeatures; ++j)
-	// row.add(null);
-	// List<ObservedValue> values;
-	// try
-	// {
-	// values = database.find(ObservedValue.class, new QueryRule(ObservedValue.FEATURE, Operator.IN, features),
-	// new QueryRule(Operator.AND), new QueryRule(ObservedValue.OBSERVATIONSET, Operator.EQUALS,
-	// observationSet));
-	// }
-	// catch (DatabaseException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// for (ObservedValue value : values)
-	// {
-	// try
-	// {
-	// row.set(featureIndex.get(value.getFeature().getId()), valueConverter.toCell(value.getValue())
-	// .getValue());
-	// }
-	// catch (ValueConverterException e)
-	// {
-	// throw new RuntimeException(e);
-	// }
-	// }
-	// return new WorkflowDataRow(row);
-	// }
+	public void createWorkflowElementDataRowConnections(Integer workflowElementId,
+			List<Integer> workflowElementDataRowIds)
+	{
+		try
+		{
+			// get data set for the given workflow element
+			List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED, EQUALS,
+					workflowElementId));
+			if (dataSets == null || dataSets.size() != 1) throw new RuntimeException(
+					"Workflow step must have exactly one data set");
+			DataSet dataSet = dataSets.get(0);
+
+			String observationSetIdentifier = UUID.randomUUID().toString();
+
+			ObservationSet destinationObservationSet = new ObservationSet();
+			destinationObservationSet.setIdentifier(observationSetIdentifier);
+			destinationObservationSet.setPartOfDataSet(dataSet);
+			database.add(destinationObservationSet);
+
+			List<ObservationSetFlow> observationSetFlows = new ArrayList<ObservationSetFlow>();
+			for (Integer workflowElementDataRowId : workflowElementDataRowIds)
+			{
+				ObservationSet sourceObservationSet = ObservationSet.findById(database, workflowElementDataRowId);
+				ObservationSetFlow observationSetFlow = new ObservationSetFlow();
+				observationSetFlow.setSource(sourceObservationSet);
+				observationSetFlow.setDestination(destinationObservationSet);
+				observationSetFlows.add(observationSetFlow);
+				
+			}
+			database.add(observationSetFlows);
+			
+			// create input values
+			List<ProtocolFlow> protocolFlows = database.find(ProtocolFlow.class, new QueryRule(
+					ProtocolFlow.DESTINATION, EQUALS, workflowElementId));
+			if (protocolFlows != null)
+			{
+				for (ProtocolFlow protocolFlow : protocolFlows)
+				{
+					ObservableFeature inputFeature = protocolFlow.getInputFeature();
+					ObservableFeature outputFeature = protocolFlow.getOutputFeature();
+					
+					for(ObservationSetFlow observationSetFlow : observationSetFlows) {
+						database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET, EQUALS, observationSetFlow.getSource()), new QueryRule(AND), new QueryRule(ObservedValue.FEATURE, EQUALS, observationSetFlow.getSource()))
+					}
+					
+				}
+			}
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+	}
 }

@@ -70,7 +70,7 @@
 							</#list>
 						</#if>
 						<#assign processedOutputDataRows = processedOutputDataRows + [outputDataRow] />
-			<td class="snug"><a href="#"><img src="/img/delete.png"></a></td>
+			<td class="snug"><a href="#" class="delete-row-btn" data-row-id="${outputDataRow.id}"><img src="/img/delete.png"></a></td>
 						<#list features as feature>
 							<#if outputDataRow.getValue(feature.id)??>
 								<#assign value = outputDataRow.getValue(feature.id)>
@@ -114,7 +114,7 @@
 <#-- case: no connected features -->
 	<#list workflowElement.workflowElementData.elementDataRows as dataRow>
 			<tr>
-				<td class="snug"><a href="#"><img src="/img/delete.png"></a></td>
+				<td class="snug"><a href="#" class="delete-row-btn" data-row-id="${dataRow.id}"><img src="/img/delete.png"></a></td>
 		<#list allFeatures as feature>
 			<#if dataRow.getValue(feature.id)??>
 				<#assign value = dataRow.getValue(feature.id)>

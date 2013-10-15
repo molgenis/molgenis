@@ -70,8 +70,8 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		List<ObservedValue> observedValues = new ArrayList<ObservedValue>();
 		for (ObservationSet observationSet : observationSets)
 		{
-			observedValues.addAll(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID,
-					Operator.EQUALS, observationSet.getIdValue())));
+			observedValues.addAll(database.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.EQUALS, observationSet.getIdentifier())));
 			if (count % 20 == 0)
 			{
 				database.remove(observedValues);

@@ -4,12 +4,14 @@ import static org.molgenis.omx.workflow.WorkflowDataEntryController.URI;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
@@ -42,10 +44,17 @@ public class WorkflowDataEntryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/workflow/{workflowId}/element/{workflowElementId}", method = RequestMethod.GET)
-	public String getWorkflowApplicationStep(@PathVariable Integer workflowId, @PathVariable Integer workflowElementId,
+	public String getWorkflowElement(@PathVariable Integer workflowId, @PathVariable Integer workflowElementId,
 			Model model) throws WorkflowException
 	{
 		model.addAttribute("workflowElement", workflowService.getWorkflowElement(workflowElementId));
 		return "view-workflowdataentry-pane";
+	}
+
+	@RequestMapping(value = "/workflowelementdatarow/{rowId}", method = RequestMethod.POST, params = "_method=DELETE")
+	@ResponseStatus(HttpStatus.OK)
+	public void deleteWorkflowElementDataRow(@PathVariable Integer rowId) throws WorkflowException
+	{
+		workflowService.deleteWorkflowElementDataRow(rowId);
 	}
 }
