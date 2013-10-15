@@ -136,12 +136,14 @@
 				description="(Optional) time when the protocol ended." />
 			<field name="active" type="bool" default="true" description="whether this data set is considered active/inactive"/>
 		</entity>
-		<entity name="ObservationSet" implements="Autoid">
+		<entity name="ObservationSet" implements="Autoid" xref_label="Identifier">
 			<description>In practice: Observation is one row within a DataSet.
 			</description>
+			<field name="Identifier" type="string" description="user supplied or automatically assigned (using a decorator) unique and short identifier, e.g. MA1234" />
 			<field name="partOfDataSet" type="xref" xref_entity="DataSet"
 				description="DataSet this ValueSet is part of." />
 			<field name="Time" type="datetime" description="Time of this observationSet" nillable="true" />
+			<unique fields="Identifier" />
 			<unique fields="partOfDataSet,Time" description="No single secondary key" />
 		</entity>
 		<entity name="ObservedValue" implements="Autoid">

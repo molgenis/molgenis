@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
@@ -32,6 +33,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 {
 	private static final Logger LOG = Logger.getLogger(DataSetImporterServiceImpl.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
+	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
 	private final Database database;
 	private final ValueConverter valueConverter;
 
@@ -99,16 +101,21 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 			String featureIdentifier = colIt.next();
 			if (featureIdentifier != null && !featureIdentifier.isEmpty())
 			{
-				ObservableFeature feature = ObservableFeature.findByIdentifier(database, featureIdentifier);
-				if (feature == null)
+				if (!featureIdentifier.equals(DATASET_ROW_IDENTIFIER_HEADER))
 				{
-					throw new DatabaseException(ObservableFeature.class.getSimpleName() + " with identifier '"
-							+ featureIdentifier
-							+ "' does not exist. This is probably due to the fact that the feature is in the dataset_"
-							+ identifier + " but is not annotated in the observablefeature entity");
+					ObservableFeature feature = ObservableFeature.findByIdentifier(database, featureIdentifier);
+					if (feature == null)
+					{
+						throw new DatabaseException(
+								ObservableFeature.class.getSimpleName()
+										+ " with identifier '"
+										+ featureIdentifier
+										+ "' does not exist. This is probably due to the fact that the feature is in the dataset_"
+										+ identifier + " but is not annotated in the observablefeature entity");
 
+					}
+					featureMap.put(featureIdentifier, feature);
 				}
-				featureMap.put(featureIdentifier, feature);
 			}
 			else throw new DatabaseException("sheet '" + sheetName + "' contains empty column header");
 		}
@@ -125,8 +132,12 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 				Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
 
+				String rowIdentifier = row.getString(DATASET_ROW_IDENTIFIER_HEADER);
+				if (rowIdentifier == null) rowIdentifier = UUID.randomUUID().toString();
+
 				// create observation set
 				ObservationSet observationSet = new ObservationSet();
+				observationSet.setIdentifier(rowIdentifier);
 				observationSet.setPartOfDataSet(dataSet);
 				database.add(observationSet);
 

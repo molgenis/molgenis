@@ -214,8 +214,9 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		when(q.eq(DataSet.IDENTIFIER, "dataset1")).thenReturn(queryFound);
 		when(queryFound.find()).thenReturn(Arrays.asList(dataset));
 
-		when(database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.EQUALS, 0)))
-				.thenReturn(observedValues0);
+		when(
+				database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER,
+						Operator.EQUALS, 0))).thenReturn(observedValues0);
 
 		when(database.find(ObservationSet.class, new QueryRule(ObservationSet.PARTOFDATASET, Operator.EQUALS, 0)))
 				.thenReturn(observationSets0);
