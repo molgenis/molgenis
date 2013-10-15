@@ -116,9 +116,9 @@ public class MutationService
 	private List<Patient> queryPatientsByMutation(String segmentId, String mutationId) throws DatabaseException
 	{
 		Query<Patient> variantQuery = database.query(Patient.class);
-		variantQuery.equals(Patient.ALLELE1, mutationId);
-		variantQuery.or();
-		variantQuery.equals(Patient.ALLELE2, segmentId);
+		variantQuery.equals(Patient.ALLELE1_IDENTIFIER, mutationId)
+		.or()
+		.equals(Patient.ALLELE2_IDENTIFIER, mutationId);
 		List<Patient> patients = variantQuery.find();
 		return patients;
 	}
