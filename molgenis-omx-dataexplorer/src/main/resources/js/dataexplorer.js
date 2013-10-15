@@ -575,11 +575,13 @@
 		var count = 0;
 
 		if (searchQuery) {
-			searchRequest.queryRules.push({
-				operator : 'SEARCH',
-				value : searchQuery
-			});
-			count++;
+			if(/\S/.test(searchQuery)){	
+				searchRequest.queryRules.push({
+					operator : 'SEARCH',
+					value : searchQuery
+				});
+				count++;
+			}
 		}
 
 		$.each(featureFilters, function(featureUri, filter) {
@@ -644,6 +646,9 @@
 
 		return searchRequest;
 	};
+	
+	
+	
 	
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
