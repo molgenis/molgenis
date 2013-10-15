@@ -11,4 +11,7 @@ public interface WorkflowService
 	WorkflowElement getWorkflowElement(Integer workflowElementId) throws WorkflowException;
 
 	void deleteWorkflowElementDataRow(Integer rowId) throws WorkflowException;
+
+	// FIXME continue working on feature
+	// void createWorkflowElementDataRowConnections()
 }

@@ -1,7 +1,7 @@
 package org.molgenis.omx.workflow;
 
-import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
 import static org.molgenis.framework.db.QueryRule.Operator.AND;
+import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -185,10 +184,10 @@ public class WorkflowServiceImpl implements WorkflowService
 				observationSetFlow.setSource(sourceObservationSet);
 				observationSetFlow.setDestination(destinationObservationSet);
 				observationSetFlows.add(observationSetFlow);
-				
+
 			}
 			database.add(observationSetFlows);
-			
+
 			// create input values
 			List<ProtocolFlow> protocolFlows = database.find(ProtocolFlow.class, new QueryRule(
 					ProtocolFlow.DESTINATION, EQUALS, workflowElementId));
@@ -198,11 +197,19 @@ public class WorkflowServiceImpl implements WorkflowService
 				{
 					ObservableFeature inputFeature = protocolFlow.getInputFeature();
 					ObservableFeature outputFeature = protocolFlow.getOutputFeature();
-					
-					for(ObservationSetFlow observationSetFlow : observationSetFlows) {
-						database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET, EQUALS, observationSetFlow.getSource()), new QueryRule(AND), new QueryRule(ObservedValue.FEATURE, EQUALS, observationSetFlow.getSource()))
+
+					for (ObservationSetFlow observationSetFlow : observationSetFlows)
+					{
+						List<ObservedValue> inputObservedValues = database.find(ObservedValue.class, new QueryRule(
+								ObservedValue.OBSERVATIONSET, EQUALS, observationSetFlow.getSource()), new QueryRule(
+								AND), new QueryRule(ObservedValue.FEATURE, EQUALS, inputFeature));
+						if (inputObservedValues == null || inputObservedValues.isEmpty()) throw new RuntimeException(
+								"missing value");
+						else if (inputObservedValues.size() > 1) throw new RuntimeException(
+								"expected exactly one value");
+						// FIXME continue working on feature
 					}
-					
+
 				}
 			}
 		}
