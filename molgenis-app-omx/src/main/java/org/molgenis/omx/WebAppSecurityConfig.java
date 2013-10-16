@@ -60,7 +60,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
 				.hasAnyAuthority(defaultPluginAuthorities("contact"))
 
-				.antMatchers("/menu/main/useraccount", "/plugin/useraccount/**")
+				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
 				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
 
 				// converters menu
@@ -156,19 +156,19 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 								"datasetdeleter"))
 
 				// admin menu plugins
-				.antMatchers("/menu/admin/permissionmanager", "/plugin/permissionmanager/**")
+				.antMatchers("/menu/admin/permissionmanager/**", "/plugin/permissionmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
 
-				.antMatchers("/menu/admin/catalogmanager", "/plugin/catalogmanager/**")
+				.antMatchers("/menu/admin/catalogmanager/**", "/plugin/catalogmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
 
-				.antMatchers("/menu/admin/studymanager", "/plugin/studymanager/**")
+				.antMatchers("/menu/admin/studymanager/**", "/plugin/studymanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("studymanager"))
 
-				.antMatchers("/menu/admin/dataindexer", "/plugin/dataindexer/**")
+				.antMatchers("/menu/admin/dataindexer/**", "/plugin/dataindexer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
 
-				.antMatchers("/menu/admin/datasetdeleter", "/plugin/datasetdeleter/**")
+				.antMatchers("/menu/admin/datasetdeleter/**", "/plugin/datasetdeleter/**")
 				.hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"));
 	}
 
