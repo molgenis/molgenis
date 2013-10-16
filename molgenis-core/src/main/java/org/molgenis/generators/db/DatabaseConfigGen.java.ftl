@@ -35,7 +35,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 {
 	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
 
-	@Value("${r"${db_driver:@com.mysql.jdbc.Driver}"}")
+	@Value("${r"${db_driver:com.mysql.jdbc.Driver}"}")
 	private String dbDriverClass;
 	@Value("${r"${db_uri:@null}"}")
 	private String dbJdbcUri;
