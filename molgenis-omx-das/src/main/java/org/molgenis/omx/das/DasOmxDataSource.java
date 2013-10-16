@@ -23,7 +23,6 @@ import org.molgenis.util.ApplicationUtil;
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
-import uk.ac.ebi.mydas.examples.EnsemblTestManager;
 import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
@@ -60,6 +59,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		this.database = database;
 		this.mutationType = type;
 		this.method = method;
+		this.dataset = "test";
 	}
 	
 	public DasOmxDataSource() throws DataSourceException
@@ -76,14 +76,15 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	}
 
 	@Override
-	public Collection<DasEntryPoint> getEntryPoints(Integer arg0, Integer arg1) throws UnimplementedFeatureException,
+	public Collection<DasEntryPoint> getEntryPoints(Integer segmentId, Integer notUsed) throws UnimplementedFeatureException,
 			DataSourceException
 	{
 		Set<DasEntryPoint> entryPoints = new TreeSet<DasEntryPoint>();
 		try
 		{
+			Chromosome chromosome = getChromosome(segmentId.toString());
 			entryPoints.add(
-							new DasEntryPoint(getChromosome(arg0.toString()).getName(), 0, getChromosome(arg0.toString()).getBpLength(), "Chromosome", "VERSION",
+							new DasEntryPoint(chromosome.getName(), 0, chromosome.getBpLength(), "Chromosome", "VERSION",
 							DasEntryPointOrientation.NO_INTRINSIC_ORIENTATION, "test", false));
 		}
 		catch (DatabaseException e)
@@ -105,7 +106,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 			if(segmentParts.length >1){
 				segmentId = segmentParts[0];
 				patient = segmentParts[1];				
-				patientObject = queryPatients(patient);
+				patientObject = findPatient(patient);
 			}
 		if (maxbins == null) maxbins = -1;
 			List<Variant> variants = queryVariants(segmentId, start, stop, patientObject);
@@ -126,7 +127,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		}
 	}
 
-	private Patient queryPatients(String patient) throws DatabaseException
+	protected Patient findPatient(String patient) throws DatabaseException
 	{
 		Patient patientObject;
 		Query<Patient> patientQuery = database.query(Patient.class);
@@ -136,7 +137,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		return patientObject;
 	}
 
-	private List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
+	protected List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
 			throws DatabaseException
 	{
 		Chromosome chromosome = getChromosome(segmentId);
@@ -160,16 +161,16 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		return variants;
 	}
 
-	private DasFeature createDasFeature(Variant variant) throws MalformedURLException, DataSourceException
+	protected DasFeature createDasFeature(Variant variant) throws MalformedURLException, DataSourceException
 	{
 		List<String> notes = new ArrayList<String>();
 		Map<URL, String> linkout = new HashMap<URL, String>();
 		linkout.put(new URL("http://www.molgenis.org/"),"Link");
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
-		dasTarget.add(new DasTarget(variant.getIdentifier(), variant.getBpStart().intValue(), variant.getBpEnd().intValue(), variant.getDescription()));
+		dasTarget.add(new MolgenisDasTarget(variant.getIdentifier(), variant.getBpStart().intValue(), variant.getBpEnd().intValue(), variant.getDescription()));
 		List<String> parents = new ArrayList<String>();
 		DasFeature feature = new DasFeature(variant.getIdentifier().toString(), variant.getDescription(), mutationType,
-				method, variant.getBpStart().intValue(), variant.getBpEnd().intValue(), null,
+				method, variant.getBpStart().intValue(), variant.getBpEnd().intValue(), new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE
 				,notes,linkout,dasTarget,parents,null
 				);
@@ -177,7 +178,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	}
 
 	@Override
-	public Integer getTotalCountForType(DasType arg0) throws DataSourceException
+	public Integer getTotalCountForType(DasType type) throws DataSourceException
 	{
 		try
 		{
@@ -197,10 +198,11 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		return types;
 	}
 
-	private Chromosome getChromosome(String segmentId) throws DatabaseException
+	protected Chromosome getChromosome(String segmentId) throws DatabaseException
 	{
 		Query<Chromosome> variantQuery = database.query(Chromosome.class);
-		variantQuery.greaterOrEqual(Chromosome.ID, segmentId);
+		
+		variantQuery.equals(Chromosome.IDENTIFIER, segmentId);
 		Chromosome chromosome = variantQuery.find().get(0);
 		return chromosome;
 	}
