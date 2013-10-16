@@ -25,4 +25,17 @@ public class TupleToEmailValueConverterTest
 		EmailValue value = new TupleToEmailValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), "a@b.org");
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		EmailValue value = new EmailValue();
+		value.setValue("a@b.org");
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "a@b.org");
+		new TupleToEmailValueConverter().updateFromTuple(tuple, colName, null, value);
+		assertEquals(value.getValue(), "a@b.org");
+	}
 }

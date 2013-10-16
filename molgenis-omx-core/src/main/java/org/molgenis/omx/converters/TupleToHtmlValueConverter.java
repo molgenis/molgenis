@@ -12,10 +12,21 @@ public class TupleToHtmlValueConverter implements TupleToValueConverter<HtmlValu
 	@Override
 	public HtmlValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new HtmlValue());
+	}
+
+	@Override
+	public HtmlValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof HtmlValue))
+		{
+			throw new ValueConverterException("value is not a " + HtmlValue.class.getSimpleName());
+		}
 		String text = tuple.getString(colName);
 		if (text == null) return null;
 
-		HtmlValue HtmlValue = new HtmlValue();
+		HtmlValue HtmlValue = (HtmlValue) value;
 		HtmlValue.setValue(text);
 		return HtmlValue;
 	}

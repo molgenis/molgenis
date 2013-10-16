@@ -19,10 +19,13 @@ public class TupleToLongValueConverterTest
 	@Test
 	public void fromTuple() throws ValueConverterException
 	{
+		LongValue value = new LongValue();
+		value.setValue(1234l);
+
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, 1234l);
-		LongValue value = new TupleToLongValueConverter().fromTuple(tuple, colName, null);
+		new TupleToLongValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), Long.valueOf(1234l));
 	}
 }
