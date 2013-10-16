@@ -15,18 +15,6 @@ public class MolgenisDasTarget extends DasTarget
 	}
 
 	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + getStartCoordinate();
-		result = prime * result + getStopCoordinate();
-		result = prime * result + ((getTargetId() == null) ? 0 : getTargetId().hashCode());
-		result = prime * result + ((getTargetName() == null) ? 0 : getTargetName().hashCode());
-		return result;
-	}
-
-	@Override
 	public boolean equals(Object obj)
 	{
 		if (this == obj) return true;

@@ -54,11 +54,11 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	}
 	
 	//for unit test
-	public DasOmxDataSource(Database database, DasType type, DasMethod method)
+	public DasOmxDataSource(Database database) throws DataSourceException
 	{
 		this.database = database;
-		this.mutationType = type;
-		this.method = method;
+		mutationType = new DasType("mutation", null, "?", "mutation");
+		method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 		this.dataset = "test";
 	}
 	
