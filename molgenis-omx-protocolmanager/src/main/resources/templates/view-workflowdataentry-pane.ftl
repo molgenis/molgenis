@@ -38,7 +38,9 @@
 							<#list connectedFeatures as feature>
 			<td data-feature="${feature.id}" rowspan="${inputDataRow.outgoingElementDataRowConnections?size}">
 								<#if outputDataRow.getValue(feature.id)??><@createInput feature.dataType outputDataRow.getValue(feature.id) true /><#else><@createInput feature.dataType "" true /></#if>
+									<#if outputFeature.dataType?upper_case != "MREF">
 				<a href="#" class="create-row-btn"><img class="pull-right" src="/img/new.png"></a>
+									</#if>
 			</td>
 							</#list>
 						</#if>
@@ -62,9 +64,10 @@
 				<label class="checkbox"><input type="checkbox">
 				</#if>
 				<#if inputDataRow.getValue(inputFeature.id)??><@createInput outputFeature.dataType inputDataRow.getValue(inputFeature.id) true /><#else><@createInput outputFeature.dataType "" true /></#if>
-				<a href="#" class="create-row-btn"><img class="pull-right" src="/img/new.png"></a>
 				<#if outputFeature.dataType?upper_case == "MREF">
 				</label>
+				<#else>
+				<a href="#" class="create-row-btn"><img class="pull-right" src="/img/new.png"></a>
 				</#if>
 			</td>
 		</tr>
