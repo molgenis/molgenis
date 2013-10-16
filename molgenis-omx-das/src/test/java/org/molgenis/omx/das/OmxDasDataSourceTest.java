@@ -44,7 +44,7 @@ import uk.ac.ebi.mydas.model.DasTarget;
 import uk.ac.ebi.mydas.model.DasType;
 
 public class OmxDasDataSourceTest {
-	DasOmxDataSource source = new DasOmxDataSource(null,null,null);
+	DasOmxDataSource source;
 	private Variant variant;
 	private DasFeature dasFeature;
 	private DasEntryPoint expectedEntryPoint;
@@ -76,7 +76,7 @@ public class OmxDasDataSourceTest {
 				,new ArrayList<String>(),linkout,dasTarget,new ArrayList<String>(),null
 				);
 		expectedEntryPoint = new DasEntryPoint("Chromosome_name", new Integer(0), new Integer(48000000), "Chromosome", "VERSION", DasEntryPointOrientation.NO_INTRINSIC_ORIENTATION, "test", false);
-		source = new DasOmxDataSource(database,new DasType("mutation", null, "?", "mutation"),new DasMethod("not_recorded", "not_recorded", "ECO:0000037"));
+		source = new DasOmxDataSource(database);
 
 		List<Chromosome> chromosomeList = new ArrayList<Chromosome>();
 		Chromosome chromosome = mock(Chromosome.class);
@@ -146,6 +146,22 @@ public class OmxDasDataSourceTest {
 		verify(patientQuery).equals(eq(Patient.ID), eq("123"));		
 	}
 		
+	
+	@Test()
+	public void getTotalCountForType() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
+	{
+		source.getTotalCountForType(new DasType("mutation", null, "?", "mutation"));
+		verify(database).count(eq(Variant.class));		
+	}
+	
+	@Test()
+	public void getTypes() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
+	{
+		List<DasType> types = new ArrayList<DasType>();
+		types.add(new DasType("mutation", null, "?", "mutation"));
+		assertEquals(types,source.getTypes());
+		
+	}
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
 	public void getFeatures() throws UnimplementedFeatureException, DataSourceException
 	{
