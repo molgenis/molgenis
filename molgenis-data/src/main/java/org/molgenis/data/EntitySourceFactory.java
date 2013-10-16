@@ -1,7 +1,8 @@
 package org.molgenis.data;
 
+
 /**
- * Creates an Entityource based on an url
+ * Creates an EntitySource based on an url
  */
 public interface EntitySourceFactory
 {

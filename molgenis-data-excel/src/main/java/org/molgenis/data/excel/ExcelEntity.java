@@ -131,4 +131,26 @@ public class ExcelEntity extends AbstractEntity
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
 	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("[");
+		boolean first = true;
+		for (String attr : colNamesMap.keySet())
+		{
+			if (!first)
+			{
+				sb.append(",");
+			}
+			sb.append(attr).append("=").append(get(attr));
+			first = false;
+		}
+		sb.append("]");
+
+		return sb.toString();
+	}
+
 }

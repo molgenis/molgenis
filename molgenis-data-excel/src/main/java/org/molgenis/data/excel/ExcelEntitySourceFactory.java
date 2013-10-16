@@ -1,10 +1,16 @@
 package org.molgenis.data.excel;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.molgenis.data.EntitySource;
-import org.molgenis.data.EntitySourceFactory;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.support.AbstractFileBasedEntitySourceFactory;
+import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.io.processor.LowerCaseProcessor;
+import org.molgenis.io.processor.TrimProcessor;
+import org.springframework.stereotype.Component;
 
 /**
  * EntitySourceFactory that creates a ExcelReader EntitySource
@@ -14,30 +20,29 @@ import org.molgenis.data.MolgenisDataException;
  * example: excel://Users/john/Documents/matrix.xls
  * 
  */
-public class ExcelEntitySourceFactory implements EntitySourceFactory
+@Component
+public class ExcelEntitySourceFactory extends AbstractFileBasedEntitySourceFactory
 {
 	public static final String EXCEL_ENTITYSOURCE_URL_PREFIX = "excel://";
+	public static final List<String> FILE_EXTENSIONS = Arrays.asList("xls", "xlsx");
+	private static final List<CellProcessor> CELLPROCESSORS = Arrays.<CellProcessor> asList(new TrimProcessor(),
+			new LowerCaseProcessor(true, false));
 
-	@Override
-	public String getUrlPrefix()
+	public ExcelEntitySourceFactory()
 	{
-		return "excel";
+		super(EXCEL_ENTITYSOURCE_URL_PREFIX, FILE_EXTENSIONS, CELLPROCESSORS);
 	}
 
-	/**
-	 * Creates an ExcelReader
-	 */
 	@Override
-	public EntitySource create(String url)
+	protected EntitySource createInternal(String url, List<CellProcessor> cellProcessors) throws IOException
 	{
-		try
-		{
-			return new ExcelEntitySource(url);
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException("Exception creating excel datasource with url [" + url + "]", e);
-		}
+		return new ExcelEntitySource(url, cellProcessors);
+	}
+
+	@Override
+	protected EntitySource createInternal(File file, List<CellProcessor> cellProcessors) throws IOException
+	{
+		return new ExcelEntitySource(file, cellProcessors);
 	}
 
 }

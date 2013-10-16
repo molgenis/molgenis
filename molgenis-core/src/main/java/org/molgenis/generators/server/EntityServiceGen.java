@@ -30,7 +30,7 @@ public class EntityServiceGen extends Generator
 	{
 		if (options.generate_tests == true)
 		{
-			generateServiceTests(model, options);
+			// generateServiceTests(model, options);
 		}
 		else
 		{
@@ -46,7 +46,7 @@ public class EntityServiceGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract and system entities
-			if (entity.isAbstract()) continue;
+			if (entity.isAbstract() || entity.isSystem()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()
@@ -80,7 +80,7 @@ public class EntityServiceGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract and system entities
-			if (entity.isAbstract()) continue;
+			if (entity.isAbstract() || entity.isSystem()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()

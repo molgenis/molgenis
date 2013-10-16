@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -11,14 +13,23 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.EntitySourceFactory;
+import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the DataService interface
  */
-public class DataServiceImpl implements DataService
+@Component
+public class DataServiceImpl implements DataService, ApplicationContextAware
 {
 	// Key: entity name, value:EntitySourceFactory
 	private final Map<String, EntitySourceFactory> entitySourceFactoryByEntityName = new LinkedHashMap<String, EntitySourceFactory>();
@@ -28,6 +39,8 @@ public class DataServiceImpl implements DataService
 
 	// Key: EntitySourceFactory.urlPrefix, value:EntitySource
 	private final Map<String, EntitySourceFactory> entitySourceFactoryByUrlPrefix = new HashMap<String, EntitySourceFactory>();
+
+	private final Map<String, FileBasedEntitySourceFactory> fileBasedEntitySourceFactoryByFileExtension = new HashMap<String, FileBasedEntitySourceFactory>();
 
 	@Override
 	public Iterable<String> getEntityNames()
@@ -64,7 +77,9 @@ public class DataServiceImpl implements DataService
 		return entitySources.iterator();
 	}
 
-	@Override
+	/**
+	 * Register a new EntitySourceFactory of an EntitySource implementation
+	 */
 	public void registerFactory(EntitySourceFactory entitySourceFactory)
 	{
 		if (entitySourceFactoryByUrlPrefix.get(entitySourceFactory.getUrlPrefix()) != null)
@@ -73,6 +88,15 @@ public class DataServiceImpl implements DataService
 		}
 
 		entitySourceFactoryByUrlPrefix.put(entitySourceFactory.getUrlPrefix(), entitySourceFactory);
+
+		if (entitySourceFactory instanceof FileBasedEntitySourceFactory)
+		{
+			FileBasedEntitySourceFactory factory = (FileBasedEntitySourceFactory) entitySourceFactory;
+			for (String fileExtension : factory.getFileExtensions())
+			{
+				fileBasedEntitySourceFactoryByFileExtension.put(fileExtension, factory);
+			}
+		}
 	}
 
 	@Override
@@ -99,4 +123,62 @@ public class DataServiceImpl implements DataService
 		}
 	}
 
+	@Override
+	public long count(String entityName, Query q)
+	{
+		return getQueryableRepository(entityName).count(q);
+	}
+
+	@Override
+	public Iterable<? extends Entity> findAll(String entityName, Query q)
+	{
+		return getQueryableRepository(entityName).findAll(q);
+	}
+
+	@Override
+	public Entity findOne(String entityName, Integer id)
+	{
+		return getQueryableRepository(entityName).findOne(id);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Queryable<? extends Entity> getQueryableRepository(String entityName)
+	{
+		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Queryable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
+		}
+
+		return (Queryable<? extends Entity>) repo;
+	}
+
+	@Override
+	public EntitySource createEntitySource(File file) throws IOException
+	{
+		if (!file.isFile())
+		{
+			throw new MolgenisDataException("File [" + file.getAbsolutePath() + "] is not a file");
+		}
+
+		String extension = StringUtils.getFilenameExtension(file.getName());
+		FileBasedEntitySourceFactory factory = fileBasedEntitySourceFactoryByFileExtension.get(extension);
+		if (factory == null)
+		{
+			throw new MolgenisDataException("Unknown file extension [" + extension + "]");
+		}
+
+		return factory.create(file);
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+	{
+		// Find all EntitySourceFactories and register them
+		Map<String, EntitySourceFactory> factories = applicationContext.getBeansOfType(EntitySourceFactory.class);
+		for (EntitySourceFactory factory : factories.values())
+		{
+			registerFactory(factory);
+		}
+	}
 }
