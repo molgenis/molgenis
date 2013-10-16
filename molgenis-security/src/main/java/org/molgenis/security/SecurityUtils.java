@@ -1,7 +1,9 @@
 package org.molgenis.security;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.springframework.security.core.Authentication;
@@ -115,10 +117,20 @@ public class SecurityUtils
 	 * @param pluginId
 	 * @return
 	 */
-	public static String[] defaultPluginAuthorities(String pluginId)
+	public static String[] defaultPluginAuthorities(String... pluginIds)
 	{
-		return new String[]
-		{ AUTHORITY_SU, getPluginReadAuthority(pluginId), getPluginWriteAuthority(pluginId) };
+		List<String> pluginAuthorities = new ArrayList<String>();
+		pluginAuthorities.add(AUTHORITY_SU);
+		if (pluginIds != null)
+		{
+			for (String pluginId : pluginIds)
+			{
+				pluginAuthorities.add(getPluginReadAuthority(pluginId));
+				pluginAuthorities.add(getPluginWriteAuthority(pluginId));
+			}
+		}
+		return pluginAuthorities.toArray(new String[]
+		{});
 	}
 
 	public static String getPluginReadAuthority(String pluginId)
