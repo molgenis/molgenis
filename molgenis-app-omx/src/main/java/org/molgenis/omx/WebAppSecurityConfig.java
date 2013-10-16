@@ -20,6 +20,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
+	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac)
 	{
@@ -178,6 +179,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		return AuthorityUtils.createAuthorityList(getPluginReadAuthority("home"));
 	}
 
+	// TODO automate role hierarchy configuration (ticket #2134)
 	@Override
 	public RoleHierarchy roleHierarchy()
 	{
@@ -204,6 +206,10 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_STUDYMANAGER > ROLE_PLUGIN_READ_STUDYMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_USERACCOUNT > ROLE_PLUGIN_READ_USERACCOUNT").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_VOID > ROLE_PLUGIN_READ_VOID").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CATALOGMANAGER > ROLE_PLUGIN_READ_CATALOGMANAGER").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_STUDYMANAGER > ROLE_PLUGIN_READ_STUDYMANAGER").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETINDEXER > ROLE_PLUGIN_READ_DATASETINDEXER").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETDELETER > ROLE_PLUGIN_READ_DATASETDELETER").append(' ');
 
 		// Entities: WRITE > READ
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_ACCESSION > ROLE_ENTITY_READ_ACCESSION").append(' ');
