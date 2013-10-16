@@ -1,6 +1,9 @@
 package org.molgenis.omx;
 
 import static org.molgenis.security.SecurityUtils.defaultPluginAuthorities;
+import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
+
+import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -9,6 +12,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 
 @Configuration
 @EnableWebSecurity
@@ -18,89 +23,126 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	protected void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac)
 	{
-		euac.antMatchers("/").permitAll()
+		euac.antMatchers("/")
+				.permitAll()
 
-		.antMatchers("/plugin/home/**").hasAnyAuthority(defaultPluginAuthorities("home"))
+				.antMatchers("/menu/main/home/**", "/plugin/home/**")
+				.hasAnyAuthority(defaultPluginAuthorities("home"))
 
-		.antMatchers("/plugin/protocolviewer/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+				.antMatchers("/menu/main/protocolviewer/**", "/plugin/protocolviewer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
-		.antMatchers("/plugin/dataexplorer/**").hasAnyAuthority(defaultPluginAuthorities("dataexplorer"))
+				.antMatchers("/menu/main/dataexplorer/**", "/plugin/dataexplorer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("dataexplorer"))
 
-		.antMatchers("/plugin/entityexplorer/**").hasAnyAuthority(defaultPluginAuthorities("entityexplorer"))
+				.antMatchers("/menu/main/entityexplorer/**", "/plugin/entityexplorer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("entityexplorer"))
 
-		.antMatchers("/plugin/importwizard/**").hasAnyAuthority(defaultPluginAuthorities("importwizard"))
+				.antMatchers("/menu/main/importwizard/**", "/plugin/importwizard/**")
+				.hasAnyAuthority(defaultPluginAuthorities("importwizard"))
 
-		.antMatchers("/plugin/news/**").hasAnyAuthority(defaultPluginAuthorities("news"))
+				.antMatchers("/menu/main/news/**", "/plugin/news/**")
+				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
-		.antMatchers("/plugin/background/**").hasAnyAuthority(defaultPluginAuthorities("background"))
+				.antMatchers("/menu/main/background/**", "/plugin/background/**")
+				.hasAnyAuthority(defaultPluginAuthorities("background"))
 
-		.antMatchers("/plugin/references/**").hasAnyAuthority(defaultPluginAuthorities("references"))
+				.antMatchers("/menu/main/references/**", "/plugin/references/**")
+				.hasAnyAuthority(defaultPluginAuthorities("references"))
 
-		.antMatchers("/plugin/contact/**").hasAnyAuthority(defaultPluginAuthorities("contact"))
+				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
+				.hasAnyAuthority(defaultPluginAuthorities("contact"))
 
-		.antMatchers("/plugin/cbmtoomxconverter/**").hasAnyAuthority(defaultPluginAuthorities("cbmtoomxconverter"))
+				.antMatchers("/menu/main/cbmtoomxconverter/**", "/plugin/cbmtoomxconverter/**")
+				.hasAnyAuthority(defaultPluginAuthorities("cbmtoomxconverter"))
 
-		.antMatchers("/plugin/form.DataSet").hasAnyAuthority(defaultPluginAuthorities("formdataSet"))
+				.antMatchers("/menu/entities/form.DataSet", "/plugin/form.DataSet")
+				.hasAnyAuthority(defaultPluginAuthorities("formdataSet"))
 
-		.antMatchers("/plugin/form.Protocol?subForms=DataSet.ProtocolUsed")
+				.antMatchers("/menu/entities/form.Protocol?subForms=DataSet.ProtocolUsed",
+						"/plugin/form.Protocol?subForms=DataSet.ProtocolUsed")
 				.hasAnyAuthority(defaultPluginAuthorities("formprotocol"))
 
-				.antMatchers("/plugin/form.ObservableFeature?subForms=Category.observableFeature")
+				.antMatchers("/menu/entities/form.ObservableFeature?subForms=Category.observableFeature",
+						"/plugin/form.ObservableFeature?subForms=Category.observableFeature")
 				.hasAnyAuthority(defaultPluginAuthorities("formobservablefeature"))
 
-				.antMatchers("/plugin/form.Category").hasAnyAuthority(defaultPluginAuthorities("formcategory"))
+				.antMatchers("/menu/entities/form.Category", "/plugin/form.Category")
+				.hasAnyAuthority(defaultPluginAuthorities("formcategory"))
 
-				.antMatchers("/plugin/form.BoolValue").hasAnyAuthority(defaultPluginAuthorities("formboolvalue"))
+				.antMatchers("/menu/entities/values/form.BoolValue", "/plugin/form.BoolValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formboolvalue"))
 
-				.antMatchers("/plugin/form.CategoricalValue")
+				.antMatchers("/menu/entities/values/form.CategoricalValue", "/plugin/form.CategoricalValue")
 				.hasAnyAuthority(defaultPluginAuthorities("formcategoricalvalue"))
 
-				.antMatchers("/plugin/form.DateValue").hasAnyAuthority(defaultPluginAuthorities("formdatevalue"))
+				.antMatchers("/menu/entities/values/form.DateValue", "/plugin/form.DateValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formdatevalue"))
 
-				.antMatchers("/plugin/form.DateTimeValue")
+				.antMatchers("/menu/entities/values/form.DateTimeValue", "/plugin/form.DateTimeValue")
 				.hasAnyAuthority(defaultPluginAuthorities("formdatetimevalue"))
 
-				.antMatchers("/plugin/form.DecimalValue").hasAnyAuthority(defaultPluginAuthorities("formdecimalvalue"))
+				.antMatchers("/menu/entities/values/form.DecimalValue", "/plugin/form.DecimalValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formdecimalvalue"))
 
-				.antMatchers("/plugin/form.EmailValue").hasAnyAuthority(defaultPluginAuthorities("formemailvalue"))
+				.antMatchers("/menu/entities/values/form.EmailValue", "/plugin/form.EmailValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formemailvalue"))
 
-				.antMatchers("/plugin/form.HtmlValue").hasAnyAuthority(defaultPluginAuthorities("formhtmlvalue"))
+				.antMatchers("/menu/entities/values/form.HtmlValue", "/plugin/form.HtmlValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formhtmlvalue"))
 
-				.antMatchers("/plugin/form.HyperlinkValue")
+				.antMatchers("/menu/entities/values/form.HyperlinkValue", "/plugin/form.HyperlinkValue")
 				.hasAnyAuthority(defaultPluginAuthorities("formhyperlinkvalue"))
 
-				.antMatchers("/plugin/form.IntValue").hasAnyAuthority(defaultPluginAuthorities("formintvalue"))
+				.antMatchers("/menu/entities/values/form.IntValue", "/plugin/form.IntValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formintvalue"))
 
-				.antMatchers("/plugin/form.LongValue").hasAnyAuthority(defaultPluginAuthorities("formlongvalue"))
+				.antMatchers("/menu/entities/values/form.LongValue", "/plugin/form.LongValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formlongvalue"))
 
-				.antMatchers("/plugin/form.MrefValue").hasAnyAuthority(defaultPluginAuthorities("formmrefvalue"))
+				.antMatchers("/menu/entities/values/form.MrefValue", "/plugin/form.MrefValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formmrefvalue"))
 
-				.antMatchers("/plugin/form.StringValue").hasAnyAuthority(defaultPluginAuthorities("formstringvalue"))
+				.antMatchers("/menu/entities/values/form.StringValue", "/plugin/form.StringValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formstringvalue"))
 
-				.antMatchers("/plugin/form.TextValue").hasAnyAuthority(defaultPluginAuthorities("formtextvalue"))
+				.antMatchers("/menu/entities/values/form.TextValue", "/plugin/form.TextValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formtextvalue"))
 
-				.antMatchers("/plugin/form.XrefValue").hasAnyAuthority(defaultPluginAuthorities("formxrefvalue"))
+				.antMatchers("/menu/entities/values/form.XrefValue", "/plugin/form.XrefValue")
+				.hasAnyAuthority(defaultPluginAuthorities("formxrefvalue"))
 
-				.antMatchers("/plugin/form.StudyDataRequest")
+				.antMatchers("/menu/entities/form.StudyDataRequest", "/plugin/form.StudyDataRequest")
 				.hasAnyAuthority(defaultPluginAuthorities("formstudydatarequest"))
 
-				.antMatchers("/plugin/form.RuntimeProperty")
+				.antMatchers("/menu/entities/form.RuntimeProperty", "/plugin/form.RuntimeProperty")
 				.hasAnyAuthority(defaultPluginAuthorities("formruntimeproperty"))
 
 				// TODO specify for each plugin configuration
 
-				.antMatchers("/plugin/permissionmanager/**")
+				.antMatchers("/menu/admin/permissionmanager", "/plugin/permissionmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
 
-				.antMatchers("/plugin/catalogmanager/**").hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
+				.antMatchers("/menu/admin/catalogmanager", "/plugin/catalogmanager/**")
+				.hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
 
-				.antMatchers("/plugin/studymanager/**").hasAnyAuthority(defaultPluginAuthorities("studymanager"))
+				.antMatchers("/menu/admin/studymanager", "/plugin/studymanager/**")
+				.hasAnyAuthority(defaultPluginAuthorities("studymanager"))
 
-				.antMatchers("/plugin/dataindexer/**").hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
+				.antMatchers("/menu/admin/dataindexer", "/plugin/dataindexer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
 
-				.antMatchers("/plugin/datasetdeleter/**").hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"))
+				.antMatchers("/menu/admin/datasetdeleter", "/plugin/datasetdeleter/**")
+				.hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"))
 
-				.antMatchers("/plugin/useraccount/**").hasAnyAuthority(defaultPluginAuthorities("useraccount"));
+				.antMatchers("/menu/main/useraccount", "/plugin/useraccount/**")
+				.hasAnyAuthority(defaultPluginAuthorities("useraccount"));
+	}
+
+	@Override
+	protected List<GrantedAuthority> createAnonymousUserAuthorities()
+	{
+		return AuthorityUtils.createAuthorityList(getPluginReadAuthority("home"));
 	}
 
 	@Override

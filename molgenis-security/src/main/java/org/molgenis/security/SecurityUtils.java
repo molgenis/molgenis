@@ -57,14 +57,18 @@ public class SecurityUtils
 	{
 		if (roles == null || roles.length == 0) return false;
 
-		Collection<? extends GrantedAuthority> authorities = getCurrentUser().getAuthorities();
-		for (String role : roles)
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null)
 		{
-			for (GrantedAuthority grantedAuthority : authorities)
+			Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+			for (String role : roles)
 			{
-				if (role.equals(grantedAuthority.getAuthority())) return true;
-			}
+				for (GrantedAuthority grantedAuthority : authorities)
+				{
+					if (role.equals(grantedAuthority.getAuthority())) return true;
+				}
 
+			}
 		}
 		return false;
 	}
@@ -117,12 +121,12 @@ public class SecurityUtils
 		{ AUTHORITY_SU, getPluginReadAuthority(pluginId), getPluginWriteAuthority(pluginId) };
 	}
 
-	private static String getPluginReadAuthority(String pluginId)
+	public static String getPluginReadAuthority(String pluginId)
 	{
 		return AUTHORITY_PLUGIN_READ_PREFIX + pluginId.toUpperCase();
 	}
 
-	private static String getPluginWriteAuthority(String pluginId)
+	public static String getPluginWriteAuthority(String pluginId)
 	{
 		return AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase();
 	}
