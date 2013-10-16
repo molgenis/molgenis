@@ -75,7 +75,6 @@ public class MapperSecurityDecoratorGen extends ForEachEntityGenerator
 				templateArgs.put("clazzName", shortKlazzName);
 				templateArgs.put("entity", entity);
 				templateArgs.put("model", model);
-				// templateArgs.put("db_driver", options.db_driver);
 				templateArgs.put("template", template.getName());
 				templateArgs.put("file",
 						packageName.replace(".", "/") + "/" + GeneratorHelper.getJavaName(entity.getName()) + getType()

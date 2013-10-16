@@ -16,6 +16,7 @@ import org.molgenis.util.EntityPager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Lazy
@@ -28,6 +29,7 @@ public class ${entity.name}Service
 	@Qualifier("database")
 	private Database db;
 
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_WRITE_${entity.name?upper_case}</#if>')")
 	public ${entity.name} create(${entity.name} ${entity.name?uncap_first}) throws DatabaseException
 	{
 		logger.debug("creating ${entity.name}");
@@ -35,18 +37,21 @@ public class ${entity.name}Service
 		return ${entity.name?uncap_first};
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_READ_${entity.name?upper_case}</#if>')")
 	public ${entity.name} read(${type(entity.primaryKey)} id) throws DatabaseException
 	{
 		logger.debug("retrieving ${entity.name}");
 		return db.findById(${entity.name}.class, id);
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_WRITE_${entity.name?upper_case}</#if>')")
 	public void update(${entity.name} ${entity.name?uncap_first}) throws DatabaseException
 	{
 		logger.debug("updating ${entity.name}");
 		db.update(${entity.name?uncap_first});
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_WRITE_${entity.name?upper_case}</#if>')")
 	public boolean deleteById(${type(entity.primaryKey)} id) throws DatabaseException
 	{
 		logger.debug("deleting ${entity.name}");
@@ -54,12 +59,14 @@ public class ${entity.name}Service
 		return db.remove(${entity.name?uncap_first}) == 1;
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_READ_${entity.name?upper_case}</#if>')")
 	public Iterable<${entity.name}> readAll() throws DatabaseException
 	{
 		logger.debug("retrieving all ${entity.name} instances");
 		return db.find(${entity.name}.class);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_READ_${entity.name?upper_case}</#if>')")
 	public EntityPager<${entity.name}> readAll(int start, int num, List<QueryRule> queryRules) throws DatabaseException
 	{
 		logger.debug("retrieving all ${entity.name} instances");
@@ -71,6 +78,7 @@ public class ${entity.name}Service
 		return new EntityPager<${entity.name}>(start, num, count, ${entity.name?uncap_first}Collection);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_READ_${entity.name?upper_case}</#if>')")
 	public Entity getEntity() throws DatabaseException
 	{
 		return db.getMetaData().getEntity("${entity.name}");
