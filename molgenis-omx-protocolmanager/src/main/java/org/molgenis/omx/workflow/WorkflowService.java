@@ -24,5 +24,5 @@ public interface WorkflowService
 	void createWorkflowElementDataRowWithConnections(Integer workflowElementId,
 			List<Integer> inputWorkflowElementDataRowIds);
 
-	void updateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId, String rawValue);
+	void createOrUpdateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId, String rawValue);
 }

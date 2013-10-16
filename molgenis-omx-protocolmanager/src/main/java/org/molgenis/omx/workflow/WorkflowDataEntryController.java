@@ -75,6 +75,6 @@ public class WorkflowDataEntryController extends MolgenisPluginController
 	public void updateWorkflowElementDataRowValue(@RequestParam Integer workflowElementDataRowId,
 			@RequestParam Integer featureId, @RequestParam String rawValue) throws WorkflowException
 	{
-		workflowService.updateWorkflowElementDataRowValue(workflowElementDataRowId, featureId, rawValue);
+		workflowService.createOrUpdateWorkflowElementDataRowValue(workflowElementDataRowId, featureId, rawValue);
 	}
 }

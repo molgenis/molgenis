@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.omx.converters.ValueConverter;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -17,10 +20,10 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.MrefValue;
-import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.omx.utils.ProtocolUtils;
+import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -257,7 +260,8 @@ public class WorkflowServiceImpl implements WorkflowService
 	}
 
 	@Override
-	public void updateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId, String rawValue)
+	public void createOrUpdateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId,
+			String rawValue)
 	{
 		try
 		{
@@ -269,10 +273,34 @@ public class WorkflowServiceImpl implements WorkflowService
 			if (observedValues.size() > 1) throw new RuntimeException(
 					"expected exactly one value for a row/column combination");
 
+			String colName = "key";
+			KeyValueTuple tuple = new KeyValueTuple();
+			tuple.set(colName, rawValue);
+
 			if (observedValues == null || observedValues.isEmpty())
 			{
-				StringValue value = new StringValue();
-				value.setValue(rawValue);
+				if (observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.XREF.toString())
+						|| observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.MREF.toString()))
+				{
+					String characteristicIdentifier = UUID.randomUUID().toString();
+
+					Characteristic characteristic = new Characteristic();
+					characteristic.setIdentifier(characteristicIdentifier);
+					characteristic.setName(rawValue);
+					database.add(characteristic);
+
+					tuple.set(colName, characteristicIdentifier);
+				}
+
+				Value value;
+				try
+				{
+					value = new ValueConverter(database).fromTuple(tuple, colName, observableFeature);
+				}
+				catch (ValueConverterException e)
+				{
+					throw new RuntimeException(e);
+				}
 
 				ObservedValue observedValue = new ObservedValue();
 				observedValue.setObservationSet(observationSet);
@@ -282,11 +310,25 @@ public class WorkflowServiceImpl implements WorkflowService
 			}
 			else
 			{
-				// FIXME use typed values
-				ObservedValue observedValue = observedValues.get(0);
-				StringValue value = (StringValue) observedValue.getValue();
-				value.setValue(rawValue);
-				database.update(value);
+				Value value = observedValues.get(0).getValue();
+				if (observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.XREF.toString()))
+				{
+					Characteristic characteristic = ((XrefValue) value).getValue();
+					characteristic.setName(rawValue);
+					database.update(characteristic);
+				}
+				else
+				{
+					try
+					{
+						new ValueConverter(database).updateFromTuple(tuple, colName, observableFeature, value);
+					}
+					catch (ValueConverterException e)
+					{
+						throw new RuntimeException(e);
+					}
+					database.update(value);
+				}
 			}
 
 		}
