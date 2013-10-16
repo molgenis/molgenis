@@ -23,3 +23,13 @@ td.snug {
 .tab-pane {
 	min-height: 250px;
 }
+
+.table th, .table td { 
+     border-top: none; 
+ }
+ 
+ input {
+ 	width: 100px;
+ 	margin-bottom: 0px !important;
+ 	padding: 0px 4px !important;
+ }

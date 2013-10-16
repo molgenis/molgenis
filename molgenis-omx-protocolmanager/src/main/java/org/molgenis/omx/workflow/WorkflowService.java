@@ -12,6 +12,17 @@ public interface WorkflowService
 
 	void deleteWorkflowElementDataRow(Integer rowId) throws WorkflowException;
 
-	// FIXME continue working on feature
-	// void createWorkflowElementDataRowConnections()
+	/**
+	 * Create new data row for the given workflow element and optionally create connections with previous workflow
+	 * elements.
+	 * 
+	 * @param workflowElementId
+	 *            workflow element id (required)
+	 * @param inputWorkflowElementDataRowIds
+	 *            ids of rows of input workflow elements (optional)
+	 */
+	void createWorkflowElementDataRowWithConnections(Integer workflowElementId,
+			List<Integer> inputWorkflowElementDataRowIds);
+
+	void updateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId, String rawValue);
 }

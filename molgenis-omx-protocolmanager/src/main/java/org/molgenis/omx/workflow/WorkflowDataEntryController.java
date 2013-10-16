@@ -2,6 +2,8 @@ package org.molgenis.omx.workflow;
 
 import static org.molgenis.omx.workflow.WorkflowDataEntryController.URI;
 
+import java.util.List;
+
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -56,5 +59,22 @@ public class WorkflowDataEntryController extends MolgenisPluginController
 	public void deleteWorkflowElementDataRow(@PathVariable Integer rowId) throws WorkflowException
 	{
 		workflowService.deleteWorkflowElementDataRow(rowId);
+	}
+
+	@RequestMapping(value = "/workflowelementdatarow", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void createWorkflowElementDataRowForConnections(@RequestParam Integer workflowElementId,
+			@RequestParam("workflowElementDataRowIds[]") List<Integer> workflowElementDataRowIds)
+			throws WorkflowException
+	{
+		workflowService.createWorkflowElementDataRowWithConnections(workflowElementId, workflowElementDataRowIds);
+	}
+
+	@RequestMapping(value = "/workflowelementdatarow/value", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateWorkflowElementDataRowValue(@RequestParam Integer workflowElementDataRowId,
+			@RequestParam Integer featureId, @RequestParam String rawValue) throws WorkflowException
+	{
+		workflowService.updateWorkflowElementDataRowValue(workflowElementDataRowId, featureId, rawValue);
 	}
 }

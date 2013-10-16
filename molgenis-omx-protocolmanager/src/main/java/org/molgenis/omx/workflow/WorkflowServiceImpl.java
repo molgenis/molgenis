@@ -10,11 +10,16 @@ import java.util.UUID;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
+import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.observ.value.MrefValue;
+import org.molgenis.omx.observ.value.StringValue;
+import org.molgenis.omx.observ.value.Value;
+import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.omx.utils.ProtocolUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -157,18 +162,17 @@ public class WorkflowServiceImpl implements WorkflowService
 		}
 	}
 
-	public void createWorkflowElementDataRowConnections(Integer workflowElementId,
+	// FIXME add transaction rollbacks
+	@Override
+	public void createWorkflowElementDataRowWithConnections(Integer workflowElementId,
 			List<Integer> workflowElementDataRowIds)
 	{
 		try
 		{
 			// get data set for the given workflow element
-			List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED, EQUALS,
-					workflowElementId));
-			if (dataSets == null || dataSets.size() != 1) throw new RuntimeException(
-					"Workflow step must have exactly one data set");
-			DataSet dataSet = dataSets.get(0);
+			DataSet dataSet = getDataSetForWorkFlowElement(workflowElementId);
 
+			// create new observation set
 			String observationSetIdentifier = UUID.randomUUID().toString();
 
 			ObservationSet destinationObservationSet = new ObservationSet();
@@ -176,40 +180,73 @@ public class WorkflowServiceImpl implements WorkflowService
 			destinationObservationSet.setPartOfDataSet(dataSet);
 			database.add(destinationObservationSet);
 
-			List<ObservationSetFlow> observationSetFlows = new ArrayList<ObservationSetFlow>();
-			for (Integer workflowElementDataRowId : workflowElementDataRowIds)
+			if (workflowElementDataRowIds != null && !workflowElementDataRowIds.isEmpty())
 			{
-				ObservationSet sourceObservationSet = ObservationSet.findById(database, workflowElementDataRowId);
-				ObservationSetFlow observationSetFlow = new ObservationSetFlow();
-				observationSetFlow.setSource(sourceObservationSet);
-				observationSetFlow.setDestination(destinationObservationSet);
-				observationSetFlows.add(observationSetFlow);
-
-			}
-			database.add(observationSetFlows);
-
-			// create input values
-			List<ProtocolFlow> protocolFlows = database.find(ProtocolFlow.class, new QueryRule(
-					ProtocolFlow.DESTINATION, EQUALS, workflowElementId));
-			if (protocolFlows != null)
-			{
-				for (ProtocolFlow protocolFlow : protocolFlows)
+				// create observation set connections to new observation set
+				List<ObservationSetFlow> observationSetFlows = new ArrayList<ObservationSetFlow>();
+				for (Integer workflowElementDataRowId : workflowElementDataRowIds)
 				{
-					ObservableFeature inputFeature = protocolFlow.getInputFeature();
-					ObservableFeature outputFeature = protocolFlow.getOutputFeature();
+					ObservationSet sourceObservationSet = ObservationSet.findById(database, workflowElementDataRowId);
+					ObservationSetFlow observationSetFlow = new ObservationSetFlow();
+					observationSetFlow.setSource(sourceObservationSet);
+					observationSetFlow.setDestination(destinationObservationSet);
+					observationSetFlows.add(observationSetFlow);
 
-					for (ObservationSetFlow observationSetFlow : observationSetFlows)
+				}
+				database.add(observationSetFlows);
+
+				// create values for output features
+				List<ProtocolFlow> protocolFlows = database.find(ProtocolFlow.class, new QueryRule(
+						ProtocolFlow.DESTINATION, EQUALS, workflowElementId));
+				if (protocolFlows != null)
+				{
+					for (ProtocolFlow protocolFlow : protocolFlows)
 					{
-						List<ObservedValue> inputObservedValues = database.find(ObservedValue.class, new QueryRule(
-								ObservedValue.OBSERVATIONSET, EQUALS, observationSetFlow.getSource()), new QueryRule(
-								AND), new QueryRule(ObservedValue.FEATURE, EQUALS, inputFeature));
-						if (inputObservedValues == null || inputObservedValues.isEmpty()) throw new RuntimeException(
-								"missing value");
-						else if (inputObservedValues.size() > 1) throw new RuntimeException(
-								"expected exactly one value");
-						// FIXME continue working on feature
-					}
+						ObservableFeature inputFeature = protocolFlow.getInputFeature();
+						ObservableFeature outputFeature = protocolFlow.getOutputFeature();
 
+						List<Value> outputValues = new ArrayList<Value>();
+						for (ObservationSetFlow observationSetFlow : observationSetFlows)
+						{
+							List<ObservedValue> inputObservedValues = database.find(ObservedValue.class, new QueryRule(
+									ObservedValue.OBSERVATIONSET, EQUALS, observationSetFlow.getSource()),
+									new QueryRule(AND), new QueryRule(ObservedValue.FEATURE, EQUALS, inputFeature));
+							if (inputObservedValues == null || inputObservedValues.isEmpty()) throw new RuntimeException(
+									"missing value");
+							else if (inputObservedValues.size() > 1) throw new RuntimeException(
+									"expected exactly one value");
+							outputValues.add(inputObservedValues.get(0).getValue());
+						}
+
+						ObservedValue outputObservedValue = new ObservedValue();
+						outputObservedValue.setObservationSet(destinationObservationSet);
+						outputObservedValue.setFeature(outputFeature);
+
+						if (outputValues.isEmpty()) throw new RuntimeException("TODO check if this is a valid case");
+						else if (outputValues.size() > 1)
+						{
+							MrefValue value = new MrefValue();
+							value.setValue(Lists.transform(outputValues, new Function<Value, Characteristic>()
+							{
+								@Override
+								public Characteristic apply(Value value)
+								{
+									if (!(value instanceof XrefValue)) throw new RuntimeException(
+											new WorkflowException("Value must be of type XrefValue instead of "
+													+ value.getClass().getSimpleName()));
+									return ((XrefValue) value).getValue();
+
+								}
+							}));
+							database.add(value);
+							outputObservedValue.setValue(value);
+						}
+						else
+						{
+							outputObservedValue.setValue(outputValues.get(0));
+						}
+						database.add(outputObservedValue);
+					}
 				}
 			}
 		}
@@ -217,6 +254,56 @@ public class WorkflowServiceImpl implements WorkflowService
 		{
 			throw new RuntimeException(e);
 		}
+	}
 
+	@Override
+	public void updateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId, String rawValue)
+	{
+		try
+		{
+			ObservationSet observationSet = ObservationSet.findById(database, workflowElementDataRowId);
+			ObservableFeature observableFeature = ObservableFeature.findById(database, featureId);
+			List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET, EQUALS, observationSet), new QueryRule(AND), new QueryRule(
+					ObservedValue.FEATURE, EQUALS, observableFeature));
+			if (observedValues.size() > 1) throw new RuntimeException(
+					"expected exactly one value for a row/column combination");
+
+			if (observedValues == null || observedValues.isEmpty())
+			{
+				StringValue value = new StringValue();
+				value.setValue(rawValue);
+
+				ObservedValue observedValue = new ObservedValue();
+				observedValue.setObservationSet(observationSet);
+				observedValue.setFeature(observableFeature);
+				observedValue.setValue(value);
+				database.add(observedValue);
+			}
+			else
+			{
+				// FIXME use typed values
+				ObservedValue observedValue = observedValues.get(0);
+				StringValue value = (StringValue) observedValue.getValue();
+				value.setValue(rawValue);
+				database.update(value);
+			}
+
+		}
+		catch (DatabaseException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	private DataSet getDataSetForWorkFlowElement(Integer workflowElementId) throws DatabaseException
+	{
+		// get data set for the given workflow element
+		List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED, EQUALS,
+				workflowElementId));
+		if (dataSets == null || dataSets.size() != 1) throw new RuntimeException(
+				"Workflow element must have exactly one data set");
+		return dataSets.get(0);
 	}
 }
