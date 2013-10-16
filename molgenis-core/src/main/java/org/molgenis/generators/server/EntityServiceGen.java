@@ -30,6 +30,7 @@ public class EntityServiceGen extends Generator
 	{
 		if (options.generate_tests == true)
 		{
+			generateServiceTests(model, options);
 		}
 		else
 		{
@@ -45,11 +46,45 @@ public class EntityServiceGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract and system entities
-			if (entity.isAbstract() || entity.isSystem()) continue;
+			if (entity.isAbstract()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()
 					+ "Service.java");
+			boolean created = generatedFile.getParentFile().mkdirs();
+			if (!created && !generatedFile.getParentFile().exists())
+			{
+				throw new IOException("could not create " + generatedFile.getParentFile());
+			}
+
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(generatedFile),
+					Charset.forName("UTF-8"));
+			try
+			{
+				template.process(templateArgs, writer);
+			}
+			finally
+			{
+				writer.close();
+			}
+
+			logger.info("generated " + generatedFile);
+		}
+	}
+
+	private void generateServiceTests(Model model, MolgenisOptions options) throws Exception
+	{
+		Template template = createTemplate("/EntityServiceTestGen.java.ftl");
+		Map<String, Object> templateArgs = createTemplateArguments(options);
+
+		for (Entity entity : model.getEntities())
+		{
+			// skip abstract and system entities
+			if (entity.isAbstract()) continue;
+			templateArgs.put("entity", entity);
+
+			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()
+					+ "ServiceTest.java");
 			boolean created = generatedFile.getParentFile().mkdirs();
 			if (!created && !generatedFile.getParentFile().exists())
 			{
