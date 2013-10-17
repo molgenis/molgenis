@@ -129,9 +129,13 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
-			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val());
+			var dataSets = [];
+			<#list dataSets as dataset>
+				dataSets.push('${dataset.id?c}');
+			</#list>
+			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val(), dataSets);
 			$('#selectedDataSet').change(function(){
-				molgenis.getMappingManager().changeDataSet($(this).val());
+				molgenis.getMappingManager().changeDataSet($(this).val(), dataSets);
 			});
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();

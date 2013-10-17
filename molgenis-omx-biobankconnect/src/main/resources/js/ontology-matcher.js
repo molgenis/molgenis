@@ -18,9 +18,10 @@
 				switchOptions();
 			}
 		}
-		$('#selectedTargetDataSets').val(selectedOptions);
 		renderOptions();
 		function renderOptions(){
+			
+			$('#selectedTargetDataSets').val(selectedOptions);
 			var targetCatalogues = $('#target-catalogue');
 			var dataSetDiv = $('<div />').addClass('span10');
 			targetCatalogues.css('margin-top', '20px').empty().append(dataSetDiv);

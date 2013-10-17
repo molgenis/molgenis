@@ -2,6 +2,10 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
+		<plugin id="BiobankConnectHappyFlows" name="BiobankConnect Wizard" url="biobankconnect"/>
+		<plugin id="MappingManager" name="Curate mappings" url="biobankconnect/mappingmanager"/>
+		<plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
+		<plugin id="importwizard" name="Upload" url="importwizard"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>

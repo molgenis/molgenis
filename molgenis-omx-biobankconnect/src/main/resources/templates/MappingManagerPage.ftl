@@ -34,9 +34,13 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			var dataSets = [];
+			<#list wizard.selectedBiobanks as dataSetId>
+				dataSets.push(${dataSetId?c});
+			</#list>
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
-			molgenis.getMappingManager().changeDataSet(${wizard.selectedDataSet.id?c});
+			molgenis.getMappingManager().changeDataSet(${wizard.selectedDataSet.id?c}, dataSets);
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();
 				return false;

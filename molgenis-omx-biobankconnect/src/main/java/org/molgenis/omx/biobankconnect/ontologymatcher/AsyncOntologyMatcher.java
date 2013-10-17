@@ -39,6 +39,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 {
@@ -58,6 +59,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String LUCENE_SCORE = "score";
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
+	private static final PorterStemmer stemmer = new PorterStemmer();
 	private static long totalNumber = 0;
 	private static int finishedNumber = 0;
 
@@ -139,12 +141,16 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					List<QueryRule> rules = new ArrayList<QueryRule>();
 					String description = feature.getDescription() == null || feature.getDescription().isEmpty() ? feature
 							.getName() : feature.getDescription();
-					rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, description));
+					// rules.add(new
+					// QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(),
+					// Operator.SEARCH, description));
 					if (feature.getDefinitions() != null && feature.getDefinitions().size() > 0)
 					{
 						position = createQueryRules(description, feature.getDefinitions());
 						rules.addAll(makeQueryForOntologyTerms(position));
 					}
+					else rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH,
+							description));
 					QueryRule finalQuery = new QueryRule(rules);
 					finalQuery.setOperator(Operator.DIS_MAX);
 
@@ -282,10 +288,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return result.iterator();
 	}
 
-	private Map<Integer, Set<String>> createQueryRules(String dataItem, List<OntologyTerm> definitions)
+	private Map<Integer, Set<String>> createQueryRules(String description, List<OntologyTerm> definitions)
 	{
-		Map<Integer, Set<String>> position = new HashMap<Integer, Set<String>>();
+		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")));
 
+		Map<Integer, Set<String>> position = new HashMap<Integer, Set<String>>();
 		Map<String, Set<String>> pathToSynonyms = new HashMap<String, Set<String>>();
 		Map<String, Boolean> allPaths = new HashMap<String, Boolean>();
 		{
@@ -325,7 +332,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			SearchResult result = searchService.search(new SearchRequest(null, queryRules, null));
 			Iterator<Hit> iterator = result.iterator();
 
-			Set<String> existingPaths = new HashSet<String>();
 			Set<String> terms = new HashSet<String>();
 			Pattern pattern = Pattern.compile("[0-9]+");
 			Matcher matcher = null;
@@ -335,38 +341,37 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				Hit hit = iterator.next();
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
 				String nodePath = columnValueMap.get(NODE_PATH).toString();
-				if (!existingPaths.contains(nodePath))
+
+				if (nodePath.startsWith(parentNodePath + ".") || nodePath.equals(parentNodePath))
 				{
-					existingPaths.add(nodePath);
-					if (nodePath.startsWith(parentNodePath + ".") || nodePath.equals(parentNodePath))
+					String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
+							.toLowerCase();
+					matcher = pattern.matcher(ontologyTermSynonym);
+					if (!matcher.find() && !ontologyTermSynonym.equals(""))
 					{
-						String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
-								.toLowerCase();
-						matcher = pattern.matcher(ontologyTermSynonym);
-						if (!matcher.find() && !ontologyTermSynonym.equals(""))
+						if (finalIndexPosition == -1) finalIndexPosition = validateOntologyTerm(uniqueTokens,
+								ontologyTermSynonym);
+
+						String boostNumber = "^5";
+						if (boost && pathToSynonyms.containsKey(parentNodePath)) boostNumber = "^10";
+						List<String> listOfSynonyms = new ArrayList<String>(pathToSynonyms.get(parentNodePath));
+						Collections.sort(listOfSynonyms, new MyComparator());
+
+						for (String boostedTerm : listOfSynonyms)
 						{
-							String boostNumber = "^3";
-							if (boost && pathToSynonyms.containsKey(parentNodePath)) boostNumber = "^6";
-
-							List<String> listOfSynonyms = new ArrayList<String>(pathToSynonyms.get(parentNodePath));
-							Collections.sort(listOfSynonyms, new MyComparator());
-
-							for (String boostedTerm : listOfSynonyms)
+							if (ontologyTermSynonym.contains(boostedTerm))
 							{
-								if (ontologyTermSynonym.contains(boostedTerm))
+								String orignalTerm = ontologyTermSynonym;
+								String replacement = boostedTerm + boostNumber;
+								if (boostedTerm.split(" +").length > 1)
 								{
-									String orignalTerm = ontologyTermSynonym;
-									String replacement = boostedTerm + boostNumber;
-									if (boostedTerm.split(" +").length > 1)
-									{
-										replacement = "\"" + boostedTerm + "\"" + boostNumber;
-									}
-									terms.add(orignalTerm.replaceAll(boostedTerm, replacement));
-									break;
+									replacement = "\"" + boostedTerm + "\"" + boostNumber;
 								}
+								terms.add(orignalTerm.replaceAll(boostedTerm, replacement));
+								break;
 							}
-							if (!ontologyTermSynonym.toString().equals("")) terms.add(ontologyTermSynonym);
 						}
+						if (!ontologyTermSynonym.toString().equals("")) terms.add(ontologyTermSynonym);
 					}
 				}
 			}
@@ -374,6 +379,32 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			position.get(finalIndexPosition).addAll(terms);
 		}
 		return position;
+	}
+
+	private Integer validateOntologyTerm(List<String> uniqueSets, String ontologyTermSynonym)
+	{
+		List<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")));
+		for (String eachTerm : termsFromDescription)
+		{
+			if (uniqueSets.contains(eachTerm))
+			{
+				return uniqueSets.indexOf(eachTerm);
+			}
+		}
+		return -1;
+	}
+
+	private List<String> stemMembers(List<String> originalList)
+	{
+		List<String> newList = new ArrayList<String>();
+		for (String eachTerm : originalList)
+		{
+			stemmer.setCurrent(eachTerm);
+			stemmer.stem();
+			eachTerm = stemmer.getCurrent().toLowerCase();
+			newList.add(eachTerm);
+		}
+		return newList;
 	}
 
 	private void deleteExistingRecords(String dataSetIdentifier, Database db) throws DatabaseException

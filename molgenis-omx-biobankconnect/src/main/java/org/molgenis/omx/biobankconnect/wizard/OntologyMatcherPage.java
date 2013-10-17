@@ -38,6 +38,7 @@ public class OntologyMatcherPage extends AbstractWizardPage implements Serializa
 			{
 				selectedTargetDataSetIds.add(Integer.parseInt(id));
 			}
+			biobankConnectWizard.setSelectedBiobanks(selectedTargetDataSetIds);
 			ontologyMatcher.match(biobankConnectWizard.getSelectedDataSet().getId(), selectedTargetDataSetIds);
 
 		}

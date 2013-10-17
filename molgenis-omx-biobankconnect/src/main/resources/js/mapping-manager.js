@@ -7,6 +7,7 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
+	var biobankDataSets = null;
 	var sortRule = null;
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
@@ -18,8 +19,9 @@
 		
 	};
 	
-	ns.MappingManager.prototype.changeDataSet = function(selectedDataSet){
+	ns.MappingManager.prototype.changeDataSet = function(selectedDataSet, dataSets){
 		ns.MappingManager.prototype.initAccordion();
+		biobankDataSets = dataSets;
 		if(selectedDataSet !== ''){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
 			var request = {
@@ -54,7 +56,6 @@
 			$('#search-button').click(function(){
 				ns.MappingManager.prototype.createMatrixForDataItems();
 			});
-			
 
 			$('#search-dataitem').on('keydown', function(e){
 			    if (e.which == 13) {
@@ -73,11 +74,15 @@
 	};
 	
 	ns.MappingManager.prototype.createMatrixForDataItems = function() {
+		var identifiers = [];
+		$.each(biobankDataSets, function(index, dataSetId){
+			identifiers.push(ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
+		});
 		var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
 			q : [{
 				field : 'identifier',
-				operator : 'LIKE',
-				value : ns.MappingManager.prototype.getSelectedDataSet() + '-'
+				operator : 'IN',
+				value : identifiers
 			}],
 		});
 		if(dataSetMapping.items.length > 0){
@@ -214,23 +219,35 @@
 							if($.inArray(storeMappedFeatureId, allFeatureCollection) === -1) allFeatureCollection.push(storeMappedFeatureId);
 						});
 					}
-					var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
-						q : [{
-							field : 'id',
-							operator : 'IN',
-							value : allFeatureCollection
-						}],
-						num : 500
-					});
-					$.each(listOfFeatures.items, function(index, element){
-						cachedFeatures[(ns.hrefToId(element.href))] = element;
-					});
 					var dataSetIdArray = dataSet.identifier.split('-');
 					mappingPerStudy[dataSetIdArray[1]] = sortMappings(tuple);
 					count++;
-					if(count === dataSets.length) renderMappingTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures);
+					
+					if(count === dataSets.length) {
+						preloadEntities(allFeatureCollection, cachedFeatures);
+						renderMappingTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures);
+					}
 				});
 			});
+		}
+		
+		function preloadEntities(allFeatureCollection, cachedFeatures){
+			var iterations = Math.ceil(allFeatureCollection.length/500) + 1;
+			for(var i = 1; i < iterations; i++){
+				var lower = (i - 1) * 500;
+				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
+					q : [{
+						field : 'id',
+						operator : 'IN',
+						value : allFeatureCollection.slice(lower, upper)
+					}],
+					num : 500
+				});
+				$.each(listOfFeatures.items, function(index, element){
+					cachedFeatures[(ns.hrefToId(element.href))] = element;
+				});
+			}
 		}
 		
 		function sortMappings(tuple){
@@ -249,10 +266,23 @@
 			var involedDataSets = [];
 			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
 			involedDataSets.push(selectedDataSet.name);
+			var removedDataSetIndex = [];
 			$.each(dataSets, function(index, dataSet){
-				var dataSetIdArray = dataSet.identifier.split('-');
-				var mappedDataSet = restApi.get('/api/v1/dataset/' + dataSetIdArray[1]);
-				involedDataSets.push(mappedDataSet.name);
+				if(dataSet !== undefined && dataSet !== null){
+					var dataSetIdArray = dataSet.identifier.split('-');
+					try{
+						var mappedDataSet = restApi.get('/api/v1/dataset/' + dataSetIdArray[1]);
+						involedDataSets.push(mappedDataSet.name);
+					}
+					catch(err){
+						removedDataSetIndex.push(index);
+						console.log(err);
+					}
+				}
+			});
+			
+			$.each(removedDataSetIndex, function(index, number){
+				dataSets.splice(number, 1);
 			});
 			
 			var tableBody = $('<tbody />');
@@ -478,11 +508,6 @@
 				absoluteScores.push(eachMapping.absoluteScore);
 			});
 			var highScoresIndex = [];
-//			$.each(jstat.pnorm(scores), function(index, pValue){
-//				if(pValue >= 0.90){
-//					highScoresIndex.push(index);
-//				}
-//			});
 			if(scores.length > 2){
 				var classifications = ss.jenks(scores, 2);
 				var naturalBreak = classifications[1];
@@ -631,7 +656,7 @@
 		function i18nDescription(feature){
 			if(feature.description === undefined) feature.description = '';
 			if(feature.description.indexOf('{') !== 0){
-				feature.description = '{"en":"' + (feature.description === null ? '' : feature.description) +'"}';
+				feature.description = '{"en":"' + (feature.description === null ? '' : feature.description.replace(new RegExp('"','gm'), '')) +'"}';
 			}
 			return eval('(' + feature.description + ')');
 		}
@@ -846,6 +871,6 @@
 	
 	ns.MappingManager.prototype.getSelectedDataSet = function (){
 		return selectedDataSet;
-	}
+	};
 	
 }($, window.top));

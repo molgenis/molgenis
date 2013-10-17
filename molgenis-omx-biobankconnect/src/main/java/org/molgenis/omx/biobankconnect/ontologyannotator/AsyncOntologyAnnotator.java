@@ -346,13 +346,12 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			Set<String> positionFilter)
 	{
 		Set<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
-		Set<String> stemmedWords = new HashSet<String>();
 		for (String eachTerm : termsFromDescription)
 		{
 			if (!uniqueSets.contains(eachTerm)) return false;
 		}
 
-		for (String eachTerm : stemmedWords)
+		for (String eachTerm : termsFromDescription)
 		{
 			if (positionFilter.contains(eachTerm)) return false;
 			else positionFilter.add(eachTerm);

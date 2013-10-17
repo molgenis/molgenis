@@ -142,7 +142,7 @@
 				var moreToShow = featureEntity.definitions.items.length;
 				$.each(featureEntity.definitions.items, function(index, ontologyTerm){
 					var newAnnotationText = annotationText + ontologyTerm.name + ' , ';
-					if(newAnnotationText.length > 50) {
+					if(newAnnotationText.length > 130) {
 						annotationText = annotationText.substring(0, annotationText.length - 3) + ' , ';
 					}else{
 						moreToShow--;

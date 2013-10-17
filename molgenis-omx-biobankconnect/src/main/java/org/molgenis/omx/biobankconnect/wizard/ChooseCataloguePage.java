@@ -46,7 +46,7 @@ public class ChooseCataloguePage extends AbstractWizardPage implements Serializa
 				BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
 				Integer selectedDataSetId = Integer.parseInt(request.getParameter("selectedDataSetId"));
 				biobankConnectWizard.setSelectedDataSet(database.findById(DataSet.class, selectedDataSetId));
-				ontologyAnnotator.annotate(selectedDataSetId, null);
+				// ontologyAnnotator.annotate(selectedDataSetId, null);
 			}
 			catch (Exception e)
 			{
