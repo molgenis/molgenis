@@ -40,7 +40,7 @@ public class ExcelEntitySource implements EntitySource
 	/** process cells after reading */
 	private List<CellProcessor> cellProcessors;
 
-	public ExcelEntitySource(InputStream is, String url)
+	protected ExcelEntitySource(InputStream is, String url, List<CellProcessor> cellProcessors)
 	{
 		if ((is == null) && (url == null))
 		{
@@ -73,21 +73,22 @@ public class ExcelEntitySource implements EntitySource
 
 		this.is = is;
 		this.url = url;
+		this.cellProcessors = cellProcessors;
 	}
 
-	public ExcelEntitySource(File file) throws IOException
+	protected ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
 	{
-		this(new FileInputStream(file), EXCEL_ENTITYSOURCE_URL_PREFIX + file.getAbsolutePath());
+		this(new FileInputStream(file), EXCEL_ENTITYSOURCE_URL_PREFIX + file.getAbsolutePath(), cellProcessors);
 	}
 
-	public ExcelEntitySource(String url) throws IOException
+	protected ExcelEntitySource(String url, List<CellProcessor> cellProcessors) throws IOException
 	{
-		this(null, url);
+		this(null, url, cellProcessors);
 	}
 
-	public ExcelEntitySource(InputStream is)
+	protected ExcelEntitySource(InputStream is, List<CellProcessor> cellProcessors)
 	{
-		this(is, null);
+		this(is, null, cellProcessors);
 	}
 
 	public int getNumberOfSheets()

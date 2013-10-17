@@ -43,4 +43,10 @@ public class MapEntity implements Entity
 		return null;
 	}
 
+	@Override
+	public String toString()
+	{
+		return values.toString();
+	}
+
 }

@@ -75,6 +75,19 @@ public class ValueConverter
 		return converter.fromTuple(tuple, colName, feature);
 	}
 
+	public Value updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
+		if (fieldType == null)
+		{
+			throw new ValueConverterException("data type is not a molgenis field type [" + feature.getDataType() + "]");
+		}
+
+		TupleToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
+		return converter.updateFromTuple(tuple, colName, feature, value);
+	}
+
 	public Cell<?> toCell(Value value) throws ValueConverterException
 	{
 		if (value == null) return null;

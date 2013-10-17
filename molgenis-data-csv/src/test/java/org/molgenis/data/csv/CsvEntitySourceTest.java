@@ -1,20 +1,25 @@
 package org.molgenis.data.csv;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
+import org.apache.commons.io.FileUtils;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -84,13 +89,13 @@ public class CsvEntitySourceTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CsvEntitySource() throws IOException
 	{
-		new CsvEntitySource(null, null);
+		new CsvEntitySource(null, null, null);
 	}
 
 	@Test
 	public void getEntityNames() throws ZipException, IOException
 	{
-		EntitySource entitySource = new CsvEntitySource(new ZipFile(ZIP_FILE));
+		EntitySource entitySource = new CsvEntitySource(ZIP_FILE, null);
 		try
 		{
 			List<String> entityNames = Lists.newArrayList(entitySource.getEntityNames());
@@ -108,7 +113,7 @@ public class CsvEntitySourceTest
 	@Test
 	public void getRepositoryByEntityName() throws ZipException, IOException
 	{
-		EntitySource entitySource = new CsvEntitySource(new ZipFile(ZIP_FILE));
+		EntitySource entitySource = new CsvEntitySource(ZIP_FILE, null);
 		try
 		{
 			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("0");
@@ -124,7 +129,7 @@ public class CsvEntitySourceTest
 	@Test
 	public void getUrl() throws ZipException, IOException
 	{
-		EntitySource entitySource = new CsvEntitySource(new ZipFile(ZIP_FILE));
+		EntitySource entitySource = new CsvEntitySource(ZIP_FILE, null);
 		try
 		{
 			assertEquals(entitySource.getUrl(), "csv://" + ZIP_FILE.getAbsolutePath());
@@ -135,4 +140,102 @@ public class CsvEntitySourceTest
 		}
 	}
 
+	@Test
+	public void createByUrl() throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/test.csv");
+		File csvFile = new File(FileUtils.getTempDirectory(), "test.csv");
+		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
+		String url = "csv://" + csvFile.getAbsolutePath();
+
+		EntitySource entitySource = new CsvEntitySource(url, null);
+		try
+		{
+			assertEquals(entitySource.getUrl(), url);
+
+			Iterator<String> it = entitySource.getEntityNames().iterator();
+			assertNotNull(it);
+			assertTrue(it.hasNext());
+			assertEquals(it.next(), "test");
+			assertFalse(it.hasNext());
+
+			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("test");
+			assertNotNull(repo);
+
+			Iterator<AttributeMetaData> itMeta = repo.getAttributes().iterator();
+			assertNotNull(itMeta);
+			assertTrue(itMeta.hasNext());
+
+			AttributeMetaData col1 = itMeta.next();
+			assertNotNull(col1);
+			assertEquals(col1.getName(), "col1");
+
+			AttributeMetaData col2 = itMeta.next();
+			assertNotNull(col2);
+			assertEquals(col2.getName(), "col2");
+			assertFalse(itMeta.hasNext());
+
+			Iterator<? extends Entity> itEntity = repo.iterator();
+			assertNotNull(itEntity);
+			assertTrue(itEntity.hasNext());
+
+			Entity entity = itEntity.next();
+			assertNotNull(entity);
+			assertEquals(entity.get("col1"), "val1");
+			assertEquals(entity.get("col2"), "val2");
+		}
+		finally
+		{
+			entitySource.close();
+		}
+	}
+
+	@Test
+	public void createByFile() throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/test.csv");
+		File csvFile = new File(FileUtils.getTempDirectory(), "test.csv");
+		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
+
+		EntitySource entitySource = new CsvEntitySource(csvFile, null);
+		try
+		{
+			assertEquals(entitySource.getUrl(), "csv://" + csvFile.getAbsolutePath());
+
+			Iterator<String> it = entitySource.getEntityNames().iterator();
+			assertNotNull(it);
+			assertTrue(it.hasNext());
+			assertEquals(it.next(), "test");
+			assertFalse(it.hasNext());
+
+			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("test");
+			assertNotNull(repo);
+
+			Iterator<AttributeMetaData> itMeta = repo.getAttributes().iterator();
+			assertNotNull(itMeta);
+			assertTrue(itMeta.hasNext());
+
+			AttributeMetaData col1 = itMeta.next();
+			assertNotNull(col1);
+			assertEquals(col1.getName(), "col1");
+
+			AttributeMetaData col2 = itMeta.next();
+			assertNotNull(col2);
+			assertEquals(col2.getName(), "col2");
+			assertFalse(itMeta.hasNext());
+
+			Iterator<? extends Entity> itEntity = repo.iterator();
+			assertNotNull(itEntity);
+			assertTrue(itEntity.hasNext());
+
+			Entity entity = itEntity.next();
+			assertNotNull(entity);
+			assertEquals(entity.get("col1"), "val1");
+			assertEquals(entity.get("col2"), "val2");
+		}
+		finally
+		{
+			entitySource.close();
+		}
+	}
 }
