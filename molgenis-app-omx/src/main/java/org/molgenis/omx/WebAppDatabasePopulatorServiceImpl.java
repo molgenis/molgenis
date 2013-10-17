@@ -2,9 +2,6 @@ package org.molgenis.omx;
 
 import java.util.Vector;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -26,9 +23,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 {
 	private static final String USERNAME_ADMIN = "admin";
 	private static final String USERNAME_USER = "user";
-
-	@PersistenceContext
-	private EntityManager em;
 
 	private final Database unsecuredDatabase;
 
