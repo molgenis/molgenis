@@ -22,6 +22,18 @@ public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValu
 	@Override
 	public XrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new XrefValue());
+	}
+
+	@Override
+	public XrefValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof XrefValue))
+		{
+			throw new ValueConverterException("value is not a " + XrefValue.class.getSimpleName());
+		}
+
 		String xrefIdentifier = tuple.getString(colName);
 		if (xrefIdentifier == null) return null;
 
@@ -39,7 +51,7 @@ public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValu
 			throw new ValueConverterException("unknown characteristic identifier [" + xrefIdentifier + ']');
 		}
 
-		XrefValue xrefValue = new XrefValue();
+		XrefValue xrefValue = (XrefValue) value;
 		xrefValue.setValue(characteristic);
 		return xrefValue;
 	}

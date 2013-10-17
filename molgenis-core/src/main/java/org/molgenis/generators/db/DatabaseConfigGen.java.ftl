@@ -35,7 +35,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 {
 	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
 
-	@Value("${r"${db_driver:@null}"}")
+	@Value("${r"${db_driver:com.mysql.jdbc.Driver}"}")
 	private String dbDriverClass;
 	@Value("${r"${db_uri:@null}"}")
 	private String dbJdbcUri;
@@ -68,8 +68,8 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	{
 		if(dbDriverClass == null) throw new IllegalArgumentException("db_driver is null");
 		if(dbJdbcUri == null) throw new IllegalArgumentException("db_uri is null");
-		if(dbUser == null) throw new IllegalArgumentException("db_user is null");
-		if(dbPassword == null) throw new IllegalArgumentException("db_password is null");
+		if(dbUser == null) throw new IllegalArgumentException("please configure the db_user property in your molgenis-server.properties");
+		if(dbPassword == null) throw new IllegalArgumentException("please configure the db_password property in your molgenis-server.properties");
 		
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		try

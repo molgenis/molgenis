@@ -19,10 +19,13 @@ public class TupleToHyperlinkValueConverterTest
 	@Test
 	public void fromTuple() throws ValueConverterException
 	{
+		HyperlinkValue value = new HyperlinkValue();
+		value.setValue("http://www.a.org/");
+
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "http://www.a.org/");
-		HyperlinkValue value = new TupleToHyperlinkValueConverter().fromTuple(tuple, colName, null);
+		new TupleToHyperlinkValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), "http://www.a.org/");
 	}
 }
