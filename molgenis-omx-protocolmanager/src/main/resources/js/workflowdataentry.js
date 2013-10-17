@@ -132,7 +132,6 @@
 			
 			$.post(plugin_uri + '/workflowelementdatarow/value', {'workflowElementDataRowId': workflowElementDataRowId, 'featureId': featureId, 'rawValue': $(this).val()})
 			  .done(function(data) {
-				  console.log(e.target);
 				  $(e.target).addClass('updated-text-input');
 			  })
 			  .fail(function(xhr, textStatus, errorThrown) {console.log(xhr, textStatus, errorThrown);

@@ -28,49 +28,51 @@
 		<#assign outputFeature = elementConnection.outputFeature>
 		<#assign inputDataRows = elementConnection.inputElement.workflowElementData.elementDataRows>
 		<#list inputDataRows as inputDataRow>
-			<#-- case: input data row has outgoing connections -->
-			<#if inputDataRow.outgoingElementDataRowConnections?has_content>
-				<#list inputDataRow.outgoingElementDataRowConnections as outgoingDataRowConnection>
-					<#assign outputDataRow = outgoingDataRowConnection.outputDataRow>
-					<#if !processedOutputDataRows?seq_contains(outputDataRow)>
+			<#if inputDataRow.completed>
+				<#-- case: input data row has outgoing connections -->
+				<#if inputDataRow.outgoingElementDataRowConnections?has_content>
+					<#list inputDataRow.outgoingElementDataRowConnections as outgoingDataRowConnection>
+						<#assign outputDataRow = outgoingDataRowConnection.outputDataRow>
+						<#if !processedOutputDataRows?seq_contains(outputDataRow)>
 		<tr data-datarow="${outputDataRow.id}" data-input-rows="<#list outputDataRow.incomingElementDataRowConnections as incomingElementDataRowConnection><#if incomingElementDataRowConnection_index &gt; 0>,</#if>${incomingElementDataRowConnection.inputDataRow.id}</#list>">		
-						<#if outgoingDataRowConnection_index == 0>
-							<#list connectedFeatures as feature>
+							<#if outgoingDataRowConnection_index == 0>
+								<#list connectedFeatures as feature>
 			<td data-feature="${feature.id}" rowspan="${inputDataRow.outgoingElementDataRowConnections?size}">
-								<#if outputDataRow.getValue(feature.id)??><@createInput feature.dataType outputDataRow.getValue(feature.id) true /><#else><@createInput feature.dataType "" true /></#if>
-									<#if outputFeature.dataType?upper_case != "MREF">
+									<#if outputDataRow.getValue(feature.id)??><@createInput feature.dataType outputDataRow.getValue(feature.id) true /><#else><@createInput feature.dataType "" true /></#if>
+										<#if outputFeature.dataType?upper_case != "MREF">
 				<a href="#" class="create-row-btn"><img class="pull-right" src="/img/new.png"></a>
-									</#if>
+										</#if>
 			</td>
-							</#list>
-						</#if>
-						<#assign processedOutputDataRows = processedOutputDataRows + [outputDataRow] />
+								</#list>
+							</#if>
+							<#assign processedOutputDataRows = processedOutputDataRows + [outputDataRow] />
 			<td class="snug">
 				<a href="#" class="delete-row-btn" data-row-id="${outputDataRow.id}"><img src="/img/delete.png"></a>
 			</td>
-						<#list features as feature>
-			<td data-feature="${feature.id}">
-							<#if outputDataRow.getValue(feature.id)??><@createInput feature.dataType outputDataRow.getValue(feature.id) false /><#else><@createInput feature.dataType "" false /></#if>
+							<#list features as feature>
+			<td<#if feature.required> class="required-feature"</#if> data-feature="${feature.id}">
+								<#if outputDataRow.getValue(feature.id)??><@createInput feature.dataType outputDataRow.getValue(feature.id) false /><#else><@createInput feature.dataType "" false /></#if>
 			</td>
-						</#list>
+							</#list>
 		</tr>
-					</#if>
-				</#list>
-			<#-- case: input data row does not have outgoing connections -->
-			<#else>
+						</#if>
+					</#list>
+				<#-- case: input data row does not have outgoing connections -->
+				<#else>
 		<tr data-input-rows="${inputDataRow.id}">
 			<td data-feature="${outputFeature.id}">
-				<#if outputFeature.dataType?upper_case == "MREF">
+					<#if outputFeature.dataType?upper_case == "MREF">
 				<label class="checkbox"><input type="checkbox">
-				</#if>
-				<#if inputDataRow.getValue(inputFeature.id)??><@createInput outputFeature.dataType inputDataRow.getValue(inputFeature.id) true /><#else><@createInput outputFeature.dataType "" true /></#if>
-				<#if outputFeature.dataType?upper_case == "MREF">
+					</#if>
+					<#if inputDataRow.getValue(inputFeature.id)??><@createInput outputFeature.dataType inputDataRow.getValue(inputFeature.id) true /><#else><@createInput outputFeature.dataType "" true /></#if>
+					<#if outputFeature.dataType?upper_case == "MREF">
 				</label>
-				<#else>
+					<#else>
 				<a href="#" class="create-row-btn"><img class="pull-right" src="/img/new.png"></a>
-				</#if>
+					</#if>
 			</td>
 		</tr>
+				</#if>
 			</#if>
 		</#list>
 	</#list>
@@ -80,7 +82,7 @@
 			<tr data-datarow="${dataRow.id}">
 				<td class="snug"><a href="#" class="delete-row-btn" data-row-id="${dataRow.id}"><img src="/img/delete.png"></a></td>
 		<#list allFeatures as feature>
-				<td data-feature="${feature.id}">
+				<td<#if feature.required> class="required-feature"</#if> data-feature="${feature.id}">
 			<#if dataRow.getValue(feature.id)??><@createInput feature.dataType dataRow.getValue(feature.id) false /><#else><@createInput feature.dataType "" false /></#if>
 				</td>
 		</#list>

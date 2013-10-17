@@ -23,7 +23,7 @@ public class WorkflowElement
 	private transient final List<WorkflowElementConnection> elementConnections;
 	private transient final WorkflowElementData workflowElementData;
 
-	public WorkflowElement(Protocol protocol, Database database) throws WorkflowException
+	public WorkflowElement(final Protocol protocol, Database database) throws WorkflowException
 	{
 		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
 		this.id = protocol.getId();
@@ -33,7 +33,7 @@ public class WorkflowElement
 			@Override
 			public WorkflowFeature apply(ObservableFeature feature)
 			{
-				return new WorkflowFeature(feature);
+				return new WorkflowFeature(feature, protocol);
 			}
 		});
 		this.elementConnections = createElementConnections(protocol, database);
@@ -96,8 +96,10 @@ public class WorkflowElement
 							throw new RuntimeException(e);
 						}
 
-						WorkflowFeature inputFeature = new WorkflowFeature(protocolFlow.getInputFeature());
-						WorkflowFeature outputFeature = new WorkflowFeature(protocolFlow.getOutputFeature());
+						WorkflowFeature inputFeature = new WorkflowFeature(protocolFlow.getInputFeature(), protocolFlow
+								.getSource());
+						WorkflowFeature outputFeature = new WorkflowFeature(protocolFlow.getOutputFeature(),
+								protocolFlow.getDestination());
 						return new WorkflowElementConnection(protocolFlow.getId(), inputElement, inputFeature,
 								outputElement, outputFeature);
 					}

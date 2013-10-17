@@ -1,19 +1,22 @@
 package org.molgenis.omx.workflow;
 
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 
 public class WorkflowFeature
 {
 	private final Integer id;
 	private final String name;
 	private final String dataType;
+	private final Boolean required;
 
-	public WorkflowFeature(ObservableFeature feature)
+	public WorkflowFeature(ObservableFeature feature, Protocol protocol)
 	{
 		if (feature == null) throw new IllegalArgumentException("ObservableFeature is null");
 		this.id = feature.getId();
 		this.name = feature.getName();
 		this.dataType = feature.getDataType();
+		this.required = protocol.getRequiredFeatures().contains(feature);
 	}
 
 	public Integer getId()
@@ -29,6 +32,11 @@ public class WorkflowFeature
 	public String getDataType()
 	{
 		return dataType;
+	}
+
+	public Boolean getRequired()
+	{
+		return required;
 	}
 
 	@Override

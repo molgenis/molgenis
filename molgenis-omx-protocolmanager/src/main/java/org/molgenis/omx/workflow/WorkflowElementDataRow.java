@@ -1,5 +1,6 @@
 package org.molgenis.omx.workflow;
 
+import static org.molgenis.framework.db.QueryRule.Operator.AND;
 import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 
@@ -23,6 +25,7 @@ public class WorkflowElementDataRow
 	private final Map<Integer, Object> valueMap;
 	private final List<WorkflowElementDataRowConnection> incomingElementDataRowConnections;
 	private final List<WorkflowElementDataRowConnection> outgoingElementDataRowConnections;
+	private final boolean completed;
 
 	public WorkflowElementDataRow(ObservationSet observationSet, Database database) throws DatabaseException
 	{
@@ -34,6 +37,7 @@ public class WorkflowElementDataRow
 				ObservationSetFlow.DESTINATION, database);
 		this.outgoingElementDataRowConnections = createElementDataRowConnections(observationSet,
 				ObservationSetFlow.SOURCE, database);
+		this.completed = determineIsCompleted(observationSet, database);
 	}
 
 	public Integer getId()
@@ -59,6 +63,38 @@ public class WorkflowElementDataRow
 	public List<WorkflowElementDataRowConnection> getOutgoingElementDataRowConnections()
 	{
 		return outgoingElementDataRowConnections;
+	}
+
+	public boolean isCompleted()
+	{
+		return completed;
+	}
+
+	private boolean determineIsCompleted(ObservationSet observationSet, Database database)
+	{
+		boolean isCompleted = true;
+		List<ObservableFeature> features = observationSet.getPartOfDataSet().getProtocolUsed().getRequiredFeatures();
+
+		// List<ObservableFeature> features = observationSet.getPartOfDataSet().getProtocolUsed().getFeatures();
+		for (ObservableFeature feature : features)
+		{
+			try
+			{
+				List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
+						ObservedValue.OBSERVATIONSET, EQUALS, observationSet), new QueryRule(AND), new QueryRule(
+						ObservedValue.FEATURE, EQUALS, feature));
+				if (observedValues == null || observedValues.isEmpty())
+				{
+					isCompleted = false;
+					break;
+				}
+			}
+			catch (DatabaseException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		return isCompleted;
 	}
 
 	private Map<Integer, Object> createValueMap(ObservationSet observationSet, Database database)
