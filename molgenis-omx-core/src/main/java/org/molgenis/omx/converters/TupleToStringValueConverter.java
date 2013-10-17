@@ -12,10 +12,21 @@ public class TupleToStringValueConverter implements TupleToValueConverter<String
 	@Override
 	public StringValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new StringValue());
+	}
+
+	@Override
+	public StringValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof StringValue))
+		{
+			throw new ValueConverterException("value is not a " + StringValue.class.getSimpleName());
+		}
 		String str = tuple.getString(colName);
 		if (str == null) return null;
 
-		StringValue stringValue = new StringValue();
+		StringValue stringValue = (StringValue) value;
 		stringValue.setValue(str);
 		return stringValue;
 	}

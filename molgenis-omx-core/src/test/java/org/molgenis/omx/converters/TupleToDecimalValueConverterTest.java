@@ -25,4 +25,17 @@ public class TupleToDecimalValueConverterTest
 		DecimalValue value = new TupleToDecimalValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), Double.valueOf(1.23));
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		DecimalValue value = new DecimalValue();
+		value.setValue(Double.valueOf(1.23));
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, 1.23);
+		new TupleToDecimalValueConverter().updateFromTuple(tuple, colName, null, value);
+		assertEquals(value.getValue(), Double.valueOf(1.23));
+	}
 }

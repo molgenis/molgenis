@@ -29,4 +29,15 @@ public class TupleToDateTimeValueConverterTest
 		DateTimeValue value = new TupleToDateTimeValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), new Date(1371447949000l));
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		DateTimeValue value = new DateTimeValue();
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "2013-06-17T07:45:49+0200");
+		new TupleToDateTimeValueConverter().updateFromTuple(tuple, colName, null, value);
+		assertEquals(value.getValue(), new Date(1371447949000l));
+	}
 }

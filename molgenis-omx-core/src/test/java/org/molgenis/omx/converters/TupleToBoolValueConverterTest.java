@@ -25,4 +25,17 @@ public class TupleToBoolValueConverterTest
 		BoolValue value = new TupleToBoolValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), Boolean.TRUE);
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		BoolValue value = new BoolValue();
+		value.setValue(Boolean.FALSE);
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, true);
+		new TupleToBoolValueConverter().updateFromTuple(tuple, colName, null, value);
+		assertEquals(value.getValue(), Boolean.TRUE);
+	}
 }

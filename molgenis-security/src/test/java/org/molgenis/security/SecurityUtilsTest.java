@@ -41,7 +41,8 @@ public class SecurityUtilsTest
 		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
 				Arrays.<GrantedAuthority> asList(authority1, authority2));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				Arrays.<GrantedAuthority> asList(authority1, authority2));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 

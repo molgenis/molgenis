@@ -19,10 +19,13 @@ public class TupleToTextValueConverterTest
 	@Test
 	public void fromTuple() throws ValueConverterException
 	{
+		TextValue value = new TextValue();
+		value.setValue("value");
+
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "value");
-		TextValue value = new TupleToTextValueConverter().fromTuple(tuple, colName, null);
+		new TupleToTextValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), "value");
 	}
 }

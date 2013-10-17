@@ -25,4 +25,17 @@ public class TupleToHtmlValueConverterTest
 		HtmlValue value = new TupleToHtmlValueConverter().fromTuple(tuple, colName, null);
 		assertEquals(value.getValue(), "value");
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException
+	{
+		HtmlValue value = new HtmlValue();
+		value.setValue("value");
+
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, "value");
+		new TupleToHtmlValueConverter().updateFromTuple(tuple, colName, null, value);
+		assertEquals(value.getValue(), "value");
+	}
 }
