@@ -506,6 +506,17 @@
 				dialogClass : 'ui-dialog-shadow'
 			});
 			$('.feature-filter-dialog').dialog('open');
+			
+			$('.feature-filter-dialog').keypress(function(e) {
+			    if (e.keyCode == $.ui.keyCode.ENTER) {
+			    	applyButton.click();
+			    	$('.feature-filter-dialog').dialog('close');
+	                return false;
+			    }
+			    if (e.keyCode == $.ui.keyCode.ESCAPE) {
+			    	$('.feature-filter-dialog').dialog('close');
+			    }
+			});
 		});
 	};
 
