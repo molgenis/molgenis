@@ -1,10 +1,10 @@
 package org.molgenis.omx.das;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.eq;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.net.MalformedURLException;
@@ -16,9 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.internal.verification.api.VerificationData;
-import org.mockito.verification.VerificationMode;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
@@ -26,7 +23,6 @@ import org.molgenis.omx.patient.Patient;
 import org.molgenis.omx.xgap.Chromosome;
 import org.molgenis.omx.xgap.Variant;
 import org.molgenis.util.HandleRequestDelegationException;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -49,14 +45,15 @@ public class OmxDasDataSourceTest {
 	private DasFeature dasFeature;
 	private DasEntryPoint expectedEntryPoint;
 	private Database database;
-	private Query<Patient> patientQuery;
-	private Query<Variant> variantQuery;
 	private Query chromosomeQuery;
+	private Patient patient;
+	private Variant variant2;
+	private ArrayList<Patient> patientList;
 	
 	@SuppressWarnings("unchecked")
 	@BeforeTest
 	public void setUp() throws HandleRequestDelegationException, Exception
-	{		
+	{	
 		database = mock(Database.class);
 		Map<URL, String> linkout = new HashMap<URL, String>();
 		linkout.put(new URL("http://www.molgenis.org/"),"Link");
@@ -66,6 +63,12 @@ public class OmxDasDataSourceTest {
 		variant.setBpStart((long)0);
 		variant.setBpEnd((long)1000);
 		variant.setDescription("variant_description");
+		
+		variant2 = new Variant();
+		variant2.setIdentifier("vatiant_identifier2");
+		variant2.setBpStart((long)0);
+		variant2.setBpEnd((long)1000);
+		variant2.setDescription("variant_description2");
 
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
 		
@@ -81,21 +84,16 @@ public class OmxDasDataSourceTest {
 		List<Chromosome> chromosomeList = new ArrayList<Chromosome>();
 		Chromosome chromosome = mock(Chromosome.class);
 		chromosomeList.add(chromosome);
-		Patient patient = new Patient();
-		List<Patient> patientList = new ArrayList<Patient>();
+		patient = mock(Patient.class);
+		patientList = new ArrayList<Patient>();
 		patientList.add(patient);
 				
 		chromosomeQuery = mock(Query.class);
-		patientQuery = mock(Query.class);
-		variantQuery = mock(Query.class);
 		
-		when(patientQuery.find()).thenReturn(patientList);
 		when(chromosome.getIdentifier()).thenReturn("Chromosome_identifier");
 		when(chromosome.getName()).thenReturn("Chromosome_name");
 		when(chromosome.getBpLength()).thenReturn(48000000);
 		when(database.query(Chromosome.class)).thenReturn(chromosomeQuery);
-		when(database.query(Patient.class)).thenReturn(patientQuery);
-		when(database.query(Variant.class)).thenReturn(variantQuery);
 		when(chromosomeQuery.find()).thenReturn(chromosomeList);
 	}
 	
@@ -128,24 +126,84 @@ public class OmxDasDataSourceTest {
 	}
 	
 	@Test()
-	public void getFeaturesRange() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException
+	public void getFeaturesRange() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
 	{
-		source.getFeatures("segment",1,100000,100);
-		verify(patientQuery, never()).equals(Patient.ID,"");		
-		verify(variantQuery).greaterOrEqual(Variant.BPSTART, 1);
-		verify(variantQuery).lessOrEqual(Variant.BPEND, 100000);
-		verify(variantQuery).equals(Variant.CHROMOSOME, 0);
-		verify(variantQuery).equals(Variant.TRACK_IDENTIFIER, "test");
+		Query patientQuery = mock(Query.class);
+		when(database.query(Patient.class)).thenReturn(patientQuery);
+		when(patientQuery.find()).thenReturn(patientList);
+		Query variantQuery = mock(Query.class);
+		when(database.query(Variant.class)).thenReturn(variantQuery);
 		
+		source.getFeatures("segment",1,100000,100);
+		verify(patientQuery, never()).equals(Patient.ID,"");
+		verify(variantQuery).equals(eq(Variant.TRACK_IDENTIFIER), eq("test"));
+		verify(variantQuery).equals(eq(Variant.CHROMOSOME), eq(0));
+		verify(variantQuery).greaterOrEqual(eq(Variant.BPSTART), eq(1));
+		verify(variantQuery).lessOrEqual(eq(Variant.BPEND), eq(100000));
 	}
 	
 	@Test()
-	public void getFeaturesRangePatient() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
+	public void getFeaturesRangePatientOneAllele() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
 	{
-		source.getFeatures("segment,123",1,100000,100);
-		verify(patientQuery).equals(eq(Patient.ID), eq("123"));		
-	}
+		Query patientQuery = mock(Query.class);
+		when(patientQuery.find()).thenReturn(patientList);
+		when(database.query(Patient.class)).thenReturn(patientQuery);
+		Query variantQuery = mock(Query.class);
+		when(database.query(Variant.class)).thenReturn(variantQuery);
 		
+		when(patient.getAllele1()).thenReturn(variant);
+		when(patient.getAllele2()).thenReturn(new Variant());
+		source.getFeatures("segment,123",1,100000,100);
+		verify(patientQuery).equals(eq(Patient.ID),eq("123"));		
+		verify(variantQuery).equals(eq(Variant.TRACK_IDENTIFIER), eq("test"));
+		verify(variantQuery).equals(eq(Variant.CHROMOSOME), eq(0));
+		verify(variantQuery).greaterOrEqual(eq(Variant.BPSTART), eq(1));
+		verify(variantQuery).lessOrEqual(eq(Variant.BPEND), eq(100000));
+		verify(variantQuery).equals(eq(Variant.IDENTIFIER),eq("vatiant_identifier"));	
+	}
+	
+	@Test()
+	public void getFeaturesRangePatientTwoAlleles() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
+	{
+		Query patientQuery = mock(Query.class);
+		when(patientQuery.find()).thenReturn(patientList);		
+		when(database.query(Patient.class)).thenReturn(patientQuery);
+		Query variantQuery = mock(Query.class);
+		when(database.query(Variant.class)).thenReturn(variantQuery);
+		when(patient.getAllele1()).thenReturn(variant);
+		when(patient.getAllele2()).thenReturn(variant2);
+		
+		source.getFeatures("segment,123",1,100000,100);
+		verify(patientQuery).equals(eq(Patient.ID),eq("123"));		
+		verify(variantQuery).equals(eq(Variant.TRACK_IDENTIFIER), eq("test"));
+		verify(variantQuery).equals(eq(Variant.CHROMOSOME), eq(0));
+		verify(variantQuery).greaterOrEqual(eq(Variant.BPSTART), eq(1));
+		verify(variantQuery).lessOrEqual(eq(Variant.BPEND), eq(100000));
+		verify(variantQuery).equals(eq(Variant.IDENTIFIER),eq("vatiant_identifier"));	
+		verify(variantQuery).or();	
+		verify(variantQuery).equals(eq(Variant.IDENTIFIER),eq("vatiant_identifier2"));	
+	}
+	
+	@Test()
+	public void getFeaturesRangePatientNoAlleles() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException
+	{
+		Query patientQuery = mock(Query.class);
+		when(patientQuery.find()).thenReturn(patientList);		
+		when(database.query(Patient.class)).thenReturn(patientQuery);
+		Query variantQuery = mock(Query.class);
+		when(database.query(Variant.class)).thenReturn(variantQuery);
+		when(patient.getAllele1()).thenReturn(null);
+		when(patient.getAllele2()).thenReturn(null);
+		
+		source.getFeatures("segment,123",1,100000,100);
+		verify(patientQuery).equals(eq(Patient.ID),eq("123"));		
+		verify(variantQuery).equals(eq(Variant.TRACK_IDENTIFIER), eq("test"));
+		verify(variantQuery).equals(eq(Variant.CHROMOSOME), eq(0));
+		verify(variantQuery).greaterOrEqual(eq(Variant.BPSTART), eq(1));
+		verify(variantQuery).lessOrEqual(eq(Variant.BPEND), eq(100000));
+		verify(variantQuery, never()).equals(eq(Variant.IDENTIFIER),eq("vatiant_identifier"));	
+		verify(variantQuery, never()).equals(eq(Variant.IDENTIFIER),eq("vatiant_identifier2"));	
+	}
 	
 	@Test()
 	public void getTotalCountForType() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException, DatabaseException

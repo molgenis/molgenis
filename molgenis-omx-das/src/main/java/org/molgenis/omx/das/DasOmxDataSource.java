@@ -140,6 +140,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	protected List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
 			throws DatabaseException
 	{
+		List<Variant> variants = new ArrayList<Variant>();
 		Chromosome chromosome = getChromosome(segmentId);
 
 		Query<Variant> variantQuery = database.query(Variant.class);
@@ -150,14 +151,13 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		if(patientObject!=null){
 			Variant allele1 = patientObject.getAllele1();
 			Variant allele2 = patientObject.getAllele2();
-			if(allele1 == null && allele2 ==null){
-				return new ArrayList<Variant>();//no mutations for selected patient, return empty list
-			}
-			if(allele1 != null)variantQuery.equals(Variant.IDENTIFIER,allele1.getIdentifier());
-			if(allele1 != null && allele2 !=null) variantQuery.or();
-			if(allele2 != null)variantQuery.equals(Variant.IDENTIFIER,allele2.getIdentifier());
+			if(allele1 != null || allele2 !=null){
+				if(allele1 != null)variantQuery.equals(Variant.IDENTIFIER,allele1.getIdentifier());
+				if(allele1 != null && allele2 !=null) variantQuery.or();
+				if(allele2 != null)variantQuery.equals(Variant.IDENTIFIER,allele2.getIdentifier());
+			}	
 		}
-		List<Variant> variants = variantQuery.find();
+		variants = variantQuery.find();
 		return variants;
 	}
 
