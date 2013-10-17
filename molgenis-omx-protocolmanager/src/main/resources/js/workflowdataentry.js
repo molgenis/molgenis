@@ -79,7 +79,11 @@
 				  ns.createWorkflowElementContainer(pane.data('workflow'), pane.data('element'), pane);
 			  })
 			  .fail(function(xhr, textStatus, errorThrown) {console.log(xhr, textStatus, errorThrown);
-				  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				  try {
+			  		  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+			  	  } catch(err) {
+			  		  var errorMessage = "Error occurred while trying to delete data row";
+			  	  }
 				  $('#plugin-container .alert').remove();
 				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 			  });
@@ -96,7 +100,11 @@
 				  ns.createWorkflowElementContainer(pane.data('workflow'), pane.data('element'), pane);
 			  })
 			  .fail(function(xhr, textStatus, errorThrown) {console.log(xhr, textStatus, errorThrown);
-				  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				  try {
+			  		  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+			  	  } catch(err) {
+			  		  var errorMessage = "Error occurred while trying to create data row";
+			  	  }
 				  $('#plugin-container .alert').remove();
 				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 			  });
@@ -120,7 +128,11 @@
 					  ns.createWorkflowElementContainer(pane.data('workflow'), pane.data('element'), pane);
 				  })
 				  .fail(function(xhr, textStatus, errorThrown) {console.log(xhr, textStatus, errorThrown);
-					  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				  	  try {
+				  		  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				  	  } catch(err) {
+				  		  var errorMessage = "Error occurred while trying to combine selected elements";
+				  	  }
 					  $('#plugin-container .alert').remove();
 					  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 				  });
@@ -135,7 +147,11 @@
 				  $(e.target).addClass('updated-text-input');
 			  })
 			  .fail(function(xhr, textStatus, errorThrown) {console.log(xhr, textStatus, errorThrown);
-				  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+			  try {
+		  		  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+		  	  } catch(err) {
+		  		  var errorMessage = "Error occurred while trying to create or update value";
+		  	  }
 				  $('#plugin-container .alert').remove();
 				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 			  });
