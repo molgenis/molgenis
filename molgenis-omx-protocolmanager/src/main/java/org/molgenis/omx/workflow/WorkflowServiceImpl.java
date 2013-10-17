@@ -42,6 +42,7 @@ public class WorkflowServiceImpl implements WorkflowService
 		this.database = database;
 	}
 
+	// TODO make transactional
 	@Override
 	public Workflow getWorkflow(Integer workflowId) throws WorkflowException
 	{
@@ -58,6 +59,7 @@ public class WorkflowServiceImpl implements WorkflowService
 		return createWorkflow(protocol);
 	}
 
+	// TODO make transactional
 	@Override
 	public List<Workflow> getWorkflows()
 	{
@@ -165,7 +167,7 @@ public class WorkflowServiceImpl implements WorkflowService
 		}
 	}
 
-	// FIXME add transaction rollbacks
+	// TODO make transactional
 	@Override
 	public void createWorkflowElementDataRowWithConnections(Integer workflowElementId,
 			List<Integer> workflowElementDataRowIds)
@@ -259,6 +261,7 @@ public class WorkflowServiceImpl implements WorkflowService
 		}
 	}
 
+	// TODO make transactional
 	@Override
 	public void createOrUpdateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId,
 			String rawValue)
