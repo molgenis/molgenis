@@ -272,10 +272,7 @@ public class Molgenis
 			}
 
 			// authorization
-			if (!options.auth_loginclass.endsWith("SimpleLogin"))
-			{
-				generators.add(new MapperSecurityDecoratorGen());
-			}
+			generators.add(new MapperSecurityDecoratorGen());
 
 			// decorators
 			if (options.generate_decorators)

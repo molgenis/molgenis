@@ -28,6 +28,18 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 	@Override
 	public MrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new MrefValue());
+	}
+
+	@Override
+	public MrefValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof MrefValue))
+		{
+			throw new ValueConverterException("value is not a " + MrefValue.class.getSimpleName());
+		}
+
 		// get identifiers
 		List<String> xrefIdentifiers = new ArrayList<String>();
 		List<String> xrefIdentifiersPreTrim;
@@ -55,7 +67,7 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 		}
 
 		// get characteristics for identifiers
-		MrefValue mrefValue = new MrefValue();
+		MrefValue mrefValue = (MrefValue) value;
 		try
 		{
 			if (xrefIdentifiers.size() == 1)

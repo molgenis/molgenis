@@ -17,11 +17,22 @@ public class TupleToDateValueConverter implements TupleToValueConverter<DateValu
 	@Override
 	public DateValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new DateValue());
+	}
+
+	@Override
+	public DateValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof DateValue))
+		{
+			throw new ValueConverterException("value is not a " + DateValue.class.getSimpleName());
+		}
 		String dateStr = tuple.getString(colName);
 		if (dateStr == null) return null;
 
 		SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(DATEFORMAT_DATE);
-		DateValue dateValue = new DateValue();
+		DateValue dateValue = (DateValue) value;
 		try
 		{
 			dateValue.setValue(iso8601DateFormat.parse(dateStr));

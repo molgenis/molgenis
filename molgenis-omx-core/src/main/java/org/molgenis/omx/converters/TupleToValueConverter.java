@@ -10,10 +10,26 @@ public interface TupleToValueConverter<S extends Value, T>
 	/**
 	 * Converts a tuple column value to a value entity
 	 * 
-	 * @param <S>
-	 * @param <T>
+	 * @param tuple
+	 * @param colName
+	 * @param feature
+	 * @return
+	 * @throws ValueConverterException
 	 */
 	public S fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException;
+
+	/**
+	 * Updates an existing value by converting a tuple column
+	 * 
+	 * @param tuple
+	 * @param colName
+	 * @param feature
+	 * @param value
+	 * @return
+	 * @throws ValueConverterException
+	 */
+	public S updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException;
 
 	/**
 	 * Returns the java type value contained by a value entity

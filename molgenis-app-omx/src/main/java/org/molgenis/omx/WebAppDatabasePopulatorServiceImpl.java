@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -31,9 +28,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 {
 	private static final String USERNAME_ADMIN = "admin";
 	private static final String USERNAME_USER = "user";
-
-	@PersistenceContext
-	private EntityManager em;
 
 	private final Database unsecuredDatabase;
 
@@ -91,6 +85,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		MolgenisGroup usersGroup = new MolgenisGroup();
 		usersGroup.setName("All Users");
 		unsecuredDatabase.add(usersGroup);
+
+		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
+		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
+		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME");
+		unsecuredDatabase.add(usersGroupHomeAuthority);
 
 		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
 		molgenisGroupMember1.setMolgenisGroup(usersGroup);

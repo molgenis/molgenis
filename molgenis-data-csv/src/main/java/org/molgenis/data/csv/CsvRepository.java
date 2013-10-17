@@ -15,17 +15,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.io.processor.AbstractCellProcessor;
+import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.springframework.util.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -54,29 +56,31 @@ public class CsvRepository extends AbstractRepository<Entity>
 	private DefaultEntityMetaData entityMetaData;
 	private final String entityName;
 
-	public CsvRepository(Reader reader, String entityName)
+	public CsvRepository(Reader reader, String entityName, List<CellProcessor> cellProcessors)
 	{
-		this(reader, DEFAULT_SEPARATOR, entityName);
+		this(reader, DEFAULT_SEPARATOR, entityName, cellProcessors);
 	}
 
-	public CsvRepository(Reader reader, char separator, String entityName)
+	public CsvRepository(Reader reader, char separator, String entityName, @Nullable
+	List<CellProcessor> cellProcessors)
 	{
 		if (reader == null) throw new IllegalArgumentException("reader is null");
 		if (entityName == null) throw new IllegalArgumentException("entityName is null");
 		this.csvReader = new CSVReader(reader, separator);
 		this.entityName = entityName;
+		this.cellProcessors = cellProcessors;
 	}
 
-	public CsvRepository(File file) throws FileNotFoundException
+	public CsvRepository(File file, List<CellProcessor> cellProcessors) throws FileNotFoundException
 	{
 		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), StringUtils.stripFilenameExtension(file
-				.getName()));
+				.getName()), cellProcessors);
 	}
 
-	public CsvRepository(File file, char separator) throws FileNotFoundException
+	public CsvRepository(File file, char separator, List<CellProcessor> cellProcessors) throws FileNotFoundException
 	{
 		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), separator, StringUtils
-				.stripFilenameExtension(file.getName()));
+				.stripFilenameExtension(file.getName()), cellProcessors);
 	}
 
 	@Override

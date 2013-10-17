@@ -19,10 +19,13 @@ public class TupleToIntValueConverterTest
 	@Test
 	public void fromTuple() throws ValueConverterException
 	{
+		IntValue value = new IntValue();
+		value.setValue(123);
+
 		String colName = "col";
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, 123);
-		IntValue value = new TupleToIntValueConverter().fromTuple(tuple, colName, null);
+		new TupleToIntValueConverter().updateFromTuple(tuple, colName, null, value);
 		assertEquals(value.getValue(), Integer.valueOf(123));
 	}
 }

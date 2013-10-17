@@ -69,7 +69,7 @@
 						$.each(cart.features, function(i, feature) {
 							var row = $('<tr>');
 							row.append('<td>' + feature.name + '</td>');
-							if(feature.i18nDescription.en){
+							if(feature.i18nDescription && feature.i18nDescription.en){
 								row.append('<td>' + feature.i18nDescription.en + '</td>');	
 							}
 							else{

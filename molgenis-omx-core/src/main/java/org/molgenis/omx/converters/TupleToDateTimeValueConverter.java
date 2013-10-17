@@ -16,10 +16,22 @@ public class TupleToDateTimeValueConverter implements TupleToValueConverter<Date
 	public DateTimeValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new DateTimeValue());
+	}
+
+	@Override
+	public DateTimeValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof DateTimeValue))
+		{
+			throw new ValueConverterException("value is not a " + DateTimeValue.class.getSimpleName());
+		}
+
 		String dateTimeStr = tuple.getString(colName);
 		if (dateTimeStr == null) return null;
 
-		DateTimeValue dateTimeValue = new DateTimeValue();
+		DateTimeValue dateTimeValue = (DateTimeValue) value;
 		try
 		{
 			dateTimeValue.setValue(MolgenisDateFormat.getDateFormat().parse(dateTimeStr));
