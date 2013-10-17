@@ -84,7 +84,6 @@
 				description="Whether this feature is time dependent and can have different values when measured 
 					on different times (e.g. weight, temporal=true) or generally only measured once (e.g. birth date, 
 					temporal=false) " />
-			<field name="required" type="boolean" default="false" description="Whether it's required that this feature has been assigned a value."/>
 		</entity>
 		<entity name="Category" extends="Characteristic">
 			<description>Category is partOf ObservableFeature to define categories for an
@@ -119,7 +118,9 @@
 			<field name="subprotocols" type="mref" xref_entity="Protocol" nillable="true" description="Subprotocols of this protocol"/>
 			<field name="Features" type="mref" nillable="true" xref_entity="ObservableFeature"
 				description="parameters (in/out) that are used or produced by this protocol." />
-				<field name="root" type="boolean" default="false" description="Indicator whether this protocol defines a workflow (e.g is the first protocol of a workflow)." />
+			<field name="RequiredFeatures" type="mref" nillable="true" xref_entity="ObservableFeature"
+				description=".........." />
+			<field name="root" type="boolean" default="false" description="Indicator whether this protocol defines a workflow (e.g is the first protocol of a workflow)." />
 		</entity>
 		<entity name="DataSet" extends="Characteristic">
 			<description>Container for one or more observations that are measured
