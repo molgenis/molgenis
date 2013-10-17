@@ -3,14 +3,17 @@
 <#assign css=["chosen.css", "jquery.bootstrap.wizard.css", "workflowdataentry.css"]>
 <#assign js=["chosen.jquery.min.js", "jquery.bootstrap.wizard.min.js", "workflowdataentry.js"]>
 <@header css js/>
+	<#if workflows?size == 0>
+		<span>No workflows</span>
+	<#else>
 			<div class="row-fluid">
 				<div class="control-group pull-right form-horizontal">
 					<label class="control-label" for="workflow-select">Choose a protocol:</label>
 					<div class="controls">
 		    			<select id="workflow-application-select">
-							<#list workflows as workflow>
+		<#list workflows as workflow>
 								<option value="${workflow.id}">${workflow.name}</option>
-							</#list>
+		</#list>
 		      			</select>
 					</div>
 				</div>
@@ -31,4 +34,5 @@
 					</div>
 				</div>
 			</div>
+	</#if>		
 <@footer/>

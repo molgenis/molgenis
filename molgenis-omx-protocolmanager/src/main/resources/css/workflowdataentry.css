@@ -33,3 +33,7 @@ td.snug {
  	margin-bottom: 0px !important;
  	padding: 0px 4px !important;
  }
+ 
+ .updated-text-input {
+	background-color: lightblue !important;
+ }

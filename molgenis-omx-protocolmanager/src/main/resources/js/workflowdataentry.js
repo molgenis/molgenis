@@ -60,7 +60,10 @@
 	$(function() {
 		// register event handler
 		$('#workflow-application-select').change(function() {
-			ns.onWorkflowSelectionChange($(this).val());
+			var workflowId = $(this).val();
+			if(workflowId != null) {
+				ns.onWorkflowSelectionChange(workflowId);
+			}
 		});
 		
 		$('#workflow-nav').on('show', 'a[data-toggle="tab"]', function(e){
@@ -128,6 +131,10 @@
 			var featureId = $(this).closest('td').data('feature');
 			
 			$.post(plugin_uri + '/workflowelementdatarow/value', {'workflowElementDataRowId': workflowElementDataRowId, 'featureId': featureId, 'rawValue': $(this).val()})
+			  .done(function(data) {
+				  console.log(e.target);
+				  $(e.target).addClass('updated-text-input');
+			  })
 			  .fail(function(xhr, textStatus, errorThrown) {console.log(xhr, textStatus, errorThrown);
 				  var errorMessage = JSON.parse(xhr.responseText).errorMessage;
 				  $('#plugin-container .alert').remove();
