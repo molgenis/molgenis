@@ -15,11 +15,6 @@
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>3.9</version>

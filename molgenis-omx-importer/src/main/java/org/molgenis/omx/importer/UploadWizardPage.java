@@ -71,7 +71,7 @@ public class UploadWizardPage extends AbstractWizardPage implements Serializable
 			Part part = request.getPart("upload");
 			if (part != null)
 			{
-				file = FileUploadUtils.saveToTempFile(part);
+				file = FileUploadUtils.saveToTempFolder(part);
 			}
 
 			if (file == null)

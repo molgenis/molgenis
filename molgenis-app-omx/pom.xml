@@ -149,6 +149,16 @@
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-excel</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-csv</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 			<version>3.2.3.RELEASE</version>

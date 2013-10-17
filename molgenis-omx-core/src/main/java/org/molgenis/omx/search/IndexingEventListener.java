@@ -2,8 +2,6 @@ package org.molgenis.omx.search;
 
 import java.util.Arrays;
 
-import org.molgenis.omx.search.DataSetsIndexer;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.util.DataSetImportedEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -27,17 +25,11 @@ public class IndexingEventListener implements ApplicationListener<ApplicationEve
 	@Override
 	public void onApplicationEvent(ApplicationEvent event)
 	{
-		try
+		if (event instanceof DataSetImportedEvent)
 		{
-			if (event instanceof DataSetImportedEvent)
-			{
-				DataSetImportedEvent dataSetImportedEvent = (DataSetImportedEvent) event;
-				dataSetsIndexer.index(Arrays.asList(dataSetImportedEvent.getDataSetId()));
-			}
+			DataSetImportedEvent dataSetImportedEvent = (DataSetImportedEvent) event;
+			dataSetsIndexer.index(Arrays.asList(dataSetImportedEvent.getDataSetId()));
 		}
-		catch (TableException e)
-		{
-			throw new RuntimeException(e);
-		}
+
 	}
 }
