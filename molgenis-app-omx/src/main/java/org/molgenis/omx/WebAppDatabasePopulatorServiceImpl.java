@@ -87,6 +87,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		usersGroup.setName("All Users");
 		unsecuredDatabase.add(usersGroup);
 
+		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
+		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
+		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME");
+		unsecuredDatabase.add(usersGroupHomeAuthority);
+
 		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
 		molgenisGroupMember1.setMolgenisGroup(usersGroup);
 		molgenisGroupMember1.setMolgenisUser(userUser);

@@ -170,7 +170,12 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
 
 				.antMatchers("/menu/admin/datasetdeleter/**", "/plugin/datasetdeleter/**")
-				.hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"));
+				.hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"))
+
+				// protocol viewer plugin dependencies
+				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+
+				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"));
 	}
 
 	@Override
@@ -208,7 +213,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_VOID > ROLE_PLUGIN_READ_VOID").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CATALOGMANAGER > ROLE_PLUGIN_READ_CATALOGMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_STUDYMANAGER > ROLE_PLUGIN_READ_STUDYMANAGER").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETINDEXER > ROLE_PLUGIN_READ_DATASETINDEXER").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETINDEXER > ROLE_PLUGIN_READ_DATASETINDEXER").append(' '); // why
+																													// datasetindexer
+																													// instead
+																													// of
+																													// dataindexer?
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETDELETER > ROLE_PLUGIN_READ_DATASETDELETER").append(' ');
 
 		// Entities: WRITE > READ
