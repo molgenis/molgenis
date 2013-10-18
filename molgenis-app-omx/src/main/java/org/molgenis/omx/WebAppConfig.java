@@ -6,6 +6,8 @@ import java.util.Properties;
 
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
+import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
@@ -39,6 +41,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -98,6 +101,13 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
+	}
+
+	@Override
+	public void addFormatters(FormatterRegistry registry)
+	{
+		registry.addConverter(new DateToStringConverter());
+		registry.addConverter(new StringToDateConverter());
 	}
 
 	@Bean
