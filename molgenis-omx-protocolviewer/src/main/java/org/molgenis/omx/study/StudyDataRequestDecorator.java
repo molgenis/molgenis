@@ -8,8 +8,6 @@ import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ApplicationContextProvider;
@@ -42,13 +40,6 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 	}
 
 	@Override
-	public void find(TupleWriter writer, QueryRule... rules) throws DatabaseException
-	{
-		rules = addUserRule(rules);
-		super.find(writer, rules);
-	}
-
-	@Override
 	public int update(List<E> entities) throws DatabaseException
 	{
 		checkEntitiesPermission(entities);
@@ -60,13 +51,6 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 	{
 		checkEntitiesPermission(entities);
 		return super.remove(entities);
-	}
-
-	@Override
-	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
-	{
-		rules = addUserRule(rules);
-		super.find(writer, fieldsToExport, rules);
 	}
 
 	@Override
@@ -149,21 +133,4 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 		return molgenisUserService.getCurrentUser();
 	}
 
-	@Override
-	public int update(TupleReader reader) throws DatabaseException
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int remove(TupleReader reader) throws DatabaseException
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<E> toList(TupleReader reader, int limit) throws DatabaseException
-	{
-		throw new UnsupportedOperationException();
-	}
 }

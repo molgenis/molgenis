@@ -2,8 +2,6 @@
 
 package ${package};
 
-import javax.persistence.EntityManagerFactory;
-
 <#list model.entities as entity>
 	<#if !entity.isAbstract()>
 import ${entity.namespace}.${JavaName(entity)};	

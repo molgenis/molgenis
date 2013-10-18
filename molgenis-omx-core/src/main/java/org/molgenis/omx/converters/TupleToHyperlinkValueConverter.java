@@ -13,10 +13,21 @@ public class TupleToHyperlinkValueConverter implements TupleToValueConverter<Hyp
 	public HyperlinkValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new HyperlinkValue());
+	}
+
+	@Override
+	public HyperlinkValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof HyperlinkValue))
+		{
+			throw new ValueConverterException("value is not a " + HyperlinkValue.class.getSimpleName());
+		}
 		String hyperlink = tuple.getString(colName);
 		if (hyperlink == null) return null;
 
-		HyperlinkValue hyperlinkValue = new HyperlinkValue();
+		HyperlinkValue hyperlinkValue = (HyperlinkValue) value;
 		hyperlinkValue.setValue(hyperlink);
 		return hyperlinkValue;
 	}

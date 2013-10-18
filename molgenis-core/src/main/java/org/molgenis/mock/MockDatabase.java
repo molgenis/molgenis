@@ -13,8 +13,6 @@ import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.SubQueryRule;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
 
@@ -42,7 +40,8 @@ public class MockDatabase implements Database
 	 * @param entities
 	 *            , to be returned by the find and query methods
 	 */
-	public MockDatabase(@SuppressWarnings("rawtypes") List entities)
+	public MockDatabase(@SuppressWarnings("rawtypes")
+	List entities)
 	{
 		super();
 		this.entities = entities;
@@ -86,20 +85,6 @@ public class MockDatabase implements Database
 	public <E extends Entity> List<E> find(Class<E> klazz, QueryRule... rules) throws DatabaseException
 	{
 		return entities;
-	}
-
-	@Override
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, QueryRule... rules)
-			throws DatabaseException
-	{
-
-	}
-
-	@Override
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, List<String> fieldsToExport,
-			QueryRule... rules) throws DatabaseException
-	{
-
 	}
 
 	@Override
@@ -241,23 +226,6 @@ public class MockDatabase implements Database
 				return entities;
 			}
 
-			@Override
-			public void find(TupleWriter writer) throws DatabaseException, ParseException
-			{
-			}
-
-			@Override
-			public void find(TupleWriter writer, List<String> fieldsToExport) throws DatabaseException, ParseException
-			{
-
-			}
-
-			@Override
-			public void find(TupleWriter writer, boolean skipAutoIds) throws DatabaseException, ParseException,
-					InstantiationException, IllegalAccessException
-			{
-			}
-
 			@SuppressWarnings("unchecked")
 			@Override
 			public List<E> find(Database db, Class<E> klazz) throws DatabaseException, ParseException
@@ -350,18 +318,6 @@ public class MockDatabase implements Database
 	}
 
 	@Override
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader, TupleWriter writer) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
 	public <E extends Entity> int update(E entity) throws DatabaseException
 	{
 		return 0;
@@ -374,12 +330,6 @@ public class MockDatabase implements Database
 	}
 
 	@Override
-	public <E extends Entity> int update(Class<E> klazz, TupleReader reader) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
 	public <E extends Entity> int remove(E entity) throws DatabaseException
 	{
 		return 0;
@@ -387,12 +337,6 @@ public class MockDatabase implements Database
 
 	@Override
 	public <E extends Entity> int remove(List<E> entities) throws DatabaseException
-	{
-		return 0;
-	}
-
-	@Override
-	public <E extends Entity> int remove(Class<E> entityClass, TupleReader reader) throws DatabaseException
 	{
 		return 0;
 	}
@@ -426,14 +370,6 @@ public class MockDatabase implements Database
 	public List<String> getEntityNames()
 	{
 		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E extends Entity> List<E> toList(Class<E> klazz, TupleReader reader, int noEntities)
-			throws DatabaseException
-	{
-		return entities;
 	}
 
 	@Override

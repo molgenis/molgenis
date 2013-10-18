@@ -1,34 +1,19 @@
 package ${package};
 
 import java.beans.PropertyVetoException;
-import java.text.ParseException;
 import java.util.Collections;
-import java.util.List;
 
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
-import org.molgenis.SecuredJpaDatabase;
-import org.molgenis.UnsecuredJpaDatabase;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.server.TokenFactory;
-import org.molgenis.util.Entity;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.AdviceMode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.EnableLoadTimeWeaving;
-import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -38,6 +23,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
@@ -49,7 +35,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 {
 	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
 
-	@Value("${r"${db_driver:@null}"}")
+	@Value("${r"${db_driver:com.mysql.jdbc.Driver}"}")
 	private String dbDriverClass;
 	@Value("${r"${db_uri:@null}"}")
 	private String dbJdbcUri;
@@ -82,8 +68,8 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	{
 		if(dbDriverClass == null) throw new IllegalArgumentException("db_driver is null");
 		if(dbJdbcUri == null) throw new IllegalArgumentException("db_uri is null");
-		if(dbUser == null) throw new IllegalArgumentException("db_user is null");
-		if(dbPassword == null) throw new IllegalArgumentException("db_password is null");
+		if(dbUser == null) throw new IllegalArgumentException("please configure the db_user property in your molgenis-server.properties");
+		if(dbPassword == null) throw new IllegalArgumentException("please configure the db_password property in your molgenis-server.properties");
 		
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		try

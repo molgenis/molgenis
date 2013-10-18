@@ -12,6 +12,18 @@ public class TupleToLongValueConverter implements TupleToValueConverter<LongValu
 	@Override
 	public LongValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new LongValue());
+	}
+
+	@Override
+	public LongValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof LongValue))
+		{
+			throw new ValueConverterException("value is not a " + LongValue.class.getSimpleName());
+		}
+
 		Long longObj;
 		try
 		{
@@ -23,7 +35,7 @@ public class TupleToLongValueConverter implements TupleToValueConverter<LongValu
 		}
 		if (longObj == null) return null;
 
-		LongValue longValue = new LongValue();
+		LongValue longValue = (LongValue) value;
 		longValue.setValue(longObj);
 		return longValue;
 	}

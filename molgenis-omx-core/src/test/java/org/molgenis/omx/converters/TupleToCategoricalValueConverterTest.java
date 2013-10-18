@@ -56,4 +56,27 @@ public class TupleToCategoricalValueConverterTest
 		CategoricalValue value = new TupleToCategoricalValueConverter(database).fromTuple(tuple, colName, feature);
 		assertEquals(value.getValue(), category);
 	}
+
+	@Test
+	public void updateFromTuple() throws ValueConverterException, DatabaseException
+	{
+		CategoricalValue value = new CategoricalValue();
+
+		String catName = "category #1";
+		Category category = new Category();
+		category.setName(catName);
+
+		String valueCode = "code1";
+		ObservableFeature feature = mock(ObservableFeature.class);
+		Database database = mock(Database.class);
+		when(
+				database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE, Operator.EQUALS, feature),
+						new QueryRule(Category.VALUECODE, Operator.EQUALS, valueCode))).thenReturn(
+				Arrays.asList(category));
+		String colName = "col";
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(colName, valueCode);
+		new TupleToCategoricalValueConverter(database).updateFromTuple(tuple, colName, feature, value);
+		assertEquals(value.getValue(), category);
+	}
 }

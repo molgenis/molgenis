@@ -56,11 +56,6 @@ public class RdfApiGen extends Generator
 			templateArgs.put("helper", new GeneratorHelper(null));
 			templateArgs.put("package", APP_DIR.replace('/', '.') + ".servlet");
 			templateArgs.put("db_filepath", options.db_filepath);
-			templateArgs.put("db_user", options.db_user);
-			templateArgs.put("db_password", options.db_password);
-			templateArgs.put("db_uri", options.db_uri);
-			templateArgs.put("db_driver", options.db_driver);
-			templateArgs.put("db_jndiname", options.db_jndiname);
 			OutputStream targetOut = new FileOutputStream(target);
 			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
 			targetOut.close();

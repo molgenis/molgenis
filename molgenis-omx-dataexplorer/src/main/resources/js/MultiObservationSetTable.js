@@ -1,9 +1,8 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 
-	var molgenis = w.molgenis = w.molgenis || {};
 	var sortRule = null;
-
+	
 	molgenis.ResultsTable = function ResultsTable() {
 	};
 
@@ -92,4 +91,4 @@
 		});
 	};
 
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
