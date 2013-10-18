@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.search.DataSetsIndexer;
@@ -69,8 +68,8 @@ public class DataSetsIndexerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException,
-			TableException
+	public DataSetIndexResponse index(@RequestBody
+	DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
 		List<String> dataSetIds = request.getSelectedDataSets();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())

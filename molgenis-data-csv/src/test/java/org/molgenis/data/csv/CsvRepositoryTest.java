@@ -77,15 +77,15 @@ public class CsvRepositoryTest
 	@Test
 	public void metaData() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/test.csv");
-		File file = new File(FileUtils.getTempDirectory(), "test.csv");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File file = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		CsvRepository csvRepository = null;
 		try
 		{
 
 			FileCopyUtils.copy(in, new FileOutputStream(file));
 			csvRepository = new CsvRepository(file, null);
-			assertEquals(csvRepository.getName(), "test");
+			assertEquals(csvRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = csvRepository.getAttributes().iterator();
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col1");
@@ -108,8 +108,8 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/test.csv");
-		File file = new File(FileUtils.getTempDirectory(), "test.csv");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File file = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		CsvRepository csvRepository = null;
 		try
 		{

@@ -682,10 +682,10 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	}
 	
 	@Override
-	public ${JavaName(entity)} create(org.molgenis.util.tuple.Tuple tuple) throws Exception
+	public ${JavaName(entity)} create(org.molgenis.data.Entity entity) throws Exception
 	{
 		${JavaName(entity)} e = new ${JavaName(entity)}();
-		e.set(tuple);
+		e.set(entity);
 		return e;
 	}
 	
