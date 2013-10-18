@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Database.DatabaseAction;
@@ -73,10 +75,8 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 	 * @return number of elements imported
 	 */
 	@Override
-	public int importEntity(TupleReader reader, Database db, DatabaseAction dbAction) throws IOException, DatabaseException 
+	public int importEntity(Repository<? extends Entity> repository, Database db, DatabaseAction dbAction) throws IOException, DatabaseException 
 	{
-		// normalize column headers
-		reader.addCellProcessor(new LowerCaseProcessor(true, false));
 		//wrapper to count
 		final AtomicInteger total = new AtomicInteger(0);
 	try {
@@ -87,14 +87,14 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 		//cache for objects to be imported from file (in batch)
 		final List<${JavaName(entity)}> ${name(entity)}List = new ArrayList<${JavaName(entity)}>(BATCH_SIZE); // FIXME
 		
-		for(Tuple tuple : reader)
+		for(Entity entity : repository)
 		{
 			// skip empty rows
-			if (!hasValues(tuple)) continue;
+			if (!hasValues(entity)) continue;
 			
 			//parse object, setting defaults and values from file
 			${JavaName(entity)} object = new ${JavaName(entity)}();
-			object.set(tuple, false);				
+			object.set(entity, false);				
 			${name(entity)}List.add(object);		
 			
 			//add to db when batch size is reached
@@ -184,11 +184,11 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter
 		return total.get();
 	}	
 	
-	private boolean hasValues(Tuple tuple)
+	private boolean hasValues(Entity entity)
 	{
-		for (String colName : tuple.getColNames())
+		for (String attributeName : entity.getAttributeNames())
 		{
-			if (tuple.get(colName) != null) return true;
+			if (entity.get(attributeName) != null) return true;
 		}
 		return false;
 	}

@@ -13,10 +13,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.model.elements.Field;
-import org.molgenis.util.tuple.EntityTuple;
-import org.molgenis.util.tuple.SingletonTuple;
-import org.molgenis.util.tuple.Tuple;
 
 /**
  * Abstract Entity class that implements common parts for each Entity.
@@ -65,19 +63,26 @@ public abstract class AbstractEntity implements Entity, Serializable
 	@Override
 	public void set(String name, Object value) throws Exception
 	{
-		this.set(new SingletonTuple<Object>(name, value), false);
+
+		this.set(new MapEntity(name, value), false);
 	}
 
 	@Override
-	public void set(Tuple values) throws Exception
+	public void set(org.molgenis.data.Entity values) throws Exception
 	{
 		this.set(values, true);
 	}
 
 	@Override
-	public Tuple getValues()
+	public org.molgenis.data.Entity getValues()
 	{
-		return new EntityTuple(this);
+		MapEntity entity = new MapEntity();
+		for (String field : getFields())
+		{
+			entity.set(field, get(field));
+		}
+
+		return entity;
 	}
 
 	@Override
@@ -136,8 +141,7 @@ public abstract class AbstractEntity implements Entity, Serializable
 	}
 
 	/**
-	 * Default implementation. Will be overriden if your entity model contains
-	 * subclasses
+	 * Default implementation. Will be overriden if your entity model contains subclasses
 	 */
 	public String get__Type()
 	{
@@ -145,8 +149,7 @@ public abstract class AbstractEntity implements Entity, Serializable
 	}
 
 	/**
-	 * Default implementation. Will be overriden if your entity model contains
-	 * subclasses
+	 * Default implementation. Will be overriden if your entity model contains subclasses
 	 */
 	public String get__TypeLabel()
 	{
@@ -155,8 +158,7 @@ public abstract class AbstractEntity implements Entity, Serializable
 	}
 
 	/**
-	 * Default implementation. Will be overriden if your entity model contains
-	 * subclasses
+	 * Default implementation. Will be overriden if your entity model contains subclasses
 	 */
 	public List<ValueLabel> get__TypeOptions()
 	{

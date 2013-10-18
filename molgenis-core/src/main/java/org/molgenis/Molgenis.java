@@ -38,7 +38,6 @@ import org.molgenis.generators.R.RApiGen;
 import org.molgenis.generators.R.REntityGen;
 import org.molgenis.generators.R.RMatrixGen;
 import org.molgenis.generators.cpp.CPPCassette;
-import org.molgenis.generators.csv.CsvEntityExporterGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
@@ -54,7 +53,6 @@ import org.molgenis.generators.doc.DotDocMinimalGen;
 import org.molgenis.generators.doc.DotDocModuleDependencyGen;
 import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
-import org.molgenis.generators.excel.ExcelEntityExporterGen;
 import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.EntityServiceGen;
@@ -291,8 +289,8 @@ public class Molgenis
 		{
 			generators.add(new EntitiesImporterGen());
 			generators.add(new EntitiesValidatorGen());
-			generators.add(new CsvEntityExporterGen());
-			generators.add(new ExcelEntityExporterGen());
+			// generators.add(new CsvEntityExporterGen());
+			// generators.add(new ExcelEntityExporterGen());
 		}
 
 		if (options.generate_Python)
@@ -414,7 +412,8 @@ public class Molgenis
 			{
 				@Override
 				@Nullable
-				public Callable<Boolean> apply(@Nullable final Generator generator)
+				public Callable<Boolean> apply(@Nullable
+				final Generator generator)
 				{
 					return generator != null ? new Callable<Boolean>()
 					{
