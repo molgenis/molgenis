@@ -75,10 +75,12 @@ Give create a database with permissions to molgenis user:
 
 Create a file called molgenis-server.properties in your home folder (so ~/molgenis-server.properties)
 
-Add two properties to this file:
+Add user and database properties to this file, such as this example:
 
-	"admin.password=admin"
-	"user.password=admin"
+    db_user=molgenis
+    db_password=molgenis
+    admin.password=admin
+    user.password=admin
 
 If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
 
@@ -90,7 +92,7 @@ In the 'goals' box type in 'jetty:start'
 
 Before running, go the the 'JRE' tab and add the the following VM arguments:
 
- 	-XX:MaxPermSize=512M
+    -XX:MaxPermSize=512M
     -Xmx2g
 
 This will add memory for the application to use.
