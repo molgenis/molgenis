@@ -43,8 +43,8 @@
 		<div class="span9">
 			<div class="pull-left">
 				VIEW:
-				<span class="viewer" id="data">data<img src="http://www.fdifinder.org/img/data-grid.gif"></img></span>
-				<span class="viewer" id="aggregate">aggregate<img src="http://www.fdifinder.org/img/aggregate.gif"></img></span>
+				<span class="viewer" id="data">data<img src="/img/grid-icon.png"></img></span>
+				<span class="viewer" id="aggregate">aggregate<img src="/img/aggregate-icon.png"></img></span>
 			</div>
 			<div class="controls pull-right">
 				<label class="control-label" for="dataset-select">Choose a dataset:</label>
