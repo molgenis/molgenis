@@ -216,3 +216,7 @@ input[type=number] {
 	margin-bottom: 20px;
 	width: 100%;
 }
+
+.viewer{
+	cursor : pointer;
+}

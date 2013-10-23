@@ -41,19 +41,30 @@
 			</div>		
 		</div>
 		<div class="span9">
+			<div class="pull-left">
+				VIEW:
+				<span class="viewer" id="data">data<img src="http://www.fdifinder.org/img/data-grid.gif"></img></span>
+				<span class="viewer" id="aggregate">aggregate<img src="http://www.fdifinder.org/img/aggregate.gif"></img></span>
+			</div>
+			<div class="controls pull-right">
+				<label class="control-label" for="dataset-select">Choose a dataset:</label>
+				<select data-placeholder="Choose a Dataset" id="dataset-select">
+			<#list dataSets as dataSet>
+				<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+			</#list>
+				</select>
+			</div>
+		</div>
+		<div class="span9">
 			<div id="dataset-select-container" class="control-group form-horizontal">
 				<div id="data-table-header" class="pull-left"></div>
-				<div class="controls pull-right">
-					<label class="control-label" for="dataset-select">Choose a dataset:</label>
-					<select data-placeholder="Choose a Dataset" id="dataset-select">
-				<#list dataSets as dataSet>
-					<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
-				</#list>
-					</select>
-				</div>
 			</div>
-			<div class="row-fluid data-table-container">
+			<div class="row-fluid data-table-container" id="dataexplorer-grid-data">
 				<table id="data-table" class="table table-striped table-condensed"></table>
+			</div>
+			<div class="row-fluid data-table-container" id="dataexplorer-aggregate-data" style="display:none">
+				<div id="bar" class="controls"></div>
+				<div id="aggregate-table-container"></div>
 			</div>
 			<div class="row-fluid data-table-pager-container">
 				<a id="download-button" class="btn" href="#">Download as csv</a>
@@ -62,4 +73,9 @@
 		</div>
 		<div class="feature-filter-dialog"></div>	
 	</div>
+	<script>
+		$(function(){
+			window.top.molgenis.setContextURL('${context_url}');
+		});
+	</script>
 <@footer/>

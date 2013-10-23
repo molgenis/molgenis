@@ -9,7 +9,16 @@
 	var selectedDataSet = null;
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
-
+	var contextURL = null;
+	
+	molgenis.setContextURL = function(contextURL){
+		this.contextURL = contextURL;
+	};
+	
+	molgenis.getContextURL = function(){
+		return this.contextURL;
+	};
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -35,7 +44,7 @@
 			
 			return children;
 		}
-		
+			
 		function createFeatureNodes(protocolFeaturesUri, featureOpts) {
 			var features = restApi.get(protocolFeaturesUri);
 			var nodes = [];
@@ -194,6 +203,13 @@
 		molgenis.updateObservationSetsTable();
 	};
 
+	molgenis.countNrofRows = function(){
+		molgenis.search(function(searchResponse) {
+			var maxRowsPerPage = resultsTable.getMaxRows();
+			var nrRows = searchResponse.totalHitCount;
+		});
+	}
+	
 	molgenis.updateObservationSetsTable = function() {
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
@@ -244,6 +260,9 @@
 		pager = $('#data-table-pager');
 	};
 
+
+	
+	
 	molgenis.openFeatureFilterDialog = function(featureUri) {
 		restApi.getAsync(featureUri, null, null, function(feature) {
 			var items = [];
@@ -522,6 +541,8 @@
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
 		molgenis.updateObservationSetsTable();
+		//alert($('#selectFeature').val());
+		molgenis.loadAggregate($('#selectFeature').val());
 	};
 
 	molgenis.createFeatureFilterList = function(featureFilters) {
@@ -648,7 +669,83 @@
 	};
 	
 	
+	molgenis.initializeAggregate = function(dataSetUri){
+		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
+			selectedDataSet = dataSet;
+			var queryRules = [];
+			queryRules.push({
+				'field' : 'type',
+				'operator' : 'EQUALS',
+				'value' : 'observablefeature'
+			});
+			queryRules.push({
+				'operator' : 'AND'
+			});
+			queryRules.push({
+				'field' : 'dataType',
+				'operator' : 'EQUALS',
+				'value' : 'categorical'
+			});
+			queryRules.push({
+				operator : 'LIMIT',
+				value : 100000
+			});
+			var fragments = selectedDataSet.href.split("/");
+			var searchRequest = { 
+				'documentType' : "protocolTree-" + fragments[fragments.length - 1],
+				'featureFilters' : featureFilters,
+				'queryRules' : queryRules
+			};
+			
+			searchApi.search(searchRequest, function(searchResponse) {
+				var searchHits = searchResponse.searchHits;
+				var totalHitCount = searchResponse.totalHitCount;
+				var selectTag = $('<select id="selectFeature"/>');
+				$.each(searchHits, function(index, hit){
+					selectTag.append('<option value=' + hit.columnValueMap.id + '>' + hit.columnValueMap.name + '</option>');
+				});			
+				$('#bar').empty().append(selectTag);
+				molgenis.loadAggregate(selectTag.val());
+				selectTag.change(function() {
+					molgenis.loadAggregate($(this).val());
+				});
+			});
+			
+			molgenis.countNrofRows();
+			$('#chooseView').after('</input><select></select>');
+		});
+		molgenis.loadAggregate($('#selectFeature').val());
+	};
 	
+	molgenis.loadAggregate = function(featureId){
+		var searchRequest = molgenis.createSearchRequest();
+		searchRequest.queryRules.push({
+			'operator' : 'LIMIT',
+			'value' : 100000
+		});
+		var feature = restApi.get('/api/v1/observablefeature/' + featureId);
+		searchRequest.fieldsToReturn = [feature.identifier];
+		var aggregateRequest = {
+			'documentType' : selectedDataSet.identifier,
+			'featureId' : featureId,
+			'searchRequest' : searchRequest
+		};
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextURL() + '/aggregate',
+			data : JSON.stringify(aggregateRequest),
+			contentType : 'application/json',
+			success : function(aggregateResult){
+				console.log(aggregateResult);
+				var table = $('<table />').addClass('table table-striped');
+				table.append('<tr><th>Category name</th><th>Count</th></tr>')
+				$.each(aggregateResult.hashCategories, function(categoryName, count){
+					table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
+				});
+				$('#aggregate-table-container').empty().append(table);
+			}
+		});
+	};
 	
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
@@ -658,16 +755,46 @@
 		parent.hideSpinner();
 	};
 	
+	molgenis.toggleViewer = function(statusDataViewer){
+		if(statusDataViewer){
+			$('#dataexplorer-grid-data').show();
+			$('#dataexplorer-aggregate-data').hide();
+		}
+		else{
+			$('#dataexplorer-aggregate-data').show();
+			$('#dataexplorer-grid-data').hide();
+		}
+	};
+	
 	// on document ready
 	$(function() {
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
 		$('#dataset-select').change(function() {
-			molgenis.onDataSetSelectionChange($(this).val());
+			var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+			restApi.getAsync($('#dataset-select').val(), null, null, function(dataSet) {
+				selectedDataSet = dataSet;
+				molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+			});
+			if(checkDataViewer)
+				molgenis.onDataSetSelectionChange($(this).val());
+			else
+				molgenis.initializeAggregate($(this).val());
 		});
 		
 		resultsTable = new molgenis.ResultsTable();
-
+		
+		$('#dataexplorer-grid-data').show();
+		
+		$('#data').click(function (){
+			molgenis.toggleViewer(true);
+		});
+		
+		$('#aggregate').click(function (){	
+			molgenis.toggleViewer(false);
+			molgenis.initializeAggregate($('#dataset-select').val());
+		});
+		
 		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			molgenis.searchObservationSets($(this).val());

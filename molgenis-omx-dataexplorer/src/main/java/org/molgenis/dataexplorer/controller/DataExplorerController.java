@@ -1,16 +1,20 @@
 package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,6 +30,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -39,9 +44,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller class for the data explorer.
@@ -95,6 +102,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 		if (dataSets != null && !dataSets.isEmpty())
 		{
+			
 			// determine selected data set and add to model
 			DataSet selectedDataSet = null;
 			if (selectedDataSetIdentifier != null)
@@ -106,6 +114,7 @@ public class DataExplorerController extends MolgenisPluginController
 						selectedDataSet = dataSet;
 						break;
 					}
+				
 				}
 				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
 						+ " is not a valid data set identifier");
@@ -180,7 +189,44 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 
 	}
-
+	
+	
+	@RequestMapping(value="/aggregate", method=RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	@ResponseBody
+	public AggregateResponse aggregate(@RequestBody AggregateRequest request){
+		
+		Map<String,Integer> hashCounts = new HashMap<String,Integer>();
+		
+		try {
+			List<Category> listOfCategories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,Operator.EQUALS,request.getFeatureId()));	
+			for(Category category : listOfCategories){
+				hashCounts.put(category.getName(), 0);
+			}
+			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
+			SearchResult searchResult = searchService.search(request.getSearchRequest());
+		
+			int count = 0;
+			for(Hit hit : searchResult.getSearchHits()){
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				if(columnValueMap.containsKey(feature.getIdentifier())){
+					String categoryValue = columnValueMap.get(feature.getIdentifier()).toString();
+					if(hashCounts.containsKey(categoryValue)){
+						Integer l = hashCounts.get(categoryValue);
+						hashCounts.put(categoryValue,++l);
+					}
+				}
+				
+			}
+		
+		} catch (DatabaseException e) {
+			logger.info(e);
+		
+		}
+		return new AggregateResponse(hashCounts);
+		
+	}
+	
+	
 	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
 	{
 		List<ObservableFeature> features = database.query(ObservableFeature.class)
