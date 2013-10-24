@@ -1,0 +1,14 @@
+<!--
+	#groups_of_user-list style
+-->
+#feedback { font-size: 1.4em; }
+#groupsWhereUserIsMember .ui-selecting { background: #FECA40; }
+#groupsWhereUserIsMember .ui-selected { background: #F39814; color: white; }
+#groupsWhereUserIsMember { list-style-type: none; margin: 0; padding: 0; width: 40%; }
+#groupsWhereUserIsMember li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+
+#feedback { font-size: 1.4em; }
+#usersMebmerOfGroup .ui-selecting { background: #FECA40; }
+#usersMebmerOfGroup .ui-selected { background: #F39814; color: white; }
+#usersMebmerOfGroup { list-style-type: none; margin: 0; padding: 0; width: 40%; }
+#usersMebmerOfGroup li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
