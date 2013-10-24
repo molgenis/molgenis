@@ -1,20 +1,16 @@
 package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,6 +33,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.ValueTuple;
@@ -94,15 +91,14 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedDataSetIdentifier, Model model) throws Exception
 	{
 		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 		model.addAttribute("dataSets", dataSets);
 
 		if (dataSets != null && !dataSets.isEmpty())
 		{
-			
 			// determine selected data set and add to model
 			DataSet selectedDataSet = null;
 			if (selectedDataSetIdentifier != null)
@@ -114,8 +110,8 @@ public class DataExplorerController extends MolgenisPluginController
 						selectedDataSet = dataSet;
 						break;
 					}
-				
 				}
+
 				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
 						+ " is not a valid data set identifier");
 			}
@@ -127,6 +123,9 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("selectedDataSet", selectedDataSet);
 		}
 
+		ProtocolViewer protocolViewer = new ProtocolViewer(SecurityUtils.currentUserIsAuthenticated());
+		model.addAttribute("model", protocolViewer);
+
 		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
 
@@ -137,8 +136,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
-			throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest")
+	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -159,7 +158,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 			// The fieldsToReturn contain identifiers, we need the names
 			tupleWriter.write(getFeatureNames(request.getFieldsToReturn()));
-
 			int count = 0;
 			SearchResult searchResult;
 
@@ -187,46 +185,52 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			IOUtils.closeQuietly(tupleWriter);
 		}
-
 	}
-	
-	
-	@RequestMapping(value="/aggregate", method=RequestMethod.POST, produces = "application/json", consumes = "application/json")
+
+	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody AggregateRequest request){
-		
-		Map<String,Integer> hashCounts = new HashMap<String,Integer>();
-		
-		try {
-			List<Category> listOfCategories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,Operator.EQUALS,request.getFeatureId()));	
-			for(Category category : listOfCategories){
+	public AggregateResponse aggregate(@RequestBody
+	AggregateRequest request)
+	{
+
+		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
+
+		try
+		{
+			List<Category> listOfCategories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
+					Operator.EQUALS, request.getFeatureId()));
+			for (Category category : listOfCategories)
+			{
 				hashCounts.put(category.getName(), 0);
 			}
+
 			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
 			SearchResult searchResult = searchService.search(request.getSearchRequest());
-		
-			int count = 0;
-			for(Hit hit : searchResult.getSearchHits()){
+
+			for (Hit hit : searchResult.getSearchHits())
+			{
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				if(columnValueMap.containsKey(feature.getIdentifier())){
+				if (columnValueMap.containsKey(feature.getIdentifier()))
+				{
 					String categoryValue = columnValueMap.get(feature.getIdentifier()).toString();
-					if(hashCounts.containsKey(categoryValue)){
-						Integer l = hashCounts.get(categoryValue);
-						hashCounts.put(categoryValue,++l);
+					if (hashCounts.containsKey(categoryValue))
+					{
+						Integer countPerCategoricalValue = hashCounts.get(categoryValue);
+						hashCounts.put(categoryValue, ++countPerCategoricalValue);
 					}
 				}
-				
 			}
-		
-		} catch (DatabaseException e) {
+
+		}
+		catch (DatabaseException e)
+		{
 			logger.info(e);
-		
+
 		}
 		return new AggregateResponse(hashCounts);
-		
+
 	}
-	
-	
+
 	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
 	{
 		List<ObservableFeature> features = database.query(ObservableFeature.class)
@@ -264,5 +268,21 @@ public class DataExplorerController extends MolgenisPluginController
 	public String handleNotAuthenticated()
 	{
 		return "redirect:/";
+	}
+
+	public class ProtocolViewer
+	{
+		final Boolean authenticated;
+
+		public ProtocolViewer(Boolean authenticated)
+		{
+
+			this.authenticated = authenticated;
+		}
+
+		public Boolean getAuthenticated()
+		{
+			return authenticated;
+		}
 	}
 }
