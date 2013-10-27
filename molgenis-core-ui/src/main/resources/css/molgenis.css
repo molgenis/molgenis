@@ -41,6 +41,11 @@
 	margin:150px 100px 0px -100px;
 }
 
+#spinner img {
+	display: block;
+	margin:0 auto;
+}
+
 .alert {
 	margin-bottom: 10px;
 }
