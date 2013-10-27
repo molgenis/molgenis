@@ -28,12 +28,10 @@
 	margin-bottom: 10px;
 }
 
-#footer, #push {
-	margin: 0;
-	height: 50px; /* .push must be the same height as .footer */
-	width: 100%;
+#molgenis-footer p {
 	text-align: center;
 	font: menu;
+	font-style: italic;
 }
 
 #spinner {
