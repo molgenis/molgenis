@@ -363,12 +363,24 @@ function toggleCssClass(cssClass)
 
 function showSpinner() 
 {
-	$('#spinner').modal('show');
+	var spinner = $('#spinner'); 
+	if(spinner.length === 0) {
+		var items = [];
+		items.push('<div id="spinner" class="modal hide fade" data-backdrop="">');
+		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
+		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
+		items.push('</div>');
+		$('body').append(items.join(''));
+		spinner = $('#spinner');
+	}
+	spinner.modal('show');
 }
 
 function hideSpinner() 
 {
-	$('#spinner').modal('hide');
+	if($('#spinner').length !== 0) {
+		$('#spinner').modal('hide');
+	}
 }
 
 /*
