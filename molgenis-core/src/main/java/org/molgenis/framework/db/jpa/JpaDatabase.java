@@ -1,7 +1,6 @@
 package org.molgenis.framework.db.jpa;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -9,9 +8,6 @@ import javax.persistence.PersistenceContext;
 
 import org.molgenis.framework.db.AbstractDatabase;
 import org.molgenis.model.elements.Model;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.WritableTuple;
 
 /**
  * Java Persistence API (JPA) implementation of Database to query relational databases.
@@ -75,30 +71,4 @@ public class JpaDatabase extends AbstractDatabase
 		return em.createNativeQuery(sqlQuery, resultClass).getResultList();
 	}
 
-	public List<Tuple> sql(String sql, String... columnNames)
-	{
-		javax.persistence.Query q = this.em.createNativeQuery(sql);
-
-		List<Tuple> result = new ArrayList<Tuple>();
-
-		for (Object o : q.getResultList())
-		{
-			WritableTuple row = new KeyValueTuple();
-
-			if (columnNames.length == 1)
-			{
-				row.set(columnNames[0], o);
-			}
-			else
-			{
-				Object[] arr = (Object[]) o;
-				for (int i = 0; i < columnNames.length; i++)
-				{
-					row.set(columnNames[i], arr[i]);
-				}
-			}
-			result.add(row);
-		}
-		return result;
-	}
 }

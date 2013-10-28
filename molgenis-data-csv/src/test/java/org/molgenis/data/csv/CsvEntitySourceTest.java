@@ -143,8 +143,8 @@ public class CsvEntitySourceTest
 	@Test
 	public void createByUrl() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/test.csv");
-		File csvFile = new File(FileUtils.getTempDirectory(), "test.csv");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 		String url = "csv://" + csvFile.getAbsolutePath();
 
@@ -156,10 +156,10 @@ public class CsvEntitySourceTest
 			Iterator<String> it = entitySource.getEntityNames().iterator();
 			assertNotNull(it);
 			assertTrue(it.hasNext());
-			assertEquals(it.next(), "test");
+			assertEquals(it.next(), "testdata");
 			assertFalse(it.hasNext());
 
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("test");
+			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("testdata");
 			assertNotNull(repo);
 
 			Iterator<AttributeMetaData> itMeta = repo.getAttributes().iterator();
@@ -193,8 +193,8 @@ public class CsvEntitySourceTest
 	@Test
 	public void createByFile() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/test.csv");
-		File csvFile = new File(FileUtils.getTempDirectory(), "test.csv");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
 		EntitySource entitySource = new CsvEntitySource(csvFile, null);
@@ -205,10 +205,10 @@ public class CsvEntitySourceTest
 			Iterator<String> it = entitySource.getEntityNames().iterator();
 			assertNotNull(it);
 			assertTrue(it.hasNext());
-			assertEquals(it.next(), "test");
+			assertEquals(it.next(), "testdata");
 			assertFalse(it.hasNext());
 
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("test");
+			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("testdata");
 			assertNotNull(repo);
 
 			Iterator<AttributeMetaData> itMeta = repo.getAttributes().iterator();

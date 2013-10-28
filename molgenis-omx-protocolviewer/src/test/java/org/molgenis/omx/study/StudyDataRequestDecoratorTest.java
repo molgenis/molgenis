@@ -12,8 +12,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ApplicationContextProvider;
@@ -31,9 +29,6 @@ public class StudyDataRequestDecoratorTest
 	private MolgenisUserService userService;
 	private Mapper<StudyDataRequest> mapper;
 	private QueryRule[] expectedUserRules;
-	private TupleWriter writer;
-	private TupleReader reader;
-	private List<String> fieldsToExport;
 	private List<StudyDataRequest> allEntities;
 	private List<StudyDataRequest> adminEntities;
 	private List<StudyDataRequest> userEntities;
@@ -123,24 +118,6 @@ public class StudyDataRequestDecoratorTest
 	}
 
 	@Test
-	public void findWithWriterAdmin() throws DatabaseException
-	{
-		when(userService.getCurrentUser()).thenReturn(admin);
-
-		decorator.find(writer, initialRules);
-		verify(mapper).find(writer, initialRules);
-	}
-
-	@Test
-	public void findWithWriter() throws DatabaseException
-	{
-		when(userService.getCurrentUser()).thenReturn(user);
-
-		decorator.find(writer, initialRules);
-		verify(mapper).find(writer, expectedUserRules);
-	}
-
-	@Test
 	public void createFindSqlInclRulesAdmin() throws DatabaseException
 	{
 		when(userService.getCurrentUser()).thenReturn(admin);
@@ -156,24 +133,6 @@ public class StudyDataRequestDecoratorTest
 
 		decorator.createFindSqlInclRules(initialRules);
 		verify(mapper).createFindSqlInclRules(expectedUserRules);
-	}
-
-	@Test
-	public void findWithExportAdmin() throws DatabaseException
-	{
-		when(userService.getCurrentUser()).thenReturn(admin);
-
-		decorator.find(writer, fieldsToExport, initialRules);
-		verify(mapper).find(writer, fieldsToExport, initialRules);
-	}
-
-	@Test
-	public void findWithExport() throws DatabaseException
-	{
-		when(userService.getCurrentUser()).thenReturn(user);
-
-		decorator.find(writer, fieldsToExport, initialRules);
-		verify(mapper).find(writer, fieldsToExport, expectedUserRules);
 	}
 
 	// read, update, delete own entities, no exceptions expected
@@ -273,21 +232,4 @@ public class StudyDataRequestDecoratorTest
 		decorator.findById(123);
 	}
 
-	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void tupleUpdate() throws DatabaseException
-	{
-		decorator.update(reader);
-	}
-
-	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void tupleRemove() throws DatabaseException
-	{
-		decorator.remove(reader);
-	}
-
-	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void tupleToList() throws DatabaseException
-	{
-		decorator.toList(reader, -1);
-	}
 }

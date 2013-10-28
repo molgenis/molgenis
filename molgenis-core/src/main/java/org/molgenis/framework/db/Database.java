@@ -22,8 +22,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.model.elements.Model;
 import org.molgenis.util.Entity;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,37 +69,6 @@ public interface Database extends Closeable
 	 */
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public <E extends Entity> List<E> find(Class<E> klazz, QueryRule... rules) throws DatabaseException;
-
-	/**
-	 * Find all entities of type entityClass and write them to a csv file.
-	 * 
-	 * Optionally the records can be filtered using QueryRule rules.
-	 * 
-	 * @param <E>
-	 *            type of entity
-	 * @param entityClass
-	 *            clazz of entity
-	 * @param writer
-	 *            to write entities found to
-	 * @param rules
-	 *            to filter or otherwise change result
-	 * @throws DatabaseException
-	 */
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, QueryRule... rules)
-			throws DatabaseException;
-
-	/**
-	 * Find all entities of type entityClass and write them to a csv file.
-	 * 
-	 * Optionally the records can be filtered using QueryRule rules.
-	 * 
-	 * Optionally the auto id's are not exported.
-	 * 
-	 */
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public <E extends Entity> void find(Class<E> entityClass, TupleWriter writer, List<String> fieldsToExport,
-			QueryRule... rules) throws DatabaseException;
 
 	/**
 	 * Find one entity object of type entityClass by using its primary id.
@@ -167,34 +134,6 @@ public interface Database extends Closeable
 	public <E extends Entity> int add(List<E> entities) throws DatabaseException;
 
 	/**
-	 * Add a list of entity objects to the database by parsing them from a csv file. Optionally the inserted records can
-	 * be written back to another csv file, for example to extract auto-generated keys.
-	 * 
-	 * @param <E>
-	 * @param klazz
-	 * @param reader
-	 * @param writer
-	 *            to write the result onto (optional)
-	 * @return number of entities added
-	 * @throws Exception
-	 */
-	@Transactional(rollbackFor = DatabaseException.class)
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader, TupleWriter writer) throws DatabaseException;
-
-	/**
-	 * Add a list of entity objects to the database by parsing them from a csv file. Optionally the inserted records can
-	 * be written back to another csv file, for example to extract auto-generated keys.
-	 * 
-	 * @param <E>
-	 * @param klazz
-	 * @param reader
-	 * @return number of entities added
-	 * @throws Exception
-	 */
-	@Transactional(rollbackFor = DatabaseException.class)
-	public <E extends Entity> int add(Class<E> klazz, TupleReader reader) throws DatabaseException;
-
-	/**
 	 * Update one entity object in the database. In JPA the entity will be automatically merged if not attached to
 	 * EntityManager, and the xref/mref proxies set based on xref_ids.
 	 * 
@@ -224,21 +163,6 @@ public interface Database extends Closeable
 	public <E extends Entity> int update(List<E> entities) throws DatabaseException;
 
 	/**
-	 * Update a list of entity objects in the database by reading the new values from a csv file.
-	 * 
-	 * @param <E>
-	 *            type of entity
-	 * @param klazz
-	 *            specifying type of data
-	 * @param reader
-	 *            of csv file
-	 * @return number of entities update
-	 * @throws Exception
-	 */
-	@Transactional(rollbackFor = DatabaseException.class)
-	public <E extends Entity> int update(Class<E> klazz, TupleReader reader) throws DatabaseException;
-
-	/**
 	 * Remove one particular entity from the database (and remove from EntityManager cache).
 	 * 
 	 * @param <E>
@@ -259,21 +183,6 @@ public interface Database extends Closeable
 	 */
 	@Transactional(rollbackFor = DatabaseException.class)
 	public <E extends Entity> int remove(List<E> entities) throws DatabaseException;
-
-	/**
-	 * Remove a list of entity objects from the database by parsing the to-be-removed data from a csv file.
-	 * 
-	 * @param <E>
-	 *            type of entity
-	 * @param entityClass
-	 *            type of entity objects in the csv file
-	 * @param reader
-	 *            of csv file
-	 * @return number of entities that have been removed
-	 * @throws Exception
-	 */
-	@Transactional(rollbackFor = DatabaseException.class)
-	public <E extends Entity> int remove(Class<E> entityClass, TupleReader reader) throws DatabaseException;
 
 	/**
 	 * Enumeration of complex database update actions supported by updateByName
@@ -338,23 +247,6 @@ public interface Database extends Closeable
 	 * @return list of entity names that are managed in this database
 	 */
 	public List<String> getEntityNames();
-
-	/**
-	 * Read data elements from a csv file and convert them into a list of entity objects. Optionally limit the number of
-	 * elements to read.
-	 * 
-	 * @param <E>
-	 * @param klazz
-	 * @param reader
-	 *            of csv file
-	 * @param noEntities
-	 *            limit
-	 * @return list of entity objects of type=klazz
-	 * @throws Exception
-	 */
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public <E extends Entity> List<E> toList(Class<E> klazz, TupleReader reader, int noEntities)
-			throws DatabaseException;
 
 	/**
 	 * Retrieve the full class object for an entity name. For example: "Experiment" may produce a

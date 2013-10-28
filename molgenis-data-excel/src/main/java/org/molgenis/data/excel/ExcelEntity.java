@@ -153,4 +153,10 @@ public class ExcelEntity extends AbstractEntity
 		return sb.toString();
 	}
 
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return colNamesMap.keySet();
+	}
+
 }

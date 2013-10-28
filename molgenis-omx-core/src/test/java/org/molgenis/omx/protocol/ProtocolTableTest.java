@@ -61,7 +61,7 @@ public class ProtocolTableTest
 	@Test
 	public void getAllColumns() throws TableException
 	{
-		assertEquals(protocolTable.getAllColumns().size(), 6);
+		assertEquals(protocolTable.getAllColumns().size(), 7);
 	}
 
 	@Test

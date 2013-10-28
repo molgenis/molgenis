@@ -1,11 +1,9 @@
 package org.molgenis.framework.db;
 
-import java.text.ParseException;
 import java.util.List;
 import java.util.Vector;
 
 import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.io.TupleWriter;
 import org.molgenis.util.Entity;
 
 /**
@@ -18,7 +16,7 @@ public class QueryImp<E extends Entity> implements Query<E>
 		return klazz;
 	}
 
-	private Vector<QueryRule> rules = new Vector<QueryRule>();
+	private final Vector<QueryRule> rules = new Vector<QueryRule>();
 	private Class<E> klazz;
 	private Database database;
 
@@ -28,8 +26,7 @@ public class QueryImp<E extends Entity> implements Query<E>
 	}
 
 	/**
-	 * Construct a Query that is bound to a database and entity-type. This
-	 * enables use of the {@link #find()} method.
+	 * Construct a Query that is bound to a database and entity-type. This enables use of the {@link #find()} method.
 	 * 
 	 * @param db
 	 *            the database this Query is bound to.
@@ -253,33 +250,6 @@ public class QueryImp<E extends Entity> implements Query<E>
 	}
 
 	@Override
-	public void find(TupleWriter writer) throws DatabaseException, ParseException
-	{
-		find(writer, null);
-	}
-
-	@Override
-	public void find(TupleWriter writer, List<String> fieldsToExport) throws DatabaseException, ParseException
-	{
-		if (this.klazz != null && this.database != null)
-		{
-			database.find(this.klazz, writer, fieldsToExport, this.getRules());
-		}
-		else
-		{
-			throw new UnsupportedOperationException(
-					"Cannot execute this count query because no database and entity is provided. Use count(Database,Class)");
-		}
-	}
-
-	@Override
-	public void find(TupleWriter writer, boolean skipAutoId) throws DatabaseException, ParseException,
-			InstantiationException, IllegalAccessException
-	{
-		this.find(writer, this.klazz.newInstance().getFields(skipAutoId));
-	}
-
-	@Override
 	public Query<E> eq(String field, Object value)
 	{
 		return this.equals(field, value);
@@ -320,8 +290,7 @@ public class QueryImp<E extends Entity> implements Query<E>
 				{
 					if (((List<?>) example.get(field)).size() > 0) this.in(field, (List<?>) example.get(field));
 				}
-				else
-					this.equals(field, example.get(field));
+				else this.equals(field, example.get(field));
 			}
 		}
 		return this;

@@ -6,11 +6,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.EntitySource;
+import org.molgenis.data.support.AbstractFileBasedEntitySourceFactory;
 import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.io.processor.TrimProcessor;
-import org.molgenis.data.support.AbstractFileBasedEntitySourceFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CsvEntitySourceFactory extends AbstractFileBasedEntitySourceFactory
 {
 	public static final String CSV_ENTITYSOURCE_URL_PREFIX = "csv://";

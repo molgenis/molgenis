@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.servlet.http.Part;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
@@ -34,6 +35,27 @@ public class FileUploadUtils
 	}
 
 	/**
+	 * Save an Uploaded file to the temp folder keeping it original name
+	 * 
+	 * @param part
+	 * @return
+	 * @throws IOException
+	 */
+	public static File saveToTempFolder(Part part) throws IOException
+	{
+		String filename = getOriginalFileName(part);
+		if (filename == null)
+		{
+			return null;
+		}
+
+		File file = new File(FileUtils.getTempDirectory(), filename);
+		FileCopyUtils.copy(part.getInputStream(), new FileOutputStream(file));
+
+		return file;
+	}
+
+	/**
 	 * Get the filename of an uploaded file
 	 * 
 	 * @param part
@@ -50,7 +72,7 @@ public class FileUploadUtils
 				if (cd.trim().startsWith("filename"))
 				{
 					String filename = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-					return StringUtils.isEmpty(filename) ? null : filename;
+					return StringUtils.hasText(filename) ? filename : null;
 				}
 			}
 		}

@@ -21,9 +21,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Mapper;
 import org.molgenis.framework.db.MapperDecorator;
 import org.molgenis.framework.db.QueryRule;
-import org.molgenis.io.TupleReader;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.io.TupleWriter;
 
 /**
  * TODO add column level security filters
@@ -67,16 +65,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 	}
 
 	@Override
-	public int add(TupleReader reader, TupleWriter writer) throws DatabaseException
-	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
-		{
-			throw new DatabaseAccessException("No write permission on ${entityClass}");
-		}
-		return super.add(reader, writer);
-	}
-
-	@Override
 	public int count(QueryRule... rules) throws DatabaseException
 	{
 		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
@@ -96,15 +84,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		return super.find(rules);
 	}
 
-	@Override
-	public void find(TupleWriter writer, QueryRule ...rules) throws DatabaseException
-	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
-		{
-			throw new DatabaseAccessException("No read permission on ${entityClass}");
-		}
-		super.find(writer, rules);
-	}
 
 	@Override
 	public E findById(Object id) throws DatabaseException
@@ -114,36 +93,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 			throw new DatabaseAccessException("No read permission on ${entityClass}");
 		}
 		return super.findById(id);
-	}
-	
-	@Override
-	public int remove(TupleReader reader) throws DatabaseException
-	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
-		{
-			throw new DatabaseAccessException("No write permission on ${entityClass}");
-		}
-		return super.remove(reader);
-	}
-
-	@Override
-	public int update(TupleReader reader) throws DatabaseException
-	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_WRITED_${securityName}"))
-		{
-			throw new DatabaseAccessException("No write permission on ${entityClass}");
-		}
-		return super.update(reader);
-	}
-
-	@Override
-	public void find(TupleWriter writer, List<String> fieldsToExport, QueryRule[] rules) throws DatabaseException
-	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
-		{
-			throw new DatabaseAccessException("No write permission on ${entityClass}");
-		}
-		super.find(writer, fieldsToExport, rules);
 	}
 
 	@Override
@@ -186,15 +135,6 @@ public class ${clazzName}<E extends ${entityClass}> extends MapperDecorator<E>
 		super.resolveForeignKeys(entities);
 	}
 	
-	@Override
-	public List<E> toList(TupleReader reader, int limit) throws DatabaseException
-	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
-		{
-			throw new DatabaseAccessException("No write permission on ${entityClass}");
-		}
-		return super.toList(reader, limit);
-	}
 	
 	@Override
 	public String createFindSqlInclRules(QueryRule[] rules) throws DatabaseException
