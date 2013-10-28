@@ -304,6 +304,7 @@
 						type : feature.dataType,
 						values : [ filter.val() ]
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			case "date":
@@ -346,6 +347,7 @@
 						range: true,
 						values : [ $('#date-feature-from').val().replace("'T'", "T"), $('#date-feature-to').val().replace("'T'", "T")]
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			case "long":
@@ -379,6 +381,7 @@
 						values : [ $('#from').val(), $('#to').val() ],
 						range : true
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				
 				$('input[type=number]').live('keyup input', function(e) {
@@ -412,6 +415,7 @@
 						type : feature.dataType,
 						values : [ $('input[name=bool-feature]:checked').val() ]
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			case "categorical":
@@ -465,6 +469,7 @@
 							return $(this).val();
 						}))
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			default:
@@ -526,6 +531,19 @@
 				dialogClass : 'ui-dialog-shadow'
 			});
 			$('.feature-filter-dialog').dialog('open');
+			
+			$('.feature-filter-dialog').keyup(function(e) {
+				  if (e.keyCode == 13) // enter
+				  {
+					  if(applyButton.attr("disabled")!="disabled"){//enter only works if button is enabled (filter input is given)
+						  	applyButton.click(); 
+					  }
+				  }     
+				  if (e.keyCode == 27)// esc
+				  { 
+					  $('.feature-filter-dialog').dialog('close'); 
+				  }   
+			});
 		});
 	};
 
@@ -542,8 +560,9 @@
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
 		molgenis.updateObservationSetsTable();
-		//alert($('#selectFeature').val());
-		molgenis.loadAggregate($('#selectFeature').val());
+		if($('#selectFeature').val()!=null){
+			molgenis.loadAggregate($('#selectFeature').val());
+		}
 	};
 
 	molgenis.createFeatureFilterList = function(featureFilters) {
