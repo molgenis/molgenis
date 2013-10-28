@@ -197,11 +197,23 @@ public class DataExplorerController extends MolgenisPluginController
 
 		try
 		{
-			List<Category> listOfCategories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
-					Operator.EQUALS, request.getFeatureId()));
-			for (Category category : listOfCategories)
+			if (request.getDataType().equals("categorical"))
 			{
-				hashCounts.put(category.getName(), 0);
+				List<Category> listOfCategories = database.find(Category.class, new QueryRule(
+						Category.OBSERVABLEFEATURE, Operator.EQUALS, request.getFeatureId()));
+				for (Category category : listOfCategories)
+				{
+					hashCounts.put(category.getName(), 0);
+				}
+			}
+			else if (request.getDataType().equals("bool"))
+			{
+				hashCounts.put("true", 0);
+				hashCounts.put("false", 0);
+			}
+			else
+			{
+				throw new RuntimeException("Illegal datatype");
 			}
 
 			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
