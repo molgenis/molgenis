@@ -146,7 +146,7 @@
 						});
 						items.push('<tr><td class="first"></td>');
 						$.each(searchHits, function(key, searchHit) {
-							items.push('<td><a href="/molgenis.do?__target=main&select=DataExplorerPlugin&dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
+							items.push('<td><a href="/plugin/dataexplorer?dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
 						});
 						items.push('</tr>');
 						items.push('</tbody>');

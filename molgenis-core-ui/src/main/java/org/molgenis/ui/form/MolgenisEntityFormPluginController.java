@@ -209,7 +209,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	{
 		Entity entityMetaData = database.getMetaData().getEntity(entityName);
 
-		if (entityMetaData == null || entityMetaData.isSystem())
+		if (entityMetaData == null || entityMetaData.isAssociation())
 		{
 			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 		}

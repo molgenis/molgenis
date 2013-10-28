@@ -105,6 +105,15 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/entities/form.RuntimeProperty", "/plugin/form.RuntimeProperty")
 				.hasAnyAuthority(defaultPluginAuthorities("formruntimeproperty"))
+				
+				.antMatchers("/menu/entities/form.MolgenisUser/**", "/plugin/form.MolgenisUser/**")
+				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisuser"))
+				
+				.antMatchers("/menu/entities/form.MolgenisGroup/**", "/plugin/form.MolgenisGroup/**")
+				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroup"))
+				
+				.antMatchers("/menu/entities/form.MolgenisGroupMember/**", "/plugin/form.MolgenisGroupMember/**")
+				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroupmember"))
 
 				// values menu
 				.antMatchers("/menu/values")
@@ -115,46 +124,46 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 								"formstringvalue", "formtextvalue", "formxrefvalue"))
 
 				// values menu plugins
-				.antMatchers("/menu/values/form.BoolValue", "/plugin/form.BoolValue")
+				.antMatchers("/menu/values/form.BoolValue/**", "/plugin/form.BoolValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formboolvalue"))
 
-				.antMatchers("/menu/values/form.CategoricalValue", "/plugin/form.CategoricalValue")
+				.antMatchers("/menu/values/form.CategoricalValue/**", "/plugin/form.CategoricalValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formcategoricalvalue"))
 
-				.antMatchers("/menu/values/form.DateValue", "/plugin/form.DateValue")
+				.antMatchers("/menu/values/form.DateValue/**", "/plugin/form.DateValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formdatevalue"))
 
-				.antMatchers("/menu/values/form.DateTimeValue", "/plugin/form.DateTimeValue")
+				.antMatchers("/menu/values/form.DateTimeValue/**", "/plugin/form.DateTimeValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formdatetimevalue"))
 
-				.antMatchers("/menu/values/form.DecimalValue", "/plugin/form.DecimalValue")
+				.antMatchers("/menu/values/form.DecimalValue/**", "/plugin/form.DecimalValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formdecimalvalue"))
 
-				.antMatchers("/menu/values/form.EmailValue", "/plugin/form.EmailValue")
+				.antMatchers("/menu/values/form.EmailValue/**", "/plugin/form.EmailValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formemailvalue"))
 
-				.antMatchers("/menu/values/form.HtmlValue", "/plugin/form.HtmlValue")
+				.antMatchers("/menu/values/form.HtmlValue/**", "/plugin/form.HtmlValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formhtmlvalue"))
 
-				.antMatchers("/menu/values/form.HyperlinkValue", "/plugin/form.HyperlinkValue")
+				.antMatchers("/menu/values/form.HyperlinkValue/**", "/plugin/form.HyperlinkValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formhyperlinkvalue"))
 
-				.antMatchers("/menu/values/form.IntValue", "/plugin/form.IntValue")
+				.antMatchers("/menu/values/form.IntValue/**", "/plugin/form.IntValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formintvalue"))
 
-				.antMatchers("/menu/values/form.LongValue", "/plugin/form.LongValue")
+				.antMatchers("/menu/values/form.LongValue/**", "/plugin/form.LongValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formlongvalue"))
 
-				.antMatchers("/menu/values/form.MrefValue", "/plugin/form.MrefValue")
+				.antMatchers("/menu/values/form.MrefValue/**", "/plugin/form.MrefValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmrefvalue"))
 
-				.antMatchers("/menu/values/form.StringValue", "/plugin/form.StringValue")
+				.antMatchers("/menu/values/form.StringValue/**", "/plugin/form.StringValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formstringvalue"))
 
-				.antMatchers("/menu/values/form.TextValue", "/plugin/form.TextValue")
+				.antMatchers("/menu/values/form.TextValue/**", "/plugin/form.TextValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formtextvalue"))
 
-				.antMatchers("/menu/values/form.XrefValue", "/plugin/form.XrefValue")
+				.antMatchers("/menu/values/form.XrefValue/**", "/plugin/form.XrefValue/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formxrefvalue"))
 
 				// admin menu
@@ -183,6 +192,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
 				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"));
+		
 	}
 
 	@Override
@@ -264,6 +274,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_TEXTVALUE > ROLE_ENTITY_READ_TEXTVALUE").append(' ');
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_VALUE > ROLE_ENTITY_READ_VALUE").append(' ');
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_XREFVALUE > ROLE_ENTITY_READ_XREFVALUE").append(' ');
+		
+		//System entity
+		hierarchyBuilder.append("ROLE_ENTITY_WRITE_MOLGENISUSER > ROLE_ENTITY_READ_MOLGENISUSER").append(' ');
 
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_ENTITY_READ_DATASET").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_READ_PROTOCOLVIEWER > ROLE_ENTITY_READ_DATASET").append(' ');
