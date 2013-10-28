@@ -1,5 +1,6 @@
 package org.molgenis.omx;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -127,7 +128,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[]
-		{ new FileSystemResource(System.getProperty("user.home") + "/molgenis-server.properties"),
+		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
 				new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
@@ -174,7 +175,20 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public FileStore fileStore()
 	{
-		return new FileStore(System.getProperty("user.home"));
+		// get store folder
+		String molgenisDir = System.getProperty("molgenis.home");
+		if (molgenisDir == null) throw new IllegalArgumentException(
+				"missing required java system property 'molgenis.home'");
+		if (!molgenisDir.endsWith("/")) molgenisDir = molgenisDir + '/';
+		String fileStoreDirStr = molgenisDir + "store";
+
+		// create store folder if not exists
+		File fileStoreDir = new File(fileStoreDirStr);
+		if (!fileStoreDir.exists())
+		{
+			if (!fileStoreDir.mkdir()) throw new RuntimeException("failed to create directory: " + fileStoreDirStr);
+		}
+		return new FileStore(molgenisDir + "store");
 	}
 
 	/**
