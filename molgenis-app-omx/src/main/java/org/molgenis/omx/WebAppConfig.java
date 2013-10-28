@@ -175,20 +175,26 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public FileStore fileStore()
 	{
-		// get store folder
-		String molgenisDir = System.getProperty("molgenis.home");
-		if (molgenisDir == null) throw new IllegalArgumentException(
-				"missing required java system property 'molgenis.home'");
-		if (!molgenisDir.endsWith("/")) molgenisDir = molgenisDir + '/';
-		String fileStoreDirStr = molgenisDir + "store";
-
-		// create store folder if not exists
-		File fileStoreDir = new File(fileStoreDirStr);
-		if (!fileStoreDir.exists())
+		// get molgenis home directory
+		String molgenisHomeDir = System.getProperty("molgenis.home");
+		if (molgenisHomeDir == null)
 		{
-			if (!fileStoreDir.mkdir()) throw new RuntimeException("failed to create directory: " + fileStoreDirStr);
+			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
-		return new FileStore(molgenisDir + "store");
+		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+
+		// create molgenis store directory in molgenis data directory if not exists
+		String molgenisFileStoreDirStr = molgenisHomeDir + "data/filestore";
+		File molgenisDataDir = new File(molgenisFileStoreDirStr);
+		if (!molgenisDataDir.exists())
+		{
+			if (!molgenisDataDir.mkdir())
+			{
+				throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
+			}
+		}
+
+		return new FileStore(molgenisFileStoreDirStr);
 	}
 
 	/**
