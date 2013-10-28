@@ -273,8 +273,6 @@ public class WorkflowServiceImpl implements WorkflowService
 			List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
 					ObservedValue.OBSERVATIONSET, EQUALS, observationSet), new QueryRule(AND), new QueryRule(
 					ObservedValue.FEATURE, EQUALS, observableFeature));
-			if (observedValues.size() > 1) throw new RuntimeException(
-					"expected exactly one value for a row/column combination");
 
 			String colName = "key";
 			KeyValueTuple tuple = new KeyValueTuple();
@@ -311,6 +309,8 @@ public class WorkflowServiceImpl implements WorkflowService
 				observedValue.setValue(value);
 				database.add(observedValue);
 			}
+			else if (observedValues.size() > 1) throw new RuntimeException(
+					"expected exactly one value for a row/column combination");
 			else
 			{
 				Value value = observedValues.get(0).getValue();
