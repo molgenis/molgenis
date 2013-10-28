@@ -101,7 +101,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 			String featureIdentifier = colIt.next();
 			if (featureIdentifier != null && !featureIdentifier.isEmpty())
 			{
-				if (!featureIdentifier.equals(DATASET_ROW_IDENTIFIER_HEADER))
+				if (!featureIdentifier.equalsIgnoreCase(DATASET_ROW_IDENTIFIER_HEADER))
 				{
 					ObservableFeature feature = ObservableFeature.findByIdentifier(database, featureIdentifier);
 					if (feature == null)
