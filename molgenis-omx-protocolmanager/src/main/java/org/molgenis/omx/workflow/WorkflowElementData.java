@@ -36,7 +36,7 @@ public class WorkflowElementData
 				{
 					for (WorkflowElementDataRowConnection elementDataRowConnection : elementDataRowConnections)
 					{
-						if (elementDataRowConnection.getInputDataRow().getId() == sourceId) return true;
+						if (elementDataRowConnection.getInputDataRow().getId().equals(sourceId)) return true;
 					}
 				}
 				return false;
