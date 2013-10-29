@@ -7,6 +7,7 @@
 	<head>
 		<title>${molgenis_ui.title?html}</title>
 		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
