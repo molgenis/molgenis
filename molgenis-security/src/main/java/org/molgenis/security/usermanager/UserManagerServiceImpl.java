@@ -11,7 +11,6 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.db.MolgenisGroupMemberEntityImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -192,7 +191,7 @@ public class UserManagerServiceImpl implements UserManagerService
 			Integer id = item.getId();
 			for(MolgenisGroup toFilterItem: toFilterItemList){
 				if(toFilterItem.getId().equals(id)) return false;
-				logger.info("toFilterItem.getId().equals(id);: " + toFilterItem.getId().equals(id));
+				logger.info("toFilterItem.getId().equals(id): " + toFilterItem.getId().equals(id));
 			}
 			return true;
 		}
@@ -200,14 +199,46 @@ public class UserManagerServiceImpl implements UserManagerService
 	}
 
 	@Override
-	public List<MolgenisUser> addGroup(Integer molgenisGroup_id, Integer molgenisUser_id) throws DatabaseException
+	public Integer addUserToGroup(Integer molgenisGroup_id, Integer molgenisUser_id) throws DatabaseException
 	{
 		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
 		molgenisGroupMember.setMolgenisGroup(molgenisGroup_id);
 		molgenisGroupMember.setMolgenisUser(molgenisUser_id);
-		database.add(molgenisGroupMember);
+		return database.add(molgenisGroupMember);
+	}
+
+	@Override
+	public Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId)
+			throws DatabaseException
+	{
+		final MolgenisUser molgenisUser = MolgenisUser.findById(database, molgenisUserId);
+
+		if (molgenisUser == null)
+		{
+			throw new RuntimeException("unknown user id [" + molgenisUserId + "]");
+		}
 		
-		// TODO THIS
-		return null;
+		final MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, molgenisGroupId);
+
+		if (molgenisGroup == null)
+		{
+			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
+		}
+		
+		final List<MolgenisGroupMember> molgenisGroupMembers = database.find(MolgenisGroupMember.class, 
+				new QueryRule(MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser), 
+				new QueryRule(MolgenisGroupMember.MOLGENISGROUP, Operator.EQUALS, molgenisGroup));
+		
+		if(null == molgenisGroupMembers || molgenisGroupMembers.isEmpty()){
+			throw new RuntimeException("molgenis group member is not found");
+		}
+		
+		if(molgenisGroupMembers.size() > 1){
+			throw new RuntimeException("there are more than one group member found");
+		}
+		
+		MolgenisGroupMember molgenisGroupMember = molgenisGroupMembers.get(0);
+
+		return database.remove(molgenisGroupMember);
 	}
 }

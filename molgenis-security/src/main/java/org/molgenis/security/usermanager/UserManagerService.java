@@ -18,5 +18,7 @@ public interface UserManagerService
 
 	public List<MolgenisUser> getUsersMemberInGroup(Integer groupId) throws DatabaseException;
 
-	public List<MolgenisUser> addGroup(Integer molgenisGroup_id, Integer molgenisUser_id) throws DatabaseException;
+	public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
+	
+	public Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
 }

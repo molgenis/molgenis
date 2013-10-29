@@ -1,75 +1,79 @@
 (function($, w) {
 	"use strict";
 	
-	$(document).ready(function() {
-		  		//TODO JQUERY UI
-		// Waarschijnlijk uiteindelijk niet gebruiken
-//		$('#groupsWhereUserIsMember').selectable();
-//		$('#usersMemberOfGroup').selectable();
+	$(function() {
 		
 		function createListOfUsersFromGroup(data) {
 			var listItems = [];
+
 			$.each(data, function (index) {
-				listItems.push('<li value="' + data[index].id + '" class="ui-widget-content">' + data[index].username + '</li>');
+				listItems.push('<tr>' 
+						+ '<td>' + data[index].id + '</td>' 
+						+ '<td>' + data[index].username + '</td></tr>');
 			});
-			return listItems.join('');
+			
+			return "<tbody>" + listItems.join('') + "</tbody>";
 		};
+		
 		
 		/**
 		 * Change event is fired when user is selected
 		 */
 		$('#user-select').change(function(){
 			this.form.submit();
-			alert("submit user");
 		});
+		
 		
 		/**
 		 * Change event is fired when group to add is selected
 		 */
-		$('#dropDownOfGroupsToAdd').change(function(){
-			$("#form-usermanager").attr("action", "/plugin/usermanager/addgroup/");
-			$("#form-usermanager").submit();
-			alert("submit group to add");
+		$('#drop-down-groups-to-add').change(function(){
+			var groupToAddId = $(this).val();	
+			alert(groupToAddId);
+			$.get('/menu/admin/usermanager/addusertogroup/' + groupToAddId, function(data) {
+				$("#form-usermanager").submit();
+			});
 		});
+		
+		
+		/**
+		 * Remove user from group
+		 */
+		$('#groupsWhereUserIsMember a[data-remove-group-id]').click(function(){
+			var groupToRemoveId = $(this).attr("data-remove-group-id");
+			$.get('/menu/admin/usermanager/removeuserfromgroup/' + groupToRemoveId, function(data) {
+				$("#form-usermanager").submit();
+			});
+		});
+		
 		
 		/**
 		 * Drop down with groups to select
 		 */
 		$('#group-select').change(function() {
 			$.get('/plugin/usermanager/users/' + $(this).val(), function(data) {
-				$('#usersMemberOfGroup').empty().html(createListOfUsersFromGroup(data));
+				$('#users-of-group').html(createListOfUsersFromGroup(data));
 			});
 		});
 		
 		/**
 		 * Groups where user is member
 		 */
-		$.each($('#groupsWhereUserIsMember li'), function(key, value){
+		$.each($('#groupsWhereUserIsMember a[data-group-id]'), function(){
 			$(this).click(function(){
-				$('#group-select').val($(this).val());
+				$('#group-select').val($(this).attr('data-group-id'));
 				$('#group-select').change();
+				$('#group-select').trigger('liszt:updated');
 			});
 		});
 		
+		$('#group-select').chosen();
+		$('#user-select').chosen();
+		$('#drop-down-groups-to-add').chosen();
 		
-		/**
-		 * Drop down with groups to add
-		 */
-		$.each($('#dropDownOfGroupsToAdd li'), function(key, value){
-			$(this).click(function(){
-				alert("dropDownOfGroupsToAdd");
-			});
-		});
-		
-		
-//		//Drop down with groups to add
-//		//
-//		$("#dropDownOfGroupsToAdd").submit(function(event) {
-//			alert( "Handler for .submit() called." );
-//			event.preventDefault();
-//		});
-		
-		console.log("de code is met succes geladen");
+		//Init groups select
+		$('#group-select').change();
+		$('#group-select').trigger('liszt:updated');
 	});
 
 }($, window.top));

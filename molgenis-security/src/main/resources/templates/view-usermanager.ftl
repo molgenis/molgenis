@@ -1,48 +1,84 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["usermanager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "usermanager.js"]>
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<#assign css=["chosen.css"]>
+<#assign js=["chosen.jquery.min.js", "usermanager.js"]>
 <@header css js/>
 <form class="form-horizontal" id="form-usermanager" method="post" action="${context_url}">
 	<div class="container-fluid"> 
 		<div class="row-fluid">
 			<div id="userView" class="span6">
+				<div class="control-group">
 					<label class="control-label" for="user-select">Select User:</label>
-					<select id="user-select" name="userId" >
-						<#if users?has_content>
-							<#list users as user>
-								<option value="${user.id?c}" <#if (user.id?string == user_selected_id?string)> selected</#if>>${user.username}</option>
-							</#list>
-						</#if>
-					</select>
-					
-					<#if groupsWhereUserIsMember?has_content>
-						<ol id="groupsWhereUserIsMember">
-							<#list groupsWhereUserIsMember as group>
-								<li value="${group.id?c}" class="ui-widget-content">${group.name}</li>
-							</#list>
-						</ol>
-					</#if>
-					
-					<#if groupsWhereUserIsNotMember?has_content>
-						<label class="control-label" for="dropDownOfGroupsToAdd">Select A group to add to user:</label>
-						<select id="dropDownOfGroupsToAdd" name="groupToAddId">
-							<#list groupsWhereUserIsNotMember as group>
-								<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
-							</#list>
+					<div class="controls">
+						<select id="user-select" data-placeholder="Choose a user" name="userId" class="chosen-select">
+							<option value="-1"></option>
+							<#if users?has_content>
+								<#list users as user>
+									<option value="${user.id?c}" <#if (user.id?string == user_selected_id?string)> selected</#if>>${user.username}</option>
+								</#list>
+							</#if>
 						</select>
+					</div>
+				</div>	
+				
+				<div class="control-group">	
+					<#if groupsWhereUserIsMember?has_content>
+						<div class="controls">
+							<table id="groupsWhereUserIsMember" class="table table-striped">
+								<tbody>
+									<#list groupsWhereUserIsMember as group>
+										<tr>
+											<td>${group.id?c}</td>
+											<td><a class="btn btn-small" data-group-id="${group.id?c}">${group.name}</a></td>
+											<td>
+												<div class="controls">
+													<a class="btn btn-small" data-remove-group-id="${group.id?c}"><i class="icon-remove"></i></a>
+												</div>
+											</td>
+										</tr>
+									</#list>
+								</tbody>
+							</table>
+						</div>
 					</#if>
+				</div>	
+					
+				<div class="control-group">	
+					<#if groupsWhereUserIsNotMember?has_content>
+						<label class="control-label" for="drop-down-groups-to-add">Add a user to group:</label>
+						<div class="controls">
+							<select id="drop-down-groups-to-add" data-placeholder="Choose a group to add" name="groupToAddId">
+								<option></option>
+								<#list groupsWhereUserIsNotMember as group>
+									<option value="${group.id?c}">${group.name}</option>
+								</#list>
+							</select>
+						</div>
+					</#if>
+				</div>	
 			</div>
 				
 			<div id="groupView" class="span6">
-				<label class="control-label" for="group-select">Select Group:</label>
-				<select id="group-select" name="groupId" >
-					<#list groups as group>
-						<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
-					</#list>
-				</select>
-				<ol id="usersMemberOfGroup"></ol>
+				<div class="control-group">
+					<label class="control-label" for="group-select">Select Group:</label>
+					<div class="controls">
+						<select id="group-select" data-placeholder="Choose a group" name="groupId">
+							<#if groups?has_content>
+								<option value="-1"></option>
+								<#list groups as group>
+									<option value="${group.id?c}" <#if (group.id?string == group_selected_id?string)> selected</#if>>${group.name}</option>
+								</#list>
+							</#if>
+						</select>
+					</div>
+				</div>	
+				
+				<div class="control-group">	
+					<div class="controls">
+						<table id="users-of-group" class="table table-striped">
+						</table>
+					</div>
+				<div>	
 			</div>
 		</div>
 	</div>
