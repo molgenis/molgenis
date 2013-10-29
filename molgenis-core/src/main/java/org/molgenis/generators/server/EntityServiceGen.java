@@ -46,7 +46,7 @@ public class EntityServiceGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract entities
-			if (entity.isAbstract() || entity.isAssociation()) continue;
+			if (entity.isImported() || entity.isAbstract() || entity.isAssociation()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()
@@ -80,7 +80,7 @@ public class EntityServiceGen extends Generator
 		for (Entity entity : model.getEntities())
 		{
 			// skip abstract entities
-			if (entity.isAbstract() || entity.isAssociation()) continue;
+			if (entity.isImported() || entity.isAbstract() || entity.isAssociation()) continue;
 			templateArgs.put("entity", entity);
 
 			File generatedFile = new File(this.getSourcePath(options) + "org/molgenis/service/" + entity.getName()
