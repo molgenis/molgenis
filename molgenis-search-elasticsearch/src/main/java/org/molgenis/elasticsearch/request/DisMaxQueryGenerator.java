@@ -48,6 +48,11 @@ public class DisMaxQueryGenerator extends AbstractQueryRulePartGenerator
 				builder.add(buildQueryString(subQuery));
 			}
 			builder.tieBreaker((float) 0.0);
+			if (query.getValue() != null)
+			{
+				Boolean boosted = (Boolean) query.getValue();
+				if (boosted) builder.boost((float) 10.0);
+			}
 			return builder;
 		}
 		else
