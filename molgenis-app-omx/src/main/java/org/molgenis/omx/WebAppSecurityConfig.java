@@ -90,6 +90,12 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 						"/plugin/form.Protocol?subForms=DataSet.ProtocolUsed")
 				.hasAnyAuthority(defaultPluginAuthorities("formprotocol"))
 
+				.antMatchers("/menu/entities/form.ProtocolFlow", "/plugin/form.ProtocolFlow")
+				.hasAnyAuthority(defaultPluginAuthorities("formprotocolflow"))
+
+				.antMatchers("/menu/entities/form.ObservationSetFlow", "/plugin/form.ObservationSetFlow")
+				.hasAnyAuthority(defaultPluginAuthorities("observationsetflow"))
+
 				.antMatchers("/menu/entities/form.ObservableFeature?subForms=Category.observableFeature",
 						"/plugin/form.ObservableFeature?subForms=Category.observableFeature")
 				.hasAnyAuthority(defaultPluginAuthorities("formobservablefeature"))
@@ -102,13 +108,13 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/entities/form.RuntimeProperty", "/plugin/form.RuntimeProperty")
 				.hasAnyAuthority(defaultPluginAuthorities("formruntimeproperty"))
-				
+
 				.antMatchers("/menu/entities/form.MolgenisUser/**", "/plugin/form.MolgenisUser/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisuser"))
-				
+
 				.antMatchers("/menu/entities/form.MolgenisGroup/**", "/plugin/form.MolgenisGroup/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroup"))
-				
+
 				.antMatchers("/menu/entities/form.MolgenisGroupMember/**", "/plugin/form.MolgenisGroupMember/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroupmember"))
 
@@ -189,7 +195,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
 				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"));
-		
+
 	}
 
 	@Override
@@ -271,8 +277,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_TEXTVALUE > ROLE_ENTITY_READ_TEXTVALUE").append(' ');
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_VALUE > ROLE_ENTITY_READ_VALUE").append(' ');
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_XREFVALUE > ROLE_ENTITY_READ_XREFVALUE").append(' ');
-		
-		//System entity
+
+		// System entity
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_MOLGENISUSER > ROLE_ENTITY_READ_MOLGENISUSER").append(' ');
 
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_ENTITY_READ_DATASET").append(' ');
