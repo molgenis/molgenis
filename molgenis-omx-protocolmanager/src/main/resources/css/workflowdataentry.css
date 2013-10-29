@@ -1,0 +1,43 @@
+#plugin-container th {
+	background-color: #5B82A4;
+	color: white;
+}
+
+#plugin-container th.input-feature {
+	background-color: black;
+}
+
+#plugin-container td.input-feature {
+	background-color: yellow;
+}
+
+#plugin-container td.required-feature {
+	background-color: lightgray;
+}
+
+#plugin-container td.snug {
+	width: 22px;
+    white-space: nowrap;
+}
+
+#workflow-nav-content {
+	padding-top: 10px;
+}
+
+#plugin-container .tab-pane {
+	min-height: 250px;
+}
+
+#plugin-container .table th, .table td { 
+     border-top: none; 
+ }
+ 
+#plugin-container input {
+ 	width: 100px;
+ 	margin-bottom: 0px !important;
+ 	padding: 0px 4px !important;
+ }
+ 
+ #plugin-container .updated-text-input {
+	background-color: lightblue !important;
+ }

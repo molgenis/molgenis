@@ -25,13 +25,13 @@ public class ValidationChecker
 {
 	private final static String IDENTIFIER = "id_sample";
 
-	public void check(String file1, String file2, BufferedWriter logger) throws IOException
+	public void check(String excelFile1, String file2, BufferedWriter logger) throws IOException
 	{
 		LinkedHashMap<String, String> hashCheckedValues = new LinkedHashMap<String, String>();
 
 		// Make Object Reference
 		ValidationFile excelfile = new ValidationFile();
-		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(file1));
+		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(excelFile1));
 
 		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
 		excelfile.bla(excelSheetReaderReferenceFile, IDENTIFIER);
