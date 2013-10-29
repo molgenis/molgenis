@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="org.molgenis.omx">
 	<module name="auth">
-		<entity name="MolgenisUser" system="true">
+		<entity name="MolgenisUser" system="true" xref_label="username">
 			<description>Anyone who can login</description>
 			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
 			<field name="username" type="string"/>
@@ -26,14 +26,17 @@
 			<unique fields="Email"/>
 			<unique fields="username"/>
 		</entity>
-		<entity name="MolgenisGroup" system="true">
+		<entity name="MolgenisGroup" system="true" xref_label="name">
 			<field name="id" type="autoid" hidden="true"/>
 			<field name="name" type="string"/>
+			<unique fields="name" />
 		</entity>
 		<entity name="MolgenisGroupMember" system="true">
 			<field name="id" type="autoid" hidden="true"/>	
-			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
+			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser" />
 			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
+			<unique fields="molgenisUser" />
+			<unique fields="molgenisGroup" />
 		</entity>
 		<entity name="Authority" abstract="true" system="true">
 			<field name="role" type="string"/>

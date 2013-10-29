@@ -8,7 +8,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 
 public interface UserManagerService
 {
-	public List<MolgenisUser> getAllMolgenisUsers() throws DatabaseException;
+	public List<MolgenisUserViewData> getAllMolgenisUsers() throws DatabaseException;
 
 	public List<MolgenisGroup> getAllMolgenisGroups() throws DatabaseException;
 
@@ -16,7 +16,7 @@ public interface UserManagerService
 
 	public List<MolgenisGroup> getGroupsWhereUserIsNotMember(Integer userId) throws DatabaseException;
 
-	public List<MolgenisUser> getUsersMemberInGroup(Integer groupId) throws DatabaseException;
+	public List<MolgenisUserViewData> getUsersMemberInGroup(Integer groupId) throws DatabaseException;
 
 	public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
 	

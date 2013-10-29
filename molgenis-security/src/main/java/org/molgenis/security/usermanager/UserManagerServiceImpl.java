@@ -40,9 +40,9 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<MolgenisUser> getAllMolgenisUsers() throws DatabaseException
+	public List<MolgenisUserViewData> getAllMolgenisUsers() throws DatabaseException
 	{
-		return database.find(MolgenisUser.class);
+		return this.parseToMolgenisUserViewData(database.find(MolgenisUser.class));
 	}
 
 	@Override
@@ -64,9 +64,9 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<MolgenisUser> getUsersMemberInGroup(Integer groupId) throws DatabaseException
+	public List<MolgenisUserViewData> getUsersMemberInGroup(Integer groupId) throws DatabaseException
 	{
-		return this.getMolgenisUsers(groupId);
+		return this.parseToMolgenisUserViewData(this.getMolgenisUsers(groupId));
 	}
 
 	private List<MolgenisGroup> getMolgenisGroups(Integer userId) throws DatabaseException
@@ -173,25 +173,19 @@ public class UserManagerServiceImpl implements UserManagerService
 		return molgenisUser;
 	}
 	
-	protected class PredicateNotInMolgenisGroupList implements Predicate<MolgenisGroup> {
+	private class PredicateNotInMolgenisGroupList implements Predicate<MolgenisGroup> {
 		final List<MolgenisGroup> toFilterItemList;
 		
 		PredicateNotInMolgenisGroupList(List<MolgenisGroup> notInList){
 			this.toFilterItemList = notInList;
-			
-			for(MolgenisGroup group: this.toFilterItemList){
-				logger.info(group);
-			}
 		}
 		
 		@Override
 		public boolean apply(MolgenisGroup item)
 		{
-			logger.info("item: " + item);
 			Integer id = item.getId();
 			for(MolgenisGroup toFilterItem: toFilterItemList){
 				if(toFilterItem.getId().equals(id)) return false;
-				logger.info("toFilterItem.getId().equals(id): " + toFilterItem.getId().equals(id));
 			}
 			return true;
 		}
@@ -240,5 +234,13 @@ public class UserManagerServiceImpl implements UserManagerService
 		MolgenisGroupMember molgenisGroupMember = molgenisGroupMembers.get(0);
 
 		return database.remove(molgenisGroupMember);
+	}
+	
+	private List<MolgenisUserViewData> parseToMolgenisUserViewData(List<MolgenisUser> users){
+		List<MolgenisUserViewData> results = new ArrayList<MolgenisUserViewData>();
+		for(MolgenisUser user: users){
+			results.add(new MolgenisUserViewData(user.getId(), user.getUsername()));
+		}
+		return results;
 	}
 }

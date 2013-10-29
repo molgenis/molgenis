@@ -54,7 +54,7 @@ public class UserManagerController extends MolgenisPluginController
 	
 	@RequestMapping(value = "/users/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
-	public List<MolgenisUser> getUsersMemberInGroup(@PathVariable Integer groupId, Model model) throws DatabaseException
+	public List<MolgenisUserViewData> getUsersMemberInGroup(@PathVariable Integer groupId, Model model) throws DatabaseException
 	{
 		this.selectedGroupId = groupId;
 		model.addAttribute("group_selected_id", this.selectedGroupId);
@@ -62,7 +62,7 @@ public class UserManagerController extends MolgenisPluginController
 		if(isValidId(this.selectedGroupId)){
 			return this.pluginUserManagerService.getUsersMemberInGroup(groupId);
 		}else{
-			return new ArrayList<MolgenisUser>();
+			return new ArrayList<MolgenisUserViewData>();
 		}
 	}
 

@@ -5,13 +5,11 @@
 		
 		function createListOfUsersFromGroup(data) {
 			var listItems = [];
-
 			$.each(data, function (index) {
 				listItems.push('<tr>' 
 						+ '<td>' + data[index].id + '</td>' 
 						+ '<td>' + data[index].username + '</td></tr>');
 			});
-			
 			return "<tbody>" + listItems.join('') + "</tbody>";
 		};
 		
@@ -28,8 +26,7 @@
 		 * Change event is fired when group to add is selected
 		 */
 		$('#drop-down-groups-to-add').change(function(){
-			var groupToAddId = $(this).val();	
-			alert(groupToAddId);
+			var groupToAddId = $(this).val();
 			$.get('/menu/admin/usermanager/addusertogroup/' + groupToAddId, function(data) {
 				$("#form-usermanager").submit();
 			});
@@ -56,6 +53,7 @@
 			});
 		});
 		
+		
 		/**
 		 * Groups where user is member
 		 */
@@ -66,6 +64,7 @@
 				$('#group-select').trigger('liszt:updated');
 			});
 		});
+		
 		
 		$('#group-select').chosen();
 		$('#user-select').chosen();
