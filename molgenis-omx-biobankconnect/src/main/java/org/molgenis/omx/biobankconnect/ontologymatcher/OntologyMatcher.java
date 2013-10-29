@@ -9,11 +9,13 @@ public interface OntologyMatcher
 {
 	void deleteDocumentByIds(String documentType, List<String> documentIds);
 
-	void match(Integer selectedCatalogue, List<Integer> cataloguesToMatch) throws DatabaseException;
+	void matchCatalogue(Integer selectedCatalogue, List<Integer> cataloguesToMatch) throws DatabaseException;
 
 	Integer matchPercentage();
 
 	boolean isRunning();
 
 	boolean checkExistingMappings(String dataSetIdentifier, Database db) throws DatabaseException;
+
+	void matchFeature(Integer sourceDataSetId, Integer selectedDataSet, List<Integer> selectedDataSetIds);
 }

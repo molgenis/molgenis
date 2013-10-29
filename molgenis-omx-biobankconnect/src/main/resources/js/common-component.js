@@ -137,13 +137,13 @@
 		this.modal.addClass('modal hide');
 		this.modal.attr('id', 'annotation-modal');
 		
-		var header = $('<div />');
+		var header = $('<div />').css('cursor','pointer');
 		header.addClass('modal-header');
 		header.append('<button type="button" name="annotation-btn-close" class="close" data-dismiss="#annotation-modal" data-backdrop="true" aria-hidden="true">&times;</button>');
 		header.append('<h3>' + title + '</h3>');
 		
 		var body = $('<div />');
-		body.addClass('modal-body');
+		body.addClass('modal-body').css('overflow', 'none');
 		if(bodyComponents!== undefined && bodyComponents !== null){
 			body.append(bodyComponents);
 		}
@@ -162,7 +162,7 @@
 		this.modal.modal({
 			'backdrop' : false,
 			'show' : true
-		});
+		}).draggable();
 	};
 	
 	molgenis.StandardModal.prototype.createModalCallback = function(title, callback){
@@ -170,20 +170,19 @@
 		if($('#annotation-modal').length != 0){
 			this.modal = $('#annotation-modal');
 			this.modal.empty();
-		}else{
-			$('body').append(this.modal);
 		}
+		this.modal.appendTo('body');
 		this.modal.addClass('modal hide');
 		this.modal.attr('id', 'annotation-modal');
 		this.modal.attr('data-backdrop', false);
 		
-		var header = $('<div />');
+		var header = $('<div />').css('cursor','pointer');
 		header.addClass('modal-header');
 		header.append('<button type="button" name="annotation-btn-close" class="close" data-dismiss="#annotation-modal" data-backdrop="true" aria-hidden="true">&times;</button>');
 		header.append('<h3>' + title + '</h3>');
 		
 		var body = $('<div />');
-		body.addClass('modal-body');
+		body.addClass('modal-body').css('overflow', 'none');
 	
 		var footer = $('<div />');
 		footer.addClass('modal-footer');
@@ -192,9 +191,11 @@
 		this.modal.append(header);
 		this.modal.append(body);
 		this.modal.append(footer);
-		this.modal.modal('show');
+		this.modal.modal({
+			'show' : false
+		}).draggable();
 		$('button[name="annotation-btn-close"]').click(function(){
-			$('#annotation-modal').modal('hide');
+			$('#annotation-modal').remove();
 		});
 		callback(this.modal);
 	};

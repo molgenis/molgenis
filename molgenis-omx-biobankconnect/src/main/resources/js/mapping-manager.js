@@ -74,17 +74,7 @@
 	};
 	
 	ns.MappingManager.prototype.createMatrixForDataItems = function() {
-		var identifiers = [];
-		$.each(biobankDataSets, function(index, dataSetId){
-			identifiers.push(ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
-		});
-		var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
-			q : [{
-				field : 'identifier',
-				operator : 'IN',
-				value : identifiers
-			}],
-		});
+		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
 			var documentType = 'protocolTree-' + dataSetMapping.items[0].identifier.split('-')[0];
 			var query = [{
@@ -104,7 +94,11 @@
 			}
 			if(sortRule !== null) query.push(sortRule);
 			searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
-				createMappingFromIndex(dataSetMapping.items, searchResponse);
+				createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
+					$('#dataitem-table').empty().append(createDynamicTableHeader(involedDataSets)).append(tableBody);
+					pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
+					pagination.updateMatrixPagination($('.pagination ul'), ns.MappingManager.prototype.createMatrixForDataItems);
+				});
 			});
 		}else{
 			$('#dataitem-table').empty();
@@ -113,16 +107,29 @@
 			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.name + '</strong> catalogue');
 		}
 		
-		function createMappingFromIndex(dataSets, searchResponse){
-			
-			var totalHitCount = searchResponse.totalHitCount;
+		function getDataSetsForMapping(){
+			var identifiers = [];
+			$.each(biobankDataSets, function(index, dataSetId){
+				if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet())
+				identifiers.push(ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
+			});
+			var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
+				q : [{
+					field : 'identifier',
+					operator : 'IN',
+					value : identifiers
+				}],
+			});
+			return dataSetMapping;
+		}
+		
+		function createMappingFromIndex(dataSets, searchResponse, callback){
 			var displayFeatures = searchResponse.searchHits;
 			var queryRules = [];
 			var allFeatureCollection = [];
 			var count = 0;
 			var mappingPerStudy = {};
 			var cachedFeatures = {};
-			var involedDataSets = [];
 			
 			$.each(displayFeatures, function(index, hit){
 				var hitInfo = hit.columnValueMap;
@@ -225,7 +232,7 @@
 					
 					if(count === dataSets.length) {
 						preloadEntities(allFeatureCollection, cachedFeatures);
-						renderMappingTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures);
+						renderMappingTable(mappingPerStudy, dataSets, displayFeatures, cachedFeatures, callback);
 					}
 				});
 			});
@@ -261,7 +268,7 @@
 			return tuple;
 		}
 		
-		function renderMappingTable(mappingPerStudy, dataSets, displayFeatures, totalHitCount, cachedFeatures){
+		function renderMappingTable(mappingPerStudy, dataSets, displayFeatures, cachedFeatures, callback){
 			//create table header
 			var involedDataSets = [];
 			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
@@ -291,10 +298,7 @@
 				var featureId = featureFromIndex.columnValueMap.id;
 				tableBody.append(createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures));
 			});
-			$('#dataitem-table').empty().append(createDynamicTableHeader(involedDataSets)).append(tableBody);
-			
-			pagination.setTotalPage(Math.ceil(totalHitCount / pagination.getPager()));
-			pagination.updateMatrixPagination($('.pagination ul'), ns.MappingManager.prototype.createMatrixForDataItems);
+			callback(tableBody, involedDataSets);
 		}
 		
 		function createDynamicTableHeader(involedDataSets){
@@ -343,7 +347,6 @@
 		}	
 		
 		function createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures){
-			
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
 			var description = '<strong>' + feature.name + '</strong> : ' + i18nDescription(feature).en;
@@ -357,7 +360,11 @@
 					placement : 'bottom'
 				});
 			}
-			$('<td />').addClass('add-border').append(popover).appendTo(row);
+			$('<td />').addClass('add-border show-popover').append(popover).click(function(){
+				createAnnotationModal(feature);
+				$('body').data('clickedRow', row);
+				$('body').data('table', row.parents('table:eq(0)'));
+			}).appendTo(row);
 			
 			$.each(dataSets, function(index, dataSet){
 				var mappedDataSetId = dataSet.identifier.split('-')[1];
@@ -409,12 +416,16 @@
 								modal.remove();
 								ns.MappingManager.prototype.createMatrixForDataItems();
 							});
-							modal.css({
-								'width' : 600,
-								'margin-top' : 120
-							});
+							var table = row.parents('table:eq(0)');
 							modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove candidate mappings?</strong></p>');
 							modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
+							modal.css({
+								'width' : 600,
+								'left' : table.width()/2 - 300,
+								'margin-left' : 0,
+								'margin-top' : 0,
+								'top' : 200
+							}).modal('show');
 						});
 					});
 					
@@ -430,10 +441,15 @@
 					}).click(function(){
 						standardModal.createModalCallback('Candidate mappings', function(modal){
 							createMappingTable(feature, mappedFeatures, restApi.get('/api/v1/dataset/' + mappedDataSetId), modal);
+							var table = row.parents('table:eq(0)');
+							modal.find('div.modal-body:eq(0)').css('max-height' , 300);
 							modal.css({
 								'width' : 950,
-								'margin-left' : -475
-							});
+								'left' : table.width() / 2 - 400,
+								'margin-left' : 0,
+								'margin-top' : 0,
+								'top' : 200
+							}).modal('show');
 						});
 					});
 					var displayTermSpan = $('<span />').addClass('show-popover').append(displayTerm).click(function(){
@@ -445,6 +461,192 @@
 				}
 			});
 			return row;
+		}
+		
+		function createAnnotationModal(feature){
+			var featureId = ns.hrefToId(feature.href);
+			var title = 'Rematch research variable : ';
+			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
+				restApi.getAsync(feature.href, ["unit", "definitions"], null, function(restApiFeature){
+					var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
+					body.append(ns.getOntologyAnnotator().createFeatureTable(title, restApiFeature, createAnnotationModal));
+					body.append(ns.getOntologyAnnotator().createSearchDiv(title, restApiFeature, createAnnotationModal));
+					var footer = modal.find('div.modal-footer:eq(0)');
+					var nextButton = $('<button type="btn" class="btn btn-primary">Next</button>').click(function(){
+						createRematchingModal(restApiFeature, biobankDataSets);
+					});
+					footer.prepend(nextButton);
+					var table = $('body table:eq(0)');
+					modal.css({
+						'width' : 800,
+						'left' : table.width()/2 - 300,
+						'margin-left' : 0,
+						'margin-top' : 0,
+						'top' : 200
+					}).modal('show');
+				});
+			});
+		}
+		
+		function createRematchingModal(feature, dataSets){
+			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
+				var body = modal.find('div.modal-body:eq(0)');
+				var divControlPanel = $('<div />').addClass('row-fluid').appendTo(body);
+				var selectTag = $('<select />');
+				$.each(dataSets, function(index, element){
+					if(element !== ns.MappingManager.prototype.getSelectedDataSet()){
+						var dataSet = restApi.get('/api/v1/dataset/' + element);
+						selectTag.append('<option value="' + ns.hrefToId(dataSet.href) + '">' + dataSet.name + '</option>');
+					}
+				});
+				var selectButton = $('<button type="btn" class="btn btn-info">Select</button>');
+				var selectAllButton = $('<button type="btn" class="btn btn-primary">Select all</button>');
+				var removeAllButton = $('<button type="btn" class="btn btn">Remove all</button>');
+				
+				$('<div />').addClass('offset1 span3').append(selectTag).appendTo(divControlPanel);
+				$('<div />').addClass('offset1 span5 btn-group').append(selectButton).append(selectAllButton).append(removeAllButton).appendTo(divControlPanel);
+				
+				var infoContainer = $('<div />').addClass('row-fluid').appendTo(body);
+				var dataSetsContainer = $('<div />').addClass('offset1 span10 well').appendTo(infoContainer);
+				$('<div />').addClass('span12').append('<legend class="legend-small">Selected catalogues : </legend>').appendTo(dataSetsContainer);
+				
+				var selectedOptions = [];
+				$(selectTag).find('option').each(function(){
+					selectedOptions.push($(this).val());
+				});
+				listOfOptions(dataSetsContainer, selectedOptions)
+				
+				var footer = modal.find('div.modal-footer:eq(0)');
+				var matchButton = $('<button type="btn" class="btn btn-primary">Rematch</button>')
+				footer.prepend(matchButton);
+				modal.modal('show');
+				
+				selectButton.click(function(){
+					var selectedDataSetId = selectTag.val();
+					if(selectedDataSetId !== null && selectedDataSetId !== undefined){
+						if($.inArray(selectedDataSetId, selectedOptions) === -1){
+							selectedOptions.push(selectedDataSetId);
+							switchOptions(selectedDataSetId, $(selectTag));
+							listOfOptions(dataSetsContainer, selectedOptions)
+						}
+					}
+				})
+				
+				selectAllButton.click(function(){
+					$(selectTag).find('option').each(function(){
+						if($.inArray($(this).val(), selectedOptions) === -1){
+							selectedOptions.push($(this).val());
+						}
+					});
+					listOfOptions(dataSetsContainer, selectedOptions)
+				});
+				
+				removeAllButton.click(function(){
+					selectedOptions = [];
+					listOfOptions(dataSetsContainer, selectedOptions)
+				});
+				
+				matchButton.click(function(){
+					var request = {
+						'sourceDataSetId' : ns.MappingManager.prototype.getSelectedDataSet(),
+						'featureId' : ns.hrefToId(feature.href),
+						'selectedDataSetIds' : selectedOptions
+					};
+					$.ajax({
+						type : 'POST',
+						url : ns.getContextURL() + '/rematch',
+						async : false,
+						data : JSON.stringify(request),
+						contentType : 'application/json',
+						success : function(data, textStatus, request) {
+							modal.remove();
+							checkProgressForRematch(feature);
+						},
+						error : function(request, textStatus, error){
+							console.log(error);
+						} 
+					});
+				});
+			});
+			
+			function checkProgressForRematch(feature){
+				$.ajax({
+					type : 'GET',
+					url : ns.getContextURL() + '/match/status',
+					async : false,
+					contentType : 'application/json',
+					success : function(data, textStatus, request) {
+						console.log(data);
+						if(data.isRunning){
+							setTimeout(function(){
+								checkProgressForRematch(feature);
+							}, 1000);
+						}else{
+							var existingRow = $('body').data('clickedRow');
+							var table = $('body').data('table');
+							var index = $.inArray(existingRow[0], table.find('tr'));
+							var searchRequest = {
+								'documentType' : 'protocolTree-' + ns.MappingManager.prototype.getSelectedDataSet(),
+								'queryRules' : [{
+									'field' : 'id',
+									'operator' : 'EQUALS',
+									'value' : ns.hrefToId(feature.href)
+								}]
+							}
+							searchApi.search(searchRequest, function(searchResponse){
+								var dataSetMapping = getDataSetsForMapping();
+								if(dataSetMapping.items.length > 0){
+									createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
+										var newMappings = tableBody.find('tr');
+										if(newMappings.length > 0){
+											if(index > 0){
+												var prevRow = table.find('tr:eq(' + --index + ')');
+												existingRow.remove();
+												prevRow.after(newMappings[0]);
+											}
+										}else{
+											existingRow.find('td').each(function(){
+												$(this).empty().append('<i class="icon-ban-circle show-popover" title="Not available"></i>');
+											});
+										}
+									});
+								}
+							});
+						}
+					},
+					error : function(request, textStatus, error){
+						console.log(error);
+					} 
+				});
+			}
+			
+			function listOfOptions(dataSetsContainer, selectedOptions){
+				dataSetsContainer.find('div:gt(0)').remove();
+				$.each(selectedOptions, function(index, dataSetId){
+					var dataSet = restApi.get('/api/v1/dataset/' + dataSetId);
+					var newRow = $('<div />').addClass('row-fluid');
+					$('<div />').addClass('offset2 span3').append(dataSet.name).appendTo(newRow);
+					var removeButton = $('<button type="btn" class="btn btn-link">Remove</button>');
+					$('<div />').addClass('offset3 span2').append(removeButton).appendTo(newRow);
+					dataSetsContainer.append(newRow);
+					removeButton.click(function(){
+						selectedOptions.splice($.inArray(dataSetId, selectedOptions), 1);
+						newRow.remove();
+					});
+				});
+			}
+			
+			function switchOptions(targetDataSetId, selectedOptions){
+				var index = 0;
+				var options = $(selectedOptions).find('option');
+				options.attr('selected', false).each(function(){
+					if(targetDataSetId !== $(this).val()){
+						index++;
+					}else return false;
+				});
+				index = index === options.length - 1 ? 0 : index + 1;
+				$(options[index]).attr('selected', true);
+			}
 		}
 		
 		function removeAnnotation(mappings){
@@ -523,7 +725,9 @@
 				});
 			}
 			
-			$.each(mappedFeatures, function(index, eachMapping){
+			var soretedMappedFeatures = sortByScoreAndLength(mappedFeatures);
+			
+			$.each(soretedMappedFeatures, function(index, eachMapping){
 				var mappedFeatureId = eachMapping.mappedFeatureId;
 				var score = eachMapping.score;
 				var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureId);
@@ -549,9 +753,8 @@
 			
 			tableDiv.append(mappingTable);
 			var body = modal.find('.modal-body:eq(0)').css({
-				'min-height' : 200,
-				'overflow' : 'auto'
-			});
+				'min-height' : 200
+			}).addClass('overflow-y-auto');
 			$('<div />').append('<div class="span4"></div>').append(tableDiv).appendTo(body);
 			
 			var infoDiv = $('<div />').addClass('span4').css({
@@ -585,6 +788,33 @@
 				});
 				selectedMappings.find('span:eq(1)').html(dataItems.join(' , '));
 			});
+		}
+		
+		function sortByScoreAndLength(mappedFeatures){
+			var total = mappedFeatures.length;
+			var subSetMappings = mappedFeatures.slice(0, total < 10 ? total : 10);
+			var map = {};
+			$.each(subSetMappings, function(index, eachMapping){
+				var mappedFeatureId = eachMapping.mappedFeatureId;
+				var score = eachMapping.score;
+				var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureId);
+				eachMapping.comparedScore = score / mappedFeature.description.length;
+				if(!map[score]){
+					map[score] = [];
+				}
+				map[score].push(eachMapping);
+			});
+			var topTenOrder = [];
+			$.each(map, function(score, mappings){
+				if(mappings.length > 1){
+					mappings.sort(function(a,b){
+						return naturalSort(b.comparedScore, a.comparedScore);
+					});
+				}
+				topTenOrder = topTenOrder.concat(mappings);
+			});
+			if(total > 10) topTenOrder = topTenOrder.concat(mappedFeatures.slice(10, total));
+			return topTenOrder;
 		}
 		
 		function updateMappingInfo(feature, mappingTable, mappedDataSet, callback){
@@ -860,8 +1090,9 @@
 			modal.find('.modal-body:eq(0)').append(container);
 			modal.css({
 				'width' : 600,
-				'margin-top' : 200
-			});
+				'margin-top' : 0,
+				'top' : 200
+			}).modal('show');
 		});
 	};
 	

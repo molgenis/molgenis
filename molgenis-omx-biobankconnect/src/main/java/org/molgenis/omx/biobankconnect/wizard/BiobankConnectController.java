@@ -15,6 +15,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherResponse;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.ui.wizard.AbstractWizardController;
@@ -129,6 +130,18 @@ public class BiobankConnectController extends AbstractWizardController
 	UpdateIndexRequest request)
 	{
 		ontologyAnnotator.updateIndex(request);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/rematch", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public OntologyMatcherResponse rematch(@RequestBody
+	OntologyMatcherRequest request) throws DatabaseException
+	{
+		ontologyMatcher.matchFeature(request.getFeatureId(), request.getSourceDataSetId(),
+				request.getSelectedDataSetIds());
+		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
+				ontologyMatcher.matchPercentage());
+		return response;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/match/status", produces = APPLICATION_JSON_VALUE)

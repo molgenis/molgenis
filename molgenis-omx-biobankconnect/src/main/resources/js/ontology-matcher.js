@@ -3,7 +3,6 @@
 	"use strict";
 	var ns = w.molgenis = w.molgenis || {};
 	var pagination = new ns.Pagination();
-	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
@@ -15,7 +14,7 @@
 			if($.inArray(targetDataSetId, selectedOptions) === -1){
 				selectedOptions.push(targetDataSetId);
 				$('#target-catalogue').data('selectedOptions', selectedOptions);
-				switchOptions();
+				switchOptions($('#targetDataSets'));
 			}
 		}
 		renderOptions();
@@ -56,9 +55,9 @@
 			});
 		}
 		
-		function switchOptions(){
+		function switchOptions(selectedOptions){
 			var index = 0;
-			var options = $('#targetDataSets option');
+			var options = $(selectedOptions).find('option');
 			options.attr('selected',false).each(function(){
 				if(targetDataSetId !== $(this).val()){
 					index++;

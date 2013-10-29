@@ -1,9 +1,11 @@
 package org.molgenis.omx.biobankconnect.utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,11 +101,12 @@ public class OntologyLoader
 		return listOfTopClasses;
 	}
 
-	public Set<OWLClass> getAssociatedClasses(OWLClass cls)
+	public List<Set<OWLClass>> getAssociatedClasses(OWLClass cls)
 	{
-		Set<OWLClass> associatedTerms = new HashSet<OWLClass>();
+		List<Set<OWLClass>> alternativeDefinitions = new ArrayList<Set<OWLClass>>();
 		for (OWLSubClassOfAxiom axiom : ontology.getSubClassAxiomsForSubClass(cls))
 		{
+			Set<OWLClass> associatedTerms = new HashSet<OWLClass>();
 			OWLClassExpression expression = axiom.getSuperClass();
 			if (expression.isAnonymous())
 			{
@@ -118,8 +121,9 @@ public class OntologyLoader
 					}
 				}
 			}
+			alternativeDefinitions.add(associatedTerms);
 		}
-		return associatedTerms;
+		return alternativeDefinitions;
 	}
 
 	public Set<String> getSynonyms(OWLClass cls)

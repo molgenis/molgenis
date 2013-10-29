@@ -5,6 +5,7 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var CONTEXT_URL = null;
+	var standardModal = new ns.StandardModal();
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
 	var mappingManager = new ns.MappingManager();
@@ -115,5 +116,12 @@
 		buttonGroup.before('<legend />');
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);
+		
+		document.onkeydown = function(evt) {
+		    evt = evt || window.event;
+		    if (evt.keyCode == 27) {
+		    	standardModal.closeModal();
+		    }
+		};
 	});
 }($, window.top))

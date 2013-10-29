@@ -41,6 +41,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
 	private static final List<String> NON_XREF_FIELDS = Arrays.asList(STORE_MAPPING_ABSOLUTE_SCORE,
 			STORE_MAPPING_SCORE, STORE_MAPPING_CONFIRM_MAPPING);
+	private final List<ObservationSet> observationSets;
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
 	private DataSet dataSet;
@@ -50,6 +51,18 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	{
 		this.dataSet = db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSetIdentifier))
 				.get(0);
+		this.observationSets = db.find(ObservationSet.class, new QueryRule(ObservationSet.PARTOFDATASET_IDENTIFIER,
+				Operator.EQUALS, dataSet.getIdentifier()));
+		this.valueConverter = new ValueConverter(db);
+		setDb(db);
+	}
+
+	public StoreMappingTable(String dataSetIdentifier, List<ObservationSet> observationSets, Database db)
+			throws DatabaseException
+	{
+		this.dataSet = db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSetIdentifier))
+				.get(0);
+		this.observationSets = observationSets;
 		this.valueConverter = new ValueConverter(db);
 		setDb(db);
 	}
@@ -63,8 +76,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 			List<Integer> observationSetIds = new ArrayList<Integer>();
 			Map<Integer, KeyValueTuple> storeMapping = new HashMap<Integer, KeyValueTuple>();
 
-			for (ObservationSet observation : db.find(ObservationSet.class, new QueryRule(
-					ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSet.getIdentifier())))
+			for (ObservationSet observation : observationSets)
 			{
 				observationSetIds.add(observation.getId());
 			}
@@ -189,9 +201,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		{
 			try
 			{
-				List<ObservationSet> observationSets = db.find(ObservationSet.class, new QueryRule(
-						ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSet.getIdentifier()));
-				numberOfRows = observationSets.size();
+				numberOfRows = this.observationSets.size();
 			}
 			catch (Exception e)
 			{

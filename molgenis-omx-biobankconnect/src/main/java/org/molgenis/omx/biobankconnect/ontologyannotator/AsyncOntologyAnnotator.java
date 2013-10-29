@@ -266,7 +266,10 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			{
 				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer, positionFilter))
 				{
-					mapUriTerm.put(data.get("ontologyTermIRI").toString(), data);
+					String uri = data.get("ontologyTermIRI").toString();
+					String ontologyLabel = data.get("ontologyLabel").toString();
+					String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
+					mapUriTerm.put(termIdentifier, data);
 					addedCandidates.add(ontologyTermSynonym);
 				}
 			}
@@ -280,19 +283,17 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		if (mapUriTerm.size() > 0)
 		{
-			for (OntologyTerm ot : db.find(OntologyTerm.class, new QueryRule(OntologyTerm.TERMACCESSION, Operator.IN,
+			for (OntologyTerm ot : db.find(OntologyTerm.class, new QueryRule(OntologyTerm.IDENTIFIER, Operator.IN,
 					new ArrayList<String>(mapUriTerm.keySet()))))
-				mapUriTerm.remove(ot.getTermAccession());
+				mapUriTerm.remove(ot.getIdentifier());
 		}
 
 		List<OntologyTerm> listOfOntologyTerms = new ArrayList<OntologyTerm>();
 		Map<String, String> ontologyInfo = new HashMap<String, String>();
 
-		for (Entry<String, Map<String, Object>> entry : mapUriTerm.entrySet())
+		for (Map<String, Object> data : mapUriTerm.values())
 		{
-			String uri = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-
+			String uri = data.get("ontologyTermIRI").toString();
 			String ontologyUri = data.get("ontologyIRI").toString();
 			String ontologyName = data.get("ontologyName").toString();
 			ontologyInfo.put(ontologyUri, ontologyName);
@@ -300,8 +301,9 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			String ontologyLabel = data.get("ontologyLabel").toString();
 			String term = ontologyLabel == null ? data.get("ontologyTerm").toString().toLowerCase() : ontologyLabel
 					+ ":" + data.get("ontologyTerm").toString().toLowerCase();
+			String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
-			ot.setIdentifier(uri);
+			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);
 			ot.setName(term);
 			ot.setOntology_Identifier(ontologyUri);

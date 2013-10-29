@@ -1,0 +1,40 @@
+img.classBorder{
+	height : 125px;
+	width : 125px;
+	border-radius: 15px;
+	cursor : pointer;
+}
+
+img.hoverClassBorder{
+	height : 125px;
+	width : 125px;
+	box-shadow:1px 3px 6px #444;
+	cursor : pointer;
+}
+
+.pico{
+	height : 75px;
+	width : 75px;
+}
+
+div#step-description{
+	margin-top : 50px;
+	min-height :200px;
+}
+
+dl, p.text-justify{
+	text-align : justify;
+	margin-top : -10px;
+	margin-bottom : 10px;
+	padding-left : 10px;
+	padding-right : 10px;
+	font-size : 16px;
+}
+
+dd{
+	margin-bottom : 20px;
+}
+
+.icon-right {
+	float : right;
+}
