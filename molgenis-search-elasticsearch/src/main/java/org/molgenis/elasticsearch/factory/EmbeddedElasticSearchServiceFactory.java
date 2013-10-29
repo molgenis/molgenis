@@ -4,17 +4,19 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.molgenis.elasticsearch.ElasticSearchService;
 
 /**
- * Factory for creating an embedded ElasticSearch server service. An elastic
- * search config file named 'elasticsearch.yml' must be on the classpath
+ * Factory for creating an embedded ElasticSearch server service. An elastic search config file named
+ * 'elasticsearch.yml' must be on the classpath
  * 
  * @author erwin
  * 
@@ -33,11 +35,37 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		this(DEFAULT_INDEX_NAME);
 	}
 
+	/**
+	 * Create an embedded ElasticSearch server service using 'elasticsearch.yml' and provided settings. The provided
+	 * settings override settings specified in 'elasticsearch.yml'
+	 * 
+	 * @param providedSettings
+	 */
+	public EmbeddedElasticSearchServiceFactory(Map<String, String> providedSettings)
+	{
+		this(DEFAULT_INDEX_NAME, providedSettings);
+	}
+
 	public EmbeddedElasticSearchServiceFactory(String indexName)
+	{
+		this(indexName, null);
+	}
+
+	/**
+	 * Create an embedded ElasticSearch server service with the given index name using 'elasticsearch.yml' and provided
+	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
+	 * 
+	 * @param indexName
+	 * @param providedSettings
+	 */
+	public EmbeddedElasticSearchServiceFactory(String indexName, Map<String, String> providedSettings)
 	{
 		this.indexName = indexName;
 
-		Settings settings = ImmutableSettings.settingsBuilder().loadFromClasspath(CONFIG_FILE_NAME).build();
+		Builder builder = ImmutableSettings.settingsBuilder().loadFromClasspath(CONFIG_FILE_NAME);
+		if (providedSettings != null) builder.put(providedSettings);
+
+		Settings settings = builder.build();
 		node = nodeBuilder().settings(settings).local(true).node();
 		client = node.client();
 
