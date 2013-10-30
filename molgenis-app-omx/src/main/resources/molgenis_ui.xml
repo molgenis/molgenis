@@ -2,6 +2,7 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
+		<plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
@@ -18,6 +19,8 @@
 	        <menu label="Entities" name ="entities">
         		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>
         		<plugin id="form.Protocol" name="Protocol" url="form.Protocol?subForms=DataSet.ProtocolUsed"/>
+        		<plugin id="form.ProtocolFlow" name="ProtocolFlow" url="form.ProtocolFlow"/>
+        		<plugin id="form.ObservationSetFlow" name="ObservationSetFlow" url="form.ObservationSetFlow"/>
         		<plugin id="form.ObservableFeature" name="ObservableFeature" url="form.ObservableFeature?subForms=Category.observableFeature"/>
         		<plugin id="form.Category" name="Category" url="form.Category"/>
         		<menu label="Values" name="values">

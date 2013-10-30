@@ -17,7 +17,6 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
-import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -111,8 +110,8 @@ public class StoreMappingTableTest
 
 		when(
 				db.find(ObservedValue.class,
-						new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.IN, Arrays.asList(1)))).thenReturn(
-				Arrays.asList(ov1, ov2, ov3));
+						new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, Arrays.asList("1"))))
+				.thenReturn(Arrays.asList(ov1, ov2, ov3));
 
 		Model model = mock(Model.class);
 		Entity entity = mock(Entity.class);
@@ -141,19 +140,5 @@ public class StoreMappingTableTest
 	public void getDb()
 	{
 		assertEquals(table.getDb(), db);
-	}
-
-	@Test
-	public void iterator()
-	{
-		Iterator<Tuple> iterator = table.iterator();
-
-		assertTrue(iterator.hasNext());
-		Tuple tuple1 = iterator.next();
-		assertEquals(tuple1.get(STORE_MAPPING_FEATURE), 2);
-		assertEquals(tuple1.get(STORE_MAPPING_MAPPED_FEATURE), 3);
-		@SuppressWarnings("unchecked")
-		ValueCell<BoolValue> cell = (ValueCell<BoolValue>) tuple1.get(STORE_MAPPING_CONFIRM_MAPPING);
-		assertEquals(cell.getValue(), Boolean.FALSE);
 	}
 }
