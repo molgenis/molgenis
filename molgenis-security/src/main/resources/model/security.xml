@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="org.molgenis.omx">
 	<module name="auth">
-		<entity name="MolgenisUser" system="true" xref_label="username">
+		<entity name="MolgenisUser" system="true">
 			<description>Anyone who can login</description>
 			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
 			<field name="username" type="string"/>
