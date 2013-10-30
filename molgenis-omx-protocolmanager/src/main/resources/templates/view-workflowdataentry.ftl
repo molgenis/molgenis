@@ -12,7 +12,7 @@
 					<div class="controls">
 		    			<select id="workflow-application-select">
 		<#list workflows as workflow>
-								<option value="${workflow.id}">${workflow.name}</option>
+								<option value="${workflow.id?c}">${workflow.name}</option>
 		</#list>
 		      			</select>
 					</div>
