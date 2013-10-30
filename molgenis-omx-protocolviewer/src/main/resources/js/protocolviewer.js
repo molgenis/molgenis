@@ -274,7 +274,7 @@
 				queryRules.push({
 					operator : 'LIMIT',
 					value : 10000
-				})
+				});
 				var dataSet = ns.getSelectedDataSet();
 				var searchRequest = {
 					documentType : 'protocolTree-' + hrefToId(dataSet.href),
@@ -398,11 +398,9 @@
 						}
 					});
 					
-					var nodesToHide = [];
 					$.each(hitsToHide, function(index, hit){
 						var object = hit.columnValueMap;
 						var nodes = object["path"].split(".");
-						var entityId = object["id"];
 						//split the path to get all ancestors;
 						for(var i = 0; i < nodes.length; i++) {
 							var isFeature = nodes[i].indexOf("F") === 0;
