@@ -134,8 +134,13 @@
 					$('#success-message-content').html(forms[formIndex].title + ' deleted.');
 					$('#success-message').show();
 				},
-				error: function() {
+				error: function(xhr) {
+					var messages = [];
+					$.each(JSON.parse(xhr.responseText).errors, function(index, error) {
+						messages.push(error.message);
+					});
 					$('#error-message-content').html('Could not delete ' + forms[formIndex].title + '.');
+					$('#error-message-details').html('Details: ' + messages.join('\n'));
 					$('#error-message').show();
 				}
 			});

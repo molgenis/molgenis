@@ -40,10 +40,14 @@
 				}
 				$('#success-message').show();
 			},
-			error: function(request, textStatus, errorThrown) {
+			error: function(xhr) {
 				ns.quoteIsoDateT();
 				
-				$('#error-message-content').html(errorThrown);
+				var messages = [];
+				$.each(JSON.parse(xhr.responseText).errors, function(index, error) {
+					messages.push(error.message);
+				});
+				$('#error-message-details').html('Details: ' + messages.join('\n'));
 				$('#error-message').show();
 			}
 		});
