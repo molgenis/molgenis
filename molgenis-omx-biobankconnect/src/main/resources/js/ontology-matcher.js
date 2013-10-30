@@ -1,7 +1,7 @@
-(function($, w) {
-	
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var pagination = new ns.Pagination();
 	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
@@ -282,4 +282,4 @@
 			ns.selectCatalogue('check');
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

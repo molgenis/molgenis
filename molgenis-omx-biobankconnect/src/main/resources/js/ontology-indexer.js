@@ -1,7 +1,7 @@
-(function($, w) {
-	
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var CONTEXT_URL = null;
@@ -95,4 +95,4 @@
 			}).submit();
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

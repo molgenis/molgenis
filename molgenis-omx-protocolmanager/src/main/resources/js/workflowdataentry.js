@@ -1,7 +1,7 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	var plugin_uri = "/plugin/workflowdataentry";
 	
 	ns.onWorkflowSelectionChange = function(workflowId) {
@@ -160,4 +160,4 @@
 		// fire event handler
 		$('#workflow-application-select').change();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

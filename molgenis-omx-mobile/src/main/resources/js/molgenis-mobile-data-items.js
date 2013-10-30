@@ -6,9 +6,10 @@ $(document).ready(function() {
 	$("#search-features").on('change', window.top.molgenis.onSearchFieldChange);
 });
 
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	var loading = false;
 	var nextHref = null;
@@ -91,4 +92,4 @@ $(document).ready(function() {
 		$('#features').empty();
 	}
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	$(function() {
@@ -75,4 +75,4 @@
 		$('#group-select').trigger('liszt:updated');
 	});
 
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

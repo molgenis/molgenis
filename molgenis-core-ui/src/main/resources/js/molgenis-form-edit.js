@@ -1,7 +1,6 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
 	
@@ -97,4 +96,4 @@
 		
 	});
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

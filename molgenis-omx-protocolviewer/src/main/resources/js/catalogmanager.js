@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	// on document ready
@@ -66,4 +66,4 @@
 		});
 		$('#catalogForm input[type="radio"]:checked').change();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	$(function() {
@@ -126,4 +126,4 @@
 		$('#plugin-group-select').change();
 		$('#entity-class-group-select').change();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

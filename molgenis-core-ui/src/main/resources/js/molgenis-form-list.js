@@ -1,7 +1,6 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient(false);
 	var NR_ROWS_PER_PAGE = 10;
@@ -213,4 +212,4 @@
 		});
 	});
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
