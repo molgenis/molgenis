@@ -10,7 +10,7 @@
 				<div class="control-group">
 					<label class="control-label" for="user-select">Select User:</label>
 					<div class="controls">
-						<select id="user-select" data-placeholder="Choose a user" name="userId" class="chosen-select">
+						<select id="user-select" data-placeholder="Choose an user" name="userId" class="chosen-select">
 							<option value="-1"></option>
 							<#if users?has_content>
 								<#list users as user>
@@ -45,9 +45,9 @@
 					
 				<div class="control-group">	
 					<#if groupsWhereUserIsNotMember?has_content>
-						<label class="control-label" for="drop-down-groups-to-add">Add a user to group:</label>
+						<label class="control-label" for="drop-down-groups-to-add">Add an user to this group:</label>
 						<div class="controls">
-							<select id="drop-down-groups-to-add" data-placeholder="Choose a group to add" name="groupToAddId">
+							<select id="drop-down-groups-to-add" data-placeholder="Choose a group" name="groupToAddId">
 								<option></option>
 								<#list groupsWhereUserIsNotMember as group>
 									<option value="${group.id?c}">${group.name}</option>
