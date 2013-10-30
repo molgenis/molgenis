@@ -60,6 +60,8 @@
 					    items.push('</td>');
 					    items.push('<td class="listEntryId">' + studyDefinition.id + '</td>');
 					    items.push('<td>' + studyDefinition.name + '</td>');
+					    items.push('<td>' + (studyDefinition.email ? studyDefinition.email : '') + '</td>');
+					    items.push('<td>' + (studyDefinition.date ? studyDefinition.date : '') + '</td>');
 					    items.push('</tr>');
 					});
 					table.html(items.join(''));
