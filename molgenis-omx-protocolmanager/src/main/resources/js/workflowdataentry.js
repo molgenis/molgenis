@@ -2,7 +2,7 @@
 	"use strict";
 	
 	var ns = molgenis;
-	var plugin_uri = "/plugin/workflowdataentry";
+	var plugin_uri = molgenis.contextUrl;
 	
 	ns.onWorkflowSelectionChange = function(workflowId) {
 		$.ajax({

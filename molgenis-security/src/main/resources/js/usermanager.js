@@ -48,7 +48,7 @@
 		 * Drop down with groups to select
 		 */
 		$('#group-select').change(function() {
-			$.get('/plugin/usermanager/users/' + $(this).val(), function(data) {
+			$.get(molgenis.contextUrl + '/users/' + $(this).val(), function(data) {
 				$('#users-of-group').html(createListOfUsersFromGroup(data));
 			});
 		});

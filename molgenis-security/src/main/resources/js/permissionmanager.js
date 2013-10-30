@@ -71,23 +71,23 @@
 		}
 		
 		$('#plugin-group-select').change(function() {
-			$.get('/plugin/permissionmanager/plugin/group/' + $(this).val(), function(data) {
+			$.get(molgenis.contextUrl + '/plugin/group/' + $(this).val(), function(data) {
 				$('#plugin-group-permission-table tbody').empty().html(createGroupPermissionTable(data));
 			});
 			
 		});
 		$('#plugin-user-select').change(function() {
-			$.get('/plugin/permissionmanager/plugin/user/' + $(this).val(), function(data) {
+			$.get(molgenis.contextUrl + '/plugin/user/' + $(this).val(), function(data) {
 				$('#plugin-user-permission-table tbody').empty().html(createUserPermissionTable(data));
 			});
 		});
 		$('#entity-class-group-select').change(function() {
-			$.get('/plugin/permissionmanager/entityclass/group/' + $(this).val(), function(data) {
+			$.get(molgenis.contextUrl + '/entityclass/group/' + $(this).val(), function(data) {
 				$('#entity-class-group-permission-table tbody').empty().html(createGroupPermissionTable(data));
 			});
 		});
 		$('#entity-class-user-select').change(function() {
-			$.get('/plugin/permissionmanager/entityclass/user/' + $(this).val(), function(data) {
+			$.get(molgenis.contextUrl + '/entityclass/user/' + $(this).val(), function(data) {
 				$('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data));
 			});
 		});

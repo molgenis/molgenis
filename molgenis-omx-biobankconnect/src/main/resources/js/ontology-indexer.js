@@ -4,11 +4,7 @@
 	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
-	var CONTEXT_URL = null;
-	
-	ns.setContextURL = function(CONTEXT_URL){
-		this.CONTEXT_URL = CONTEXT_URL;
-	};
+	var CONTEXT_URL = molgenis.contextUrl;
 	
 	ns.getContextURL = function() {
 		return this.CONTEXT_URL;

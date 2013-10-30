@@ -9,16 +9,7 @@
 	var selectedDataSet = null;
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
-	var contextURL = null;
 	var aggregateView = false;
-	
-	molgenis.setContextURL = function(contextURL){
-		this.contextURL = contextURL;
-	};
-	
-	molgenis.getContextURL = function(){
-		return this.contextURL;
-	};
 	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
@@ -203,13 +194,6 @@
 		searchQuery = query;
 		molgenis.updateObservationSetsTable();
 	};
-
-	molgenis.countNrofRows = function(){
-		molgenis.search(function(searchResponse) {
-			var maxRowsPerPage = resultsTable.getMaxRows();
-			var nrRows = searchResponse.totalHitCount;
-		});
-	}
 	
 	molgenis.updateObservationSetsTable = function() {
 		if (selectedFeatures.length > 0) {
@@ -721,7 +705,6 @@
 		searchApi.search(searchRequest, function(searchResponse) {
 			
 			var searchHits = searchResponse.searchHits;
-			var totalHitCount = searchResponse.totalHitCount;
 			var selectTag = $('<select id="selectFeature"/>');
 		
 			$.each(searchHits, function(index, hit){
@@ -752,12 +735,12 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextURL() + '/aggregate',
+			url : molgenis.contextUrl + '/aggregate',
 			data : JSON.stringify(aggregateRequest),
 			contentType : 'application/json',
 			success : function(aggregateResult){
 				var table = $('<table />').addClass('table table-striped');
-				table.append('<tr><th>Category name</th><th>Count</th></tr>')
+				table.append('<tr><th>Category name</th><th>Count</th></tr>');
 				$.each(aggregateResult.hashCategories, function(categoryName, count){
 					table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
 				});
@@ -770,7 +753,7 @@
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
 		
 		parent.showSpinner();
-		$.download('/plugin/dataexplorer/download',{searchRequest :  jsonRequest});
+		$.download(molgenis.contextUrl + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
 	};
 	

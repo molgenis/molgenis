@@ -54,7 +54,6 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.setContextURL('${context_url}');
 			molgenis.getOntologyAnnotator().changeDataSet('${wizard.selectedDataSet.id?c}');
 			molgenis.getOntologyAnnotator().searchOntologies();
 			
@@ -73,7 +72,7 @@
 			$('#annotate-all-dataitems').click(function(){
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.getContextURL() + '/annotate',
+					'action' : molgenis.contextUrl + '/annotate',
 					'method' : 'POST'
 				}).submit();
 			});

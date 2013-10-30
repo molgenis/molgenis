@@ -30,6 +30,12 @@
 	<#if molgenis_ui.hrefJs?has_content>
 		<script src="/js/${molgenis_ui.hrefJs?html}"></script>
 	</#if>
+	<#if context_url??>
+		<script>
+			top.molgenis = top.molgenis || {};
+			top.molgenis.contextUrl = '${context_url}';
+		</script>
+	</#if>
 	</head>
 	<body>
 		<div class="container-fluid">
