@@ -136,7 +136,6 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		this.setSecurityContextSuperUser();
 
-
 		final MolgenisGroupMember molgenisGroupMemberOne = mock(MolgenisGroupMember.class);
 		molgenisGroupMemberOne.setMolgenisGroup(Integer.valueOf("20"));
 		molgenisGroupMemberOne.setMolgenisUser(Integer.valueOf("1"));
@@ -150,6 +149,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		molgenisGroupMemberThree.setMolgenisUser(Integer.valueOf("2"));
 				
 		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(Integer.valueOf("1")).getMock();
+		
 		Query<MolgenisUser> queryUser = mock(Query.class);
 		Query<MolgenisUser> queryUser1 = mock(Query.class);
 		when(queryUser.eq(MolgenisUser.ID, Integer.valueOf("1"))).thenReturn(queryUser1);
@@ -160,11 +160,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(
 				database.find(MolgenisGroupMember.class, new QueryRule(MolgenisGroupMember.MOLGENISUSER,
 						Operator.EQUALS, user1))).thenReturn(
-				Arrays.asList(molgenisGroupMemberOne, molgenisGroupMemberTwo, molgenisGroupMemberThree));
+				Arrays.asList(molgenisGroupMemberOne, molgenisGroupMemberTwo));
 
 		List<MolgenisGroup> groups = userManagerService.getGroupsWhereUserIsMember(Integer.valueOf("1"));
-
-		System.out.println("groups.size(): " + groups.size());
 		
 		assertEquals(groups.size(), 2);
 	}
