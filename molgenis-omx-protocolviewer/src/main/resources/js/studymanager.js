@@ -50,7 +50,6 @@
 				success : function(data) {
 					var table = $('#studyDefinitionList tbody');
 					var items = [];
-					var checked = false;
 					$.each(data.studyDefinitions, function(idx, studyDefinition) {
 					    items.push('<tr>');
 					    items.push('<td class="listEntryRadio">');
@@ -129,7 +128,6 @@
 		}
 		
 		$('#studyDefinitionForm').on('change', 'input[type="radio"]', function() {
-			console.log("radio change!");
 			if($('#study-definition-viewer').is(':visible'))
 				updateStudyDefinitionViewer();
 			if($('#study-definition-editor').is(':visible'))
@@ -140,6 +138,11 @@
 		});
 		$('a[data-toggle="tab"][href="#study-definition-editor"]').on('show', function (e) {
 			updateStudyDefinitionEditor();
+		});
+		
+		$('#download-study-definition-btn').click(function() {
+			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
+			window.location = '/plugin/studymanager/download/' + studyDefinitionId;
 		});
 		
 		$('#update-study-definition-btn').click(function() {

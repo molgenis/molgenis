@@ -2,17 +2,14 @@ package org.molgenis.omx.protocolviewer;
 
 import static org.molgenis.omx.protocolviewer.ProtocolViewerController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.framework.db.Database;
@@ -26,6 +23,7 @@ import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.util.ShoppingCart;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,15 +43,18 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 	private final Database database;
 	private final MolgenisSettings molgenisSettings;
+	private final ShoppingCart shoppingCart;
 
 	@Autowired
-	public ProtocolViewerController(Database database, MolgenisSettings molgenisSettings)
+	public ProtocolViewerController(Database database, MolgenisSettings molgenisSettings, ShoppingCart shoppingCart)
 	{
 		super(URI);
 		if (database == null) throw new IllegalArgumentException("Database is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
+		if (shoppingCart == null) throw new IllegalArgumentException("ShoppingCart is null");
 		this.database = database;
 		this.molgenisSettings = molgenisSettings;
+		this.shoppingCart = shoppingCart;
 	}
 
 	@RequestMapping(method = GET)
@@ -75,22 +76,9 @@ public class ProtocolViewerController extends MolgenisPluginController
 		return "view-protocolviewer";
 	}
 
-	@RequestMapping(value = "/download", method = POST)
-	public void download(HttpServletRequest request, HttpServletResponse response) throws IOException,
-			DatabaseException
+	@RequestMapping(value = "/download", method = GET)
+	public void download(HttpServletResponse response) throws IOException, DatabaseException
 	{
-		// get features
-		String featuresStr = request.getParameter("features");
-		List<ObservableFeature> features = null;
-		if (featuresStr != null && !featuresStr.isEmpty())
-		{
-			String[] featuresStrArr = request.getParameter("features").split(",");
-			List<Integer> featureIds = new ArrayList<Integer>(featuresStrArr.length);
-			for (String featureStr : featuresStrArr)
-				featureIds.add(Integer.valueOf(featureStr));
-			features = findFeatures(database, featureIds);
-		}
-
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm");
 		String fileName = "variables_" + dateFormat.format(new Date()) + ".xls";
 
@@ -104,17 +92,26 @@ public class ProtocolViewerController extends MolgenisPluginController
 		try
 		{
 			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
-			sheetWriter.writeColNames(header);
-			if (features != null)
+			try
 			{
-				for (ObservableFeature feature : features)
+				sheetWriter.writeColNames(header);
+
+				List<ObservableFeature> features = findFeatures(database, shoppingCart.getCart());
+				if (features != null)
 				{
-					KeyValueTuple tuple = new KeyValueTuple();
-					tuple.set(header.get(0), feature.getIdentifier());
-					tuple.set(header.get(1), feature.getName());
-					tuple.set(header.get(2), feature.getDescription());
-					sheetWriter.write(tuple);
+					for (ObservableFeature feature : features)
+					{
+						KeyValueTuple tuple = new KeyValueTuple();
+						tuple.set(header.get(0), feature.getIdentifier());
+						tuple.set(header.get(1), feature.getName());
+						tuple.set(header.get(2), feature.getDescription());
+						sheetWriter.write(tuple);
+					}
 				}
+			}
+			finally
+			{
+				sheetWriter.close();
 			}
 		}
 		finally
