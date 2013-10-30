@@ -2,7 +2,7 @@ $(document).bind("mobileinit", function() {
 	$(document).on('pageshow', '#catalogue-page', window.top.molgenis.onCataloguePageShow);
 });
 
-$(document).ready(function() {
+$(function() {
 	$("#search-features").on('change', window.top.molgenis.onSearchFieldChange);
 });
 

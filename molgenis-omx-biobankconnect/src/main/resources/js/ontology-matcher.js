@@ -253,7 +253,7 @@
 		$('#catalogue-container').hide().find('table').empty();
 	}
 	
-	$(document).ready(function(){
+	$(function(){
 		$('#add-target-dataset').click(function(){
 			var targetDataSet = $('#targetDataSets option:selected');
 			ns.addTargetDataSet(targetDataSet.val());

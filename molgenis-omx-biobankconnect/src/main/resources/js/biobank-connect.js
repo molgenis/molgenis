@@ -109,7 +109,7 @@
 		});
 	};
 	
-	$(document).ready(function(){
+	$(function(){
 		var buttonGroup = $('.bwizard-buttons');
 		$('#wizardForm').prepend(buttonGroup);
 		buttonGroup.before('<legend />');
