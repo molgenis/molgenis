@@ -506,7 +506,6 @@
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-omx-mobile</module>
 		<module>molgenis-app-omx</module>
-		<module>molgenis-app-ngs</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
