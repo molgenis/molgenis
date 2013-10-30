@@ -30,6 +30,8 @@
 											<th></th>
 											<th>Id</th>
 											<th>Name</th>
+											<th>Email</th>
+											<th>Date</th>
 										</tr>
 									</thead>
 									<tbody>

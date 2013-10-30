@@ -45,7 +45,8 @@ public class OmxStudyManagerService implements StudyManagerService
 			@Override
 			public StudyDefinitionMeta apply(StudyDataRequest studyDataRequest)
 			{
-				return new StudyDefinitionMeta(studyDataRequest.getIdentifier(), studyDataRequest.getName());
+				return new StudyDefinitionMeta(studyDataRequest.getIdentifier(), studyDataRequest.getName(),
+						studyDataRequest.getMolgenisUser().getEmail(), studyDataRequest.getRequestDate());
 			}
 		});
 	}

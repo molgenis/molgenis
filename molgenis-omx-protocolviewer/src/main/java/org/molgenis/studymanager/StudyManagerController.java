@@ -106,6 +106,8 @@ public class StudyManagerController extends MolgenisPluginController
 					{
 						String id = studyDefinitionMeta.getId();
 						String name = studyDefinitionMeta.getName();
+						String email = studyDefinitionMeta.getEmail();
+						Date date = studyDefinitionMeta.getDate();
 						boolean loaded;
 						try
 						{
@@ -115,7 +117,7 @@ public class StudyManagerController extends MolgenisPluginController
 						{
 							throw new RuntimeException(e);
 						}
-						return new StudyDefinitionMetaModel(id, name, loaded);
+						return new StudyDefinitionMetaModel(id, name, email, date, loaded);
 					}
 				});
 
