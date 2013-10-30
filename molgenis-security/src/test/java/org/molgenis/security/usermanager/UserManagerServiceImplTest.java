@@ -143,10 +143,6 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		final MolgenisGroupMember molgenisGroupMemberTwo = mock(MolgenisGroupMember.class);
 		molgenisGroupMemberTwo.setMolgenisGroup(Integer.valueOf("21"));
 		molgenisGroupMemberTwo.setMolgenisUser(Integer.valueOf("1"));
-
-		final MolgenisGroupMember molgenisGroupMemberThree = mock(MolgenisGroupMember.class);
-		molgenisGroupMemberThree.setMolgenisGroup(Integer.valueOf("22"));
-		molgenisGroupMemberThree.setMolgenisUser(Integer.valueOf("2"));
 				
 		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(Integer.valueOf("1")).getMock();
 		
@@ -165,6 +161,38 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		List<MolgenisGroup> groups = userManagerService.getGroupsWhereUserIsMember(Integer.valueOf("1"));
 		
 		assertEquals(groups.size(), 2);
+	}
+	
+	@Test
+	public void getUsersMemberInGroup() throws DatabaseException
+	{
+		this.setSecurityContextSuperUser();
+		
+		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn(Integer.valueOf("22")).getMock();
+		
+		MolgenisUser user1 = mock(MolgenisUser.class);
+		when(user1.getId()).thenReturn(Integer.valueOf("1"));
+		when(user1.getUsername()).thenReturn("Jonathan");
+		
+		final MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
+		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
+		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
+		
+		Query<MolgenisGroup> queryGroup = mock(Query.class);
+		Query<MolgenisGroup> queryGroup22 = mock(Query.class);
+		when(queryGroup.eq(MolgenisGroup.ID, Integer.valueOf("22"))).thenReturn(queryGroup22);
+		when(queryGroup.eq(MolgenisGroup.ID, Integer.valueOf("-22"))).thenReturn(queryGroup);
+		when(queryGroup22.find()).thenReturn(Arrays.<MolgenisGroup> asList(group22));
+		when(database.query(MolgenisGroup.class)).thenReturn(queryGroup);
+		
+		when(
+				database.find(MolgenisGroupMember.class, new QueryRule(MolgenisGroupMember.MOLGENISGROUP,
+						Operator.EQUALS, group22))).thenReturn(
+				Arrays.asList(molgenisGroupMember));
+
+		List<MolgenisUserViewData> users = userManagerService.getUsersMemberInGroup(Integer.valueOf("22"));
+		
+		assertEquals(users.size(), 1);
 	}
 
 	private void setSecurityContextSuperUser()
