@@ -167,17 +167,6 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		assertEquals(groups.size(), 2);
 	}
 
-	//
-	// public List<MolgenisGroup> getGroupsWhereUserIsMember(Integer userId) throws DatabaseException;
-	//
-	// public List<MolgenisGroup> getGroupsWhereUserIsNotMember(Integer userId) throws DatabaseException;
-	//
-	// public List<MolgenisUserViewData> getUsersMemberInGroup(Integer groupId) throws DatabaseException;
-	//
-	// public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
-	//
-	// public Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
-
 	private void setSecurityContextSuperUser()
 	{
 		Collection<? extends GrantedAuthority> authorities = Arrays
