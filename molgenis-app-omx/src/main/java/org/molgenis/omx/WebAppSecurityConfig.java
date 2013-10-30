@@ -172,12 +172,15 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// admin menu
 				.antMatchers("/menu/admin")
 				.hasAnyAuthority(
-						defaultPluginAuthorities("permissionmanager", "catalogmanager", "studymanager", "dataindexer",
+						defaultPluginAuthorities("permissionmanager", "usermanager", "catalogmanager", "studymanager", "dataindexer",
 								"datasetdeleter"))
 
 				// admin menu plugins
 				.antMatchers("/menu/admin/permissionmanager/**", "/plugin/permissionmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
+				
+				.antMatchers("/menu/admin/usermanager/**", "/plugin/usermanager/**")
+				.hasAnyAuthority(defaultPluginAuthorities("usermanager"))
 
 				.antMatchers("/menu/admin/catalogmanager/**", "/plugin/catalogmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
@@ -224,6 +227,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_IMPORTWIZARD > ROLE_PLUGIN_READ_IMPORTWIZARD").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_NEWS > ROLE_PLUGIN_READ_NEWS").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PERMISSIONMANAGER > ROLE_PLUGIN_READ_PERMISSIONMANAGER").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_USERMANAGER > ROLE_PLUGIN_READ_USERMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLMANAGER > ROLE_PLUGIN_READ_PROTOCOLMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_PLUGIN_READ_PROTOCOLVIEWER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_REFERENCES > ROLE_PLUGIN_READ_REFERENCES").append(' ');

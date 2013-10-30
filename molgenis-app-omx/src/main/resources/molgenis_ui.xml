@@ -45,6 +45,7 @@
         		<plugin id="form.MolgenisGroupMember" name="MolgenisGroupMember" url="form.MolgenisGroupMember"/>
 	        </menu>
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
+	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
         	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
 			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
 			<plugin id="datasetindexer" name="Data Set Indexer" url="dataindexer"/>
