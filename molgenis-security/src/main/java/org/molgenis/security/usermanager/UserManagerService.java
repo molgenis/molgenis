@@ -4,21 +4,20 @@ import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
 
 public interface UserManagerService
 {
-	public List<MolgenisUserViewData> getAllMolgenisUsers() throws DatabaseException;
+	List<MolgenisUserViewData> getAllMolgenisUsers() throws DatabaseException;
 
-	public List<MolgenisGroup> getAllMolgenisGroups() throws DatabaseException;
+	List<MolgenisGroup> getAllMolgenisGroups() throws DatabaseException;
 
-	public List<MolgenisGroup> getGroupsWhereUserIsMember(Integer userId) throws DatabaseException;
+	List<MolgenisGroup> getGroupsWhereUserIsMember(Integer userId) throws DatabaseException;
 
-	public List<MolgenisGroup> getGroupsWhereUserIsNotMember(Integer userId) throws DatabaseException;
+	List<MolgenisGroup> getGroupsWhereUserIsNotMember(Integer userId) throws DatabaseException;
 
-	public List<MolgenisUserViewData> getUsersMemberInGroup(Integer groupId) throws DatabaseException;
+	List<MolgenisUserViewData> getUsersMemberInGroup(Integer groupId) throws DatabaseException;
 
-	public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
-	
-	public Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
+	Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
+
+	Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException;
 }

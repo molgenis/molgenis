@@ -173,7 +173,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		return molgenisUser;
 	}
 	
-	private class PredicateNotInMolgenisGroupList implements Predicate<MolgenisGroup> {
+	private static class PredicateNotInMolgenisGroupList implements Predicate<MolgenisGroup> {
 		final List<MolgenisGroup> toFilterItemList;
 		
 		PredicateNotInMolgenisGroupList(List<MolgenisGroup> notInList){
@@ -193,11 +193,11 @@ public class UserManagerServiceImpl implements UserManagerService
 	}
 
 	@Override
-	public Integer addUserToGroup(Integer molgenisGroup_id, Integer molgenisUser_id) throws DatabaseException
+	public Integer addUserToGroup(Integer molgenisGrougId, Integer molgenisUserId) throws DatabaseException
 	{
 		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-		molgenisGroupMember.setMolgenisGroup(molgenisGroup_id);
-		molgenisGroupMember.setMolgenisUser(molgenisUser_id);
+		molgenisGroupMember.setMolgenisGroup(molgenisGrougId);
+		molgenisGroupMember.setMolgenisUser(molgenisUserId);
 		return database.add(molgenisGroupMember);
 	}
 

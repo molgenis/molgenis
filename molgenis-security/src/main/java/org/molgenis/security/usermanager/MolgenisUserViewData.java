@@ -2,31 +2,30 @@ package org.molgenis.security.usermanager;
 
 public class MolgenisUserViewData
 {
-	private Integer id =  null;
-	private String username =  null;
-	
-	MolgenisUserViewData(Integer id, String username){
+	private final Integer id;
+	private final String username;
+
+	MolgenisUserViewData(final Integer id, final String username)
+	{
+		if (null == id)
+		{
+			throw new IllegalArgumentException("id is null");
+		}
+		if (null == username)
+		{
+			throw new IllegalArgumentException("username is null");
+		}
 		this.id = id;
 		this.username = username;
 	}
-	
+
 	public Integer getId()
 	{
 		return id;
 	}
-	
-	public void setId(Integer id)
-	{
-		this.id = id;
-	}
-	
+
 	public String getUsername()
 	{
 		return username;
-	}
-	
-	public void setUsername(String username)
-	{
-		this.username = username;
 	}
 }

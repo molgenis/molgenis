@@ -11,7 +11,7 @@
 						+ '<td>' + data[index].username + '</td></tr>');
 			});
 			return "<tbody>" + listItems.join('') + "</tbody>";
-		};
+		}
 		
 		
 		/**
@@ -27,7 +27,7 @@
 		 */
 		$('#drop-down-groups-to-add').change(function(){
 			var groupToAddId = $(this).val();
-			$.get('/menu/admin/usermanager/addusertogroup/' + groupToAddId, function(data) {
+			$.get('/menu/admin/usermanager/addusertogroup/' + groupToAddId, function() {
 				$("#form-usermanager").submit();
 			});
 		});
@@ -38,7 +38,7 @@
 		 */
 		$('#groupsWhereUserIsMember a[data-remove-group-id]').click(function(){
 			var groupToRemoveId = $(this).attr("data-remove-group-id");
-			$.get('/menu/admin/usermanager/removeuserfromgroup/' + groupToRemoveId, function(data) {
+			$.get('/menu/admin/usermanager/removeuserfromgroup/' + groupToRemoveId, function() {
 				$("#form-usermanager").submit();
 			});
 		});

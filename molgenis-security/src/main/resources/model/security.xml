@@ -26,17 +26,14 @@
 			<unique fields="Email"/>
 			<unique fields="username"/>
 		</entity>
-		<entity name="MolgenisGroup" system="true" xref_label="name">
+		<entity name="MolgenisGroup" system="true">
 			<field name="id" type="autoid" hidden="true"/>
 			<field name="name" type="string"/>
-			<unique fields="name" />
 		</entity>
 		<entity name="MolgenisGroupMember" system="true">
 			<field name="id" type="autoid" hidden="true"/>	
-			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser" />
+			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
 			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
-			<unique fields="molgenisUser" />
-			<unique fields="molgenisGroup" />
 		</entity>
 		<entity name="Authority" abstract="true" system="true">
 			<field name="role" type="string"/>
