@@ -83,30 +83,28 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 								"formcategory", "formstudydatarequest", "formruntimeproperty"))
 
 				// entities menu plugins
-				.antMatchers("/menu/entities/form.DataSet", "/plugin/form.DataSet")
+				.antMatchers("/menu/entities/form.DataSet/**", "/plugin/form.DataSet/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formdataSet"))
 
-				.antMatchers("/menu/entities/form.Protocol?subForms=DataSet.ProtocolUsed",
-						"/plugin/form.Protocol?subForms=DataSet.ProtocolUsed")
+				.antMatchers("/menu/entities/form.Protocol/**", "/plugin/form.Protocol/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formprotocol"))
 
-				.antMatchers("/menu/entities/form.ProtocolFlow", "/plugin/form.ProtocolFlow")
+				.antMatchers("/menu/entities/form.ProtocolFlow/**", "/plugin/form.ProtocolFlow/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formprotocolflow"))
 
-				.antMatchers("/menu/entities/form.ObservationSetFlow", "/plugin/form.ObservationSetFlow")
+				.antMatchers("/menu/entities/form.ObservationSetFlow/**", "/plugin/form.ObservationSetFlow/**")
 				.hasAnyAuthority(defaultPluginAuthorities("observationsetflow"))
 
-				.antMatchers("/menu/entities/form.ObservableFeature?subForms=Category.observableFeature",
-						"/plugin/form.ObservableFeature?subForms=Category.observableFeature")
+				.antMatchers("/menu/entities/form.ObservableFeature/**", "/plugin/form.ObservableFeature/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formobservablefeature"))
 
-				.antMatchers("/menu/entities/form.Category", "/plugin/form.Category")
+				.antMatchers("/menu/entities/form.Category/**", "/plugin/form.Category/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formcategory"))
 
-				.antMatchers("/menu/entities/form.StudyDataRequest", "/plugin/form.StudyDataRequest")
+				.antMatchers("/menu/entities/form.StudyDataRequest/**", "/plugin/form.StudyDataRequest/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formstudydatarequest"))
 
-				.antMatchers("/menu/entities/form.RuntimeProperty", "/plugin/form.RuntimeProperty")
+				.antMatchers("/menu/entities/form.RuntimeProperty/**", "/plugin/form.RuntimeProperty/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formruntimeproperty"))
 
 				.antMatchers("/menu/entities/form.MolgenisUser/**", "/plugin/form.MolgenisUser/**")
@@ -172,13 +170,13 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// admin menu
 				.antMatchers("/menu/admin")
 				.hasAnyAuthority(
-						defaultPluginAuthorities("permissionmanager", "usermanager", "catalogmanager", "studymanager", "dataindexer",
-								"datasetdeleter"))
+						defaultPluginAuthorities("permissionmanager", "usermanager", "catalogmanager", "studymanager",
+								"dataindexer", "datasetdeleter"))
 
 				// admin menu plugins
 				.antMatchers("/menu/admin/permissionmanager/**", "/plugin/permissionmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
-				
+
 				.antMatchers("/menu/admin/usermanager/**", "/plugin/usermanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("usermanager"))
 
