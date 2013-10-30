@@ -47,10 +47,13 @@
 							</ul>
 							<div class="tab-content">
 							    <div class="tab-pane active" id="study-definition-viewer">
-									<div id="study-definition-viewer-info">
+									<div id="study-definition-viewer-container">
+										<div id="study-definition-viewer-info">
+										</div>
+										<div id="study-definition-viewer-tree">
+										</div>
 									</div>
-									<div id="study-definition-viewer-tree">
-									</div>
+									<button id="download-study-definition-btn" class="btn pull-right" type="button">Download</button>
 							    </div>
 							    <div class="tab-pane" id="study-definition-editor">
 							    	<div id="study-definition-editor-container">

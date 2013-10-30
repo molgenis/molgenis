@@ -6,8 +6,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
@@ -15,6 +13,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.protocolviewer.ProtocolViewerController;
+import org.molgenis.util.ShoppingCart;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.testng.annotations.Test;
@@ -27,6 +26,7 @@ public class ProtocolViewerControllerTest
 		// mock db
 		Database db = mock(Database.class);
 		MolgenisSettings settings = mock(MolgenisSettings.class);
+		ShoppingCart shoppingCart = mock(ShoppingCart.class);
 
 		DataSet dataSet = new DataSet();
 		dataSet.setId(1);
@@ -56,17 +56,16 @@ public class ProtocolViewerControllerTest
 		when(db.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(1, 2, 3))))
 				.thenReturn(Arrays.asList(feature1, feature2, feature3));
 
-		ProtocolViewerController controller = new ProtocolViewerController(db, settings);
+		ProtocolViewerController controller = new ProtocolViewerController(db, settings, shoppingCart);
 
 		// mock request
 		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
 		httpRequest.setMethod("GET");
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getParameter("features")).thenReturn("1,2,3");
+		when(shoppingCart.getCart()).thenReturn(Arrays.asList(1, 2, 3));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		controller.download(request, response);
+		controller.download(response);
 		// assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()),
 		// "c9dea8a729c83d5428137bddc77f5540");
 	}
@@ -77,6 +76,7 @@ public class ProtocolViewerControllerTest
 		// mock db
 		Database db = mock(Database.class);
 		MolgenisSettings settings = mock(MolgenisSettings.class);
+		ShoppingCart shoppingCart = mock(ShoppingCart.class);
 
 		DataSet dataSet = new DataSet();
 		dataSet.setId(1);
@@ -105,17 +105,16 @@ public class ProtocolViewerControllerTest
 		when(db.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(1, 2, 3))))
 				.thenReturn(Arrays.asList(feature1, feature2, feature3));
 
-		ProtocolViewerController controller = new ProtocolViewerController(db, settings);
+		ProtocolViewerController controller = new ProtocolViewerController(db, settings, shoppingCart);
 
 		// mock request
 		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
 		httpRequest.setMethod("GET");
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getParameter("features")).thenReturn("1,2,3");
+		when(shoppingCart.getCart()).thenReturn(Arrays.asList(1, 2, 3));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		controller.download(request, response);
+		controller.download(response);
 
 		// assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()),
 		// "ed7513d8dc5ef44e36c51b6595f44dbf");
@@ -127,6 +126,7 @@ public class ProtocolViewerControllerTest
 		// mock db
 		Database db = mock(Database.class);
 		MolgenisSettings settings = mock(MolgenisSettings.class);
+		ShoppingCart shoppingCart = mock(ShoppingCart.class);
 
 		DataSet dataSet = new DataSet();
 		dataSet.setId(1);
@@ -135,17 +135,16 @@ public class ProtocolViewerControllerTest
 		when(db.find(DataSet.class, new QueryRule(DataSet.ID, Operator.EQUALS, 1))).thenReturn(
 				Collections.singletonList(dataSet));
 
-		ProtocolViewerController controller = new ProtocolViewerController(db, settings);
+		ProtocolViewerController controller = new ProtocolViewerController(db, settings, shoppingCart);
 
 		// mock request
 		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
 		httpRequest.setMethod("GET");
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getParameter("features")).thenReturn("1,2,3");
+		when(shoppingCart.getCart()).thenReturn(Arrays.asList(1, 2, 3));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		controller.download(request, response);
+		controller.download(response);
 		// assertEquals(DigestUtils.md5Hex(httpResponse.getContentAsByteArray()),
 		// "b5eeb35c257e5dced33bb2367c8924bd");
 	}

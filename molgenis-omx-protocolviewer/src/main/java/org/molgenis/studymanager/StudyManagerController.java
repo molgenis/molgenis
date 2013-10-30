@@ -1,9 +1,14 @@
 package org.molgenis.studymanager;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -16,10 +21,13 @@ import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.io.TupleWriter;
+import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
 import org.molgenis.study.StudyDefinitionMeta;
 import org.molgenis.study.UnknownStudyDefinitionException;
+import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -200,6 +208,46 @@ public class StudyManagerController extends MolgenisPluginController
 		}
 
 		return getStudyDefinitions(model);
+	}
+
+	@RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
+	public void downloadStudyDefinition(@PathVariable String id, HttpServletResponse response)
+			throws UnknownStudyDefinitionException, IOException
+	{
+		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+
+		// write response headers
+		String fileName = "variables_" + new SimpleDateFormat("yyyy-MM-dd_HH.mm").format(new Date()) + ".xls";
+		response.setContentType("application/vnd.ms-excel");
+		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+		// write excel file
+		List<String> header = Arrays.asList("Id", "Variable", "Description");
+		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
+		try
+		{
+			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
+			try
+			{
+				sheetWriter.writeColNames(header);
+				for (CatalogItem catalogItem : studyDefinition.getItems())
+				{
+					KeyValueTuple tuple = new KeyValueTuple();
+					tuple.set(header.get(0), catalogItem.getId());
+					tuple.set(header.get(1), catalogItem.getName());
+					tuple.set(header.get(2), catalogItem.getDescription());
+					sheetWriter.write(tuple);
+				}
+			}
+			finally
+			{
+				sheetWriter.close();
+			}
+		}
+		finally
+		{
+			excelWriter.close();
+		}
 	}
 
 	public static class StudyDefinitionUpdateRequest
