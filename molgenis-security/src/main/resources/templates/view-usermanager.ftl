@@ -24,12 +24,11 @@
 				<div class="control-group">	
 					<#if groupsWhereUserIsMember?has_content>
 						<div class="controls">
-							<table id="groupsWhereUserIsMember" class="table table-striped">
+							<table id="groupsWhereUserIsMember" class="table table-striped table-hover">
 								<tbody>
 									<#list groupsWhereUserIsMember as group>
-										<tr>
-											<td>${group.id?c}</td>
-											<td><a class="btn btn-small" data-group-id="${group.id?c}">${group.name}</a></td>
+										<tr data-group-id="${group.id?c}" style="cursor: pointer;">
+											<td>${group.name}</td>
 											<td>
 												<div class="controls">
 													<a class="btn btn-small" data-remove-group-id="${group.id?c}"><i class="icon-remove"></i></a>
@@ -75,7 +74,7 @@
 				
 				<div class="control-group">	
 					<div class="controls">
-						<table id="users-of-group" class="table table-striped">
+						<table id="users-of-group" class="table table-striped table-hover">
 						</table>
 					</div>
 				<div>	

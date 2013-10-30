@@ -6,9 +6,7 @@
 		function createListOfUsersFromGroup(data) {
 			var listItems = [];
 			$.each(data, function (index) {
-				listItems.push('<tr>' 
-						+ '<td>' + data[index].id + '</td>' 
-						+ '<td>' + data[index].username + '</td></tr>');
+				listItems.push('<tr><td>' + data[index].username + '</td></tr>');
 			});
 			return "<tbody>" + listItems.join('') + "</tbody>";
 		}
@@ -57,7 +55,7 @@
 		/**
 		 * Groups where user is member
 		 */
-		$.each($('#groupsWhereUserIsMember a[data-group-id]'), function(){
+		$.each($('#groupsWhereUserIsMember tr[data-group-id]'), function(){
 			$(this).click(function(){
 				$('#group-select').val($(this).attr('data-group-id'));
 				$('#group-select').change();
