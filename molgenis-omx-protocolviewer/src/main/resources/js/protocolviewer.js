@@ -658,10 +658,11 @@
 		var table = $('<table />');
 		
 		table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
+		table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
 		$.each(getDescription(feature), function(key, val){
 			table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 		});
-
+		
 		table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 		if (feature.unit)
 			table.append('<tr><td>' + "Unit:" + '</td><td>' + feature.unit.name + '</td></tr>');
@@ -728,15 +729,18 @@
 		}
 
 		var table = $('<table class="table table-striped table-condensed table-hover" />');
-		$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Remove</th>').appendTo(table);
+		$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
+				var restData = restApi.get(node.data.key);
 				var protocol_name = node.parent.data.title;
-				var name = node.data.title;
-				var description = node.data.tooltip;
+				var name = restData.name;	
+				var identifier = restData.identifier;
+				var description = restData.description;
 				var row = $('<tr />').attr('id', node.data.key + "_row");
 				$('<td />').text(typeof protocol_name !== 'undefined' ? protocol_name : "").appendTo(row);
 				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
+				$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 				$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 				var deleteButton = $('<i class="icon-remove"></i>');
 				deleteButton.click($.proxy(function() {
