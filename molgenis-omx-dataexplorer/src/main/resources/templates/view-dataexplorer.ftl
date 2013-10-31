@@ -82,7 +82,6 @@
 	</div>
 	<script>
 		$(function(){
-			window.top.molgenis.setContextURL('${context_url}');
 			<#if !model.authenticated>
 				$('#dataexplorer-grid-data').hide();
 				$('#dataexplorer-aggregate-data').show();

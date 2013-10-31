@@ -21,6 +21,9 @@
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/jquery.validate.min.js"></script>
 		<script src="/js/molgenis.js"></script>
+	<#if context_url??>
+		<script>top.molgenis.setContextUrl('${context_url}');</script>
+	</#if>
 		<!--[if lt IE 9]>
 			<script src="/js/molgenis-ie8.js"></script>
 		<![endif]-->

@@ -1,3 +1,14 @@
+(function($, molgenis) {
+	molgenis.setContextUrl = function(contextUrl) {
+		molgenis.contextUrl = contextUrl;
+	};
+	
+	molgenis.getContextUrl = function() {
+		return molgenis.contextUrl;
+	};
+}($, window.top.molgenis = window.top.molgenis || {}));
+
+
 // Add endsWith function to the string class
 if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function(suffix) {
@@ -84,10 +95,8 @@ $(function() {
 });
 
 // molgenis entity REST API client
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-
-	var molgenis = w.molgenis = w.molgenis || {};
 
 	molgenis.RestClient = function RestClient(cache) {
 		this.cache = cache === false ? null : [];
@@ -222,13 +231,11 @@ $(function() {
 		});
 	};
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
 
 // molgenis search API client
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-
-	var molgenis = w.molgenis = w.molgenis || {};
 
 	molgenis.SearchClient = function SearchClient() {
 	};
@@ -249,7 +256,7 @@ $(function() {
 			}
 		});
 	};
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
 
 function toggleDiv(div, image)
 {

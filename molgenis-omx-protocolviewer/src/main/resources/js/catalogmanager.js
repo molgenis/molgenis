@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	// on document ready
@@ -50,7 +50,7 @@
 			
 			// create new catalog preview
 			var catalogId = $('#catalogForm input[type="radio"]:checked').val();
-			$.get('/plugin/catalogmanager/view/' + catalogId, function(catalog) {
+			$.get(molgenis.getContextUrl() + '/view/' + catalogId, function(catalog) {
 				var items= [];
 				items.push('<table class="table table-condensed table-borderless">');
 				items.push('<tr><td>Version</td><td>' + catalog.version + '</td></tr>');
@@ -66,4 +66,4 @@
 		});
 		$('#catalogForm input[type="radio"]:checked').change();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

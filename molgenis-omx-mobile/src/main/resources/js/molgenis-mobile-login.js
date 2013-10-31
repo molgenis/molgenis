@@ -25,9 +25,9 @@ $(document).bind("mobileinit", function() {
 	$(document).on('click', '.logout', ns.logout);
 });
 
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	
 	ns.isUserAuthenticated = function(callback) {
 		$.ajax({
@@ -95,4 +95,4 @@ $(document).bind("mobileinit", function() {
 			}
 		});
 	}
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

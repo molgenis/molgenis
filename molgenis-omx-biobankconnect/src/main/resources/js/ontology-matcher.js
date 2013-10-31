@@ -1,7 +1,7 @@
-(function($, w) {
-	
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var pagination = new ns.Pagination();
 	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
@@ -83,7 +83,7 @@
 		}
 		$.ajax({
 			type : 'POST',
-			url : ns.getContextURL() + '/ontologymatcher/' + action,
+			url : molgenis.getContextUrl() + '/ontologymatcher/' + action,
 			data : JSON.stringify(request),
 			contentType : 'application/json',
 			async : false,
@@ -253,7 +253,7 @@
 		$('#catalogue-container').hide().find('table').empty();
 	}
 	
-	$(document).ready(function(){
+	$(function(){
 		$('#add-target-dataset').click(function(){
 			var targetDataSet = $('#targetDataSets option:selected');
 			ns.addTargetDataSet(targetDataSet.val());
@@ -282,4 +282,4 @@
 			ns.selectCatalogue('check');
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
