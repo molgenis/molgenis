@@ -119,6 +119,9 @@ $(function() {
 					success : function(resource) {
 						if (_this.cache) _this._cachePut(resourceUri, resource, expands);
 						cachedResource = resource;	
+					},
+					error : function(xhr) {
+						alert(xhr.responseText);
 					}
 				});
 			} else {
@@ -130,6 +133,9 @@ $(function() {
 					success : function(resource) {
 						if (_this.cache) _this._cachePut(resourceUri, resource, expands);
 						cachedResource = resource;
+					},
+					error : function(xhr) {
+						alert(xhr.responseText);
 					}
 				});
 			}
@@ -156,6 +162,9 @@ $(function() {
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
 						callback(resource);	
+					},
+					error : function(xhr) {
+						alert(xhr.responseText);
 					}
 				});
 			} else {
@@ -167,6 +176,9 @@ $(function() {
 					success : function(resource) {
 						_this._cachePut(resourceUri, resource, expands);
 						callback(resource);
+					},
+					error : function(xhr) {
+						alert(xhr.responseText);
 					}
 				});
 			}
@@ -253,6 +265,9 @@ $(function() {
 					alert(searchResponse.errorMessage);
 				}
 				callback(searchResponse);
+			},
+			error : function(xhr) {
+				alert(xhr.responseText);
 			}
 		});
 	};
