@@ -1,0 +1,9 @@
+digraph G {
+	step1 -> step2;
+	step2 -> step3;
+	step2 -> step5;
+	step3 -> step4;
+	step4 -> step5;
+	step4 -> step6;
+	step5 -> step7;
+}
