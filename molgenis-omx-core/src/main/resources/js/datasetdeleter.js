@@ -1,7 +1,7 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	
 	// fill dataset select
@@ -25,7 +25,7 @@
 		var form = $('#deletedataset-form');
 		$.ajax({
 		    type: 'POST',
-		    url: '/plugin/datasetdeleter/delete',
+		    url: molgenis.getContextUrl() + '/delete',
 		    data: form.serialize(),
 		    success: function (msg) {
 		    	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
@@ -38,4 +38,4 @@
 		 } 
 	});
 };
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

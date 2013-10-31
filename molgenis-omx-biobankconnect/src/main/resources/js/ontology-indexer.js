@@ -1,18 +1,9 @@
-(function($, w) {
-	
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
-	var CONTEXT_URL = null;
-	
-	ns.setContextURL = function(CONTEXT_URL){
-		this.CONTEXT_URL = CONTEXT_URL;
-	};
-	
-	ns.getContextURL = function() {
-		return this.CONTEXT_URL;
-	};
 	
 	ns.searchAvailableIndices = function(runningIndexUri) {
 		searchApi.search(ns.createSearchRequest(), function(searchResponse) {
@@ -34,7 +25,7 @@
 					var removeIcon = $('<i class="icon-remove"></i>').click(function(){
 						$('input[name="ontologyUri"]').val(ontologyUri);
 						$('#ontologyindexer-form').attr({
-							'action' : ns.getContextURL() + '/remove',
+							'action' : molgenis.getContextUrl() + '/remove',
 							'method' : 'POST'
 						}).submit();
 					});
@@ -81,7 +72,7 @@
 				ns.showAlertMessage('alert alert-error','Please define the name of ontology!');
 			}else if($('#uploadedOntology').val() !== ''){
 				$('#ontologyindexer-form').attr({
-					'action' : ns.getContextURL() + '/index',
+					'action' : molgenis.getContextUrl() + '/index',
 					'method' : 'POST'
 				}).submit();
 			}else{
@@ -90,9 +81,9 @@
 		});
 		$('#refresh-button').click(function(){
 			$('#ontologyindexer-form').attr({
-				'action' : ns.getContextURL(),
+				'action' : molgenis.getContextUrl(),
 				'method' : 'GET'
 			}).submit();
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

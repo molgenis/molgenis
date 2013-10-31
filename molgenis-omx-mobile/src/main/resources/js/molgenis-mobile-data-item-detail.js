@@ -5,9 +5,10 @@ $(document).bind("mobileinit", function() {
 	$(document).on('pagehide', '#feature-page', window.top.molgenis.onDataItemPageHide);
 });
 
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	
 	ns.onDataItemPageShow = function() {
@@ -47,4 +48,4 @@ $(document).bind("mobileinit", function() {
 		$('#categories').html('');
 	}
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

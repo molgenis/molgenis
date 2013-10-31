@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	$(function() {
@@ -48,7 +48,7 @@
 		 * Drop down with groups to select
 		 */
 		$('#group-select').change(function() {
-			$.get('/plugin/usermanager/users/' + $(this).val(), function(data) {
+			$.get(molgenis.getContextUrl() + '/users/' + $(this).val(), function(data) {
 				$('#users-of-group').html(createListOfUsersFromGroup(data));
 			});
 		});
@@ -75,4 +75,4 @@
 		$('#group-select').trigger('liszt:updated');
 	});
 
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
