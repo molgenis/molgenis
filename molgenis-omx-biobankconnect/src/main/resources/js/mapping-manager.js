@@ -371,7 +371,7 @@
 								};
 								$.ajax({
 									type : 'POST',
-									url : ns.getContextURL() + '/mappingmanager/delete',
+									url : molgenis.getContextUrl() + '/mappingmanager/delete',
 									async : false,
 									data : JSON.stringify(deleteRequest),
 									contentType : 'application/json',
@@ -605,7 +605,7 @@
 					};
 					$.ajax({
 						type : 'POST',
-						url : ns.getContextURL() + '/mappingmanager/update',
+						url : molgenis.getContextUrl() + '/mappingmanager/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json',
@@ -822,7 +822,7 @@
 			'dataSetId' : selectedDataSet,
 			'documentType' : dataSet.identifier
 		};
-		$.download(ns.getContextURL() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+		$.download(molgenis.getContextUrl() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
 	ns.MappingManager.prototype.createHelpModal = function(){

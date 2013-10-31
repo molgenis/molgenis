@@ -1,3 +1,14 @@
+(function($, molgenis) {
+	molgenis.setContextUrl = function(contextUrl) {
+		molgenis.contextUrl = contextUrl;
+	};
+	
+	molgenis.getContextUrl = function() {
+		return molgenis.contextUrl;
+	};
+}($, window.top.molgenis = window.top.molgenis || {}));
+
+
 // Add endsWith function to the string class
 if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function(suffix) {

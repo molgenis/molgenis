@@ -2,11 +2,10 @@
 	"use strict";
 	
 	var ns = molgenis;
-	var plugin_uri = molgenis.contextUrl;
 	
 	ns.onWorkflowSelectionChange = function(workflowId) {
 		$.ajax({
-			url: plugin_uri + '/workflow/' + workflowId,
+			url: molgenis.getContextUrl() + '/workflow/' + workflowId,
 			success: function(data) {
 				ns.createWorkflowContainer(data);
 			},
@@ -46,7 +45,7 @@
 	
 	ns.createWorkflowElementContainer = function(workflowId, workflowElementId, container) {
 		$.ajax({
-			url: plugin_uri + '/workflow/' + workflowId + '/element/' + workflowElementId,
+			url: molgenis.getContextUrl() + '/workflow/' + workflowId + '/element/' + workflowElementId,
 			success: function(data) {
 				container.html(data);
 			},
@@ -73,7 +72,7 @@
 		});
 		$(document).on('click', '.delete-row-btn', function(e){
 			var el = $(this);
-			$.post(plugin_uri + '/workflowelementdatarow/' + el.data('row-id') + '?_method=DELETE')
+			$.post(molgenis.getContextUrl() + '/workflowelementdatarow/' + el.data('row-id') + '?_method=DELETE')
 			  .done(function(data) {
 				  var pane = el.closest('.workflow-element-pane');
 				  ns.createWorkflowElementContainer(pane.data('workflow'), pane.data('element'), pane);
@@ -95,7 +94,7 @@
 				inputRowIds = $(this).closest('tr').data('input-rows');
 			}
 			
-			$.post(plugin_uri + '/workflowelementdatarow', {'workflowElementId': pane.data('element'), 'workflowElementDataRowIds[]': inputRowIds})
+			$.post(molgenis.getContextUrl() + '/workflowelementdatarow', {'workflowElementId': pane.data('element'), 'workflowElementDataRowIds[]': inputRowIds})
 			  .done(function(data) {
 				  ns.createWorkflowElementContainer(pane.data('workflow'), pane.data('element'), pane);
 			  })
@@ -122,7 +121,7 @@
 				$.each(selectedRows, function(i, selectedRow) {
 					inputRowIds = inputRowIds.concat($(selectedRow).closest('tr').data('input-rows').toString().split(','));
 				});
-				$.post(plugin_uri + '/workflowelementdatarow', {'workflowElementId': elementId, 'workflowElementDataRowIds': inputRowIds})
+				$.post(molgenis.getContextUrl() + '/workflowelementdatarow', {'workflowElementId': elementId, 'workflowElementDataRowIds': inputRowIds})
 				  .done(function(data) {
 					  var pane = $(selectedRows[0]).closest('.workflow-element-pane');
 					  ns.createWorkflowElementContainer(pane.data('workflow'), pane.data('element'), pane);
@@ -142,7 +141,7 @@
 			var workflowElementDataRowId = $(this).closest('tr').data('datarow');
 			var featureId = $(this).closest('td').data('feature');
 			
-			$.post(plugin_uri + '/workflowelementdatarow/value', {'workflowElementDataRowId': workflowElementDataRowId, 'featureId': featureId, 'rawValue': $(this).val()})
+			$.post(molgenis.getContextUrl() + '/workflowelementdatarow/value', {'workflowElementDataRowId': workflowElementDataRowId, 'featureId': featureId, 'rawValue': $(this).val()})
 			  .done(function(data) {
 				  $(e.target).addClass('updated-text-input');
 			  })

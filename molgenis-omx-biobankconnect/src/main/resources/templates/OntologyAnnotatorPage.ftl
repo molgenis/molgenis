@@ -72,7 +72,7 @@
 			$('#annotate-all-dataitems').click(function(){
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.contextUrl + '/annotate',
+					'action' : molgenis.getContextUrl() + '/annotate',
 					'method' : 'POST'
 				}).submit();
 			});

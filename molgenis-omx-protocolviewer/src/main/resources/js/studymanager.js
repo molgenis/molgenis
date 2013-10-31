@@ -46,7 +46,7 @@
 		function updateStudyDefinitionTable() {
 			$.ajax({
 				type : 'GET',
-				url : molgenis.contextUrl + '/list',
+				url : molgenis.getContextUrl() + '/list',
 				success : function(data) {
 					var table = $('#studyDefinitionList tbody');
 					var items = [];
@@ -89,7 +89,7 @@
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			$.ajax({
 				type : 'GET',
-				url : molgenis.contextUrl + '/view/' + studyDefinitionId,
+				url : molgenis.getContextUrl() + '/view/' + studyDefinitionId,
 				success : function(catalog) {
 					viewInfoContainer.html(createCatalogInfo(catalog));
 					viewTreeContainer.empty();
@@ -115,7 +115,7 @@
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			$.ajax({
 				type : 'GET',
-				url : molgenis.contextUrl + '/edit/' + studyDefinitionId,
+				url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
 				success : function(catalog) {
 					editInfoContainer.html(createCatalogInfo(catalog));
 					editTreeContainer.empty();
@@ -144,7 +144,7 @@
 		
 		$('#download-study-definition-btn').click(function() {
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
-			window.location = molgenis.contextUrl + '/download/' + studyDefinitionId;
+			window.location = molgenis.getContextUrl() + '/download/' + studyDefinitionId;
 		});
 		
 		$('#update-study-definition-btn').click(function() {
@@ -166,7 +166,7 @@
 			
 			$.ajax({
 				type : 'POST',
-				url : molgenis.contextUrl + '/update/' + studyDefinitionId,
+				url : molgenis.getContextUrl() + '/update/' + studyDefinitionId,
 				data : JSON.stringify({
 					'catalogItemIds': uniquecatalogItemIds
 				}),

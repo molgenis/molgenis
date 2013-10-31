@@ -50,7 +50,7 @@
 			
 			// create new catalog preview
 			var catalogId = $('#catalogForm input[type="radio"]:checked').val();
-			$.get(molgenis.contextUrl + '/view/' + catalogId, function(catalog) {
+			$.get(molgenis.getContextUrl() + '/view/' + catalogId, function(catalog) {
 				var items= [];
 				items.push('<table class="table table-condensed table-borderless">');
 				items.push('<tr><td>Version</td><td>' + catalog.version + '</td></tr>');

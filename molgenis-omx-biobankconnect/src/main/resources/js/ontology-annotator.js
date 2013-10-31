@@ -477,7 +477,7 @@
 				modal.modal('hide');
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.getContextURL() + '/annotate/remove',
+					'action' : molgenis.getContextUrl() + '/annotate/remove',
 					'method' : 'POST'
 				}).submit();
 			});
@@ -512,7 +512,7 @@
 			};
 			$.ajax({
 				type : 'POST',
-				url : ns.getContextURL() + '/annotate/update',
+				url : molgenis.getContextUrl() + '/annotate/update',
 				async : false,
 				data : JSON.stringify(updateRequest),
 				contentType : 'application/json',

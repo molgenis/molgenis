@@ -83,7 +83,7 @@
 		}
 		$.ajax({
 			type : 'POST',
-			url : ns.getContextURL() + '/ontologymatcher/' + action,
+			url : molgenis.getContextUrl() + '/ontologymatcher/' + action,
 			data : JSON.stringify(request),
 			contentType : 'application/json',
 			async : false,

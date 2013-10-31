@@ -4,15 +4,10 @@
 	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
-	var CONTEXT_URL = molgenis.contextUrl;
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
 	var mappingManager = new ns.MappingManager();
-		
-	ns.getContextURL = function() {
-		return this.CONTEXT_URL;
-	};
-	
+
 	ns.hrefToId = function(href){
 		return href.substring(href.lastIndexOf('/') + 1); 
 	};

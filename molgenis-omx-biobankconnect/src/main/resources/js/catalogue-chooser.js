@@ -162,7 +162,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : ns.getContextURL() + '/update',
+			url : molgenis.getContextUrl() + '/update',
 			async : false,
 			data : JSON.stringify(updateRequest),
 			contentType : 'application/json',

@@ -735,7 +735,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : molgenis.contextUrl + '/aggregate',
+			url : molgenis.getContextUrl() + '/aggregate',
 			data : JSON.stringify(aggregateRequest),
 			contentType : 'application/json',
 			success : function(aggregateResult){
@@ -753,7 +753,7 @@
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
 		
 		parent.showSpinner();
-		$.download(molgenis.contextUrl + '/download',{searchRequest :  jsonRequest});
+		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
 	};
 	

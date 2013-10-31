@@ -25,7 +25,7 @@
 		var form = $('#deletedataset-form');
 		$.ajax({
 		    type: 'POST',
-		    url: molgenis.contextUrl + '/delete',
+		    url: molgenis.getContextUrl() + '/delete',
 		    data: form.serialize(),
 		    success: function (msg) {
 		    	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
