@@ -37,6 +37,8 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 	</#if>
 </#if>
 </#list>
+import org.molgenis.ui.util.ErrorMessageResponse;
+import org.molgenis.ui.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.EntityPager;
 import org.molgenis.util.MolgenisDateFormat;
 
@@ -520,13 +522,33 @@ public class ${entity.name}Controller
 	
 	@ExceptionHandler(EntityNotFoundException.class)
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
-	public void handleEntityNotFoundException(EntityNotFoundException e)
+	@ResponseBody
+	public ErrorMessageResponse handleEntityNotFoundException(EntityNotFoundException e)
 	{
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
-	
+
+	@ExceptionHandler(DatabaseException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
+	{
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	@ExceptionHandler(DatabaseAccessException.class)
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	public void handleDatabaseAccessException(DatabaseAccessException e)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseAccessException(DatabaseAccessException e)
 	{
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+	
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 }

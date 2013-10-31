@@ -1,7 +1,6 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient(false);
 	var NR_ROWS_PER_PAGE = 10;
@@ -134,8 +133,13 @@
 					$('#success-message-content').html(forms[formIndex].title + ' deleted.');
 					$('#success-message').show();
 				},
-				error: function() {
+				error: function(xhr) {
+					var messages = [];
+					$.each(JSON.parse(xhr.responseText).errors, function(index, error) {
+						messages.push(error.message);
+					});
 					$('#error-message-content').html('Could not delete ' + forms[formIndex].title + '.');
+					$('#error-message-details').html('Details: ' + messages.join('\n'));
 					$('#error-message').show();
 				}
 			});
@@ -208,4 +212,4 @@
 		});
 	});
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

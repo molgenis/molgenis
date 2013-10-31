@@ -83,12 +83,12 @@ public class WebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/");
-		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/");
-		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/");
-		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/");
-		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/");
-		registry.addResourceHandler("/myDas/**").addResourceLocations("/myDas/", "classpath:/myDas/");
+		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/").setCachePeriod(3600);
+		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/").setCachePeriod(3600);
+		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/").setCachePeriod(3600);
+		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
+		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
+		registry.addResourceHandler("/myDas/**").addResourceLocations("/myDas/", "classpath:/myDas/").setCachePeriod(3600);
 	}
 
 	@Override

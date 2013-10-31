@@ -125,7 +125,6 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.setContextURL('${context_url}');
 			var ontologyUri = null;
 			<#if ontologyUri ??> 
 				ontologyUri = "${ontologyUri}"; 
