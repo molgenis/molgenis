@@ -8,9 +8,9 @@
 		<div class="row-fluid">
 			<div id="userView" class="span6">
 				<div class="control-group">
-					<label class="control-label" for="user-select">Select User:</label>
+					<label class="control-label" for="user-select">Select user:</label>
 					<div class="controls">
-						<select id="user-select" data-placeholder="Choose an user" name="userId" class="chosen-select">
+						<select id="user-select" data-placeholder="Select an user" name="userId" class="chosen-select">
 							<option value="-1"></option>
 							<#if users?has_content>
 								<#list users as user>
@@ -44,9 +44,9 @@
 					
 				<div class="control-group">	
 					<#if groupsWhereUserIsNotMember?has_content>
-						<label class="control-label" for="drop-down-groups-to-add">Add an user to this group:</label>
+						<label class="control-label" for="drop-down-groups-to-add">Select a group to add user:</label>
 						<div class="controls">
-							<select id="drop-down-groups-to-add" data-placeholder="Choose a group" name="groupToAddId">
+							<select id="drop-down-groups-to-add" data-placeholder="Select a group" name="groupToAddId">
 								<option></option>
 								<#list groupsWhereUserIsNotMember as group>
 									<option value="${group.id?c}">${group.name}</option>
@@ -59,9 +59,9 @@
 				
 			<div id="groupView" class="span6">
 				<div class="control-group">
-					<label class="control-label" for="group-select">Select Group:</label>
+					<label class="control-label" for="group-select">Select group:</label>
 					<div class="controls">
-						<select id="group-select" data-placeholder="Choose a group" name="groupId">
+						<select id="group-select" data-placeholder="Select a group" name="groupId">
 							<#if groups?has_content>
 								<option value="-1"></option>
 								<#list groups as group>

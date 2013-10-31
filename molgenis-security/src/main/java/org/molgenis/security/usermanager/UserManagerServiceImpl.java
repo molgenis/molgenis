@@ -120,6 +120,54 @@ public class UserManagerServiceImpl implements UserManagerService
 		
 		return Lists.<MolgenisGroup> newArrayList(Iterables.filter(molgenisGroups, predicate));
 	}
+	
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	public Integer addUserToGroup(Integer molgenisGrougId, Integer molgenisUserId) throws DatabaseException
+	{
+		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
+		molgenisGroupMember.setMolgenisGroup(molgenisGrougId);
+		molgenisGroupMember.setMolgenisUser(molgenisUserId);
+		return database.add(molgenisGroupMember);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	public Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId)
+			throws DatabaseException
+	{
+		final MolgenisUser molgenisUser = MolgenisUser.findById(database, molgenisUserId);
+
+		if (molgenisUser == null)
+		{
+			throw new RuntimeException("unknown user id [" + molgenisUserId + "]");
+		}
+		
+		final MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, molgenisGroupId);
+
+		if (molgenisGroup == null)
+		{
+			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
+		}
+		
+		final List<MolgenisGroupMember> molgenisGroupMembers = database.find(MolgenisGroupMember.class, 
+				new QueryRule(MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser), 
+				new QueryRule(MolgenisGroupMember.MOLGENISGROUP, Operator.EQUALS, molgenisGroup));
+		
+		if(null == molgenisGroupMembers || molgenisGroupMembers.isEmpty()){
+			throw new RuntimeException("molgenis group member is not found");
+		}
+		
+		if(molgenisGroupMembers.size() > 1){
+			throw new RuntimeException("there are more than one group member found");
+		}
+		
+		MolgenisGroupMember molgenisGroupMember = molgenisGroupMembers.get(0);
+
+		return database.remove(molgenisGroupMember);
+	}
 
 	/**
 	 * Get All the molgenis groups from the list of molgenis group members
@@ -190,50 +238,6 @@ public class UserManagerServiceImpl implements UserManagerService
 			return true;
 		}
 		
-	}
-
-	@Override
-	public Integer addUserToGroup(Integer molgenisGrougId, Integer molgenisUserId) throws DatabaseException
-	{
-		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-		molgenisGroupMember.setMolgenisGroup(molgenisGrougId);
-		molgenisGroupMember.setMolgenisUser(molgenisUserId);
-		return database.add(molgenisGroupMember);
-	}
-
-	@Override
-	public Integer removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId)
-			throws DatabaseException
-	{
-		final MolgenisUser molgenisUser = MolgenisUser.findById(database, molgenisUserId);
-
-		if (molgenisUser == null)
-		{
-			throw new RuntimeException("unknown user id [" + molgenisUserId + "]");
-		}
-		
-		final MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, molgenisGroupId);
-
-		if (molgenisGroup == null)
-		{
-			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
-		}
-		
-		final List<MolgenisGroupMember> molgenisGroupMembers = database.find(MolgenisGroupMember.class, 
-				new QueryRule(MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser), 
-				new QueryRule(MolgenisGroupMember.MOLGENISGROUP, Operator.EQUALS, molgenisGroup));
-		
-		if(null == molgenisGroupMembers || molgenisGroupMembers.isEmpty()){
-			throw new RuntimeException("molgenis group member is not found");
-		}
-		
-		if(molgenisGroupMembers.size() > 1){
-			throw new RuntimeException("there are more than one group member found");
-		}
-		
-		MolgenisGroupMember molgenisGroupMember = molgenisGroupMembers.get(0);
-
-		return database.remove(molgenisGroupMember);
 	}
 	
 	private List<MolgenisUserViewData> parseToMolgenisUserViewData(List<MolgenisUser> users){
