@@ -5,7 +5,6 @@ import static org.molgenis.security.usermanager.UserManagerController.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +22,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class UserManagerController extends MolgenisPluginController
 {
-	private final static Logger logger = Logger.getLogger(UserManagerController.class);
 	public final static String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "usermanager";
 	private final UserManagerService pluginUserManagerService;
 
-	private Integer selectedUserId = new Integer(-1);
-	private Integer selectedGroupId = new Integer(-1);
+	private Integer selectedUserId = Integer.valueOf(-1);
+	private Integer selectedGroupId = Integer.valueOf(-1);
 
 	@Autowired
 	public UserManagerController(UserManagerService pluginUserManagerService)
 	{
 		super(URI);
-		if (pluginUserManagerService == null) 
+		if (pluginUserManagerService == null)
 		{
 			throw new IllegalArgumentException("PluginUserManagerService is null");
 		}
@@ -48,17 +46,16 @@ public class UserManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
-	public String updateView(@RequestParam
-	Integer userId, @RequestParam(value = "groupId", required = false)
-	Integer groupId, Model model) throws DatabaseException
+	public String updateView(@RequestParam Integer userId,
+			@RequestParam(value = "groupId", required = false) Integer groupId, Model model) throws DatabaseException
 	{
 		return refreshUserManagerView(userId, groupId, model);
 	}
 
 	@RequestMapping(value = "/users/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
-	public List<MolgenisUserViewData> getUsersMemberInGroup(@PathVariable
-	Integer groupId, Model model) throws DatabaseException
+	public List<MolgenisUserViewData> getUsersMemberInGroup(@PathVariable Integer groupId, Model model)
+			throws DatabaseException
 	{
 		this.selectedGroupId = groupId;
 		model.addAttribute("group_selected_id", this.selectedGroupId);
@@ -75,8 +72,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/addusertogroup/{groupToAddId}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public void addUserToGroup(@PathVariable
-	Integer groupToAddId) throws DatabaseException
+	public void addUserToGroup(@PathVariable Integer groupToAddId) throws DatabaseException
 	{
 		if (isValidId(this.selectedUserId) && isValidId(groupToAddId))
 		{
@@ -86,8 +82,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/removeuserfromgroup/{groupToRemoveId}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public void removeUserFromGroup(@PathVariable
-	Integer groupToRemoveId) throws DatabaseException
+	public void removeUserFromGroup(@PathVariable Integer groupToRemoveId) throws DatabaseException
 	{
 		if (isValidId(this.selectedUserId) && isValidId(groupToRemoveId))
 		{

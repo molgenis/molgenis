@@ -1,10 +1,12 @@
 package org.molgenis.ui.wizard;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.validation.BindingResult;
 
-public interface WizardPage
+public interface WizardPage extends Serializable
 {
 	String getTitle();
 

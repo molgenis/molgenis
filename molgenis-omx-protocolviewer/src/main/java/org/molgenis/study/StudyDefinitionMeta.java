@@ -25,7 +25,7 @@ public class StudyDefinitionMeta extends CatalogMeta
 	{
 		super(id, name);
 		this.email = email;
-		this.date = date;
+		this.date = new Date(date.getTime()); // do not store externally mutable object
 	}
 
 	public String getEmail()
@@ -35,6 +35,6 @@ public class StudyDefinitionMeta extends CatalogMeta
 
 	public Date getDate()
 	{
-		return date;
+		return new Date(date.getTime()); // do not expose mutual object
 	}
 }
