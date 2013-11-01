@@ -27,6 +27,8 @@ import org.springframework.validation.ObjectError;
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
 	private final Database database;
 	private final EntitiesImporter entitiesImporter;

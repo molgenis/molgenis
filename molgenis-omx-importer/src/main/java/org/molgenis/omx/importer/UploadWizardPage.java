@@ -2,7 +2,6 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,7 +33,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 @Component
-public class UploadWizardPage extends AbstractWizardPage implements Serializable
+public class UploadWizardPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
