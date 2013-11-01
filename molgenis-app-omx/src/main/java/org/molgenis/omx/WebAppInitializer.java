@@ -10,6 +10,7 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class WebAppInitializer implements WebApplicationInitializer
@@ -39,6 +40,11 @@ public class WebAppInitializer implements WebApplicationInitializer
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
 		}
+
+		// add filters
+		javax.servlet.FilterRegistration.Dynamic etagFilter = servletContext.addFilter("etagFilter",
+				new ShallowEtagHeaderFilter());
+		etagFilter.addMappingForServletNames(null, true, "dispatcher");
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
