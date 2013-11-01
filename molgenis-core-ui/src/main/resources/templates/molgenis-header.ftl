@@ -7,6 +7,7 @@
 	<head>
 		<title>${molgenis_ui.title?html}</title>
 		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
@@ -19,7 +20,10 @@
 		<script src="/js/jquery-1.8.3.min.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/jquery.validate.min.js"></script>
-		<script src="/js/molgenis-all.js"></script>
+		<script src="/js/molgenis.js"></script>
+	<#if context_url??>
+		<script>top.molgenis.setContextUrl('${context_url}');</script>
+	</#if>
 		<!--[if lt IE 9]>
 			<script src="/js/molgenis-ie8.js"></script>
 		<![endif]-->

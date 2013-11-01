@@ -24,7 +24,8 @@ public class ExcelEntitySourceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		excelEntitySource = new ExcelEntitySource(this.getClass().getResourceAsStream("/test.xls"), "excel://test");
+		excelEntitySource = new ExcelEntitySource(this.getClass().getResourceAsStream("/test.xls"), "excel://test",
+				null);
 	}
 
 	@AfterMethod
@@ -37,7 +38,7 @@ public class ExcelEntitySourceTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ExcelReaderIllegalUrl() throws IOException
 	{
-		new ExcelEntitySource("test");
+		new ExcelEntitySource("test", null);
 	}
 
 	@Test

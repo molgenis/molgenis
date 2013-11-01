@@ -23,7 +23,6 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.Tuple;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -186,16 +185,6 @@ public class ElasticSearchServiceTest
 		}
 
 		@Override
-		public void set(Tuple values) throws Exception
-		{
-		}
-
-		@Override
-		public void set(Tuple values, boolean strict) throws Exception
-		{
-		}
-
-		@Override
 		public Object get(String columnName)
 		{
 			return fields.get(columnName);
@@ -215,12 +204,6 @@ public class ElasticSearchServiceTest
 
 		@Override
 		public List<String> getLabelFields()
-		{
-			return null;
-		}
-
-		@Override
-		public Tuple getValues()
 		{
 			return null;
 		}
@@ -276,12 +259,6 @@ public class ElasticSearchServiceTest
 		}
 
 		@Override
-		public Entity create(Tuple tuple) throws Exception
-		{
-			return null;
-		}
-
-		@Override
 		public String getXrefIdFieldName(String fieldName)
 		{
 			return null;
@@ -289,6 +266,30 @@ public class ElasticSearchServiceTest
 
 		@Override
 		public String getLabelValue()
+		{
+			return null;
+		}
+
+		@Override
+		public void set(org.molgenis.data.Entity values) throws Exception
+		{
+
+		}
+
+		@Override
+		public void set(org.molgenis.data.Entity values, boolean strict) throws Exception
+		{
+
+		}
+
+		@Override
+		public org.molgenis.data.Entity getValues()
+		{
+			return null;
+		}
+
+		@Override
+		public Entity create(org.molgenis.data.Entity values) throws Exception
 		{
 			return null;
 		}

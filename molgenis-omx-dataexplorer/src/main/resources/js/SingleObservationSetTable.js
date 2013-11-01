@@ -1,7 +1,5 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-
-	var molgenis = w.molgenis = w.molgenis || {};
 
 	molgenis.ResultsTable = function ResultsTable() {
 	};
@@ -53,4 +51,4 @@
 		$('.show-popover').popover({trigger:'hover', placement: 'right'});
 	};
 
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

@@ -1,7 +1,7 @@
-(function($, w) {
-	
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var pagination = new ns.Pagination();
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
@@ -161,7 +161,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : ns.getContextURL() + '/update',
+			url : molgenis.getContextUrl() + '/update',
 			async : false,
 			data : JSON.stringify(updateRequest),
 			contentType : 'application/json',
@@ -205,4 +205,4 @@
 			response(result);
 		});
 	};
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

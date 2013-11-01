@@ -1,22 +1,39 @@
 package org.molgenis.data.csv;
 
-import org.molgenis.data.EntitySource;
-import org.molgenis.data.EntitySourceFactory;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
-public class CsvEntitySourceFactory implements EntitySourceFactory
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.support.AbstractFileBasedEntitySourceFactory;
+import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.io.processor.LowerCaseProcessor;
+import org.molgenis.io.processor.TrimProcessor;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CsvEntitySourceFactory extends AbstractFileBasedEntitySourceFactory
 {
 	public static final String CSV_ENTITYSOURCE_URL_PREFIX = "csv://";
+	public static final List<String> FILE_EXTENSIONS = Arrays.asList("csv", "txt", "tsv", "zip");
+	private static final List<CellProcessor> CELLPROCESSORS = Arrays.<CellProcessor> asList(new TrimProcessor(),
+			new LowerCaseProcessor(true, false));
 
-	@Override
-	public String getUrlPrefix()
+	public CsvEntitySourceFactory()
 	{
-		return "csv";
+		super(CSV_ENTITYSOURCE_URL_PREFIX, FILE_EXTENSIONS, CELLPROCESSORS);
 	}
 
 	@Override
-	public EntitySource create(String url)
+	protected EntitySource createInternal(String url, List<CellProcessor> cellProcessors) throws IOException
 	{
-		return new CsvEntitySource(url);
+		return new CsvEntitySource(url, cellProcessors);
 	}
 
+	@Override
+	protected EntitySource createInternal(File file, List<CellProcessor> cellProcessors) throws IOException
+	{
+		return new CsvEntitySource(file, cellProcessors);
+	}
 }

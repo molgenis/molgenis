@@ -1,7 +1,5 @@
 package org.molgenis.omx.biobankconnect.wizard;
 
-import java.io.Serializable;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.framework.db.Database;
@@ -14,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 @Component
-public class ChooseCataloguePage extends AbstractWizardPage implements Serializable
+public class ChooseCataloguePage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
 	private final Database database;

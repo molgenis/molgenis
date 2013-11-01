@@ -84,11 +84,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		this.searchService = searchService;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
+	@Override
 	public boolean isRunning()
 	{
 		if (runningProcesses.get() != 0) return true;
@@ -104,6 +106,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return percentage.intValue();
 	}
 
+	@Override
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
 	{
 		searchService.deleteDocumentByIds(documentType, documentIds);
@@ -320,7 +323,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			List<ObservationSet> existingObservationSets = database.find(ObservationSet.class, new QueryRule(
 					ObservationSet.ID, Operator.IN, observationSets));
 			List<ObservedValue> existingObservedValues = database.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET_ID, Operator.IN, observationSets));
+					ObservedValue.OBSERVATIONSET, Operator.IN, observationSets));
 			if (existingObservedValues.size() > 0) database.remove(existingObservedValues);
 			if (existingObservationSets.size() > 0) database.remove(existingObservationSets);
 		}
@@ -757,13 +760,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 		if (listOfObservationSets.size() > 0)
 		{
-			List<Integer> listOfObservationIds = new ArrayList<Integer>();
+			List<String> listOfObservationIdentifiers = new ArrayList<String>();
 			for (ObservationSet observation : listOfObservationSets)
 			{
-				listOfObservationIds.add(observation.getId());
+				listOfObservationIdentifiers.add(observation.getIdentifier());
 			}
 			List<ObservedValue> listOfObservedValues = db.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET_ID, Operator.IN, listOfObservationIds));
+					ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, listOfObservationIdentifiers));
 			if (listOfObservedValues.size() > 0) db.remove(listOfObservedValues);
 			db.remove(listOfObservationSets);
 

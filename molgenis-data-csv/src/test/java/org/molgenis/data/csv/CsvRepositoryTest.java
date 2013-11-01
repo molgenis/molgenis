@@ -29,14 +29,14 @@ public class CsvRepositoryTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CsvRepository()
 	{
-		new CsvRepository((Reader) null, null);
+		new CsvRepository((Reader) null, null, null);
 	}
 
 	@Test
 	public void addCellProcessor_header() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(new StringReader("col1,col2\nval1,val2"), ',', "test");
+		CsvRepository csvRepository = new CsvRepository(new StringReader("col1,col2\nval1,val2"), ',', "test", null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -57,7 +57,7 @@ public class CsvRepositoryTest
 	public void addCellProcessor_data() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(new StringReader("col1,col2\nval1,val2"), ',', "test");
+		CsvRepository csvRepository = new CsvRepository(new StringReader("col1,col2\nval1,val2"), ',', "test", null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -77,15 +77,15 @@ public class CsvRepositoryTest
 	@Test
 	public void metaData() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/test.csv");
-		File file = new File(FileUtils.getTempDirectory(), "test.csv");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File file = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		CsvRepository csvRepository = null;
 		try
 		{
 
 			FileCopyUtils.copy(in, new FileOutputStream(file));
-			csvRepository = new CsvRepository(file);
-			assertEquals(csvRepository.getName(), "test");
+			csvRepository = new CsvRepository(file, null);
+			assertEquals(csvRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = csvRepository.getAttributes().iterator();
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col1");
@@ -108,14 +108,14 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator() throws IOException
 	{
-		InputStream in = getClass().getResourceAsStream("/test.csv");
-		File file = new File(FileUtils.getTempDirectory(), "test.csv");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File file = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		CsvRepository csvRepository = null;
 		try
 		{
 
 			FileCopyUtils.copy(in, new FileOutputStream(file));
-			csvRepository = new CsvRepository(file);
+			csvRepository = new CsvRepository(file, null);
 			Iterator<Entity> it = csvRepository.iterator();
 
 			assertTrue(it.hasNext());
@@ -157,7 +157,7 @@ public class CsvRepositoryTest
 	public void iterator_noValues() throws IOException
 	{
 		String csvString = "col1,col2,col3";
-		CsvRepository csvRepository = new CsvRepository(new StringReader(csvString), "test");
+		CsvRepository csvRepository = new CsvRepository(new StringReader(csvString), "test", null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -173,7 +173,7 @@ public class CsvRepositoryTest
 	public void iterator_emptyValues() throws IOException
 	{
 		String csvString = "col1,col2,col3\n,,\n";
-		CsvRepository csvRepository = new CsvRepository(new StringReader(csvString), "test");
+		CsvRepository csvRepository = new CsvRepository(new StringReader(csvString), "test", null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -189,7 +189,8 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_separator() throws IOException
 	{
-		CsvRepository tsvRepository = new CsvRepository(new StringReader("col1\tcol2\nval1\tval2\n"), '\t', "test");
+		CsvRepository tsvRepository = new CsvRepository(new StringReader("col1\tcol2\nval1\tval2\n"), '\t', "test",
+				null);
 		try
 		{
 			Iterator<Entity> it = tsvRepository.iterator();
@@ -208,7 +209,7 @@ public class CsvRepositoryTest
 	public void close() throws IOException
 	{
 		Reader reader = mock(Reader.class);
-		CsvRepository csvRepository = new CsvRepository(reader, "test");
+		CsvRepository csvRepository = new CsvRepository(reader, "test", null);
 		csvRepository.close();
 		verify(reader).close();
 	}

@@ -1,6 +1,5 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-	var molgenis = w.molgenis = w.molgenis || {};
 	
 	molgenis.Pagination = function Pagination(){
 		this.offSet = 1;
@@ -101,11 +100,10 @@
 		return searchRequest;
 	};
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));
 
-(function($, w){
+(function($, molgenis){
 	"use strict";
-	var molgenis = w.molgenis = w.molgenis || {};
 	
 	molgenis.StandardModal = function StandardModal(){
 		this.modal = $('<div />');
@@ -199,4 +197,4 @@
 		});
 		callback(this.modal);
 	};
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

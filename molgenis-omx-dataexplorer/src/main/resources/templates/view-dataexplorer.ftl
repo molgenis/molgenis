@@ -41,25 +41,57 @@
 			</div>		
 		</div>
 		<div class="span9">
-			<div id="dataset-select-container" class="control-group form-horizontal">
-				<div id="data-table-header" class="pull-left"></div>
-				<div class="controls pull-right">
-					<label class="control-label" for="dataset-select">Choose a dataset:</label>
-					<select data-placeholder="Choose a Dataset" id="dataset-select">
-				<#list dataSets as dataSet>
-					<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
-				</#list>
-					</select>
+			<div class="pull-right">
+				<label class="control-label" for="dataset-select">View:</label>
+				<div id="dataDiv" class="<#if !authenticated>view-disabled<#else>view-enabled</#if>">
+					<span class="viewer" id="data">data<img src="/img/grid-icon.png"></img>
+					</span>
+				</div>
+				<div id="aggregateDiv">
+					<span class="viewer" id="aggregate">aggregate<img src="/img/aggregate-icon.png"></img></span>
 				</div>
 			</div>
-			<div class="row-fluid data-table-container">
-				<table id="data-table" class="table table-striped table-condensed"></table>
+			<div class="controls pull-left">
+				<label class="control-label" for="dataset-select">Choose a dataset:</label>
+				<select data-placeholder="Choose a Dataset" id="dataset-select">
+					<#list dataSets as dataSet>
+						<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+					</#list>
+				</select>
 			</div>
-			<div class="row-fluid data-table-pager-container">
-				<a id="download-button" class="btn" href="#">Download as csv</a>
-				<div id="data-table-pager" class="pagination pagination-centered"></div>
+		</div>
+		<div class="span9">
+			<legend></legend>
+			<div id="dataexplorer-grid-data">	
+				<div class="row-fluid data-table-container" >	
+					<table id="data-table" class="table table-striped table-condensed"></table>	
+				</div>	
+				<div class="row-fluid data-table-pager-container">
+					<div id="nrOfDataItems" class="pull-left"></div>
+					<a id="download-button" class="btn" href="#">Download as csv</a>
+					<div id="data-table-pager" class="pagination pagination-centered"></div>			
+				</div>
+			</div>	
+			<div class="row-fluid data-table-container" id="dataexplorer-aggregate-data" style="display:none">
+				<label class="control-label" for="feature-select">Aggregate by:</label>
+				<div id="feature-select" class="controls"></div>
+				<div id="aggregate-table-container"></div>
 			</div>
 		</div>
 		<div class="feature-filter-dialog"></div>	
 	</div>
+	<script>
+		$(function(){
+			<#if !authenticated>
+				$('#dataexplorer-grid-data').hide();
+				$('#dataexplorer-aggregate-data').show();
+				$('#aggregateDiv').addClass("selected");
+				$('#aggregate').click();
+			<#else>
+				$('#dataexplorer-grid-data').show();
+				$('#dataexplorer-aggregate-data').hide();
+				$('#dataDiv').addClass("selected");
+			</#if>
+		});
+	</script>
 <@footer/>

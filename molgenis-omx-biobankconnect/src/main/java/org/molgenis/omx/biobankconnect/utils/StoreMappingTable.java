@@ -44,7 +44,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	private final List<ObservationSet> observationSets;
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
-	private DataSet dataSet;
+	private final DataSet dataSet;
 	private List<Field> columns;
 
 	public StoreMappingTable(String dataSetIdentifier, Database db) throws DatabaseException
@@ -73,16 +73,16 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		List<Tuple> tuples = new ArrayList<Tuple>();
 		try
 		{
-			List<Integer> observationSetIds = new ArrayList<Integer>();
+			List<String> observationSetIdentifiers = new ArrayList<String>();
 			Map<Integer, KeyValueTuple> storeMapping = new HashMap<Integer, KeyValueTuple>();
 
 			for (ObservationSet observation : observationSets)
 			{
-				observationSetIds.add(observation.getId());
+				observationSetIdentifiers.add(observation.getIdentifier());
 			}
 
-			for (ObservedValue ov : db.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_ID,
-					Operator.IN, observationSetIds)))
+			for (ObservedValue ov : db.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER,
+					Operator.IN, observationSetIdentifiers)))
 			{
 				KeyValueTuple tuple = null;
 				Integer observationId = ov.getObservationSet_Id();

@@ -24,13 +24,13 @@
 	overflow: auto;
 }
 
-#catalog-preview, #study-definition-viewer, #study-definition-editor-container {
+#study-definition-viewer-container, #study-definition-editor-container {
 	max-height: 450px;
 	overflow: auto;
 	margin: 10px 0px;
 }
 
-#catalog-preview-info, #study-definition-viewer-info, #study-definition-editor-info {
+#study-definition-viewer-info, #study-definition-editor-info {
 	font-size: 10px;
 }
 

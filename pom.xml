@@ -391,24 +391,6 @@
 
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${user.home}/molgenis-server.properties</file>
-							</files>
-							<quiet>true</quiet>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 			</plugin>
@@ -524,10 +506,10 @@
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-omx-mobile</module>
 		<module>molgenis-app-omx</module>
-		<module>molgenis-app-ngs</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
-		<module>molgenis-data</module>
+		<module>molgenis-data-excel</module>
+		<module>molgenis-data-csv</module>
 	</modules>
 </project>

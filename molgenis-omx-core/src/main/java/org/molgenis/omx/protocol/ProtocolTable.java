@@ -28,6 +28,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
+	private static final String FIELD_IDENTIFIER = "identifier";
 	private static final String FIELD_NAME = "name";
 	private static final String FIELD_DESCRIPTION = "description";
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
@@ -74,6 +75,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 		List<Field> columns = new ArrayList<Field>();
 		columns.add(new Field(FIELD_TYPE));
 		columns.add(new Field(FIELD_ID));
+		columns.add(new Field(FIELD_IDENTIFIER));
 		columns.add(new Field(FIELD_NAME));
 		columns.add(new Field(FIELD_DESCRIPTION));
 		columns.add(new Field(FIELD_DESCRIPTION_STOPWORDS));
@@ -115,6 +117,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
 				tuple.set(FIELD_ID, p.getId());
+				tuple.set(FIELD_IDENTIFIER, p.getIdentifier());
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, description);
 				tuple.set(FIELD_PATH, path);
@@ -148,6 +151,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set(FIELD_TYPE, ObservableFeature.class.getSimpleName().toLowerCase());
 				tuple.set(FIELD_ID, feature.getId());
+				tuple.set(FIELD_IDENTIFIER, feature.getIdentifier());
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, description);
 				tuple.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));

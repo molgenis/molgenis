@@ -44,12 +44,6 @@ public class DatabaseConfigGen extends Generator
 			templateArgs.put("package", APP_DIR.replace('/', '.'));
 			templateArgs.put("databaseImp",
 					options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
-			templateArgs.put("db_mode", options.db_mode);
-			templateArgs.put("db_driver", options.db_driver);
-			templateArgs.put("db_uri", options.db_uri);
-			templateArgs.put("db_user", options.db_user);
-			templateArgs.put("db_password", options.db_password);
-			templateArgs.put("auth_loginclass", options.auth_loginclass);
 
 			Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
 			OutputStream targetOut = new FileOutputStream(target);

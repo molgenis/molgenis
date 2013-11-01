@@ -17,7 +17,6 @@ import org.molgenis.data.support.AbstractWritable;
 import org.molgenis.io.processor.AbstractCellProcessor;
 import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.util.ListEscapeUtils;
-
 public class CsvWriter extends AbstractWritable
 {
 

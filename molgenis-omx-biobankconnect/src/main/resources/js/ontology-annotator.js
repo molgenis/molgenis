@@ -1,7 +1,7 @@
-(function($, w) {
-	
+(function($, molgenis) {
 	"use strict";
-	var ns = w.molgenis = w.molgenis || {};
+	
+	var ns = molgenis;
 	var pagination = new ns.Pagination();
 	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
@@ -321,7 +321,7 @@
 				modal.modal('hide');
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.getContextURL() + '/annotate/remove',
+					'action' : molgenis.getContextUrl() + '/annotate/remove',
 					'method' : 'POST'
 				}).submit();
 			});
@@ -714,4 +714,4 @@
 	function getselectedDataSetId(){
 		return selectedDataSetId;
 	}
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

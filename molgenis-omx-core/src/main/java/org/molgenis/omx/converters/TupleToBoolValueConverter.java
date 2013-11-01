@@ -12,11 +12,23 @@ public class TupleToBoolValueConverter implements TupleToValueConverter<BoolValu
 	@Override
 	public BoolValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new BoolValue());
+	}
+
+	@Override
+	public BoolValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof BoolValue))
+		{
+			throw new ValueConverterException("value is not a " + BoolValue.class.getSimpleName());
+		}
+
 		Boolean booleanObj = tuple.getBoolean(colName);
 		if (booleanObj == null) return null;
 
-		BoolValue boolValue = new BoolValue();
-		boolValue.setValue(booleanObj);
+		BoolValue boolValue = (BoolValue) value;
+		((BoolValue) value).setValue(booleanObj);
 		return boolValue;
 	}
 

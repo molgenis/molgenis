@@ -19,6 +19,25 @@
 			</resource>
 		</resources>
 		<plugins>
+			<!-- make molgenis server properties available in pom.xml -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${user.home}/.molgenis/omx/molgenis-server.properties</file>
+							</files>
+							<quiet>true</quiet>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- execute molgenis generator -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -78,6 +97,14 @@
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<systemProperties>
+				      <systemProperty>
+				         <name>molgenis.home</name>
+				         <value>${user.home}/.molgenis/omx</value>
+				       </systemProperty>
+				    </systemProperties>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -146,6 +173,16 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-mobile</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-excel</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-csv</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
