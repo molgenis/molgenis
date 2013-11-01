@@ -18,6 +18,7 @@ import java.util.zip.ZipFile;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
@@ -121,18 +122,22 @@ public class CsvEntitySource implements EntitySource
 	public Repository<? extends Entity> getRepositoryByEntityName(String entityName)
 	{
 		ZipEntry zipEntry = zipEntryMap.get(entityName);
+		InputStream in = null;
 
 		try
 		{
 			if (zipEntry != null)
 			{
-				return toRepository(zipEntry.getName(), zipFile.getInputStream(zipEntry), cellProcessors);
+				in = zipFile.getInputStream(zipEntry);
+				return toRepository(zipEntry.getName(), in, cellProcessors);
 			}
 
-			return toRepository(csvFile.getName(), new FileInputStream(csvFile), cellProcessors);
+			in = new FileInputStream(csvFile);
+			return toRepository(csvFile.getName(), in, cellProcessors);
 		}
 		catch (IOException e)
 		{
+			IOUtils.closeQuietly(in);
 			throw new MolgenisDataException("Error reading zipfile [" + url + "]", e);
 		}
 	}
