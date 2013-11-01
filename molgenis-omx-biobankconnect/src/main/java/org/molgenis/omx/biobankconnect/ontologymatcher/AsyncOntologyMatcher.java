@@ -586,7 +586,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		Map<Integer, List<BoostTermContainer>> position = new HashMap<Integer, List<BoostTermContainer>>();
 		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")));
-		List<String> selectedOntologyTerms = new ArrayList<String>();
+		// List<String> selectedOntologyTerms = new ArrayList<String>();
 
 		for (OntologyTermContainer ontologyTermContainer : totalHits.values())
 		{
@@ -698,6 +698,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		// }
 		// }
 		// }
+		// descriptionBoostTermContainer.getTerms().add(StringUtils.join(uniqueTokens,
+		// ' '));
 		descriptionBoostTermContainer.getTerms().add(removeStopWords(description));
 		position.get(-2).add(descriptionBoostTermContainer);
 
