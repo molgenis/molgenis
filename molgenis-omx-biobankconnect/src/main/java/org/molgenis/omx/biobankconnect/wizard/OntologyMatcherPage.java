@@ -1,6 +1,5 @@
 package org.molgenis.omx.biobankconnect.wizard;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 @Component
-public class OntologyMatcherPage extends AbstractWizardPage implements Serializable
+public class OntologyMatcherPage extends AbstractWizardPage
 {
+	private static final long serialVersionUID = 1L;
+
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
-
-	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String getTitle()

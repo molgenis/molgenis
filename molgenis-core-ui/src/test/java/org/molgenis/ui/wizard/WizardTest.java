@@ -127,6 +127,7 @@ public class WizardTest
 
 	private static class TestWizardPage extends AbstractWizardPage
 	{
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public String getTitle()

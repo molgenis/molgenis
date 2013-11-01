@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
  */
 public abstract class AbstractWizardPage implements WizardPage
 {
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public abstract String getTitle();
