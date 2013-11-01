@@ -39,8 +39,8 @@ public class UploadWizardPage extends AbstractWizardPage implements Serializable
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
 	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
-	private final Database database;
-	private final EntitiesValidator entitiesValidator;
+	private final transient Database database;
+	private final transient EntitiesValidator entitiesValidator;
 
 	@Autowired
 	public UploadWizardPage(Database database, EntitiesValidator entitiesValidator)
@@ -60,6 +60,12 @@ public class UploadWizardPage extends AbstractWizardPage implements Serializable
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
+		if (!(wizard instanceof ImportWizard))
+		{
+			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
+					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
+		}
+
 		ImportWizard importWizard = (ImportWizard) wizard;
 		String entityImportOption = request.getParameter("entity_option");
 
