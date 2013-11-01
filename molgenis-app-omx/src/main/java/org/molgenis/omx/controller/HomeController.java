@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
+@Deprecated
 public class HomeController extends MolgenisPluginController
 {
 	public static final String URI = "/plugin/home";
