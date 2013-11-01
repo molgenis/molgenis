@@ -1,12 +1,10 @@
 package org.molgenis.omx;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +13,13 @@ public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
 
-	private final Database unsecuredDatabase;
+	private final DataService dataService;
 
 	@Autowired
-	public MolgenisDbSettings(Database unsecuredDatabase)
+	public MolgenisDbSettings(DataService dataService)
 	{
-		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
-		this.unsecuredDatabase = unsecuredDatabase;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -35,23 +33,24 @@ public class MolgenisDbSettings implements MolgenisSettings
 	{
 		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
 				RuntimeProperty.class.getSimpleName() + '_' + key);
-		List<RuntimeProperty> properties;
+
+		RuntimeProperty property;
 		try
 		{
-			properties = unsecuredDatabase.find(RuntimeProperty.class, propertyRule);
+			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule);
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			logger.warn(e);
 			return defaultValue;
 		}
-		if (properties == null || properties.isEmpty()) return defaultValue;
-		RuntimeProperty property = properties.get(0);
+
 		if (property == null)
 		{
 			logger.warn(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
 			return defaultValue;
 		}
+
 		return property.getValue();
 	}
 
@@ -62,14 +61,8 @@ public class MolgenisDbSettings implements MolgenisSettings
 		property.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + key);
 		property.setName(key);
 		property.setValue(value);
-		try
-		{
-			unsecuredDatabase.add(property);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
+		dataService.add(RuntimeProperty.ENTITY_NAME, property);
 	}
 
 	@Override

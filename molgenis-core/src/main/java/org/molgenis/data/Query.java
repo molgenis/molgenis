@@ -3,7 +3,6 @@ package org.molgenis.data;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.QueryRule;
 import org.springframework.data.domain.Sort;
 
 /**
@@ -17,7 +16,7 @@ public interface Query
 	List<QueryRule> getRules();
 
 	/**
-	 * Enable attribute selection
+	 * Enable attribute selection, if null then all attributes will be returned
 	 */
 	Iterator<String> getAttributeNames();
 
@@ -27,14 +26,14 @@ public interface Query
 	int getPageSize();
 
 	/**
-	 * Number of selected page.
+	 * Start
 	 */
-	int getPageNumber();
+	int getOffset();
 
 	/**
 	 * Returns sort
 	 */
-	Iterator<Sort> getSort();
+	Sort getSort();
 
 	/**
 	 * Search all fields

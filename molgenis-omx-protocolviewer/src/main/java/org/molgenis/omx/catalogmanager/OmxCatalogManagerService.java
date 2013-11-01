@@ -1,46 +1,40 @@
 package org.molgenis.omx.catalogmanager;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.DataSetRepository;
 import org.molgenis.omx.study.StudyDataRequest;
+import org.molgenis.omx.study.StudyDataRequestRepository;
 import org.molgenis.study.UnknownStudyDefinitionException;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 
 public class OmxCatalogManagerService implements CatalogManagerService
 {
-	private final Database database;
+	private final DataSetRepository dataSetRepository;
+	private final StudyDataRequestRepository studyDataRequestRepository;
 
-	public OmxCatalogManagerService(Database database)
+	public OmxCatalogManagerService(DataSetRepository dataSetRepository,
+			StudyDataRequestRepository studyDataRequestRepository)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (dataSetRepository == null) throw new IllegalArgumentException("dataSetRepository is null");
+		if (studyDataRequestRepository == null) throw new IllegalArgumentException("studyDataRequestRepository is null");
+		this.dataSetRepository = dataSetRepository;
+		this.studyDataRequestRepository = studyDataRequestRepository;
 	}
 
 	@Override
-	public List<CatalogMeta> findCatalogs()
+	public Iterable<CatalogMeta> findCatalogs()
 	{
-		List<DataSet> dataSets;
-		try
-		{
-			dataSets = database.find(DataSet.class);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		if (dataSets == null) return Collections.emptyList();
+		Iterable<DataSet> dataSets = dataSetRepository.findAll(new QueryImpl());
 
-		return Lists.transform(dataSets, new Function<DataSet, CatalogMeta>()
+		return Iterables.transform(dataSets, new Function<DataSet, CatalogMeta>()
 		{
 			@Override
 			public CatalogMeta apply(DataSet dataSet)
@@ -133,38 +127,19 @@ public class OmxCatalogManagerService implements CatalogManagerService
 
 	private DataSet getDataSet(String dataSetIdentifier)
 	{
-		try
-		{
-			return DataSet.findByIdentifier(database, dataSetIdentifier);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		Query q = new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier);
+		return dataSetRepository.findOne(q);
 	}
 
 	private void setDataSetActive(DataSet dataSet, boolean active)
 	{
 		dataSet.setActive(active);
-		try
-		{
-			database.update(dataSet);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		dataSetRepository.update(dataSet);
 	}
 
 	private StudyDataRequest getStudyDataRequest(String studyDataRequestIdentifier)
 	{
-		try
-		{
-			return StudyDataRequest.findByIdentifier(database, studyDataRequestIdentifier);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		Query q = new QueryImpl().eq(StudyDataRequest.IDENTIFIER, studyDataRequestIdentifier);
+		return studyDataRequestRepository.findOne(q);
 	}
 }

@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
@@ -16,14 +18,19 @@ import org.molgenis.data.EntitySourceFactory;
 import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.Updateable;
+import org.molgenis.data.Writable;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import com.google.common.collect.Lists;
 
 /**
  * Implementation of the DataService interface
@@ -126,23 +133,79 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	@Override
 	public long count(String entityName, Query q)
 	{
-		return getQueryableRepository(entityName).count(q);
+		return getQueryable(entityName).count(q);
 	}
 
 	@Override
-	public Iterable<? extends Entity> findAll(String entityName, Query q)
+	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
 	{
-		return getQueryableRepository(entityName).findAll(q);
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(String entityName, Integer id)
+	public <E extends Entity> List<E> findAllAsList(String entityName, Query q)
 	{
-		return getQueryableRepository(entityName).findOne(id);
+		Iterable<E> iterable = findAll(entityName, q);
+		return Lists.newArrayList(iterable);
+	}
+
+	@Override
+	public <E extends Entity> List<E> findAllAsList(String entityName, QueryRule... queryRules)
+	{
+		return findAllAsList(entityName, new QueryImpl(Lists.newArrayList(queryRules)));
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Integer id)
+	{
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findOne(id);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Query q)
+	{
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findOne(q);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, QueryRule... queryRules)
+	{
+		return findOne(entityName, new QueryImpl(Lists.newArrayList(queryRules)));
+	}
+
+	@Override
+	public <E extends Entity> void add(String entityName, E entity)
+	{
+		Writable<E> writable = getWritable(entityName);
+		writable.add(entity);
+	}
+
+	@Override
+	public <E extends Entity> void update(String entityName, E entity)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.update(entity);
+	}
+
+	@Override
+	public <E extends Entity> void delete(String entityName, E entity)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.delete(entity);
+	}
+
+	@Override
+	public <E extends Entity> void delete(String entityName, Iterable<E> entities)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.delete(entities);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Queryable<? extends Entity> getQueryableRepository(String entityName)
+	private <E extends Entity> Queryable<E> getQueryable(String entityName)
 	{
 		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Queryable))
@@ -150,7 +213,31 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
 		}
 
-		return (Queryable<? extends Entity>) repo;
+		return (Queryable<E>) repo;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <E extends Entity> Writable<E> getWritable(String entityName)
+	{
+		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Writable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't writable");
+		}
+
+		return (Writable<E>) repo;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <E extends Entity> Updateable<E> getUpdateable(String entityName)
+	{
+		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Updateable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't updateable");
+		}
+
+		return (Updateable<E>) repo;
 	}
 
 	@Override
@@ -181,4 +268,18 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 			registerFactory(factory);
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> CrudRepository<E> getCrudRepository(String entityName)
+	{
+		Repository<? extends Entity> repository = getRepositoryByEntityName(entityName);
+		if (repository instanceof CrudRepository)
+		{
+			return (CrudRepository<E>) repository;
+		}
+
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] isn't a CrudRepository");
+	}
+
 }

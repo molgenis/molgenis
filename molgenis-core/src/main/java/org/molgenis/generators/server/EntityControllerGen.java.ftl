@@ -20,7 +20,7 @@ import org.molgenis.framework.server.EntityCollectionResponse;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntityNotFoundException;
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.QueryRule;
 import org.molgenis.service.${entity.name}Service;
 <#assign javaImports = ["${entity.name}"]>
 <#list fields as field>
@@ -322,8 +322,7 @@ public class ${entity.name}Controller
 
 	private void _delete${entity.name}(${type(entity.primaryKey)} id) throws DatabaseException
 	{
-		boolean isDeleted = ${entity.name?uncap_first}Service.deleteById(id);
-		if(!isDeleted) throw new EntityNotFoundException("${entity.name} " + id.toString() + " not found");
+		${entity.name?uncap_first}Service.deleteById(id);
 	}
 	
 	<#-- Entity collection GET operations -->

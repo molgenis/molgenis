@@ -15,17 +15,22 @@
 
 package ${package};
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.support.MapEntity;
+
 /**
  * ${Name(entity)}: ${entity.description}.
  * @author MOLGENIS generator
  */
 <#if entity.abstract>
-public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list><#else>org.molgenis.util.Entity</#if>
+public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list><#else>org.molgenis.data.jpa.JpaEntity</#if>
 <#else>
 <#-- disables many-to-many relationships (makes it compatible with no-JPA database)   -->
 	<#if !entity.description?contains("Link table for many-to-many relationship") >
 @javax.persistence.Entity
-//@org.hibernate.search.annotations.Indexed
 @javax.persistence.Table(name = "${SqlName(entity)}"<#list entity.getUniqueKeysWithoutPk() as uniqueKeys ><@compress single_line=true>
 	<#if uniqueKeys_index = 0 >, uniqueConstraints={
 	@javax.persistence.UniqueConstraint( columnNames={<#else>), @javax.persistence.UniqueConstraint( columnNames={</#if>
@@ -49,8 +54,7 @@ public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list 
 		</#if>
 	</#if>
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
-//@EntityListeners({${package}.db.${JavaName(entity)}EntityListener.class})
-public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getAncestor().namespace}.${JavaName(entity.getAncestor())}<#else>org.molgenis.util.AbstractEntity</#if> <#if entity.hasImplements()>implements<#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list></#if>
+public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getAncestor().namespace}.${JavaName(entity.getAncestor())}<#else>org.molgenis.data.support.AbstractEntity</#if> implements org.molgenis.data.jpa.JpaEntity<#if entity.hasImplements()>,<#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list></#if>
 </#if>
 {
 <#if entity.abstract>
@@ -90,43 +94,14 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 <#else>
     /** default serial version ID */
     private static final long serialVersionUID = 1L;
+    
+    public final static String ENTITY_NAME = "${entity.name}";
+    
 	// fieldname constants
     <#foreach field in entity.getImplementedFields()>
 	public final static String ${field.name?upper_case} = "${field.name}";<#if field.type == "xref" || field.type == "mref"><#list field.xrefLabelNames as label>
 	public final static String ${field.name?upper_case}_${label?upper_case} = "${field.name}_${label}";</#list></#if>
 	</#foreach>
-	
-	//static methods
-	/**
-	 * Shorthand for db.query(${JavaName(entity)}.class).
-	 */
-	public static org.molgenis.framework.db.Query<? extends ${JavaName(entity)}> query(org.molgenis.framework.db.Database db)
-	{
-		return db.query(${JavaName(entity)}.class);
-	}
-	
-	/**
-	 * Shorthand for db.find(${JavaName(entity)}.class, org.molgenis.framework.db.QueryRule ... rules).
-	 */
-	public static java.util.List<? extends ${JavaName(entity)}> find(org.molgenis.framework.db.Database db, org.molgenis.framework.db.QueryRule ... rules) throws org.molgenis.framework.db.DatabaseException
-	{
-		return db.find(${JavaName(entity)}.class, rules);
-	}	
-	
-<#foreach key in entity.getAllKeys()>	
-	/**
-	 * 
-	 */
-	public static ${JavaName(entity)} findBy<#list key.fields as f>${JavaName(f)}</#list>(org.molgenis.framework.db.Database db<#list key.fields as f>, ${type(f)} ${name(f)}</#list>) throws org.molgenis.framework.db.DatabaseException
-	{
-		org.molgenis.framework.db.Query<${JavaName(entity)}> q = db.query(${JavaName(entity)}.class);
-		<#list key.fields as f>q = q.eq(${JavaName(entity)}.${f.name?upper_case}, ${name(f)});</#list>
-		java.util.List<${JavaName(entity)}> result = q.find();
-		if(result.size()>0) return result.get(0);
-		else return null;
-	}
-
-</#foreach>	
 	
 	// member variables (including setters.getters for interface)
 	<#foreach field in entity.getImplementedFields()>
@@ -149,27 +124,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
     			</#if>
     		</#if>
 		</#if>	
-		<#assign key_found = 0>
-		<#foreach index in entity.indices>
-			<#if key_found == 1>
-				<#break>
-			</#if>
-			<#if index.name == field.name>
-//	@org.hibernate.search.annotations.Field(index=org.hibernate.search.annotations.Index.TOKENIZED, store=org.hibernate.search.annotations.Store.NO)
-				<#assign key_found = 1>
-			</#if>
-		</#foreach>
-		<#foreach unique in entity.getUniqueKeysWithoutPk()>
-			<#if key_found == 1>
-				<#break>
-			</#if>
-			<#foreach unique_field in unique.fields>
-				<#if unique_field.name == field.name>
-//	@org.hibernate.search.annotations.Field(index=org.hibernate.search.annotations.Index.TOKENIZED, store=org.hibernate.search.annotations.Store.NO)
-					<#assign key_found = 1>
-				</#if>
-			</#foreach>
-		</#foreach>
+
         <#if field.type == "date">
     @javax.persistence.Temporal(javax.persistence.TemporalType.DATE)
     	<#elseif field.type == "datetime">
@@ -213,7 +168,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		<#assign type_label = field.getType().toString()>
 			<#if isPrimaryKey(field,entity)>
 				<#if !entity.hasAncestor()>
-	//@javax.validation.constraints.NotNull
 	private <#if field.type="xref">${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)}<#elseif field.type="mref">java.util.List<${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)}><#else>${type(field)}</#if> ${name(field)} = <#if field.type == "mref">new java.util.ArrayList<${field.xrefEntity.namespace}.${JavaName(field.xrefEntity)}>()<#elseif field.type == "xref">null<#else> ${default(field)}</#if>;
 				</#if>
 			<#else>
@@ -263,15 +217,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		//set the type for a new instance
 		set${typefield()}(this.getClass().getSimpleName());
 	</#if>
-	}
-	
-	/** copy constructor */
-	public ${JavaName(entity)}(${JavaName(entity)} copyMe) throws Exception
-	{	
-		for(String f : this.getFields())
-		{
-			this.set(f, copyMe.get(f));
-		}	
 	}
 	
 	//getters and setters
@@ -349,7 +294,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	 */	
 	public void set${JavaName(field)}(String datestring) throws java.text.ParseException
 	{
-		this.set${JavaName(field)}(string2date(datestring));
+		this.set${JavaName(field)}(org.molgenis.data.DataConverter.toDate(datestring));
 	}	
 	<#elseif type_label == "enum" >
 	/**
@@ -532,16 +477,14 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		return null;
 	}	
 	
+	<#include "DataTypeCommons.java.ftl">	
+	
 	@Override
-	public void validate() throws org.molgenis.framework.db.DatabaseException
+	public void set(org.molgenis.data.Entity entity)
 	{
-	<#list allFields(entity) as field><#if field.nillable == false>
-		if(this.get${JavaName(field)}() == null) throw new org.molgenis.framework.db.DatabaseException("required field ${name(field)} is null");
-	</#if></#list>
+		set(entity, true);
 	}
 	
-	<#include "DataTypeCommons.java.ftl">	
-
 	@Override
 	public String toString()
 	{
@@ -570,124 +513,13 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 
 	}
 
-	/**
-	 * Get the names of all public properties of ${JavaName(entity)}.
-	 */
-	@Override
-	public java.util.Vector<String> getFields(boolean skipAutoIds)
-	{
-		java.util.Vector<String> fields = new java.util.Vector<String>();
-	<#list allFields(entity) as field>
-		<#if (field.auto && field.type = "int")>
-		if(!skipAutoIds)
-		</#if>
-		{
-			<#if field.type="xref" || field.type="mref">
-			fields.add("${field.name}_${field.getXrefEntity().getPrimaryKey().name}");
-			<#else>
-			fields.add("${field.name}");
-			</#if>
-		}
-		<#if field.type="xref" || field.type="mref">
-			<#if field.xrefLabelNames[0] != field.xrefFieldName><#list field.xrefLabelNames as label>
-		fields.add("${field.name}_${label}");
-			</#list></#if>
-		</#if>
-	</#list>		
-		return fields;
-	}	
-
-	@Override
-	public java.util.Vector<String> getFields()
-	{
-		return getFields(false);
-	}
-
-	@Override
-	public String getIdField()
-	{
-		return "${name(pkey(entity))}";
-	}
-
-	@Override
-	public java.util.List<String> getLabelFields()
-	{
-		java.util.List<String> result = new java.util.ArrayList<String>();
-		<#if entity.getXrefLabels()?exists><#list entity.getXrefLabels() as label>
-		result.add("${label}");
-		</#list></#if>
-		return result;
-	}
-
-	@Deprecated
-	@Override
-	public String getFields(String sep)
-	{
-		return (""
-	<#list allFields(entity) as field>
-		+ "${name(field)}" <#if field_has_next>+sep</#if>
-	</#list>
-		);
-	}
-
 <#if !entity.abstract>	
 	@Override
-	public Object getIdValue()
+	public Integer getIdValue()
 	{
-		return get(getIdField());
+		return get${JavaName(pkey(entity))}();
 	}		
-	
-	@Override
-    public String getXrefIdFieldName(String fieldName) {
-        <#list allFields(entity) as field>
-        	<#if field.type = 'xref' >
-        if (fieldName.equalsIgnoreCase("${name(field)}")) {
-            return "${name(field.getXrefEntity().getPrimaryKey())}";
-        }
-        	</#if>
-                <#if field.type = 'mref' >
-        if (fieldName.equalsIgnoreCase("${name(field)}")) {
-            return "${name(field.getXrefEntity().getPrimaryKey())}";
-        }
-        	</#if>
-        </#list>
-        
-        <#if !(superclasses(entity)??) >
-        return super.getXrefIdFieldName(fieldName);
-        <#else>
-        return null;
-        </#if>
-    }	
 </#if>
-
-	@Deprecated
-	@Override
-	public String getValues(String sep)
-	{
-		java.io.StringWriter out = new java.io.StringWriter();
-	<#list allFields(entity) as field>
-		{
-			Object valueO = get${JavaName(field)}();
-			String valueS;
-			if (valueO != null)
-				valueS = valueO.toString();
-			else 
-				valueS = "";
-			valueS = valueS.replaceAll("\r\n"," ").replaceAll("\n"," ").replaceAll("\r"," ");
-			valueS = valueS.replaceAll("\t"," ").replaceAll(sep," ");
-			out.write(valueS<#if field_has_next>+sep</#if>);
-		}
-	</#list>
-		return out.toString();
-	}
-	
-	@Override
-	public ${JavaName(entity)} create(org.molgenis.data.Entity entity) throws Exception
-	{
-		${JavaName(entity)} e = new ${JavaName(entity)}();
-		e.set(entity);
-		return e;
-	}
 	
 <#list model.entities as e>
 	<#if !e.abstract && !e.isAssociation()>
@@ -720,6 +552,40 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		</#list>
 	</#if>
 </#list>
+
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		Set<String> attributeNames = new LinkedHashSet<String>();
+		for (AttributeMetaData attr : new ${JavaName(entity)}MetaData().getAttributes())
+		{
+			attributeNames.add(attr.getName());
+		}
+
+		return attributeNames;
+	}
+	
+	@Override
+	public java.util.List<String> getLabelAttributeNames()
+	{
+		java.util.List<String> result = new java.util.ArrayList<String>();
+		<#if entity.getXrefLabels()?exists><#list entity.getXrefLabels() as label>
+		result.add("${label}");
+		</#list></#if>
+		return result;
+	}
+
+	@Override
+	public void set(String attributeName, Object value)
+	{
+		set(new MapEntity(attributeName, value), false);
+	}
+
+	@Override
+	public String getLabelValue()
+	{
+		return null;
+	}
 
 <#-- Implement equals() and hashCode() using business key equality -->
 <#assign uniqueKeys = entity.getUniqueKeysWithoutPk()>

@@ -12,10 +12,10 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.framework.db.DatabaseAccessException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
@@ -42,7 +42,7 @@ public class EntityExplorerController extends MolgenisPluginController
 	public static final String URI = "/plugin/entityexplorer";
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -54,16 +54,18 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(required = false) String entity,
-			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
-			throws Exception
+	public String init(@RequestParam(required = false)
+	String entity, @RequestParam(required = false)
+	String identifier, @RequestParam(required = false)
+	String query, Model model) throws Exception
 	{
 		// select all characteristic entities
 		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(database.getEntityClasses(),
 				new Predicate<Class<? extends Entity>>()
 				{
 					@Override
-					public boolean apply(@Nullable Class<? extends Entity> clazz)
+					public boolean apply(@Nullable
+					Class<? extends Entity> clazz)
 					{
 						return clazz != null && Characteristic.class.isAssignableFrom(clazz)
 								&& !clazz.equals(Characteristic.class);

@@ -9,7 +9,7 @@ public class EntityCollectionResponse<T>
 	private final String href;
 	private final int start;
 	private final int num;
-	private final int total;
+	private final long total;
 	private final String prevHref;
 	private final String nextHref;
 	private final List<T> items;
@@ -42,7 +42,7 @@ public class EntityCollectionResponse<T>
 		return num;
 	}
 
-	public int getTotal()
+	public long getTotal()
 	{
 		return total;
 	}

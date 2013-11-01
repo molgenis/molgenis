@@ -29,6 +29,8 @@
 			<field name="className" unique="true" description="Full name of the entity" />
 			<unique fields="name,type_" />
 		</entity>
+		
+		<!--  
 		<entity name="MolgenisFile" implements="Identifiable"
 			decorator="org.molgenis.omx.decorators.MolgenisFileDecorator"  xref_label="Name">
 			<description>
@@ -41,6 +43,8 @@
 				description="The file extension. This will be mapped to MIME type at runtime. For example, a type 'png' will be served out as 'image/png'." />
 			<unique fields="Name"/>
 		</entity>
+		-->
+		
 		<entity name="RuntimeProperty" implements="Identifiable"  xref_label="Name">
 			<field name="Value" type="text" nillable="false" />
 			<unique fields="Name" description="Name is unique within its type " />

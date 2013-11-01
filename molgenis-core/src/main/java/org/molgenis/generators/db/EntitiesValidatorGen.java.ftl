@@ -37,7 +37,7 @@ import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
-import org.molgenis.util.Entity;
+import org.molgenis.data.Entity;
 
 <#list model.entities as entity>
 <#if !entity.abstract && !entity.system>

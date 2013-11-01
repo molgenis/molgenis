@@ -1,5 +1,5 @@
 	@Override
-	public void set(org.molgenis.data.Entity entity, boolean strict ) throws Exception
+	public void set(org.molgenis.data.Entity entity, boolean strict)
 	{
 <#list allFields(entity) as f>
 	<#assign type_label = f.getType().toString()>
@@ -16,8 +16,8 @@
 			{
 				if(ref instanceof String)
 					values.add(${type(xrefField(model,f))}.parse${settertype(xrefField(model,f))}((String)ref));
-				else if(ref instanceof org.molgenis.util.AbstractEntity) 	
-					values.add((${type(xrefField(model,f))})((org.molgenis.util.AbstractEntity)ref).getIdValue() );
+				else if(ref instanceof org.molgenis.data.support.AbstractEntity) 	
+					values.add((${type(xrefField(model,f))})((org.molgenis.data.support.AbstractEntity)ref).getIdValue() );
 				else
 					values.add((${type(xrefField(model,f))})ref);		
 			}											
@@ -63,16 +63,16 @@
 		else if( entity.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}_${f.xrefField.name?lower_case}") != null) this.set${JavaName(f)}(entity.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}_${f.xrefField.name?lower_case}"));
 		//alias of xref
 		if( entity.get("${f.name}") != null) { 
-			if(org.molgenis.util.AbstractEntity.isObjectRepresentation(entity.get("${f.name}").toString())) {
-				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.util.AbstractEntity.setValuesFromString((String)entity.get("${f.name}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
+			if(org.molgenis.data.support.AbstractEntity.isObjectRepresentation(entity.get("${f.name}").toString())) {
+				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.data.support.AbstractEntity.setValuesFromString((String)entity.get("${f.name}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
 				this.set${JavaName(f)}(instance);				
 			} else {
 				this.set${JavaName(f)}_${JavaName(f.xrefField)}(entity.get${settertype(f.xrefField)}("${f.name}")); 
 			}
 		}
 		else if( entity.get("${f.name?lower_case}") != null) { 
-			if(org.molgenis.util.AbstractEntity.isObjectRepresentation(entity.get("${f.name?lower_case}").toString())) {
-				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.util.AbstractEntity.setValuesFromString((String)entity.get("${f.name?lower_case}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
+			if(org.molgenis.data.support.AbstractEntity.isObjectRepresentation(entity.get("${f.name?lower_case}").toString())) {
+				${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)} instance = org.molgenis.data.support.AbstractEntity.setValuesFromString((String)entity.get("${f.name?lower_case}"), ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
 				this.set${JavaName(f)}(instance);				
 			} else {
 				this.set${JavaName(f)}_${JavaName(f.xrefField)}(entity.get${settertype(f.xrefField)}("${f.name}"));

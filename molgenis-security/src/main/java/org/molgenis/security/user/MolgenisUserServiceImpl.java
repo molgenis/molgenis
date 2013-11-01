@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,23 +20,24 @@ import com.google.common.collect.Lists;
 @Service
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
-	private final Database database;
+	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public MolgenisUserServiceImpl(Database database, PasswordEncoder passwordEncoder)
+	public MolgenisUserServiceImpl(DataService dataService, PasswordEncoder passwordEncoder)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (passwordEncoder == null) throw new IllegalArgumentException("MolgenisPasswordEncoder is null");
-		this.database = database;
+		this.dataService = dataService;
 		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
-	public List<String> getSuEmailAddresses() throws DatabaseException
+	public List<String> getSuEmailAddresses()
 	{
-		List<MolgenisUser> superUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.SUPERUSER,
-				Operator.EQUALS, true));
+		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(
+				MolgenisUser.SUPERUSER, Operator.EQUALS, true));
+
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
 		{
 			@Override
@@ -48,32 +49,34 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
-	public MolgenisUser findById(Integer userId) throws DatabaseException
+	public MolgenisUser findById(Integer userId)
 	{
-		return MolgenisUser.findById(database, userId);
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, userId);
 	}
 
 	@Override
-	public void update(MolgenisUser molgenisUser) throws DatabaseException
+	public void update(MolgenisUser molgenisUser)
 	{
-		MolgenisUser currentMolgenisUser = MolgenisUser.findById(database, molgenisUser.getId());
+		MolgenisUser currentMolgenisUser = findById(molgenisUser.getId());
 		if (!currentMolgenisUser.getPassword().equals(molgenisUser.getPassword()))
 		{
 			String encryptedPassword = passwordEncoder.encode(molgenisUser.getPassword());
 			molgenisUser.setPassword(encryptedPassword);
 		}
-		database.update(molgenisUser);
+
+		dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 	}
 
 	@Override
-	public MolgenisUser getCurrentUser() throws DatabaseException
+	public MolgenisUser getCurrentUser()
 	{
 		String currentUsername = SecurityUtils.getCurrentUsername();
-		return MolgenisUser.findByUsername(database, currentUsername);
+		return dataService
+				.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, currentUsername));
 	}
 
 	@Override
-	public void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2) throws DatabaseException
+	public void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2)
 	{
 		if (StringUtils.isEmpty(oldPwd) || StringUtils.isEmpty(newPwd1) || StringUtils.isEmpty(newPwd2))
 		{
@@ -81,7 +84,9 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 		}
 		if (!StringUtils.equals(newPwd1, newPwd2)) throw new MolgenisUserException("Passwords do not match");
 
-		MolgenisUser user = MolgenisUser.findByUsername(database, userName);
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, userName));
+
 		if (user == null)
 		{
 			throw new RuntimeException("User does not exist [" + userName + "]");

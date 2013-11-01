@@ -2,47 +2,72 @@ package org.molgenis.omx.decorators;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Mapper;
-import org.molgenis.framework.db.MapperDecorator;
+import javax.validation.ValidationException;
+
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.omx.observ.value.HyperlinkValue;
 
-public class HyperlinkValueDecorator<E extends HyperlinkValue> extends MapperDecorator<E>
+public class HyperlinkValueDecorator<E extends HyperlinkValue> extends CrudRepositoryDecorator<E>
 {
-	public HyperlinkValueDecorator(Mapper<E> generatedMapper)
+	public HyperlinkValueDecorator(CrudRepository<E> generatedRepository)
 	{
-		super(generatedMapper);
-		if (generatedMapper == null) throw new IllegalArgumentException("Mapper is null");
+		super(generatedRepository);
 	}
 
 	@Override
-	public int add(List<E> entities) throws DatabaseException
+	public void add(E entity)
+	{
+		String uri = entity.getValue();
+		if (!isValidURI(uri))
+		{
+			throw new ValidationException("not a hyperlink [" + uri + "]");
+		}
+
+		super.add(entity);
+	}
+
+	@Override
+	public void add(Iterable<E> entities)
 	{
 		for (E entity : entities)
 		{
 			String uri = entity.getValue();
 			if (!isValidURI(uri))
 			{
-				throw new DatabaseException("not a hyperlink [" + uri + "]");
+				throw new ValidationException("not a hyperlink [" + uri + "]");
 			}
 		}
-		return super.add(entities);
+
+		super.add(entities);
 	}
 
 	@Override
-	public int update(List<E> entities) throws DatabaseException
+	public void update(E entity)
+	{
+		String uri = entity.getValue();
+		if (!isValidURI(uri))
+		{
+			throw new ValidationException("not a hyperlink [" + uri + "]");
+		}
+
+		super.update(entity);
+	}
+
+	@Override
+	public void update(Iterable<E> entities)
 	{
 		for (E entity : entities)
 		{
 			String uri = entity.getValue();
 			if (!isValidURI(uri))
 			{
-				throw new DatabaseException("not a hyperlink [" + uri + "]");
+				throw new ValidationException("not a hyperlink [" + uri + "]");
 			}
 		}
-		return super.update(entities);
+
+		super.update(entities);
 	}
 
 	private boolean isValidURI(String uri)

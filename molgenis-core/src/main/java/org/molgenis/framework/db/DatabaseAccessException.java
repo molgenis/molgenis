@@ -1,6 +1,8 @@
 package org.molgenis.framework.db;
 
-public class DatabaseAccessException extends DatabaseException
+import org.molgenis.data.MolgenisDataException;
+
+public class DatabaseAccessException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
 
