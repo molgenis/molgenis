@@ -35,6 +35,7 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
+			molgenis.setContextURL('${context_url}');
 			molgenis.getMappingManager().changeDataSet(${wizard.selectedDataSet.id?c});
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();

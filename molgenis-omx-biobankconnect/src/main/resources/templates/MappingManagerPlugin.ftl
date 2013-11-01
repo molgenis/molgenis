@@ -128,6 +128,7 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
+			molgenis.setContextURL('${context_url}');
 			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val());
 			$('#selectedDataSet').change(function(){
 				molgenis.getMappingManager().changeDataSet($(this).val());

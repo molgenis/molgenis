@@ -1,13 +1,22 @@
-(function($, molgenis) {
-	"use strict";
+(function($, w) {
 	
-	var ns = molgenis;
+	"use strict";
+	var ns = w.molgenis = w.molgenis || {};
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
+	var CONTEXT_URL = null;
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
 	var mappingManager = new ns.MappingManager();
-
+	
+	ns.setContextURL = function(CONTEXT_URL){
+		this.CONTEXT_URL = CONTEXT_URL;
+	};
+	
+	ns.getContextURL = function() {
+		return this.CONTEXT_URL;
+	};
+	
 	ns.hrefToId = function(href){
 		return href.substring(href.lastIndexOf('/') + 1); 
 	};
@@ -100,11 +109,11 @@
 		});
 	};
 	
-	$(function(){
+	$(document).ready(function(){
 		var buttonGroup = $('.bwizard-buttons');
 		$('#wizardForm').prepend(buttonGroup);
 		buttonGroup.before('<legend />');
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);
 	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top))

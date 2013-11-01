@@ -1,7 +1,7 @@
-(function($, molgenis) {
-	"use strict";
+(function($, w) {
 	
-	var ns = molgenis;
+	"use strict";
+	var ns = w.molgenis = w.molgenis || {};
 	var pagination = new ns.Pagination();
 	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
@@ -477,7 +477,7 @@
 				modal.modal('hide');
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.getContextUrl() + '/annotate/remove',
+					'action' : molgenis.getContextURL() + '/annotate/remove',
 					'method' : 'POST'
 				}).submit();
 			});
@@ -512,7 +512,7 @@
 			};
 			$.ajax({
 				type : 'POST',
-				url : molgenis.getContextUrl() + '/annotate/update',
+				url : ns.getContextURL() + '/annotate/update',
 				async : false,
 				data : JSON.stringify(updateRequest),
 				contentType : 'application/json',
@@ -613,4 +613,4 @@
 	function getselectedDataSetId(){
 		return selectedDataSetId;
 	}
-}($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top));

@@ -1,21 +1,16 @@
 package org.molgenis.omx;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.genomebrowser.controller.GenomebrowserController;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,27 +98,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 			entityAuthority.setMolgenisGroup(usersGroup);
 			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entity.getName().toUpperCase());
 			unsecuredDatabase.add(entityAuthority);
-		}
-		
-		//Genomebrowser stuff
-		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
-		
-		runtimePropertyMap.put(GenomebrowserController.INITLOCATION,"chr:'3', viewStart:48601506,viewEnd:48632700,cookieKey:'human'");
-		runtimePropertyMap.put(GenomebrowserController.COORDSYSTEM,"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37'}");  
-		runtimePropertyMap.put(GenomebrowserController.CHAINS,"{hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',{speciesName: 'Human',taxon: 9606,auth: 'NCBI',version: 36})}");
-		runtimePropertyMap.put(GenomebrowserController.SOURCES,"[{name:'Genome',uri:'http://www.derkholm.net:8080/das/hg19comp/',desc:'Human reference genome build GRCh37',tier_type:'sequence',provides_entrypoints: true},{name:'Genes',desc:'Gene structures from Ensembl 59 (GENCODE 4)',uri:'http://www.derkholm.net:8080/das/hsa_59_37d/',collapseSuperGroups:true,provides_karyotype:true,provides_search:true},{name:'col7a1 mutations',uri:'http://localhost:8080/das/col7a1/',desc:'Patient mutations in the COL7A1 gene'}]");
-		runtimePropertyMap.put(GenomebrowserController.BROWSERLINKS,"{Ensembl: 'http://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'}");  
-		runtimePropertyMap.put(GenomebrowserController.SEARCHENDPOINT,"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
-		runtimePropertyMap.put(GenomebrowserController.KARYOTYPEENDPOINT,"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
-
-		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
-		{
-			RuntimeProperty runtimeProperty = new RuntimeProperty();
-			String propertyKey = entry.getKey();
-			runtimeProperty.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + propertyKey);
-			runtimeProperty.setName(propertyKey);
-			runtimeProperty.setValue(entry.getValue());
-			unsecuredDatabase.add(runtimeProperty);
 		}
 	}
 

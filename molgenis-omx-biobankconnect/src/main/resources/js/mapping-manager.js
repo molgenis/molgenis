@@ -1,7 +1,7 @@
-(function($, molgenis, w) {
-	"use strict";
+(function($, w) {
 	
-	var ns = molgenis;
+	"use strict";
+	var ns = w.molgenis = w.molgenis || {};
 	var pagination = new ns.Pagination();
 	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
@@ -371,7 +371,7 @@
 								};
 								$.ajax({
 									type : 'POST',
-									url : molgenis.getContextUrl() + '/mappingmanager/delete',
+									url : ns.getContextURL() + '/mappingmanager/delete',
 									async : false,
 									data : JSON.stringify(deleteRequest),
 									contentType : 'application/json',
@@ -605,7 +605,7 @@
 					};
 					$.ajax({
 						type : 'POST',
-						url : molgenis.getContextUrl() + '/mappingmanager/update',
+						url : ns.getContextURL() + '/mappingmanager/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json',
@@ -822,7 +822,7 @@
 			'dataSetId' : selectedDataSet,
 			'documentType' : dataSet.identifier
 		};
-		$.download(molgenis.getContextUrl() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+		$.download(ns.getContextURL() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
 	ns.MappingManager.prototype.createHelpModal = function(){
@@ -848,4 +848,4 @@
 		return selectedDataSet;
 	}
 	
-}($, window.top.molgenis = window.top.molgenis || {}, window.top));
+}($, window.top));

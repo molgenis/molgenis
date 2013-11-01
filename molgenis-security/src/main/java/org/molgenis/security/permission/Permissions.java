@@ -112,8 +112,10 @@ public class Permissions
 						{
 							String group1 = o1.getGroup();
 							String group2 = o2.getGroup();
-							if (group1 == null) return group2 == null ? 0 : -1;
-							else return group2 == null ? 1 : group1.compareTo(group2);
+							if (group1 == null && group2 == null) return 0;
+							else if (group1 != null && group2 == null) return 1;
+							else if (group1 == null && group2 != null) return -1;
+							else return group1.compareTo(group2);
 						}
 					});
 				}
@@ -132,8 +134,10 @@ public class Permissions
 						{
 							String group1 = o1.getGroup();
 							String group2 = o2.getGroup();
-							if (group1 == null) return group2 == null ? 0 : -1;
-							else return group2 == null ? 1 : group1.compareTo(group2);
+							if (group1 == null && group2 == null) return 0;
+							else if (group1 != null && group2 == null) return 1;
+							else if (group1 == null && group2 != null) return -1;
+							else return group1.compareTo(group2);
 						}
 					});
 				}

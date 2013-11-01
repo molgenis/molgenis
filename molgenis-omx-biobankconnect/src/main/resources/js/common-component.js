@@ -1,5 +1,6 @@
-(function($, molgenis) {
+(function($, w) {
 	"use strict";
+	var molgenis = w.molgenis = w.molgenis || {};
 	
 	molgenis.Pagination = function Pagination(){
 		this.offSet = 1;
@@ -100,10 +101,11 @@
 		return searchRequest;
 	};
 	
-}($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top));
 
-(function($, molgenis){
+(function($, w){
 	"use strict";
+	var molgenis = w.molgenis = w.molgenis || {};
 	
 	molgenis.StandardModal = function StandardModal(){
 		this.modal = $('<div />');
@@ -196,4 +198,4 @@
 		});
 		callback(this.modal);
 	};
-}($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top));
