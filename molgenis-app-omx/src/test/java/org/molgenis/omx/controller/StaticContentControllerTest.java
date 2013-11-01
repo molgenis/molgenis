@@ -50,7 +50,7 @@ public class NewsControllerTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public NewsController NewsController()
+		public NewsController newsController()
 		{
 			return new NewsController(molgenisSettings());
 		}
