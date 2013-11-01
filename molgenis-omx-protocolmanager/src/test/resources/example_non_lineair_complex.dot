@@ -1,0 +1,18 @@
+digraph G {
+	stepA -> step1;
+	stepB -> step1;
+	stepC -> step1;
+	stepD -> step1;
+	step1 -> step2;
+	step2 -> step3;
+	step2 -> step5;
+	stepE -> step5;
+	stepF -> step5;
+	step3 -> step4;
+	step4 -> step5;
+	step4 -> step6;
+	step5 -> passed;
+	step5 -> failed;
+	failed -> step1;
+	passed -> sendResult;
+}
