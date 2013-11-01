@@ -2,8 +2,11 @@ package org.molgenis.omx.controller;
 
 import static org.molgenis.omx.controller.StaticContentController.URI;
 
+import org.apache.log4j.Logger;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.usermanager.UserManagerController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,45 +23,31 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(URI)
 public class StaticContentController extends MolgenisPluginController
 {
+	private final static Logger logger = Logger.getLogger(StaticContentController.class);
+
 	/**
 	 * TODO before ending this implementation
 	 * 
 	 * REMOVE: BackgroundController.java; NewsController.java; HomeController.java; ContactController.java; MORE???
 	 */
 
-	public static final String URI = "/plugin/staticcontent";
+	/**
+	 * REMOVE ME AAL content need to come from the databse //WEB APP data populator public static final String
+	 * DEFAULT_CONTENT = "
+	 * <p>
+	 * Place here some content!
+	 * </p>
+	 * ";
+	 */
+	public static final String DEFAULT_CONTENT = "<p>Place here some content!</p>";
 
-	private static final String DEFAULT_CONTENT = "<p>Place here some content!</p>";
-
-	private static enum KeyApp
-	{
-		NEWS("app.news"),
-		HOME("app.home.html"),
-		BACKGROUND("app.background"),
-		CONTACT("app.contact"),
-		REFERENCES("app.references");
-
-		private String keyApp;
-
-		private KeyApp(String keyApp)
-		{
-			if (keyApp == null || keyApp.isEmpty())
-			{
-				throw new IllegalArgumentException("keyApp kan niet null zijn");
-			}
-			this.keyApp = keyApp;
-		}
-
-		public String getKeyApp()
-		{
-			return this.keyApp;
-		}
-	}
+	public static final String URI = "/plugin/static";
+	public static final String PREFIX_KEY = "app.";
 
 	private final MolgenisSettings molgenisSettings;
 
 	@Autowired
-	public StaticContentController(MolgenisSettings molgenisSettings)
+	public StaticContentController(final MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (molgenisSettings == null)
@@ -69,14 +58,20 @@ public class StaticContentController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/{uniqueReference}", method = RequestMethod.GET)
-	public String init(@PathVariable
-	String uniqueReference, Model model)
+	public String init(final @PathVariable
+	String uniqueReference, final Model model)
 	{
-		// TODO 
-		// check permission !!!@££$%^&^**
-		KeyApp keyApp = KeyApp.valueOf(uniqueReference.toUpperCase());
-		String content = molgenisSettings.getProperty(keyApp.getKeyApp(), DEFAULT_CONTENT);
-		model.addAttribute("content", content);
+		String content = this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference, DEFAULT_CONTENT);
+
+		if (null == content || content.isEmpty())
+		{
+			throw new MolgenisDataException("content is null or empty");
+		}
+		else
+		{
+			model.addAttribute("content", content);
+		}
+
 		return "view-staticcontent";
 	}
 }
