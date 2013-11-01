@@ -32,6 +32,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	private static final String FIELD_DESCRIPTION = "description";
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
 	private static final String FIELD_PATH = "path";
+	private static final String FIELD_BOOST_ONTOLOGYTERM = "boostOntologyTerms";
 	private static final String DATA_TYPE = "dataType";
 	private static final String FIELD_CATEGORY = "category";
 
@@ -76,6 +77,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 		columns.add(new Field(FIELD_NAME));
 		columns.add(new Field(FIELD_DESCRIPTION));
 		columns.add(new Field(FIELD_DESCRIPTION_STOPWORDS));
+		columns.add(new Field(FIELD_BOOST_ONTOLOGYTERM));
 		columns.add(new Field(FIELD_PATH));
 		columns.add(new Field(FIELD_CATEGORY));
 		return columns;
@@ -149,6 +151,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, description);
 				tuple.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
+				tuple.set(FIELD_BOOST_ONTOLOGYTERM, StringUtils.EMPTY);
 				tuple.set(FIELD_PATH, path);
 				tuple.set(DATA_TYPE, feature.getDataType());
 				tuple.set(FIELD_CATEGORY, categoryValue.toString().toLowerCase());

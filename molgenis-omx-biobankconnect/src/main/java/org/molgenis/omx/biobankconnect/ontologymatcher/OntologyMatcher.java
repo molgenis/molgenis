@@ -9,7 +9,8 @@ public interface OntologyMatcher
 {
 	void deleteDocumentByIds(String documentType, List<String> documentIds);
 
-	void matchCatalogue(Integer selectedCatalogue, List<Integer> cataloguesToMatch) throws DatabaseException;
+	void match(Integer selectedCatalogue, List<Integer> cataloguesToMatch, Integer sourceDataSetId)
+			throws DatabaseException;
 
 	Integer matchPercentage();
 
@@ -17,5 +18,6 @@ public interface OntologyMatcher
 
 	boolean checkExistingMappings(String dataSetIdentifier, Database db) throws DatabaseException;
 
-	void matchFeature(Integer sourceDataSetId, Integer selectedDataSet, List<Integer> selectedDataSetIds);
+	// void matchFeature(Integer selectedDataSet, List<Integer>
+	// selectedDataSetIds, Integer sourceDataSetId);
 }

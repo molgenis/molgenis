@@ -469,7 +469,7 @@
 			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
 				restApi.getAsync(feature.href, ["unit", "definitions"], null, function(restApiFeature){
 					var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
-					body.append(ns.getOntologyAnnotator().createFeatureTable(title, restApiFeature, createAnnotationModal));
+					ns.getOntologyAnnotator().createFeatureTable(body, title, restApiFeature, createAnnotationModal);
 					body.append(ns.getOntologyAnnotator().createSearchDiv(title, restApiFeature, createAnnotationModal));
 					var footer = modal.find('div.modal-footer:eq(0)');
 					var nextButton = $('<button type="btn" class="btn btn-primary">Next</button>').click(function(){
@@ -576,7 +576,6 @@
 					async : false,
 					contentType : 'application/json',
 					success : function(data, textStatus, request) {
-						console.log(data);
 						if(data.isRunning){
 							setTimeout(function(){
 								checkProgressForRematch(feature);
@@ -725,8 +724,8 @@
 				});
 			}
 			
-			var soretedMappedFeatures = sortByScoreAndLength(mappedFeatures);
-			
+//			var soretedMappedFeatures = sortByScoreAndLength(mappedFeatures);
+			var soretedMappedFeatures = mappedFeatures;
 			$.each(soretedMappedFeatures, function(index, eachMapping){
 				var mappedFeatureId = eachMapping.mappedFeatureId;
 				var score = eachMapping.score;
@@ -806,7 +805,7 @@
 			});
 			var topTenOrder = [];
 			$.each(map, function(score, mappings){
-				if(mappings.length > 1){
+				if(mappings.length > 1 && score > 0){
 					mappings.sort(function(a,b){
 						return naturalSort(b.comparedScore, a.comparedScore);
 					});

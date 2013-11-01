@@ -18,6 +18,7 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherResponse;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.search.SearchService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
+
+	@Autowired
+	private SearchService searchService;
 
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
@@ -137,8 +141,7 @@ public class BiobankConnectController extends AbstractWizardController
 	public OntologyMatcherResponse rematch(@RequestBody
 	OntologyMatcherRequest request) throws DatabaseException
 	{
-		ontologyMatcher.matchFeature(request.getFeatureId(), request.getSourceDataSetId(),
-				request.getSelectedDataSetIds());
+		ontologyMatcher.match(request.getSourceDataSetId(), request.getSelectedDataSetIds(), request.getFeatureId());
 		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
 				ontologyMatcher.matchPercentage());
 		return response;

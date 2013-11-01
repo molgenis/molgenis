@@ -299,13 +299,15 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			ontologyInfo.put(ontologyUri, ontologyName);
 
 			String ontologyLabel = data.get("ontologyLabel").toString();
-			String term = ontologyLabel == null ? data.get("ontologyTerm").toString().toLowerCase() : ontologyLabel
-					+ ":" + data.get("ontologyTerm").toString().toLowerCase();
+			String oontologyTermSynonym = data.get("ontologyTermSynonym").toString();
+			String term = ontologyLabel == null ? oontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
+					+ oontologyTermSynonym.toLowerCase();
 			String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
 			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);
 			ot.setName(term);
+			ot.setDefinition(oontologyTermSynonym);
 			ot.setOntology_Identifier(ontologyUri);
 
 			listOfOntologyTerms.add(ot);

@@ -50,8 +50,7 @@ public class DisMaxQueryGenerator extends AbstractQueryRulePartGenerator
 			builder.tieBreaker((float) 0.0);
 			if (query.getValue() != null)
 			{
-				Boolean boosted = (Boolean) query.getValue();
-				if (boosted) builder.boost((float) 10.0);
+				builder.boost(Float.parseFloat(query.getValue().toString()));
 			}
 			return builder;
 		}

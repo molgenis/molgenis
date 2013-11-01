@@ -29,6 +29,7 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
 	private static final String FIELD_NAME = "name";
+	private static final String FIELD_DESCRIPTION = "description";
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
 
 	private final Protocol protocol;
@@ -70,6 +71,7 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 		columns.add(new Field(FIELD_TYPE));
 		columns.add(new Field(FIELD_ID));
 		columns.add(new Field(FIELD_NAME));
+		columns.add(new Field(FIELD_DESCRIPTION));
 		columns.add(new Field(FIELD_DESCRIPTION_STOPWORDS));
 		return columns;
 	}
@@ -117,9 +119,10 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 				descriptionStopWords.removeAll(STOPWORDSLIST);
 
 				KeyValueTuple tuple = new KeyValueTuple();
-				tuple.set(FIELD_TYPE, ObservableFeature.class.getSimpleName().toLowerCase());
+				tuple.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
 				tuple.set(FIELD_ID, c.getObservableFeature_Id());
 				tuple.set(FIELD_NAME, name);
+				tuple.set(FIELD_DESCRIPTION, name);
 				tuple.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
 				tuples.add(tuple);
 			}
