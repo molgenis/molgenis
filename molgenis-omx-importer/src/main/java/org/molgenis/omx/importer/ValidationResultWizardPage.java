@@ -27,6 +27,8 @@ import org.springframework.validation.ObjectError;
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
 	private final Database database;
 	private final EntitiesImporter entitiesImporter;
@@ -53,6 +55,12 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
+		if (!(wizard instanceof ImportWizard))
+		{
+			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
+					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
+		}
+
 		ImportWizard importWizard = (ImportWizard) wizard;
 		String entityImportOption = importWizard.getEntityImportOption();
 
