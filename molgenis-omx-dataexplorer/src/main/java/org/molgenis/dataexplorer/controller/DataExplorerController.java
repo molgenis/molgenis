@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
@@ -33,14 +32,12 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -91,8 +88,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
+			throws Exception
 	{
 		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 		model.addAttribute("dataSets", dataSets);
@@ -123,9 +120,6 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("selectedDataSet", selectedDataSet);
 		}
 
-		ProtocolViewer protocolViewer = new ProtocolViewer(SecurityUtils.currentUserIsAuthenticated());
-		model.addAttribute("model", protocolViewer);
-
 		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
 
@@ -136,8 +130,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
+			throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -189,8 +183,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody
-	AggregateRequest request)
+	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
 	{
 
 		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
@@ -268,33 +261,5 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
-	}
-
-	/**
-	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
-	 * to the home page
-	 * 
-	 * @return
-	 */
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
-	}
-
-	public class ProtocolViewer
-	{
-		final Boolean authenticated;
-
-		public ProtocolViewer(Boolean authenticated)
-		{
-
-			this.authenticated = authenticated;
-		}
-
-		public Boolean getAuthenticated()
-		{
-			return authenticated;
-		}
 	}
 }

@@ -43,7 +43,7 @@
 		<div class="span9">
 			<div class="pull-right">
 				<label class="control-label" for="dataset-select">View:</label>
-				<div id="dataDiv" class="<#if !model.authenticated>view-disabled<#else>view-enabled</#if>">
+				<div id="dataDiv" class="<#if !authenticated>view-disabled<#else>view-enabled</#if>">
 					<span class="viewer" id="data">data<img src="/img/grid-icon.png"></img>
 					</span>
 				</div>
@@ -82,7 +82,7 @@
 	</div>
 	<script>
 		$(function(){
-			<#if !model.authenticated>
+			<#if !authenticated>
 				$('#dataexplorer-grid-data').hide();
 				$('#dataexplorer-aggregate-data').show();
 				$('#aggregateDiv').addClass("selected");
