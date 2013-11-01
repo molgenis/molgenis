@@ -21,7 +21,7 @@ public class StudyDefinitionMetaModel extends CatalogMetaModel
 	{
 		super(id, name, loaded);
 		this.email = email;
-		this.date = date;
+		this.date = new Date(date.getTime()); // do not store externally mutable object
 	}
 
 	public String getUser()
@@ -31,6 +31,36 @@ public class StudyDefinitionMetaModel extends CatalogMetaModel
 
 	public Date getDate()
 	{
-		return date;
+		return new Date(date.getTime()); // do not expose mutual object
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((date == null) ? 0 : date.hashCode());
+		result = prime * result + ((email == null) ? 0 : email.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+		StudyDefinitionMetaModel other = (StudyDefinitionMetaModel) obj;
+		if (date == null)
+		{
+			if (other.date != null) return false;
+		}
+		else if (!date.equals(other.date)) return false;
+		if (email == null)
+		{
+			if (other.email != null) return false;
+		}
+		else if (!email.equals(other.email)) return false;
+		return true;
 	}
 }
