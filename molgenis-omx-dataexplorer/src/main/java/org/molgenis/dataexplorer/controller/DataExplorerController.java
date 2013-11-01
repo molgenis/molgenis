@@ -16,11 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
@@ -90,8 +88,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedDataSetIdentifier, Model model) throws Exception
 	{
 		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.ACTIVE, true));
@@ -134,8 +132,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
-			throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest")
+	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -190,7 +188,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@RequestBody
+	AggregateRequest request)
 	{
 
 		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
