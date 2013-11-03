@@ -30,6 +30,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring.version>3.2.4.RELEASE</spring.version>
+		<spring.security.version>3.2.0.RC2</spring.security.version>
 	</properties>
 
 	<repositories>
@@ -477,7 +479,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>3.2.4.RELEASE</version>
+			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- scope: provided -->
@@ -490,7 +492,7 @@
 		<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.25</version>
+            <version>5.1.26</version>
             <scope>provided</scope>
         </dependency>
 	</dependencies>
