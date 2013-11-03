@@ -5,6 +5,7 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 
 import java.util.List;
 
+import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -22,9 +23,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
-	protected void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac)
+	protected void configureUrlAuthorization(
+			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
-		euac.antMatchers("/")
+		expressionInterceptUrlRegistry
+				.antMatchers("/")
 				.permitAll()
 
 				// main menu

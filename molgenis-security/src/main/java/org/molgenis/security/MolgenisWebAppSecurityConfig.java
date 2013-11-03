@@ -1,5 +1,9 @@
 package org.molgenis.security;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.molgenis.framework.db.Database;
@@ -12,19 +16,24 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyAuthoritiesMapper;
 import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
+	private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
+
 	@Autowired
 	private Database unsecuredDatabase;
 
@@ -34,12 +43,14 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac = http.authorizeRequests();
-		configureUrlAuthorization(euac);
+		http.addFilter(anonymousAuthFilter());
+		http.authenticationProvider(anonymousAuthenticationProvider());
 
-		euac.antMatchers("/").permitAll()
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
+				.authorizeRequests();
+		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		.antMatchers("/login").permitAll()
+		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
 
 		.antMatchers("/account/**").permitAll()
 
@@ -53,9 +64,13 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		.antMatchers("/plugin/void/**").permitAll()
 
-		.antMatchers("/plugin/**").denyAll()
+		.antMatchers("/api/**").permitAll()
 
-		.anyRequest().authenticated().and()
+		.antMatchers("/search").permitAll()
+
+		.antMatchers("/captcha").permitAll()
+
+		.anyRequest().denyAll().and()
 
 		.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
@@ -64,9 +79,33 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.csrf().disable();
 	}
 
-	protected abstract void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac);
+	protected abstract void configureUrlAuthorization(
+			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry);
 
 	protected abstract RoleHierarchy roleHierarchy();
+
+	@Bean
+	public AnonymousAuthenticationFilter anonymousAuthFilter()
+	{
+		List<GrantedAuthority> anonymousUserAuthorities = createAnonymousUserAuthorities();
+
+		Collection<? extends GrantedAuthority> anonymousUserMappedAuthorities = roleHierarchyAuthoritiesMapper()
+				.mapAuthorities(anonymousUserAuthorities);
+		List<GrantedAuthority> allAnonymousUserAuthorityList = new ArrayList<GrantedAuthority>();
+		for (GrantedAuthority anonymousUserMappedAuthority : anonymousUserMappedAuthorities)
+			allAnonymousUserAuthorityList.add(anonymousUserMappedAuthority);
+
+		return new AnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
+				allAnonymousUserAuthorityList);
+	}
+
+	protected abstract List<GrantedAuthority> createAnonymousUserAuthorities();
+
+	@Bean
+	public AnonymousAuthenticationProvider anonymousAuthenticationProvider()
+	{
+		return new AnonymousAuthenticationProvider(ANONYMOUS_AUTHENTICATION_KEY);
+	}
 
 	@Bean
 	public RoleHierarchy roleHierarchyBean()
@@ -106,7 +145,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Override
-	protected void registerAuthentication(AuthenticationManagerBuilder auth)
+	protected void configure(AuthenticationManagerBuilder auth)
 	{
 		try
 		{
