@@ -85,18 +85,6 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	}
 
 	@Override
-	public Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException
-	{
-		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
-		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
-				+ "] does not exist");
-		DataSet dataSet = studyDataRequest.getDataSet();
-		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
-		return new OmxCatalog(dataSet);
-	}
-
-	@Override
 	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
