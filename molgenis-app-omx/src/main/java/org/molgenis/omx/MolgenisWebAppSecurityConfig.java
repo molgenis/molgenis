@@ -62,12 +62,17 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.antMatchers("/js/**").permitAll()
 
 		.antMatchers("/html/**").permitAll()
-
+		
 		.antMatchers("/plugin/void/**").permitAll()
 
 		.antMatchers("/api/**").permitAll()
 
 		.antMatchers("/search").permitAll()
+
+		//DAS datasource uses the database, unautheticated users can not see any data 
+		.antMatchers("/das/**").permitAll()
+		
+		.antMatchers("/myDas/**").permitAll()
 
 		.antMatchers("/captcha").permitAll()
 

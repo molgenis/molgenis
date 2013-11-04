@@ -70,7 +70,7 @@ function patientMutationTable(data) {
 			
 			var dallianceTrack = [ {
 				name : 'Patient ' + patientName,
-				uri : 'http://'+molgenisUrl+'/das/col7a1/patient'
+				uri : 'http://'+molgenisUrl+'/das/molgenis/patient'
 						+ patientId + '/',
 				desc : 'Mutations observed in patient '
 						+ patientName,

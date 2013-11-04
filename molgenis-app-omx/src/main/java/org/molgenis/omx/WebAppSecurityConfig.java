@@ -47,6 +47,12 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/entityexplorer/**", "/plugin/entityexplorer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("entityexplorer"))
 
+				.antMatchers("/menu/main/genomebrowser/**", "/plugin/genomebrowser/**")
+				.hasAnyAuthority(defaultPluginAuthorities("genomebrowser"))
+				
+				.antMatchers("/plugin/protocolviewer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+
 				.antMatchers("/menu/main/workflowdataentry/**", "/plugin/workflowdataentry/**")
 				.hasAnyAuthority(defaultPluginAuthorities("workflowdataentry"))
 
