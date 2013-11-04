@@ -35,6 +35,6 @@ public class StudyDefinitionMeta extends CatalogMeta
 
 	public Date getDate()
 	{
-		return date != null ? new Date(date.getTime()) : null; // do not expose mutable object
+		return date != null ? new Date(date.getTime()) : null; // do not expose mutual object
 	}
 }
