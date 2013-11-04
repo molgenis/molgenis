@@ -1,12 +1,11 @@
 package org.molgenis.omx.controller;
 
-import static org.molgenis.omx.controller.StaticContentController.URI;
+import static org.molgenis.omx.controller.ContentController.URI;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.security.usermanager.UserManagerController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(URI)
-public class StaticContentController extends MolgenisPluginController
+public class ContentController extends MolgenisPluginController
 {
-	private final static Logger logger = Logger.getLogger(StaticContentController.class);
+	private final static Logger logger = Logger.getLogger(ContentController.class);
 
 	/**
 	 * TODO before ending this implementation
@@ -32,7 +31,7 @@ public class StaticContentController extends MolgenisPluginController
 	 */
 
 	/**
-	 * REMOVE ME AAL content need to come from the databse //WEB APP data populator public static final String
+	 * REMOVE ME all other standard default content DEFAULT_CONTENT then content need to come from the database //WEB APP data populator public static final String
 	 * DEFAULT_CONTENT = "
 	 * <p>
 	 * Place here some content!
@@ -41,13 +40,13 @@ public class StaticContentController extends MolgenisPluginController
 	 */
 	public static final String DEFAULT_CONTENT = "<p>Place here some content!</p>";
 
-	public static final String URI = "/plugin/static";
+	public static final String URI = "/plugin/content";
 	public static final String PREFIX_KEY = "app.";
 
 	private final MolgenisSettings molgenisSettings;
 
 	@Autowired
-	public StaticContentController(final MolgenisSettings molgenisSettings)
+	public ContentController(final MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (molgenisSettings == null)
@@ -58,10 +57,9 @@ public class StaticContentController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/{uniqueReference}", method = RequestMethod.GET)
-	public String init(final @PathVariable
-	String uniqueReference, final Model model)
+	public String init(final @PathVariable String uniqueReference, final Model model)
 	{
-		String content = this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference, DEFAULT_CONTENT);
+		String content = "New Content --- " + this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference, DEFAULT_CONTENT);
 
 		if (null == content || content.isEmpty())
 		{
@@ -73,5 +71,12 @@ public class StaticContentController extends MolgenisPluginController
 		}
 
 		return "view-staticcontent";
+	}
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public String init(final Model model)
+	{
+		logger.warn("init: " + "HOME~~~!!!!!");
+		return init("home", model);
 	}
 }

@@ -5,6 +5,7 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -20,6 +21,8 @@ import org.springframework.security.core.authority.AuthorityUtils;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
+	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
+	
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac)
@@ -32,11 +35,14 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.hasAnyAuthority(
 						defaultPluginAuthorities("home", "protocolviewer", "dataexplorer", "entityexplorer",
 								"workflowdataentry", "importwizard", "news", "background", "references", "contact",
-								"useraccount"))
+								"useraccount", "content"))
 
 				// main menu plugins
-				.antMatchers("/menu/main/home/**", "/plugin/home/**")
+				.antMatchers("/menu/main/home/*", "/plugin/home/*")
 				.hasAnyAuthority(defaultPluginAuthorities("home"))
+				
+				.antMatchers("/menu/main/content/*", "/plugin/content/*")
+				.hasAnyAuthority(defaultPluginAuthorities("content"))
 
 				.antMatchers("/menu/main/protocolviewer/**", "/plugin/protocolviewer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
@@ -53,8 +59,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/importwizard/**", "/plugin/importwizard/**")
 				.hasAnyAuthority(defaultPluginAuthorities("importwizard"))
 
-				.antMatchers("/menu/main/news/**", "/plugin/news/**")
-				.hasAnyAuthority(defaultPluginAuthorities("news"))
+//				.antMatchers("/menu/main/news/**", "/plugin/news/**")
+//				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
 				.antMatchers("/menu/main/background/**", "/plugin/background/**")
 				.hasAnyAuthority(defaultPluginAuthorities("background"))
@@ -202,7 +208,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	protected List<GrantedAuthority> createAnonymousUserAuthorities()
 	{
-		return AuthorityUtils.createAuthorityList(getPluginReadAuthority("home"));
+		String s = getPluginReadAuthority("content");		
+		return AuthorityUtils.createAuthorityList(s);
 	}
 
 	// TODO automate role hierarchy configuration (ticket #2134)
@@ -212,23 +219,20 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		StringBuilder hierarchyBuilder = new StringBuilder();
 
 		// Plugins: WRITE -> READ
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_BACKGROUND > ROLE_PLUGIN_READ_BACKGROUND").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CATALOGMANAGER > ROLE_PLUGIN_READ_CATALOGMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CBMTOOMXCONVERTER > ROLE_PLUGIN_READ_CBMTOOMXCONVERTER").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CONTACT > ROLE_PLUGIN_READ_CONTACT").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATAEXPLORER > ROLE_PLUGIN_READ_DATAEXPLORER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATAINDEXER > ROLE_PLUGIN_READ_DATAINDEXER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETDELETER > ROLE_PLUGIN_READ_DATASETDELETER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_ENTITYEXPLORER > ROLE_PLUGIN_READ_ENTITYEXPLORER").append(' ');
 		// TODO add form plugins
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_HOME > ROLE_PLUGIN_READ_HOME").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CONTENT > ROLE_PLUGIN_READ_CONTENT").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_IMPORTWIZARD > ROLE_PLUGIN_READ_IMPORTWIZARD").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_NEWS > ROLE_PLUGIN_READ_NEWS").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PERMISSIONMANAGER > ROLE_PLUGIN_READ_PERMISSIONMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_USERMANAGER > ROLE_PLUGIN_READ_USERMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLMANAGER > ROLE_PLUGIN_READ_PROTOCOLMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_PLUGIN_READ_PROTOCOLVIEWER").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_REFERENCES > ROLE_PLUGIN_READ_REFERENCES").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_STUDY > ROLE_PLUGIN_READ_STUDY").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_STUDYMANAGER > ROLE_PLUGIN_READ_STUDYMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_USERACCOUNT > ROLE_PLUGIN_READ_USERACCOUNT").append(' ');
