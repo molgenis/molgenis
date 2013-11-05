@@ -2,7 +2,10 @@ package org.molgenis.genomebrowser.services;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -11,9 +14,6 @@ import org.molgenis.omx.patient.Patient;
 import org.molgenis.omx.xgap.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 @Service
 public class MutationService
@@ -26,21 +26,20 @@ public class MutationService
 		this.database = database;
 	}
 
-	public JsonArray getPatientMutationData(String segmentId, String mutationId) throws ParseException,
+	public List<Map<String,String>> getPatientMutationData(String segmentId, String mutationId) throws ParseException,
 			DatabaseException, IOException
 	{
 		List<Patient> patientQueryResult = null;
-		JsonObject jsonObject = new JsonObject();
-		JsonArray jsonArray = new JsonArray();
+		List<Map<String,String>> variantArray = new ArrayList<Map<String,String>>();
 
 		patientQueryResult = queryPatients(segmentId, mutationId);
 
 		for (Patient patient : patientQueryResult)
 		{
-			createPatientFields(jsonArray, patient);
+			createPatientFields(variantArray, patient);
 		}
 		
-		return jsonArray;
+		return variantArray;
 
 	}
 
@@ -58,35 +57,35 @@ public class MutationService
 		return patientQueryResult;
 	}
 
-	private void createPatientFields(JsonArray jsonArray, Patient patient)
+	private void createPatientFields(List<Map<String,String>> variantArray, Patient patient)
 	{
-		JsonObject jsonValues = new JsonObject();
+		Map<String,String> valueMap = new HashMap<String,String>();
 		for (String field : patient.getFields())
 		{
 			if (patient.get(field) != null)
 			{
-				jsonValues.addProperty(field, patient.get(field).toString());
+				valueMap.put(field, patient.get(field).toString());
 			}
-			else jsonValues.addProperty(field, "");
+			else valueMap.put(field, "");
 		}
-		createVarientFields(patient, jsonValues);
-		jsonArray.add(jsonValues);
+		createVarientFields(patient, valueMap);
+		variantArray.add(valueMap);
 	}
 
-	private void createVarientFields(Patient patient, JsonObject jsonValues)
+	private void createVarientFields(Patient patient, Map<String,String> valueMap)
 	{
-		createVarientFieldsForAllele(patient, jsonValues, "1");
-		createVarientFieldsForAllele(patient, jsonValues, "2");
+		createVarientFieldsForAllele(patient, valueMap, "1");
+		createVarientFieldsForAllele(patient, valueMap, "2");
 	}
 
-	private void createVarientFieldsForAllele(Patient patient, JsonObject jsonValues, String alleleId)
+	private void createVarientFieldsForAllele(Patient patient, Map<String,String> valueMap, String alleleId)
 	{
 		Variant variant = null;
 		if (patient.get("Allele" + alleleId + "_id") == null)
 		{
-			jsonValues.addProperty("CdnaNotation" + alleleId, "");
-			jsonValues.addProperty("Consequence" + alleleId, "");
-			jsonValues.addProperty("Exon" + alleleId, "");
+			valueMap.put("CdnaNotation" + alleleId, "");
+			valueMap.put("Consequence" + alleleId, "");
+			valueMap.put("Exon" + alleleId, "");
 		}
 		else
 		{
@@ -102,11 +101,11 @@ public class MutationService
 			{
 				if (variant.get(allelefield) != null)
 				{
-					jsonValues.addProperty(allelefield + alleleId, variant.get(allelefield).toString());
+					valueMap.put(allelefield + alleleId, variant.get(allelefield).toString());
 				}
 				else
 				{
-					jsonValues.addProperty(allelefield, "");
+					valueMap.put(allelefield, "");
 				}
 			}
 		}

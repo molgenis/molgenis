@@ -5,13 +5,13 @@ function patientMutationTable(data) {
     	molgenisUrl = molgenisUrl+":"+location.port;
     }
 	
-    var length = data.elements.length,
+    var length = data.length,
     element = null;
     for (var i = 0; i < length; i++) {
     	//add a plus sign for every datarow to give the user a visual que that the row is clickable
     	//also add a empty value for the empty column between the data of the two alelles. 
     	//TODO find a cleaner solution for the empty column
-    	element = data.elements[i];
+    	element = data[i];
     	element.addTrack = "<center><img src='/img/PlusSign.gif' alt='+'></center>";
     	element.empty = "";
 	}
@@ -26,7 +26,7 @@ function patientMutationTable(data) {
 
 	$('#patientMutationDataTable').dataTable(
 	{
-		"aaData" : data.elements,
+		"aaData" : data,
 		"aoColumns" : [ {
 			"mData" : "addTrack"
 		},{
