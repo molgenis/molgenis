@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
-		<plugin id="content" name="Home" url="content/home"/>
+		<plugin id="home" name="Home" url="content/home"/>
 		<plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>

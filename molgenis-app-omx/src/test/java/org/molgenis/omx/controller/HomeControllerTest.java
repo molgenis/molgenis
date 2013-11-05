@@ -1,11 +1,18 @@
 package org.molgenis.omx.controller;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
+
+import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.controller.HomeControllerTest.Config;
+import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +32,12 @@ public class HomeControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private HomeController homeController;
 
+	@Autowired
+	private Database unsecuredDatabase;
+	
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+	
 	private MockMvc mockMvc;
 
 	@BeforeMethod
@@ -43,6 +56,17 @@ public class HomeControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void init() throws Exception
 	{
+		String uniqueReference = "home";
+		RuntimeProperty runtimeProperty = mock(RuntimeProperty.class);
+		when(runtimeProperty.getValue()).thenReturn("<p>content</p>");
+		
+		when(unsecuredDatabase.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER,
+						Operator.EQUALS, RuntimeProperty.class.getSimpleName() + "_app." + uniqueReference))).thenReturn(
+				Arrays.asList(runtimeProperty));
+		
+		when(molgenisSettings.getProperty("app.home" , ContentController.DEFAULT_CONTENT))
+			.thenReturn("<p>content</p>");
+		
 		mockMvc.perform(get(HomeController.URI)).andExpect(status().isOk());
 	}
 
@@ -59,6 +83,11 @@ public class HomeControllerTest extends AbstractTestNGSpringContextTests
 		public MolgenisSettings molgenisSettings()
 		{
 			return mock(MolgenisSettings.class);
+		}
+		
+		@Bean
+		public Database unsecuredDatabase(){
+			return mock(Database.class);
 		}
 	}
 }

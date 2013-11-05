@@ -40,7 +40,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 								"workflowdataentry", "importwizard", "news", "background", "references", "contact",
 								"useraccount", "content"))
 
-				// main menu plugins
+				 //main menu plugins
 				.antMatchers("/menu/main/home/*", "/plugin/home/*")
 				.hasAnyAuthority(defaultPluginAuthorities("home"))
 				
@@ -61,18 +61,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/main/importwizard/**", "/plugin/importwizard/**")
 				.hasAnyAuthority(defaultPluginAuthorities("importwizard"))
-
-//				.antMatchers("/menu/main/news/**", "/plugin/news/**")
-//				.hasAnyAuthority(defaultPluginAuthorities("news"))
-
-				.antMatchers("/menu/main/background/**", "/plugin/background/**")
-				.hasAnyAuthority(defaultPluginAuthorities("background"))
-
-				.antMatchers("/menu/main/references/**", "/plugin/references/**")
-				.hasAnyAuthority(defaultPluginAuthorities("references"))
-
-				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
-				.hasAnyAuthority(defaultPluginAuthorities("contact"))
 
 				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
 				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
@@ -211,7 +199,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	protected List<GrantedAuthority> createAnonymousUserAuthorities()
 	{
-		String s = getPluginReadAuthority("content");		
+		String s = getPluginReadAuthority("home");		
 		return AuthorityUtils.createAuthorityList(s);
 	}
 
