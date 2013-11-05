@@ -36,9 +36,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// main menu
 				.antMatchers("/menu/main")
 				.hasAnyAuthority(
-						defaultPluginAuthorities("home", "protocolviewer", "dataexplorer", "entityexplorer",
-								"workflowdataentry", "importwizard", "news", "background", "references", "contact",
-								"useraccount", "content"))
+						defaultPluginAuthorities("home", "content", "protocolviewer", "dataexplorer", "entityexplorer",
+								"workflowdataentry", "importwizard", "useraccount"))
 
 				 //main menu plugins
 				.antMatchers("/menu/main/home/*", "/plugin/home/*")
