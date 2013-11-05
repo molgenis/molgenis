@@ -11,6 +11,7 @@
 		<plugin id="background" name="Background" url="content/background"/>
 		<plugin id="references" name="References" url="content/references"/>
 		<plugin id="contact" name="Contact" url="content/contact"/>
+        <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
 		<menu label="Converters" name="converters">
 			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
 		</menu>
