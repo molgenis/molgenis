@@ -6,7 +6,7 @@ import uk.ac.ebi.mydas.model.DasTarget;
 public class MolgenisDasTarget extends DasTarget
 {
 	//class used to override  the equals method so it can be used in unittests
-	private static final long serialVersionUID = -8224228379988653794L;
+	private static final long serialVersionUID = 1L;
 
 	public MolgenisDasTarget(String targetId, int startCoordinate, int stopCoordinate, String targetName)
 			throws DataSourceException
