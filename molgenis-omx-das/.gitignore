@@ -1,6 +1,5 @@
 bin/
 target/
 test-output/
-src/test/resources/myDas/xslt/.svn
 .classpath
 .project
