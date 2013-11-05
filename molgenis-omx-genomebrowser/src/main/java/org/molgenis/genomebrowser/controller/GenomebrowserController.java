@@ -8,6 +8,7 @@ import java.text.ParseException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.util.log.Log;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -18,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -64,22 +66,15 @@ public class GenomebrowserController extends MolgenisPluginController
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/data")
 	public @ResponseBody
-	void getAll(HttpServletResponse response) throws ParseException, DatabaseException, IOException
+	void getAll(HttpServletResponse response, @RequestParam(value = "mutation", required = false) String mutationId,
+			@RequestParam(value = "segment", required = true) String segmentId) throws ParseException, DatabaseException, IOException
 	{
+		if(mutationId==null){
+			mutationId="";
+		}
 		PrintWriter printWriter = response.getWriter();
 		response.setContentType("text/plain");
-		printWriter.print(mutationService.getPatientMutationData("3",""));
-		printWriter.close();
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/data/{patientId}")
-	public @ResponseBody
-	void getAttribute(@PathVariable(value = "patientId")
-	String patientId, HttpServletResponse response) throws ParseException, DatabaseException, IOException
-	{
-		PrintWriter printWriter = response.getWriter();
-		response.setContentType("text/plain");
-		printWriter.print(mutationService.getPatientMutationData("3",patientId));
+		printWriter.print(mutationService.getPatientMutationData(segmentId,mutationId));
 		printWriter.close();
 	}
 }
