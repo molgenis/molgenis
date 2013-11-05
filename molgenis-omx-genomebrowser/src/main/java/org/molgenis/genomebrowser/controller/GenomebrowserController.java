@@ -14,6 +14,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.genomebrowser.services.MutationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * Controller that handles home page requests
@@ -64,17 +68,14 @@ public class GenomebrowserController extends MolgenisPluginController
 		return "view-genomebrowser";
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/data")
+	@RequestMapping(method = RequestMethod.GET, value = "/data", produces = {MediaType.APPLICATION_JSON_VALUE})
 	public @ResponseBody
-	void getAll(HttpServletResponse response, @RequestParam(value = "mutation", required = false) String mutationId,
+	JsonArray getAll(HttpServletResponse response, @RequestParam(value = "mutation", required = false) String mutationId,
 			@RequestParam(value = "segment", required = true) String segmentId) throws ParseException, DatabaseException, IOException
 	{
 		if(mutationId==null){
 			mutationId="";
 		}
-		PrintWriter printWriter = response.getWriter();
-		response.setContentType("text/plain");
-		printWriter.print(mutationService.getPatientMutationData(segmentId,mutationId));
-		printWriter.close();
+		return mutationService.getPatientMutationData(segmentId,mutationId);
 	}
 }

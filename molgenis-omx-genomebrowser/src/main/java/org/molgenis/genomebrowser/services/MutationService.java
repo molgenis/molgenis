@@ -26,7 +26,7 @@ public class MutationService
 		this.database = database;
 	}
 
-	public JsonObject getPatientMutationData(String segmentId, String mutationId) throws ParseException,
+	public JsonArray getPatientMutationData(String segmentId, String mutationId) throws ParseException,
 			DatabaseException, IOException
 	{
 		List<Patient> patientQueryResult = null;
@@ -40,8 +40,7 @@ public class MutationService
 			createPatientFields(jsonArray, patient);
 		}
 		
-		jsonObject.add("variants", jsonArray);
-		return jsonObject;
+		return jsonArray;
 
 	}
 
