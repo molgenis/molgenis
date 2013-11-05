@@ -477,6 +477,8 @@
 			}
 			return;
 		}
+		var prevRenderMode = rootNode.tree.enableUpdate(false); // disable rendering
+		
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
@@ -511,6 +513,8 @@
 				if(currentNode != null) currentNode.select(false);
 			});
 		}
+		
+		rootNode.tree.enableUpdate(prevRenderMode); // restore previous rendering state
 		
 		//reset variables
 		search = false;
