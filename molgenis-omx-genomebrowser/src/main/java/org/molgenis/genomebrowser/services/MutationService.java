@@ -18,11 +18,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class MutationService
 {
-	private Database database;
+	private final Database database;
 
 	@Autowired
 	public MutationService(Database database)
 	{
+		if (database == null) throw new IllegalArgumentException("database is null");	
 		this.database = database;
 	}
 
@@ -46,7 +47,7 @@ public class MutationService
 	private List<Patient> queryPatients(String segmentId, String mutationId) throws DatabaseException
 	{
 		List<Patient> patientQueryResult;
-		if (mutationId != null && !"".equals(mutationId))
+		if (mutationId != null && !mutationId.isEmpty())
 		{
 			patientQueryResult = queryPatientsByMutation(segmentId, mutationId);
 		}
