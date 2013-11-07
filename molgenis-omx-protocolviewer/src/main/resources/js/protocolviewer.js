@@ -429,7 +429,7 @@
 					sortNodes(topNodes);
 					rootNode.removeChildren();
 					if(topNodes.length !== 0)
-						rootNode.addChild(topNodes[0].children); // FIXME continue after LL meeting
+						rootNode.addChild(topNodes[0].children);
 					
 					if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 					if(topNodes.length === 0) {
