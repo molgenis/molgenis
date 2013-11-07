@@ -212,6 +212,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								mappedFeatureIds.add(mappedId);
 
 								ObservationSet observation = new ObservationSet();
+								observation.setIdentifier(feature.getId() + "-" + mappedId + "-identifier");
 								observation.setPartOfDataSet_Identifier(dataSetIdentifier.toString());
 								listOfNewObservationSets.add(observation);
 								if (featureId != null) observationSetsPerDataSet.get(dataSetIdentifier.toString()).add(

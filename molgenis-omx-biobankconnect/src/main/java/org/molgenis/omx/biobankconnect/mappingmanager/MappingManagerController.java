@@ -3,18 +3,23 @@ package org.molgenis.omx.biobankconnect.mappingmanager;
 import static org.molgenis.omx.biobankconnect.mappingmanager.MappingManagerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -26,6 +31,8 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.io.excel.ExcelReader;
+import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.wizard.BiobankConnectController;
@@ -35,7 +42,9 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,6 +71,9 @@ public class MappingManagerController extends MolgenisPluginController
 	private final OntologyMatcher ontologyMatcher;
 	private final SearchService searchService;
 	private final Database database;
+
+	@Autowired
+	private FileStore fileStore;
 
 	@Autowired
 	public MappingManagerController(OntologyMatcher ontologyMatcher, SearchService searchService, Database database)
@@ -120,6 +132,130 @@ public class MappingManagerController extends MolgenisPluginController
 		{
 			logger.error("Exception calling searchservice for request [" + request + "]", e);
 		}
+	}
+
+	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
+	public String verify(@RequestParam
+	Integer selectedDataSet, @RequestParam
+	Part file, Model model) throws IOException, DatabaseException
+	{
+		ExcelReader reader = null;
+		try
+		{
+			File uploadFile = fileStore.store(file.getInputStream(), file.getName());
+			reader = new ExcelReader(uploadFile);
+			ExcelSheetReader sheet = reader.getSheet(0);
+			Iterator<String> columnIterator = sheet.colNamesIterator();
+
+			// collect all columns
+			String firstColumn = null;
+			List<String> biobankNames = new ArrayList<String>();
+			int count = 0;
+			while (columnIterator.hasNext())
+			{
+				if (count == 0) firstColumn = columnIterator.next();
+				else biobankNames.add(columnIterator.next());
+				count++;
+			}
+
+			Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
+			Iterator<Tuple> iterator = sheet.iterator();
+			while (iterator.hasNext())
+			{
+				Tuple row = iterator.next();
+				String variableName = row.getString(firstColumn);
+				if (!maunalMappings.containsKey(variableName)) maunalMappings.put(variableName,
+						new HashMap<String, List<String>>());
+				for (String biobank : biobankNames)
+				{
+					if (row.get(biobank) != null)
+					{
+						String mappingString = row.get(biobank).toString();
+						Map<String, List<String>> mappingDetail = new HashMap<String, List<String>>();
+						mappingDetail.put(biobank.toLowerCase(), Arrays.asList(mappingString.split(",")));
+						maunalMappings.put(variableName, mappingDetail);
+					}
+				}
+			}
+
+			List<DataSet> dataSets = database.find(DataSet.class,
+					new QueryRule(DataSet.NAME, Operator.IN, biobankNames));
+			for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
+			{
+				String variableName = entry.getKey();
+				System.out.println(variableName);
+				Map<String, List<String>> mappingDetail = entry.getValue();
+				List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(
+						ObservableFeature.NAME, Operator.EQUALS, variableName));
+				if (!features.isEmpty())
+				{
+					for (DataSet dataSet : dataSets)
+					{
+						if (mappingDetail.containsKey(dataSet.getName().toLowerCase()))
+						{
+							List<Integer> mappedFeatureIds = findFeaturesFromIndex(
+									mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
+
+							String mappingDataSetIdentifier = selectedDataSet + "-" + dataSet.getId();
+							List<QueryRule> queryRules = new ArrayList<QueryRule>();
+							queryRules.add(new QueryRule("store_mapping_feature", Operator.EQUALS, features.get(0)
+									.getId()));
+							queryRules.add(new QueryRule(Operator.SORTDESC, "store_mapping_score"));
+							SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, queryRules, null);
+							SearchResult result = searchService.search(searchRequest);
+
+							double previousScore = -1;
+							int rank = 0;
+							for (Hit hit : result.getSearchHits())
+							{
+								Map<String, Object> columnValueMap = hit.getColumnValueMap();
+								String mappedFeatureId = columnValueMap.get("store_mapping_mapped_feature").toString();
+								String score = columnValueMap.get("store_mapping_score").toString();
+
+								if (previousScore != Double.parseDouble(score))
+								{
+									previousScore = Double.parseDouble(score);
+									rank++;
+								}
+								if (mappedFeatureIds.contains(Integer.parseInt(mappedFeatureId)))
+								{
+									System.out.println("Rank in " + dataSet.getName() + " is " + rank);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (DatabaseException e)
+		{
+			new RuntimeException(e);
+		}
+		finally
+		{
+			if (reader != null) reader.close();
+		}
+		return init(null, model);
+	}
+
+	private List<Integer> findFeaturesFromIndex(List<String> featureNames, Integer dataSetId)
+	{
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		for (String featureName : featureNames)
+		{
+			if (queryRules.size() > 0) queryRules.add(new QueryRule(Operator.OR));
+			queryRules.add(new QueryRule("name", Operator.EQUALS, featureName));
+		}
+		queryRules.add(new QueryRule(Operator.LIMIT, 10000));
+		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, queryRules, null));
+
+		List<Integer> featureIds = new ArrayList<Integer>();
+		for (Hit hit : result.getSearchHits())
+		{
+			String featureId = hit.getColumnValueMap().get("id").toString();
+			featureIds.add(Integer.parseInt(featureId));
+		}
+		return featureIds;
 	}
 
 	@RequestMapping(value = "/download", method = RequestMethod.POST)

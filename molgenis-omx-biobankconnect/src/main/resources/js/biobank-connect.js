@@ -10,6 +10,14 @@
 	var ontologyAnnotator = new ns.OntologyAnnotator();
 	var mappingManager = new ns.MappingManager();
 
+	ns.setContextURL = function(CONTEXT_URL){
+		this.CONTEXT_URL = CONTEXT_URL;
+	};
+	
+	ns.getContextURL = function(){
+		return this.CONTEXT_URL;
+	};
+	
 	ns.hrefToId = function(href){
 		return href.substring(href.lastIndexOf('/') + 1); 
 	};

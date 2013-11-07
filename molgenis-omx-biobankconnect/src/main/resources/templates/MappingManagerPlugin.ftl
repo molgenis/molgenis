@@ -1,7 +1,7 @@
-\<#include "molgenis-header.ftl">
+<#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "biobank-connect.css", "mapping-manager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js", "biobank-connect.js", "simple_statistics.js"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "biobank-connect.css", "mapping-manager.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js", "biobank-connect.js", "simple_statistics.js"]>
 <@header css js/>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
@@ -50,6 +50,26 @@
 					</div>
 				</div>
 			</div>
+			<!-- <div class="row-fluid">
+				<div class="span3">
+					<div class="fileupload fileupload-new" data-provides="fileupload">
+						<div class="input-append">
+							<div class="uneditable-input">
+								<i class="icon-file fileupload-exists"></i>
+								<span class="fileupload-preview"></span>
+							</div>
+							<span class="btn btn-file btn-info">
+								<span class="fileupload-new">Select file</span>
+								<span class="fileupload-exists">Change</span>
+								<input type="file" id="file" name="file" required/>
+							</span>
+							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
+							<button class="btn btn-primary" id="verify-button" type="button">Verify mapping</button>
+						</div>
+					</div>
+				</div></div>
+			</div>-->
+			
 		</div>
 	</div>
 </form>
@@ -71,6 +91,13 @@
 			});
 			$('#help-button').click(function(){
 				molgenis.getMappingManager().createHelpModal();
+			});
+			
+			$('#verify-button').click(function(){
+				$('#wizardForm').attr({
+					'action' : molgenis.getContextUrl() + '/mappingmanager/verify',
+					'method' : 'POST'
+				}).submit();
 			});
 		});
 	</script>
