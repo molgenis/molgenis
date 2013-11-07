@@ -195,7 +195,13 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// protocol viewer plugin dependencies
 				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
-				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"));
+				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+
+				.antMatchers("/menu/main/biobankconnect/**", "/plugin/biobankconnect/**")
+				.hasAnyAuthority(defaultPluginAuthorities("biobankconnect"))
+
+				.antMatchers("/menu/main/ontologyindexer/**", "/plugin/ontologyindexer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("ontologyindexer"));
 
 	}
 
