@@ -102,6 +102,10 @@
 				      <systemProperty>
 				         <name>molgenis.home</name>
 				         <value>${user.home}/.molgenis/omx</value>
+				      </systemProperty>
+				      <systemProperty>
+				         <name>log4j.configuration</name>
+				         <value>log4j-molgenis.properties</value>
 				       </systemProperty>
 				    </systemProperties>
 				</configuration>
