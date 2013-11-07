@@ -43,13 +43,13 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public String getDescription()
 	{
-		return null; // FIXME
+		return null; // TODO https://github.com/molgenis/molgenis/issues/859
 	}
 
 	@Override
 	public String getVersion()
 	{
-		return null; // FIXME
+		return null; // TODO https://github.com/molgenis/molgenis/issues/860
 	}
 
 	@Override
