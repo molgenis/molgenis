@@ -47,7 +47,7 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public String getCatalogVersion()
+	public String getVersion()
 	{
 		return null; // FIXME
 	}
