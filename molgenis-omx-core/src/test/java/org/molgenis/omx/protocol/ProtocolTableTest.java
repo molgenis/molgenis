@@ -72,6 +72,41 @@ public class ProtocolTableTest
 	}
 
 	@Test
+	public void getCountOneProtocolWithOneFeature() throws DatabaseException, TableException
+	{
+		int featureId = 1;
+		ObservableFeature feature = when(mock(ObservableFeature.class).getId()).thenReturn(featureId).getMock();
+		when(feature.getName()).thenReturn("f10");
+
+		int protocolId = 0;
+		Protocol protocol = when(mock(Protocol.class).getId()).thenReturn(protocolId).getMock();
+		when(protocol.getSubprotocols()).thenReturn(Collections.<Protocol> emptyList());
+		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
+		when(protocol.getName()).thenReturn("p0");
+
+		assertEquals(new ProtocolTable(protocol, database).getCount(), 1); // excluding root protocol
+	}
+
+	@Test
+	public void getCountProtocolWithSubProtocolAndFeature() throws DatabaseException, TableException
+	{
+		ObservableFeature feature1 = when(mock(ObservableFeature.class).getId()).thenReturn(10).getMock();
+		when(feature1.getName()).thenReturn("f10");
+
+		Protocol protocol1 = when(mock(Protocol.class).getId()).thenReturn(1).getMock();
+		when(protocol1.getSubprotocols()).thenReturn(Collections.<Protocol> emptyList());
+		when(protocol1.getFeatures()).thenReturn(Collections.<ObservableFeature> emptyList());
+		when(protocol1.getName()).thenReturn("p1");
+
+		Protocol protocol0 = when(mock(Protocol.class).getId()).thenReturn(0).getMock();
+		when(protocol0.getSubprotocols()).thenReturn(Collections.singletonList(protocol1));
+		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
+		when(protocol0.getName()).thenReturn("p0");
+
+		assertEquals(new ProtocolTable(protocol0, database).getCount(), 2); // excluding root protocol
+	}
+
+	@Test
 	public void getDb()
 	{
 		assertEquals(protocolTable.getDb(), database);
@@ -157,7 +192,6 @@ public class ProtocolTableTest
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getString("path"), protocolId + ".F" + featureId);
 		assertFalse(it.hasNext());
-
 	}
 
 	@Test
