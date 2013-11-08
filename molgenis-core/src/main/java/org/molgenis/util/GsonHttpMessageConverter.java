@@ -62,7 +62,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 				.disableHtmlEscaping();
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
 			builder = builder.setPrettyPrinting();
 		}
@@ -136,10 +136,10 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		try
 		{
 			Type typeOfT = getType();
-			if (LOG.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
 				String jsonStr = IOUtils.toString(json);
-				LOG.debug("Json request:\n" + jsonStr);
+				LOG.trace("Json request:\n" + jsonStr);
 
 				if (typeOfT != null)
 				{
@@ -188,7 +188,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		{
 			Type typeOfSrc = getType();
 
-			if (LOG.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
 				StringBuilder sb = new StringBuilder();
 				if (this.prefixJson)

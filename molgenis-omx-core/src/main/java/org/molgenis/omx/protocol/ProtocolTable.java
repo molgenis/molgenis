@@ -91,7 +91,8 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 		List<Tuple> tuples = new ArrayList<Tuple>();
 		try
 		{
-			createTuplesRec("", protocol, tuples);
+			// TODO discuss whether we want to index the input (=root) protocol
+			createTuplesRec(protocol.getId().toString(), protocol, tuples);
 		}
 		catch (DatabaseException e)
 		{
@@ -103,7 +104,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	private void createTuplesRec(String protocolPath, Protocol protocol, List<Tuple> tuples) throws DatabaseException
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
-		if (!subProtocols.isEmpty())
+		if (subProtocols != null && !subProtocols.isEmpty())
 		{
 			for (Protocol p : subProtocols)
 			{
@@ -127,9 +128,10 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				createTuplesRec(pathBuilder.toString(), p, tuples);
 			}
 		}
-		else
+		List<ObservableFeature> features = protocol.getFeatures();
+		if (features != null && !features.isEmpty())
 		{
-			for (ObservableFeature feature : protocol.getFeatures())
+			for (ObservableFeature feature : features)
 			{
 				StringBuilder pathBuilder = new StringBuilder();
 				String name = feature.getName();
@@ -178,8 +180,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	}
 
 	/**
-	 * Count the number of protocols and features of this protocol (excluding
-	 * this protocol itself)
+	 * Count the number of protocols and features of this protocol (excluding this protocol itself)
 	 */
 	@Override
 	public int getCount() throws TableException
@@ -199,7 +200,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	private void countTuplesRec(Protocol protocol, AtomicInteger count) throws DatabaseException
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
-		if (!subProtocols.isEmpty())
+		if (subProtocols != null && !subProtocols.isEmpty())
 		{
 			for (Protocol p : subProtocols)
 			{
@@ -207,10 +208,10 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				countTuplesRec(p, count);
 			}
 		}
-		else
+		List<ObservableFeature> features = protocol.getFeatures();
+		if (features != null && !features.isEmpty())
 		{
-			List<ObservableFeature> features = protocol.getFeatures();
-			if (!features.isEmpty()) count.addAndGet(features.size());
+			count.addAndGet(features.size());
 		}
 	}
 }

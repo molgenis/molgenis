@@ -428,7 +428,8 @@
 					
 					sortNodes(topNodes);
 					rootNode.removeChildren();
-					rootNode.addChild(topNodes);
+					if(topNodes.length !== 0)
+						rootNode.addChild(topNodes[0].children);
 					
 					if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 					if(topNodes.length === 0) {
@@ -477,6 +478,8 @@
 			}
 			return;
 		}
+		var prevRenderMode = rootNode.tree.enableUpdate(false); // disable rendering
+		
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
@@ -511,6 +514,8 @@
 				if(currentNode != null) currentNode.select(false);
 			});
 		}
+		
+		rootNode.tree.enableUpdate(prevRenderMode); // restore previous rendering state
 		
 		//reset variables
 		search = false;

@@ -31,7 +31,7 @@ public class AccountService
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
 
 	@Autowired
-	private Database database;
+	private Database unsecuredDatabase;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -67,7 +67,7 @@ public class AccountService
 		// create user
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
-		database.add(molgenisUser);
+		unsecuredDatabase.add(molgenisUser);
 		logger.debug("created user " + molgenisUser.getUsername());
 
 		// send activation email
@@ -91,13 +91,14 @@ public class AccountService
 	 */
 	public void activateUser(String activationCode) throws DatabaseException
 	{
-		List<MolgenisUser> molgenisUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.ACTIVE,
-				Operator.EQUALS, false), new QueryRule(MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, activationCode));
+		List<MolgenisUser> molgenisUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
+				MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(MolgenisUser.ACTIVATIONCODE,
+				Operator.EQUALS, activationCode));
 		if (molgenisUsers != null && !molgenisUsers.isEmpty())
 		{
 			MolgenisUser molgenisUser = molgenisUsers.get(0);
 			molgenisUser.setActive(true);
-			database.update(molgenisUser);
+			unsecuredDatabase.update(molgenisUser);
 
 			// send activated email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -110,13 +111,13 @@ public class AccountService
 
 	public void resetPassword(String userEmail) throws DatabaseException
 	{
-		MolgenisUser molgenisUser = MolgenisUser.findByEmail(database, userEmail);
+		MolgenisUser molgenisUser = MolgenisUser.findByEmail(unsecuredDatabase, userEmail);
 		if (molgenisUser != null)
 		{
 			// TODO: make this mandatory (password that was sent is valid only once)
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
 			molgenisUser.setPassword(newPassword);
-			database.update(molgenisUser);
+			unsecuredDatabase.update(molgenisUser);
 
 			// send password reseted email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
