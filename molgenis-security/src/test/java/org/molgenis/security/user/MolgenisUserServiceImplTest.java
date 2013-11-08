@@ -21,7 +21,7 @@ public class MolgenisUserServiceImplTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisUserServiceImpl()
 	{
-		new MolgenisUserServiceImpl(null, null);
+		new MolgenisUserServiceImpl(null, null, null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -42,7 +42,7 @@ public class MolgenisUserServiceImplTest
 		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
 		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
 
-		MolgenisUserServiceImpl molgenisUserService = new MolgenisUserServiceImpl(database, passwordEncoder);
+		MolgenisUserServiceImpl molgenisUserService = new MolgenisUserServiceImpl(database, database, passwordEncoder);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);
@@ -70,7 +70,7 @@ public class MolgenisUserServiceImplTest
 		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
 		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
 
-		MolgenisUserServiceImpl molgenisUserService = new MolgenisUserServiceImpl(database, passwordEncoder);
+		MolgenisUserServiceImpl molgenisUserService = new MolgenisUserServiceImpl(database, database, passwordEncoder);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);

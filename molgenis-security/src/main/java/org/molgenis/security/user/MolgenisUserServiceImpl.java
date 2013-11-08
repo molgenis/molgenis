@@ -21,22 +21,25 @@ import com.google.common.collect.Lists;
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
 	private final Database database;
+	private final Database unsecuredDatabase;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public MolgenisUserServiceImpl(Database database, PasswordEncoder passwordEncoder)
+	public MolgenisUserServiceImpl(Database database, Database unsecuredDatabase, PasswordEncoder passwordEncoder)
 	{
 		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (unsecuredDatabase == null) throw new IllegalArgumentException("Database is null");
 		if (passwordEncoder == null) throw new IllegalArgumentException("MolgenisPasswordEncoder is null");
 		this.database = database;
+		this.unsecuredDatabase = unsecuredDatabase;
 		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
 	public List<String> getSuEmailAddresses() throws DatabaseException
 	{
-		List<MolgenisUser> superUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.SUPERUSER,
-				Operator.EQUALS, true));
+		List<MolgenisUser> superUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
+				MolgenisUser.SUPERUSER, Operator.EQUALS, true));
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
 		{
 			@Override
