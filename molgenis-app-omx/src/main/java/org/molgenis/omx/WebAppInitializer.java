@@ -35,7 +35,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 		else
 		{
 			final int maxSize = 32 * 1024 * 1024;
-			dispatcherServlet.setLoadOnStartup(1);
+			dispatcherServlet.setLoadOnStartup(2);
 			dispatcherServlet.addMapping("/");
 			dispatcherServlet.setMultipartConfig(new MultipartConfigElement(null, maxSize, maxSize, maxSize));
 			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");

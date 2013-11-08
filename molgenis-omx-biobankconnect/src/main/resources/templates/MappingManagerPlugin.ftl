@@ -50,7 +50,7 @@
 					</div>
 				</div>
 			</div>
-			<!-- <div class="row-fluid">
+			<div class="row-fluid">
 				<div class="span3">
 					<div class="fileupload fileupload-new" data-provides="fileupload">
 						<div class="input-append">
@@ -68,8 +68,7 @@
 						</div>
 					</div>
 				</div></div>
-			</div>-->
-			
+			</div>
 		</div>
 	</div>
 </form>

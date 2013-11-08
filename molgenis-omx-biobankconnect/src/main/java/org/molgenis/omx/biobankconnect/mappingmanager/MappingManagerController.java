@@ -137,26 +137,32 @@ public class MappingManagerController extends MolgenisPluginController
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String verify(@RequestParam
 	Integer selectedDataSet, @RequestParam
-	Part file, Model model) throws IOException, DatabaseException
+	Part file, HttpServletResponse response, Model model) throws IOException, DatabaseException
 	{
 		ExcelReader reader = null;
+		TupleWriter tupleWriter = null;
+
 		try
 		{
 			File uploadFile = fileStore.store(file.getInputStream(), file.getName());
+
+			response.setContentType("text/csv");
+			response.addHeader("Content-Disposition", "attachment; filename="
+					+ getCsvFileName(file.getName() + "-ranks.csv"));
+
 			reader = new ExcelReader(uploadFile);
+			tupleWriter = new CsvWriter(response.getWriter());
 			ExcelSheetReader sheet = reader.getSheet(0);
 			Iterator<String> columnIterator = sheet.colNamesIterator();
 
-			// collect all columns
-			String firstColumn = null;
 			List<String> biobankNames = new ArrayList<String>();
-			int count = 0;
 			while (columnIterator.hasNext())
 			{
-				if (count == 0) firstColumn = columnIterator.next();
-				else biobankNames.add(columnIterator.next());
-				count++;
+				biobankNames.add(columnIterator.next());
 			}
+			String firstColumn = biobankNames.get(0);
+			tupleWriter.write(new ValueTuple(biobankNames));
+			biobankNames.remove(0);
 
 			Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
 			Iterator<Tuple> iterator = sheet.iterator();
@@ -171,9 +177,16 @@ public class MappingManagerController extends MolgenisPluginController
 					if (row.get(biobank) != null)
 					{
 						String mappingString = row.get(biobank).toString();
-						Map<String, List<String>> mappingDetail = new HashMap<String, List<String>>();
-						mappingDetail.put(biobank.toLowerCase(), Arrays.asList(mappingString.split(",")));
-						maunalMappings.put(variableName, mappingDetail);
+						if (!maunalMappings.containsKey(variableName))
+						{
+							maunalMappings.put(variableName, new HashMap<String, List<String>>());
+						}
+						if (!maunalMappings.get(variableName).containsKey(biobank.toLowerCase()))
+						{
+							maunalMappings.get(variableName).put(biobank.toLowerCase(), new ArrayList<String>());
+						}
+						maunalMappings.get(variableName).get(biobank.toLowerCase())
+								.addAll(Arrays.asList(mappingString.split(",")));
 					}
 				}
 			}
@@ -183,6 +196,8 @@ public class MappingManagerController extends MolgenisPluginController
 			for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
 			{
 				String variableName = entry.getKey();
+				List<String> ranks = new ArrayList<String>();
+				ranks.add(variableName);
 				System.out.println(variableName);
 				Map<String, List<String>> mappingDetail = entry.getValue();
 				List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(
@@ -191,6 +206,7 @@ public class MappingManagerController extends MolgenisPluginController
 				{
 					for (DataSet dataSet : dataSets)
 					{
+						StringBuilder outputRank = new StringBuilder();
 						if (mappingDetail.containsKey(dataSet.getName().toLowerCase()))
 						{
 							List<Integer> mappedFeatureIds = findFeaturesFromIndex(
@@ -219,12 +235,16 @@ public class MappingManagerController extends MolgenisPluginController
 								}
 								if (mappedFeatureIds.contains(Integer.parseInt(mappedFeatureId)))
 								{
+									if (outputRank.length() != 0) outputRank.append(',');
+									outputRank.append(rank);
 									System.out.println("Rank in " + dataSet.getName() + " is " + rank);
 								}
 							}
 						}
+						ranks.add(outputRank.toString());
 					}
 				}
+				tupleWriter.write(new ValueTuple(ranks));
 			}
 		}
 		catch (DatabaseException e)
@@ -234,6 +254,7 @@ public class MappingManagerController extends MolgenisPluginController
 		finally
 		{
 			if (reader != null) reader.close();
+			if (tupleWriter != null) IOUtils.closeQuietly(tupleWriter);
 		}
 		return init(null, model);
 	}
