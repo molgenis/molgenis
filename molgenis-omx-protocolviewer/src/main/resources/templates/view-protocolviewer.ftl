@@ -99,11 +99,6 @@
  					
  					// on ready
 					$(function() {
-						<#-- disable all form submission -->
-						$('form').submit(function() {
-							return false;
-						});
-						
 						<#-- prevent user form submission by pressing enter -->
 					    $(window).keydown(function(e){
 					      if(e.keyCode === 13 || e.which === '13') {
