@@ -28,6 +28,26 @@
 	</scm>
 	<developers/>
 
+	<profiles>
+		<!-- development profile -->
+		<profile>
+			<id>dev</id>
+			<properties>
+				<minify.skipMinify>true</minify.skipMinify>
+			</properties>
+		</profile>
+		<!-- release profile (default) -->
+		<profile>
+			<id>release</id>
+			<properties>
+				<minify.skipMinify>false</minify.skipMinify>
+			</properties>
+			<activation>
+	            <activeByDefault>true</activeByDefault>
+	        </activation>
+		</profile>
+	</profiles>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>3.2.4.RELEASE</spring.version>
@@ -388,7 +408,41 @@
 							</goals>
 						</execution>
 					</executions>
-				</plugin>	
+				</plugin>
+				<!-- minify css/js -->
+				<plugin>
+					<groupId>com.samaxes.maven</groupId>
+					<artifactId>minify-maven-plugin</artifactId>
+					<version>1.7.2</version>
+					<executions>
+						<execution>
+							<id>default-minify</id>
+							<goals>
+								<goal>minify</goal>
+							</goals>
+							<configuration>
+								<webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
+								<webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+								<cssSourceIncludes>
+									<cssSourceInclude>**/*.css</cssSourceInclude>
+								</cssSourceIncludes>
+								<cssSourceExcludes>
+									<cssSourceExclude>**/*.min.css</cssSourceExclude>
+								</cssSourceExcludes>
+								<jsSourceIncludes>
+									<jsSourceInclude>**/*.js</jsSourceInclude>
+								</jsSourceIncludes>
+								<jsSourceExcludes>
+									<jsSourceExclude>**/*.min.js</jsSourceExclude>
+								</jsSourceExcludes>
+								<skipMerge>true</skipMerge>
+								<skipMinify>${minify.skipMinify}</skipMinify>
+								<nosuffix>true</nosuffix>
+								<verbose>true</verbose>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
