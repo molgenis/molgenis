@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.MolgenisPasswordEncoder;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
@@ -35,6 +36,9 @@ public class AccountController
 	@Autowired
 	private CaptchaService captchaService;
 
+	@Autowired
+	private MolgenisPasswordEncoder passwordEncoder;
+	
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String getLoginForm()
 	{
@@ -108,7 +112,7 @@ public class AccountController
 	{
 		MolgenisUser user = new MolgenisUser();
 		user.setUsername(request.getUsername());
-		user.setPassword(request.getPassword());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
 		user.setFax(request.getFax());
