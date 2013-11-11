@@ -50,32 +50,14 @@
 					</div>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div class="span3">
-					<div class="fileupload fileupload-new" data-provides="fileupload">
-						<div class="input-append">
-							<div class="uneditable-input">
-								<i class="icon-file fileupload-exists"></i>
-								<span class="fileupload-preview"></span>
-							</div>
-							<span class="btn btn-file btn-info">
-								<span class="fileupload-new">Select file</span>
-								<span class="fileupload-exists">Change</span>
-								<input type="file" id="file" name="file" required/>
-							</span>
-							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
-							<button class="btn btn-primary" id="verify-button" type="button">Verify mapping</button>
-						</div>
-					</div>
-				</div></div>
-			</div>
 		</div>
 	</div>
 </form>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.setContextURL('${context_url}');
+			var contextUrl = '${context_url}';
+			molgenis.setContextURL(contextUrl.replace('/mappingmanager', '/biobankconnect'));
 			var dataSets = [];
 			<#list dataSets as dataset>
 				dataSets.push('${dataset.id?c}');

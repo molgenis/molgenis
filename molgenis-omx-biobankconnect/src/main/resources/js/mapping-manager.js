@@ -408,7 +408,7 @@
 								};
 								$.ajax({
 									type : 'POST',
-									url : molgenis.getContextUrl() + '/mappingmanager/delete',
+									url : molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/delete',
 									async : false,
 									data : JSON.stringify(deleteRequest),
 									contentType : 'application/json',
@@ -859,7 +859,7 @@
 					};
 					$.ajax({
 						type : 'POST',
-						url : molgenis.getContextUrl() + '/mappingmanager/update',
+						url : molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json',
@@ -1076,7 +1076,7 @@
 			'dataSetId' : selectedDataSet,
 			'documentType' : dataSet.identifier
 		};
-		$.download(molgenis.getContextUrl() + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
 	ns.MappingManager.prototype.createHelpModal = function(){

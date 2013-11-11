@@ -35,7 +35,6 @@ import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
-import org.molgenis.omx.biobankconnect.wizard.BiobankConnectController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -60,7 +59,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class MappingManagerController extends MolgenisPluginController
 {
-	public static final String URI = BiobankConnectController.URI + "/mappingmanager";
+	public static final String URI = "/plugin/mappingmanager";
 	private static final Logger logger = Logger.getLogger(MappingManagerController.class);
 	private static final String FEATURE_ID = "id";
 	private static final String FEATURE_NAME = "name";
