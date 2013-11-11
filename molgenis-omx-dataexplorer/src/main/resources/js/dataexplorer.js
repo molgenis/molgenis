@@ -9,7 +9,8 @@
 	var selectedDataSet = null;
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
-
+	var aggregateView = false;
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -35,7 +36,7 @@
 			
 			return children;
 		}
-		
+			
 		function createFeatureNodes(protocolFeaturesUri, featureOpts) {
 			var features = restApi.get(protocolFeaturesUri);
 			var nodes = [];
@@ -116,7 +117,7 @@
 
 			// render tree and open first branch
 			container.dynatree({
-				checkbox : true,
+				checkbox : !aggregateView,
 				selectMode : 3,
 				minExpandLevel : 2,
 				debugLevel : 0,
@@ -193,7 +194,7 @@
 		searchQuery = query;
 		molgenis.updateObservationSetsTable();
 	};
-
+	
 	molgenis.updateObservationSetsTable = function() {
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
@@ -205,7 +206,7 @@
 				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 			});
 		} else {
-			$('#data-table-header').html('no features selected');
+			$('#nrOfDataItems').html('no features selected');
 			$('#data-table-pager').empty();
 			$('#data-table').empty();
 		}
@@ -217,7 +218,7 @@
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 			});
 		} else {
-			$('#data-table-header').html('no features selected');
+			$('#nrOfDataItems').html('no features selected');
 			$('#data-table-pager').empty();
 			$('#data-table').empty();
 		}
@@ -230,9 +231,9 @@
 
 	molgenis.updateObservationSetsTableHeader = function(nrRows) {
 		if (nrRows == 1)
-			$('#data-table-header').html(nrRows + ' data item found');
+			$('#nrOfDataItems').html(nrRows + ' data item found');
 		else
-			$('#data-table-header').html(nrRows + ' data items found');
+			$('#nrOfDataItems').html(nrRows + ' data items found');
 	};
 
 	molgenis.updateObservationSetsTablePager = function(nrRows, nrRowsPerPage) {
@@ -244,6 +245,9 @@
 		pager = $('#data-table-pager');
 	};
 
+
+	
+	
 	molgenis.openFeatureFilterDialog = function(featureUri) {
 		restApi.getAsync(featureUri, null, null, function(feature) {
 			var items = [];
@@ -284,6 +288,7 @@
 						type : feature.dataType,
 						values : [ filter.val() ]
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			case "date":
@@ -326,6 +331,7 @@
 						range: true,
 						values : [ $('#date-feature-from').val().replace("'T'", "T"), $('#date-feature-to').val().replace("'T'", "T")]
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			case "long":
@@ -359,6 +365,7 @@
 						values : [ $('#from').val(), $('#to').val() ],
 						range : true
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				
 				$('input[type=number]').live('keyup input', function(e) {
@@ -392,6 +399,7 @@
 						type : feature.dataType,
 						values : [ $('input[name=bool-feature]:checked').val() ]
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			case "categorical":
@@ -445,6 +453,7 @@
 							return $(this).val();
 						}))
 					});
+					$('.feature-filter-dialog').dialog('close');
 				});
 				break;
 			default:
@@ -506,6 +515,19 @@
 				dialogClass : 'ui-dialog-shadow'
 			});
 			$('.feature-filter-dialog').dialog('open');
+			
+			$('.feature-filter-dialog').keyup(function(e) {
+				  if (e.keyCode == 13) // enter
+				  {
+					  if(applyButton.attr("disabled")!="disabled"){//enter only works if button is enabled (filter input is given)
+						  	applyButton.click(); 
+					  }
+				  }     
+				  if (e.keyCode == 27)// esc
+				  { 
+					  $('.feature-filter-dialog').dialog('close'); 
+				  }   
+			});
 		});
 	};
 
@@ -522,6 +544,9 @@
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
 		molgenis.updateObservationSetsTable();
+		if($('#selectFeature').val()!=null){
+			molgenis.loadAggregate($('#selectFeature').val());
+		}
 	};
 
 	molgenis.createFeatureFilterList = function(featureFilters) {
@@ -648,14 +673,105 @@
 	};
 	
 	
+	molgenis.initializeAggregate = function(dataSetUri){
+		selectedDataSet = restApi.get(dataSetUri, null, null);
+		var queryRules = [];
+
+		queryRules.push({
+			'field' : 'dataType',
+			'operator' : 'EQUALS',
+			'value' : 'categorical'
+		});
+		queryRules.push({
+			'operator' : 'OR'
+		});
+		queryRules.push({
+			'field' : 'dataType',
+			'operator' : 'EQUALS',
+			'value' : 'bool'
+		});
+		
+		queryRules.push({
+			operator : 'LIMIT',
+			value : 100000
+		});
+		var fragments = selectedDataSet.href.split("/");
+		var searchRequest = { 
+			'documentType' : "protocolTree-" + fragments[fragments.length - 1],
+			'featureFilters' : featureFilters,
+			'queryRules' : queryRules
+		};
+		
+		searchApi.search(searchRequest, function(searchResponse) {
+			
+			var searchHits = searchResponse.searchHits;
+			var selectTag = $('<select id="selectFeature"/>');
+		
+			$.each(searchHits, function(index, hit){
+				selectTag.append('<option value=' + hit.columnValueMap.id + '>' + hit.columnValueMap.name + '</option>');
+			});			
+			$('#feature-select').empty().append(selectTag);
+			molgenis.loadAggregate(selectTag.val());
+			selectTag.chosen();
+			selectTag.change(function() {
+				molgenis.loadAggregate($(this).val());
+			});
+		});
+	};
 	
+	molgenis.loadAggregate = function(featureId){
+		var searchRequest = molgenis.createSearchRequest();
+		searchRequest.queryRules.push({
+			'operator' : 'LIMIT',
+			'value' : 100000
+		});
+		var feature = restApi.get('/api/v1/observablefeature/' + featureId);
+		searchRequest.fieldsToReturn = [feature.identifier];
+		var aggregateRequest = {
+			'documentType' : selectedDataSet.identifier,
+			'featureId' : featureId,
+			'searchRequest' : searchRequest,
+			'dataType' : feature.dataType
+		};
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/aggregate',
+			data : JSON.stringify(aggregateRequest),
+			contentType : 'application/json',
+			success : function(aggregateResult){
+				var table = $('<table />').addClass('table table-striped');
+				table.append('<tr><th>Category name</th><th>Count</th></tr>');
+				$.each(aggregateResult.hashCategories, function(categoryName, count){
+					table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
+				});
+				$('#aggregate-table-container').empty().append(table);
+			}
+		});
+	};
 	
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
 		
 		parent.showSpinner();
-		$.download('/plugin/dataexplorer/download',{searchRequest :  jsonRequest});
+		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
+	};
+	
+	molgenis.toggleViewer = function(statusDataViewer){
+		if(statusDataViewer){
+			aggregateView = false;
+			$('#dataexplorer-grid-data').show();
+			$('#dataDiv').removeClass("notselected").addClass("selected");
+			$('#aggregateDiv').removeClass("selected").addClass("notselected");
+			$('#dataexplorer-aggregate-data').hide();
+		}
+		else{
+			aggregateView = true;
+			$('#dataexplorer-aggregate-data').show();
+			$('#dataDiv').removeClass("selected").addClass("notselected");
+			$('#aggregateDiv').removeClass("notselected").addClass("selected");
+			$('#dataexplorer-grid-data').hide();
+		}
 	};
 	
 	// on document ready
@@ -663,11 +779,30 @@
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
 		$('#dataset-select').change(function() {
-			molgenis.onDataSetSelectionChange($(this).val());
+			var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+			restApi.getAsync($('#dataset-select').val(), null, null, function(dataSet) {
+				selectedDataSet = dataSet;
+				molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+			});
+			if(checkDataViewer)
+				molgenis.onDataSetSelectionChange($(this).val());
+			else
+				molgenis.initializeAggregate($(this).val());
 		});
 		
 		resultsTable = new molgenis.ResultsTable();
-
+		
+		$('#data').click(function (){
+			molgenis.toggleViewer(true);
+			molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
+		});
+		
+		$('#aggregate').click(function (){	
+			molgenis.toggleViewer(false);
+			molgenis.initializeAggregate($('#dataset-select').val());
+			molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
+		});
+		
 		$("#observationset-search").focus();
 		$("#observationset-search").change(function(e) {
 			molgenis.searchObservationSets($(this).val());
@@ -682,7 +817,7 @@
 		$('#download-button').click(function() {
 			molgenis.download();
 		});
-		
+
 		// fire event handler
 		$('#dataset-select').change();
 	});

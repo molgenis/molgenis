@@ -1,5 +1,3 @@
-[![Build Status](http://molgenis.org/jenkins/job/new-molgenis/badge/icon)](http://molgenis.org/jenkins/job/new-molgenis/)
-
 # Welcome to MOLGENIS
 
 MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life science research. Each app in the MOLGENIS family comes with rich data management interface and plug-in integration of analysis tools in R, Java and web services.
@@ -73,12 +71,13 @@ Give create a database with permissions to molgenis user:
 
 ## 7. Configure the default admin password
 
-Create a file called molgenis-server.properties in your home folder (so ~/molgenis-server.properties)
+Create the directory ~/.molgenis/omx and create a file called molgenis-server.properties in this folder (~ is your home folder)
 
 Add user and database properties to this file, such as this example:
 
     db_user=molgenis
     db_password=molgenis
+    db_uri=jdbc:mysql://localhost/omx
     admin.password=admin
     user.password=admin
 

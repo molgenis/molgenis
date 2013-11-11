@@ -1,7 +1,7 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	
 	var search = false;
 	var searchQuery = null;
@@ -274,7 +274,7 @@
 				queryRules.push({
 					operator : 'LIMIT',
 					value : 10000
-				})
+				});
 				var dataSet = ns.getSelectedDataSet();
 				var searchRequest = {
 					documentType : 'protocolTree-' + hrefToId(dataSet.href),
@@ -398,11 +398,9 @@
 						}
 					});
 					
-					var nodesToHide = [];
 					$.each(hitsToHide, function(index, hit){
 						var object = hit.columnValueMap;
 						var nodes = object["path"].split(".");
-						var entityId = object["id"];
 						//split the path to get all ancestors;
 						for(var i = 0; i < nodes.length; i++) {
 							var isFeature = nodes[i].indexOf("F") === 0;
@@ -430,7 +428,8 @@
 					
 					sortNodes(topNodes);
 					rootNode.removeChildren();
-					rootNode.addChild(topNodes);
+					if(topNodes.length !== 0)
+						rootNode.addChild(topNodes[0].children);
 					
 					if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 					if(topNodes.length === 0) {
@@ -479,6 +478,8 @@
 			}
 			return;
 		}
+		var prevRenderMode = rootNode.tree.enableUpdate(false); // disable rendering
+		
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
@@ -513,6 +514,8 @@
 				if(currentNode != null) currentNode.select(false);
 			});
 		}
+		
+		rootNode.tree.enableUpdate(prevRenderMode); // restore previous rendering state
 		
 		//reset variables
 		search = false;
@@ -660,10 +663,11 @@
 		var table = $('<table />');
 		
 		table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
+		table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
 		$.each(getDescription(feature), function(key, val){
 			table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 		});
-
+		
 		table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 		if (feature.unit)
 			table.append('<tr><td>' + "Unit:" + '</td><td>' + feature.unit.name + '</td></tr>');
@@ -730,15 +734,18 @@
 		}
 
 		var table = $('<table class="table table-striped table-condensed table-hover" />');
-		$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Remove</th>').appendTo(table);
+		$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
+				var restData = restApi.get(node.data.key);
 				var protocol_name = node.parent.data.title;
-				var name = node.data.title;
-				var description = node.data.tooltip;
+				var name = restData.name;	
+				var identifier = restData.identifier;
+				var description = restData.description;
 				var row = $('<tr />').attr('id', node.data.key + "_row");
 				$('<td />').text(typeof protocol_name !== 'undefined' ? protocol_name : "").appendTo(row);
 				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
+				$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 				$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 				var deleteButton = $('<i class="icon-remove"></i>');
 				deleteButton.click($.proxy(function() {
@@ -812,4 +819,4 @@
 			selectedAllNodes = null;
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

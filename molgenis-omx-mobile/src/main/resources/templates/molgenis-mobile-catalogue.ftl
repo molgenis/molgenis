@@ -17,7 +17,7 @@
 	<script src="/js/jquery-1.10.2.min.js"></script>
 	<script src="/js/jquery.validate.min.js"></script>
 	<script src="/js/jquery.loadmask.min.js"></script>
-	<script src="/js/molgenis-all.js"></script>
+	<script src="/js/molgenis.js"></script>
 	<script src="/js/molgenis-mobile-login.js"></script>
 	<script src="/js/molgenis-mobile-data-items.js"></script>
 	<script src="/js/molgenis-mobile-data-item-detail.js"></script>

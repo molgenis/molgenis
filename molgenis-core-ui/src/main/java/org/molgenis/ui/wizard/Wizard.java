@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Wizard implements Serializable
 {
-	private static final long serialVersionUID = 7784726738424387228L;
+	private static final long serialVersionUID = 1L;
 	private final List<WizardPage> pages = new LinkedList<WizardPage>();
 	private int currentPageIndex = 0;
 

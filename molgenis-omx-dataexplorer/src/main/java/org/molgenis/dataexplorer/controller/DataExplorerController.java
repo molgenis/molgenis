@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
@@ -26,6 +25,7 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -38,10 +38,11 @@ import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller class for the data explorer.
@@ -57,8 +58,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(URI)
 public class DataExplorerController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
+
+	public static final String ID = "dataexplorer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
 
 	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
@@ -107,6 +111,7 @@ public class DataExplorerController extends MolgenisPluginController
 						break;
 					}
 				}
+
 				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
 						+ " is not a valid data set identifier");
 			}
@@ -150,7 +155,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 			// The fieldsToReturn contain identifiers, we need the names
 			tupleWriter.write(getFeatureNames(request.getFieldsToReturn()));
-
 			int count = 0;
 			SearchResult searchResult;
 
@@ -178,6 +182,60 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			IOUtils.closeQuietly(tupleWriter);
 		}
+	}
+
+	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	@ResponseBody
+	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
+	{
+
+		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
+
+		try
+		{
+			if (request.getDataType().equals("categorical"))
+			{
+				List<Category> listOfCategories = database.find(Category.class, new QueryRule(
+						Category.OBSERVABLEFEATURE, Operator.EQUALS, request.getFeatureId()));
+				for (Category category : listOfCategories)
+				{
+					hashCounts.put(category.getName(), 0);
+				}
+			}
+			else if (request.getDataType().equals("bool"))
+			{
+				hashCounts.put("true", 0);
+				hashCounts.put("false", 0);
+			}
+			else
+			{
+				throw new RuntimeException("Illegal datatype");
+			}
+
+			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
+			SearchResult searchResult = searchService.search(request.getSearchRequest());
+
+			for (Hit hit : searchResult.getSearchHits())
+			{
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				if (columnValueMap.containsKey(feature.getIdentifier()))
+				{
+					String categoryValue = columnValueMap.get(feature.getIdentifier()).toString();
+					if (hashCounts.containsKey(categoryValue))
+					{
+						Integer countPerCategoricalValue = hashCounts.get(categoryValue);
+						hashCounts.put(categoryValue, ++countPerCategoricalValue);
+					}
+				}
+			}
+
+		}
+		catch (DatabaseException e)
+		{
+			logger.info(e);
+
+		}
+		return new AggregateResponse(hashCounts);
 
 	}
 
@@ -206,17 +264,5 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
-	}
-
-	/**
-	 * When someone directly accesses /dataexplorer and is not logged in an DataAccessException is thrown, redirect him
-	 * to the home page
-	 * 
-	 * @return
-	 */
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
 	}
 }

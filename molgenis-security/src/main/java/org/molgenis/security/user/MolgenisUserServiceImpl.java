@@ -21,22 +21,25 @@ import com.google.common.collect.Lists;
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
 	private final Database database;
+	private final Database unsecuredDatabase;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public MolgenisUserServiceImpl(Database database, PasswordEncoder passwordEncoder)
+	public MolgenisUserServiceImpl(Database database, Database unsecuredDatabase, PasswordEncoder passwordEncoder)
 	{
 		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (unsecuredDatabase == null) throw new IllegalArgumentException("Database is null");
 		if (passwordEncoder == null) throw new IllegalArgumentException("MolgenisPasswordEncoder is null");
 		this.database = database;
+		this.unsecuredDatabase = unsecuredDatabase;
 		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
 	public List<String> getSuEmailAddresses() throws DatabaseException
 	{
-		List<MolgenisUser> superUsers = database.find(MolgenisUser.class, new QueryRule(MolgenisUser.SUPERUSER,
-				Operator.EQUALS, true));
+		List<MolgenisUser> superUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
+				MolgenisUser.SUPERUSER, Operator.EQUALS, true));
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
 		{
 			@Override
@@ -54,15 +57,25 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
-	public void update(MolgenisUser molgenisUser) throws DatabaseException
+	public void update(MolgenisUser updatedUser) throws DatabaseException
 	{
-		MolgenisUser currentMolgenisUser = MolgenisUser.findById(database, molgenisUser.getId());
-		if (!currentMolgenisUser.getPassword().equals(molgenisUser.getPassword()))
+		MolgenisUser currentUser = MolgenisUser.findByUsername(database, updatedUser.getUsername());
+		if (currentUser == null)
 		{
-			String encryptedPassword = passwordEncoder.encode(molgenisUser.getPassword());
-			molgenisUser.setPassword(encryptedPassword);
+			throw new RuntimeException("User does not exist [" + updatedUser.getUsername() + "]");
 		}
-		database.update(molgenisUser);
+		String password = currentUser.getPassword();
+		String newPassword = updatedUser.getPassword();
+		if (StringUtils.isNotEmpty(newPassword) && !password.equals(newPassword))
+		{
+			if (!passwordEncoder.matches(newPassword, currentUser.getPassword()))
+			{
+				throw new MolgenisUserException("Wrong password");
+			}
+			String encryptedPassword = passwordEncoder.encode(newPassword);
+			updatedUser.setPassword(encryptedPassword);
+		}
+		unsecuredDatabase.update(updatedUser);
 	}
 
 	@Override
@@ -70,25 +83,5 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		String currentUsername = SecurityUtils.getCurrentUsername();
 		return MolgenisUser.findByUsername(database, currentUsername);
-	}
-
-	@Override
-	public void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2) throws DatabaseException
-	{
-		if (StringUtils.isEmpty(oldPwd) || StringUtils.isEmpty(newPwd1) || StringUtils.isEmpty(newPwd2))
-		{
-			throw new MolgenisUserException("Passwords empty");
-		}
-		if (!StringUtils.equals(newPwd1, newPwd2)) throw new MolgenisUserException("Passwords do not match");
-
-		MolgenisUser user = MolgenisUser.findByUsername(database, userName);
-		if (user == null)
-		{
-			throw new RuntimeException("User does not exist [" + userName + "]");
-		}
-		if (!passwordEncoder.matches(oldPwd, user.getPassword()))
-		{
-			throw new MolgenisUserException("Wrong password");
-		}
 	}
 }

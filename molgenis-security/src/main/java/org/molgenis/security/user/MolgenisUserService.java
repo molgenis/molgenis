@@ -26,6 +26,4 @@ public interface MolgenisUserService
 	 * @throws DatabaseException
 	 */
 	MolgenisUser getCurrentUser() throws DatabaseException;
-
-	void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2) throws DatabaseException;
 }

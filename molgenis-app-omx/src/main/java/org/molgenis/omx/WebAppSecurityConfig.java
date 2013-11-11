@@ -5,6 +5,7 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 
 import java.util.List;
 
+import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -22,16 +23,19 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
-	protected void configureUrlAuthorization(ExpressionUrlAuthorizationConfigurer<HttpSecurity> euac)
+	protected void configureUrlAuthorization(
+			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
-		euac.antMatchers("/")
+		expressionInterceptUrlRegistry
+			.antMatchers("/")
 				.permitAll()
 
 				// main menu
 				.antMatchers("/menu/main")
 				.hasAnyAuthority(
 						defaultPluginAuthorities("home", "protocolviewer", "dataexplorer", "entityexplorer",
-								"importwizard", "news", "background", "references", "contact", "useraccount"))
+								"workflowdataentry", "importwizard", "news", "background", "references", "contact",
+								"useraccount"))
 
 				// main menu plugins
 				.antMatchers("/menu/main/home/**", "/plugin/home/**")
@@ -45,6 +49,15 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/main/entityexplorer/**", "/plugin/entityexplorer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("entityexplorer"))
+
+				.antMatchers("/menu/main/genomebrowser/**", "/plugin/genomebrowser/**")
+				.hasAnyAuthority(defaultPluginAuthorities("genomebrowser"))
+				
+				.antMatchers("/plugin/protocolviewer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+
+				.antMatchers("/menu/main/workflowdataentry/**", "/plugin/workflowdataentry/**")
+				.hasAnyAuthority(defaultPluginAuthorities("workflowdataentry"))
 
 				.antMatchers("/menu/main/importwizard/**", "/plugin/importwizard/**")
 				.hasAnyAuthority(defaultPluginAuthorities("importwizard"))
@@ -79,32 +92,36 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 								"formcategory", "formstudydatarequest", "formruntimeproperty"))
 
 				// entities menu plugins
-				.antMatchers("/menu/entities/form.DataSet", "/plugin/form.DataSet")
+				.antMatchers("/menu/entities/form.DataSet/**", "/plugin/form.DataSet/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formdataSet"))
 
-				.antMatchers("/menu/entities/form.Protocol?subForms=DataSet.ProtocolUsed",
-						"/plugin/form.Protocol?subForms=DataSet.ProtocolUsed")
+				.antMatchers("/menu/entities/form.Protocol/**", "/plugin/form.Protocol/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formprotocol"))
 
-				.antMatchers("/menu/entities/form.ObservableFeature?subForms=Category.observableFeature",
-						"/plugin/form.ObservableFeature?subForms=Category.observableFeature")
+				.antMatchers("/menu/entities/form.ProtocolFlow/**", "/plugin/form.ProtocolFlow/**")
+				.hasAnyAuthority(defaultPluginAuthorities("formprotocolflow"))
+
+				.antMatchers("/menu/entities/form.ObservationSetFlow/**", "/plugin/form.ObservationSetFlow/**")
+				.hasAnyAuthority(defaultPluginAuthorities("observationsetflow"))
+
+				.antMatchers("/menu/entities/form.ObservableFeature/**", "/plugin/form.ObservableFeature/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formobservablefeature"))
 
-				.antMatchers("/menu/entities/form.Category", "/plugin/form.Category")
+				.antMatchers("/menu/entities/form.Category/**", "/plugin/form.Category/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formcategory"))
 
-				.antMatchers("/menu/entities/form.StudyDataRequest", "/plugin/form.StudyDataRequest")
+				.antMatchers("/menu/entities/form.StudyDataRequest/**", "/plugin/form.StudyDataRequest/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formstudydatarequest"))
 
-				.antMatchers("/menu/entities/form.RuntimeProperty", "/plugin/form.RuntimeProperty")
+				.antMatchers("/menu/entities/form.RuntimeProperty/**", "/plugin/form.RuntimeProperty/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formruntimeproperty"))
-				
+
 				.antMatchers("/menu/entities/form.MolgenisUser/**", "/plugin/form.MolgenisUser/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisuser"))
-				
+
 				.antMatchers("/menu/entities/form.MolgenisGroup/**", "/plugin/form.MolgenisGroup/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroup"))
-				
+
 				.antMatchers("/menu/entities/form.MolgenisGroupMember/**", "/plugin/form.MolgenisGroupMember/**")
 				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroupmember"))
 
@@ -162,12 +179,15 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// admin menu
 				.antMatchers("/menu/admin")
 				.hasAnyAuthority(
-						defaultPluginAuthorities("permissionmanager", "catalogmanager", "studymanager", "dataindexer",
-								"datasetdeleter"))
+						defaultPluginAuthorities("permissionmanager", "usermanager", "catalogmanager", "studymanager",
+								"dataindexer", "datasetdeleter"))
 
 				// admin menu plugins
 				.antMatchers("/menu/admin/permissionmanager/**", "/plugin/permissionmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
+
+				.antMatchers("/menu/admin/usermanager/**", "/plugin/usermanager/**")
+				.hasAnyAuthority(defaultPluginAuthorities("usermanager"))
 
 				.antMatchers("/menu/admin/catalogmanager/**", "/plugin/catalogmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
@@ -184,8 +204,12 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// protocol viewer plugin dependencies
 				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
-				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"));
-		
+				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+				
+				//DAS datasource uses the database, unautheticated users can not see any data 
+		 		.antMatchers("/das/**").permitAll()
+		 		
+		 		.antMatchers("/myDas/**").permitAll();
 	}
 
 	@Override
@@ -214,6 +238,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_IMPORTWIZARD > ROLE_PLUGIN_READ_IMPORTWIZARD").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_NEWS > ROLE_PLUGIN_READ_NEWS").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PERMISSIONMANAGER > ROLE_PLUGIN_READ_PERMISSIONMANAGER").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_USERMANAGER > ROLE_PLUGIN_READ_USERMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLMANAGER > ROLE_PLUGIN_READ_PROTOCOLMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_PLUGIN_READ_PROTOCOLVIEWER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_REFERENCES > ROLE_PLUGIN_READ_REFERENCES").append(' ');
@@ -267,8 +292,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_TEXTVALUE > ROLE_ENTITY_READ_TEXTVALUE").append(' ');
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_VALUE > ROLE_ENTITY_READ_VALUE").append(' ');
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_XREFVALUE > ROLE_ENTITY_READ_XREFVALUE").append(' ');
-		
-		//System entity
+
+		// System entity
 		hierarchyBuilder.append("ROLE_ENTITY_WRITE_MOLGENISUSER > ROLE_ENTITY_READ_MOLGENISUSER").append(' ');
 
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PROTOCOLVIEWER > ROLE_ENTITY_READ_DATASET").append(' ');

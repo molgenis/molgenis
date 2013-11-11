@@ -17,7 +17,6 @@ import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
-import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -76,6 +75,7 @@ public class StoreMappingTableTest
 
 		ObservationSet observation1 = mock(ObservationSet.class);
 		when(observation1.getId()).thenReturn(1);
+		when(observation1.getIdentifier()).thenReturn("1");
 
 		when(
 				db.find(ObservationSet.class, new QueryRule(ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS,
@@ -86,6 +86,7 @@ public class StoreMappingTableTest
 
 		ObservedValue ov1 = mock(ObservedValue.class);
 		when(ov1.getObservationSet_Id()).thenReturn(1);
+		when(ov1.getObservationSet_Identifier()).thenReturn("1");
 		when(ov1.getFeature_Identifier()).thenReturn(STORE_MAPPING_CONFIRM_MAPPING);
 		when(ov1.getValue()).thenReturn(value1);
 
@@ -96,6 +97,7 @@ public class StoreMappingTableTest
 
 		ObservedValue ov2 = mock(ObservedValue.class);
 		when(ov2.getObservationSet_Id()).thenReturn(1);
+		when(ov2.getObservationSet_Identifier()).thenReturn("1");
 		when(ov2.getFeature_Identifier()).thenReturn(STORE_MAPPING_FEATURE);
 		when(ov2.getValue()).thenReturn(value2);
 
@@ -106,13 +108,14 @@ public class StoreMappingTableTest
 
 		ObservedValue ov3 = mock(ObservedValue.class);
 		when(ov3.getObservationSet_Id()).thenReturn(1);
+		when(ov3.getObservationSet_Identifier()).thenReturn("1");
 		when(ov3.getFeature_Identifier()).thenReturn(STORE_MAPPING_MAPPED_FEATURE);
 		when(ov3.getValue()).thenReturn(value3);
 
 		when(
 				db.find(ObservedValue.class,
-						new QueryRule(ObservedValue.OBSERVATIONSET_ID, Operator.IN, Arrays.asList(1)))).thenReturn(
-				Arrays.asList(ov1, ov2, ov3));
+						new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, Arrays.asList("1"))))
+				.thenReturn(Arrays.asList(ov1, ov2, ov3));
 
 		Model model = mock(Model.class);
 		Entity entity = mock(Entity.class);

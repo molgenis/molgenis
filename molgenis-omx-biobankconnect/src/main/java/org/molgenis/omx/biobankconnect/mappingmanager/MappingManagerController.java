@@ -28,7 +28,6 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
-import org.molgenis.omx.biobankconnect.wizard.BiobankConnectController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -51,8 +50,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class MappingManagerController extends MolgenisPluginController
 {
-	public static final String URI = BiobankConnectController.URI + "/mappingmanager";
 	private static final Logger logger = Logger.getLogger(MappingManagerController.class);
+
+	public static final String ID = "mappingmanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private static final String FEATURE_ID = "id";
 	private static final String FEATURE_NAME = "name";
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
@@ -76,8 +78,8 @@ public class MappingManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, Model model) throws DatabaseException
+	public String init(@RequestParam(value = "selectedDataSet", required = false) String selectedDataSetId, Model model)
+			throws DatabaseException
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : database.find(DataSet.class))
@@ -93,8 +95,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/delete", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteDocuments(@RequestBody
-	UpdateIndexRequest request)
+	public void deleteDocuments(@RequestBody UpdateIndexRequest request)
 	{
 		try
 		{
@@ -108,8 +109,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/update", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateDocument(@RequestBody
-	UpdateIndexRequest request)
+	public void updateDocument(@RequestBody UpdateIndexRequest request)
 	{
 		try
 		{
@@ -123,8 +123,8 @@ public class MappingManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = RequestMethod.POST)
-	public void download(@RequestParam("request")
-	String requestString, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("request") String requestString, HttpServletResponse response)
+			throws IOException, DatabaseException, TableException
 	{
 		requestString = URLDecoder.decode(requestString, "UTF-8");
 		logger.info("Download request: [" + requestString + "]");

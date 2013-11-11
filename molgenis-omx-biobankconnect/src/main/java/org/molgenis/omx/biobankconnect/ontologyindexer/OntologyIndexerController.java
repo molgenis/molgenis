@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(URI)
 public class OntologyIndexerController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/ontologyindexer";
+	public static final String ID = "ontologyindexer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
 	private FileStore fileStore;
@@ -45,9 +46,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/index", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public String indexOntology(@RequestParam
-	String ontologyName, @RequestParam
-	Part file, Model model)
+	public String indexOntology(@RequestParam String ontologyName, @RequestParam Part file, Model model)
 	{
 		try
 		{
@@ -65,8 +64,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/remove", method = RequestMethod.POST)
-	public String removeOntology(@RequestParam
-	String ontologyUri, Model model)
+	public String removeOntology(@RequestParam String ontologyUri, Model model)
 	{
 		try
 		{

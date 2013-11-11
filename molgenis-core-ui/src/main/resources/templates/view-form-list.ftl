@@ -20,6 +20,7 @@
 <div id="error-message" class="alert alert-error" style="display: none">
 	<button type="button" class="close">&times;</button>
   	<strong id="error-message-content"></strong>
+  	<p id="error-message-details"></p>
 </div>
 			
 

@@ -2,6 +2,7 @@ package org.molgenis.omx.importer;
 
 import static org.molgenis.omx.importer.ImportWizardController.URI;
 
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class ImportWizardController extends AbstractWizardController
 {
-	public static final String URI = "/plugin/importwizard";
+	public static final String ID = "importwizard";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private final UploadWizardPage uploadWizardPage;
 	private final ValidationResultWizardPage validationResultWizardPage;
 	private final ImportResultsWizardPage importResultsWizardPage;

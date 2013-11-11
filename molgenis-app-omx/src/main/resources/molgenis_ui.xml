@@ -2,6 +2,7 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
+		<plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
 		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
@@ -10,6 +11,7 @@
 		<plugin id="background" name="Background" url="background"/>
 		<plugin id="references" name="References" url="references"/>
 		<plugin id="contact" name="Contact" url="contact"/>
+        <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
 		<menu label="Converters" name="converters">
 			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
 		</menu>
@@ -17,6 +19,8 @@
 	        <menu label="Entities" name ="entities">
         		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>
         		<plugin id="form.Protocol" name="Protocol" url="form.Protocol?subForms=DataSet.ProtocolUsed"/>
+        		<plugin id="form.ProtocolFlow" name="ProtocolFlow" url="form.ProtocolFlow"/>
+        		<plugin id="form.ObservationSetFlow" name="ObservationSetFlow" url="form.ObservationSetFlow"/>
         		<plugin id="form.ObservableFeature" name="ObservableFeature" url="form.ObservableFeature?subForms=Category.observableFeature"/>
         		<plugin id="form.Category" name="Category" url="form.Category"/>
         		<menu label="Values" name="values">
@@ -42,6 +46,7 @@
         		<plugin id="form.MolgenisGroupMember" name="MolgenisGroupMember" url="form.MolgenisGroupMember"/>
 	        </menu>
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
+	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
         	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
 			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
 			<plugin id="datasetindexer" name="Data Set Indexer" url="dataindexer"/>

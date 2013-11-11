@@ -14,6 +14,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 
+import org.apache.log4j.Logger;
+
 import ${entity.namespace}.${JavaName(entity)};
 import org.molgenis.framework.server.EntityCollectionRequest;
 import org.molgenis.framework.server.EntityCollectionResponse;
@@ -37,6 +39,8 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 	</#if>
 </#if>
 </#list>
+import org.molgenis.ui.util.ErrorMessageResponse;
+import org.molgenis.ui.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.EntityPager;
 import org.molgenis.util.MolgenisDateFormat;
 
@@ -71,6 +75,8 @@ import com.google.common.collect.Lists;
 @RequestMapping("/api/v1/${entity.name?lower_case}")
 public class ${entity.name}Controller
 {
+	private static Logger logger = Logger.getLogger(${entity.name}Controller.class);
+	 
 	@Autowired
 	private ${entity.name}Service ${entity.name?uncap_first}Service;
 
@@ -520,13 +526,37 @@ public class ${entity.name}Controller
 	
 	@ExceptionHandler(EntityNotFoundException.class)
 	@ResponseStatus(value = HttpStatus.NOT_FOUND)
-	public void handleEntityNotFoundException(EntityNotFoundException e)
+	@ResponseBody
+	public ErrorMessageResponse handleEntityNotFoundException(EntityNotFoundException e)
 	{
+		logger.debug(e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
-	
+
+	@ExceptionHandler(DatabaseException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
+	{
+		logger.error(e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	@ExceptionHandler(DatabaseAccessException.class)
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	public void handleDatabaseAccessException(DatabaseAccessException e)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseAccessException(DatabaseAccessException e)
 	{
+		logger.info(e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+	
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		logger.error(e);		
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 }
