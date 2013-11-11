@@ -51,7 +51,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(URI)
 public class EvaluationController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/evaluation";
+	public static final String ID = "evaluation";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private final SearchService searchService;
 	private final Database database;

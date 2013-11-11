@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
@@ -36,7 +37,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class BiobankConnectController extends AbstractWizardController
 {
 	private static final Logger logger = Logger.getLogger(BiobankConnectController.class);
-	public static final String URI = "/plugin/biobankconnect";
+
+	public static final String ID = "biobankconnect";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private final ChooseCataloguePage chooseCataloguePager;
 	private final OntologyAnnotatorPage ontologyAnnotatorPager;
 	private final OntologyMatcherPage ontologyMatcherPager;
@@ -130,8 +134,7 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateDocument(@RequestBody
-	UpdateIndexRequest request)
+	public void updateDocument(@RequestBody UpdateIndexRequest request)
 	{
 		ontologyAnnotator.updateIndex(request);
 	}
@@ -156,6 +159,7 @@ public class BiobankConnectController extends AbstractWizardController
 		return response;
 	}
 
+	@Override
 	@ModelAttribute("javascripts")
 	public List<String> getJavascripts()
 	{
@@ -164,6 +168,7 @@ public class BiobankConnectController extends AbstractWizardController
 				"biobank-connect.js");
 	}
 
+	@Override
 	@ModelAttribute("stylesheets")
 	public List<String> getStylesheets()
 	{

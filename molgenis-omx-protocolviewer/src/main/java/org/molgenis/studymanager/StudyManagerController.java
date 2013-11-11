@@ -50,7 +50,8 @@ public class StudyManagerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(StudyManagerController.class);
 
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "studymanager";
+	public static final String ID = "studymanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String VIEW_NAME = "view-studymanager";
 
 	private final StudyManagerService studyDefinitionManagerService;

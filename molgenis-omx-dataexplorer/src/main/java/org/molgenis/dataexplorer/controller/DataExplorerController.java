@@ -58,8 +58,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataExplorerController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/dataexplorer";
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
+
+	public static final String ID = "dataexplorer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
 
 	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";

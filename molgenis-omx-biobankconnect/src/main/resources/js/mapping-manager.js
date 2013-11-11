@@ -140,7 +140,7 @@
 				});
 				queryRules.push({
 					operator : 'OR'
-				})
+				});
 				allFeatureCollection.push(hitInfo.id);
 			});
 			queryRules.pop();
@@ -393,7 +393,7 @@
 					displayTerm = selectedMappings.length > 0 ? selectedMappings.join(' , ') : displayTerm;
 					var removeIcon = $('<i />').addClass('icon-trash show-popover').css({
 						position : 'relative',
-						float : 'right'
+						'float':'right'
 					}).click(function(){
 						standardModal.createModalCallback('Confirmation', function(modal){
 							var confirmButton = $('<button type="btn" class="btn btn-primary">Confirm</button>').click(function(){
@@ -437,7 +437,7 @@
 					}
 					editIcon.css({
 						position : 'relative',
-						float : 'right'
+						'float' : 'right'
 					}).click(function(){
 						standardModal.createModalCallback('Candidate mappings', function(modal){
 							createMappingTable(feature, mappedFeatures, restApi.get('/api/v1/dataset/' + mappedDataSetId), modal);
@@ -667,7 +667,7 @@
 			$.each(observedValues.items, function(index, ov){
 				observedValueIds.push(ns.hrefToId(ov.href));
 			});
-			deleteEntity('/api/v1/observedvalue/', observedValueIds, function(){deleteEntity('/api/v1/observationset/', observationSetIds, null)});
+			deleteEntity('/api/v1/observedvalue/', observedValueIds, function(){deleteEntity('/api/v1/observationset/', observationSetIds, null);});
 		}
 		
 		function deleteEntity(entityType, ids, callback){
@@ -879,7 +879,7 @@
 			$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
 			messageDiv.empty().append(messageAlert);
 			$('form:eq(-1)').prepend(messageDiv);
-			w.setTimeout(function(){messageDiv.fadeOut(1000).remove()}, 10000);
+			w.setTimeout(function(){messageDiv.fadeOut(1000).remove();}, 10000);
 		}
 		
 		function i18nDescription(feature){

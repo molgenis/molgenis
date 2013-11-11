@@ -59,8 +59,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class MappingManagerController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/mappingmanager";
 	private static final Logger logger = Logger.getLogger(MappingManagerController.class);
+
+	public static final String ID = "mappingmanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	private static final String FEATURE_ID = "id";
 	private static final String FEATURE_NAME = "name";
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";

@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(URI)
 public class HomeController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/home";
+	public static final String ID = "home";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String DEFAULT_APP_HOME_HTML = "<p>Welcome to Molgenis!</p>";
 	private static final String KEY_APP_HOME_HTML = "app.home.html";

@@ -39,6 +39,7 @@ public class MolgenisUserServiceImplTest
 		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
 		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
 		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
+		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
 		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
 		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
 
@@ -46,6 +47,7 @@ public class MolgenisUserServiceImplTest
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);
+		when(updatedMolgenisUser.getUsername()).thenReturn("username");
 		when(updatedMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
 		molgenisUserService.update(updatedMolgenisUser);
@@ -58,15 +60,17 @@ public class MolgenisUserServiceImplTest
 	{
 		Database database = mock(Database.class);
 		PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
-
+		when(passwordEncoder.matches("new-password", "encrypted-password")).thenReturn(true);
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
 		when(existingMolgenisUser.getId()).thenReturn(1);
-		when(existingMolgenisUser.getPassword()).thenReturn("new-password");
+		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		when(existingMolgenisUser.getUsername()).thenReturn("username");
 
 		Query<MolgenisUser> queryUser = mock(Query.class);
 		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
 		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
 		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
+		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
 		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
 		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
 
@@ -74,9 +78,10 @@ public class MolgenisUserServiceImplTest
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);
-		when(updatedMolgenisUser.getPassword()).thenReturn("password");
+		when(updatedMolgenisUser.getPassword()).thenReturn("new-password");
+		when(updatedMolgenisUser.getUsername()).thenReturn("username");
 
 		molgenisUserService.update(updatedMolgenisUser);
-		verify(passwordEncoder, times(1)).encode("password");
+		verify(passwordEncoder, times(1)).encode("new-password");
 	}
 }

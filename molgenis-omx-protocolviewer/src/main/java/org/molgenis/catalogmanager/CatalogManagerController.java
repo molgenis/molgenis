@@ -30,7 +30,8 @@ public class CatalogManagerController extends MolgenisPluginController
 {
 	private static final Logger LOG = Logger.getLogger(CatalogManagerController.class);
 
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "catalogmanager";
+	public static final String ID = "catalogmanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String VIEW_NAME = "view-catalogmanager";
 

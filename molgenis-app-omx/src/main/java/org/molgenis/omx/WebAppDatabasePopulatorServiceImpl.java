@@ -15,8 +15,10 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -83,12 +85,12 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		unsecuredDatabase.add(userUser);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
-		usersGroup.setName("All Users");
+		usersGroup.setName(AccountService.ALL_USER_GROUP);
 		unsecuredDatabase.add(usersGroup);
 
 		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
 		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
-		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME");
+		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + HomeController.ID.toUpperCase());
 		unsecuredDatabase.add(usersGroupHomeAuthority);
 
 		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
