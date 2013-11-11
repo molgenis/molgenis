@@ -5,6 +5,7 @@ package org.molgenis.service;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.CrudRepository;
@@ -24,12 +25,14 @@ public class ${entity.name}Service
 {
 	private static final Logger logger = Logger.getLogger(${entity.name}Service.class);
 
-	private final CrudRepository<${entity.name}> repository;
-
+	private CrudRepository<${entity.name}> repository;
+	private DataService dataService;
+	
 	@Autowired
-	public ${entity.name}Service(DataService dataService)
+	public void setDataService(DataService dataService)
 	{
 		this.repository = dataService.getCrudRepository("${entity.name}");
+		this.dataService = dataService;
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_WRITE_${entity.name?upper_case}</#if>')")
@@ -74,7 +77,7 @@ public class ${entity.name}Service
 		logger.debug("retrieving all Accession instances");
 		if (queryRules == null) queryRules = new ArrayList<QueryRule>();
 
-		QueryImpl q = new QueryImpl(queryRules);
+		QueryImpl q = new QueryImpl(resolveRefIdentifiers(queryRules));
 		q.setPageSize(num);
 		q.setOffset(start);
 
@@ -88,5 +91,24 @@ public class ${entity.name}Service
 	public EntityMetaData getEntityMetaData()
 	{
 		return repository;
+	}
+	
+	//Handle a bit of lagacy, handle query like 'SELECT FROM Category WHERE observableFeature_Identifier=xxx'
+	private List<QueryRule> resolveRefIdentifiers(List<QueryRule> rules)
+	{
+		for (QueryRule r : rules)
+		{
+			if ((r.getField() != null) && r.getField().endsWith("_Identifier"))
+			{
+				String entityName = StringUtils.capitalize(r.getField().substring(0,
+						r.getField().length() - "_Identifier".length()));
+				r.setField(entityName);
+
+				Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
+				r.setValue(value);
+			}
+		}
+
+		return rules;
 	}
 }

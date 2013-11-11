@@ -1,7 +1,5 @@
 package org.molgenis.omx.dataset;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -20,9 +18,6 @@ import org.molgenis.omx.observ.value.Value;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 
 public class DataSetTableIterator implements Iterator<Tuple>
 {
@@ -62,20 +57,9 @@ public class DataSetTableIterator implements Iterator<Tuple>
 
 		WritableTuple tuple = new KeyValueTuple();
 
-		// Only retrieve the visible columns
-		Collection<String> fieldNames = Collections2.transform(columns, new Function<Field, String>()
-		{
-			@Override
-			public String apply(final Field field)
-			{
-				return field.getName();
-			}
-		});
-
 		try
 		{
-			Query q = new QueryImpl().eq(ObservedValue.OBSERVATIONSET, currentRowToGet.getId()).in(
-					ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames));
+			Query q = new QueryImpl().eq(ObservedValue.OBSERVATIONSET, currentRowToGet);
 			Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME, q);
 
 			for (ObservedValue v : observedValues)

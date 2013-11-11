@@ -26,7 +26,7 @@ public class JpaEntitySourceImpl implements JpaEntitySource
 	<#list model.entities as entity>
 	<#if !entity.abstract>
 	@Autowired
-	public void set${JavaName(entity)}Repository(${entity.namespace}.${JavaName(entity)}Repository ${name(entity)}Repository)
+	public void set${JavaName(entity)}Repository(CrudRepository<${entity.namespace}.${JavaName(entity)}> ${name(entity)}Repository)
 	{	
 		<#if disable_decorators>
 		repos.put("${entity.name}", ${name(entity)}Repository);

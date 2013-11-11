@@ -147,8 +147,12 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void indexTupleTable(String documentType, TupleTable tupleTable)
 	{
+		System.out.println("Indexing " + documentType);
+
 		try
 		{
+			System.out.println("Count = " + tupleTable.getCount());
+
 			if (tupleTable.getCount() == 0)
 			{
 				return;
@@ -224,6 +228,7 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Delete done.");
 	}
 
+	@Override
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
 	{
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentIds);
@@ -245,6 +250,7 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Delete done.");
 	}
 
+	@Override
 	public void updateDocumentById(String documentType, String documentId, String updateScript)
 	{
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentId);

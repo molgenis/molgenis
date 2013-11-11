@@ -131,10 +131,7 @@ public class QueryImpl implements Query
 	@Override
 	public Query in(String field, Iterable<?> objectIterator)
 	{
-		List<Object> objectList = new ArrayList<Object>();
-		for (Object o : objectIterator)
-			objectList.add(o);
-		rules.lastElement().add(new QueryRule(field, Operator.IN, objectList));
+		rules.lastElement().add(new QueryRule(field, Operator.IN, objectIterator));
 		return this;
 	}
 

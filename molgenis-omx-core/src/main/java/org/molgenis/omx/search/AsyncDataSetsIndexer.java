@@ -13,6 +13,7 @@ import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.protocol.ProtocolTable;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -59,6 +60,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	 */
 	@Override
 	@Async
+	@RunAsSystem
 	public void index()
 	{
 		runningIndexProcesses.incrementAndGet();
@@ -90,6 +92,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	 */
 	@Override
 	@Async
+	@RunAsSystem
 	public void indexNew()
 	{
 		List<Integer> dataSetIds = new ArrayList<Integer>();
@@ -118,6 +121,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 	@Override
 	@Async
+	@RunAsSystem
 	public void index(List<Integer> dataSetIds)
 	{
 		while (isIndexingRunning())
@@ -135,8 +139,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
-					new QueryImpl().in(DataSet.ID, dataSetIds));
+			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, dataSetIds);
 
 			for (DataSet dataSet : dataSets)
 			{

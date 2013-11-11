@@ -61,6 +61,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -91,6 +92,8 @@ public class ${entity.name}Controller
 	</#if>
 </#if>
 </#list>
+	private final Logger logger = Logger.getLogger(${entity.name}Controller.class);
+	
 	<#-- Entity instance CRUD operations -->
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
@@ -540,6 +543,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleDatabaseAccessException(DatabaseAccessException e)
 	{
+		logger.error("DatabaseException occured", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 	
@@ -548,6 +552,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
+		logger.error("RuntimeException occured", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 }

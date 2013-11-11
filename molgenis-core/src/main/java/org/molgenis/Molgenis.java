@@ -257,6 +257,7 @@ public class Molgenis
 				generators.add(new EntityMetaDataGen());
 				generators.add(new JpaRepositoryGen());
 				generators.add(new EntityServiceGen());
+				generators.add(new EntityImporterGen());
 
 				// Temp remove when omx is migrated to DataApi
 				generators.add(new JDBCMetaDatabaseGen());
@@ -280,21 +281,19 @@ public class Molgenis
 				generators.add(new CountPerTableGen());
 			}
 
-			// authorization
-			generators.add(new MapperSecurityDecoratorGen());
-
 			// decorators
 			if (options.generate_decorators)
 			{
 				// generators.add(new MapperDecoratorGen());
+				// authorization
+				generators.add(new MapperSecurityDecoratorGen());
+
 			}
 		}
 		else
 		{
 			logger.info("SEVERE: Skipping ALL SQL ....");
 		}
-
-		generators.add(new EntityImporterGen());
 
 		if (options.generate_entityio)
 		{

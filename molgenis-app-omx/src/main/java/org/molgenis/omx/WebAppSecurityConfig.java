@@ -202,7 +202,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	protected List<GrantedAuthority> createAnonymousUserAuthorities()
 	{
-		return AuthorityUtils.createAuthorityList(getPluginReadAuthority("home"));
+		return AuthorityUtils.createAuthorityList(getPluginReadAuthority("home"), "ROLE_ANONYMOUS");
 	}
 
 	// TODO automate role hierarchy configuration (ticket #2134)

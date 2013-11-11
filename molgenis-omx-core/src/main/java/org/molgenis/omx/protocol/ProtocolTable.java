@@ -109,7 +109,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				StringBuilder categoryValue = new StringBuilder();
 
 				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-						new QueryImpl().eq(Category.OBSERVABLEFEATURE_IDENTIFIER, feature.getIdentifier()));
+						new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
 
 				for (Category c : categories)
 				{

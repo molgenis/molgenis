@@ -7,6 +7,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MolgenisDbSettings implements MolgenisSettings
@@ -23,12 +24,14 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public String getProperty(String key)
 	{
 		return getProperty(key, null);
 	}
 
 	@Override
+	@RunAsSystem
 	public String getProperty(String key, String defaultValue)
 	{
 		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
@@ -38,6 +41,8 @@ public class MolgenisDbSettings implements MolgenisSettings
 		try
 		{
 			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule);
+			// property = DataSecurityUtils.findOneAsSystem(dataService, RuntimeProperty.ENTITY_NAME, new QueryImpl(
+			// propertyRule));
 		}
 		catch (MolgenisDataException e)
 		{

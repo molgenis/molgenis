@@ -6,6 +6,10 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 
+	var source   = $("#datasets-template").html();
+	var template = Handlebars.compile(source);
+	var html = 
+	
 	ns.onEntityChange = function(name) {
 		restApi.getAsync('/api/v1/' + name, null, null, function(entities) {
 			var items = [];

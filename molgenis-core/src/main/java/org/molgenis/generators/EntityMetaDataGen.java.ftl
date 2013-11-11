@@ -14,12 +14,15 @@ package ${package};
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.EntityMetaDataCache;
 
 public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
 	public  ${JavaName(entity)}MetaData()
 	{
 		super("${JavaName(entity)}");
+		EntityMetaDataCache.add(this);
+		
 		setLabel("${entity.label}");
 		
 <#list entity.allFields as f>
@@ -40,12 +43,13 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
 		<#if f.isXRef()>
-		${f.xrefEntity.namespace?lower_case}.${JavaName(f.xrefEntity)}MetaData ${name(f)}Xref = new ${f.xrefEntity.namespace?lower_case}.${JavaName(f.xrefEntity)}MetaData();
-		${name(f)}.setRefEntity(${name(f)}Xref);
-		${name(f)}.setRefAttribute(${name(f)}Xref.getAttribute("${f.xrefFieldName}"));
+		${name(f)}.setRefEntityName("${f.xrefEntity.name}");
 		</#if>
 		addAttributeMetaData(${name(f)});	
 		 
 </#list>
+		
 	}
+	
+	
 }

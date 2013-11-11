@@ -194,7 +194,7 @@ public class DataSetTable extends AbstractFilterableTupleTable
 
 		if (getFilters().isEmpty())
 		{
-			query = new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet.getId());
+			query = new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet);
 		}
 		else
 		{

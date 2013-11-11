@@ -35,9 +35,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public long count()
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.count();
@@ -46,7 +46,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void add(E entity)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -57,9 +57,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public long count(Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.count(q);
@@ -68,7 +68,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void update(E entity)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -79,7 +79,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void add(Iterable<E> entities)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -90,16 +90,20 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void update(Iterable<E> records)
 	{
-		// TODO Auto-generated method stub
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
+		{
+			throw new MolgenisDataException("No write permission on ${entityClass}");
+		} 
+		
 		super.update(records);
 	}
 
 	@Override
 	public Iterable<E> findAll(Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.findAll(q);
@@ -108,7 +112,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void flush()
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -119,7 +123,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void delete(E entity)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -130,9 +134,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public E findOne(Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.findOne(q);
@@ -141,9 +145,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public String getLabel()
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.getLabel();
@@ -163,7 +167,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void deleteById(Integer id)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -174,9 +178,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public Iterator<E> iterator()
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.iterator();
@@ -185,9 +189,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public E findOne(Integer id)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.findOne(id);
@@ -196,7 +200,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void deleteById(Iterable<Integer> ids)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -207,9 +211,9 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public Iterable<E> findAll(Iterable<Integer> ids)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
-			throw new MolgenisDataException("No write permission on ${entityClass}");
+			throw new MolgenisDataException("No read permission on ${entityClass}");
 		}
 		
 		return super.findAll(ids);
@@ -218,7 +222,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void deleteAll()
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}
@@ -229,7 +233,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void update(List<E> entities, DatabaseAction dbAction, String... keyName)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}

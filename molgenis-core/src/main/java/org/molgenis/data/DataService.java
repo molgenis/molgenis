@@ -18,6 +18,8 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 */
 	void registerEntitySource(String url);
 
+	void registerFactory(EntitySourceFactory entitySourceFactory);
+
 	/**
 	 * return number of entities matched by query
 	 * 
@@ -31,6 +33,8 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
 	<E extends Entity> Iterable<E> findAll(String entityName, Query q);
+
+	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids);
 
 	<E extends Entity> List<E> findAllAsList(String entityName, Query q);
 
@@ -58,6 +62,8 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * throws MolgenisDataException if the repository of the entity isn't a Writable
 	 */
 	<E extends Entity> void add(String entityName, E entity);
+
+	<E extends Entity> void add(String entityName, Iterable<E> entities);
 
 	/**
 	 * Updates an entity
@@ -95,4 +101,7 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * Does not register the EntitySource
 	 */
 	EntitySource createEntitySource(File file) throws IOException;
+
+	EntitySource getEntitySource(String url);
+
 }

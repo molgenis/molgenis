@@ -35,6 +35,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 /**
  * Repository implementation for (generated) jpa entities
  */
@@ -65,7 +67,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void add(E entity)
 	{
 		if (entityClass.isAssignableFrom(entity.getClass()))
@@ -89,21 +91,21 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public Iterator<E> iterator()
 	{
 		return findAll(new QueryImpl()).iterator();
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public long count()
 	{
 		return count(new QueryImpl());
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public long count(Query q)
 	{
 		EntityManager em = getEntityManager();
@@ -122,22 +124,34 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public E findOne(Integer id)
 	{
 		return getEntityManager().find(getEntityClass(), id);
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public Iterable<E> findAll(Iterable<Integer> ids)
 	{
-		Query q = new QueryImpl().in(getIdAttribute().getName(), ids);
-		return findAll(q);
+		String idAttrName = getIdAttribute().getName();
+
+		// TODO why doesn't this work?
+		// Query q = new QueryImpl().in(idAttrName, ids);
+		// return findAll(q);
+
+		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+		CriteriaQuery<E> cq = cb.createQuery(getEntityClass());
+		Root<E> from = cq.from(getEntityClass());
+		cq.select(from).where(from.get(idAttrName).in(Lists.newArrayList(ids)));
+
+		return em.createQuery(cq).getResultList();
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public Iterable<E> findAll(Query q)
 	{
 		EntityManager em = getEntityManager();
@@ -151,6 +165,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		createWhere(q, from, cq, cb);
 
 		TypedQuery<E> tq = em.createQuery(cq);
+
 		if (q.getPageSize() > 0) tq.setMaxResults(q.getPageSize());
 		if (q.getOffset() > 0) tq.setFirstResult(q.getOffset());
 
@@ -158,7 +173,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public E findOne(Query q)
 	{
 		Iterable<E> result = findAll(q);
@@ -172,7 +187,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void update(E entity)
 	{
 		EntityManager em = getEntityManager();
@@ -181,7 +196,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void update(Iterable<E> entities)
 	{
 		EntityManager em = getEntityManager();
@@ -203,7 +218,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void update(List<E> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
@@ -363,25 +378,28 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 							+ (existingEntities.size() > 5 ? " and " + (existingEntities.size() - 5) + "more" : ""
 									+ existingEntities));
 				}
+				break;
 
-				// will not test for existing entities before add
-				// (so will ignore existingEntities)
+			// will not test for existing entities before add
+			// (so will ignore existingEntities)
 			case ADD_IGNORE_EXISTING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will skip " + existingEntities.size() + " existing entities");
 				add(newEntities);
+				break;
 
-				// will try to update(existingEntities) entities and
-				// add(missingEntities)
-				// so allows user to be sloppy in adding/updating
+			// will try to update(existingEntities) entities and
+			// add(missingEntities)
+			// so allows user to be sloppy in adding/updating
 			case ADD_UPDATE_EXISTING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">)  will try to update " + existingEntities.size() + " existing entities and add "
 						+ newEntities.size() + " new entities");
 				add(newEntities);
 				update(existingEntities);
+				break;
 
-				// update while testing for newEntities.size == 0
+			// update while testing for newEntities.size == 0
 			case UPDATE:
 				if (newEntities.size() == 0)
 				{
@@ -392,18 +410,20 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 					throw new MolgenisDataException("Tried to update non-existing " + entityName + "elements "
 							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
 				}
+				break;
 
-				// update that doesn't test for newEntities but just ignores
-				// those
-				// (so only updates exsiting)
+			// update that doesn't test for newEntities but just ignores
+			// those
+			// (so only updates exsiting)
 			case UPDATE_IGNORE_MISSING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will try to update " + existingEntities.size() + " existing entities and skip "
 						+ newEntities.size() + " new entities");
 				update(existingEntities);
+				break;
 
-				// remove all elements in list, test if no elements are missing
-				// (so test for newEntities == 0)
+			// remove all elements in list, test if no elements are missing
+			// (so test for newEntities == 0)
 			case REMOVE:
 				if (newEntities.size() == 0)
 				{
@@ -417,17 +437,19 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
 
 				}
+				break;
 
-				// remove entities that are in the list, ignore if they don't
-				// exist in database
-				// (so don't check the newEntities.size == 0)
+			// remove entities that are in the list, ignore if they don't
+			// exist in database
+			// (so don't check the newEntities.size == 0)
 			case REMOVE_IGNORE_MISSING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will try to remove " + existingEntities.size() + " existing entities and skip "
 						+ newEntities.size() + " new entities");
 				delete(existingEntities);
+				break;
 
-				// unexpected error
+			// unexpected error
 			default:
 				throw new MolgenisDataException("updateByName failed because of unknown dbAction " + dbAction);
 		}
@@ -478,14 +500,14 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void deleteById(Integer id)
 	{
 		delete(findOne(id));
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void delete(E entity)
 	{
 		EntityManager em = getEntityManager();
@@ -494,7 +516,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void delete(Iterable<E> entities)
 	{
 		EntityManager em = getEntityManager();
@@ -515,9 +537,9 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	private void createWhere(Query q, Root<?> from, CriteriaQuery<?> cq, CriteriaBuilder cb)
 	{
 		List<Predicate> where = createPredicates(from, cb, q.getRules());
-		if (where != null) cq.where(cb.and(where.toArray(new Predicate[where.size()])));
+		if (!where.isEmpty()) cq.where(cb.and(where.toArray(new Predicate[where.size()])));
 		List<Order> orders = createOrder(from, cb, q.getSort());
-		if (orders != null && orders.size() > 0) cq.orderBy(orders);
+		if (!orders.isEmpty()) cq.orderBy(orders);
 	}
 
 	/** Converts MOLGENIS query rules into JPA predicates */
@@ -547,17 +569,20 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 					andPredicates.clear();
 					break;
 				case EQUALS:
-					andPredicates.add(cb.equal(from.get(r.getField()), r.getValue()));
+					andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
+					break;
+				case IN:
+					andPredicates.add(from.get(r.getJpaAttribute()).in(Lists.newArrayList(r.getValue())));
 					break;
 				case LIKE:
 					String like = "%" + r.getValue() + "%";
-					String f = r.getField();
+					String f = r.getJpaAttribute();
 					andPredicates.add(cb.like(from.<String> get(f), like));
 					break;
 				default:
 					// go into comparator based criteria, that need
 					// conversion...
-					Path<Comparable> field = from.get(r.getField());
+					Path<Comparable> field = from.get(r.getJpaAttribute());
 					Object value = r.getValue();
 					Comparable cValue = null;
 
@@ -613,15 +638,19 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	private List<Order> createOrder(Root<?> from, CriteriaBuilder cb, Sort sort)
 	{
 		List<Order> orders = new ArrayList<Order>();
-		for (Sort.Order sortOrder : sort)
+
+		if (sort != null)
 		{
-			if (sortOrder.isAscending())
+			for (Sort.Order sortOrder : sort)
 			{
-				orders.add(cb.asc(from.get(sortOrder.getProperty())));
-			}
-			else
-			{
-				orders.add(cb.desc(from.get(sortOrder.getProperty())));
+				if (sortOrder.isAscending())
+				{
+					orders.add(cb.asc(from.get(sortOrder.getProperty())));
+				}
+				else
+				{
+					orders.add(cb.desc(from.get(sortOrder.getProperty())));
+				}
 			}
 		}
 
@@ -635,7 +664,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void deleteById(Iterable<Integer> ids)
 	{
 		for (Integer id : ids)
@@ -645,7 +674,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = Exception.class)
+	@Transactional(readOnly = true)
 	public void flush()
 	{
 		getEntityManager().flush();

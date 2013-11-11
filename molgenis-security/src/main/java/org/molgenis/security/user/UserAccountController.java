@@ -5,7 +5,8 @@ import static org.molgenis.security.user.UserAccountController.URI;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -30,7 +31,7 @@ public class UserAccountController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "useraccount";
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private AccountService accountService;
@@ -68,7 +69,9 @@ public class UserAccountController extends MolgenisPluginController
 			molgenisUserService.checkPassword(SecurityUtils.getCurrentUsername(), oldPwd, newPwd1, newPwd2);
 		}
 
-		MolgenisUser user = MolgenisUser.findByUsername(database, SecurityUtils.getCurrentUsername());
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getCurrentUsername()));
+
 		this.updateMolgenisUser(user, request);
 		molgenisUserService.update(user);
 	}

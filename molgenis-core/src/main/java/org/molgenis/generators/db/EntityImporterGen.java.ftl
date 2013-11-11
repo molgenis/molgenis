@@ -261,12 +261,28 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 		
 		if(${name(f)}Keymap.size() > 0) 
 		{
-			Iterable<? extends Entity> ${name(f)}List = dataService.findAll("${f.getXrefEntityName()}",
-					new QueryImpl().in("${f.getXrefLabelNames()[0]}", new ArrayList<Object>(${name(f)}Keymap.keySet())));
+			System.out.println("map:" + ${name(f)}Keymap);
+
+			QueryImpl q = new QueryImpl();
+			boolean first = true;
+			for (Object o : ${name(f)}Keymap.keySet())
+			{
+				if (!first)
+				{
+					q.or();
+					first = false;
+				}
+				q.eq("${name(f.getXrefLabelNames()[0])}", o);
+			}
+			
+			Iterable<? extends Entity> ${name(f)}List = dataService.findAll("${f.getXrefEntityName()}",q);
+			
+			//Iterable<? extends Entity> ${name(f)}List = dataService.findAll("${f.getXrefEntityName()}",
+			//		new QueryImpl().in("${f.getXrefLabelNames()[0]}", new ArrayList<Object>(${name(f)}Keymap.keySet())));
 					
 			for(Entity xref :  ${name(f)}List)
 			{
-				${name(f)}Keymap.put(xref.get("${f.getXrefLabelNames()[0]}"), xref.get("${f.getXrefFieldName()}"));
+				${name(f)}Keymap.put(xref.get("${name(f.getXrefLabelNames()[0])}"), xref.get("${f.getXrefFieldName()}"));
 			}
 		}
 		</#if>

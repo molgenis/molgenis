@@ -58,6 +58,7 @@ public class IndexRequestGenerator
 		for (Entity entity : entities)
 		{
 			Object id = entity.getIdValue();
+			System.out.println("entityId:" + id);
 			Map<String, Object> doc = new HashMap<String, Object>();
 			for (String field : entity.getFields())
 			{
@@ -138,6 +139,7 @@ public class IndexRequestGenerator
 				{
 					Tuple tuple = it.next();
 					Map<String, Object> doc = new HashMap<String, Object>();
+
 					for (String columnName : tuple.getColNames())
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on

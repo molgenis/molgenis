@@ -24,9 +24,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -36,7 +33,7 @@ import com.google.common.collect.Lists;
  * Implementation of the DataService interface
  */
 @Component
-public class DataServiceImpl implements DataService, ApplicationContextAware
+public class DataServiceImpl implements DataService
 {
 	// Key: entity name, value:EntitySourceFactory
 	private final Map<String, EntitySourceFactory> entitySourceFactoryByEntityName = new LinkedHashMap<String, EntitySourceFactory>();
@@ -87,6 +84,7 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	/**
 	 * Register a new EntitySourceFactory of an EntitySource implementation
 	 */
+	@Override
 	public void registerFactory(EntitySourceFactory entitySourceFactory)
 	{
 		if (entitySourceFactoryByUrlPrefix.get(entitySourceFactory.getUrlPrefix()) != null)
@@ -109,20 +107,9 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	@Override
 	public void registerEntitySource(String url)
 	{
-		int index = url.indexOf("://");
-		if (index == -1)
-		{
-			throw new MolgenisDataException("Incorrect url format should be of format prefix://");
-		}
-
-		String prefix = url.substring(0, index);
-		EntitySourceFactory entitySourceFactory = entitySourceFactoryByUrlPrefix.get(prefix);
-		if (entitySourceFactory == null)
-		{
-			throw new MolgenisDataException("Unknown EntitySource url prefix [" + prefix + "]");
-		}
-
+		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
 		EntitySource entitySource = entitySourceFactory.create(url);
+
 		for (String entityName : entitySource.getEntityNames())
 		{
 			entitySourceFactoryByEntityName.put(entityName, entitySourceFactory);
@@ -141,6 +128,13 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	{
 		Queryable<E> queryable = getQueryable(entityName);
 		return queryable.findAll(q);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids)
+	{
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findAll(ids);
 	}
 
 	@Override
@@ -181,6 +175,13 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	{
 		Writable<E> writable = getWritable(entityName);
 		writable.add(entity);
+	}
+
+	@Override
+	public <E extends Entity> void add(String entityName, Iterable<E> entities)
+	{
+		Writable<E> writable = getWritable(entityName);
+		writable.add(entities);
 	}
 
 	@Override
@@ -258,17 +259,6 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 		return factory.create(file);
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
-	{
-		// Find all EntitySourceFactories and register them
-		Map<String, EntitySourceFactory> factories = applicationContext.getBeansOfType(EntitySourceFactory.class);
-		for (EntitySourceFactory factory : factories.values())
-		{
-			registerFactory(factory);
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E extends Entity> CrudRepository<E> getCrudRepository(String entityName)
@@ -282,4 +272,28 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 		throw new MolgenisDataException("Repository [" + repository.getName() + "] isn't a CrudRepository");
 	}
 
+	@Override
+	public EntitySource getEntitySource(String url)
+	{
+		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
+		return entitySourceFactory.create(url);
+	}
+
+	private EntitySourceFactory getEntitySourcefactory(String url)
+	{
+		int index = url.indexOf("://");
+		if (index == -1)
+		{
+			throw new MolgenisDataException("Incorrect url format should be of format prefix://");
+		}
+
+		String prefix = url.substring(0, index + "://".length());
+		EntitySourceFactory entitySourceFactory = entitySourceFactoryByUrlPrefix.get(prefix);
+		if (entitySourceFactory == null)
+		{
+			throw new MolgenisDataException("Unknown EntitySource url prefix [" + prefix + "]");
+		}
+
+		return entitySourceFactory;
+	}
 }

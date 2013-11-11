@@ -1,17 +1,16 @@
 package org.molgenis.omx;
 
-import java.util.Vector;
-
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.model.elements.Entity;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,7 +23,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private static final String USERNAME_ADMIN = "admin";
 	private static final String USERNAME_USER = "user";
 
-	private final Database unsecuredDatabase;
+	private final DataService dataService;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -36,22 +35,22 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private String userEmail;
 
 	@Autowired
-	public WebAppDatabasePopulatorServiceImpl(Database unsecuredDatabase)
+	public WebAppDatabasePopulatorServiceImpl(DataService dataService)
 	{
-		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
-		this.unsecuredDatabase = unsecuredDatabase;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
-	@Transactional(rollbackFor = DatabaseException.class)
-	public void populateDatabase() throws DatabaseException
+	@Transactional
+	@RunAsSystem
+	public void populateDatabase()
 	{
 		if (adminPassword == null) throw new RuntimeException(
 				"please configure the admin.password property in your molgenis-server.properties");
 		if (userPassword == null) throw new RuntimeException(
 				"please configure the user.password property in your molgenis-server.properties");
 
-		// FIXME create users and groups through service class
 		MolgenisUser userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
 		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
@@ -60,12 +59,12 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userAdmin.setSuperuser(true);
 		userAdmin.setFirstName(USERNAME_ADMIN);
 		userAdmin.setLastName(USERNAME_ADMIN);
-		unsecuredDatabase.add(userAdmin);
+		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
 		UserAuthority suAuthority = new UserAuthority();
 		suAuthority.setMolgenisUser(userAdmin);
 		suAuthority.setRole("ROLE_SU");
-		unsecuredDatabase.add(suAuthority);
+		dataService.add(UserAuthority.ENTITY_NAME, suAuthority);
 
 		MolgenisUser userUser = new MolgenisUser();
 		userUser.setUsername(USERNAME_USER);
@@ -75,36 +74,37 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userUser.setSuperuser(false);
 		userUser.setFirstName(USERNAME_USER);
 		userUser.setLastName(USERNAME_USER);
-		unsecuredDatabase.add(userUser);
+		dataService.add(MolgenisUser.ENTITY_NAME, userUser);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
 		usersGroup.setName("All Users");
-		unsecuredDatabase.add(usersGroup);
+		dataService.add(MolgenisGroup.ENTITY_NAME, usersGroup);
 
 		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
 		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
 		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME");
-		unsecuredDatabase.add(usersGroupHomeAuthority);
+		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupHomeAuthority);
 
 		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
 		molgenisGroupMember1.setMolgenisGroup(usersGroup);
 		molgenisGroupMember1.setMolgenisUser(userUser);
-		unsecuredDatabase.add(molgenisGroupMember1);
+		dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember1);
 
-		Vector<Entity> entities = unsecuredDatabase.getMetaData().getEntities();
-		for (Entity entity : entities)
+		for (String entityName : dataService.getEntityNames())
 		{
 			GroupAuthority entityAuthority = new GroupAuthority();
 			entityAuthority.setMolgenisGroup(usersGroup);
-			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entity.getName().toUpperCase());
-			unsecuredDatabase.add(entityAuthority);
+			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase());
+			dataService.add(GroupAuthority.ENTITY_NAME, entityAuthority);
 		}
+
 	}
 
 	@Override
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	@Transactional
+	@RunAsSystem
 	public boolean isDatabasePopulated() throws DatabaseException
 	{
-		return unsecuredDatabase.count(MolgenisUser.class) > 0;
+		return dataService.count(MolgenisUser.ENTITY_NAME, new QueryImpl()) > 0;
 	}
 }
