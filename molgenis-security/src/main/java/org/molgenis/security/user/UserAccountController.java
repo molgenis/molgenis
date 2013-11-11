@@ -5,15 +5,11 @@ import static org.molgenis.security.user.UserAccountController.URI;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
-import org.molgenis.security.account.AccountService;
 import org.molgenis.security.captcha.CaptchaException;
-import org.molgenis.security.captcha.CaptchaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -30,27 +26,20 @@ public class UserAccountController extends MolgenisPluginController
 	public static final String ID = "useraccount";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	@Autowired
-	private Database database;
+	private final UserAccountService userAccountService;
 
 	@Autowired
-	private AccountService accountService;
-
-	@Autowired
-	private CaptchaService captchaService;
-
-	@Autowired
-	private MolgenisUserService molgenisUserService;
-
-	public UserAccountController()
+	public UserAccountController(UserAccountService userAccountService)
 	{
 		super(URI);
+		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
+		this.userAccountService = userAccountService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String showAccount(Model model) throws DatabaseException
 	{
-		model.addAttribute("user", molgenisUserService.getCurrentUser());
+		model.addAttribute("user", userAccountService.getCurrentUser());
 		return "view-useraccount";
 	}
 
@@ -58,39 +47,15 @@ public class UserAccountController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateAccount(HttpServletRequest request) throws Exception
 	{
-		if (StringUtils.isNotEmpty(request.getParameter("oldpwd"))
-				|| StringUtils.isNotEmpty(request.getParameter("newpwd"))
-				|| StringUtils.isNotEmpty(request.getParameter("newpwd2")))
+		String newPassword = request.getParameter("newpwd");
+		String newPasswordConfirm = request.getParameter("newpwd2");
+		if (!StringUtils.equals(newPassword, newPasswordConfirm))
 		{
-			String oldPwd = request.getParameter("oldpwd");
-			String newPwd1 = request.getParameter("newpwd");
-			String newPwd2 = request.getParameter("newpwd2");
-
-			molgenisUserService.checkPassword(SecurityUtils.getCurrentUsername(), oldPwd, newPwd1, newPwd2);
+			throw new MolgenisUserException("Passwords do not match.");
 		}
 
-		MolgenisUser user = MolgenisUser.findByUsername(database, SecurityUtils.getCurrentUsername());
-		this.updateMolgenisUser(user, request);
-		molgenisUserService.update(user);
-	}
+		MolgenisUser user = userAccountService.getCurrentUser();
 
-	@ExceptionHandler(DatabaseAccessException.class)
-	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	private void handleDatabaseAccessException(DatabaseAccessException e)
-	{
-	}
-
-	@ExceptionHandler(CaptchaException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	private void handleCaptchaException(CaptchaException e)
-	{
-	}
-
-	private MolgenisUser updateMolgenisUser(MolgenisUser user, HttpServletRequest request)
-			throws MolgenisUserException, DatabaseException
-	{
-		if (!StringUtils.equals(request.getParameter("newpwd"), request.getParameter("newpwd2"))) throw new MolgenisUserException(
-				"Passwords do not match.");
 		if (StringUtils.isNotEmpty(request.getParameter("newpwd"))) user.setPassword(request.getParameter("newpwd"));
 		if (StringUtils.isNotEmpty(request.getParameter("emailaddress"))) user.setEmail(request
 				.getParameter("emailaddress"));
@@ -110,6 +75,19 @@ public class UserAccountController extends MolgenisPluginController
 				.getParameter("department"));
 		if (StringUtils.isNotEmpty(request.getParameter("city"))) user.setCity(request.getParameter("city"));
 		if (StringUtils.isNotEmpty(request.getParameter("country"))) user.setCountry(request.getParameter("country"));
-		return user;
+
+		userAccountService.updateCurrentUser(user);
+	}
+
+	@ExceptionHandler(DatabaseAccessException.class)
+	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+	private void handleDatabaseAccessException(DatabaseAccessException e)
+	{
+	}
+
+	@ExceptionHandler(CaptchaException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	private void handleCaptchaException(CaptchaException e)
+	{
 	}
 }
