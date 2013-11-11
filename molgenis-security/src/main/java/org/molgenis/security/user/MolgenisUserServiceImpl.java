@@ -57,15 +57,25 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
-	public void update(MolgenisUser molgenisUser) throws DatabaseException
+	public void update(MolgenisUser updatedUser) throws DatabaseException
 	{
-		MolgenisUser currentMolgenisUser = MolgenisUser.findById(database, molgenisUser.getId());
-		if (!currentMolgenisUser.getPassword().equals(molgenisUser.getPassword()))
+		MolgenisUser currentUser = MolgenisUser.findByUsername(database, updatedUser.getUsername());
+		if (currentUser == null)
 		{
-			String encryptedPassword = passwordEncoder.encode(molgenisUser.getPassword());
-			molgenisUser.setPassword(encryptedPassword);
+			throw new RuntimeException("User does not exist [" + updatedUser.getUsername() + "]");
 		}
-		database.update(molgenisUser);
+		String password = currentUser.getPassword();
+		String newPassword = updatedUser.getPassword();
+		if (StringUtils.isNotEmpty(newPassword) && !password.equals(newPassword))
+		{
+			if (!passwordEncoder.matches(newPassword, currentUser.getPassword()))
+			{
+				throw new MolgenisUserException("Wrong password");
+			}
+			String encryptedPassword = passwordEncoder.encode(newPassword);
+			updatedUser.setPassword(encryptedPassword);
+		}
+		unsecuredDatabase.update(updatedUser);
 	}
 
 	@Override
@@ -73,25 +83,5 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		String currentUsername = SecurityUtils.getCurrentUsername();
 		return MolgenisUser.findByUsername(database, currentUsername);
-	}
-
-	@Override
-	public void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2) throws DatabaseException
-	{
-		if (StringUtils.isEmpty(oldPwd) || StringUtils.isEmpty(newPwd1) || StringUtils.isEmpty(newPwd2))
-		{
-			throw new MolgenisUserException("Passwords empty");
-		}
-		if (!StringUtils.equals(newPwd1, newPwd2)) throw new MolgenisUserException("Passwords do not match");
-
-		MolgenisUser user = MolgenisUser.findByUsername(database, userName);
-		if (user == null)
-		{
-			throw new RuntimeException("User does not exist [" + userName + "]");
-		}
-		if (!passwordEncoder.matches(oldPwd, user.getPassword()))
-		{
-			throw new MolgenisUserException("Wrong password");
-		}
 	}
 }
