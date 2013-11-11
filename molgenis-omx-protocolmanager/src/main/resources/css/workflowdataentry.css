@@ -26,6 +26,7 @@
 
 #plugin-container .tab-pane {
 	min-height: 250px;
+	overflow: auto !important;
 }
 
 #plugin-container .table th, .table td { 

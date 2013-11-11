@@ -14,6 +14,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -43,6 +44,7 @@ public class AccountService
 	@Autowired
 	private MolgenisUserService molgenisUserService;
 
+	@RunAsSystem
 	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
 	{
 		// collect activation info
@@ -90,6 +92,7 @@ public class AccountService
 	 * @param activationCode
 	 * @throws DatabaseException
 	 */
+	@RunAsSystem
 	public void activateUser(String activationCode) throws DatabaseException
 	{
 		List<MolgenisUser> molgenisUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(
@@ -111,6 +114,7 @@ public class AccountService
 		}
 	}
 
+	@RunAsSystem
 	public void resetPassword(String userEmail) throws DatabaseException
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,

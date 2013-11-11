@@ -7,6 +7,16 @@
 	</parent>
 	<artifactId>molgenis-omx-dataexplorer</artifactId>
 	<packaging>jar</packaging>
+
+	<build>
+		<plugins>
+			<!-- minify css/js -->
+			<plugin>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 	
 	<dependencies>
 		<dependency>
@@ -32,12 +42,12 @@
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context-support</artifactId>
-		    <version>3.2.3.RELEASE</version>
+		    <version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>3.2.3.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 	</dependencies>
 </project>

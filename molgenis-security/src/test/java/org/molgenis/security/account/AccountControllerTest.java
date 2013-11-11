@@ -191,7 +191,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database unauthorizedDatabase()
+		public Database unsecuredDatabase()
 		{
 			return mock(Database.class);
 		}

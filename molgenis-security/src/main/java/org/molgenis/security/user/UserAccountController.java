@@ -28,7 +28,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class UserAccountController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "useraccount";
+	public static final String ID = "useraccount";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
 	private DataService dataService;

@@ -10,6 +10,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
+	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
 		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(

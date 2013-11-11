@@ -20,7 +20,8 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
-	public static final String URI = "/plugin/entityexplorer";
+	public static final String ID = "entityexplorer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
 	private DataService dataService;
