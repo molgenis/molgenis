@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(URI)
 public class WorkflowDataEntryController extends MolgenisPluginController
 {
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "workflowdataentry";
+	public static final String ID = "workflowdataentry";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final WorkflowService workflowService;
 

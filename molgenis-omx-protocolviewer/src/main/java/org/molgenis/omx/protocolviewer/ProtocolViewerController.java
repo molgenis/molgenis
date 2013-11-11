@@ -34,7 +34,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class ProtocolViewerController extends MolgenisPluginController
 {
-	public static final String URI = PLUGIN_URI_PREFIX + "protocolviewer";
+	public static final String ID = "protocolviewer";
+	public static final String URI = PLUGIN_URI_PREFIX + ID;
 
 	public static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
 	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
