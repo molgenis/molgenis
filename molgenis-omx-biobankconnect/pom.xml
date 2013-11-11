@@ -7,7 +7,17 @@
 	</parent>
 	<artifactId>molgenis-omx-biobankconnect</artifactId>
 	<packaging>jar</packaging>
-  	
+
+	<build>
+		<plugins>
+			<!-- minify css/js -->
+			<plugin>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
   	<dependencies>
   		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>

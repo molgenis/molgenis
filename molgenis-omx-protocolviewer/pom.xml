@@ -43,6 +43,11 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<!-- minify css/js -->
+			<plugin>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 	
