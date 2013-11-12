@@ -6,6 +6,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 
@@ -168,5 +170,17 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 
 		userAccountServiceImpl.updateCurrentUser(updatedMolgenisUser);
 		verify(passwordEncoder, times(1)).encode("new-password");
+	}
+
+	@Test
+	public void validateCurrentUserPassword() throws DatabaseException
+	{
+		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
+		when(existingMolgenisUser.getId()).thenReturn(1);
+		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
+		when(existingMolgenisUser.getUsername()).thenReturn("username");
+		when(passwordEncoder.matches("password", "encrypted-password")).thenReturn(true);
+		assertTrue(userAccountServiceImpl.validateCurrentUserPassword("password"));
+		assertFalse(userAccountServiceImpl.validateCurrentUserPassword("wrong-password"));
 	}
 }

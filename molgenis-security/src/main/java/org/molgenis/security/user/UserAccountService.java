@@ -24,4 +24,13 @@ public interface UserAccountService
 	 * @throws DatabaseException
 	 */
 	void updateCurrentUser(MolgenisUser molgenisUser) throws DatabaseException;
+
+	/**
+	 * Validates the password of the current logged in user
+	 * 
+	 * @param password
+	 * @return
+	 * @throws DatabaseException
+	 */
+	boolean validateCurrentUserPassword(String password) throws DatabaseException;
 }

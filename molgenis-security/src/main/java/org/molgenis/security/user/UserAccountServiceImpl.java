@@ -54,4 +54,19 @@ public class UserAccountServiceImpl implements UserAccountService
 		}
 		unsecuredDatabase.update(updatedCurrentUser);
 	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
+	@Transactional(rollbackFor = DatabaseException.class)
+	public boolean validateCurrentUserPassword(String password) throws DatabaseException
+	{
+		if (password == null || password.isEmpty()) return false;
+
+		MolgenisUser currentUser = getCurrentUser();
+		if (currentUser == null)
+		{
+			throw new RuntimeException("User does not exist [" + SecurityUtils.getCurrentUsername() + "]");
+		}
+		return passwordEncoder.matches(password, currentUser.getPassword());
+	}
 }
