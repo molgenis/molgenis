@@ -3,6 +3,9 @@ package org.molgenis.security.user;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
 
+/**
+ * Manage account of the current user
+ */
 public interface UserAccountService
 {
 	/**
