@@ -49,6 +49,13 @@ public class ${entity.name}Service
 		logger.debug("retrieving ${entity.name}");
 		return repository.findOne(id);
 	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_READ_${entity.name?upper_case}</#if>')")
+	public Iterable<${entity.name}> read(List<${type(entity.primaryKey)}> ids)
+	{
+		logger.debug("retrieving ${entity.name}s");
+		return repository.findAll(ids);
+	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU<#if !entity.system>, ROLE_ENTITY_WRITE_${entity.name?upper_case}</#if>')")
 	public void update(${entity.name} ${entity.name?uncap_first})

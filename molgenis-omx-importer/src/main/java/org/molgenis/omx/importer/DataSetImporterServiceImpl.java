@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.io.TableReader;
@@ -105,7 +107,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 				if (!featureIdentifier.equalsIgnoreCase(DATASET_ROW_IDENTIFIER_HEADER))
 				{
 					ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-							new QueryImpl().eq(ObservableFeature.IDENTIFIER, identifier));
+							new QueryImpl().eq(ObservableFeature.IDENTIFIER, featureIdentifier));
 
 					if (feature == null)
 					{
@@ -125,7 +127,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 		if (featureMap.isEmpty()) throw new MolgenisDataException("sheet '" + sheetName + "' contains no header");
 
 		int rownr = 0;
-		int transactionRows = Math.max(1, 5000 / featureMap.size());
+		int transactionRows = 10;// ;Math.max(1, 5000 / featureMap.size());
 
 		for (Tuple row : sheetReader)
 		{
@@ -133,7 +135,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 			if (!row.isEmpty())
 			{
 				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
-				Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
+				Map<String, List<Value>> valueMap = new HashMap<String, List<Value>>();
 
 				String rowIdentifier = row.getString(DATASET_ROW_IDENTIFIER_HEADER);
 				if (rowIdentifier == null) rowIdentifier = UUID.randomUUID().toString();
@@ -156,11 +158,11 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 						observedValue.setValue(value);
 						observedValue.setObservationSet(observationSet);
 
-						List<Value> valueList = valueMap.get(value.getClass());
+						List<Value> valueList = valueMap.get(value.getEntityName());
 						if (valueList == null)
 						{
 							valueList = new ArrayList<Value>();
-							valueMap.put(value.getClass(), valueList);
+							valueMap.put(value.getEntityName(), valueList);
 						}
 						valueList.add(value);
 						obsValueList.add(observedValue);
@@ -169,22 +171,22 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 				}
 				dataService.add(ObservedValue.ENTITY_NAME, obsValueList);
 
-				for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
-					dataService.add(entry.getValue().getClass().getSimpleName(), entry.getValue());
+				for (Map.Entry<String, List<Value>> entry : valueMap.entrySet())
+					dataService.add(entry.getKey(), entry.getValue());
 			}
 
 			if (++rownr % transactionRows == 0)
 			{
-				// TODO
-				// database.getEntityManager().flush();
-				// database.getEntityManager().clear();
+				CrudRepository<? extends Entity> repo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+				repo.flush();
+				repo.clearCache();
 			}
 		}
 		if (rownr % transactionRows != 0)
 		{
-			// TODO
-			// database.getEntityManager().flush();
-			// database.getEntityManager().clear();
+			CrudRepository<? extends Entity> repo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+			repo.flush();
+			repo.clearCache();
 		}
 	}
 }

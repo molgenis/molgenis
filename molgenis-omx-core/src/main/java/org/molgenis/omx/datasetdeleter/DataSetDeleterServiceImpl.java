@@ -72,7 +72,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		for (ObservationSet observationSet : observationSets)
 		{
 			List<ObservedValue> list = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
-					new QueryImpl().eq(ObservedValue.OBSERVATIONSET_IDENTIFIER, observationSet.getIdentifier()));
+					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet));
 
 			observedValues.addAll(list);
 
@@ -200,8 +200,8 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		Class<? extends Characteristic> clazz = characteristic.getClass();
 		for (Protocol p : allProtocols)
 		{
-			if ((clazz.equals(ObservableFeature.class) && p.getFeatures_Id().contains(characteristic.getId()) || (clazz
-					.equals(Protocol.class) && p.getSubprotocols_Id().contains(characteristic.getId()))))
+			if ((clazz.equals(ObservableFeature.class) && p.getFeatures().contains(characteristic) || (clazz
+					.equals(Protocol.class) && p.getSubprotocols().contains(characteristic))))
 			{
 				protocolcount++;
 			}

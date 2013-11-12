@@ -78,13 +78,14 @@ public class DataSetTable extends AbstractFilterableTupleTable
 		try
 		{
 			Protocol protocol = dataSet.getProtocolUsed();
+			System.out.println("Protocol:" + protocol);
 
 			// if dataset has protocol-used, determine columns from protocol
 			if (protocol != null)
 			{
 				List<ObservableFeature> features = new ArrayList<ObservableFeature>();
 				getFeatures(protocol, features);
-
+				System.out.println("Features:" + features);
 				if (features != null && !features.isEmpty())
 				{
 					columns = new ArrayList<Field>(features.size());
@@ -112,6 +113,7 @@ public class DataSetTable extends AbstractFilterableTupleTable
 							field.setXrefField(org.molgenis.omx.observ.Category.NAME);
 						}
 
+						System.out.println("Field:" + field);
 						columns.add(field);
 					}
 				}
@@ -219,7 +221,9 @@ public class DataSetTable extends AbstractFilterableTupleTable
 					filter.setValue(null);
 				}
 
-				queryRules.add(new QueryRule(ObservedValue.FEATURE_IDENTIFIER, Operator.EQUALS, filter.getField()));
+				queryRules.add(new QueryRule(ObservedValue.FEATURE, Operator.EQUALS, dataService.findOne(
+						ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.IDENTIFIER, filter.getField()))));
 				queryRules.add(new QueryRule(ObservedValue.VALUE, filter.getOperator(), filter.getValue()));
 			}
 
@@ -235,14 +239,13 @@ public class DataSetTable extends AbstractFilterableTupleTable
 			List<Integer> observationSetIds = new ArrayList<Integer>();
 			for (ObservedValue observedValue : observedValues)
 			{
-				if (!observationSetIds.contains(observedValue.getObservationSet_Id()))
+				if (!observationSetIds.contains(observedValue.getObservationSet().getId()))
 				{
-					observationSetIds.add(observedValue.getObservationSet_Id());
+					observationSetIds.add(observedValue.getObservationSet().getId());
 				}
 			}
 
-			query = new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet.getId()).in(ObservationSet.ID,
-					observationSetIds);
+			query = new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet).in(ObservationSet.ID, observationSetIds);
 		}
 
 		return query;

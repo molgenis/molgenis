@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
@@ -136,7 +137,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	{
 		String idAttrName = getIdAttribute().getName();
 
-		// TODO why doesn't this work?
+		// TODO why doesn't this work? Should work now (test it)
 		// Query q = new QueryImpl().in(idAttrName, ids);
 		// return findAll(q);
 
@@ -572,7 +573,13 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 					andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
 					break;
 				case IN:
-					andPredicates.add(from.get(r.getJpaAttribute()).in(Lists.newArrayList(r.getValue())));
+					In<Object> in = cb.in(from.get(r.getJpaAttribute()));
+					for (Object o : (Iterable) r.getValue())
+					{
+						in.value(o);
+					}
+					andPredicates.add(in);
+					// andPredicates.add(from.get(r.getJpaAttribute()).in(Lists.newArrayList(r.getValue())));
 					break;
 				case LIKE:
 					String like = "%" + r.getValue() + "%";

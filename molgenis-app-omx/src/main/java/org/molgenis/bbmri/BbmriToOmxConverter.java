@@ -200,8 +200,8 @@ public class BbmriToOmxConverter
 		{
 			tupleWriter.writeColNames(Arrays.asList(Person.IDENTIFIER, Person.NAME, Person.ADDRESS, Person.PHONE,
 					Person.EMAIL, Person.FAX, Person.TOLLFREEPHONE, Person.CITY, Person.COUNTRY, Person.FIRSTNAME,
-					Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION_NAME, Person.DEPARTMENT,
-					Person.ROLES_IDENTIFIER));
+					Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION + "_" + Institute.NAME,
+					Person.DEPARTMENT, Person.ROLES + "_" + PersonRole.IDENTIFIER));
 
 			TupleReader tupleSheetReader = tableReader.getTupleReader("BiobankCoordinator");
 			try
@@ -226,9 +226,11 @@ public class BbmriToOmxConverter
 					outputTuple.set(Person.MIDINITIALS, inputTuple.getString("MidInitials"));
 					outputTuple.set(Person.LASTNAME, inputTuple.getString("LastName"));
 					outputTuple.set(Person.TITLE, inputTuple.getString("Title"));
-					outputTuple.set(Person.AFFILIATION_NAME, inputTuple.getString("Affiliation_name"));
+					outputTuple
+							.set(Person.AFFILIATION + "_" + Institute.NAME, inputTuple.getString("Affiliation_name"));
 					outputTuple.set(Person.DEPARTMENT, inputTuple.getString("Department"));
-					outputTuple.set(Person.ROLES_IDENTIFIER, ontologyMap.get(inputTuple.getString("Roles_name")));
+					outputTuple.set(Person.ROLES + "_" + PersonRole.IDENTIFIER,
+							ontologyMap.get(inputTuple.getString("Roles_name")));
 					tupleWriter.write(outputTuple);
 				}
 			}
@@ -578,11 +580,12 @@ public class BbmriToOmxConverter
 								}
 							}));
 
-			tupleWriter.writeColNames(Arrays.asList(Protocol.IDENTIFIER, Protocol.NAME, Protocol.FEATURES_IDENTIFIER));
+			tupleWriter.writeColNames(Arrays.asList(Protocol.IDENTIFIER, Protocol.NAME, Protocol.FEATURES + "_"
+					+ ObservableFeature.IDENTIFIER));
 			WritableTuple tuple = new KeyValueTuple();
 			tuple.set(Protocol.IDENTIFIER, identifier);
 			tuple.set(Protocol.NAME, "Biobanks");
-			tuple.set(Protocol.FEATURES_IDENTIFIER, featureIdentifiersStr);
+			tuple.set(Protocol.FEATURES + "_" + ObservableFeature.IDENTIFIER, featureIdentifiersStr);
 			tupleWriter.write(tuple);
 		}
 		finally
@@ -596,11 +599,12 @@ public class BbmriToOmxConverter
 		TupleWriter tupleWriter = tableWriter.createTupleWriter(Dataset.class.getSimpleName());
 		try
 		{
-			tupleWriter.writeColNames(Arrays.asList(DataSet.IDENTIFIER, DataSet.NAME, DataSet.PROTOCOLUSED_IDENTIFIER));
+			tupleWriter.writeColNames(Arrays.asList(DataSet.IDENTIFIER, DataSet.NAME, DataSet.PROTOCOLUSED + "_"
+					+ Protocol.IDENTIFIER));
 			WritableTuple tuple = new KeyValueTuple();
 			tuple.set(DataSet.IDENTIFIER, identifier);
 			tuple.set(DataSet.NAME, "Biobanks data set");
-			tuple.set(DataSet.PROTOCOLUSED_IDENTIFIER, protocolIdentifier);
+			tuple.set(DataSet.PROTOCOLUSED + "_" + Protocol.IDENTIFIER, protocolIdentifier);
 			tupleWriter.write(tuple);
 		}
 		finally

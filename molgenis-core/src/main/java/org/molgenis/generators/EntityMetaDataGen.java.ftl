@@ -39,14 +39,23 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		<#if f.description??>
 		${name(f)}.setDescription("${f.description!}");
 		</#if>
-		${name(f)}.setIdAttribute(${(entity.primaryKey.name == f.name)?string('true', 'false')});
+		<#if entity.primaryKey.name == f.name >
+		${name(f)}.setIdAttribute(true);
+		${name(f)}.setUnique(true);
+		<#else>
+			<#list entity.keys as k>
+				<#if k.fields?size == 1 && k.fields?first.name == f.name>
+		${name(f)}.setUnique(true);
+				</#if>
+			</#list>
+		</#if>
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
 		<#if f.isXRef()>
 		${name(f)}.setRefEntityName("${f.xrefEntity.name}");
 		</#if>
-		addAttributeMetaData(${name(f)});	
-		 
+		addAttributeMetaData(${name(f)});
+			
 </#list>
 		
 	}

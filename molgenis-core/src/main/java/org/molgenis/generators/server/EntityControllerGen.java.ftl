@@ -199,7 +199,7 @@ public class ${entity.name}Controller
 	{
 		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.read(id);
 		if (${entity.name?uncap_first} == null) throw new EntityNotFoundException("${entity.name} " + id.toString() + " not found");
-		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${JavaName(field)}_${field.xrefEntity.primaryKey.name?cap_first}();
+		${type(entity.primaryKey)} ${field.xrefEntity.name?uncap_first}Id = ${entity.name?uncap_first}.get${JavaName(field)}().get${field.xrefEntity.primaryKey.name?cap_first}();
 		<#-- 'forward:' prefix does not work with URL query parameters -->
 		String redirectUri = "redirect:/api/v1/${field.xrefEntity.name?lower_case}/" + ${field.xrefEntity.name?uncap_first}Id.toString();
 		StringBuilder qsBuilder = new StringBuilder();
@@ -384,7 +384,7 @@ public class ${entity.name}Controller
 	}
 
 	<#-- Entity request class -->
-	private static class ${entity.name}Request
+	private class ${entity.name}Request
 	{
 	<#list fields as field>
 	<#if !field.system && !field.hidden && field.name != "__Type">
@@ -411,10 +411,15 @@ public class ${entity.name}Controller
 			${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
 		<#list fields as field>
 		<#if !field.system && !field.hidden && field.name != "__Type">
-			<#if field.type == "xref" || field.type == "mref">
+			<#if field.type == "xref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			${entity.name?uncap_first}.set${JavaName(field)}_${field.xrefEntity.primaryKey.name?cap_first}(${field.name?uncap_first});
+			${entity.name?uncap_first}.set${JavaName(field)}(${field.xrefEntity.name?uncap_first}Service.read(${field.name?uncap_first}));
+				</#if>
+			<#elseif field.type == "mref">
+				<#-- security: do not expose system fields/entities -->
+				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
+			${entity.name?uncap_first}.set${JavaName(field)}(Lists.newArrayList(${field.xrefEntity.name?uncap_first}Service.read(${field.name?uncap_first})));
 				</#if>
 			<#else>
 			${entity.name?uncap_first}.set${JavaName(field)}(${field.name?uncap_first});

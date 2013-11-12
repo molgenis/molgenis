@@ -41,6 +41,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.EntityImporter;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 
 ${imports(model, entity, "")}
 
@@ -50,18 +53,8 @@ ${imports(model, entity, "")}
 public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaName(entity)}>
 {
 	private static final Logger logger = Logger.getLogger(${JavaName(entity)}EntityImporter.class);
-	
 	private static int BATCH_SIZE = 10000;
-	<#assign has_xrefs=false />
-	<#list allFields(entity) as f><#if (f.type == 'xref' || f.type == 'mref') && f.getXrefLabelNames()[0] != f.xrefFieldName><#assign has_xrefs=true>
-	<#if f.xrefLabels?size &gt; 1>
-	//foreign key map for composite xref '${name(f)}' (maps ${name(f.xrefEntity)}.${csv(f.xrefLabelNames)} -> ${name(f.xrefEntity)}.${name(f.xrefField)})			
-	final Map<String,Object> ${name(f)}Keymap = new TreeMap<String,Object>();	
-	<#else>
-	//foreign key map for xref '${name(f)}' (maps ${name(f.xrefEntity)}.${csv(f.xrefLabelNames)} -> ${name(f.xrefEntity)}.${name(f.xrefField)})			
-	final Map<Object,Object> ${name(f)}Keymap = new TreeMap<Object,Object>();	
-	</#if>
-	</#if></#list>	
+		
 			
 	/**
 	 * Imports ${JavaName(entity)} from tab/comma delimited File
@@ -78,32 +71,82 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 		//wrapper to count
 		final AtomicInteger total = new AtomicInteger(0);
 	try {
-		//cache for entities of which xrefs couldn't be resolved (e.g. if there is a self-refence)
-		//these entities can be updated with their xrefs in a second round when all entities are in the database
-		List<${JavaName(entity)}> ${name(entity)}sMissingRefs = new ArrayList<${JavaName(entity)}>();
-	
-		//cache for objects to be imported from file (in batch)
-		final List<${JavaName(entity)}> ${name(entity)}List = new ArrayList<${JavaName(entity)}>(BATCH_SIZE); // FIXME
 		
-		CrudRepository<${JavaName(entity)}> crudRepository = dataService.getCrudRepository("${entity.name}");
-					
-		for(Entity entity : repository)
-		{
-			// skip empty rows
-			if (!hasValues(entity)) continue;
-			
-			//parse object, setting defaults and values from file
-			${JavaName(entity)} object = new ${JavaName(entity)}();
-			object.set(entity);				
-			${name(entity)}List.add(object);		
-			
-			//add to db when batch size is reached
-			if(${name(entity)}List.size() == BATCH_SIZE)
+			// cache for entities of which xrefs couldn't be resolved (e.g. if there is a self-refence)
+			// these entities can be updated with their xrefs in a second round when all entities are in the database
+			List<${JavaName(entity)}> ${name(entity)}sMissingRefs = new ArrayList<${JavaName(entity)}>();
+			List<Entity> entityMissingRefs = new ArrayList<Entity>();
+
+			// cache for objects to be imported from file (in batch)
+			List<${JavaName(entity)}> ${name(entity)}List = new ArrayList<${JavaName(entity)}>(BATCH_SIZE); // FIXME
+			List<Entity> entityList = new ArrayList<Entity>(BATCH_SIZE);
+
+			CrudRepository<${JavaName(entity)}> crudRepository = dataService.getCrudRepository("${entity.name}");
+		
+			for (Entity entity : repository)
 			{
-				//resolve foreign keys and copy those entities that could not be resolved to the missingRefs list
-				${name(entity)}sMissingRefs.addAll(resolveForeignKeys(dataService, ${name(entity)}List));
-				${name(entity)}List.removeAll(${name(entity)}sMissingRefs);
-				
+				// skip empty rows
+				if (!hasValues(entity)) continue;
+
+				// parse object, setting defaults and values from file
+				${JavaName(entity)} object = new ${JavaName(entity)}();
+				object.set(entity);
+				${name(entity)}List.add(object);
+				entityList.add(entity);
+
+				if (!resolveForeignKeys(dataService, entity, object, crudRepository))
+				{
+					${name(entity)}sMissingRefs.add(object);
+					entityMissingRefs.add(entity);
+					${name(entity)}List.remove(object);
+					entityList.remove(entity);
+				}
+
+				// add to db when batch size is reached
+				if (${name(entity)}List.size() == BATCH_SIZE)
+				{
+					<#if entity.getXrefLabels()?exists>
+					//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
+					crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
+					<#else>
+					//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
+					crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
+					</#if>
+
+					// clear for next batch
+					${name(entity)}List.clear();
+					entityList.clear();
+
+					// keep count
+					total.set(total.get() + BATCH_SIZE);
+
+					crudRepository.flush();
+					crudRepository.clearCache();
+				}
+			}
+
+			// add remaining elements to the database
+			if (!${name(entity)}List.isEmpty())
+			{
+				total.set(total.get() + ${name(entity)}List.size());
+
+				// resolve foreign keys, again keeping track of those entities that could not be solved
+				for (int i = 0; i < ${name(entity)}List.size(); i++)
+				{
+					Entity entity = entityList.get(i);
+					${JavaName(entity)} object = ${name(entity)}List.get(i);
+
+					if (!resolveForeignKeys(dataService, entity, object, crudRepository))
+					{
+						${name(entity)}sMissingRefs.add(object);
+						entityMissingRefs.add(entity);
+						${name(entity)}List.remove(object);
+						entityList.remove(entity);
+					}
+				}
+
+				// update objects in the database using xref_label defined secondary key(s) 'Identifier' defined in
+				// xref_label
 				<#if entity.getXrefLabels()?exists>
 				//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
 				crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
@@ -111,76 +154,69 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 				//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
 				crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
 				</#if>
-				
-				//clear for next batch						
-				${name(entity)}List.clear();		
-				
-				//keep count
-				total.set(total.get() + BATCH_SIZE);
-				
-				crudRepository.flush();
-				crudRepository.clearCache();	
+				${name(entity)}List.clear();
+				entityList.clear();
 			}
-		}
-			
-		//add remaining elements to the database
-		if(!${name(entity)}List.isEmpty())
+
+			// Try to resolve FK's for entities until all are resolved or we have more then 100 iterations
+			if (!${name(entity)}sMissingRefs.isEmpty())
+			{
+				int iterationCount = 0;
+
+				do
+				{
+					for (int i = 0; i < ${name(entity)}sMissingRefs.size(); i++)
+					{
+						Entity entity = entityMissingRefs.get(i);
+						${JavaName(entity)} object = ${name(entity)}sMissingRefs.get(i);
+
+						if (resolveForeignKeys(dataService, entity, object, crudRepository))
+						{
+							${name(entity)}List.add(object);
+							entityMissingRefs.remove(entity);
+							${name(entity)}sMissingRefs.remove(object);
+						}
+
+						if (!${name(entity)}List.isEmpty())
+						{
+							<#if entity.getXrefLabels()?exists>
+							//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
+							crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
+							<#else>
+							//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
+							crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
+							</#if>
+							${name(entity)}List.clear();
+						}
+					}
+
+					if (iterationCount++ > 100)
+					{
+						String identifier = "";
+						String name = "";
+						for (${JavaName(entity)} blaat : ${name(entity)}sMissingRefs)
+						{
+							identifier = blaat.getString("Identifier");
+							name = blaat.getString("Name");
+						}
+						throw new Exception(
+								"Import of '${name(entity)}' entity failed:"
+										+ "This is probably caused by a(n) '${name(entity)}' that has a reference but that does not exist."
+										+ "(identifier:" + identifier + ", name:" + name + ")");
+					}
+				}
+				while (!${name(entity)}sMissingRefs.isEmpty());
+			}
+
+			logger.info("imported " + total.get() + " ${name(entity)} from CSV");
+		
+		} 
+		catch(Exception e) 
 		{
-			total.set(total.get() + ${name(entity)}List.size());
-			
-			//resolve foreign keys, again keeping track of those entities that could not be solved
-			${name(entity)}sMissingRefs.addAll(resolveForeignKeys(dataService, ${name(entity)}List));
-			${name(entity)}List.removeAll(${name(entity)}sMissingRefs);
-			
-			<#if entity.getXrefLabels()?exists>
-			//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
-			crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
-			<#else>
-			//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
-			crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
-			</#if>
+			e.printStackTrace();
+			throw new MolgenisDataException(e);
 		}
 		
-		//Try to resolve FK's for entities until all are resolved or we have more then 100 iterations
-		List<${JavaName(entity)}> ${name(entity)}s = new ArrayList<${JavaName(entity)}>(${name(entity)}sMissingRefs);
-
-		int iterationCount = 0;
-
-		do
-		{
-			${name(entity)}sMissingRefs = resolveForeignKeys(dataService, ${name(entity)}sMissingRefs);
-			
-			LinkedHashSet<${JavaName(entity)}> differenceSet = new LinkedHashSet<${JavaName(entity)}>();
-			Sets.symmetricDifference(new LinkedHashSet<${JavaName(entity)}>(${name(entity)}s), new LinkedHashSet<${JavaName(entity)}>(${name(entity)}sMissingRefs)).copyInto(differenceSet);
-			List<${JavaName(entity)}> resolvable${name(entity)}s = new ArrayList<${JavaName(entity)}>(differenceSet);
-			
-			${name(entity)}s.removeAll(resolvable${name(entity)}s);
-			
-			<#if entity.getXrefLabels()?exists>
-			crudRepository.update(resolvable${name(entity)}s,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
-			<#else>
-			crudRepository.update(resolvable${name(entity)}s,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
-			</#if>
-
-			if (iterationCount++ > 100)
-			{
-			String identifier = "";
-			String name = "";
-				for(${JavaName(entity)} blaat : ${name(entity)}sMissingRefs){
-					identifier = blaat.getString("Identifier");
-					name = blaat.getString("Name");
-				}
-				throw new Exception(
-						"Import of '${name(entity)}' entity failed:"
-								+ "This is probably caused by a(n) '${name(entity)}' that has a reference but that does not exist."
-								+"(identifier:"+identifier+", name:"+name+")");		
-			}
-		}
-		while (${name(entity)}sMissingRefs.size() > 0);
-
-		logger.info("imported " + total.get() + " ${name(entity)} from CSV");
-
-		} catch(Exception e) {throw new MolgenisDataException(e);}
 		return total.get();
 	}	
 	
@@ -195,187 +231,66 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 	
 	/**
 	 * This method tries to resolve foreign keys (i.e. xref_field) based on the secondary key/key (i.e. xref_labels).
-	 *
-	 * @param db database
-	 * @param ${name(entity)}List 
-	 * @return the entities for which foreign keys cannot be resolved
 	 */
-	private List<${JavaName(entity)}> resolveForeignKeys(DataService dataService, List<${JavaName(entity)}> ${name(entity)}List) throws Exception
+	private boolean resolveForeignKeys(DataService dataService, Entity entity, ${JavaName(entity)} object,
+			EntityMetaData metaData)
 	{
-		//keep a list of ${entity.name} instances that miss a reference which might be resolvable later
-		List<${JavaName(entity)}> ${name(entity)}sMissingRefs = new ArrayList<${JavaName(entity)}>();
-	
-		<#list allFields(entity) as f><#if (f.type == 'xref' || f.type == 'mref') && f.getXrefLabelNames()[0] != f.xrefFieldName>
-		<#if f.xrefLabels?size &gt; 1>
-		//resolve <#if f.type="mref">mref<#else>xref</#if> '${name(f)}' from composite key ${name(f.getXrefEntityName())}.[${csv(f.getXrefLabelNames())}] -> ${name(f.getXrefEntityName())}.${name(f.getXrefFieldName())})
-		org.molgenis.framework.db.Query<${JavaName(f.getXrefEntityName())}> ${name(f)}Query = db.query(${JavaName(f.getXrefEntityName())}.class);
-		for(${JavaName(entity)} o: ${name(entity)}List)
+		for (AttributeMetaData attr : metaData.getAttributes())
 		{
-			if(<#list f.xrefLabelNames as label>o.get${JavaName(f)}_${JavaName(label)}() != null<#if label_has_next> || </#if></#list>)
+			if (attr.getRefEntity() != null)
 			{
-				<#if f.type="mref">
-				//mref: get pairs as a list query, assume longest list size
-				int listSize = 0;
-				<#list f.xrefLabelNames as label>
-				if(o.get${JavaName(f)}_${JavaName(label)}() != null) listSize = Math.max(o.get${JavaName(f)}_${JavaName(label)}().size(), listSize);
-				</#list>
-				for(int i = 0; i < listSize; i++)
+				for (AttributeMetaData attrXref : attr.getRefEntity().getAttributes())
 				{
-					//check if list != null, i < size, otherwise 'null'
-					<#list f.xrefLabelNames as label>
-					${name(f)}Query.eq("${label}", o.get${JavaName(f)}_${JavaName(label)}() != null && i < o.get${JavaName(f)}_${JavaName(label)}().size() ? o.get${JavaName(f)}_${JavaName(label)}().get(i) : null);
-					<#if label_has_next>
-					${name(f)}Query.and();</#if>
-					</#list>
-					${name(f)}Query.or();
-				}				
-				<#else>
-				//xref: 
-				<#list f.xrefLabelNames as label>
-				${name(f)}Query.eq("${label}", o.get${JavaName(f)}_${JavaName(label)}());
-				<#if label_has_next>
-				${name(f)}Query.and();</#if>
-				</#list>
-				${name(f)}Query.or();
-				</#if>
-				
-			}
-		}
-		List<${JavaName(f.xrefEntity)}> ${name(f)}List = ${name(f)}Query.find();
-		for(${JavaName(f.xrefEntity)} xref :  ${name(f)}List)
-		{
-			String key = "";
-			<#list f.xrefLabelNames as label>
-			//key.put("${label}", xref.get${JavaName(label)}());
-			key += "|" + xref.get${JavaName(label)}();
-			</#list>
-			${name(f)}Keymap.put(key, xref.get${JavaName(f.getXrefFieldName())}());
-		}		
-		<#else>
-		//resolve xref '${name(f)}' from ${name(f.getXrefEntityName())}.${csv(f.getXrefLabelNames())} -> ${name(f.getXrefEntityName())}.${name(f.getXrefFieldName())}
-		for(${JavaName(entity)} o: ${name(entity)}List) <#if f.type == "mref">for(${JavaType(f.xrefLabels[0])} xref_label: o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}())</#if>
-		{
-			if(<#if f.type == "mref">xref_label<#else>o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}()</#if> != null) 
-				${name(f)}Keymap.put(<#if f.type == "mref">xref_label.trim()<#else>o.get${JavaName(f)}_${JavaName(f.getXrefLabelNames()[0])}()</#if>, null);
-		}
-		
-		if(${name(f)}Keymap.size() > 0) 
-		{
-			System.out.println("map:" + ${name(f)}Keymap);
-
-			QueryImpl q = new QueryImpl();
-			boolean first = true;
-			for (Object o : ${name(f)}Keymap.keySet())
-			{
-				if (!first)
-				{
-					q.or();
-					first = false;
-				}
-				q.eq("${name(f.getXrefLabelNames()[0])}", o);
-			}
-			
-			Iterable<? extends Entity> ${name(f)}List = dataService.findAll("${f.getXrefEntityName()}",q);
-			
-			//Iterable<? extends Entity> ${name(f)}List = dataService.findAll("${f.getXrefEntityName()}",
-			//		new QueryImpl().in("${f.getXrefLabelNames()[0]}", new ArrayList<Object>(${name(f)}Keymap.keySet())));
-					
-			for(Entity xref :  ${name(f)}List)
-			{
-				${name(f)}Keymap.put(xref.get("${name(f.getXrefLabelNames()[0])}"), xref.get("${f.getXrefFieldName()}"));
-			}
-		}
-		</#if>
-		</#if></#list>
-		//update objects with foreign key values
-		for(${JavaName(entity)} o:  ${name(entity)}List)
-		{
-			while(true){
-				<#list allFields(entity) as f>
-				<#if f.type == 'xref'  && f.getXrefLabelNames()[0] != f.getXrefFieldName()>
-				//update xref ${f.name}
-				if(<#list f.xrefLabelNames as label><#if label_index &gt; 0> || </#if>o.get${JavaName(f)}_${JavaName(label)}() != null</#list>) 
-				{
-					<#if f.xrefLabelNames?size &gt; 1>
-					String key = "";
-					<#list f.xrefLabelNames as label>
-					//key.put("${label}", o.get${JavaName(f)}_${JavaName(label)}());
-					key += "|" + o.get${JavaName(f)}_${JavaName(label)}();
-					</#list>
-					<#else>	
-					${type(f.xrefLabels[0])} key = o.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}();
-					</#if>
-					if(${name(f)}Keymap.get(key) == null)
+					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
 					{
-					<#if entity.name == f.getXrefEntityName()>
-						<#if f.nillable == true>
-						${name(entity)}sMissingRefs.add(o);
-						break;
-						<#else>
-						throw new Exception("Import of '${entity.name}' objects failed: attempting to resolve in-list references, but this is (at the moment) not possible for non-nillable XREF fields");
-						</#if>
-					<#else>
-						throw new Exception("Import of '${entity.name}' objects failed: cannot find ${JavaName(f.getXrefEntityName())} for <#list f.xrefLabelNames as label><#if label_index &gt; 0> and </#if>${name(f)}_${label}='"+o.get${JavaName(f)}_${JavaName(label)}()+"'</#list>");
-					</#if>
-					}
-					o.set("${f.name}_${f.getXrefField().getName()}",${name(f)}Keymap.get(key));
-				}
-				<#elseif f.type == 'mref'  && f.getXrefLabelNames()[0] != f.getXrefFieldName()>
-				//update mref ${f.name}
-				if(<#list f.xrefLabelNames as label><#if label_index &gt; 0> || </#if>o.get${JavaName(f)}_${JavaName(label)}() != null</#list>) 
-				{
-					List<Object> mrefs = new ArrayList<Object>();
-					boolean breakToNext${JavaName(entity)} = false;
-
-					int listSize = 0;
-					<#list f.xrefLabelNames as label>
-					if(o.get${JavaName(f)}_${JavaName(label)}() != null) listSize = Math.max(o.get${JavaName(f)}_${JavaName(label)}().size(), listSize);
-					</#list>
-					for(int i = 0; i < listSize; i++)
-					{
-						<#if f.xrefLabelNames?size &gt; 1>
-						String key = "";
-						<#list f.xrefLabelNames as label>
-						key = key + "|" +(o.get${JavaName(f)}_${JavaName(label)}() != null && i < o.get${JavaName(f)}_${JavaName(label)}().size() ? o.get${JavaName(f)}_${JavaName(label)}().get(i) : "null");
-						</#list>
-						<#else>	
-						${JavaType(f.xrefLabels[0])} key = o.get${JavaName(f)}_${JavaName(f.xrefLabelNames[0])}().get(i);
-							<#if JavaType(f.xrefLabels[0]) == 'String'>
-							key = key.trim();				
-							</#if>						
-						</#if>
-						if(${name(f)}Keymap.get(key) == null){
-							<#if entity.name == f.getXrefEntityName()>
-								<#if f.nillable == true>
-							${name(entity)}sMissingRefs.add(o);
-							breakToNext${JavaName(entity)} = true;
-							break;
-								<#else>
-							throw new Exception("Import of '${entity.name}' objects failed: attempting to resolve in-list references, but this is (at the moment) not possible for non-nillable MREF fields");
-								</#if>
-							<#else>
-							logger.error("Import of '${entity.name}' objects failed: "+o);
-							throw new Exception("Import of '${entity.name}' objects failed:" 
-							+"cannot find <#list f.xrefLabelNames as label><#if label_index &gt; 0> and </#if>${name(f)}_${label}='"+(o.get${JavaName(f)}_${JavaName(label)}() != null && i < o.get${JavaName(f)}_${JavaName(label)}().size() ? o.get${JavaName(f)}_${JavaName(label)}().get(i) : "null")+"'</#list>");
-							</#if>
+						Object value = entity.get(attr.getName() + "_" + attrXref.getName());
+						if (value == null)
+						{
+							value = entity.get(attr.getName().toLowerCase() + "_"
+									+ attrXref.getName().toLowerCase());
 						}
-						mrefs.add(${name(f)}Keymap.get(key));
+
+						if (value != null)
+						{
+							Object xref = dataService.findOne(attr.getRefEntity().getName(),
+									new QueryImpl().eq(attrXref.getName(), value));
+
+							if (xref == null)
+							{
+								return false;
+							}
+
+							object.set(attr.getName(), xref);
+						}
 					}
-					if(breakToNext${JavaName(entity)}){
-						break;
+					else if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF)
+					{
+						List<String> value = entity.getList(attr.getName() + "_" + attrXref.getName());
+						if (value == null || value.isEmpty())
+						{
+							value = entity.getList(attr.getName().toLowerCase() + "_"
+									+ attrXref.getName().toLowerCase());
+						}
+
+						if (value != null && !value.isEmpty())
+						{
+							List<?> mref = dataService.findAllAsList(attr.getRefEntity().getName(),
+									new QueryImpl().in(attrXref.getName(), value));
+
+							if (mref.size() < value.size())
+							{
+								return false;
+							}
+
+							object.set(attr.getName(), mref);
+						}
 					}
-					o.set("${f.name}_${f.xrefField.name}",mrefs);
+
 				}
-				</#if></#list>
-				break;
 			}
 		}
-		
-		<#list allFields(entity) as f><#if (f.type == 'xref' || f.type == 'mref') && f.getXrefLabelNames()[0] != f.getXrefFieldName()>
-		${name(f)}Keymap.clear();
-		</#if></#list>
-		
-		return ${name(entity)}sMissingRefs;
+
+		return true;
 	}
 }
 

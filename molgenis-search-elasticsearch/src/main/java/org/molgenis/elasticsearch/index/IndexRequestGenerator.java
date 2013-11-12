@@ -58,7 +58,6 @@ public class IndexRequestGenerator
 		for (Entity entity : entities)
 		{
 			Object id = entity.getIdValue();
-			System.out.println("entityId:" + id);
 			Map<String, Object> doc = new HashMap<String, Object>();
 			for (String field : entity.getFields())
 			{
