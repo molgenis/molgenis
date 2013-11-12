@@ -45,15 +45,12 @@ public class UserAccountServiceImpl implements UserAccountService
 			throw new RuntimeException("User does not exist [" + currentUsername + "]");
 		}
 		String password = currentUser.getPassword();
-		String newPassword = updatedCurrentUser.getPassword();
-		if (StringUtils.isNotEmpty(newPassword) && !password.equals(newPassword))
+		String updatedPassword = updatedCurrentUser.getPassword();
+		if (StringUtils.isNotEmpty(updatedPassword) && !password.equals(updatedPassword))
 		{
-			if (!passwordEncoder.matches(newPassword, currentUser.getPassword()))
-			{
-				throw new MolgenisUserException("Wrong password");
-			}
-			String encryptedPassword = passwordEncoder.encode(newPassword);
-			updatedCurrentUser.setPassword(encryptedPassword);
+			// encode updated password
+			String encodedPassword = passwordEncoder.encode(updatedPassword);
+			updatedCurrentUser.setPassword(encodedPassword);
 		}
 		unsecuredDatabase.update(updatedCurrentUser);
 	}
