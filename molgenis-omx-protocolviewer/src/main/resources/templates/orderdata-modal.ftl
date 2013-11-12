@@ -49,8 +49,8 @@
 
   		<#-- modal events -->
   		modal.on('show', function () {
-  			submitBtn.attr("disabled", false);
-			cancelBtn.attr("disabled", false);
+  			submitBtn.attr('disabled', false);
+			cancelBtn.attr('disabled', false);
   			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
@@ -80,7 +80,7 @@
 							var deleteBtn = $('<i class="icon-remove"></i>');
 							deleteBtn.click(function() {
 				                deletedFeatures.push({
-									"feature": feature.id
+									'feature': feature.id
 				                });
 								row.remove();
 								// restore focus
@@ -159,8 +159,8 @@
 		
 		function order() {
 			showSpinner();
-			submitBtn.attr("disabled", true);
-			cancelBtn.attr("disabled", true);
+			submitBtn.attr('disabled', true);
+			cancelBtn.attr('disabled', true);
 			$.ajax({
 			    type: 'POST',
 			    url: '/plugin/study/order',
