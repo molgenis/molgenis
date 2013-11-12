@@ -53,33 +53,6 @@
 				});
 			}
 		}
-
-		function onNodeSelectionChange(selectedNodes) {
-			function getSiblingPos(node) {
-				var pos = 0;
-				do {
-					node = node.getPrevSibling();
-					if (node == null)
-						break;
-					else
-						++pos;
-				} while (true);
-				return pos;
-			}
-			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				var diff = node1.getLevel() - node2.getLevel();
-				if (diff == 0) {
-					diff = getSiblingPos(node1.getParent()) - getSiblingPos(node2.getParent());
-					if (diff == 0)
-						diff = getSiblingPos(node1) - getSiblingPos(node2);
-				}
-				return diff <= 0 ? -1 : 1;
-			});
-			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder ? null : node.data.key;
-			});
-			ns.onFeatureSelectionChange(sortedFeatures);
-		}
 		
 		function updateNodesInSearch(select, node){
 			
@@ -107,10 +80,7 @@
 					if($.inArray(node.data.key, selectKeys) == -1) updatedNodes.select[node.data.key] = node;
 				}
 			}
-			else{
-				var selectKeys = Object.keys(updatedNodes.select);
-				var unselectKeys = Object.keys(updatedNodes.unselect);
-				
+			else{				
 				if(node.data.isFolder){
 					node.visit(function(subNode){
 						if(!subNode.isSelected()){
@@ -218,11 +188,11 @@
 			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
 			var nrRequest = nrFeatureRequests + nrProtocolRequests;
 			if(nrRequest > 0){
-				var workers = [];
-				for(var i = 0 ; i < nrRequest ; i++) {
+				var workers = [], i;
+				for(i = 0 ; i < nrRequest ; i++) {
 					workers[i] = false;
 				}
-				for(var i = 0 ; i < nrRequest ; i++) {
+				for(i = 0 ; i < nrRequest ; i++) {
 					var entityType = i < nrProtocolRequests ?  "protocol" : "observablefeature";
 					var ids = i < nrProtocolRequests ?  protocolIds : featureIds;
 					var start = i < nrProtocolRequests ? i * batchSize : (i - nrProtocolRequests) * batchSize;
