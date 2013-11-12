@@ -1,5 +1,7 @@
 package org.molgenis.security.account;
 
+import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
+
 import java.net.URI;
 
 import javax.validation.Valid;
@@ -50,6 +52,7 @@ public class AccountController
 	{
 		ModelAndView model = new ModelAndView("register-modal");
 		model.addObject("countries", CountryCodes.get());
+		model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
 		return model;
 	}
 
