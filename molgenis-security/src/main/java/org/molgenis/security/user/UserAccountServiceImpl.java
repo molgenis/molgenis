@@ -25,7 +25,6 @@ public class UserAccountServiceImpl implements UserAccountService
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public MolgenisUser getCurrentUser() throws DatabaseException
 	{
-		// TODO do not expose password
 		return MolgenisUser.findByUsername(unsecuredDatabase, SecurityUtils.getCurrentUsername());
 	}
 
