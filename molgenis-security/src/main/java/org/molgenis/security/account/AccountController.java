@@ -8,13 +8,13 @@ import javax.validation.constraints.NotNull;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.MolgenisPasswordEncoder;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.util.CountryCodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,8 +37,8 @@ public class AccountController
 	private CaptchaService captchaService;
 
 	@Autowired
-	private MolgenisPasswordEncoder passwordEncoder;
-	
+	private PasswordEncoder passwordEncoder;
+
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String getLoginForm()
 	{
