@@ -737,11 +737,11 @@
 		$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
-				var restData = restApi.get(node.data.key);
+				var feature = restApi.get(node.data.key);
 				var protocol_name = node.parent.data.title;
-				var name = restData.name;	
-				var identifier = restData.identifier;
-				var description = restData.description;
+				var name = feature.name;
+				var identifier = feature.identifier;
+				var description = getDescription(feature).en;
 				var row = $('<tr />').attr('id', node.data.key + "_row");
 				$('<td />').text(typeof protocol_name !== 'undefined' ? protocol_name : "").appendTo(row);
 				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
@@ -812,7 +812,7 @@
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			var uri = ns.getSelectedDataSet().href;
 			ns.selectDataSet(uri.substring(uri.lastIndexOf('/') + 1)); // reset catalogue
-			$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			molgenis.createAlert([{'message':msg}], 'success');
 			search = false;
 			updatedNodes = null;
 			treePrevState = null;

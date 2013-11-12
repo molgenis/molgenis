@@ -4,6 +4,7 @@ import static org.molgenis.omx.order.OrderStudyDataController.URI;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,11 +13,14 @@ import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.ui.util.ErrorMessageResponse;
+import org.molgenis.ui.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +42,8 @@ import com.google.common.collect.Lists;
 @RequestMapping(URI)
 public class OrderStudyDataController extends MolgenisPluginController
 {
+	private static final Logger logger = Logger.getLogger(OrderStudyDataController.class);
+
 	public static final String URI = "/plugin/study";
 
 	@Autowired
@@ -161,10 +167,39 @@ public class OrderStudyDataController extends MolgenisPluginController
 		}
 	}
 
-	// TODO default exception handler?
 	@ExceptionHandler(DatabaseException.class)
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	public void handleDatabaseException(DatabaseException e)
+	@ResponseBody
+	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
 	{
+		logger.error("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(IOException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleIOException(IOException e)
+	{
+		logger.error("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(MessagingException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleMessagingException(MessagingException e)
+	{
+		logger.error("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		logger.error("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }
