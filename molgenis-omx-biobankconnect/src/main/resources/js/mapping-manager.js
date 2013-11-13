@@ -724,8 +724,8 @@
 				});
 			}
 			
-//			var soretedMappedFeatures = sortByScoreAndLength(mappedFeatures);
-			var soretedMappedFeatures = mappedFeatures;
+			var soretedMappedFeatures = sortByScoreAndLength(mappedFeatures);
+//			var soretedMappedFeatures = mappedFeatures;
 			$.each(soretedMappedFeatures, function(index, eachMapping){
 				var mappedFeatureId = eachMapping.mappedFeatureId;
 				var score = eachMapping.score;

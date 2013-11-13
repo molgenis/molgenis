@@ -4,22 +4,23 @@ import static org.molgenis.omx.biobankconnect.evaluation.EvaluationController.UR
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
@@ -108,7 +109,7 @@ public class EvaluationController extends MolgenisPluginController
 	Part file, HttpServletResponse response, Model model) throws IOException, DatabaseException
 	{
 		ExcelReader reader = null;
-		ExcelWriter excelWriter = null;
+		ExcelWriter excelWriterRanks = null;
 
 		try
 		{
@@ -117,14 +118,18 @@ public class EvaluationController extends MolgenisPluginController
 				File uploadFile = fileStore.store(file.getInputStream(), file.getName());
 				response.setContentType("application/vnd.ms-excel");
 				response.addHeader("Content-Disposition", "attachment; filename="
-						+ getCsvFileName(file.getName() + "-ranks.xls"));
-				excelWriter = new ExcelWriter(response.getOutputStream());
-				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-				TupleWriter sheetWriter = excelWriter.createTupleWriter("result");
+						+ getCsvFileName(file.getName() + "-ranks"));
+				excelWriterRanks = new ExcelWriter(response.getOutputStream());
+				excelWriterRanks.addCellProcessor(new LowerCaseProcessor(true, false));
+
+				TupleWriter sheetWriterRank = excelWriterRanks.createTupleWriter("result");
+				TupleWriter sheetWriterRankStatistics = excelWriterRanks.createTupleWriter("rank statistics");
+				TupleWriter sheetWriteBiobankRanks = excelWriterRanks.createTupleWriter("biobank average ranks");
+				TupleWriter sheetWriteSpssInput = excelWriterRanks.createTupleWriter("spss ranks");
 
 				reader = new ExcelReader(uploadFile);
-				ExcelSheetReader sheet = reader.getSheet(0);
-				Iterator<String> columnIterator = sheet.colNamesIterator();
+				ExcelSheetReader inputSheet = reader.getSheet(0);
+				Iterator<String> columnIterator = inputSheet.colNamesIterator();
 
 				List<String> biobankNames = new ArrayList<String>();
 				while (columnIterator.hasNext())
@@ -139,7 +144,7 @@ public class EvaluationController extends MolgenisPluginController
 						.equalsIgnoreCase(firstColumn))
 				{
 					Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
-					Iterator<Tuple> iterator = sheet.iterator();
+					Iterator<Tuple> iterator = inputSheet.iterator();
 					while (iterator.hasNext())
 					{
 						Tuple row = iterator.next();
@@ -175,7 +180,10 @@ public class EvaluationController extends MolgenisPluginController
 					List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.NAME, Operator.IN,
 							lowerCaseBiobankNames));
 					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
-					sheetWriter.writeColNames(lowerCaseBiobankNames);
+					sheetWriterRank.writeColNames(lowerCaseBiobankNames);
+
+					Map<String, Map<String, List<Integer>>> rankCollection = new HashMap<String, Map<String, List<Integer>>>();
+					List<Object> allRanks = new ArrayList<Object>();
 
 					for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
 					{
@@ -185,24 +193,28 @@ public class EvaluationController extends MolgenisPluginController
 						Map<String, List<String>> mappingDetail = entry.getValue();
 						List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(
 								ObservableFeature.NAME, Operator.EQUALS, variableName));
+						String description = features.get(0).getDescription();
+						if (!rankCollection.containsKey(description)) rankCollection.put(description,
+								new HashMap<String, List<Integer>>());
+
 						if (!features.isEmpty())
 						{
 							KeyValueTuple row = new KeyValueTuple();
-							row.set(firstColumn.toLowerCase(), variableName);
+							row.set(firstColumn.toLowerCase(), description);
 
 							for (DataSet dataSet : dataSets)
 							{
+								List<Integer> ranksBiobank = new ArrayList<Integer>();
 								if (mappingDetail.containsKey(dataSet.getName().toLowerCase()))
 								{
-									StringBuilder outputRank = new StringBuilder();
-									List<String> mappedFeatureIds = findFeaturesFromIndex(
+									Map<String, Hit> mappedFeatureIds = findFeaturesFromIndex("name",
 											mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
 
 									String mappingDataSetIdentifier = selectedDataSetId + "-" + dataSet.getId();
 									List<QueryRule> queryRules = new ArrayList<QueryRule>();
 									queryRules.add(new QueryRule("store_mapping_feature", Operator.EQUALS, features
 											.get(0).getId()));
-									queryRules.add(new QueryRule(Operator.LIMIT, 30));
+									queryRules.add(new QueryRule(Operator.LIMIT, 50));
 									queryRules.add(new QueryRule(Operator.SORTDESC, "store_mapping_score"));
 									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier,
 											queryRules, null);
@@ -210,39 +222,122 @@ public class EvaluationController extends MolgenisPluginController
 
 									if (mappedFeatureIds.size() == 0)
 									{
-										row.set(dataSet.getName().toLowerCase(), "Missing");
+										row.set(dataSet.getName().toLowerCase(), "N/A2");
 										continue;
 									}
 
-									double previousScore = -1;
+									List<String> ids = new ArrayList<String>();
+									for (Hit hit : result.getSearchHits())
+									{
+										Map<String, Object> columnValueMap = hit.getColumnValueMap();
+										ids.add(columnValueMap.get("store_mapping_mapped_feature").toString());
+									}
+									Map<String, Hit> featureInfos = findFeaturesFromIndex("id", ids, dataSet.getId());
+
+									String previousDescription = null;
 									int rank = 0;
 									for (Hit hit : result.getSearchHits())
 									{
 										Map<String, Object> columnValueMap = hit.getColumnValueMap();
 										String mappedFeatureId = columnValueMap.get("store_mapping_mapped_feature")
 												.toString();
-										String score = columnValueMap.get("store_mapping_score").toString();
+										String mappedFeatureDescription = featureInfos.get(mappedFeatureId)
+												.getColumnValueMap().get("description").toString()
+												.replaceAll("[^0-9a-zA-Z ]", " ");
 
-										if (previousScore != Double.parseDouble(score))
+										rank++;
+										if (previousDescription != null
+												&& previousDescription.equalsIgnoreCase(mappedFeatureDescription)) rank--;
+
+										if (mappedFeatureIds.containsKey(mappedFeatureId))
 										{
-											previousScore = Double.parseDouble(score);
-											rank++;
-										}
-										if (mappedFeatureIds.contains(mappedFeatureId))
-										{
-											// foundMappings = true;
-											if (outputRank.length() != 0) outputRank.append(',');
-											outputRank.append(rank);
+											ranksBiobank.add(rank);
+											allRanks.add(rank);
 											mappedFeatureIds.remove(mappedFeatureId);
 										}
+										previousDescription = mappedFeatureDescription;
 									}
-									if (mappedFeatureIds.size() == 0) row.set(dataSet.getName().toLowerCase(),
-											outputRank.toString());
-									else row.set(dataSet.getName().toLowerCase(), "Not mapped");
+									if (mappedFeatureIds.size() == 0)
+									{
+										String output = StringUtils.join(ranksBiobank, ',');
+										if (ranksBiobank.size() > 1)
+										{
+											output += " (" + averageRank(ranksBiobank) + ")";
+										}
+										row.set(dataSet.getName().toLowerCase(), output);
+									}
+									else
+									{
+										for (int i = 0; i < mappedFeatureIds.size(); i++)
+											allRanks.add("Not mapped");
+										row.set(dataSet.getName().toLowerCase(), "Not mapped");
+										ranksBiobank.clear();
+									}
 								}
-								else row.set(dataSet.getName().toLowerCase(), "");
+								else row.set(dataSet.getName().toLowerCase(), "N/A1");
+
+								rankCollection.get(description).put(dataSet.getName().toLowerCase(), ranksBiobank);
 							}
-							sheetWriter.write(row);
+							sheetWriterRank.write(row);
+						}
+					}
+
+					Map<String, List<Integer>> rankCollectionPerBiobank = new HashMap<String, List<Integer>>();
+					{
+						sheetWriterRankStatistics.writeColNames(Arrays.asList(firstColumn.toLowerCase(),
+								"average rank", "round-up rank", "median rank", "minium", "maximum"));
+						for (Entry<String, Map<String, List<Integer>>> entry : rankCollection.entrySet())
+						{
+							String variableName = entry.getKey();
+							KeyValueTuple row = new KeyValueTuple();
+							row.set(firstColumn.toLowerCase(), variableName);
+							List<Integer> rankAllBiobanks = new ArrayList<Integer>();
+							for (Entry<String, List<Integer>> rankBiobanks : entry.getValue().entrySet())
+							{
+								if (!rankCollectionPerBiobank.containsKey(rankBiobanks.getKey())) rankCollectionPerBiobank
+										.put(rankBiobanks.getKey(), new ArrayList<Integer>());
+								rankCollectionPerBiobank.get(rankBiobanks.getKey()).addAll(rankBiobanks.getValue());
+								rankAllBiobanks.addAll(rankBiobanks.getValue());
+							}
+
+							row.set("average rank", averageRank(rankAllBiobanks));
+							row.set("round-up rank", Math.ceil(averageRank(rankAllBiobanks)));
+							Collections.sort(rankAllBiobanks);
+							row.set("minium", rankAllBiobanks.get(0));
+							row.set("maximum", rankAllBiobanks.get(rankAllBiobanks.size() - 1));
+							double medianRank = 0;
+							if (rankAllBiobanks.size() % 2 == 0)
+							{
+								medianRank = (double) (rankAllBiobanks.get(rankAllBiobanks.size() / 2 - 1) + rankAllBiobanks
+										.get(rankAllBiobanks.size() / 2)) / 2;
+							}
+							else
+							{
+								medianRank = (double) rankAllBiobanks.get(rankAllBiobanks.size() / 2);
+							}
+							row.set("median rank", medianRank);
+							sheetWriterRankStatistics.write(row);
+						}
+					}
+
+					{
+						lowerCaseBiobankNames.remove(0);
+						sheetWriteBiobankRanks.writeColNames(lowerCaseBiobankNames);
+						KeyValueTuple tuple = new KeyValueTuple();
+						for (Entry<String, List<Integer>> entry : rankCollectionPerBiobank.entrySet())
+						{
+							tuple.set(entry.getKey(), averageRank(entry.getValue()));
+						}
+						sheetWriteBiobankRanks.write(tuple);
+					}
+
+					{
+						sheetWriteSpssInput.writeColNames(Arrays.asList("rank"));
+						for (Object rank : allRanks)
+						{
+							KeyValueTuple tuple = new KeyValueTuple();
+							tuple.set("rank", rank);
+							sheetWriteSpssInput.write(tuple);
 						}
 					}
 				}
@@ -255,32 +350,43 @@ public class EvaluationController extends MolgenisPluginController
 		finally
 		{
 			if (reader != null) reader.close();
-			if (excelWriter != null) IOUtils.closeQuietly(excelWriter);
+			if (excelWriterRanks != null) IOUtils.closeQuietly(excelWriterRanks);
 		}
 	}
 
-	private List<String> findFeaturesFromIndex(List<String> featureNames, Integer dataSetId)
+	private double averageRank(List<Integer> ranks)
+	{
+		double result = 0;
+		for (Integer rank : ranks)
+		{
+			result = result + rank;
+		}
+		DecimalFormat df = new DecimalFormat("#0.0");
+		return ranks.size() == 0 ? -1 : Double.parseDouble(df.format(result / ranks.size()));
+	}
+
+	private Map<String, Hit> findFeaturesFromIndex(String field, List<String> featureNames, Integer dataSetId)
 	{
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		for (String featureName : featureNames)
 		{
 			if (queryRules.size() > 0) queryRules.add(new QueryRule(Operator.OR));
-			queryRules.add(new QueryRule("name", Operator.EQUALS, featureName));
+			queryRules.add(new QueryRule(field, Operator.EQUALS, featureName));
 		}
 		queryRules.add(new QueryRule(Operator.LIMIT, 10000));
 		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, queryRules, null));
 
-		Set<String> featureIds = new HashSet<String>();
+		Map<String, Hit> featureIds = new HashMap<String, Hit>();
 		for (Hit hit : result.getSearchHits())
 		{
-			featureIds.add(hit.getColumnValueMap().get("id").toString());
+			featureIds.put(hit.getColumnValueMap().get("id").toString(), hit);
 		}
-		return new ArrayList<String>(featureIds);
+		return featureIds;
 	}
 
 	private String getCsvFileName(String dataSetName)
 	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return dataSetName + "_" + dateFormat.format(new Date()) + ".xls";
 	}
 }
