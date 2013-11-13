@@ -26,14 +26,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class AccountService
 {
-	private static Logger logger = Logger.getLogger(AccountService.class);
+	private static final Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
 	public static final String ALL_USER_GROUP = "All Users";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
-	
+
 	@Autowired
 	private Database unsecuredDatabase;
 
@@ -68,18 +68,18 @@ public class AccountService
 				throw new RuntimeException("unknown activation mode: " + getActivationMode());
 		}
 
-		
 		// create user
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
 		logger.debug("created user " + molgenisUser.getUsername());
 		unsecuredDatabase.add(molgenisUser);
 
-		//add user to group
+		// add user to group
 		Query<MolgenisGroup> groupQuery = unsecuredDatabase.query(MolgenisGroup.class);
 		groupQuery.equals(MolgenisGroup.NAME, ALL_USER_GROUP);
 		List<MolgenisGroup> allUserGroups = groupQuery.find();
-		if(allUserGroups.size() == 1){
+		if (allUserGroups.size() == 1)
+		{
 			MolgenisGroup group = allUserGroups.get(0);
 			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
 			molgenisGroupMember.setMolgenisGroup(group.getId());

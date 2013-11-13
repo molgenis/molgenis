@@ -18,10 +18,9 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
-import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ShoppingCart;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -70,8 +69,7 @@ public class OrderStudyDataController extends MolgenisPluginController
 	public void orderData(@RequestParam String dataSetIdentifier, @RequestParam String name, @RequestParam Part file)
 			throws DatabaseException, IOException, MessagingException
 	{
-		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart(),
-				SecurityUtils.getCurrentUsername());
+		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart());
 		shoppingCart.emptyCart();
 	}
 
@@ -79,8 +77,7 @@ public class OrderStudyDataController extends MolgenisPluginController
 	@ResponseBody
 	public OrdersResponse getOrders() throws DatabaseException
 	{
-		Iterable<OrderResponse> ordersIterable = Iterables.transform(
-				orderStudyDataService.getOrders(SecurityUtils.getCurrentUsername()),
+		Iterable<OrderResponse> ordersIterable = Iterables.transform(orderStudyDataService.getOrders(),
 				new Function<StudyDataRequest, OrderResponse>()
 				{
 					@Override
