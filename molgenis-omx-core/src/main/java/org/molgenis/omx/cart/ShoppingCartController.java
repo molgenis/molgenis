@@ -1,5 +1,6 @@
 package org.molgenis.omx.cart;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -7,13 +8,17 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,6 +34,8 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping("/cart")
 public class ShoppingCartController
 {
+	private static final Logger logger = Logger.getLogger(ShoppingCartController.class);
+
 	@Autowired
 	private ShoppingCart shoppingCart;
 
@@ -112,6 +119,15 @@ public class ShoppingCartController
 						return featureRequest != null ? featureRequest.getFeature() : null;
 					}
 				}));
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
+	{
+		logger.error("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
 	private static class FeaturesRequest
