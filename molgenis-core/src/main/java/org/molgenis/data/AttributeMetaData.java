@@ -33,11 +33,6 @@ public interface AttributeMetaData
 	boolean isReadonly();
 
 	/**
-	 * Whether attribute must be unique
-	 */
-	boolean isUnique();
-
-	/**
 	 * Default value
 	 */
 	Object getDefaultValue();

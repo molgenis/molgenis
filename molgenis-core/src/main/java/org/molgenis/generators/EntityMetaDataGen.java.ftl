@@ -14,15 +14,12 @@ package ${package};
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.EntityMetaDataCache;
 
 public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
-	public  ${JavaName(entity)}MetaData()
+	public ${JavaName(entity)}MetaData()
 	{
 		super("${JavaName(entity)}");
-		EntityMetaDataCache.add(this);
-		
 		setLabel("${entity.label}");
 		
 <#list entity.allFields as f>
@@ -39,16 +36,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		<#if f.description??>
 		${name(f)}.setDescription("${f.description!}");
 		</#if>
-		<#if entity.primaryKey.name == f.name >
-		${name(f)}.setIdAttribute(true);
-		${name(f)}.setUnique(true);
-		<#else>
-			<#list entity.keys as k>
-				<#if k.fields?size == 1 && k.fields?first.name == f.name>
-		${name(f)}.setUnique(true);
-				</#if>
-			</#list>
-		</#if>
+		${name(f)}.setIdAttribute(${(entity.primaryKey.name == f.name)?string('true', 'false')});
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
 		<#if f.isXRef()>
