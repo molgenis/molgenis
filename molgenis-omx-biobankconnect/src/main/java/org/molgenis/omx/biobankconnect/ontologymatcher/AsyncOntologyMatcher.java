@@ -152,20 +152,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					{
 						boostedOntologyTermUris.add(ontolgoyTermUri);
 					}
-					// List<String> boostedDocuments =
-					// Arrays.asList(columnValueMap.get(FIELD_BOOST_ONTOLOGYTERM)
-					// .toString().split(","));
-					// for (String documentId : boostedDocuments)
-					// {
-					// Hit document = searchService.getDocumentById(documentId);
-					// Map<String, Object> documentData =
-					// document.getColumnValueMap();
-					// if (documentData.containsKey(ONTOLOGY_TERM_IRI))
-					// {
-					// boostedOntologyTermUris.add(documentData.get(ONTOLOGY_TERM_IRI).toString());
-					// }
-					// }
-
 					String description = feature.getDescription() == null || feature.getDescription().isEmpty() ? feature
 							.getName() : feature.getDescription();
 					description = description.replaceAll("[^a-zA-Z0-9 ]", " ");
@@ -174,9 +160,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					List<QueryRule> rules = new ArrayList<QueryRule>();
 					if (definitions != null && definitions.size() > 0)
 					{
-						// Map<String, OntologyTermContainer>
-						// ontologyTermContainers = collectOntologyTermInfo(
-						// definitions, boostedOntologyTermUris);
 						Map<String, OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(
 								definitions, boostedOntologyTermUris);
 						rules.addAll(makeQueryForOntologyTerms(createQueryRules(description, ontologyTermContainers)));
@@ -494,8 +477,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		{
 			if (rules.size() != 0) rules.add(new QueryRule(Operator.OR));
 			rules.add(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, ot.getTermAccession()));
-			// validOntologyTerm.put(ot.getTermAccession(),
-			// ot.getOntology().getOntologyURI());
 			validOntologyTerm.put(ot.getTermAccession(), ot.getName());
 		}
 		rules.add(new QueryRule(Operator.LIMIT, 10000));
@@ -511,8 +492,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			String ontologyTermUri = columnValueMap.get(ONTOLOGY_TERM_IRI).toString();
 			String ontologyTermName = columnValueMap.get(ONTOLOGY_LABEL) + ":"
 					+ columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString();
-			// Boolean boost =
-			// boostedDocuments.contains(hit.getId().toString());
 			Boolean boost = boostedOntologyTermUris.contains(ontologyTermUri);
 
 			if (validOntologyTerm.containsKey(ontologyTermUri)
@@ -632,21 +611,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						{
 							if (finalIndexPosition == -1) finalIndexPosition = locateTermInDescription(uniqueTokens,
 									ontologyTermSynonym);
-							// if
-							// (ontologyTermContainer.getSelectedOntologyTerms().contains(hit.getId()))
-							// {
-							// selectedOntologyTerms.add(ontologyTermSynonym);
-							// StringBuilder boostedSynonym = new
-							// StringBuilder();
-							// for (String eachToken :
-							// ontologyTermSynonym.split(" +"))
-							// {
-							// if (eachToken.length() != 0)
-							// boostedSynonym.append(' ');
-							// boostedSynonym.append(eachToken).append('^').append(1.5);
-							// }
-							// ontologyTermSynonym = boostedSynonym.toString();
-							// }
 							if (!ontologyTermSynonym.toString().equals("")) boostTermContainer.getTerms().add(
 									ontologyTermSynonym);
 						}
@@ -658,9 +622,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							{
 								int levelDown = nodePath.split("\\.").length - parentNodeLevel;
 								double boostedNumber = Math.pow(0.5, levelDown);
-								// if (boost) boostedNumber = boostedNumber *
-								// 10;
-
 								if (finalIndexPosition == -1) finalIndexPosition = locateTermInDescription(
 										uniqueTokens, ontologyTermSynonym);
 
@@ -687,23 +648,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		if (!position.containsKey(-2)) position.put(-2, new ArrayList<BoostTermContainer>());
 		BoostTermContainer descriptionBoostTermContainer = new BoostTermContainer(null, new LinkedHashSet<String>(),
 				false);
-		// for (String ontologyTerm : selectedOntologyTerms)
-		// {
-		// List<String> stemmedTokens =
-		// stemMembers(Arrays.asList(ontologyTerm.split(" +")));
-		// for (String token : uniqueTokens)
-		// {
-		// if (stemmedTokens.contains(token) && !token.contains("^"))
-		// {
-		// int index = stemmedTokens.indexOf(token);
-		// uniqueTokens.remove(index);
-		// uniqueTokens.add(index, token + "^2.0");
-		// descriptionBoostTermContainer.setBoost(true);
-		// }
-		// }
-		// }
-		// descriptionBoostTermContainer.getTerms().add(StringUtils.join(uniqueTokens,
-		// ' '));
 		descriptionBoostTermContainer.getTerms().add(removeStopWords(description));
 		position.get(-2).add(descriptionBoostTermContainer);
 
