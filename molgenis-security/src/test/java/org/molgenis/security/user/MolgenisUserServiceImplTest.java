@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -27,6 +27,8 @@ import org.testng.annotations.Test;
 { Config.class })
 public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTests
 {
+	private static Authentication AUTHENTICATION_PREVIOUS;
+
 	@Configuration
 	static class Config
 	{
@@ -58,12 +60,17 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		SecurityContext context = mock(SecurityContext.class);
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("username").getMock();
 		Authentication authentication = when(mock(Authentication.class).getPrincipal()).thenReturn(userDetails)
 				.getMock();
-		when(context.getAuthentication()).thenReturn(authentication);
-		SecurityContextHolder.setContext(context);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
 	@SuppressWarnings("unchecked")
