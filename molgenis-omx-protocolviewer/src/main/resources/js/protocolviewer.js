@@ -618,6 +618,9 @@
 					categories.push($(this)[0]);
 				});
 				data["categories"] = categories;
+			},
+			error: function (xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		callback(data);
@@ -749,7 +752,13 @@
 
 	function updateShoppingCart(features) {
 		if (features === null) {
-			$.post('/cart/empty');
+			$.ajax({
+				type : 'POST',
+				url : '/cart/empty',
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
+			});
 		} else {
 			$.ajax({
 				type : 'POST',
@@ -757,7 +766,10 @@
 				data : JSON.stringify({
 					'features' : features
 					}),
-				contentType : 'application/json'
+				contentType : 'application/json',
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
 			});
 		}
 	}
