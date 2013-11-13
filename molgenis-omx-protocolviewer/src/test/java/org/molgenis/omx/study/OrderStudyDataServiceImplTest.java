@@ -28,6 +28,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.omx.order.OrderStudyDataServiceImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.studymanager.StudyManagerService;
@@ -42,7 +43,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration
-public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
+public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Configuration
 	static class Config
@@ -50,7 +51,7 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public OrderStudyDataService orderStudyDataService()
 		{
-			return new OrderStudyDataService();
+			return new OrderStudyDataServiceImpl();
 		}
 
 		@SuppressWarnings("unchecked")
@@ -147,6 +148,9 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 	private StudyManagerService studyManagerService;
 
 	@Autowired
+	private MolgenisUserService molgenisUserService;
+
+	@Autowired
 	private Database database;
 
 	@Autowired
@@ -164,6 +168,7 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		when(queryUser.eq(MolgenisUser.USERNAME, "non-existing-user")).thenReturn(queryUser);
 		when(queryUser1.find()).thenReturn(Arrays.<MolgenisUser> asList(user1));
 		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
+		when(molgenisUserService.getCurrentUser()).thenReturn(user1);
 	}
 
 	@Test
@@ -184,7 +189,7 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 		when(requestForm.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]
 		{ 0, 1, 2 }));
 		orderStudyDataService.orderStudyData("study #1", requestForm, "1",
-				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), "user1");
+				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 
 		// TODO improve test
 		verify(database).add(any(StudyDataRequest.class));
@@ -195,34 +200,33 @@ public class OrderStudyDataServiceTest extends AbstractTestNGSpringContextTests
 	public void orderStudyData_noStudyName() throws DatabaseException, MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData(null, mock(Part.class), "1",
-				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), "user1");
+				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noRequestForm() throws DatabaseException, MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData("study #1", null, "1",
-				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)), "user1");
+				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noFeatures() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", null, "user1");
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_emptyFeatures() throws DatabaseException, MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", Collections.<Integer> emptyList(),
-				"user1");
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", Collections.<Integer> emptyList());
 	}
 
 	@Test(expectedExceptions = DatabaseException.class)
 	public void orderStudyData_invalidFeatures() throws DatabaseException, MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1",
-				Arrays.asList(Integer.valueOf(-2), Integer.valueOf(-1)), "user1");
+				Arrays.asList(Integer.valueOf(-2), Integer.valueOf(-1)));
 	}
 
 	@Test
