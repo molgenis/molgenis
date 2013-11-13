@@ -1,0 +1,25 @@
+<#include "molgenis-header.ftl">
+<#include "molgenis-footer.ftl">
+<#assign css=[]>
+<#assign js=["tinymce/tinymce.min.js", "staticcontent.edit.js"]>
+<@header css js/>
+<div class="row-fluid">
+	<div class="span12">
+		<form id="contentForm" method="post">
+		<div class="row-fluid">
+		   <div class="control-group">
+				<div class="controls">
+					<div class="btn-group">
+						<a id="cancelBtn" href="${cancelHref}" class="btn">Cancel</a>
+						<button id="submitBtn" type="submit" class="btn">Save</a>
+					</div>
+				</div>
+			</div>	
+		</div>
+		<div class="row-fluid">
+		    <textarea id="elm1" name="content" form="contentForm" rows="15">${content} <#if succes?has_content>${succes}</#if></textarea>
+		</div>    
+		</form>
+	</div>
+</div>
+<@footer/>

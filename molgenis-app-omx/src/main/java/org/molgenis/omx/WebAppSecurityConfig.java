@@ -36,15 +36,24 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// main menu
 				.antMatchers("/menu/main")
 				.hasAnyAuthority(
-						defaultPluginAuthorities("home", "content", "protocolviewer", "dataexplorer", "entityexplorer",
+						defaultPluginAuthorities("home", "background", "news", "references", "contact", "protocolviewer", "dataexplorer", "entityexplorer",
 								"workflowdataentry", "importwizard", "useraccount"))
 
 				 //main menu plugins
-				.antMatchers("/menu/main/home/*", "/plugin/home/*")
+				.antMatchers("/menu/main/home/**", "/plugin/home/**")
 				.hasAnyAuthority(defaultPluginAuthorities("home"))
 				
-				.antMatchers("/menu/main/content/*", "/plugin/content/*")
-				.hasAnyAuthority(defaultPluginAuthorities("content"))
+				.antMatchers("/menu/main/news/**", "/plugin/news/**")
+				.hasAnyAuthority(defaultPluginAuthorities("news"))
+				
+				.antMatchers("/menu/main/background/**", "/plugin/background/**")
+				.hasAnyAuthority(defaultPluginAuthorities("background"))
+				
+				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
+				.hasAnyAuthority(defaultPluginAuthorities("contact"))
+				
+				.antMatchers("/menu/main/references/**", "/plugin/references/**")
+				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
 				.antMatchers("/menu/main/protocolviewer/**", "/plugin/protocolviewer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
@@ -227,7 +236,10 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_ENTITYEXPLORER > ROLE_PLUGIN_READ_ENTITYEXPLORER").append(' ');
 		// TODO add form plugins
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_HOME > ROLE_PLUGIN_READ_HOME").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CONTENT > ROLE_PLUGIN_READ_CONTENT").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_NEWS > ROLE_PLUGIN_READ_NEWS").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CONTACT > ROLE_PLUGIN_READ_CONTACT").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_BACKGROUND > ROLE_PLUGIN_READ_BACKGROUND").append(' ');
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_REFERENCES > ROLE_PLUGIN_READ_REFERENCES").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_IMPORTWIZARD > ROLE_PLUGIN_READ_IMPORTWIZARD").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_PERMISSIONMANAGER > ROLE_PLUGIN_READ_PERMISSIONMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_USERMANAGER > ROLE_PLUGIN_READ_USERMANAGER").append(' ');
