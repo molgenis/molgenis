@@ -21,7 +21,6 @@
 	};
 	
 	ns.MappingManager.prototype.changeDataSet = function(selectedDataSet, dataSets){
-		ns.MappingManager.prototype.initAccordion();
 		biobankDataSets = dataSets;
 		if(selectedDataSet !== ''){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
@@ -126,26 +125,27 @@
 		}
 		
 		function createMappingFromIndex(dataSets, searchResponse, callback){
-			var displayFeatures = searchResponse.searchHits;
-			var queryRules = [];
 			var allFeatureCollection = [];
 			var count = 0;
 			var mappingPerStudy = {};
 			var cachedFeatures = {};
 			
+			var displayFeatures = searchResponse.searchHits;
+			var queryRules = [];
 			$.each(displayFeatures, function(index, hit){
 				var hitInfo = hit.columnValueMap;
+				if(queryRules.length > 0){
+					queryRules.push({
+						operator : 'OR'
+					});
+				}
 				queryRules.push({
 					field : storeMappingFeature,
 					operator : 'EQUALS',
-					value : '' + hitInfo.id
-				});
-				queryRules.push({
-					operator : 'OR'
+					value : hitInfo.id.toString()
 				});
 				allFeatureCollection.push(hitInfo.id);
 			});
-			queryRules.pop();
 			queryRules.push({
 				operator : 'LIMIT',
 				value : 100000 
@@ -160,69 +160,18 @@
 				searchApi.search(searchRequest, function(searchResponse) {
 					var searchHits = searchResponse.searchHits;	
 					if(searchHits.length > 0){
-						var confirmedMappingIds = [];
-						var observationIds = [];
-						
 						$.each(searchHits, function(index, hit){
 							var mapping = hit.columnValueMap;
-							var observationSet = mapping['observation_set'];
-							observationIds.push(observationSet);
-						});
-						
-						var valuesObject = restApi.get('/api/v1/observedvalue', ['observationSet',  'value'], {
-							q : [{
-								field : 'feature_identifier',
-								operator : 'EQUALS',
-								value : storeMappingConfirmMapping
-							},{
-								field : 'observationSet',
-								operator : 'IN',
-								value : observationIds
-							}],
-							num : 500,
-						});
-						
-						var mappingConfirmMap = {};
-						var boolValueIds = [];
-						if(valuesObject !== undefined && valuesObject.items.length > 0){
-							$.each(valuesObject.items, function(index, ov){
-								boolValueIds.push(ns.hrefToId(ov.value.href));
-							});
-							restApi.get('/api/v1/boolvalue', null, {
-								q : [{
-									field : 'id',
-									operator : 'IN',
-									value : boolValueIds
-								}],
-								num : 500
-							});
-							
-							$.each(valuesObject.items, function(index, ov){
-								mappingConfirmMap[ns.hrefToId(ov.observationSet.href)] = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(ov.value.href));
-							});
-						}
-						
-						$.each(searchHits, function(index, hit){
-							var mapping = hit['columnValueMap'];
-							var documentId = hit['id'];
 							var featureId = mapping[storeMappingFeature];
 							var storeMappedFeatureId = mapping[storeMappingMappedFeature];
-							var score = mapping[scoreMappingScore];
-							var absoluteScore = mapping[scoreMappingAbsoluteScore] === undefined ? null : mapping[scoreMappingAbsoluteScore];
-							var observationSet = mapping['observation_set'];
-							var confirmed = false;
 							
-							if(mappingConfirmMap[observationSet])
-								confirmed = mappingConfirmMap[observationSet].value;
-							if(!tuple[featureId])
-								tuple[featureId] = [];
+							if(!tuple[featureId]) tuple[featureId] = [];
 							tuple[featureId].push({
-								'score' : score,
-								'absoluteScore' : absoluteScore,
-								'mappedFeatureId' : storeMappedFeatureId,
-								'confirmed' : confirmed,
-								'observationSet' : observationSet,
-								'documentId' : documentId
+								score : mapping[scoreMappingScore],
+								mappedFeatureId : storeMappedFeatureId,
+								confirmed : mapping[storeMappingConfirmMapping],
+								observationSet : mapping.observation_set,
+								documentId : hit.id
 							});
 							
 							if($.inArray(storeMappedFeatureId, allFeatureCollection) === -1) allFeatureCollection.push(storeMappedFeatureId);
@@ -295,7 +244,6 @@
 			});
 			
 			var tableBody = $('<tbody />');
-
 			$.each(displayFeatures, function(index, featureFromIndex){
 				var featureId = featureFromIndex.columnValueMap.id;
 				tableBody.append(createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures));
@@ -344,7 +292,6 @@
 					return false;
 				});
 			}
-			
 			return $('<thead />').append(headerRow).append(dataSetRow);
 		}	
 		
@@ -352,7 +299,7 @@
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
 			var description = '<strong>' + feature.name + '</strong> : ' + i18nDescription(feature).en;
-			var isPopOver = description.length < 100;
+			var isPopOver = description.length < 90;
 			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 90) + ' ...');
 			if(!isPopOver){
 				popover.addClass('show-popover');
@@ -362,11 +309,14 @@
 					placement : 'bottom'
 				});
 			}
-			$('<td />').addClass('add-border show-popover').append(popover).click(function(){
-				createAnnotationModal(feature);
-				$('body').data('clickedRow', row);
+			$('<td />').addClass('add-border show-popover').append(popover).appendTo(row).click(function(){
+				var row = $(this).parents('tr:eq(0)');
+				if(!$('body').data('clickedRow')) $('body').data('clickedRow', {});
+				var storedRowInfo = $('body').data('clickedRow');
+				storedRowInfo[featureId] = row;
 				$('body').data('table', row.parents('table:eq(0)'));
-			}).appendTo(row);
+				createAnnotationModal(feature);
+			});
 			
 			$.each(dataSets, function(index, dataSet){
 				var mappedDataSetId = dataSet.identifier.split('-')[1];
@@ -393,6 +343,10 @@
 						}
 					});
 					displayTerm = selectedMappings.length > 0 ? selectedMappings.join(' , ') : displayTerm;
+					var displayTermSpan = $('<span />').addClass('show-popover').append(displayTerm).click(function(){
+						editIcon.click();
+					});
+					
 					var removeIcon = $('<i />').addClass('icon-trash show-popover').css({
 						position : 'relative',
 						'float':'right'
@@ -431,18 +385,13 @@
 						});
 					});
 					
-					var editIcon = $('<i />');
-					if(confirmed === true){
-						editIcon.addClass('icon-ok show-popover');
-					}else{
-						editIcon.addClass('icon-pencil show-popover');
-					}
+					var editIcon = $('<i />').addClass('show-popover ' + (confirmed ? 'icon-ok' : 'icon-pencil'));
 					editIcon.css({
 						position : 'relative',
 						'float' : 'right'
 					}).click(function(){
 						standardModal.createModalCallback('Candidate mappings', function(modal){
-							createMappingTable(feature, mappedFeatures, restApi.get('/api/v1/dataset/' + mappedDataSetId), modal);
+							createMappingTable(feature, mappedFeatures, restApi.get('/api/v1/dataset/' + mappedDataSetId), modal, editIcon);
 							var table = row.parents('table:eq(0)');
 							modal.find('div.modal-body:eq(0)').css('max-height' , 300);
 							modal.css({
@@ -454,9 +403,7 @@
 							}).modal('show');
 						});
 					});
-					var displayTermSpan = $('<span />').addClass('show-popover').append(displayTerm).click(function(){
-						editIcon.click();
-					});
+					
 					$('<td />').addClass('add-border').append(displayTermSpan).append(removeIcon).append(editIcon).appendTo(row);
 				}else{
 					$('<td />').addClass('add-border').append('<i class="icon-ban-circle show-popover" title="Not available"></i>').appendTo(row);
@@ -562,6 +509,10 @@
 						contentType : 'application/json',
 						success : function(data, textStatus, request) {
 							modal.remove();
+							var storedRowInfo = $('body').data('clickedRow');
+							var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
+							var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
+							existingRow.find('td:gt(0)').empty().append(spinner).css('text-align', 'center');
 							checkProgressForRematch(feature);
 						},
 						error : function(request, textStatus, error){
@@ -583,41 +534,49 @@
 								checkProgressForRematch(feature);
 							}, 1000);
 						}else{
-							var existingRow = $('body').data('clickedRow');
-							var table = $('body').data('table');
-							var index = $.inArray(existingRow[0], table.find('tr'));
-							var searchRequest = {
-								'documentType' : 'protocolTree-' + ns.MappingManager.prototype.getSelectedDataSet(),
-								'queryRules' : [{
-									'field' : 'id',
-									'operator' : 'EQUALS',
-									'value' : ns.hrefToId(feature.href)
-								}]
-							}
-							searchApi.search(searchRequest, function(searchResponse){
-								var dataSetMapping = getDataSetsForMapping();
-								if(dataSetMapping.items.length > 0){
-									createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
-										var newMappings = tableBody.find('tr');
-										if(newMappings.length > 0){
-											if(index > 0){
-												var prevRow = table.find('tr:eq(' + --index + ')');
-												existingRow.remove();
-												prevRow.after(newMappings[0]);
-											}
-										}else{
-											existingRow.find('td').each(function(){
-												$(this).empty().append('<i class="icon-ban-circle show-popover" title="Not available"></i>');
-											});
-										}
-									});
-								}
-							});
+							setTimeout(function(){
+								replaceMappingInTable(feature);
+							}, 1500);
 						}
 					},
 					error : function(request, textStatus, error){
 						console.log(error);
 					} 
+				});
+			}
+			
+			function replaceMappingInTable(feature){
+				var searchRequest = {
+					'documentType' : 'protocolTree-' + ns.MappingManager.prototype.getSelectedDataSet(),
+					'queryRules' : [{
+						'field' : 'id',
+						'operator' : 'EQUALS',
+						'value' : ns.hrefToId(feature.href).toString()
+					}]
+				}
+				searchApi.search(searchRequest, function(searchResponse){
+					var storedRowInfo = $('body').data('clickedRow');
+					var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
+					var table = $('body').data('table');
+					var index = $.inArray(existingRow[0], table.find('tr'));
+					var dataSetMapping = getDataSetsForMapping();
+					if(dataSetMapping.items.length > 0){
+						createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
+							var newMappings = tableBody.find('tr');
+							if(newMappings.length > 0){
+								if(index > 0){
+									var prevRow = table.find('tr:eq(' + --index + ')');
+									existingRow.remove();
+									prevRow.after(newMappings[0]);
+								}
+							}else{
+								existingRow.find('td').each(function(){
+									$(this).empty().append('<i class="icon-ban-circle show-popover" title="Not available"></i>');
+								});
+							}
+						});
+					}
+					delete storedRowInfo[ns.hrefToId(feature.href)];
 				});
 			}
 			
@@ -696,7 +655,7 @@
 			}
 		}
 		
-		function createMappingTable(feature, mappedFeatures, mappedDataSet, modal){
+		function createMappingTable(feature, mappedFeatures, mappedDataSet, modal, clickedCell){
 			var selectedFeatures = [];
 			var tableDiv = $('<div />').addClass('span7').css('margin-right', -100);
 			$('<div />').append('<h4>' + mappedDataSet.name + '</h4>').appendTo(tableDiv);
@@ -704,11 +663,9 @@
 			var header = $('<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>');
 			mappingTable.append(header);
 			
-			var absoluteScores = [];
 			var scores = [];
 			$.each(mappedFeatures, function(index, eachMapping){
 				scores.push(eachMapping.score);
-				absoluteScores.push(eachMapping.absoluteScore);
 			});
 			var highScoresIndex = [];
 			if(scores.length > 2){
@@ -727,7 +684,6 @@
 			}
 			
 			var soretedMappedFeatures = sortByScoreAndLength(mappedFeatures);
-//			var soretedMappedFeatures = mappedFeatures;
 			$.each(soretedMappedFeatures, function(index, eachMapping){
 				var mappedFeatureId = eachMapping.mappedFeatureId;
 				var score = eachMapping.score;
@@ -745,8 +701,7 @@
 					row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 				}
 				if($.inArray(index, highScoresIndex) !== -1){
-					if(absoluteScores[index] >= 85) row.addClass('success');
-					else row.addClass('info');
+					row.addClass('info');
 				}else{
 					row.addClass('warning');
 				}
@@ -775,7 +730,7 @@
 			
 			var confirmButton = $('<button class="btn btn-primary">Confirm</button>');
 			confirmButton.click(function(){
-				updateMappingInfo(feature, mappingTable, mappedDataSet, ns.MappingManager.prototype.createMatrixForDataItems);
+				updateMappingInfo(feature, mappingTable, mappedDataSet, clickedCell);
 				standardModal.closeModal();
 			});
 			
@@ -818,27 +773,33 @@
 			return topTenOrder;
 		}
 		
-		function updateMappingInfo(feature, mappingTable, mappedDataSet, callback){
-			var ifShowMessage = false;
+		function updateMappingInfo(feature, mappingTable, mappedDataSet, clickedCell){
+			var displayedFeatures = [];
+			var confirmFeature = null;
 			mappingTable.find('input').each(function(index, checkBox){
 				var eachMapping = $(checkBox).data('eachMapping');
 				var changedValue = null;
+				if(checkBox.checked){
+					displayedFeatures.push(eachMapping.mappedFeature.name);
+				}
 				if(checkBox.checked && !eachMapping.confirmed){
 					changedValue = true;
-					ifShowMessage = true;
 				}
 				if(!checkBox.checked && eachMapping.confirmed){
 					changedValue = false;
-					ifShowMessage = true;
 				}
 				if(changedValue !== null){
-					var confirmFeature = restApi.get('/api/v1/observablefeature', null, {
-						q : [{
-							field : 'identifier',
-							operator : 'EQUALS',
-							value : storeMappingConfirmMapping
-						}]
-					});
+					
+					eachMapping.confirmed = changedValue;
+					if(confirmFeature === null){
+						confirmFeature = restApi.get('/api/v1/observablefeature', null, {
+							q : [{
+								field : 'identifier',
+								operator : 'EQUALS',
+								value : storeMappingConfirmMapping
+							}]
+						});
+					}
 					var observedValue = restApi.get('/api/v1/observedvalue', ['value'], {
 						q : [{
 							field : 'observationset',
@@ -853,25 +814,30 @@
 					var xrefValue = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(observedValue.items[0].value.href));
 					xrefValue.value = changedValue;
 					updateEntity(xrefValue.href, xrefValue);
-					
 					var updateRequest = {
 						'documentType' : selectedDataSet + '-' + ns.hrefToId(mappedDataSet.href),
 						'documentIds' : [eachMapping.documentId],
-						'updateScript' : storeMappingConfirmMapping + '=true',
+						'updateScript' : storeMappingConfirmMapping + '=' + changedValue,
 					};
 					$.ajax({
 						type : 'POST',
 						url : molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
-						contentType : 'application/json',
+						contentType : 'application/json'
 					});
 				}
-			});
-			if(ifShowMessage){
+				
 				showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedDataSet.name + '</strong> Biobank!');
-				callback();
-			}
+				if(displayedFeatures.length > 0){
+					clickedCell.siblings('span:eq(0)').empty().append(displayedFeatures.join(' , '));
+					clickedCell.removeClass('icon-pencil').addClass('icon-ok');
+				}else{
+					var firstMapping = mappingTable.find('input:eq(0)').data('eachMapping');
+					clickedCell.siblings('span:eq(0)').empty().append(firstMapping.mappedFeature.name);
+					clickedCell.removeClass('icon-ok').addClass('icon-pencil');
+				}
+			});
 		}
 		
 		function showMessage(alertClass, message){
@@ -891,127 +857,6 @@
 			}
 			return eval('(' + feature.description + ')');
 		}
-
-		function createMapping(dataSet){
-			var batchSize = 500;
-			var tuple = {};
-			var observationSets = restApi.get('/api/v1/observationset/', null, {
-				q : [{
-					field : 'partOfDataSet',
-					operator : 'EQUALS',
-					value : ns.hrefToId(dataSet.href)
-				}],
-				num : batchSize
-			});
-			var observationIds = [];
-			if(observationSets.items.length > 0){
-				var map = {};
-				
-				$.each(observationSets.items, function(index, observation){
-					observationIds.push(ns.hrefToId(observation.href));
-				});
-			}
-			var iteration = Math.ceil(observationSets.total / batchSize);
-			for(var i = 1; i < iteration; i++){
-				var query = {
-						q : [{
-							field : 'partOfDataSet',
-							operator : 'EQUALS',
-							value : ns.hrefToId(dataSet.href)
-						}],
-						num : batchSize,
-						start : i * batchSize
-				};
-				observationSets = restApi.get('/api/v1/observationset/', null, query);
-				$.each(observationSets.items, function(index, observation){
-					observationIds.push(ns.hrefToId(observation.href));
-				});
-			}
-			if(observationIds.length > 0){	
-				var observedValues = restApi.get('/api/v1/observedvalue/', ['feature', 'value', 'observationSet'], {
-					start : 0,
-					num : batchSize,
-					q : [{
-						field : 'observationset',
-						operator : 'IN',
-						value : observationIds
-					}],
-				});
-				preLoadValueEntities(observedValues.items, map);
-				iteration = Math.ceil(observedValues.total / batchSize);
-				for(var i = 1; i < iteration; i++){
-					var query = {
-							q : [ {
-								"field" : "observationset",
-								"operator" : "IN",
-								"value" : observationIds
-							} ],
-							num : batchSize,
-							start : i * batchSize
-					};
-					observedValues = restApi.get('/api/v1/observedvalue/', ['feature', 'value', 'observationSet'], query);
-					preLoadValueEntities(observedValues.items, map);
-				}
-				
-				$.each(map, function(key, value){
-					var dataItem = value[feature] === undefined ? null : value[feature];
-					var mappedDataItems = value[storeMappingMappedFeature] === undefined ? null : value[storeMappingMappedFeature];
-					var confirmMapping = value[storeMappingConfirmMapping] === undefined ? null : value[storeMappingConfirmMapping];
-					if(dataItem !== null && mappedDataItems !== null){
-						if(!tuple[ns.hrefToId(dataItem.value.href)])
-							tuple[ns.hrefToId(dataItem.value.href)] = [];
-						tuple[ns.hrefToId(dataItem.value.href)].push({
-							'mappedFeature' : mappedDataItems.value,
-							'confirmed' : confirmMapping.value,
-							'observationSetIdentifier' : key
-						});
-					}
-				});
-			}
-			
-			return tuple;
-		}
-		
-		function preLoadValueEntities(observedValues, map){
-			var valueType = {'xref':[], 'bool' : []};
-			$.each(observedValues, function(index, observedValue){
-				var featureIdentifier = observedValue.feature.identifier;
-				if(featureIdentifier === storeMappingFeature || featureIdentifier === storeMappingMappedFeature)
-					valueType.xref.push(ns.hrefToId(observedValue.value.href));
-				else if(featureIdentifier === storeMappingConfirmMapping)
-					valueType.bool.push(ns.hrefToId(observedValue.value.href));
-			});
-			restApi.get('/api/v1/xrefvalue/', ['value'], {
-				q : [{
-					field : 'id',
-					operator : 'IN',
-					value : valueType.xref
-				}],
-				num : 500
-			});
-			restApi.get('/api/v1/boolvalue/', ['value'], {
-				q : [{
-					field : 'id',
-					operator : 'IN',
-					value : valueType.bool
-				}],
-				num : 500
-			});
-			
-			$.each(observedValues, function(index, observedValue){
-				if(!map[observedValue.observationSet.href])
-					map[observedValue.observationSet.href] = {};
-				var data = map[observedValue.observationSet.href];
-				if(observedValue.feature.identifier === storeMappingFeature){
-					data[storeMappingFeature] = getDataValueId(observedValue.feature, ns.hrefToId(observedValue.value.href));
-				}else if(observedValue.feature.identifier === storeMappingMappedFeature){
-					data[storeMappingMappedFeature] = getDataValueId(observedValue.feature, ns.hrefToId(observedValue.value.href));
-				}else if(observedValue.feature.identifier === storeMappingConfirmMapping){
-					data[storeMappingConfirmMapping] = getDataValueId(observedValue.feature, ns.hrefToId(observedValue.value.href));
-				}
-				map[observedValue.observationSet.href] = data;
-			});
-		}
 		
 		function updateEntity(href, data){
 			$.ajax({
@@ -1021,7 +866,7 @@
 				cache: true,
 				data : JSON.stringify(data),
 				contentType : 'application/json',
-				async : true,
+				async : false,
 				success : function(data, textStatus, request) {
 					console.log(data);
 				},
@@ -1030,46 +875,6 @@
 				} 
 			});
 		}
-		
-		function getDataValueId(feature, valueId){
-			var prefix = '';
-			switch(feature.dataType){
-				case 'xref' : 
-					prefix = '/api/v1/xrefvalue/';
-					break;
-				case 'mref' : 
-					prefix = '/api/v1/mrefvalue/';
-					break;
-				case 'categorical' :
-					prefix = '/api/v1/categoricalvalue/';
-					break;
-				case 'bool' : 
-					prefix = '/api/v1/boolvalue/';
-					break;
-			}
-			var valueEntity = restApi.get(prefix + valueId);
-			return valueEntity;
-		}
-	};
-	
-	ns.MappingManager.prototype.initAccordion = function(){
-		$('#accordion-action-content').show();
-		$('#accordion-icon-meaning-content').hide();
-		$('.accordion ul li').removeClass('active');
-		$('.accordion ul li:eq(0)').addClass('active');
-		
-		$('#accordion-action-click').click(function(){
-			$('.accordion ul li').removeClass('active');
-			$(this).addClass('active');
-			$('#accordion-icon-meaning-content').hide();
-			$('#accordion-action-content').show();
-		});
-		$('#accordion-icon-meaning-click').click(function(){
-			$('.accordion ul li').removeClass('active');
-			$(this).addClass('active');
-			$('#accordion-icon-meaning-content').show();
-			$('#accordion-action-content').hide();
-		});
 	};
 	
 	ns.MappingManager.prototype.downloadMappings = function(){
