@@ -70,11 +70,11 @@ function formatTableCellValue(value, dataType, entityName) {
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value) + '</a>';
 		
-	} if (dataType.toLowerCase() == "xref" && (typeof entityName !== 'undefined') && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+	} else if (dataType.toLowerCase() == "xref" && (typeof entityName !== 'undefined') && (typeof molgenis.entityExplorerUrl !== 'undefined')){
 		value = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + entityName + '&identifier=' + value + '">' 
 			+ htmlEscape(value) + '</a>';
 	}	
-	if (dataType.toLowerCase() == "mref" && (typeof entityName !== 'undefined') && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+	else if (dataType.toLowerCase() == "mref" && (typeof entityName !== 'undefined') && (typeof molgenis.entityExplorerUrl !== 'undefined')){
 		var elements = value.split(',');
 		value = "";
 		for (var i = 0; i < elements.length; i++) {
