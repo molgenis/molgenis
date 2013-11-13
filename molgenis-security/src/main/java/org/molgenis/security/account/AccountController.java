@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -84,10 +85,23 @@ public class AccountController
 	}
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
-	public String activateUser(@Valid @NotNull @PathVariable String activationCode) throws DatabaseException
+	public String activateUser(@Valid @NotNull @PathVariable String activationCode, Model model)
+			throws DatabaseException
 	{
-		accountService.activateUser(activationCode);
-		return "redirect:" + ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+		try
+		{
+			accountService.activateUser(activationCode);
+			model.addAttribute("successMessage", "Your account has been activated, you can now sign in.");
+		}
+		catch (DatabaseException e)
+		{
+			model.addAttribute("errorMessage", e.getMessage());
+		}
+		catch (RuntimeException e)
+		{
+			model.addAttribute("errorMessage", e.getMessage());
+		}
+		return "forward:/";
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)

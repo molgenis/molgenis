@@ -16,6 +16,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -122,6 +123,10 @@ public class AccountService
 			mailMessage.setSubject("Your registration request for " + getAppName());
 			mailMessage.setText(createActivatedEmailText(molgenisUser, getAppName()));
 			mailSender.send(mailMessage);
+		}
+		else
+		{
+			throw new MolgenisUserException("Invalid activation code or account already activated.");
 		}
 	}
 
