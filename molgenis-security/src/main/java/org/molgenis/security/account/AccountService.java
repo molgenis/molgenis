@@ -82,8 +82,8 @@ public class AccountService
 		if (group != null)
 		{
 			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-			molgenisGroupMember.setMolgenisGroup(group.getId());
-			molgenisGroupMember.setMolgenisUser(molgenisUser.getId());
+			molgenisGroupMember.setMolgenisGroup(group);
+			molgenisGroupMember.setMolgenisUser(molgenisUser);
 			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
 		}
 

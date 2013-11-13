@@ -123,23 +123,21 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-<<<<<<< HEAD
-	@Transactional(readOnly = true)
-	public void addUserToGroup(Integer molgenisGrougId, Integer molgenisUserId)
-=======
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException
->>>>>>> 089df9b1a205c6a5f00d705a73b656ffc34968c0
+	@Transactional
+	public void addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId)
 	{
+		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME, molgenisGroupId);
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId);
+
 		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-		molgenisGroupMember.setMolgenisGroup(molgenisGroupId);
-		molgenisGroupMember.setMolgenisUser(molgenisUserId);
+		molgenisGroupMember.setMolgenisGroup(group);
+		molgenisGroupMember.setMolgenisUser(user);
 		dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional(readOnly = true)
+	@Transactional
 	public void removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId)
 	{
 		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId);

@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
@@ -16,6 +14,9 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
+/**
+ * Manage user in groups
+ */
 @Service
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
@@ -32,8 +33,8 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(
-				MolgenisUser.SUPERUSER, Operator.EQUALS, true));
+		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ACTIVATIONCODE,
+				new QueryImpl().eq(MolgenisUser.SUPERUSER, true));
 
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
 		{
@@ -46,11 +47,11 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
+	@RunAsSystem
 	public MolgenisUser getCurrentUser()
 	{
 		String currentUsername = SecurityUtils.getCurrentUsername();
 		return dataService
 				.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, currentUsername));
 	}
-
 }

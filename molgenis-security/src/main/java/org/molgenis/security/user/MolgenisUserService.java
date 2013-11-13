@@ -15,14 +15,8 @@ public interface MolgenisUserService
 	 */
 	List<String> getSuEmailAddresses();
 
-	MolgenisUser findById(Integer userId);
-
-	void update(MolgenisUser user);
-
 	/*
 	 * Returns the currently logged in user
 	 */
 	MolgenisUser getCurrentUser();
-
-	void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2);
 }
