@@ -15,8 +15,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 
 /**
- * decorator for DataSetFilter, Checks for every read, update and delete operation if the user requesting the operation
- * matches the user owning the DataSetFilter on which the operation is requested
+ * decorator for StudyDataRequest, Checks for every read, update and delete operation if the user requesting the
+ * operation matches the user owning the StudyDataRequest on which the operation is requested
  */
 public class StudyDataRequestDecorator<E extends StudyDataRequest> extends MapperDecorator<E>
 {
@@ -80,7 +80,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends Mappe
 			return array;
 		}
 
-		QueryRule rule = new QueryRule("MolgenisUser", Operator.EQUALS, user);
+		QueryRule rule = new QueryRule(StudyDataRequest.MOLGENISUSER, Operator.EQUALS, user);
 		return addRule(array, rule);
 	}
 

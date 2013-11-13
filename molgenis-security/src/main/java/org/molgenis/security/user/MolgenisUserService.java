@@ -15,10 +15,6 @@ public interface MolgenisUserService
 	 */
 	List<String> getSuEmailAddresses() throws DatabaseException;
 
-	MolgenisUser findById(Integer userId) throws DatabaseException;
-
-	void update(MolgenisUser user) throws DatabaseException;
-
 	/**
 	 * Returns the currently logged in user
 	 * 
