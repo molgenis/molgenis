@@ -3,20 +3,7 @@
 <#assign css=["ui.dynatree.css", "studymanager.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "studymanager.js"]>
 <@header css js/>
-	<div class="span2"></div>
-	<div class="span8">
-	<#if errorMessage??>
-		<div class="alert alert-error">
-			<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> 
-			${errorMessage}
-		</div>
-	</#if>
-	<#if successMessage??>
-		<div class="alert alert-success">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			${successMessage}
-		</div>
-	</#if>
+	<div class="span8 offset2">
 		<div class="row-fluid">	
 			<div class="well">
 				<p id="loader-title" class="box-title">Choose a study definition to manage</p>
@@ -73,5 +60,4 @@
 			</div>
 		</div>
 	</div>
-	<div class="span2"></div>
 <@footer/>

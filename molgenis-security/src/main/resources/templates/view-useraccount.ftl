@@ -75,15 +75,15 @@
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="firstname">First name *</label>
+							<label class="control-label" for="firstname">First name</label>
 							<div class="controls">
-								<input type="text" name="firstname" value="${user.firstname}" required>
+								<input type="text" name="firstname"<#if user.firstname??> value="${user.firstname}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="lastname">Last name *</label>
+							<label class="control-label" for="lastname">Last name</label>
 							<div class="controls">
-								<input type="text" name="lastname" value="${user.lastname}" required>
+								<input type="text" name="lastname"<#if user.lastname??> value="${user.lastname}"</#if>>
 							</div>
 						</div>
 					</div>
