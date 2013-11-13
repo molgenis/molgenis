@@ -48,7 +48,8 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(CbmToOmxConverterController.class);
 
-	public static final String URI = "/plugin/cbmtoomxconverter";
+	public static final String ID = "cbmtoomxconverter";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private File currentFile;
 	private final File outputDir = new File(System.getProperty("java.io.tmpdir"));

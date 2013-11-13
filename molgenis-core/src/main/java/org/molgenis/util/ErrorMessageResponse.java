@@ -1,4 +1,4 @@
-package org.molgenis.ui.util;
+package org.molgenis.util;
 
 import java.util.ArrayList;
 import java.util.Collections;

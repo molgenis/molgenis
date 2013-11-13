@@ -47,6 +47,10 @@
 						items.push('<p>You did not place any orders</p>');
 					}
 					container.html(items.join(''));
+				},
+				error: function(xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+					modal.modal('hide');
 				}
 			});	
   		});

@@ -126,7 +126,7 @@
   		form.validate();
   		
   		$('#reg-password').rules('add', {
-			minlength: 6
+			minlength: ${min_password_length}
 		});
 		$('#reg-password-confirm').rules('add', {
 			equalTo: '#reg-password'

@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(URI)
 public class NewsController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/news";
+	public static final String ID = "news";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String DEFAULT_KEY_APP_NEWS = "<p>Paste here some news !</p>";
 	private static final String KEY_APP_NEWS = "app.news";

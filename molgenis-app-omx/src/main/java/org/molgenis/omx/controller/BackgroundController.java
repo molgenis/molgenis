@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(URI)
 public class BackgroundController extends MolgenisPluginController
 {
-	public static final String URI = "/plugin/background";
+	public static final String ID = "background";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String DEFAULT_KEY_APP_BACKGROUND = "<p>Paste the code</p>";
 	private static final String KEY_APP_BACKGROUND = "app.background";

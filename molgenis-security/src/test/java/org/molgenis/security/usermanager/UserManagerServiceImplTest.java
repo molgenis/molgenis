@@ -31,18 +31,23 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
 { Config.class })
 public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 {
+	private static Authentication AUTHENTICATION_PREVIOUS;
+
 	@Configuration
 	@EnableWebSecurity
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -96,6 +101,18 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private Database database;
 
+	@BeforeClass
+	public void setUpBeforeClass()
+	{
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+	}
+
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void userManagerServiceImpl()
 	{
@@ -131,11 +148,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getGroupsWhereUserIsMemberNonUs() throws DatabaseException {
+	public void getGroupsWhereUserIsMemberNonUs() throws DatabaseException
+	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getGroupsWhereUserIsMember(Integer.valueOf("1"));
 	}
-	
+
 	@Test
 	public void getGroupsWhereUserIsMemberSu() throws DatabaseException
 	{
@@ -169,11 +187,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getUsersMemberInGroupNonUs() throws DatabaseException {
+	public void getUsersMemberInGroupNonUs() throws DatabaseException
+	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getUsersMemberInGroup(Integer.valueOf("22"));
 	}
-	
+
 	@Test
 	public void getUsersMemberInGroup() throws DatabaseException
 	{
@@ -206,11 +225,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getGroupsWhereUserIsNotMemberNonUs() throws DatabaseException {
+	public void getGroupsWhereUserIsNotMemberNonUs() throws DatabaseException
+	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getGroupsWhereUserIsNotMember(Integer.valueOf("1"));
 	}
-	
+
 	@Test
 	public void getGroupsWhereUserIsNotMemberUs() throws DatabaseException
 	{

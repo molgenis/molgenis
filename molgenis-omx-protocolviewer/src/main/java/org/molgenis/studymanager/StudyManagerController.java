@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,8 @@ public class StudyManagerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(StudyManagerController.class);
 
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "studymanager";
+	public static final String ID = "studymanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String VIEW_NAME = "view-studymanager";
 
 	private final StudyManagerService studyDefinitionManagerService;
@@ -223,8 +225,21 @@ public class StudyManagerController extends MolgenisPluginController
 		response.setContentType("application/vnd.ms-excel");
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
+		// TODO remove code duplication (see ProtocolViewerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
+		List<CatalogItem> catalogItems = studyDefinition.getItems();
+		if (catalogItems != null)
+		{
+			Collections.sort(catalogItems, new Comparator<CatalogItem>()
+			{
+				@Override
+				public int compare(CatalogItem catalogItem1, CatalogItem catalogItem2)
+				{
+					return catalogItem1.getId().compareTo(catalogItem2.getId());
+				}
+			});
+		}
 		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
 		try
 		{
@@ -232,7 +247,7 @@ public class StudyManagerController extends MolgenisPluginController
 			try
 			{
 				sheetWriter.writeColNames(header);
-				for (CatalogItem catalogItem : studyDefinition.getItems())
+				for (CatalogItem catalogItem : catalogItems)
 				{
 					KeyValueTuple tuple = new KeyValueTuple();
 					tuple.set(header.get(0), catalogItem.getId());
