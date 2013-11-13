@@ -54,10 +54,8 @@ public class StudyDataRequestDecoratorTest
 		userService = mock(MolgenisUserService.class);
 
 		when(mapper.getDatabase()).thenReturn(database);
-		when(userService.findById(1)).thenReturn(admin);
 		when(admin.getSuperuser()).thenReturn(true);
 		when(admin.getId()).thenReturn(1);
-		when(userService.findById(2)).thenReturn(user);
 		when(user.getSuperuser()).thenReturn(false);
 		when(user.getId()).thenReturn(2);
 

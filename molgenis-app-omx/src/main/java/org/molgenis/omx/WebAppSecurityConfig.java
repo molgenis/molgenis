@@ -101,7 +101,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/entities")
 				.hasAnyAuthority(
 						defaultPluginAuthorities("formdataSet", "formprotocol", "formobservablefeature",
-								"formcategory", "formstudydatarequest", "formruntimeproperty"))
+								"formcategory", "formstudydatarequest", "formruntimeproperty", "formmolgenisuser",
+								"formmolgenisgroup", "formmolgenisgroupmember"))
 
 				// entities menu plugins
 				.antMatchers("/menu/entities/form.DataSet/**", "/plugin/form.DataSet/**")

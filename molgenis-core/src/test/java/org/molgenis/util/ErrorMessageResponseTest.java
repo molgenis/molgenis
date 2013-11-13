@@ -1,4 +1,4 @@
-package org.molgenis.ui.util;
+package org.molgenis.util;
 
 import static org.testng.Assert.assertEquals;
 
@@ -6,7 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.ui.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.testng.annotations.Test;
 
 public class ErrorMessageResponseTest

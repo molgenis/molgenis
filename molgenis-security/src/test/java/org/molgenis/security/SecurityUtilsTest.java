@@ -97,12 +97,6 @@ public class SecurityUtilsTest
 	}
 
 	@Test
-	public void getCurrentUser()
-	{
-		assertEquals(SecurityUtils.getCurrentUser(), userDetails);
-	}
-
-	@Test
 	public void getCurrentUsername()
 	{
 		assertEquals(SecurityUtils.getCurrentUsername(), userDetails.getUsername());
