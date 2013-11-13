@@ -12,7 +12,7 @@
 package ${package};
 
 import org.molgenis.data.jpa.AbstractJpaRepository;
-
+import org.molgenis.data.support.EntityMetaDataCache;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,6 +21,13 @@ public class ${JavaName(entity)}Repository extends AbstractJpaRepository<${JavaN
 	@Override
 	public ${JavaName(entity)}MetaData getEntityMetaData()
 	{
-		return new ${JavaName(entity)}MetaData();
+		${JavaName(entity)}MetaData metaData = (${JavaName(entity)}MetaData)EntityMetaDataCache.get("${JavaName(entity)}");
+		if (metaData == null)
+		{
+			metaData = new ${JavaName(entity)}MetaData();
+			EntityMetaDataCache.add(metaData);
+		}
+		
+		return metaData;
 	}
 }
