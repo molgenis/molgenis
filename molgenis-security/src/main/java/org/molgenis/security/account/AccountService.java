@@ -13,6 +13,8 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserService;
@@ -28,6 +30,7 @@ public class AccountService
 	private static Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
+	public static final String ALL_USER_GROUP = "All Users";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
@@ -72,6 +75,17 @@ public class AccountService
 		molgenisUser.setActive(false);
 		dataService.add(MolgenisUser.ENTITY_NAME, molgenisUser);
 		logger.debug("created user " + molgenisUser.getUsername());
+
+		// add user to group
+		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP));
+		if (group != null)
+		{
+			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
+			molgenisGroupMember.setMolgenisGroup(group.getId());
+			molgenisGroupMember.setMolgenisUser(molgenisUser.getId());
+			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
+		}
 
 		// send activation email
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();

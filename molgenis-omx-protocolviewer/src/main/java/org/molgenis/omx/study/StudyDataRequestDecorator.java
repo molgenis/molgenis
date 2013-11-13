@@ -1,13 +1,13 @@
 package org.molgenis.omx.study;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.QueryImpl;
+import java.util.List;
+
 import org.molgenis.framework.db.DatabaseAccessException;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Mapper;
+import org.molgenis.framework.db.MapperDecorator;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ApplicationContextProvider;
@@ -15,156 +15,100 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 
 /**
- * decorator for DataSetFilter, Checks for every read, update and delete operation if the user requesting the operation
- * matches the user owning the DataSetFilter on which the operation is requested
+ * decorator for StudyDataRequest, Checks for every read, update and delete operation if the user requesting the
+ * operation matches the user owning the StudyDataRequest on which the operation is requested
  */
-public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudRepositoryDecorator<E>
+public class StudyDataRequestDecorator<E extends StudyDataRequest> extends MapperDecorator<E>
 {
-	public StudyDataRequestDecorator(CrudRepository<E> generatedRepository)
+	public StudyDataRequestDecorator(Mapper<E> generatedMapper)
 	{
-		super(generatedRepository);
+		super(generatedMapper);
 	}
 
 	@Override
-	public long count(Query q)
+	public int count(QueryRule... rules) throws DatabaseException
 	{
-		q = addUserRule(q);
-		return super.count(q);
+		rules = addUserRule(rules);
+		return super.count(rules);
 	}
 
 	@Override
-	public void update(E entity)
+	public List<E> find(QueryRule... rules) throws DatabaseException
 	{
-		checkEntityPermission(entity);
-		super.update(entity);
+		rules = addUserRule(rules);
+		return super.find(rules);
 	}
 
 	@Override
-	public void update(Iterable<E> entities)
-	{
-		checkEntitiesPermission(entities);
-		super.update(entities);
-	}
-
-	@Override
-	public Iterable<E> findAll(Query q)
-	{
-		q = addUserRule(q);
-		return super.findAll(q);
-	}
-
-	@Override
-	public void delete(E entity)
-	{
-		checkEntityPermission(entity);
-		super.delete(entity);
-	}
-
-	@Override
-	public E findOne(Query q)
-	{
-		q = addUserRule(q);
-		return super.findOne(q);
-	}
-
-	@Override
-	public void delete(Iterable<E> entities)
+	public int update(List<E> entities) throws DatabaseException
 	{
 		checkEntitiesPermission(entities);
-		super.delete(entities);
+		return super.update(entities);
 	}
 
 	@Override
-	public void deleteById(Integer id)
+	public int remove(List<E> entities) throws DatabaseException
 	{
-		findOne(id);
-		super.deleteById(id);
+		checkEntitiesPermission(entities);
+		return super.remove(entities);
 	}
 
 	@Override
-	public E findOne(Integer id)
+	public String createFindSqlInclRules(QueryRule[] rules) throws DatabaseException
+	{
+		rules = addUserRule(rules);
+		return super.createFindSqlInclRules(rules);
+	}
+
+	@Override
+	public E findById(Object id) throws DatabaseException
 	{
 		MolgenisUser user = getCurrentUser();
-		E entity = super.findOne(id);
+		E entity = super.findById(id);
 		if (!hasEntityPermission(entity) && !user.getSuperuser())
 		{
-			throw new MolgenisDataException("No permission on DataSetFilter");
+			throw new DatabaseAccessException("No permission on DataSetFilter");
 		}
-
 		return entity;
 	}
 
-	@Override
-	public void deleteById(Iterable<Integer> ids)
-	{
-		findAll(ids);
-		super.deleteById(ids);
-	}
-
-	@Override
-	public Iterable<E> findAll(Iterable<Integer> ids)
-	{
-		Iterable<E> entities = super.findAll(ids);
-		MolgenisUser user = getCurrentUser();
-
-		if (!user.getSuperuser())
-		{
-			for (E entity : entities)
-			{
-				if (!hasEntityPermission(entity))
-				{
-					throw new MolgenisDataException("No permission on DataSetFilter");
-				}
-			}
-		}
-
-		return entities;
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		Iterable<E> entities = super.findAll(new QueryImpl());
-		checkEntitiesPermission(entities);
-
-		super.deleteAll();
-	}
-
-	public Query addUserRule(Query q)
+	public QueryRule[] addUserRule(QueryRule[] array) throws DatabaseException
 	{
 		MolgenisUser user = getCurrentUser();
 		if (user.getSuperuser())
 		{
-			return q;
+			return array;
 		}
 
-		QueryImpl result = new QueryImpl(q.getRules());
-		result.addRule(new QueryRule("MolgenisUser", Operator.EQUALS, user));
-
-		return result;
+		QueryRule rule = new QueryRule(StudyDataRequest.MOLGENISUSER, Operator.EQUALS, user);
+		return addRule(array, rule);
 	}
 
-	private void checkEntitiesPermission(Iterable<E> entities)
+	public QueryRule[] addRule(QueryRule[] array, QueryRule rule)
+	{
+		QueryRule[] anotherArray = new QueryRule[array.length + 1];
+		System.arraycopy(array, 0, anotherArray, 0, array.length);
+		anotherArray[array.length] = rule;
+
+		return anotherArray;
+	}
+
+	private void checkEntitiesPermission(List<E> entities) throws DatabaseException
 	{
 		MolgenisUser user = getCurrentUser();
 		if (!user.getSuperuser())
 		{
-			for (E request : entities)
+			for (StudyDataRequest request : entities)
 			{
-				checkEntityPermission(request);
+				if (!hasEntityPermission(request))
+				{
+					throw new DatabaseAccessException("No permission on DataSetFilter");
+				}
 			}
 		}
 	}
 
-	private void checkEntityPermission(E entity)
-	{
-		if (!hasEntityPermission(entity))
-		{
-			throw new DatabaseAccessException("No permission on DataSetFilter");
-		}
-	}
-
-	private boolean hasEntityPermission(StudyDataRequest request)
+	private boolean hasEntityPermission(StudyDataRequest request) throws DatabaseException
 	{
 		MolgenisUser user = getCurrentUser();
 		if (!user.getId().equals(request.getMolgenisUser().getId()))
@@ -174,7 +118,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 		return true;
 	}
 
-	private MolgenisUser getCurrentUser()
+	private MolgenisUser getCurrentUser() throws DatabaseException
 	{
 		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
 		if (applicationContext == null)

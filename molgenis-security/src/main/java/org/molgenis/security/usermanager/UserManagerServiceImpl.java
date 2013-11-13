@@ -123,11 +123,16 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
+<<<<<<< HEAD
 	@Transactional(readOnly = true)
 	public void addUserToGroup(Integer molgenisGrougId, Integer molgenisUserId)
+=======
+	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException
+>>>>>>> 089df9b1a205c6a5f00d705a73b656ffc34968c0
 	{
 		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-		molgenisGroupMember.setMolgenisGroup(molgenisGrougId);
+		molgenisGroupMember.setMolgenisGroup(molgenisGroupId);
 		molgenisGroupMember.setMolgenisUser(molgenisUserId);
 		dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
 	}

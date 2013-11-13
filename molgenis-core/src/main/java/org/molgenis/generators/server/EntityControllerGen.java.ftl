@@ -39,9 +39,9 @@ import org.molgenis.service.${field.xrefEntity.name}Service;
 	</#if>
 </#if>
 </#list>
-import org.molgenis.ui.util.ErrorMessageResponse;
-import org.molgenis.ui.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.EntityPager;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;

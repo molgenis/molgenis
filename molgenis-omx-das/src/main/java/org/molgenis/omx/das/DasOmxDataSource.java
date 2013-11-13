@@ -77,7 +77,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	public Collection<DasEntryPoint> getEntryPoints(Integer segmentId, Integer notUsed)
 			throws UnimplementedFeatureException, DataSourceException
 	{
-		Set<DasEntryPoint> entryPoints = new TreeSet<DasEntryPoint>();
+		List<DasEntryPoint> entryPoints = new ArrayList<DasEntryPoint>();
 		try
 		{
 			Chromosome chromosome = getChromosome(segmentId.toString());

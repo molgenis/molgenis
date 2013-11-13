@@ -19,11 +19,8 @@ public interface MolgenisUserService
 
 	void update(MolgenisUser user);
 
-	/**
+	/*
 	 * Returns the currently logged in user
-	 * 
-	 * @return
-	 * @throws DatabaseException
 	 */
 	MolgenisUser getCurrentUser();
 

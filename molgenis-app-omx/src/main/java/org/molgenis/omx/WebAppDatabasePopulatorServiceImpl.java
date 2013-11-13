@@ -11,6 +11,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.account.AccountService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,8 +81,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		dataService.add(MolgenisUser.ENTITY_NAME, userUser);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
-		usersGroup.setName("All Users");
+		usersGroup.setName(AccountService.ALL_USER_GROUP);
 		dataService.add(MolgenisGroup.ENTITY_NAME, usersGroup);
+		usersGroup.setName(AccountService.ALL_USER_GROUP);
 
 		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
 		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);

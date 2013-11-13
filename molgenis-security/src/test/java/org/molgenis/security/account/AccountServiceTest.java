@@ -24,8 +24,8 @@ import org.molgenis.framework.db.Query;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.account.AccountService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -86,6 +86,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private JavaMailSender javaMailSender;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp() throws DatabaseException
 	{
@@ -98,6 +99,13 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 				database.find(MolgenisUser.class, new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS, false),
 						new QueryRule(MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "456"))).thenReturn(
 				Collections.<MolgenisUser> emptyList());
+
+		MolgenisGroup allUsersGroup = mock(MolgenisGroup.class);
+		Query<MolgenisGroup> queryGroup = mock(Query.class);
+		Query<MolgenisGroup> queryGroupSuccess = mock(Query.class);
+		when(database.query(MolgenisGroup.class)).thenReturn(queryGroup);
+		when(queryGroup.eq(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP)).thenReturn(queryGroupSuccess);
+		when(queryGroupSuccess.find()).thenReturn(Arrays.<MolgenisGroup> asList(allUsersGroup));
 
 		reset(javaMailSender);
 		MimeMessage mimeMessage = mock(MimeMessage.class);
