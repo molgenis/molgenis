@@ -9,6 +9,7 @@
 	var selectedDataSet = null;
 	var biobankDataSets = null;
 	var sortRule = null;
+	var previousSearchText = null;
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
@@ -59,14 +60,15 @@
 
 			$('#search-dataitem').on('keydown', function(e){
 			    if (e.which == 13) {
+			    	previousSearchText = $(this).val();
 			    	$('#search-button').click();
 			    	return false;
 			    }
 			});
 			
 			$('#search-dataitem').on('keyup', function(e){
-				if($(this).val() === ''){
-					$('#search-dataitem').val('');
+				if($(this).val() === '' && previousSearchText !== null){
+					previousSearchText = null;
 					ns.MappingManager.prototype.createMatrixForDataItems();
 			    }
 			});

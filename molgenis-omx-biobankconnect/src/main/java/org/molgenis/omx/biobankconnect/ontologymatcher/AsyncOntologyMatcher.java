@@ -185,7 +185,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						{
 							QueryRule queryRule = new QueryRule(makeQueryForOntologyTerms(alternativeDefinition));
 							queryRule.setOperator(Operator.DIS_MAX);
-							queryRule.setValue(0.5);
+							queryRule.setValue(0.6);
 							rules.add(queryRule);
 						}
 					}
