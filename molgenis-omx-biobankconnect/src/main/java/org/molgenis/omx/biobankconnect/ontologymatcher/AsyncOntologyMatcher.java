@@ -70,8 +70,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final PorterStemmer stemmer = new PorterStemmer();
-	private static long totalNumber = 0;
-	private static int finishedNumber = 0;
+	private long totalNumber = 0;
+	private int finishedNumber = 0;
 
 	@Autowired
 	@Qualifier("unsecuredDatabase")
@@ -123,7 +123,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		Map<String, List<ObservationSet>> observationSetsPerDataSet = new HashMap<String, List<ObservationSet>>();
 		try
 		{
-			preprocessing(featureId, selectedDataSet, dataSetsToMatch, database);
+			preprocessing(featureId, selectedDataSet, dataSetsToMatch);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			if (featureId == null)
 			{
@@ -273,35 +273,59 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 	}
 
-	private void preprocessing(Integer featureId, Integer selectedDataSet, List<Integer> dataSetsToMatch, Database db)
+	private void preprocessing(Integer featureId, Integer selectedDataSet, List<Integer> dataSetsToMatch)
 			throws DatabaseException
 	{
-		createMappingStore(selectedDataSet, dataSetsToMatch, db);
+		createMappingStore(selectedDataSet, dataSetsToMatch);
+		List<String> dataSetsForMapping = new ArrayList<String>();
 		for (Integer catalogueId : dataSetsToMatch)
 		{
 			StringBuilder dataSetIdentifier = new StringBuilder();
 			dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
-			if (featureId == null) deleteExistingRecords(dataSetIdentifier.toString(), db);
-			else removeExistingMappings(featureId, dataSetIdentifier.toString());
+			dataSetsForMapping.add(dataSetIdentifier.toString());
+		}
+		if (featureId == null) deleteExistingRecords(dataSetsForMapping);
+		else removeExistingMappings(featureId, dataSetsForMapping);
+	}
+
+	private void deleteExistingRecords(List<String> dataSetsForMapping) throws DatabaseException
+	{
+		List<ObservationSet> listOfObservationSets = database.find(ObservationSet.class, new QueryRule(
+				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.IN, dataSetsForMapping));
+
+		if (listOfObservationSets.size() > 0)
+		{
+			List<Integer> listOfObservationIdentifiers = new ArrayList<Integer>();
+			for (ObservationSet observation : listOfObservationSets)
+			{
+				listOfObservationIdentifiers.add(observation.getId());
+			}
+			List<ObservedValue> listOfObservedValues = database.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET, Operator.IN, listOfObservationIdentifiers));
+			if (listOfObservedValues.size() > 0) database.remove(listOfObservedValues);
+			database.remove(listOfObservationSets);
 		}
 	}
 
-	private void removeExistingMappings(Integer featureId, String dataSetIdentifier) throws DatabaseException
+	private void removeExistingMappings(Integer featureId, List<String> dataSetsForMapping) throws DatabaseException
 	{
 		List<Integer> observationSets = new ArrayList<Integer>();
-		List<QueryRule> rules = new ArrayList<QueryRule>();
-		rules.add(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, featureId));
-		rules.add(new QueryRule(Operator.LIMIT, 100000));
-		SearchRequest request = new SearchRequest(dataSetIdentifier, rules, null);
-		SearchResult searchResult = searchService.search(request);
-		List<String> indexIds = new ArrayList<String>();
-		for (Hit hit : searchResult.getSearchHits())
+		for (String dataSet : dataSetsForMapping)
 		{
-			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			indexIds.add(hit.getId());
-			observationSets.add(Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
+			List<QueryRule> rules = new ArrayList<QueryRule>();
+			rules.add(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, featureId));
+			rules.add(new QueryRule(Operator.LIMIT, 100000));
+			SearchRequest request = new SearchRequest(dataSet, rules, null);
+			SearchResult searchResult = searchService.search(request);
+			List<String> indexIds = new ArrayList<String>();
+			for (Hit hit : searchResult.getSearchHits())
+			{
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				indexIds.add(hit.getId());
+				observationSets.add(Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
+			}
+			searchService.deleteDocumentByIds(dataSet, indexIds);
 		}
-		searchService.deleteDocumentByIds(dataSetIdentifier, indexIds);
 		if (observationSets.size() > 0)
 		{
 			List<ObservationSet> existingObservationSets = database.find(ObservationSet.class, new QueryRule(
@@ -698,31 +722,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return newList;
 	}
 
-	private void deleteExistingRecords(String dataSetIdentifier, Database db) throws DatabaseException
+	private void createMappingStore(Integer selectedDataSet, List<Integer> dataSetsToMatch) throws DatabaseException
 	{
-		List<ObservationSet> listOfObservationSets = db.find(ObservationSet.class, new QueryRule(
-				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSetIdentifier));
-
-		if (listOfObservationSets.size() > 0)
-		{
-			List<String> listOfObservationIdentifiers = new ArrayList<String>();
-			for (ObservationSet observation : listOfObservationSets)
-			{
-				listOfObservationIdentifiers.add(observation.getIdentifier());
-			}
-			List<ObservedValue> listOfObservedValues = db.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, listOfObservationIdentifiers));
-			if (listOfObservedValues.size() > 0) db.remove(listOfObservedValues);
-			db.remove(listOfObservationSets);
-
-			searchService.deleteDocumentsByType(dataSetIdentifier);
-		}
-	}
-
-	private void createMappingStore(Integer selectedDataSet, List<Integer> dataSetsToMatch, Database db)
-			throws DatabaseException
-	{
-		boolean isFeatureExists = db.find(ObservableFeature.class,
+		boolean isFeatureExists = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_FEATURE)).size() == 0;
 		if (isFeatureExists)
 		{
@@ -730,11 +732,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			feature.setIdentifier(STORE_MAPPING_FEATURE);
 			feature.setDataType("xref");
 			feature.setName("Features");
-			db.add(feature);
+			database.add(feature);
 		}
 		else return;
 
-		boolean isMappedFeatureExists = db.find(ObservableFeature.class,
+		boolean isMappedFeatureExists = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_MAPPED_FEATURE)).size() == 0;
 		if (isMappedFeatureExists)
 		{
@@ -742,10 +744,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
 			mappedFeature.setDataType("xref");
 			mappedFeature.setName("Mapped features");
-			db.add(mappedFeature);
+			database.add(mappedFeature);
 		}
 
-		boolean isMappedFetureScore = db.find(ObservableFeature.class,
+		boolean isMappedFetureScore = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_SCORE)).size() == 0;
 		if (isMappedFetureScore)
 		{
@@ -753,10 +755,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			mappedFeatureScore.setIdentifier(STORE_MAPPING_SCORE);
 			mappedFeatureScore.setDataType("decimal");
 			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
-			db.add(mappedFeatureScore);
+			database.add(mappedFeatureScore);
 		}
 
-		boolean isMappedFetureAbsoluteScore = db.find(ObservableFeature.class,
+		boolean isMappedFetureAbsoluteScore = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_ABSOLUTE_SCORE)).size() == 0;
 		if (isMappedFetureAbsoluteScore)
 		{
@@ -764,10 +766,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
 			mappedFeatureAbsoluteScore.setDataType("decimal");
 			mappedFeatureAbsoluteScore.setName(STORE_MAPPING_ABSOLUTE_SCORE);
-			db.add(mappedFeatureAbsoluteScore);
+			database.add(mappedFeatureAbsoluteScore);
 		}
 
-		boolean isConfirmMappingExists = db.find(ObservableFeature.class,
+		boolean isConfirmMappingExists = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_CONFIRM_MAPPING)).size() == 0;
 		if (isConfirmMappingExists)
 		{
@@ -775,10 +777,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
 			confirmMapping.setDataType("bool");
 			confirmMapping.setName("Mapping confirmed");
-			db.add(confirmMapping);
+			database.add(confirmMapping);
 		}
 
-		boolean ifProtocolExists = db.find(Protocol.class,
+		boolean ifProtocolExists = database.find(Protocol.class,
 				new QueryRule(Protocol.IDENTIFIER, Operator.EQUALS, PROTOCOL_IDENTIFIER)).size() == 0;
 		if (ifProtocolExists)
 		{
@@ -787,13 +789,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			protocol.setName("store_mapping");
 			protocol.setFeatures_Identifier(Arrays.asList(STORE_MAPPING_FEATURE, STORE_MAPPING_MAPPED_FEATURE,
 					STORE_MAPPING_SCORE, STORE_MAPPING_ABSOLUTE_SCORE, STORE_MAPPING_CONFIRM_MAPPING));
-			db.add(protocol);
+			database.add(protocol);
 		}
 
 		for (Integer dataSetId : dataSetsToMatch)
 		{
 			String identifier = selectedDataSet + "-" + dataSetId;
-			boolean ifDataSetExists = db.find(DataSet.class,
+			boolean ifDataSetExists = database.find(DataSet.class,
 					new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier)).size() == 0;
 			if (ifDataSetExists)
 			{
@@ -801,7 +803,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				dataSet.setIdentifier(identifier);
 				dataSet.setName(identifier);
 				dataSet.setProtocolUsed_Identifier(PROTOCOL_IDENTIFIER);
-				db.add(dataSet);
+				database.add(dataSet);
 			}
 		}
 	}
