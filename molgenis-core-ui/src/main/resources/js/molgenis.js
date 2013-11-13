@@ -62,12 +62,11 @@ function htmlEscape(text) {
  * Create a table cell to show data of a certain type
  * Is used by the dataexplorer and the forms plugin 
  */
-function formatTableCellValue(value, dataType, entityName) {
+function formatTableCellValue(value, dataType) {
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value) + '</a>';
 		
-	} 
-	else if (dataType.toLowerCase() == "email") {
+	} else if (dataType.toLowerCase() == "email") {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
 	
 	} else if (dataType.toLowerCase() == 'bool') {
