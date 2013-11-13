@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -28,6 +27,8 @@ import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
 import org.molgenis.study.StudyDefinitionMeta;
 import org.molgenis.study.UnknownStudyDefinitionException;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -299,21 +300,21 @@ public class StudyManagerController extends MolgenisPluginController
 	}
 
 	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		logger.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(
+				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage())));
 	}
 
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, String> handleException(Exception e)
+	public ErrorMessageResponse handleException(Exception e)
 	{
 		logger.debug(null, e);
-		return Collections.singletonMap("errorMessage", e.getMessage());
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }

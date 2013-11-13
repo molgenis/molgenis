@@ -60,7 +60,19 @@
 				</div>
 			</div>
 			<div class="row-fluid">
-				<div class="alerts"></div>
+				<div class="alerts"><#if errorMessage??>
+					<#assign message = errorMessage>
+					<#assign messageType = "error"> 
+				<#elseif warningMessage??>
+					<#assign message = warningMessage>
+					<#assign messageType = "warning">
+				<#elseif successMessage??>
+					<#assign message = successMessage>
+					<#assign messageType = "success">
+				</#if>
+				<#if messageType??>
+					<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+				</#if></div>
 			</div>
 			<div class="row-fluid">
 				<div id="plugin-container" class="container-fluid">

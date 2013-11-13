@@ -70,9 +70,8 @@
 					studyDefinitionRadio.attr('checked', 'checked');
 					studyDefinitionRadio.change();
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
@@ -95,10 +94,9 @@
 					viewTreeContainer.empty();
 					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-				    viewTreeContainer.empty();
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				error: function (xhr) {
+					viewTreeContainer.empty();
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
@@ -121,10 +119,9 @@
 					editTreeContainer.empty();
 					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				error: function (xhr) {
 					editTreeContainer.empty();
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
@@ -174,9 +171,8 @@
 				success : function(entities) {
 					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Updated study definition [' + studyDefinitionId + ']</div>');
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		});
