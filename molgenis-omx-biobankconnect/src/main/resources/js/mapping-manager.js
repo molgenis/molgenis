@@ -789,7 +789,6 @@
 					changedValue = false;
 				}
 				if(changedValue !== null){
-					
 					eachMapping.confirmed = changedValue;
 					if(confirmFeature === null){
 						confirmFeature = restApi.get('/api/v1/observablefeature', null, {
@@ -826,9 +825,10 @@
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json'
 					});
+					
+					showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedDataSet.name + '</strong> Biobank!');
 				}
 				
-				showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedDataSet.name + '</strong> Biobank!');
 				if(displayedFeatures.length > 0){
 					clickedCell.siblings('span:eq(0)').empty().append(displayedFeatures.join(' , '));
 					clickedCell.removeClass('icon-pencil').addClass('icon-ok');
