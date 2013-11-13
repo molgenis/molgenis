@@ -2,6 +2,10 @@
 	"use strict";
 
 	var sortRule = null;
+
+	molgenis.setEntityExplorerUrl = function(entityExplorerUrl) {
+		molgenis.entityExplorerUrl = entityExplorerUrl;
+	};
 	
 	molgenis.ResultsTable = function ResultsTable() {
 	};
@@ -53,8 +57,24 @@
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
 				var value = columnValueMap[feature.identifier];
+				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
-					items.push('<td class="multi-os-datacell">' + formatTableCellValue(value, feature.dataType, feature.identifier) + '</td>');
+					if (feature.dataType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + formatTableCellValue(value, feature.dataType); + '">' 
+							+ htmlEscape(value) + '</a>';
+					}	
+					else if (feature.dataType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var elements = value.split(',');
+						for (var i = 0; i < elements.length; i++) {
+							var element = elements[i].replace(/\s/g, '');
+						    if(i>0) cellValue += ",";
+						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + element + '">' + htmlEscape(element) + '</a>';
+						}
+					}
+					else{
+						cellValue = formatTableCellValue(value, feature.dataType);
+					}
+					items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
 				} else {
 					items.push('<td></td>');
 				}

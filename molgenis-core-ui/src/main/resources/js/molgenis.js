@@ -3,10 +3,6 @@
 		molgenis.contextUrl = contextUrl;
 	};
 	
-	molgenis.setEntityExplorerUrl = function(entityExplorerUrl) {
-		molgenis.entityExplorerUrl = entityExplorerUrl;
-	};
-	
 	molgenis.getContextUrl = function() {
 		return molgenis.contextUrl;
 	};
@@ -70,20 +66,7 @@ function formatTableCellValue(value, dataType, entityName) {
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value) + '</a>';
 		
-	} else if (dataType.toLowerCase() == "xref" && (typeof entityName !== 'undefined') && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-		value = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + entityName + '&identifier=' + value + '">' 
-			+ htmlEscape(value) + '</a>';
-	}	
-	else if (dataType.toLowerCase() == "mref" && (typeof entityName !== 'undefined') && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-		var elements = value.split(',');
-		value = "";
-		for (var i = 0; i < elements.length; i++) {
-			var element = elements[i].replace(/\s/g, '');
-		    if(i>0) value += ","
-			value += '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + entityName + '&identifier=' + element + '">' 
-			+ htmlEscape(element) + '</a>';
-		}
-	}
+	} 
 	else if (dataType.toLowerCase() == "email") {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
 	
