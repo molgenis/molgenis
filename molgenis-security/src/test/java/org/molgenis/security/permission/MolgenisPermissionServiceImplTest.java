@@ -13,15 +13,20 @@ import org.molgenis.security.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class MolgenisPermissionServiceImplTest
 {
+	private static Authentication AUTHENTICATION;
+
 	@SuppressWarnings("unchecked")
-	@BeforeMethod
-	public void setUp()
+	@BeforeClass
+	public static void setUpBeforeClass()
 	{
+		AUTHENTICATION = SecurityContextHolder.getContext().getAuthentication();
+
 		Authentication authentication = mock(Authentication.class);
 		GrantedAuthority authority1 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
 				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.READ + "_ENTITY1").getMock();
@@ -35,6 +40,12 @@ public class MolgenisPermissionServiceImplTest
 		when((Collection<GrantedAuthority>) (authentication.getAuthorities())).thenReturn(
 				Arrays.<GrantedAuthority> asList(authority1, authority2, authority3, authority4));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION);
 	}
 
 	@Test
