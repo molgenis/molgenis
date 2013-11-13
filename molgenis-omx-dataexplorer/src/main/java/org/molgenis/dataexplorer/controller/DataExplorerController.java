@@ -201,12 +201,16 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (request.getDataType().equals("categorical"))
 			{
-				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-						new QueryImpl().eq(Category.OBSERVABLEFEATURE, request.getFeatureId()));
-
-				for (Category category : categories)
+				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
+				if (feature != null)
 				{
-					hashCounts.put(category.getName(), 0);
+					Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+
+					for (Category category : categories)
+					{
+						hashCounts.put(category.getName(), 0);
+					}
 				}
 			}
 			else if (request.getDataType().equals("bool"))
