@@ -29,18 +29,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class GenomebrowserController extends MolgenisPluginController
 {
+	public static final String ID = "genomebrowser";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+
 	public static final String INITLOCATION = "initLocation";
-	public static final String COORDSYSTEM   = "coordSystem";
+	public static final String COORDSYSTEM = "coordSystem";
 	public static final String CHAINS = "chains";
 	public static final String SOURCES = "sources";
-	public static final String BROWSERLINKS   = "browserLinks";
+	public static final String BROWSERLINKS = "browserLinks";
 	public static final String SEARCHENDPOINT = "searchEndpoint";
 	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
-	
-	public static final String URI = "/plugin/genomebrowser";
+
 	private final MolgenisSettings molgenisSettings;
 	public MutationService mutationService;
-	
+
 	@Autowired
 	public GenomebrowserController(MolgenisSettings molgenisSettings, MutationService service)
 	{
@@ -52,26 +54,30 @@ public class GenomebrowserController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
-	{	
+	{
 		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
-		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));  
+		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
 		model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
 		model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
-		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));  
+		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
 		model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
 		model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
 
 		return "view-genomebrowser";
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/data", produces = {MediaType.APPLICATION_JSON_VALUE})
+
+	@RequestMapping(method = RequestMethod.GET, value = "/data", produces =
+	{ MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody
-	List<Map<String,String>> getAll(HttpServletResponse response, @RequestParam(value = "mutation", required = false) String mutationId,
-			@RequestParam(value = "segment", required = true) String segmentId) throws ParseException, DatabaseException, IOException
+	List<Map<String, String>> getAll(HttpServletResponse response,
+			@RequestParam(value = "mutation", required = false) String mutationId,
+			@RequestParam(value = "segment", required = true) String segmentId) throws ParseException,
+			DatabaseException, IOException
 	{
-		if(mutationId==null){
-			mutationId="";
+		if (mutationId == null)
+		{
+			mutationId = "";
 		}
-		return mutationService.getPatientMutationData(segmentId,mutationId);
+		return mutationService.getPatientMutationData(segmentId, mutationId);
 	}
 }

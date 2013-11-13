@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class BackgroundController extends AbstractStaticContectController
 {
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "background";
-	public static final String UNIQUEREFERENCE = "background";
+	public static final String ID = "background";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	
 	public BackgroundController()
 	{
-		super(UNIQUEREFERENCE, URI);
+		super(ID, URI);
 	}
 }

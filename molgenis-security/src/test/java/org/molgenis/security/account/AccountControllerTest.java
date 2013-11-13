@@ -18,6 +18,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.MolgenisPasswordEncoder;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -191,7 +192,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database unauthorizedDatabase()
+		public Database unsecuredDatabase()
 		{
 			return mock(Database.class);
 		}
@@ -206,6 +207,12 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
+		}
+
+		@Bean
+		public MolgenisPasswordEncoder molgenisPasswordEncoder()
+		{
+			return mock(MolgenisPasswordEncoder.class);
 		}
 	}
 }

@@ -60,6 +60,9 @@
 				</div>
 			</div>
 			<div class="row-fluid">
+				<div class="alerts"></div>
+			</div>
+			<div class="row-fluid">
 				<div id="plugin-container" class="container-fluid">
 </#macro>
 

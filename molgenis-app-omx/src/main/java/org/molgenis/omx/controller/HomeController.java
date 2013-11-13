@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class HomeController extends AbstractStaticContectController
 {
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "home";
-	public static final String UNIQUEREFERENCE = "home";
+	public static final String ID = "home";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	
 	public HomeController()
 	{
-		super(UNIQUEREFERENCE, URI);
+		super(ID, URI);
 	}
 }

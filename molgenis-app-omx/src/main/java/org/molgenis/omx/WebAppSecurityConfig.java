@@ -30,7 +30,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
 		expressionInterceptUrlRegistry
-			.antMatchers("/")
+				.antMatchers("/")
 				.permitAll()
 
 				// main menu
@@ -66,7 +66,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/main/genomebrowser/**", "/plugin/genomebrowser/**")
 				.hasAnyAuthority(defaultPluginAuthorities("genomebrowser"))
-				
+
 				.antMatchers("/plugin/protocolviewer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
@@ -91,7 +91,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/entities")
 				.hasAnyAuthority(
 						defaultPluginAuthorities("formdataSet", "formprotocol", "formobservablefeature",
-								"formcategory", "formstudydatarequest", "formruntimeproperty"))
+								"formcategory", "formstudydatarequest", "formruntimeproperty", "formmolgenisuser",
+								"formmolgenisgroup", "formmolgenisgroupmember"))
 
 				// entities menu plugins
 				.antMatchers("/menu/entities/form.DataSet/**", "/plugin/form.DataSet/**")
@@ -207,11 +208,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
 				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
-				
-				//DAS datasource uses the database, unautheticated users can not see any data 
-		 		.antMatchers("/das/**").permitAll()
-		 		
-		 		.antMatchers("/myDas/**").permitAll();
+
+				// DAS datasource uses the database, unautheticated users can not see any data
+				.antMatchers("/das/**").permitAll()
+
+				.antMatchers("/myDas/**").permitAll();
 	}
 
 	@Override

@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class ReferencesController extends AbstractStaticContectController
 {
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "references";
-	public static final String UNIQUEREFERENCE = "references";
+	public static final String ID = "references";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	
 	public ReferencesController()
+
 	{
-		super(UNIQUEREFERENCE, URI);
+		super(ID, URI);
 	}
 }

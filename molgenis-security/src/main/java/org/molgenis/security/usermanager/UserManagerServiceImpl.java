@@ -124,10 +124,10 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public Integer addUserToGroup(Integer molgenisGrougId, Integer molgenisUserId) throws DatabaseException
+	public Integer addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId) throws DatabaseException
 	{
 		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-		molgenisGroupMember.setMolgenisGroup(molgenisGrougId);
+		molgenisGroupMember.setMolgenisGroup(molgenisGroupId);
 		molgenisGroupMember.setMolgenisUser(molgenisUserId);
 		return database.add(molgenisGroupMember);
 	}

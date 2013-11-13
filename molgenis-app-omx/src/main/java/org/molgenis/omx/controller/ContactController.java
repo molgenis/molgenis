@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class ContactController extends AbstractStaticContectController
 {
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "contact";
-	public static final String UNIQUEREFERENCE = "contact";
+	public static final String ID = "contact";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	
 	public ContactController()
 	{
-		super(UNIQUEREFERENCE, URI);
+		super(ID, URI);
 	}
 }

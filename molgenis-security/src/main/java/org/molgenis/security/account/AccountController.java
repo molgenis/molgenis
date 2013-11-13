@@ -1,5 +1,7 @@
 package org.molgenis.security.account;
 
+import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
+
 import java.net.URI;
 
 import javax.validation.Valid;
@@ -14,6 +16,7 @@ import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.util.CountryCodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +38,9 @@ public class AccountController
 	@Autowired
 	private CaptchaService captchaService;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String getLoginForm()
 	{
@@ -46,6 +52,7 @@ public class AccountController
 	{
 		ModelAndView model = new ModelAndView("register-modal");
 		model.addObject("countries", CountryCodes.get());
+		model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
 		return model;
 	}
 
@@ -108,7 +115,7 @@ public class AccountController
 	{
 		MolgenisUser user = new MolgenisUser();
 		user.setUsername(request.getUsername());
-		user.setPassword(request.getPassword());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
 		user.setFax(request.getFax());

@@ -110,27 +110,27 @@ public class ContentControllerTest extends AbstractTestNGSpringContextTests
 	
 	@Test
 	public void pageGetRequestHome() throws Exception {
-		this.pageGetRequest(mockMvcHome, HomeController.URI, HomeController.UNIQUEREFERENCE);
+		this.pageGetRequest(mockMvcHome, HomeController.URI, HomeController.ID);
 	}
 	
 	@Test
 	public void pageGetRequestNews() throws Exception {
-		this.pageGetRequest(mockMvcNews, NewsController.URI, NewsController.UNIQUEREFERENCE);
+		this.pageGetRequest(mockMvcNews, NewsController.URI, NewsController.ID);
 	}
 	
 	@Test
 	public void pageGetRequestBackground() throws Exception {
-		this.pageGetRequest(mockMvcBackground, BackgroundController.URI, BackgroundController.UNIQUEREFERENCE);
+		this.pageGetRequest(mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
 	}
 	
 	@Test
 	public void pageGetRequestContact() throws Exception {
-		this.pageGetRequest(mockMvcContact, ContactController.URI, ContactController.UNIQUEREFERENCE);
+		this.pageGetRequest(mockMvcContact, ContactController.URI, ContactController.ID);
 	}
 	
 	@Test
 	public void pageGetRequestReferences() throws Exception {
-		this.pageGetRequest(mockMvcReferences, ReferencesController.URI, ReferencesController.UNIQUEREFERENCE);
+		this.pageGetRequest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
 	}
 
 	public void pageGetRequest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception

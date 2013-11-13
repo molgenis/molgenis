@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +36,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(URI)
 public class ProtocolViewerController extends MolgenisPluginController
 {
-	public static final String URI = PLUGIN_URI_PREFIX + "protocolviewer";
+	public static final String ID = "protocolviewer";
+	public static final String URI = PLUGIN_URI_PREFIX + ID;
 
 	public static final String KEY_ACTION_DOWNLOAD = "plugin.catalogue.action.download";
 	private static final boolean DEFAULT_KEY_ACTION_DOWNLOAD = true;
@@ -86,8 +89,21 @@ public class ProtocolViewerController extends MolgenisPluginController
 		response.setContentType("application/vnd.ms-excel");
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
+		// TODO remove code duplication (see StudyManagerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
+		List<ObservableFeature> features = findFeatures(database, shoppingCart.getCart());
+		if (features != null)
+		{
+			Collections.sort(features, new Comparator<ObservableFeature>()
+			{
+				@Override
+				public int compare(ObservableFeature feature1, ObservableFeature feature2)
+				{
+					return feature1.getIdentifier().compareTo(feature2.getIdentifier());
+				}
+			});
+		}
 		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
 		try
 		{
@@ -96,7 +112,6 @@ public class ProtocolViewerController extends MolgenisPluginController
 			{
 				sheetWriter.writeColNames(header);
 
-				List<ObservableFeature> features = findFeatures(database, shoppingCart.getCart());
 				if (features != null)
 				{
 					for (ObservableFeature feature : features)
