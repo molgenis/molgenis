@@ -9,7 +9,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.controller.ContentControllerTest.Config;
+import org.molgenis.omx.controller.ContentControllersTest.Config;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = Config.class)
-public class ContentControllerTest extends AbstractTestNGSpringContextTests
+public class ContentControllersTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private HomeController homeController;
