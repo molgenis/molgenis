@@ -511,8 +511,13 @@
 							modal.remove();
 							var storedRowInfo = $('body').data('clickedRow');
 							var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
-							var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
-							existingRow.find('td:gt(0)').empty().append(spinner).css('text-align', 'center');
+							$.each(selectedOptions, function(index, dataSetId){
+								var index = $.inArray(dataSetId, biobankDataSets);
+								if(index !== -1){
+									var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
+									existingRow.find('td:eq(' + index + ')').empty().append(spinner).css('text-align', 'center');
+								}
+							});
 							checkProgressForRematch(feature);
 						},
 						error : function(request, textStatus, error){

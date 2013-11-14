@@ -40,13 +40,12 @@
 			url : prefix + '/match/status',
 			contentType : 'application/json',
 			success : function(response) {
-				console.log(response);
 				$('#control-container ul.pager li').addClass('disabled');
 				if(response.isRunning){
 					if(response.matchePercentage === 0){
 						var width = $(progressBarElement).width();
 						var parentWidth = $(progressBarElement).offsetParent().width();
-						var percent = 100 * width / parentWidth + 4;
+						var percent = 100 * width / parentWidth + 5;
 						$(progressBarElement).width(percent + '%');
 					}else if(response.matchePercentage === 100){
 						$(progressBarElement).width(response.matchePercentage + '%');
