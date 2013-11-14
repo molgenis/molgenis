@@ -106,7 +106,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		}
 		catch (Exception e)
 		{
-			new RuntimeException(e);
+			new RuntimeException("Failed to index mapping table : " + dataSet.getName() + " error : " + e.getMessage());
 		}
 		return tuples.iterator();
 	}
@@ -179,7 +179,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		}
 		catch (Exception e)
 		{
-			throw new TableException(e);
+			throw new TableException("Failed to initialize the columns for Mapping Table" + e);
 		}
 	}
 

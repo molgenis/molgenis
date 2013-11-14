@@ -66,16 +66,12 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 		{
 			Tuple eachRow = listOfRows.next();
 			String featureID = eachRow.getString("variable");
-			// String featureName = eachRow.getString("variable");
 			if (featureID != null)
 			{
 				featureID = featureID.trim();
 
 				String code = eachRow.getString("name");
 				String categoryDescription = eachRow.getString("label:en");
-
-				// String code = eachRow.getString("Value");
-				// String categoryDescription = eachRow.getString("Text");
 
 				List<UniqueCategory> listOfCategoriesPerVariable = null;
 				if (featureCategoryLinks.containsKey(featureID))

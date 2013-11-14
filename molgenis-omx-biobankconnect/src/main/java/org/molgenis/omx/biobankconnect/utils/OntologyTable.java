@@ -16,9 +16,9 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 {
 	private Database db;
 	private OntologyLoader loader;
-	private final String ONTOLOGY_URL = "url";
-	private final String ENTITY_TYPE = "entity_type";
-	private final String ONTOLOGY_LABEL = "ontologyLabel";
+	private final static String ONTOLOGY_URL = "url";
+	private final static String ENTITY_TYPE = "entity_type";
+	private final static String ONTOLOGY_LABEL = "ontologyLabel";
 
 	public OntologyTable(OntologyLoader loader, Database db)
 	{

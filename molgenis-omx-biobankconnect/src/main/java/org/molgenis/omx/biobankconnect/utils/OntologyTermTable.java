@@ -22,16 +22,16 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	private Database db;
 	private final String ontologyIRI;
 	private final String ontologyName;
-	private final String NODE_PATH = "nodePath";
-	private final String BOOST = "boost";
-	private final String ONTOLOGY_IRI = "ontologyIRI";
-	private final String ONTOLOGY_NAME = "ontologyName";
-	private final String ONTOLOGY_TERM = "ontologyTerm";
-	private final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
-	private final String SYNONYMS = "ontologyTermSynonym";
-	private final String ALTERNATIVE_DEFINITION = "alternativeDefinition";
-	private final String ONTOLOGY_LABEL = "ontologyLabel";
-	private final String ENTITY_TYPE = "entity_type";
+	private final static String NODE_PATH = "nodePath";
+	private final static String BOOST = "boost";
+	private final static String ONTOLOGY_IRI = "ontologyIRI";
+	private final static String ONTOLOGY_NAME = "ontologyName";
+	private final static String ONTOLOGY_TERM = "ontologyTerm";
+	private final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
+	private final static String SYNONYMS = "ontologyTermSynonym";
+	private final static String ALTERNATIVE_DEFINITION = "alternativeDefinition";
+	private final static String ONTOLOGY_LABEL = "ontologyLabel";
+	private final static String ENTITY_TYPE = "entity_type";
 
 	public OntologyTermTable(OntologyLoader loader, Database db)
 	{

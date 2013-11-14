@@ -67,7 +67,7 @@ abstract class AbstractOmxConvertor
 	public void writeToPhenoFormat(ExcelWriter writer) throws IOException
 	{
 		String protocolIdentifier = studyName + "_protocol";
-		String listOfFeatureIdentifier = "";
+		StringBuilder listOfFeatureIdentifier = new StringBuilder();
 		// Create sheet for investigation
 		ExcelSheetWriter dataSet = null;
 		// CSVWriter dataSet = null;
@@ -141,7 +141,7 @@ abstract class AbstractOmxConvertor
 				else if (dataType != null && dataType.equals("decimal")) dataType = "decimal";
 				else dataType = "string";
 
-				listOfFeatureIdentifier += identifier + ",";
+				listOfFeatureIdentifier.append(identifier).append(',');
 				eachRow.set("identifier", identifier);
 				eachRow.set("name", name);
 				eachRow.set("description", eachVariable.getLabel());
@@ -169,8 +169,9 @@ abstract class AbstractOmxConvertor
 			if (protocolFeatureLinks.size() == 0)
 			{
 				protocol.set("features_identifier",
-						listOfFeatureIdentifier.substring(0, listOfFeatureIdentifier.length() - 1));
-				System.out.println(listOfFeatureIdentifier.substring(0, listOfFeatureIdentifier.length() - 1));
+						listOfFeatureIdentifier.substring(0, listOfFeatureIdentifier.length() - 1).toString());
+				System.out.println(listOfFeatureIdentifier.substring(0, listOfFeatureIdentifier.length() - 1)
+						.toString());
 			}
 			else
 			{

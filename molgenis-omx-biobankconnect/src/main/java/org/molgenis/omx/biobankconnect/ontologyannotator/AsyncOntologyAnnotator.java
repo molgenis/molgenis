@@ -39,7 +39,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
-	private static boolean complete = false;
+	private boolean complete = false;
 
 	@Autowired
 	public void setSearchService(SearchService searchService)
