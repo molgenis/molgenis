@@ -728,62 +728,45 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_FEATURE)).size() == 0;
 		if (isFeatureExists)
 		{
+			List<ObservableFeature> features = new ArrayList<ObservableFeature>();
+
 			ObservableFeature feature = new ObservableFeature();
 			feature.setIdentifier(STORE_MAPPING_FEATURE);
 			feature.setDataType("xref");
 			feature.setName("Features");
-			database.add(feature);
-		}
-		else return;
+			features.add(feature);
+			// database.add(feature);
 
-		boolean isMappedFeatureExists = database.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_MAPPED_FEATURE)).size() == 0;
-		if (isMappedFeatureExists)
-		{
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
 			mappedFeature.setDataType("xref");
 			mappedFeature.setName("Mapped features");
-			database.add(mappedFeature);
-		}
+			features.add(mappedFeature);
+			// database.add(mappedFeature);
 
-		boolean isMappedFetureScore = database.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_SCORE)).size() == 0;
-		if (isMappedFetureScore)
-		{
 			ObservableFeature mappedFeatureScore = new ObservableFeature();
 			mappedFeatureScore.setIdentifier(STORE_MAPPING_SCORE);
 			mappedFeatureScore.setDataType("decimal");
 			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
-			database.add(mappedFeatureScore);
-		}
+			features.add(mappedFeatureScore);
+			// database.add(mappedFeatureScore);
 
-		boolean isMappedFetureAbsoluteScore = database.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_ABSOLUTE_SCORE)).size() == 0;
-		if (isMappedFetureAbsoluteScore)
-		{
 			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
 			mappedFeatureAbsoluteScore.setDataType("decimal");
 			mappedFeatureAbsoluteScore.setName(STORE_MAPPING_ABSOLUTE_SCORE);
-			database.add(mappedFeatureAbsoluteScore);
-		}
+			features.add(mappedFeatureAbsoluteScore);
+			// database.add(mappedFeatureAbsoluteScore);
 
-		boolean isConfirmMappingExists = database.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_CONFIRM_MAPPING)).size() == 0;
-		if (isConfirmMappingExists)
-		{
 			ObservableFeature confirmMapping = new ObservableFeature();
 			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
 			confirmMapping.setDataType("bool");
 			confirmMapping.setName("Mapping confirmed");
-			database.add(confirmMapping);
-		}
+			features.add(confirmMapping);
+			// database.add(confirmMapping);
 
-		boolean ifProtocolExists = database.find(Protocol.class,
-				new QueryRule(Protocol.IDENTIFIER, Operator.EQUALS, PROTOCOL_IDENTIFIER)).size() == 0;
-		if (ifProtocolExists)
-		{
+			database.add(features);
+
 			Protocol protocol = new Protocol();
 			protocol.setIdentifier("store_mapping");
 			protocol.setName("store_mapping");
