@@ -512,7 +512,8 @@
 							var storedRowInfo = $('body').data('clickedRow');
 							var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
 							$.each(selectedOptions, function(index, dataSetId){
-								var index = $.inArray(dataSetId, biobankDataSets);
+								var index = $.inArray(parseInt(dataSetId), biobankDataSets);
+								if(index < 0) index = $.inArray(dataSetId, biobankDataSets);
 								if(index !== -1){
 									var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
 									existingRow.find('td:eq(' + index + ')').empty().append(spinner).css('text-align', 'center');
