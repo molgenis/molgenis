@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css", "bootstrap-datetimepicker.min.css", "dataexplorer.css", "ui.dynatree.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "${resultsTableJavascriptFile}", "jquery.bootstrap.pager.js", "jquery.dynatree.min.js", "bootstrap-datetimepicker.min.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "${resultsTableJavascriptFile}", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "jquery.dynatree.min.js", "bootstrap-datetimepicker.min.js"]>
 <@header css js/>
 	<#if entityExplorerUrl??>
 		<script>top.molgenis.setEntityExplorerUrl('${entityExplorerUrl}');</script>
@@ -15,6 +15,9 @@
 						<#-- add span11 to ensure that input is styled correctly at low and high solutions -->
 						<input class="span10" id="observationset-search" type="text" placeholder="Search data values">
 						<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+					</div>
+					<div class="input-append span12">
+						<a href="#filter-dialog-modal" id="filter-wizard-button" role="button" class="btn btn-primary" data-toggle="modal">start filter wizard</a>
 					</div>
 				</div>
 				<div class="row-fluid">
@@ -46,12 +49,14 @@
 		<div class="span9">
 			<div class="pull-right">
 				<label class="control-label" for="dataset-select">View:</label>
-				<div id="dataDiv" class="<#if !authenticated>view-disabled<#else>view-enabled</#if>">
-					<span class="viewer" id="data">data<img src="/img/grid-icon.png"></img>
-					</span>
-				</div>
-				<div id="aggregateDiv">
-					<span class="viewer" id="aggregate">aggregate<img src="/img/aggregate-icon.png"></img></span>
+				<div id="switchview" class="pull-right">
+					<div id="dataDiv" class="<#if !authenticated>view-disabled<#else>view-enabled</#if>">
+						<span class="viewer" id="data">data<img id="dataViewIcon" src="/img/grid-icon.png"></img>
+						</span>
+					</div>
+					<div id="aggregateDiv">
+						<span class="viewer" id="aggregate">aggregate<img id="aggregateViewIcon" src="/img/aggregate-icon.png"></img></span>
+					</div>
 				</div>
 			</div>
 			<div class="controls pull-left">
@@ -61,6 +66,10 @@
 						<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
 					</#list>
 				</select>
+			</div>
+		</div>
+		<div id="filter-dialog-modal-container">
+			<div id="filter-dialog-modal" class="modal hide" tabindex="-1" role="dialog">
 			</div>
 		</div>
 		<div class="span9">
