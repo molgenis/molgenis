@@ -653,7 +653,7 @@
 				var row = $('<tr />');
 				$('<td />').text(category.valueCode).appendTo(row);
 				$('<td />').text(category.name).appendTo(row);
-				$('<td />').text(category.name).appendTo(row);
+				$('<td />').text(category.description).appendTo(row);
 				row.appendTo(categoryTable);
 			});
 			categoryTable.addClass('listtable');
