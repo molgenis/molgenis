@@ -192,8 +192,8 @@
 		            	$(document).trigger('molgenis-registered', 'You have successfully registered');
 		        		modal.modal('hide');
 		            },
-		            error: function() {
-		            	$('.modal-header', modal).after($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Unknown error occurred</div>'));
+		            error: function(xhr) {
+		            	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
 		            }
 		        });
 	        }
