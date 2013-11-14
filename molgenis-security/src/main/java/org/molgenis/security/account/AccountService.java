@@ -147,6 +147,10 @@ public class AccountService
 			mailMessage.setText(createPasswordResettedEmailText(newPassword));
 			mailSender.send(mailMessage);
 		}
+		else
+		{
+			throw new MolgenisUserException("Invalid email address.");
+		}
 	}
 
 	private ActivationMode getActivationMode()

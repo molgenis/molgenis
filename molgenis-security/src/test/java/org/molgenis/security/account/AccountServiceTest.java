@@ -167,4 +167,18 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
 	}
+
+	@Test(expectedExceptions = MolgenisUserException.class)
+	public void resetPassword_invalidEmailAddress() throws DatabaseException
+	{
+		@SuppressWarnings("unchecked")
+		Query<MolgenisUser> query = mock(Query.class);
+		when(query.eq(MolgenisUser.EMAIL, "invalid-user@molgenis.org")).thenReturn(query);
+		MolgenisUser molgenisUser = mock(MolgenisUser.class);
+		when(molgenisUser.getPassword()).thenReturn("password");
+		when(query.find()).thenReturn(Collections.<MolgenisUser> emptyList());
+		when(database.query(MolgenisUser.class)).thenReturn(query);
+
+		accountService.resetPassword("invalid-user@molgenis.org");
+	}
 }
