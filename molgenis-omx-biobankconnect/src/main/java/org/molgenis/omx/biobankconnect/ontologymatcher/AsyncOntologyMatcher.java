@@ -438,15 +438,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 									.toString()));
 							rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, boostedSynonym
 									.toString()));
-
-							// allQueries.add(new
-							// QueryRule(FIELD_DESCRIPTION_STOPWORDS,
-							// Operator.SEARCH, boostedSynonym
-							// .toString()));
-							// allQueries.add(new
-							// QueryRule(ObservableFeature.DESCRIPTION,
-							// Operator.SEARCH, boostedSynonym
-							// .toString()));
 						}
 					}
 					QueryRule queryRule = new QueryRule(rules);
@@ -593,7 +584,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		Map<Integer, List<BoostTermContainer>> position = new HashMap<Integer, List<BoostTermContainer>>();
 		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")));
-		// List<String> selectedOntologyTerms = new ArrayList<String>();
 
 		for (OntologyTermContainer ontologyTermContainer : totalHits.values())
 		{
@@ -735,35 +725,30 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			feature.setDataType("xref");
 			feature.setName("Features");
 			features.add(feature);
-			// database.add(feature);
 
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
 			mappedFeature.setDataType("xref");
 			mappedFeature.setName("Mapped features");
 			features.add(mappedFeature);
-			// database.add(mappedFeature);
 
 			ObservableFeature mappedFeatureScore = new ObservableFeature();
 			mappedFeatureScore.setIdentifier(STORE_MAPPING_SCORE);
 			mappedFeatureScore.setDataType("decimal");
 			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
 			features.add(mappedFeatureScore);
-			// database.add(mappedFeatureScore);
 
 			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
 			mappedFeatureAbsoluteScore.setDataType("decimal");
 			mappedFeatureAbsoluteScore.setName(STORE_MAPPING_ABSOLUTE_SCORE);
 			features.add(mappedFeatureAbsoluteScore);
-			// database.add(mappedFeatureAbsoluteScore);
 
 			ObservableFeature confirmMapping = new ObservableFeature();
 			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
 			confirmMapping.setDataType("bool");
 			confirmMapping.setName("Mapping confirmed");
 			features.add(confirmMapping);
-			// database.add(confirmMapping);
 
 			database.add(features);
 
