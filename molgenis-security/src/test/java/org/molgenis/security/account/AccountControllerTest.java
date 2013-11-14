@@ -90,7 +90,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser() throws Exception
 	{
-		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("redirect:http://localhost"));
+		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("forward:/"));
 		verify(accountService).activateUser("123");
 	}
 
