@@ -20,10 +20,16 @@
 		
 	};
 	
-	ns.MappingManager.prototype.changeDataSet = function(selectedDataSet, dataSets){
-		biobankDataSets = dataSets;
-		if(selectedDataSet !== ''){
+	ns.MappingManager.prototype.changeDataSet = function(selectedDataSet, dataSetIds){
+		if(selectedDataSet !== '' && dataSetIds.length > 0){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+			biobankDataSets = restApi.get('/api/v1/dataset/', null, {
+				q : [{
+					field : 'id',
+					operator : 'IN',
+					value : dataSetIds
+				}],
+			}).items;
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
 				queryRules : [{
@@ -52,12 +58,10 @@
 				minLength : 3,
 				items : 20
 			});
-			
 			$('#search-button').click(function(){
 				ns.MappingManager.prototype.createMatrixForDataItems();
 				previousSearchText = $('#search-dataitem').val();
 			});
-
 			$('#search-dataitem').on('keydown', function(e){
 			    if (e.which == 13) {
 			    	previousSearchText = $(this).val();
@@ -65,7 +69,6 @@
 			    	return false;
 			    }
 			});
-			
 			$('#search-dataitem').on('keyup', function(e){
 				if($(this).val() === '' && previousSearchText !== null){
 					previousSearchText = null;
@@ -111,7 +114,8 @@
 		
 		function getDataSetsForMapping(){
 			var identifiers = [];
-			$.each(biobankDataSets, function(index, dataSetId){
+			$.each(biobankDataSets, function(index, dataSet){
+				var dataSetId = ns.hrefToId(dataSet.href);
 				if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet())
 				identifiers.push(ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
 			});
@@ -220,34 +224,33 @@
 			return tuple;
 		}
 		
-		function renderMappingTable(mappingPerStudy, dataSets, displayFeatures, cachedFeatures, callback){
+		function renderMappingTable(mappingPerStudy, mappingDataSets, displayFeatures, cachedFeatures, callback){
 			//create table header
+			var involvedDataSetIds = [];
 			var involvedDataSetNames = [];
 			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			involvedDataSetNames.push(selectedDataSet.name);
-			var removedDataSetIndex = [];
-			biobankDataSets = [];
-			$.each(dataSets, function(index, dataSet){
+			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
 					var dataSetIdArray = dataSet.identifier.split('-');
-					biobankDataSets.push(dataSetIdArray[1]);
+					involvedDataSetIds.push(dataSetIdArray[1]);
 				}
 			});
-			var involvedDataSets = restApi.get('/api/v1/dataset/', null, {
-				q : [{
-					field : 'id',
-					operator : 'IN',
-					value : biobankDataSets
-				}],
+			involvedDataSetIds.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
+			var removeDataSetIndex = [];
+			$.each(biobankDataSets, function(index, dataSet){
+				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
+					involvedDataSetNames.push(dataSet.name);
+				}else{
+					removeDataSetIndex.push(index);
+				}
 			});
-			$.each(involvedDataSets.items, function(index, mappedDataSet){
-				involvedDataSetNames.push(mappedDataSet.name);
+			$.each(removeDataSetIndex, function(index, number){
+				biobankDataSets.splice(number, 1);
 			});
-			biobankDataSets.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
 			var tableBody = $('<tbody />');
 			$.each(displayFeatures, function(index, featureFromIndex){
 				var featureId = featureFromIndex.columnValueMap.id;
-				tableBody.append(createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures));
+				tableBody.append(createRowForMappingTable(mappingPerStudy, mappingDataSets, featureId, cachedFeatures));
 			});
 			callback(tableBody, involvedDataSetNames);
 		}
@@ -423,7 +426,7 @@
 					body.append(ns.getOntologyAnnotator().createSearchDiv(title, restApiFeature, createAnnotationModal));
 					var footer = modal.find('div.modal-footer:eq(0)');
 					var nextButton = $('<button type="btn" class="btn btn-primary">Next</button>').click(function(){
-						createRematchingModal(restApiFeature, biobankDataSets);
+						createRematchingModal(restApiFeature);
 					});
 					footer.prepend(nextButton);
 					var table = $('body table:eq(0)');
@@ -438,15 +441,15 @@
 			});
 		}
 		
-		function createRematchingModal(feature, dataSets){
+		function createRematchingModal(feature){
 			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
 				var body = modal.find('div.modal-body:eq(0)');
 				var divControlPanel = $('<div />').addClass('row-fluid').appendTo(body);
 				var selectTag = $('<select />');
-				$.each(dataSets, function(index, element){
-					if(element !== ns.MappingManager.prototype.getSelectedDataSet()){
-						var dataSet = restApi.get('/api/v1/dataset/' + element);
-						selectTag.append('<option value="' + ns.hrefToId(dataSet.href) + '">' + dataSet.name + '</option>');
+				$.each(biobankDataSets, function(index, dataSet){
+					var dataSetId = ns.hrefToId(dataSet.href);
+					if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet()){
+						selectTag.append('<option value="' + dataSetId + '">' + dataSet.name + '</option>');
 					}
 				});
 				var selectButton = $('<button type="btn" class="btn btn-info">Select</button>');
@@ -512,9 +515,13 @@
 							modal.remove();
 							var storedRowInfo = $('body').data('clickedRow');
 							var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
+							var biobankDataSetIds = [];
+							$.each(biobankDataSets, function(index, dataSet){
+								biobankDataSetIds.push(ns.hrefToId(dataSet.href));
+							});
 							$.each(selectedOptions, function(index, dataSetId){
-								var index = $.inArray(parseInt(dataSetId), biobankDataSets);
-								if(index < 0) index = $.inArray(dataSetId, biobankDataSets);
+								var index = $.inArray(parseInt(dataSetId), biobankDataSetIds);
+								if(index < 0) index = $.inArray(dataSetId, biobankDataSetIds);
 								if(index !== -1){
 									var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
 									existingRow.find('td:eq(' + index + ')').empty().append(spinner).css('text-align', 'center');

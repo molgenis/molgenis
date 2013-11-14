@@ -58,13 +58,13 @@
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
 			molgenis.setContextURL(contextUrl.replace('/mappingmanager', '/biobankconnect'));
-			var dataSets = [];
+			var dataSetIds = [];
 			<#list dataSets as dataset>
-				dataSets.push('${dataset.id?c}');
+				dataSetIds.push('${dataset.id?c}');
 			</#list>
-			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val(), dataSets);
+			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val(), dataSetIds);
 			$('#selectedDataSet').change(function(){
-				molgenis.getMappingManager().changeDataSet($(this).val(), dataSets);
+				molgenis.getMappingManager().changeDataSet($(this).val(), dataSetIds);
 			});
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();
