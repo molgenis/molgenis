@@ -21,6 +21,7 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -46,6 +47,9 @@ public class AccountService
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
 	{
@@ -135,9 +139,8 @@ public class AccountService
 		MolgenisUser molgenisUser = MolgenisUser.findByEmail(unsecuredDatabase, userEmail);
 		if (molgenisUser != null)
 		{
-			// TODO: make this mandatory (password that was sent is valid only once)
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
-			molgenisUser.setPassword(newPassword);
+			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
 			unsecuredDatabase.update(molgenisUser);
 
 			// send password reseted email to user
