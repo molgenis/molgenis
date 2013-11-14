@@ -55,6 +55,7 @@
 			
 			$('#search-button').click(function(){
 				ns.MappingManager.prototype.createMatrixForDataItems();
+				previousSearchText = $('#search-dataitem').val();
 			});
 
 			$('#search-dataitem').on('keydown', function(e){
