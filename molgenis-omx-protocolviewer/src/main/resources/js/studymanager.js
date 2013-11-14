@@ -7,6 +7,7 @@
 		var viewTreeContainer = $('#study-definition-viewer-tree');
 		var editInfoContainer = $('#study-definition-editor-info');
 		var editTreeContainer = $('#study-definition-editor-tree');
+		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
 		
 		function createDynatreeConfig(catalog) {
 			function createDynatreeConfigRec(node, dynaNode) {
@@ -77,6 +78,8 @@
 		}
 		
 		function updateStudyDefinitionViewer() {
+			showSpinner();
+			
 			// clear previous tree
 			if (viewTreeContainer.children('ul').length > 0)
 				viewTreeContainer.dynatree('destroy');
@@ -90,11 +93,13 @@
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/view/' + studyDefinitionId,
 				success : function(catalog) {
+					hideSpinner();
 					viewInfoContainer.html(createCatalogInfo(catalog));
 					viewTreeContainer.empty();
 					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
 				error: function (xhr) {
+					hideSpinner();
 					viewTreeContainer.empty();
 					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
@@ -102,6 +107,8 @@
 		}
 		
 		function updateStudyDefinitionEditor() {
+			showSpinner();
+			
 			// clear previous tree
 			if (editTreeContainer.children('ul').length > 0)
 				editTreeContainer.dynatree('destroy');
@@ -115,11 +122,13 @@
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
 				success : function(catalog) {
+					hideSpinner();
 					editInfoContainer.html(createCatalogInfo(catalog));
 					editTreeContainer.empty();
 					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
 				},
 				error: function (xhr) {
+					hideSpinner();
 					editTreeContainer.empty();
 					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
@@ -144,7 +153,10 @@
 			window.location = molgenis.getContextUrl() + '/download/' + studyDefinitionId;
 		});
 		
-		$('#update-study-definition-btn').click(function() {
+		updateStudyDefinitionBtn.click(function() {
+			updateStudyDefinitionBtn.prop('disabled', true);
+			showSpinner();
+			
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			
 			// get selected nodes
@@ -169,9 +181,12 @@
 				}),
 				contentType : 'application/json',
 				success : function(entities) {
-					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Updated study definition [' + studyDefinitionId + ']</div>');
+					hideSpinner();
+					updateStudyDefinitionBtn.prop('disabled', false);
+					molgenis.createAlert([{'message': 'Updated study definition [' + studyDefinitionId + ']'}], 'success');
 				},
 				error: function (xhr) {
+					hideSpinner();
 					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
