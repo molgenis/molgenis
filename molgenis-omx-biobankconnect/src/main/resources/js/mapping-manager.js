@@ -221,34 +221,34 @@
 		
 		function renderMappingTable(mappingPerStudy, dataSets, displayFeatures, cachedFeatures, callback){
 			//create table header
-			var involedDataSets = [];
+			var involvedDataSetNames = [];
 			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			involedDataSets.push(selectedDataSet.name);
+			involvedDataSetNames.push(selectedDataSet.name);
 			var removedDataSetIndex = [];
+			biobankDataSets = [];
 			$.each(dataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
 					var dataSetIdArray = dataSet.identifier.split('-');
-					try{
-						var mappedDataSet = restApi.get('/api/v1/dataset/' + dataSetIdArray[1]);
-						involedDataSets.push(mappedDataSet.name);
-					}
-					catch(err){
-						removedDataSetIndex.push(index);
-						console.log(err);
-					}
+					biobankDataSets.push(dataSetIdArray[1]);
 				}
 			});
-			
-			$.each(removedDataSetIndex, function(index, number){
-				dataSets.splice(number, 1);
+			var involvedDataSets = restApi.get('/api/v1/dataset/', null, {
+				q : [{
+					field : 'id',
+					operator : 'IN',
+					value : biobankDataSets
+				}],
 			});
-			
+			$.each(involvedDataSets.items, function(index, mappedDataSet){
+				involvedDataSetNames.push(mappedDataSet.name);
+			});
+			biobankDataSets.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
 			var tableBody = $('<tbody />');
 			$.each(displayFeatures, function(index, featureFromIndex){
 				var featureId = featureFromIndex.columnValueMap.id;
 				tableBody.append(createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures));
 			});
-			callback(tableBody, involedDataSets);
+			callback(tableBody, involvedDataSetNames);
 		}
 		
 		function createDynamicTableHeader(involedDataSets){
