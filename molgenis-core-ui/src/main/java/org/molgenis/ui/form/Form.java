@@ -1,16 +1,18 @@
 package org.molgenis.ui.form;
 
+import org.molgenis.data.Entity;
+
 public interface Form
 {
 	String getTitle();
 
-	String getPrimaryKey();
+	Integer getPrimaryKey();
 
 	boolean getHasWritePermission();
 
 	FormMetaData getMetaData();
 
-	org.molgenis.util.Entity getEntity();
+	Entity getEntity();
 
 	String getBaseUri(String contextUrl);
 

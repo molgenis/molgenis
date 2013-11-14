@@ -18,16 +18,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ${JavaName(entity)}Repository extends AbstractJpaRepository<${JavaName(entity)}>
 {	
+	public ${JavaName(entity)}Repository()
+	{
+		EntityMetaDataCache.add(new ${JavaName(entity)}MetaData());
+	}
+	
 	@Override
 	public ${JavaName(entity)}MetaData getEntityMetaData()
 	{
-		${JavaName(entity)}MetaData metaData = (${JavaName(entity)}MetaData)EntityMetaDataCache.get("${JavaName(entity)}");
-		if (metaData == null)
-		{
-			metaData = new ${JavaName(entity)}MetaData();
-			EntityMetaDataCache.add(metaData);
-		}
-		
-		return metaData;
+		return (${JavaName(entity)}MetaData)EntityMetaDataCache.get("${JavaName(entity)}");
 	}
 }

@@ -11,6 +11,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.QueryRule;
 import ${entity.namespace}.${entity.name};
 import org.molgenis.util.EntityPager;
@@ -87,10 +89,10 @@ public class ${entity.name}Service
 		QueryImpl q = new QueryImpl(resolveRefIdentifiers(queryRules));
 		q.setPageSize(num);
 		q.setOffset(start);
-
-		long count = repository.count();
+		
+		long count = repository.count(q);
 		Iterable<${entity.name}> ${entity.name?uncap_first}Collection = repository.findAll(q);
-
+		
 		return new EntityPager<${entity.name}>(start, num, count, ${entity.name?uncap_first}Collection);
 	}
 	
@@ -105,17 +107,35 @@ public class ${entity.name}Service
 	{
 		for (QueryRule r : rules)
 		{
-			if ((r.getField() != null) && r.getField().endsWith("_Identifier"))
+			if (r.getField() != null)
 			{
-				String entityName = StringUtils.capitalize(r.getField().substring(0,
-						r.getField().length() - "_Identifier".length()));
-				r.setField(entityName);
+				if (r.getField().endsWith("_Identifier"))
+				{
+					String entityName = StringUtils.capitalize(r.getField().substring(0,
+							r.getField().length() - "_Identifier".length()));
+					r.setField(entityName);
 
-				Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
-				r.setValue(value);
+					Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
+					r.setValue(value);
+				}
+				else
+				{
+					// Resolve xref, mref fields
+					AttributeMetaData attr = getEntityMetaData().getAttribute(r.getField());
+				
+					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF
+							&& StringUtils.isNumeric(r.getValue().toString()))
+					{
+						Object value = dataService.findOne(attr.getRefEntity().getName(),
+								new QueryImpl().eq(attr.getRefEntity().getIdAttribute().getName(), r.getValue()));
+						r.setValue(value);
+					}
+				}
 			}
+
 		}
 
 		return rules;
 	}
+
 }

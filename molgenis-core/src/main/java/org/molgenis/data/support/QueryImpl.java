@@ -201,4 +201,11 @@ public class QueryImpl implements Query
 		return this;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "QueryImpl [rules=" + rules + ", order=" + order + ", attributeNames=" + attributeNames + ", pageSize="
+				+ pageSize + ", offset=" + offset + ", sort=" + sort + "]";
+	}
+
 }

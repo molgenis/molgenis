@@ -116,7 +116,20 @@ public class ${entity.name}Controller
 
 	private ResponseEntity<${entity.name}Response> _create${entity.name}(${entity.name}Request ${entity.name?uncap_first}Request) throws DatabaseException
 	{
-		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.create(${entity.name?uncap_first}Request.to${entity.name}());
+		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Service.create(${entity.name?uncap_first}Request.to${entity.name}(${entity.name?uncap_first}Service
+<#assign javaFields = ["${entity.name}"]>
+<#list fields as field>
+<#if !field.system && !field.hidden && field.name != "__Type">
+	<#if field.type == "xref" || field.type == "mref">
+		<#if !javaFields?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
+				,${field.xrefEntity.name?uncap_first}Service
+				<#assign javaFields = javaFields + ["${field.xrefEntity.name}"]>
+			</#if>
+		</#if>
+	</#if>
+</#if>
+</#list>));
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Location", "/api/v1/${entity.name?lower_case}/" + ${entity.name?uncap_first}.getId());
 		return new ResponseEntity<${entity.name}Response>(responseHeaders, HttpStatus.CREATED);
@@ -305,7 +318,20 @@ public class ${entity.name}Controller
 
 	private void _update${entity.name}(${type(entity.primaryKey)} id, ${entity.name}Request ${entity.name?uncap_first}Request) throws DatabaseException
 	{
-		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Request.to${entity.name}();
+		${entity.name} ${entity.name?uncap_first} = ${entity.name?uncap_first}Request.to${entity.name}(${entity.name?uncap_first}Service
+<#assign javaFields = ["${entity.name}"]>
+<#list fields as field>
+<#if !field.system && !field.hidden && field.name != "__Type">
+	<#if field.type == "xref" || field.type == "mref">
+		<#if !javaFields?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
+				,${field.xrefEntity.name?uncap_first}Service
+				<#assign javaFields = javaFields + ["${field.xrefEntity.name}"]>
+			</#if>
+		</#if>
+	</#if>
+</#if>
+</#list>);
 		${entity.name?uncap_first}.setId(id);
 		${entity.name?uncap_first}Service.update(${entity.name?uncap_first});
 	}
@@ -384,7 +410,7 @@ public class ${entity.name}Controller
 	}
 
 	<#-- Entity request class -->
-	private class ${entity.name}Request
+	private static class ${entity.name}Request
 	{
 	<#list fields as field>
 	<#if !field.system && !field.hidden && field.name != "__Type">
@@ -406,7 +432,19 @@ public class ${entity.name}Controller
 	</#if>
 	</#list>
 	
-		public ${entity.name} to${entity.name}()
+		public ${entity.name} to${entity.name}(${entity.name}Service ${entity.name?uncap_first}Service
+<#assign javaFields = ["${entity.name}"]><#list fields as field>
+<#if !field.system && !field.hidden && field.name != "__Type">
+	<#if field.type == "xref" || field.type == "mref">
+		<#if !javaFields?seq_contains("${field.xrefEntity.name}")>
+			<#if (!(field.xrefField??) || !field.xrefField.system) && (!(field.xrefEntity??) || !field.xrefEntity.system)>
+				,${field.xrefEntity.name}Service ${field.xrefEntity.name?uncap_first}Service
+				<#assign javaFields = javaFields + ["${field.xrefEntity.name}"]>
+			</#if>
+		</#if>
+	</#if>
+</#if>
+</#list>)
 		{
 			${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
 		<#list fields as field>
@@ -414,12 +452,18 @@ public class ${entity.name}Controller
 			<#if field.type == "xref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			${entity.name?uncap_first}.set${JavaName(field)}(${field.xrefEntity.name?uncap_first}Service.read(${field.name?uncap_first}));
+			if (${field.name?uncap_first} != null)
+			{
+				${entity.name?uncap_first}.set${JavaName(field)}(${field.xrefEntity.name?uncap_first}Service.read(${field.name?uncap_first}));
+			}
 				</#if>
 			<#elseif field.type == "mref">
 				<#-- security: do not expose system fields/entities -->
 				<#if (!(field.xrefField??) || !field.xrefField.system) && !field.xrefEntity.system>
-			${entity.name?uncap_first}.set${JavaName(field)}(Lists.newArrayList(${field.xrefEntity.name?uncap_first}Service.read(${field.name?uncap_first})));
+			if ((${field.name?uncap_first} != null) && !${field.name?uncap_first}.isEmpty())
+			{
+				${entity.name?uncap_first}.set${JavaName(field)}(Lists.newArrayList(${field.xrefEntity.name?uncap_first}Service.read(${field.name?uncap_first})));
+			}
 				</#if>
 			<#else>
 			${entity.name?uncap_first}.set${JavaName(field)}(${field.name?uncap_first});
@@ -543,6 +587,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
 	{
+		e.printStackTrace();
 		logger.error(e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
@@ -561,6 +606,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
+		e.printStackTrace();
 		logger.error(e);		
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}

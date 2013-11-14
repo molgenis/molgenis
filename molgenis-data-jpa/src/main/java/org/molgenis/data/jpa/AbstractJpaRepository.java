@@ -57,6 +57,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		entityClass = (Class<E>) pt.getActualTypeArguments()[0];
 	}
 
+	@Override
 	public Class<E> getEntityClass()
 	{
 		return entityClass;

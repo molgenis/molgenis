@@ -42,6 +42,12 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		<#if f.isXRef()>
 		${name(f)}.setRefEntityName("${f.xrefEntity.name}");
 		</#if>
+		<#list entity.getXrefLabels() as xrefLabel>
+			<#if xrefLabel == f.name>
+		${name(f)}.setLabelAttribute(true);
+			</#if>
+		</#list>	
+		
 		addAttributeMetaData(${name(f)});
 			
 </#list>
