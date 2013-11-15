@@ -1,16 +1,12 @@
 package org.molgenis.omx.controller;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import java.util.Arrays;
-
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
-import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +24,7 @@ import org.testng.annotations.Test;
 @WebAppConfiguration
 @ContextConfiguration(classes = Config.class)
 public class ContentControllersTest extends AbstractTestNGSpringContextTests
-{
+{	
 	@Autowired
 	private HomeController homeController;
 	
@@ -46,12 +42,6 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private StaticContentService staticContentService;
-
-	@Autowired
-	private Database unsecuredDatabase;
-	
-	@Autowired
-	private MolgenisSettings molgenisSettings;
 	
 	private MockMvc mockMvcHome;
 	private MockMvc mockMvcNews;
@@ -60,8 +50,8 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	private MockMvc mockMvcBackground;
 
 	@BeforeMethod
-	public void setUp()
-	{
+	public void beforeMethod()
+	{		
 		mockMvcHome = MockMvcBuilders.standaloneSetup(homeController)
 				.setMessageConverters(new GsonHttpMessageConverter()).build();
 		
@@ -77,7 +67,7 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		mockMvcReferences = MockMvcBuilders.standaloneSetup(referencesController)
 				.setMessageConverters(new GsonHttpMessageConverter()).build();
 	}
-
+	
 	@Test
 	public void getHomeController()
 	{
@@ -108,54 +98,89 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		new ContactController();
 	}
 	
+	//Init
+	 
 	@Test
-	public void pageGetRequestHome() throws Exception {
-		this.pageGetRequest(mockMvcHome, HomeController.URI, HomeController.ID);
+	public void initHome() throws Exception {
+		this.initMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
 	}
 	
 	@Test
-	public void pageGetRequestNews() throws Exception {
-		this.pageGetRequest(mockMvcNews, NewsController.URI, NewsController.ID);
+	public void initNews() throws Exception {
+		this.initMethodTest(mockMvcNews, NewsController.URI, NewsController.ID);
 	}
 	
 	@Test
-	public void pageGetRequestBackground() throws Exception {
-		this.pageGetRequest(mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
+	public void initBackground() throws Exception {
+		this.initMethodTest(mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
 	}
 	
 	@Test
-	public void pageGetRequestContact() throws Exception {
-		this.pageGetRequest(mockMvcContact, ContactController.URI, ContactController.ID);
+	public void initContact() throws Exception {
+		this.initMethodTest(mockMvcContact, ContactController.URI, ContactController.ID);
 	}
 	
 	@Test
-	public void pageGetRequestReferences() throws Exception {
-		this.pageGetRequest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
+	public void initReferences() throws Exception {
+		this.initMethodTest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
 	}
-
-	public void pageGetRequest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
-	{	
-		RuntimeProperty runtimeProperty = mock(RuntimeProperty.class);
-		when(runtimeProperty.getValue()).thenReturn("<p>content</p>");
+	
+	
+	//Init Edit Get
+	@Test
+	public void initEditGetHome() throws Exception {
+		this.initEditGetMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
+	}
+	
+	@Test
+	public void initEditGetNews() throws Exception {
+		this.initEditGetMethodTest(mockMvcNews, NewsController.URI, NewsController.ID);
+	}
+	
+	@Test
+	public void initEditGetBackground() throws Exception {
+		this.initEditGetMethodTest(mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
+	}
+	
+	@Test
+	public void initEditGetContact() throws Exception {
+		this.initEditGetMethodTest(mockMvcContact, ContactController.URI, ContactController.ID);
+	}
+	
+	@Test
+	public void initEditGetReferences() throws Exception {
+		this.initEditGetMethodTest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
+	}
+	
+	public void initMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
+	{		
+		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
+		mockMvc.perform(MockMvcRequestBuilders.get(uri))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(view().name("view-staticcontent"))
+				.andExpect(model().attributeExists("content"))
+				.andExpect(model().attributeExists("isCurrentUserAuthenticatedSu"))
+				.andExpect(model().attribute("editHref", "/menu/main/" + uniqueReference + "/edit"));
+	}
+	
+	public void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
+	{		
+		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
+		when(this.staticContentService.isCurrentUserAuthenticatedSu()).thenReturn(true);
 		
-		when(unsecuredDatabase.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER,
-						Operator.EQUALS, RuntimeProperty.class.getSimpleName() + "_app." + uniqueReference))).thenReturn(
-				Arrays.asList(runtimeProperty));
-		
-		when(molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + uniqueReference , StaticContentServiceImpl.DEFAULT_CONTENT))
-			.thenReturn("<p>content</p>");
-		
-		mockMvc.perform(MockMvcRequestBuilders.get(uri)).andExpect(
-				MockMvcResultMatchers.status().isOk());
+		mockMvc.perform(MockMvcRequestBuilders.get(uri + "/edit"))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(view().name("view-staticcontent-edit"))
+				.andExpect(model().attributeExists("content"))
+				.andExpect(model().attribute("cancelHref", "/menu/main/" + uniqueReference));
 	}
 	
 	@Test
 	public void initNotExistingURI() throws Exception
 	{
-		mockMvcHome.perform(MockMvcRequestBuilders.get(org.molgenis.omx.controller.HomeController.URI + "/NotExistingURI")).andExpect(
+		mockMvcHome.perform(MockMvcRequestBuilders.get(HomeController.URI + "/NotExistingURI")).andExpect(
 				MockMvcResultMatchers.status().isNotFound());
 	}
-	
 
 	@Configuration
 	public static class Config
@@ -188,17 +213,6 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		public ReferencesController referencesController()
 		{
 			return new ReferencesController();
-		}
-
-		@Bean
-		public MolgenisSettings molgenisSettings()
-		{
-			return mock(MolgenisSettings.class);
-		}
-		
-		@Bean
-		public Database unsecuredDatabase(){
-			return mock(Database.class);
 		}
 		
 		@Bean
