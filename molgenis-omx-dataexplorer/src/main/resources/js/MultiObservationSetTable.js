@@ -60,16 +60,15 @@
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
 					if (feature.dataType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						entityInfo = restApi.get(feature.href);
-						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + formatTableCellValue(value, feature.dataType) + '">' 
-						+ htmlEscape(value) + '</a>';
+						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + value + '">' 
+						+ formatTableCellValue(value, feature.dataType) + '</a>';
 					}	
 					else if (feature.dataType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
 						var elements = value.split(',');
 						for (var i = 0; i < elements.length; i++) {
 							var element = elements[i].replace(/\s/g, '');
 						    if(i>0) cellValue += ",";
-						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + element + '">' + htmlEscape(element) + '</a>';
+						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + element + '">' + htmlEscape(element) + '</a>';
 						}
 					}
 					else{
