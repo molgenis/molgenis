@@ -210,14 +210,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
-		</dependency>
-		
+		</dependency>		
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-protocolmanager</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
-		<!--  
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-das</artifactId>
@@ -228,7 +226,6 @@
 			<artifactId>molgenis-omx-genomebrowser</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
-			-->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>

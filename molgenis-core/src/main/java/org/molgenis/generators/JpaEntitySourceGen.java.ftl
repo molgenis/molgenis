@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @org.springframework.stereotype.Repository
 public class JpaEntitySourceImpl implements JpaEntitySource
@@ -26,6 +27,7 @@ public class JpaEntitySourceImpl implements JpaEntitySource
 	<#list model.entities as entity>
 	<#if !entity.abstract>
 	@Autowired
+	@Qualifier("${JavaName(entity)}Repository")
 	public void set${JavaName(entity)}Repository(CrudRepository<${entity.namespace}.${JavaName(entity)}> ${name(entity)}Repository)
 	{	
 		<#if disable_decorators>

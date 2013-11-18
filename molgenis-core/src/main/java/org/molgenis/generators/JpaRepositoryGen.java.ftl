@@ -15,7 +15,7 @@ import org.molgenis.data.jpa.AbstractJpaRepository;
 import org.molgenis.data.support.EntityMetaDataCache;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("${JavaName(entity)}Repository")
 public class ${JavaName(entity)}Repository extends AbstractJpaRepository<${JavaName(entity)}>
 {	
 	public ${JavaName(entity)}Repository()

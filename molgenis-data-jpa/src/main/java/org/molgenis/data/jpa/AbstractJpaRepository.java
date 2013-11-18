@@ -618,6 +618,12 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 						case LESS:
 							andPredicates.add(cb.lessThan(field, cValue));
 							break;
+						case GREATER_EQUAL:
+							andPredicates.add(cb.greaterThanOrEqualTo(field, cValue));
+							break;
+						case LESS_EQUAL:
+							andPredicates.add(cb.lessThanOrEqualTo(field, cValue));
+							break;
 						default:
 							throw new RuntimeException("canno solve query rule:  " + r);
 					}
