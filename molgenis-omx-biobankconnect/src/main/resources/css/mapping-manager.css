@@ -48,16 +48,16 @@ td.add-border {
 	margin-bottom : 10px;
 }
 
-dl{
+dl {
 	font-size : 16px;
 	margin-top : -5px;
 }
 
-dt,dd{
+dt,dd {
 	padding-bottom : 8px;
 }
 
-ol li{
+ol li {
 	padding-bottom : 7px;
 }
 
@@ -67,4 +67,28 @@ h3 {
 
 h5 {
 	padding-left : 10px;
+}
+
+.overflow-y-visible {
+	overflow-y : visible;
+}
+
+.overflow-y-auto {
+	overflow-y : auto;
+}
+
+legend.legend-mapping-manager {
+	padding-bottom : 10px;
+}
+
+legend.legend-mapping-manager select {
+	margin-left : 20px;
+}
+
+button#downloadButton {
+	margin-top : -5px;
+}
+
+div#div-search {
+	margin-bottom : 10px;
 }

@@ -3,7 +3,6 @@
 	
 	var ns = molgenis;
 	var pagination = new ns.Pagination();
-	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;

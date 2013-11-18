@@ -67,8 +67,8 @@ td.feature-detail-td {
 	cursor: pointer;
 }
 
-.modal-body {
-	overflow-y: visible;
+.overflow-y-visible {
+	overflow-y : visible;
 }
 
 ol.action-list, ol.action-list li{
