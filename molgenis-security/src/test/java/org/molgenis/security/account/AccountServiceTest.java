@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
@@ -65,6 +66,12 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public PasswordEncoder passwordEncoder()
+		{
+			return mock(PasswordEncoder.class);
+		}
+
+		@Bean
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
@@ -85,6 +92,9 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private JavaMailSender javaMailSender;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -162,6 +172,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 
 		accountService.resetPassword("user@molgenis.org");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
+		verify(passwordEncoder).encode(any(String.class));
 		verify(database).update(argument.capture());
 		assertNotNull(argument.getValue().getPassword());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));

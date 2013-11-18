@@ -134,7 +134,7 @@
 					    	order();
 					    },
 					    error: function(xhr) {
-					    	molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+					    	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
 					    	modal.modal('hide');
 					    }
 					});
