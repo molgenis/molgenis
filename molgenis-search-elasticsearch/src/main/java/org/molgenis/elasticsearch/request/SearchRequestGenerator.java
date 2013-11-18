@@ -46,15 +46,15 @@ public class SearchRequestGenerator
 	 * 
 	 * @return SearchRequestBuilder
 	 */
-	public SearchRequestBuilder buildSearchRequest(String entityName, SearchType searchType,
+	public SearchRequestBuilder buildSearchRequest(List<String> entityNames, SearchType searchType,
 			List<QueryRule> queryRules, List<String> fieldsToReturn)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
-		if (entityName != null)
+		if (entityNames != null)
 		{
-			searchRequestBuilder.setTypes(entityName);
+			searchRequestBuilder.setTypes(entityNames.toArray(new String[entityNames.size()]));
 		}
 
 		// Fields
@@ -87,6 +87,13 @@ public class SearchRequestGenerator
 		}
 
 		return searchRequestBuilder;
+	}
+
+	public SearchRequestBuilder buildSearchRequest(String entityName, SearchType searchType,
+			List<QueryRule> queryRules, List<String> fieldsToReturn)
+	{
+		return buildSearchRequest(entityName == null ? null : Arrays.asList(entityName), searchType, queryRules,
+				fieldsToReturn);
 	}
 
 	private QueryRulePartGenerator findGeneratorForOperator(Operator operator)

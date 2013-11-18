@@ -3,7 +3,6 @@
 	
 	var ns = molgenis;
 	var pagination = new ns.Pagination();
-	var standardModal = new ns.StandardModal();
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var selectedDataSet = null;
@@ -15,12 +14,13 @@
 			if($.inArray(targetDataSetId, selectedOptions) === -1){
 				selectedOptions.push(targetDataSetId);
 				$('#target-catalogue').data('selectedOptions', selectedOptions);
-				switchOptions();
+				switchOptions($('#targetDataSets'));
 			}
 		}
-		$('#selectedTargetDataSets').val(selectedOptions);
 		renderOptions();
 		function renderOptions(){
+			
+			$('#selectedTargetDataSets').val(selectedOptions);
 			var targetCatalogues = $('#target-catalogue');
 			var dataSetDiv = $('<div />').addClass('span10');
 			targetCatalogues.css('margin-top', '20px').empty().append(dataSetDiv);
@@ -55,9 +55,9 @@
 			});
 		}
 		
-		function switchOptions(){
+		function switchOptions(selectedOptions){
 			var index = 0;
-			var options = $('#targetDataSets option');
+			var options = $(selectedOptions).find('option');
 			options.attr('selected',false).each(function(){
 				if(targetDataSetId !== $(this).val()){
 					index++;

@@ -22,15 +22,16 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	private Database db;
 	private final String ontologyIRI;
 	private final String ontologyName;
-	private final String NODE_PATH = "nodePath";
-	private final String BOOST = "boost";
-	private final String ONTOLOGY_IRI = "ontologyIRI";
-	private final String ONTOLOGY_NAME = "ontologyName";
-	private final String ONTOLOGY_TERM = "ontologyTerm";
-	private final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
-	private final String SYNONYMS = "ontologyTermSynonym";
-	private final String ONTOLOGY_LABEL = "ontologyLabel";
-	private final String ENTITY_TYPE = "entity_type";
+	private final static String NODE_PATH = "nodePath";
+	private final static String BOOST = "boost";
+	private final static String ONTOLOGY_IRI = "ontologyIRI";
+	private final static String ONTOLOGY_NAME = "ontologyName";
+	private final static String ONTOLOGY_TERM = "ontologyTerm";
+	private final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
+	private final static String SYNONYMS = "ontologyTermSynonym";
+	private final static String ALTERNATIVE_DEFINITION = "alternativeDefinition";
+	private final static String ONTOLOGY_LABEL = "ontologyLabel";
+	private final static String ENTITY_TYPE = "entity_type";
 
 	public OntologyTermTable(OntologyLoader loader, Database db)
 	{
@@ -58,12 +59,30 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		}
 	}
 
-	private void recursiveAddTuple(String termPath, OWLClass cls, OntologyLoader model, List<Tuple> tuples)
+	private void recursiveAddTuple(String termPath, OWLClass cls, OntologyLoader ontologyLoader, List<Tuple> tuples)
 	{
-		String label = model.getLabel(cls).replaceAll("[^a-zA-Z0-9 ]", " ");
+		String label = ontologyLoader.getLabel(cls).replaceAll("[^a-zA-Z0-9 ]", " ");
 		Set<String> synonyms = new HashSet<String>();
 		synonyms.add(label);
-		synonyms.addAll(model.getSynonyms(cls));
+		synonyms.addAll(ontologyLoader.getSynonyms(cls));
+		// listOfChildren.addAll(model.getAssociatedClasses(cls));
+		StringBuilder alternativeDefinitions = new StringBuilder();
+		for (Set<OWLClass> alternativeDefinition : ontologyLoader.getAssociatedClasses(cls))
+		{
+			StringBuilder newDefinition = new StringBuilder();
+			for (OWLClass associatedClass : alternativeDefinition)
+			{
+				if (newDefinition.length() != 0) newDefinition.append(',');
+				newDefinition.append(associatedClass.getIRI().toString());
+			}
+			if (alternativeDefinitions.length() != 0 && newDefinition.length() != 0) alternativeDefinitions
+					.append("&&&");
+			alternativeDefinitions.append(newDefinition);
+		}
+		if (alternativeDefinitions.length() != 0)
+		{
+			System.out.println(alternativeDefinitions.toString());
+		}
 		for (String synonym : synonyms)
 		{
 			KeyValueTuple tuple = new KeyValueTuple();
@@ -73,21 +92,21 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 			tuple.set(ONTOLOGY_NAME, ontologyName);
 			tuple.set(ONTOLOGY_TERM, label);
 			tuple.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
-			tuple.set(ONTOLOGY_LABEL, model.getOntologyName());
+			tuple.set(ONTOLOGY_LABEL, ontologyLoader.getOntologyName());
 			tuple.set(ENTITY_TYPE, "ontologyTerm");
 			tuple.set(SYNONYMS, synonym.replaceAll("[^a-zA-Z0-9 ]", " "));
+			tuple.set(ALTERNATIVE_DEFINITION, alternativeDefinitions.toString());
 			tuples.add(tuple);
 		}
 
-		Set<OWLClass> listOfChildren = model.getChildClass(cls);
-		listOfChildren.addAll(model.getAssociatedClasses(cls));
+		Set<OWLClass> listOfChildren = ontologyLoader.getChildClass(cls);
 		if (listOfChildren.size() > 0)
 		{
 			int i = 0;
 			for (OWLClass childClass : listOfChildren)
 			{
 				String childTermPath = termPath + "." + i;
-				recursiveAddTuple(childTermPath, childClass, model, tuples);
+				recursiveAddTuple(childTermPath, childClass, ontologyLoader, tuples);
 				i++;
 			}
 		}
@@ -117,6 +136,7 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 		columns.add(new Field(ONTOLOGY_LABEL));
 		columns.add(new Field(SYNONYMS));
 		columns.add(new Field(ENTITY_TYPE));
+		columns.add(new Field(ALTERNATIVE_DEFINITION));
 		return columns;
 	}
 

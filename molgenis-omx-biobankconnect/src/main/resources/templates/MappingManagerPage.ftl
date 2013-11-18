@@ -34,8 +34,14 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			var dataSetIds = [];
+			dataSetIds.push('${wizard.selectedDataSet.id?c}');
+			<#list wizard.selectedBiobanks as dataSetId>
+				dataSetIds.push('${dataSetId?c}');
+			</#list>
 			var molgenis = window.top.molgenis;
-			molgenis.getMappingManager().changeDataSet(${wizard.selectedDataSet.id?c});
+			molgenis.setContextURL('${context_url}');
+			molgenis.getMappingManager().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();
 				return false;

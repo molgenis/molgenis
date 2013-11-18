@@ -3,6 +3,7 @@ package org.molgenis.elasticsearch;
 import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.molgenis.elasticsearch.response.ResponseParser;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
+import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
@@ -75,6 +77,12 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
+	public SearchResult multiSearch(MultiSearchRequest request)
+	{
+		return multiSearch(SearchType.QUERY_AND_FETCH, request);
+	}
+
+	@Override
 	public long count(String documentType, List<QueryRule> queryRules)
 	{
 
@@ -82,6 +90,36 @@ public class ElasticSearchService implements SearchService
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
+	}
+
+	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
+	{
+		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
+		List<String> documentTypes = null;
+		if (request.getDocumentType() != null)
+		{
+			documentTypes = new ArrayList<String>();
+			for (String documentType : request.getDocumentType())
+			{
+				documentTypes.add(sanitizeMapperType(documentType));
+			}
+		}
+
+		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentTypes, searchType,
+				request.getQueryRules(), request.getFieldsToReturn());
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("SearchRequestBuilder:" + requestBuilder);
+		}
+
+		SearchResponse response = requestBuilder.execute().actionGet();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("SearchResponse:" + response);
+		}
+
+		return responseParser.parseSearchResponse(response);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
@@ -243,6 +281,52 @@ public class ElasticSearchService implements SearchService
 			}
 		}
 		LOG.info("Delete done.");
+	}
+
+	@Override
+	public void updateIndexTupleTable(String documentType, TupleTable tupleTable)
+	{
+		try
+		{
+			if (tupleTable.getCount() == 0)
+			{
+				return;
+			}
+		}
+		catch (TableException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
+		LOG.info("Going to create mapping for documentType [" + documentType + "]");
+		createMappings(documentTypeSantized, tupleTable);
+
+		LOG.info("Going to insert documents of type [" + documentType + "]");
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+
+		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
+		for (BulkRequestBuilder request : requests)
+		{
+			LOG.info("Request created");
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("BulkRequest:" + request);
+			}
+
+			BulkResponse response = request.execute().actionGet();
+			LOG.info("Request done");
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("BulkResponse:" + response);
+			}
+
+			if (response.hasFailures())
+			{
+				throw new ElasticSearchException(response.buildFailureMessage());
+			}
+		}
 	}
 
 	public void updateDocumentById(String documentType, String documentId, String updateScript)

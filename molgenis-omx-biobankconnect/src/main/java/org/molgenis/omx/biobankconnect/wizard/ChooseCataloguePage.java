@@ -39,16 +39,16 @@ public class ChooseCataloguePage extends AbstractWizardPage
 
 		if (request.getParameter("selectedDataSetId") != null)
 		{
+			BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
+			Integer selectedDataSetId = Integer.parseInt(request.getParameter("selectedDataSetId"));
 			try
 			{
-				BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
-				Integer selectedDataSetId = Integer.parseInt(request.getParameter("selectedDataSetId"));
 				biobankConnectWizard.setSelectedDataSet(database.findById(DataSet.class, selectedDataSetId));
-				ontologyAnnotator.annotate(selectedDataSetId, null);
 			}
 			catch (Exception e)
 			{
-				new RuntimeException(e);
+				new RuntimeException("Could not find dataset based on id : " + selectedDataSetId
+						+ "  from the database");
 			}
 		}
 		return null;
