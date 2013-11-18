@@ -91,8 +91,7 @@ public class AccountController
 			throw new BindException(RegisterRequest.class, "password does not match confirm password");
 		}
 		MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
-		URI activationUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/account/activate").build()
-				.toUri();
+		URI activationUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/account/activate").build().toUri();
 		accountService.createUser(molgenisUser, activationUri);
 
 		String successMessage;
