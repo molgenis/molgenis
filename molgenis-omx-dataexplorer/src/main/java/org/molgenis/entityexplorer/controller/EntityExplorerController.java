@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.server.MolgenisPermissionService;
