@@ -3,7 +3,7 @@
 	<parent>
 	    <groupId>org.molgenis</groupId>
 	    <artifactId>molgenis</artifactId>
-	    <version>0.0.3-SNAPSHOT</version>
+	    <version>0.0.4-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-omx-biobankconnect</artifactId>
 	<packaging>jar</packaging>
@@ -32,32 +32,32 @@
 		<dependency>
         	<groupId>org.molgenis</groupId>
             <artifactId>molgenis-omx-core</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-security</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-search</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-search-elasticsearch</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>
