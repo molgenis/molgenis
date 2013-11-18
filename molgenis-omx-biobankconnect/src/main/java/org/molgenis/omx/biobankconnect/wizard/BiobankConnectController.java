@@ -20,6 +20,7 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherResponse;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class BiobankConnectController extends AbstractWizardController
 	private final OntologyMatcherPage ontologyMatcherPager;
 	private final MappingManagerPage mappingManagerPager;
 	private final ProgressingBarPage progressingBarPager;
+	private final UserAccountService userAccountService;
 
 	private BiobankConnectWizard wizard;
 
@@ -66,7 +68,8 @@ public class BiobankConnectController extends AbstractWizardController
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
 			OntologyAnnotatorPage ontologyAnnotatorPager, OntologyMatcherPage ontologyMatcherPager,
-			MappingManagerPage mappingManagerPager, ProgressingBarPage progressingBarPager)
+			MappingManagerPage mappingManagerPager, ProgressingBarPage progressingBarPager,
+			UserAccountService userAccountService)
 	{
 		super(URI, "biobankconnect");
 		if (chooseCataloguePager == null) throw new IllegalArgumentException("ChooseCataloguePager is null");
@@ -74,11 +77,13 @@ public class BiobankConnectController extends AbstractWizardController
 		if (ontologyMatcherPager == null) throw new IllegalArgumentException("OntologyMatcherPager is null");
 		if (mappingManagerPager == null) throw new IllegalArgumentException("MappingManagerPager is null");
 		if (progressingBarPager == null) throw new IllegalArgumentException("ProgressingBarPager is null");
+		if (userAccountService == null) throw new IllegalArgumentException("userAccountService is null");
 		this.chooseCataloguePager = chooseCataloguePager;
 		this.ontologyAnnotatorPager = ontologyAnnotatorPager;
 		this.ontologyMatcherPager = ontologyMatcherPager;
 		this.mappingManagerPager = mappingManagerPager;
 		this.progressingBarPager = progressingBarPager;
+		this.userAccountService = userAccountService;
 		this.wizard = new BiobankConnectWizard();
 	}
 
@@ -92,18 +97,19 @@ public class BiobankConnectController extends AbstractWizardController
 			{
 				if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 			}
+			wizard = new BiobankConnectWizard();
+			wizard.setDataSets(dataSets);
+			wizard.setUserName(userAccountService.getCurrentUser().getUsername());
+			wizard.addPage(chooseCataloguePager);
+			wizard.addPage(ontologyAnnotatorPager);
+			wizard.addPage(ontologyMatcherPager);
+			wizard.addPage(progressingBarPager);
+			wizard.addPage(mappingManagerPager);
 		}
 		catch (Exception e)
 		{
 			logger.error("Exception validating import file", e);
 		}
-		wizard = new BiobankConnectWizard();
-		wizard.setDataSets(dataSets);
-		wizard.addPage(chooseCataloguePager);
-		wizard.addPage(ontologyAnnotatorPager);
-		wizard.addPage(ontologyMatcherPager);
-		wizard.addPage(progressingBarPager);
-		wizard.addPage(mappingManagerPager);
 		return wizard;
 	}
 
@@ -134,7 +140,8 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateDocument(@RequestBody UpdateIndexRequest request)
+	public void updateDocument(@RequestBody
+	UpdateIndexRequest request)
 	{
 		ontologyAnnotator.updateIndex(request);
 	}
@@ -144,7 +151,8 @@ public class BiobankConnectController extends AbstractWizardController
 	public OntologyMatcherResponse rematch(@RequestBody
 	OntologyMatcherRequest request) throws DatabaseException
 	{
-		ontologyMatcher.match(request.getSourceDataSetId(), request.getSelectedDataSetIds(), request.getFeatureId());
+		ontologyMatcher.match(userAccountService.getCurrentUser().getUsername(), request.getSourceDataSetId(),
+				request.getSelectedDataSetIds(), request.getFeatureId());
 		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
 				ontologyMatcher.matchPercentage());
 		return response;

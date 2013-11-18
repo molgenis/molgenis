@@ -41,7 +41,8 @@ public class OntologyMatcherPage extends AbstractWizardPage
 
 		try
 		{
-			ontologyMatcher.match(selectedDataSetId, selectedTargetDataSetIds, null);
+			ontologyMatcher
+					.match(biobankConnectWizard.getUserName(), selectedDataSetId, selectedTargetDataSetIds, null);
 
 		}
 		catch (Exception e)

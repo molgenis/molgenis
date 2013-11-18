@@ -15,6 +15,8 @@ public class BiobankConnectWizard extends Wizard
 
 	private List<Integer> selectedBiobanks;
 
+	private String userName;
+
 	public List<DataSet> getDataSets()
 	{
 		return dataSets;
@@ -43,5 +45,15 @@ public class BiobankConnectWizard extends Wizard
 	public void setSelectedBiobanks(List<Integer> selectedBiobanks)
 	{
 		this.selectedBiobanks = selectedBiobanks;
+	}
+
+	public String getUserName()
+	{
+		return userName;
+	}
+
+	public void setUserName(String userName)
+	{
+		this.userName = userName;
 	}
 }

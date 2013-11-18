@@ -38,6 +38,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
@@ -56,6 +57,7 @@ public class EvaluationController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
+	private final UserAccountService userAccountService;
 	private final SearchService searchService;
 	private final Database database;
 
@@ -63,12 +65,15 @@ public class EvaluationController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService, Database database)
+	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService,
+			UserAccountService userAccountService, Database database)
 	{
 		super(URI);
 		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
+		this.userAccountService = userAccountService;
 		this.searchService = searchService;
 		this.database = database;
 	}
@@ -92,10 +97,11 @@ public class EvaluationController extends MolgenisPluginController
 			for (DataSet dataSet : database.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.LIKE,
 					selectedDataSetId)))
 			{
-				if (dataSet.getIdentifier().startsWith(selectedDataSetId))
+				if (dataSet.getIdentifier().startsWith(
+						userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId))
 				{
 					String[] dataSetIds = dataSet.getIdentifier().toString().split("-");
-					if (dataSetIds.length > 1) mappedDataSets.add(dataSetIds[1]);
+					if (dataSetIds.length > 1) mappedDataSets.add(dataSetIds[2]);
 				}
 			}
 		}
@@ -210,7 +216,8 @@ public class EvaluationController extends MolgenisPluginController
 									Map<String, Hit> mappedFeatureIds = findFeaturesFromIndex("name",
 											mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
 
-									String mappingDataSetIdentifier = selectedDataSetId + "-" + dataSet.getId();
+									String mappingDataSetIdentifier = userAccountService.getCurrentUser().getUsername()
+											+ "-" + selectedDataSetId + "-" + dataSet.getId();
 									List<QueryRule> queryRules = new ArrayList<QueryRule>();
 									queryRules.add(new QueryRule("store_mapping_feature", Operator.EQUALS, features
 											.get(0).getId()));

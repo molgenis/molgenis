@@ -41,7 +41,7 @@
 			</#list>
 			var molgenis = window.top.molgenis;
 			molgenis.setContextURL('${context_url}');
-			molgenis.getMappingManager().changeDataSet('${wizard.selectedDataSet.id?c}', dataSetIds);
+			molgenis.getMappingManager().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();
 				return false;

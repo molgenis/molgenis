@@ -9,7 +9,7 @@ public interface OntologyMatcher
 {
 	void deleteDocumentByIds(String documentType, List<String> documentIds);
 
-	void match(Integer selectedCatalogue, List<Integer> cataloguesToMatch, Integer sourceDataSetId)
+	void match(String userName, Integer selectedCatalogue, List<Integer> cataloguesToMatch, Integer sourceDataSetId)
 			throws DatabaseException;
 
 	Integer matchPercentage();

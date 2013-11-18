@@ -76,6 +76,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	@Autowired
 	@Qualifier("unsecuredDatabase")
 	private Database database;
+
 	private SearchService searchService;
 
 	@Autowired
@@ -113,9 +114,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	@Async
-	public void match(Integer selectedDataSet, List<Integer> dataSetsToMatch, Integer featureId)
+	public void match(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch, Integer featureId)
 			throws DatabaseException
 	{
+
 		runningProcesses.incrementAndGet();
 		dataSetsToMatch.remove(selectedDataSet);
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
@@ -123,7 +125,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		Map<String, List<ObservationSet>> observationSetsPerDataSet = new HashMap<String, List<ObservationSet>>();
 		try
 		{
-			preprocessing(featureId, selectedDataSet, dataSetsToMatch);
+			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			if (featureId == null)
 			{
@@ -180,7 +182,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					for (Integer dataSetId : dataSetsToMatch)
 					{
 						StringBuilder dataSetIdentifier = new StringBuilder();
-						dataSetIdentifier.append(selectedDataSet).append('-').append(dataSetId);
+						dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
+								.append(dataSetId);
 						if (featureId != null) observationSetsPerDataSet.put(dataSetIdentifier.toString(),
 								new ArrayList<ObservationSet>());
 						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(dataSetId.toString(), finalQuery);
@@ -195,7 +198,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								mappedFeatureIds.add(mappedId);
 
 								ObservationSet observation = new ObservationSet();
-								observation.setIdentifier(feature.getId() + "-" + mappedId + "-identifier");
+								observation.setIdentifier(userName + "-" + feature.getId() + "-" + mappedFeatureIds
+										+ "-identifier");
 								observation.setPartOfDataSet_Identifier(dataSetIdentifier.toString());
 								listOfNewObservationSets.add(observation);
 								if (featureId != null) observationSetsPerDataSet.get(dataSetIdentifier.toString()).add(
@@ -255,7 +259,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				for (Integer catalogueId : dataSetsToMatch)
 				{
 					StringBuilder dataSetIdentifier = new StringBuilder();
-					dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
+					dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
+							.append(catalogueId);
 					searchService.indexTupleTable(dataSetIdentifier.toString(),
 							new StoreMappingTable(dataSetIdentifier.toString(), database));
 				}
@@ -273,18 +278,21 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 	}
 
-	private void preprocessing(Integer featureId, Integer selectedDataSet, List<Integer> dataSetsToMatch)
-			throws DatabaseException
+	private void preprocessing(String userName, Integer featureId, Integer selectedDataSet,
+			List<Integer> dataSetsToMatch) throws DatabaseException
 	{
-		createMappingStore(selectedDataSet, dataSetsToMatch);
 		List<String> dataSetsForMapping = new ArrayList<String>();
 		for (Integer catalogueId : dataSetsToMatch)
 		{
 			StringBuilder dataSetIdentifier = new StringBuilder();
-			dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
+			dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-').append(catalogueId);
 			dataSetsForMapping.add(dataSetIdentifier.toString());
 		}
-		if (featureId == null) deleteExistingRecords(dataSetsForMapping);
+		if (featureId == null)
+		{
+			createMappingStore(userName, selectedDataSet, dataSetsToMatch);
+			deleteExistingRecords(dataSetsForMapping);
+		}
 		else removeExistingMappings(featureId, dataSetsForMapping);
 	}
 
@@ -292,7 +300,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		List<ObservationSet> listOfObservationSets = database.find(ObservationSet.class, new QueryRule(
 				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.IN, dataSetsForMapping));
-
 		if (listOfObservationSets.size() > 0)
 		{
 			List<Integer> listOfObservationIdentifiers = new ArrayList<Integer>();
@@ -712,7 +719,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return newList;
 	}
 
-	private void createMappingStore(Integer selectedDataSet, List<Integer> dataSetsToMatch) throws DatabaseException
+	private void createMappingStore(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch)
+			throws DatabaseException
 	{
 		boolean isFeatureExists = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_FEATURE)).size() == 0;
@@ -762,7 +770,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 		for (Integer dataSetId : dataSetsToMatch)
 		{
-			String identifier = selectedDataSet + "-" + dataSetId;
+			String identifier = userName + "-" + selectedDataSet + "-" + dataSetId;
 			boolean ifDataSetExists = database.find(DataSet.class,
 					new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier)).size() == 0;
 			if (ifDataSetExists)
@@ -771,6 +779,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				dataSet.setIdentifier(identifier);
 				dataSet.setName(identifier);
 				dataSet.setProtocolUsed_Identifier(PROTOCOL_IDENTIFIER);
+				dataSet.setDescription("");
 				database.add(dataSet);
 			}
 		}

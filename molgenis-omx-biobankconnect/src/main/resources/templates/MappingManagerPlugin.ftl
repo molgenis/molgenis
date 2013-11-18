@@ -62,9 +62,9 @@
 			<#list dataSets as dataset>
 				dataSetIds.push('${dataset.id?c}');
 			</#list>
-			molgenis.getMappingManager().changeDataSet($('#selectedDataSet').val(), dataSetIds);
+			molgenis.getMappingManager().changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
 			$('#selectedDataSet').change(function(){
-				molgenis.getMappingManager().changeDataSet($(this).val(), dataSetIds);
+				molgenis.getMappingManager().changeDataSet('${userName}', $(this).val(), dataSetIds);
 			});
 			$('#downloadButton').click(function(){
 				molgenis.getMappingManager().downloadMappings();

@@ -41,6 +41,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.tuple.Tuple;
@@ -73,17 +74,21 @@ public class MappingManagerController extends MolgenisPluginController
 	private final OntologyMatcher ontologyMatcher;
 	private final SearchService searchService;
 	private final Database database;
+	private final UserAccountService userAccountService;
 
 	@Autowired
 	private FileStore fileStore;
 
 	@Autowired
-	public MappingManagerController(OntologyMatcher ontologyMatcher, SearchService searchService, Database database)
+	public MappingManagerController(OntologyMatcher ontologyMatcher, SearchService searchService,
+			UserAccountService userAccountService, Database database)
 	{
 		super(URI);
 		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (userAccountService == null) throw new IllegalArgumentException("userAccountService is null");
+		this.userAccountService = userAccountService;
 		this.ontologyMatcher = ontologyMatcher;
 		this.searchService = searchService;
 		this.database = database;
@@ -99,6 +104,7 @@ public class MappingManagerController extends MolgenisPluginController
 			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
 		model.addAttribute("dataSets", dataSets);
+		model.addAttribute("userName", userAccountService.getCurrentUser().getUsername());
 		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
 
@@ -298,17 +304,19 @@ public class MappingManagerController extends MolgenisPluginController
 		{
 			Set<Integer> featureIds = new HashSet<Integer>();
 			tupleWriter = new CsvWriter(response.getWriter());
-			Integer dataSetId = request.getDataSetId();
-			DataSet mappingDataSet = database.findById(DataSet.class, dataSetId);
+			Integer selectedDataSetId = request.getDataSetId();
+			DataSet mappingDataSet = database.findById(DataSet.class, selectedDataSetId);
 			List<DataSet> storeMappingDataSet = database.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER,
-					Operator.LIKE, "" + dataSetId));
+					Operator.LIKE, selectedDataSetId.toString()));
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(mappingDataSet.getName());
 			Map<Integer, Map<Integer, MappingClass>> dataSetMappings = new HashMap<Integer, Map<Integer, MappingClass>>();
 			for (DataSet dataSet : storeMappingDataSet)
 			{
-				Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[1]);
-				if (!mappedDataSetId.equals(dataSetId))
+				Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
+				if (dataSet.getIdentifier().startsWith(
+						userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
+						&& !mappedDataSetId.equals(selectedDataSetId))
 				{
 					DataSet mappedDataSet = database.findById(DataSet.class, mappedDataSetId);
 					dataSetNames.add(mappedDataSet.getName());
@@ -346,7 +354,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 			List<QueryRule> rules = new ArrayList<QueryRule>();
 			rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
-			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + dataSetId, rules, null);
+			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId, rules, null);
 			SearchResult featureSearchResult = searchService.search(searchFeatures);
 			for (Hit hit : featureSearchResult.getSearchHits())
 			{
@@ -357,8 +365,8 @@ public class MappingManagerController extends MolgenisPluginController
 				values.add(featureName);
 				for (DataSet dataSet : storeMappingDataSet)
 				{
-					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[1]);
-					if (!mappedDataSetId.equals(dataSetId))
+					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
+					if (!mappedDataSetId.equals(selectedDataSetId))
 					{
 						StringBuilder value = new StringBuilder();
 						Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
