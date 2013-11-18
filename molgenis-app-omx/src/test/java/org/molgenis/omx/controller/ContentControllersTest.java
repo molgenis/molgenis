@@ -97,8 +97,6 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	{
 		new ContactController();
 	}
-	
-	//Init
 	 
 	@Test
 	public void initHome() throws Exception {
@@ -125,8 +123,6 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		this.initMethodTest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
 	}
 	
-	
-	//Init Edit Get
 	@Test
 	public void initEditGetHome() throws Exception {
 		this.initEditGetMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);

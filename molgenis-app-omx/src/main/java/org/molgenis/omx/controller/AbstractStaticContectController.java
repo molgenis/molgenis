@@ -1,6 +1,5 @@
 package org.molgenis.omx.controller;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public abstract class AbstractStaticContectController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(AbstractStaticContectController.class);
-	
 	@Autowired
 	private StaticContentService staticContentService;
 	private final String uniqueReference;

@@ -70,12 +70,11 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		assertFalse(this.staticContentService.isCurrentUserAuthenticatedSu());
 	}
 	
-//TODO: implementing this	
-//	@Test
-//	public void submitContent(final String uniqueReference, final String content)
-//	{
-//		this.staticContentService.submitContent(uniqueReference, content);
-//	}
+	@Test
+	public void submitContent()
+	{	
+		assertTrue(this.staticContentService.submitContent("home", StaticContentServiceImpl.DEFAULT_CONTENT));
+	}
 	
 	private void setSecurityContextSuperUser()
 	{
@@ -130,16 +129,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public Database database() throws DatabaseException
 		{
-			Database database = mock(Database.class);
-
-//TODO: implementing this			
-//			RuntimeProperty runtimeProperty = mock(RuntimeProperty.class);
-//			when(runtimeProperty.getValue()).thenReturn("p>Welcome to Molgenis!</p>");
-//			when(database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER,
-//						Operator.EQUALS, RuntimeProperty.class.getSimpleName() + "_app.home"))).thenReturn(
-//					Arrays.asList(runtimeProperty));
-			
-			return database;
+			return mock(Database.class);
 		}
 		
 		@Bean
@@ -147,6 +137,12 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
 			when(molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home" , StaticContentServiceImpl.DEFAULT_CONTENT))
 				.thenReturn("<p>Welcome to Molgenis!</p>");		
+			
+			when(molgenisSettings.propertyExists(StaticContentServiceImpl.PREFIX_KEY + "home"))
+				.thenReturn(true);		
+			
+			when(molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home" , StaticContentServiceImpl.DEFAULT_CONTENT))
+				.thenReturn(true);
 			
 			StaticContentService staticContentService = new StaticContentServiceImpl(molgenisSettings);
 			return staticContentService;
