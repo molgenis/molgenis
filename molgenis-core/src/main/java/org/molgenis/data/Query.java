@@ -42,6 +42,8 @@ public interface Query
 
 	Query or();
 
+	Query and();
+
 	Query like(String field, Object value);
 
 	/**

@@ -171,13 +171,11 @@
 			<artifactId>molgenis-omx-importer</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
-		<!--
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-protocolviewer</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
-		-->
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-mobile</artifactId>
@@ -213,12 +211,13 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		<!--  
+		
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-protocolmanager</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
+		<!--  
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-das</artifactId>

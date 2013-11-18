@@ -115,6 +115,12 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Query and()
+	{
+		return this;
+	}
+
+	@Override
 	public Query like(String field, Object value)
 	{
 		rules.lastElement().add(new QueryRule(field, Operator.LIKE, value));

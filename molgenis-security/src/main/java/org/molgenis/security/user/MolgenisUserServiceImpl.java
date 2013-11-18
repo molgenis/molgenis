@@ -6,7 +6,6 @@ import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ACTIVATIONCODE,
+		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.SUPERUSER, true));
 
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
@@ -48,10 +47,8 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 
 	@Override
 	@RunAsSystem
-	public MolgenisUser getCurrentUser()
+	public MolgenisUser getUser(String username)
 	{
-		String currentUsername = SecurityUtils.getCurrentUsername();
-		return dataService
-				.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, currentUsername));
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username));
 	}
 }

@@ -66,7 +66,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	{
 		int count = 0;
 		List<ObservationSet> observationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset.getIdValue()));
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset));
 
 		List<ObservedValue> observedValues = new ArrayList<ObservedValue>();
 		for (ObservationSet observationSet : observationSets)
@@ -151,7 +151,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		for (ObservableFeature feature : features)
 		{
 			List<Category> categories = dataService.findAllAsList(Category.ENTITY_NAME,
-					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature.getIdValue()));
+					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
 			deleteCategories(categories);
 
 			int protocolcount = countReferringProtocols(feature, allProtocols);
@@ -174,7 +174,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		for (Category category : categories)
 		{
 			List<CategoricalValue> categoricalValues = dataService.findAllAsList(CategoricalValue.ENTITY_NAME,
-					new QueryImpl().eq(CategoricalValue.VALUE, category.getIdValue()));
+					new QueryImpl().eq(CategoricalValue.VALUE, category));
 
 			for (CategoricalValue cat : categoricalValues)
 			{

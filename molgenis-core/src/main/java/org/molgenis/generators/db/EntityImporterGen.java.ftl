@@ -19,19 +19,9 @@
 package ${package};
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-<#list allFields(entity) as f>
-<#if f.type="xref" ||  f.type="mref" >
-import java.util.Map;
-import java.util.TreeMap;
-<#break>
-</#if>
-</#list>
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.StringUtils;
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.CrudRepository;
@@ -44,8 +34,7 @@ import org.molgenis.framework.db.EntityImporter;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-
-${imports(model, entity, "")}
+import ${entity.namespace}.${JavaName(entity)};
 
 /**
  * Reads ${JavaName(entity)} from a delimited (csv) file, resolving xrefs to ids where needed, that is the tricky bit ;-)
@@ -145,8 +134,6 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 					}
 				}
 
-				// update objects in the database using xref_label defined secondary key(s) 'Identifier' defined in
-				// xref_label
 				<#if entity.getXrefLabels()?exists>
 				//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
 				crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
@@ -165,32 +152,30 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 
 				do
 				{
-					for (int i = 0; i < ${name(entity)}sMissingRefs.size(); i++)
+					int index = new java.util.Random().nextInt(${name(entity)}sMissingRefs.size());
+					Entity entity = entityMissingRefs.get(index);
+					${JavaName(entity)} object = ${name(entity)}sMissingRefs.get(index);
+
+					if (resolveForeignKeys(dataService, entity, object, crudRepository))
 					{
-						Entity entity = entityMissingRefs.get(i);
-						${JavaName(entity)} object = ${name(entity)}sMissingRefs.get(i);
-
-						if (resolveForeignKeys(dataService, entity, object, crudRepository))
-						{
-							${name(entity)}List.add(object);
-							entityMissingRefs.remove(entity);
-							${name(entity)}sMissingRefs.remove(object);
-						}
-
-						if (!${name(entity)}List.isEmpty())
-						{
-							<#if entity.getXrefLabels()?exists>
-							//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
-							crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
-							<#else>
-							//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
-							crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
-							</#if>
-							${name(entity)}List.clear();
-						}
+						${name(entity)}List.add(object);
+						entityMissingRefs.remove(entity);
+						${name(entity)}sMissingRefs.remove(object);
 					}
 
-					if (iterationCount++ > 100)
+					if (!${name(entity)}List.isEmpty())
+					{
+						<#if entity.getXrefLabels()?exists>
+						//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
+						crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
+						<#else>
+						//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
+						crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
+						</#if>
+						${name(entity)}List.clear();
+					}
+
+					if (iterationCount++ > 1000)
 					{
 						String identifier = "";
 						String name = "";
@@ -213,7 +198,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 		} 
 		catch(Exception e) 
 		{
-			e.printStackTrace();
+			logger.error("Error importing repository [" + repository.getName() + "]", e);
 			throw new MolgenisDataException(e);
 		}
 		
@@ -250,7 +235,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 									+ attrXref.getName().toLowerCase());
 						}
 
-						if (value != null)
+						if ((value != null) && (object.get(attr.getName()) == null))
 						{
 							Object xref = dataService.findOne(attr.getRefEntity().getName(),
 									new QueryImpl().eq(attrXref.getName(), value));
@@ -271,18 +256,22 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 							value = entity.getList(attr.getName().toLowerCase() + "_"
 									+ attrXref.getName().toLowerCase());
 						}
+						
+						@SuppressWarnings("unchecked")
+						List<Entity> xrefObjects = (List<Entity>) object.get(attr.getName());
 
-						if (value != null && !value.isEmpty())
+						if (value != null && !value.isEmpty()
+								&& ((xrefObjects == null) || (xrefObjects.size() < value.size())))
 						{
-							List<?> mref = dataService.findAllAsList(attr.getRefEntity().getName(),
+							List<Entity> mref = dataService.findAllAsList(attr.getRefEntity().getName(),
 									new QueryImpl().in(attrXref.getName(), value));
+
+							object.set(attr.getName(), mref);
 
 							if (mref.size() < value.size())
 							{
 								return false;
 							}
-
-							object.set(attr.getName(), mref);
 						}
 					}
 

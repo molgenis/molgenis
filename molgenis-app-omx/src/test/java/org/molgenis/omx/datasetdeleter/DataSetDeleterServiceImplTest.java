@@ -14,11 +14,9 @@ import java.util.List;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
@@ -26,6 +24,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.observ.value.Value;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +61,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	private DataSetDeleterServiceImpl dataSetDeleterServiceImpl;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@SuppressWarnings("deprecation")
 	@Captor
@@ -82,15 +81,15 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		@Bean
 		public DataSetDeleterServiceImpl dataSetDeleterServiceImpl() throws Exception
 		{
-			return new DataSetDeleterServiceImpl(database(), searchService());
+			return new DataSetDeleterServiceImpl(dataService(), searchService());
 		}
 
 		@Bean
-		public Database database() throws Exception
+		public DataService dataService() throws Exception
 		{
-			Database database = mock(Database.class);
-			setUp(database);
-			return database;
+			DataService dataService = mock(DataService.class);
+			setUp(dataService);
+			return dataService;
 		}
 
 		@Bean
@@ -106,7 +105,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		}
 	}
 
-	public static void setUp(Database database) throws Exception
+	public static void setUp(DataService dataService) throws Exception
 	{
 		features0 = new ArrayList<ObservableFeature>();
 		features1 = new ArrayList<ObservableFeature>();
@@ -131,21 +130,21 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		protocol0.setDescription("description0");
 		protocol0.setIdentifier("identifier0");
 		protocol0.setId(0);
-		protocol0.setFeatures(feature0);
+		protocol0.setFeatures(features0);
 		protocol1 = new Protocol();
 		protocol1.setDescription("description1");
 		protocol1.setIdentifier("identifier1");
 		protocol1.setId(1);
-		protocol1.setFeatures(feature1);
+		protocol1.setFeatures(features1);
 		protocol2 = new Protocol();
 		protocol2.setDescription("description2");
 		protocol2.setIdentifier("identifier2");
-		protocol2.setSubprotocols(protocol1);
+		protocol2.setSubprotocols(subProtocols);
 		protocol2.setId(2);
 		protocol3 = new Protocol();
 		protocol3.setDescription("description3");
 		protocol3.setIdentifier("identifier3");
-		protocol3.setSubprotocols(protocol1);
+		protocol3.setSubprotocols(subProtocols);
 		protocol3.setId(3);
 
 		allProtocols.add(protocol0);
@@ -177,21 +176,21 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 
 		ObservedValue observedValue0 = new ObservedValue();
 		observedValue0.setId(0);
-		observedValue0.setObservationSet(0);
-		observedValue0.setValue_Id(0);
-		observedValue0.setFeature_Id(0);
-		observedValue0.setFeature_Identifier("feature" + 0);
-		observedValue0.setObservationSet(0);
+		observedValue0.setObservationSet(observationSet0);
+		observedValue0.setValue(new Value());
+		observedValue0.setFeature(feature0);
+		observedValue0.setObservationSet(observationSet0);
 		observedValues0 = new ArrayList<ObservedValue>();
 		observedValues0.add(observedValue0);
 
 		ObservedValue observedValue1 = new ObservedValue();
 		observedValue1.setId(1);
-		observedValue1.setObservationSet(1);
-		observedValue1.setValue_Id(1);
-		observedValue1.setFeature_Id(1);
-		observedValue1.setFeature_Identifier("feature" + 1);
-		observedValue1.setObservationSet(1);
+		observedValue1.setObservationSet(observationSet1);
+		Value v1 = new Value();
+		v1.setId(1);
+		observedValue1.setValue(v1);
+		observedValue1.setFeature(feature1);
+		observedValue1.setObservationSet(observationSet1);
 		observedValues1 = new ArrayList<ObservedValue>();
 		observedValues1.add(observedValue1);
 
@@ -206,28 +205,23 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		List<DataSet> datasets = new ArrayList<DataSet>();
 		datasets.add(dataset);
 
-		@SuppressWarnings("unchecked")
-		Query<DataSet> q = mock(Query.class);
-		@SuppressWarnings("unchecked")
-		Query<DataSet> queryFound = mock(Query.class);
-		when(database.query(DataSet.class)).thenReturn(q);
-		when(q.eq(DataSet.IDENTIFIER, "dataset1")).thenReturn(queryFound);
-		when(queryFound.find()).thenReturn(Arrays.asList(dataset));
-
+		when(dataService.findAllAsList(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1")))
+				.thenReturn(Arrays.<Entity> asList(dataset));
 		when(
-				database.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER,
-						Operator.EQUALS, 0))).thenReturn(observedValues0);
+				dataService.findAllAsList(ObservedValue.ENTITY_NAME,
+						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet0))).thenReturn(
+				Arrays.<Entity> asList(observedValue0));
 
-		when(database.find(ObservationSet.class, new QueryRule(ObservationSet.PARTOFDATASET, Operator.EQUALS, 0)))
-				.thenReturn(observationSets0);
+		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME, new QueryImpl().eq(ObservationSet.PARTOFDATASET, 0)))
+				.thenReturn(Arrays.<Entity> asList(observationSet0));
 
 	}
 
 	@BeforeMethod
 	public void beforeTest() throws Exception
 	{
-		reset(database);
-		setUp(database);
+		reset(dataService);
+		setUp(dataService);
 	}
 
 	@Test
@@ -245,51 +239,51 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	}
 
 	@Test
-	public void delete() throws DatabaseException, IOException
+	public void delete() throws IOException
 	{
 		dataSetDeleterServiceImpl.delete("dataset1", true);
-		verify(database).remove(dataset);
+		verify(dataService).delete(DataSet.ENTITY_NAME, dataset);
 	}
 
 	@Test
-	public void deleteNoMetadata() throws DatabaseException, IOException
+	public void deleteNoMetadata() throws IOException
 	{
 		dataSetDeleterServiceImpl.delete("dataset1", false);
-		verify(database, Mockito.times(0)).remove(dataset);
+		verify(dataService, Mockito.times(0)).delete(DataSet.ENTITY_NAME, dataset);
 	}
 
 	@Test
-	public void deleteCategories() throws DatabaseException
+	public void deleteCategories()
 	{
 		dataSetDeleterServiceImpl.deleteCategories(categories);
-		verify(database).remove(category0);
+		verify(dataService).delete(Category.ENTITY_NAME, category0);
 	}
 
 	@Test
-	public void deleteData() throws DatabaseException
+	public void deleteData()
 	{
 		dataSetDeleterServiceImpl.deleteData(dataset);
 		// verify that only observationsets and abservedvalues belonging to the dataset are removed
-		verify(database, Mockito.atLeastOnce()).remove(captorObservationSets.capture());
+		verify(dataService, Mockito.atLeastOnce()).delete(ObservationSet.ENTITY_NAME, captorObservationSets.capture());
 		assertEquals(new Integer(0), captorObservationSets.getValue().get(0).getId());
 		assertEquals(1, captorObservationSets.getValue().size());
 	}
 
 	@Test
-	public void deleteFeatures() throws DatabaseException
+	public void deleteFeatures()
 	{
 		dataSetDeleterServiceImpl.deleteFeatures(features0, allProtocols);
-		verify(database, Mockito.atLeastOnce()).remove(captorFeatures.capture());
+		verify(dataService, Mockito.atLeastOnce()).delete(ObservableFeature.ENTITY_NAME, captorFeatures.capture());
 		assertEquals("feature0", captorFeatures.getValue().get(0).getIdentifier());
 		assertEquals(1, captorFeatures.getValue().size());
 	}
 
 	@Test
-	public void deleteProtocol() throws DatabaseException
+	public void deleteProtocol()
 	{
 		dataSetDeleterServiceImpl.deleteProtocol(protocolUsed, allProtocols);
-		verify(database).remove(protocolUsed);
-		verify(database).remove(subProtocols);
-		verify(database, Mockito.times(0)).remove(protocol1);
+		verify(dataService).delete(Protocol.ENTITY_NAME, protocolUsed);
+		verify(dataService).delete(Protocol.ENTITY_NAME, subProtocols);
+		verify(dataService, Mockito.times(0)).delete(Protocol.ENTITY_NAME, protocol1);
 	}
 }

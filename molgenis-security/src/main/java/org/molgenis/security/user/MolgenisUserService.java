@@ -18,5 +18,5 @@ public interface MolgenisUserService
 	/*
 	 * Returns the currently logged in user
 	 */
-	MolgenisUser getCurrentUser();
+	MolgenisUser getUser(String username);
 }

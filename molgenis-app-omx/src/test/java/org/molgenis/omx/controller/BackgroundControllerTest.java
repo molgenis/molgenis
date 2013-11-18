@@ -30,8 +30,8 @@ public class BackgroundControllerTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void setUp()
 	{
-		mockMvc = MockMvcBuilders.standaloneSetup(backgroundController).setMessageConverters(new GsonHttpMessageConverter())
-				.build();
+		mockMvc = MockMvcBuilders.standaloneSetup(backgroundController)
+				.setMessageConverters(new GsonHttpMessageConverter()).build();
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)

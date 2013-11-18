@@ -104,4 +104,5 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 
 	EntitySource getEntitySource(String url);
 
+	Iterable<Class<? extends Entity>> getEntityClasses();
 }

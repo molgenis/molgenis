@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -295,5 +296,18 @@ public class DataServiceImpl implements DataService
 		}
 
 		return entitySourceFactory;
+	}
+
+	@Override
+	public Iterable<Class<? extends Entity>> getEntityClasses()
+	{
+		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
+		for (String entityName : getEntityNames())
+		{
+			Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+			entityClasses.add(repo.getEntityClass());
+		}
+
+		return entityClasses;
 	}
 }
