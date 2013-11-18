@@ -237,7 +237,7 @@ public class ElasticSearchService implements SearchService
 		String documentTypeSantized = sanitizeMapperType(documentType);
 
 		return client.admin().indices().typesExists(new TypesExistsRequest(new String[]
-		{ indexName }, documentTypeSantized)).actionGet().exists();
+		{ indexName }, documentTypeSantized)).actionGet().isExists();
 	}
 
 	@Override
@@ -252,8 +252,8 @@ public class ElasticSearchService implements SearchService
 
 		if (deleteResponse != null)
 		{
-			IndexDeleteByQueryResponse idbqr = deleteResponse.index(indexName);
-			if ((idbqr != null) && (idbqr.failedShards() > 0))
+			IndexDeleteByQueryResponse idbqr = deleteResponse.getIndex(indexName);
+			if ((idbqr != null) && (idbqr.getFailedShards() > 0))
 			{
 				throw new ElasticSearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
 			}
@@ -262,6 +262,7 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Delete done.");
 	}
 
+	@Override
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
 	{
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentIds);
@@ -329,6 +330,7 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
+	@Override
 	public void updateDocumentById(String documentType, String documentId, String updateScript)
 	{
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentId);
@@ -349,11 +351,11 @@ public class ElasticSearchService implements SearchService
 	{
 		// Wait until elasticsearch is ready
 		client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().exists();
+		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().isExists();
 		if (!hasIndex)
 		{
 			CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).execute().actionGet();
-			if (!response.acknowledged())
+			if (!response.isAcknowledged())
 			{
 				throw new ElasticSearchException("Creation of index [" + indexName + "] failed. Response=" + response);
 			}
@@ -389,7 +391,7 @@ public class ElasticSearchService implements SearchService
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
 				.setType(documentTypeSantized).setSource(jsonBuilder).execute().actionGet();
 
-		if (!response.acknowledged())
+		if (!response.isAcknowledged())
 		{
 			throw new ElasticSearchException("Creation of mapping for documentType [" + documentType
 					+ "] failed. Response=" + response);
