@@ -60,8 +60,9 @@
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
 					if (feature.dataType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + formatTableCellValue(value, feature.dataType); + '">' 
-							+ htmlEscape(value) + '</a>';
+						entityInfo = restApi.get(feature.href);
+						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + formatTableCellValue(value, feature.dataType) + '">' 
+						+ htmlEscape(value) + '</a>';
 					}	
 					else if (feature.dataType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
 						var elements = value.split(',');
