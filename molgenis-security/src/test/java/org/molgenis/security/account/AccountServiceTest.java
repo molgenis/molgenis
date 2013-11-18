@@ -4,7 +4,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -26,12 +25,14 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
@@ -65,6 +66,12 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public PasswordEncoder passwordEncoder()
+		{
+			return mock(PasswordEncoder.class);
+		}
+
+		@Bean
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
@@ -85,6 +92,9 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private JavaMailSender javaMailSender;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -124,24 +134,16 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		// TODO improve test
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_invalidActivationCode() throws DatabaseException
 	{
 		accountService.activateUser("invalid");
-		verify(database).find(any(Class.class), any(QueryRule.class), any(QueryRule.class));
-		verifyNoMoreInteractions(database);
-		verifyNoMoreInteractions(javaMailSender);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_alreadyActivated() throws DatabaseException
 	{
 		accountService.activateUser("456");
-		verify(database).find(any(Class.class), any(QueryRule.class), any(QueryRule.class));
-		verifyNoMoreInteractions(database);
-		verifyNoMoreInteractions(javaMailSender);
 	}
 
 	@Test
@@ -170,9 +172,24 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 
 		accountService.resetPassword("user@molgenis.org");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
+		verify(passwordEncoder).encode(any(String.class));
 		verify(database).update(argument.capture());
 		assertNotNull(argument.getValue().getPassword());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
+	}
+
+	@Test(expectedExceptions = MolgenisUserException.class)
+	public void resetPassword_invalidEmailAddress() throws DatabaseException
+	{
+		@SuppressWarnings("unchecked")
+		Query<MolgenisUser> query = mock(Query.class);
+		when(query.eq(MolgenisUser.EMAIL, "invalid-user@molgenis.org")).thenReturn(query);
+		MolgenisUser molgenisUser = mock(MolgenisUser.class);
+		when(molgenisUser.getPassword()).thenReturn("password");
+		when(query.find()).thenReturn(Collections.<MolgenisUser> emptyList());
+		when(database.query(MolgenisUser.class)).thenReturn(query);
+
+		accountService.resetPassword("invalid-user@molgenis.org");
 	}
 }

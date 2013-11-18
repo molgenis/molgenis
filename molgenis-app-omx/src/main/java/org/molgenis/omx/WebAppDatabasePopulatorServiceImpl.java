@@ -55,10 +55,15 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		if (userPassword == null) throw new RuntimeException(
 				"please configure the user.password property in your molgenis-server.properties");
 
+		String firstName = "John";
+		String lastName = "Doe";
+
 		MolgenisUser userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
 		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
 		userAdmin.setEmail(adminEmail);
+		userAdmin.setFirstName(firstName);
+		userAdmin.setLastName(lastName);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
 		userAdmin.setFirstName(USERNAME_ADMIN);
@@ -74,6 +79,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userUser.setUsername(USERNAME_USER);
 		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
 		userUser.setEmail(userEmail);
+		userUser.setFirstName(firstName);
+		userUser.setLastName(lastName);
 		userUser.setActive(true);
 		userUser.setSuperuser(false);
 		userUser.setFirstName(USERNAME_USER);

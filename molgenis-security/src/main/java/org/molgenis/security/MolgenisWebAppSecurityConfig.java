@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -144,6 +146,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		return userDetailsService();
 	}
 
+	@Bean
+	public UserDetailsChecker userDetailsChecker()
+	{
+		return new MolgenisUserDetailsChecker();
+	}
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth)
 	{
@@ -154,6 +162,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 			DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
 			daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
 			daoAuthenticationProvider.setUserDetailsService(userDetailsServiceBean());
+			daoAuthenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
 			auth.authenticationProvider(daoAuthenticationProvider);
 		}
 		catch (Exception e)

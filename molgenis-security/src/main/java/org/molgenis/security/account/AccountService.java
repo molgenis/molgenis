@@ -7,27 +7,29 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class AccountService
 {
-	private static Logger logger = Logger.getLogger(AccountService.class);
+	private static final Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
 	public static final String ALL_USER_GROUP = "All Users";
@@ -46,6 +48,9 @@ public class AccountService
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@RunAsSystem
 	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
@@ -126,6 +131,10 @@ public class AccountService
 			mailMessage.setText(createActivatedEmailText(molgenisUser, getAppName()));
 			mailSender.send(mailMessage);
 		}
+		else
+		{
+			throw new MolgenisUserException("Invalid activation code or account already activated.");
+		}
 	}
 
 	@RunAsSystem
@@ -136,9 +145,9 @@ public class AccountService
 
 		if (molgenisUser != null)
 		{
-			// TODO: make this mandatory (password that was sent is valid only once)
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
 			molgenisUser.setPassword(newPassword);
+			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
 			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send password reseted email to user
@@ -147,6 +156,10 @@ public class AccountService
 			mailMessage.setSubject("Your new password request");
 			mailMessage.setText(createPasswordResettedEmailText(newPassword));
 			mailSender.send(mailMessage);
+		}
+		else
+		{
+			throw new MolgenisUserException("Invalid email address.");
 		}
 	}
 

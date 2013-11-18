@@ -93,4 +93,57 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 		return value;
 	}
+	
+	@Override
+	public boolean updateProperty(String key, String content) 
+	{
+		if (null == content)
+		{
+			throw new IllegalArgumentException("content is null");
+		}
+		
+		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+				RuntimeProperty.class.getSimpleName() + '_' + key);
+		List<RuntimeProperty> properties;
+		
+		try
+		{
+			properties = unsecuredDatabase.find(RuntimeProperty.class, propertyRule);
+			if (null != properties && !properties.isEmpty() && properties.size() == 1) {
+				RuntimeProperty property = properties.get(0);
+				property.setValue(content);
+				int result = unsecuredDatabase.update(property);
+				logger.info("result: " + result);
+				return true;
+			}
+		}
+		catch (DatabaseException e)
+		{
+			logger.warn(e);
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public boolean propertyExists(String key) 
+	{		
+		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
+				RuntimeProperty.class.getSimpleName() + '_' + key);
+		int count;
+		
+		try
+		{
+			count = unsecuredDatabase.count(RuntimeProperty.class, propertyRule);
+			if (count > 0) {
+				return true;
+			}
+		}
+		catch (DatabaseException e)
+		{
+			logger.warn(e);
+		}
+		
+		return false;
+	}
 }

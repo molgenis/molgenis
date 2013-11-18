@@ -79,7 +79,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 			Set<GrantedAuthority> allGrantedAuthorities = new HashSet<GrantedAuthority>();
 			if (grantedAuthorities != null) allGrantedAuthorities.addAll(grantedAuthorities);
 			if (grantedGroupAuthorities != null) allGrantedAuthorities.addAll(grantedGroupAuthorities);
-			return new User(user.getUsername(), user.getPassword(),
+			return new User(user.getUsername(), user.getPassword(), user.getActive(), true, true, true,
 					grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities));
 		}
 		catch (Throwable e)

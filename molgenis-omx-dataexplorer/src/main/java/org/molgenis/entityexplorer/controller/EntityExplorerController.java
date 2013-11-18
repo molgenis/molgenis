@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.DatabaseAccessException;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
@@ -40,6 +43,9 @@ public class EntityExplorerController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -57,6 +63,14 @@ public class EntityExplorerController extends MolgenisPluginController
 	String identifier, @RequestParam(required = false)
 	String query, Model model) throws Exception
 	{
+		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only if the user has permission to see the
+		// plugin
+		if (molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.READ)
+				|| molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.WRITE))
+		{
+			model.addAttribute("dataExplorerUrl", DataExplorerController.ID);
+		}
+
 		// select all characteristic entities
 		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(dataService.getEntityClasses(),
 				new Predicate<Class<? extends Entity>>()

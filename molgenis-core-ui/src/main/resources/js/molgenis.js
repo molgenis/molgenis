@@ -143,7 +143,7 @@ $(function() {
 						cachedResource = resource;	
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			} else {
@@ -157,7 +157,7 @@ $(function() {
 						cachedResource = resource;
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			}
@@ -186,7 +186,7 @@ $(function() {
 						callback(resource);	
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			} else {
@@ -200,7 +200,7 @@ $(function() {
 						callback(resource);
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			}
