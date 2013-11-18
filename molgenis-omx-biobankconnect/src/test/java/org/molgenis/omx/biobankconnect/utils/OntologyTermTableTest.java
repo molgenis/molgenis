@@ -10,8 +10,6 @@ import java.util.Iterator;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermTable;
 import org.molgenis.util.tuple.Tuple;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
@@ -34,7 +32,7 @@ public class OntologyTermTableTest
 	@Test
 	public void getAllColumns() throws TableException
 	{
-		assertEquals(table.getAllColumns().size(), 8);
+		assertEquals(table.getAllColumns().size(), 9);
 	}
 
 	@Test

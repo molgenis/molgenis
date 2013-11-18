@@ -29,20 +29,26 @@ public class OntologyMatcherPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
+		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
+		Integer selectedDataSetId = biobankConnectWizard.getSelectedDataSet().getId();
+		List<Integer> selectedTargetDataSetIds = new ArrayList<Integer>();
+
+		for (String id : request.getParameter("selectedTargetDataSets").split(","))
+		{
+			selectedTargetDataSetIds.add(Integer.parseInt(id));
+		}
+		biobankConnectWizard.setSelectedBiobanks(selectedTargetDataSetIds);
+
 		try
 		{
-			BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
-			List<Integer> selectedTargetDataSetIds = new ArrayList<Integer>();
-			for (String id : request.getParameter("selectedTargetDataSets").split(","))
-			{
-				selectedTargetDataSetIds.add(Integer.parseInt(id));
-			}
-			ontologyMatcher.match(biobankConnectWizard.getSelectedDataSet().getId(), selectedTargetDataSetIds);
+			ontologyMatcher
+					.match(biobankConnectWizard.getUserName(), selectedDataSetId, selectedTargetDataSetIds, null);
 
 		}
 		catch (Exception e)
 		{
-			new RuntimeException(e);
+			new RuntimeException("Error occurs when matching dataset " + selectedDataSetId + " with datasets "
+					+ selectedTargetDataSetIds);
 		}
 		return null;
 	}

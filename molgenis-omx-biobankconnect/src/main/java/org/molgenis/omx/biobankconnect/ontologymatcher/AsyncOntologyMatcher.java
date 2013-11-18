@@ -3,10 +3,10 @@ package org.molgenis.omx.biobankconnect.ontologymatcher;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,11 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -32,6 +34,7 @@ import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.search.Hit;
+import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
@@ -39,6 +42,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 {
@@ -50,20 +54,29 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
 	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
 	private static final String CATALOGUE_PREFIX = "protocolTree-";
-	private static final String BOOST = "boost";
+	private static final String FEATURE_CATEGORY = "featureCategory-";
+	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
+	private static final String FIELD_BOOST_ONTOLOGYTERM = "boostOntologyTerms";
+	private static final String ONTOLOGY_IRI = "ontologyIRI";
+	private static final String ONTOLOGY_LABEL = "ontologyLabel";
+	private static final String OBSERVATION_SET = "observation_set";
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
+	private static final String ONTOLOGY_TERM = "ontologyTerm";
 	private static final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
+	private static final String ALTERNATIVE_DEFINITION = "alternativeDefinition";
 	private static final String NODE_PATH = "nodePath";
 	private static final String ENTITY_ID = "id";
 	private static final String LUCENE_SCORE = "score";
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
-	private static long totalNumber = 0;
-	private static int finishedNumber = 0;
+	private static final PorterStemmer stemmer = new PorterStemmer();
+	private long totalNumber = 0;
+	private int finishedNumber = 0;
 
 	@Autowired
 	@Qualifier("unsecuredDatabase")
 	private Database database;
+
 	private SearchService searchService;
 
 	@Autowired
@@ -81,8 +94,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	@Override
 	public boolean isRunning()
 	{
-		if (runningProcesses.get() == 0) return false;
-		return true;
+		if (runningProcesses.get() != 0) return true;
+		return false;
 	}
 
 	@Override
@@ -100,33 +113,30 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		searchService.deleteDocumentByIds(documentType, documentIds);
 	}
 
-	private void preprocessing(Integer selectedDataSet, List<Integer> dataSetsToMatch, Database db)
+	@Async
+	public void match(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch, Integer featureId)
 			throws DatabaseException
 	{
-		createMappingStore(selectedDataSet, dataSetsToMatch, db);
 
-		for (Integer catalogueId : dataSetsToMatch)
-		{
-			StringBuilder dataSetIdentifier = new StringBuilder();
-			dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
-			deleteExistingRecords(dataSetIdentifier.toString(), db);
-		}
-	}
-
-	@Override
-	@Async
-	public void match(Integer selectedDataSet, List<Integer> dataSetsToMatch) throws DatabaseException
-	{
 		runningProcesses.incrementAndGet();
+		dataSetsToMatch.remove(selectedDataSet);
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
-
+		Map<String, List<ObservationSet>> observationSetsPerDataSet = new HashMap<String, List<ObservationSet>>();
 		try
 		{
-			preprocessing(selectedDataSet, dataSetsToMatch, database);
+			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
-			queryRules.add(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
-					.toLowerCase()));
+			if (featureId == null)
+			{
+				queryRules.add(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
+						.toLowerCase()));
+			}
+			else
+			{
+				queryRules.add(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
+			}
+
 			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
 			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet,
 					queryRules, null));
@@ -139,67 +149,94 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						columnValueMap.get(ObservableFeature.ID.toString()));
 				if (feature != null)
 				{
-					Map<Integer, Set<String>> position = null;
-					List<QueryRule> rules = new ArrayList<QueryRule>();
+					Set<String> boostedOntologyTermUris = new HashSet<String>();
+					for (String ontolgoyTermUri : columnValueMap.get(FIELD_BOOST_ONTOLOGYTERM).toString().split(","))
+					{
+						boostedOntologyTermUris.add(ontolgoyTermUri);
+					}
 					String description = feature.getDescription() == null || feature.getDescription().isEmpty() ? feature
 							.getName() : feature.getDescription();
-					rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, description));
-					if (feature.getDefinitions() != null && feature.getDefinitions().size() > 0)
+					description = description.replaceAll("[^a-zA-Z0-9 ]", " ");
+					List<OntologyTerm> definitions = feature.getDefinitions();
+
+					List<QueryRule> rules = new ArrayList<QueryRule>();
+					if (definitions != null && definitions.size() > 0)
 					{
-						position = createQueryRules(description, feature.getDefinitions());
-						rules.addAll(makeQueryForOntologyTerms(position));
+						Map<String, OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(
+								definitions, boostedOntologyTermUris);
+						rules.addAll(makeQueryForOntologyTerms(createQueryRules(description, ontologyTermContainers)));
+
+						for (Map<Integer, List<BoostTermContainer>> alternativeDefinition : addAlternativeDefinition(ontologyTermContainers))
+						{
+							QueryRule queryRule = new QueryRule(makeQueryForOntologyTerms(alternativeDefinition));
+							queryRule.setOperator(Operator.DIS_MAX);
+							queryRule.setValue(0.6);
+							rules.add(queryRule);
+						}
 					}
+					else rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, description));
 					QueryRule finalQuery = new QueryRule(rules);
 					finalQuery.setOperator(Operator.DIS_MAX);
+					Set<Integer> mappedFeatureIds = new HashSet<Integer>();
 
-					for (Integer catalogueId : dataSetsToMatch)
+					for (Integer dataSetId : dataSetsToMatch)
 					{
 						StringBuilder dataSetIdentifier = new StringBuilder();
-						dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
-						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(CATALOGUE_PREFIX + catalogueId, finalQuery);
-
+						dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
+								.append(dataSetId);
+						if (featureId != null) observationSetsPerDataSet.put(dataSetIdentifier.toString(),
+								new ArrayList<ObservationSet>());
+						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(dataSetId.toString(), finalQuery);
 						while (mappedFeatureHits.hasNext())
 						{
 							Hit mappedFeatureHit = mappedFeatureHits.next();
 							Map<String, Object> columValueMap = mappedFeatureHit.getColumnValueMap();
 							Integer mappedId = Integer.parseInt(columValueMap.get(ENTITY_ID).toString());
 							Double score = Double.parseDouble(columValueMap.get(LUCENE_SCORE).toString());
+							if (!mappedFeatureIds.contains(mappedId))
+							{
+								mappedFeatureIds.add(mappedId);
 
-							ObservationSet observation = new ObservationSet();
-							observation.setPartOfDataSet_Identifier(dataSetIdentifier.toString());
-							listOfNewObservationSets.add(observation);
+								ObservationSet observation = new ObservationSet();
+								observation.setIdentifier(userName + "-" + feature.getId() + "-" + mappedFeatureIds
+										+ "-identifier");
+								observation.setPartOfDataSet_Identifier(dataSetIdentifier.toString());
+								listOfNewObservationSets.add(observation);
+								if (featureId != null) observationSetsPerDataSet.get(dataSetIdentifier.toString()).add(
+										observation);
 
-							XrefValue xrefForFeature = new XrefValue();
-							xrefForFeature.setValue(database.findById(Characteristic.class, feature.getId()));
-							ObservedValue valueForFeature = new ObservedValue();
-							valueForFeature.setObservationSet(observation);
-							valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
-							valueForFeature.setValue(xrefForFeature);
-							listOfNewObservedValues.add(valueForFeature);
+								XrefValue xrefForFeature = new XrefValue();
+								xrefForFeature.setValue(database.findById(Characteristic.class, feature.getId()));
+								ObservedValue valueForFeature = new ObservedValue();
+								valueForFeature.setObservationSet(observation);
+								valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
+								valueForFeature.setValue(xrefForFeature);
+								listOfNewObservedValues.add(valueForFeature);
 
-							XrefValue xrefForMappedFeature = new XrefValue();
-							xrefForMappedFeature.setValue(database.findById(Characteristic.class, mappedId));
-							ObservedValue valueForMappedFeature = new ObservedValue();
-							valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
-							valueForMappedFeature.setObservationSet(observation);
-							valueForMappedFeature.setValue(xrefForMappedFeature);
-							listOfNewObservedValues.add(valueForMappedFeature);
+								XrefValue xrefForMappedFeature = new XrefValue();
+								xrefForMappedFeature.setValue(database.findById(Characteristic.class, mappedId));
+								ObservedValue valueForMappedFeature = new ObservedValue();
+								valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
+								valueForMappedFeature.setObservationSet(observation);
+								valueForMappedFeature.setValue(xrefForMappedFeature);
+								listOfNewObservedValues.add(valueForMappedFeature);
 
-							DecimalValue decimalForScore = new DecimalValue();
-							decimalForScore.setValue(score);
-							ObservedValue valueForMappedFeatureScore = new ObservedValue();
-							valueForMappedFeatureScore.setFeature_Identifier(STORE_MAPPING_SCORE);
-							valueForMappedFeatureScore.setObservationSet(observation);
-							valueForMappedFeatureScore.setValue(decimalForScore);
-							listOfNewObservedValues.add(valueForMappedFeatureScore);
+								DecimalValue decimalForScore = new DecimalValue();
+								decimalForScore.setValue(score);
+								ObservedValue valueForMappedFeatureScore = new ObservedValue();
+								valueForMappedFeatureScore.setFeature_Identifier(STORE_MAPPING_SCORE);
+								valueForMappedFeatureScore.setObservationSet(observation);
+								valueForMappedFeatureScore.setValue(decimalForScore);
+								listOfNewObservedValues.add(valueForMappedFeatureScore);
 
-							BoolValue boolValue = new BoolValue();
-							boolValue.setValue(false);
-							ObservedValue confirmMappingValue = new ObservedValue();
-							confirmMappingValue.setFeature_Identifier(STORE_MAPPING_CONFIRM_MAPPING);
-							confirmMappingValue.setObservationSet(observation);
-							confirmMappingValue.setValue(boolValue);
-							listOfNewObservedValues.add(confirmMappingValue);
+								BoolValue boolValue = new BoolValue();
+								boolValue.setValue(false);
+								ObservedValue confirmMappingValue = new ObservedValue();
+								confirmMappingValue.setFeature_Identifier(STORE_MAPPING_CONFIRM_MAPPING);
+								confirmMappingValue.setObservationSet(observation);
+								confirmMappingValue.setValue(boolValue);
+								listOfNewObservedValues.add(confirmMappingValue);
+							}
 						}
 					}
 					finishedNumber++;
@@ -209,12 +246,24 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			database.add(listOfNewObservationSets);
 			database.add(listOfNewObservedValues);
 
-			for (Integer catalogueId : dataSetsToMatch)
+			if (featureId != null)
 			{
-				StringBuilder dataSetIdentifier = new StringBuilder();
-				dataSetIdentifier.append(selectedDataSet).append('-').append(catalogueId);
-				searchService.indexTupleTable(dataSetIdentifier.toString(),
-						new StoreMappingTable(dataSetIdentifier.toString(), database));
+				for (Entry<String, List<ObservationSet>> entry : observationSetsPerDataSet.entrySet())
+				{
+					searchService.updateIndexTupleTable(entry.getKey(),
+							new StoreMappingTable(entry.getKey(), entry.getValue(), database));
+				}
+			}
+			else
+			{
+				for (Integer catalogueId : dataSetsToMatch)
+				{
+					StringBuilder dataSetIdentifier = new StringBuilder();
+					dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
+							.append(catalogueId);
+					searchService.indexTupleTable(dataSetIdentifier.toString(),
+							new StoreMappingTable(dataSetIdentifier.toString(), database));
+				}
 			}
 		}
 		catch (Exception e)
@@ -229,54 +278,208 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 	}
 
-	private List<QueryRule> makeQueryForOntologyTerms(Map<Integer, Set<String>> nameTokens)
+	private void preprocessing(String userName, Integer featureId, Integer selectedDataSet,
+			List<Integer> dataSetsToMatch) throws DatabaseException
 	{
-		List<QueryRule> subQueries = new ArrayList<QueryRule>();
-		List<QueryRule> allQueries = new ArrayList<QueryRule>();
+		List<String> dataSetsForMapping = new ArrayList<String>();
+		for (Integer catalogueId : dataSetsToMatch)
+		{
+			StringBuilder dataSetIdentifier = new StringBuilder();
+			dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-').append(catalogueId);
+			dataSetsForMapping.add(dataSetIdentifier.toString());
+		}
+		if (featureId == null)
+		{
+			createMappingStore(userName, selectedDataSet, dataSetsToMatch);
+			deleteExistingRecords(dataSetsForMapping);
+		}
+		else removeExistingMappings(featureId, dataSetsForMapping);
+	}
 
-		for (Entry<Integer, Set<String>> entries : nameTokens.entrySet())
+	private void deleteExistingRecords(List<String> dataSetsForMapping) throws DatabaseException
+	{
+		List<ObservationSet> listOfObservationSets = database.find(ObservationSet.class, new QueryRule(
+				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.IN, dataSetsForMapping));
+		if (listOfObservationSets.size() > 0)
+		{
+			List<Integer> listOfObservationIdentifiers = new ArrayList<Integer>();
+			for (ObservationSet observation : listOfObservationSets)
+			{
+				listOfObservationIdentifiers.add(observation.getId());
+			}
+			List<ObservedValue> listOfObservedValues = database.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET, Operator.IN, listOfObservationIdentifiers));
+			if (listOfObservedValues.size() > 0) database.remove(listOfObservedValues);
+			database.remove(listOfObservationSets);
+		}
+	}
+
+	private void removeExistingMappings(Integer featureId, List<String> dataSetsForMapping) throws DatabaseException
+	{
+		List<Integer> observationSets = new ArrayList<Integer>();
+		for (String dataSet : dataSetsForMapping)
 		{
 			List<QueryRule> rules = new ArrayList<QueryRule>();
-			Integer index = entries.getKey();
-
-			if (index != -1)
+			rules.add(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, featureId));
+			rules.add(new QueryRule(Operator.LIMIT, 100000));
+			SearchRequest request = new SearchRequest(dataSet, rules, null);
+			SearchResult searchResult = searchService.search(request);
+			List<String> indexIds = new ArrayList<String>();
+			for (Hit hit : searchResult.getSearchHits())
 			{
-				for (String term : entries.getValue())
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				indexIds.add(hit.getId());
+				observationSets.add(Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
+			}
+			searchService.deleteDocumentByIds(dataSet, indexIds);
+		}
+		if (observationSets.size() > 0)
+		{
+			List<ObservationSet> existingObservationSets = database.find(ObservationSet.class, new QueryRule(
+					ObservationSet.ID, Operator.IN, observationSets));
+			List<ObservedValue> existingObservedValues = database.find(ObservedValue.class, new QueryRule(
+					ObservedValue.OBSERVATIONSET, Operator.IN, observationSets));
+			if (existingObservedValues.size() > 0) database.remove(existingObservedValues);
+			if (existingObservationSets.size() > 0) database.remove(existingObservationSets);
+		}
+	}
+
+	private List<QueryRule> makeQueryForOntologyTerms(Map<Integer, List<BoostTermContainer>> position)
+	{
+		boolean boostDesccription = false;
+		List<QueryRule> allQueries = new ArrayList<QueryRule>();
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		Map<Integer, Boolean> boostIndex = new HashMap<Integer, Boolean>();
+		for (Entry<Integer, List<BoostTermContainer>> entry : position.entrySet())
+		{
+			Integer index = entry.getKey();
+			if (index >= 0)
+			{
+				boolean boost = false;
+				List<QueryRule> subQueries = new ArrayList<QueryRule>();
+				for (BoostTermContainer boostTermContainer : entry.getValue())
 				{
-					rules.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, term));
+					List<QueryRule> rules = new ArrayList<QueryRule>();
+					for (String term : boostTermContainer.getTerms())
+					{
+						rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, term.trim()));
+						rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, term.trim()));
+					}
+					if (!boost) boost = boostTermContainer.isBoost();
+					QueryRule queryRule = new QueryRule(rules);
+					queryRule.setOperator(Operator.DIS_MAX);
+					queryRule.setValue(boostTermContainer.isBoost() ? 10 : null);
+					subQueries.add(queryRule);
 				}
-				QueryRule queryRule = new QueryRule(rules);
-				queryRule.setOperator(Operator.DIS_MAX);
-				subQueries.add(queryRule);
+				if (!boostIndex.containsKey(index))
+				{
+					boostIndex.put(index, boost);
+				}
+				else if (!boostIndex.get(index))
+				{
+					boostIndex.put(index, boost);
+				}
+				QueryRule queryRule = null;
+				if (subQueries.size() == 1)
+				{
+					queryRule = subQueries.get(0);
+				}
+				else
+				{
+					queryRule = new QueryRule(subQueries);
+					queryRule.setOperator(Operator.DIS_MAX);
+					queryRule.setValue(boost ? 10 : null);
+				}
+				queryRules.add(queryRule);
+
+				if (!boostDesccription) boostDesccription = boost;
+			}
+			else if (index == -1)
+			{
+				for (BoostTermContainer boostTermContainer : entry.getValue())
+				{
+					if (boostTermContainer.getTerms().size() > 0)
+					{
+						List<QueryRule> rules = new ArrayList<QueryRule>();
+						for (String term : boostTermContainer.getTerms())
+						{
+							if (!term.isEmpty())
+							{
+								rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, term.trim()));
+								rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, term.trim()));
+							}
+						}
+						QueryRule queryRule = new QueryRule(rules);
+						queryRule.setOperator(Operator.DIS_MAX);
+						queryRule.setValue(boostTermContainer.isBoost() ? 10 : null);
+						allQueries.add(queryRule);
+						if (!boostDesccription) boostDesccription = boostTermContainer.isBoost();
+					}
+				}
 			}
 			else
 			{
-				for (String term : entries.getValue())
+				for (BoostTermContainer boostTermContainer : entry.getValue())
 				{
-					allQueries.add(new QueryRule(ObservableFeature.DESCRIPTION.toLowerCase(), Operator.SEARCH, term));
+					StringBuilder boostedSynonym = new StringBuilder();
+					List<QueryRule> rules = new ArrayList<QueryRule>();
+					for (String term : boostTermContainer.getTerms())
+					{
+						if (!term.isEmpty())
+						{
+							int count = 0;
+							if (boostDesccription)
+							{
+								for (String eachToken : term.split(" +"))
+								{
+									if (boostedSynonym.length() != 0) boostedSynonym.append(' ');
+									boostedSynonym.append(eachToken);
+									if (boostIndex.containsKey(count) && boostIndex.get(count)) boostedSynonym.append(
+											'^').append(10);
+									count++;
+								}
+							}
+							else boostedSynonym.append(term);
+
+							rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, boostedSynonym
+									.toString()));
+							rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, boostedSynonym
+									.toString()));
+						}
+					}
+					QueryRule queryRule = new QueryRule(rules);
+					queryRule.setOperator(Operator.DIS_MAX);
+					queryRule.setValue(boostDesccription || boostTermContainer.isBoost() ? 1.5 : null);
+					allQueries.add(queryRule);
 				}
 			}
 		}
-		QueryRule combinedQuery = new QueryRule(subQueries);
-		combinedQuery.setOperator(Operator.SHOULD);
-		allQueries.add(combinedQuery);
 
+		if (queryRules.size() > 0)
+		{
+			QueryRule combinedQuery = null;
+			if (queryRules.size() != 1)
+			{
+				combinedQuery = new QueryRule(queryRules);
+				combinedQuery.setOperator(Operator.SHOULD);
+				allQueries.add(combinedQuery);
+			}
+			else allQueries.add(queryRules.get(0));
+		}
 		return allQueries;
 	}
 
-	private Iterator<Hit> searchDisMaxQuery(String documentType, QueryRule disMaxQuery)
+	private Iterator<Hit> searchDisMaxQuery(String dataSetId, QueryRule disMaxQuery)
 	{
 		SearchResult result = null;
 		try
 		{
 			List<QueryRule> finalQuery = new ArrayList<QueryRule>();
-			finalQuery.add(new QueryRule(ENTITY_TYPE, Operator.EQUALS, ObservableFeature.class.getSimpleName()
-					.toLowerCase()));
-			finalQuery.add(new QueryRule(Operator.AND));
 			finalQuery.add(disMaxQuery);
 			finalQuery.add(new QueryRule(Operator.LIMIT, 50));
-			SearchRequest request = new SearchRequest(documentType, finalQuery, null);
-			result = searchService.search(request);
+			MultiSearchRequest request = new MultiSearchRequest(Arrays.asList(CATALOGUE_PREFIX + dataSetId,
+					FEATURE_CATEGORY + dataSetId), finalQuery, null);
+			result = searchService.multiSearch(request);
 		}
 		catch (Exception e)
 		{
@@ -286,195 +489,289 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return result.iterator();
 	}
 
-	private Map<Integer, Set<String>> createQueryRules(String dataItem, List<OntologyTerm> definitions)
+	private Map<String, OntologyTermContainer> collectOntologyTermInfo(List<OntologyTerm> definitions,
+			Set<String> boostedOntologyTermUris)
 	{
-		Map<Integer, Set<String>> position = new HashMap<Integer, Set<String>>();
-
-		Map<String, Set<String>> pathToSynonyms = new HashMap<String, Set<String>>();
-		Map<String, Boolean> allPaths = new HashMap<String, Boolean>();
+		Map<String, String> validOntologyTerm = new HashMap<String, String>();
+		Map<String, OntologyTermContainer> totalHits = new HashMap<String, OntologyTermContainer>();
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+		for (OntologyTerm ot : definitions)
 		{
-			List<QueryRule> rules = new ArrayList<QueryRule>();
-			for (OntologyTerm ot : definitions)
+			if (rules.size() != 0) rules.add(new QueryRule(Operator.OR));
+			rules.add(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, ot.getTermAccession()));
+			validOntologyTerm.put(ot.getTermAccession(), ot.getName());
+		}
+		rules.add(new QueryRule(Operator.LIMIT, 10000));
+		SearchRequest request = new SearchRequest(null, rules, null);
+		SearchResult result = searchService.search(request);
+		Iterator<Hit> iterator = result.iterator();
+
+		while (iterator.hasNext())
+		{
+			Hit hit = iterator.next();
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			String ontologyIRI = columnValueMap.get(ONTOLOGY_IRI).toString();
+			String ontologyTermUri = columnValueMap.get(ONTOLOGY_TERM_IRI).toString();
+			String ontologyTermName = columnValueMap.get(ONTOLOGY_LABEL) + ":"
+					+ columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString();
+			Boolean boost = boostedOntologyTermUris.contains(ontologyTermUri);
+
+			if (validOntologyTerm.containsKey(ontologyTermUri)
+					&& validOntologyTerm.get(ontologyTermUri).equalsIgnoreCase(ontologyTermName))
 			{
-				if (rules.size() != 0) rules.add(new QueryRule(Operator.OR));
-				rules.add(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, ot.getTermAccession()));
-			}
-			rules.add(new QueryRule(Operator.LIMIT, 10000));
-			SearchRequest request = new SearchRequest(null, rules, null);
-			SearchResult result = searchService.search(request);
-			Iterator<Hit> iterator = result.iterator();
-			while (iterator.hasNext())
-			{
-				Hit hit = iterator.next();
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				Boolean boost = (Boolean) columnValueMap.get(BOOST);
+				String alternativeDefinitions = columnValueMap.get(ALTERNATIVE_DEFINITION) == null ? StringUtils.EMPTY : columnValueMap
+						.get(ALTERNATIVE_DEFINITION).toString();
 				String nodePath = columnValueMap.get(NODE_PATH).toString();
-				allPaths.put(nodePath, boost);
-				if (!pathToSynonyms.containsKey(nodePath)) pathToSynonyms.put(nodePath, new HashSet<String>());
-				pathToSynonyms.get(nodePath).add(
-						columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim().toLowerCase());
+				if (!totalHits.containsKey(ontologyIRI)) totalHits.put(ontologyIRI, new OntologyTermContainer(
+						ontologyIRI));
+				totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
+				totalHits.get(ontologyIRI).getAlternativeDefinitions().put(nodePath, alternativeDefinitions);
+				totalHits.get(ontologyIRI).getSelectedOntologyTerms().add(hit.getId());
 			}
 		}
+		return totalHits;
+	}
 
-		for (Entry<String, Boolean> entry : allPaths.entrySet())
+	private List<Map<Integer, List<BoostTermContainer>>> addAlternativeDefinition(
+			Map<String, OntologyTermContainer> ontologyTermContainers)
+	{
+		List<Map<Integer, List<BoostTermContainer>>> positions = new ArrayList<Map<Integer, List<BoostTermContainer>>>();
+		for (Entry<String, OntologyTermContainer> entry : ontologyTermContainers.entrySet())
 		{
-			String parentNodePath = entry.getKey();
-			Boolean boost = entry.getValue();
-			Integer finalIndexPosition = -1;
-
-			List<QueryRule> queryRules = new ArrayList<QueryRule>();
-			queryRules.add(new QueryRule(NODE_PATH, Operator.LIKE, entry.getKey()));
-			queryRules.add(new QueryRule(Operator.LIMIT, 5000));
-
-			SearchResult result = searchService.search(new SearchRequest(null, queryRules, null));
-			Iterator<Hit> iterator = result.iterator();
-
-			Set<String> existingPaths = new HashSet<String>();
-			Set<String> terms = new HashSet<String>();
-			Pattern pattern = Pattern.compile("[0-9]+");
-			Matcher matcher = null;
-
-			while (iterator.hasNext())
+			String ontologyIRI = entry.getKey();
+			OntologyTermContainer container = entry.getValue();
+			if (container.getAlternativeDefinitions().size() > 0)
 			{
-				Hit hit = iterator.next();
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				String nodePath = columnValueMap.get(NODE_PATH).toString();
-				if (!existingPaths.contains(nodePath))
+				for (Entry<String, String> entryForAlterDefinition : container.getAlternativeDefinitions().entrySet())
 				{
-					existingPaths.add(nodePath);
-					if (nodePath.startsWith(parentNodePath + ".") || nodePath.equals(parentNodePath))
+					String definitionString = entryForAlterDefinition.getValue();
+					if (!definitionString.isEmpty())
 					{
-						String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
-								.toLowerCase();
-						matcher = pattern.matcher(ontologyTermSynonym);
-						if (!matcher.find() && !ontologyTermSynonym.equals(""))
+						Boolean boost = container.getAllPaths().get(entryForAlterDefinition.getKey());
+						for (String definition : definitionString.split("&&&"))
 						{
-							String boostNumber = "^3";
-							if (boost && pathToSynonyms.containsKey(parentNodePath)) boostNumber = "^6";
-
-							List<String> listOfSynonyms = new ArrayList<String>(pathToSynonyms.get(parentNodePath));
-							Collections.sort(listOfSynonyms, new MyComparator());
-
-							for (String boostedTerm : listOfSynonyms)
+							Map<String, OntologyTermContainer> totalHits = new HashMap<String, OntologyTermContainer>();
+							Set<String> ontologyTerms = new HashSet<String>();
+							List<QueryRule> rules = new ArrayList<QueryRule>();
+							for (String relatedOntologyTermUri : definition.split(","))
 							{
-								if (ontologyTermSynonym.contains(boostedTerm))
+								if (rules.size() != 0) rules.add(new QueryRule(Operator.OR));
+								rules.add(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, relatedOntologyTermUri));
+							}
+							rules.add(new QueryRule(Operator.LIMIT, 10000));
+							SearchRequest request = new SearchRequest(null, rules, null);
+							SearchResult result = searchService.search(request);
+							Iterator<Hit> iterator = result.iterator();
+							while (iterator.hasNext())
+							{
+								Hit hit = iterator.next();
+								Map<String, Object> columnValueMap = hit.getColumnValueMap();
+								if (columnValueMap.get(ONTOLOGY_IRI).toString().equals(ontologyIRI))
 								{
-									String orignalTerm = ontologyTermSynonym;
-									String replacement = boostedTerm + boostNumber;
-									if (boostedTerm.split(" +").length > 1)
-									{
-										replacement = "\"" + boostedTerm + "\"" + boostNumber;
-									}
-									terms.add(orignalTerm.replaceAll(boostedTerm, replacement));
-									break;
+									String nodePath = columnValueMap.get(NODE_PATH).toString();
+									String ontologyTerm = columnValueMap.get(ONTOLOGY_TERM).toString().trim()
+											.toLowerCase();
+									if (!ontologyTerms.contains(ontologyTerm)) ontologyTerms.add(ontologyTerm);
+									if (!totalHits.containsKey(ontologyIRI)) totalHits.put(ontologyIRI,
+											new OntologyTermContainer(ontologyIRI));
+									totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
 								}
 							}
-							if (!ontologyTermSynonym.toString().equals("")) terms.add(ontologyTermSynonym);
+							positions.add(createQueryRules(StringUtils.join(ontologyTerms.toArray(), ' '), totalHits));
 						}
 					}
 				}
 			}
-			if (!position.containsKey(finalIndexPosition)) position.put(finalIndexPosition, new HashSet<String>());
-			position.get(finalIndexPosition).addAll(terms);
 		}
+		return positions;
+	}
+
+	private Map<Integer, List<BoostTermContainer>> createQueryRules(String description,
+			Map<String, OntologyTermContainer> totalHits)
+	{
+		Map<Integer, List<BoostTermContainer>> position = new HashMap<Integer, List<BoostTermContainer>>();
+		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")));
+
+		for (OntologyTermContainer ontologyTermContainer : totalHits.values())
+		{
+			Set<String> existingQueryStrings = new HashSet<String>();
+			for (Entry<String, Boolean> entry : ontologyTermContainer.getAllPaths().entrySet())
+			{
+				String documentType = "ontologyTerm-" + ontologyTermContainer.getOntologyIRI();
+				String parentNodePath = entry.getKey();
+				int parentNodeLevel = parentNodePath.split("\\.").length;
+				Boolean boost = entry.getValue();
+
+				List<QueryRule> queryRules = new ArrayList<QueryRule>();
+				queryRules.add(new QueryRule(NODE_PATH, Operator.LIKE, entry.getKey()));
+				queryRules.add(new QueryRule(Operator.LIMIT, 5000));
+
+				SearchResult result = searchService.search(new SearchRequest(documentType, queryRules, null));
+				Iterator<Hit> iterator = result.iterator();
+
+				Pattern pattern = Pattern.compile("[0-9]+");
+				Matcher matcher = null;
+
+				BoostTermContainer boostTermContainer = new BoostTermContainer(parentNodePath,
+						new LinkedHashSet<String>(), boost);
+				int finalIndexPosition = -1;
+
+				while (iterator.hasNext())
+				{
+					Hit hit = iterator.next();
+					Map<String, Object> columnValueMap = hit.getColumnValueMap();
+					String nodePath = columnValueMap.get(NODE_PATH).toString();
+					String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
+							.toLowerCase();
+
+					if (!existingQueryStrings.contains(ontologyTermSynonym))
+					{
+						existingQueryStrings.add(ontologyTermSynonym);
+
+						if (nodePath.equals(parentNodePath))
+						{
+							if (finalIndexPosition == -1) finalIndexPosition = locateTermInDescription(uniqueTokens,
+									ontologyTermSynonym);
+							if (!ontologyTermSynonym.toString().equals("")) boostTermContainer.getTerms().add(
+									ontologyTermSynonym);
+						}
+						else if (nodePath.startsWith(parentNodePath + "."))
+						{
+							matcher = pattern.matcher(ontologyTermSynonym);
+
+							if (!matcher.find() && !ontologyTermSynonym.equals(""))
+							{
+								int levelDown = nodePath.split("\\.").length - parentNodeLevel;
+								double boostedNumber = Math.pow(0.5, levelDown);
+								if (finalIndexPosition == -1) finalIndexPosition = locateTermInDescription(
+										uniqueTokens, ontologyTermSynonym);
+
+								StringBuilder boostedSynonym = new StringBuilder();
+								for (String eachToken : ontologyTermSynonym.split(" +"))
+								{
+									if (eachToken.length() != 0) boostedSynonym.append(' ');
+									boostedSynonym.append(eachToken).append('^').append(boostedNumber);
+								}
+								ontologyTermSynonym = boostedSynonym.toString();
+							}
+
+							if (!ontologyTermSynonym.toString().equals("")) boostTermContainer.getTerms().add(
+									ontologyTermSynonym);
+						}
+					}
+				}
+				if (!position.containsKey(finalIndexPosition)) position.put(finalIndexPosition,
+						new ArrayList<BoostTermContainer>());
+				position.get(finalIndexPosition).add(boostTermContainer);
+			}
+		}
+
+		if (!position.containsKey(-2)) position.put(-2, new ArrayList<BoostTermContainer>());
+		BoostTermContainer descriptionBoostTermContainer = new BoostTermContainer(null, new LinkedHashSet<String>(),
+				false);
+		descriptionBoostTermContainer.getTerms().add(removeStopWords(description));
+		position.get(-2).add(descriptionBoostTermContainer);
+
 		return position;
 	}
 
-	private void deleteExistingRecords(String dataSetIdentifier, Database db) throws DatabaseException
+	private String removeStopWords(String originalTerm)
 	{
-		List<ObservationSet> listOfObservationSets = db.find(ObservationSet.class, new QueryRule(
-				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSetIdentifier));
-
-		if (listOfObservationSets.size() > 0)
-		{
-			List<String> listOfObservationIdentifiers = new ArrayList<String>();
-			for (ObservationSet observation : listOfObservationSets)
-			{
-				listOfObservationIdentifiers.add(observation.getIdentifier());
-			}
-			List<ObservedValue> listOfObservedValues = db.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, listOfObservationIdentifiers));
-			if (listOfObservedValues.size() > 0) db.remove(listOfObservedValues);
-			db.remove(listOfObservationSets);
-
-			searchService.deleteDocumentsByType(dataSetIdentifier);
-		}
+		Set<String> tokens = new LinkedHashSet<String>(Arrays.asList(originalTerm.trim().toLowerCase().split(" +")));
+		tokens.removeAll(NGramMatchingModel.STOPWORDSLIST);
+		return StringUtils.join(tokens.toArray(), ' ');
 	}
 
-	private void createMappingStore(Integer selectedDataSet, List<Integer> dataSetsToMatch, Database db)
+	private Integer locateTermInDescription(List<String> uniqueSets, String ontologyTermSynonym)
+	{
+		int finalIndex = -1;
+		List<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")));
+		for (String eachTerm : termsFromDescription)
+		{
+			if (!uniqueSets.contains(eachTerm))
+			{
+				return -1;
+			}
+			else
+			{
+				int currentIndex = uniqueSets.indexOf(eachTerm);
+				if (finalIndex == -1) finalIndex = currentIndex;
+				else finalIndex = finalIndex < currentIndex ? finalIndex : currentIndex;
+			}
+		}
+		return finalIndex;
+	}
+
+	private List<String> stemMembers(List<String> originalList)
+	{
+		List<String> newList = new ArrayList<String>();
+		for (String eachTerm : originalList)
+		{
+			eachTerm = eachTerm.toLowerCase().trim();
+			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm))
+			{
+				stemmer.setCurrent(eachTerm);
+				stemmer.stem();
+				eachTerm = stemmer.getCurrent().toLowerCase();
+				newList.add(eachTerm);
+			}
+		}
+		return newList;
+	}
+
+	private void createMappingStore(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch)
 			throws DatabaseException
 	{
-		boolean isFeatureExists = db.find(ObservableFeature.class,
+		boolean isFeatureExists = database.find(ObservableFeature.class,
 				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_FEATURE)).size() == 0;
 		if (isFeatureExists)
 		{
+			List<ObservableFeature> features = new ArrayList<ObservableFeature>();
+
 			ObservableFeature feature = new ObservableFeature();
 			feature.setIdentifier(STORE_MAPPING_FEATURE);
 			feature.setDataType("xref");
 			feature.setName("Features");
-			db.add(feature);
-		}
+			features.add(feature);
 
-		boolean isMappedFeatureExists = db.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_MAPPED_FEATURE)).size() == 0;
-		if (isMappedFeatureExists)
-		{
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
 			mappedFeature.setDataType("xref");
 			mappedFeature.setName("Mapped features");
-			db.add(mappedFeature);
-		}
+			features.add(mappedFeature);
 
-		boolean isMappedFetureScore = db.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_SCORE)).size() == 0;
-		if (isMappedFetureScore)
-		{
 			ObservableFeature mappedFeatureScore = new ObservableFeature();
 			mappedFeatureScore.setIdentifier(STORE_MAPPING_SCORE);
 			mappedFeatureScore.setDataType("decimal");
 			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
-			db.add(mappedFeatureScore);
-		}
+			features.add(mappedFeatureScore);
 
-		boolean isMappedFetureAbsoluteScore = db.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_ABSOLUTE_SCORE)).size() == 0;
-		if (isMappedFetureAbsoluteScore)
-		{
 			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
 			mappedFeatureAbsoluteScore.setDataType("decimal");
 			mappedFeatureAbsoluteScore.setName(STORE_MAPPING_ABSOLUTE_SCORE);
-			db.add(mappedFeatureAbsoluteScore);
-		}
+			features.add(mappedFeatureAbsoluteScore);
 
-		boolean isConfirmMappingExists = db.find(ObservableFeature.class,
-				new QueryRule(ObservableFeature.IDENTIFIER, Operator.EQUALS, STORE_MAPPING_CONFIRM_MAPPING)).size() == 0;
-		if (isConfirmMappingExists)
-		{
 			ObservableFeature confirmMapping = new ObservableFeature();
 			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
 			confirmMapping.setDataType("bool");
 			confirmMapping.setName("Mapping confirmed");
-			db.add(confirmMapping);
-		}
+			features.add(confirmMapping);
 
-		boolean ifProtocolExists = db.find(Protocol.class,
-				new QueryRule(Protocol.IDENTIFIER, Operator.EQUALS, PROTOCOL_IDENTIFIER)).size() == 0;
-		if (ifProtocolExists)
-		{
+			database.add(features);
+
 			Protocol protocol = new Protocol();
 			protocol.setIdentifier("store_mapping");
 			protocol.setName("store_mapping");
 			protocol.setFeatures_Identifier(Arrays.asList(STORE_MAPPING_FEATURE, STORE_MAPPING_MAPPED_FEATURE,
 					STORE_MAPPING_SCORE, STORE_MAPPING_ABSOLUTE_SCORE, STORE_MAPPING_CONFIRM_MAPPING));
-			db.add(protocol);
+			database.add(protocol);
 		}
 
 		for (Integer dataSetId : dataSetsToMatch)
 		{
-			String identifier = selectedDataSet + "-" + dataSetId;
-			boolean ifDataSetExists = db.find(DataSet.class,
+			String identifier = userName + "-" + selectedDataSet + "-" + dataSetId;
+			boolean ifDataSetExists = database.find(DataSet.class,
 					new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, identifier)).size() == 0;
 			if (ifDataSetExists)
 			{
@@ -482,7 +779,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				dataSet.setIdentifier(identifier);
 				dataSet.setName(identifier);
 				dataSet.setProtocolUsed_Identifier(PROTOCOL_IDENTIFIER);
-				db.add(dataSet);
+				dataSet.setDescription("");
+				database.add(dataSet);
 			}
 		}
 	}
@@ -510,6 +808,110 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				return 1;
 			}
 			return o1.compareTo(o2);
+		}
+	}
+
+	public class BoostTermContainer
+	{
+		private final String parentNodePath;
+		private boolean boost;
+		private final LinkedHashSet<String> terms;
+
+		public BoostTermContainer(String parentNodePath, LinkedHashSet<String> terms, boolean boost)
+		{
+			this.parentNodePath = parentNodePath;
+			this.terms = terms;
+			this.boost = boost;
+		}
+
+		public LinkedHashSet<String> getTerms()
+		{
+			return terms;
+		}
+
+		public void setBoost(boolean boost)
+		{
+			if (!this.boost) this.boost = boost;
+		}
+
+		public boolean isBoost()
+		{
+			return boost;
+		}
+
+		public String getParentNodePath()
+		{
+			return parentNodePath;
+		}
+	}
+
+	public class OntologyTermContainer
+	{
+		private final String ontologyIRI;
+		private final HashMap<String, String> alternativeDefinitions;
+		private final Map<String, Boolean> allPaths;
+		private final Set<String> selectedOntologyTerms;
+
+		// private final Map<String, String>
+
+		public OntologyTermContainer(String ontologyIRI)
+		{
+			this.ontologyIRI = ontologyIRI;
+			this.alternativeDefinitions = new HashMap<String, String>();
+			this.allPaths = new HashMap<String, Boolean>();
+			this.selectedOntologyTerms = new HashSet<String>();
+
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((ontologyIRI == null) ? 0 : ontologyIRI.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			OntologyTermContainer other = (OntologyTermContainer) obj;
+			if (!getOuterType().equals(other.getOuterType())) return false;
+			if (ontologyIRI == null)
+			{
+				if (other.ontologyIRI != null) return false;
+			}
+			else if (!ontologyIRI.equals(other.ontologyIRI)) return false;
+			return true;
+		}
+
+		private AsyncOntologyMatcher getOuterType()
+		{
+			return AsyncOntologyMatcher.this;
+		}
+
+		public String getOntologyIRI()
+		{
+			return ontologyIRI;
+		}
+
+		public Map<String, Boolean> getAllPaths()
+		{
+			return allPaths;
+		}
+
+		public HashMap<String, String> getAlternativeDefinitions()
+		{
+			return alternativeDefinitions;
+		}
+
+		public Set<String> getSelectedOntologyTerms()
+		{
+			return selectedOntologyTerms;
 		}
 	}
 }

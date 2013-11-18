@@ -1,7 +1,7 @@
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
 	<div class="row-fluid">
 		<div class="span12">
-			<legend><div><strong>Please be patient</strong> : this will table approximately 5 mins</div></legend>
+			<legend><div><strong>Please be patient</strong> : this will take up to 5 mins</div></legend>
 		</div>
 	</div>
 	<div id="progress-bar-div" class="row-fluid">

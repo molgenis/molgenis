@@ -38,7 +38,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.hasAnyAuthority(
 						defaultPluginAuthorities("home", "background", "news", "references", "contact",
 								"protocolviewer", "dataexplorer", "entityexplorer", "workflowdataentry",
-								"importwizard", "useraccount"))
+								"importwizard", "useraccount", "mappingmanager", "biobankconnect", "evaluation"))
 
 				// main menu plugins
 				.antMatchers("/menu/main/home/**", "/plugin/home/**")
@@ -79,6 +79,18 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
 				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
+
+				.antMatchers("/menu/main/biobankconnect/**", "/plugin/biobankconnect/**")
+				.hasAnyAuthority(defaultPluginAuthorities("biobankconnect"))
+
+				.antMatchers("/menu/main/mappingmanager/**", "/plugin/mappingmanager/**")
+				.hasAnyAuthority(defaultPluginAuthorities("mappingmanager"))
+
+				.antMatchers("/menu/main/evaluation/**", "/plugin/evaluation/**")
+				.hasAnyAuthority(defaultPluginAuthorities("evaluation"))
+
+				.antMatchers("/menu/main/ontologyindexer/**", "/plugin/ontologyindexer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("ontologyindexer"))
 
 				// converters menu
 				.antMatchers("/menu/converters")
@@ -210,7 +222,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
-				// DAS datasource uses the database, unautheticated users can not see any data
+				// DAS datasource uses the database, unautheticated users can
+				// not see any data
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll();

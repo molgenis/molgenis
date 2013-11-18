@@ -64,6 +64,8 @@ public interface SearchService
 	 */
 	SearchResult search(SearchRequest request);
 
+	SearchResult multiSearch(MultiSearchRequest request);
+
 	/**
 	 * Get the total hit count
 	 * 
@@ -72,7 +74,7 @@ public interface SearchService
 	 * @return
 	 */
 	long count(String documentType, List<QueryRule> queryRules);
-	
+
 	/**
 	 * delete documentType from index
 	 * 
@@ -80,4 +82,6 @@ public interface SearchService
 	 * @return boolean succeeded
 	 */
 	void deleteDocumentsByType(String documentType);
+
+	void updateIndexTupleTable(String documentType, TupleTable tupleTable);
 }
