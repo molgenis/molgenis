@@ -4,6 +4,7 @@ import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENG
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -41,6 +42,9 @@ public class AccountController
 {
 	private static final Logger logger = Logger.getLogger(AccountController.class);
 
+	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been send to your email.";
+	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
+
 	@Autowired
 	private AccountService accountService;
 
@@ -73,8 +77,8 @@ public class AccountController
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
+	@ResponseBody
+	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
 			@Valid @ModelAttribute CaptchaRequest captchaRequest) throws DatabaseException, CaptchaException,
 			BindException
 	{
@@ -90,6 +94,20 @@ public class AccountController
 		URI activationUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/account/activate").build()
 				.toUri();
 		accountService.createUser(molgenisUser, activationUri);
+
+		String successMessage;
+		switch (accountService.getActivationMode())
+		{
+			case ADMIN:
+				successMessage = REGISTRATION_SUCCESS_MESSAGE_ADMIN;
+				break;
+			case USER:
+				successMessage = REGISTRATION_SUCCESS_MESSAGE_USER;
+				break;
+			default:
+				throw new RuntimeException("Unknown activation mode " + accountService.getActivationMode());
+		}
+		return Collections.singletonMap("message", successMessage);
 	}
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
