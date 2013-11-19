@@ -544,7 +544,7 @@
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
 		molgenis.updateObservationSetsTable();
-		if($('#selectFeature').val()!=null){
+		if ($('#selectFeature').val() != null) {
 			molgenis.loadAggregate($('#selectFeature').val());
 		}
 	};
@@ -709,11 +709,13 @@
 			var searchHits = searchResponse.searchHits;
 			var selectTag = $('<select id="selectFeature"/>');
 		
+			if(searchHits.length === 0)  selectTag.attr('disabled', 'disabled');
+			
 			$.each(searchHits, function(index, hit){
 				selectTag.append('<option value=' + hit.columnValueMap.id + '>' + hit.columnValueMap.name + '</option>');
-			});			
+			});
 			$('#feature-select').empty().append(selectTag);
-			molgenis.loadAggregate(selectTag.val());
+			if(searchHits.length > 0) molgenis.loadAggregate(selectTag.val());
 			selectTag.chosen();
 			selectTag.change(function() {
 				molgenis.loadAggregate($(this).val());
