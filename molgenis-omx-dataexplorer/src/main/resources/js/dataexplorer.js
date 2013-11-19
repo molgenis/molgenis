@@ -544,7 +544,7 @@
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
 		molgenis.updateObservationSetsTable();
-		if($('#selectFeature').val()!=null){
+		if ($('#selectFeature').val() != null) {
 			molgenis.loadAggregate($('#selectFeature').val());
 		}
 	};
@@ -667,6 +667,8 @@
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
 			searchRequest.fieldsToReturn.push(feature.identifier);
+			if(feature.dataType === 'xref' || feature.dataType === 'mref')
+				searchRequest.fieldsToReturn.push("key-" + feature.identifier);
 		});
 
 		return searchRequest;
@@ -707,11 +709,13 @@
 			var searchHits = searchResponse.searchHits;
 			var selectTag = $('<select id="selectFeature"/>');
 		
+			if(searchHits.length === 0)  selectTag.attr('disabled', 'disabled');
+			
 			$.each(searchHits, function(index, hit){
 				selectTag.append('<option value=' + hit.columnValueMap.id + '>' + hit.columnValueMap.name + '</option>');
-			});			
+			});
 			$('#feature-select').empty().append(selectTag);
-			molgenis.loadAggregate(selectTag.val());
+			if(searchHits.length > 0) molgenis.loadAggregate(selectTag.val());
 			selectTag.chosen();
 			selectTag.change(function() {
 				molgenis.loadAggregate($(this).val());
@@ -756,24 +760,7 @@
 		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
 	};
-	
-	molgenis.toggleViewer = function(statusDataViewer){
-		if(statusDataViewer){
-			aggregateView = false;
-			$('#dataexplorer-grid-data').show();
-			$('#dataDiv').removeClass("notselected").addClass("selected");
-			$('#aggregateDiv').removeClass("selected").addClass("notselected");
-			$('#dataexplorer-aggregate-data').hide();
-		}
-		else{
-			aggregateView = true;
-			$('#dataexplorer-aggregate-data').show();
-			$('#dataDiv').removeClass("selected").addClass("notselected");
-			$('#aggregateDiv').removeClass("notselected").addClass("selected");
-			$('#dataexplorer-grid-data').hide();
-		}
-	};
-	
+		
 	// on document ready
 	$(function() {
 		// use chosen plugin for data set select
@@ -792,13 +779,7 @@
 		
 		resultsTable = new molgenis.ResultsTable();
 		
-		$('#data').click(function (){
-			molgenis.toggleViewer(true);
-			molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
-		});
-		
-		$('#aggregate').click(function (){	
-			molgenis.toggleViewer(false);
+		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('shown', function (e) {
 			molgenis.initializeAggregate($('#dataset-select').val());
 			molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
 		});

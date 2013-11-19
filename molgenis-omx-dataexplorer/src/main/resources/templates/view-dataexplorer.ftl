@@ -7,6 +7,20 @@
 		<script>top.molgenis.setEntityExplorerUrl('${entityExplorerUrl}');</script>
 	</#if>
 	<div class="row-fluid">
+		<div class="row-fluid pull-right form-horizontal">
+			<div id="dataset-select-container" class="pull-right form-horizontal">
+				<label class="control-label" for="dataset-select">Choose a dataset:</label>
+				<div class="controls">
+					<select data-placeholder="Choose a Dataset" id="dataset-select">
+						<#list dataSets as dataSet>
+							<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
+		</div>	
+	</div>
+	<div class="row-fluid">
 		<div class="span3">
 			<div class="well">
 				<div class="row-fluid">
@@ -44,57 +58,38 @@
 			</div>		
 		</div>
 		<div class="span9">
-			<div class="pull-right">
-				<label class="control-label" for="dataset-select">View:</label>
-				<div id="dataDiv" class="<#if !authenticated>view-disabled<#else>view-enabled</#if>">
-					<span class="viewer" id="data">data<img src="/img/grid-icon.png"></img>
-					</span>
+				<div class="tabbable">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>  
+						<li><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="dataset-data-container">
+							<div id="dataexplorer-grid-data">	
+								<div class="row-fluid data-table-container" >	
+									<table id="data-table" class="table table-striped table-condensed"></table>	
+								</div>	
+								<div class="row-fluid data-table-pager-container">
+									<div id="nrOfDataItems" class="pull-left"></div>
+									<a id="download-button" class="btn" href="#">Download as csv</a>
+									<div id="data-table-pager" class="pagination pagination-centered"></div>			
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane" id="dataset-aggregate-container">
+							<div class="row-fluid data-table-container form-horizontal" id="dataexplorer-aggregate-data">
+								<div id=""feature-select-container">
+									<label class="control-label" for="feature-select">Aggregate by:</label>
+									<div id="feature-select" class="controls">
+									</div>
+								</div>
+								<div id="aggregate-table-container"></div>
+							</div>
+						</div>
+					</div>
 				</div>
-				<div id="aggregateDiv">
-					<span class="viewer" id="aggregate">aggregate<img src="/img/aggregate-icon.png"></img></span>
-				</div>
-			</div>
-			<div class="controls pull-left">
-				<label class="control-label" for="dataset-select">Choose a dataset:</label>
-				<select data-placeholder="Choose a Dataset" id="dataset-select">
-					<#list dataSets as dataSet>
-						<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
-					</#list>
-				</select>
-			</div>
-		</div>
-		<div class="span9">
-			<legend></legend>
-			<div id="dataexplorer-grid-data">	
-				<div class="row-fluid data-table-container" >	
-					<table id="data-table" class="table table-striped table-condensed"></table>	
-				</div>	
-				<div class="row-fluid data-table-pager-container">
-					<div id="nrOfDataItems" class="pull-left"></div>
-					<a id="download-button" class="btn" href="#">Download as csv</a>
-					<div id="data-table-pager" class="pagination pagination-centered"></div>			
-				</div>
-			</div>	
-			<div class="row-fluid data-table-container" id="dataexplorer-aggregate-data" style="display:none">
-				<label class="control-label" for="feature-select">Aggregate by:</label>
-				<div id="feature-select" class="controls"></div>
-				<div id="aggregate-table-container"></div>
 			</div>
 		</div>
 		<div class="feature-filter-dialog"></div>	
 	</div>
-	<script>
-		$(function(){
-			<#if !authenticated>
-				$('#dataexplorer-grid-data').hide();
-				$('#dataexplorer-aggregate-data').show();
-				$('#aggregateDiv').addClass("selected");
-				$('#aggregate').click();
-			<#else>
-				$('#dataexplorer-grid-data').show();
-				$('#dataexplorer-aggregate-data').hide();
-				$('#dataDiv').addClass("selected");
-			</#if>
-		});
-	</script>
 <@footer/>
