@@ -156,7 +156,7 @@ public class AccountService
 		}
 	}
 
-	private ActivationMode getActivationMode()
+	public ActivationMode getActivationMode()
 	{
 		String activationModeStr = molgenisSettings.getProperty(KEY_PLUGIN_AUTH_ACTIVATIONMODE);
 		return ActivationMode.from(activationModeStr, DEFAULT_ACTIVATION_MODE);
@@ -197,7 +197,7 @@ public class AccountService
 		return molgenisSettings.getProperty(KEY_APP_NAME, DEFAULT_APP_NAME);
 	}
 
-	private static enum ActivationMode
+	static enum ActivationMode
 	{
 		ADMIN, USER;
 
