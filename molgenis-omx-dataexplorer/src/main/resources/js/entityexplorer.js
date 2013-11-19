@@ -140,7 +140,7 @@
 					    items.push('<h3>Protocol summary</h3>');
 					    items.push('<p>' + protocol.description + '</p>');
 					    items.push('</div>');
-					    items.push('<div class="span9">');
+					    items.push('<div id="table-protocol-container" class="span9">');
 					    
 						// build protocol result table
 						var features = $.merge(matchedFeatures, remainingFeatures);
@@ -150,7 +150,12 @@
 							items.push('<tr>');
 							items.push('<td class="first">' + feature.name + '</td>');
 							$.each(searchHits, function(key, searchHit) {
-								items.push('<td>' + searchHit.columnValueMap[feature.identifier] + '</td>');
+								if(searchHit.columnValueMap[feature.identifier]){
+									items.push('<td>' + formatTableCellValue(searchHit.columnValueMap[feature.identifier],feature.dataType) + '</td>');
+								}
+								else{
+									items.push('<td/>');
+								}
 							});
 							items.push('</tr>');
 						});
@@ -177,6 +182,7 @@
 				
 				$('#entity-search-results-header').html(searchResponse.totalHitCount + ' search results in ' + nrProtocols + ' protocols');
 				$('#entity-search-results').html(items.join(''));
+				$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 			});
 		});
 	};
