@@ -117,7 +117,13 @@
 						
 						items.push('<div class="accordion-group">');
 						items.push('<div class="accordion-heading">');
-						items.push('<a class="accordion-toggle" data-toggle="collapse" href="#collapse-' + protocol.identifier + '">');
+						items.push('<a class="accordion-toggle" data-toggle="collapse" href="#collapse-' + protocol.identifier + '"><i class="icon-chevron-');
+						if(firstProtocol) {
+							items.push('down');
+						} else {
+							items.push('right');
+						}
+						items.push('"></i> ');
 					    items.push(protocol.name);
 					    items.push('</a>');
 					    items.push('</div>');
@@ -201,6 +207,12 @@
 			ns.onEntitySelectionChange($(this).val());
 		});
 
+		$(document).on('show', '#accordion .collapse', function() {
+		    $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");
+		}).on('hide', '#accordion .collapse', function() {
+		    $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
+		});
+		
 		var selected = $('#entity-instance-select').val();
 		if (selected != null)
 			$('#entity-instance-select').change();
