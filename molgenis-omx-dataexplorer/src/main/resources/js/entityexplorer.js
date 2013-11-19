@@ -145,7 +145,7 @@
 							items.push('<td class="first">' + feature.name + '</td>');
 							$.each(searchHits, function(key, searchHit) {
 								if(searchHit.columnValueMap[feature.identifier]){
-									items.push('<td>' + searchHit.columnValueMap[feature.identifier] + '</td>');
+									items.push('<td>' + formatTableCellValue(searchHit.columnValueMap[feature.identifier],feature.dataType) + '</td>');
 								}
 								else{
 									items.push('<td/>');
