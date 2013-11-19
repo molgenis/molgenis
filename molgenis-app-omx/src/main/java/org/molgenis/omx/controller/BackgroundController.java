@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping(URI)
-public class BackgroundController extends AbstractStaticContectController
+public class BackgroundController extends AbstractStaticContentController
 {
 	public static final String ID = "background";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;

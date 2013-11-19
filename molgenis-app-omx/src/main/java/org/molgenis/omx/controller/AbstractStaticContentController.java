@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public abstract class AbstractStaticContectController extends MolgenisPluginController
+public abstract class AbstractStaticContentController extends MolgenisPluginController
 {
 	@Autowired
 	private StaticContentService staticContentService;
 	private final String uniqueReference;
 	
-	public AbstractStaticContectController(final String uniqueReference, final String uri)
+	public AbstractStaticContentController(final String uniqueReference, final String uri)
 	{
 		super(uri);
 		this.uniqueReference = uniqueReference;
@@ -29,7 +29,7 @@ public abstract class AbstractStaticContectController extends MolgenisPluginCont
 	@RequestMapping(value = "/edit", method = RequestMethod.GET)
 	public String initEdit(final Model model)
 	{
-		if(this.staticContentService.isCurrentUserAuthenticatedSu()){
+		if(this.staticContentService.isCurrentUserCanEdit()){
 			return this.initEditModelAndView(uniqueReference, model);
 		}else{
 			return this.initModelAndView(uniqueReference, model);
@@ -46,7 +46,7 @@ public abstract class AbstractStaticContectController extends MolgenisPluginCont
 	private String initModelAndView(final String uniqueReference, final Model model)
 	{
 		model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
-		model.addAttribute("isCurrentUserAuthenticatedSu", this.staticContentService.isCurrentUserAuthenticatedSu());
+		model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit());
 		model.addAttribute("editHref", "/menu/main/" + uniqueReference + "/edit");
 		return "view-staticcontent";
 	}

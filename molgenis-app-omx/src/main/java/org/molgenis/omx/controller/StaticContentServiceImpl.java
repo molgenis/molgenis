@@ -47,7 +47,7 @@ public class StaticContentServiceImpl implements StaticContentService
 		return succes;
 	}
 
-	public boolean isCurrentUserAuthenticatedSu()
+	public boolean isCurrentUserCanEdit()
 	{
 		return SecurityUtils.currentUserIsAuthenticated() && SecurityUtils.currentUserIsSu();
 	}

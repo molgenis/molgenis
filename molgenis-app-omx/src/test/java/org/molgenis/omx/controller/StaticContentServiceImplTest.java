@@ -50,24 +50,24 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	}
 	
 	@Test
-	public void isCurrentUserAuthenticatedSu_SuperUser()
+	public void isCurrentUserCanEdit_SuperUser()
 	{
 		this.setSecurityContextSuperUser();
-		assertTrue(this.staticContentService.isCurrentUserAuthenticatedSu());
+		assertTrue(this.staticContentService.isCurrentUserCanEdit());
 	}
 	
 	@Test
-	public void isCurrentUserAuthenticatedSu_NonSuperUser()
+	public void isCurrentUserCanEdit_NonSuperUser()
 	{
 		this.setSecurityContextNonSuperUser();
-		assertFalse(this.staticContentService.isCurrentUserAuthenticatedSu());
+		assertFalse(this.staticContentService.isCurrentUserCanEdit());
 	}
 	
 	@Test
-	public void isCurrentUserAuthenticatedSu_AnonymousUsers()
+	public void isCurrentUserCanEdit_AnonymousUsers()
 	{
 		this.setSecurityContextAnonymousUsers();
-		assertFalse(this.staticContentService.isCurrentUserAuthenticatedSu());
+		assertFalse(this.staticContentService.isCurrentUserCanEdit());
 	}
 	
 	@Test

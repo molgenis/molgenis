@@ -155,14 +155,14 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(view().name("view-staticcontent"))
 				.andExpect(model().attributeExists("content"))
-				.andExpect(model().attributeExists("isCurrentUserAuthenticatedSu"))
+				.andExpect(model().attributeExists("isCurrentUserCanEdit"))
 				.andExpect(model().attribute("editHref", "/menu/main/" + uniqueReference + "/edit"));
 	}
 	
 	public void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{		
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
-		when(this.staticContentService.isCurrentUserAuthenticatedSu()).thenReturn(true);
+		when(this.staticContentService.isCurrentUserCanEdit()).thenReturn(true);
 		
 		mockMvc.perform(MockMvcRequestBuilders.get(uri + "/edit"))
 				.andExpect(MockMvcResultMatchers.status().isOk())

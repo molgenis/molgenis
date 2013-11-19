@@ -11,5 +11,5 @@ public interface StaticContentService
 
 	boolean submitContent(final String uniqueReference, final String content);
 
-	boolean isCurrentUserAuthenticatedSu();
+	boolean isCurrentUserCanEdit();
 }
