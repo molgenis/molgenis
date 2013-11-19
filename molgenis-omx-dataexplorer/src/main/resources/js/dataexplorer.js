@@ -667,6 +667,8 @@
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
 			searchRequest.fieldsToReturn.push(feature.identifier);
+			if(feature.dataType === 'xref' || feature.dataType === 'mref')
+				searchRequest.fieldsToReturn.push("key-" + feature.identifier);
 		});
 
 		return searchRequest;
