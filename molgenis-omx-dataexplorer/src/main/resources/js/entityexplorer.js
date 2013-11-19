@@ -176,6 +176,7 @@
 				
 				$('#entity-search-results-header').html(searchResponse.totalHitCount + ' search results in ' + nrProtocols + ' protocols');
 				$('#entity-search-results').html(items.join(''));
+				$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 			});
 		});
 	};

@@ -41,6 +41,11 @@
     font-weight: bold;
 }
 
+.show-popover {
+	cursor: hand;
+	cursor: pointer;
+}
+
 .accordion-group {
 	background-color: #5B82A4;
 }
