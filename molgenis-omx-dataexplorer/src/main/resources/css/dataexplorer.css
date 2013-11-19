@@ -6,15 +6,6 @@
 	margin-bottom: 20px;
 }
 
-.control-label {
-	margin-right: 5px;
-}
-
-#dataset-select-container {
-	margin-top: 4px;
-	margin-bottom: 8px;
-}
-
 #dataset-select-label {
 	margin-right: 10px;
 	font-size: 15.4px;
@@ -224,7 +215,6 @@ input[type=number] {
 }
 
 #dataexplorer-grid-data table {
-	margin-top: 20px;
 	background: #DDDDDD;
 }
 
