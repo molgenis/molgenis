@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -21,16 +20,6 @@ public class QueryImpl implements Query
 	private int pageSize;
 	private int offset;
 	private Sort sort;
-
-	public QueryImpl(QueryRule queryRule)
-	{
-		this.rules.add(Arrays.asList(queryRule));
-	}
-
-	public QueryImpl(List<QueryRule> queryRules)
-	{
-		this.rules.add(queryRules);
-	}
 
 	public QueryImpl()
 	{
