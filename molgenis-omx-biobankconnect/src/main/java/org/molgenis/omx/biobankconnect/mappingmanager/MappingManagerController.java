@@ -23,8 +23,8 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
@@ -41,6 +41,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -73,7 +74,7 @@ public class MappingManagerController extends MolgenisPluginController
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private final OntologyMatcher ontologyMatcher;
 	private final SearchService searchService;
-	private final Database database;
+	private final DataService dataService;
 	private final UserAccountService userAccountService;
 
 	@Autowired
@@ -81,30 +82,33 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@Autowired
 	public MappingManagerController(OntologyMatcher ontologyMatcher, SearchService searchService,
-			UserAccountService userAccountService, Database database)
+			UserAccountService userAccountService, DataService dataService)
 	{
 		super(URI);
 		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (userAccountService == null) throw new IllegalArgumentException("userAccountService is null");
 		this.userAccountService = userAccountService;
 		this.ontologyMatcher = ontologyMatcher;
 		this.searchService = searchService;
-		this.database = database;
+		this.dataService = dataService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, Model model) throws DatabaseException
+	String selectedDataSetId, Model model)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		for (DataSet dataSet : database.find(DataSet.class))
+
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		for (DataSet dataSet : allDataSets)
 		{
-			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
+
 		model.addAttribute("dataSets", dataSets);
-		model.addAttribute("userName", userAccountService.getCurrentUser().getUsername());
+		model.addAttribute("userName", SecurityUtils.getCurrentUsername());
 		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
 
@@ -145,7 +149,7 @@ public class MappingManagerController extends MolgenisPluginController
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String verify(@RequestParam
 	Integer selectedDataSet, @RequestParam
-	Part file, HttpServletResponse response, Model model) throws IOException, DatabaseException
+	Part file, HttpServletResponse response, Model model) throws IOException
 	{
 		ExcelReader reader = null;
 		TupleWriter tupleWriter = null;
@@ -199,17 +203,18 @@ public class MappingManagerController extends MolgenisPluginController
 				}
 			}
 
-			List<DataSet> dataSets = database.find(DataSet.class,
-					new QueryRule(DataSet.NAME, Operator.IN, biobankNames));
+			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
+					new QueryImpl().in(DataSet.NAME, biobankNames));
+
 			for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
 			{
 				String variableName = entry.getKey();
 				List<String> ranks = new ArrayList<String>();
 				ranks.add(variableName);
-				System.out.println(variableName);
 				Map<String, List<String>> mappingDetail = entry.getValue();
-				List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(
-						ObservableFeature.NAME, Operator.EQUALS, variableName));
+				List<ObservableFeature> features = dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.NAME, variableName));
+
 				if (!features.isEmpty())
 				{
 					for (DataSet dataSet : dataSets)
@@ -245,7 +250,6 @@ public class MappingManagerController extends MolgenisPluginController
 								{
 									if (outputRank.length() != 0) outputRank.append(',');
 									outputRank.append(rank);
-									System.out.println("Rank in " + dataSet.getName() + " is " + rank);
 								}
 							}
 						}
@@ -254,10 +258,6 @@ public class MappingManagerController extends MolgenisPluginController
 				}
 				tupleWriter.write(new ValueTuple(ranks));
 			}
-		}
-		catch (DatabaseException e)
-		{
-			new RuntimeException(e);
 		}
 		finally
 		{
@@ -289,7 +289,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/download", method = RequestMethod.POST)
 	public void download(@RequestParam("request")
-	String requestString, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	String requestString, HttpServletResponse response) throws IOException, TableException
 	{
 		requestString = URLDecoder.decode(requestString, "UTF-8");
 		logger.info("Download request: [" + requestString + "]");
@@ -305,20 +305,21 @@ public class MappingManagerController extends MolgenisPluginController
 			Set<Integer> featureIds = new HashSet<Integer>();
 			tupleWriter = new CsvWriter(response.getWriter());
 			Integer selectedDataSetId = request.getDataSetId();
-			DataSet mappingDataSet = database.findById(DataSet.class, selectedDataSetId);
-			List<DataSet> storeMappingDataSet = database.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER,
-					Operator.LIKE, selectedDataSetId.toString()));
+			DataSet mappingDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId);
+			List<DataSet> storeMappingDataSet = dataService.findAllAsList(DataSet.ENTITY_NAME,
+					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId.toString()));
+
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(mappingDataSet.getName());
 			Map<Integer, Map<Integer, MappingClass>> dataSetMappings = new HashMap<Integer, Map<Integer, MappingClass>>();
+
 			for (DataSet dataSet : storeMappingDataSet)
 			{
 				Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
-				if (dataSet.getIdentifier().startsWith(
-						userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
+				if (dataSet.getIdentifier().startsWith(SecurityUtils.getCurrentUsername() + "-" + selectedDataSetId)
 						&& !mappedDataSetId.equals(selectedDataSetId))
 				{
-					DataSet mappedDataSet = database.findById(DataSet.class, mappedDataSetId);
+					DataSet mappedDataSet = dataService.findOne(DataSet.ENTITY_NAME, mappedDataSetId);
 					dataSetNames.add(mappedDataSet.getName());
 					List<QueryRule> rules = new ArrayList<QueryRule>();
 					rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
@@ -344,8 +345,9 @@ public class MappingManagerController extends MolgenisPluginController
 			}
 
 			Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
-			for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
-					Operator.IN, new ArrayList<Integer>(featureIds))))
+			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().in(ObservableFeature.ID, new ArrayList<Integer>(featureIds)));
+			for (ObservableFeature feature : features)
 			{
 				featureMap.put(feature.getId(), feature);
 			}

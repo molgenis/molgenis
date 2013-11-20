@@ -72,6 +72,8 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 */
 	<E extends Entity> void update(String entityName, E entity);
 
+	<E extends Entity> void update(String entityName, Iterable<E> entities);
+
 	/**
 	 * Deletes an entity
 	 * 

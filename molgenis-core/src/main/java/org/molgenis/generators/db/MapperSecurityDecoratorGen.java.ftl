@@ -156,7 +156,7 @@ public class ${clazzName}<E extends ${entityClass}> extends CrudRepositoryDecora
 	@Override
 	public void delete(Iterable<E> entities)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_ENTITY_WRITE_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_${securityName}"))
 		{
 			throw new MolgenisDataException("No write permission on ${entityClass}");
 		}

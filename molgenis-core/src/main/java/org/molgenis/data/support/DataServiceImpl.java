@@ -193,6 +193,13 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public <E extends Entity> void update(String entityName, Iterable<E> entities)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.update(entities);
+	}
+
+	@Override
 	public <E extends Entity> void delete(String entityName, E entity)
 	{
 		Updateable<E> updateable = getUpdateable(entityName);
@@ -310,4 +317,5 @@ public class DataServiceImpl implements DataService
 
 		return entityClasses;
 	}
+
 }

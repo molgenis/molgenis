@@ -72,9 +72,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-						new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
-						new CategoryTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+						new CategoryTable(dataSet.getProtocolUsed(), dataService));
 			}
 		}
 		catch (Exception e)
@@ -148,9 +148,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-						new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
-						new CategoryTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+						new CategoryTable(dataSet.getProtocolUsed(), dataService));
 			}
 		}
 		catch (Exception e)

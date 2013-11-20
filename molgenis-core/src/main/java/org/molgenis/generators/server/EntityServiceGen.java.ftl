@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -103,6 +104,8 @@ public class ${entity.name}Service
 	}
 	
 	//Handle a bit of lagacy, handle query like 'SELECT FROM Category WHERE observableFeature_Identifier=xxx'
+	// Resolve xref ids.
+	// TODO Do this in a cleaner way and support more operators, Move to util class or remove this completely?
 	private List<QueryRule> resolveRefIdentifiers(List<QueryRule> rules)
 	{
 		for (QueryRule r : rules)
@@ -123,12 +126,22 @@ public class ${entity.name}Service
 					// Resolve xref, mref fields
 					AttributeMetaData attr = getEntityMetaData().getAttribute(r.getField());
 				
-					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF
-							&& StringUtils.isNumeric(r.getValue().toString()))
+					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
 					{
-						Object value = dataService.findOne(attr.getRefEntity().getName(),
+						if (r.getOperator() == Operator.IN)
+						{
+							List<?> values = dataService.findAllAsList(
+									attr.getRefEntity().getName(),
+									new QueryImpl().in(attr.getRefEntity().getIdAttribute().getName(),
+											(Iterable<?>) r.getValue()));
+							r.setValue(values);
+						}
+						else
+						{
+							Object value = dataService.findOne(attr.getRefEntity().getName(),
 								new QueryImpl().eq(attr.getRefEntity().getIdAttribute().getName(), r.getValue()));
-						r.setValue(value);
+							r.setValue(value);
+						}
 					}
 				}
 			}
