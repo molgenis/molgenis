@@ -48,7 +48,7 @@ public class LuceneQueryStringBuilderTest
 	public void testEscapeValue()
 	{
 		// The characters that need to be escaped are: + - ! ( ) { } [ ] ^
-		// " ~ * ? : \ +
+		// " ~ * ? : \ + |
 		assertEquals(escapeValue("+"), "\\+");
 		assertEquals(escapeValue("-"), "\\-");
 		assertEquals(escapeValue("!"), "\\!");
@@ -67,6 +67,7 @@ public class LuceneQueryStringBuilderTest
 		assertEquals(escapeValue("/"), "\\/");
 		assertEquals(escapeValue(":"), "\\:");
 		assertEquals(escapeValue("&"), "\\&");
+		assertEquals(escapeValue("|"), "\\|");
 	}
 
 	@Test
