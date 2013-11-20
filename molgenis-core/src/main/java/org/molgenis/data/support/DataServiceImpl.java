@@ -19,7 +19,6 @@ import org.molgenis.data.EntitySourceFactory;
 import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
@@ -146,12 +145,6 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> List<E> findAllAsList(String entityName, QueryRule... queryRules)
-	{
-		return findAllAsList(entityName, new QueryImpl(Lists.newArrayList(queryRules)));
-	}
-
-	@Override
 	public <E extends Entity> E findOne(String entityName, Integer id)
 	{
 		Queryable<E> queryable = getQueryable(entityName);
@@ -163,12 +156,6 @@ public class DataServiceImpl implements DataService
 	{
 		Queryable<E> queryable = getQueryable(entityName);
 		return queryable.findOne(q);
-	}
-
-	@Override
-	public <E extends Entity> E findOne(String entityName, QueryRule... queryRules)
-	{
-		return findOne(entityName, new QueryImpl(Lists.newArrayList(queryRules)));
 	}
 
 	@Override

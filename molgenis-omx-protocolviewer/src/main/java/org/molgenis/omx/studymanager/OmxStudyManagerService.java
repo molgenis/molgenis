@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
@@ -86,8 +87,8 @@ public class OmxStudyManagerService implements StudyManagerService
 	public void updateStudyDefinition(StudyDefinition studyDefinition) throws UnknownStudyDefinitionException
 	{
 		String id = studyDefinition.getId();
-		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.IDENTIFIER, id));
+		Query q = new QueryImpl().eq(StudyDataRequest.IDENTIFIER, id);
+		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME, q);
 
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");

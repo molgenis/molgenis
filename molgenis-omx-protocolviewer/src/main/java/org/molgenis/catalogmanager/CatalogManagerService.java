@@ -29,6 +29,16 @@ public interface CatalogManagerService
 	Catalog getCatalog(String id) throws UnknownCatalogException;
 
 	/**
+	 * Returns the catalog of the study definition with the given id
+	 * 
+	 * @param id
+	 * @return
+	 * @throws UnknownCatalogException
+	 * @throws UnknownStudyDefinitionException
+	 */
+	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
+
+	/**
 	 * Retrieves a catalog and store it in the database
 	 * 
 	 * @param id
@@ -52,16 +62,6 @@ public interface CatalogManagerService
 	 * @throws UnknownCatalogException
 	 */
 	boolean isCatalogLoaded(String id) throws UnknownCatalogException;
-
-	/**
-	 * Returns the catalog for the study definition with the given id
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 * @throws UnknownStudyDefinitionException
-	 */
-	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 
 	/**
 	 * Retrieves a catalog of a study definition and store it in the database

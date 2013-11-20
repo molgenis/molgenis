@@ -36,9 +36,15 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 
 	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids);
 
+	@Deprecated
+	/**
+	 * Use Iterable<E> findAll instead or count(String entityName, Query q);
+	 * 
+	 * @param entityName
+	 * @param q
+	 * @return
+	 */
 	<E extends Entity> List<E> findAllAsList(String entityName, Query q);
-
-	<E extends Entity> List<E> findAllAsList(String entityName, QueryRule... queryRules);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -53,8 +59,6 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
 	<E extends Entity> E findOne(String entityName, Query q);
-
-	<E extends Entity> E findOne(String entityName, QueryRule... queryRules);
 
 	/**
 	 * Adds an entity to it's repository

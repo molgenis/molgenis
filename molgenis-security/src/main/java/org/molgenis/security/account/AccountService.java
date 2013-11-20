@@ -8,8 +8,6 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -114,13 +112,11 @@ public class AccountService
 	@RunAsSystem
 	public void activateUser(String activationCode) throws DatabaseException
 	{
-		List<MolgenisUser> molgenisUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(
-				MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(MolgenisUser.ACTIVATIONCODE,
-				Operator.EQUALS, activationCode));
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode));
 
-		if (molgenisUsers != null && !molgenisUsers.isEmpty())
+		if (molgenisUser != null)
 		{
-			MolgenisUser molgenisUser = molgenisUsers.get(0);
 			molgenisUser.setActive(true);
 			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 

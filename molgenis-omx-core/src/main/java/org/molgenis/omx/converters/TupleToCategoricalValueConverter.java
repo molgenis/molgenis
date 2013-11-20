@@ -1,11 +1,9 @@
 package org.molgenis.omx.converters;
 
-import java.util.List;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.CategoricalValue;
@@ -46,15 +44,13 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 		Category category;
 		try
 		{
-			List<Category> categories = dataService.findAllAsList(Category.ENTITY_NAME, new QueryRule(
-					Category.OBSERVABLEFEATURE, Operator.EQUALS, feature), new QueryRule(Category.VALUECODE,
-					Operator.EQUALS, categoryValueCode));
-
-			if (categories == null || categories.isEmpty())
+			Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and()
+					.eq(Category.VALUECODE, categoryValueCode);
+			category = dataService.findOne(Category.ENTITY_NAME, q);
+			if (category == null)
 			{
 				throw new ValueConverterException("unknown category value code [" + categoryValueCode + ']');
 			}
-			category = categories.get(0);
 		}
 		catch (MolgenisDataException e)
 		{

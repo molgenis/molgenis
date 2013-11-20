@@ -12,6 +12,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.protocolviewer.ProtocolViewerController;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -28,10 +29,12 @@ public class ProtocolViewerControllerTest
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		ShoppingCart shoppingCart = mock(ShoppingCart.class);
 
+		Protocol protocol = when(mock(Protocol.class).getIdentifier()).thenReturn("protocol1").getMock();
+
 		DataSet dataSet = new DataSet();
 		dataSet.setId(1);
 		dataSet.setName("dataset");
-		dataSet.setProtocolUsed_Identifier("protocol1");
+		dataSet.setProtocolUsed(protocol);
 
 		ObservableFeature feature1 = new ObservableFeature();
 		feature1.setId(1);

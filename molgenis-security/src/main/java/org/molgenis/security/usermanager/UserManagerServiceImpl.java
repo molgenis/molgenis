@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
@@ -154,10 +153,11 @@ public class UserManagerServiceImpl implements UserManagerService
 			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
 		}
 
-		final List<MolgenisGroupMember> molgenisGroupMembers = dataService
-				.findAllAsList(MolgenisGroupMember.ENTITY_NAME, new QueryRule(MolgenisGroupMember.MOLGENISUSER,
-						Operator.EQUALS, molgenisUser), new QueryRule(MolgenisGroupMember.MOLGENISGROUP,
-						Operator.EQUALS, molgenisGroup));
+		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser).and()
+				.eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup);
+
+		final List<MolgenisGroupMember> molgenisGroupMembers = dataService.findAllAsList(
+				MolgenisGroupMember.ENTITY_NAME, q);
 
 		if (null == molgenisGroupMembers || molgenisGroupMembers.isEmpty())
 		{
