@@ -18,8 +18,8 @@
 			<form class="form-search text-center pull-right" method="get" action="#">
 				<select id="query-fields">
 					<#list form.metaData.fields as field>
-						<#if field.type.enumType == 'STRING'>
-							<option id="${field.name}">${field.label}</option>
+						<#if field.dataType.enumType == 'STRING'>
+							<option id="${field.name}">${field.name}</option>
 						</#if>
 					</#list>
 				</select>
@@ -45,7 +45,7 @@
 						<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 					</#if>
 					<#list form.metaData.fields as field>
-						<th>${field.label}</th>
+						<th>${field.name}</th>
 					</#list>
 				</tr>
 			</thead>
@@ -80,15 +80,15 @@
 	forms[${index}].meta.fields = [<#list form.metaData.fields as field>
 					{
 						name:'${field.name?uncap_first}', 
-						xref:${field.isXRef()?string('true', 'false')},
-						mref:${field.isMRef()?string('true', 'false')},
-						type:'${field.type.enumType}',
-						readOnly:${field.isReadOnly()?string('true', 'false')},
-						unique:${field.isUnique()?string('true', 'false')},
-						<#if field.isXRef()?string == 'true' || field.isMRef()?string == 'true'>
-							xrefLabelName: '${field.xrefLabelNames[0]?uncap_first}',
-							xrefLabel: '${field.xrefEntity.label}',
-							xrefEntityName: '${field.xrefEntity.name?lower_case}'
+						xref:${(field.dataType.enumType == 'XREF')?string('true', 'false')},
+						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
+						type:'${field.dataType.enumType}',
+						readOnly:${field.isReadonly()?string('true', 'false')},
+						unique:false,
+						<#if field.refEntity??>
+						xrefLabelName: '${field.refEntity.labelAttribute.name?uncap_first}',
+						xrefLabel: '${field.refEntity.name}',
+						xrefEntityName: '${field.refEntity.name?lower_case}'
 						</#if>
 					}
 					<#if field_has_next>,</#if>
@@ -133,6 +133,7 @@
 <script>
 	//Remote validation rules for unique fields (check if unique)
 	var remoteRules = {
+		<#-- TODO
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
 				${field.name?uncap_first}: {
@@ -163,9 +164,11 @@
 				},
 			</#if>
 		</#list>
+		-->
 	};
 	
 	var remoteMessages = {
+		<#-- TODO
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
 				${field.name?uncap_first}: {
@@ -173,6 +176,7 @@
 				},
 			</#if>
 		</#list>
+		-->
 	};
 </script>
 </#macro>

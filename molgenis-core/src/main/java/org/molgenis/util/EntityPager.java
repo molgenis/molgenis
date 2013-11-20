@@ -1,13 +1,15 @@
 package org.molgenis.util;
 
+import org.molgenis.data.Entity;
+
 public class EntityPager<T extends Entity>
 {
 	private final int start;
 	private final int num;
-	private final int total;
+	private final long total;
 	private final Iterable<T> iterable;
 
-	public EntityPager(int start, int num, int total, Iterable<T> iterable)
+	public EntityPager(int start, int num, long total, Iterable<T> iterable)
 	{
 		this.start = start;
 		this.num = num;
@@ -25,7 +27,7 @@ public class EntityPager<T extends Entity>
 		return num;
 	}
 
-	public int getTotal()
+	public long getTotal()
 	{
 		return total;
 	}

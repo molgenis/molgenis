@@ -1,6 +1,6 @@
 package org.molgenis.omx;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ShoppingCart;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class OmxConfig
 {
 	@Autowired
-	public Database unsecuredDatabase;
+	private DataService dataService;
 
 	@Bean
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
@@ -26,6 +26,6 @@ public class OmxConfig
 	@Bean
 	public MolgenisSettings molgenisSettings()
 	{
-		return new MolgenisDbSettings(unsecuredDatabase);
+		return new MolgenisDbSettings(dataService);
 	}
 }

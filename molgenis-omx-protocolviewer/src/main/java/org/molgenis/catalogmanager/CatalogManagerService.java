@@ -1,7 +1,5 @@
 package org.molgenis.catalogmanager;
 
-import java.util.List;
-
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
@@ -17,9 +15,9 @@ public interface CatalogManagerService
 	/**
 	 * Gets all available catalogs
 	 * 
-	 * @return List of CatalogInfo
+	 * @return Iterable of CatalogInfo
 	 */
-	List<CatalogMeta> findCatalogs();
+	Iterable<CatalogMeta> findCatalogs();
 
 	/**
 	 * Returns the catalog with the given id

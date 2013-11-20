@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.converters.ValueConverterException;
 
 public interface DataSetImporterService
 {
-	void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, DatabaseException;
+	void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, ValueConverterException;
 }

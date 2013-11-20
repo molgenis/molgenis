@@ -5,8 +5,9 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Mapper;
+import javax.validation.ValidationException;
+
+import org.molgenis.data.CrudRepository;
 import org.molgenis.omx.observ.value.HyperlinkValue;
 import org.testng.annotations.Test;
 
@@ -20,9 +21,9 @@ public class HyperlinkValueDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void add() throws DatabaseException
+	public void add()
 	{
-		Mapper<HyperlinkValue> mapper = mock(Mapper.class);
+		CrudRepository<HyperlinkValue> mapper = mock(CrudRepository.class);
 		HyperlinkValue value1 = new HyperlinkValue();
 		value1.setValue("http://www.a1.org/");
 		HyperlinkValue value2 = new HyperlinkValue();
@@ -32,10 +33,10 @@ public class HyperlinkValueDecoratorTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = DatabaseException.class)
-	public void add_InvalidHyperlink() throws DatabaseException
+	@Test(expectedExceptions = ValidationException.class)
+	public void add_InvalidHyperlink()
 	{
-		Mapper<HyperlinkValue> mapper = mock(Mapper.class);
+		CrudRepository<HyperlinkValue> mapper = mock(CrudRepository.class);
 		HyperlinkValue value1 = new HyperlinkValue();
 		value1.setValue("not a hyperlink");
 		new HyperlinkValueDecorator<HyperlinkValue>(mapper).add(Arrays.asList(value1));
@@ -43,9 +44,9 @@ public class HyperlinkValueDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void update() throws DatabaseException
+	public void update()
 	{
-		Mapper<HyperlinkValue> mapper = mock(Mapper.class);
+		CrudRepository<HyperlinkValue> mapper = mock(CrudRepository.class);
 		HyperlinkValue value1 = new HyperlinkValue();
 		value1.setValue("http://www.a1.org/");
 		HyperlinkValue value2 = new HyperlinkValue();
@@ -55,10 +56,10 @@ public class HyperlinkValueDecoratorTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = DatabaseException.class)
-	public void update_InvalidHyperlink() throws DatabaseException
+	@Test(expectedExceptions = ValidationException.class)
+	public void update_InvalidHyperlink()
 	{
-		Mapper<HyperlinkValue> mapper = mock(Mapper.class);
+		CrudRepository<HyperlinkValue> mapper = mock(CrudRepository.class);
 		HyperlinkValue value1 = new HyperlinkValue();
 		value1.setValue("not a hyperlink");
 		new HyperlinkValueDecorator<HyperlinkValue>(mapper).update(Arrays.asList(value1));

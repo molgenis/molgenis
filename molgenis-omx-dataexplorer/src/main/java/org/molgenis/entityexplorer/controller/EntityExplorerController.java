@@ -9,19 +9,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseAccessException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
-import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,8 +27,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -45,12 +41,12 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	public static final String ID = "entityexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	
+
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
-	
+
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -62,22 +58,25 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(required = false) String entity,
-			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
-			throws Exception
+	public String init(@RequestParam(required = false)
+	String entity, @RequestParam(required = false)
+	String identifier, @RequestParam(required = false)
+	String query, Model model) throws Exception
 	{
-		//set dataExplorer URL for link to DataExplorer for x/mrefs, but only if the user has permission to see the plugin
-		if(molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.READ)||
-			molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.WRITE)){		
+		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only if the user has permission to see the
+		// plugin
+		if (molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.READ)
+				|| molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.WRITE))
+		{
 			model.addAttribute("dataExplorerUrl", DataExplorerController.ID);
 		}
-		
+
 		// select all characteristic entities
-		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(database.getEntityClasses(),
+		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(dataService.getEntityClasses(),
 				new Predicate<Class<? extends Entity>>()
 				{
 					@Override
-					public boolean apply(@Nullable Class<? extends Entity> clazz)
+					public boolean apply(Class<? extends Entity> clazz)
 					{
 						return clazz != null && Characteristic.class.isAssignableFrom(clazz)
 								&& !clazz.equals(Characteristic.class);
@@ -87,7 +86,10 @@ public class EntityExplorerController extends MolgenisPluginController
 		Map<String, Class<? extends Characteristic>> clazzMap = new LinkedHashMap<String, Class<? extends Characteristic>>();
 		for (Class<? extends Entity> clazz : entityClazzes)
 		{
-			if (database.count(clazz) > 0) clazzMap.put(clazz.getSimpleName(), (Class<? extends Characteristic>) clazz);
+			if (dataService.count(clazz.getSimpleName(), new QueryImpl()) > 0)
+			{
+				clazzMap.put(clazz.getSimpleName(), (Class<? extends Characteristic>) clazz);
+			}
 		}
 
 		// select initial entity
@@ -107,7 +109,8 @@ public class EntityExplorerController extends MolgenisPluginController
 		// determine instances for selected entity
 		if (selectedClazz != null)
 		{
-			List<? extends Characteristic> characteristics = database.find(selectedClazz);
+			List<? extends Characteristic> characteristics = dataService.findAllAsList(selectedClazz.getSimpleName(),
+					new QueryImpl());
 			Collections.sort(characteristics, new Comparator<Characteristic>()
 			{
 				@Override
@@ -121,8 +124,9 @@ public class EntityExplorerController extends MolgenisPluginController
 			Characteristic selectedCharacteristic = null;
 			if (identifier != null)
 			{
-				List<? extends Characteristic> selectedCharacteristics = database.find(selectedClazz, new QueryRule(
-						Characteristic.IDENTIFIER, Operator.EQUALS, identifier));
+				List<? extends Characteristic> selectedCharacteristics = dataService.findAllAsList(
+						selectedClazz.getSimpleName(), new QueryImpl().eq(Characteristic.IDENTIFIER, identifier));
+
 				if (selectedCharacteristics != null && !selectedCharacteristics.isEmpty())
 				{
 					selectedCharacteristic = selectedCharacteristics.get(0);

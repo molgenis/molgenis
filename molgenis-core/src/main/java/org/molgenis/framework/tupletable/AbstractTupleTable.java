@@ -326,8 +326,7 @@ public abstract class AbstractTupleTable implements TupleTable
 	}
 
 	/**
-	 * Checks if the column is in the current view port (the columns that the
-	 * user sees in the table on the screen)
+	 * Checks if the column is in the current view port (the columns that the user sees in the table on the screen)
 	 * 
 	 * @param columnName
 	 * @return
