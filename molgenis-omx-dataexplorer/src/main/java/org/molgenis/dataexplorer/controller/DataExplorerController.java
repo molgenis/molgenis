@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -31,6 +33,8 @@ import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -74,7 +78,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
-	
+
 	@Autowired
 	private Database database;
 
@@ -97,15 +101,17 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedDataSetIdentifier, Model model) throws Exception
 	{
-		//set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the plugin
-		if(molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)||
-			molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE)){		
+		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
+		// plugin
+		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
+				|| molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE))
+		{
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
-		
+
 		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 		model.addAttribute("dataSets", dataSets);
 
@@ -145,8 +151,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
-			throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest")
+	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -198,7 +204,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@RequestBody
+	AggregateRequest request)
 	{
 
 		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
@@ -249,6 +256,32 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		return new AggregateResponse(hashCounts);
 
+	}
+
+	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public String filterwizard(@RequestBody
+	@Valid
+	@NotNull
+	FilterWizardRequest request, Model model)
+	{
+		List<Protocol> listOfallProtocols = null;
+
+		DataSet dataSet;
+		String dataSetIdentifier = request.getDataSetIdentifier();
+		try
+		{
+			dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
+			listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
+		}
+		catch (DatabaseException e)
+		{
+			logger.error(e);
+			e.printStackTrace();
+		}
+
+		model.addAttribute("listOfallProtocols", listOfallProtocols);
+		model.addAttribute("identifier", dataSetIdentifier);
+		return "view-filter-dialog";
 	}
 
 	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
