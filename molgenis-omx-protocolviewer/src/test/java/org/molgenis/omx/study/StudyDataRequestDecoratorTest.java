@@ -114,7 +114,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void count_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.count();
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).count(argument.capture());
@@ -124,7 +124,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void count_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.count();
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).count(argument.capture());
@@ -135,7 +135,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void countQuery_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.count(new QueryImpl(exampleRule));
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).count(argument.capture());
@@ -147,7 +147,7 @@ public class StudyDataRequestDecoratorTest
 	public void countQuery_Admin()
 	{
 		QueryRule initialRule = new QueryRule("field", Operator.EQUALS, "value");
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.count(new QueryImpl(initialRule));
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).count(argument.capture());
@@ -157,7 +157,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void add_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.add(userStudyDataRequest);
 		verify(crudRepositoryDecorator).add(userStudyDataRequest);
 	}
@@ -165,14 +165,14 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void add_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.add(adminStudyDataRequest);
 	}
 
 	@Test
 	public void add_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.add(adminStudyDataRequest);
 		verify(crudRepositoryDecorator).add(adminStudyDataRequest);
 	}
@@ -180,7 +180,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void add_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.add(userStudyDataRequest);
 		verify(crudRepositoryDecorator).add(userStudyDataRequest);
 	}
@@ -188,7 +188,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void addIterable_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.add(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).add(Collections.singletonList(userStudyDataRequest));
 	}
@@ -196,21 +196,21 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void addIterable_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.add(Collections.singletonList(adminStudyDataRequest));
 	}
 
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void addIterable_UserNotAllowedSome()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.add(Arrays.asList(userStudyDataRequest, adminStudyDataRequest));
 	}
 
 	@Test
 	public void addIterable_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.add(Collections.singletonList(adminStudyDataRequest));
 		verify(crudRepositoryDecorator).add(Collections.singletonList(adminStudyDataRequest));
 	}
@@ -218,7 +218,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void addIterable_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.add(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).add(Collections.singletonList(userStudyDataRequest));
 	}
@@ -226,7 +226,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void update_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(userStudyDataRequest);
 		verify(crudRepositoryDecorator).update(userStudyDataRequest);
 	}
@@ -234,14 +234,14 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void update_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(adminStudyDataRequest);
 	}
 
 	@Test
 	public void update_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(adminStudyDataRequest);
 		verify(crudRepositoryDecorator).update(adminStudyDataRequest);
 	}
@@ -249,7 +249,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void update_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(userStudyDataRequest);
 		verify(crudRepositoryDecorator).update(userStudyDataRequest);
 	}
@@ -257,7 +257,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateIterable_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest));
 	}
@@ -265,21 +265,21 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void updateIterable_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest));
 	}
 
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void updateIterable_UserNotAllowedSome()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Arrays.asList(userStudyDataRequest, adminStudyDataRequest));
 	}
 
 	@Test
 	public void updateIterable_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest));
 		verify(crudRepositoryDecorator).update(Collections.singletonList(adminStudyDataRequest));
 	}
@@ -287,7 +287,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateIterable_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest));
 	}
@@ -295,7 +295,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateList_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 	}
@@ -303,14 +303,14 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void updateList_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
 	}
 
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void updateList_UserNotAllowedSome()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Arrays.asList(userStudyDataRequest, adminStudyDataRequest),
 				DatabaseAction.UPDATE);
 	}
@@ -318,7 +318,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateList_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
 		verify(crudRepositoryDecorator).update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
 	}
@@ -326,7 +326,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void updateList_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 	}
@@ -335,7 +335,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findAllQuery_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findAll(new QueryImpl(exampleRule));
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).findAll(argument.capture());
@@ -346,7 +346,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findAllQuery_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.findAll(new QueryImpl(exampleRule));
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).findAll(argument.capture());
@@ -357,7 +357,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findOneQuery_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findOne(new QueryImpl(exampleRule));
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).findOne(argument.capture());
@@ -368,7 +368,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findOneQuery_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.findOne(new QueryImpl(exampleRule));
 		ArgumentCaptor<Query> argument = ArgumentCaptor.forClass(Query.class);
 		verify(crudRepositoryDecorator).findOne(argument.capture());
@@ -378,7 +378,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findOne_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findOne(exampleUserId);
 		verify(crudRepositoryDecorator).findOne(exampleUserId);
 	}
@@ -386,14 +386,14 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void findOne_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findOne(exampleAdminId);
 	}
 
 	@Test
 	public void findOne_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.findOne(exampleAdminId);
 		verify(crudRepositoryDecorator).findOne(exampleAdminId);
 	}
@@ -401,7 +401,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findOne_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.findOne(exampleUserId);
 		verify(crudRepositoryDecorator).findOne(exampleUserId);
 	}
@@ -409,7 +409,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findAllIterable_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		Iterable<StudyDataRequest> entities = studyDataRequestDecorator.findAll(exampleUserIds);
 		assertEquals(entities, Arrays.asList(userStudyDataRequest));
 	}
@@ -417,21 +417,21 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void findAllIterable_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findAll(exampleAdminIds);
 	}
 
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void findAllIterable_UserNotAllowedSome()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findAll(exampleUserAdminIds);
 	}
 
 	@Test
 	public void findAllIterable_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		Iterable<StudyDataRequest> entities = studyDataRequestDecorator.findAll(exampleAdminIds);
 		assertEquals(entities, Arrays.asList(adminStudyDataRequest));
 	}
@@ -439,7 +439,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void findAllIterable_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		Iterable<StudyDataRequest> entities = studyDataRequestDecorator.findAll(exampleUserIds);
 		assertEquals(entities, Arrays.asList(userStudyDataRequest));
 	}
@@ -447,7 +447,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void delete_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.delete(userStudyDataRequest);
 		verify(crudRepositoryDecorator).delete(userStudyDataRequest);
 	}
@@ -455,14 +455,14 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void delete_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.delete(adminStudyDataRequest);
 	}
 
 	@Test
 	public void delete_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.delete(adminStudyDataRequest);
 		verify(crudRepositoryDecorator).delete(adminStudyDataRequest);
 	}
@@ -470,7 +470,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void delete_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.delete(adminStudyDataRequest);
 		verify(crudRepositoryDecorator).delete(adminStudyDataRequest);
 	}
@@ -478,7 +478,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteIterable_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.delete(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).delete(Collections.singletonList(userStudyDataRequest));
 	}
@@ -486,21 +486,21 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void deleteIterable_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.delete(Collections.singletonList(adminStudyDataRequest));
 	}
 
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void deleteIterable_UserNotAllowedSome()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.delete(Arrays.asList(userStudyDataRequest, adminStudyDataRequest));
 	}
 
 	@Test
 	public void deleteIterable_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.delete(Collections.singletonList(adminStudyDataRequest));
 		verify(crudRepositoryDecorator).delete(Collections.singletonList(adminStudyDataRequest));
 	}
@@ -508,7 +508,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteIterable_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.delete(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).delete(Collections.singletonList(userStudyDataRequest));
 	}
@@ -516,7 +516,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteById_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.deleteById(exampleUserId);
 		verify(crudRepositoryDecorator).deleteById(exampleUserId);
 	}
@@ -524,14 +524,14 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void deleteById_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.deleteById(exampleAdminId);
 	}
 
 	@Test
 	public void deleteById_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.deleteById(exampleAdminId);
 		verify(crudRepositoryDecorator).deleteById(exampleAdminId);
 	}
@@ -539,7 +539,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteById_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.deleteById(exampleUserId);
 		verify(crudRepositoryDecorator).deleteById(exampleUserId);
 	}
@@ -547,7 +547,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteByIdIterable_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.deleteById(exampleUserIds);
 		verify(crudRepositoryDecorator).deleteById(exampleUserIds);
 	}
@@ -555,21 +555,21 @@ public class StudyDataRequestDecoratorTest
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void deleteByIdIterable_UserNotAllowed()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.deleteById(exampleAdminIds);
 	}
 
 	@Test(expectedExceptions = DatabaseAccessException.class)
 	public void deleteByIdIterable_UserNotAllowedSome()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.deleteById(exampleUserAdminIds);
 	}
 
 	@Test
 	public void deleteByIdIterable_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.deleteById(exampleAdminIds);
 		verify(crudRepositoryDecorator).deleteById(exampleAdminIds);
 	}
@@ -577,7 +577,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteByIdIterable_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.deleteById(exampleUserIds);
 		verify(crudRepositoryDecorator).deleteById(exampleUserIds);
 	}
@@ -587,7 +587,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteAll_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(userRules))).thenReturn(
 				Collections.singletonList(userStudyDataRequest));
 		studyDataRequestDecorator.deleteAll();
@@ -601,7 +601,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteAll_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
 				Collections.singletonList(adminStudyDataRequest));
 		studyDataRequestDecorator.deleteAll();
@@ -615,7 +615,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void deleteAll_AdminAsUser()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_ADMIN);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
 				Collections.singletonList(userStudyDataRequest));
 		studyDataRequestDecorator.deleteAll();
@@ -628,7 +628,7 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void iterator_User()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(userRules))).thenReturn(
 				Collections.singletonList(userStudyDataRequest));
 
@@ -639,50 +639,12 @@ public class StudyDataRequestDecoratorTest
 	@Test
 	public void iterator_Admin()
 	{
-		when(authentication.getName()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
 				Collections.singletonList(userStudyDataRequest));
 
 		assertEquals(studyDataRequestDecorator.iterator(), Collections.singletonList(adminStudyDataRequest).iterator());
 	}
-
-	//
-	// @Test
-	// public void findAllIterableInteger()
-	// {
-	// throw new RuntimeException("Test not implemented");
-	// }
-	//
-	// @Test
-	// public void findOneQuery()
-	// {
-	// throw new RuntimeException("Test not implemented");
-	// }
-	//
-	// @Test
-	// public void findOneInteger()
-	// {
-	// throw new RuntimeException("Test not implemented");
-	// }
-	//
-	// @Test
-	// public void getCurrentUser()
-	// {
-	// throw new RuntimeException("Test not implemented");
-	// }
-	//
-	// @Test
-	// public void hasEntityPermission()
-	// {
-	// throw new RuntimeException("Test not implemented");
-	// }
-	//
-	// @Test
-	// public void iterator()
-	// {
-	// throw new RuntimeException("Test not implemented");
-	// }
-	//
 
 	private List<QueryRule> createList(QueryRule queryRule, List<QueryRule> queryRules)
 	{
