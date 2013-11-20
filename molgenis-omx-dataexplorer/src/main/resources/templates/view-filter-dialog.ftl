@@ -13,11 +13,11 @@
 			<div id="filter-nav-content" class="tab-content">
 				<#list listOfallProtocols as protocol>
 					<div class="tab-pane" id="${protocol.identifier}-tab">	
-						<table  id="${protocol.identifier}-table">
+						<table id="${protocol.identifier}-table">
 						   	<#list protocol.features as feature> 
 							  	<tr>
 								  	<td>
-								  		<a class="test" data-molgenis-url="/api/v1/observablefeature/${feature.id}" style="btn">${feature.name}</a>
+								  		<a class="test" data-molgenis-url="/api/v1/observablefeature/${feature.id?c}" style="btn">${feature.name}</a>
 						  			</td>
 				  				</tr>
 						   	</#list>
@@ -34,17 +34,14 @@
 		</div>
 		</form>
 	</div>
-	<div class="modal-footer">
-	</div>
+
 </div>
 
 <script>
-$(document).ready(function() {
+$(function() {
   	$('#filter-wizard').bootstrapWizard();
   	$.each($('#filter-nav-content a.test'), function (index, element) {
-  		console.log(element);
   		molgenis.createFeatureFilterField(element, $(element).attr('data-molgenis-url'));
-		
 	});
 });
 </script>

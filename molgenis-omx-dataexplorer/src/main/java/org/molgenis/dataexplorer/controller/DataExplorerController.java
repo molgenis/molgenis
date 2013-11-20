@@ -260,16 +260,14 @@ public class DataExplorerController extends MolgenisPluginController
 	public String filterwizard(@RequestBody
 	FilterWizardRequest request, Model model)
 	{
-		List<Protocol> listOfallProtocols = new ArrayList<Protocol>();
-		// List<ObservableFeature> listOfallFeatures = new ArrayList<ObservableFeature>();
-		Map<Protocol, List<ObservableFeature>> hashProt = new HashMap<Protocol, List<ObservableFeature>>();
-		List<DataSet> listofDataset;
+		List<Protocol> listOfallProtocols = null;
+
+		DataSet dataSet;
+		String dataSetIdentifier = request.getDatasetIdentifier();
 		try
 		{
-			System.out.println(request.getDatasetIdentifier() + "----" + request.getDatasetId());
-			listofDataset = database.find(DataSet.class,
-					new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, request.getDatasetIdentifier()));
-			listOfallProtocols = ProtocolUtils.getProtocolDescendants(listofDataset.get(0).getProtocolUsed(), true);
+			dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
+			listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
 		}
 		catch (DatabaseException e)
 		{
@@ -277,13 +275,8 @@ public class DataExplorerController extends MolgenisPluginController
 			e.printStackTrace();
 		}
 
-		for (Protocol protocol : listOfallProtocols)
-		{
-			hashProt.put(protocol, protocol.getFeatures());
-		}
-		// model.addAttribute("hashProt", hashProt);
 		model.addAttribute("listOfallProtocols", listOfallProtocols);
-		model.addAttribute("identifier", request.getDatasetIdentifier());
+		model.addAttribute("identifier", dataSetIdentifier);
 		return "view-filter-dialog";
 	}
 
