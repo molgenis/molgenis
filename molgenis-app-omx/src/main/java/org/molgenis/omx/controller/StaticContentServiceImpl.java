@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 /**
  * Controller that handles static content pages requests
@@ -34,29 +33,6 @@ public class StaticContentServiceImpl implements StaticContentService
 	}
 
 	@Override
-	public String init(final String uniqueReference, final Model model)
-	{
-		model.addAttribute("content", this.getContent(uniqueReference, model));
-		model.addAttribute("isCurrentUserAuthenticatedSu", this.isCurrentUserAuthenticatedSu());
-		model.addAttribute("editHref", "/menu/main/" + uniqueReference + "/edit");
-		return "view-staticcontent";
-	}
-
-	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public String initEdit(final String uniqueReference, final Model model)
-	{
-		if(this.isCurrentUserAuthenticatedSu()){
-			model.addAttribute("content", this.getContent(uniqueReference, model));
-			model.addAttribute("cancelHref", "/menu/main/" + uniqueReference);
-			return "view-staticcontent-edit";
-		}else{
-			return this.init(uniqueReference, model);
-		}
-	}
-
-	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
 	public boolean submitContent(final String uniqueReference, final String content)
@@ -71,12 +47,13 @@ public class StaticContentServiceImpl implements StaticContentService
 		return succes;
 	}
 
-	private boolean isCurrentUserAuthenticatedSu()
+	public boolean isCurrentUserCanEdit()
 	{
 		return SecurityUtils.currentUserIsAuthenticated() && SecurityUtils.currentUserIsSu();
 	}
 
-	private String getContent(final String uniqueReference, final Model model)
+	@Override
+	public String getContent(final String uniqueReference)
 	{
 		String content = this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference, DEFAULT_CONTENT);
 

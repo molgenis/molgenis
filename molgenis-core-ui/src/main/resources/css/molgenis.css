@@ -2,20 +2,20 @@
 	margin-bottom: 10px;
 }
 
-#molgenis-menu.nav {
+.nav {
 	margin-bottom: 10px;
+}
+
+.nav-tabs>li>a {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-right: 8px;
+	padding-left: 8px;
 }
 
 #molgenis-menu.nav li.active a {
 	background-color: #3079C2;
 	color: white;
-}
-
-#molgenis-menu.nav-tabs>li>a {
-	padding-top: 5px;
-	padding-bottom: 5px;
-	padding-right: 8px;
-	padding-left: 8px;
 }
 
 #molgenis-breadcrumb {

@@ -108,14 +108,21 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
 				RuntimeProperty.class.getSimpleName() + '_' + key);
-		List<RuntimeProperty> properties = dataService.findAllAsList(RuntimeProperty.ENTITY_NAME, propertyRule);
 
-		if (null != properties && !properties.isEmpty() && properties.size() == 1)
+		try
 		{
-			RuntimeProperty property = properties.get(0);
-			property.setValue(content);
-			dataService.update(RuntimeProperty.ENTITY_NAME, property);
-			return true;
+			List<RuntimeProperty> properties = dataService.findAllAsList(RuntimeProperty.ENTITY_NAME, propertyRule);
+			if (null != properties && !properties.isEmpty() && properties.size() == 1)
+			{
+				RuntimeProperty property = properties.get(0);
+				property.setValue(content);
+				dataService.update(RuntimeProperty.ENTITY_NAME, property);
+				return true;
+			}
+		}
+		catch (MolgenisDataException e)
+		{
+			logger.warn(e);
 		}
 
 		return false;

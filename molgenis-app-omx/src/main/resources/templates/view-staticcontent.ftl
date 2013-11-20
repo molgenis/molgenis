@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <@header/>
-<#if isCurrentUserAuthenticatedSu>
+<#if isCurrentUserCanEdit>
 <div class="row-fluid">
    <div class="control-group">
 		<div class="controls">

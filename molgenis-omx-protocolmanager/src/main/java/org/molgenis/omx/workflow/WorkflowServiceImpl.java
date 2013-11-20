@@ -246,7 +246,10 @@ public class WorkflowServiceImpl implements WorkflowService
 		if (observedValues.isEmpty())
 		{
 			if (observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.XREF.toString())
-					|| observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.MREF.toString()))
+					|| observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.MREF.toString())
+					|| observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.INT.toString())
+					|| observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.DATE.toString())
+					|| observableFeature.getDataType().equalsIgnoreCase(FieldTypeEnum.BOOL.toString()))
 			{
 				String characteristicIdentifier = UUID.randomUUID().toString();
 
