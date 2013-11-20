@@ -18,11 +18,11 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -77,10 +77,10 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private DataService dataService;
 
 	@Autowired
-	private Database database;
+	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -112,7 +112,9 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
+		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.ACTIVE, true));
+
 		model.addAttribute("dataSets", dataSets);
 
 		if (dataSets != null && !dataSets.isEmpty())
@@ -158,9 +160,12 @@ public class DataExplorerController extends MolgenisPluginController
 		logger.info("Download request: [" + searchRequest + "]");
 
 		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-		request.getQueryRules().add(new QueryRule(Operator.LIMIT, DOWNLOAD_SEARCH_LIMIT));
 
-		QueryRule offsetRule = new QueryRule(Operator.OFFSET, 0);
+		request.getQueryRules().add(
+				new org.molgenis.framework.db.QueryRule(org.molgenis.framework.db.QueryRule.Operator.LIMIT,
+						DOWNLOAD_SEARCH_LIMIT));
+		org.molgenis.framework.db.QueryRule offsetRule = new org.molgenis.framework.db.QueryRule(
+				org.molgenis.framework.db.QueryRule.Operator.OFFSET, 0);
 		request.getQueryRules().add(offsetRule);
 
 		response.setContentType("text/csv");
@@ -214,11 +219,16 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (request.getDataType().equals("categorical"))
 			{
-				List<Category> listOfCategories = database.find(Category.class, new QueryRule(
-						Category.OBSERVABLEFEATURE, Operator.EQUALS, request.getFeatureId()));
-				for (Category category : listOfCategories)
+				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
+				if (feature != null)
 				{
-					hashCounts.put(category.getName(), 0);
+					Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+
+					for (Category category : categories)
+					{
+						hashCounts.put(category.getName(), 0);
+					}
 				}
 			}
 			else if (request.getDataType().equals("bool"))
@@ -231,7 +241,7 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new RuntimeException("Illegal datatype");
 			}
 
-			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
+			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
 			SearchResult searchResult = searchService.search(request.getSearchRequest());
 
 			for (Hit hit : searchResult.getSearchHits())
@@ -249,7 +259,7 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			logger.info(e);
 
@@ -264,20 +274,10 @@ public class DataExplorerController extends MolgenisPluginController
 	@NotNull
 	FilterWizardRequest request, Model model)
 	{
-		List<Protocol> listOfallProtocols = null;
-
-		DataSet dataSet;
 		String dataSetIdentifier = request.getDataSetIdentifier();
-		try
-		{
-			dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
-			listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
-		}
-		catch (DatabaseException e)
-		{
-			logger.error(e);
-			e.printStackTrace();
-		}
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
 
 		model.addAttribute("listOfallProtocols", listOfallProtocols);
 		model.addAttribute("identifier", dataSetIdentifier);
@@ -286,8 +286,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
 	{
-		List<ObservableFeature> features = database.query(ObservableFeature.class)
-				.in(ObservableFeature.IDENTIFIER, identifiers).find();
+
+		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers));
 
 		// Keep order the same
 		Map<String, String> nameByIdentifier = new HashMap<String, String>();

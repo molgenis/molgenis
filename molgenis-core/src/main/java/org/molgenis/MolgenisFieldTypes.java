@@ -80,7 +80,7 @@ public class MolgenisFieldTypes
 	{
 		init();
 
-		FieldType fieldType = types.get(name + "field");
+		FieldType fieldType = types.get(name.replaceAll("[_]", "") + "field");
 		if (fieldType != null)
 		{
 			try

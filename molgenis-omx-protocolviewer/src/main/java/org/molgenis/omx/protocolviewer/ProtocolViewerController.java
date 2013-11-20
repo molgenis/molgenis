@@ -14,10 +14,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
@@ -44,18 +43,19 @@ public class ProtocolViewerController extends MolgenisPluginController
 	public static final String KEY_ACTION_ORDER = "plugin.catalogue.action.order";
 	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
 
-	private final Database database;
+	private final DataService dataService;
 	private final MolgenisSettings molgenisSettings;
 	private final ShoppingCart shoppingCart;
 
 	@Autowired
-	public ProtocolViewerController(Database database, MolgenisSettings molgenisSettings, ShoppingCart shoppingCart)
+	public ProtocolViewerController(DataService dataService, MolgenisSettings molgenisSettings,
+			ShoppingCart shoppingCart)
 	{
 		super(URI);
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
 		if (shoppingCart == null) throw new IllegalArgumentException("ShoppingCart is null");
-		this.database = database;
+		this.dataService = dataService;
 		this.molgenisSettings = molgenisSettings;
 		this.shoppingCart = shoppingCart;
 	}
@@ -63,7 +63,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model) throws DatabaseException
 	{
-		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
+		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.ACTIVE, true));
 
 		// create new model
 		ProtocolViewer protocolViewer = new ProtocolViewer();
@@ -92,7 +93,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 		// TODO remove code duplication (see StudyManagerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
-		List<ObservableFeature> features = findFeatures(database, shoppingCart.getCart());
+		List<ObservableFeature> features = findFeatures(dataService, shoppingCart.getCart());
 		if (features != null)
 		{
 			Collections.sort(features, new Comparator<ObservableFeature>()
@@ -135,11 +136,12 @@ public class ProtocolViewerController extends MolgenisPluginController
 		}
 	}
 
-	private List<ObservableFeature> findFeatures(Database db, List<Integer> featureIds) throws DatabaseException
+	private List<ObservableFeature> findFeatures(DataService dataService, List<Integer> featureIds)
+			throws DatabaseException
 	{
 		if (featureIds == null || featureIds.isEmpty()) return null;
-		List<ObservableFeature> features = db.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
-				Operator.IN, featureIds));
-		return features;
+
+		return dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.ID, featureIds));
 	}
 }

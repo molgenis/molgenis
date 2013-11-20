@@ -21,8 +21,8 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -38,6 +38,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
@@ -59,34 +60,36 @@ public class EvaluationController extends MolgenisPluginController
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private final UserAccountService userAccountService;
 	private final SearchService searchService;
-	private final Database database;
+	private final DataService dataService;
 
 	@Autowired
 	private FileStore fileStore;
 
 	@Autowired
 	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService,
-			UserAccountService userAccountService, Database database)
+			UserAccountService userAccountService, DataService dataService)
 	{
 		super(URI);
 		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("Dataservice is null");
 		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
 		this.userAccountService = userAccountService;
 		this.searchService = searchService;
-		this.database = database;
+		this.dataService = dataService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, Model model) throws DatabaseException
+	String selectedDataSetId, Model model)
 	{
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		for (DataSet dataSet : database.find(DataSet.class))
+		for (DataSet dataSet : allDataSets)
 		{
 			if (selectedDataSetId == null) selectedDataSetId = dataSet.getId().toString();
-			if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
 		model.addAttribute("dataSets", dataSets);
 
@@ -94,11 +97,11 @@ public class EvaluationController extends MolgenisPluginController
 		if (selectedDataSetId != null)
 		{
 			model.addAttribute("selectedDataSet", selectedDataSetId);
-			for (DataSet dataSet : database.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.LIKE,
-					selectedDataSetId)))
+			Iterable<DataSet> it = dataService.findAll(DataSet.ENTITY_NAME,
+					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId));
+			for (DataSet dataSet : it)
 			{
-				if (dataSet.getIdentifier().startsWith(
-						userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId))
+				if (dataSet.getIdentifier().startsWith(SecurityUtils.getCurrentUsername() + "-" + selectedDataSetId))
 				{
 					String[] dataSetIds = dataSet.getIdentifier().toString().split("-");
 					if (dataSetIds.length > 1) mappedDataSets.add(dataSetIds[2]);
@@ -112,7 +115,7 @@ public class EvaluationController extends MolgenisPluginController
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public void verify(@RequestParam(value = "selectedDataSet", required = false)
 	String selectedDataSetId, @RequestParam
-	Part file, HttpServletResponse response, Model model) throws IOException, DatabaseException
+	Part file, HttpServletResponse response, Model model) throws IOException
 	{
 		ExcelReader reader = null;
 		ExcelWriter excelWriterRanks = null;
@@ -146,8 +149,9 @@ public class EvaluationController extends MolgenisPluginController
 				biobankNames.remove(0);
 
 				// First column has to correspond to the selected dataset
-				if (database.findById(DataSet.class, Integer.parseInt(selectedDataSetId)).getName()
-						.equalsIgnoreCase(firstColumn))
+				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId));
+
+				if (ds.getName().equalsIgnoreCase(firstColumn))
 				{
 					Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
 					Iterator<Tuple> iterator = inputSheet.iterator();
@@ -183,8 +187,9 @@ public class EvaluationController extends MolgenisPluginController
 						lowerCaseBiobankNames.add(element.toLowerCase());
 					}
 
-					List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.NAME, Operator.IN,
-							lowerCaseBiobankNames));
+					List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
+							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames));
+
 					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
 					sheetWriterRank.writeColNames(lowerCaseBiobankNames);
 
@@ -197,8 +202,8 @@ public class EvaluationController extends MolgenisPluginController
 						List<String> ranks = new ArrayList<String>();
 						ranks.add(variableName);
 						Map<String, List<String>> mappingDetail = entry.getValue();
-						List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(
-								ObservableFeature.NAME, Operator.EQUALS, variableName));
+						List<ObservableFeature> features = dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
+								new QueryImpl().eq(ObservableFeature.NAME, variableName));
 						String description = features.get(0).getDescription();
 						if (!rankCollection.containsKey(description)) rankCollection.put(description,
 								new HashMap<String, List<Integer>>());
@@ -216,8 +221,8 @@ public class EvaluationController extends MolgenisPluginController
 									Map<String, Hit> mappedFeatureIds = findFeaturesFromIndex("name",
 											mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
 
-									String mappingDataSetIdentifier = userAccountService.getCurrentUser().getUsername()
-											+ "-" + selectedDataSetId + "-" + dataSet.getId();
+									String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
+											+ selectedDataSetId + "-" + dataSet.getId();
 									List<QueryRule> queryRules = new ArrayList<QueryRule>();
 									queryRules.add(new QueryRule("store_mapping_feature", Operator.EQUALS, features
 											.get(0).getId()));
@@ -320,7 +325,7 @@ public class EvaluationController extends MolgenisPluginController
 							}
 							else
 							{
-								medianRank = (double) rankAllBiobanks.get(rankAllBiobanks.size() / 2);
+								medianRank = rankAllBiobanks.get(rankAllBiobanks.size() / 2);
 							}
 							row.set("median rank", medianRank);
 							sheetWriterRankStatistics.write(row);
@@ -349,10 +354,6 @@ public class EvaluationController extends MolgenisPluginController
 					}
 				}
 			}
-		}
-		catch (DatabaseException e)
-		{
-			new RuntimeException(e);
 		}
 		finally
 		{

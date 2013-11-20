@@ -940,9 +940,9 @@
 		var datasetId = $('#dataset-select').val();
 		
 		var filterDialogRequest = {
-				'datasetIdentifier' : selectedDataSet.identifier,
-				'datasetName' : selectedDataSet.name,
-				'datasetId' : datasetId
+				'dataSetIdentifier' : selectedDataSet.identifier,
+				'dataSetName' : selectedDataSet.name,
+				'dataSetId' : datasetId
 		};
 		$.ajax({
 			type : 'POST',

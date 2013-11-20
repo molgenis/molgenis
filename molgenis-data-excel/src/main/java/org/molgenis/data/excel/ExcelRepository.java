@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -157,5 +158,11 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	public void close() throws IOException
 	{
 		// Nothing
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return ExcelEntity.class;
 	}
 }

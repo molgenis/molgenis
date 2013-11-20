@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -16,10 +15,10 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
@@ -28,6 +27,7 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.studymanager.OmxStudyDefinition;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
@@ -46,7 +46,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	private static final Logger logger = Logger.getLogger(OrderStudyDataServiceImpl.class);
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private JavaMailSender mailSender;
@@ -72,21 +72,22 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
-	{ DatabaseException.class, MessagingException.class, IOException.class })
+	{ MessagingException.class, IOException.class })
 	public void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds)
-			throws DatabaseException, MessagingException, IOException
+			throws MessagingException, IOException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
 		if (requestForm == null) throw new IllegalArgumentException("request form is null");
 		if (featureIds == null || featureIds.isEmpty()) throw new IllegalArgumentException(
 				"feature list is null or empty");
 
-		List<ObservableFeature> features = database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
-				Operator.IN, featureIds));
-		if (features == null || features.isEmpty()) throw new DatabaseException("requested features do not exist");
+		Query q = new QueryImpl().in(ObservableFeature.ENTITY_NAME, featureIds);
+		List<ObservableFeature> features = dataService.findOne(ObservableFeature.ENTITY_NAME, q);
+		if (features.isEmpty()) throw new MolgenisDataException("requested features do not exist");
 
-		DataSet dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
-		MolgenisUser molgenisUser = molgenisUserService.getCurrentUser();
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+		MolgenisUser molgenisUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 
 		String appName = getAppName();
 
@@ -108,8 +109,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 		StudyDefinition studyDefinition = studyManagerService.persistStudyDefinition(new OmxStudyDefinition(
 				studyDataRequest));
 		studyDataRequest.setIdentifier(studyDefinition.getId());
-
-		database.add(studyDataRequest);
+		dataService.add(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 		logger.debug("created study data request: " + studyName);
 
 		// create excel attachment for study data request
@@ -137,11 +137,10 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	 */
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<StudyDataRequest> getOrders() throws DatabaseException
+	@Transactional(readOnly = true)
+	public List<StudyDataRequest> getOrders()
 	{
-		List<StudyDataRequest> orderList = database.find(StudyDataRequest.class);
-		return orderList != null ? orderList : Collections.<StudyDataRequest> emptyList();
+		return dataService.findAllAsList(StudyDataRequest.ENTITY_NAME, new QueryImpl());
 	}
 
 	/*
@@ -151,10 +150,10 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	 */
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public StudyDataRequest getOrder(Integer orderId) throws DatabaseException
+	@Transactional(readOnly = true)
+	public StudyDataRequest getOrder(Integer orderId)
 	{
-		return StudyDataRequest.findById(database, orderId);
+		return dataService.findOne(StudyDataRequest.ENTITY_NAME, orderId);
 	}
 
 	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest, String appName)
