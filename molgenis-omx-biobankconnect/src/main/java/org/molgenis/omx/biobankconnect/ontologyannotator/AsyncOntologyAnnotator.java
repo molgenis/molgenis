@@ -297,7 +297,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		List<String> identifiers = new ArrayList<String>();
 
-		// List<OntologyTerm> definitions = new ArrayList<OntologyTerm>();
 		if (feature.getDefinitions() != null)
 		{
 			for (OntologyTerm ot : feature.getDefinitions())
@@ -306,7 +305,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			}
 		}
 
-		// definitions.addAll(feature.getDefinitions());
 		for (String uri : mapUriTerm.keySet())
 		{
 

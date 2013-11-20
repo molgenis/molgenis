@@ -44,8 +44,6 @@ public class MolgenisDbSettings implements MolgenisSettings
 		try
 		{
 			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule);
-			// property = DataSecurityUtils.findOneAsSystem(dataService, RuntimeProperty.ENTITY_NAME, new QueryImpl(
-			// propertyRule));
 		}
 		catch (MolgenisDataException e)
 		{

@@ -185,12 +185,8 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void indexTupleTable(String documentType, TupleTable tupleTable)
 	{
-		System.out.println("Indexing " + documentType);
-
 		try
 		{
-			System.out.println("Count = " + tupleTable.getCount());
-
 			if (tupleTable.getCount() == 0)
 			{
 				return;

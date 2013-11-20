@@ -78,14 +78,12 @@ public class DataSetTable extends AbstractFilterableTupleTable
 		try
 		{
 			Protocol protocol = dataSet.getProtocolUsed();
-			System.out.println("Protocol:" + protocol);
 
 			// if dataset has protocol-used, determine columns from protocol
 			if (protocol != null)
 			{
 				List<ObservableFeature> features = new ArrayList<ObservableFeature>();
 				getFeatures(protocol, features);
-				System.out.println("Features:" + features);
 				if (features != null && !features.isEmpty())
 				{
 					columns = new ArrayList<Field>(features.size());

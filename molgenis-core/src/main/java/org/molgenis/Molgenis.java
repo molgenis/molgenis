@@ -249,8 +249,6 @@ public class Molgenis
 			{
 				if (options.generate_db)
 				{
-					// generators.add(new JpaDatabaseGen());
-					// generators.add(new JDBCMetaDatabaseGen());
 					generators.add(new DatabaseConfigGen());
 				}
 				generators.add(new DataTypeGen());
@@ -267,8 +265,6 @@ public class Molgenis
 					generators.add(new JpaEntitySourceGen());
 				}
 
-				// generators.add(new JpaMapperGen());
-
 				if (options.generate_persistence)
 				{
 					generators.add(new PersistenceGen());
@@ -284,7 +280,6 @@ public class Molgenis
 			// decorators
 			if (options.generate_decorators)
 			{
-				// generators.add(new MapperDecoratorGen());
 				// authorization
 				generators.add(new MapperSecurityDecoratorGen());
 

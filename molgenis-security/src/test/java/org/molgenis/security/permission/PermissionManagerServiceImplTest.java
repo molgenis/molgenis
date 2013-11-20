@@ -4,30 +4,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
-import static org.molgenis.framework.db.QueryRule.Operator.IN;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.model.elements.Entity;
-import org.molgenis.model.elements.Model;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,13 +38,13 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(database(), molgenisPluginRegistry(), grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(), grantedAuthoritiesMapper());
 		}
 
 		@Bean
-		public Database database()
+		public DataService dataService()
 		{
-			return mock(Database.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
@@ -74,7 +64,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	private PermissionManagerServiceImpl pluginPermissionManagerService;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisPluginRegistry molgenisPluginRegistry;
@@ -86,96 +76,89 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@BeforeMethod
 	public void setUp() throws DatabaseException
 	{
-		reset(database);
+		reset(dataService);
 
-		// meta data
-		Model metaData = mock(Model.class);
-		Vector<Entity> entities = new Vector<Entity>();
-		Entity entity1 = when(mock(Entity.class).getName()).thenReturn("entity1").getMock();
-		Entity entity2 = when(mock(Entity.class).getName()).thenReturn("entity2").getMock();
-		entities.add(entity1);
-		entities.add(entity2);
-		when(metaData.getEntities(false, false)).thenReturn(entities);
-		when(database.getMetaData()).thenReturn(metaData);
-
-		MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn(1).getMock();
-		when(group1.getName()).thenReturn("group1");
-		Query<MolgenisGroup> queryGroup = mock(Query.class);
-		Query<MolgenisGroup> queryGroup1 = mock(Query.class);
-		when(queryGroup.eq(MolgenisGroup.ID, 1)).thenReturn(queryGroup1);
-		when(queryGroup.eq(MolgenisGroup.ID, -1)).thenReturn(queryGroup);
-		when(queryGroup1.find()).thenReturn(Arrays.<MolgenisGroup> asList(group1));
-		when(database.query(MolgenisGroup.class)).thenReturn(queryGroup);
-		when(database.find(MolgenisGroup.class)).thenReturn(Arrays.asList(group1));
-
-		groupPlugin1Authority = mock(GroupAuthority.class);
-		when(groupPlugin1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin1");
-		when(groupPlugin1Authority.getMolgenisGroup()).thenReturn(group1);
-		groupPlugin2Authority = mock(GroupAuthority.class);
-		when(groupPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
-		when(groupPlugin2Authority.getMolgenisGroup()).thenReturn(group1);
-		groupEntity1Authority = mock(GroupAuthority.class);
-		when(groupEntity1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity1");
-		when(groupEntity1Authority.getMolgenisGroup()).thenReturn(group1);
-		groupEntity2Authority = mock(GroupAuthority.class);
-		when(groupEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
-		when(groupEntity2Authority.getMolgenisGroup()).thenReturn(group1);
-		when(
-				database.find(GroupAuthority.class,
-						new QueryRule(GroupAuthority.MOLGENISGROUP, IN, Arrays.asList(group1)))).thenReturn(
-				Arrays.<GroupAuthority> asList(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority,
-						groupEntity2Authority));
-
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
-		MolgenisUser user2 = when(mock(MolgenisUser.class).getId()).thenReturn(2).getMock();
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUser1 = mock(Query.class);
-		Query<MolgenisUser> queryUser2 = mock(Query.class);
-		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUser1);
-		when(queryUser.eq(MolgenisUser.ID, 2)).thenReturn(queryUser2);
-		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
-		when(queryUser1.find()).thenReturn(Arrays.<MolgenisUser> asList(user1));
-		when(queryUser2.find()).thenReturn(Arrays.<MolgenisUser> asList(user2));
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-
-		MolgenisUser adminUser = when(mock(MolgenisUser.class).getId()).thenReturn(3).getMock();
-		when(adminUser.getSuperuser()).thenReturn(true);
-		when(database.find(MolgenisUser.class)).thenReturn(Arrays.asList(user1, user2, adminUser));
-
-		userPlugin2Authority = mock(UserAuthority.class);
-		when(userPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
-		when(userPlugin2Authority.getMolgenisUser()).thenReturn(user1);
-		userPlugin3Authority = mock(UserAuthority.class);
-		when(userPlugin3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin3");
-		when(userPlugin3Authority.getMolgenisUser()).thenReturn(user1);
-		userEntity2Authority = mock(UserAuthority.class);
-		when(userEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
-		when(userEntity2Authority.getMolgenisUser()).thenReturn(user1);
-		userEntity3Authority = mock(UserAuthority.class);
-		when(userEntity3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity3");
-		when(userEntity3Authority.getMolgenisUser()).thenReturn(user1);
-
-		when(database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, EQUALS, user1))).thenReturn(
-				Arrays.<UserAuthority> asList(userPlugin2Authority, userPlugin3Authority, userEntity2Authority,
-						userEntity3Authority));
-
-		when(database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, EQUALS, user2))).thenReturn(
-				Arrays.<UserAuthority> asList(userPlugin2Authority, userPlugin3Authority, userEntity2Authority,
-						userEntity3Authority));
-
-		MolgenisGroupMember molgenisGroupMember1 = mock(MolgenisGroupMember.class);
-		when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(group1);
-		when(
-				database.find(MolgenisGroupMember.class, new QueryRule(MolgenisGroupMember.MOLGENISUSER,
-						Operator.EQUALS, user2))).thenReturn(Arrays.<MolgenisGroupMember> asList(molgenisGroupMember1));
-
-		MolgenisPlugin plugin1 = when(mock(MolgenisPlugin.class).getId()).thenReturn("1").getMock();
-		when(plugin1.getName()).thenReturn("plugin1");
-		MolgenisPlugin plugin2 = when(mock(MolgenisPlugin.class).getId()).thenReturn("2").getMock();
-		when(plugin2.getName()).thenReturn("plugin2");
-		MolgenisPlugin plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
-		when(plugin3.getName()).thenReturn("plugin3n");
-		when(molgenisPluginRegistry.getPlugins()).thenReturn(Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3));
+		// MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn(1).getMock();
+		// when(group1.getName()).thenReturn("group1");
+		// Query<MolgenisGroup> queryGroup = mock(Query.class);
+		// Query<MolgenisGroup> queryGroup1 = mock(Query.class);
+		// when(queryGroup.eq(MolgenisGroup.ID, 1)).thenReturn(queryGroup1);
+		// when(queryGroup.eq(MolgenisGroup.ID, -1)).thenReturn(queryGroup);
+		// when(queryGroup1.find()).thenReturn(Arrays.<MolgenisGroup> asList(group1));
+		// when(database.query(MolgenisGroup.class)).thenReturn(queryGroup);
+		// when(database.find(MolgenisGroup.class)).thenReturn(Arrays.asList(group1));
+		//
+		// groupPlugin1Authority = mock(GroupAuthority.class);
+		// when(groupPlugin1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin1");
+		// when(groupPlugin1Authority.getMolgenisGroup()).thenReturn(group1);
+		// groupPlugin2Authority = mock(GroupAuthority.class);
+		// when(groupPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
+		// when(groupPlugin2Authority.getMolgenisGroup()).thenReturn(group1);
+		// groupEntity1Authority = mock(GroupAuthority.class);
+		// when(groupEntity1Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity1");
+		// when(groupEntity1Authority.getMolgenisGroup()).thenReturn(group1);
+		// groupEntity2Authority = mock(GroupAuthority.class);
+		// when(groupEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
+		// when(groupEntity2Authority.getMolgenisGroup()).thenReturn(group1);
+		// when(
+		// database.find(GroupAuthority.class,
+		// new QueryRule(GroupAuthority.MOLGENISGROUP, IN, Arrays.asList(group1)))).thenReturn(
+		// Arrays.<GroupAuthority> asList(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority,
+		// groupEntity2Authority));
+		//
+		// MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
+		// MolgenisUser user2 = when(mock(MolgenisUser.class).getId()).thenReturn(2).getMock();
+		// Query<MolgenisUser> queryUser = mock(Query.class);
+		// Query<MolgenisUser> queryUser1 = mock(Query.class);
+		// Query<MolgenisUser> queryUser2 = mock(Query.class);
+		// when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUser1);
+		// when(queryUser.eq(MolgenisUser.ID, 2)).thenReturn(queryUser2);
+		// when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
+		// when(queryUser1.find()).thenReturn(Arrays.<MolgenisUser> asList(user1));
+		// when(queryUser2.find()).thenReturn(Arrays.<MolgenisUser> asList(user2));
+		// when(database.query(MolgenisUser.class)).thenReturn(queryUser);
+		//
+		// MolgenisUser adminUser = when(mock(MolgenisUser.class).getId()).thenReturn(3).getMock();
+		// when(adminUser.getSuperuser()).thenReturn(true);
+		// when(database.find(MolgenisUser.class)).thenReturn(Arrays.asList(user1, user2, adminUser));
+		//
+		// userPlugin2Authority = mock(UserAuthority.class);
+		// when(userPlugin2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin2");
+		// when(userPlugin2Authority.getMolgenisUser()).thenReturn(user1);
+		// userPlugin3Authority = mock(UserAuthority.class);
+		// when(userPlugin3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "plugin3");
+		// when(userPlugin3Authority.getMolgenisUser()).thenReturn(user1);
+		// userEntity2Authority = mock(UserAuthority.class);
+		// when(userEntity2Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity2");
+		// when(userEntity2Authority.getMolgenisUser()).thenReturn(user1);
+		// userEntity3Authority = mock(UserAuthority.class);
+		// when(userEntity3Authority.getRole()).thenReturn(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "entity3");
+		// when(userEntity3Authority.getMolgenisUser()).thenReturn(user1);
+		//
+		// when(database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, EQUALS,
+		// user1))).thenReturn(
+		// Arrays.<UserAuthority> asList(userPlugin2Authority, userPlugin3Authority, userEntity2Authority,
+		// userEntity3Authority));
+		//
+		// when(database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, EQUALS,
+		// user2))).thenReturn(
+		// Arrays.<UserAuthority> asList(userPlugin2Authority, userPlugin3Authority, userEntity2Authority,
+		// userEntity3Authority));
+		//
+		// MolgenisGroupMember molgenisGroupMember1 = mock(MolgenisGroupMember.class);
+		// when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(group1);
+		// when(
+		// database.find(MolgenisGroupMember.class, new QueryRule(MolgenisGroupMember.MOLGENISUSER,
+		// Operator.EQUALS, user2))).thenReturn(Arrays.<MolgenisGroupMember> asList(molgenisGroupMember1));
+		//
+		// MolgenisPlugin plugin1 = when(mock(MolgenisPlugin.class).getId()).thenReturn("1").getMock();
+		// when(plugin1.getName()).thenReturn("plugin1");
+		// MolgenisPlugin plugin2 = when(mock(MolgenisPlugin.class).getId()).thenReturn("2").getMock();
+		// when(plugin2.getName()).thenReturn("plugin2");
+		// MolgenisPlugin plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
+		// when(plugin3.getName()).thenReturn("plugin3n");
+		// when(molgenisPluginRegistry.getPlugins()).thenReturn(Arrays.<MolgenisPlugin> asList(plugin1, plugin2,
+		// plugin3));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -213,12 +196,6 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getEntityClassIds() throws DatabaseException
-	{
-		assertEquals(pluginPermissionManagerService.getEntityClassIds(), Arrays.asList("entity1", "entity2"));
-	}
-
-	@Test
 	public void getGroupEntityClassPermissions() throws DatabaseException
 	{
 		Permissions permissions = pluginPermissionManagerService.getGroupEntityClassPermissions(1);
@@ -235,6 +212,9 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void getGroupPluginPermissions() throws DatabaseException
 	{
+		MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn(1).getMock();
+		when(group1.getName()).thenReturn("group1");
+
 		Permissions permissions = pluginPermissionManagerService.getGroupPluginPermissions(1);
 		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
 
@@ -319,8 +299,9 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
 		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, 1);
-		verify(database).remove(Arrays.asList(groupEntity1Authority, groupEntity2Authority));
-		verify(database).add(authorities);
+		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
+				Arrays.asList(groupEntity1Authority, groupEntity2Authority));
+		verify(dataService).add(GroupAuthority.ENTITY_NAME, authorities);
 	}
 
 	@Test
@@ -328,8 +309,9 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
 		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, 1);
-		verify(database).remove(Arrays.asList(groupPlugin1Authority, groupPlugin2Authority));
-		verify(database).add(authorities);
+		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
+				Arrays.asList(groupPlugin1Authority, groupPlugin2Authority));
+		verify(dataService).add(GroupAuthority.ENTITY_NAME, authorities);
 	}
 
 	@Test
@@ -337,8 +319,9 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
 		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, 1);
-		verify(database).remove(Arrays.asList(userEntity2Authority, userEntity3Authority));
-		verify(database).add(authorities);
+		verify(dataService)
+				.delete(UserAuthority.ENTITY_NAME, Arrays.asList(userEntity2Authority, userEntity3Authority));
+		verify(dataService).add(UserAuthority.ENTITY_NAME, authorities);
 	}
 
 	@Test
@@ -346,7 +329,8 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
 		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, 1);
-		verify(database).remove(Arrays.asList(userPlugin2Authority, userPlugin3Authority));
-		verify(database).add(authorities);
+		verify(dataService)
+				.delete(UserAuthority.ENTITY_NAME, Arrays.asList(userPlugin2Authority, userPlugin3Authority));
+		verify(dataService).add(UserAuthority.ENTITY_NAME, authorities);
 	}
 }
