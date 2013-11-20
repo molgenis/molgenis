@@ -1,23 +1,22 @@
 package org.molgenis.ui.form;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
-import java.text.ParseException;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.elements.Entity;
-import org.molgenis.model.elements.Field;
 import org.molgenis.ui.MolgenisUiUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
@@ -29,6 +28,7 @@ import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -41,27 +41,28 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	private static final String VIEW_NAME_EDIT = "view-form-edit";
 	private static final Logger logger = Logger.getLogger(MolgenisEntityFormPluginController.class);
 
-	private final Database database;
+	private final DataService dataService;
 	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	public MolgenisEntityFormPluginController(Database database, MolgenisPermissionService molgenisPermissionService)
+	public MolgenisEntityFormPluginController(DataService dataService,
+			MolgenisPermissionService molgenisPermissionService)
 	{
 		super(URI);
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
-		this.database = database;
+		this.dataService = dataService;
 		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
-	@RequestMapping(method = GET, value = URI + "{entityName}")
-	public String list(@PathVariable("entityName") String entityName,
-			@RequestParam(value = "subForms", required = false) String[] subForms, Model model)
-			throws DatabaseException, MolgenisModelException
+	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}")
+	public String list(@PathVariable("entityName")
+	String entityName, @RequestParam(value = "subForms", required = false)
+	String[] subForms, Model model) throws MolgenisModelException
 	{
 		model.addAttribute("current_uri", MolgenisUiUtils.getCurrentUri());
 
-		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
+		EntityMetaData entityMetaData = createAndValidateEntity(entityName, Permission.READ);
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 
 		EntityForm form = new EntityForm(entityMetaData, hasWritePermission);
@@ -80,11 +81,11 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 				String subEntityName = subFormParts[0];
 				String xrefFieldName = subFormParts[1];
 
-				Entity subEntityMetaData = createAndValidateEntity(subEntityName, Permission.READ);
+				EntityMetaData subEntityMetaData = createAndValidateEntity(subEntityName, Permission.READ);
 				boolean found = false;
-				for (Field field : subEntityMetaData.getFields())
+				for (AttributeMetaData attr : subEntityMetaData.getAttributes())
 				{
-					if (field.isXRef() && field.getName().equals(xrefFieldName))
+					if ((attr.getRefEntity() != null) && attr.getName().equals(xrefFieldName))
 					{
 						found = true;
 						break;
@@ -109,39 +110,37 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 		return VIEW_NAME_LIST;
 	}
 
-	@RequestMapping(method = GET, value = URI + "{entityName}/{id}")
-	public String edit(@PathVariable("entityName") String entityName, @PathVariable("id") String id,
-			@RequestParam(value = "back", required = false) String back, Model model) throws DatabaseException,
-			MolgenisModelException, ParseException
+	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/{id}")
+	public String edit(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, @RequestParam(value = "back", required = false)
+	String back, Model model)
 	{
 		if (StringUtils.isNotBlank(back))
 		{
 			model.addAttribute("back", back);
 		}
 
-		Entity entityMetaData = createAndValidateEntity(entityName, Permission.READ);
-		org.molgenis.util.Entity entity = findEntityById(entityMetaData, id);
+		EntityMetaData entityMetaData = createAndValidateEntity(entityName, Permission.READ);
+		Entity entity = findEntityById(entityMetaData, id);
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
 
 		return VIEW_NAME_EDIT;
 	}
 
-	@RequestMapping(method = GET, value = URI + "{entityName}/create")
-	public String create(@PathVariable("entityName") String entityName, HttpServletRequest request,
-			@RequestParam(value = "back", required = false) String back, Model model) throws Exception
+	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/create")
+	public String create(@PathVariable("entityName")
+	String entityName, HttpServletRequest request, @RequestParam(value = "back", required = false)
+	String back, Model model) throws Exception
 	{
 		if (StringUtils.isNotBlank(back))
 		{
 			model.addAttribute("back", back);
 		}
 
-		Entity entityMetaData = createAndValidateEntity(entityName, Permission.WRITE);
-
-		// Requestparameters are used to prefill the form (for example in case of subform)
-		// Create an entity of the correct type and set the field values from the request params
-		Class<? extends org.molgenis.util.Entity> entityClass = database.getClassForName(entityName);
-		org.molgenis.util.Entity entity = BeanUtils.instantiateClass(entityClass);
+		Repository<? extends Entity> repo = createAndValidateEntity(entityName, Permission.WRITE);
+		Entity entity = BeanUtils.instantiateClass(repo.getEntityClass());
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
 		if (!parameterMap.isEmpty())
@@ -157,27 +156,27 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 
 				if (StringUtils.isNotBlank(value))
 				{
-					Field field = entityMetaData.getAllField(fieldName);
-					if ((field != null) && field.isXRef() && !field.isMRef())
+					AttributeMetaData attr = repo.getAttribute(fieldName);
+					if ((attr != null) && (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF))
 					{
-						List<? extends org.molgenis.util.Entity> results = null;
-						String pkFieldName = field.getXrefEntity().getPrimaryKey().getName();
-						Class<? extends org.molgenis.util.Entity> xrefEntityClass = database.getClassForName(field
-								.getXrefEntityName());
+						EntityMetaData xrefEntityMetadata = attr.getRefEntity();
+						Entity xref = null;
 						try
 						{
-							results = database.query(xrefEntityClass).equals(pkFieldName, value).find();
+
+							xref = dataService.findOne(xrefEntityMetadata.getName(),
+									new QueryImpl().eq(xrefEntityMetadata.getIdAttribute().getName(), value));
 						}
 						catch (Exception e)
 						{
 							// Probably pk is of wrong type, could be that user entered an invalid value
-							logger.debug("Exception getting entity [" + xrefEntityClass
+							logger.debug("Exception getting entity [" + xrefEntityMetadata.getName()
 									+ "] by primarykey with value [" + value + "]", e);
 						}
 
-						if ((results != null) && !results.isEmpty())
+						if (xref != null)
 						{
-							new BeanWrapperImpl(entity).setPropertyValue(fieldName, results.get(0));
+							new BeanWrapperImpl(entity).setPropertyValue(fieldName, xref);
 						}
 					}
 
@@ -185,18 +184,16 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			}
 		}
 
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, true, entity));
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(repo, true, entity));
 
 		return VIEW_NAME_EDIT;
 	}
 
-	private org.molgenis.util.Entity findEntityById(Entity entityMetaData, String id) throws DatabaseException,
-			ParseException, MolgenisModelException
+	private Entity findEntityById(EntityMetaData entityMetaData, Integer id)
 	{
 		String entityName = entityMetaData.getName();
-		Class<? extends org.molgenis.util.Entity> entityClass = database.getClassForName(entityName);
-		Object entityId = entityMetaData.getPrimaryKey().getType().getTypedValue(id);
-		org.molgenis.util.Entity entity = database.findById(entityClass, entityId);
+		Entity entity = dataService.findOne(entityName, id);
+
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Unknown entity [" + entityName + "] with id [" + id + "]");
@@ -205,21 +202,16 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 		return entity;
 	}
 
-	private Entity createAndValidateEntity(String entityName, Permission permission) throws DatabaseException
+	private Repository<? extends Entity> createAndValidateEntity(String entityName, Permission permission)
 	{
-		Entity entityMetaData = database.getMetaData().getEntity(entityName);
-
-		if (entityMetaData == null || entityMetaData.isAssociation())
-		{
-			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-		}
+		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
 
 		if (!molgenisPermissionService.hasPermissionOnEntity(entityName, permission))
 		{
 			throw new MolgenisEntityFormSecurityException();
 		}
 
-		return entityMetaData;
+		return repo;
 	}
 
 }

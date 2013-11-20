@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.DataService;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.framework.db.Database;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.CategoricalValue;
@@ -51,14 +51,14 @@ public class ValueConverter
 		VALUE_FIELDTYPE_MAP.put(XrefValue.class, FieldTypeEnum.XREF);
 	}
 
-	private final Database database;
+	private final DataService dataService;
 	private final Map<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>> tupleConverters;
 	private CharacteristicLoadingCache characteristicLoadingCache;
 
-	public ValueConverter(Database database)
+	public ValueConverter(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("Database is null");
+		this.dataService = dataService;
 		this.tupleConverters = new EnumMap<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>>(
 				FieldTypeEnum.class);
 	}
@@ -113,7 +113,7 @@ public class ValueConverter
 					tupleConverter = new TupleToBoolValueConverter();
 					break;
 				case CATEGORICAL:
-					tupleConverter = new TupleToCategoricalValueConverter(database);
+					tupleConverter = new TupleToCategoricalValueConverter(dataService);
 					break;
 				case DATE:
 					tupleConverter = new TupleToDateValueConverter();
@@ -161,7 +161,7 @@ public class ValueConverter
 	{
 		if (characteristicLoadingCache == null)
 		{
-			characteristicLoadingCache = new CharacteristicLoadingCache(database);
+			characteristicLoadingCache = new CharacteristicLoadingCache(dataService);
 		}
 		return characteristicLoadingCache;
 	}

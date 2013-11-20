@@ -1,7 +1,6 @@
 package org.molgenis.omx.workflow;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
 
 public class WorkflowElementDataRowConnection
 {
@@ -9,14 +8,13 @@ public class WorkflowElementDataRowConnection
 	private final WorkflowElementDataRow inputDataRow;
 	private final WorkflowElementDataRow outputDataRow;
 
-	public WorkflowElementDataRowConnection(ObservationSetFlow observationSetFlow, Database database)
-			throws DatabaseException
+	public WorkflowElementDataRowConnection(ObservationSetFlow observationSetFlow, DataService dataService)
 	{
 		if (observationSetFlow == null) throw new IllegalArgumentException("ObservationSetFlow is null");
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		this.id = observationSetFlow.getId();
-		this.inputDataRow = new WorkflowElementDataRow(observationSetFlow.getSource(), database);
-		this.outputDataRow = new WorkflowElementDataRow(observationSetFlow.getDestination(), database);
+		this.inputDataRow = new WorkflowElementDataRow(observationSetFlow.getSource(), dataService);
+		this.outputDataRow = new WorkflowElementDataRow(observationSetFlow.getDestination(), dataService);
 	}
 
 	public Integer getId()

@@ -1,46 +1,34 @@
 package org.molgenis.omx.catalogmanager;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.UnknownStudyDefinitionException;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 
 public class OmxCatalogManagerService implements CatalogManagerService
 {
-	private final Database database;
+	private final DataService dataService;
 
-	public OmxCatalogManagerService(Database database)
+	public OmxCatalogManagerService(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
-	public List<CatalogMeta> findCatalogs()
+	public Iterable<CatalogMeta> findCatalogs()
 	{
-		List<DataSet> dataSets;
-		try
-		{
-			dataSets = database.find(DataSet.class);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		if (dataSets == null) return Collections.emptyList();
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 
-		return Lists.transform(dataSets, new Function<DataSet, CatalogMeta>()
+		return Iterables.transform(dataSets, new Function<DataSet, CatalogMeta>()
 		{
 			@Override
 			public CatalogMeta apply(DataSet dataSet)
@@ -133,38 +121,18 @@ public class OmxCatalogManagerService implements CatalogManagerService
 
 	private DataSet getDataSet(String dataSetIdentifier)
 	{
-		try
-		{
-			return DataSet.findByIdentifier(database, dataSetIdentifier);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		return dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
 	}
 
 	private void setDataSetActive(DataSet dataSet, boolean active)
 	{
 		dataSet.setActive(active);
-		try
-		{
-			database.update(dataSet);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		dataService.update(DataSet.ENTITY_NAME, dataSet);
 	}
 
 	private StudyDataRequest getStudyDataRequest(String studyDataRequestIdentifier)
 	{
-		try
-		{
-			return StudyDataRequest.findByIdentifier(database, studyDataRequestIdentifier);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		return dataService.findOne(StudyDataRequest.ENTITY_NAME,
+				new QueryImpl().eq(StudyDataRequest.IDENTIFIER, studyDataRequestIdentifier));
 	}
 }

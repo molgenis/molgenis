@@ -68,7 +68,7 @@
 				if (entity.hasOwnProperty(fieldName)) {
 					//TODO support deeper nesting of xref fields
 					if (field.mref) {
-							
+						
 						$.each(entity[fieldName]['items'], function(index, mrefEntity) {
 							if (index > 0) {
 								value += ', ';

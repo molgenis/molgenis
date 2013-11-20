@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -49,7 +50,7 @@ public class UserAccountController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String showAccount(Model model) throws DatabaseException
 	{
-		model.addAttribute("user", userAccountService.getCurrentUser());
+		model.addAttribute("user", userAccountService.getUser(SecurityUtils.getCurrentUsername()));
 		model.addAttribute("countries", CountryCodes.get());
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
 		return "view-useraccount";
@@ -57,7 +58,9 @@ public class UserAccountController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest) throws DatabaseException
+	public void updateAccount(@Valid
+	@NotNull
+	AccountUpdateRequest updateRequest) throws DatabaseException
 	{
 		// validate new password
 		String newPassword = updateRequest.getNewpwd();
@@ -71,7 +74,8 @@ public class UserAccountController extends MolgenisPluginController
 			{
 				throw new MolgenisUserException("Please enter old password to update your password.");
 			}
-			boolean valid = userAccountService.validateCurrentUserPassword(oldPassword);
+			boolean valid = userAccountService.validateCurrentUserPassword(oldPassword,
+					SecurityUtils.getCurrentUsername());
 			if (!valid) throw new MolgenisUserException("The password you entered is incorrect.");
 
 			// validate new password against new password confirmation
@@ -89,7 +93,7 @@ public class UserAccountController extends MolgenisPluginController
 		}
 
 		// update current user
-		MolgenisUser user = userAccountService.getCurrentUser();
+		MolgenisUser user = userAccountService.getUser(SecurityUtils.getCurrentUsername());
 
 		if (StringUtils.isNotEmpty(newPassword)) user.setPassword(newPassword);
 		if (StringUtils.isNotEmpty(updateRequest.getPhone())) user.setPhone(updateRequest.getPhone());
@@ -111,7 +115,7 @@ public class UserAccountController extends MolgenisPluginController
 			user.setCountry(CountryCodes.get(updateRequest.getCountry()));
 		}
 
-		userAccountService.updateCurrentUser(user);
+		userAccountService.updateCurrentUser(user, SecurityUtils.getCurrentUsername());
 	}
 
 	@ExceptionHandler(DatabaseException.class)

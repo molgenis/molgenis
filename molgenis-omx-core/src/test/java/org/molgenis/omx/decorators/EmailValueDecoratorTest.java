@@ -5,8 +5,9 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Mapper;
+import javax.validation.ValidationException;
+
+import org.molgenis.data.CrudRepository;
 import org.molgenis.omx.observ.value.EmailValue;
 import org.testng.annotations.Test;
 
@@ -20,9 +21,9 @@ public class EmailValueDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void add() throws DatabaseException
+	public void add()
 	{
-		Mapper<EmailValue> mapper = mock(Mapper.class);
+		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("a1@b.org");
 		EmailValue value2 = new EmailValue();
@@ -32,10 +33,10 @@ public class EmailValueDecoratorTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = DatabaseException.class)
-	public void add_InvalidEmail() throws DatabaseException
+	@Test(expectedExceptions = ValidationException.class)
+	public void add_InvalidEmail()
 	{
-		Mapper<EmailValue> mapper = mock(Mapper.class);
+		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("not an email address");
 		new EmailValueDecorator<EmailValue>(mapper).add(Arrays.asList(value1));
@@ -43,9 +44,9 @@ public class EmailValueDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void update() throws DatabaseException
+	public void update()
 	{
-		Mapper<EmailValue> mapper = mock(Mapper.class);
+		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("a1@b.org");
 		EmailValue value2 = new EmailValue();
@@ -55,10 +56,10 @@ public class EmailValueDecoratorTest
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = DatabaseException.class)
-	public void update_InvalidEmail() throws DatabaseException
+	@Test(expectedExceptions = ValidationException.class)
+	public void update_InvalidEmail()
 	{
-		Mapper<EmailValue> mapper = mock(Mapper.class);
+		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("not an email address");
 		new EmailValueDecorator<EmailValue>(mapper).update(Arrays.asList(value1));

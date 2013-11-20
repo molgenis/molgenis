@@ -815,9 +815,10 @@
 							}]
 						});
 					}
+					
 					var observedValue = restApi.get('/api/v1/observedvalue', ['value'], {
 						q : [{
-							field : 'observationset',
+							field : 'observationSet',
 							operator : 'EQUALS',
 							value : eachMapping.observationSet
 						},{

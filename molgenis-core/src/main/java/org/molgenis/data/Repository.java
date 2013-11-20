@@ -7,4 +7,5 @@ import java.io.Closeable;
  */
 public interface Repository<E extends Entity> extends EntityMetaData, Iterable<E>, Closeable
 {
+	Class<? extends Entity> getEntityClass();
 }

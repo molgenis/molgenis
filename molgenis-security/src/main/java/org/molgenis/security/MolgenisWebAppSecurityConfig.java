@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
@@ -37,7 +37,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
 
 	@Autowired
-	private Database unsecuredDatabase;
+	private DataService dataService;
 
 	@Autowired
 	private DataSource dataSource;
@@ -136,7 +136,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Override
 	protected UserDetailsService userDetailsService()
 	{
-		return new MolgenisUserDetailsService(unsecuredDatabase, roleHierarchyAuthoritiesMapper());
+		return new MolgenisUserDetailsService(dataService, roleHierarchyAuthoritiesMapper());
 	}
 
 	@Override

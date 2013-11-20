@@ -2,7 +2,7 @@ package org.molgenis.omx.biobankconnect.wizard;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.ui.wizard.AbstractWizardPage;
@@ -15,16 +15,16 @@ import org.springframework.validation.BindingResult;
 public class ChooseCataloguePage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
-	private final Database database;
+	private final DataService dataService;
 
 	@Autowired
 	private OntologyAnnotator ontologyAnnotator;
 
 	@Autowired
-	public ChooseCataloguePage(Database database)
+	public ChooseCataloguePage(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -41,16 +41,16 @@ public class ChooseCataloguePage extends AbstractWizardPage
 		{
 			BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
 			Integer selectedDataSetId = Integer.parseInt(request.getParameter("selectedDataSetId"));
-			try
+			DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId);
+			if (dataSet == null)
 			{
-				biobankConnectWizard.setSelectedDataSet(database.findById(DataSet.class, selectedDataSetId));
-			}
-			catch (Exception e)
-			{
-				new RuntimeException("Could not find dataset based on id : " + selectedDataSetId
+				throw new RuntimeException("Could not find dataset based on id : " + selectedDataSetId
 						+ "  from the database");
 			}
+
+			biobankConnectWizard.setSelectedDataSet(dataSet);
 		}
+
 		return null;
 	}
 }

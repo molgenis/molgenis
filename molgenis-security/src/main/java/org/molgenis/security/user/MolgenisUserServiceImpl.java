@@ -3,35 +3,38 @@ package org.molgenis.security.user;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
+/**
+ * Manage user in groups
+ */
 @Service
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
-	private final Database unsecuredDatabase;
+	private final DataService dataService;
 
 	@Autowired
-	public MolgenisUserServiceImpl(Database unsecuredDatabase)
+	public MolgenisUserServiceImpl(DataService dataService)
 	{
-		if (unsecuredDatabase == null) throw new IllegalArgumentException("Database is null");
-		this.unsecuredDatabase = unsecuredDatabase;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
-	public List<String> getSuEmailAddresses() throws DatabaseException
+	@RunAsSystem
+	public List<String> getSuEmailAddresses()
 	{
-		List<MolgenisUser> superUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
-				MolgenisUser.SUPERUSER, Operator.EQUALS, true));
+		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.SUPERUSER, true));
+
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
 		{
 			@Override
@@ -43,9 +46,9 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
-	public MolgenisUser getCurrentUser() throws DatabaseException
+	@RunAsSystem
+	public MolgenisUser getUser(String username)
 	{
-		String currentUsername = SecurityUtils.getCurrentUsername();
-		return MolgenisUser.findByUsername(unsecuredDatabase, currentUsername);
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username));
 	}
 }

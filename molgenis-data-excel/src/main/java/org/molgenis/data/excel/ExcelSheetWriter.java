@@ -17,7 +17,7 @@ import org.molgenis.util.ListEscapeUtils;
 /**
  * Writable implementation for an excel sheet
  */
-public class ExcelSheetWriter extends AbstractWritable
+public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
 {
 	private final Sheet sheet;
 	private int row;
@@ -114,6 +114,18 @@ public class ExcelSheetWriter extends AbstractWritable
 
 	@Override
 	public void close() throws IOException
+	{
+		// Nothing
+	}
+
+	@Override
+	public void flush()
+	{
+		// Nothing
+	}
+
+	@Override
+	public void clearCache()
 	{
 		// Nothing
 	}

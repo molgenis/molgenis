@@ -463,6 +463,7 @@
 		searchApi.search(searchRequest, function(searchResponse){
 			$.each(searchResponse.searchHits, function(index, hit){
 				callback(hit);
+				return false;
 			});
 		});
 	}

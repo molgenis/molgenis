@@ -3,55 +3,60 @@ package org.molgenis.omx;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
 
-	private final Database unsecuredDatabase;
+	private final DataService dataService;
 
 	@Autowired
-	public MolgenisDbSettings(Database unsecuredDatabase)
+	public MolgenisDbSettings(DataService dataService)
 	{
-		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
-		this.unsecuredDatabase = unsecuredDatabase;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
+	@RunAsSystem
 	public String getProperty(String key)
 	{
 		return getProperty(key, null);
 	}
 
 	@Override
+	@RunAsSystem
 	public String getProperty(String key, String defaultValue)
 	{
 		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
 				RuntimeProperty.class.getSimpleName() + '_' + key);
-		List<RuntimeProperty> properties;
+
+		RuntimeProperty property;
 		try
 		{
-			properties = unsecuredDatabase.find(RuntimeProperty.class, propertyRule);
+			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule);
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			logger.warn(e);
 			return defaultValue;
 		}
-		if (properties == null || properties.isEmpty()) return defaultValue;
-		RuntimeProperty property = properties.get(0);
+
 		if (property == null)
 		{
 			logger.warn(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
 			return defaultValue;
 		}
+
 		return property.getValue();
 	}
 
@@ -62,14 +67,8 @@ public class MolgenisDbSettings implements MolgenisSettings
 		property.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + key);
 		property.setName(key);
 		property.setValue(value);
-		try
-		{
-			unsecuredDatabase.add(property);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
+		dataService.add(RuntimeProperty.ENTITY_NAME, property);
 	}
 
 	@Override
@@ -95,56 +94,48 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 		return value;
 	}
-	
+
 	@Override
-	public boolean updateProperty(String key, String content) 
+	@RunAsSystem
+	public boolean updateProperty(String key, String content)
 	{
 		if (null == content)
 		{
 			throw new IllegalArgumentException("content is null");
 		}
-		
+
 		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
 				RuntimeProperty.class.getSimpleName() + '_' + key);
-		List<RuntimeProperty> properties;
-		
+
 		try
 		{
-			properties = unsecuredDatabase.find(RuntimeProperty.class, propertyRule);
-			if (null != properties && !properties.isEmpty() && properties.size() == 1) {
+			List<RuntimeProperty> properties = dataService.findAllAsList(RuntimeProperty.ENTITY_NAME, propertyRule);
+			if (null != properties && !properties.isEmpty() && properties.size() == 1)
+			{
 				RuntimeProperty property = properties.get(0);
 				property.setValue(content);
-				unsecuredDatabase.update(property);
+				dataService.update(RuntimeProperty.ENTITY_NAME, property);
 				return true;
 			}
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			logger.warn(e);
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
-	public boolean propertyExists(String key) 
-	{		
-		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-				RuntimeProperty.class.getSimpleName() + '_' + key);
-		int count;
-		
-		try
+	public boolean propertyExists(String key)
+	{
+		long count = dataService.count(RuntimeProperty.ENTITY_NAME,
+				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_' + key));
+		if (count > 0)
 		{
-			count = unsecuredDatabase.count(RuntimeProperty.class, propertyRule);
-			if (count > 0) {
-				return true;
-			}
+			return true;
 		}
-		catch (DatabaseException e)
-		{
-			logger.warn(e);
-		}
-		
+
 		return false;
 	}
 }

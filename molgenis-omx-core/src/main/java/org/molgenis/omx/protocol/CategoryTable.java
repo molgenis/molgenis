@@ -9,22 +9,19 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
-public class CategoryTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
+public class CategoryTable extends AbstractFilterableTupleTable
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
@@ -33,7 +30,7 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
 
 	private final Protocol protocol;
-	private Database db;
+	private final DataService dataService;
 	public static final Set<String> STOPWORDSLIST;
 	static
 	{
@@ -55,12 +52,12 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public CategoryTable(Protocol protocol, Database db) throws TableException
+	public CategoryTable(Protocol protocol, DataService dataService) throws TableException
 	{
 		if (protocol == null) throw new TableException("protocol cannot be null");
 		this.protocol = protocol;
-		if (db == null) throw new TableException("db cannot be null");
-		this.db = db;
+		if (dataService == null) throw new TableException("dataService cannot be null");
+		this.dataService = dataService;
 		setFirstColumnFixed(false);
 	}
 
@@ -103,13 +100,10 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 		}
 		else
 		{
-			List<Integer> featureIds = new ArrayList<Integer>();
-			for (ObservableFeature feature : protocol.getFeatures())
-			{
-				featureIds.add(feature.getId());
-			}
-			for (Category c : db.find(Category.class,
-					new QueryRule(Category.OBSERVABLEFEATURE, Operator.IN, featureIds)))
+			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()));
+
+			for (Category c : categories)
 			{
 				String name = c.getIdentifier();
 				String description = c.getName() == null ? StringUtils.EMPTY : I18nTools.get(c.getName())
@@ -120,31 +114,18 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 
 				KeyValueTuple tuple = new KeyValueTuple();
 				tuple.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
-				tuple.set(FIELD_ID, c.getObservableFeature_Id());
+				tuple.set(FIELD_ID, c.getObservableFeature().getId());
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, name);
 				tuple.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
 				tuples.add(tuple);
 			}
-
 		}
-	}
 
-	@Override
-	public Database getDb()
-	{
-		return db;
-	}
-
-	@Override
-	public void setDb(Database db)
-	{
-		this.db = db;
 	}
 
 	/**
-	 * Count the number of protocols and features of this protocol (excluding
-	 * this protocol itself)
+	 * Count the number of protocols and features of this protocol (excluding this protocol itself)
 	 */
 	@Override
 	public int getCount() throws TableException
@@ -173,13 +154,8 @@ public class CategoryTable extends AbstractFilterableTupleTable implements Datab
 		}
 		else
 		{
-			List<Integer> featureIds = new ArrayList<Integer>();
-			for (ObservableFeature feature : protocol.getFeatures())
-			{
-				featureIds.add(feature.getId());
-			}
-			List<Category> categories = db.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE, Operator.IN,
-					featureIds));
+			List<Category> categories = dataService.findAllAsList(Category.ENTITY_NAME,
+					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()));
 			if (!categories.isEmpty()) count.addAndGet(categories.size());
 		}
 	}

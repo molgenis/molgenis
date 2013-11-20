@@ -3,10 +3,8 @@ package org.molgenis.omx.workflow;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -23,7 +21,7 @@ public class WorkflowElement
 	private transient final List<WorkflowElementConnection> elementConnections;
 	private transient final WorkflowElementData workflowElementData;
 
-	public WorkflowElement(final Protocol protocol, Database database) throws WorkflowException
+	public WorkflowElement(final Protocol protocol, DataService dataService) throws WorkflowException
 	{
 		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
 		this.id = protocol.getId();
@@ -36,8 +34,8 @@ public class WorkflowElement
 				return new WorkflowFeature(feature, protocol);
 			}
 		});
-		this.elementConnections = createElementConnections(protocol, database);
-		this.workflowElementData = createWorkflowElementData(protocol, database);
+		this.elementConnections = createElementConnections(protocol, dataService);
+		this.workflowElementData = createWorkflowElementData(protocol, dataService);
 	}
 
 	public Integer getId()
@@ -65,18 +63,10 @@ public class WorkflowElement
 		return workflowElementData;
 	}
 
-	private List<WorkflowElementConnection> createElementConnections(Protocol protocol, final Database database)
+	private List<WorkflowElementConnection> createElementConnections(Protocol protocol, final DataService dataService)
 	{
-		List<ProtocolFlow> protocolFlows;
-		try
-		{
-			protocolFlows = database.find(ProtocolFlow.class, new QueryRule(ProtocolFlow.DESTINATION_IDENTIFIER,
-					Operator.EQUALS, protocol.getIdentifier()));
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		List<ProtocolFlow> protocolFlows = dataService.findAllAsList(ProtocolFlow.ENTITY_NAME,
+				new QueryImpl().eq(ProtocolFlow.DESTINATION, protocol));
 
 		return protocolFlows != null ? Lists.transform(protocolFlows,
 				new Function<ProtocolFlow, WorkflowElementConnection>()
@@ -88,8 +78,8 @@ public class WorkflowElement
 						WorkflowElement outputElement;
 						try
 						{
-							inputElement = new WorkflowElement(protocolFlow.getSource(), database);
-							outputElement = new WorkflowElement(protocolFlow.getDestination(), database);
+							inputElement = new WorkflowElement(protocolFlow.getSource(), dataService);
+							outputElement = new WorkflowElement(protocolFlow.getDestination(), dataService);
 						}
 						catch (WorkflowException e)
 						{
@@ -106,36 +96,23 @@ public class WorkflowElement
 				}) : null;
 	}
 
-	private WorkflowElementData createWorkflowElementData(Protocol protocol, Database database)
+	private WorkflowElementData createWorkflowElementData(Protocol protocol, DataService dataService)
 			throws WorkflowException
 	{
-		List<? extends ObservationSet> observationSets;
-		try
-		{
-			List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.PROTOCOLUSED, Operator.EQUALS,
-					protocol));
-			if (dataSets == null || dataSets.size() != 1) throw new RuntimeException(
-					"Workflow step must have exactly one data set");
-			DataSet dataSet = dataSets.get(0);
+		;
+		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.PROTOCOLUSED, protocol));
 
-			observationSets = ObservationSet.find(database, new QueryRule(ObservationSet.PARTOFDATASET,
-					Operator.EQUALS, dataSet));
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		if (dataSets.size() != 1) throw new RuntimeException("Workflow step must have exactly one data set");
+		DataSet dataSet = dataSets.get(0);
+
+		List<? extends ObservationSet> observationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
 
 		List<WorkflowElementDataRow> dataMatrix = new ArrayList<WorkflowElementDataRow>();
-		try
-		{
-			for (ObservationSet observationSet : observationSets)
-				dataMatrix.add(new WorkflowElementDataRow(observationSet, database));
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
+		for (ObservationSet observationSet : observationSets)
+			dataMatrix.add(new WorkflowElementDataRow(observationSet, dataService));
 
 		return new WorkflowElementData(dataMatrix);
 	}

@@ -100,11 +100,6 @@
                 </dependency>
                 <dependency>
                         <groupId>org.molgenis</groupId>
-                        <artifactId>molgenis-omx-biobankconnect</artifactId>
-                        <version>0.0.4-SNAPSHOT</version>
-                </dependency>
-                <dependency>
-                        <groupId>org.molgenis</groupId>
                         <artifactId>molgenis-omx-dataexplorer</artifactId>
                         <version>0.0.4-SNAPSHOT</version>
                 </dependency>

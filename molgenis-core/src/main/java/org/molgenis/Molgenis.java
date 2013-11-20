@@ -33,7 +33,10 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.generators.DataTypeGen;
+import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
+import org.molgenis.generators.JpaEntitySourceGen;
+import org.molgenis.generators.JpaRepositoryGen;
 import org.molgenis.generators.R.RApiGen;
 import org.molgenis.generators.R.REntityGen;
 import org.molgenis.generators.R.RMatrixGen;
@@ -43,9 +46,6 @@ import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
-import org.molgenis.generators.db.JpaDatabaseGen;
-import org.molgenis.generators.db.JpaMapperGen;
-import org.molgenis.generators.db.MapperDecoratorGen;
 import org.molgenis.generators.db.MapperSecurityDecoratorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
@@ -249,13 +249,21 @@ public class Molgenis
 			{
 				if (options.generate_db)
 				{
-					generators.add(new JpaDatabaseGen());
-					generators.add(new JDBCMetaDatabaseGen());
 					generators.add(new DatabaseConfigGen());
 				}
 				generators.add(new DataTypeGen());
+				generators.add(new EntityMetaDataGen());
+				generators.add(new JpaRepositoryGen());
 				generators.add(new EntityServiceGen());
-				generators.add(new JpaMapperGen());
+				generators.add(new EntityImporterGen());
+
+				// Temp remove when omx is migrated to DataApi
+				generators.add(new JDBCMetaDatabaseGen());
+
+				if (options.generate_jpa_entity_source)
+				{
+					generators.add(new JpaEntitySourceGen());
+				}
 
 				if (options.generate_persistence)
 				{
@@ -269,21 +277,18 @@ public class Molgenis
 				generators.add(new CountPerTableGen());
 			}
 
-			// authorization
-			generators.add(new MapperSecurityDecoratorGen());
-
 			// decorators
 			if (options.generate_decorators)
 			{
-				generators.add(new MapperDecoratorGen());
+				// authorization
+				generators.add(new MapperSecurityDecoratorGen());
+
 			}
 		}
 		else
 		{
 			logger.info("SEVERE: Skipping ALL SQL ....");
 		}
-
-		generators.add(new EntityImporterGen());
 
 		if (options.generate_entityio)
 		{

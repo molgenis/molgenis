@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
@@ -17,6 +18,8 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 */
 	void registerEntitySource(String url);
 
+	void registerFactory(EntitySourceFactory entitySourceFactory);
+
 	/**
 	 * return number of entities matched by query
 	 * 
@@ -29,14 +32,70 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	Iterable<? extends Entity> findAll(String entityName, Query q);
+	<E extends Entity> Iterable<E> findAll(String entityName, Query q);
+
+	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids);
+
+	<E extends Entity> List<E> findAllAsList(String entityName, Query q);
+
+	<E extends Entity> List<E> findAllAsList(String entityName, QueryRule... queryRules);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	Entity findOne(String entityName, Integer id);
+	<E extends Entity> E findOne(String entityName, Integer id);
+
+	/**
+	 * Find one entity based on id. Returns null if not exists
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 */
+	<E extends Entity> E findOne(String entityName, Query q);
+
+	<E extends Entity> E findOne(String entityName, QueryRule... queryRules);
+
+	/**
+	 * Adds an entity to it's repository
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't a Writable
+	 */
+	<E extends Entity> void add(String entityName, E entity);
+
+	<E extends Entity> void add(String entityName, Iterable<E> entities);
+
+	/**
+	 * Updates an entity
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
+	 */
+	<E extends Entity> void update(String entityName, E entity);
+
+	<E extends Entity> void update(String entityName, Iterable<E> entities);
+
+	/**
+	 * Deletes an entity
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
+	 */
+	<E extends Entity> void delete(String entityName, E entity);
+
+	/**
+	 * Deletes entities
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
+	 */
+	<E extends Entity> void delete(String entityName, Iterable<E> entity);
+
+	/**
+	 * Get a CrudRepository by entity name
+	 * 
+	 * throws UnknownEntityException when the repository can not be found
+	 * 
+	 * throws MolgenisDataException if the repository doesn't implement CrudRepository
+	 */
+	<E extends Entity> CrudRepository<E> getCrudRepository(String entityName);
 
 	/**
 	 * Creates a new file based entity source (like excel, csv)
@@ -44,4 +103,8 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * Does not register the EntitySource
 	 */
 	EntitySource createEntitySource(File file) throws IOException;
+
+	EntitySource getEntitySource(String url);
+
+	Iterable<Class<? extends Entity>> getEntityClasses();
 }

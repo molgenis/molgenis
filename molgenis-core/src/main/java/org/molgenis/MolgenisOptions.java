@@ -214,6 +214,9 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
 	public boolean generate_db = true;
 
+	@Option(name = "generate_jpa_entity_source", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate JpaEntitySource. Default: false")
+	public boolean generate_jpa_entity_source = false;
+
 	@Option(name = "delete_generated_folder", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "delete generated Folder before generators are executed. Default: true")
 	// default set to false as partial generation leads to compile problems in
 	// for example molgenis_apps

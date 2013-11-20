@@ -12,6 +12,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
 import org.molgenis.io.processor.CellProcessor;
@@ -19,7 +20,7 @@ import org.molgenis.io.processor.CellProcessor;
 /**
  * Creates new Excel sheets
  */
-public class ExcelWriter implements WritableFactory
+public class ExcelWriter<E extends Entity> implements WritableFactory<E>
 {
 	private final Workbook workbook;
 	private final OutputStream os;
@@ -60,10 +61,10 @@ public class ExcelWriter implements WritableFactory
 	}
 
 	@Override
-	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
+	public ExcelSheetWriter<E> createWritable(String entityName, List<String> attributeNames)
 	{
 		Sheet poiSheet = workbook.createSheet(entityName);
-		return new ExcelSheetWriter(poiSheet, attributeNames, cellProcessors);
+		return new ExcelSheetWriter<E>(poiSheet, attributeNames, cellProcessors);
 	}
 
 	@Override
