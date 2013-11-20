@@ -50,7 +50,23 @@
 					molgenis.createAlert([{'message': response.message}], response.isRunning ? 'success' : 'error');
 					$('.dataset-chk').attr('checked', false);
 				});
+				
+				setStatusMessage();
+				
 				return false;
 			});
+			
+			function setStatusMessage() {
+			    $.get('${context_url}/index/status', function() {
+			    	alert(${context_url}/index/status);
+			    	console.log(${context_url}/index/status);
+					molgenis.createAlert([{'message': response.message}], response.isRunning ? 'success' : 'error');
+					alert('response.isRunning');
+					if(response.isRunning === true){
+						setTimeout(setStatusMessage(), 1000);
+						alert("setTimeout()");
+					}
+				});
+			};
 		});
 	</script>

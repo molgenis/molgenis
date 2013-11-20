@@ -71,17 +71,17 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	public DataSetIndexResponse index(@RequestBody
 	DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
+		if (dataSetsIndexer.isIndexingRunning())
+		{
+			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
+		}
+		
 		List<String> dataSetIds = request.getSelectedDataSets();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())
 		{
 			return new DataSetIndexResponse(false, "Please select a dataset");
 		}
-
-		if (dataSetsIndexer.isIndexingRunning())
-		{
-			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
-		}
-
+		
 		// Convert the strings to integer
 		List<Integer> ids = new ArrayList<Integer>();
 		for (String dataSetId : dataSetIds)
@@ -94,6 +94,17 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		dataSetsIndexer.index(ids);
 
 		return new DataSetIndexResponse(true, "Indexing started");
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/menu/admin/dataindexer/index/status", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public DataSetIndexResponse indexingStatus() {
+		if (dataSetsIndexer.isIndexingRunning())
+		{
+			return new DataSetIndexResponse(true, "Indexer is running..");
+		} else {
+			return new DataSetIndexResponse(false, "Indexer is finished!");
+		}
 	}
 
 	@ExceptionHandler(DatabaseAccessException.class)

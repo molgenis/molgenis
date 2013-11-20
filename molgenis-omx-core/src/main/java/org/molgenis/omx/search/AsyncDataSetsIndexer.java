@@ -122,6 +122,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Async
 	public void index(List<Integer> dataSetIds)
 	{
+		System.out.println("1 TEST --- index: " + dataSetIds);
 		while (isIndexingRunning())
 		{
 			try
@@ -133,20 +134,22 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				throw new RuntimeException(e);
 			}
 		}
+		
+		System.out.println("2 TEST --- index: " + dataSetIds);
 
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
+			System.out.println("3 TEST --- index: " + dataSetIds);
 			List<DataSet> dataSets = unsecuredDatabase.query(DataSet.class).in(DataSet.ID, dataSetIds).find();
 
 			for (DataSet dataSet : dataSets)
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unsecuredDatabase));
-				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-						new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
-				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
-						new CategoryTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+				searchService.indexTupleTable("protocolTree-" + dataSet.getId(), new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+				searchService.indexTupleTable("featureCategory-" + dataSet.getId(), new CategoryTable(dataSet.getProtocolUsed(), unsecuredDatabase));
 			}
+			System.out.println("4 TEST --- index: " + dataSetIds);
 		}
 		catch (Exception e)
 		{
@@ -155,6 +158,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		finally
 		{
 			runningIndexProcesses.decrementAndGet();
+			System.out.println("5 TEST --- index: " + dataSetIds);
 		}
 	}
 
