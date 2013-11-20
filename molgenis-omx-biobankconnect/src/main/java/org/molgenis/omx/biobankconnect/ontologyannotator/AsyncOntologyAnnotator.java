@@ -39,7 +39,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
-	private static boolean complete = false;
+	private boolean complete = false;
 
 	@Autowired
 	public void setSearchService(SearchService searchService)
@@ -266,7 +266,10 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			{
 				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer, positionFilter))
 				{
-					mapUriTerm.put(data.get("ontologyTermIRI").toString(), data);
+					String uri = data.get("ontologyTermIRI").toString();
+					String ontologyLabel = data.get("ontologyLabel").toString();
+					String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
+					mapUriTerm.put(termIdentifier, data);
 					addedCandidates.add(ontologyTermSynonym);
 				}
 			}
@@ -280,30 +283,31 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		if (mapUriTerm.size() > 0)
 		{
-			for (OntologyTerm ot : db.find(OntologyTerm.class, new QueryRule(OntologyTerm.TERMACCESSION, Operator.IN,
+			for (OntologyTerm ot : db.find(OntologyTerm.class, new QueryRule(OntologyTerm.IDENTIFIER, Operator.IN,
 					new ArrayList<String>(mapUriTerm.keySet()))))
-				mapUriTerm.remove(ot.getTermAccession());
+				mapUriTerm.remove(ot.getIdentifier());
 		}
 
 		List<OntologyTerm> listOfOntologyTerms = new ArrayList<OntologyTerm>();
 		Map<String, String> ontologyInfo = new HashMap<String, String>();
 
-		for (Entry<String, Map<String, Object>> entry : mapUriTerm.entrySet())
+		for (Map<String, Object> data : mapUriTerm.values())
 		{
-			String uri = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-
+			String uri = data.get("ontologyTermIRI").toString();
 			String ontologyUri = data.get("ontologyIRI").toString();
 			String ontologyName = data.get("ontologyName").toString();
 			ontologyInfo.put(ontologyUri, ontologyName);
 
 			String ontologyLabel = data.get("ontologyLabel").toString();
-			String term = ontologyLabel == null ? data.get("ontologyTerm").toString().toLowerCase() : ontologyLabel
-					+ ":" + data.get("ontologyTerm").toString().toLowerCase();
+			String oontologyTermSynonym = data.get("ontologyTermSynonym").toString();
+			String term = ontologyLabel == null ? oontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
+					+ oontologyTermSynonym.toLowerCase();
+			String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
-			ot.setIdentifier(uri);
+			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);
 			ot.setName(term);
+			ot.setDefinition(oontologyTermSynonym);
 			ot.setOntology_Identifier(ontologyUri);
 
 			listOfOntologyTerms.add(ot);
@@ -346,13 +350,12 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			Set<String> positionFilter)
 	{
 		Set<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
-		Set<String> stemmedWords = new HashSet<String>();
 		for (String eachTerm : termsFromDescription)
 		{
 			if (!uniqueSets.contains(eachTerm)) return false;
 		}
 
-		for (String eachTerm : stemmedWords)
+		for (String eachTerm : termsFromDescription)
 		{
 			if (positionFilter.contains(eachTerm)) return false;
 			else positionFilter.add(eachTerm);

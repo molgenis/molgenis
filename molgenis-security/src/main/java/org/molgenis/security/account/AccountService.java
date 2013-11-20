@@ -16,24 +16,26 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class AccountService
 {
-	private static Logger logger = Logger.getLogger(AccountService.class);
+	private static final Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
 	public static final String ALL_USER_GROUP = "All Users";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
-	
+
 	@Autowired
 	private Database unsecuredDatabase;
 
@@ -45,6 +47,9 @@ public class AccountService
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
 	{
@@ -68,18 +73,18 @@ public class AccountService
 				throw new RuntimeException("unknown activation mode: " + getActivationMode());
 		}
 
-		
 		// create user
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
 		logger.debug("created user " + molgenisUser.getUsername());
 		unsecuredDatabase.add(molgenisUser);
 
-		//add user to group
+		// add user to group
 		Query<MolgenisGroup> groupQuery = unsecuredDatabase.query(MolgenisGroup.class);
 		groupQuery.equals(MolgenisGroup.NAME, ALL_USER_GROUP);
 		List<MolgenisGroup> allUserGroups = groupQuery.find();
-		if(allUserGroups.size() == 1){
+		if (allUserGroups.size() == 1)
+		{
 			MolgenisGroup group = allUserGroups.get(0);
 			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
 			molgenisGroupMember.setMolgenisGroup(group.getId());
@@ -123,6 +128,10 @@ public class AccountService
 			mailMessage.setText(createActivatedEmailText(molgenisUser, getAppName()));
 			mailSender.send(mailMessage);
 		}
+		else
+		{
+			throw new MolgenisUserException("Invalid activation code or account already activated.");
+		}
 	}
 
 	public void resetPassword(String userEmail) throws DatabaseException
@@ -130,9 +139,8 @@ public class AccountService
 		MolgenisUser molgenisUser = MolgenisUser.findByEmail(unsecuredDatabase, userEmail);
 		if (molgenisUser != null)
 		{
-			// TODO: make this mandatory (password that was sent is valid only once)
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
-			molgenisUser.setPassword(newPassword);
+			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
 			unsecuredDatabase.update(molgenisUser);
 
 			// send password reseted email to user
@@ -142,9 +150,13 @@ public class AccountService
 			mailMessage.setText(createPasswordResettedEmailText(newPassword));
 			mailSender.send(mailMessage);
 		}
+		else
+		{
+			throw new MolgenisUserException("Invalid email address.");
+		}
 	}
 
-	private ActivationMode getActivationMode()
+	public ActivationMode getActivationMode()
 	{
 		String activationModeStr = molgenisSettings.getProperty(KEY_PLUGIN_AUTH_ACTIVATIONMODE);
 		return ActivationMode.from(activationModeStr, DEFAULT_ACTIVATION_MODE);
@@ -185,7 +197,7 @@ public class AccountService
 		return molgenisSettings.getProperty(KEY_APP_NAME, DEFAULT_APP_NAME);
 	}
 
-	private static enum ActivationMode
+	static enum ActivationMode
 	{
 		ADMIN, USER;
 

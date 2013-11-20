@@ -10,6 +10,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.protocol.CategoryTable;
 import org.molgenis.omx.protocol.ProtocolTable;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,6 +71,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unsecuredDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
+						new CategoryTable(dataSet.getProtocolUsed(), unsecuredDatabase));
 			}
 		}
 		catch (Exception e)
@@ -141,6 +144,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, unsecuredDatabase));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), unsecuredDatabase));
+				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
+						new CategoryTable(dataSet.getProtocolUsed(), unsecuredDatabase));
 			}
 		}
 		catch (Exception e)

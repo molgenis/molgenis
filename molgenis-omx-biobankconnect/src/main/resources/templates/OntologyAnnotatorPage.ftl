@@ -56,7 +56,7 @@
 			var molgenis = window.top.molgenis;
 			molgenis.getOntologyAnnotator().changeDataSet('${wizard.selectedDataSet.id?c}');
 			molgenis.getOntologyAnnotator().searchOntologies();
-			
+			molgenis.setContextURL('${context_url}');
 			$('#toggle-select').click(function(){
 				if($(this).hasClass('select-all')){
 					$('#ontology-list').find('input').empty().attr('checked', false);

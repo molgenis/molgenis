@@ -16,10 +16,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -70,6 +73,9 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
+	
+	@Autowired
 	private Database database;
 
 	@Autowired
@@ -94,6 +100,12 @@ public class DataExplorerController extends MolgenisPluginController
 	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
 			throws Exception
 	{
+		//set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the plugin
+		if(molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)||
+			molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE)){		
+			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
+		}
+		
 		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
 		model.addAttribute("dataSets", dataSets);
 

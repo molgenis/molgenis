@@ -22,6 +22,10 @@
 	margin-bottom: 8px;
 }
 
+#table-protocol-container{
+	overflow: auto;
+}
+
 .table thead th {
 	background-color: #5B82A4;
 	color: white;
@@ -35,6 +39,11 @@
 .table-protocol td.first {
     border-left: none;
     font-weight: bold;
+}
+
+.show-popover {
+	cursor: hand;
+	cursor: pointer;
 }
 
 .accordion-group {

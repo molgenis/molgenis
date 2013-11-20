@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -19,8 +20,10 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.MolgenisPasswordEncoder;
+import org.molgenis.security.account.AccountService.ActivationMode;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -61,7 +64,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
 		freeMarkerViewResolver.setSuffix(".ftl");
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
-				.setMessageConverters(new FormHttpMessageConverter()).build();
+				.setMessageConverters(new FormHttpMessageConverter(), new GsonHttpMessageConverter()).build();
 
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
@@ -90,18 +93,40 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser() throws Exception
 	{
-		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("redirect:http://localhost"));
+		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("forward:/"));
 		verify(accountService).activateUser("123");
 	}
 
 	@Test
-	public void registerUser() throws Exception
+	public void registerUser_activationModeUser() throws Exception
 	{
-		this.mockMvc.perform(
-				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
-						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
-						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
-						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		this.mockMvc
+				.perform(
+						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+								.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
+								.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
+								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+	}
+
+	@Test
+	public void registerUser_activationModeAdmin() throws Exception
+	{
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.ADMIN);
+		this.mockMvc
+				.perform(
+						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+								.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
+								.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
+								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN + "\"}"));
 	}
 
 	@Test

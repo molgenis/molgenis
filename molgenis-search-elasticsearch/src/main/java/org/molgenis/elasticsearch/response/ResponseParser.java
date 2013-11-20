@@ -43,9 +43,9 @@ public class ResponseParser
 		}
 
 		List<Hit> searchHits = new ArrayList<Hit>();
-		long totalCount = response.hits().totalHits();
+		long totalCount = response.getHits().totalHits();
 
-		for (SearchHit hit : response.hits().hits())
+		for (SearchHit hit : response.getHits().hits())
 		{
 			Map<String, Object> columnValueMap = new LinkedHashMap<String, Object>();
 
