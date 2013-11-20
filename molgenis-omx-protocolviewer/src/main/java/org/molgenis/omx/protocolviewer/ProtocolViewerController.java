@@ -31,6 +31,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.common.collect.Lists;
+
 @Controller
 @RequestMapping(URI)
 public class ProtocolViewerController extends MolgenisPluginController
@@ -63,13 +65,12 @@ public class ProtocolViewerController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model) throws DatabaseException
 	{
-		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.ACTIVE, true));
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.ACTIVE, true));
 
 		// create new model
 		ProtocolViewer protocolViewer = new ProtocolViewer();
 		protocolViewer.setAuthenticated(SecurityUtils.currentUserIsAuthenticated());
-		protocolViewer.setDataSets(dataSets);
+		protocolViewer.setDataSets(Lists.newArrayList(dataSets));
 
 		protocolViewer.setEnableDownloadAction(molgenisSettings.getBooleanProperty(KEY_ACTION_DOWNLOAD,
 				DEFAULT_KEY_ACTION_DOWNLOAD));
@@ -140,8 +141,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 			throws DatabaseException
 	{
 		if (featureIds == null || featureIds.isEmpty()) return null;
-
-		return dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
+		Iterable<ObservableFeature> it = dataService.findAll(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().in(ObservableFeature.ID, featureIds));
+		return it != null ? Lists.newArrayList(it) : null;
 	}
 }
