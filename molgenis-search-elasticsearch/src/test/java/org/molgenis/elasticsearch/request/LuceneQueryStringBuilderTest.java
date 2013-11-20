@@ -64,6 +64,7 @@ public class LuceneQueryStringBuilderTest
 		assertEquals(escapeValue("*"), "\\*");
 		assertEquals(escapeValue("?"), "\\?");
 		assertEquals(escapeValue("\\"), "\\\\");
+		assertEquals(escapeValue("/"), "\\/");
 		assertEquals(escapeValue(":"), "\\:");
 		assertEquals(escapeValue("&"), "\\&");
 	}
