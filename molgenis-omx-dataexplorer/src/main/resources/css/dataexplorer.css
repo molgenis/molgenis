@@ -242,35 +242,16 @@ input[type=number] {
 	height: 26px;
 	float: left;
 	width: 90px;
-	
-	border-radius: 3px;
-	margin-left:5px
 }
 
 #feature-select {
 	padding-bottom: 20px;
 }
 
-#switchview {
-	
-	border-radius: 3px;
-}
-
 #nrOfDataItems {
 	font-style: italic;
 	margin-bottom: 8px;
 	margin-top: 4px;
-}
-
-.notselected {
-	border: none;
-	background: #F5F5F5;
-	color: #C0C0C0;
-}
-
-.selected {
-	box-shadow: 1px 1px 8px black;
-	color: black;
 }
 
 #filter-dialog-modal .modal-body{

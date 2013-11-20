@@ -1,32 +1,35 @@
 package org.molgenis.dataexplorer.controller;
 
+import javax.validation.constraints.NotNull;
+
 public class FilterWizardRequest
 {
 
-	private final String datasetIdentifier;
-	private final String datasetName;
-	private final String datasetId;
+	private final String dataSetIdentifier;
+	private final String dataSetName;
+	private final String dataSetId;
 
-	public FilterWizardRequest(String datasetIdentifier, String datasetName, String datasetId)
+	@NotNull
+	public FilterWizardRequest(String dataSetIdentifier, String dataSetName, String dataSetId)
 	{
-		this.datasetIdentifier = datasetIdentifier;
-		this.datasetName = datasetIdentifier;
-		this.datasetId = datasetId;
+		this.dataSetIdentifier = dataSetIdentifier;
+		this.dataSetName = dataSetIdentifier;
+		this.dataSetId = dataSetId;
 	}
 
-	public String getDatasetId()
+	public String getDataSetId()
 	{
-		return datasetId;
+		return dataSetId;
 	}
 
-	public String getDatasetIdentifier()
+	public String getDataSetIdentifier()
 	{
-		return datasetIdentifier;
+		return dataSetIdentifier;
 	}
 
-	public String getDatasetName()
+	public String getDataSetName()
 	{
-		return datasetName;
+		return dataSetName;
 	}
 
 }

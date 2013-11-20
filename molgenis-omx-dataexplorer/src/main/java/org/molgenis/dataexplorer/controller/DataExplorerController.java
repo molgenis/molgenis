@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -258,12 +260,14 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	public String filterwizard(@RequestBody
+	@Valid
+	@NotNull
 	FilterWizardRequest request, Model model)
 	{
 		List<Protocol> listOfallProtocols = null;
 
 		DataSet dataSet;
-		String dataSetIdentifier = request.getDatasetIdentifier();
+		String dataSetIdentifier = request.getDataSetIdentifier();
 		try
 		{
 			dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
