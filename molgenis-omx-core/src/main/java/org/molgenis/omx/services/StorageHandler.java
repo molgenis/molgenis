@@ -7,11 +7,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.List;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.DetectOS;
@@ -343,31 +342,8 @@ public class StorageHandler
 	 */
 	private RuntimeProperty getRuntimeProperty(String propName, DataService dataService) throws DatabaseException
 	{
-		QueryRule name = new QueryRule(RuntimeProperty.NAME, Operator.EQUALS, propName);
-		List<RuntimeProperty> rpList = null;
-		try
-		{
-			rpList = dataService.findAllAsList(RuntimeProperty.ENTITY_NAME, name);
-		}
-		catch (Exception e)
-		{
-			// maybe database or table does not exist yet
-			// or db.find comes up null
-			return null;
-		}
-
-		if (rpList.size() == 0)
-		{
-			return null;
-		}
-		else if (rpList.size() == 1)
-		{
-			return rpList.get(0);
-		}
-		else
-		{
-			throw new DatabaseException("SEVERE: RuntimeProperty name '" + propName + "' not unique");
-		}
+		Query q = new QueryImpl().eq(RuntimeProperty.NAME, propName);
+		return dataService.findOne(RuntimeProperty.NAME, q);
 	}
 
 	/**

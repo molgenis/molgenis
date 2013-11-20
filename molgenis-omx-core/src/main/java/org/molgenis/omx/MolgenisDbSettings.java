@@ -1,12 +1,9 @@
 package org.molgenis.omx;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
@@ -37,8 +34,8 @@ public class MolgenisDbSettings implements MolgenisSettings
 	@RunAsSystem
 	public String getProperty(String key, String defaultValue)
 	{
-		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-				RuntimeProperty.class.getSimpleName() + '_' + key);
+		Query propertyRule = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_'
+				+ key);
 
 		RuntimeProperty property;
 		try
@@ -104,15 +101,12 @@ public class MolgenisDbSettings implements MolgenisSettings
 			throw new IllegalArgumentException("content is null");
 		}
 
-		QueryRule propertyRule = new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-				RuntimeProperty.class.getSimpleName() + '_' + key);
-
+		Query query = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_' + key);
 		try
 		{
-			List<RuntimeProperty> properties = dataService.findAllAsList(RuntimeProperty.ENTITY_NAME, propertyRule);
-			if (null != properties && !properties.isEmpty() && properties.size() == 1)
+			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query);
+			if (property != null)
 			{
-				RuntimeProperty property = properties.get(0);
 				property.setValue(content);
 				dataService.update(RuntimeProperty.ENTITY_NAME, property);
 				return true;
