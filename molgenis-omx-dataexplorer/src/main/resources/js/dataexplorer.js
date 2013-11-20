@@ -630,7 +630,7 @@
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
 		molgenis.updateObservationSetsTable();
-		if($('#selectFeature').val()!=null){
+		if ($('#selectFeature').val() != null) {
 			molgenis.loadAggregate($('#selectFeature').val());
 		}
 	};
@@ -753,6 +753,8 @@
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
 			searchRequest.fieldsToReturn.push(feature.identifier);
+			if(feature.dataType === 'xref' || feature.dataType === 'mref')
+				searchRequest.fieldsToReturn.push("key-" + feature.identifier);
 		});
 
 		return searchRequest;
@@ -793,11 +795,13 @@
 			var searchHits = searchResponse.searchHits;
 			var selectTag = $('<select id="selectFeature"/>');
 		
+			if(searchHits.length === 0)  selectTag.attr('disabled', 'disabled');
+			
 			$.each(searchHits, function(index, hit){
 				selectTag.append('<option value=' + hit.columnValueMap.id + '>' + hit.columnValueMap.name + '</option>');
-			});			
+			});
 			$('#feature-select').empty().append(selectTag);
-			molgenis.loadAggregate(selectTag.val());
+			if(searchHits.length > 0) molgenis.loadAggregate(selectTag.val());
 			selectTag.chosen();
 			selectTag.change(function() {
 				molgenis.loadAggregate($(this).val());
@@ -866,6 +870,7 @@
 		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
 	};
+<<<<<<< HEAD
 	
 	molgenis.toggleViewer = function(statusDataViewer){
 		if(statusDataViewer){
@@ -890,6 +895,9 @@
 		}
 	};
 	
+=======
+		
+>>>>>>> a9082e1cdff9655ab77e2c2170fb5cf7d2e4017a
 	// on document ready
 	$(function() {
 		// use chosen plugin for data set select
@@ -907,22 +915,7 @@
 		});
 		
 		resultsTable = new molgenis.ResultsTable();
-		
-		$('#data').click(function (){
-			molgenis.toggleViewer(true);
-			molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
-		});
-		
-		$('#filter-wizard-button').click(function (){
-			molgenis.filterDialog();
-		});
-		
-		
-		$('#aggregateViewIcon').attr("src","/img/aggregate-icon-notselected.png");
-		$('#aggregateDiv').css({"color":"#C0C0C0"});
-		
-		$('#aggregate').click(function (){	
-			molgenis.toggleViewer(false);
+		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('shown', function (e) {
 			molgenis.initializeAggregate($('#dataset-select').val());
 			molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
 		});

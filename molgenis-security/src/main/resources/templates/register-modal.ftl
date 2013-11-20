@@ -188,8 +188,8 @@
 		            type: 'POST',
 		            url:  '/account/register',
 		            data: form.serialize(),
-		            success: function () {
-		            	$(document).trigger('molgenis-registered', 'You have successfully registered');
+		            success: function (data) {
+		            	$(document).trigger('molgenis-registered', data.message);
 		        		modal.modal('hide');
 		            },
 		            error: function(xhr) {

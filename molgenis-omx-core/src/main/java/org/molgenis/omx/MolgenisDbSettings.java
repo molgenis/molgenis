@@ -114,8 +114,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 			if (null != properties && !properties.isEmpty() && properties.size() == 1) {
 				RuntimeProperty property = properties.get(0);
 				property.setValue(content);
-				int result = unsecuredDatabase.update(property);
-				logger.info("result: " + result);
+				unsecuredDatabase.update(property);
 				return true;
 			}
 		}

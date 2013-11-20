@@ -105,13 +105,39 @@
 </div>
 <#macro createInput type value readonly>
 	<#if type?upper_case == 'BOOL'>
-		<input type="checkbox"<#if value?? && value> checked</#if><#if readonly> disabled</#if>>
+		<input type="checkbox"<#if value??> checked</#if><#if readonly> disabled</#if>>
 	<#elseif type?upper_case == 'STRING'>
 		<input type="text"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
 	<#elseif type?upper_case == 'XREF'>
 		<input type="text"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
 	<#elseif type?upper_case == 'MREF'>
 		<input type="text"<#if value??> value="<#if value?is_sequence><#list value as subValue><#if subValue_index &gt; 0>, </#if>${subValue}</#list><#else>${value}</#if>"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'DATE'>
+		<input type="date"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'INT'>
+		<input type="int"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'CATEGORICAL'>
+		<select><option <#if value??> value="${value}"</#if><#if readonly> disabled</#if>></option></select>
+	<#elseif type?upper_case == 'DATETIME'>
+		<input type="datetime"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'DECIMAL'>
+		<input type="number" step="any"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'EMAIL'>
+		<input type="email"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'ENUM'>
+		<select><option <#if value??> value="${value}"</#if><#if readonly> disabled</#if>></option></select>
+	<#elseif type?upper_case == 'FILE'>
+		<input type="file"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'HTML'>
+		<input type="text"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'HYPERLINK'>
+		<input type="url"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'IMAGE'>
+		<input type="image"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'LONG'>
+		<input type="number" min="0" step="1" pattern="\d+"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
+	<#elseif type?upper_case == 'TEXT'>
+		<input type="text"<#if value??> value="${value}"</#if><#if readonly> disabled</#if>>
 	<#else>
 		<span>ERROR: type ${type} not supported</span>
 	</#if>

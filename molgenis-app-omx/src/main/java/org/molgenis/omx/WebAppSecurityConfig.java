@@ -23,7 +23,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
-	
+
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
@@ -36,22 +36,23 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// main menu
 				.antMatchers("/menu/main")
 				.hasAnyAuthority(
-						defaultPluginAuthorities("home", "background", "news", "references", "contact", "protocolviewer", "dataexplorer", "entityexplorer",
-								"workflowdataentry", "importwizard", "useraccount"))
+						defaultPluginAuthorities("home", "background", "news", "references", "contact",
+								"protocolviewer", "dataexplorer", "entityexplorer", "workflowdataentry",
+								"importwizard", "useraccount", "mappingmanager", "biobankconnect", "evaluation"))
 
-				 //main menu plugins
+				// main menu plugins
 				.antMatchers("/menu/main/home/**", "/plugin/home/**")
 				.hasAnyAuthority(defaultPluginAuthorities("home"))
-				
+
 				.antMatchers("/menu/main/news/**", "/plugin/news/**")
 				.hasAnyAuthority(defaultPluginAuthorities("news"))
-				
+
 				.antMatchers("/menu/main/background/**", "/plugin/background/**")
 				.hasAnyAuthority(defaultPluginAuthorities("background"))
-				
+
 				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
 				.hasAnyAuthority(defaultPluginAuthorities("contact"))
-				
+
 				.antMatchers("/menu/main/references/**", "/plugin/references/**")
 				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
@@ -78,6 +79,18 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
 				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
+
+				.antMatchers("/menu/main/biobankconnect/**", "/plugin/biobankconnect/**")
+				.hasAnyAuthority(defaultPluginAuthorities("biobankconnect"))
+
+				.antMatchers("/menu/main/mappingmanager/**", "/plugin/mappingmanager/**")
+				.hasAnyAuthority(defaultPluginAuthorities("mappingmanager"))
+
+				.antMatchers("/menu/main/evaluation/**", "/plugin/evaluation/**")
+				.hasAnyAuthority(defaultPluginAuthorities("evaluation"))
+
+				.antMatchers("/menu/main/ontologyindexer/**", "/plugin/ontologyindexer/**")
+				.hasAnyAuthority(defaultPluginAuthorities("ontologyindexer"))
 
 				// converters menu
 				.antMatchers("/menu/converters")
@@ -209,7 +222,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
-				// DAS datasource uses the database, unautheticated users can not see any data
+				// DAS datasource uses the database, unautheticated users can
+				// not see any data
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll();
@@ -218,7 +232,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	protected List<GrantedAuthority> createAnonymousUserAuthorities()
 	{
-		String s = getPluginReadAuthority("home");		
+		String s = getPluginReadAuthority("home");
 		return AuthorityUtils.createAuthorityList(s);
 	}
 

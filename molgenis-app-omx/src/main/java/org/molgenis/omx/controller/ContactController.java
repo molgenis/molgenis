@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping(URI)
-public class ContactController extends AbstractStaticContectController
+public class ContactController extends AbstractStaticContentController
 {
 	public static final String ID = "contact";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;

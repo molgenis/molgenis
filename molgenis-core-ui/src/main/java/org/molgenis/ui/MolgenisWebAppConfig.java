@@ -199,7 +199,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
-
+		result.setDefaultEncoding("UTF-8");
 		return result;
 
 	}

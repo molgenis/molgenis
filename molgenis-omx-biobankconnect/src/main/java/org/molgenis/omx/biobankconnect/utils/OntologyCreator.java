@@ -13,6 +13,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -51,6 +52,24 @@ public class OntologyCreator
 	{
 		if (parentClass == null) parentClass = factory.getOWLThing();
 		manager.applyChange(new AddAxiom(ontology, factory.getOWLSubClassOfAxiom(cls, parentClass)));
+	}
+
+	public void addSynonym(OWLClass cls, String synonym)
+	{
+		OWLAnnotationProperty property = factory.getOWLAnnotationProperty(IRI
+				.create("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN"));
+		OWLAnnotation commentAnno = factory.getOWLAnnotation(property, factory.getOWLLiteral(synonym, "en"));
+		OWLAxiom ax = factory.getOWLAnnotationAssertionAxiom(cls.getIRI(), commentAnno);
+		manager.applyChange(new AddAxiom(ontology, ax));
+	}
+
+	public void addLabel(OWLClass cls, String label)
+	{
+		OWLAnnotationProperty property = factory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI());
+		OWLAnnotation commentAnno = factory.getOWLAnnotation(property, factory.getOWLLiteral(label, "en"));
+		OWLAxiom ax = factory.getOWLAnnotationAssertionAxiom(cls.getIRI(), commentAnno);
+		manager.applyChange(new AddAxiom(ontology, ax));
+
 	}
 
 	public OWLClass createOWLClass(String URI)

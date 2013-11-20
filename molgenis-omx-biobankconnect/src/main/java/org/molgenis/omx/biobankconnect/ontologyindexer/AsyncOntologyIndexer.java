@@ -1,14 +1,20 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
+import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.OntologyTable;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermTable;
+import org.molgenis.omx.observ.target.Ontology;
+import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.SearchService;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.InitializingBean;
@@ -73,6 +79,26 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 
 	public void removeOntology(String ontologyURI)
 	{
+		try
+		{
+			List<Ontology> ontologies = database.find(Ontology.class, new QueryRule(Ontology.IDENTIFIER,
+					Operator.EQUALS, ontologyURI));
+			if (ontologies.size() > 0)
+			{
+				for (Ontology ontology : ontologies)
+				{
+					List<OntologyTerm> ontologyTerms = database.find(OntologyTerm.class, new QueryRule(
+							OntologyTerm.ONTOLOGY_IDENTIFIER, Operator.EQUALS, ontology.getIdentifier()));
+
+					if (ontologyTerms.size() > 0) database.remove(ontologyTerms);
+				}
+				database.remove(ontologies);
+			}
+		}
+		catch (DatabaseException e)
+		{
+			new RuntimeException(e);
+		}
 		searchService.deleteDocumentsByType("ontology-" + ontologyURI);
 		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyURI);
 	}

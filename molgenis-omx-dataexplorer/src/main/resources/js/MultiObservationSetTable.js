@@ -60,15 +60,18 @@
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
 					if (feature.dataType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + formatTableCellValue(value, feature.dataType); + '">' 
-							+ htmlEscape(value) + '</a>';
+						var valueKey = columnValueMap['key-' + feature.identifier];
+						var valueValue = formatTableCellValue(value, feature.dataType);
+						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
 					}	
 					else if (feature.dataType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						var elements = value.split(',');
-						for (var i = 0; i < elements.length; i++) {
-							var element = elements[i].replace(/\s/g, '');
-						    if(i>0) cellValue += ",";
-						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=' + feature.identifier + '&identifier=' + element + '">' + htmlEscape(element) + '</a>';
+						var valueKeys = columnValueMap['key-' + feature.identifier];
+						var valueValues = value.split(',');
+						for (var i = 0; i < valueValues.length; i++) {
+							var valueKey = valueKeys[i];
+							var valueValue = formatTableCellValue(valueValues[i], feature.dataType);
+						    if(i > 0) cellValue +=  ',';
+						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
 						}
 					}
 					else{
