@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -31,6 +33,8 @@ import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -100,9 +104,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public String init(@RequestParam(value = "dataset", required = false)
 	String selectedDataSetIdentifier, Model model) throws Exception
 	{
-		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.ACTIVE, true));
-
 		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
 		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
@@ -110,6 +111,9 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
+
+		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.ACTIVE, true));
 
 		model.addAttribute("dataSets", dataSets);
 
@@ -262,6 +266,22 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		return new AggregateResponse(hashCounts);
 
+	}
+
+	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public String filterwizard(@RequestBody
+	@Valid
+	@NotNull
+	FilterWizardRequest request, Model model)
+	{
+		String dataSetIdentifier = request.getDataSetIdentifier();
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
+
+		model.addAttribute("listOfallProtocols", listOfallProtocols);
+		model.addAttribute("identifier", dataSetIdentifier);
+		return "view-filter-dialog";
 	}
 
 	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException

@@ -33,7 +33,7 @@ public class MeshLoaderApp
 			MeshLoader loader = new MeshLoader(new File(args[0]));
 			MeshTerm topNode = loader.getTopNode();
 			OntologyCreator creator = new OntologyCreator(PREFIX);
-			for (String path : Arrays.asList("J02", "G07.610.240", "F01.145.928", "F01.145.317"))
+			for (String path : Arrays.asList("J02", "D26.255", "G07.610.240", "F01.145.928", "F01.145.317"))
 			{
 				recursiveVisit(topNode.get(path), creator);
 			}
