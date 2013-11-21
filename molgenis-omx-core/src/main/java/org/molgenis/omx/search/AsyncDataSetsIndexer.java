@@ -70,7 +70,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 			for (DataSet dataSet : dataSets)
 			{
-				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService, new JDBCMetaDatabase()));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
@@ -146,7 +146,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 			for (DataSet dataSet : dataSets)
 			{
-				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService));
+				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService, new JDBCMetaDatabase()));
 				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
