@@ -27,6 +27,11 @@ public class JpaEntitySourceGen extends Generator
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
 	{
+		if (options.generate_tests)
+		{
+			return;
+		}
+
 		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
 		Map<String, Object> templateArgs = createTemplateArguments(options);
 
