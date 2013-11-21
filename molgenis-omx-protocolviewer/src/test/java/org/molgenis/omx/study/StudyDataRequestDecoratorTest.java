@@ -12,12 +12,12 @@ import java.util.List;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.Database.DatabaseAction;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ApplicationContextProvider;
@@ -164,7 +164,7 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).add(userStudyDataRequest);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void add_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -195,14 +195,14 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).add(Collections.singletonList(userStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void addIterable_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.add(Collections.singletonList(adminStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void addIterable_UserNotAllowedSome()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -233,7 +233,7 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).update(userStudyDataRequest);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void update_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -264,14 +264,14 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void updateIterable_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void updateIterable_UserNotAllowedSome()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -302,14 +302,14 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void updateList_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void updateList_UserNotAllowedSome()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -385,7 +385,7 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).findOne(exampleUserId);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void findOne_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -416,14 +416,14 @@ public class StudyDataRequestDecoratorTest
 		assertEquals(entities, Arrays.asList(userStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void findAllIterable_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.findAll(exampleAdminIds);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void findAllIterable_UserNotAllowedSome()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -454,7 +454,7 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).delete(userStudyDataRequest);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void delete_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -485,14 +485,14 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).delete(Collections.singletonList(userStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteIterable_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.delete(Collections.singletonList(adminStudyDataRequest));
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteIterable_UserNotAllowedSome()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -523,7 +523,7 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).deleteById(exampleUserId);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteById_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
@@ -554,14 +554,14 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).deleteById(exampleUserIds);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteByIdIterable_UserNotAllowed()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		studyDataRequestDecorator.deleteById(exampleAdminIds);
 	}
 
-	@Test(expectedExceptions = DatabaseAccessException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteByIdIterable_UserNotAllowedSome()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);

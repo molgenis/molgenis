@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.molgenis.controller.${entity.name}ControllerTest.${entity.name}ControllerConfig;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
 import ${entity.namespace}.${entity.name};
 import org.molgenis.service.${entity.name}Service;
@@ -101,7 +101,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void retrieveEntity_forbidden() throws Exception
 	{
-		when(${entity.name?uncap_first}Service.read(2)).thenThrow(new MolgenisDataException("Access denied"));
+		when(${entity.name?uncap_first}Service.read(2)).thenThrow(new MolgenisDataAccessException("Access denied"));
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 	
@@ -112,7 +112,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	public void retrieveEntityXref${field.name?cap_first}() throws Exception
 	{
 		${field.xrefEntity.namespace}.${field.xrefEntity.name} ${field.xrefEntity.name?uncap_first}Xref = new ${field.xrefEntity.namespace}.${field.xrefEntity.name}();
-		${field.xrefEntity.name?uncap_first}Xref.set${field.xrefEntity.primaryKey.name?cap_first}(1);
+		${field.xrefEntity.name?uncap_first}Xref.set${field.xrefEntity.primaryKey.name?cap_first}(0);
 		${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
 		${entity.name?uncap_first}.set${field.name?cap_first}(${field.xrefEntity.name?uncap_first}Xref);
 		when(${entity.name?uncap_first}Service.read(0)).thenReturn(${entity.name?uncap_first});
@@ -124,7 +124,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void retrieveEntityCollection_forbidden() throws Exception
 	{
-		when(${entity.name?uncap_first}Service.readAll(Matchers.any(${type(entity.primaryKey)}.class), Matchers.any(${type(entity.primaryKey)}.class), Matchers.<List<QueryRule>>any())).thenThrow(new MolgenisDataException("Access denied"));
+		when(${entity.name?uncap_first}Service.readAll(Matchers.any(${type(entity.primaryKey)}.class), Matchers.any(${type(entity.primaryKey)}.class), Matchers.<List<QueryRule>>any())).thenThrow(new MolgenisDataAccessException("Access denied"));
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}").accept(MediaType.APPLICATION_JSON)).andExpect(status().isUnauthorized());
 	}
 	
@@ -138,7 +138,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void deleteEntity_unauthorized() throws Exception
 	{
-		doThrow(new MolgenisDataException("Access denied")).when(${entity.name?uncap_first}Service).deleteById(5);
+		doThrow(new MolgenisDataAccessException("Access denied")).when(${entity.name?uncap_first}Service).deleteById(5);
 		this.mockMvc.perform(delete("/api/v1/${entity.name?lower_case}/5")).andExpect(status().isUnauthorized());
 	}
 
@@ -152,7 +152,7 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void deleteEntityPOST_unauthorized() throws Exception
 	{
-		doThrow(new MolgenisDataException("Access denied")).when(${entity.name?uncap_first}Service).deleteById(8);
+		doThrow(new MolgenisDataAccessException("Access denied")).when(${entity.name?uncap_first}Service).deleteById(8);
 		this.mockMvc.perform(post("/api/v1/${entity.name?lower_case}/8?_method=DELETE")).andExpect(status().isUnauthorized());
 	}
 			
