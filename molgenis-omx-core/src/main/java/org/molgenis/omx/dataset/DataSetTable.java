@@ -43,17 +43,17 @@ public class DataSetTable extends AbstractFilterableTupleTable
 	private List<Field> columns;
 	private final JDBCMetaDatabase jdbcMetaDatabase;
 
-	public DataSetTable(DataSet set, DataService dataService) throws TableException, DatabaseException
+	public DataSetTable(DataSet set, DataService dataService, JDBCMetaDatabase jdbcMetaDatabase) throws TableException,
+			DatabaseException
 	{
 		if (set == null) throw new TableException("DataSet cannot be null");
 		if (dataService == null) throw new TableException("DataService cannot be null");
-
+		if (jdbcMetaDatabase == null) throw new TableException("JDBCMetaDatabase cannot be null");
 		this.dataSet = set;
 		this.dataService = dataService;
+		this.jdbcMetaDatabase = jdbcMetaDatabase;
 
 		setFirstColumnFixed(true);
-
-		jdbcMetaDatabase = new JDBCMetaDatabase();
 	}
 
 	public DataSet getDataSet()
