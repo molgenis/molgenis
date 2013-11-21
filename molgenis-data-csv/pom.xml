@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>0.0.3</version>
+		<version>0.0.4</version>
 	</parent>
 	<artifactId>molgenis-data-csv</artifactId>
 
@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
-			<version>0.0.3</version>
+			<version>0.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
