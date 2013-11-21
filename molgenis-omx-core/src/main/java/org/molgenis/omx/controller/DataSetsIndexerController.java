@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
@@ -18,7 +17,6 @@ import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -69,8 +67,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public DataSetIndexResponse index(@RequestBody
-	DataSetIndexRequest request) throws UnsupportedEncodingException
+	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
 		List<String> dataSetIds = request.getSelectedDataSets();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())
@@ -95,12 +92,6 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		dataSetsIndexer.index(ids);
 
 		return new DataSetIndexResponse(true, "Indexing started");
-	}
-
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
 	}
 
 	static class DataSetIndexRequest

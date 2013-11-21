@@ -19,9 +19,9 @@ import org.apache.log4j.Logger;
 import ${entity.namespace}.${JavaName(entity)};
 import org.molgenis.framework.server.EntityCollectionRequest;
 import org.molgenis.framework.server.EntityCollectionResponse;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.service.${entity.name}Service;
 <#assign javaImports = ["${entity.name}"]>
@@ -586,15 +586,14 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		e.printStackTrace();
 		logger.error(e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(DatabaseAccessException.class)
+	@ExceptionHandler(MolgenisDataAccessException.class)
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
 	@ResponseBody
-	public ErrorMessageResponse handleDatabaseAccessException(DatabaseAccessException e)
+	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 		logger.info(e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
@@ -605,7 +604,6 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		e.printStackTrace();
 		logger.error(e);		
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}

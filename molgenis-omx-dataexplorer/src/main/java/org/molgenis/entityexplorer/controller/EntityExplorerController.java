@@ -14,7 +14,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -23,7 +22,6 @@ import org.molgenis.omx.observ.Characteristic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,10 +56,9 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(required = false)
-	String entity, @RequestParam(required = false)
-	String identifier, @RequestParam(required = false)
-	String query, Model model) throws Exception
+	public String init(@RequestParam(required = false) String entity,
+			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
+			throws Exception
 	{
 		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
@@ -148,11 +145,5 @@ public class EntityExplorerController extends MolgenisPluginController
 		}
 
 		return "view-entityexplorer";
-	}
-
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
 	}
 }
