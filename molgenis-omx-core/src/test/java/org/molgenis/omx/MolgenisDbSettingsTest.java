@@ -35,25 +35,24 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public DataService dataService()
 		{
-
 			DataService dataservice = mock(DataService.class);
-			Query q;
-
-			q = new QueryImpl();
-			q.eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + "_property0");
+			Query q = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName()
+					+ "_property0");
 			RuntimeProperty property0 = new RuntimeProperty();
 			property0.setValue("value0");
 			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property0);
 
-			q.eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + "_property1");
+			Query q1 = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName()
+					+ "_property1");
 			RuntimeProperty property1 = new RuntimeProperty();
-			property0.setValue("true");
-			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property1);
+			property1.setValue("true");
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q1)).thenReturn(property1);
 
-			q.eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + "_property0");
+			Query q2 = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName()
+					+ "_property2");
 			RuntimeProperty property2 = new RuntimeProperty();
-			property0.setValue("false");
-			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property2);
+			property2.setValue("false");
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q2)).thenReturn(property2);
 
 			return dataservice;
 		}
