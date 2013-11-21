@@ -5,12 +5,12 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
-import javax.persistence.EntityManager;
-
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.omx.observ.Characteristic;
 import org.testng.annotations.Test;
 
@@ -25,20 +25,22 @@ public class CharacteristicLoadingCacheTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void findCharacteristic() throws DatabaseException
+	public void findCharacteristic() throws DatabaseException, ExecutionException
 	{
-		Database database = mock(Database.class);
-		CharacteristicLoadingCache characteristicLoadingCache = new CharacteristicLoadingCache(database);
-		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
+		DataService dataService = mock(DataService.class);
 
+		CharacteristicLoadingCache characteristicLoadingCache = new CharacteristicLoadingCache(dataService);
+
+		Characteristic ch1 = mock(Characteristic.class);
+		when(ch1.getIdentifier()).thenReturn("ch1");
 		when(ch1.getId()).thenReturn(1);
-		Query<Characteristic> query = mock(Query.class);
-		when(database.query(Characteristic.class)).thenReturn(query);
-		when(query.eq(Characteristic.IDENTIFIER, "ch1")).thenReturn(query);
-		when(query.find()).thenReturn(Arrays.asList(ch1));
-		EntityManager em = mock(EntityManager.class);
-		when(database.getEntityManager()).thenReturn(em);
-		when(em.getReference(Characteristic.class, 1)).thenReturn(ch1);
+		when(dataService.findOne(Characteristic.ENTITY_NAME, new QueryImpl().eq(Characteristic.IDENTIFIER, "ch1")))
+				.thenReturn(ch1);
+		when(
+				dataService.findAllAsList(Characteristic.ENTITY_NAME,
+						new QueryImpl().in(Characteristic.IDENTIFIER, Arrays.asList("ch1")))).thenReturn(
+				Arrays.<Entity> asList(ch1));
+		when(dataService.findOne(Characteristic.ENTITY_NAME, 1)).thenReturn(ch1);
 
 		assertEquals(characteristicLoadingCache.findCharacteristic("ch1"), ch1);
 	}
@@ -47,23 +49,32 @@ public class CharacteristicLoadingCacheTest
 	@Test
 	public void findCharacteristics() throws DatabaseException
 	{
-		Database database = mock(Database.class);
-		CharacteristicLoadingCache characteristicLoadingCache = new CharacteristicLoadingCache(database);
-		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
-		Characteristic ch2 = when(mock(Characteristic.class).getName()).thenReturn("ch2").getMock();
+		DataService dataService = mock(DataService.class);
+		CharacteristicLoadingCache characteristicLoadingCache = new CharacteristicLoadingCache(dataService);
+		Characteristic ch1 = mock(Characteristic.class);
+		when(ch1.getIdentifier()).thenReturn("ch1");
 		when(ch1.getId()).thenReturn(1);
+
+		Characteristic ch2 = mock(Characteristic.class);
+		when(ch2.getIdentifier()).thenReturn("ch2");
 		when(ch2.getId()).thenReturn(2);
-		Query<Characteristic> query = mock(Query.class);
-		when(database.query(Characteristic.class)).thenReturn(query);
-		Query<Characteristic> query2 = mock(Query.class);
-		when(query.in(Characteristic.IDENTIFIER, Arrays.asList("ch1", "ch2"))).thenReturn(query2);
-		when(query2.find()).thenReturn(Arrays.asList(ch1, ch2));
-		EntityManager em = mock(EntityManager.class);
-		when(database.getEntityManager()).thenReturn(em);
-		when(em.getReference(Characteristic.class, 1)).thenReturn(ch1);
-		when(em.getReference(Characteristic.class, 2)).thenReturn(ch2);
+
+		when(dataService.findOne(Characteristic.ENTITY_NAME, new QueryImpl().eq(Characteristic.IDENTIFIER, "ch1")))
+				.thenReturn(ch1);
+
+		when(dataService.findOne(Characteristic.ENTITY_NAME, new QueryImpl().eq(Characteristic.IDENTIFIER, "ch2")))
+				.thenReturn(ch2);
+
+		when(
+				dataService.findAllAsList(Characteristic.ENTITY_NAME,
+						new QueryImpl().in(Characteristic.IDENTIFIER, Arrays.asList("ch1", "ch2")))).thenReturn(
+				Arrays.<Entity> asList(ch1, ch2));
+
+		when(dataService.findOne(Characteristic.ENTITY_NAME, 1)).thenReturn(ch1);
+		when(dataService.findOne(Characteristic.ENTITY_NAME, 2)).thenReturn(ch2);
 
 		assertEquals(characteristicLoadingCache.findCharacteristics(Arrays.asList("ch1", "ch2")),
 				Arrays.asList(ch1, ch2));
 	}
+
 }
