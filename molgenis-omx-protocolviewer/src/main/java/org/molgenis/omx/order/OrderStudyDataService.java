@@ -26,7 +26,7 @@ public interface OrderStudyDataService
 	 * @throws IOException
 	 */
 	void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds)
-			throws DatabaseException, MessagingException, IOException;
+			throws MessagingException, IOException;
 
 	/**
 	 * Returns order for the current user
@@ -34,7 +34,7 @@ public interface OrderStudyDataService
 	 * @return
 	 * @throws DatabaseException
 	 */
-	List<StudyDataRequest> getOrders() throws DatabaseException;
+	List<StudyDataRequest> getOrders();
 
 	/**
 	 * Returns the given order for the current user
@@ -43,5 +43,5 @@ public interface OrderStudyDataService
 	 * @return
 	 * @throws DatabaseException
 	 */
-	StudyDataRequest getOrder(Integer orderId) throws DatabaseException;
+	StudyDataRequest getOrder(Integer orderId);
 }
