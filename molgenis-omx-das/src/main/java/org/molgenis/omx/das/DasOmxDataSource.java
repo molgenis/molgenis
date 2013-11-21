@@ -98,7 +98,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		{
 			segmentId = segmentParts[0];
 			patient = segmentParts[1];
-			patientObject = findPatient(Integer.parseInt(patient));
+			patientObject = findPatient(patient);
 		}
 		if (maxbins == null) maxbins = -1;
 		List<Variant> variants = queryVariants(segmentId, start, stop, patientObject);
@@ -123,9 +123,9 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 
 	}
 
-	protected Patient findPatient(Integer patient)
+	protected Patient findPatient(String patient)
 	{
-		return dataService.findOne(Patient.ENTITY_NAME, patient);
+		return dataService.findOne(Patient.ENTITY_NAME, new QueryImpl().eq(Patient.IDENTIFIER, patient));
 	}
 
 	protected List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
