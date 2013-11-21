@@ -1,12 +1,13 @@
 package org.molgenis.ui.form;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.model.elements.Entity;
@@ -31,7 +32,7 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 	private MolgenisEntityFormPluginController molgenisEntityFormPluginController;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisPermissionService permissionService;
@@ -42,15 +43,13 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(molgenisEntityFormPluginController).build();
+		reset(dataService);
 	}
 
 	@Test
 	public void listUnknownEntity() throws Exception
 	{
-		Model model = mock(Model.class);
-		when(model.getEntity("Test")).thenReturn(null);
-		when(database.getMetaData()).thenReturn(model);
-
+		when(dataService.getRepositoryByEntityName("Test")).thenThrow(new UnknownEntityException());
 		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(404));
 	}
 
@@ -60,7 +59,6 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		Model model = mock(Model.class);
 		Entity entity = mock(Entity.class);
 		when(model.getEntity("Test")).thenReturn(entity);
-		when(database.getMetaData()).thenReturn(model);
 		when(permissionService.hasPermissionOnEntity("Test", Permission.READ)).thenReturn(false);
 
 		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(401));
@@ -72,7 +70,6 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		Model model = mock(Model.class);
 		Entity entity = mock(Entity.class);
 		when(model.getEntity("Test")).thenReturn(entity);
-		when(database.getMetaData()).thenReturn(model);
 		when(permissionService.hasPermissionOnEntity("Test", Permission.READ)).thenReturn(true);
 
 		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(200))
@@ -83,9 +80,9 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 	public static class Config
 	{
 		@Bean
-		public Database database()
+		public DataService dataService()
 		{
-			return mock(Database.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
@@ -97,7 +94,7 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		@Bean
 		public MolgenisEntityFormPluginController molgenisEntityFormPluginController()
 		{
-			return new MolgenisEntityFormPluginController(database(), permissionService());
+			return new MolgenisEntityFormPluginController(dataService(), permissionService());
 		}
 	}
 }
