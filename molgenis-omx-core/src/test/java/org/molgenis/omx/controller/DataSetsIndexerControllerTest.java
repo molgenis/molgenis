@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.omx.controller.DataSetsIndexerController.DataSetIndexRequest;
 import org.molgenis.omx.controller.DataSetsIndexerControllerTest.Config;
 import org.molgenis.omx.search.DataSetsIndexer;
@@ -69,9 +69,9 @@ public class DataSetsIndexerControllerTest extends AbstractTestNGSpringContextTe
 		}
 
 		@Bean
-		public Database database()
+		public DataService dataService()
 		{
-			return mock(Database.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
