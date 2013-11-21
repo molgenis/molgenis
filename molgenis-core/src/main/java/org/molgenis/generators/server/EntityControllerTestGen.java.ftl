@@ -111,8 +111,10 @@ public class ${entity.name}ControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void retrieveEntityXref${field.name?cap_first}() throws Exception
 	{
+		${field.xrefEntity.namespace}.${field.xrefEntity.name} ${field.xrefEntity.name?uncap_first}Xref = new ${field.xrefEntity.namespace}.${field.xrefEntity.name}();
+		${field.xrefEntity.name?uncap_first}Xref.set${field.xrefEntity.primaryKey.name?cap_first}(1);
 		${entity.name} ${entity.name?uncap_first} = new ${entity.name}();
-		${entity.name?uncap_first}.set${field.name?cap_first}(new ${field.xrefEntity.namespace}.${field.xrefEntity.name}());
+		${entity.name?uncap_first}.set${field.name?cap_first}(${field.xrefEntity.name?uncap_first}Xref);
 		when(${entity.name?uncap_first}Service.read(0)).thenReturn(${entity.name?uncap_first});
 		this.mockMvc.perform(get("/api/v1/${entity.name?lower_case}/0/${field.name?uncap_first}")).andExpect(redirectedUrl("/api/v1/${field.xrefEntity.name?lower_case}/0"));
 	}
