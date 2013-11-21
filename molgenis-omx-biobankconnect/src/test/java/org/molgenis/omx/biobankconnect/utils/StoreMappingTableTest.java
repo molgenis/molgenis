@@ -9,12 +9,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.omx.converters.ValueConverterException;
@@ -34,7 +33,7 @@ import org.testng.annotations.Test;
 public class StoreMappingTableTest
 {
 	StoreMappingTable table;
-	Database db;
+	DataService db;
 	private static final String dataSetIdentifer = "test-set";
 	private static final String OBSERVATION_SET = "observation_set";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
@@ -44,9 +43,9 @@ public class StoreMappingTableTest
 			STORE_MAPPING_CONFIRM_MAPPING, OBSERVATION_SET);
 
 	@BeforeMethod
-	public void setUp() throws DatabaseException, ValueConverterException
+	public void setUp() throws ValueConverterException
 	{
-		db = mock(Database.class);
+		db = mock(DataService.class);
 
 		ObservableFeature feature1 = mock(ObservableFeature.class);
 		when(feature1.getIdentifier()).thenReturn(STORE_MAPPING_FEATURE);
@@ -70,35 +69,37 @@ public class StoreMappingTableTest
 		when(dataSet.getIdentifier()).thenReturn(dataSetIdentifer);
 		when(dataSet.getProtocolUsed()).thenReturn(p);
 
-		when(db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSetIdentifer))).thenReturn(
-				Arrays.asList(dataSet));
+		Query q = new QueryImpl();
+		q.eq(DataSet.IDENTIFIER, dataSetIdentifer);
+		when(db.findOne(DataSet.ENTITY_NAME, q)).thenReturn(dataSet);
 
-		ObservationSet observation1 = mock(ObservationSet.class);
-		when(observation1.getId()).thenReturn(1);
-		when(observation1.getIdentifier()).thenReturn("1");
+		ObservationSet observationSet1 = mock(ObservationSet.class);
+		when(observationSet1.getId()).thenReturn(1);
+		when(observationSet1.getIdentifier()).thenReturn("1");
 
-		when(
-				db.find(ObservationSet.class, new QueryRule(ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS,
-						dataSet.getIdentifier()))).thenReturn(Arrays.asList(observation1));
+		Query q2 = new QueryImpl();
+		q2.eq(ObservationSet.PARTOFDATASET, dataSet.getIdentifier());
+		when(db.findOne(ObservationSet.ENTITY_NAME, q2)).thenReturn(observationSet1);
 
+		ObservedValue observedValue1 = mock(ObservedValue.class);
+		when(observedValue1.getObservationSet()).thenReturn(observationSet1);
 		BoolValue value1 = new BoolValue();
 		value1.setValue(false);
-
-		ObservedValue ov1 = mock(ObservedValue.class);
-		when(ov1.getObservationSet_Id()).thenReturn(1);
-		when(ov1.getObservationSet_Identifier()).thenReturn("1");
-		when(ov1.getFeature_Identifier()).thenReturn(STORE_MAPPING_CONFIRM_MAPPING);
-		when(ov1.getValue()).thenReturn(value1);
-
+		when(observedValue1.getValue()).thenReturn(value1);
+		
+		ObservableFeature observableFeature1 = mock(ObservableFeature.class);
+		when(observableFeature1.getIdentifier()).thenReturn(STORE_MAPPING_CONFIRM_MAPPING);
+		when(observedValue1.getFeature()).thenReturn(observableFeature1);
+		
 		Characteristic ch2 = mock(Characteristic.class);
 		when(ch2.getId()).thenReturn(2);
 		XrefValue value2 = new XrefValue();
 		value2.setValue(ch2);
 
 		ObservedValue ov2 = mock(ObservedValue.class);
-		when(ov2.getObservationSet_Id()).thenReturn(1);
-		when(ov2.getObservationSet_Identifier()).thenReturn("1");
-		when(ov2.getFeature_Identifier()).thenReturn(STORE_MAPPING_FEATURE);
+		when(ov2.getObservationSet().getId()).thenReturn(1);
+		when(ov2.getObservationSet().getIdentifier()).thenReturn("1");
+		when(ov2.getFeature().getIdentifier()).thenReturn(STORE_MAPPING_FEATURE);
 		when(ov2.getValue()).thenReturn(value2);
 
 		Characteristic ch3 = mock(Characteristic.class);
@@ -107,20 +108,19 @@ public class StoreMappingTableTest
 		value3.setValue(ch3);
 
 		ObservedValue ov3 = mock(ObservedValue.class);
-		when(ov3.getObservationSet_Id()).thenReturn(1);
-		when(ov3.getObservationSet_Identifier()).thenReturn("1");
-		when(ov3.getFeature_Identifier()).thenReturn(STORE_MAPPING_MAPPED_FEATURE);
+		when(ov3.getObservationSet().getId()).thenReturn(1);
+		when(ov3.getObservationSet().getIdentifier()).thenReturn("1");
+		when(ov3.getFeature().getIdentifier()).thenReturn(STORE_MAPPING_MAPPED_FEATURE);
 		when(ov3.getValue()).thenReturn(value3);
 
-		when(
-				db.find(ObservedValue.class,
-						new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.IN, Arrays.asList("1"))))
-				.thenReturn(Arrays.asList(ov1, ov2, ov3));
+		Query q3 = new QueryImpl();
+		q3.in(ObservedValue.OBSERVATIONSET, Arrays.asList("1"));
+		Iterable<Entity> observedValues = Arrays.<Entity>asList(observedValue1, ov2, ov3);
+		when(db.findAll(ObservedValue.ENTITY_NAME, q3)).thenReturn(observedValues);
 
 		Model model = mock(Model.class);
-		Entity entity = mock(Entity.class);
+		org.molgenis.model.elements.Entity entity = mock(org.molgenis.model.elements.Entity.class);
 		when(model.getEntity(ObservableFeature.class.getSimpleName())).thenReturn(entity);
-		when(db.getMetaData()).thenReturn(model);
 
 		table = new StoreMappingTable(dataSetIdentifer, db);
 	}
@@ -138,12 +138,6 @@ public class StoreMappingTableTest
 	public void getCount() throws TableException
 	{
 		assertEquals(table.getCount(), 1);
-	}
-
-	@Test
-	public void getDb()
-	{
-		assertEquals(table.getDb(), db);
 	}
 
 	@Test
