@@ -314,7 +314,7 @@ public class ${entity.name}ServiceTest extends AbstractTestNGSpringContextTests
 		this.setSecurityContextNonSuperUserRead();
 		Integer start = Integer.valueOf(1);
 		Integer num = Integer.valueOf(1);
-		List<QueryRule> queryRules = (List<QueryRule>) mock(List.class);
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		${entity.name?uncap_first}Service.readAll(start.intValue(), num.intValue(), queryRules);
 	}
 </#if>
