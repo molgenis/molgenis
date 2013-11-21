@@ -13,7 +13,6 @@ import static org.testng.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collections;
 
 import javax.mail.internet.MimeMessage;
 
@@ -101,15 +100,6 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	public void setUp()
 	{
 		reset(dataService);
-		when(
-				dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "123")))
-				.thenReturn(Collections.<Entity> singletonList(new MolgenisUser()));
-
-		when(
-				dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "456")))
-				.thenReturn(Collections.<Entity> emptyList());
 
 		MolgenisGroup allUsersGroup = mock(MolgenisGroup.class);
 		when(
@@ -124,6 +114,11 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser() throws DatabaseException
 	{
+		when(
+				dataService.findOne(MolgenisUser.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "123")))
+				.thenReturn(new MolgenisUser());
+
 		accountService.activateUser("123");
 
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
@@ -142,6 +137,11 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_alreadyActivated() throws DatabaseException
 	{
+		when(
+				dataService.findOne(MolgenisUser.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "456")))
+				.thenReturn(null);
+
 		accountService.activateUser("456");
 	}
 

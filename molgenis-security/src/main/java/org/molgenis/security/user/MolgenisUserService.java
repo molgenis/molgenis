@@ -15,8 +15,15 @@ public interface MolgenisUserService
 	 */
 	List<String> getSuEmailAddresses();
 
-	/*
+	/**
 	 * Returns the currently logged in user
 	 */
 	MolgenisUser getUser(String username);
+
+	/**
+	 * Update user
+	 * 
+	 * @param user
+	 */
+	void update(MolgenisUser user);
 }
