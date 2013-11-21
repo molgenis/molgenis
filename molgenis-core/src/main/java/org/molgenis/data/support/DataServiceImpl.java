@@ -124,6 +124,12 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName)
+	{
+		return findAll(entityName, new QueryImpl());
+	}
+
+	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
 	{
 		Queryable<E> queryable = getQueryable(entityName);
@@ -304,5 +310,4 @@ public class DataServiceImpl implements DataService
 
 		return entityClasses;
 	}
-
 }

@@ -1,6 +1,7 @@
 package org.molgenis.omx.study;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,17 +13,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.mockito.ArgumentCaptor;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.DataSet;
@@ -37,8 +40,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -54,53 +61,10 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 			return new OrderStudyDataServiceImpl();
 		}
 
-		@SuppressWarnings("unchecked")
 		@Bean
-		public Database database() throws DatabaseException
+		public DataService dataService()
 		{
-			ObservableFeature feature0 = mock(ObservableFeature.class);
-			when(feature0.getId()).thenReturn(0);
-			when(feature0.getName()).thenReturn("feature #0");
-			when(feature0.getDescription()).thenReturn("feature #0 description");
-
-			ObservableFeature feature1 = mock(ObservableFeature.class);
-			when(feature1.getId()).thenReturn(1);
-			when(feature1.getName()).thenReturn("feature #1");
-			when(feature1.getDescription()).thenReturn("feature #1 description");
-
-			Database database = mock(Database.class);
-			when(
-					database.find(
-							ObservableFeature.class,
-							new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(Integer.valueOf(0),
-									Integer.valueOf(1))))).thenReturn(Arrays.asList(feature0, feature1));
-
-			MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
-			when(user1.getEmail()).thenReturn("email@user.com");
-			Query<MolgenisUser> queryUser = mock(Query.class);
-			Query<MolgenisUser> queryUser1 = mock(Query.class);
-			when(queryUser.eq(MolgenisUser.USERNAME, "user1")).thenReturn(queryUser1);
-			when(queryUser.eq(MolgenisUser.USERNAME, "non-existing-user")).thenReturn(queryUser);
-			when(queryUser1.find()).thenReturn(Arrays.<MolgenisUser> asList(user1));
-			when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-			when(database.findById(MolgenisUser.class, 1)).thenReturn(user1);
-
-			MolgenisUser adminUser = when(mock(MolgenisUser.class).getEmail()).thenReturn("admin@molgenis.org")
-					.getMock();
-			Query<MolgenisUser> query = mock(Query.class);
-			when(database.query(MolgenisUser.class)).thenReturn(query);
-			when(query.equals(MolgenisUser.SUPERUSER, true)).thenReturn(query);
-			when(query.find()).thenReturn(Collections.singletonList(adminUser));
-
-			StudyDataRequest request0 = mock(StudyDataRequest.class);
-			when(request0.getId()).thenReturn(0);
-			StudyDataRequest request1 = mock(StudyDataRequest.class);
-			when(request1.getId()).thenReturn(1);
-			when(database.find(StudyDataRequest.class)).thenReturn(Arrays.asList(request0, request1));
-			when(
-					database.find(StudyDataRequest.class, new QueryRule(StudyDataRequest.MOLGENISUSER, Operator.EQUALS,
-							user1))).thenReturn(Arrays.asList(request0));
-			return database;
+			return mock(DataService.class);
 		}
 
 		@Bean
@@ -141,6 +105,15 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 		}
 	}
 
+	private static final String USERNAME_USER = "user";
+
+	private static Authentication AUTHENTICATION_PREVIOUS;
+	private Authentication authentication;
+	private MolgenisUser molgenisUser;
+	private final String dataSet1Identifier = "1";
+	private DataSet dataSet1;
+	private ObservableFeature feature0, feature1;
+
 	@Autowired
 	private OrderStudyDataService orderStudyDataService;
 
@@ -151,99 +124,129 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 	private MolgenisUserService molgenisUserService;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private JavaMailSender javaMailSender;
 
-	@SuppressWarnings("unchecked")
-	@BeforeMethod
-	public void setUp() throws DatabaseException
+	@BeforeClass
+	public void setUpBeforeClass()
 	{
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
-		when(user1.getEmail()).thenReturn("email@user.com");
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUser1 = mock(Query.class);
-		when(queryUser.eq(MolgenisUser.USERNAME, "user1")).thenReturn(queryUser1);
-		when(queryUser.eq(MolgenisUser.USERNAME, "non-existing-user")).thenReturn(queryUser);
-		when(queryUser1.find()).thenReturn(Arrays.<MolgenisUser> asList(user1));
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-		when(molgenisUserService.getCurrentUser()).thenReturn(user1);
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+		authentication = mock(Authentication.class);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+	}
+
+	@SuppressWarnings(
+	{ "deprecation" })
+	@BeforeMethod
+	public void setUp()
+	{
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
+		molgenisUser = when(mock(MolgenisUser.class).getId()).thenReturn(1).getMock();
+		when(molgenisUser.getUsername()).thenReturn(USERNAME_USER);
+		when(molgenisUser.getEmail()).thenReturn("email@user.com");
+		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(molgenisUser);
+
+		feature0 = mock(ObservableFeature.class);
+		when(feature0.getId()).thenReturn(0);
+		when(feature0.getName()).thenReturn("feature #0");
+		when(feature0.getDescription()).thenReturn("feature #0 description");
+
+		feature1 = mock(ObservableFeature.class);
+		when(feature1.getId()).thenReturn(1);
+		when(feature1.getName()).thenReturn("feature #1");
+		when(feature1.getDescription()).thenReturn("feature #1 description");
+
+		Query q0 = new QueryImpl(new QueryRule(ObservableFeature.ENTITY_NAME, Operator.IN, Arrays.asList(0, 1)));
+		when(dataService.findAll(ObservableFeature.ENTITY_NAME, q0)).thenReturn(
+				Arrays.<Entity> asList(feature0, feature1));
+
+		dataSet1 = when(mock(DataSet.class).getIdentifier()).thenReturn(dataSet1Identifier).getMock();
+		Query q1 = new QueryImpl(new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSet1Identifier));
+		when(dataService.findOne(DataSet.ENTITY_NAME, q1)).thenReturn(dataSet1);
+
+		Query q2 = new QueryImpl(new QueryRule(ObservableFeature.ENTITY_NAME, Operator.IN, Arrays.asList(-2, -1)));
+		when(dataService.findAll(ObservableFeature.ENTITY_NAME, q2)).thenReturn(Collections.<Entity> emptyList());
 	}
 
 	@Test
-	public void orderStudyData() throws DatabaseException, MessagingException, IOException
+	public void orderStudyData() throws MessagingException, IOException
 	{
 		StudyDefinition studyDefinition = when(mock(StudyDefinition.class).getId()).thenReturn("1").getMock();
 		when(studyManagerService.persistStudyDefinition((StudyDefinition) any())).thenReturn(studyDefinition);
 
-		@SuppressWarnings("unchecked")
-		Query<DataSet> q = mock(Query.class);
-		@SuppressWarnings("unchecked")
-		Query<DataSet> qFound = mock(Query.class);
-		DataSet dataSet = mock(DataSet.class);
-		when(database.query(DataSet.class)).thenReturn(q);
-		when(q.eq(DataSet.IDENTIFIER, "1")).thenReturn(qFound);
-		when(qFound.find()).thenReturn(Collections.singletonList(dataSet));
+		String studyDataRequestName = "study #1";
 		Part requestForm = mock(Part.class);
 		when(requestForm.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]
 		{ 0, 1, 2 }));
-		orderStudyDataService.orderStudyData("study #1", requestForm, "1",
+		orderStudyDataService.orderStudyData(studyDataRequestName, requestForm, "1",
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 
-		// TODO improve test
-		verify(database).add(any(StudyDataRequest.class));
+		ArgumentCaptor<StudyDataRequest> argument = ArgumentCaptor.forClass(StudyDataRequest.class);
+		verify(dataService).add(eq(StudyDataRequest.ENTITY_NAME), argument.capture());
+		StudyDataRequest studyDataRequest = argument.getValue();
+		assertEquals(studyDataRequest.getMolgenisUser(), molgenisUser);
+		assertEquals(studyDataRequest.getName(), studyDataRequestName);
+		assertEquals(studyDataRequest.getDataSet(), dataSet1);
+		assertEquals(studyDataRequest.getFeatures(), Arrays.asList(feature0, feature1));
 		verify(javaMailSender).send(any(MimeMessage.class));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void orderStudyData_noStudyName() throws DatabaseException, MessagingException, IOException
+	public void orderStudyData_noStudyName() throws MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData(null, mock(Part.class), "1",
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void orderStudyData_noRequestForm() throws DatabaseException, MessagingException, IOException
+	public void orderStudyData_noRequestForm() throws MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData("study #1", null, "1",
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void orderStudyData_noFeatures() throws DatabaseException, MessagingException, IOException
+	public void orderStudyData_noFeatures() throws MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void orderStudyData_emptyFeatures() throws DatabaseException, MessagingException, IOException
+	public void orderStudyData_emptyFeatures() throws MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", Collections.<Integer> emptyList());
 	}
 
-	@Test(expectedExceptions = DatabaseException.class)
-	public void orderStudyData_invalidFeatures() throws DatabaseException, MessagingException, IOException
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void orderStudyData_invalidFeatures() throws MessagingException, IOException
 	{
 		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1",
 				Arrays.asList(Integer.valueOf(-2), Integer.valueOf(-1)));
 	}
 
 	@Test
-	public void getOrders() throws DatabaseException
+	public void getOrders()
 	{
-		List<StudyDataRequest> orders = orderStudyDataService.getOrders();
-		assertEquals(orders.size(), 2);
-		assertEquals(orders.get(0).getId(), Integer.valueOf(0));
-		assertEquals(orders.get(1).getId(), Integer.valueOf(1));
+		StudyDataRequest studyDataRequest0 = mock(StudyDataRequest.class);
+		StudyDataRequest studyDataRequest1 = mock(StudyDataRequest.class);
+		when(dataService.findAll(StudyDataRequest.ENTITY_NAME, new QueryImpl())).thenReturn(
+				Arrays.<Entity> asList(studyDataRequest0, studyDataRequest1));
+		assertEquals(orderStudyDataService.getOrders(), Arrays.asList(studyDataRequest0, studyDataRequest1));
 	}
 
-	// FIXME mockito does not work, enable test after mockito update
-	// @Test
-	// public void getOrdersString() throws DatabaseException
-	// {
-	// List<StudyDataRequest> orders = orderStudyDataService.getOrders("user1");
-	// assertEquals(orders.size(), 1);
-	// assertEquals(orders.get(0).getId(), Integer.valueOf(0));
-	// }
+	@Test
+	public void getOrdersString()
+	{
+		StudyDataRequest studyDataRequest0 = mock(StudyDataRequest.class);
+		when(dataService.findOne(StudyDataRequest.ENTITY_NAME, 1)).thenReturn(studyDataRequest0);
+		assertEquals(orderStudyDataService.getOrder(1), studyDataRequest0);
+	}
 }
