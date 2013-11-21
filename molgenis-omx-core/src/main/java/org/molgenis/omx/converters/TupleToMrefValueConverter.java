@@ -1,6 +1,7 @@
 package org.molgenis.omx.converters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
@@ -72,7 +73,7 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 		{
 			if (xrefIdentifiers.size() == 1)
 			{
-				mrefValue.setValue(characteristicLoader.findCharacteristic(xrefIdentifiers.get(0)));
+				mrefValue.setValue(Arrays.asList(characteristicLoader.findCharacteristic(xrefIdentifiers.get(0))));
 			}
 			else
 			{

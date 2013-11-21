@@ -9,12 +9,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
@@ -24,7 +22,7 @@ import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
-public class ProtocolTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
+public class ProtocolTable extends AbstractFilterableTupleTable
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
@@ -38,7 +36,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 	private static final String FIELD_CATEGORY = "category";
 
 	private final Protocol protocol;
-	private Database db;
+	private final DataService dataService;
 	public static final Set<String> STOPWORDSLIST;
 	static
 	{
@@ -60,12 +58,12 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public ProtocolTable(Protocol protocol, Database db) throws TableException
+	public ProtocolTable(Protocol protocol, DataService dataService) throws TableException
 	{
 		if (protocol == null) throw new TableException("protocol cannot be null");
 		this.protocol = protocol;
-		if (db == null) throw new TableException("db cannot be null");
-		this.db = db;
+		if (dataService == null) throw new TableException("dataService cannot be null");
+		this.dataService = dataService;
 		setFirstColumnFixed(false);
 	}
 
@@ -140,8 +138,10 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 				String path = pathBuilder.append(protocolPath).append(".F").append(feature.getId()).toString();
 				StringBuilder categoryValue = new StringBuilder();
 
-				for (Category c : Category.find(db, new QueryRule(Category.OBSERVABLEFEATURE_IDENTIFIER,
-						Operator.EQUALS, feature.getIdentifier())))
+				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+						new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+
+				for (Category c : categories)
 				{
 					String categoryName = c.getName() == null ? StringUtils.EMPTY : c.getName().replaceAll(
 							"[^a-zA-Z0-9 ]", " ");
@@ -165,18 +165,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable implements Datab
 			}
 
 		}
-	}
-
-	@Override
-	public Database getDb()
-	{
-		return db;
-	}
-
-	@Override
-	public void setDb(Database db)
-	{
-		this.db = db;
 	}
 
 	/**

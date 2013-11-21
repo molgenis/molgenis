@@ -7,15 +7,14 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class AccountService
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
 
 	@Autowired
-	private Database unsecuredDatabase;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -51,6 +50,7 @@ public class AccountService
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@RunAsSystem
 	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
 	{
 		// collect activation info
@@ -76,21 +76,20 @@ public class AccountService
 		// create user
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
+		dataService.add(MolgenisUser.ENTITY_NAME, molgenisUser);
 		logger.debug("created user " + molgenisUser.getUsername());
-		unsecuredDatabase.add(molgenisUser);
 
 		// add user to group
-		Query<MolgenisGroup> groupQuery = unsecuredDatabase.query(MolgenisGroup.class);
-		groupQuery.equals(MolgenisGroup.NAME, ALL_USER_GROUP);
-		List<MolgenisGroup> allUserGroups = groupQuery.find();
-		if (allUserGroups.size() == 1)
+		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP));
+		if (group != null)
 		{
-			MolgenisGroup group = allUserGroups.get(0);
 			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
-			molgenisGroupMember.setMolgenisGroup(group.getId());
-			molgenisGroupMember.setMolgenisUser(molgenisUser.getId());
-			unsecuredDatabase.add(molgenisGroupMember);
+			molgenisGroupMember.setMolgenisGroup(group);
+			molgenisGroupMember.setMolgenisUser(molgenisUser);
+			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
 		}
+
 		// send activation email
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
 
@@ -110,16 +109,16 @@ public class AccountService
 	 * @param activationCode
 	 * @throws DatabaseException
 	 */
+	@RunAsSystem
 	public void activateUser(String activationCode) throws DatabaseException
 	{
-		List<MolgenisUser> molgenisUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
-				MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(MolgenisUser.ACTIVATIONCODE,
-				Operator.EQUALS, activationCode));
-		if (molgenisUsers != null && !molgenisUsers.isEmpty())
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode));
+
+		if (molgenisUser != null)
 		{
-			MolgenisUser molgenisUser = molgenisUsers.get(0);
 			molgenisUser.setActive(true);
-			unsecuredDatabase.update(molgenisUser);
+			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send activated email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -134,14 +133,18 @@ public class AccountService
 		}
 	}
 
+	@RunAsSystem
 	public void resetPassword(String userEmail) throws DatabaseException
 	{
-		MolgenisUser molgenisUser = MolgenisUser.findByEmail(unsecuredDatabase, userEmail);
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.EMAIL, userEmail));
+
 		if (molgenisUser != null)
 		{
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
+			molgenisUser.setPassword(newPassword);
 			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
-			unsecuredDatabase.update(molgenisUser);
+			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send password reseted email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();

@@ -3,13 +3,14 @@ package org.molgenis.genomebrowser.services;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.patient.Patient;
 import org.molgenis.omx.xgap.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,20 +19,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class MutationService
 {
-	private final Database database;
+	private final DataService dataService;
 
 	@Autowired
-	public MutationService(Database database)
+	public MutationService(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");	
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
-	public List<Map<String,String>> getPatientMutationData(String segmentId, String mutationId) throws ParseException,
-			DatabaseException, IOException
+	public List<Map<String, String>> getPatientMutationData(String segmentId, String mutationId) throws ParseException,
+			IOException
 	{
 		List<Patient> patientQueryResult = null;
-		List<Map<String,String>> variantArray = new ArrayList<Map<String,String>>();
+		List<Map<String, String>> variantArray = new ArrayList<Map<String, String>>();
 
 		patientQueryResult = queryPatients(segmentId, mutationId);
 
@@ -39,12 +40,12 @@ public class MutationService
 		{
 			createPatientFields(variantArray, patient);
 		}
-		
+
 		return variantArray;
 
 	}
 
-	private List<Patient> queryPatients(String segmentId, String mutationId) throws DatabaseException
+	private List<Patient> queryPatients(String segmentId, String mutationId)
 	{
 		List<Patient> patientQueryResult;
 		if (mutationId != null && !mutationId.isEmpty())
@@ -53,15 +54,16 @@ public class MutationService
 		}
 		else
 		{
-			patientQueryResult = database.query(Patient.class).find();
+			patientQueryResult = dataService.findAllAsList(Patient.ENTITY_NAME, new QueryImpl());
 		}
+
 		return patientQueryResult;
 	}
 
-	private void createPatientFields(List<Map<String,String>> variantArray, Patient patient)
+	private void createPatientFields(List<Map<String, String>> variantArray, Patient patient)
 	{
-		Map<String,String> valueMap = new HashMap<String,String>();
-		for (String field : patient.getFields())
+		Map<String, String> valueMap = new HashMap<String, String>();
+		for (String field : patient.getAttributeNames())
 		{
 			if (patient.get(field) != null)
 			{
@@ -73,16 +75,16 @@ public class MutationService
 		variantArray.add(valueMap);
 	}
 
-	private void createVarientFields(Patient patient, Map<String,String> valueMap)
+	private void createVarientFields(Patient patient, Map<String, String> valueMap)
 	{
 		createVarientFieldsForAllele(patient, valueMap, "1");
 		createVarientFieldsForAllele(patient, valueMap, "2");
 	}
 
-	private void createVarientFieldsForAllele(Patient patient, Map<String,String> valueMap, String alleleId)
+	private void createVarientFieldsForAllele(Patient patient, Map<String, String> valueMap, String alleleId)
 	{
 		Variant variant = null;
-		if (patient.get("Allele" + alleleId + "_id") == null)
+		if (patient.get("Allele" + alleleId) == null)
 		{
 			valueMap.put("CdnaNotation" + alleleId, "");
 			valueMap.put("Consequence" + alleleId, "");
@@ -92,13 +94,13 @@ public class MutationService
 		{
 			if ("1".equals(alleleId))
 			{
-				variant = (Variant) patient.getAllele1();
+				variant = patient.getAllele1();
 			}
 			else if ("2".equals(alleleId))
 			{
-				variant = (Variant) patient.getAllele2();
+				variant = patient.getAllele2();
 			}
-			for (String allelefield : variant.getFields())
+			for (String allelefield : variant.getAttributeNames())
 			{
 				if (variant.get(allelefield) != null)
 				{
@@ -112,13 +114,15 @@ public class MutationService
 		}
 	}
 
-	private List<Patient> queryPatientsByMutation(String segmentId, String mutationId) throws DatabaseException
+	private List<Patient> queryPatientsByMutation(String segmentId, String mutationId)
 	{
-		Query<Patient> variantQuery = database.query(Patient.class);
-		variantQuery.equals(Patient.ALLELE1_IDENTIFIER, mutationId)
-		.or()
-		.equals(Patient.ALLELE2_IDENTIFIER, mutationId);
-		List<Patient> patients = variantQuery.find();
-		return patients;
+		Variant allele = dataService.findOne(Variant.ENTITY_NAME, new QueryImpl().eq(Variant.IDENTIFIER, mutationId));
+		if (allele == null)
+		{
+			return Collections.emptyList();
+		}
+
+		Query q = new QueryImpl().eq(Patient.ALLELE1, allele).or().eq(Patient.ALLELE2, allele);
+		return dataService.findAllAsList(Patient.ENTITY_NAME, q);
 	}
 }

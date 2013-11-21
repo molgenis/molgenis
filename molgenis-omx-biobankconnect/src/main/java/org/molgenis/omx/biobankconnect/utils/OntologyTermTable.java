@@ -6,20 +6,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.semanticweb.owlapi.model.OWLClass;
 
-public class OntologyTermTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
+public class OntologyTermTable extends AbstractFilterableTupleTable
 {
 
-	private OntologyLoader loader;
-	private Database db;
+	private final OntologyLoader loader;
 	private final String ontologyIRI;
 	private final String ontologyName;
 	private final static String NODE_PATH = "nodePath";
@@ -33,12 +30,11 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 	private final static String ONTOLOGY_LABEL = "ontologyLabel";
 	private final static String ENTITY_TYPE = "entity_type";
 
-	public OntologyTermTable(OntologyLoader loader, Database db)
+	public OntologyTermTable(OntologyLoader loader)
 	{
 		this.loader = loader;
 		this.ontologyName = this.loader.getOntologyName();
 		this.ontologyIRI = this.loader.getOntologyIRI();
-		setDb(db);
 	}
 
 	@Override
@@ -110,18 +106,6 @@ public class OntologyTermTable extends AbstractFilterableTupleTable implements D
 				i++;
 			}
 		}
-	}
-
-	@Override
-	public Database getDb()
-	{
-		return db;
-	}
-
-	@Override
-	public void setDb(Database db)
-	{
-		this.db = db;
 	}
 
 	@Override

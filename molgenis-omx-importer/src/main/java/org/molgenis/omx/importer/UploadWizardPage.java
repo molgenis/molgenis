@@ -14,7 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -38,15 +39,15 @@ public class UploadWizardPage extends AbstractWizardPage
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
 	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
-	private final transient Database database;
+	private final transient DataService dataService;
 	private final transient EntitiesValidator entitiesValidator;
 
 	@Autowired
-	public UploadWizardPage(Database database, EntitiesValidator entitiesValidator)
+	public UploadWizardPage(DataService dataService, EntitiesValidator entitiesValidator)
 	{
-		this.database = database;
+		this.dataService = dataService;
 		this.entitiesValidator = entitiesValidator;
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (entitiesValidator == null) throw new IllegalArgumentException("EntitiesValidator is null");
 	}
 
@@ -115,7 +116,7 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 		}
 
-		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(database, file);
+		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(dataService, file);
 
 		// determine if validation succeeded
 		boolean ok = true;
@@ -162,7 +163,8 @@ public class UploadWizardPage extends AbstractWizardPage
 		return msg;
 	}
 
-	private Map<String, Boolean> validateDataSetInstances(Database db, File file) throws IOException, DatabaseException
+	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException,
+			DatabaseException
 	{
 		TableReader tableReader = TableReaderFactory.create(file);
 		try
@@ -202,7 +204,8 @@ public class UploadWizardPage extends AbstractWizardPage
 
 					// Check if dataset is present in the excel or in the database
 					boolean canImport = datasetIdentifiers.contains(identifier)
-							|| (DataSet.findByIdentifier(db, identifier) != null);
+							|| (dataService.findOne(DataSet.ENTITY_NAME,
+									new QueryImpl().eq(DataSet.IDENTIFIER, identifier)) != null);
 
 					dataSetValidationMap.put(identifier, canImport);
 				}

@@ -2,7 +2,7 @@ package org.molgenis.framework.tupletable;
 
 import java.util.List;
 
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.QueryRule;
 
 /**
  * Extension of TupleTable that allows filterings, sortings, etc on the table.
@@ -10,9 +10,8 @@ import org.molgenis.framework.db.QueryRule;
 public interface FilterableTupleTable extends TupleTable
 {
 	/**
-	 * Set the row filters, based on column names. Not allowed are LIMIT, OFFSET
-	 * and SORT filters (@see setLimit, setOffset), which will throw
-	 * TableException.
+	 * Set the row filters, based on column names. Not allowed are LIMIT, OFFSET and SORT filters (@see setLimit,
+	 * setOffset), which will throw TableException.
 	 * 
 	 * @throws TableException
 	 */
@@ -23,10 +22,4 @@ public interface FilterableTupleTable extends TupleTable
 	 */
 	public List<QueryRule> getFilters();
 
-	/**
-	 * This we can inherit from Query interface?
-	 * 
-	 * nb: multiple columns are not allowed for now.
-	 */
-	public QueryRule getSortRule();
 }

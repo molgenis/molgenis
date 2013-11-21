@@ -134,8 +134,8 @@ public class StudyManagerController extends MolgenisPluginController
 	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
 			UnknownStudyDefinitionException
 	{
-		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(id);
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 		return CatalogModelBuilder.create(catalog, studyDefinition, true);
 	}
 
@@ -145,8 +145,8 @@ public class StudyManagerController extends MolgenisPluginController
 			UnknownStudyDefinitionException
 	{
 		// get study definition and catalog used to create study definition
-		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(id);
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 		return CatalogModelBuilder.create(catalog, studyDefinition, false);
 	}
 
@@ -157,8 +157,8 @@ public class StudyManagerController extends MolgenisPluginController
 			UnknownCatalogException
 	{
 		// get study definition and catalog used to create study definition
-		final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(id);
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 
 		// create updated study definition
 		StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);

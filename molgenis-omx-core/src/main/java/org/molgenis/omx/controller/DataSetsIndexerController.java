@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -45,7 +46,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	}
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private DataSetsIndexer dataSetsIndexer;
@@ -61,7 +62,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	public String init(Model model) throws Exception
 	{
 		// add data sets to model
-		List<DataSet> dataSets = database.find(DataSet.class);
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 		model.addAttribute("dataSets", dataSets);
 		return "view-datasetsindexer";
 	}

@@ -242,8 +242,6 @@ input[type=number] {
 	height: 26px;
 	float: left;
 	width: 90px;
-	border-radius: 5px;
-	margin-left: 5px;
 }
 
 #feature-select {
@@ -256,14 +254,7 @@ input[type=number] {
 	margin-top: 4px;
 }
 
-.notselected {
-	border: none;
-	background: transparant;
-	color: black;
-}
-
-.selected {
-	border: 1px solid black;
-	box-shadow: 0px 0px 10px #5B82A4;
-	color: black;
+#filter-dialog-modal .modal-body{
+	max-height:none;
+	
 }

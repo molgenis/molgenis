@@ -26,7 +26,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesImporter;
@@ -59,15 +58,12 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	</#list>
 	}
 	
-	private final Database database;
 	private final DataService dataService;
 
 	@Autowired
-	public EntitiesImporterImpl(Database database, DataService dataService)
+	public EntitiesImporterImpl(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.database = database;
 		this.dataService = dataService;
 	}
 
@@ -141,7 +137,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 				if (repository != null)
 				{
 					EntityImporter entityImporter = entry.getValue();
-					int nr = entityImporter.importEntity(repository, database, dbAction);
+					int nr = entityImporter.importEntity(repository, dataService, dbAction);
 					if (nr > 0)
 					{
 						importReport.getMessages().put(entry.getKey(),
