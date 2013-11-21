@@ -1,11 +1,8 @@
 package org.molgenis.security.user;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.DataService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
-import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,32 +13,31 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserAccountServiceImpl implements UserAccountService
 {
 	@Autowired
-	private DataService dataService;
+	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private MolgenisUserService userService;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
 	@Transactional(readOnly = true)
-	@RunAsSystem
-	public MolgenisUser getUser(String userName)
+	public MolgenisUser getCurrentUser()
 	{
-		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, userName));
+		return userService.getUser(SecurityUtils.getCurrentUsername());
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_USERACCOUNT')")
 	@Transactional
-	@RunAsSystem
-	public void updateCurrentUser(MolgenisUser updatedCurrentUser, String currentUsername)
+	public void updateCurrentUser(MolgenisUser updatedCurrentUser)
 	{
+		String currentUsername = SecurityUtils.getCurrentUsername();
 		if (!currentUsername.equals(updatedCurrentUser.getUsername()))
 		{
 			throw new RuntimeException("Updated user differs from the current user");
 		}
 
-		MolgenisUser currentUser = getUser(currentUsername);
+		MolgenisUser currentUser = userService.getUser(currentUsername);
 		if (currentUser == null)
 		{
 			throw new RuntimeException("User does not exist [" + currentUsername + "]");
@@ -55,18 +51,18 @@ public class UserAccountServiceImpl implements UserAccountService
 			updatedCurrentUser.setPassword(encodedPassword);
 		}
 
-		dataService.update(MolgenisUser.ENTITY_NAME, updatedCurrentUser);
+		userService.update(currentUser);
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
 	@Transactional
-	@RunAsSystem
-	public boolean validateCurrentUserPassword(String password, String username)
+	public boolean validateCurrentUserPassword(String password)
 	{
 		if (password == null || password.isEmpty()) return false;
 
-		MolgenisUser currentUser = getUser(username);
+		String currentUsername = SecurityUtils.getCurrentUsername();
+		MolgenisUser currentUser = userService.getUser(currentUsername);
 		if (currentUser == null)
 		{
 			throw new RuntimeException("User does not exist [" + SecurityUtils.getCurrentUsername() + "]");
