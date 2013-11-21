@@ -28,6 +28,13 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	long count(String entityName, Query q);
 
 	/**
+	 * Find all entities of the given type. Returns empty Iterable if no matches.
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName);
+
+	/**
 	 * Find entities that match a query. Returns empty Iterable if no matches.
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
