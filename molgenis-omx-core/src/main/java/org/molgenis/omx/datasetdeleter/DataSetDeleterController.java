@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -14,7 +13,6 @@ import org.molgenis.omx.observ.DataSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,11 +58,5 @@ public class DataSetDeleterController extends MolgenisPluginController
 		boolean doDeleteMetaData = deleteMetaData != null ? deleteMetaData.booleanValue() : false;
 		DataSet dataSet = dataSetDeleterService.delete(dataSetIdentifier, doDeleteMetaData);
 		return dataSet.getName();
-	}
-
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
 	}
 }

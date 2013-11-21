@@ -8,8 +8,8 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
@@ -51,7 +51,7 @@ public class AccountService
 	private PasswordEncoder passwordEncoder;
 
 	@RunAsSystem
-	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
+	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri)
 	{
 		// collect activation info
 		String activationCode = UUID.randomUUID().toString();
@@ -60,12 +60,12 @@ public class AccountService
 		{
 			case ADMIN:
 				activationEmailAddresses = molgenisUserService.getSuEmailAddresses();
-				if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new DatabaseException(
+				if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new MolgenisDataException(
 						"Administrator account is missing required email address");
 				break;
 			case USER:
 				String activationEmailAddress = molgenisUser.getEmail();
-				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new DatabaseException(
+				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new MolgenisDataException(
 						"User '" + molgenisUser.getUsername() + "' is missing required email address");
 				activationEmailAddresses = Arrays.asList(activationEmailAddress);
 				break;
@@ -110,7 +110,7 @@ public class AccountService
 	 * @throws DatabaseException
 	 */
 	@RunAsSystem
-	public void activateUser(String activationCode) throws DatabaseException
+	public void activateUser(String activationCode)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode));
@@ -134,7 +134,7 @@ public class AccountService
 	}
 
 	@RunAsSystem
-	public void resetPassword(String userEmail) throws DatabaseException
+	public void resetPassword(String userEmail)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.EMAIL, userEmail));
