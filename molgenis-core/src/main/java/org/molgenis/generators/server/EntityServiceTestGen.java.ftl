@@ -11,13 +11,13 @@ import java.lang.Integer;
 
 import javax.sql.DataSource;
 
+import org.molgenis.data.QueryRule;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.model.elements.Model;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.service.${entity.name}Service;
 import org.molgenis.service.${entity.name}ServiceTest.Config;
-import org.molgenis.framework.db.QueryRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -297,32 +297,6 @@ public class ${entity.name}ServiceTest extends AbstractTestNGSpringContextTests
 		Integer num = Integer.valueOf(1);
 		List<QueryRule> queryRules = (List<QueryRule>) mock(List.class);
 		${entity.name?uncap_first}Service.readAll(start.intValue(), num.intValue(), queryRules);
-	}
-</#if>
-
-
-	@Test
-	public void getEntity_EntityPager_securitySuperUser() throws DatabaseException
-	{
-		// test passes if no security exception is thrown
-		this.setSecurityContextSuperUser();
-		${entity.name?uncap_first}Service.getEntity();
-	}
-	
-<#if entity.system>	
-	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getEntity_securityNonSuperUserRead() throws DatabaseException
-	{
-		this.setSecurityContextNonSuperUserRead();
-		${entity.name?uncap_first}Service.getEntity();
-	}
-<#else>
-	@Test()
-	public void getEntity_securityNonSuperUserWrite() throws DatabaseException
-	{
-		// test passes if no security exception is thrown
-		this.setSecurityContextNonSuperUserRead();
-		${entity.name?uncap_first}Service.getEntity();
 	}
 </#if>
 	

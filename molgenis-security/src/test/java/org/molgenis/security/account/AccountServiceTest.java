@@ -21,8 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -104,13 +102,14 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	{
 		reset(dataService);
 		when(
-				dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS,
-						false), new QueryRule(MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "123"))).thenReturn(
-				Collections.<Entity> singletonList(new MolgenisUser()));
+				dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "123")))
+				.thenReturn(Collections.<Entity> singletonList(new MolgenisUser()));
+
 		when(
-				dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryRule(MolgenisUser.ACTIVE, Operator.EQUALS,
-						false), new QueryRule(MolgenisUser.ACTIVATIONCODE, Operator.EQUALS, "456"))).thenReturn(
-				Collections.<Entity> emptyList());
+				dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "456")))
+				.thenReturn(Collections.<Entity> emptyList());
 
 		MolgenisGroup allUsersGroup = mock(MolgenisGroup.class);
 		when(

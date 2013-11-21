@@ -29,6 +29,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+
 public class StudyDataRequestDecoratorTest
 {
 	private static final String USERNAME_USER = "user";
@@ -631,19 +633,19 @@ public class StudyDataRequestDecoratorTest
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(userRules))).thenReturn(
 				Collections.singletonList(userStudyDataRequest));
-
-		assertEquals(studyDataRequestDecorator.iterator(), Collections.singletonList(userStudyDataRequest).iterator());
+		assertEquals(Lists.<StudyDataRequest> newArrayList(studyDataRequestDecorator.iterator()),
+				Collections.singletonList(userStudyDataRequest));
 	}
 
 	@SuppressWarnings("deprecation")
 	@Test
 	public void iterator_Admin()
 	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
-				Collections.singletonList(userStudyDataRequest));
-
-		assertEquals(studyDataRequestDecorator.iterator(), Collections.singletonList(adminStudyDataRequest).iterator());
+				Collections.singletonList(adminStudyDataRequest));
+		assertEquals(Lists.<StudyDataRequest> newArrayList(studyDataRequestDecorator.iterator()),
+				Collections.singletonList(adminStudyDataRequest));
 	}
 
 	private List<QueryRule> createList(QueryRule queryRule, List<QueryRule> queryRules)

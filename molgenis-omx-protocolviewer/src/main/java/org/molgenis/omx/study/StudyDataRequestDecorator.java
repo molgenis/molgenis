@@ -9,8 +9,6 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.DatabaseAccessException;
@@ -182,14 +180,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 		{
 			return;
 		}
-
-		QueryRule rule = new QueryRule(StudyDataRequest.MOLGENISUSER, Operator.EQUALS, user);
-		addRule(q, rule);
-	}
-
-	private void addRule(Query q, QueryRule r)
-	{
-		q.getRules().add(r);
+		q.eq(StudyDataRequest.MOLGENISUSER, user);
 	}
 
 	private void checkEntitiesPermission(StudyDataRequest request)
