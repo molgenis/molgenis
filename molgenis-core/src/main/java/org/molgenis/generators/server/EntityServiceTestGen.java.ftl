@@ -4,6 +4,7 @@ package org.molgenis.service;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -11,10 +12,11 @@ import java.lang.Integer;
 
 import javax.sql.DataSource;
 
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.model.elements.Model;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.service.${entity.name}Service;
 import org.molgenis.service.${entity.name}ServiceTest.Config;
@@ -23,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +37,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ${entity.namespace}.${entity.name};
 
@@ -45,19 +50,19 @@ public class ${entity.name}ServiceTest extends AbstractTestNGSpringContextTests
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	static class Config extends WebSecurityConfigurerAdapter
 	{
+		@SuppressWarnings("unchecked")
 		@Bean
-		public Database database() throws DatabaseException
+		public CrudRepository<Entity> crudRepository()
 		{
-			Database db = mock(Database.class);
-			Model model = mock(Model.class);
-			when(db.getMetaData()).thenReturn(model);
-			return db;
+			return mock(CrudRepository.class);
 		}
 
 		@Bean
-		public Database unsecuredDatabase()
+		public DataService dataService() throws DatabaseException
 		{
-			return mock(Database.class);
+			DataService dataService = mock(DataService.class);
+			when(dataService.getCrudRepository("${entity.name}")).thenReturn(crudRepository());
+			return dataService;
 		}
 
 		@Bean
@@ -93,6 +98,20 @@ public class ${entity.name}ServiceTest extends AbstractTestNGSpringContextTests
 		}
 	}
 
+	private static Authentication AUTHENTICATION_PREVIOUS;
+
+	@BeforeClass
+	public void setUpBeforeClass()
+	{
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+	}
+	
 	@Autowired
 	public ${entity.name}Service ${entity.name?uncap_first}Service;
 
@@ -271,7 +290,7 @@ public class ${entity.name}ServiceTest extends AbstractTestNGSpringContextTests
 		this.setSecurityContextSuperUser();
 		Integer start = Integer.valueOf(1);
 		Integer num = Integer.valueOf(1);
-		List<QueryRule> queryRules = (List<QueryRule>) mock(List.class);
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		${entity.name?uncap_first}Service.readAll(start.intValue(), num.intValue(), queryRules);
 	}
 	
@@ -283,7 +302,7 @@ public class ${entity.name}ServiceTest extends AbstractTestNGSpringContextTests
 		this.setSecurityContextNonSuperUserRead();
 				Integer start = Integer.valueOf(1);
 		Integer num = Integer.valueOf(1);
-		List<QueryRule> queryRules = (List<QueryRule>) mock(List.class);
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		${entity.name?uncap_first}Service.readAll(start.intValue(), num.intValue(), queryRules);
 	}
 <#else>

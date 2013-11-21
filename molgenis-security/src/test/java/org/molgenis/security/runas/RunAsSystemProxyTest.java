@@ -8,12 +8,28 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class RunAsSystemProxyTest
 {
+	private static Authentication AUTHENTICATION_PREVIOUS;
+
+	@BeforeClass
+	public void setUpBeforeClass()
+	{
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+	}
 
 	@Test
 	public void invoke() throws NoSuchMethodException, SecurityException, Throwable
