@@ -8,12 +8,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
-
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,43 +26,41 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 	static class Config
 	{
 		@Bean
-		public MolgenisDbSettings molgenisDbSettings() throws DatabaseException
+		public MolgenisDbSettings molgenisDbSettings()
 		{
-			return new MolgenisDbSettings(unsecuredDatabase());
+
+			return new MolgenisDbSettings(dataService());
 		}
 
 		@Bean
-		public Database unsecuredDatabase() throws DatabaseException
+		public DataService dataService()
 		{
-			Database database = mock(Database.class);
 
+			DataService dataservice = mock(DataService.class);
+			Query q;
+
+			q = new QueryImpl();
+			q.eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + "_property0");
 			RuntimeProperty property0 = new RuntimeProperty();
 			property0.setValue("value0");
-			when(
-					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-							RuntimeProperty.class.getSimpleName() + "_property0")))
-					.thenReturn(Arrays.asList(property0));
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property0);
 
+			q.eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + "_property1");
 			RuntimeProperty property1 = new RuntimeProperty();
-			property1.setValue("true");
-			when(
-					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-							RuntimeProperty.class.getSimpleName() + "_property1")))
-					.thenReturn(Arrays.asList(property1));
+			property0.setValue("true");
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property1);
 
+			q.eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + "_property0");
 			RuntimeProperty property2 = new RuntimeProperty();
-			property2.setValue("false");
-			when(
-					database.find(RuntimeProperty.class, new QueryRule(RuntimeProperty.IDENTIFIER, Operator.EQUALS,
-							RuntimeProperty.class.getSimpleName() + "_property2")))
-					.thenReturn(Arrays.asList(property2));
+			property0.setValue("false");
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property2);
 
-			return database;
+			return dataservice;
 		}
 	}
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisDbSettings molgenisDbSettings;
@@ -119,7 +114,7 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void setProperty() throws DatabaseException
+	public void setProperty()
 	{
 		molgenisDbSettings.setProperty("property0", "value0");
 
@@ -127,6 +122,6 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 		property0.setIdentifier(RuntimeProperty.class.getSimpleName() + "_property0");
 		property0.setName("property0");
 		property0.setValue("value0-updated");
-		verify(database).add(property0);
+		verify(dataService).add(RuntimeProperty.ENTITY_NAME, property0);
 	}
 }
