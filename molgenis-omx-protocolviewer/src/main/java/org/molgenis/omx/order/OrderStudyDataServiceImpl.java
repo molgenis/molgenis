@@ -40,6 +40,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 @Service
 public class OrderStudyDataServiceImpl implements OrderStudyDataService
 {
@@ -82,7 +84,8 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 				"feature list is null or empty");
 
 		Query q = new QueryImpl().in(ObservableFeature.ENTITY_NAME, featureIds);
-		List<ObservableFeature> features = dataService.findOne(ObservableFeature.ENTITY_NAME, q);
+		Iterable<ObservableFeature> it = dataService.findAll(ObservableFeature.ENTITY_NAME, q);
+		List<ObservableFeature> features = Lists.newArrayList(it);
 		if (features.isEmpty()) throw new MolgenisDataException("requested features do not exist");
 
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
@@ -140,7 +143,8 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	@Transactional(readOnly = true)
 	public List<StudyDataRequest> getOrders()
 	{
-		return dataService.findAllAsList(StudyDataRequest.ENTITY_NAME, new QueryImpl());
+		Iterable<StudyDataRequest> it = dataService.findAll(StudyDataRequest.ENTITY_NAME, new QueryImpl());
+		return Lists.newArrayList(it);
 	}
 
 	/*
