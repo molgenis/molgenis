@@ -4,7 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.TextValue;
@@ -15,12 +15,12 @@ import org.testng.annotations.Test;
 
 public class ValueConverterTest
 {
-	private Database database;
+	private DataService dataService;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		database = mock(Database.class);
+		dataService = mock(DataService.class);
 	}
 
 	@Test
@@ -28,13 +28,13 @@ public class ValueConverterTest
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
-		assertEquals(new ValueConverter(database).toCell(value).getValue(), Boolean.TRUE);
+		assertEquals(new ValueConverter(dataService).toCell(value).getValue(), Boolean.TRUE);
 	}
 
 	@Test(expectedExceptions = ValueConverterException.class)
 	public void extractValue_UnsupportValue() throws ValueConverterException
 	{
-		new ValueConverter(database).toCell(new Value());
+		new ValueConverter(dataService).toCell(new Value());
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class ValueConverterTest
 		tuple.set(colName, "value");
 		TextValue value = new TextValue();
 		value.setValue("value");
-		assertEquals(new ValueConverter(database).fromTuple(tuple, colName, feature), value);
+		assertEquals(new ValueConverter(dataService).fromTuple(tuple, colName, feature), value);
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class ValueConverterTest
 		KeyValueTuple tuple = new KeyValueTuple();
 		tuple.set(colName, "value");
 		TextValue value = new TextValue();
-		new ValueConverter(database).updateFromTuple(tuple, colName, feature, value);
+		new ValueConverter(dataService).updateFromTuple(tuple, colName, feature, value);
 		assertEquals(value.getValue(), "value");
 	}
 }
