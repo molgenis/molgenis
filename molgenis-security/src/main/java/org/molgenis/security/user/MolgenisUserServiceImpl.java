@@ -51,4 +51,11 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username));
 	}
+
+	@Override
+	@RunAsSystem
+	public void update(MolgenisUser user)
+	{
+		dataService.update(MolgenisUser.ENTITY_NAME, user);
+	}
 }

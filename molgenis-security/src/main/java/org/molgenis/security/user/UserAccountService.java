@@ -14,7 +14,7 @@ public interface UserAccountService
 	 * @return
 	 * @throws DatabaseException
 	 */
-	MolgenisUser getUser(String username);
+	MolgenisUser getCurrentUser();
 
 	/**
 	 * Update the currently logged in user
@@ -23,7 +23,7 @@ public interface UserAccountService
 	 *            updated user
 	 * @throws DatabaseException
 	 */
-	void updateCurrentUser(MolgenisUser molgenisUser, String username);
+	void updateCurrentUser(MolgenisUser molgenisUser);
 
 	/**
 	 * Validates the password of the current logged in user
@@ -32,5 +32,5 @@ public interface UserAccountService
 	 * @return
 	 * @throws DatabaseException
 	 */
-	boolean validateCurrentUserPassword(String password, String username);
+	boolean validateCurrentUserPassword(String password);
 }

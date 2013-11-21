@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
@@ -14,11 +13,6 @@ public interface Query
 	 * Filtering rules
 	 */
 	List<QueryRule> getRules();
-
-	/**
-	 * Enable attribute selection, if null then all attributes will be returned
-	 */
-	Iterator<String> getAttributeNames();
 
 	/**
 	 * Size of a page. Synonym: limit
