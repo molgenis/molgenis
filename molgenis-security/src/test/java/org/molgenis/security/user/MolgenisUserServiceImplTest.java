@@ -4,11 +4,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
-
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +33,13 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 		@Bean
 		public MolgenisUserServiceImpl molgenisUserServiceImpl()
 		{
-			return new MolgenisUserServiceImpl(database());
+			return new MolgenisUserServiceImpl(dataService());
 		}
 
 		@Bean
-		public Database database()
+		public DataService dataService()
 		{
-			return mock(Database.class);
+			return mock(DataService.class);
 		}
 	}
 
@@ -49,7 +47,7 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	private MolgenisUserServiceImpl molgenisUserServiceImpl;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisUserServiceImpl()
@@ -73,24 +71,19 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void getCurrentUser() throws DatabaseException
+	public void getUser() throws DatabaseException
 	{
+		String username = "username";
+
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
 		when(existingMolgenisUser.getId()).thenReturn(1);
-		when(existingMolgenisUser.getUsername()).thenReturn("username");
+		when(existingMolgenisUser.getUsername()).thenReturn(username);
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
-		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username)))
+				.thenReturn(existingMolgenisUser);
 
-		assertEquals("username", molgenisUserServiceImpl.getCurrentUser().getUsername());
+		assertEquals(existingMolgenisUser, molgenisUserServiceImpl.getUser(username));
 	}
-
 }
