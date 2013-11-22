@@ -114,6 +114,11 @@ public class ElasticSearchServiceTest
 		clemantine.set("color", "orange");
 		fruits.add(clemantine);
 
+		Entity appleWithDot = new TestEntity(5);
+		appleWithDot.set("name", "brown.banana");
+		appleWithDot.set("color", "brown");
+		fruits.add(appleWithDot);
+
 		searchService.updateIndex("fruit", fruits);
 		waitForIndexUpdate();
 
@@ -161,6 +166,32 @@ public class ElasticSearchServiceTest
 		assertEquals(hits.get(1).getDocumentType(), "fruit");
 		objectValueMapExpected = new LinkedHashMap<String, Object>();
 		objectValueMapExpected.put("id", 4);
+		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
+
+		// Search3
+		request = new SearchRequest("fruit", Arrays.asList(new QueryRule(Operator.SEARCH, "banana")),
+				Arrays.asList("id"));
+
+		searchResult = searchService.search(request);
+		assertNotNull(searchResult);
+		assertEquals(searchResult.getTotalHitCount(), 2);
+		assertNull(searchResult.getErrorMessage());
+
+		hits = searchResult.getSearchHits();
+		assertNotNull(hits);
+		assertEquals(hits.size(), 2);
+		assertEquals(hits.get(0).getId(), "2");
+		assertEquals(hits.get(0).getDocumentType(), "fruit");
+		assertEquals(hits.get(0).getHref(), "/api/v1/fruit/2");
+		objectValueMapExpected = new LinkedHashMap<String, Object>();
+		objectValueMapExpected.put("id", 2);
+		assertEquals(hits.get(0).getColumnValueMap(), objectValueMapExpected);
+
+		assertEquals(hits.get(1).getId(), "5");
+		assertEquals(hits.get(1).getDocumentType(), "fruit");
+		assertEquals(hits.get(1).getHref(), "/api/v1/fruit/5");
+		objectValueMapExpected = new LinkedHashMap<String, Object>();
+		objectValueMapExpected.put("id", 5);
 		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
 	}
 
