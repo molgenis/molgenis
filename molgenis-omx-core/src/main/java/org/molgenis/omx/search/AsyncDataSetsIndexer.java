@@ -155,7 +155,6 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
 						new CategoryTable(dataSet.getProtocolUsed(), dataService));
 			}
-			System.out.println("4 TEST --- index: " + dataSetIds);
 		}
 		catch (Exception e)
 		{
@@ -164,7 +163,6 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		finally
 		{
 			runningIndexProcesses.decrementAndGet();
-			System.out.println("5 TEST --- index: " + dataSetIds);
 		}
 	}
 

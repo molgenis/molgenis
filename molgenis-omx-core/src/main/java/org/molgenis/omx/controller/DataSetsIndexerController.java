@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.cart.ShoppingCartController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataSetsIndexerController extends MolgenisPluginController
 {
+	private static final Logger logger = Logger.getLogger(DataSetsIndexerController.class);
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "dataindexer";
 
 	public DataSetsIndexerController()
@@ -69,6 +72,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	@ResponseBody
 	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
+		//TODO JJ fix/850
 		if (dataSetsIndexer.isIndexingRunning())
 		{
 			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
@@ -94,9 +98,12 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		return new DataSetIndexResponse(true, "Indexing started");
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/menu/admin/dataindexer/index/status", produces = APPLICATION_JSON_VALUE)
+	//TODO JJ fix/850
+	@RequestMapping(method = RequestMethod.GET, value = "/status", 
+			consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public DataSetIndexResponse indexingStatus() {
+		logger.info("indexingStatus() --- TEST");
 		if (dataSetsIndexer.isIndexingRunning())
 		{
 			return new DataSetIndexResponse(true, "Indexer is running..");
