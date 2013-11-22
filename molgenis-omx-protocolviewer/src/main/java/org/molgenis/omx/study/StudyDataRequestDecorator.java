@@ -8,10 +8,10 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.Database.DatabaseAction;
-import org.molgenis.framework.db.DatabaseAccessException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -190,7 +190,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 		{
 			if (!hasEntityPermission(request))
 			{
-				throw new DatabaseAccessException("No permission on DataSetFilter");
+				throw new MolgenisDataAccessException("No permission on DataSetFilter");
 			}
 		}
 	}

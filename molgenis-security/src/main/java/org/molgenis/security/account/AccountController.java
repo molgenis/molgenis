@@ -10,8 +10,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.DatabaseAccessException;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
@@ -61,7 +61,7 @@ public class AccountController
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
-	public ModelAndView getRegisterForm() throws DatabaseException
+	public ModelAndView getRegisterForm()
 	{
 		ModelAndView model = new ModelAndView("register-modal");
 		model.addObject("countries", CountryCodes.get());
@@ -79,8 +79,7 @@ public class AccountController
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest) throws DatabaseException, CaptchaException,
-			BindException
+			@Valid @ModelAttribute CaptchaRequest captchaRequest) throws CaptchaException, BindException
 	{
 		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
@@ -111,16 +110,11 @@ public class AccountController
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
 	public String activateUser(@Valid @NotNull @PathVariable String activationCode, Model model)
-			throws DatabaseException
 	{
 		try
 		{
 			accountService.activateUser(activationCode);
 			model.addAttribute("successMessage", "Your account has been activated, you can now sign in.");
-		}
-		catch (DatabaseException e)
-		{
-			model.addAttribute("errorMessage", e.getMessage());
 		}
 		catch (RuntimeException e)
 		{
@@ -133,14 +127,13 @@ public class AccountController
 	@RequestMapping(value = "/password/reset", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void resetPassword(@Valid @ModelAttribute PasswordResetRequest passwordResetRequest)
-			throws DatabaseException
 	{
 		accountService.resetPassword(passwordResetRequest.getEmail());
 	}
 
-	@ExceptionHandler(DatabaseAccessException.class)
+	@ExceptionHandler(MolgenisDataAccessException.class)
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-	private void handleDatabaseAccessException(DatabaseAccessException e)
+	private void handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 	}
 
@@ -159,10 +152,10 @@ public class AccountController
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
-	@ExceptionHandler(DatabaseException.class)
+	@ExceptionHandler(MolgenisDataException.class)
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 	@ResponseBody
-	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
+	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
 		logger.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));

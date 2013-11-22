@@ -1,5 +1,6 @@
 package org.molgenis.omx.datasetdeleter;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.mockito.ArgumentCaptor;
@@ -55,7 +57,8 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	private static ObservableFeature feature1;
 	private static ObservableFeature feature0;
 	private static Category category0;
-	private static List<ObservationSet> observationSets0;
+	private static List<Entity> observationSets0;
+	private static List<Protocol> subProtocols1;
 
 	@Autowired
 	private DataSetDeleterServiceImpl dataSetDeleterServiceImpl;
@@ -69,8 +72,13 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 
 	@SuppressWarnings("deprecation")
 	@Captor
-	private final ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSets = new ArgumentCaptor<ArrayList<ObservationSet>>();
+	private final ArgumentCaptor<LinkedList<ObservationSet>> captorObservationSets = new ArgumentCaptor<LinkedList<ObservationSet>>();
 
+	@SuppressWarnings("deprecation")
+	@Captor
+	private final ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSetsArrayList = new ArgumentCaptor<ArrayList<ObservationSet>>();
+
+	
 	@SuppressWarnings("deprecation")
 	@Captor
 	private final ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
@@ -111,6 +119,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		features1 = new ArrayList<ObservableFeature>();
 		allProtocols = new ArrayList<Protocol>();
 		subProtocols = new ArrayList<Protocol>();
+		subProtocols1 = new ArrayList<Protocol>();
 		categories = new ArrayList<Category>();
 
 		feature0 = new ObservableFeature();
@@ -136,15 +145,16 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		protocol1.setIdentifier("identifier1");
 		protocol1.setId(1);
 		protocol1.setFeatures(features1);
+		subProtocols1.add(protocol1);
 		protocol2 = new Protocol();
 		protocol2.setDescription("description2");
 		protocol2.setIdentifier("identifier2");
-		protocol2.setSubprotocols(subProtocols);
+		protocol2.setSubprotocols(subProtocols1);
 		protocol2.setId(2);
 		protocol3 = new Protocol();
 		protocol3.setDescription("description3");
 		protocol3.setIdentifier("identifier3");
-		protocol3.setSubprotocols(subProtocols);
+		protocol3.setSubprotocols(subProtocols1);
 		protocol3.setId(3);
 
 		allProtocols.add(protocol0);
@@ -170,6 +180,9 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		observationSet0 = new ObservationSet();
 		observationSet0.setId(0);
 		observationSet0.setPartOfDataSet(dataset);
+		
+		observationSets0 = new ArrayList<Entity>();
+		observationSets0.add(observationSet0);
 
 		observationSet1 = new ObservationSet();
 		observationSet1.setId(1);
@@ -194,7 +207,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		observedValues1 = new ArrayList<ObservedValue>();
 		observedValues1.add(observedValue1);
 
-		observationSets0 = new ArrayList<ObservationSet>();
+		observationSets0 = new ArrayList<Entity>();
 		observationSets0.add(observationSet0);
 
 		category0 = new Category();
@@ -241,6 +254,9 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void delete() throws IOException
 	{
+		when(dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(dataset);
+		
 		dataSetDeleterServiceImpl.delete("dataset1", true);
 		verify(dataService).delete(DataSet.ENTITY_NAME, dataset);
 	}
@@ -248,6 +264,9 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteNoMetadata() throws IOException
 	{
+		when(dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(dataset);
+		
 		dataSetDeleterServiceImpl.delete("dataset1", false);
 		verify(dataService, Mockito.times(0)).delete(DataSet.ENTITY_NAME, dataset);
 	}
@@ -262,18 +281,22 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteData()
 	{
+		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset))).thenReturn(observationSets0);
 		dataSetDeleterServiceImpl.deleteData(dataset);
 		// verify that only observationsets and abservedvalues belonging to the dataset are removed
-		verify(dataService, Mockito.atLeastOnce()).delete(ObservationSet.ENTITY_NAME, captorObservationSets.capture());
-		assertEquals(new Integer(0), captorObservationSets.getValue().get(0).getId());
-		assertEquals(1, captorObservationSets.getValue().size());
+		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservationSet.ENTITY_NAME), captorObservationSetsArrayList.capture());
+		
+		
+		assertEquals(new Integer(0), captorObservationSetsArrayList.getValue().get(0).getId());
+		assertEquals(1, captorObservationSetsArrayList.getValue().size());
 	}
 
 	@Test
 	public void deleteFeatures()
 	{
 		dataSetDeleterServiceImpl.deleteFeatures(features0, allProtocols);
-		verify(dataService, Mockito.atLeastOnce()).delete(ObservableFeature.ENTITY_NAME, captorFeatures.capture());
+		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservableFeature.ENTITY_NAME), captorFeatures.capture());
 		assertEquals("feature0", captorFeatures.getValue().get(0).getIdentifier());
 		assertEquals(1, captorFeatures.getValue().size());
 	}
