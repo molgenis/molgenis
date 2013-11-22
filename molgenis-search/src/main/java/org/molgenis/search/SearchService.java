@@ -2,9 +2,9 @@ package org.molgenis.search;
 
 import java.util.List;
 
+import org.molgenis.data.Entity;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.util.Entity;
 
 /**
  * Interface that a concrete SearchService must implement.

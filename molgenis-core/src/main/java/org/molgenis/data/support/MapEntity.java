@@ -12,9 +12,15 @@ public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
 	private Map<String, Object> values = new LinkedHashMap<String, Object>();
+	private String idAttributeName = null;
 
 	public MapEntity()
 	{
+	}
+
+	public MapEntity(String idAttributeName)
+	{
+		this.idAttributeName = idAttributeName;
 	}
 
 	public MapEntity(Map<String, Object> values)
@@ -48,13 +54,23 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public Integer getIdValue()
 	{
-		return null;
+		if (idAttributeName == null)
+		{
+			return null;
+		}
+
+		return (Integer) get(idAttributeName);
 	}
 
 	@Override
 	public String getLabelValue()
 	{
 		return null;
+	}
+
+	public String getIdAttributeName()
+	{
+		return idAttributeName;
 	}
 
 	@Override
