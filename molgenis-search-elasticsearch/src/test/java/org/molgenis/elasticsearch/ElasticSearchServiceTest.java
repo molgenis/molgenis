@@ -121,7 +121,8 @@ public class ElasticSearchServiceTest
 		clemantine.set("color", "orange");
 		fruits.add(clemantine);
 
-		Entity appleWithDot = new TestEntity(5);
+		Entity appleWithDot = new MapEntity("id");
+		appleWithDot.set("id", 5);
 		appleWithDot.set("name", "brown.banana");
 		appleWithDot.set("color", "brown");
 		fruits.add(appleWithDot);
