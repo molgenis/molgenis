@@ -2,50 +2,32 @@ package org.molgenis.ui.form;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
-import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.elements.Entity;
-import org.molgenis.model.elements.Field;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 
 public class EntityFormMetaData implements FormMetaData
 {
-	private final Entity entityMetaData;
+	private final EntityMetaData entityMetaData;
 
-	public EntityFormMetaData(Entity entityMetaData)
+	public EntityFormMetaData(EntityMetaData entityMetaData)
 	{
 		this.entityMetaData = entityMetaData;
 	}
 
 	@Override
-	public List<Field> getFields()
+	public List<AttributeMetaData> getFields()
 	{
-		try
+		List<AttributeMetaData> attributes = new ArrayList<AttributeMetaData>();
+		for (AttributeMetaData attr : entityMetaData.getAttributes())
 		{
-			List<Field> fields = new ArrayList<Field>(entityMetaData.getNonSystemFields(true));
-
-			// Remove hidden fields
-			ListIterator<Field> it = fields.listIterator();
-			while (it.hasNext())
+			if (!attr.isIdAtrribute() && !attr.getName().equals("__Type"))// TODO system fields in AttributeMetaData
 			{
-				Field field = it.next();
-				if (field.isHidden())
-				{
-					it.remove();
-				}
+				attributes.add(attr);
 			}
-
-			// Workaround for bug that if an entity implements an abstract entity in the model xml and that has a hidden
-			// field it is not set to hidden in the implementing entity
-			fields.remove(entityMetaData.getPrimaryKey());
-
-			return fields;
 		}
-		catch (MolgenisModelException e)
-		{
-			throw new UnknownEntityException("Exception getting fields for entity [" + entityMetaData.getName() + "]",
-					e);
-		}
+
+		return attributes;
 	}
 
 	@Override

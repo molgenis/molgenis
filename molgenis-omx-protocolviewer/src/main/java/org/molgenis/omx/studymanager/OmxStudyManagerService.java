@@ -1,11 +1,11 @@
 package org.molgenis.omx.studymanager;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.StudyDefinition;
@@ -18,27 +18,19 @@ import com.google.common.collect.Lists;
 
 public class OmxStudyManagerService implements StudyManagerService
 {
-	private final Database database;
+	private final DataService dataService;
 
-	public OmxStudyManagerService(Database database)
+	public OmxStudyManagerService(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
 	public List<StudyDefinitionMeta> getStudyDefinitions()
 	{
-		List<StudyDataRequest> studyDataRequests;
-		try
-		{
-			studyDataRequests = database.find(StudyDataRequest.class);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		if (studyDataRequests == null) return Collections.emptyList();
+		List<StudyDataRequest> studyDataRequests = dataService.findAllAsList(StudyDataRequest.ENTITY_NAME,
+				new QueryImpl());
 
 		return Lists.transform(studyDataRequests, new Function<StudyDataRequest, StudyDefinitionMeta>()
 		{
@@ -54,17 +46,11 @@ public class OmxStudyManagerService implements StudyManagerService
 	@Override
 	public StudyDefinition getStudyDefinition(String id) throws UnknownStudyDefinitionException
 	{
-		StudyDataRequest studyDataRequest;
-		try
-		{
-			studyDataRequest = StudyDataRequest.findByIdentifier(database, id);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
+				new QueryImpl().eq(StudyDataRequest.IDENTIFIER, id));
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
+
 		return new OmxStudyDefinition(studyDataRequest);
 	}
 
@@ -101,15 +87,9 @@ public class OmxStudyManagerService implements StudyManagerService
 	public void updateStudyDefinition(StudyDefinition studyDefinition) throws UnknownStudyDefinitionException
 	{
 		String id = studyDefinition.getId();
-		StudyDataRequest studyDataRequest;
-		try
-		{
-			studyDataRequest = StudyDataRequest.findByIdentifier(database, id);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		Query q = new QueryImpl().eq(StudyDataRequest.IDENTIFIER, id);
+		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME, q);
+
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
 
@@ -122,30 +102,18 @@ public class OmxStudyManagerService implements StudyManagerService
 					public ObservableFeature apply(CatalogItem catalogItem)
 					{
 						String id = catalogItem.getId();
-						ObservableFeature feature;
-						try
-						{
-							feature = ObservableFeature.findByIdentifier(database, id);
-						}
-						catch (DatabaseException e)
-						{
-							throw new RuntimeException(e);
-						}
+						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+								new QueryImpl().eq(ObservableFeature.IDENTIFIER, id));
 						if (feature == null)
 						{
 							throw new RuntimeException("Observable feature does not exist identifier: " + id);
 						}
+
 						return feature;
 					}
 				})));
-		try
-		{
-			database.update(studyDataRequest); // FIXME Duplicate entry '...' for key 'PRIMARY' exceptions
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
+		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
 
 	@Override

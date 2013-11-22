@@ -138,6 +138,7 @@ public class IndexRequestGenerator
 				{
 					Tuple tuple = it.next();
 					Map<String, Object> doc = new HashMap<String, Object>();
+
 					for (String columnName : tuple.getColNames())
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on

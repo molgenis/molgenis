@@ -4,31 +4,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.model.elements.Entity;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 
 public class EntityForm implements Form
 {
-	private final Entity entityMetaData;
-	private org.molgenis.util.Entity entity;
-	private String primaryKey;
+	private final EntityMetaData entityMetaData;
+	private Entity entity;
+	private Integer primaryKey;
 	private final boolean hasWritePermission;
 	private final List<SubEntityForm> subForms = new ArrayList<SubEntityForm>();
 
-	public EntityForm(Entity entityMetaData, boolean hasWritePermission)
+	public EntityForm(EntityMetaData entityMetaData, boolean hasWritePermission)
 	{
 		this.entityMetaData = entityMetaData;
 		this.hasWritePermission = hasWritePermission;
 	}
 
-	public EntityForm(Entity entityMetaData, boolean hasWritePermission, org.molgenis.util.Entity entity)
+	public EntityForm(EntityMetaData entityMetaData, boolean hasWritePermission, Entity entity)
 	{
 		this.entityMetaData = entityMetaData;
 		this.hasWritePermission = hasWritePermission;
 		this.entity = entity;
 	}
 
-	public EntityForm(Entity entityMetaData, org.molgenis.util.Entity entity, String primaryKey,
-			boolean hasWritePermission)
+	public EntityForm(EntityMetaData entityMetaData, Entity entity, Integer primaryKey, boolean hasWritePermission)
 	{
 		this.entityMetaData = entityMetaData;
 		this.primaryKey = primaryKey;
@@ -39,7 +39,7 @@ public class EntityForm implements Form
 	@Override
 	public String getTitle()
 	{
-		return entityMetaData.getLabel();
+		return entityMetaData.getName();
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class EntityForm implements Form
 	}
 
 	@Override
-	public String getPrimaryKey()
+	public Integer getPrimaryKey()
 	{
 		return primaryKey;
 	}
@@ -71,7 +71,7 @@ public class EntityForm implements Form
 	}
 
 	@Override
-	public org.molgenis.util.Entity getEntity()
+	public Entity getEntity()
 	{
 		return entity;
 	}

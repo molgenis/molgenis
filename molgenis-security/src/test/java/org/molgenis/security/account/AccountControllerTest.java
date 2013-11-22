@@ -13,10 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.MolgenisPasswordEncoder;
@@ -54,7 +53,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	private CaptchaService captchaService;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	private MockMvc mockMvc;
 
@@ -206,20 +205,16 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database database() throws DatabaseException
+		public DataService dataService()
 		{
-			Database database = mock(Database.class);
+			DataService dataService = mock(DataService.class);
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(
-					database.find(MolgenisUser.class, new QueryRule(MolgenisUser.EMAIL, Operator.EQUALS,
-							"admin@molgenis.org"))).thenReturn(Collections.<MolgenisUser> singletonList(molgenisUser));
-			return database;
-		}
+					dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+							new QueryImpl().eq(MolgenisUser.EMAIL, "admin@molgenis.org"))).thenReturn(
+					Collections.<Entity> singletonList(molgenisUser));
 
-		@Bean
-		public Database unsecuredDatabase()
-		{
-			return mock(Database.class);
+			return dataService;
 		}
 
 		@Bean

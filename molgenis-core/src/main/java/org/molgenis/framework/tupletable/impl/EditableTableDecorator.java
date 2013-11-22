@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.QueryRule;
 import org.molgenis.framework.tupletable.FilterableTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
@@ -157,12 +157,6 @@ public class EditableTableDecorator implements FilterableTupleTable
 	public List<QueryRule> getFilters()
 	{
 		return decoratedTable.getFilters();
-	}
-
-	@Override
-	public QueryRule getSortRule()
-	{
-		return decoratedTable.getSortRule();
 	}
 
 	@Override

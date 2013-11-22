@@ -14,7 +14,7 @@ public interface StudyDefinition
 
 	String getDescription();
 
-	String getCatalogVersion();
+	String getVersion();
 
 	List<CatalogItem> getItems();
 

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.QueryRule;
 
 public class EntityCollectionRequest
 {

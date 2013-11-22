@@ -1,15 +1,11 @@
 package org.molgenis.omx.workflow;
 
-import static org.molgenis.framework.db.QueryRule.Operator.AND;
-import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -27,17 +23,17 @@ public class WorkflowElementDataRow
 	private final List<WorkflowElementDataRowConnection> outgoingElementDataRowConnections;
 	private final boolean completed;
 
-	public WorkflowElementDataRow(ObservationSet observationSet, Database database) throws DatabaseException
+	public WorkflowElementDataRow(ObservationSet observationSet, DataService dataService)
 	{
 		if (observationSet == null) throw new IllegalArgumentException("ObservationSet is null");
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("Database is null");
 		this.id = observationSet.getId();
-		this.valueMap = createValueMap(observationSet, database);
+		this.valueMap = createValueMap(observationSet, dataService);
 		this.incomingElementDataRowConnections = createElementDataRowConnections(observationSet,
-				ObservationSetFlow.DESTINATION, database);
+				ObservationSetFlow.DESTINATION, dataService);
 		this.outgoingElementDataRowConnections = createElementDataRowConnections(observationSet,
-				ObservationSetFlow.SOURCE, database);
-		this.completed = determineIsCompleted(observationSet, database);
+				ObservationSetFlow.SOURCE, dataService);
+		this.completed = determineIsCompleted(observationSet, dataService);
 	}
 
 	public Integer getId()
@@ -70,7 +66,7 @@ public class WorkflowElementDataRow
 		return completed;
 	}
 
-	private boolean determineIsCompleted(ObservationSet observationSet, Database database)
+	private boolean determineIsCompleted(ObservationSet observationSet, DataService dataService)
 	{
 		boolean isCompleted = true;
 		List<ObservableFeature> features = observationSet.getPartOfDataSet().getProtocolUsed().getRequiredFeatures();
@@ -78,76 +74,59 @@ public class WorkflowElementDataRow
 		// List<ObservableFeature> features = observationSet.getPartOfDataSet().getProtocolUsed().getFeatures();
 		for (ObservableFeature feature : features)
 		{
-			try
+
+			long count = dataService
+					.count(ObservedValue.ENTITY_NAME, new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet)
+							.eq(ObservedValue.FEATURE, feature));
+
+			if (count > 0)
 			{
-				List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
-						ObservedValue.OBSERVATIONSET, EQUALS, observationSet), new QueryRule(AND), new QueryRule(
-						ObservedValue.FEATURE, EQUALS, feature));
-				if (observedValues == null || observedValues.isEmpty())
-				{
-					isCompleted = false;
-					break;
-				}
+				isCompleted = false;
+				break;
 			}
-			catch (DatabaseException e)
-			{
-				throw new RuntimeException(e);
-			}
+
 		}
 		return isCompleted;
 	}
 
-	private Map<Integer, Object> createValueMap(ObservationSet observationSet, Database database)
+	private Map<Integer, Object> createValueMap(ObservationSet observationSet, DataService dataService)
 	{
 		Map<Integer, Object> valueMap = new HashMap<Integer, Object>();
 		try
 		{
-			List<ObservedValue> observedValues = database.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET, EQUALS, observationSet));
+			List<ObservedValue> observedValues = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
+					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet));
 
-			if (observedValues != null)
+			ValueConverter valueConverter = new ValueConverter(dataService);
+			for (ObservedValue observedValue : observedValues)
 			{
-				ValueConverter valueConverter = new ValueConverter(database);
-				for (ObservedValue observedValue : observedValues)
-				{
-					Object value = valueConverter.toCell(observedValue.getValue()).getValue();
-					valueMap.put(observedValue.getFeature().getId(), value);
-				}
+				Object value = valueConverter.toCell(observedValue.getValue()).getValue();
+				valueMap.put(observedValue.getFeature().getId(), value);
 			}
 		}
 		catch (ValueConverterException e)
 		{
 			throw new RuntimeException(e);
 		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
 		return valueMap;
 	}
 
 	private List<WorkflowElementDataRowConnection> createElementDataRowConnections(ObservationSet observationSet,
-			String direction, final Database database) throws DatabaseException
+			String direction, final DataService dataService)
 	{
-		List<ObservationSetFlow> observationSetFlows = database.find(ObservationSetFlow.class, new QueryRule(direction,
-				EQUALS, observationSet));
+		List<ObservationSetFlow> observationSetFlows = dataService.findAllAsList(ObservationSetFlow.ENTITY_NAME,
+				new QueryImpl().eq(direction, observationSet));
 
-		return observationSetFlows != null ? Lists.transform(observationSetFlows,
+		return Lists.transform(observationSetFlows,
 				new Function<ObservationSetFlow, WorkflowElementDataRowConnection>()
 				{
 					@Override
 					public WorkflowElementDataRowConnection apply(ObservationSetFlow observationSetFlow)
 					{
-						try
-						{
-							return new WorkflowElementDataRowConnection(observationSetFlow, database);
-						}
-						catch (DatabaseException e)
-						{
-							throw new RuntimeException(e);
-						}
+						return new WorkflowElementDataRowConnection(observationSetFlow, dataService);
 					}
-				}) : null;
+				});
 	}
 
 	@Override

@@ -6,11 +6,8 @@ import java.util.Collections;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.TokenFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,25 +40,6 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	private String dbUser;
 	@Value("${r"${db_password:@null}"}")
 	private String dbPassword;
-		
-	@Bean
-	public Database database() throws DatabaseException
-	{
-		return new SecuredJpaDatabase(jdbcMetaDatabase());
-	}
-
-	@Bean
-	@Qualifier("unsecuredDatabase")
-	public Database unsecuredDatabase() throws DatabaseException
-	{
-		return new UnsecuredJpaDatabase(jdbcMetaDatabase());
-	}
-	
-	@Bean
-	public JDBCMetaDatabase jdbcMetaDatabase() throws DatabaseException
-	{
-		return new JDBCMetaDatabase();
-	}
 	
 	@Bean
 	public DataSource dataSource()

@@ -18,9 +18,10 @@ import org.molgenis.framework.db.QueryRule.Operator;
  */
 public class LuceneQueryStringBuilder
 {
-	// The characters that need to be escaped are: && + - ! ( ) { } [ ] ^ " ~ *
-	// ? :
-	private static final String LUCENE_ESCAPE_CHARS_VALUE = "[-&+!\\|\\(\\){}\\[\\]\"\\~\\*\\?:\\\\]";
+	// The characters that need to be escaped are: && || + - ! ( ) { } [ ] " ~ *
+	// / \ ? :
+	// ^ was not included because it needs to be used for query boosting
+	private static final String LUCENE_ESCAPE_CHARS_VALUE = "[-&+!\\|\\(\\){}\\[\\]\"\\~\\*\\?:\\\\\\/]";
 	private static final Pattern LUCENE_PATTERN_VALUE = Pattern.compile(LUCENE_ESCAPE_CHARS_VALUE);
 
 	// Field also needs escaping of whitespace (TODO test each char if it's

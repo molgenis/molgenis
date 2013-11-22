@@ -9,8 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -40,7 +39,7 @@ public class ShoppingCartController
 	private ShoppingCart shoppingCart;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
@@ -51,17 +50,10 @@ public class ShoppingCartController
 		{
 			@Override
 			@Nullable
-			public FeatureResponse apply(@Nullable Integer featureId)
+			public FeatureResponse apply(@Nullable
+			Integer featureId)
 			{
-				ObservableFeature feature;
-				try
-				{
-					feature = database.findById(ObservableFeature.class, featureId);
-				}
-				catch (DatabaseException e)
-				{
-					throw new RuntimeException(e);
-				}
+				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId);
 				return new FeatureResponse(feature);
 			}
 		}));
@@ -69,13 +61,16 @@ public class ShoppingCartController
 
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void addToCart(@Valid @RequestBody FeaturesRequest featuresRequest)
+	public void addToCart(@Valid
+	@RequestBody
+	FeaturesRequest featuresRequest)
 	{
 		shoppingCart.addToCart(Lists.transform(featuresRequest.getFeatures(), new Function<FeatureRequest, Integer>()
 		{
 			@Override
 			@Nullable
-			public Integer apply(@Nullable FeatureRequest featureRequest)
+			public Integer apply(@Nullable
+			FeatureRequest featureRequest)
 			{
 				return featureRequest != null ? featureRequest.getFeature() : null;
 			}
@@ -91,14 +86,17 @@ public class ShoppingCartController
 
 	@RequestMapping(value = "/remove", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void removeFromCart(@Valid @RequestBody FeaturesRequest featuresRequest)
+	public void removeFromCart(@Valid
+	@RequestBody
+	FeaturesRequest featuresRequest)
 	{
 		shoppingCart.removeFromCart(Lists.transform(featuresRequest.getFeatures(),
 				new Function<FeatureRequest, Integer>()
 				{
 					@Override
 					@Nullable
-					public Integer apply(@Nullable FeatureRequest featureRequest)
+					public Integer apply(@Nullable
+					FeatureRequest featureRequest)
 					{
 						return featureRequest != null ? featureRequest.getFeature() : null;
 					}
@@ -107,14 +105,17 @@ public class ShoppingCartController
 
 	@RequestMapping(value = "/replace", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void emptyAndAddToCart(@Valid @RequestBody FeaturesRequest featuresRequest)
+	public void emptyAndAddToCart(@Valid
+	@RequestBody
+	FeaturesRequest featuresRequest)
 	{
 		shoppingCart.emptyAndAddToCart(Lists.transform(featuresRequest.getFeatures(),
 				new Function<FeatureRequest, Integer>()
 				{
 					@Override
 					@Nullable
-					public Integer apply(@Nullable FeatureRequest featureRequest)
+					public Integer apply(@Nullable
+					FeatureRequest featureRequest)
 					{
 						return featureRequest != null ? featureRequest.getFeature() : null;
 					}

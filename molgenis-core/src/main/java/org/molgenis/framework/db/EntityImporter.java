@@ -1,13 +1,11 @@
 package org.molgenis.framework.db;
 
-import java.io.IOException;
-
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.db.Database.DatabaseAction;
 
-public interface EntityImporter
+public interface EntityImporter<E extends Entity>
 {
-	public int importEntity(Repository<? extends Entity> repository, Database db, DatabaseAction dbAction)
-			throws IOException, DatabaseException;
+	int importEntity(Repository<? extends Entity> repository, DataService dataService, DatabaseAction dbAction);
 }

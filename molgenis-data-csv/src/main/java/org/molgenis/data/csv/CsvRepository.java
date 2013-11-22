@@ -22,12 +22,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.io.processor.AbstractCellProcessor;
+import org.molgenis.io.processor.CellProcessor;
 import org.springframework.util.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -231,6 +231,12 @@ public class CsvRepository extends AbstractRepository<Entity>
 	public void close() throws IOException
 	{
 		csvReader.close();
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return MapEntity.class;
 	}
 
 }

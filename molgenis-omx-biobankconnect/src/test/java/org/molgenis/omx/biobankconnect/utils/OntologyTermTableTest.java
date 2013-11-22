@@ -26,7 +26,7 @@ public class OntologyTermTableTest
 	{
 		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
 		db = mock(Database.class);
-		table = new OntologyTermTable(loader, db);
+		table = new OntologyTermTable(loader);
 	}
 
 	@Test
@@ -39,12 +39,6 @@ public class OntologyTermTableTest
 	public void getCount()
 	{
 		assertEquals(table.getCount(), 12);
-	}
-
-	@Test
-	public void getDb()
-	{
-		assertEquals(table.getDb(), db);
 	}
 
 	@Test

@@ -7,18 +7,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.patient.Patient;
 import org.molgenis.omx.xgap.Chromosome;
+import org.molgenis.omx.xgap.Track;
 import org.molgenis.omx.xgap.Variant;
-import org.molgenis.util.ApplicationUtil;
+import org.molgenis.util.ApplicationContextProvider;
 
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
@@ -40,11 +38,12 @@ import uk.ac.ebi.mydas.model.Range;
 
 public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 {
-	private Database database;
-	private DasType mutationType;
-	private DasMethod method;
+	private final DataService dataService;
+	private final DasType mutationType;
+	private final DasMethod method;
 	private String dataset;
 
+	@Override
 	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
 			DataSourceConfiguration dataSourceConfig) throws DataSourceException
 	{
@@ -53,9 +52,9 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	}
 
 	// for unit test
-	public DasOmxDataSource(Database database) throws DataSourceException
+	public DasOmxDataSource(DataService dataService) throws DataSourceException
 	{
-		this.database = database;
+		this.dataService = dataService;
 		mutationType = new DasType("mutation", null, "?", "mutation");
 		method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 		this.dataset = "test";
@@ -63,7 +62,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 
 	public DasOmxDataSource() throws DataSourceException
 	{
-		database = ApplicationUtil.getDatabase();
+		dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
 		mutationType = new DasType("mutation", null, "?", "mutation");
 		method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 	}
@@ -79,89 +78,83 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 			throws UnimplementedFeatureException, DataSourceException
 	{
 		List<DasEntryPoint> entryPoints = new ArrayList<DasEntryPoint>();
-		try
-		{
-			Chromosome chromosome = getChromosome(segmentId.toString());
-			entryPoints.add(new DasEntryPoint(chromosome.getName(), 0, chromosome.getBpLength(), "Chromosome",
-					"VERSION", DasEntryPointOrientation.NO_INTRINSIC_ORIENTATION, "test", false));
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException("error getting das entrypoints. " + e);
-		}
+
+		Chromosome chromosome = getChromosome(segmentId.toString());
+		entryPoints.add(new DasEntryPoint(chromosome.getName(), 0, chromosome.getBpLength(), "Chromosome", "VERSION",
+				DasEntryPointOrientation.NO_INTRINSIC_ORIENTATION, "test", false));
 
 		return entryPoints;
 	}
 
+	@Override
 	public DasAnnotatedSegment getFeatures(String segmentId, int start, int stop, Integer maxbins)
 			throws BadReferenceObjectException, CoordinateErrorException, DataSourceException
 	{
-		try
-		{
-			String[] segmentParts = segmentId.split(",");
-			String patient = null;
-			Patient patientObject = null;
-			if (segmentParts.length > 1)
-			{
-				segmentId = segmentParts[0];
-				patient = segmentParts[1];
-				patientObject = findPatient(patient);
-			}
-			if (maxbins == null) maxbins = -1;
-			List<Variant> variants = queryVariants(segmentId, start, stop, patientObject);
-			List<DasFeature> features = new ArrayList<DasFeature>();
 
-			for (Variant variant : variants)
-			{
-				DasFeature feature = createDasFeature(variant);
-				features.add(feature);
-			}
-
-			DasAnnotatedSegment segment = new DasAnnotatedSegment(segmentId, start, stop, "1.00", segmentId, features);
-			return segment;
-		}
-		catch (Exception e)
+		String[] segmentParts = segmentId.split(",");
+		String patient = null;
+		Patient patientObject = null;
+		if (segmentParts.length > 1)
 		{
-			throw new RuntimeException("error getting das features. " + e);
+			segmentId = segmentParts[0];
+			patient = segmentParts[1];
+			patientObject = findPatient(patient);
 		}
+		if (maxbins == null) maxbins = -1;
+		List<Variant> variants = queryVariants(segmentId, start, stop, patientObject);
+		List<DasFeature> features = new ArrayList<DasFeature>();
+
+		for (Variant variant : variants)
+		{
+			DasFeature feature;
+			try
+			{
+				feature = createDasFeature(variant);
+			}
+			catch (MalformedURLException e)
+			{
+				throw new RuntimeException(e);
+			}
+			features.add(feature);
+		}
+
+		DasAnnotatedSegment segment = new DasAnnotatedSegment(segmentId, start, stop, "1.00", segmentId, features);
+		return segment;
+
 	}
 
-	protected Patient findPatient(String patient) throws DatabaseException
+	protected Patient findPatient(String patient)
 	{
-		Patient patientObject;
-		Query<Patient> patientQuery = database.query(Patient.class);
-		patientQuery.equals(Patient.ID, patient);
-		List<Patient> patients = patientQuery.find();
-		patientObject = patients.get(0);
-		return patientObject;
+		return dataService.findOne(Patient.ENTITY_NAME, new QueryImpl().eq(Patient.IDENTIFIER, patient));
 	}
 
 	protected List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
-			throws DatabaseException
 	{
 		List<Variant> variants = new ArrayList<Variant>();
 		Chromosome chromosome = getChromosome(segmentId);
+		Track track = dataService.findOne(Track.ENTITY_NAME, new QueryImpl().eq(Track.IDENTIFIER, dataset));
 
-		Query<Variant> variantQuery = database.query(Variant.class);
-		variantQuery.greaterOrEqual(Variant.BPSTART, start);
-		variantQuery.lessOrEqual(Variant.BPEND, stop);
-		variantQuery.equals(Variant.CHROMOSOME, chromosome.getId());
-		variantQuery.equals(Variant.TRACK_IDENTIFIER, dataset);
+		QueryImpl variantQuery = new QueryImpl();
+		variantQuery.ge(Variant.BPSTART, start);
+		variantQuery.le(Variant.BPEND, stop);
+		variantQuery.eq(Variant.CHROMOSOME, chromosome);
+		variantQuery.eq(Variant.TRACK, track);
+
 		if (patientObject != null)
 		{
 			Variant allele1 = patientObject.getAllele1();
 			Variant allele2 = patientObject.getAllele2();
 			if (allele1 != null || allele2 != null)
 			{
-				if (allele1 != null) variantQuery.equals(Variant.IDENTIFIER, allele1.getIdentifier());
+				if (allele1 != null) variantQuery.eq(Variant.IDENTIFIER, allele1.getIdentifier());
 				if (allele1 != null && allele2 != null) variantQuery.or();
-				if (allele2 != null) variantQuery.equals(Variant.IDENTIFIER, allele2.getIdentifier());
-				variants = variantQuery.find();
+				if (allele2 != null) variantQuery.eq(Variant.IDENTIFIER, allele2.getIdentifier());
+				variants = dataService.findAllAsList(Variant.ENTITY_NAME, variantQuery);
 			}
 		}
 		else
 		{
-			variants = variantQuery.find();
+			variants = dataService.findAllAsList(Variant.ENTITY_NAME, variantQuery);
 		}
 		return variants;
 	}
@@ -185,14 +178,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	@Override
 	public Integer getTotalCountForType(DasType type) throws DataSourceException
 	{
-		try
-		{
-			return database.count(Variant.class);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException("error getting das total type count. " + e);
-		}
+		return new Long(dataService.count(Variant.ENTITY_NAME, new QueryImpl())).intValue();
 	}
 
 	@Override
@@ -203,13 +189,9 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		return types;
 	}
 
-	protected Chromosome getChromosome(String segmentId) throws DatabaseException
+	protected Chromosome getChromosome(String segmentId)
 	{
-		Query<Chromosome> variantQuery = database.query(Chromosome.class);
-
-		variantQuery.equals(Chromosome.IDENTIFIER, segmentId);
-		Chromosome chromosome = variantQuery.find().get(0);
-		return chromosome;
+		return dataService.findOne(Chromosome.ENTITY_NAME, new QueryImpl().eq(Chromosome.IDENTIFIER, segmentId));
 	}
 
 	// unimplemented functions
