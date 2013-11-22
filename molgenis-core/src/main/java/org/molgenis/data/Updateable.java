@@ -2,8 +2,6 @@ package org.molgenis.data;
 
 import java.util.List;
 
-import org.molgenis.framework.db.Database.DatabaseAction;
-
 /* 
  * Updateable repository
  */

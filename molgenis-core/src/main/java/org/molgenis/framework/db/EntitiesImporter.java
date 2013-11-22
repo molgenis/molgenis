@@ -3,10 +3,10 @@ package org.molgenis.framework.db;
 import java.io.File;
 import java.io.IOException;
 
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.db.Database.DatabaseAction;
 
 /**
  * Import entities into the database

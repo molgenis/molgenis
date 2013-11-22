@@ -29,7 +29,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.Database.DatabaseAction;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntityImporter;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;

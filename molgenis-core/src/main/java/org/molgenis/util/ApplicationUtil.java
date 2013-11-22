@@ -2,7 +2,6 @@ package org.molgenis.util;
 
 import javax.persistence.EntityManagerFactory;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -18,20 +17,6 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 public class ApplicationUtil
 {
-	public static Database getDatabase()
-	{
-		return getApplicationContext().getBean("database", Database.class);
-	}
-
-	public static Database getUnauthorizedDatabase()
-	{
-		return getDatabase();
-	}
-
-	public static Database getUnauthorizedPrototypeDatabase()
-	{
-		return getDatabase();
-	}
 
 	public static EntityManagerFactory getEntityManagerFactory()
 	{

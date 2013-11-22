@@ -20,7 +20,7 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.framework.db.Database.DatabaseAction;
+import org.molgenis.data.DatabaseAction;
 
 /**
  * TODO add column level security filters

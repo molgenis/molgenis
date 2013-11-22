@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.Database.DatabaseAction;
-
 /**
  * Base class for CrudRepository decorators.
  * 
