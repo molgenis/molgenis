@@ -121,6 +121,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data</artifactId>
+			<version>0.0.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 		</dependency>

@@ -2,8 +2,6 @@ package org.molgenis.util;
 
 import javax.persistence.EntityManagerFactory;
 
-import org.molgenis.framework.db.EntitiesImporter;
-import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
@@ -31,16 +29,6 @@ public class ApplicationUtil
 	public static MolgenisSettings getMolgenisSettings()
 	{
 		return getApplicationContext().getBean("molgenisSettings", MolgenisSettings.class);
-	}
-
-	public static EntitiesImporter getEntitiesImporter()
-	{
-		return getApplicationContext().getBean(EntitiesImporter.class);
-	}
-
-	public static EntitiesValidator getEntitiesValidator()
-	{
-		return getApplicationContext().getBean(EntitiesValidator.class);
 	}
 
 	private static ApplicationContext getApplicationContext()

@@ -45,7 +45,7 @@ import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
-import org.molgenis.generators.db.MapperSecurityDecoratorGen;
+import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
@@ -259,7 +259,7 @@ public class Molgenis
 			if (options.generate_decorators)
 			{
 				// authorization
-				generators.add(new MapperSecurityDecoratorGen());
+				generators.add(new CrudRepositorySecurityDecoratorGen());
 
 			}
 		}

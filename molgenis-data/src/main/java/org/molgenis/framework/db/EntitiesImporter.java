@@ -22,7 +22,7 @@ public interface EntitiesImporter
 	 * @throws IOException
 	 * @throws DatabaseException
 	 */
-	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException;
+	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException;
 
 	/**
 	 * Import entities from a {@link org.molgenis.io.TupleReader}
@@ -35,7 +35,7 @@ public interface EntitiesImporter
 	 * @throws DatabaseException
 	 */
 	public EntityImportReport importEntities(Repository<? extends Entity> repository, String entityName,
-			DatabaseAction dbAction) throws IOException, DatabaseException;
+			DatabaseAction dbAction) throws IOException;
 
 	/**
 	 * Import entities from a {@link org.molgenis.io.TableReader}
@@ -47,6 +47,5 @@ public interface EntitiesImporter
 	 * @throws IOException
 	 * @throws DatabaseException
 	 */
-	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException,
-			DatabaseException;
+	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException;
 }

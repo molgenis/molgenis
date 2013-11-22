@@ -27,7 +27,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.db.EntityImporter;
@@ -69,17 +68,17 @@ public class EntitiesImporterImpl implements EntitiesImporter
 
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
-	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException
+	{ IOException.class})
+	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException
 	{
 		return importEntities(dataService.createEntitySource(file), dbAction);
 	}
 	
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
+	{ IOException.class})
 	public EntityImportReport importEntities(final Repository<? extends Entity> repository, final String entityName,
-			DatabaseAction dbAction) throws IOException, DatabaseException
+			DatabaseAction dbAction) throws IOException
 	{
 
 		return importEntities(new EntitySource()
@@ -114,9 +113,8 @@ public class EntitiesImporterImpl implements EntitiesImporter
 
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
-	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException,
-			DatabaseException
+	{ IOException.class})
+	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException
 	{
 		EntityImportReport importReport = new EntityImportReport();
 

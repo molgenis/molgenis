@@ -16,7 +16,7 @@ import org.molgenis.model.elements.Model;
 
 import freemarker.template.Template;
 
-public class MapperSecurityDecoratorGen extends ForEachEntityGenerator
+public class CrudRepositorySecurityDecoratorGen extends ForEachEntityGenerator
 {
 	@Override
 	public String getDescription()

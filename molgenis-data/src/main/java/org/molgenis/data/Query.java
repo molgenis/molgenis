@@ -1,9 +1,7 @@
 package org.molgenis.data;
 
-import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.QueryRule;
 import org.springframework.data.domain.Sort;
 
 /**
@@ -17,24 +15,19 @@ public interface Query
 	List<QueryRule> getRules();
 
 	/**
-	 * Enable attribute selection
-	 */
-	Iterator<String> getAttributeNames();
-
-	/**
 	 * Size of a page. Synonym: limit
 	 */
 	int getPageSize();
 
 	/**
-	 * Number of selected page.
+	 * Start
 	 */
-	int getPageNumber();
+	int getOffset();
 
 	/**
 	 * Returns sort
 	 */
-	Iterator<Sort> getSort();
+	Sort getSort();
 
 	/**
 	 * Search all fields
@@ -42,6 +35,8 @@ public interface Query
 	Query search(String searchTerms);
 
 	Query or();
+
+	Query and();
 
 	Query like(String field, Object value);
 
