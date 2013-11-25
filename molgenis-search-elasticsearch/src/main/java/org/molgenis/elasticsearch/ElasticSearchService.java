@@ -36,7 +36,7 @@ import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.Entity;
+import org.molgenis.data.Entity;
 
 /**
  * ElasticSearch implementation of the SearchService interface
