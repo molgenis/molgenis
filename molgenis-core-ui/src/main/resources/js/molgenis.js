@@ -27,7 +27,31 @@
 		items.push('</div>');
 		
 		container.prepend(items.join(''));
-	};		
+	};	
+	
+	/*
+	 * Create a datasets indexer alert when indexer is running.
+	 */
+	molgenis.createDatasetsindexerAlert = function () {
+		$.get("/menu/admin/dataindexer/status", function(response) {
+			if(response && response.isRunning === true){
+				showDatasetsindexerStatusMessage();
+			}
+		});
+		
+		function showDatasetsindexerStatusMessage() {
+			$.get("/menu/admin/dataindexer/status", function(response) {
+				$('.datasetsindexerAlerts').empty();
+				if(response.isRunning === true){
+					setTimeout(showDatasetsindexerStatusMessage, 3000);
+					molgenis.createAlert([{'message': response.message}], 'warning', $('.datasetsindexerAlerts'));
+				}else{
+					molgenis.createAlert([{'message': response.message}], 'success', $('.datasetsindexerAlerts'));
+				}
+			});
+		};
+	};
+	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 
@@ -501,4 +525,8 @@ $(function() {
 		 //send request and remove form from dom
 		 $('<form action="' + url +'" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
 	 }; 
+});
+
+$(function() {
+	molgenis.createDatasetsindexerAlert();
 });

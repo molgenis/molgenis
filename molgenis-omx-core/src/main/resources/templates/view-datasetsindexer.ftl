@@ -1,8 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=[]>
-<#assign js=["datasetsindexer.js"]>
-<@header css js/>
+<@header/>
 	<div class="row-fluid">
 		<div class="span9">
 		<h4>Index datasets:</h4>
@@ -21,10 +19,9 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		alert("test");
-		console.log("stap 1");
-		alert("test2");
+
 		$(document).ready(function(){
+			
 			$('#select-all').click(function() {
 				$('.dataset-chk').attr('checked', true);
 				return false;
@@ -54,11 +51,26 @@
 				}).done(function(response){
 					molgenis.createAlert([{'message': response.message}], response.isRunning ? 'success' : 'error');
 					$('.dataset-chk').attr('checked', false);
+					molgenis.createDatasetsindexerAlert();
+					if(response.isRunning === true){
+						$('.alerts').empty();
+					}
 				});
 				
 				return false;
 			});
-			console.log("stap 2");
+			
+//			function setStatusMessage() {
+//				//console.log("setStatusMessage() ---: " + new Date());
+//			    $.get("/menu/admin/dataindexer/status", function(response) {
+//					if(response.isRunning === true){
+//						setTimeout(setStatusMessage, 2000);
+//					}else{
+//						molgenis.createAlert([{'message': response.message}], 'success');
+//					}
+//				});
+//			};		
+			
 		});
 	</script>
 <@footer/>	

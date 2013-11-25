@@ -13,7 +13,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.cart.ShoppingCartController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +71,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	@ResponseBody
 	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
-		//TODO JJ fix/850
+
 		if (dataSetsIndexer.isIndexingRunning())
 		{
 			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
@@ -95,20 +94,17 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		}
 		dataSetsIndexer.index(ids);
 
-		return new DataSetIndexResponse(true, "Indexing started");
+		return new DataSetIndexResponse(true, "");
 	}
 	
-	//TODO JJ fix/850
-	@RequestMapping(method = RequestMethod.GET, value = "/status", 
-			consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = "/status", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public DataSetIndexResponse indexingStatus() {
-		logger.info("indexingStatus() --- TEST");
 		if (dataSetsIndexer.isIndexingRunning())
 		{
-			return new DataSetIndexResponse(true, "Indexer is running..");
+			return new DataSetIndexResponse(true, "Indexer is running <i class=\"icon-refresh\"></i> functionality is not fully active!");
 		} else {
-			return new DataSetIndexResponse(false, "Indexer is finished!");
+			return new DataSetIndexResponse(false, "Indexing is finished <i class=\"icon-ok\"></i>");
 		}
 	}
 

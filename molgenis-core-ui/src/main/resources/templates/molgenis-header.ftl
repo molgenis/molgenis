@@ -60,6 +60,9 @@
 				</div>
 			</div>
 			<div class="row-fluid">
+				<div class="datasetsindexerAlerts"></div>
+			</div>
+			<div class="row-fluid">
 				<div class="alerts"><#if errorMessage??>
 					<#assign message = errorMessage>
 					<#assign messageType = "error"> 
