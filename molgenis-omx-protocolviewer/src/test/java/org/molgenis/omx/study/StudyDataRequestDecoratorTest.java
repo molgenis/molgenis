@@ -12,12 +12,12 @@ import java.util.List;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ApplicationContextProvider;

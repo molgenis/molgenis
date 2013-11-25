@@ -52,9 +52,4 @@ public interface AttributeMetaData
 	 */
 	EntityMetaData getRefEntity();
 
-	/**
-	 * When getDataType=xref/mref, get other end of xref
-	 */
-	AttributeMetaData getRefAttribute();
-
 }

@@ -17,6 +17,7 @@ public class StringToDateConverter implements Converter<String, Date>
 		}
 		catch (ParseException e)
 		{
+
 			throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
 					+ MolgenisDateFormat.DATEFORMAT_DATETIME);
 		}

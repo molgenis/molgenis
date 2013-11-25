@@ -37,7 +37,7 @@ public class DataServiceImplTest
 		when(entitySource.getRepositoryByEntityName("Entity2")).thenReturn(repo);
 
 		EntitySourceFactory factory = mock(EntitySourceFactory.class);
-		when(factory.getUrlPrefix()).thenReturn("test");
+		when(factory.getUrlPrefix()).thenReturn("test://");
 		when(factory.create(url)).thenReturn(entitySource);
 
 		dataService = new DataServiceImpl();

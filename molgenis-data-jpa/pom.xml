@@ -11,7 +11,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-core</artifactId>
+			<artifactId>molgenis-data</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		 <!-- database hibernate, connectionpool, driver -->

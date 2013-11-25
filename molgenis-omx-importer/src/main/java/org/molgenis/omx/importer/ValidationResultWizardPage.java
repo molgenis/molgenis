@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.Database.DatabaseAction;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.observ.DataSet;
