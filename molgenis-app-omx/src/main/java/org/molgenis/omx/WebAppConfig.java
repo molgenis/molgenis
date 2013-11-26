@@ -1,11 +1,9 @@
 package org.molgenis.omx;
 
-import java.util.Map;
-
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntitySourceFactory;
+import org.molgenis.data.jpa.JpaEntitySourceRegistrator;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
@@ -13,10 +11,8 @@ import org.molgenis.omx.studymanager.OmxStudyManagerService;
 import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisWebAppConfig;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -33,22 +29,15 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
 		DataExplorerConfig.class, SearchSecurityConfig.class })
-public class WebAppConfig extends MolgenisWebAppConfig implements ApplicationContextAware
+public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
 	private DataService dataService;
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+	@Bean
+	public ApplicationListener<?> jpaEntitySourceRegistrator()
 	{
-		// TODO see if @PostConstruct works
-		Map<String, EntitySourceFactory> factories = applicationContext.getBeansOfType(EntitySourceFactory.class);
-		for (EntitySourceFactory factory : factories.values())
-		{
-			dataService.registerFactory(factory);
-		}
-
-		dataService.registerEntitySource("jpa://");
+		return new JpaEntitySourceRegistrator(dataService);
 	}
 
 	@Bean
