@@ -6,6 +6,50 @@
 	molgenis.getContextUrl = function() {
 		return molgenis.contextUrl;
 	};
+	
+	molgenis.createAlert = function(alerts, type, container) {
+		if(type !== 'error' && type !== 'warning' && type !== 'success') type = 'error';
+		if(container === undefined) {
+			container = $('.alerts');
+			container.empty();
+		}
+		
+		var items = [];
+		items.push('<div class="alert alert-');
+		items.push(type);
+		items.push('"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>');
+		items.push(type.charAt(0).toUpperCase() + type.slice(1));
+		items.push('!</strong> ');
+		$.each(alerts, function(i, alert) {
+			items.push(alert.message);
+			if(i > 0) items.push('\n');
+		});
+		items.push('</div>');
+		
+		container.prepend(items.join(''));
+	};
+	
+	/*
+	 * Create a datasets indexer alert when indexer is running.
+	 */
+	molgenis.createDatasetsindexerAlert = function () {
+		$.get("/dataindexerstatus", function(response) {
+			if(response && response.isRunning === true){
+				showDatasetsindexerStatusMessage();
+			}
+		});
+		
+		function showDatasetsindexerStatusMessage() {
+			$.get("/dataindexerstatus", function(response) {
+				$('.datasetsindexerAlerts').empty();
+				if(response.isRunning === true){
+					setTimeout(showDatasetsindexerStatusMessage, 3000);
+				}
+				molgenis.createAlert([{'message': response.message}], response.type, $('.datasetsindexerAlerts'));
+			});
+		};
+	};
+	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 
@@ -121,7 +165,7 @@ $(function() {
 						cachedResource = resource;	
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			} else {
@@ -135,7 +179,7 @@ $(function() {
 						cachedResource = resource;
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			}
@@ -164,7 +208,7 @@ $(function() {
 						callback(resource);	
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			} else {
@@ -178,7 +222,7 @@ $(function() {
 						callback(resource);
 					},
 					error : function(xhr) {
-						alert(xhr.responseText);
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 					}
 				});
 			}
@@ -295,7 +339,7 @@ function moveDivHorizontal()
 	else if (typeof(document.body.scrollLeft) == 'number'){x = document.body.scrollLeft; w = "auto";}
 	else if (typeof(document.documentElement.scrollLeft) == 'number'){x = document.documentElement.scrollLeft;}
 		
-	for (i = 0; i < headersArray.length; i++)
+	for (var i = 0; i < headersArray.length; i++)
 	{
 		document.getElementById(headersArray[i]).style.marginLeft = x;
 		document.getElementById(headersArray[i]).style.width = w;
@@ -308,7 +352,7 @@ function validateForm(form, fields)
 {
 	alertstring = "";
 	
-	for (i = 0; i < fields.length; i++) {
+	for (var i = 0; i < fields.length; i++) {
 		if (fields[i].value == "")
 		{
 			alertstring += fields[i].name + "\n";
@@ -338,7 +382,7 @@ function setInput(form, targetv, actionv, __targetv, __actionv, __showv)
 function checkAll(formname, inputname)
 {
 	forminputs = document.getElementById(formname).getElementsByTagName('input');
-	for (i = 0; i < forminputs.length; i++) 
+	for (var i = 0; i < forminputs.length; i++) 
 	{
 		if (forminputs[i].name == inputname && !forminputs[i].disabled) 
 		{
@@ -363,7 +407,7 @@ function toggleCssClass(cssClass)
 	
 	missing = true;
 
-	for (i=0; i< cssRules.length; i++)
+	for (var i=0; i< cssRules.length; i++)
 	{
 		if(cssRules[i].selectorText.toLowerCase() == "."+cssClass.toLowerCase())
 		{ 
@@ -417,7 +461,7 @@ function hideSpinner()
         dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
         hre = /^0x[0-9a-f]+$/i,
         ore = /^0/,
-        i = function(s) { return naturalSort.insensitive && (''+s).toLowerCase() || ''+s },
+        i = function(s) { return naturalSort.insensitive && (''+s).toLowerCase() || ''+s; },
         // convert all to strings strip whitespace
         x = i(a).replace(sre, '') || '',
         y = i(b).replace(sre, '') || '',
@@ -479,4 +523,8 @@ $(function() {
 		 //send request and remove form from dom
 		 $('<form action="' + url +'" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
 	 }; 
+});
+
+$(function() {
+	molgenis.createDatasetsindexerAlert();
 });

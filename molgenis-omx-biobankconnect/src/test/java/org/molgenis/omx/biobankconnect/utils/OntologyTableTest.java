@@ -1,16 +1,12 @@
 package org.molgenis.omx.biobankconnect.utils;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Iterator;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.omx.biobankconnect.utils.OntologyTable;
 import org.molgenis.util.tuple.Tuple;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
@@ -20,14 +16,12 @@ public class OntologyTableTest
 {
 	OntologyTable table;
 	OntologyLoader loader;
-	Database db;
 
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
 		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
-		db = mock(Database.class);
-		table = new OntologyTable(loader, db);
+		table = new OntologyTable(loader);
 	}
 
 	@Test
@@ -40,12 +34,6 @@ public class OntologyTableTest
 	public void getCount()
 	{
 		assertEquals(table.getCount(), 1);
-	}
-
-	@Test
-	public void getDb()
-	{
-		assertEquals(table.getDb(), db);
 	}
 
 	@Test

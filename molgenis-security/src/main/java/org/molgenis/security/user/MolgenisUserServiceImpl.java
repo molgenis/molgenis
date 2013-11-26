@@ -3,43 +3,38 @@ package org.molgenis.security.user;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
+/**
+ * Manage user in groups
+ */
 @Service
 public class MolgenisUserServiceImpl implements MolgenisUserService
 {
-	private final Database database;
-	private final Database unsecuredDatabase;
-	private final PasswordEncoder passwordEncoder;
+	private final DataService dataService;
 
 	@Autowired
-	public MolgenisUserServiceImpl(Database database, Database unsecuredDatabase, PasswordEncoder passwordEncoder)
+	public MolgenisUserServiceImpl(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		if (unsecuredDatabase == null) throw new IllegalArgumentException("Database is null");
-		if (passwordEncoder == null) throw new IllegalArgumentException("MolgenisPasswordEncoder is null");
-		this.database = database;
-		this.unsecuredDatabase = unsecuredDatabase;
-		this.passwordEncoder = passwordEncoder;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
-	public List<String> getSuEmailAddresses() throws DatabaseException
+	@RunAsSystem
+	public List<String> getSuEmailAddresses()
 	{
-		List<MolgenisUser> superUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
-				MolgenisUser.SUPERUSER, Operator.EQUALS, true));
+		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.SUPERUSER, true));
+
 		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
 		{
 			@Override
@@ -51,37 +46,16 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	}
 
 	@Override
-	public MolgenisUser findById(Integer userId) throws DatabaseException
+	@RunAsSystem
+	public MolgenisUser getUser(String username)
 	{
-		return MolgenisUser.findById(database, userId);
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username));
 	}
 
 	@Override
-	public void update(MolgenisUser updatedUser) throws DatabaseException
+	@RunAsSystem
+	public void update(MolgenisUser user)
 	{
-		MolgenisUser currentUser = MolgenisUser.findByUsername(database, updatedUser.getUsername());
-		if (currentUser == null)
-		{
-			throw new RuntimeException("User does not exist [" + updatedUser.getUsername() + "]");
-		}
-		String password = currentUser.getPassword();
-		String newPassword = updatedUser.getPassword();
-		if (StringUtils.isNotEmpty(newPassword) && !password.equals(newPassword))
-		{
-			if (!passwordEncoder.matches(newPassword, currentUser.getPassword()))
-			{
-				throw new MolgenisUserException("Wrong password");
-			}
-			String encryptedPassword = passwordEncoder.encode(newPassword);
-			updatedUser.setPassword(encryptedPassword);
-		}
-		unsecuredDatabase.update(updatedUser);
-	}
-
-	@Override
-	public MolgenisUser getCurrentUser() throws DatabaseException
-	{
-		String currentUsername = SecurityUtils.getCurrentUsername();
-		return MolgenisUser.findByUsername(database, currentUsername);
+		dataService.update(MolgenisUser.ENTITY_NAME, user);
 	}
 }

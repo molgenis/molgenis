@@ -7,31 +7,36 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class AccountService
 {
-	private static Logger logger = Logger.getLogger(AccountService.class);
+	private static final Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
+	public static final String ALL_USER_GROUP = "All Users";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
 
 	@Autowired
-	private Database unsecuredDatabase;
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -42,7 +47,11 @@ public class AccountService
 	@Autowired
 	private MolgenisUserService molgenisUserService;
 
-	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri) throws DatabaseException
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
+	@RunAsSystem
+	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri)
 	{
 		// collect activation info
 		String activationCode = UUID.randomUUID().toString();
@@ -51,12 +60,12 @@ public class AccountService
 		{
 			case ADMIN:
 				activationEmailAddresses = molgenisUserService.getSuEmailAddresses();
-				if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new DatabaseException(
+				if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new MolgenisDataException(
 						"Administrator account is missing required email address");
 				break;
 			case USER:
 				String activationEmailAddress = molgenisUser.getEmail();
-				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new DatabaseException(
+				if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new MolgenisDataException(
 						"User '" + molgenisUser.getUsername() + "' is missing required email address");
 				activationEmailAddresses = Arrays.asList(activationEmailAddress);
 				break;
@@ -67,8 +76,19 @@ public class AccountService
 		// create user
 		molgenisUser.setActivationCode(activationCode);
 		molgenisUser.setActive(false);
-		unsecuredDatabase.add(molgenisUser);
+		dataService.add(MolgenisUser.ENTITY_NAME, molgenisUser);
 		logger.debug("created user " + molgenisUser.getUsername());
+
+		// add user to group
+		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP));
+		if (group != null)
+		{
+			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
+			molgenisGroupMember.setMolgenisGroup(group);
+			molgenisGroupMember.setMolgenisUser(molgenisUser);
+			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
+		}
 
 		// send activation email
 		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
@@ -89,16 +109,16 @@ public class AccountService
 	 * @param activationCode
 	 * @throws DatabaseException
 	 */
-	public void activateUser(String activationCode) throws DatabaseException
+	@RunAsSystem
+	public void activateUser(String activationCode)
 	{
-		List<MolgenisUser> molgenisUsers = unsecuredDatabase.find(MolgenisUser.class, new QueryRule(
-				MolgenisUser.ACTIVE, Operator.EQUALS, false), new QueryRule(MolgenisUser.ACTIVATIONCODE,
-				Operator.EQUALS, activationCode));
-		if (molgenisUsers != null && !molgenisUsers.isEmpty())
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode));
+
+		if (molgenisUser != null)
 		{
-			MolgenisUser molgenisUser = molgenisUsers.get(0);
 			molgenisUser.setActive(true);
-			unsecuredDatabase.update(molgenisUser);
+			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send activated email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -107,17 +127,24 @@ public class AccountService
 			mailMessage.setText(createActivatedEmailText(molgenisUser, getAppName()));
 			mailSender.send(mailMessage);
 		}
+		else
+		{
+			throw new MolgenisUserException("Invalid activation code or account already activated.");
+		}
 	}
 
-	public void resetPassword(String userEmail) throws DatabaseException
+	@RunAsSystem
+	public void resetPassword(String userEmail)
 	{
-		MolgenisUser molgenisUser = MolgenisUser.findByEmail(unsecuredDatabase, userEmail);
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.EMAIL, userEmail));
+
 		if (molgenisUser != null)
 		{
-			// TODO: make this mandatory (password that was sent is valid only once)
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
 			molgenisUser.setPassword(newPassword);
-			unsecuredDatabase.update(molgenisUser);
+			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
+			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send password reseted email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -126,9 +153,13 @@ public class AccountService
 			mailMessage.setText(createPasswordResettedEmailText(newPassword));
 			mailSender.send(mailMessage);
 		}
+		else
+		{
+			throw new MolgenisUserException("Invalid email address.");
+		}
 	}
 
-	private ActivationMode getActivationMode()
+	public ActivationMode getActivationMode()
 	{
 		String activationModeStr = molgenisSettings.getProperty(KEY_PLUGIN_AUTH_ACTIVATIONMODE);
 		return ActivationMode.from(activationModeStr, DEFAULT_ACTIVATION_MODE);
@@ -169,7 +200,7 @@ public class AccountService
 		return molgenisSettings.getProperty(KEY_APP_NAME, DEFAULT_APP_NAME);
 	}
 
-	private static enum ActivationMode
+	static enum ActivationMode
 	{
 		ADMIN, USER;
 

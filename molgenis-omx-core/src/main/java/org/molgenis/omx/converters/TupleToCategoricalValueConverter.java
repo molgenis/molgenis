@@ -1,11 +1,9 @@
 package org.molgenis.omx.converters;
 
-import java.util.List;
-
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.CategoricalValue;
@@ -16,12 +14,12 @@ import org.molgenis.util.tuple.Tuple;
 
 public class TupleToCategoricalValueConverter implements TupleToValueConverter<CategoricalValue, String>
 {
-	private final Database database;
+	private final DataService dataService;
 
-	public TupleToCategoricalValueConverter(Database database)
+	public TupleToCategoricalValueConverter(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("Database is null");
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -46,15 +44,15 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 		Category category;
 		try
 		{
-			List<Category> categories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
-					Operator.EQUALS, feature), new QueryRule(Category.VALUECODE, Operator.EQUALS, categoryValueCode));
-			if (categories == null || categories.isEmpty())
+			Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and()
+					.eq(Category.VALUECODE, categoryValueCode);
+			category = dataService.findOne(Category.ENTITY_NAME, q);
+			if (category == null)
 			{
 				throw new ValueConverterException("unknown category value code [" + categoryValueCode + ']');
 			}
-			category = categories.get(0);
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			throw new ValueConverterException(e);
 		}

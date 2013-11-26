@@ -2,14 +2,12 @@ package org.molgenis.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class SecurityUtils
@@ -25,28 +23,22 @@ public class SecurityUtils
 	public static final String AUTHORITY_ENTITY_READ_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.READ + "_";
 	public static final String AUTHORITY_ENTITY_WRITE_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITE + "_";
 
-	public static UserDetails getCurrentUser()
+	public static String getCurrentUsername()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null)
 		{
 			return null;
 		}
-
 		Object principal = authentication.getPrincipal();
-		if (!(principal instanceof UserDetails))
+		if (principal instanceof UserDetails)
 		{
-			return new User(principal.toString(), "", Collections.<GrantedAuthority> emptyList());
+			return ((UserDetails) principal).getUsername();
 		}
-		return (UserDetails) principal;
-	}
-
-	public static String getCurrentUsername()
-	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		Object principal = authentication.getPrincipal();
-		if (!(principal instanceof UserDetails)) return ((UserDetails) principal).getUsername();
-		else return ((UserDetails) principal).getUsername();
+		else
+		{
+			return principal.toString();
+		}
 	}
 
 	/**

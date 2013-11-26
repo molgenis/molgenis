@@ -10,14 +10,17 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherResponse;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.search.SearchService;
+import org.molgenis.security.SecurityUtils;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,13 +53,16 @@ public class BiobankConnectController extends AbstractWizardController
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	@Autowired
 	private OntologyAnnotator ontologyAnnotator;
 
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
+
+	@Autowired
+	private SearchService searchService;
 
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
@@ -83,28 +89,30 @@ public class BiobankConnectController extends AbstractWizardController
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		try
 		{
-			for (DataSet dataSet : database.find(DataSet.class))
+			Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+			for (DataSet dataSet : allDataSets)
 			{
-				if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+				if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 			}
+			wizard = new BiobankConnectWizard();
+			wizard.setDataSets(dataSets);
+			wizard.setUserName(SecurityUtils.getCurrentUsername());
+			wizard.addPage(chooseCataloguePager);
+			wizard.addPage(ontologyAnnotatorPager);
+			wizard.addPage(ontologyMatcherPager);
+			wizard.addPage(progressingBarPager);
+			wizard.addPage(mappingManagerPager);
 		}
 		catch (Exception e)
 		{
 			logger.error("Exception validating import file", e);
 		}
-		wizard = new BiobankConnectWizard();
-		wizard.setDataSets(dataSets);
-		wizard.addPage(chooseCataloguePager);
-		wizard.addPage(ontologyAnnotatorPager);
-		wizard.addPage(ontologyMatcherPager);
-		wizard.addPage(progressingBarPager);
-		wizard.addPage(mappingManagerPager);
 		return wizard;
 	}
 
 	// TODO : requestParam
 	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
-	public String annotate(HttpServletRequest request) throws Exception
+	public String annotate(HttpServletRequest request)
 	{
 		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
 		if (request.getParameter("selectedOntologies") != null)
@@ -129,14 +137,27 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateDocument(@RequestBody UpdateIndexRequest request)
+	public void updateDocument(@RequestBody
+	UpdateIndexRequest request)
 	{
 		ontologyAnnotator.updateIndex(request);
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/rematch", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public OntologyMatcherResponse rematch(@RequestBody
+	OntologyMatcherRequest request)
+	{
+		ontologyMatcher.match(SecurityUtils.getCurrentUsername(), request.getSourceDataSetId(),
+				request.getSelectedDataSetIds(), request.getFeatureId());
+		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
+				ontologyMatcher.matchPercentage());
+		return response;
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/match/status", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public OntologyMatcherResponse checkMatch() throws DatabaseException
+	public OntologyMatcherResponse checkMatch()
 	{
 		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
 				ontologyMatcher.matchPercentage());

@@ -4,26 +4,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
-public class OntologyTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
+public class OntologyTable extends AbstractFilterableTupleTable
 {
-	private Database db;
-	private OntologyLoader loader;
-	private final String ONTOLOGY_URL = "url";
-	private final String ENTITY_TYPE = "entity_type";
-	private final String ONTOLOGY_LABEL = "ontologyLabel";
+	private final OntologyLoader loader;
+	private final static String ONTOLOGY_URL = "url";
+	private final static String ENTITY_TYPE = "entity_type";
+	private final static String ONTOLOGY_LABEL = "ontologyLabel";
 
-	public OntologyTable(OntologyLoader loader, Database db)
+	public OntologyTable(OntologyLoader loader)
 	{
 		this.loader = loader;
-		setDb(db);
 	}
 
 	@Override
@@ -38,18 +34,6 @@ public class OntologyTable extends AbstractFilterableTupleTable implements Datab
 		tuples.add(tuple);
 
 		return tuples.iterator();
-	}
-
-	@Override
-	public Database getDb()
-	{
-		return db;
-	}
-
-	@Override
-	public void setDb(Database db)
-	{
-		this.db = db;
 	}
 
 	@Override

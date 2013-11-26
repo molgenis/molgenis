@@ -2,13 +2,16 @@ package org.molgenis.data.support;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
@@ -19,17 +22,18 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.molgenis.data.Updateable;
+import org.molgenis.data.Writable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import com.google.common.collect.Lists;
 
 /**
  * Implementation of the DataService interface
  */
 @Component
-public class DataServiceImpl implements DataService, ApplicationContextAware
+public class DataServiceImpl implements DataService
 {
 	// Key: entity name, value:EntitySourceFactory
 	private final Map<String, EntitySourceFactory> entitySourceFactoryByEntityName = new LinkedHashMap<String, EntitySourceFactory>();
@@ -80,6 +84,7 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	/**
 	 * Register a new EntitySourceFactory of an EntitySource implementation
 	 */
+	@Override
 	public void registerFactory(EntitySourceFactory entitySourceFactory)
 	{
 		if (entitySourceFactoryByUrlPrefix.get(entitySourceFactory.getUrlPrefix()) != null)
@@ -102,20 +107,9 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	@Override
 	public void registerEntitySource(String url)
 	{
-		int index = url.indexOf("://");
-		if (index == -1)
-		{
-			throw new MolgenisDataException("Incorrect url format should be of format prefix://");
-		}
-
-		String prefix = url.substring(0, index);
-		EntitySourceFactory entitySourceFactory = entitySourceFactoryByUrlPrefix.get(prefix);
-		if (entitySourceFactory == null)
-		{
-			throw new MolgenisDataException("Unknown EntitySource url prefix [" + prefix + "]");
-		}
-
+		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
 		EntitySource entitySource = entitySourceFactory.create(url);
+
 		for (String entityName : entitySource.getEntityNames())
 		{
 			entitySourceFactoryByEntityName.put(entityName, entitySourceFactory);
@@ -126,23 +120,94 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 	@Override
 	public long count(String entityName, Query q)
 	{
-		return getQueryableRepository(entityName).count(q);
+		return getQueryable(entityName).count(q);
 	}
 
 	@Override
-	public Iterable<? extends Entity> findAll(String entityName, Query q)
+	public <E extends Entity> Iterable<E> findAll(String entityName)
 	{
-		return getQueryableRepository(entityName).findAll(q);
+		return findAll(entityName, new QueryImpl());
 	}
 
 	@Override
-	public Entity findOne(String entityName, Integer id)
+	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
 	{
-		return getQueryableRepository(entityName).findOne(id);
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findAll(q);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids)
+	{
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findAll(ids);
+	}
+
+	@Override
+	public <E extends Entity> List<E> findAllAsList(String entityName, Query q)
+	{
+		Iterable<E> iterable = findAll(entityName, q);
+		return Lists.newArrayList(iterable);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Integer id)
+	{
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findOne(id);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Query q)
+	{
+		Queryable<E> queryable = getQueryable(entityName);
+		return queryable.findOne(q);
+	}
+
+	@Override
+	public <E extends Entity> void add(String entityName, E entity)
+	{
+		Writable<E> writable = getWritable(entityName);
+		writable.add(entity);
+	}
+
+	@Override
+	public <E extends Entity> void add(String entityName, Iterable<E> entities)
+	{
+		Writable<E> writable = getWritable(entityName);
+		writable.add(entities);
+	}
+
+	@Override
+	public <E extends Entity> void update(String entityName, E entity)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.update(entity);
+	}
+
+	@Override
+	public <E extends Entity> void update(String entityName, Iterable<E> entities)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.update(entities);
+	}
+
+	@Override
+	public <E extends Entity> void delete(String entityName, E entity)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.delete(entity);
+	}
+
+	@Override
+	public <E extends Entity> void delete(String entityName, Iterable<E> entities)
+	{
+		Updateable<E> updateable = getUpdateable(entityName);
+		updateable.delete(entities);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Queryable<? extends Entity> getQueryableRepository(String entityName)
+	private <E extends Entity> Queryable<E> getQueryable(String entityName)
 	{
 		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Queryable))
@@ -150,7 +215,31 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
 		}
 
-		return (Queryable<? extends Entity>) repo;
+		return (Queryable<E>) repo;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <E extends Entity> Writable<E> getWritable(String entityName)
+	{
+		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Writable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't writable");
+		}
+
+		return (Writable<E>) repo;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <E extends Entity> Updateable<E> getUpdateable(String entityName)
+	{
+		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Updateable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't updateable");
+		}
+
+		return (Updateable<E>) repo;
 	}
 
 	@Override
@@ -171,14 +260,54 @@ public class DataServiceImpl implements DataService, ApplicationContextAware
 		return factory.create(file);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+	public <E extends Entity> CrudRepository<E> getCrudRepository(String entityName)
 	{
-		// Find all EntitySourceFactories and register them
-		Map<String, EntitySourceFactory> factories = applicationContext.getBeansOfType(EntitySourceFactory.class);
-		for (EntitySourceFactory factory : factories.values())
+		Repository<? extends Entity> repository = getRepositoryByEntityName(entityName);
+		if (repository instanceof CrudRepository)
 		{
-			registerFactory(factory);
+			return (CrudRepository<E>) repository;
 		}
+
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] isn't a CrudRepository");
+	}
+
+	@Override
+	public EntitySource getEntitySource(String url)
+	{
+		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
+		return entitySourceFactory.create(url);
+	}
+
+	private EntitySourceFactory getEntitySourcefactory(String url)
+	{
+		int index = url.indexOf("://");
+		if (index == -1)
+		{
+			throw new MolgenisDataException("Incorrect url format should be of format prefix://");
+		}
+
+		String prefix = url.substring(0, index + "://".length());
+		EntitySourceFactory entitySourceFactory = entitySourceFactoryByUrlPrefix.get(prefix);
+		if (entitySourceFactory == null)
+		{
+			throw new MolgenisDataException("Unknown EntitySource url prefix [" + prefix + "]");
+		}
+
+		return entitySourceFactory;
+	}
+
+	@Override
+	public Iterable<Class<? extends Entity>> getEntityClasses()
+	{
+		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
+		for (String entityName : getEntityNames())
+		{
+			Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+			entityClasses.add(repo.getEntityClass());
+		}
+
+		return entityClasses;
 	}
 }

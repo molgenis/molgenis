@@ -16,9 +16,18 @@ public interface Queryable<E extends Entity>
 	long count(Query q);
 
 	/**
-	 * type-safe find entities that match a quer
+	 * type-safe find entities that match a query
 	 */
 	Iterable<E> findAll(Query q);
+
+	/**
+	 * Find an entity base on a query
+	 * 
+	 * Returns null if not exists.
+	 * 
+	 * Returns first result if multiple found
+	 */
+	E findOne(Query q);
 
 	/**
 	 * type-safe find one entity based on id. Returns null if not exists

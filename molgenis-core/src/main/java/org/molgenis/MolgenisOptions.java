@@ -76,10 +76,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "output_dir", param = Option.Param.DIRPATH, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Directory where all generated code is stored")
 	public String output_dir = "generated";
 
-	/** Source directory for generated python */
-	@Option(name = "output_python", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for the generated Python classes. Default: 'generated/python'")
-	public String output_python = output_dir + "/python";
-
 	/** Source directory for generated java */
 	@Option(name = "output_src", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for the generated Java classes. Default: 'generated/java'")
 	public String output_src = output_dir + "/java";
@@ -169,20 +165,11 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_entityio", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should entity importers and exporters be generated. Default: true.")
 	public boolean generate_entityio = true;
 
-	@Option(name = "generate_Python", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should Python-interface be generated. Default: false.")
-	public boolean generate_Python = false;
-
 	@Option(name = "generate_tests", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Should test code for generated code be generated. Default: false.")
 	public boolean generate_tests = false;
 
 	@Option(name = "db_mode", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Which mode should the molgenisServlet use when contacting the dabase. Default: 'servlet'")
 	public String db_mode = "servlet";
-
-	@Option(name = "output_cpp", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for the generated CPP classes. Default: 'generated/cpp'")
-	public String output_cpp = output_dir + "/cpp";
-
-	@Option(name = "generate_cpp", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate CPP. Default: false")
-	public boolean generate_cpp = false;
 
 	@Option(name = "generate_model", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Generate any SQL related classes. Default: true")
 	public boolean generate_model = true;
@@ -213,6 +200,9 @@ public class MolgenisOptions implements Serializable
 
 	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
 	public boolean generate_db = true;
+
+	@Option(name = "generate_jpa_entity_source", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate JpaEntitySource. Default: false")
+	public boolean generate_jpa_entity_source = false;
 
 	@Option(name = "delete_generated_folder", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "delete generated Folder before generators are executed. Default: true")
 	// default set to false as partial generation leads to compile problems in

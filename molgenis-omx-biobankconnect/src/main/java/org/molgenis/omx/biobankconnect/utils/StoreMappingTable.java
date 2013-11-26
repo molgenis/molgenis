@@ -8,15 +8,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.JDBCMetaDatabase;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.DatabaseTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.converters.ValueConverter;
@@ -31,27 +31,59 @@ import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
-public class StoreMappingTable extends AbstractFilterableTupleTable implements DatabaseTupleTable
+public class StoreMappingTable extends AbstractFilterableTupleTable
 {
 
-	private Database db;
+	private DataService dataService;
 	private static final String OBSERVATION_SET = "observation_set";
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
 	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
 	private static final List<String> NON_XREF_FIELDS = Arrays.asList(STORE_MAPPING_ABSOLUTE_SCORE,
 			STORE_MAPPING_SCORE, STORE_MAPPING_CONFIRM_MAPPING);
+	private final List<ObservationSet> observationSets;
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
 	private final DataSet dataSet;
 	private List<Field> columns;
+	private final JDBCMetaDatabase jdbcMetaDatabase;
 
-	public StoreMappingTable(String dataSetIdentifier, Database db) throws DatabaseException
+	public StoreMappingTable(String dataSetIdentifier, DataService dataService)
 	{
-		this.dataSet = db.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSetIdentifier))
-				.get(0);
-		this.valueConverter = new ValueConverter(db);
-		setDb(db);
+		this.dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+
+		this.observationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
+
+		this.valueConverter = new ValueConverter(dataService);
+		this.dataService = dataService;
+		try
+		{
+			jdbcMetaDatabase = new JDBCMetaDatabase();
+		}
+		catch (DatabaseException e)
+		{
+			throw new MolgenisDataException(e);
+		}
+	}
+
+	public StoreMappingTable(String dataSetIdentifier, List<ObservationSet> observationSets, DataService dataService)
+	{
+		this.dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+
+		this.observationSets = observationSets;
+		this.valueConverter = new ValueConverter(dataService);
+
+		try
+		{
+			jdbcMetaDatabase = new JDBCMetaDatabase();
+		}
+		catch (DatabaseException e)
+		{
+			throw new MolgenisDataException(e);
+		}
 	}
 
 	@Override
@@ -60,30 +92,25 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		List<Tuple> tuples = new ArrayList<Tuple>();
 		try
 		{
-			List<String> observationSetIdentifiers = new ArrayList<String>();
 			Map<Integer, KeyValueTuple> storeMapping = new HashMap<Integer, KeyValueTuple>();
 
-			for (ObservationSet observation : db.find(ObservationSet.class, new QueryRule(
-					ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSet.getIdentifier())))
-			{
-				observationSetIdentifiers.add(observation.getIdentifier());
-			}
+			Iterable<ObservedValue> values = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
+					new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets));
 
-			for (ObservedValue ov : db.find(ObservedValue.class, new QueryRule(ObservedValue.OBSERVATIONSET_IDENTIFIER,
-					Operator.IN, observationSetIdentifiers)))
+			for (ObservedValue ov : values)
 			{
 				KeyValueTuple tuple = null;
-				Integer observationId = ov.getObservationSet_Id();
+				Integer observationId = ov.getObservationSet().getId();
 				if (storeMapping.containsKey(observationId)) tuple = storeMapping.get(observationId);
 				else tuple = new KeyValueTuple();
-				if (NON_XREF_FIELDS.contains(ov.getFeature_Identifier()))
+				if (NON_XREF_FIELDS.contains(ov.getFeature().getIdentifier()))
 				{
-					tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
+					tuple.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue()));
 				}
 				else
 				{
 					Characteristic xrefCharacteristic = ((XrefValue) ov.getValue()).getValue();
-					tuple.set(ov.getFeature_Identifier(), xrefCharacteristic.getId());
+					tuple.set(ov.getFeature().getIdentifier(), xrefCharacteristic.getId());
 				}
 				if (tuple.get(OBSERVATION_SET) == null) tuple.set(OBSERVATION_SET, observationId);
 				storeMapping.put(observationId, tuple);
@@ -94,21 +121,9 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		}
 		catch (Exception e)
 		{
-			new RuntimeException(e);
+			new RuntimeException("Failed to index mapping table : " + dataSet.getName() + " error : " + e.getMessage());
 		}
 		return tuples.iterator();
-	}
-
-	@Override
-	public Database getDb()
-	{
-		return this.db;
-	}
-
-	@Override
-	public void setDb(Database db)
-	{
-		this.db = db;
 	}
 
 	@Override
@@ -139,7 +154,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 						FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
 
 						Field field = new Field(feature.getIdentifier());
-						field.setEntity(db.getMetaData().getEntity(ObservableFeature.class.getSimpleName()));
+						field.setEntity(jdbcMetaDatabase.getEntity(ObservableFeature.class.getSimpleName()));
 						field.setLabel(feature.getName());
 						field.setType(fieldType);
 						field.setName(feature.getIdentifier());
@@ -167,11 +182,11 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		}
 		catch (Exception e)
 		{
-			throw new TableException(e);
+			throw new TableException("Failed to initialize the columns for Mapping Table" + e);
 		}
 	}
 
-	private void getFeatures(Protocol protocol, List<ObservableFeature> features) throws DatabaseException
+	private void getFeatures(Protocol protocol, List<ObservableFeature> features)
 	{
 		// store features
 		features.addAll(protocol.getFeatures());
@@ -189,9 +204,7 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 		{
 			try
 			{
-				List<ObservationSet> observationSets = db.find(ObservationSet.class, new QueryRule(
-						ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSet.getIdentifier()));
-				numberOfRows = observationSets.size();
+				numberOfRows = this.observationSets.size();
 			}
 			catch (Exception e)
 			{

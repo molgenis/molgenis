@@ -5,11 +5,15 @@ import java.io.Closeable;
 /**
  * Repository that can be extended with more entity instances.
  */
-public interface Writable extends Closeable
+public interface Writable<E extends Entity> extends Closeable
 {
 	/** Add one entity */
-	void add(Entity entity);
+	void add(E entity);
 
 	/** Stream add multiple entities */
-	void add(Iterable<? extends Entity> entities);
+	void add(Iterable<E> entities);
+
+	void flush();
+
+	void clearCache();
 }

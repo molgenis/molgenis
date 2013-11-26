@@ -1,14 +1,13 @@
 package org.molgenis.omx.dataset;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
@@ -20,25 +19,28 @@ import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.WritableTuple;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-
 public class DataSetTableIterator implements Iterator<Tuple>
 {
 
-	private final Database db;
+	private final DataService dataService;
 	private int currentRow;
-	private final List<ObservationSet> observationSets;
+	private List<ObservationSet> observationSets;
 	private final List<Field> columns;
 	private final ValueConverter valueConverter;
 
-	public DataSetTableIterator(Database db, List<Field> columns, Query<ObservationSet> query) throws DatabaseException
+	public DataSetTableIterator(DataService dataService, List<Field> columns, Query query) throws DatabaseException
 	{
-		this.db = db;
+		this.dataService = dataService;
 		this.columns = columns;
-		this.observationSets = query != null ? query.find() : Collections.<ObservationSet> emptyList();
+
+		this.observationSets = Collections.<ObservationSet> emptyList();
+		if (query != null)
+		{
+			this.observationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME, query);
+		}
+
 		this.currentRow = 0;
-		this.valueConverter = new ValueConverter(db);
+		this.valueConverter = new ValueConverter(dataService);
 	}
 
 	@Override
@@ -55,31 +57,17 @@ public class DataSetTableIterator implements Iterator<Tuple>
 
 		WritableTuple tuple = new KeyValueTuple();
 
-		Query<ObservedValue> queryObservedValue = db.query(ObservedValue.class);
-
-		// Only retrieve the visible columns
-		Collection<String> fieldNames = Collections2.transform(columns, new Function<Field, String>()
-		{
-			@Override
-			public String apply(final Field field)
-			{
-				return field.getName();
-			}
-		});
-
 		try
 		{
-			for (ObservedValue v : queryObservedValue.eq(ObservedValue.OBSERVATIONSET, currentRowToGet.getId())
-					.in(ObservedValue.FEATURE_IDENTIFIER, new ArrayList<String>(fieldNames)).find())
+			Query q = new QueryImpl().eq(ObservedValue.OBSERVATIONSET, currentRowToGet);
+			Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME, q);
+
+			for (ObservedValue v : observedValues)
 			{
 				ObservableFeature feature = v.getFeature();
 				Value value = v.getValue();
 				tuple.set(feature.getIdentifier(), valueConverter.toCell(value));
 			}
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
 		}
 		catch (ValueConverterException e)
 		{

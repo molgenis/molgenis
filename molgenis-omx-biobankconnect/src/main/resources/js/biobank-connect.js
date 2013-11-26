@@ -4,10 +4,20 @@
 	var ns = molgenis;
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
+	var CONTEXT_URL = null;
+	var standardModal = new ns.StandardModal();
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
 	var mappingManager = new ns.MappingManager();
 
+	ns.setContextURL = function(CONTEXT_URL){
+		this.CONTEXT_URL = CONTEXT_URL;
+	};
+	
+	ns.getContextURL = function(){
+		return this.CONTEXT_URL;
+	};
+	
 	ns.hrefToId = function(href){
 		return href.substring(href.lastIndexOf('/') + 1); 
 	};
@@ -30,13 +40,12 @@
 			url : prefix + '/match/status',
 			contentType : 'application/json',
 			success : function(response) {
-				console.log(response);
 				$('#control-container ul.pager li').addClass('disabled');
 				if(response.isRunning){
 					if(response.matchePercentage === 0){
 						var width = $(progressBarElement).width();
 						var parentWidth = $(progressBarElement).offsetParent().width();
-						var percent = 100 * width / parentWidth + 4;
+						var percent = 100 * width / parentWidth + 5;
 						$(progressBarElement).width(percent + '%');
 					}else if(response.matchePercentage === 100){
 						$(progressBarElement).width(response.matchePercentage + '%');
@@ -106,5 +115,12 @@
 		buttonGroup.before('<legend />');
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);
+		
+		document.onkeydown = function(evt) {
+		    evt = evt || window.event;
+		    if (evt.keyCode == 27) {
+		    	standardModal.closeModal();
+		    }
+		};
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

@@ -2,6 +2,10 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
+		<plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
+		<plugin id="mappingmanager" name="Curate mappings" url="mappingmanager"/>
+		<plugin id="evaluation" name="Evaluation" url="evaluation"/>
+		<plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
 		<plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
@@ -49,7 +53,7 @@
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
         	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
 			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
-			<plugin id="datasetindexer" name="Data Set Indexer" url="dataindexer"/>
+			<plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
 			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>

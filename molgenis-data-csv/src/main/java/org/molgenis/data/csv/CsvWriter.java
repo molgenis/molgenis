@@ -17,7 +17,8 @@ import org.molgenis.data.support.AbstractWritable;
 import org.molgenis.io.processor.AbstractCellProcessor;
 import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.util.ListEscapeUtils;
-public class CsvWriter extends AbstractWritable
+
+public class CsvWriter<E extends Entity> extends AbstractWritable<E>
 {
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
@@ -127,5 +128,25 @@ public class CsvWriter extends AbstractWritable
 			value = obj.toString();
 		}
 		return AbstractCellProcessor.processCell(value, false, this.cellProcessors);
+	}
+
+	@Override
+	public void flush()
+	{
+		try
+		{
+			csvWriter.flush();
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException("Error flushing csvwriter", e);
+		}
+
+	}
+
+	@Override
+	public void clearCache()
+	{
+		// Nothing
 	}
 }

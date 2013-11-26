@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.genomebrowser.services.MutationService;
@@ -69,15 +68,16 @@ public class GenomebrowserController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET, value = "/data", produces =
 	{ MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody
-	List<Map<String, String>> getAll(HttpServletResponse response,
-			@RequestParam(value = "mutation", required = false) String mutationId,
-			@RequestParam(value = "segment", required = true) String segmentId) throws ParseException,
-			DatabaseException, IOException
+	List<Map<String, String>> getAll(HttpServletResponse response, @RequestParam(value = "mutation", required = false)
+	String mutationId, @RequestParam(value = "segment", required = true)
+	String segmentId) throws ParseException, IOException
 	{
 		if (mutationId == null)
 		{
 			mutationId = "";
 		}
-		return mutationService.getPatientMutationData(segmentId, mutationId);
+		List<Map<String, String>> result = mutationService.getPatientMutationData(segmentId, mutationId);
+		System.out.println(result);
+		return result;
 	}
 }

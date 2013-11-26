@@ -1,5 +1,7 @@
 package org.molgenis.omx.protocol;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -10,9 +12,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.util.tuple.Tuple;
@@ -21,12 +26,14 @@ import org.testng.annotations.Test;
 
 public class ProtocolTableTest
 {
-	private Database database;
+	private DataService dataService;
 	private ProtocolTable protocolTable;
 
 	@BeforeMethod
 	public void setUp() throws DatabaseException, TableException
 	{
+		dataService = mock(DataService.class);
+
 		ObservableFeature feature10 = when(mock(ObservableFeature.class).getId()).thenReturn(10).getMock();
 		when(feature10.getName()).thenReturn("f10");
 		ObservableFeature feature11 = when(mock(ObservableFeature.class).getId()).thenReturn(11).getMock();
@@ -40,7 +47,7 @@ public class ProtocolTableTest
 		when(subProtocol1.getName()).thenReturn("p1");
 
 		Protocol subProtocol2 = when(mock(Protocol.class).getId()).thenReturn(2).getMock();
-		when(subProtocol2.getSubprotocols_Id()).thenReturn(Collections.<Integer> emptyList());
+		when(subProtocol2.getSubprotocols()).thenReturn(Collections.<Protocol> emptyList());
 		when(subProtocol2.getFeatures()).thenReturn(Arrays.asList(feature12));
 		when(subProtocol2.getName()).thenReturn("p2");
 
@@ -48,9 +55,10 @@ public class ProtocolTableTest
 		when(protocol.getSubprotocols()).thenReturn(Arrays.asList(subProtocol1, subProtocol2));
 		when(protocol.getName()).thenReturn("p0");
 
-		database = mock(Database.class);
+		when(dataService.findAll(Category.ENTITY_NAME, new QueryImpl().eq(anyString(), any(ObservableFeature.class))))
+				.thenReturn(Collections.<Entity> emptyList());
 
-		protocolTable = new ProtocolTable(protocol, database);
+		protocolTable = new ProtocolTable(protocol, dataService);
 	}
 
 	@Test(expectedExceptions = TableException.class)
@@ -62,7 +70,7 @@ public class ProtocolTableTest
 	@Test
 	public void getAllColumns() throws TableException
 	{
-		assertEquals(protocolTable.getAllColumns().size(), 7);
+		assertEquals(protocolTable.getAllColumns().size(), 9);
 	}
 
 	@Test
@@ -84,7 +92,7 @@ public class ProtocolTableTest
 		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
 		when(protocol.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTable(protocol, database).getCount(), 1); // excluding root protocol
+		assertEquals(new ProtocolTable(protocol, dataService).getCount(), 1); // excluding root protocol
 	}
 
 	@Test
@@ -103,13 +111,7 @@ public class ProtocolTableTest
 		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
 		when(protocol0.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTable(protocol0, database).getCount(), 2); // excluding root protocol
-	}
-
-	@Test
-	public void getDb()
-	{
-		assertEquals(protocolTable.getDb(), database);
+		assertEquals(new ProtocolTable(protocol0, dataService).getCount(), 2); // excluding root protocol
 	}
 
 	@Test
@@ -159,7 +161,7 @@ public class ProtocolTableTest
 		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
 		when(protocol0.getName()).thenReturn("p0");
 
-		ProtocolTable protocolTable = new ProtocolTable(protocol0, database);
+		ProtocolTable protocolTable = new ProtocolTable(protocol0, dataService);
 		Iterator<Tuple> it = protocolTable.iterator();
 		assertTrue(it.hasNext());
 		Tuple tuple0 = it.next();
@@ -187,18 +189,10 @@ public class ProtocolTableTest
 		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
 		when(protocol.getName()).thenReturn("p0");
 
-		ProtocolTable protocolTable2 = new ProtocolTable(protocol, database);
+		ProtocolTable protocolTable2 = new ProtocolTable(protocol, dataService);
 		Iterator<Tuple> it = protocolTable2.iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getString("path"), protocolId + ".F" + featureId);
 		assertFalse(it.hasNext());
-	}
-
-	@Test
-	public void setDb()
-	{
-		Database anotherDatabase = mock(Database.class);
-		protocolTable.setDb(anotherDatabase);
-		assertEquals(protocolTable.getDb(), anotherDatabase);
 	}
 }

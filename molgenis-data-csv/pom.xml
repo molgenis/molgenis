@@ -4,15 +4,15 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-csv</artifactId>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-core</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<artifactId>molgenis-data</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>

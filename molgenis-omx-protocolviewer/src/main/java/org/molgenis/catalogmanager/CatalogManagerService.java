@@ -1,7 +1,5 @@
 package org.molgenis.catalogmanager;
 
-import java.util.List;
-
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
@@ -17,9 +15,9 @@ public interface CatalogManagerService
 	/**
 	 * Gets all available catalogs
 	 * 
-	 * @return List of CatalogInfo
+	 * @return Iterable of CatalogInfo
 	 */
-	List<CatalogMeta> findCatalogs();
+	Iterable<CatalogMeta> findCatalogs();
 
 	/**
 	 * Returns the catalog with the given id
@@ -29,6 +27,16 @@ public interface CatalogManagerService
 	 * @throws UnknownCatalogException
 	 */
 	Catalog getCatalog(String id) throws UnknownCatalogException;
+
+	/**
+	 * Returns the catalog of the study definition with the given id
+	 * 
+	 * @param id
+	 * @return
+	 * @throws UnknownCatalogException
+	 * @throws UnknownStudyDefinitionException
+	 */
+	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 
 	/**
 	 * Retrieves a catalog and store it in the database
@@ -54,16 +62,6 @@ public interface CatalogManagerService
 	 * @throws UnknownCatalogException
 	 */
 	boolean isCatalogLoaded(String id) throws UnknownCatalogException;
-
-	/**
-	 * Returns the catalog for the study definition with the given id
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 * @throws UnknownStudyDefinitionException
-	 */
-	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 
 	/**
 	 * Retrieves a catalog of a study definition and store it in the database

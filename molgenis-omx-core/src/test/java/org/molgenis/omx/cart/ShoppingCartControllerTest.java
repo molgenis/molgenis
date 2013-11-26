@@ -10,9 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.cart.ShoppingCartController;
+import org.molgenis.data.DataService;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -140,7 +138,7 @@ public class ShoppingCartControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database database() throws DatabaseException
+		public DataService dataService()
 		{
 			ObservableFeature feature0 = mock(ObservableFeature.class);
 			when(feature0.getId()).thenReturn(0);
@@ -152,10 +150,10 @@ public class ShoppingCartControllerTest extends AbstractTestNGSpringContextTests
 			when(feature1.getName()).thenReturn("feature #1");
 			when(feature1.getDescription()).thenReturn("feature #1 description");
 
-			Database database = mock(Database.class);
-			when(database.findById(ObservableFeature.class, 0)).thenReturn(feature0);
-			when(database.findById(ObservableFeature.class, 1)).thenReturn(feature1);
-			return database;
+			DataService dataService = mock(DataService.class);
+			when(dataService.findOne(ObservableFeature.ENTITY_NAME, 0)).thenReturn(feature0);
+			when(dataService.findOne(ObservableFeature.ENTITY_NAME, 1)).thenReturn(feature1);
+			return dataService;
 		}
 	}
 }

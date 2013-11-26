@@ -10,11 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Date;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.order.OrderStudyDataController;
 import org.molgenis.omx.order.OrderStudyDataService;
+import org.molgenis.omx.order.OrderStudyDataServiceImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
@@ -77,6 +78,13 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void getOrders() throws Exception
 	{
+		StudyDataRequest request0 = mock(StudyDataRequest.class);
+		when(request0.getId()).thenReturn(0);
+		when(request0.getRequestDate()).thenReturn(new Date(1350000000000l));
+		when(request0.getRequestStatus()).thenReturn("pending");
+		when(request0.getName()).thenReturn("request #0");
+		when(orderStudyDataService.getOrders()).thenReturn(Arrays.asList(request0));
+
 		when(authentication.isAuthenticated()).thenReturn(true);
 		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("user0").getMock();
 		when(authentication.getPrincipal()).thenReturn(userDetails);
@@ -118,9 +126,9 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 			when(request1.getRequestDate()).thenReturn(new Date(1360000000000l));
 			when(request1.getRequestStatus()).thenReturn("rejected");
 			when(request1.getName()).thenReturn("request #1");
-			OrderStudyDataService orderStudyDataService = mock(OrderStudyDataService.class);
-			when(orderStudyDataService.getOrders("user0")).thenReturn(Arrays.asList(request0));
-			when(orderStudyDataService.getOrders("user1")).thenReturn(Arrays.asList(request1));
+			OrderStudyDataService orderStudyDataService = mock(OrderStudyDataServiceImpl.class);
+			when(orderStudyDataService.getOrders()).thenReturn(Arrays.asList(request0));
+			when(orderStudyDataService.getOrders()).thenReturn(Arrays.asList(request1));
 			return orderStudyDataService;
 		}
 
@@ -131,9 +139,9 @@ public class OrderStudyDataControllerTest extends AbstractTestNGSpringContextTes
 		}
 
 		@Bean
-		public Database database()
+		public DataService dataService()
 		{
-			return mock(Database.class);
+			return mock(DataService.class);
 		}
 
 		@Bean

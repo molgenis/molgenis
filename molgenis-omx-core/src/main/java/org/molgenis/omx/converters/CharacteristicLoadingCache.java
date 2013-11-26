@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.omx.observ.Characteristic;
 
 import com.google.common.base.Function;
@@ -22,13 +22,13 @@ class CharacteristicLoadingCache
 {
 	private static final long MAX_CACHE_ITEMS = 10000;
 
-	private final Database database;
+	private final DataService dataService;
 	private final LoadingCache<String, Integer> characteristicLoadingCache;
 
-	public CharacteristicLoadingCache(Database database)
+	public CharacteristicLoadingCache(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
 		this.characteristicLoadingCache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_ITEMS).softValues()
 				.build(new CacheLoader<String, Integer>()
 				{
@@ -57,7 +57,8 @@ class CharacteristicLoadingCache
 		{
 			throw new DatabaseException(e);
 		}
-		return database.getEntityManager().getReference(Characteristic.class, primaryKey);
+
+		return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey);
 	}
 
 	public List<Characteristic> findCharacteristics(List<String> identifiers) throws DatabaseException
@@ -78,14 +79,16 @@ class CharacteristicLoadingCache
 			public Characteristic apply(String identifier)
 			{
 				Integer primaryKey = characteristicIdMap.get(identifier);
-				return database.getEntityManager().getReference(Characteristic.class, primaryKey);
+				return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey);
 			}
 		});
 	}
 
 	private Integer findCharacteristicId(String identifier) throws DatabaseException, ValueConverterException
 	{
-		Characteristic characteristic = Characteristic.findByIdentifier(database, identifier);
+		Characteristic characteristic = dataService.findOne(Characteristic.ENTITY_NAME,
+				new QueryImpl().eq(Characteristic.IDENTIFIER, identifier));
+
 		if (characteristic == null)
 		{
 			throw new ValueConverterException("unknown characteristic identifier [" + identifier + ']');
@@ -97,8 +100,8 @@ class CharacteristicLoadingCache
 			throws DatabaseException, ValueConverterException
 	{
 		List<String> identifiers = Lists.newArrayList(identifiersIterable);
-		Query<Characteristic> query = database.query(Characteristic.class).in(Characteristic.IDENTIFIER, identifiers);
-		List<Characteristic> values = query.find();
+		List<Characteristic> values = dataService.findAllAsList(Characteristic.ENTITY_NAME,
+				new QueryImpl().in(Characteristic.IDENTIFIER, identifiers));
 
 		final int nrIdentifiers = identifiers.size();
 		if (nrIdentifiers != values.size())

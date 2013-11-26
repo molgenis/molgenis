@@ -3,6 +3,9 @@ package org.molgenis.security.user;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
 
+/**
+ * Manage account of the current user
+ */
 public interface UserAccountService
 {
 	/**
@@ -11,7 +14,7 @@ public interface UserAccountService
 	 * @return
 	 * @throws DatabaseException
 	 */
-	MolgenisUser getCurrentUser() throws DatabaseException;
+	MolgenisUser getCurrentUser();
 
 	/**
 	 * Update the currently logged in user
@@ -20,5 +23,14 @@ public interface UserAccountService
 	 *            updated user
 	 * @throws DatabaseException
 	 */
-	void updateCurrentUser(MolgenisUser molgenisUser) throws DatabaseException;
+	void updateCurrentUser(MolgenisUser molgenisUser);
+
+	/**
+	 * Validates the password of the current logged in user
+	 * 
+	 * @param password
+	 * @return
+	 * @throws DatabaseException
+	 */
+	boolean validateCurrentUserPassword(String password);
 }

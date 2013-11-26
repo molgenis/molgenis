@@ -7,12 +7,12 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.JDBCMetaDatabase;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
-import org.molgenis.model.elements.Model;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -51,14 +51,13 @@ public class DataSetTableTest
 
 		DataSet dataSet = when(mock(DataSet.class).getProtocolUsed()).thenReturn(p0).getMock();
 
-		Database db = mock(Database.class);
-		Model model = mock(Model.class);
+		DataService dataService = mock(DataService.class);
+		JDBCMetaDatabase jdbcMetaDatabase = mock(JDBCMetaDatabase.class);
 		Entity entity = mock(Entity.class);
 
-		when(model.getEntity(ObservableFeature.class.getSimpleName())).thenReturn(entity);
-		when(db.getMetaData()).thenReturn(model);
+		when(jdbcMetaDatabase.getEntity(ObservableFeature.class.getSimpleName())).thenReturn(entity);
 
-		List<Field> cols = new DataSetTable(dataSet, db).getAllColumns();
+		List<Field> cols = new DataSetTable(dataSet, dataService, jdbcMetaDatabase).getAllColumns();
 		assertEquals("10", cols.get(0).getName());
 		assertEquals("name10", cols.get(0).getLabel());
 		assertEquals("11", cols.get(1).getName());

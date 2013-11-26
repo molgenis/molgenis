@@ -2,8 +2,9 @@ package org.molgenis.omx;
 
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
+import org.molgenis.data.DataService;
+import org.molgenis.data.jpa.JpaEntitySourceRegistrator;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.framework.db.Database;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
@@ -11,6 +12,7 @@ import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -30,17 +32,24 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
-	private Database database;
+	private DataService dataService;
+
+	@Bean
+	public ApplicationListener<?> jpaEntitySourceRegistrator()
+	{
+		return new JpaEntitySourceRegistrator(dataService);
+	}
 
 	@Bean
 	public CatalogManagerService catalogManagerService()
 	{
-		return new OmxCatalogManagerService(database);
+		return new OmxCatalogManagerService(dataService);
 	}
 
 	@Bean
 	public StudyManagerService studyDefinitionManagerService()
 	{
-		return new OmxStudyManagerService(database);
+		return new OmxStudyManagerService(dataService);
 	}
+
 }

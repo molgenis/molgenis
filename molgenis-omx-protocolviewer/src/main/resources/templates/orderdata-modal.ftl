@@ -49,8 +49,8 @@
 
   		<#-- modal events -->
   		modal.on('show', function () {
-  			submitBtn.attr("disabled", false);
-			cancelBtn.attr("disabled", false);
+  			submitBtn.attr('disabled', false);
+			cancelBtn.attr('disabled', false);
   			deletedFeatures = [];
 	  		$.ajax({
 				type : 'GET',
@@ -80,7 +80,7 @@
 							var deleteBtn = $('<i class="icon-remove"></i>');
 							deleteBtn.click(function() {
 				                deletedFeatures.push({
-									"feature": feature.id
+									'feature': feature.id
 				                });
 								row.remove();
 								// restore focus
@@ -131,12 +131,13 @@
 					    data: JSON.stringify({features : deletedFeatures}),
 					    contentType: 'application/json',
 					    success : function() {
-					      order();
+					    	order();
 					    },
-					    error: function() {
-					      alert("error");
-					        }
-					    });
+					    error: function(xhr) {
+					    	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+					    	modal.modal('hide');
+					    }
+					});
 				}
 				else{
 					order();
@@ -158,8 +159,8 @@
 		
 		function order() {
 			showSpinner();
-			submitBtn.attr("disabled", true);
-			cancelBtn.attr("disabled", true);
+			submitBtn.attr('disabled', true);
+			cancelBtn.attr('disabled', true);
 			$.ajax({
 			    type: 'POST',
 			    url: '/plugin/study/order',
@@ -172,9 +173,10 @@
 					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
 					modal.modal('hide');
 			    },
-			    error: function() {
+			    error: function(xhr) {
 			    	hideSpinner();
-			      	alert("error"); // TODO display error message
+			    	molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+			    	modal.modal('hide');
 			    }
 			});
 		}

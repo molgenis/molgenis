@@ -31,13 +31,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
-import org.molgenis.util.Entity;
+import org.molgenis.data.Entity;
 
 <#list model.entities as entity>
 <#if !entity.abstract && !entity.system>
@@ -65,15 +64,12 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private final Database database;
 	private final DataService dataService;
 
 	@Autowired
-	public EntitiesValidatorImpl(Database database, DataService dataService)
+	public EntitiesValidatorImpl(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.database = database;
 		this.dataService = dataService;
 	}
 	
@@ -125,7 +121,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 			Class<? extends Entity> entityClazz, EntitiesValidationReport validationReport)
 			throws MolgenisModelException, DatabaseException, IOException
 	{
-		List<Field> entityFields = database.getMetaData().getEntity(entityClazz.getSimpleName()).getAllFields();
+		List<Field> entityFields = new JDBCMetaDatabase().getEntity(entityClazz.getSimpleName()).getAllFields();
 
 		// construct a list of all required and optional fields
 		Map<String, Field> requiredFields = new LinkedHashMap<String, Field>();

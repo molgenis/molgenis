@@ -2,6 +2,10 @@
 	"use strict";
 
 	var sortRule = null;
+
+	molgenis.setEntityExplorerUrl = function(entityExplorerUrl) {
+		molgenis.entityExplorerUrl = entityExplorerUrl;
+	};
 	
 	molgenis.ResultsTable = function ResultsTable() {
 	};
@@ -53,8 +57,27 @@
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
 				var value = columnValueMap[feature.identifier];
+				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
-					items.push('<td class="multi-os-datacell">' + formatTableCellValue(value, feature.dataType) + '</td>');
+					if (feature.dataType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var valueKey = columnValueMap['key-' + feature.identifier];
+						var valueValue = formatTableCellValue(value, feature.dataType);
+						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
+					}	
+					else if (feature.dataType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var valueKeys = columnValueMap['key-' + feature.identifier];
+						var valueValues = value.split(',');
+						for (var i = 0; i < valueValues.length; i++) {
+							var valueKey = valueKeys[i];
+							var valueValue = formatTableCellValue(valueValues[i], feature.dataType);
+						    if(i > 0) cellValue +=  ',';
+						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
+						}
+					}
+					else{
+						cellValue = formatTableCellValue(value, feature.dataType);
+					}
+					items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
 				} else {
 					items.push('<td></td>');
 				}

@@ -3,6 +3,7 @@ package org.molgenis.elasticsearch;
 import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,10 +32,11 @@ import org.molgenis.elasticsearch.response.ResponseParser;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
+import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.util.Entity;
+import org.molgenis.data.Entity;
 
 /**
  * ElasticSearch implementation of the SearchService interface
@@ -75,6 +77,12 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
+	public SearchResult multiSearch(MultiSearchRequest request)
+	{
+		return multiSearch(SearchType.QUERY_AND_FETCH, request);
+	}
+
+	@Override
 	public long count(String documentType, List<QueryRule> queryRules)
 	{
 
@@ -82,6 +90,36 @@ public class ElasticSearchService implements SearchService
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
+	}
+
+	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
+	{
+		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
+		List<String> documentTypes = null;
+		if (request.getDocumentType() != null)
+		{
+			documentTypes = new ArrayList<String>();
+			for (String documentType : request.getDocumentType())
+			{
+				documentTypes.add(sanitizeMapperType(documentType));
+			}
+		}
+
+		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentTypes, searchType,
+				request.getQueryRules(), request.getFieldsToReturn());
+
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("SearchRequestBuilder:" + requestBuilder);
+		}
+
+		SearchResponse response = requestBuilder.execute().actionGet();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("SearchResponse:" + response);
+		}
+
+		return responseParser.parseSearchResponse(response);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
@@ -199,7 +237,7 @@ public class ElasticSearchService implements SearchService
 		String documentTypeSantized = sanitizeMapperType(documentType);
 
 		return client.admin().indices().typesExists(new TypesExistsRequest(new String[]
-		{ indexName }, documentTypeSantized)).actionGet().exists();
+		{ indexName }, documentTypeSantized)).actionGet().isExists();
 	}
 
 	@Override
@@ -214,8 +252,8 @@ public class ElasticSearchService implements SearchService
 
 		if (deleteResponse != null)
 		{
-			IndexDeleteByQueryResponse idbqr = deleteResponse.index(indexName);
-			if ((idbqr != null) && (idbqr.failedShards() > 0))
+			IndexDeleteByQueryResponse idbqr = deleteResponse.getIndex(indexName);
+			if ((idbqr != null) && (idbqr.getFailedShards() > 0))
 			{
 				throw new ElasticSearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
 			}
@@ -224,6 +262,7 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Delete done.");
 	}
 
+	@Override
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
 	{
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentIds);
@@ -245,6 +284,53 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Delete done.");
 	}
 
+	@Override
+	public void updateIndexTupleTable(String documentType, TupleTable tupleTable)
+	{
+		try
+		{
+			if (tupleTable.getCount() == 0)
+			{
+				return;
+			}
+		}
+		catch (TableException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		String documentTypeSantized = sanitizeMapperType(documentType);
+
+		LOG.info("Going to create mapping for documentType [" + documentType + "]");
+		createMappings(documentTypeSantized, tupleTable);
+
+		LOG.info("Going to insert documents of type [" + documentType + "]");
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+
+		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
+		for (BulkRequestBuilder request : requests)
+		{
+			LOG.info("Request created");
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("BulkRequest:" + request);
+			}
+
+			BulkResponse response = request.execute().actionGet();
+			LOG.info("Request done");
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("BulkResponse:" + response);
+			}
+
+			if (response.hasFailures())
+			{
+				throw new ElasticSearchException(response.buildFailureMessage());
+			}
+		}
+	}
+
+	@Override
 	public void updateDocumentById(String documentType, String documentId, String updateScript)
 	{
 		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentId);
@@ -265,11 +351,11 @@ public class ElasticSearchService implements SearchService
 	{
 		// Wait until elasticsearch is ready
 		client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().exists();
+		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().isExists();
 		if (!hasIndex)
 		{
 			CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).execute().actionGet();
-			if (!response.acknowledged())
+			if (!response.isAcknowledged())
 			{
 				throw new ElasticSearchException("Creation of index [" + indexName + "] failed. Response=" + response);
 			}
@@ -305,7 +391,7 @@ public class ElasticSearchService implements SearchService
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
 				.setType(documentTypeSantized).setSource(jsonBuilder).execute().actionGet();
 
-		if (!response.acknowledged())
+		if (!response.isAcknowledged())
 		{
 			throw new ElasticSearchException("Creation of mapping for documentType [" + documentType
 					+ "] failed. Response=" + response);

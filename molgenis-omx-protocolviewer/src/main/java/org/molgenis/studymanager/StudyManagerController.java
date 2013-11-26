@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -27,6 +27,8 @@ import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
 import org.molgenis.study.StudyDefinitionMeta;
 import org.molgenis.study.UnknownStudyDefinitionException;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -132,8 +134,8 @@ public class StudyManagerController extends MolgenisPluginController
 	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
 			UnknownStudyDefinitionException
 	{
-		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(id);
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 		return CatalogModelBuilder.create(catalog, studyDefinition, true);
 	}
 
@@ -143,8 +145,8 @@ public class StudyManagerController extends MolgenisPluginController
 			UnknownStudyDefinitionException
 	{
 		// get study definition and catalog used to create study definition
-		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(id);
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 		return CatalogModelBuilder.create(catalog, studyDefinition, false);
 	}
 
@@ -155,8 +157,8 @@ public class StudyManagerController extends MolgenisPluginController
 			UnknownCatalogException
 	{
 		// get study definition and catalog used to create study definition
-		final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(id);
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 
 		// create updated study definition
 		StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
@@ -224,8 +226,21 @@ public class StudyManagerController extends MolgenisPluginController
 		response.setContentType("application/vnd.ms-excel");
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
+		// TODO remove code duplication (see ProtocolViewerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
+		List<CatalogItem> catalogItems = studyDefinition.getItems();
+		if (catalogItems != null)
+		{
+			Collections.sort(catalogItems, new Comparator<CatalogItem>()
+			{
+				@Override
+				public int compare(CatalogItem catalogItem1, CatalogItem catalogItem2)
+				{
+					return catalogItem1.getId().compareTo(catalogItem2.getId());
+				}
+			});
+		}
 		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
 		try
 		{
@@ -233,7 +248,7 @@ public class StudyManagerController extends MolgenisPluginController
 			try
 			{
 				sheetWriter.writeColNames(header);
-				for (CatalogItem catalogItem : studyDefinition.getItems())
+				for (CatalogItem catalogItem : catalogItems)
 				{
 					KeyValueTuple tuple = new KeyValueTuple();
 					tuple.set(header.get(0), catalogItem.getId());
@@ -285,21 +300,21 @@ public class StudyManagerController extends MolgenisPluginController
 	}
 
 	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	@ResponseBody
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		logger.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(
+				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage())));
 	}
 
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, String> handleException(Exception e)
+	public ErrorMessageResponse handleException(Exception e)
 	{
 		logger.debug(null, e);
-		return Collections.singletonMap("errorMessage", e.getMessage());
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }
