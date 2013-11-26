@@ -149,7 +149,7 @@ public class ChartController
 	/**
 	 * Renders a heatmap with r
 	 * 
-	 * Returns a piece of javascript that can be retrieved by an html page with a ajax request.
+	 * Returns a piece of javascript that can be retrieved by an html page with an ajax request.
 	 * 
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
 	 * 
