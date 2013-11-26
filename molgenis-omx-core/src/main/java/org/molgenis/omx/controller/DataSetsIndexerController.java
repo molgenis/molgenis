@@ -96,17 +96,6 @@ public class DataSetsIndexerController extends MolgenisPluginController
 
 		return new DataSetIndexResponse(true, "");
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/status", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public DataSetIndexResponse indexingStatus() {
-		if (dataSetsIndexer.isIndexingRunning())
-		{
-			return new DataSetIndexResponse(true, "Indexer is running <i class=\"icon-refresh\"></i> functionality is not fully active!");
-		} else {
-			return new DataSetIndexResponse(false, "Indexing is finished <i class=\"icon-ok\"></i>");
-		}
-	}
 
 	static class DataSetIndexRequest
 	{
