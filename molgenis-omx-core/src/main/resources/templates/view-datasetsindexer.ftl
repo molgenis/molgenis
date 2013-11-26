@@ -58,18 +58,7 @@
 				});
 				
 				return false;
-			});
-			
-//			function setStatusMessage() {
-//				//console.log("setStatusMessage() ---: " + new Date());
-//			    $.get("/menu/admin/dataindexer/status", function(response) {
-//					if(response.isRunning === true){
-//						setTimeout(setStatusMessage, 2000);
-//					}else{
-//						molgenis.createAlert([{'message': response.message}], 'success');
-//					}
-//				});
-//			};		
+			});	
 			
 		});
 	</script>
