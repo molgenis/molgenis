@@ -226,7 +226,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// not see any data
 				.antMatchers("/das/**").permitAll()
 
-				.antMatchers("/myDas/**").permitAll();
+				.antMatchers("/myDas/**").permitAll()
+
+				.antMatchers("/charts/**").authenticated();
 	}
 
 	@Override
