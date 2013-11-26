@@ -100,7 +100,7 @@ function annotateHeatMap(){
 
 	
 	// first col, first row:
-	var rowsLeft = nCol;
+	var rowsLeft = nRow;
 	var thisCol = 1;
 	test = nCol + nCol + nRow;
 	console.log("tipping <g> " + startPoint + " to " + test);
@@ -108,24 +108,29 @@ function annotateHeatMap(){
 	.each(function(){
 		if(rowsLeft == 1){
 			$(this).qtip(getTipConfig(rowsLeft, thisCol));
+			console.log(rowsLeft + " " + thisCol);
 			thisCol++;
 		}else{
 			$(this).qtip(getTipConfig(rowsLeft, thisCol));
+			console.log(rowsLeft + " " + thisCol);
 			rowsLeft--;
 		}
 	});
 
 	//the rest:
-	var thisRow = nCol;
+	var thisRow = nRow;
 	var thisCol = 2;
 	console.log("tipping <path> 0 to " + (nCol-1)*(nCol-1));
-	$("svg > g > path").slice(0, (nCol-1)*(nCol-1)).each(function(index){
+	$("svg > g > path").slice(0, (nCol-1)*(nRow-1)).each(function(index){
 		if(thisRow == 2){
 			$(this).qtip(getTipConfig(thisRow, thisCol));
+			console.log(thisRow + " " + thisCol);
 			thisRow = nCol;
 			thisCol++;
+
 		}else{
 			$(this).qtip(getTipConfig(thisRow, thisCol));
+			console.log(thisRow + " " + thisCol);
 			thisRow--;
 		}
 	});
