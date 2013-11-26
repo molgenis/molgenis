@@ -572,5 +572,7 @@
 		<module>molgenis-data-csv</module>
 		<module>molgenis-data</module>
 		<module>molgenis-data-jpa</module>
+		<module>molgenis-r</module>
+		<module>molgenis-charts</module>
 	</modules>
 </project>
