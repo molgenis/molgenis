@@ -24,9 +24,7 @@ public class CategoryChecker
 			return;
 		}
 		CategoryChecker vc = new CategoryChecker();
-
 		vc.check(args[0], args[1]);
-
 	}
 
 	public void check(String file, String datasetMatrix) throws IOException
@@ -58,9 +56,7 @@ public class CategoryChecker
 				if (!hashCategories.get(category).contains(t.getString(category)))
 				{
 					getList.add(t.getString(category));
-
 				}
-
 			}
 		}
 		printForCategoryTab(hashCategories);
