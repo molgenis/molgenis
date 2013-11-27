@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 
 /**
  * Protocol viewer model
@@ -13,7 +14,7 @@ public class ProtocolViewer implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private List<DataSet> dataSets;
+	private List<Protocol> protocols;
 
 	private boolean enableDownloadAction;
 
@@ -21,14 +22,14 @@ public class ProtocolViewer implements Serializable
 
 	private boolean authenticated;
 
-	public List<DataSet> getDataSets()
+	public List<Protocol> getProtocols()
 	{
-		return dataSets != null ? dataSets : Collections.<DataSet> emptyList();
+		return protocols != null ? protocols : Collections.<Protocol> emptyList();
 	}
 
-	public void setDataSets(List<DataSet> dataSets)
+	public void setProtocols(List<Protocol> protocols)
 	{
-		this.dataSets = dataSets;
+		this.protocols = protocols;
 	}
 
 	public boolean isEnableDownloadAction()
