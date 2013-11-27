@@ -28,8 +28,8 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.order.OrderStudyDataService;
 import org.molgenis.omx.order.OrderStudyDataServiceImpl;
 import org.molgenis.security.user.MolgenisUserService;
@@ -110,8 +110,8 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 	private static Authentication AUTHENTICATION_PREVIOUS;
 	private Authentication authentication;
 	private MolgenisUser molgenisUser;
-	private final String dataSet1Identifier = "1";
-	private DataSet dataSet1;
+	private final String protocol1Identifier = "1";
+	private Protocol protocol1;
 	private ObservableFeature feature0, feature1;
 
 	@Autowired
@@ -164,13 +164,16 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 		when(feature1.getName()).thenReturn("feature #1");
 		when(feature1.getDescription()).thenReturn("feature #1 description");
 
-		Query q0 = new QueryImpl(new QueryRule(ObservableFeature.ENTITY_NAME, Operator.IN, Arrays.asList(0, 1)));
+		Query q0 = new QueryImpl(new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(0, 1)));
 		when(dataService.findAll(ObservableFeature.ENTITY_NAME, q0)).thenReturn(
 				Arrays.<Entity> asList(feature0, feature1));
 
-		dataSet1 = when(mock(DataSet.class).getIdentifier()).thenReturn(dataSet1Identifier).getMock();
-		Query q1 = new QueryImpl(new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS, dataSet1Identifier));
-		when(dataService.findOne(DataSet.ENTITY_NAME, q1)).thenReturn(dataSet1);
+		Query q0b = new QueryImpl(new QueryRule(ObservableFeature.ID, Operator.IN, Arrays.asList(-2, -1)));
+		when(dataService.findAll(ObservableFeature.ENTITY_NAME, q0b)).thenReturn(Collections.<Entity> emptyList());
+
+		protocol1 = when(mock(Protocol.class).getIdentifier()).thenReturn(protocol1Identifier).getMock();
+		Query q1 = new QueryImpl(new QueryRule(Protocol.ID, Operator.EQUALS, protocol1Identifier));
+		when(dataService.findOne(Protocol.ENTITY_NAME, q1)).thenReturn(protocol1);
 
 		Query q2 = new QueryImpl(new QueryRule(ObservableFeature.ENTITY_NAME, Operator.IN, Arrays.asList(-2, -1)));
 		when(dataService.findAll(ObservableFeature.ENTITY_NAME, q2)).thenReturn(Collections.<Entity> emptyList());
@@ -186,7 +189,7 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 		Part requestForm = mock(Part.class);
 		when(requestForm.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]
 		{ 0, 1, 2 }));
-		orderStudyDataService.orderStudyData(studyDataRequestName, requestForm, "1",
+		orderStudyDataService.orderStudyData(studyDataRequestName, requestForm, protocol1Identifier,
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 
 		ArgumentCaptor<StudyDataRequest> argument = ArgumentCaptor.forClass(StudyDataRequest.class);
@@ -194,7 +197,7 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 		StudyDataRequest studyDataRequest = argument.getValue();
 		assertEquals(studyDataRequest.getMolgenisUser(), molgenisUser);
 		assertEquals(studyDataRequest.getName(), studyDataRequestName);
-		assertEquals(studyDataRequest.getDataSet(), dataSet1);
+		assertEquals(studyDataRequest.getProtocol(), protocol1);
 		assertEquals(studyDataRequest.getFeatures(), Arrays.asList(feature0, feature1));
 		verify(javaMailSender).send(any(MimeMessage.class));
 	}
@@ -202,33 +205,34 @@ public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noStudyName() throws MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData(null, mock(Part.class), "1",
+		orderStudyDataService.orderStudyData(null, mock(Part.class), protocol1Identifier,
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noRequestForm() throws MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", null, "1",
+		orderStudyDataService.orderStudyData("study #1", null, protocol1Identifier,
 				Arrays.asList(Integer.valueOf(0), Integer.valueOf(1)));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_noFeatures() throws MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", null);
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), protocol1Identifier, null);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void orderStudyData_emptyFeatures() throws MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1", Collections.<Integer> emptyList());
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), protocol1Identifier,
+				Collections.<Integer> emptyList());
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void orderStudyData_invalidFeatures() throws MessagingException, IOException
 	{
-		orderStudyDataService.orderStudyData("study #1", mock(Part.class), "1",
+		orderStudyDataService.orderStudyData("study #1", mock(Part.class), protocol1Identifier,
 				Arrays.asList(Integer.valueOf(-2), Integer.valueOf(-1)));
 	}
 
