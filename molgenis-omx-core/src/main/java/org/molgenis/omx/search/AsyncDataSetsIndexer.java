@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.JDBCMetaDatabase;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
@@ -55,9 +54,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	}
 
 	/**
-	 * Index all datasets
-	 * 
-	 * @throws DatabaseException
+	 * Index all data sets
+	 *
 	 * @throws TableException
 	 */
 	@Override
@@ -68,12 +66,12 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME);
 			for (DataSet dataSet : dataSets)
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService,
 						new JDBCMetaDatabase()));
-				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+				searchService.indexTupleTable("protocolTree-" + dataSet.getProtocolUsed().getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
 						new CategoryTable(dataSet.getProtocolUsed(), dataService));
@@ -90,9 +88,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	}
 
 	/**
-	 * Index all datatsets that are not in the index yet
-	 * 
-	 * @throws DatabaseException
+	 * Index all data sets that are not in the index yet
+	 *
 	 * @throws TableException
 	 */
 	@Override
@@ -150,7 +147,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService,
 						new JDBCMetaDatabase()));
-				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+				searchService.indexTupleTable("protocolTree-" + dataSet.getProtocolUsed().getId(),
 						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
 						new CategoryTable(dataSet.getProtocolUsed(), dataService));
