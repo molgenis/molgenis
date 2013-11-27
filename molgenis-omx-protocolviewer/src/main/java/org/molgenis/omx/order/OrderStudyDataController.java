@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.utils.I18nTools;
@@ -57,7 +57,7 @@ public class OrderStudyDataController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
-	public String getOrderDataForm() throws DatabaseException
+	public String getOrderDataForm()
 	{
 		return "orderdata-modal";
 	}
@@ -66,16 +66,16 @@ public class OrderStudyDataController extends MolgenisPluginController
 	// ModelAttribute
 	@RequestMapping(value = "/order", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void orderData(@RequestParam String dataSetIdentifier, @RequestParam String name, @RequestParam Part file)
-			throws DatabaseException, IOException, MessagingException
+	public void orderData(@RequestParam String catalogId, @RequestParam String name, @RequestParam Part file)
+			throws IOException, MessagingException
 	{
-		orderStudyDataService.orderStudyData(name, file, dataSetIdentifier, shoppingCart.getCart());
+		orderStudyDataService.orderStudyData(name, file, catalogId, shoppingCart.getCart());
 		shoppingCart.emptyCart();
 	}
 
 	@RequestMapping(value = "/orders", method = RequestMethod.GET)
 	@ResponseBody
-	public OrdersResponse getOrders() throws DatabaseException
+	public OrdersResponse getOrders()
 	{
 		Iterable<OrderResponse> ordersIterable = Iterables.transform(orderStudyDataService.getOrders(),
 				new Function<StudyDataRequest, OrderResponse>()
@@ -91,16 +91,16 @@ public class OrderStudyDataController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/orders/view", method = RequestMethod.GET)
-	public String getOrdersForm() throws DatabaseException
+	public String getOrdersForm()
 	{
 		return "orderlist-modal";
 	}
 
 	@RequestMapping(value = "/orders/{orderId}/view", method = RequestMethod.GET)
-	public ModelAndView getOrderDetailsForm(@Valid @NotNull @PathVariable Integer orderId) throws DatabaseException
+	public ModelAndView getOrderDetailsForm(@Valid @NotNull @PathVariable Integer orderId)
 	{
 		StudyDataRequest studyDataRequest = orderStudyDataService.getOrder(orderId);
-		if (studyDataRequest == null) throw new DatabaseException("invalid order id");
+		if (studyDataRequest == null) throw new MolgenisDataException("invalid order id");
 
 		ModelAndView model = new ModelAndView("orderdetails-modal");
 		model.addObject("order", studyDataRequest);
@@ -164,10 +164,10 @@ public class OrderStudyDataController extends MolgenisPluginController
 		}
 	}
 
-	@ExceptionHandler(DatabaseException.class)
+	@ExceptionHandler(MolgenisDataException.class)
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	@ResponseBody
-	public ErrorMessageResponse handleDatabaseException(DatabaseException e)
+	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
 		logger.error("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
