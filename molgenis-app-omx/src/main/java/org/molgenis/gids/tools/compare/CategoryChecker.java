@@ -29,6 +29,7 @@ public class CategoryChecker
 
 	public void check(String file, String datasetMatrix) throws IOException
 	{
+
 		ExcelReader excelReader = new ExcelReader(new File(file));
 		List<String> listOfCategoricalFeatures = new ArrayList<String>();
 		ExcelSheetReader readObservableFeatureSheet = excelReader.getSheet("observablefeature");
@@ -36,13 +37,10 @@ public class CategoryChecker
 		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
 		for (Tuple t : readObservableFeatureSheet)
 		{
-			if (StringUtils.isNotBlank(t.getString("dataType")))
+			if ("categorical".equals(t.getString("dataType")))
 			{
-				if (t.getString("dataType").equals("categorical"))
-				{
-					listOfCategoricalFeatures.add(t.getString("identifier"));
-					hashCategories.put(t.getString("identifier"), new ArrayList<String>());
-				}
+				listOfCategoricalFeatures.add(t.getString("identifier"));
+				hashCategories.put(t.getString("identifier"), new ArrayList<String>());
 			}
 		}
 
@@ -60,6 +58,7 @@ public class CategoryChecker
 			}
 		}
 		printForCategoryTab(hashCategories);
+		excelReader.close();
 
 	}
 
