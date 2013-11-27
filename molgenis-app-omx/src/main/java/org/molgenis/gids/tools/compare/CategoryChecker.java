@@ -79,14 +79,15 @@ public class CategoryChecker
 	{
 		for (Entry<String, List<String>> entry : hashCategories.entrySet())
 		{
-
 			for (String valueCode : entry.getValue())
 			{
-
-				System.out.println(entry.getKey() + "_" + valueCode + "," + valueCode + "," + valueCode + ","
-						+ entry.getKey());
+				if (StringUtils.isNotBlank(valueCode))
+				{
+					String identifierCode = valueCode.replaceAll("\\s", "_");
+					System.out.println(entry.getKey() + "_" + identifierCode + "^" + valueCode + "^" + valueCode + "^"
+							+ entry.getKey());
+				}
 			}
 		}
 	}
-
 }
