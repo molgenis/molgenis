@@ -89,41 +89,6 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		}
 	}
 
-	/**
-	 * Index all datatsets that are not in the index yet
-	 * 
-	 * @throws DatabaseException
-	 * @throws TableException
-	 */
-	@Override
-	@Async
-	@RunAsSystem
-	public void indexNew()
-	{
-		List<Integer> dataSetIds = new ArrayList<Integer>();
-
-		try
-		{
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
-			for (DataSet dataSet : dataSets)
-			{
-				if (!searchService.documentTypeExists(dataSet.getIdentifier()))
-				{
-					dataSetIds.add(dataSet.getId());
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LOG.error("Exception index()", e);
-		}
-
-		if (!dataSetIds.isEmpty())
-		{
-			index(dataSetIds);
-		}
-	}
-
 	@Override
 	@Async
 	@RunAsSystem
