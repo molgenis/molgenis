@@ -8,33 +8,10 @@
 		<entity name="StudyDataRequest" implements="Identifiable" decorator="org.molgenis.omx.study.StudyDataRequestDecorator">
 			<field name="RequestForm" type="string" description="request form filename"/>
 			<field name="Features" type="mref" xref_entity="ObservableFeature"/>
-			<field name="DataSet" type="xref" xref_entity="DataSet" description="data set used to create request"/>
+			<field name="Protocol" type="xref" xref_entity="Protocol" description="protocol used to create request"/>
 			<field name="MolgenisUser" type="xref" xref_entity="MolgenisUser"/>
 			<field name="RequestDate" type="datetime" description="request date"/>
 			<field name="RequestStatus" type="enum" enum_options="[pending,accepted,rejected]"/>
 		</entity>
-		
-		
-		<!--
-		<entity name="DataSetFilter" implements="Identifiable">
-			<description>A selection of features that can be stored in the database</description>
-			<field name="FeatureFilters" type="mref" xref_entity="FeatureFilter" />
-		</entity>
-		<entity name="FeatureFilter" implements="Autoid">
-			<description>A Filter on a specific set of values in a Feature</description>
-			<field name="Feature" type="xref" xref_entity="ObservableFeature" />
-		</entity>
-		
-		
-		<entity name="DataSetFilter" implements="Identifiable">
-			<description>A selection of features that can be stored in the database</description>
-			<field name="DataSet" type="xref" xref_entity="DataSet" />
-		</entity>
-		<entity name="FeatureFilter" implements="Autoid">
-			<description>A Filter on a specific set of values in a Feature</description>
-			<field name="PartOfDataSetFilter" type="xref" xref_entity="DataSetFilter" />
-			<field name="Feature" type="xref" xref_entity="ObservableFeature" />
-		</entity>
-		 -->
 	</module>
 </molgenis>
