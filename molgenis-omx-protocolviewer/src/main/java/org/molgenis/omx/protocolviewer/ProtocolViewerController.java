@@ -6,11 +6,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,17 +17,19 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.ShoppingCart;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.collect.Lists;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
@@ -65,12 +63,13 @@ public class ProtocolViewerController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model) throws DatabaseException
 	{
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.ACTIVE, true));
+		Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
+				new QueryImpl().eq(Protocol.ROOT, true).and().eq(Protocol.ACTIVE, true));
 
 		// create new model
 		ProtocolViewer protocolViewer = new ProtocolViewer();
 		protocolViewer.setAuthenticated(SecurityUtils.currentUserIsAuthenticated());
-		protocolViewer.setDataSets(Lists.newArrayList(dataSets));
+		protocolViewer.setProtocols(Lists.newArrayList(protocols));
 
 		protocolViewer.setEnableDownloadAction(molgenisSettings.getBooleanProperty(KEY_ACTION_DOWNLOAD,
 				DEFAULT_KEY_ACTION_DOWNLOAD));
@@ -81,8 +80,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 		return "view-protocolviewer";
 	}
 
+	@RequestMapping(value = "/selection/{catalogId}", method = GET)
+	@ResponseBody
+	public Map<String, List<Integer>> getSelection(@PathVariable
+	Integer catalogId)
+	{
+		// TODO implement
+		return Collections.singletonMap("selectedItems", Collections.<Integer> emptyList());
+	}
+
 	@RequestMapping(value = "/download", method = GET)
-	public void download(HttpServletResponse response) throws IOException, DatabaseException
+	public void download(HttpServletResponse response) throws IOException
 	{
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm");
 		String fileName = "variables_" + dateFormat.format(new Date()) + ".xls";
@@ -138,7 +146,6 @@ public class ProtocolViewerController extends MolgenisPluginController
 	}
 
 	private List<ObservableFeature> findFeatures(DataService dataService, List<Integer> featureIds)
-			throws DatabaseException
 	{
 		if (featureIds == null || featureIds.isEmpty()) return null;
 		Iterable<ObservableFeature> it = dataService.findAll(ObservableFeature.ENTITY_NAME,
