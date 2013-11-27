@@ -80,8 +80,8 @@ public class CategoryChecker
 				if (StringUtils.isNotBlank(valueCode))
 				{
 					String identifierCode = valueCode.replaceAll("\\s", "_");
-					System.out.println(entry.getKey() + "_" + identifierCode + "^" + valueCode + "^" + valueCode + "^"
-							+ entry.getKey());
+					System.out.println(entry.getKey() + "_" + identifierCode + "\t" + valueCode + "\t" + valueCode
+							+ "\t" + entry.getKey());
 				}
 			}
 		}
