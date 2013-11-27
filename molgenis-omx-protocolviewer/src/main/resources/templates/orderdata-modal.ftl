@@ -30,7 +30,7 @@
   </div>
 </div>
 <script type="text/javascript">
-	$(function() {	 
+	$(function() {
 		var deletedFeatures = [];	
 		var modal = $('#orderdata-modal');
   		var submitBtn = $('#orderdata-btn');
@@ -39,9 +39,9 @@
   		
   		<#-- set current selected data set -->
 		if($('#orderdata-modal-container')) {
-			var dataSet = $('#orderdata-modal-container').data('data-set');
-			if(dataSet) {
-				$('#orderdata-form').prepend('<input type="hidden" name="dataSetIdentifier" value="' + dataSet.identifier + '">');
+			var catalogId = $('#orderdata-modal-container').data('catalog-id');
+			if(catalogId) {
+				$('#orderdata-form').prepend('<input type="hidden" name="catalogId" value="' + catalogId + '">');
 			}	
 		}
   		
