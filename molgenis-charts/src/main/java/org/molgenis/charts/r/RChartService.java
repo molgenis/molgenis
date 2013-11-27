@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.charttypes.HeatMapChart;
+import org.molgenis.charts.svg.SVGEditor;
 import org.molgenis.r.ROutputHandler;
 import org.molgenis.r.RScriptExecutor;
 import org.molgenis.util.FileStore;
@@ -55,7 +56,11 @@ public class RChartService
 
 		File script = generateScript("R_heatmap.ftl", data, fileName + ".r");
 		runScript(script);
-
+		
+		// annotate the SVG here
+		File f = fileStore.getFile(fileName + ".svg");
+		SVGEditor.annotateHeatMap(chart, f);
+		
 		return fileName;
 	}
 
