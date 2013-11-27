@@ -25,6 +25,7 @@ import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.omx.studymanager.OmxStudyDefinition;
 import org.molgenis.security.SecurityUtils;
@@ -75,7 +76,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
 	{ MessagingException.class, IOException.class })
-	public void orderStudyData(String studyName, Part requestForm, String dataSetIdentifier, List<Integer> featureIds)
+	public void orderStudyData(String studyName, Part requestForm, String catalogId, List<Integer> featureIds)
 			throws MessagingException, IOException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
@@ -83,13 +84,13 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 		if (featureIds == null || featureIds.isEmpty()) throw new IllegalArgumentException(
 				"feature list is null or empty");
 
-		Query q = new QueryImpl().in(ObservableFeature.ENTITY_NAME, featureIds);
+		Query q = new QueryImpl().in(ObservableFeature.ID, featureIds);
 		Iterable<ObservableFeature> it = dataService.findAll(ObservableFeature.ENTITY_NAME, q);
 		List<ObservableFeature> features = Lists.newArrayList(it);
 		if (features.isEmpty()) throw new MolgenisDataException("requested features do not exist");
 
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
+				new QueryImpl().eq(Protocol.ID, catalogId));
 		MolgenisUser molgenisUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 
 		String appName = getAppName();
@@ -102,7 +103,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
 		studyDataRequest.setName(studyName);
-		studyDataRequest.setDataSet(dataSet);
+		studyDataRequest.setProtocol(protocol);
 		studyDataRequest.setFeatures(features);
 		studyDataRequest.setMolgenisUser(molgenisUser);
 		studyDataRequest.setRequestDate(new Date());
