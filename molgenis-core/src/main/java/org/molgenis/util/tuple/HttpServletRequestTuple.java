@@ -23,8 +23,8 @@ import org.apache.log4j.Logger;
  * Simple Map based implementation of Tuple that wraps HttpServletRequest.
  * <p>
  * HttpRequestTuple can thus be questioned as if it was a Tuple. It uses the <a
- * href="http://jakarta.apache.org/commons/fileupload/using.html">org.apache.
- * commons.fileupload</a> to parse multipart requests
+ * href="http://jakarta.apache.org/commons/fileupload/using.html">org.apache. commons.fileupload</a> to parse multipart
+ * requests
  */
 public class HttpServletRequestTuple extends AbstractTuple
 {
@@ -37,7 +37,7 @@ public class HttpServletRequestTuple extends AbstractTuple
 	private final transient HttpServletResponse response;
 
 	/** indicates whether this request contains multipart content */
-	private boolean isMultipartRequest;
+	private final boolean isMultipartRequest;
 	/** params for request with multipart content */
 	private Map<String, Object> multipartParams;
 
@@ -50,7 +50,6 @@ public class HttpServletRequestTuple extends AbstractTuple
 		this(request, null);
 	}
 
-	@SuppressWarnings("deprecation")
 	public HttpServletRequestTuple(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		if (request == null) throw new IllegalArgumentException("request is null");
@@ -82,7 +81,6 @@ public class HttpServletRequestTuple extends AbstractTuple
 		return isMultipartRequest ? multipartParams.size() : request.getParameterMap().size();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<String> getColNames()
 	{
@@ -235,8 +233,7 @@ public class HttpServletRequestTuple extends AbstractTuple
 		if (elements.size() == 1)
 		{
 			if (item.getString().isEmpty()) multipartParams.put(item.getFieldName(), null);
-			else
-				multipartParams.put(item.getFieldName(), item.getString());
+			else multipartParams.put(item.getFieldName(), item.getString());
 		}
 		else
 		{

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataSetsIndexerController extends MolgenisPluginController
 {
+	private static final Logger logger = Logger.getLogger(DataSetsIndexerController.class);
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "dataindexer";
 
 	public DataSetsIndexerController()
@@ -69,17 +71,18 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	@ResponseBody
 	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
-		List<String> dataSetIds = request.getSelectedDataSets();
-		if ((dataSetIds == null) || dataSetIds.isEmpty())
-		{
-			return new DataSetIndexResponse(false, "Please select a dataset");
-		}
 
 		if (dataSetsIndexer.isIndexingRunning())
 		{
 			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
 		}
-
+		
+		List<String> dataSetIds = request.getSelectedDataSets();
+		if ((dataSetIds == null) || dataSetIds.isEmpty())
+		{
+			return new DataSetIndexResponse(false, "Please select a dataset");
+		}
+		
 		// Convert the strings to integer
 		List<Integer> ids = new ArrayList<Integer>();
 		for (String dataSetId : dataSetIds)
@@ -91,7 +94,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		}
 		dataSetsIndexer.index(ids);
 
-		return new DataSetIndexResponse(true, "Indexing started");
+		return new DataSetIndexResponse(true, "");
 	}
 
 	static class DataSetIndexRequest

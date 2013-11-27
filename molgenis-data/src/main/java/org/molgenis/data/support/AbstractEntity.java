@@ -1,65 +1,99 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.AttributeMetaData;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.List;
+
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
+import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
-	private final EntityMetaData metaData;
 
-	public AbstractEntity(EntityMetaData metaData)
+	@Override
+	public String getString(String attributeName)
 	{
-		if (metaData == null) throw new IllegalArgumentException("EntityMetaData cannot be null");
-		this.metaData = metaData;
+		return DataConverter.toString(get(attributeName));
 	}
 
 	@Override
-	public void set(Entity entity)
+	public Integer getInt(String attributeName)
 	{
-		for (AttributeMetaData attribute : metaData.getAttributes())
+		return DataConverter.toInt(get(attributeName));
+	}
+
+	@Override
+	public Long getLong(String attributeName)
+	{
+		return DataConverter.toLong(get(attributeName));
+	}
+
+	@Override
+	public Boolean getBoolean(String attributeName)
+	{
+		return DataConverter.toBoolean(get(attributeName));
+	}
+
+	@Override
+	public Double getDouble(String attributeName)
+	{
+		return DataConverter.toDouble(get(attributeName));
+	}
+
+	@Override
+	public Date getDate(String attributeName)
+	{
+		return DataConverter.toDate(get(attributeName));
+	}
+
+	@Override
+	public Timestamp getTimestamp(String attributeName)
+	{
+		return DataConverter.toTimestamp(get(attributeName));
+	}
+
+	@Override
+	public List<String> getList(String attributeName)
+	{
+		return DataConverter.toList(get(attributeName));
+	}
+
+	@Override
+	public List<Integer> getIntList(String attributeName)
+	{
+		return DataConverter.toIntList(get(attributeName));
+	}
+
+	public static boolean isObjectRepresentation(String objStr)
+	{
+		int left = objStr.indexOf('(');
+		int right = objStr.lastIndexOf(')');
+		return (left == -1 || right == -1) ? false : true;
+	}
+
+	public static <T extends Entity> T setValuesFromString(String objStr, Class<T> klass)
+	{
+		T result = BeanUtils.instantiateClass(klass);
+
+		int left = objStr.indexOf('(');
+		int right = objStr.lastIndexOf(')');
+
+		String content = objStr.substring(left + 1, right);
+
+		String[] attrValues = content.split(" ");
+		for (String attrValue : attrValues)
 		{
-			Object value = entity.get(attribute.getName());
-			if (value != null)
+			String[] av = attrValue.split("=");
+			String attr = av[0];
+			String value = av[1];
+			if (value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
 			{
-				set(attribute.getName(), value);
+				value = value.substring(1, value.length() - 1);
 			}
+			result.set(attr, value);
 		}
-	}
-
-	@Override
-	public Integer getIdValue()
-	{
-		AttributeMetaData idAttribute = metaData.getIdAttribute();
-		if (idAttribute == null)
-		{
-			return null;
-		}
-
-		Object id = get(idAttribute.getName());
-		if (!id.getClass().isAssignableFrom(Integer.class))
-		{
-			throw new MolgenisDataException("Id attribute should be of type Integer but is of type [" + id.getClass()
-					+ "]");
-		}
-
-		return (Integer) id;
-	}
-
-	@Override
-	public String getLabelValue()
-	{
-		AttributeMetaData labelAttribute = metaData.getLabelAttribute();
-		if (labelAttribute == null)
-		{
-			return null;
-		}
-
-		Object label = get(labelAttribute.getName());
-
-		return DataConverter.convert(label, String.class);
+		return result;
 	}
 }

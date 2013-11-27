@@ -19,7 +19,9 @@
 		</div>
 	</div>
 	<script type="text/javascript">
+
 		$(document).ready(function(){
+			
 			$('#select-all').click(function() {
 				$('.dataset-chk').attr('checked', true);
 				return false;
@@ -49,8 +51,15 @@
 				}).done(function(response){
 					molgenis.createAlert([{'message': response.message}], response.isRunning ? 'success' : 'error');
 					$('.dataset-chk').attr('checked', false);
+					molgenis.createDatasetsindexerAlert();
+					if(response.isRunning === true){
+						$('.alerts').empty();
+					}
 				});
+				
 				return false;
-			});
+			});	
+			
 		});
 	</script>
+<@footer/>	

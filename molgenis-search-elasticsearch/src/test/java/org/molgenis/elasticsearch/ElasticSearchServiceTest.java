@@ -12,17 +12,17 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
-import org.molgenis.util.Entity;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -60,7 +60,7 @@ public class ElasticSearchServiceTest
 	{
 		assertFalse(searchService.documentTypeExists("xxx"));
 
-		searchService.updateIndex("beer", Arrays.asList(new TestEntity(1)));
+		searchService.updateIndex("beer", Arrays.asList(new MapEntity()));
 		waitForIndexUpdate();
 
 		assertTrue(searchService.documentTypeExists("beer"));
@@ -70,15 +70,18 @@ public class ElasticSearchServiceTest
 	public void testCount() throws Exception
 	{
 		List<Entity> entities = new ArrayList<Entity>();
-		Entity e1 = new TestEntity(1);
+		Entity e1 = new MapEntity("id");
+		e1.set("id", 1);
 		e1.set("name", "Piet");
 		entities.add(e1);
 
-		Entity e2 = new TestEntity(2);
+		Entity e2 = new MapEntity("id");
+		e2.set("id", 2);
 		e2.set("name", "Piet");
 		entities.add(e2);
 
-		Entity e3 = new TestEntity(3);
+		Entity e3 = new MapEntity("id");
+		e3.set("id", 3);
 		e3.set("name", "Klaas");
 		entities.add(e3);
 
@@ -94,25 +97,35 @@ public class ElasticSearchServiceTest
 	{
 		List<Entity> fruits = new ArrayList<Entity>();
 
-		Entity apple = new TestEntity(1);
+		Entity apple = new MapEntity("id");
+		apple.set("id", 1);
 		apple.set("name", "apple");
 		apple.set("color", "green");
 		fruits.add(apple);
 
-		Entity banana = new TestEntity(2);
+		Entity banana = new MapEntity("id");
+		banana.set("id", 2);
 		banana.set("name", "banana");
 		banana.set("color", "yellow");
 		fruits.add(banana);
 
-		Entity orange = new TestEntity(3);
+		Entity orange = new MapEntity("id");
+		orange.set("id", 3);
 		orange.set("name", "orange");
 		orange.set("color", "orange");
 		fruits.add(orange);
 
-		Entity clemantine = new TestEntity(4);
+		Entity clemantine = new MapEntity("id");
+		clemantine.set("id", 4);
 		clemantine.set("name", "clemantine");
 		clemantine.set("color", "orange");
 		fruits.add(clemantine);
+
+		Entity appleWithDot = new MapEntity("id");
+		appleWithDot.set("id", 5);
+		appleWithDot.set("name", "brown.banana");
+		appleWithDot.set("color", "brown");
+		fruits.add(appleWithDot);
 
 		searchService.updateIndex("fruit", fruits);
 		waitForIndexUpdate();
@@ -162,6 +175,32 @@ public class ElasticSearchServiceTest
 		objectValueMapExpected = new LinkedHashMap<String, Object>();
 		objectValueMapExpected.put("id", 4);
 		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
+
+		// Search3
+		request = new SearchRequest("fruit", Arrays.asList(new QueryRule(Operator.SEARCH, "banana")),
+				Arrays.asList("id"));
+
+		searchResult = searchService.search(request);
+		assertNotNull(searchResult);
+		assertEquals(searchResult.getTotalHitCount(), 2);
+		assertNull(searchResult.getErrorMessage());
+
+		hits = searchResult.getSearchHits();
+		assertNotNull(hits);
+		assertEquals(hits.size(), 2);
+		assertEquals(hits.get(0).getId(), "2");
+		assertEquals(hits.get(0).getDocumentType(), "fruit");
+		assertEquals(hits.get(0).getHref(), "/api/v1/fruit/2");
+		objectValueMapExpected = new LinkedHashMap<String, Object>();
+		objectValueMapExpected.put("id", 2);
+		assertEquals(hits.get(0).getColumnValueMap(), objectValueMapExpected);
+
+		assertEquals(hits.get(1).getId(), "5");
+		assertEquals(hits.get(1).getDocumentType(), "fruit");
+		assertEquals(hits.get(1).getHref(), "/api/v1/fruit/5");
+		objectValueMapExpected = new LinkedHashMap<String, Object>();
+		objectValueMapExpected.put("id", 5);
+		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
 	}
 
 	private void waitForIndexUpdate()
@@ -169,130 +208,4 @@ public class ElasticSearchServiceTest
 		client.admin().indices().prepareRefresh().execute().actionGet();
 	}
 
-	private class TestEntity implements Entity
-	{
-		private final Map<String, Object> fields = new LinkedHashMap<String, Object>();
-
-		public TestEntity(int id)
-		{
-			fields.put("id", id);
-		}
-
-		@Override
-		public void set(String fieldName, Object value) throws Exception
-		{
-			fields.put(fieldName, value);
-		}
-
-		@Override
-		public Object get(String columnName)
-		{
-			return fields.get(columnName);
-		}
-
-		@Override
-		public String getIdField()
-		{
-			return "id";
-		}
-
-		@Override
-		public Object getIdValue()
-		{
-			return fields.get(getIdField());
-		}
-
-		@Override
-		public List<String> getLabelFields()
-		{
-			return null;
-		}
-
-		@Override
-		public Vector<String> getFields()
-		{
-			return getFields(false);
-		}
-
-		@Override
-		public Vector<String> getFields(boolean skipAutoIds)
-		{
-			Vector<String> fieldsVector = new Vector<String>(fields.keySet());
-			if (skipAutoIds)
-			{
-				fieldsVector.remove(getIdField());
-			}
-
-			return fieldsVector;
-		}
-
-		@Override
-		public void setReadonly(boolean readonly)
-		{
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public boolean isReadonly()
-		{
-			return false;
-		}
-
-		@Override
-		@Deprecated
-		public String getValues(String sep)
-		{
-			return null;
-		}
-
-		@Override
-		@Deprecated
-		public String getFields(String sep)
-		{
-			return null;
-		}
-
-		@Override
-		public void validate() throws Exception
-		{
-		}
-
-		@Override
-		public String getXrefIdFieldName(String fieldName)
-		{
-			return null;
-		}
-
-		@Override
-		public String getLabelValue()
-		{
-			return null;
-		}
-
-		@Override
-		public void set(org.molgenis.data.Entity values) throws Exception
-		{
-
-		}
-
-		@Override
-		public void set(org.molgenis.data.Entity values, boolean strict) throws Exception
-		{
-
-		}
-
-		@Override
-		public org.molgenis.data.Entity getValues()
-		{
-			return null;
-		}
-
-		@Override
-		public Entity create(org.molgenis.data.Entity values) throws Exception
-		{
-			return null;
-		}
-
-	}
 }

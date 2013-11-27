@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -572,5 +572,7 @@
 		<module>molgenis-data-csv</module>
 		<module>molgenis-data</module>
 		<module>molgenis-data-jpa</module>
+		<module>molgenis-r</module>
+		<module>molgenis-charts</module>
 	</modules>
 </project>

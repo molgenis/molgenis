@@ -226,7 +226,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// not see any data
 				.antMatchers("/das/**").permitAll()
 
-				.antMatchers("/myDas/**").permitAll();
+				.antMatchers("/myDas/**").permitAll()
+
+				.antMatchers("/charts/**").authenticated();
 	}
 
 	@Override
@@ -246,8 +248,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CATALOGMANAGER > ROLE_PLUGIN_READ_CATALOGMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CBMTOOMXCONVERTER > ROLE_PLUGIN_READ_CBMTOOMXCONVERTER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATAEXPLORER > ROLE_PLUGIN_READ_DATAEXPLORER").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATAINDEXER > ROLE_PLUGIN_READ_DATAINDEXER").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETDELETER > ROLE_PLUGIN_READ_DATASETDELETER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_ENTITYEXPLORER > ROLE_PLUGIN_READ_ENTITYEXPLORER").append(' ');
 		// TODO add form plugins
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_HOME > ROLE_PLUGIN_READ_HOME").append(' ');
@@ -266,11 +266,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_VOID > ROLE_PLUGIN_READ_VOID").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_CATALOGMANAGER > ROLE_PLUGIN_READ_CATALOGMANAGER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_STUDYMANAGER > ROLE_PLUGIN_READ_STUDYMANAGER").append(' ');
-		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETINDEXER > ROLE_PLUGIN_READ_DATASETINDEXER").append(' '); // why
-																													// datasetindexer
-																													// instead
-																													// of
-																													// dataindexer?
+		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATAINDEXER > ROLE_PLUGIN_READ_DATAINDEXER").append(' ');
 		hierarchyBuilder.append("ROLE_PLUGIN_WRITE_DATASETDELETER > ROLE_PLUGIN_READ_DATASETDELETER").append(' ');
 
 		// Entities: WRITE > READ

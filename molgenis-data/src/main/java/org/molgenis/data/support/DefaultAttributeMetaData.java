@@ -20,8 +20,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private Object defaultValue = null;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
-	private EntityMetaData refEntity = null;
-	private AttributeMetaData refAttribute = null;
+	private String refEntityName = null;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -111,23 +110,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public EntityMetaData getRefEntity()
 	{
-		return refEntity;
+		return EntityMetaDataCache.get(refEntityName);
 	}
 
-	public void setRefEntity(EntityMetaData refEntity)
+	public void setRefEntityName(String refEntityName)
 	{
-		this.refEntity = refEntity;
-	}
-
-	@Override
-	public AttributeMetaData getRefAttribute()
-	{
-		return refAttribute;
-	}
-
-	public void setRefAttribute(AttributeMetaData refAttribute)
-	{
-		this.refAttribute = refAttribute;
+		this.refEntityName = refEntityName;
 	}
 
 }

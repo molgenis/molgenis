@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StaticContentServiceImpl implements StaticContentService
 {
-	public static final String DEFAULT_CONTENT = "<p>Place here some content!</p>";
+	public static final String DEFAULT_CONTENT = "<p>Place some content!</p>";
 	public static final String PREFIX_KEY = "app.";
 			
 	private final MolgenisSettings molgenisSettings;
