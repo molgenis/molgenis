@@ -7,6 +7,7 @@ import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.UnknownStudyDefinitionException;
 
@@ -43,9 +44,9 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	@Override
 	public Catalog getCatalog(String id) throws UnknownCatalogException
 	{
-		DataSet dataSet = getDataSet(id);
-		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return new OmxCatalog(dataSet);
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		return new OmxCatalog(protocol);
 	}
 
 	@Override
@@ -55,33 +56,33 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		DataSet dataSet = studyDataRequest.getDataSet();
-		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return new OmxCatalog(dataSet);
+		Protocol protocol = studyDataRequest.getProtocol();
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		return new OmxCatalog(protocol);
 	}
 
 	@Override
 	public void loadCatalog(String id) throws UnknownCatalogException
 	{
-		DataSet dataSet = getDataSet(id);
-		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		setDataSetActive(dataSet, true);
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setProtocolActive(protocol, true);
 	}
 
 	@Override
 	public void unloadCatalog(String id) throws UnknownCatalogException
 	{
-		DataSet dataSet = getDataSet(id);
-		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		setDataSetActive(dataSet, false);
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setProtocolActive(protocol, false);
 	}
 
 	@Override
 	public boolean isCatalogLoaded(String id) throws UnknownCatalogException
 	{
-		DataSet dataSet = getDataSet(id);
-		if (dataSet == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return dataSet.getActive();
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		return protocol.getActive();
 	}
 
 	@Override
@@ -90,9 +91,9 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		DataSet dataSet = studyDataRequest.getDataSet();
-		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
-		setDataSetActive(dataSet, true);
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		setProtocolActive(protocol, true);
 	}
 
 	@Override
@@ -102,9 +103,9 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		DataSet dataSet = studyDataRequest.getDataSet();
-		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
-		setDataSetActive(dataSet, false);
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		setProtocolActive(protocol, false);
 	}
 
 	@Override
@@ -114,20 +115,20 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		StudyDataRequest studyDataRequest = getStudyDataRequest(id);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		DataSet dataSet = studyDataRequest.getDataSet();
-		if (dataSet == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
-		return dataSet.getActive();
+		Protocol protocol = getProtocol(id);
+		if (protocol == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
+		return protocol.getActive();
 	}
 
-	private DataSet getDataSet(String dataSetIdentifier)
+	private Protocol getProtocol(String protocolIdentifier)
 	{
-		return dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+		return dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.IDENTIFIER, protocolIdentifier));
 	}
 
-	private void setDataSetActive(DataSet dataSet, boolean active)
+	private void setProtocolActive(Protocol protocol, boolean active)
 	{
-		dataSet.setActive(active);
-		dataService.update(DataSet.ENTITY_NAME, dataSet);
+		protocol.setActive(active);
+		dataService.update(Protocol.ENTITY_NAME, protocol);
 	}
 
 	private StudyDataRequest getStudyDataRequest(String studyDataRequestIdentifier)
