@@ -16,8 +16,6 @@ public interface DataSetsIndexer
 
 	void index(List<Integer> datasetIds);
 
-	void indexNew() throws DatabaseException;
-
 	/**
 	 * Check if there is an indexing job running
 	 * 
