@@ -56,7 +56,10 @@ public class DataSetDeleterController extends MolgenisPluginController
 			@RequestParam(value = "deletemetadata", required = false) Boolean deleteMetaData) throws DatabaseException
 	{
 		boolean doDeleteMetaData = deleteMetaData != null ? deleteMetaData.booleanValue() : false;
-		DataSet dataSet = dataSetDeleterService.delete(dataSetIdentifier, doDeleteMetaData);
-		return dataSet.getName();
+		String dataSetName = dataSetDeleterService.deleteData(dataSetIdentifier);
+		if(doDeleteMetaData){
+			dataSetDeleterService.deleteMetadata(dataSetIdentifier);
+		}
+		return dataSetName;
 	}
 }
