@@ -13,7 +13,7 @@ import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.util.tuple.Tuple;
 
-public class CategoryChecker
+public class CategoryParser
 {
 
 	public static void main(String[] args) throws IOException
@@ -23,7 +23,7 @@ public class CategoryChecker
 			System.err.println("2 arguments please 1) filename 2) name of datamatrix tabs");
 			return;
 		}
-		CategoryChecker vc = new CategoryChecker();
+		CategoryParser vc = new CategoryParser();
 		vc.check(args[0], args[1]);
 	}
 
