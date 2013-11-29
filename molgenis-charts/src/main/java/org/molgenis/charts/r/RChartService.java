@@ -59,7 +59,7 @@ public class RChartService
 		
 		// annotate the SVG here
 		File f = fileStore.getFile(fileName + ".svg");
-		SVGEditor.annotateHeatMap(chart, f);
+		//SVGEditor.annotateHeatMap(chart, f);
 		
 		return fileName;
 	}
