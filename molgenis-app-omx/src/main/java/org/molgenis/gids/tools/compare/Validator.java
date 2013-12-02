@@ -21,7 +21,7 @@ import org.molgenis.util.tuple.Tuple;
  * This script is created to compare 2 excelfiles. The files are given via the arguments
  */
 
-public class ValidationChecker
+public class Validator
 {
 	private final static String IDENTIFIER = "id_sample";
 
@@ -33,20 +33,22 @@ public class ValidationChecker
 		ValidationFile excelfile = new ValidationFile();
 		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(excelFile1));
 
-		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
-		excelfile.bla(excelSheetReaderReferenceFile, IDENTIFIER);
+		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet("dataset_celiac_sprue");
+		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER);
 
 		// Make Object FileToCompare
 		ValidationFile csvFile = new ValidationFile();
 		CsvReader csvReaderFileToCompare = new CsvReader(new File(file2));
 
-		csvFile.bla(csvReaderFileToCompare, IDENTIFIER);
+		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER);
 		boolean noUniqueColums = false;
 		// Make list for shared headers
 
 		List<String> listOfSharedHeaders = new ArrayList<String>();
 		// Compare the headers of Reference file with fileToCompare
 		// Add Reference headers to the listOfSharedHeaders
+		System.out
+				.println("------------------------------------------------------------------------------------------------");
 		System.out.println("### Unique columns");
 		for (String o : excelfile.getListOfHeaders())
 		{
@@ -75,9 +77,11 @@ public class ValidationChecker
 
 		if (noUniqueColums == false)
 		{
+
 			System.out.println("###There are no added/deleted columns\n");
 		}
-
+		System.out
+				.println("------------------------------------------------------------------------------------------------");
 		System.out.println("\n###Comparing the values ");
 		System.out.println("Sample ID\tFeature\tFile1\tFile2");
 
@@ -102,7 +106,8 @@ public class ValidationChecker
 				}
 
 			}
-
+			System.out
+					.println("------------------------------------------------------------------------------------------------");
 			System.out.println("\n###Unique samples in file1");
 			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
 			{
@@ -111,6 +116,8 @@ public class ValidationChecker
 					System.out.println(entry.getKey());
 				}
 			}
+			System.out
+					.println("------------------------------------------------------------------------------------------------");
 			System.out.println("\n###Unique samples in file2 ");
 			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
 			{
@@ -205,7 +212,7 @@ public class ValidationChecker
 							+ "args[2] /Users/Roan/logger.txt");
 			return;
 		}
-		ValidationChecker vc = new ValidationChecker();
+		Validator vc = new Validator();
 		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2])));
 		try
 		{
