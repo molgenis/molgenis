@@ -1,4 +1,4 @@
-package org.molgenis.omx.order;
+package org.molgenis.omx.protocolviewer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,7 +23,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
@@ -44,9 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 
 @Service
-public class OrderStudyDataServiceImpl implements OrderStudyDataService
+public class ProtocolViewerServiceImpl implements ProtocolViewerService
 {
-	private static final Logger logger = Logger.getLogger(OrderStudyDataServiceImpl.class);
+	private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
 
 	@Autowired
 	private DataService dataService;
@@ -69,7 +68,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.molgenis.omx.order.OrderStudyDataService#orderStudyData(java.lang.String, javax.servlet.http.Part,
+	 * @see org.molgenis.omx.protocolviewer.ProtocolViewerService#orderStudyData(java.lang.String, javax.servlet.http.Part,
 	 * java.lang.String, java.util.List)
 	 */
 	@Override
@@ -137,7 +136,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.molgenis.omx.order.OrderStudyDataService#getOrders()
+	 * @see org.molgenis.omx.protocolviewer.ProtocolViewerService#getOrders()
 	 */
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
@@ -151,7 +150,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.molgenis.omx.order.OrderStudyDataService#getOrder(java.lang.Integer)
+	 * @see org.molgenis.omx.protocolviewer.ProtocolViewerService#getOrder(java.lang.Integer)
 	 */
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")

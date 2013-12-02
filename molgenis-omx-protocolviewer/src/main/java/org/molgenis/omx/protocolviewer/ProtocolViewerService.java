@@ -1,4 +1,4 @@
-package org.molgenis.omx.order;
+package org.molgenis.omx.protocolviewer;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.molgenis.omx.study.StudyDataRequest;
 /**
  * Create and view study data requests
  */
-public interface OrderStudyDataService
+public interface ProtocolViewerService
 {
 	/**
 	 * Place an order for the current user
