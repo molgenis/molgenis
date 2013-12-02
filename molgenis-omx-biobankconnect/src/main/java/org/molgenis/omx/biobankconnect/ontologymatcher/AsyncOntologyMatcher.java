@@ -23,7 +23,6 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -32,7 +31,7 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.DecimalValue;
-import org.molgenis.omx.observ.value.XrefValue;
+import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.search.Hit;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
@@ -205,16 +204,16 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								if (featureId != null) observationSetsPerDataSet.get(dataSetIdentifier.toString()).add(
 										observation);
 
-								XrefValue xrefForFeature = new XrefValue();
-								xrefForFeature.setValue(database.findById(Characteristic.class, feature.getId()));
+								IntValue xrefForFeature = new IntValue();
+								xrefForFeature.setValue(feature.getId());
 								ObservedValue valueForFeature = new ObservedValue();
 								valueForFeature.setObservationSet(observation);
 								valueForFeature.setFeature_Identifier(STORE_MAPPING_FEATURE);
 								valueForFeature.setValue(xrefForFeature);
 								listOfNewObservedValues.add(valueForFeature);
 
-								XrefValue xrefForMappedFeature = new XrefValue();
-								xrefForMappedFeature.setValue(database.findById(Characteristic.class, mappedId));
+								IntValue xrefForMappedFeature = new IntValue();
+								xrefForMappedFeature.setValue(mappedId);
 								ObservedValue valueForMappedFeature = new ObservedValue();
 								valueForMappedFeature.setFeature_Identifier(STORE_MAPPING_MAPPED_FEATURE);
 								valueForMappedFeature.setObservationSet(observation);
@@ -730,13 +729,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 			ObservableFeature feature = new ObservableFeature();
 			feature.setIdentifier(STORE_MAPPING_FEATURE);
-			feature.setDataType("xref");
+			feature.setDataType("int");
 			feature.setName("Features");
 			features.add(feature);
 
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
-			mappedFeature.setDataType("xref");
+			mappedFeature.setDataType("int");
 			mappedFeature.setName("Mapped features");
 			features.add(mappedFeature);
 
@@ -745,6 +744,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			mappedFeatureScore.setDataType("decimal");
 			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
 			features.add(mappedFeatureScore);
+
+			ObservableFeature observationSetFeature = new ObservableFeature();
+			observationSetFeature.setIdentifier(OBSERVATION_SET);
+			observationSetFeature.setDataType("int");
+			observationSetFeature.setName(OBSERVATION_SET);
+			features.add(observationSetFeature);
 
 			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
@@ -764,7 +769,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			protocol.setIdentifier("store_mapping");
 			protocol.setName("store_mapping");
 			protocol.setFeatures_Identifier(Arrays.asList(STORE_MAPPING_FEATURE, STORE_MAPPING_MAPPED_FEATURE,
-					STORE_MAPPING_SCORE, STORE_MAPPING_ABSOLUTE_SCORE, STORE_MAPPING_CONFIRM_MAPPING));
+					STORE_MAPPING_SCORE, OBSERVATION_SET, STORE_MAPPING_ABSOLUTE_SCORE, STORE_MAPPING_CONFIRM_MAPPING));
 			database.add(protocol);
 		}
 

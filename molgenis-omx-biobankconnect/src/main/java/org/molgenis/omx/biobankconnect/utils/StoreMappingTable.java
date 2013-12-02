@@ -1,7 +1,6 @@
 package org.molgenis.omx.biobankconnect.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,7 +26,6 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 
@@ -36,11 +34,6 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 
 	private Database db;
 	private static final String OBSERVATION_SET = "observation_set";
-	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
-	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
-	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
-	private static final List<String> NON_XREF_FIELDS = Arrays.asList(STORE_MAPPING_ABSOLUTE_SCORE,
-			STORE_MAPPING_SCORE, STORE_MAPPING_CONFIRM_MAPPING);
 	private final List<ObservationSet> observationSets;
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
@@ -88,15 +81,9 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 				Integer observationId = ov.getObservationSet_Id();
 				if (storeMapping.containsKey(observationId)) tuple = storeMapping.get(observationId);
 				else tuple = new KeyValueTuple();
-				if (NON_XREF_FIELDS.contains(ov.getFeature_Identifier()))
-				{
-					tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
-				}
-				else
-				{
-					Characteristic xrefCharacteristic = ((XrefValue) ov.getValue()).getValue();
-					tuple.set(ov.getFeature_Identifier(), xrefCharacteristic.getId());
-				}
+
+				tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
+
 				if (tuple.get(OBSERVATION_SET) == null) tuple.set(OBSERVATION_SET, observationId);
 				storeMapping.put(observationId, tuple);
 			}
@@ -127,7 +114,6 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 	public List<Field> getAllColumns() throws TableException
 	{
 		if (columns == null) initColumnsFromDb();
-		columns.add(new Field(OBSERVATION_SET));
 		return Collections.unmodifiableList(columns);
 	}
 
