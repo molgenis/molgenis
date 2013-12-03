@@ -30,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
 		DataExplorerConfig.class, SearchSecurityConfig.class })
-public class WebAppConfig extends MolgenisWebAppConfig implements ApplicationListener<ContextRefreshedEvent>
+public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
 	private DataService dataService;
@@ -51,11 +51,6 @@ public class WebAppConfig extends MolgenisWebAppConfig implements ApplicationLis
 	public StudyManagerService studyDefinitionManagerService()
 	{
 		return new OmxStudyManagerService(dataService);
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent arg0) {
-		dataService.registerEntitySource("excel:///Users/tommydeboer/git/molgenis/molgenis/molgenis-charts/src/test/resources/heatmap.xlsx");
 	}
 
 }

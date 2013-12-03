@@ -1,10 +1,8 @@
 package org.molgenis.charts.r;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,11 +64,7 @@ public class RChartService extends AbstractChartVisualizationService
 		{
 			chartFileName = renderHeatMap(heatMapChart);
 		}
-		catch (IOException e)
-		{
-			throw new MolgenisChartException(e);
-		}
-		catch (TemplateException e)
+		catch (Exception e)
 		{
 			throw new MolgenisChartException(e);
 		}
@@ -82,7 +76,7 @@ public class RChartService extends AbstractChartVisualizationService
 		return "heatmap";
 	}
 
-	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException
+	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		String fileName = UUID.randomUUID().toString();
 

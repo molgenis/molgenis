@@ -108,14 +108,8 @@ public class ChartController
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name")
 	String name, @PathVariable("extension")
-<<<<<<< HEAD
 	String extension,  HttpServletResponse response) throws IOException
 	{
-
-=======
-	String extension, HttpServletResponse response) throws IOException
-	{
->>>>>>> 51438d2b77a2b9c372b578942b683af0e7caed1a
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
 		{
