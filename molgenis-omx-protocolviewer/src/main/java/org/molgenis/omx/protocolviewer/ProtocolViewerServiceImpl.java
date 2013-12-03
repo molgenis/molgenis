@@ -1,7 +1,16 @@
 package org.molgenis.omx.protocolviewer;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.mail.MessagingException;
@@ -9,7 +18,11 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.catalog.*;
+import org.molgenis.catalog.Catalog;
+import org.molgenis.catalog.CatalogItem;
+import org.molgenis.catalog.CatalogMeta;
+import org.molgenis.catalog.CatalogService;
+import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.TupleWriter;
@@ -58,8 +71,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		return Iterables.filter(catalogService.getCatalogs(), new Predicate<CatalogMeta>()
 		{
 			@Override
-			public boolean apply(@Nullable
-			CatalogMeta catalogMeta)
+			public boolean apply(@Nullable CatalogMeta catalogMeta)
 			{
 				try
 				{
@@ -75,8 +87,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
+
 		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(
 				SecurityUtils.getCurrentUsername(), StudyDefinition.Status.DRAFT);
 		for (StudyDefinition studyDefinition : studyDefinitions)
@@ -105,13 +119,14 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	public StudyDefinition createStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
 		return studyManagerService.createStudyDefinition(SecurityUtils.getCurrentUsername(), catalogId);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	public List<StudyDefinition> getStudyDefinitionsForCurrentUser()
 	{
 		List<StudyDefinition> studyDefinitions = new ArrayList<StudyDefinition>();
@@ -124,7 +139,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	public StudyDefinition getStudyDefinitionForCurrentUser(Integer id) throws UnknownStudyDefinitionException
 	{
 		MolgenisUser user = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
@@ -137,7 +152,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
 	{ MessagingException.class, IOException.class })
 	public void submitStudyDefinitionDraftForCurrentUser(String studyName, Part requestForm, String catalogId)
@@ -154,6 +169,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		{
 			throw new IllegalArgumentException("feature list is null or empty");
 		}
+
+		// update study definition
+		studyDefinition.setName(studyName);
+		studyManagerService.updateStudyDefinition(studyDefinition);
 
 		// submit study definition
 		studyManagerService.submitStudyDefinition(studyDefinition.getId(), catalogId);
@@ -182,7 +201,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	public void updateStudyDefinitionDraftForCurrentUser(List<Integer> catalogItemIds, String catalogId)
 			throws UnknownCatalogException
 	{
@@ -196,8 +215,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		{
 			@Nullable
 			@Override
-			public CatalogItem apply(@Nullable
-			final Integer catalogItemId)
+			public CatalogItem apply(@Nullable final Integer catalogItemId)
 			{
 				return new CatalogItem()
 				{
@@ -247,7 +265,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
 	public void createStudyDefinitionDraftXlsForCurrentUser(OutputStream outputStream, String catalogId)
 			throws IOException, UnknownCatalogException
 	{
