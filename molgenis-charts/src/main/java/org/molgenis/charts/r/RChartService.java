@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -15,6 +16,10 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.charts.AbstractChartVisualizationService;
+import org.molgenis.charts.Chart;
+import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.svg.SVGEditor;
 import org.molgenis.r.ROutputHandler;
@@ -22,13 +27,14 @@ import org.molgenis.r.RScriptExecutor;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @Component
-public class RChartService
+public class RChartService extends AbstractChartVisualizationService
 {
 	private static final Logger logger = Logger.getLogger(RChartService.class);
 	private final FileStore fileStore;
@@ -38,6 +44,8 @@ public class RChartService
 	@Autowired
 	public RChartService(FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig, RScriptExecutor rScriptExecutor)
 	{
+		super(Arrays.asList(ChartType.HEAT_MAP));
+
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
 		if (freeMarkerConfig == null) throw new IllegalArgumentException("FreeMarkerConfig is null");
 		if (rScriptExecutor == null) throw new IllegalArgumentException("rScriptExecutor is null");
@@ -47,7 +55,34 @@ public class RChartService
 		this.rScriptExecutor = rScriptExecutor;
 	}
 
-	public String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+	@Override
+	protected String renderChartInternal(Chart chart, Model model)
+	{
+		// For now r is only used for HeatMaps
+		HeatMapChart heatMapChart = (HeatMapChart) chart;
+
+		String chartFileName;
+		try
+		{
+			chartFileName = renderHeatMap(heatMapChart);
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisChartException(e);
+		}
+		catch (TemplateException e)
+		{
+			throw new MolgenisChartException(e);
+		}
+
+		model.addAttribute("fileName", chartFileName);
+		model.addAttribute("nRow", heatMapChart.getData().getRowTargets().size());
+		model.addAttribute("nCol", heatMapChart.getData().getColumnTargets().size());
+
+		return "heatmap";
+	}
+
+	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException
 	{
 		String fileName = UUID.randomUUID().toString();
 

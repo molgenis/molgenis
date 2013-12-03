@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -29,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
 		DataExplorerConfig.class, SearchSecurityConfig.class })
-public class WebAppConfig extends MolgenisWebAppConfig
+public class WebAppConfig extends MolgenisWebAppConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	@Autowired
 	private DataService dataService;
@@ -50,6 +51,11 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	public StudyManagerService studyDefinitionManagerService()
 	{
 		return new OmxStudyManagerService(dataService);
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent arg0) {
+		dataService.registerEntitySource("excel:///Users/tommydeboer/git/molgenis/molgenis/molgenis-charts/src/test/resources/heatmap.xlsx");
 	}
 
 }
