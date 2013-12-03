@@ -58,7 +58,7 @@ public class CatalogManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String listCatalogs(Model model)
 	{
-		Iterable<CatalogMeta> catalogs = catalogManagerService.findCatalogs();
+		Iterable<CatalogMeta> catalogs = catalogManagerService.getCatalogs();
 		LOG.debug("Got catalogs from service");
 
 		List<CatalogMetaModel> models = new ArrayList<CatalogMetaModel>();
