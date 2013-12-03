@@ -15,7 +15,6 @@
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
-	var scoreMappingAbsoluteScore = "store_mapping_absolute_score";
 	
 	ns.MappingManager = function MappingManager(){
 		
@@ -230,16 +229,14 @@
 			//create table header
 			var involvedDataSetIds = [];
 			var involvedDataSetNames = [];
-			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			biobankDataSets = sortOrderOfDataSets(biobankDataSets, selectedDataSet);
 			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
 					var dataSetIdArray = dataSet.identifier.split('-');
 					involvedDataSetIds.push(dataSetIdArray[2]);
 				}
 			});
-			
 			involvedDataSetIds.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
+			biobankDataSets = sortOrderOfDataSets(biobankDataSets, involvedDataSetIds);
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
 				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
@@ -258,13 +255,22 @@
 			});
 			callback(tableBody, involvedDataSetNames);
 			
-			function sortOrderOfDataSets(biobankDataSets, selectedDataSet){
+			function sortOrderOfDataSets(biobankDataSets, involvedDataSetIds){
 				var sortedDataSets = [];
-				$.each(biobankDataSets, function(index, dataSet){
-					if(ns.hrefToId(dataSet.href) === ns.hrefToId(selectedDataSet.href))
-						sortedDataSets.splice(0, 0, dataSet);
-					else sortedDataSets.push(dataSet);
+				$.each(involvedDataSetIds, function(index, dataSetId){
+					for(var i = 0; i < biobankDataSets.length; i++){
+						var currentDataSet = biobankDataSets[i];
+						if(ns.hrefToId(currentDataSet.href) === dataSetId){
+							sortedDataSets.splice(index, 0, currentDataSet);
+							break;
+						}
+					}
 				});
+//				$.each(biobankDataSets, function(index, dataSet){
+//					if(ns.hrefToId(dataSet.href) === ns.hrefToId(selectedDataSet.href))
+//						sortedDataSets.splice(0, 0, dataSet);
+//					else sortedDataSets.push(dataSet);
+//				});
 				return sortedDataSets;
 			}
 		}
