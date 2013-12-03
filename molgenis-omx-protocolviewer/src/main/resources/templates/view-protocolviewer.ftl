@@ -4,10 +4,10 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "protocolviewer.js", "jquery.dynatree.min.js", "jquery.catalog.js", "jquery.validate.min.js"]>
 <@header css js/>
 	<div class="row-fluid">			
-    <#if (model.protocols?size == 0)>
+    <#if (catalogs?size == 0)>
         <span>No active catalogs</span>
     <#else>
-        <#if (model.protocols?size > 0)>
+        <#if (catalogs?size > 0)>
             <#if !authenticated>
                 <div id="login-modal-container"></div>
                 <div class="alert">
@@ -16,13 +16,13 @@
                 </div>
             </#if>
         </#if>
-        <div class="row-fluid grid">
+        <div class="row-fluid grid<#if (catalogs?size == 1)> hide</#if>">
             <div id="catalog-select-container" class="control-group form-horizontal pull-right">
                 <label class="control-label" for="catalog-select">Choose a catalog:</label>
                 <div class="controls">
                     <select data-placeholder="Choose a catalog" id="catalog-select">
-                <#list model.protocols as protocol>
-                        <option value="${protocol.id?c}"<#if protocol_index == 0> selected</#if>>${protocol.name}</option>
+                <#list catalogs as catalog>
+                        <option value="${catalog.id}"<#if catalog_index == 0> selected</#if>>${catalog.name}</option>
                 </#list>
                     </select>
                 </div>
@@ -47,18 +47,18 @@
                 <div class="row-fluid grid" id="feature-shopping-controls">
                     <div class="span9">
                         <div class="btn-group pull-left">
-                    <#if model.enableDownloadAction>
+                    <#if enableDownloadAction>
                             <button class="btn" id="download-xls-button">Download</button>
                     </#if>
                         </div>
                     </div>
                     <div class="span3">
-                    <#if model.enableOrderAction>
+                    <#if enableOrderAction>
                         <div id="orderdata-modal-container"></div>
                         <div id="ordersview-modal-container"></div>
                         <div class="btn-group pull-right">
-                            <a class="modal-href btn<#if !model.authenticated> disabled</#if>" href="/plugin/study/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
-                            <a class="modal-href btn btn-primary<#if !model.authenticated> disabled</#if>" href="/plugin/study/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
+                            <a class="modal-href btn<#if !authenticated> disabled</#if>" href="/plugin/protocolviewer/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+                            <a class="modal-href btn btn-primary<#if !authenticated> disabled</#if>" href="/plugin/protocolviewer/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
                         </div>
                     </#if>
                     </div>
