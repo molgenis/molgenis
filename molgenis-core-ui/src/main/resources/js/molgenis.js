@@ -43,7 +43,7 @@
 			};
 		else
 			i18nObj = JSON.parse(str ? str : '{}');
-		return i18nObj.lang;
+		return i18nObj[lang];
 	};
 	molgenis.i18n.getAll = function(str, lang) {
 		lang = typeof lang !== 'undefined' ? lang : 'en';
