@@ -4,22 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 
 public class SearchRequest
 {
 	private String documentType;
-	private List<QueryRule> queryRules = new ArrayList<QueryRule>();
-	private List<String> fieldsToReturn = new ArrayList<String>();
+	private QueryImpl query;
+	private final List<String> fieldsToReturn;
 
 	public SearchRequest()
 	{
+		fieldsToReturn = new ArrayList<String>();
 	}
 
-	public SearchRequest(String documentType, List<QueryRule> queryRules, List<String> fieldsToReturn)
+	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn)
 	{
 		this.documentType = documentType;
-		this.queryRules = queryRules;
+		this.query = new QueryImpl(query);
 		this.fieldsToReturn = fieldsToReturn;
 	}
 
@@ -28,9 +30,14 @@ public class SearchRequest
 		return documentType;
 	}
 
-	public List<QueryRule> getQueryRules()
+	public Query getQuery()
 	{
-		return queryRules;
+		if (query == null)
+		{
+			query = new QueryImpl();
+		}
+
+		return query;
 	}
 
 	public List<String> getFieldsToReturn()

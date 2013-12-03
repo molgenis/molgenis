@@ -1,24 +1,24 @@
 package org.molgenis.elasticsearch.request;
 
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.GREATER;
+import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LESS;
+import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NOT;
+import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.data.QueryRule.Operator.SEARCH;
 import static org.molgenis.elasticsearch.request.LuceneQueryStringBuilder.buildQueryString;
 import static org.molgenis.elasticsearch.request.LuceneQueryStringBuilder.escapeField;
 import static org.molgenis.elasticsearch.request.LuceneQueryStringBuilder.escapeValue;
-import static org.molgenis.framework.db.QueryRule.Operator.AND;
-import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
-import static org.molgenis.framework.db.QueryRule.Operator.GREATER;
-import static org.molgenis.framework.db.QueryRule.Operator.GREATER_EQUAL;
-import static org.molgenis.framework.db.QueryRule.Operator.LESS;
-import static org.molgenis.framework.db.QueryRule.Operator.LESS_EQUAL;
-import static org.molgenis.framework.db.QueryRule.Operator.LIKE;
-import static org.molgenis.framework.db.QueryRule.Operator.NOT;
-import static org.molgenis.framework.db.QueryRule.Operator.OR;
-import static org.molgenis.framework.db.QueryRule.Operator.SEARCH;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.QueryRule;
 import org.testng.annotations.Test;
 
 public class LuceneQueryStringBuilderTest
