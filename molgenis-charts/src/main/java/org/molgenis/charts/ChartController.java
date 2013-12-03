@@ -14,11 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
+import org.molgenis.charts.Chart.ChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.charttypes.LineChart;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
-import org.molgenis.charts.r.RChartService;
 import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.LineChartRequest;
 import org.molgenis.data.QueryRule;
@@ -27,52 +27,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 import freemarker.template.TemplateException;
 
 @Controller
 @RequestMapping(URI)
-@SessionAttributes("fileNames")
 public class ChartController
 {
 	public static final String URI = "/charts";
 	private static final Logger logger = Logger.getLogger(ChartController.class);
 
 	private final ChartDataService chartDataService;
-	private final RChartService rchartService;
+	private final ChartVisualizationServiceFactory chartVisualizationServiceFactory;
 	private final FileStore fileStore;
 
 	@Autowired
-	public ChartController(ChartDataService chartDataService, RChartService rchartService, FileStore fileStore)
+	public ChartController(ChartDataService chartDataService,
+			ChartVisualizationServiceFactory chartVisualizationServiceFactory, FileStore fileStore)
 	{
 		if (chartDataService == null) throw new IllegalArgumentException("chartDataService is null");
-		if (rchartService == null) throw new IllegalArgumentException("rchartVisualizationService is null");
+		if (chartVisualizationServiceFactory == null) throw new IllegalArgumentException(
+				"chartVisualizationServiceFactory is null");
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
 
 		this.chartDataService = chartDataService;
-		this.rchartService = rchartService;
+		this.chartVisualizationServiceFactory = chartVisualizationServiceFactory;
 		this.fileStore = fileStore;
-	}
-
-	/**
-	 * List of filenames of a user. User can only view his own files
-	 */
-	@ModelAttribute("fileNames")
-	public List<String> getFileNames(Model model)
-	{
-		@SuppressWarnings("unchecked")
-		List<String> fileNames = (List<String>) model.asMap().get("fileNames");
-		if (fileNames == null)
-		{
-			fileNames = new ArrayList<String>();
-			model.addAttribute("fileNames", fileNames);
-		}
-
-		return fileNames;
 	}
 
 	@RequestMapping("/test")
@@ -99,12 +81,13 @@ public class ChartController
 
 		Chart chart = new LineChart(series);
 		chart.setTitle(request.getTitle());
-		chart.setxLabel(request.getxLabel());
-		chart.setyLabel(request.getyLabel());
 		chart.setWidth(request.getWidth());
 		chart.setHeight(request.getHeight());
-		model.addAttribute("chart", chart);
-		return "timeseries";
+
+		ChartVisualizationService service = chartVisualizationServiceFactory
+				.getVisualizationService(ChartType.LINE_CHART);
+
+		return service.renderChart(chart, model);
 	}
 
 	/**
@@ -123,16 +106,8 @@ public class ChartController
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name")
 	String name, @PathVariable("extension")
-	String extension, @ModelAttribute("fileNames")
-	List<String> fileNames, HttpServletResponse response) throws IOException
+	String extension, HttpServletResponse response) throws IOException
 	{
-		// User can only see his own charts
-		if (!fileNames.contains(name))
-		{
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
 		{
@@ -154,7 +129,6 @@ public class ChartController
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
 	 * 
 	 * @param request
-	 * @param fileNames
 	 * @param model
 	 * @return
 	 * @throws IOException
@@ -162,26 +136,19 @@ public class ChartController
 	 */
 	@RequestMapping("/heatmap")
 	public String renderHeatMap(@Valid
-	HeatMapRequest request, @ModelAttribute("fileNames")
-	List<String> fileNames, Model model) throws IOException, TemplateException
+	HeatMapRequest request, Model model) throws IOException, TemplateException
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
 
 		HeatMapChart chart = new HeatMapChart(matrix);
 		chart.setTitle(request.getTitle());
-		chart.setxLabel(request.getxLabel());
-		chart.setyLabel(request.getyLabel());
 		chart.setWidth(request.getWidth());
 		chart.setHeight(request.getHeight());
 
-		String chartFileName = rchartService.renderHeatMap(chart);
-		fileNames.add(chartFileName);
+		ChartVisualizationService service = chartVisualizationServiceFactory
+				.getVisualizationService(ChartType.HEAT_MAP);
 
-		model.addAttribute("fileName", chartFileName);
-		model.addAttribute("nRow", chart.getData().getRowTargets().size());
-		model.addAttribute("nCol", chart.getData().getColumnTargets().size());
-
-		return "heatmap";
+		return service.renderChart(chart, model);
 	}
 }
