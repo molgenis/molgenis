@@ -4,9 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +13,6 @@ import java.util.Iterator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -30,7 +27,7 @@ public class ProtocolTableTest
 	private ProtocolTable protocolTable;
 
 	@BeforeMethod
-	public void setUp() throws DatabaseException, TableException
+	public void setUp() throws TableException
 	{
 		dataService = mock(DataService.class);
 
@@ -70,17 +67,17 @@ public class ProtocolTableTest
 	@Test
 	public void getAllColumns() throws TableException
 	{
-		assertEquals(protocolTable.getAllColumns().size(), 9);
+		assertEquals(protocolTable.getAllColumns().size(), 10);
 	}
 
 	@Test
-	public void getCount() throws DatabaseException, TableException
+	public void getCount() throws TableException
 	{
 		assertEquals(protocolTable.getCount(), 5);
 	}
 
 	@Test
-	public void getCountOneProtocolWithOneFeature() throws DatabaseException, TableException
+	public void getCountOneProtocolWithOneFeature() throws TableException
 	{
 		int featureId = 1;
 		ObservableFeature feature = when(mock(ObservableFeature.class).getId()).thenReturn(featureId).getMock();
@@ -96,7 +93,7 @@ public class ProtocolTableTest
 	}
 
 	@Test
-	public void getCountProtocolWithSubProtocolAndFeature() throws DatabaseException, TableException
+	public void getCountProtocolWithSubProtocolAndFeature() throws TableException
 	{
 		ObservableFeature feature1 = when(mock(ObservableFeature.class).getId()).thenReturn(10).getMock();
 		when(feature1.getName()).thenReturn("f10");
