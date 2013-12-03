@@ -320,7 +320,6 @@ public class MappingManagerController extends MolgenisPluginController
 				{
 					DataSet mappedDataSet = database.findById(DataSet.class, mappedDataSetId);
 					dataSetNames.add(mappedDataSet.getName());
-					dataSetNames.add(mappedDataSet.getName() + ":description");
 					List<QueryRule> rules = new ArrayList<QueryRule>();
 					rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
 					SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(), rules, null);
