@@ -21,6 +21,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
 	private String refEntityName = null;
+	private String label = null;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -116,6 +117,17 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public void setRefEntityName(String refEntityName)
 	{
 		this.refEntityName = refEntityName;
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return label == null ? name : label;
+	}
+
+	public void setLabel(String label)
+	{
+		this.label = label;
 	}
 
 }

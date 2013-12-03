@@ -25,18 +25,18 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
-import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.data.Entity;
 
 /**
  * ElasticSearch implementation of the SearchService interface
@@ -51,6 +51,7 @@ public class ElasticSearchService implements SearchService
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser(REST_API_BASE_URL);
+	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 
 	public ElasticSearchService(Client client, String indexName)
 	{
@@ -83,10 +84,10 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public long count(String documentType, List<QueryRule> queryRules)
+	public long count(String documentType, Query q)
 	{
 
-		SearchRequest request = new SearchRequest(documentType, queryRules, Collections.<String> emptyList());
+		SearchRequest request = new SearchRequest(documentType, q, Collections.<String> emptyList());
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
@@ -94,7 +95,7 @@ public class ElasticSearchService implements SearchService
 
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
 	{
-		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
+
 		List<String> documentTypes = null;
 		if (request.getDocumentType() != null)
 		{
@@ -105,15 +106,17 @@ public class ElasticSearchService implements SearchService
 			}
 		}
 
-		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentTypes, searchType,
-				request.getQueryRules(), request.getFieldsToReturn());
+		SearchRequestBuilder builder = client.prepareSearch(indexName);
+
+		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
+				request.getFieldsToReturn());
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("SearchRequestBuilder:" + requestBuilder);
+			LOG.debug("SearchRequestBuilder:" + builder);
 		}
 
-		SearchResponse response = requestBuilder.execute().actionGet();
+		SearchResponse response = builder.execute().actionGet();
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("SearchResponse:" + response);
@@ -124,19 +127,18 @@ public class ElasticSearchService implements SearchService
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
-
-		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
-
+		SearchRequestBuilder builder = client.prepareSearch(indexName);
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
-		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentType, searchType,
-				request.getQueryRules(), request.getFieldsToReturn());
+
+		generator
+				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn());
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("SearchRequestBuilder:" + requestBuilder);
+			LOG.debug("SearchRequestBuilder:" + builder);
 		}
 
-		SearchResponse response = requestBuilder.execute().actionGet();
+		SearchResponse response = builder.execute().actionGet();
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("SearchResponse:" + response);

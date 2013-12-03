@@ -253,7 +253,6 @@
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
 			items.push('<h3>Filter:</h3>');
-			var filter = null;
 			var config = featureFilters[featureUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			
@@ -358,13 +357,6 @@
 					});
 					$('.feature-filter-dialog').dialog('close');
 				});
-//				$('input[type=number]').live('keyup input', function(e) {
-//					if ((fromFilter.val() == '') && (toFilter.val() == '')) {
-//						applyButton.attr('disabled', 'disabled');
-//					} else {
-//						applyButton.removeAttr('disabled');
-//					}
-//				});
 			break;
 			case "bool":
 				$('input[name=bool-feature'+feature.identifier+']').live('change', function() {
@@ -703,7 +695,6 @@
 	molgenis.createFeatureFilterField = function(element, featureUri){
 		var feature = restApi.get(featureUri);
 			var items = [];
-			var filter = null;
 			var config = featureFilters[featureUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton,featureUri,true);
@@ -756,23 +747,19 @@
 	molgenis.createSearchRequest = function(includeLimitOffset) {
 		var searchRequest = {
 			documentType : selectedDataSet.identifier,
-			queryRules : [ ]
+			query: {
+				rules : [[ ]]
+			}
 		};
 		
 		if (includeLimitOffset) {
-			searchRequest.queryRules.push({
-				operator : 'LIMIT',
-				value : resultsTable.getMaxRows()
-			});
+			searchRequest.query.pageSize = resultsTable.getMaxRows();
 			
 			if(pager != null) {
 				var page = $('#data-table-pager').pager('getPage');
 				if (page > 1) {
 					var offset = (page - 1) * resultsTable.getMaxRows();
-					searchRequest.queryRules.push({
-						operator : 'OFFSET',
-						value : offset
-					});
+					searchRequest.query.offset = offset;
 				}
 			}
 		}
@@ -781,7 +768,7 @@
 
 		if (searchQuery) {
 			if(/\S/.test(searchQuery)){	
-				searchRequest.queryRules.push({
+				searchRequest.query.rules[0].push({
 					operator : 'SEARCH',
 					value : searchQuery
 				});
@@ -791,16 +778,17 @@
 
 		$.each(featureFilters, function(featureUri, filter) {
 			if (count > 0) {
-				searchRequest.queryRules.push({
+				searchRequest.query.rules[0].push({
 					operator : 'AND'
 				});
 			}
 			$.each(filter.values, function(index, value) {
 				if (filter.range) {
+					
 					// Range filter
 					var rangeAnd = false;
 					if ((index == 0) && (value != '')) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							field : filter.identifier,
 							operator : 'GREATER_EQUAL',
 							value : value
@@ -808,12 +796,12 @@
 						rangeAnd = true;
 					}
 					if (rangeAnd) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							operator : 'AND'
 						});
 					}
 					if ((index == 1) && (value != '')) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							field : filter.identifier,
 							operator : 'LESS_EQUAL',
 							value : value
@@ -822,11 +810,11 @@
 
 				} else {
 					if (index > 0) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							operator : 'OR'
 						});
 					}
-					searchRequest.queryRules.push({
+					searchRequest.query.rules[0].push({
 						field : filter.identifier,
 						operator : 'EQUALS',
 						value : value
@@ -840,7 +828,7 @@
 
 		var sortRule = resultsTable.getSortRule();
 		if (sortRule) {
-			searchRequest.queryRules.push(sortRule);
+			searchRequest.query.sort = sortRule;
 		}
 
 		searchRequest.fieldsToReturn = [];
@@ -873,15 +861,14 @@
 			'value' : 'bool'
 		});
 		
-		queryRules.push({
-			operator : 'LIMIT',
-			value : 1000000
-		});
 		var fragments = selectedDataSet.href.split("/");
 		var searchRequest = { 
 			'documentType' : "protocolTree-" + fragments[fragments.length - 1],
 			'featureFilters' : featureFilters,
-			'queryRules' : queryRules
+			query : {
+				'rules' : [queryRules]
+			}, 
+			'pageSize' : 1000000
 		};
 		
 		searchApi.search(searchRequest, function(searchResponse) {
@@ -905,10 +892,8 @@
 	
 	molgenis.loadAggregate = function(featureId){
 		var searchRequest = molgenis.createSearchRequest();
-		searchRequest.queryRules.push({
-			'operator' : 'LIMIT',
-			'value' : 1000000
-		});
+		searchRequest.query.pageSize = 1000000;
+		
 		var feature = restApi.get('/api/v1/observablefeature/' + featureId);
 		searchRequest.fieldsToReturn = [feature.identifier];
 		var aggregateRequest = {

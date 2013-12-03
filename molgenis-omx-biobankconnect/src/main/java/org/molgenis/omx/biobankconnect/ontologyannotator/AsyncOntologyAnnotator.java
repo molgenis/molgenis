@@ -14,9 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -78,10 +78,12 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public void removeAnnotations(Integer dataSetId)
 	{
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId);
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
-		queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), queryRules, null);
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100000);
+		q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
+
+		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), q, null);
 		SearchResult result = searchService.search(request);
 
 		List<Integer> listOfFeatureIds = new ArrayList<Integer>();
@@ -130,11 +132,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (documentTypes == null) documentTypes = searchAllOntologies();
 
 			PorterStemmer stemmer = new PorterStemmer();
-			List<QueryRule> queryRules = new ArrayList<QueryRule>();
-			queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
-			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, queryRules, null);
+
+			QueryImpl q = new QueryImpl();
+			q.pageSize(100000);
+			q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
+			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, q, null);
 			SearchResult result = searchService.search(request);
+
 			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
 
 			Iterator<Hit> iterator = result.iterator();
@@ -163,7 +167,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				feature.setDefinitions(definitions);
 				featuresToUpdate.add(feature);
 			}
-			System.out.println(featuresToUpdate);
 			dataService.update(ObservableFeature.ENTITY_NAME, featuresToUpdate);
 		}
 		finally
@@ -200,10 +203,12 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public List<String> searchAllOntologies()
 	{
 		List<String> ontologyUris = new ArrayList<String>();
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		queryRules.add(new QueryRule("entity_type", Operator.SEARCH, "indexedOntology"));
-		queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-		SearchResult result = searchService.search(new SearchRequest(null, queryRules, null));
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100000);
+		q.addRule(new QueryRule("entity_type", Operator.SEARCH, "indexedOntology"));
+
+		SearchResult result = searchService.search(new SearchRequest(null, q, null));
 		for (Hit hit : result.getSearchHits())
 		{
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
@@ -247,20 +252,26 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms
 					.add(eachTerm);
 		}
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		queryRules.add(new QueryRule(Operator.LIMIT, 100));
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100);
+
+		boolean first = true;
 		for (String term : uniqueTerms)
 		{
 			if (!term.isEmpty() && !term.matches(" +"))
 			{
+				if (!first)
+				{
+					q.addRule(new QueryRule(Operator.OR));
+				}
 				term = term.replaceAll("[^(a-zA-Z0-9 )]", "");
-				queryRules.add(new QueryRule("ontologyTermSynonym", Operator.SEARCH, term));
-				queryRules.add(new QueryRule(Operator.OR));
+				q.addRule(new QueryRule("ontologyTermSynonym", Operator.SEARCH, term));
+				first = false;
 			}
 		}
-		if (queryRules.size() > 0) queryRules.remove(queryRules.size() - 1);
 
-		SearchRequest request = new SearchRequest(documentType, queryRules, null);
+		SearchRequest request = new SearchRequest(documentType, q, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
 		List<TermComparison> listOfHits = new ArrayList<TermComparison>();

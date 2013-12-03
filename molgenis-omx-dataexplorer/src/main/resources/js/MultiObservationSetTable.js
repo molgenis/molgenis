@@ -29,8 +29,8 @@
 		items.push('<thead>');
 		$.each(selectedFeatures, function(i, val) {
 			var feature = restApi.get(this);
-			if (sortRule && sortRule.value == feature.identifier) {
-				if (sortRule.operator == 'SORTASC') {
+			if (sortRule && sortRule.orders[0].property == feature.identifier) {
+				if (sortRule.orders[0].direction == 'ASC') {
 					items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
 							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 				} else {
@@ -97,15 +97,19 @@
 
 			var featureIdentifier = $(this).data('value');
 			console.log("select sort column: " + featureIdentifier);
-			if (sortRule && sortRule.operator == 'SORTASC') {
+			if (sortRule && sortRule.orders[0].direction == 'ASC') {
 				sortRule = {
-					value : featureIdentifier,
-					operator : 'SORTDESC'
+						orders: [{
+							property: featureIdentifier,
+							direction: 'DESC'
+						}]
 				};
 			} else {
 				sortRule = {
-					value : featureIdentifier,
-					operator : 'SORTASC'
+						orders: [{
+							property: featureIdentifier,
+							direction: 'ASC'
+						}]
 				};
 			}
 
