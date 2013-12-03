@@ -1,6 +1,5 @@
 package org.molgenis.omx.search;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,12 +28,10 @@ import org.springframework.scheduling.annotation.Async;
 public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 {
 	private static final Logger LOG = Logger.getLogger(AsyncDataSetsIndexer.class);
-
+	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 	@Autowired
 	private DataService dataService;
-
 	private SearchService searchService;
-	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
 	@Autowired
 	public void setSearchService(SearchService searchService)
@@ -73,8 +70,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService,
 						new JDBCMetaDatabase()));
-				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
+				searchService.indexTupleTable("protocolTree-" + dataSet.getProtocolUsed().getId(), new ProtocolTable(
+						dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
 						new CategoryTable(dataSet.getProtocolUsed(), dataService));
 			}
@@ -115,8 +112,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexTupleTable(dataSet.getIdentifier(), new DataSetTable(dataSet, dataService,
 						new JDBCMetaDatabase()));
-				searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
-						new ProtocolTable(dataSet.getProtocolUsed(), dataService));
+				searchService.indexTupleTable("protocolTree-" + dataSet.getProtocolUsed().getId(), new ProtocolTable(
+						dataSet.getProtocolUsed(), dataService));
 				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
 						new CategoryTable(dataSet.getProtocolUsed(), dataService));
 			}
