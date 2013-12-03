@@ -1,4 +1,4 @@
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data" action="">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
@@ -47,6 +47,40 @@
 			</div>
 		</div>
 	</div>
+	<div class="row-fluid">
+		<div id="import-features-modal" class="modal hide">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3>Import features</h3>
+			</div>
+			<div class="modal-body">
+				<div><strong>Please input dataSet name</strong></div>
+				<div><input type="text" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div>
+				<div><strong>Please upload features</strong></div>
+				<div>
+					<div class="fileupload fileupload-new" data-provides="fileupload">
+						<div class="input-append">
+							<div class="uneditable-input">
+								<i class="icon-file fileupload-exists"></i>
+								<span class="fileupload-preview"></span>
+							</div>
+							<span class="btn btn-file btn-info">
+								<span class="fileupload-new">Select file</span>
+								<span class="fileupload-exists">Change</span>
+								<input type="file" id="uploadedOntology" name="file" required/>
+							</span>
+							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
+						</div>
+						<div class="float-right"><a href="#">Down example data</a></div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<a href="#" class="btn" data-dismiss="modal">Close</a>
+				<a href="#" class="btn btn-primary" id="import-features">Import features</a>
+			</div>
+		</div>
+	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
@@ -58,9 +92,13 @@
 				$('.pager li.next').addClass('disabled');
 			}
 			$('#import-data-button').click(function(){
+				$('#import-features-modal').modal('show');
+				return false;
+			});
+			$('#import-features').click(function(){
 				$('#wizardForm').attr({
-					'action' : '/menu/main/importwizard',
-					'method' : 'GET'
+					'action' : '${context_url}/uploadfeatures',
+					'method' : 'POST'
 				}).submit();
 			});
 		});

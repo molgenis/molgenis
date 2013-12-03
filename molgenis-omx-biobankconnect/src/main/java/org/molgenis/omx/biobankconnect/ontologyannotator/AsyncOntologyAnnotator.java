@@ -1,5 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologyannotator;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,17 +19,23 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.io.csv.CsvReader;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.omx.protocol.CategoryTable;
+import org.molgenis.omx.protocol.ProtocolTable;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.util.tuple.Tuple;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBean
@@ -69,6 +77,63 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public void initComplete()
 	{
 		complete = false;
+	}
+
+	@Transactional
+	public String uploadFeatures(File uploadFile, String datasetName) throws IOException
+	{
+		CsvReader reader = null;
+		try
+		{
+			List<DataSet> dataSets = database.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER, Operator.EQUALS,
+					datasetName + "_dataset" + "_identifier"));
+			if (dataSets != null && dataSets.size() > 0) return "the dataset name has existed";
+
+			// load the features into memory
+			reader = new CsvReader(uploadFile);
+			List<ObservableFeature> fList = new ArrayList<ObservableFeature>();
+			List<String> featureIdentifiers = new ArrayList<String>();
+			for (Tuple t : reader)
+			{
+				ObservableFeature f = new ObservableFeature();
+				f.setName(t.getString(ObservableFeature.NAME.toLowerCase()));
+				f.setDescription(t.getString(ObservableFeature.DESCRIPTION));
+				f.setIdentifier(datasetName + "_" + f.getName() + "_identifier");
+				featureIdentifiers.add(f.getIdentifier());
+				fList.add(f);
+			}
+
+			// create protocol and link the features
+			Protocol prot = new Protocol();
+			prot.setName(datasetName + "_protocol");
+			prot.setIdentifier(datasetName + "_protocol" + "_identifier");
+			prot.setFeatures_Identifier(featureIdentifiers);
+
+			// create dataset
+			DataSet dataSet = new DataSet();
+			dataSet.setName(datasetName);
+			dataSet.setIdentifier(datasetName + "_dataset" + "_identifier");
+			dataSet.setProtocolUsed_Identifier(prot.getIdentifier());
+
+			database.add(fList);
+			database.add(prot);
+			database.add(dataSet);
+
+			searchService.indexTupleTable("protocolTree-" + dataSet.getId(),
+					new ProtocolTable(dataSet.getProtocolUsed(), database));
+			searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
+					new CategoryTable(dataSet.getProtocolUsed(), database));
+		}
+		catch (Exception e)
+		{
+			logger.error("failed to index dataset : " + datasetName + ". The reason is : " + e.getMessage());
+		}
+		finally
+		{
+			if (reader != null) reader.close();
+		}
+
+		return "";
 	}
 
 	@Override

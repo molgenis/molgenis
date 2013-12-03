@@ -3,15 +3,20 @@ package org.molgenis.omx.biobankconnect.wizard;
 import static org.molgenis.omx.biobankconnect.wizard.BiobankConnectController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
@@ -23,13 +28,16 @@ import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
+import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -113,6 +121,27 @@ public class BiobankConnectController extends AbstractWizardController
 		return wizard;
 	}
 
+	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
+	public String importFeatures(@RequestParam
+	String dataSetName, @RequestParam
+	Part file, HttpSession session, Model model) throws IOException, TableException, DatabaseException
+	{
+		File uploadFile = FileUploadUtils.saveToTempFolder(file);
+		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
+
+		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) session.getAttribute("biobankconnect");
+		List<DataSet> dataSets = new ArrayList<DataSet>();
+		List<DataSet> allDataSets = database.find(DataSet.class);
+		for (DataSet dataSet : allDataSets)
+		{
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+		}
+		biobankConnectWizard.setDataSets(dataSets);
+
+		logger.error(message);
+		return init();
+	}
+
 	// TODO : requestParam
 	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
 	public String annotate(HttpServletRequest request) throws Exception
@@ -171,16 +200,16 @@ public class BiobankConnectController extends AbstractWizardController
 	@ModelAttribute("javascripts")
 	public List<String> getJavascripts()
 	{
-		return Arrays.asList("jquery-ui-1.9.2.custom.min.js", "common-component.js", "catalogue-chooser.js",
-				"ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js", "simple_statistics.js",
-				"biobank-connect.js");
+		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
+				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
+				"simple_statistics.js", "biobank-connect.js");
 	}
 
 	@Override
 	@ModelAttribute("stylesheets")
 	public List<String> getStylesheets()
 	{
-		return Arrays.asList("jquery-ui-1.9.2.custom.min.css", "biobank-connect.css", "catalogue-chooser.css",
-				"ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css");
+		return Arrays.asList("bootstrap-fileupload.min.css", "jquery-ui-1.9.2.custom.min.css", "biobank-connect.css",
+				"catalogue-chooser.css", "ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css");
 	}
 }
