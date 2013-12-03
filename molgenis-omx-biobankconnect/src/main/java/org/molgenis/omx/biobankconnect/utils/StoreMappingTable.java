@@ -33,7 +33,6 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 {
 
 	private Database db;
-	private static final String OBSERVATION_SET = "observation_set";
 	private final List<ObservationSet> observationSets;
 	private final ValueConverter valueConverter;
 	private Integer numberOfRows = null;
