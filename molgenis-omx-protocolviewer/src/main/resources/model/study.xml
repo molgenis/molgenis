@@ -11,7 +11,7 @@
 			<field name="Protocol" type="xref" xref_entity="Protocol" description="protocol used to create request"/>
 			<field name="MolgenisUser" type="xref" xref_entity="MolgenisUser"/>
 			<field name="RequestDate" type="datetime" description="request date"/>
-			<field name="RequestStatus" type="enum" enum_options="[pending,accepted,rejected]"/>
+			<field name="RequestStatus" type="enum" enum_options="[draft,submitted,approved,rejected]"/>
 		</entity>
 	</module>
 </molgenis>
