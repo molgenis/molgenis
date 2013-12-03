@@ -372,10 +372,9 @@ public class MappingManagerController extends MolgenisPluginController
 						Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
 						if (storeMappings.containsKey(featureId))
 						{
-							List<Integer> candidateIds = null;
+							List<Integer> candidateIds = new ArrayList<Integer>();
 							MappingClass mappingClass = storeMappings.get(featureId);
 							if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
-							else candidateIds = mappingClass.getCandidateMappings();
 							for (Integer id : candidateIds)
 							{
 								if (featureMap.containsKey(id))

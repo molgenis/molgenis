@@ -83,8 +83,6 @@ public class StoreMappingTable extends AbstractFilterableTupleTable implements D
 				else tuple = new KeyValueTuple();
 
 				tuple.set(ov.getFeature_Identifier(), valueConverter.toCell(ov.getValue()));
-
-				if (tuple.get(OBSERVATION_SET) == null) tuple.set(OBSERVATION_SET, observationId);
 				storeMapping.put(observationId, tuple);
 			}
 

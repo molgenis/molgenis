@@ -243,6 +243,26 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 
 			database.add(listOfNewObservationSets);
+
+			Set<Integer> processedObservationSets = new HashSet<Integer>();
+			List<ObservedValue> valuesForObservationSets = new ArrayList<ObservedValue>();
+			for (ObservedValue value : listOfNewObservedValues)
+			{
+				ObservationSet observationSet = value.getObservationSet();
+				Integer observationSetId = observationSet.getId();
+				if (!processedObservationSets.contains(observationSetId))
+				{
+					processedObservationSets.add(observationSetId);
+					IntValue observationSetIntValue = new IntValue();
+					observationSetIntValue.setValue(observationSetId);
+					ObservedValue valueForObservationSet = new ObservedValue();
+					valueForObservationSet.setFeature_Identifier(OBSERVATION_SET);
+					valueForObservationSet.setObservationSet(observationSet);
+					valueForObservationSet.setValue(observationSetIntValue);
+					valuesForObservationSets.add(valueForObservationSet);
+				}
+			}
+			listOfNewObservedValues.addAll(valuesForObservationSets);
 			database.add(listOfNewObservedValues);
 
 			if (featureId != null)

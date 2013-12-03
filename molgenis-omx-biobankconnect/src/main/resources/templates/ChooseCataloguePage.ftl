@@ -55,7 +55,7 @@
 			</div>
 			<div class="modal-body">
 				<div><strong>Please input dataSet name</strong></div>
-				<div><input type="text" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div>
+				<div><input type="text" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div><br>
 				<div><strong>Please upload features</strong></div>
 				<div>
 					<div class="fileupload fileupload-new" data-provides="fileupload">
