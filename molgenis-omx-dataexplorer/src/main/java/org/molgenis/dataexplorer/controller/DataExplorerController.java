@@ -16,9 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
@@ -112,8 +114,7 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.ACTIVE, true));
+		List<DataSet> dataSets = Lists.<DataSet>newArrayList(dataService.<DataSet>findAll(DataSet.ENTITY_NAME));
 
 		model.addAttribute("dataSets", dataSets);
 
