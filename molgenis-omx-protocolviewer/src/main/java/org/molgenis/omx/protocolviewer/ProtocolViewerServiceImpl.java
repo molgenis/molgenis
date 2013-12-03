@@ -1,34 +1,23 @@
 package org.molgenis.omx.protocolviewer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.io.*;
+import java.util.*;
 
+import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.catalog.*;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.study.StudyDataRequest;
-import org.molgenis.omx.studymanager.OmxStudyDefinition;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.study.StudyDefinition;
+import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
@@ -40,127 +29,234 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
 public class ProtocolViewerServiceImpl implements ProtocolViewerService
 {
 	private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
-
 	@Autowired
-	private DataService dataService;
-
+	private CatalogService catalogService;
 	@Autowired
 	private JavaMailSender mailSender;
-
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-
 	@Autowired
 	private FileStore fileStore;
-
 	@Autowired
 	private StudyManagerService studyManagerService;
-
 	@Autowired
 	private org.molgenis.security.user.MolgenisUserService molgenisUserService;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.omx.protocolviewer.ProtocolViewerService#orderStudyData(java.lang.String, javax.servlet.http.Part,
-	 * java.lang.String, java.util.List)
-	 */
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	public Iterable<CatalogMeta> getCatalogs()
+	{
+		return Iterables.filter(catalogService.getCatalogs(), new Predicate<CatalogMeta>()
+		{
+			@Override
+			public boolean apply(@Nullable
+			CatalogMeta catalogMeta)
+			{
+				try
+				{
+					return catalogService.isCatalogLoaded(catalogMeta.getId());
+				}
+				catch (UnknownCatalogException e)
+				{
+					logger.error(e);
+					throw new RuntimeException(e);
+				}
+			}
+		});
+	}
+
+	@Override
+	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
+	{
+		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(
+				SecurityUtils.getCurrentUsername(), StudyDefinition.Status.DRAFT);
+		for (StudyDefinition studyDefinition : studyDefinitions)
+		{
+			Catalog catalogOfStudyDefinition;
+			try
+			{
+				catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
+			}
+			catch (UnknownCatalogException e)
+			{
+				logger.error("", e);
+				throw new RuntimeException(e);
+			}
+			catch (UnknownStudyDefinitionException e)
+			{
+				logger.error("", e);
+				throw new RuntimeException(e);
+			}
+			if (catalogOfStudyDefinition.getId().equals(catalogId))
+			{
+				return studyDefinition;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public StudyDefinition createStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
+	{
+		return studyManagerService.createStudyDefinition(SecurityUtils.getCurrentUsername(), catalogId);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	public List<StudyDefinition> getStudyDefinitionsForCurrentUser()
+	{
+		List<StudyDefinition> studyDefinitions = new ArrayList<StudyDefinition>();
+		String username = SecurityUtils.getCurrentUsername();
+		for (StudyDefinition.Status status : StudyDefinition.Status.values())
+		{
+			studyDefinitions.addAll(studyManagerService.getStudyDefinitions(username, status));
+		}
+		return studyDefinitions;
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	public StudyDefinition getStudyDefinitionForCurrentUser(Integer id) throws UnknownStudyDefinitionException
+	{
+		MolgenisUser user = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+		StudyDefinition studyDefinition = studyManagerService.getStudyDefinition(id.toString());
+		if (!studyDefinition.getAuthorEmail().equals(user.getEmail()))
+		{
+			throw new MolgenisDataAccessException("Access denied to study definition [" + id + "]");
+		}
+		return studyDefinition;
+	}
+
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
 	{ MessagingException.class, IOException.class })
-	public void orderStudyData(String studyName, Part requestForm, String catalogId, List<Integer> featureIds)
-			throws MessagingException, IOException
+	public void submitStudyDefinitionDraftForCurrentUser(String studyName, Part requestForm, String catalogId)
+			throws MessagingException, IOException, UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (studyName == null) throw new IllegalArgumentException("study name is null");
 		if (requestForm == null) throw new IllegalArgumentException("request form is null");
-		if (featureIds == null || featureIds.isEmpty()) throw new IllegalArgumentException(
-				"feature list is null or empty");
 
-		Query q = new QueryImpl().in(ObservableFeature.ID, featureIds);
-		Iterable<ObservableFeature> it = dataService.findAll(ObservableFeature.ENTITY_NAME, q);
-		List<ObservableFeature> features = Lists.newArrayList(it);
-		if (features.isEmpty()) throw new MolgenisDataException("requested features do not exist");
+		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
+		if (studyDefinition == null) throw new UnknownStudyDefinitionException("no study definition draft for user");
 
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.ID, catalogId));
-		MolgenisUser molgenisUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+		List<CatalogItem> catalogItems = studyDefinition.getItems();
+		if (catalogItems == null || catalogItems.isEmpty())
+		{
+			throw new IllegalArgumentException("feature list is null or empty");
+		}
 
-		String appName = getAppName();
+		// submit study definition
+		studyManagerService.submitStudyDefinition(studyDefinition.getId(), catalogId);
 
+		// create excel attachment for study data request
+		String appName = molgenisSettings.getProperty("app.name", "MOLGENIS");
 		long timestamp = System.currentTimeMillis();
 		String fileName = appName + "-request_" + timestamp + ".doc";
 		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
-
-		logger.debug("creating study data request: " + studyName);
-		StudyDataRequest studyDataRequest = new StudyDataRequest();
-		studyDataRequest.setIdentifier(UUID.randomUUID().toString());
-		studyDataRequest.setName(studyName);
-		studyDataRequest.setProtocol(protocol);
-		studyDataRequest.setFeatures(features);
-		studyDataRequest.setMolgenisUser(molgenisUser);
-		studyDataRequest.setRequestDate(new Date());
-		studyDataRequest.setRequestStatus("pending");
-		studyDataRequest.setRequestForm(orderFile.getPath());
-
-		StudyDefinition studyDefinition = studyManagerService.persistStudyDefinition(new OmxStudyDefinition(
-				studyDataRequest));
-		studyDataRequest.setIdentifier(studyDefinition.getId());
-		dataService.add(StudyDataRequest.ENTITY_NAME, studyDataRequest);
-		logger.debug("created study data request: " + studyName);
-
-		// create excel attachment for study data request
 		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
-		InputStream variablesIs = createOrderExcelAttachment(studyDataRequest, features);
+		InputStream variablesIs = createStudyDefinitionXlsStream(studyDefinition);
 		File variablesFile = fileStore.store(variablesIs, variablesFileName);
 
 		// send order confirmation to user and admin
+		MolgenisUser molgenisUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		helper.setTo(molgenisUser.getEmail());
 		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
 		{}));
 		helper.setSubject("Order confirmation from " + appName);
-		helper.setText(createOrderConfirmationEmailText(studyDataRequest, appName));
+		helper.setText(createOrderConfirmationEmailText(appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
 		helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
 		mailSender.send(message);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.omx.protocolviewer.ProtocolViewerService#getOrders()
-	 */
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
-	@Transactional(readOnly = true)
-	public List<StudyDataRequest> getOrders()
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
+	public void updateStudyDefinitionDraftForCurrentUser(List<Integer> catalogItemIds, String catalogId)
+			throws UnknownCatalogException
 	{
-		Iterable<StudyDataRequest> it = dataService.findAll(StudyDataRequest.ENTITY_NAME, new QueryImpl());
-		return Lists.newArrayList(it);
+		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
+		if (studyDefinition == null)
+		{
+			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
+		}
+
+		List<CatalogItem> catalogItems = Lists.transform(catalogItemIds, new Function<Integer, CatalogItem>()
+		{
+			@Nullable
+			@Override
+			public CatalogItem apply(@Nullable
+			final Integer catalogItemId)
+			{
+				return new CatalogItem()
+				{
+					@Override
+					public String getId()
+					{
+						return catalogItemId.toString();
+					}
+
+					@Override
+					public String getName()
+					{
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getDescription()
+					{
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getCode()
+					{
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getCodeSystem()
+					{
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+		});
+		studyDefinition.setItems(catalogItems);
+
+		try
+		{
+			studyManagerService.updateStudyDefinition(studyDefinition);
+		}
+		catch (UnknownStudyDefinitionException e)
+		{
+			logger.error("", e);
+			throw new RuntimeException(e);
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.omx.protocolviewer.ProtocolViewerService#getOrder(java.lang.Integer)
-	 */
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
-	@Transactional(readOnly = true)
-	public StudyDataRequest getOrder(Integer orderId)
+	public void createStudyDefinitionDraftXlsForCurrentUser(OutputStream outputStream, String catalogId)
+			throws IOException, UnknownCatalogException
 	{
-		return dataService.findOne(StudyDataRequest.ENTITY_NAME, orderId);
+		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
+		if (studyDefinition == null) return;
+		writeStudyDefinitionXls(studyDefinition, outputStream);
 	}
 
-	private String createOrderConfirmationEmailText(StudyDataRequest studyDataRequest, String appName)
+	private String createOrderConfirmationEmailText(String appName)
 	{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("Dear Researcher,\n\n");
@@ -173,54 +269,67 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		return strBuilder.toString();
 	}
 
-	private InputStream createOrderExcelAttachment(StudyDataRequest studyDataRequest, List<ObservableFeature> features)
-			throws IOException
+	private InputStream createStudyDefinitionXlsStream(StudyDefinition studyDefinition) throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		byte[] bytes = null;
 		try
 		{
-			List<String> header = Arrays.asList("Id", "Variable", "Description");
-			ExcelWriter excelWriter = new ExcelWriter(bos);
+			writeStudyDefinitionXls(studyDefinition, bos);
+			return new ByteArrayInputStream(bos.toByteArray());
+		}
+		finally
+		{
+			bos.close();
+		}
+	}
+
+	private void writeStudyDefinitionXls(StudyDefinition studyDefinition, OutputStream outputStream) throws IOException
+	{
+		if (studyDefinition == null) return;
+
+		// write excel file
+		List<String> header = Arrays.asList("Id", "Variable", "Description");
+
+		List<CatalogItem> catalogItems = Lists.newArrayList(studyDefinition.getItems());
+		if (catalogItems != null)
+		{
+			Collections.sort(catalogItems, new Comparator<CatalogItem>()
+			{
+				@Override
+				public int compare(CatalogItem feature1, CatalogItem feature2)
+				{
+					return feature1.getId().compareTo(feature2.getId());
+				}
+			});
+		}
+		ExcelWriter excelWriter = new ExcelWriter(outputStream);
+		try
+		{
+			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
 			try
 			{
-				TupleWriter sheetWriter = excelWriter.createTupleWriter(studyDataRequest.getName());
-				try
-				{
-					sheetWriter.writeColNames(header);
+				sheetWriter.writeColNames(header);
 
-					for (ObservableFeature feature : features)
+				if (catalogItems != null)
+				{
+					for (CatalogItem catalogItem : catalogItems)
 					{
 						KeyValueTuple tuple = new KeyValueTuple();
-						tuple.set(header.get(0), feature.getIdentifier());
-						tuple.set(header.get(1), feature.getName());
-						tuple.set(header.get(2), feature.getDescription());
+						tuple.set(header.get(0), catalogItem.getId());
+						tuple.set(header.get(1), catalogItem.getName());
+						tuple.set(header.get(2), catalogItem.getDescription());
 						sheetWriter.write(tuple);
 					}
-				}
-				finally
-				{
-					sheetWriter.close();
 				}
 			}
 			finally
 			{
-				excelWriter.close();
+				sheetWriter.close();
 			}
 		}
 		finally
 		{
-			bytes = bos.toByteArray();
-			bos.close();
+			excelWriter.close();
 		}
-		return new ByteArrayInputStream(bytes);
-	}
-
-	// TODO move to utility class
-	private String getAppName()
-	{
-		String keyAppName = "app.name";
-		String defaultKeyAppName = "MOLGENIS";
-		return molgenisSettings.getProperty(keyAppName, defaultKeyAppName);
 	}
 }
