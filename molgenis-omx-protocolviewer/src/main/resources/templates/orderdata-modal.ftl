@@ -59,8 +59,44 @@
             $.ajax({
                 type: 'GET',
                 url: pluginUri + '/selection/' + catalogId,
-                success: function (catalogItems) {
-                    molgenis.Catalog.updateFeatureSelection(catalogItems, $('#orderdata-selection-table-container'));
+                success: function (selection) {
+                    var container = $('#orderdata-selection-table-container');
+                    if (selection.length == 0) {
+                        submitBtn.addClass('disabled');
+                        container.append('<p>no variables selected</p>');
+                    } else {
+                        submitBtn.removeClass('disabled');
+                        var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
+                        table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
+                        var body = $('<tbody>');
+
+                        $.each(selection, function (i, featureUri) {
+                        	var feature = molgenis.Catalog.getFeature(featureUri);
+                            var row = $('<tr>');
+                            row.append('<td>' + feature.name + '</td>');
+                            console.log(feature.description);
+                            console.log(molgenis);
+                            console.log(molgenis.i18n);
+                            console.log(molgenis.i18n.get(feature.description));
+                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
+
+                            var deleteCol = $('<td class="center">');
+                            var deleteBtn = $('<i class="icon-remove"></i>');
+                            deleteBtn.click(function () {
+                                deletedFeatures.push({
+                                    'feature': feature.id
+                                });
+                                row.remove();
+                                // restore focus
+                                form.find('input:visible:first').focus();
+                            });
+                            deleteBtn.appendTo(deleteCol);
+
+                            row.append(deleteCol);
+                            body.append(row);
+                        });
+                        table.append(body).appendTo(container);
+                    }
                 }
             });
         });

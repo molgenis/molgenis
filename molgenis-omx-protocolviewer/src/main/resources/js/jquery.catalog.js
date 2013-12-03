@@ -28,16 +28,13 @@
 			getSelectedItems : function() {
 				return $.map($('.catalog-tree', container).dynatree('getTree').getSelectedNodes(), function(node) {
 					if (!node.data.isFolder) {
-						return {
-							'item' : node.data.key,
-							'folder' : node.parent.data.key
-						};
+						return node.data.key;
 					}
 					return null;
 				});
 			},
 			selectItem : function(options) {
-				$('.catalog-tree', container).dynatree('getTree').getNodeByKey(options.item).select(options.select);
+				$('.catalog-tree', container).dynatree('getTree').getNodeByKey(options.feature).select(options.select);
 			}
 		});
 
@@ -118,7 +115,7 @@
 
 			// render tree and open first branch
 			treeContainer.dynatree({
-				checkbox : true,
+				checkbox : settings.selection,
 				selectMode : 3,
 				minExpandLevel : 2,
 				debugLevel : 0,
@@ -173,12 +170,12 @@
 							if (i > 0) {
 								queryRules.push({
 									operator : 'OR'
-								})
+								});
 							}
 							queryRules.push({
 								field : 'siblingIds',
 								operator : 'SEARCH',
-								value : item
+								value : hrefToId(item)
 							});
 						});
 						return queryRules;
@@ -186,9 +183,7 @@
 				};
 
 				// TODO create tree children in one step instead of updating children in tree above
-				searchAndUpdateTree(searchRequest, protocol.href, $.map(settings.selectedItems, function(selectedItemId) {
-					return '/api/v1/observablefeature/' + selectedItemId;
-				}), 'select');
+				searchAndUpdateTree(searchRequest, protocol.href, settings.selectedItems, 'select');
 			}
 
 			//treeContainer.find(".dynatree-checkbox").first().hide(); // FIXME

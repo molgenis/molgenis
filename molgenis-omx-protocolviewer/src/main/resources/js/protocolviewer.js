@@ -1,9 +1,20 @@
 (function($, molgenis) {
 	var restApi = new molgenis.RestClient();
 	var catalogContainer;
-
 	var Catalog = molgenis.Catalog = molgenis.Catalog || {};
 
+	Catalog.getEnableSelection = function() {
+		return typeof Catalog.enableSelection !== 'undefined' ? Catalog.enableSelection : false; 
+	};
+	
+	Catalog.setEnableSelection = function(enableSelection) {
+		Catalog.enableSelection = enableSelection;
+	};
+	
+	Catalog.getFeature = function(featureUri) {
+		return restApi.get(featureUri);
+	};
+	
 	var onCatalogChange = function(catalogId) {
 		$.ajax({
 			type : 'GET',
@@ -21,21 +32,19 @@
 
 	var updateCatalog = function(catalogId, selection) {
 		catalogContainer.catalog({
+			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
-			'selectedItems' : selection.selectedItems ? selection.selectedItems : null,
+			'selectedItems' : selection ? selection : null,
 			'sort' : molgenis.naturalSort,
 			'onItemClick' : function(featureUri) {
-				console.log('handle item click', featureUri);
 				updateFeatureDetails(featureUri);
 			},
 			'onItemSelect' : function(featureUri, select) {
-				console.log('handle item select', featureUri, select);
-				var catalogItems = catalogContainer.catalog('getSelectedItems');
+				var catalogItems = catalogContainer.catalog('getSelectedItems'); //FIXME returns the selected items of the search tree when searching
 				updateShoppingCart(catalogItems, catalogId);
 				updateFeatureSelection(catalogItems);
 			},
 			'onFolderSelect' : function(protocolUri, select) {
-				console.log('handle folder select', protocolUri, select);
 				var catalogItems = catalogContainer.catalog('getSelectedItems'); //FIXME returns the selected items of the search tree when searching
 				updateShoppingCart(catalogItems, catalogId);
 				updateFeatureSelection(catalogItems);
@@ -63,7 +72,7 @@
 
 				table.addClass('listtable feature-table');
 				table.find('td:first-child').addClass('feature-table-col1');
-				detailsContainer.append(table);
+				detailsContainer.html(table);
 
 				if (feature.categories && feature.categories.length > 0) {
 					var categoryTable = $('<table class="table table-striped table-condensed" />');
@@ -76,7 +85,7 @@
 						row.appendTo(categoryTable);
 					});
 					categoryTable.addClass('listtable');
-					detailsContainer.html(categoryTable);
+					detailsContainer.append(categoryTable);
 				}
 			});
 		}
@@ -111,16 +120,14 @@
 		callback(data);
 	};
 
-	var updateFeatureSelection = function(catalogItems) {
+	var updateFeatureSelection = function(features) {
 		var selectionContainer = $('#feature-selection');
-		if (catalogItems && catalogItems.length > 0) {
+		if (features && features.length > 0) {
 			var table = $('<table class="table table-striped table-condensed table-hover" />');
 			$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
-			$.each(catalogItems, function(i, catalogItem) {
-				var feature = restApi.get(catalogItem.item);
-				var protocol = restApi.get(catalogItem.folder);
-
-				var protocolName = protocol.name;
+			$.each(features, function(i, feature) {
+				var feature = restApi.get(feature);
+				var protocolName = "FIXME";
 				var name = feature.name;
 				var identifier = feature.identifier;
 				var description = molgenis.i18n.get(feature.description);
@@ -133,7 +140,7 @@
 				deleteButton.click(function() {
 					var featureUri = $(this).closest('tr').data('key');
 					catalogContainer.catalog('selectItem', {
-						'item' : featureUri,
+						'feature' : featureUri,
 						'select' : false
 					});
 					return false; // TODO do we need this?
@@ -165,7 +172,7 @@
 				data : JSON.stringify({
 					'features' : $.map(catalogItems, function(catalogItem) {
 						return {
-							'feature' : catalogItem.item.substring(catalogItem.item.lastIndexOf('/') + 1)
+							'feature' : catalogItem.substring(catalogItem.lastIndexOf('/') + 1)
 						// TODO href --> id mapping not elegant
 						};
 					})

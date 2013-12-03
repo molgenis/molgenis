@@ -3,6 +3,11 @@
 <#assign css=["ui.dynatree.css", "chosen.css", "protocolviewer.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "protocolviewer.js", "jquery.dynatree.min.js", "jquery.catalog.js", "jquery.validate.min.js"]>
 <@header css js/>
+<#if authenticated>	
+	<script>
+		molgenis.Catalog.setEnableSelection(true);
+	</script>
+</#if>
 	<div class="row-fluid">			
     <#if (catalogs?size == 0)>
         <span>No active catalogs</span>
@@ -39,6 +44,7 @@
                     <div id="feature-details">
                     </div>
                 </div>
+			<#if authenticated>               
                 <div class="row-fluid grid" id="feature-shopping">
                     <p class="box-title">Variable selection</p>
                     <div id="feature-selection">
@@ -57,12 +63,13 @@
                         <div id="orderdata-modal-container"></div>
                         <div id="ordersview-modal-container"></div>
                         <div class="btn-group pull-right">
-                            <a class="modal-href btn<#if !authenticated> disabled</#if>" href="/plugin/protocolviewer/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
-                            <a class="modal-href btn btn-primary<#if !authenticated> disabled</#if>" href="/plugin/protocolviewer/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
+                            <a class="modal-href btn" href="/plugin/protocolviewer/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Orders</a>
+                            <a class="modal-href btn btn-primary" href="/plugin/protocolviewer/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Order</a>
                         </div>
                     </#if>
                     </div>
                 </div>
+			</#if>
             </div>
         </div>
     </#if>

@@ -33,8 +33,9 @@
                         items.push('<thead><th>#<th>Study</th><th>Order Date</th><th>Status</th><th></th></thead><tbody>');
                         $.each(data.orders, function (i, order) {
                             var clazz;
-                            if (order.orderStatus === 'accepted') clazz = 'success';
-                            else if (order.orderStatus === 'pending') clazz = 'warning';
+                            if (order.orderStatus === 'approved') clazz = 'success';
+                            else if (order.orderStatus === 'draft') clazz = 'warning';
+                            else if (order.orderStatus === 'submitted') clazz = 'warning';
                             else if (order.orderStatus === 'rejected') clazz = 'error';
                             else clazz = 'error';
                             var containerId = 'orderdetails' + order.id + 'modal-container';
