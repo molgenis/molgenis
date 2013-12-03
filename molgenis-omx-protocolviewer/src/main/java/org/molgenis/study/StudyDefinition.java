@@ -13,6 +13,8 @@ public interface StudyDefinition
 
 	String getName();
 
+	void setName(String name);
+
 	String getDescription();
 
 	String getVersion();
