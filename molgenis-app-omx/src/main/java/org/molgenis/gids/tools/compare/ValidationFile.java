@@ -21,7 +21,7 @@ public class ValidationFile
 	private final List<String> listOfHeaders = new ArrayList<String>();
 	private final LinkedHashMap<String, Tuple> hash = new LinkedHashMap<String, Tuple>();
 
-	public void readFile(ExcelSheetReader excelSheetReader, String identifier) throws IOException
+	public void readFile(ExcelSheetReader excelSheetReader, String identifier, String identifier2) throws IOException
 	{
 		Iterator<String> iterableFileToCompare = excelSheetReader.colNamesIterator();
 
@@ -33,11 +33,11 @@ public class ValidationFile
 
 		for (Tuple t : excelSheetReader)
 		{
-			hash.put(t.getString(identifier), t);
+			hash.put(t.getString(identifier) + "_" + t.getString(identifier2), t);
 		}
 	}
 
-	public void readFile(CsvReader csvSheetReader, String identifier) throws IOException
+	public void readFile(CsvReader csvSheetReader, String identifier, String identifier2) throws IOException
 
 	{
 		Iterator<String> iterableFileToCompare = csvSheetReader.colNamesIterator();
@@ -50,7 +50,7 @@ public class ValidationFile
 
 		for (Tuple t : csvSheetReader)
 		{
-			hash.put(t.getString(identifier), t);
+			hash.put(t.getString(identifier) + "_" + t.getString(identifier2), t);
 		}
 	}
 
