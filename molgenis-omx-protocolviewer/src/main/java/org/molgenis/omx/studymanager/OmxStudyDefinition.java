@@ -46,6 +46,12 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
+	public void setName(String name)
+	{
+		studyDataRequest.setName(name);
+	}
+
+	@Override
 	public String getDescription()
 	{
 		return null; // TODO https://github.com/molgenis/molgenis/issues/859
