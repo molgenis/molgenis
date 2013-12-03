@@ -71,7 +71,7 @@
 							</span>
 							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
 						</div>
-						<div class="float-right"><a href="#">Down example data</a></div>
+						<div class="float-right"><a href="/html/example-data.csv">Download example data</a></div>
 					</div>
 				</div>
 			</div>

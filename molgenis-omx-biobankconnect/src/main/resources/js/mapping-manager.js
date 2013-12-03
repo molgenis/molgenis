@@ -231,12 +231,14 @@
 			var involvedDataSetIds = [];
 			var involvedDataSetNames = [];
 			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
+			biobankDataSets = sortOrderOfDataSets(biobankDataSets, selectedDataSet);
 			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
 					var dataSetIdArray = dataSet.identifier.split('-');
 					involvedDataSetIds.push(dataSetIdArray[2]);
 				}
 			});
+			
 			involvedDataSetIds.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
@@ -255,6 +257,16 @@
 				tableBody.append(createRowForMappingTable(mappingPerStudy, mappingDataSets, featureId, cachedFeatures));
 			});
 			callback(tableBody, involvedDataSetNames);
+			
+			function sortOrderOfDataSets(biobankDataSets, selectedDataSet){
+				var sortedDataSets = [];
+				$.each(biobankDataSets, function(index, dataSet){
+					if(ns.hrefToId(dataSet.href) === ns.hrefToId(selectedDataSet.href))
+						sortedDataSets.splice(0, 0, dataSet);
+					else sortedDataSets.push(dataSet);
+				});
+				return sortedDataSets;
+			}
 		}
 		
 		function createDynamicTableHeader(involedDataSets){

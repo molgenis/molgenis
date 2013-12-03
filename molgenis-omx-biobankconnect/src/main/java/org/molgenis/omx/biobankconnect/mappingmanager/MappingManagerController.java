@@ -379,8 +379,8 @@ public class MappingManagerController extends MolgenisPluginController
 							{
 								if (featureMap.containsKey(id))
 								{
+									if (value.length() > 0) value.append(',');
 									value.append(featureMap.get(id).getName());
-									value.append(',');
 								}
 							}
 						}
@@ -405,17 +405,13 @@ public class MappingManagerController extends MolgenisPluginController
 	static class MappingClass
 	{
 		private Integer featureId = null;
-		private boolean confirmation = false;
 		private List<Integer> finalizedMapping = null;
-		private List<Integer> candidateMappings = null;
 
 		public void addMapping(Integer featureId, Integer singleMappedFeatureId, boolean confirmation)
 		{
 			if (this.featureId == null) this.featureId = featureId;
 			if (this.finalizedMapping == null) this.finalizedMapping = new ArrayList<Integer>();
-			if (this.candidateMappings == null) this.candidateMappings = new ArrayList<Integer>();
-			this.confirmation = confirmation;
-			this.candidateMappings.add(singleMappedFeatureId);
+
 			if (confirmation) finalizedMapping.add(singleMappedFeatureId);
 		}
 
@@ -426,17 +422,12 @@ public class MappingManagerController extends MolgenisPluginController
 
 		public boolean isConfirmation()
 		{
-			return confirmation;
+			return finalizedMapping.size() > 0;
 		}
 
 		public List<Integer> getFinalizedMapping()
 		{
 			return finalizedMapping;
-		}
-
-		public List<Integer> getCandidateMappings()
-		{
-			return candidateMappings;
 		}
 	}
 }
