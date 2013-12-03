@@ -1,12 +1,17 @@
 package org.molgenis.charts.r;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -42,7 +47,7 @@ public class RChartService
 		this.rScriptExecutor = rScriptExecutor;
 	}
 
-	public String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException
+	public String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		String fileName = UUID.randomUUID().toString();
 
@@ -58,8 +63,12 @@ public class RChartService
 		runScript(script);
 		
 		// annotate the SVG here
-		File f = fileStore.getFile(fileName + ".svg");
-		//SVGEditor.annotateHeatMap(chart, f);
+		File in = fileStore.getFile(fileName + ".svg");
+		
+		File out = new File(fileStore.getStorageDir() + "/" + fileName + "_annotated.svg");
+		
+		SVGEditor svge = new SVGEditor(in, out);
+		svge.annotateHeatMap(chart);			
 		
 		return fileName;
 	}

@@ -49,14 +49,14 @@ var nRowAnnotations = 0;
 var nColAnnotations = 0;
 
 $.ajax({
-	url: '/charts/get/${fileName}.svg',
+	url: '/charts/get/${fileName}_annotated.svg',
 	async: false
 }).done(function (svgDoc){
 	//import contents of the svg document into this document
 	var importedSVGRootElement = document.importNode(svgDoc.documentElement,true);
 	//append the imported SVG root element to the appropriate HTML element
 	$("#container").append(importedSVGRootElement);
-	annotateHeatMap();
+	//annotateHeatMap();
 }
 );
 
@@ -66,6 +66,16 @@ $.ajax({
 	FUNCTIONS
 */
 
+$('path').click(function(e) {
+    //console.log($(this));
+    //console.log($(this).attr('row'));
+});
+
+$('g').click(function(e) {
+	console.log("name lcick y'all");
+  $(this).border('thin solid black');
+ });
+ 
 function getTipConfig(x, y){
 	return {
 		content: {

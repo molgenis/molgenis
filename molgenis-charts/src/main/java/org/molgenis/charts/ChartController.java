@@ -12,6 +12,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
 import org.molgenis.charts.charttypes.HeatMapChart;
@@ -36,7 +38,6 @@ import freemarker.template.TemplateException;
 
 @Controller
 @RequestMapping(URI)
-@SessionAttributes("fileNames")
 public class ChartController
 {
 	public static final String URI = "/charts";
@@ -56,23 +57,6 @@ public class ChartController
 		this.chartDataService = chartDataService;
 		this.rchartService = rchartService;
 		this.fileStore = fileStore;
-	}
-
-	/**
-	 * List of filenames of a user. User can only view his own files
-	 */
-	@ModelAttribute("fileNames")
-	public List<String> getFileNames(Model model)
-	{
-		@SuppressWarnings("unchecked")
-		List<String> fileNames = (List<String>) model.asMap().get("fileNames");
-		if (fileNames == null)
-		{
-			fileNames = new ArrayList<String>();
-			model.addAttribute("fileNames", fileNames);
-		}
-
-		return fileNames;
 	}
 
 	@RequestMapping("/test")
@@ -123,15 +107,8 @@ public class ChartController
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name")
 	String name, @PathVariable("extension")
-	String extension, @ModelAttribute("fileNames")
-	List<String> fileNames, HttpServletResponse response) throws IOException
+	String extension,  HttpServletResponse response) throws IOException
 	{
-		// User can only see his own charts
-		if (!fileNames.contains(name))
-		{
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
 
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
@@ -159,11 +136,12 @@ public class ChartController
 	 * @return
 	 * @throws IOException
 	 * @throws TemplateException
+	 * @throws FactoryConfigurationError 
+	 * @throws XMLStreamException 
 	 */
 	@RequestMapping("/heatmap")
 	public String renderHeatMap(@Valid
-	HeatMapRequest request, @ModelAttribute("fileNames")
-	List<String> fileNames, Model model) throws IOException, TemplateException
+	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -176,7 +154,6 @@ public class ChartController
 		chart.setHeight(request.getHeight());
 
 		String chartFileName = rchartService.renderHeatMap(chart);
-		fileNames.add(chartFileName);
 
 		model.addAttribute("fileName", chartFileName);
 		model.addAttribute("nRow", chart.getData().getRowTargets().size());

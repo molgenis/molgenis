@@ -2,6 +2,7 @@ package org.molgenis.charts.svg;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
@@ -11,6 +12,7 @@ import java.util.ListIterator;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.*;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -37,30 +39,80 @@ public class SVGEditor {
 	static final String PATH = "path";
 	static final QName ID = new QName("id");
 	
-	/** Creates a new instance of SVGEditor */
-	public SVGEditor(){
-	}
-
+	private XMLEventReader reader;
+	private OutputStream os;
+	private XMLEventWriter writer;
 	
-	public static void annotateHeatMap(HeatMapChart chart, File input, File output){
+	/** Creates a new instance of SVGEditor 
+	 * @throws FactoryConfigurationError 
+	 * @throws XMLStreamException 
+	 * @throws FileNotFoundException */
+	public SVGEditor(File inFile, File outFile) throws FileNotFoundException, XMLStreamException, FactoryConfigurationError{
+		reader = XMLInputFactory.newInstance().createXMLEventReader(
+                new java.io.FileInputStream(inFile));
 		
+	    os = new FileOutputStream(outFile);
+	    writer = XMLOutputFactory.newInstance().createXMLEventWriter(os);
 	}
 	
-	public static void main(String[] args) {
-
+	/**
+	 * Annotates a block of values of a heatmap.plus SVG.
+	 * A heatmap.plus can contain up to three 'blocks': row annotations, column annotations and the matrix.
+	 * These blocks are drawn the same way.
+	 * @throws XMLStreamException 
+	 */
+	private void annotateHeatMapBlock(int nRow, int nCol, String blockType) throws XMLStreamException{
+		int counter = 0;
+		int nPath = nRow * nCol;
+		int currentRow = nRow;
+		int currentCol = 1;
+		while (counter < nPath){
+			XMLEvent event = (XMLEvent) reader.next();
+			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(PATH)){
+				// change element 
+				@SuppressWarnings("unchecked")
+				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+				
+				StartElement newSe = m_eventFactory.createStartElement(new QName(PATH), attributes, null);
+				writer.add(newSe);
+				writer.add(m_eventFactory.createAttribute(ID, blockType));
+				writer.add(m_eventFactory.createAttribute(new QName("row"), Integer.toString(currentRow)));
+				writer.add(m_eventFactory.createAttribute(new QName("col"), Integer.toString(currentCol)));
+			
+				currentRow--;
+				if (currentRow == 0){
+					currentRow = nRow;
+					currentCol++;
+				}
+				counter++;
+			}else{
+				writer.add(event);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Can annotate SVG heatmap.plus charts made by R. Reads and writes using StAX, adding 
+	 * row and col attributes to <path> elements corresponding to data points in the heatmap. 
+	 * All indexes can be calculated using nRow, nCol, nRowAnnotations and nColAnnotations.
+	 * @param chart 
+	 */
+	public void annotateHeatMap(HeatMapChart chart){
+ 
+        // get values from HeatMapChart
+		int nRow = chart.getData().getRowTargets().size();
+		int nCol = chart.getData().getColumnTargets().size();
+		
+		//TODO get from HeatMapChart:
+		int nRowAnnotations = 0;
+		int nColAnnotations = 0;
+		
 		try {
-            SVGEditor ms = new SVGEditor();
-
-            XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(
-                        new java.io.FileInputStream("/Users/tommydeboer/test3.svg"));
-            OutputStream os = new FileOutputStream("/Users/tommydeboer/test2.svg");
-            XMLEventWriter writer = XMLOutputFactory.newInstance().createXMLEventWriter(os);
-
-               
         	// skip the headers and <def> bit until we reach <g id="">
             while (true){
             	XMLEvent event = (XMLEvent) reader.next();
-            	if (event.getEventType() == event.START_ELEMENT){
+            	if (event.isStartElement()){
             		StartElement se = event.asStartElement();
 	            	if (se.getName().getLocalPart().equals(G) && se.getAttributeByName(ID) != null){
             			System.out.println("INFO: <g id=\"\"> reached");
@@ -71,73 +123,73 @@ public class SVGEditor {
             	writer.add(event);
             }
             
-            // annotation begins here  
-            // get values from HeatMapChart
-    		int nRow = 50;
-    		int nCol = 50;
-    		
-    		int nRowAnnotations = 2;
-    		int nColAnnotations = 2;
+            // annotation begins here 
             
             // ROW ANNOTATIONS
     		if (nRowAnnotations > 0){
     			System.out.println("parsing row annotations");
-    			int nPath = nRowAnnotations * nRow;
-    			int counter = 0;
-    			while(counter < nPath){
-    				XMLEvent event = (XMLEvent) reader.next();
-    				if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(PATH)){
-    					// annotate path elements
-    					writer.add(event);
-    					counter++;
-    				}else{    				
-    					writer.add(event);
-    				}
-    			}
+    			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation");
     		}
     		
-    		// COL ANNOTATIONS
+    		// COLUMN ANNOTATIONS
     		if (nColAnnotations > 0){
     			System.out.println("parsing col annotations");
-    			int nPath = nColAnnotations * nCol;
-    			int counter = 0;
-    			while(counter < nPath){
-    				XMLEvent event = (XMLEvent) reader.next();
-    				if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(PATH)){
-    					// annotate path elements
-    					writer.add(event);
-    					counter++;
-    				}else{
-    					writer.add(event);
-    				}
+    			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation");
+    		}
+    		
+    		// MATRIX ANNOTATIONS
+    		System.out.println("parsing matrix");
+    		annotateHeatMapBlock(nRow, nCol, "matrix");
+    		
+    		// COLUMN NAMES
+    		System.out.println("parsing column names");
+    		int counter = 0;
+    		while (counter < nCol){
+    			XMLEvent event = (XMLEvent) reader.next();
+    			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G)){
+    				
+    				@SuppressWarnings("unchecked")
+					Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+    				
+    				StartElement newSe = m_eventFactory.createStartElement(new QName(G), attributes, null);
+    				writer.add(newSe);
+    				writer.add(m_eventFactory.createAttribute(ID, "colName"));
+    				writer.add(m_eventFactory.createAttribute(new QName("col"), Integer.toString(counter+1)));
+    				
+    				
+    				counter++;
+    			}else{
+    				writer.add(event);
     			}
     		}
     		
-    		// matrix annotations
-    		int counter = 0;
-    		int nPath = nRow * nCol;
-    		while (counter < nPath){
+    		// ROW NAMES
+    		System.out.println("parsing row names");
+    		counter = 0;
+    		while (counter < nRow){
     			XMLEvent event = (XMLEvent) reader.next();
-    			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(PATH)){
-    				// change element 
-    				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+    			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G)){
     				
-    				StartElement newSe = ms.m_eventFactory.createStartElement(new QName(PATH), attributes, null);
+    				@SuppressWarnings("unchecked")
+					Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+    				
+    				StartElement newSe = m_eventFactory.createStartElement(new QName(G), attributes, null);
     				writer.add(newSe);
-					writer.add(ms.m_eventFactory.createAttribute(ID, "matrix"));
-					counter++;
-				}else{
-					writer.add(event);
-				}
+    				writer.add(m_eventFactory.createAttribute(ID, "rowName"));
+    				writer.add(m_eventFactory.createAttribute(new QName("row"), Integer.toString(nRow-counter)));
+    				counter++;
+    			}else{
+    				writer.add(event);
+    			}
     		}
     		
     		// finish rest of file
             while (reader.hasNext()){	
             	XMLEvent event = (XMLEvent) reader.next();
             	if (event.isEndElement()){
-            		// close the <g id="surface1"> tag.
+            		// close the <g id=""> tag, right before the </svg> end element
             		if (event.asEndElement().getName().getLocalPart().equals(new QName("svg"))){
-            			EndElement newEe = ms.m_eventFactory.createEndElement(new QName(G), null);
+            			EndElement newEe = m_eventFactory.createEndElement(new QName(G), null);
                 		writer.add(newEe);
             		}
             	}
@@ -150,23 +202,5 @@ public class SVGEditor {
         }
 
 	}
-	
-	/** New Character event (with text containing current time) is created using XMLEventFactory in case the
-     *  Characters event passed matches the criteria.
-     *
-     *  @param Characters Current character event.
-     *  return Characters New Characters event.
-     */
-    private Characters getNewCharactersEvent(Characters event) {
-        if (event.getData()
-                     .equalsIgnoreCase("Yogasana Vijnana: the Science of Yoga")) {
-            return m_eventFactory.createCharacters(
-                    Calendar.getInstance().getTime().toString());
-        }
-        //else return the same event
-        else {
-            return event;
-        }
-    }
 
 }
