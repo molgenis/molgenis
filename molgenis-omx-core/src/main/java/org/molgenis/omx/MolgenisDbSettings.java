@@ -44,7 +44,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		}
 		catch (MolgenisDataException e)
 		{
-			logger.warn(e);
+			logger.debug(e);
 			return defaultValue;
 		}
 
