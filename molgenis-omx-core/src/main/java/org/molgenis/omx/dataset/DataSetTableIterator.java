@@ -68,6 +68,7 @@ public class DataSetTableIterator implements Iterator<Tuple>
 				Value value = v.getValue();
 				tuple.set(feature.getIdentifier(), valueConverter.toCell(value));
 			}
+            tuple.set("partOfDataset", currentRowToGet.getPartOfDataSet().getIdentifier());
 		}
 		catch (ValueConverterException e)
 		{
