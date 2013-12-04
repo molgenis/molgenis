@@ -84,4 +84,9 @@ public interface Query
 	 */
 	Query rng(String field, Object smaller, Object bigger);
 
+	Query pageSize(int pageSize);
+
+	Query offset(int offset);
+
+	Query sort(Sort sort);
 }

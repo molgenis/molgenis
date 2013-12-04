@@ -4,22 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 
 public class MultiSearchRequest
 {
 	private List<String> documentTypes;
-	private List<QueryRule> queryRules = new ArrayList<QueryRule>();
+	private QueryImpl query;
 	private List<String> fieldsToReturn = new ArrayList<String>();
 
 	public MultiSearchRequest()
 	{
 	}
 
-	public MultiSearchRequest(List<String> documentTypes, List<QueryRule> queryRules, List<String> fieldsToReturn)
+	public MultiSearchRequest(List<String> documentTypes, Query query, List<String> fieldsToReturn)
 	{
 		this.documentTypes = documentTypes;
-		this.queryRules = queryRules;
+		this.query = new QueryImpl(query);
 		this.fieldsToReturn = fieldsToReturn;
 	}
 
@@ -28,9 +29,9 @@ public class MultiSearchRequest
 		return documentTypes;
 	}
 
-	public List<QueryRule> getQueryRules()
+	public Query getQuery()
 	{
-		return queryRules;
+		return query;
 	}
 
 	public List<String> getFieldsToReturn()

@@ -108,11 +108,13 @@
 			$('#selected-catalogue').empty().append(dataSetEntity.name);
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
-				queryRules : [{
-					field : 'type',
-					operator : 'EQUALS',
-					value : 'observablefeature'
-				}]
+				query : {
+					rules : [[{
+						field : 'type',
+						operator : 'EQUALS',
+						value : 'observablefeature'
+					}]]
+				}
 			};
 			searchApi.search(request, function(searchResponse){
 				pagination.reset();
@@ -142,25 +144,30 @@
 	
 	function createMatrixForDataItems () {
 		var documentType = 'protocolTree-' + getSelectedDataSet();
-		var query = [{
-			field : 'type',
-			operator : 'SEARCH',
-			value : 'observablefeature'
-		}];
+		
+		var q = {
+				rules : [[{
+					field : 'type',
+					operator : 'SEARCH',
+					value : 'observablefeature'
+				}]]
+		}
 		
 		var queryText = $('#search-dataitem').val();
 		if(queryText !== ''){
-			query.push({
+			q.rules[0].push({
 				operator : 'AND'
 			});
-			query.push({
+			q.rules[0].push({
 				operator : 'SEARCH',
 				value : queryText
 			});
 			pagination.reset();
 		}
-		
-		if(sortRule !== null) query.push(sortRule);
+		if(sortRule !== null)
+		{
+			q.sort.orders = [sortRule];
+		}
 		
 		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
 			var searchHits = searchResponse.searchHits;

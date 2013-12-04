@@ -22,9 +22,10 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelReader;
@@ -44,6 +45,8 @@ import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -223,13 +226,12 @@ public class EvaluationController extends MolgenisPluginController
 
 									String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
 											+ selectedDataSetId + "-" + dataSet.getId();
-									List<QueryRule> queryRules = new ArrayList<QueryRule>();
-									queryRules.add(new QueryRule("store_mapping_feature", Operator.EQUALS, features
-											.get(0).getId()));
-									queryRules.add(new QueryRule(Operator.LIMIT, 50));
-									queryRules.add(new QueryRule(Operator.SORTDESC, "store_mapping_score"));
-									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier,
-											queryRules, null);
+
+									Query q = new QueryImpl().eq("store_mapping_feature", features.get(0).getId())
+											.pageSize(50).sort(new Sort(Direction.DESC, "store_mapping_score"));
+
+									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
+
 									SearchResult result = searchService.search(searchRequest);
 
 									if (mappedFeatureIds.size() == 0)
@@ -375,14 +377,16 @@ public class EvaluationController extends MolgenisPluginController
 
 	private Map<String, Hit> findFeaturesFromIndex(String field, List<String> featureNames, Integer dataSetId)
 	{
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		QueryImpl q = new QueryImpl();
+		q.pageSize(10000);
+
 		for (String featureName : featureNames)
 		{
-			if (queryRules.size() > 0) queryRules.add(new QueryRule(Operator.OR));
-			queryRules.add(new QueryRule(field, Operator.EQUALS, featureName));
+			if (q.getRules().size() > 0) q.addRule(new QueryRule(Operator.OR));
+			q.addRule(new QueryRule(field, Operator.EQUALS, featureName));
 		}
-		queryRules.add(new QueryRule(Operator.LIMIT, 10000));
-		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, queryRules, null));
+
+		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, q, null));
 
 		Map<String, Hit> featureIds = new HashMap<String, Hit>();
 		for (Hit hit : result.getSearchHits())

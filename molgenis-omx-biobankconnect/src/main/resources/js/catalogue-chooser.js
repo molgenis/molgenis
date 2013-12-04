@@ -18,11 +18,13 @@
 			$('#selected-catalogue').empty().append(dataSetEntity.name);
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
-				queryRules : [{
-					field : 'type',
-					operator : 'EQUALS',
-					value : 'observablefeature'
-				}]
+				query:{
+					rules:[[{
+						field : 'type',
+						operator : 'EQUALS',
+						value : 'observablefeature'
+					}]]
+				}
 			};
 			searchApi.search(request, function(searchResponse){
 				sortRule = null;
@@ -63,26 +65,32 @@
 	
 	ns.CatalogueChooser.prototype.createMatrixForDataItems = function() {
 		var documentType = 'protocolTree-' + getSelectedDataSet();
-		var query = [{
-			field : 'type',
-			operator : 'SEARCH',
-			value : 'observablefeature'
-		}];
+		
+		var q = {
+				rules : [[{
+					field : 'type',
+					operator : 'SEARCH',
+					value : 'observablefeature'
+				}]]
+		}
 		
 		var queryText = $('#search-dataitem').val();
 		if(queryText !== ''){
-			query.push({
+			q.rules[0].push({
 				operator : 'AND'
 			});
-			query.push({
+			q.rules[0].push({
 				operator : 'SEARCH',
 				value : queryText
 			});
 			pagination.reset();
 		}
-		if(sortRule !== null) query.push(sortRule);
+		if(sortRule !== null)
+		{
+			q.sort.orders = [sortRule];
+		}
 
-		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
+		searchApi.search(pagination.createSearchRequest(documentType, q), function(searchResponse) {
 			var searchHits = searchResponse.searchHits;
 			var tableObject = $('#dataitem-table');
 			var tableBody = $('<tbody />');
@@ -119,7 +127,7 @@
 			var headerRow = $('<tr />');
 			var firstColumn = $('<th>Name</th>').css('width', '30%').appendTo(headerRow);
 			if (sortRule) {
-				if (sortRule.operator == 'SORTASC') {
+				if (sortRule.direction == 'ASC') {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 				} else {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -131,15 +139,15 @@
 			
 			// Sort click
 			$(firstColumn).find('.ui-icon').click(function() {
-				if (sortRule && sortRule.operator == 'SORTASC') {
+				if (sortRule && sortRule.direction == 'ASC') {
 					sortRule = {
-						value : 'name',
-						operator : 'SORTDESC'
+						property : 'name',
+						direction : 'DESC'
 					};
 				} else {
 					sortRule = {
-						value : 'name',
-						operator : 'SORTASC'
+						property : 'name',
+						direction : 'SORTASC'
 					};
 				}
 				ns.CatalogueChooser.prototype.createMatrixForDataItems();
@@ -182,13 +190,13 @@
 		},{
 			operator : 'SEARCH',
 			value : query
-		},{
-			operator : 'LIMIT',
-			value : 20
 		}];
 		var searchRequest = {
 			documentType : 'protocolTree-' + dataSetId,
-			queryRules : queryRules
+			query :{
+				pageSize: 20,
+				rules: [queryRules]
+			}
 		};
 		searchApi.search(searchRequest, function(searchReponse){
 			var result = [];

@@ -253,8 +253,11 @@ input[type=number] {
 	margin-bottom: 8px;
 	margin-top: 4px;
 }
-
-#filter-dialog-modal .modal-body{
-	max-height:none;
-	
+#filter-dialog-modal-container{
+	overflow-y: scroll; 
 }
+
+#filter-dialog-modal-container .modal{
+	width:700px;
+}
+
