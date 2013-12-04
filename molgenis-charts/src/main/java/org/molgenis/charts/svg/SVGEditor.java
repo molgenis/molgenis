@@ -54,7 +54,6 @@ public class SVGEditor {
                 new java.io.FileInputStream(inFile));
 		
 	    os = new FileOutputStream(outFile);
-	    writer = XMLOutputFactory.newInstance().createXMLEventWriter(os);
 	}
 	
 	/**
@@ -105,7 +104,8 @@ public class SVGEditor {
 	 * @param chart 
 	 */
 	public void annotateHeatMap(HeatMapChart chart){
- 
+
+		
         // get values from HeatMapChart
 		int nRow = chart.getData().getRowTargets().size();
 		int nCol = chart.getData().getColumnTargets().size();
@@ -115,6 +115,8 @@ public class SVGEditor {
 		int nColAnnotations = 0;
 		
 		try {
+			writer = XMLOutputFactory.newInstance().createXMLEventWriter(os);
+			
         	// skip the headers and <def> bit until we reach <g id="">
             while (true){
             	XMLEvent event = (XMLEvent) reader.next();
