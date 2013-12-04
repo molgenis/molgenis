@@ -43,7 +43,7 @@ public class SVGEditor {
 	private OutputStream os;
 	private XMLEventWriter writer;
 	
-	/** Creates a new instance of SVGEditor 
+	/** Creates a new instance of SVGEditor.
 	 * @throws FactoryConfigurationError 
 	 * @throws XMLStreamException 
 	 * @throws FileNotFoundException */
@@ -56,36 +56,40 @@ public class SVGEditor {
 	}
 	
 	/**
-	 * Annotates a block of values of a heatmap.plus SVG.
+	 * Annotates a block of values of a heatmap.plus SVG file by giving them an id and row/column attributes.
 	 * A heatmap.plus can contain up to three 'blocks': row annotations, column annotations and the matrix.
-	 * These blocks are drawn the same way.
-	 * @throws XMLStreamException 
+	 * @param nRow	number of rows of this block
+	 * @param nCol	number of columns of this block
+	 * @param blockId	value of the id attribute to give elements in this block
+	 * @throws XMLStreamException
 	 */
-	private void annotateHeatMapBlock(int nRow, int nCol, String blockType) throws XMLStreamException{
+	private void annotateHeatMapBlock(int nRow, int nCol, String blockId) throws XMLStreamException{
 		int counter = 0;
 		int nPath = nRow * nCol;
-		int currentRow = nRow;
+		int currentRow = nRow; // elements drawn from bottom to top, so start counting at last row
 		int currentCol = 1;
 		while (counter < nPath){
 			XMLEvent event = (XMLEvent) reader.next();
 			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(PATH)){
-				// change element 
+				// make a new start element with the same attributes plus the extra annotations
 				@SuppressWarnings("unchecked")
 				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
 				
 				StartElement newSe = m_eventFactory.createStartElement(new QName(PATH), attributes, null);
 				writer.add(newSe);
-				writer.add(m_eventFactory.createAttribute(ID, blockType));
+				writer.add(m_eventFactory.createAttribute(ID, blockId));
 				writer.add(m_eventFactory.createAttribute(new QName("row"), Integer.toString(currentRow)));
 				writer.add(m_eventFactory.createAttribute(new QName("col"), Integer.toString(currentCol)));
 			
 				currentRow--;
 				if (currentRow == 0){
+					// finished one column, reset currentRow and increment currentCol
 					currentRow = nRow;
 					currentCol++;
 				}
 				counter++;
 			}else{
+				// write the rest untouched
 				writer.add(event);
 			}
 		}
@@ -124,25 +128,24 @@ public class SVGEditor {
             }
             
             // annotation begins here 
-            
             // ROW ANNOTATIONS
     		if (nRowAnnotations > 0){
-    			System.out.println("parsing row annotations");
+    			logger.info("parsing " + nRowAnnotations + " row annotations");
     			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation");
     		}
     		
     		// COLUMN ANNOTATIONS
     		if (nColAnnotations > 0){
-    			System.out.println("parsing col annotations");
+    			logger.info("parsing " + nColAnnotations + " col annotations");
     			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation");
     		}
     		
     		// MATRIX ANNOTATIONS
-    		System.out.println("parsing matrix");
+    		logger.info("parsing " + (nRow*nCol) + " matrix values");
     		annotateHeatMapBlock(nRow, nCol, "matrix");
     		
     		// COLUMN NAMES
-    		System.out.println("parsing column names");
+    		logger.info("parsing " + nCol + " column names");
     		int counter = 0;
     		while (counter < nCol){
     			XMLEvent event = (XMLEvent) reader.next();
@@ -164,7 +167,7 @@ public class SVGEditor {
     		}
     		
     		// ROW NAMES
-    		System.out.println("parsing row names");
+    		System.out.println("parsing " + nRow + " row names");
     		counter = 0;
     		while (counter < nRow){
     			XMLEvent event = (XMLEvent) reader.next();
@@ -178,6 +181,7 @@ public class SVGEditor {
     				writer.add(m_eventFactory.createAttribute(ID, "rowName"));
     				writer.add(m_eventFactory.createAttribute(new QName("row"), Integer.toString(nRow-counter)));
     				counter++;
+    			
     			}else{
     				writer.add(event);
     			}

@@ -150,7 +150,7 @@ public class ChartController
 		chart.setTitle(request.getTitle());
 		chart.setWidth(request.getWidth());
 		chart.setHeight(request.getHeight());
-		
+			
 		ChartVisualizationService service = chartVisualizationServiceFactory
 				.getVisualizationService(ChartType.HEAT_MAP);
 
