@@ -91,6 +91,7 @@
                 var protocolUsed = dataset.protocolUsed.href;
                 protocolsMap = getSubProtocols(dataset.identifier, protocolUsed, protocolsMap);
             });
+
             function getSubProtocols (datasetIdentifier, rootProtocolUri, protocolsMap){
                 var rootProtocol = restApi.get(rootProtocolUri, ["subprotocols"]);
                 //check if the protocol was already found in another dataset
@@ -108,6 +109,7 @@
                 });
                 return protocolsMap;
             }
+
 			// get all protocol features
             restApi.getAsync('/api/v1/protocol', ['features'], null, function(protocols) {
                 var items = [];
