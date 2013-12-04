@@ -12,15 +12,6 @@
     <#if (catalogs?size == 0)>
         <span>No active catalogs</span>
     <#else>
-        <#if (catalogs?size > 0)>
-            <#if !authenticated>
-                <div id="login-modal-container"></div>
-                <div class="alert">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <strong>Warning!</strong> You need to <a class="modal-href" href="/account/login" data-target="login-modal-container">sign in</a> to save your variable selection. (your current selection will be discarded)
-                </div>
-            </#if>
-        </#if>
         <div class="row-fluid grid<#if (catalogs?size == 1)> hide</#if>">
             <div id="catalog-select-container" class="control-group form-horizontal pull-right">
                 <label class="control-label" for="catalog-select">Choose a catalog:</label>

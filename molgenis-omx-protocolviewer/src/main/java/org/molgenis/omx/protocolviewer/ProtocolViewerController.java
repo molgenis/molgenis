@@ -77,6 +77,10 @@ public class ProtocolViewerController extends MolgenisPluginController
 		model.addAttribute("catalogs", Lists.newArrayList(protocolViewerService.getCatalogs()));
 		model.addAttribute("enableDownloadAction", getEnableDownloadAction());
 		model.addAttribute("enableOrderAction", getEnableOrderAction());
+		if (!SecurityUtils.currentUserIsAuthenticated())
+		{
+			model.addAttribute("infoMessage", "You need to sign in to order catalog items");
+		}
 		return "view-protocolviewer";
 	}
 
