@@ -359,8 +359,10 @@
 				});
 			break;
 			case "bool":
+				$(applyButton).prop('disabled',true);
+				
 				$('input[name=bool-feature'+feature.identifier+']').live('change', function() {
-					applyButton.removeAttr('disabled');
+					$(applyButton).prop('disabled',false);
 				});
 
 				applyButton.click(function() {
@@ -375,15 +377,15 @@
 			break;
 			case "categorical":
 				if (config && config.values.length > 0) {
-					applyButton.removeAttr('disabled');
+					$(applyButton).prop('disabled',false);
 				} else {
-					applyButton.attr('disabled', 'disabled');
+					$(applyButton).prop('disabled',true);
 				}
 				$('.cat-value').live('change', function() {
 					if ($('.cat-value:checked').length > 0) {
 						applyButton.removeAttr('disabled');
 					} else {
-						applyButton.attr('disabled', 'disabled');
+						$(applyButton).prop('disabled',true);
 					}
 				});
 				
@@ -447,8 +449,6 @@
             });
     }
 	};
-	
-	
 	
 	//Generic part for filter fields
 	molgenis.createGenericFeatureField = function (items,feature,config,applyButton,featureUri,wizard){
@@ -516,11 +516,11 @@
 				var toFilter;
 				
 				if (config == null) {
-					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" autofocus="autofocus" step="any">');
-					toFilter = $('<input id="to_'+feature.identifier+'" type="number" autofocus="autofocus" step="any">');	
+					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any">');
+					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any">');	
 				} else {
-					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-					toFilter = $('<input id="to_'+feature.identifier+'" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');	
+					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any" value="' + config.values[0] + '">');
+					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any" value="' + config.values[1] + '">');	
 				}
 				
 				fromFilter.on('keyup input', function() {

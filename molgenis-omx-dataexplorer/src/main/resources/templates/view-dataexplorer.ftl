@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css", "bootstrap-datetimepicker.min.css", "dataexplorer.css", "ui.dynatree.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "${resultsTableJavascriptFile}", "jquery.bootstrap.pager.js", "jquery.dynatree.min.js", "jquery.bootstrap.wizard.min.js" "bootstrap-datetimepicker.min.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "${resultsTableJavascriptFile}", "jquery.bootstrap.pager.js", "jquery.dynatree.min.js", "jquery.bootstrap.wizard.min.js","bootstrap-datetimepicker.min.js"]>
 <@header css js/>
 	<#if entityExplorerUrl??>
 		<script>top.molgenis.setEntityExplorerUrl('${entityExplorerUrl}');</script>
@@ -86,7 +86,7 @@
 						</div>
 						<div class="tab-pane" id="dataset-aggregate-container">
 							<div class="row-fluid data-table-container form-horizontal" id="dataexplorer-aggregate-data">
-								<div id=""feature-select-container">
+								<div id="feature-select-container">
 									<label class="control-label" for="feature-select">Aggregate by:</label>
 									<div id="feature-select" class="controls">
 									</div>
