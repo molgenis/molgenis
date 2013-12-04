@@ -360,11 +360,9 @@
 			break;
 			case "bool":
 				$(applyButton).prop('disabled',true);
-				
-				$('input[name=bool-feature'+feature.identifier+']').live('change', function() {
+				$('input[type=radio]').live('change', function() {
 					$(applyButton).prop('disabled',false);
 				});
-
 				applyButton.click(function() {
 					molgenis.updateFeatureFilter(featureUri, {
 						name : feature.name,
@@ -625,7 +623,7 @@
 			}
 
 			if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
-				$('input[type=text]').autocomplete({
+				$('#text_'+feature.identifier).autocomplete({
 					source: function( request, response ) {
 						$.ajax({
 							type : 'POST',
@@ -692,14 +690,37 @@
 		return divContainer;
 	};
 	
-	molgenis.createFeatureFilterField = function(element, featureUri){
-		var feature = restApi.get(featureUri);
+	molgenis.createFeatureFilterField = function(elements){
+		var featureIds = [];
+		$.each(elements, function (index, element) {
+	  		var href = $(element).attr('data-molgenis-url');
+	  		var id = href.substring(href.lastIndexOf('/') + 1);
+	  		featureIds.push(id);
+		});
+		
+		var features = restApi.get('/api/v1/observablefeature', null, {
+			q : [{
+				field : 'id',
+				operator : 'IN',
+				value : featureIds
+			}],
+			num : 500
+		});
+		var map = {};
+		$.each(features.items, function(index, feature){
+			map[feature.href] = feature;
+		});
+		
+		$.each(elements, function (index, element) {
 			var items = [];
-			var config = featureFilters[featureUri];
+			var featureUri = $(element).attr('data-molgenis-url');
+			var feature = map[featureUri];
+			var config = featureFilters[feature.href];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-			var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton,featureUri,true);
+			var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton,feature.href,true);
 			var trElement = $(element).closest('tr');
-			trElement.append(divContainer);			
+			trElement.append(divContainer);	
+		});
 	};
 
 	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
@@ -929,6 +950,7 @@
 				'dataSetName' : selectedDataSet.name,
 				'dataSetId' : datasetId
 		};
+
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/filterdialog',
@@ -940,17 +962,16 @@
 					
 					$('#filter-dialog-modal').show();
 				});
-
 			}
 		});
+
 	}
 	
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
 		
-		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
-		parent.hideSpinner();
+
 	};
 		
 	// on document ready
