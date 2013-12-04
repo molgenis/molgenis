@@ -25,7 +25,9 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.r.RChartService;
 
@@ -33,7 +35,7 @@ public class SVGEditor {
 
 	private static final Logger logger = Logger.getLogger(SVGEditor.class);
 	
-	XMLEventFactory m_eventFactory = XMLEventFactory.newInstance();
+	XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 	
 	static final String G = "g";
 	static final String PATH = "path";
@@ -75,11 +77,11 @@ public class SVGEditor {
 				@SuppressWarnings("unchecked")
 				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
 				
-				StartElement newSe = m_eventFactory.createStartElement(new QName(PATH), attributes, null);
+				StartElement newSe = eventFactory.createStartElement(new QName(PATH), attributes, null);
 				writer.add(newSe);
-				writer.add(m_eventFactory.createAttribute(ID, blockId));
-				writer.add(m_eventFactory.createAttribute(new QName("row"), Integer.toString(currentRow)));
-				writer.add(m_eventFactory.createAttribute(new QName("col"), Integer.toString(currentCol)));
+				writer.add(eventFactory.createAttribute(ID, blockId));
+				writer.add(eventFactory.createAttribute(new QName("row"), Integer.toString(currentRow)));
+				writer.add(eventFactory.createAttribute(new QName("col"), Integer.toString(currentCol)));
 			
 				currentRow--;
 				if (currentRow == 0){
@@ -119,7 +121,7 @@ public class SVGEditor {
             	if (event.isStartElement()){
             		StartElement se = event.asStartElement();
 	            	if (se.getName().getLocalPart().equals(G) && se.getAttributeByName(ID) != null){
-            			System.out.println("INFO: <g id=\"\"> reached");
+            			logger.info("<g id=\"\"> reached");
             			writer.add(event);
             			break;
 	            	}
@@ -154,10 +156,10 @@ public class SVGEditor {
     				@SuppressWarnings("unchecked")
 					Iterator<Attribute> attributes = event.asStartElement().getAttributes();
     				
-    				StartElement newSe = m_eventFactory.createStartElement(new QName(G), attributes, null);
+    				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
     				writer.add(newSe);
-    				writer.add(m_eventFactory.createAttribute(ID, "colName"));
-    				writer.add(m_eventFactory.createAttribute(new QName("col"), Integer.toString(counter+1)));
+    				writer.add(eventFactory.createAttribute(ID, "colName"));
+    				writer.add(eventFactory.createAttribute(new QName("col"), Integer.toString(counter+1)));
     				
     				
     				counter++;
@@ -176,10 +178,10 @@ public class SVGEditor {
     				@SuppressWarnings("unchecked")
 					Iterator<Attribute> attributes = event.asStartElement().getAttributes();
     				
-    				StartElement newSe = m_eventFactory.createStartElement(new QName(G), attributes, null);
+    				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
     				writer.add(newSe);
-    				writer.add(m_eventFactory.createAttribute(ID, "rowName"));
-    				writer.add(m_eventFactory.createAttribute(new QName("row"), Integer.toString(nRow-counter)));
+    				writer.add(eventFactory.createAttribute(ID, "rowName"));
+    				writer.add(eventFactory.createAttribute(new QName("row"), Integer.toString(nRow-counter)));
     				counter++;
     			
     			}else{
@@ -193,16 +195,25 @@ public class SVGEditor {
             	if (event.isEndElement()){
             		// close the <g id=""> tag, right before the </svg> end element
             		if (event.asEndElement().getName().getLocalPart().equals(new QName("svg"))){
-            			EndElement newEe = m_eventFactory.createEndElement(new QName(G), null);
+            			EndElement newEe = eventFactory.createEndElement(new QName(G), null);
                 		writer.add(newEe);
             		}
             	}
             	writer.add(event);
             }
 
-            writer.close();
+           
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
+            throw new MolgenisChartException(ex);
+        }finally{
+        	try {
+				writer.close();
+			} catch (XMLStreamException e) {
+				logger.error(e.getMessage());
+				throw new MolgenisChartException(e);
+			}
+
         }
 
 	}
