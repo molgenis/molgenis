@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChartVisualizationService;
@@ -16,6 +19,7 @@ import org.molgenis.charts.Chart;
 import org.molgenis.charts.Chart.ChartType;
 import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
+import org.molgenis.charts.svg.SVGEditor;
 import org.molgenis.r.ROutputHandler;
 import org.molgenis.r.RScriptExecutor;
 import org.molgenis.util.FileStore;
@@ -60,11 +64,7 @@ public class RChartService extends AbstractChartVisualizationService
 		{
 			chartFileName = renderHeatMap(heatMapChart);
 		}
-		catch (IOException e)
-		{
-			throw new MolgenisChartException(e);
-		}
-		catch (TemplateException e)
+		catch (Exception e)
 		{
 			throw new MolgenisChartException(e);
 		}
@@ -76,7 +76,7 @@ public class RChartService extends AbstractChartVisualizationService
 		return "heatmap";
 	}
 
-	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException
+	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		String fileName = UUID.randomUUID().toString();
 
@@ -90,7 +90,15 @@ public class RChartService extends AbstractChartVisualizationService
 
 		File script = generateScript("R_heatmap.ftl", data, fileName + ".r");
 		runScript(script);
-
+		
+		// annotate the SVG here
+		File in = fileStore.getFile(fileName + ".svg");
+		
+		File out = new File(fileStore.getStorageDir() + "/" + fileName + "_annotated.svg");
+		
+		SVGEditor svge = new SVGEditor(in, out);
+		svge.annotateHeatMap(chart);			
+		
 		return fileName;
 	}
 
