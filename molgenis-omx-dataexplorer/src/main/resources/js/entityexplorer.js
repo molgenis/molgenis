@@ -83,17 +83,41 @@
 						}
 					}
 				});
-			});				
-			
+			});
+            //create a map of protocols with the datasets they are used in
+            var protocolsMap = {};
+            var datasets = restApi.get('/api/v1/dataset');
+            $.each(datasets.items, function(key, dataset) {
+                var protocolUsed = dataset.protocolUsed.href;
+                protocolsMap = getSubProtocols(dataset.identifier, protocolUsed, protocolsMap);
+            });
+            function getSubProtocols (datasetIdentifier, rootProtocolUri, protocolsMap){
+                var rootProtocol = restApi.get(rootProtocolUri, ["subprotocols"]);
+                //check if the protocol was already found in another dataset
+                //add dataset to list of datasets in which the protocol occurs
+                var datasetIdentifiers = protocolsMap[rootProtocol];
+                if(!datasetIdentifiers) {
+                    datasetIdentifiers = [];
+                }
+                datasetIdentifiers.push(datasetIdentifier);
+                protocolsMap[rootProtocol.identifier] = datasetIdentifiers;
+                $.each(rootProtocol.subprotocols.items, function(key, protocol) {
+                      if(protocol.subprotocols.length>0){
+                          protocolsMap = getSubProtocols(datasetIdentifier, protocol.href, protocolsMap);
+                      }
+                });
+                return protocolsMap;
+            }
 			// get all protocol features
-			restApi.getAsync('/api/v1/protocol', ['features'], null, function(protocols) {
-				var items = [];
-				items.push('<div class="accordion" id="accordion">');
-				
-				var nrProtocols = 0;
-				var firstProtocol = true;
-				$.each(protocols.items, function(key, protocol) {
-					// determine features that reference the given entity
+            restApi.getAsync('/api/v1/protocol', ['features'], null, function(protocols) {
+                var items = [];
+                items.push('<div class="accordion" id="accordion">');
+
+                var nrProtocols = 0;
+                var firstProtocol = true;
+                $.each(protocols.items, function(key, protocol) {
+                    var datasets = protocolsMap[protocol.identifier];
+                   	// determine features that reference the given entity
 					var matchedFeatures = [];
 					var remainingFeatures = [];
 					$.each(protocol.features.items, function(key, feature) {
@@ -150,20 +174,26 @@
 							items.push('<tr>');
 							items.push('<td class="first">' + feature.name + '</td>');
 							$.each(searchHits, function(key, searchHit) {
-								if(searchHit.columnValueMap[feature.identifier]){
-									items.push('<td>' + formatTableCellValue(searchHit.columnValueMap[feature.identifier],feature.dataType) + '</td>');
-								}
-								else{
-									items.push('<td/>');
-								}
+                                //only include data that was found in a dataset where the current protocol is part of
+								if(datasets.indexOf(searchHit.columnValueMap['partOfDataset'])!=-1){
+                                    if(searchHit.columnValueMap[feature.identifier]){
+                                        items.push('<td>' + formatTableCellValue(searchHit.columnValueMap[feature.identifier],feature.dataType) + '</td>');
+                                    }
+                                    else{
+                                        items.push('<td/>');
+                                    }
+                                }
 							});
 							items.push('</tr>');
 						});
 						items.push('<tr><td class="first"></td>');
 						$.each(searchHits, function(key, searchHit) {
-							if(typeof ns.dataExplorerUrl !== 'undefined'){
-								items.push('<td><a href="'+ns.dataExplorerUrl+'?dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
-							}
+                            //only include data that was found in a dataset where the current protocol is part of
+                            if(datasets.indexOf(searchHit.columnValueMap['partOfDataset'])!=-1){
+                                if(typeof ns.dataExplorerUrl !== 'undefined'){
+                                    items.push('<td><a href="'+ns.dataExplorerUrl+'?dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
+                                }
+                            }
 						});
 						items.push('</tr>');
 						items.push('</tbody>');
