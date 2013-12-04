@@ -36,7 +36,13 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public Object get(String attributeName)
 	{
-		return values.get(attributeName);
+		Object value = values.get(attributeName);
+		if (value == null)
+		{
+			value = values.get(attributeName.toLowerCase());
+		}
+
+		return value;
 	}
 
 	@Override
