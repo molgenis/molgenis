@@ -252,6 +252,10 @@ input[type=number] {
 	margin-bottom: 20px;
 }
 
+#filter-nav li a:hover{
+	cursor: default
+}
+
 #feature-select {
 	position:absolute;
 }
