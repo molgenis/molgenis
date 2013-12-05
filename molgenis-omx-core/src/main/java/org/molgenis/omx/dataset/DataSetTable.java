@@ -111,7 +111,6 @@ public class DataSetTable extends AbstractFilterableTupleTable
 							field.setXrefField(org.molgenis.omx.observ.Category.NAME);
 						}
 
-						System.out.println("Field:" + field);
 						columns.add(field);
 					}
 				}
@@ -119,6 +118,15 @@ public class DataSetTable extends AbstractFilterableTupleTable
 				{
 					columns = Collections.emptyList();
 				}
+
+				// Id column (is id of ObservationSet)
+				Field field = new Field("id");
+				field.setDescription("id");
+				field.setEntity(jdbcMetaDatabase.getEntity(ObservableFeature.class.getSimpleName()));
+				field.setLabel("id");
+				field.setType(MolgenisFieldTypes.getType("int"));
+
+				columns.add(field);
 			}
 		}
 		catch (Exception e)
