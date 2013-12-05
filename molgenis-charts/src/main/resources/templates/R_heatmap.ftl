@@ -1,6 +1,6 @@
 ### R script for generating heatmaps.
 # Obligatory parameters: values, rowNames, colNames, wd
-# Optional parameters: title, legend
+# Optional parameters: title, xLabel, yLabel
 
 ###################
 # LOAD PARAMETERS #
@@ -50,9 +50,30 @@ rowAnnotations <-
 			</#list>
 		</#if>
 	)
-	
-title <- "<#if title??>${title}</#if>"
-	
+
+title <- "<#if chart.title??>${chart.title}</#if>"
+xLabel <- "<#if chart.xLabel??>${chart.xLabel}</#if>"
+yLabel <- "<#if chart.yLabel??>${chart.yLabel}</#if>"
+
+
+scale <- 
+<#if chart.scale??>
+	<#switch chart.scale>
+		<#case "ROW">
+			"row"
+			<#break>
+	    <#case "COL">
+	        "column"
+	        <#break>
+	      <#case "NONE">
+	        "none"
+	        <#break>
+	    <#default>
+	        "row"
+	</#switch>
+</#if>
+
+
 wd <- "${wd}"
 
 fileName <- "${fileName}"
@@ -83,7 +104,6 @@ if (length(colAnnotations) != 0){
 	color.map <- function(colAnnotations) { if (colAnnotations=="ALL1/AF4") "#FF0000" else "#0000FF" }
 	colColors <- unlist(lapply(colAnnotations, color.map))
 	
-	
 	#hv <- heatmap(mat, col=topo.colors(100), ColSideColors = colColors)
 	
 	hv <- heatmap.plus(mat, col=topo.colors(75), scale="none", ColSideColors=colColors)
@@ -92,7 +112,9 @@ if (length(colAnnotations) != 0){
 }else{
     hv <- heatmap.plus( 
     	col=topo.colors(75),
-    	<#if title??>main="${title}",</#if>
+    	main=title,
+    	xlab=xLabel,
+    	ylab=yLabel,
     	mat) 
     
     d <- dev.off() #store in d to prevent printing 

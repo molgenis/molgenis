@@ -171,7 +171,7 @@ public class SVGEditor {
     		}
     		
     		// ROW NAMES
-    		System.out.println("parsing " + nRow + " row names");
+    		logger.info("parsing " + nRow + " row names");
     		counter = 0;
     		while (counter < nRow){
     			XMLEvent event = (XMLEvent) reader.next();
