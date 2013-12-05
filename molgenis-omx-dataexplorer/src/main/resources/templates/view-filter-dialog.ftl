@@ -66,8 +66,5 @@ $(function() {
 	});
 	
   	molgenis.createFeatureFilterField($('#filter-nav-content a.test'));
-  	$.each($('#filter-nav-content a.test'), function (index, element) {
-  		//molgenis.createFeatureFilterField(element, $(element).attr('data-molgenis-url'));
-	});
 });
 </script>
