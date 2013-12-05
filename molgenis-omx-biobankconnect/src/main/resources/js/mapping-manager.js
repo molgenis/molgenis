@@ -913,8 +913,13 @@
 	
 	ns.MappingManager.prototype.downloadMappings = function(){
 		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
+		var mappedDataSetIds = [];
+		$.each(biobankDataSets, function(index, dataSet){
+			if(ns.hrefToId(dataSet.href) !== selectedDataSet) mappedDataSetIds.push(ns.hrefToId(dataSet.href));
+		});
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
+			'matchedDataSetIds' : mappedDataSetIds,
 			'documentType' : dataSet.identifier
 		};
 		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});

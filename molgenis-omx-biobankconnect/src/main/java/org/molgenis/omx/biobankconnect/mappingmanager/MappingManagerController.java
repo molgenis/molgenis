@@ -306,8 +306,13 @@ public class MappingManagerController extends MolgenisPluginController
 			tupleWriter = new CsvWriter(response.getWriter());
 			Integer selectedDataSetId = request.getDataSetId();
 			DataSet mappingDataSet = database.findById(DataSet.class, selectedDataSetId);
+
+			List<String> identifiers = new ArrayList<String>();
+			for (Integer mappedDataSetId : request.getMatchedDataSetIds())
+				identifiers.add(userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId + "-"
+						+ mappedDataSetId);
 			List<DataSet> storeMappingDataSet = database.find(DataSet.class, new QueryRule(DataSet.IDENTIFIER,
-					Operator.LIKE, selectedDataSetId.toString()));
+					Operator.IN, identifiers));
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(mappingDataSet.getName());
 			Map<Integer, Map<Integer, MappingClass>> dataSetMappings = new HashMap<Integer, Map<Integer, MappingClass>>();
@@ -375,6 +380,7 @@ public class MappingManagerController extends MolgenisPluginController
 							List<Integer> candidateIds = new ArrayList<Integer>();
 							MappingClass mappingClass = storeMappings.get(featureId);
 							if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
+							else candidateIds = mappingClass.getCandidateMappings();
 							for (Integer id : candidateIds)
 							{
 								if (featureMap.containsKey(id))
@@ -407,12 +413,14 @@ public class MappingManagerController extends MolgenisPluginController
 	{
 		private Integer featureId = null;
 		private List<Integer> finalizedMapping = null;
+		private List<Integer> candidateMappings = null;
 
 		public void addMapping(Integer featureId, Integer singleMappedFeatureId, boolean confirmation)
 		{
 			if (this.featureId == null) this.featureId = featureId;
 			if (this.finalizedMapping == null) this.finalizedMapping = new ArrayList<Integer>();
-
+			if (this.candidateMappings == null) this.candidateMappings = new ArrayList<Integer>();
+			this.candidateMappings.add(singleMappedFeatureId);
 			if (confirmation) finalizedMapping.add(singleMappedFeatureId);
 		}
 
@@ -429,6 +437,11 @@ public class MappingManagerController extends MolgenisPluginController
 		public List<Integer> getFinalizedMapping()
 		{
 			return finalizedMapping;
+		}
+
+		public List<Integer> getCandidateMappings()
+		{
+			return candidateMappings;
 		}
 	}
 }
