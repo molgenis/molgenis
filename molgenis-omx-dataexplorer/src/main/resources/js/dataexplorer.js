@@ -969,9 +969,9 @@
 	
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
-		
+		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
-
+		parent.hideSpinner();
 	};
 		
 	// on document ready
