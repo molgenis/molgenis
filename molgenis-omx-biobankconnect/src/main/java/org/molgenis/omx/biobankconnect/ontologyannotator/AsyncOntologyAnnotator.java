@@ -19,6 +19,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.io.csv.CsvReader;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.observ.DataSet;
@@ -91,8 +92,17 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 			// load the features into memory
 			reader = new CsvReader(uploadFile);
-			List<ObservableFeature> fList = new ArrayList<ObservableFeature>();
+			List<String> requiredColumns = new ArrayList<String>(Arrays.asList(ObservableFeature.NAME.toLowerCase(),
+					ObservableFeature.DESCRIPTION));
+			Iterator<String> columnNamesIterator = reader.colNamesIterator();
+			while (columnNamesIterator.hasNext())
+			{
+				requiredColumns.remove(columnNamesIterator.next().toString());
+			}
+			if (requiredColumns.size() > 0) return "The header(s) " + requiredColumns.toString() + " is missing";
+
 			List<String> featureIdentifiers = new ArrayList<String>();
+			List<ObservableFeature> fList = new ArrayList<ObservableFeature>();
 			for (Tuple t : reader)
 			{
 				ObservableFeature f = new ObservableFeature();
@@ -102,6 +112,10 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				featureIdentifiers.add(f.getIdentifier());
 				fList.add(f);
 			}
+			if (featureIdentifiers.size() == 0) return "Please check the uploaded file, there are no features in the file!";
+			if (checkExistingFeatures(featureIdentifiers).size() > 0) return "The features : "
+					+ checkExistingFeatures(featureIdentifiers)
+					+ " exist in the database already! Please remove them from uploaded file!";
 
 			// create protocol and link the features
 			Protocol prot = new Protocol();
@@ -124,7 +138,17 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
 					new CategoryTable(dataSet.getProtocolUsed(), database));
 		}
-		catch (Exception e)
+		catch (IOException e)
+		{
+			logger.error("Failed to read CSV file!");
+			return "Failed to import the features, please check your file again.";
+		}
+		catch (DatabaseException e)
+		{
+			logger.error("failed to index dataset : " + datasetName + ". The reason is : " + e.getMessage());
+			return "Failed to import the features, please check your file again.";
+		}
+		catch (TableException e)
 		{
 			logger.error("failed to index dataset : " + datasetName + ". The reason is : " + e.getMessage());
 		}
@@ -134,6 +158,20 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 
 		return "";
+	}
+
+	public List<String> checkExistingFeatures(List<String> featureIdentifiers) throws DatabaseException
+	{
+		List<String> existingFeatures = new ArrayList<String>();
+		if (featureIdentifiers.size() > 0)
+		{
+			for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(
+					ObservableFeature.IDENTIFIER, Operator.IN, featureIdentifiers)))
+			{
+				existingFeatures.add(feature.getName());
+			}
+		}
+		return existingFeatures;
 	}
 
 	@Override

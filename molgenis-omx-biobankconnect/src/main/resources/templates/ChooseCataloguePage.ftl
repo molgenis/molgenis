@@ -55,7 +55,7 @@
 			</div>
 			<div class="modal-body">
 				<div><strong>Please input dataSet name</strong></div>
-				<div><input type="text" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div><br>
+				<div><input type="text" id="dataSetName" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div><br>
 				<div><strong>Please upload features</strong></div>
 				<div>
 					<div class="fileupload fileupload-new" data-provides="fileupload">
@@ -96,11 +96,28 @@
 				return false;
 			});
 			$('#import-features').click(function(){
-				$('#wizardForm').attr({
-					'action' : '${context_url}/uploadfeatures',
-					'method' : 'POST'
-				}).submit();
+				var alert = {};
+				var uploadedFile = $('#uploadedOntology').val();
+				if($('#dataSetName').val() === ''){
+					alert.message = 'Please define the dataset name!';
+					molgenis.createAlert([alert], 'error');
+					$('#import-features-modal').modal('hide');
+				}else if(uploadedFile === '' || uploadedFile.substr(uploadedFile.length - 4, uploadedFile.length) !== '.csv'){
+					alert.message = 'Please upload your file in CSV';
+					molgenis.createAlert([alert], 'error');
+					$('#import-features-modal').modal('hide');
+				}else{
+					$('#wizardForm').attr({
+						'action' : '${context_url}/uploadfeatures',
+						'method' : 'POST'
+					}).submit();
+				}
 			});
+			<#if message??>
+				var alert = {};
+				alert.message = '${message}';
+				molgenis.createAlert([alert], 'error');
+			</#if>
 		});
 	</script>
 </form>

@@ -137,8 +137,8 @@ public class BiobankConnectController extends AbstractWizardController
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
 		biobankConnectWizard.setDataSets(dataSets);
-
 		logger.error(message);
+		if (message.length() > 0) model.addAttribute("message", message);
 		return init();
 	}
 
