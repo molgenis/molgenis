@@ -244,7 +244,11 @@ input[type=number] {
 	width: 90px;
 }
 
-#feature-select-container{
+#filter-nav-content{
+	margin-top: 25px;
+}
+
+#feature-select-container{	
 	margin-bottom: 20px;
 }
 
