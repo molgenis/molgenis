@@ -1002,7 +1002,7 @@
 			molgenis.searchObservationSets($(this).val());
 		});
 
-		$('#filter-wizard-button').click(function (){
+		$('#wizard-button').click(function (){
 			molgenis.filterDialog();
 		});
 		

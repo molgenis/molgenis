@@ -244,8 +244,12 @@ input[type=number] {
 	width: 90px;
 }
 
+#feature-select-container{
+	margin-bottom: 20px;
+}
+
 #feature-select {
-	padding-bottom: 20px;
+	position:absolute;
 }
 
 #nrOfDataItems {
@@ -261,3 +265,7 @@ input[type=number] {
 	width:700px;
 }
 
+#wizard-button{
+	color:white;
+	background:#5B82A4
+}
