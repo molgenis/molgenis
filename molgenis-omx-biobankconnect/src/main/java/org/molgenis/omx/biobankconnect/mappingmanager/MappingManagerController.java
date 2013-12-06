@@ -24,9 +24,10 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.io.TupleWriter;
@@ -48,6 +49,8 @@ import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.tuple.Tuple;
 import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -226,11 +229,11 @@ public class MappingManagerController extends MolgenisPluginController
 									mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
 
 							String mappingDataSetIdentifier = selectedDataSet + "-" + dataSet.getId();
-							List<QueryRule> queryRules = new ArrayList<QueryRule>();
-							queryRules.add(new QueryRule("store_mapping_feature", Operator.EQUALS, features.get(0)
-									.getId()));
-							queryRules.add(new QueryRule(Operator.SORTDESC, "store_mapping_score"));
-							SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, queryRules, null);
+
+							Query q = new QueryImpl().eq("store_mapping_feature", features.get(0).getId()).sort(
+									new Sort(Direction.DESC, "store_mapping_score"));
+
+							SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
 							SearchResult result = searchService.search(searchRequest);
 
 							double previousScore = -1;
@@ -269,14 +272,16 @@ public class MappingManagerController extends MolgenisPluginController
 
 	private List<Integer> findFeaturesFromIndex(List<String> featureNames, Integer dataSetId)
 	{
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		QueryImpl q = new QueryImpl();
+		q.pageSize(10000);
+
 		for (String featureName : featureNames)
 		{
-			if (queryRules.size() > 0) queryRules.add(new QueryRule(Operator.OR));
-			queryRules.add(new QueryRule("name", Operator.EQUALS, featureName));
+			if (q.getRules().size() > 0) q.addRule(new QueryRule(Operator.OR));
+			q.addRule(new QueryRule("name", Operator.EQUALS, featureName));
 		}
-		queryRules.add(new QueryRule(Operator.LIMIT, 10000));
-		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, queryRules, null));
+
+		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, q, null));
 
 		List<Integer> featureIds = new ArrayList<Integer>();
 		for (Hit hit : result.getSearchHits())
@@ -321,10 +326,12 @@ public class MappingManagerController extends MolgenisPluginController
 				{
 					DataSet mappedDataSet = dataService.findOne(DataSet.ENTITY_NAME, mappedDataSetId);
 					dataSetNames.add(mappedDataSet.getName());
-					List<QueryRule> rules = new ArrayList<QueryRule>();
-					rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
-					SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(), rules, null);
+
+					SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(),
+							new QueryImpl().pageSize(1000000), null);
+
 					SearchResult result = searchService.search(searchRequest);
+
 					Map<Integer, MappingClass> storeMappings = new HashMap<Integer, MappingClass>();
 					for (Hit hit : result.getSearchHits())
 					{
@@ -354,9 +361,9 @@ public class MappingManagerController extends MolgenisPluginController
 
 			tupleWriter.write(new ValueTuple(dataSetNames));
 
-			List<QueryRule> rules = new ArrayList<QueryRule>();
-			rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
-			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId, rules, null);
+			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId,
+					new QueryImpl().pageSize(1000000), null);
+
 			SearchResult featureSearchResult = searchService.search(searchFeatures);
 			for (Hit hit : featureSearchResult.getSearchHits())
 			{

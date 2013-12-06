@@ -24,6 +24,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		this.dataService = dataService;
+
 	}
 
 	@Override
@@ -62,6 +63,9 @@ public class ChartDataServiceImpl implements ChartDataService
 	public DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules)
 	{
+		// dataService
+		// .registerEntitySource("excel:///Users/erwin/projects/molgenis/molgenis-charts/src/test/resources/heatmap.xlsx");
+
 		Iterable<? extends Entity> iterable = dataService.getRepositoryByEntityName(entityName);
 
 		if (queryRules != null && !queryRules.isEmpty())
@@ -105,4 +109,5 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		return new DataMatrix(columnTargets, rowTargets, values);
 	}
+
 }
