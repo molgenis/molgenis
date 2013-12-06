@@ -6,6 +6,7 @@ import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologyindexer.OntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -35,5 +36,11 @@ public class BiobankConnectConfig
 	public OntologyMatcher ontologyMatcher()
 	{
 		return new AsyncOntologyMatcher();
+	}
+
+	@Bean
+	public CurrentUserStatus currentUserStatus()
+	{
+		return new CurrentUserStatus();
 	}
 }

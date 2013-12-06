@@ -61,7 +61,6 @@ public class BiobankConnectController extends AbstractWizardController
 	private final UserAccountService userAccountService;
 
 	private BiobankConnectWizard wizard;
-
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String VIEW_NAME = "view-wizard";
 
@@ -76,6 +75,9 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@Autowired
 	private SearchService searchService;
+
+	@Autowired
+	private CurrentUserStatus currentUserStatus;
 
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
@@ -144,7 +146,7 @@ public class BiobankConnectController extends AbstractWizardController
 	public Map<String, Boolean> isRunning()
 	{
 		Map<String, Boolean> result = new HashMap<String, Boolean>();
-		result.put("isRunning", ontologyMatcher.isRunning());
+		result.put("isRunning", currentUserStatus.getUserstatus(wizard.getUserName()));
 		return result;
 	}
 

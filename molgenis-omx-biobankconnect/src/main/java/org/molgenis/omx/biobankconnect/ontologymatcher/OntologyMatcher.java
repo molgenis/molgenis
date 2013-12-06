@@ -17,7 +17,4 @@ public interface OntologyMatcher
 	boolean isRunning();
 
 	boolean checkExistingMappings(String dataSetIdentifier, Database db) throws DatabaseException;
-
-	// void matchFeature(Integer selectedDataSet, List<Integer>
-	// selectedDataSetIds, Integer sourceDataSetId);
 }

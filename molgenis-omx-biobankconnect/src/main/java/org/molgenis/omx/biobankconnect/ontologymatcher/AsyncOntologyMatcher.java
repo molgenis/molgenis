@@ -23,6 +23,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -76,6 +77,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	@Qualifier("unsecuredDatabase")
 	private Database database;
 
+	@Autowired
+	private CurrentUserStatus currentUserStatus;
+
 	private SearchService searchService;
 
 	@Autowired
@@ -117,6 +121,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			throws DatabaseException
 	{
 		runningProcesses.incrementAndGet();
+		currentUserStatus.setUserStatus(userName, true);
 		dataSetsToMatch.remove(selectedDataSet);
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
@@ -291,6 +296,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		finally
 		{
 			runningProcesses.decrementAndGet();
+			currentUserStatus.setUserStatus(userName, false);
 			totalNumber = 0;
 			finishedNumber = 0;
 		}
