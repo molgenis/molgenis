@@ -39,32 +39,35 @@ import uk.ac.ebi.mydas.model.Range;
 public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 {
 	private final DataService dataService;
-	private final DasType mutationType;
-	private final DasMethod method;
+	private DasType mutationType;
+	private DasMethod method;
 	private String dataset;
+    private String type;
 
 	@Override
 	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
 			DataSourceConfiguration dataSourceConfig) throws DataSourceException
 	{
 		this.dataset = dataSourceConfig.getDataSourceProperties().get("dataset").getValue();
+        this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
+        this.mutationType = new DasType(type, null, "?", type);
+        this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 
-	}
+    }
 
 	// for unit test
 	public DasOmxDataSource(DataService dataService) throws DataSourceException
 	{
 		this.dataService = dataService;
-		mutationType = new DasType("mutation", null, "?", "mutation");
-		method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
-		this.dataset = "test";
+        this.dataset = "test";
+        this.type = "type";
+        mutationType = new DasType(type, null, "?", type);
+        method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 	}
 
 	public DasOmxDataSource() throws DataSourceException
 	{
 		dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		mutationType = new DasType("mutation", null, "?", "mutation");
-		method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 	}
 
 	@Override
@@ -125,7 +128,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 
 	protected Patient findPatient(String patient)
 	{
-		return dataService.findOne(Patient.ENTITY_NAME, new QueryImpl().eq(Patient.IDENTIFIER, patient));
+		return dataService.findOne(Patient.ENTITY_NAME, new QueryImpl().eq(Patient.ID, patient));
 	}
 
 	protected List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
@@ -168,7 +171,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		dasTarget.add(new MolgenisDasTarget(variant.getIdentifier(), variant.getBpStart().intValue(), variant
 				.getBpEnd().intValue(), variant.getDescription()));
 		List<String> parents = new ArrayList<String>();
-		DasFeature feature = new DasFeature(variant.getIdentifier().toString(), variant.getDescription(), mutationType,
+		DasFeature feature = new DasFeature(variant.getIdentifier().toString(), variant.getName()+","+variant.getDescription(), mutationType,
 				method, variant.getBpStart().intValue(), variant.getBpEnd().intValue(), new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTarget, parents, null);

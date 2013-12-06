@@ -31,6 +31,7 @@
 				<capability type="das1:unknown-feature"	/>
 				<capability type="das1:entry_points" />
 				<property key="dataset" value="molgenis"/>
+                <property key="type" value="type"/>
 			</version>
 			<stylesheet>molgenis.style</stylesheet>
             <dna-command-enabled>true</dna-command-enabled>
