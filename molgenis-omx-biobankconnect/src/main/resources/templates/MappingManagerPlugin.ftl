@@ -55,6 +55,12 @@
 </form>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			<#if isRunning?? && isRunning>
+			var items = [];
+			items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message : </strong></div>');
+			items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient</p></div></div>');
+			$('#wizardForm').html(items.join(''));
+			<#else>
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
 			molgenis.setContextURL(contextUrl.replace('/mappingmanager', '/biobankconnect'));
@@ -80,6 +86,7 @@
 					'method' : 'POST'
 				}).submit();
 			});
+			</#if>
 		});
 	</script>
 <@footer/>	

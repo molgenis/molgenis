@@ -116,7 +116,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	public void match(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch, Integer featureId)
 			throws DatabaseException
 	{
-
 		runningProcesses.incrementAndGet();
 		dataSetsToMatch.remove(selectedDataSet);
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();

@@ -84,40 +84,42 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
-			$('#selectedDataSetId').change(function(){
+			molgenis.ontologyMatcherRunning(function(){
 				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
-			});
-			if($('#selectedDataSetId option').length === 0){
-				$('.pager li.next').addClass('disabled');
-			}
-			$('#import-data-button').click(function(){
-				$('#import-features-modal').modal('show');
-				return false;
-			});
-			$('#import-features').click(function(){
-				var alert = {};
-				var uploadedFile = $('#uploadedOntology').val();
-				if($('#dataSetName').val() === ''){
-					alert.message = 'Please define the dataset name!';
-					molgenis.createAlert([alert], 'error');
-					$('#import-features-modal').modal('hide');
-				}else if(uploadedFile === '' || uploadedFile.substr(uploadedFile.length - 4, uploadedFile.length) !== '.csv'){
-					alert.message = 'Please upload your file in CSV';
-					molgenis.createAlert([alert], 'error');
-					$('#import-features-modal').modal('hide');
-				}else{
-					$('#wizardForm').attr({
-						'action' : '${context_url}/uploadfeatures',
-						'method' : 'POST'
-					}).submit();
+				$('#selectedDataSetId').change(function(){
+					molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+				});
+				if($('#selectedDataSetId option').length === 0){
+					$('.pager li.next').addClass('disabled');
 				}
+				$('#import-data-button').click(function(){
+					$('#import-features-modal').modal('show');
+					return false;
+				});
+				$('#import-features').click(function(){
+					var alert = {};
+					var uploadedFile = $('#uploadedOntology').val();
+					if($('#dataSetName').val() === ''){
+						alert.message = 'Please define the dataset name!';
+						molgenis.createAlert([alert], 'error');
+						$('#import-features-modal').modal('hide');
+					}else if(uploadedFile === '' || uploadedFile.substr(uploadedFile.length - 4, uploadedFile.length) !== '.csv'){
+						alert.message = 'Please upload your file in CSV';
+						molgenis.createAlert([alert], 'error');
+						$('#import-features-modal').modal('hide');
+					}else{
+						$('#wizardForm').attr({
+							'action' : '${context_url}/uploadfeatures',
+							'method' : 'POST'
+						}).submit();
+					}
+				});
+				<#if message??>
+					var alert = {};
+					alert.message = '${message}';
+					molgenis.createAlert([alert], 'error');
+				</#if>
 			});
-			<#if message??>
-				var alert = {};
-				alert.message = '${message}';
-				molgenis.createAlert([alert], 'error');
-			</#if>
 		});
 	</script>
 </form>

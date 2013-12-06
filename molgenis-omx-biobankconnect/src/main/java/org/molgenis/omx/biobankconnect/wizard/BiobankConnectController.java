@@ -2,12 +2,15 @@ package org.molgenis.omx.biobankconnect.wizard;
 
 import static org.molgenis.omx.biobankconnect.wizard.BiobankConnectController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -60,6 +63,7 @@ public class BiobankConnectController extends AbstractWizardController
 	private BiobankConnectWizard wizard;
 
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
+	private static final String VIEW_NAME = "view-wizard";
 
 	@Autowired
 	private Database database;
@@ -96,7 +100,8 @@ public class BiobankConnectController extends AbstractWizardController
 	}
 
 	@Override
-	protected Wizard createWizard()
+	@RequestMapping(value = "/**", method = GET)
+	public String init()
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		try
@@ -105,8 +110,21 @@ public class BiobankConnectController extends AbstractWizardController
 			{
 				if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 			}
-			wizard = new BiobankConnectWizard();
 			wizard.setDataSets(dataSets);
+		}
+		catch (Exception e)
+		{
+			logger.error("Exception validating import file", e);
+		}
+		return VIEW_NAME;
+	}
+
+	@Override
+	protected Wizard createWizard()
+	{
+		try
+		{
+			wizard = new BiobankConnectWizard();
 			wizard.setUserName(userAccountService.getCurrentUser().getUsername());
 			wizard.addPage(chooseCataloguePager);
 			wizard.addPage(ontologyAnnotatorPager);
@@ -114,11 +132,20 @@ public class BiobankConnectController extends AbstractWizardController
 			wizard.addPage(progressingBarPager);
 			wizard.addPage(mappingManagerPager);
 		}
-		catch (Exception e)
+		catch (DatabaseException e)
 		{
-			logger.error("Exception validating import file", e);
+			logger.error("Could not get current user", e);
 		}
 		return wizard;
+	}
+
+	@RequestMapping(value = "/running", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Boolean> isRunning()
+	{
+		Map<String, Boolean> result = new HashMap<String, Boolean>();
+		result.put("isRunning", ontologyMatcher.isRunning());
+		return result;
 	}
 
 	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")

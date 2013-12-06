@@ -5,6 +5,7 @@
 	var restApi = new ns.RestClient();
 	var searchApi = new ns.SearchClient();
 	var CONTEXT_URL = null;
+	var isRunning = null;
 	var standardModal = new ns.StandardModal();
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
@@ -16,6 +17,14 @@
 	
 	ns.getContextURL = function(){
 		return this.CONTEXT_URL;
+	};
+	
+	ns.setIsRunning = function(isRunning){
+		this.isRunning = isRunning;
+	};
+	
+	ns.getIsRunning = function(){
+		return this.isRunning;
 	};
 	
 	ns.hrefToId = function(href){
@@ -32,6 +41,38 @@
 	
 	ns.getMappingManager = function() {
 		return mappingManager;
+	};
+	
+	ns.ontologyMatcherRunning = function(callback) {
+		$.ajax({
+			type : 'GET',
+			url : ns.getContextUrl() + '/running',
+			contentType : 'application/json',
+			success : function(response) {
+				if(response.isRunning){
+					var childElements = $('#wizardForm').children();
+					if($('#wizardForm').data('childElements') === null || $('#wizardForm').data('childElements') === undefined)
+						$('#wizardForm').data('childElements', childElements);
+					var items = [];
+					items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message : </strong></div>');
+					items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient</p></div></div>');
+					$('#wizardForm').html(items.join(''));
+					setTimeout(function(){
+						ns.ontologyMatcherRunning(callback);
+					}, 5000);
+				}else{
+					var childElements = $('#wizardForm').data('childElements');
+					$('#wizardForm').data('childElements', null);
+					if(childElements !== null && childElements !== undefined) $('#wizardForm').empty().append(childElements);
+					if(callback !== undefined && callback !== null) {
+						callback();
+					}
+				}
+			},
+			error : function(error){
+				console.log('error');
+			}
+		});
 	};
 	
 	ns.checkMatchingStatus = function(prefix, progressBarElement) {

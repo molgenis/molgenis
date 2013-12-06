@@ -316,85 +316,88 @@ public class MappingManagerController extends MolgenisPluginController
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(mappingDataSet.getName());
 			Map<Integer, Map<Integer, MappingClass>> dataSetMappings = new HashMap<Integer, Map<Integer, MappingClass>>();
-			for (DataSet dataSet : storeMappingDataSet)
+			if (storeMappingDataSet.size() > 0)
 			{
-				Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
-				if (dataSet.getIdentifier().startsWith(
-						userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
-						&& !mappedDataSetId.equals(selectedDataSetId))
-				{
-					DataSet mappedDataSet = database.findById(DataSet.class, mappedDataSetId);
-					dataSetNames.add(mappedDataSet.getName());
-					List<QueryRule> rules = new ArrayList<QueryRule>();
-					rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
-					SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(), rules, null);
-					SearchResult result = searchService.search(searchRequest);
-					Map<Integer, MappingClass> storeMappings = new HashMap<Integer, MappingClass>();
-					for (Hit hit : result.getSearchHits())
-					{
-						Map<String, Object> map = hit.getColumnValueMap();
-						Integer storeMappingFeatureId = Integer.parseInt(map.get(STORE_MAPPING_FEATURE).toString());
-						Integer storeMappingMappedFeatureId = Integer.parseInt(map.get(STORE_MAPPING_MAPPED_FEATURE)
-								.toString());
-						boolean confirmation = (Boolean) map.get(STORE_MAPPING_CONFIRM_MAPPING);
-						if (!storeMappings.containsKey(storeMappingFeatureId)) storeMappings.put(storeMappingFeatureId,
-								new MappingClass());
-						storeMappings.get(storeMappingFeatureId).addMapping(storeMappingFeatureId,
-								storeMappingMappedFeatureId, confirmation);
-						featureIds.add(storeMappingFeatureId);
-						featureIds.add(storeMappingMappedFeatureId);
-					}
-					dataSetMappings.put(mappedDataSetId, storeMappings);
-				}
-			}
-
-			Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
-			for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(ObservableFeature.ID,
-					Operator.IN, new ArrayList<Integer>(featureIds))))
-			{
-				featureMap.put(feature.getId(), feature);
-			}
-
-			tupleWriter.write(new ValueTuple(dataSetNames));
-
-			List<QueryRule> rules = new ArrayList<QueryRule>();
-			rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
-			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId, rules, null);
-			SearchResult featureSearchResult = searchService.search(searchFeatures);
-			for (Hit hit : featureSearchResult.getSearchHits())
-			{
-				List<String> values = new ArrayList<String>();
-				Map<String, Object> map = hit.getColumnValueMap();
-				String featureName = map.get(FEATURE_NAME).toString();
-				Integer featureId = Integer.parseInt(map.get(FEATURE_ID).toString());
-				values.add(featureName);
 				for (DataSet dataSet : storeMappingDataSet)
 				{
 					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
-					if (!mappedDataSetId.equals(selectedDataSetId))
+					if (dataSet.getIdentifier().startsWith(
+							userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
+							&& !mappedDataSetId.equals(selectedDataSetId))
 					{
-						StringBuilder value = new StringBuilder();
-						Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
-						if (storeMappings.containsKey(featureId))
+						DataSet mappedDataSet = database.findById(DataSet.class, mappedDataSetId);
+						dataSetNames.add(mappedDataSet.getName());
+						List<QueryRule> rules = new ArrayList<QueryRule>();
+						rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
+						SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(), rules, null);
+						SearchResult result = searchService.search(searchRequest);
+						Map<Integer, MappingClass> storeMappings = new HashMap<Integer, MappingClass>();
+						for (Hit hit : result.getSearchHits())
 						{
-							List<Integer> candidateIds = new ArrayList<Integer>();
-							MappingClass mappingClass = storeMappings.get(featureId);
-							if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
-							else candidateIds = mappingClass.getCandidateMappings();
-							for (Integer id : candidateIds)
-							{
-								if (featureMap.containsKey(id))
-								{
-									if (value.length() > 0) value.append(',').append('\r');
-									value.append(featureMap.get(id).getName()).append(':')
-											.append(featureMap.get(id).getDescription());
-								}
-							}
+							Map<String, Object> map = hit.getColumnValueMap();
+							Integer storeMappingFeatureId = Integer.parseInt(map.get(STORE_MAPPING_FEATURE).toString());
+							Integer storeMappingMappedFeatureId = Integer.parseInt(map
+									.get(STORE_MAPPING_MAPPED_FEATURE).toString());
+							boolean confirmation = (Boolean) map.get(STORE_MAPPING_CONFIRM_MAPPING);
+							if (!storeMappings.containsKey(storeMappingFeatureId)) storeMappings.put(
+									storeMappingFeatureId, new MappingClass());
+							storeMappings.get(storeMappingFeatureId).addMapping(storeMappingFeatureId,
+									storeMappingMappedFeatureId, confirmation);
+							featureIds.add(storeMappingFeatureId);
+							featureIds.add(storeMappingMappedFeatureId);
 						}
-						values.add(value.toString());
+						dataSetMappings.put(mappedDataSetId, storeMappings);
 					}
 				}
-				tupleWriter.write(new ValueTuple(values));
+
+				Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
+				for (ObservableFeature feature : database.find(ObservableFeature.class, new QueryRule(
+						ObservableFeature.ID, Operator.IN, new ArrayList<Integer>(featureIds))))
+				{
+					featureMap.put(feature.getId(), feature);
+				}
+
+				tupleWriter.write(new ValueTuple(dataSetNames));
+
+				List<QueryRule> rules = new ArrayList<QueryRule>();
+				rules.add(new QueryRule(QueryRule.Operator.LIMIT, 1000000));
+				SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId, rules, null);
+				SearchResult featureSearchResult = searchService.search(searchFeatures);
+				for (Hit hit : featureSearchResult.getSearchHits())
+				{
+					List<String> values = new ArrayList<String>();
+					Map<String, Object> map = hit.getColumnValueMap();
+					String featureName = map.get(FEATURE_NAME).toString();
+					Integer featureId = Integer.parseInt(map.get(FEATURE_ID).toString());
+					values.add(featureName);
+					for (DataSet dataSet : storeMappingDataSet)
+					{
+						Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
+						if (!mappedDataSetId.equals(selectedDataSetId))
+						{
+							StringBuilder value = new StringBuilder();
+							Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
+							if (storeMappings.containsKey(featureId))
+							{
+								List<Integer> candidateIds = new ArrayList<Integer>();
+								MappingClass mappingClass = storeMappings.get(featureId);
+								if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
+								else candidateIds = mappingClass.getCandidateMappings();
+								for (Integer id : candidateIds)
+								{
+									if (featureMap.containsKey(id))
+									{
+										if (value.length() > 0) value.append(',').append('\r');
+										value.append(featureMap.get(id).getName()).append(':')
+												.append(featureMap.get(id).getDescription());
+									}
+								}
+							}
+							values.add(value.toString());
+						}
+					}
+					tupleWriter.write(new ValueTuple(values));
+				}
 			}
 		}
 		finally
