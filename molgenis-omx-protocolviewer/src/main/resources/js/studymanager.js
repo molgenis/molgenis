@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	// on document ready
@@ -7,6 +7,7 @@
 		var viewTreeContainer = $('#study-definition-viewer-tree');
 		var editInfoContainer = $('#study-definition-editor-info');
 		var editTreeContainer = $('#study-definition-editor-tree');
+		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
 		
 		function createDynatreeConfig(catalog) {
 			function createDynatreeConfigRec(node, dynaNode) {
@@ -46,11 +47,10 @@
 		function updateStudyDefinitionTable() {
 			$.ajax({
 				type : 'GET',
-				url : '/plugin/studymanager/list',
+				url : molgenis.getContextUrl() + '/list',
 				success : function(data) {
 					var table = $('#studyDefinitionList tbody');
 					var items = [];
-					var checked = false;
 					$.each(data.studyDefinitions, function(idx, studyDefinition) {
 					    items.push('<tr>');
 					    items.push('<td class="listEntryRadio">');
@@ -61,6 +61,8 @@
 					    items.push('</td>');
 					    items.push('<td class="listEntryId">' + studyDefinition.id + '</td>');
 					    items.push('<td>' + studyDefinition.name + '</td>');
+					    items.push('<td>' + (studyDefinition.email ? studyDefinition.email : '') + '</td>');
+					    items.push('<td>' + (studyDefinition.date ? studyDefinition.date : '') + '</td>');
 					    items.push('</tr>');
 					});
 					table.html(items.join(''));
@@ -69,14 +71,15 @@
 					studyDefinitionRadio.attr('checked', 'checked');
 					studyDefinitionRadio.change();
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
 		
 		function updateStudyDefinitionViewer() {
+			showSpinner();
+			
 			// clear previous tree
 			if (viewTreeContainer.children('ul').length > 0)
 				viewTreeContainer.dynatree('destroy');
@@ -88,21 +91,24 @@
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			$.ajax({
 				type : 'GET',
-				url : '/plugin/studymanager/view/' + studyDefinitionId,
+				url : molgenis.getContextUrl() + '/view/' + studyDefinitionId,
 				success : function(catalog) {
+					hideSpinner();
 					viewInfoContainer.html(createCatalogInfo(catalog));
 					viewTreeContainer.empty();
 					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-				    viewTreeContainer.empty();
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				error: function (xhr) {
+					hideSpinner();
+					viewTreeContainer.empty();
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
 		
 		function updateStudyDefinitionEditor() {
+			showSpinner();
+			
 			// clear previous tree
 			if (editTreeContainer.children('ul').length > 0)
 				editTreeContainer.dynatree('destroy');
@@ -114,22 +120,22 @@
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			$.ajax({
 				type : 'GET',
-				url : '/plugin/studymanager/edit/' + studyDefinitionId,
+				url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
 				success : function(catalog) {
+					hideSpinner();
 					editInfoContainer.html(createCatalogInfo(catalog));
 					editTreeContainer.empty();
 					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
+				error: function (xhr) {
+					hideSpinner();
 					editTreeContainer.empty();
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
 		
 		$('#studyDefinitionForm').on('change', 'input[type="radio"]', function() {
-			console.log("radio change!");
 			if($('#study-definition-viewer').is(':visible'))
 				updateStudyDefinitionViewer();
 			if($('#study-definition-editor').is(':visible'))
@@ -142,7 +148,15 @@
 			updateStudyDefinitionEditor();
 		});
 		
-		$('#update-study-definition-btn').click(function() {
+		$('#download-study-definition-btn').click(function() {
+			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
+			window.location = molgenis.getContextUrl() + '/download/' + studyDefinitionId;
+		});
+		
+		updateStudyDefinitionBtn.click(function() {
+			updateStudyDefinitionBtn.prop('disabled', true);
+			showSpinner();
+			
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			
 			// get selected nodes
@@ -161,21 +175,23 @@
 			
 			$.ajax({
 				type : 'POST',
-				url : '/plugin/studymanager/update/' + studyDefinitionId,
+				url : molgenis.getContextUrl() + '/update/' + studyDefinitionId,
 				data : JSON.stringify({
 					'catalogItemIds': uniquecatalogItemIds
 				}),
 				contentType : 'application/json',
 				success : function(entities) {
-					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Updated study definition [' + studyDefinitionId + ']</div>');
+					hideSpinner();
+					updateStudyDefinitionBtn.prop('disabled', false);
+					molgenis.createAlert([{'message': 'Updated study definition [' + studyDefinitionId + ']'}], 'success');
 				},
-				error: function (xhr, textStatus, errorThrown) {
-					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				error: function (xhr) {
+					hideSpinner();
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		});
 		
 		updateStudyDefinitionTable();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

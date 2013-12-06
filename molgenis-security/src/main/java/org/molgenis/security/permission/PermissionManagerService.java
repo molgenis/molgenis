@@ -2,9 +2,7 @@ package org.molgenis.security.permission;
 
 import java.util.List;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -15,30 +13,27 @@ import org.molgenis.omx.auth.UserAuthority;
  */
 public interface PermissionManagerService
 {
-	List<MolgenisUser> getUsers() throws DatabaseException;
+	List<MolgenisUser> getUsers();
 
-	List<MolgenisGroup> getGroups() throws DatabaseException;
+	List<MolgenisGroup> getGroups();
 
-	List<MolgenisPlugin> getPlugins() throws DatabaseException;
+	List<MolgenisPlugin> getPlugins();
 
-	List<String> getEntityClassIds() throws DatabaseException;
+	List<String> getEntityClassIds();
 
-	List<GroupAuthority> getGroupPluginPermissions(Integer groupId) throws DatabaseException;
+	Permissions getGroupPluginPermissions(Integer groupId);
 
-	List<GroupAuthority> getGroupEntityClassPermissions(Integer groupId) throws DatabaseException;
+	Permissions getGroupEntityClassPermissions(Integer groupId);
 
-	List<? extends Authority> getUserPluginPermissions(Integer userId) throws DatabaseException;
+	Permissions getUserPluginPermissions(Integer userId);
 
-	List<? extends Authority> getUserEntityClassPermissions(Integer userId) throws DatabaseException;
+	Permissions getUserEntityClassPermissions(Integer userId);
 
-	void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
-			throws DatabaseException;
+	void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId);
 
-	void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId)
-			throws DatabaseException;
+	void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId);
 
-	void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId) throws DatabaseException;
+	void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId);
 
-	void replaceUserEntityClassPermissions(List<UserAuthority> entityAuthorities, Integer userId)
-			throws DatabaseException;
+	void replaceUserEntityClassPermissions(List<UserAuthority> entityAuthorities, Integer userId);
 }

@@ -3,7 +3,7 @@
 	<parent>
 	  <groupId>org.molgenis</groupId>
 	  <artifactId>molgenis</artifactId>
-	  <version>0.0.3-SNAPSHOT</version>
+	  <version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-core</artifactId>
 	<packaging>jar</packaging>
@@ -109,30 +109,35 @@
 			<version>2.3</version>
 		</dependency>
          <!-- Spring -->
+         <dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<version>1.6.2.RELEASE</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>3.2.3.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context-support</artifactId>
-		    <version>3.2.3.RELEASE</version>
+		    <version>${spring.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-orm</artifactId>
-		    <version>3.2.3.RELEASE</version>
+		    <version>${spring.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-web</artifactId>
-		    <version>3.2.0.RC1</version>
+		    <version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-core</artifactId>
-		    <version>3.2.0.RC1</version>
+		    <version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.sun.mail</groupId>

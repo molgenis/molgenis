@@ -7,6 +7,7 @@
 	<head>
 		<title>${molgenis_ui.title?html}</title>
 		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
 		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
@@ -19,7 +20,10 @@
 		<script src="/js/jquery-1.8.3.min.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/jquery.validate.min.js"></script>
-		<script src="/js/molgenis-all.js"></script>
+		<script src="/js/molgenis.js"></script>
+	<#if context_url??>
+		<script>top.molgenis.setContextUrl('${context_url}');</script>
+	</#if>
 		<!--[if lt IE 9]>
 			<script src="/js/molgenis-ie8.js"></script>
 		<![endif]-->
@@ -54,6 +58,24 @@
 						<a class="modal-href pull-right" href="/account/login" data-target="login-modal-container-header"><button class="btn btn-inverse">Sign in</button></a>
 					</#if>
 				</div>
+			</div>
+			<div class="row-fluid">
+				<div class="datasetsindexerAlerts"></div>
+			</div>
+			<div class="row-fluid">
+				<div class="alerts"><#if errorMessage??>
+					<#assign message = errorMessage>
+					<#assign messageType = "error"> 
+				<#elseif warningMessage??>
+					<#assign message = warningMessage>
+					<#assign messageType = "warning">
+				<#elseif successMessage??>
+					<#assign message = successMessage>
+					<#assign messageType = "success">
+				</#if>
+				<#if messageType??>
+					<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+				</#if></div>
 			</div>
 			<div class="row-fluid">
 				<div id="plugin-container" class="container-fluid">

@@ -1,14 +1,21 @@
 package org.molgenis.elasticsearch.request;
 
-import static org.molgenis.framework.db.QueryRule.Operator.AND;
-import static org.molgenis.framework.db.QueryRule.Operator.NOT;
-import static org.molgenis.framework.db.QueryRule.Operator.OR;
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.GREATER;
+import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LESS;
+import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NOT;
+import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.data.QueryRule.Operator.SEARCH;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 
 /**
  * Builds a Lucene query from molgenis QueryRules
@@ -18,9 +25,10 @@ import org.molgenis.framework.db.QueryRule.Operator;
  */
 public class LuceneQueryStringBuilder
 {
-	// The characters that need to be escaped are: && + - ! ( ) { } [ ] ^ " ~ *
-	// ? :
-	private static final String LUCENE_ESCAPE_CHARS_VALUE = "[-&+!\\|\\(\\){}\\[\\]\\^\"\\~\\*\\?:\\\\]";
+	// The characters that need to be escaped are: && || + - ! ( ) { } [ ] " ~ *
+	// / \ ? :
+	// ^ was not included because it needs to be used for query boosting
+	private static final String LUCENE_ESCAPE_CHARS_VALUE = "[-&+!\\|\\(\\){}\\[\\]\"\\~\\*\\?:\\\\\\/]";
 	private static final Pattern LUCENE_PATTERN_VALUE = Pattern.compile(LUCENE_ESCAPE_CHARS_VALUE);
 
 	// Field also needs escaping of whitespace (TODO test each char if it's
@@ -38,6 +46,11 @@ public class LuceneQueryStringBuilder
 	 */
 	public static String buildQueryString(List<QueryRule> queryRules)
 	{
+		if (queryRules.isEmpty())
+		{
+			return "*:*";
+		}
+
 		StringBuilder sb = new StringBuilder();
 		QueryRule previousRule = null;
 
@@ -47,7 +60,10 @@ public class LuceneQueryStringBuilder
 			{
 				previousRule = queryRule;
 			}
-			else
+			else if (queryRule.getOperator() == EQUALS || queryRule.getOperator() == NOT
+					|| queryRule.getOperator() == LIKE || queryRule.getOperator() == LESS
+					|| queryRule.getOperator() == LESS_EQUAL || queryRule.getOperator() == GREATER
+					|| queryRule.getOperator() == GREATER_EQUAL || queryRule.getOperator() == SEARCH)
 			{
 				if (previousRule != null)
 				{
@@ -113,11 +129,6 @@ public class LuceneQueryStringBuilder
 
 				previousRule = null;
 			}
-		}
-
-		if (sb.length() == 0)
-		{
-			sb.append("*:*");
 		}
 
 		return sb.toString();

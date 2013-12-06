@@ -13,19 +13,17 @@ public interface MolgenisUserService
 	 * @return
 	 * @throws DatabaseException
 	 */
-	List<String> getSuEmailAddresses() throws DatabaseException;
-
-	MolgenisUser findById(Integer userId) throws DatabaseException;
-
-	void update(MolgenisUser user) throws DatabaseException;
+	List<String> getSuEmailAddresses();
 
 	/**
 	 * Returns the currently logged in user
-	 * 
-	 * @return
-	 * @throws DatabaseException
 	 */
-	MolgenisUser getCurrentUser() throws DatabaseException;
+	MolgenisUser getUser(String username);
 
-	void checkPassword(String userName, String oldPwd, String newPwd1, String newPwd2) throws DatabaseException;
+	/**
+	 * Update user
+	 * 
+	 * @param user
+	 */
+	void update(MolgenisUser user);
 }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -9,7 +8,7 @@
 	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -27,10 +26,33 @@
 		<connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
 		<url>https://github.com/molgenis/molgenis</url>
 	</scm>
-	<developers></developers>
+	<developers/>
 
+	<profiles>
+		<!-- development profile -->
+		<profile>
+			<id>dev</id>
+			<properties>
+				<minify.skipMinify>true</minify.skipMinify>
+			</properties>
+		</profile>
+		<!-- release profile (default) -->
+		<profile>
+			<id>release</id>
+			<properties>
+				<minify.skipMinify>false</minify.skipMinify>
+			</properties>
+			<activation>
+	            <activeByDefault>true</activeByDefault>
+	        </activation>
+		</profile>
+	</profiles>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring.version>3.2.4.RELEASE</spring.version>
+		<spring.security.version>3.2.0.RC2</spring.security.version>
+		<mysql.connector.java.version>5.1.26</mysql.connector.java.version>
 	</properties>
 
 	<repositories>
@@ -73,7 +95,7 @@
 						<source>1.6</source>
 						<target>1.6</target>
 						<compilerArguments>
-							<Xlint />
+							<Xlint/>
 						</compilerArguments>
 					</configuration>
 				</plugin>
@@ -134,12 +156,12 @@
 							<configuration>
 								<tasks>
 									<path id="generate-classpath">
-										<path refid="maven.compile.classpath" />
-										<pathelement path="${project.basedir}/src/main/resources" />
+										<path refid="maven.compile.classpath"/>
+										<pathelement path="${project.basedir}/src/main/resources"/>
 									</path>
 									<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-										<arg value="molgenis.properties" />
-										<arg value="${project.build.directory}/generated-sources/molgenis" />
+										<arg value="molgenis.properties"/>
+										<arg value="${project.build.directory}/generated-sources/molgenis"/>
 									</java>
 								</tasks>
 							</configuration>
@@ -153,13 +175,13 @@
 							<configuration>
 								<tasks>
 									<path id="generate-classpath">
-										<path refid="maven.compile.classpath" />
-										<pathelement path="${project.basedir}/src/main/resources" />
+										<path refid="maven.compile.classpath"/>
+										<pathelement path="${project.basedir}/src/main/resources"/>
 									</path>
 									<java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-										<arg value="molgenis.properties" />
-										<arg value="${project.build.directory}/generated-test-sources/molgenis" />
-										<arg value="--generatetests" />
+										<arg value="molgenis.properties"/>
+										<arg value="${project.build.directory}/generated-test-sources/molgenis"/>
+										<arg value="--generatetests"/>
 									</java>
 								</tasks>
 							</configuration>
@@ -293,7 +315,7 @@
 						<dependency>
 				            <groupId>mysql</groupId>
 				            <artifactId>mysql-connector-java</artifactId>
-				            <version>5.1.25</version>
+				            <version>${mysql.connector.java.version}</version>
 				        </dependency>
 			        </dependencies>
 				</plugin>
@@ -315,7 +337,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -328,7 +350,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -341,7 +363,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -354,7 +376,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -386,29 +408,45 @@
 							</goals>
 						</execution>
 					</executions>
-				</plugin>	
+				</plugin>
+				<!-- minify css/js -->
+				<plugin>
+					<groupId>com.samaxes.maven</groupId>
+					<artifactId>minify-maven-plugin</artifactId>
+					<version>1.7.2</version>
+					<executions>
+						<execution>
+							<id>default-minify</id>
+							<goals>
+								<goal>minify</goal>
+							</goals>
+							<configuration>
+								<webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
+								<webappTargetDir>${project.build.outputDirectory}</webappTargetDir>
+								<cssSourceIncludes>
+									<cssSourceInclude>**/*.css</cssSourceInclude>
+								</cssSourceIncludes>
+								<cssSourceExcludes>
+									<cssSourceExclude>**/*.min.css</cssSourceExclude>
+								</cssSourceExcludes>
+								<jsSourceIncludes>
+									<jsSourceInclude>**/*.js</jsSourceInclude>
+								</jsSourceIncludes>
+								<jsSourceExcludes>
+									<jsSourceExclude>**/*.min.js</jsSourceExclude>
+								</jsSourceExcludes>
+								<skipMerge>true</skipMerge>
+								<skipMinify>${minify.skipMinify}</skipMinify>
+								<nosuffix>true</nosuffix>
+								<verbose>true</verbose>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${user.home}/molgenis-server.properties</file>
-							</files>
-							<quiet>true</quiet>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -453,11 +491,6 @@
 					<xmlOutput>true</xmlOutput>
 				</configuration>
 			</plugin>
-			<!-- javadoc <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<version>2.9</version> <reportSets> <reportSet> <id>non-aggregate</id> <reports> 
-				<report>javadoc</report> </reports> </reportSet> <reportSet> <id>aggregate</id> 
-				<reports> <report>aggregate</report> </reports> </reportSet> </reportSets> 
-				</plugin> -->
 			<!-- project reports -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -496,7 +529,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>3.2.3.RELEASE</version>
+			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- scope: provided -->
@@ -509,7 +542,7 @@
 		<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.25</version>
+            <version>${mysql.connector.java.version}</version>
             <scope>provided</scope>
         </dependency>
 	</dependencies>
@@ -517,16 +550,24 @@
 	<modules>
 		<module>molgenis-core</module>
 		<module>molgenis-core-ui</module>
+		<module>molgenis-omx-biobankconnect</module>
 		<module>molgenis-omx-core</module>
+		<module>molgenis-omx-das</module>
 		<module>molgenis-omx-dataexplorer</module>
+		<module>molgenis-omx-genomebrowser</module>
 		<module>molgenis-omx-protocolmanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
 		<module>molgenis-omx-mobile</module>
 		<module>molgenis-app-omx</module>
-		<module>molgenis-app-ngs</module>
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
+		<module>molgenis-data-excel</module>
+		<module>molgenis-data-csv</module>
+		<module>molgenis-data</module>
+		<module>molgenis-data-jpa</module>
+		<module>molgenis-r</module>
+		<module>molgenis-charts</module>
 	</modules>
 </project>

@@ -31,4 +31,15 @@ public class FileStore
 		}
 		return file;
 	}
+
+	public File getFile(String fileName)
+	{
+		return new File(storageDir + '/' + fileName);
+	}
+
+	public String getStorageDir()
+	{
+		return storageDir;
+	}
+
 }

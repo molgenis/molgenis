@@ -33,8 +33,9 @@ import org.molgenis.model.elements.Field;
  */
 public class MolgenisFieldTypes
 {
+	private static final Logger logger = Logger.getLogger(MolgenisFieldTypes.class);
+
 	private static Map<String, FieldType> types = new TreeMap<String, FieldType>();
-	private static Logger logger = Logger.getLogger(MolgenisFieldTypes.class);
 	private static boolean init = false;
 
 	public enum FieldTypeEnum
@@ -79,7 +80,7 @@ public class MolgenisFieldTypes
 	{
 		init();
 
-		FieldType fieldType = types.get(name + "field");
+		FieldType fieldType = types.get(name.replaceAll("[_]", "") + "field");
 		if (fieldType != null)
 		{
 			try

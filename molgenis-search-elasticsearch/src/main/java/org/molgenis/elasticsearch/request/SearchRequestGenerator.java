@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.Query;
 
 /**
  * Builds a ElasticSearch search request
@@ -16,45 +15,32 @@ import org.molgenis.framework.db.QueryRule.Operator;
  */
 public class SearchRequestGenerator
 {
-	private final List<? extends QueryRulePartGenerator> generators = Arrays.asList(new QueryGenerator(),
-			new SortGenerator(), new LimitOffsetGenerator());
-	private final SearchRequestBuilder searchRequestBuilder;
-
-	public SearchRequestGenerator(SearchRequestBuilder searchRequestBuilder)
-	{
-		if (searchRequestBuilder == null)
-		{
-			throw new IllegalArgumentException("SearchRequestBuilder is null");
-		}
-
-		this.searchRequestBuilder = searchRequestBuilder;
-	}
+	private final List<? extends QueryPartGenerator> generators = Arrays.asList(new QueryGenerator(),
+			new SortGenerator(), new LimitOffsetGenerator(), new DisMaxQueryGenerator());
 
 	/**
-	 * Add the 'searchType', 'fields', 'types' and 'query' of the
-	 * SearchRequestBuilder
+	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
 	 * 
 	 * @param entityName
 	 *            , can be null
 	 * @param searchType
 	 * @param queryRules
-	 *            , the queryRules to use, throws IllegalArgumentException if an
-	 *            invalid QueryRule is used
+	 *            , the queryRules to use, throws IllegalArgumentException if an invalid QueryRule is used
 	 * 
 	 * @param fieldsToReturn
 	 *            , can be null
 	 * 
 	 * @return SearchRequestBuilder
 	 */
-	public SearchRequestBuilder buildSearchRequest(String entityName, SearchType searchType,
-			List<QueryRule> queryRules, List<String> fieldsToReturn)
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
+			SearchType searchType, Query query, List<String> fieldsToReturn)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
-		if (entityName != null)
+		if (entityNames != null)
 		{
-			searchRequestBuilder.setTypes(entityName);
+			searchRequestBuilder.setTypes(entityNames.toArray(new String[entityNames.size()]));
 		}
 
 		// Fields
@@ -63,42 +49,17 @@ public class SearchRequestGenerator
 			searchRequestBuilder.addFields(fieldsToReturn.toArray(new String[fieldsToReturn.size()]));
 		}
 
-		// Add queryrules to generators
-		if (queryRules != null)
-		{
-			for (QueryRule queryRule : queryRules)
-			{
-				QueryRulePartGenerator generator = findGeneratorForOperator(queryRule.getOperator());
-
-				if (generator == null)
-				{
-					throw new IllegalArgumentException("Operator [" + queryRule.getOperator()
-							+ "] not implemented for elasticsearch");
-				}
-
-				generator.addQueryRule(queryRule);
-			}
-		}
-
 		// Generate query
-		for (QueryRulePartGenerator generator : generators)
+		for (QueryPartGenerator generator : generators)
 		{
-			generator.generate(searchRequestBuilder);
+			generator.generate(searchRequestBuilder, query);
 		}
-
-		return searchRequestBuilder;
 	}
 
-	private QueryRulePartGenerator findGeneratorForOperator(Operator operator)
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
+			Query query, List<String> fieldsToReturn)
 	{
-		for (QueryRulePartGenerator generator : generators)
-		{
-			if (generator.supportsOperator(operator))
-			{
-				return generator;
-			}
-		}
-
-		return null;
+		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
+				query, fieldsToReturn);
 	}
 }

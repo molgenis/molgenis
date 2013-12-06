@@ -3,6 +3,9 @@
 <#assign css=["chosen.css", "entityexplorer.css"]>
 <#assign js=["chosen.jquery.min.js", "entityexplorer.js"]>
 <@header css js/>
+	<#if dataExplorerUrl??>
+		<script>top.molgenis.setDataExplorerUrl('${dataExplorerUrl}');</script>
+	</#if>
 	<div class="row-fluid">
 		<div class="span2"></div>
 		<div class="span8">

@@ -19,8 +19,8 @@
 							  			<thead>
 							  				<tr>
 							  					<th>Entity Class</th>
-							  					<th>Write</th>
-							  					<th>Read</th>
+							  					<th>Edit</th>
+							  					<th>View</th>
 							  					<th>None</th>
 							  				</tr>
 							  			</thead>
@@ -46,8 +46,8 @@
 							  			<thead>
 							  				<tr>
 							  					<th>Entity Class</th>
-							  					<th>Write</th>
-							  					<th>Read</th>
+							  					<th>Edit</th>
+							  					<th>View</th>
 							  					<th>None</th>
 							  				</tr>
 							  			</thead>

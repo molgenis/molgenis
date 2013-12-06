@@ -126,7 +126,7 @@
   		form.validate();
   		
   		$('#reg-password').rules('add', {
-			minlength: 6
+			minlength: ${min_password_length}
 		});
 		$('#reg-password-confirm').rules('add', {
 			equalTo: '#reg-password'
@@ -188,12 +188,12 @@
 		            type: 'POST',
 		            url:  '/account/register',
 		            data: form.serialize(),
-		            success: function () {
-		            	$(document).trigger('molgenis-registered', 'You have successfully registered');
+		            success: function (data) {
+		            	$(document).trigger('molgenis-registered', data.message);
 		        		modal.modal('hide');
 		            },
-		            error: function() {
-		            	$('.modal-header', modal).after($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Unknown error occurred</div>'));
+		            error: function(xhr) {
+		            	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
 		            }
 		        });
 	        }

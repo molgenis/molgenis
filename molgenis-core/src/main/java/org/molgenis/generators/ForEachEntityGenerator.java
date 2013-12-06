@@ -89,6 +89,7 @@ public abstract class ForEachEntityGenerator extends Generator
 			{
 				File targetFile = new File(targetDir + "/" + GeneratorHelper.getJavaName(entity.getName()) + getType()
 						+ templatePostFix + getExtension());
+
 				if (!handwritten || !targetFile.exists())
 				{
 					boolean created = targetDir.mkdirs();
@@ -99,7 +100,6 @@ public abstract class ForEachEntityGenerator extends Generator
 
 					templateArgs.put("entity", entity);
 					templateArgs.put("model", model);
-					templateArgs.put("db_driver", options.db_driver);
 					templateArgs.put("template", template.getName());
 					templateArgs.put("file", targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
 							+ getType() + templatePostFix + getExtension());

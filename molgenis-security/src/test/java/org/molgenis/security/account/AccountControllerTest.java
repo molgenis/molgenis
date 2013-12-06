@@ -6,20 +6,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.Collections;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.MolgenisPasswordEncoder;
+import org.molgenis.security.account.AccountService.ActivationMode;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +53,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	private CaptchaService captchaService;
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
 
 	private MockMvc mockMvc;
 
@@ -60,7 +63,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
 		freeMarkerViewResolver.setSuffix(".ftl");
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
-				.setMessageConverters(new FormHttpMessageConverter()).build();
+				.setMessageConverters(new FormHttpMessageConverter(), new GsonHttpMessageConverter()).build();
 
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
@@ -89,18 +92,40 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser() throws Exception
 	{
-		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("redirect:http://localhost"));
+		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("forward:/"));
 		verify(accountService).activateUser("123");
 	}
 
 	@Test
-	public void registerUser() throws Exception
+	public void registerUser_activationModeUser() throws Exception
 	{
-		this.mockMvc.perform(
-				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
-						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
-						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
-						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		this.mockMvc
+				.perform(
+						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+								.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
+								.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
+								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+	}
+
+	@Test
+	public void registerUser_activationModeAdmin() throws Exception
+	{
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.ADMIN);
+		this.mockMvc
+				.perform(
+						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+								.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
+								.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
+								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN + "\"}"));
 	}
 
 	@Test
@@ -180,20 +205,16 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database database() throws DatabaseException
+		public DataService dataService()
 		{
-			Database database = mock(Database.class);
+			DataService dataService = mock(DataService.class);
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(
-					database.find(MolgenisUser.class, new QueryRule(MolgenisUser.EMAIL, Operator.EQUALS,
-							"admin@molgenis.org"))).thenReturn(Collections.<MolgenisUser> singletonList(molgenisUser));
-			return database;
-		}
+					dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
+							new QueryImpl().eq(MolgenisUser.EMAIL, "admin@molgenis.org"))).thenReturn(
+					Collections.<Entity> singletonList(molgenisUser));
 
-		@Bean
-		public Database unauthorizedDatabase()
-		{
-			return mock(Database.class);
+			return dataService;
 		}
 
 		@Bean
@@ -206,6 +227,12 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
+		}
+
+		@Bean
+		public MolgenisPasswordEncoder molgenisPasswordEncoder()
+		{
+			return mock(MolgenisPasswordEncoder.class);
 		}
 	}
 }

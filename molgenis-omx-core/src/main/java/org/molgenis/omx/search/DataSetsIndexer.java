@@ -3,7 +3,6 @@ package org.molgenis.omx.search;
 import java.util.List;
 
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.TableException;
 
 /**
  * Indexes DataSet matrices.
@@ -13,11 +12,9 @@ import org.molgenis.framework.tupletable.TableException;
  */
 public interface DataSetsIndexer
 {
-	void index() throws DatabaseException, TableException;
+	void index() throws DatabaseException;
 
-	void index(List<Integer> datasetIds) throws TableException;
-
-	void indexNew() throws DatabaseException, TableException;
+	void index(List<Integer> datasetIds);
 
 	/**
 	 * Check if there is an indexing job running

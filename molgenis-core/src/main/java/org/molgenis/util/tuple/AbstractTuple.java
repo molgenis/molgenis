@@ -2,13 +2,15 @@ package org.molgenis.util.tuple;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.log4j.Logger;
-import org.molgenis.util.AbstractEntity;
 import org.molgenis.util.ListEscapeUtils;
 
 /**
@@ -19,6 +21,30 @@ public abstract class AbstractTuple implements Tuple
 {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(AbstractTuple.class);
+
+	public static java.sql.Date string2date(String str) throws ParseException
+	{
+		String dateFormat = "MMMM d, yyyy";
+		String dateFormat2 = "dd-MM-yyyy";
+		try
+		{
+			DateFormat formatter = new SimpleDateFormat(dateFormat, Locale.US);
+			return new java.sql.Date(formatter.parse(str).getTime());
+		}
+		catch (ParseException pe)
+		{
+			try
+			{
+				DateFormat formatter = new SimpleDateFormat(dateFormat2, Locale.US);
+				return new java.sql.Date(formatter.parse(str).getTime());
+			}
+			catch (ParseException pe2)
+			{
+				throw new ParseException("parsing failed: expected date value formatted '" + dateFormat + " or "
+						+ dateFormat2, 0);
+			}
+		}
+	}
 
 	@Override
 	public boolean hasColNames()
@@ -164,7 +190,7 @@ public abstract class AbstractTuple implements Tuple
 			}
 			catch (IllegalArgumentException e)
 			{
-				result = AbstractEntity.string2date(obj.toString());
+				result = AbstractTuple.string2date(obj.toString());
 			}
 		}
 		catch (ParseException e)
@@ -207,7 +233,6 @@ public abstract class AbstractTuple implements Tuple
 	}
 
 	// TODO: Improve code of getIntList (maybe merge with getList above?)
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Integer> getIntList(String colName)
 	{

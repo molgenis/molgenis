@@ -1,20 +1,20 @@
 package org.molgenis.security.permission;
 
-import static org.molgenis.framework.db.QueryRule.Operator.EQUALS;
-import static org.molgenis.framework.db.QueryRule.Operator.IN;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Vector;
+import java.util.Map;
+import java.util.TreeMap;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.model.elements.Entity;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
@@ -24,6 +24,9 @@ import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,96 +38,115 @@ import com.google.common.collect.Lists;
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
 {
-	private final Database database;
+	private final DataService dataService;
 	private final MolgenisPluginRegistry molgenisPluginRegistry;
+	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public PermissionManagerServiceImpl(Database database, MolgenisPluginRegistry molgenisPluginRegistry)
+	public PermissionManagerServiceImpl(DataService dataService, MolgenisPluginRegistry molgenisPluginRegistry,
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("Molgenis plugin registry is null");
-		this.database = database;
+		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
+		this.dataService = dataService;
 		this.molgenisPluginRegistry = molgenisPluginRegistry;
+		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<MolgenisUser> getUsers() throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	public List<MolgenisUser> getUsers()
 	{
-		return database.find(MolgenisUser.class);
+		return dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryImpl());
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<MolgenisGroup> getGroups() throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	public List<MolgenisGroup> getGroups()
 	{
-		return database.find(MolgenisGroup.class);
+		return dataService.findAllAsList(MolgenisGroup.ENTITY_NAME, new QueryImpl());
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	public List<MolgenisPlugin> getPlugins() throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	public List<MolgenisPlugin> getPlugins()
 	{
 		return new ArrayList<MolgenisPlugin>(molgenisPluginRegistry.getPlugins());
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	public List<String> getEntityClassIds() throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	public List<String> getEntityClassIds()
 	{
-		Vector<Entity> entities = database.getMetaData().getEntities(false, false);
-		List<String> entityIds = new ArrayList<String>(entities.size());
-		for (Entity entity : entities)
-			entityIds.add(entity.getName());
-		return entityIds;
+		EntitySource entitySource = dataService.getEntitySource("jpa://");
+		return Lists.newArrayList(entitySource.getEntityNames());
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<GroupAuthority> getGroupPluginPermissions(Integer groupId) throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	public Permissions getGroupPluginPermissions(Integer groupId)
 	{
-		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
+		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
-		return getGroupPermissions(molgenisGroup, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+
+		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
+		Permissions permissions = createPermissions(groupPermissions, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		permissions.setGroupId(groupId);
+		return permissions;
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<GroupAuthority> getGroupEntityClassPermissions(Integer groupId) throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	public Permissions getGroupEntityClassPermissions(Integer groupId)
 	{
-		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
+		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
-		return getGroupPermissions(molgenisGroup, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
+		Permissions permissions = createPermissions(groupPermissions, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		permissions.setGroupId(groupId);
+		return permissions;
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<? extends Authority> getUserPluginPermissions(Integer userId) throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	public Permissions getUserPluginPermissions(Integer userId)
 	{
-		return getUserPermissions(userId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		List<? extends Authority> userPermissions = getUserPermissions(userId);
+		Permissions permissions = createPermissions(userPermissions, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		permissions.setUserId(userId);
+		return permissions;
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_READ_PLUGINPERMISSIONMANAGER')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public List<? extends Authority> getUserEntityClassPermissions(Integer userId) throws DatabaseException
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	public Permissions getUserEntityClassPermissions(Integer userId)
 	{
-		return getUserPermissions(userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		List<? extends Authority> userPermissions = getUserPermissions(userId);
+		Permissions permissions = createPermissions(userPermissions, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+		permissions.setUserId(userId);
+		return permissions;
+	}
+
+	private List<? extends Authority> getUserPermissions(Integer userId)
+	{
+		return getUserPermissions(userId, null);
 	}
 
 	private List<? extends Authority> getUserPermissions(Integer userId, String authorityPrefix)
-			throws DatabaseException
 	{
-		MolgenisUser molgenisUser = MolgenisUser.findById(database, userId);
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
-		List<MolgenisGroupMember> groupMembers = database.find(MolgenisGroupMember.class, new QueryRule(
-				MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser));
+		List<MolgenisGroupMember> groupMembers = dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser));
+
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
 			List<MolgenisGroup> molgenisGroups = Lists.transform(groupMembers,
@@ -136,36 +158,32 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 							return molgenisGroupMember.getMolgenisGroup();
 						}
 					});
-			List<GroupAuthority> groupAuthorities = getGroupPermissions(molgenisGroups, authorityPrefix);
+			List<Authority> groupAuthorities = getGroupPermissions(molgenisGroups, authorityPrefix);
 			if (groupAuthorities != null && !groupAuthorities.isEmpty()) userPermissions.addAll(groupAuthorities);
-
 		}
 
 		return userPermissions;
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
-	@Transactional(rollbackFor = DatabaseException.class)
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, Integer groupId)
-			throws DatabaseException
 	{
 		replaceGroupPermissions(pluginAuthorities, groupId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
-	@Transactional(rollbackFor = DatabaseException.class)
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	public void replaceGroupEntityClassPermissions(List<GroupAuthority> entityAuthorities, Integer groupId)
-			throws DatabaseException
 	{
 		replaceGroupPermissions(entityAuthorities, groupId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private void replaceGroupPermissions(List<GroupAuthority> entityAuthorities, Integer groupId, String authorityPrefix)
-			throws DatabaseException
 	{
-		MolgenisGroup molgenisGroup = MolgenisGroup.findById(database, groupId);
+		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 
 		// inject user
@@ -173,35 +191,33 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			entityAuthority.setMolgenisGroup(molgenisGroup);
 
 		// delete old plugin authorities
-		List<GroupAuthority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix);
-		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) database.remove(oldEntityAuthorities);
+		List<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix);
+		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) dataService.delete(
+				GroupAuthority.ENTITY_NAME, oldEntityAuthorities);
 
 		// insert new plugin authorities
-		if (!entityAuthorities.isEmpty()) database.add(entityAuthorities);
+		if (!entityAuthorities.isEmpty()) dataService.add(GroupAuthority.ENTITY_NAME, entityAuthorities);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
-	@Transactional(rollbackFor = DatabaseException.class)
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
-			throws DatabaseException
 	{
 		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_PLUGIN_WRITE_PLUGINPERMISSIONMANAGER')")
-	@Transactional(rollbackFor = DatabaseException.class)
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, Integer userId)
-			throws DatabaseException
 	{
 		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
 	}
 
 	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, Integer userId, String authorityType)
-			throws DatabaseException
 	{
-		MolgenisUser molgenisUser = MolgenisUser.findById(database, userId);
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 
 		// inject user
@@ -210,46 +226,147 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		// delete old plugin authorities
 		List<? extends Authority> oldEntityAuthorities = getUserPermissions(molgenisUser, authorityType);
-		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) database.remove(oldEntityAuthorities);
+		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) dataService.delete(
+				UserAuthority.ENTITY_NAME, oldEntityAuthorities);
 
 		// insert new plugin authorities
-		if (!entityAuthorities.isEmpty()) database.add(entityAuthorities);
+		if (!entityAuthorities.isEmpty()) dataService.add(UserAuthority.ENTITY_NAME, entityAuthorities);
 	}
 
 	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
-			throws DatabaseException
 	{
-		List<UserAuthority> authorities = database.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER,
-				EQUALS, molgenisUser));
+		List<UserAuthority> authorities = dataService.findAllAsList(UserAuthority.ENTITY_NAME,
+				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser));
 
-		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<UserAuthority>()
+		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<Authority>()
 		{
 			@Override
-			public boolean apply(UserAuthority authority)
+			public boolean apply(Authority authority)
 			{
-				return authority.getRole().startsWith(authorityPrefix);
+				return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
 			}
 		}));
 	}
 
-	private List<GroupAuthority> getGroupPermissions(MolgenisGroup molgenisGroup, String authorityPrefix)
-			throws DatabaseException
+	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
+	{
+		return getGroupPermissions(Arrays.asList(molgenisGroup));
+	}
+
+	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup, String authorityPrefix)
 	{
 		return getGroupPermissions(Arrays.asList(molgenisGroup), authorityPrefix);
 	}
 
-	private List<GroupAuthority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
-			throws DatabaseException
+	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups)
 	{
-		List<GroupAuthority> authorities = database.find(GroupAuthority.class, new QueryRule(
-				GroupAuthority.MOLGENISGROUP, IN, molgenisGroups));
-		return Lists.newArrayList(Iterables.filter(authorities, new Predicate<GroupAuthority>()
+		return getGroupPermissions(molgenisGroups, null);
+	}
+
+	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
+	{
+		List<GroupAuthority> authorities = dataService.findAllAsList(GroupAuthority.ENTITY_NAME,
+				new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups));
+
+		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<Authority>()
 		{
 			@Override
-			public boolean apply(GroupAuthority authority)
+			public boolean apply(Authority authority)
 			{
-				return authority.getRole().startsWith(authorityPrefix);
+				return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
 			}
 		}));
+	}
+
+	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)
+	{
+		Permissions permissions = new Permissions();
+		if (authorityPrefix.equals(SecurityUtils.AUTHORITY_PLUGIN_PREFIX))
+		{
+			List<MolgenisPlugin> plugins = this.getPlugins();
+			if (plugins != null)
+			{
+				Collections.sort(plugins, new Comparator<MolgenisPlugin>()
+				{
+					@Override
+					public int compare(MolgenisPlugin o1, MolgenisPlugin o2)
+					{
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
+				Map<String, String> pluginMap = new LinkedHashMap<String, String>();
+				for (MolgenisPlugin plugin : plugins)
+					pluginMap.put(plugin.getId(), plugin.getName());
+				permissions.setEntityIds(pluginMap);
+			}
+		}
+		else if (authorityPrefix.equals(SecurityUtils.AUTHORITY_ENTITY_PREFIX))
+		{
+			List<String> entityClassIds = this.getEntityClassIds();
+			if (entityClassIds != null)
+			{
+				Map<String, String> entityClassMap = new TreeMap<String, String>();
+				for (String entityClassId : entityClassIds)
+					entityClassMap.put(entityClassId, entityClassId);
+				permissions.setEntityIds(entityClassMap);
+			}
+		}
+		else throw new RuntimeException("Invalid authority prefix [" + authorityPrefix + "]");
+
+		for (Authority authority : entityAuthorities)
+		{
+
+			// add permissions for authorities that match prefix
+			if (authority.getRole().startsWith(authorityPrefix))
+			{
+				Permission permission = new Permission();
+
+				String authorityType = getAuthorityType(authority.getRole(), authorityPrefix);
+				String authorityPluginId = getAuthorityEntityId(authority.getRole(), authorityPrefix);
+				permission.setType(authorityType);
+				if (authority instanceof GroupAuthority)
+				{
+					permission.setGroup(((GroupAuthority) authority).getMolgenisGroup().getName());
+					permissions.addGroupPermission(authorityPluginId, permission);
+				}
+				else
+				{
+					permissions.addUserPermission(authorityPluginId, permission);
+				}
+			}
+
+			// add permissions for inherited authorities from authority that match prefix
+			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
+			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper
+					.mapAuthorities(Collections.singletonList(grantedAuthority));
+			hierarchyAuthorities.remove(grantedAuthority);
+
+			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)
+			{
+				if (hierarchyAuthority.getAuthority().startsWith(authorityPrefix))
+				{
+					String authorityPluginId = getAuthorityEntityId(hierarchyAuthority.getAuthority(), authorityPrefix);
+
+					Permission hierarchyPermission = new Permission();
+					hierarchyPermission.setType(getAuthorityType(hierarchyAuthority.getAuthority(), authorityPrefix));
+					permissions.addHierarchyPermission(authorityPluginId, hierarchyPermission);
+				}
+			}
+		}
+
+		permissions.sort();
+		return permissions;
+	}
+
+	private String getAuthorityEntityId(String role, String authorityPrefix)
+	{
+		role = role.substring(authorityPrefix.length());
+		return role.substring(role.indexOf('_') + 1).toLowerCase();
+	}
+
+	private String getAuthorityType(String role, String authorityPrefix)
+	{
+		role = role.substring(authorityPrefix.length());
+		return role.substring(0, role.indexOf('_')).toLowerCase();
 	}
 }

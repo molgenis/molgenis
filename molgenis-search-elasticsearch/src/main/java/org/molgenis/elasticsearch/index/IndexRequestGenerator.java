@@ -15,10 +15,10 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.base.Joiner;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.Entity;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
-import org.molgenis.util.Entity;
 import org.molgenis.util.tuple.Cell;
 import org.molgenis.util.tuple.Tuple;
 
@@ -59,7 +59,7 @@ public class IndexRequestGenerator
 		{
 			Object id = entity.getIdValue();
 			Map<String, Object> doc = new HashMap<String, Object>();
-			for (String field : entity.getFields())
+			for (String field : entity.getAttributeNames())
 			{
 				doc.put(field, entity.get(field));
 
@@ -138,6 +138,7 @@ public class IndexRequestGenerator
 				{
 					Tuple tuple = it.next();
 					Map<String, Object> doc = new HashMap<String, Object>();
+
 					for (String columnName : tuple.getColNames())
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on

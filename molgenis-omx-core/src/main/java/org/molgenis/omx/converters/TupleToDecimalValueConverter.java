@@ -13,6 +13,18 @@ public class TupleToDecimalValueConverter implements TupleToValueConverter<Decim
 	public DecimalValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
+		return updateFromTuple(tuple, colName, feature, new DecimalValue());
+	}
+
+	@Override
+	public DecimalValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		if (!(value instanceof DecimalValue))
+		{
+			throw new ValueConverterException("value is not a " + DecimalValue.class.getSimpleName());
+		}
+
 		Double doubleObj;
 		try
 		{
@@ -24,7 +36,7 @@ public class TupleToDecimalValueConverter implements TupleToValueConverter<Decim
 		}
 		if (doubleObj == null) return null;
 
-		DecimalValue decimalValue = new DecimalValue();
+		DecimalValue decimalValue = (DecimalValue) value;
 		decimalValue.setValue(doubleObj);
 		return decimalValue;
 	}

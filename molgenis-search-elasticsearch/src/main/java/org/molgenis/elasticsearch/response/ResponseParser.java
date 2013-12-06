@@ -43,9 +43,9 @@ public class ResponseParser
 		}
 
 		List<Hit> searchHits = new ArrayList<Hit>();
-		long totalCount = response.hits().totalHits();
+		long totalCount = response.getHits().totalHits();
 
-		for (SearchHit hit : response.hits().hits())
+		for (SearchHit hit : response.getHits().hits())
 		{
 			Map<String, Object> columnValueMap = new LinkedHashMap<String, Object>();
 
@@ -65,6 +65,11 @@ public class ResponseParser
 				{
 					columnValueMap.put(entry.getKey(), entry.getValue());
 				}
+				if ((hit.getScore() + "").equals("NaN"))
+				{
+					columnValueMap.put("score", 0);
+				}
+				else columnValueMap.put("score", hit.getScore());
 			}
 
 			searchHits.add(new Hit(hit.id(), hit.type(), createHref(hit.id(), hit.type()), columnValueMap));

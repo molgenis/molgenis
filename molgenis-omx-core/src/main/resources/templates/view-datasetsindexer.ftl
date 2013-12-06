@@ -19,7 +19,9 @@
 		</div>
 	</div>
 	<script type="text/javascript">
+
 		$(document).ready(function(){
+			
 			$('#select-all').click(function() {
 				$('.dataset-chk').attr('checked', true);
 				return false;
@@ -47,20 +49,17 @@
 					data : JSON.stringify(indexRequest),
 					contentType : 'application/json',
 				}).done(function(response){
-					$('#alertMessage').remove();
-					var alertMessage = $('<div id="alertMessage" class="alert"></div>');
-					var button = $('<button type="button" class="close" data-dismiss="alert">&times;</button>');
-					var textMessage = $('<p />');
-					alertMessage.append(button).append(textMessage);
-					if(!response.isRunning)
-						alertMessage.addClass('alert-error');
-					else
-						alertMessage.addClass('alert-success');
-					textMessage.html('<strong>Message : </strong>' + response.message).css('text-align', 'center');
+					molgenis.createAlert([{'message': response.message}], response.isRunning ? 'success' : 'error');
 					$('.dataset-chk').attr('checked', false);
-					$('body div:eq(0)').before(alertMessage);
+					molgenis.createDatasetsindexerAlert();
+					if(response.isRunning === true){
+						$('.alerts').empty();
+					}
 				});
+				
 				return false;
-			});
+			});	
+			
 		});
 	</script>
+<@footer/>	

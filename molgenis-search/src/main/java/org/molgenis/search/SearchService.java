@@ -2,9 +2,9 @@ package org.molgenis.search;
 
 import java.util.List;
 
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.util.Entity;
 
 /**
  * Interface that a concrete SearchService must implement.
@@ -31,6 +31,23 @@ public interface SearchService
 	void updateIndex(String documentType, Iterable<? extends Entity> entities);
 
 	/**
+	 * delete documents by Ids
+	 * 
+	 * @param documentType
+	 * @param documentId
+	 */
+	void deleteDocumentByIds(String documentType, List<String> documentIds);
+
+	/**
+	 * update document by Id
+	 * 
+	 * @param documentType
+	 * @param documentId
+	 * @param updateScript
+	 */
+	void updateDocumentById(String documentType, String documentId, String updateScript);
+
+	/**
 	 * Index a TupleTable
 	 * 
 	 * @param documentType
@@ -47,6 +64,8 @@ public interface SearchService
 	 */
 	SearchResult search(SearchRequest request);
 
+	SearchResult multiSearch(MultiSearchRequest request);
+
 	/**
 	 * Get the total hit count
 	 * 
@@ -54,8 +73,8 @@ public interface SearchService
 	 * @param queryRules
 	 * @return
 	 */
-	long count(String documentType, List<QueryRule> queryRules);
-	
+	long count(String documentType, Query q);
+
 	/**
 	 * delete documentType from index
 	 * 
@@ -63,4 +82,6 @@ public interface SearchService
 	 * @return boolean succeeded
 	 */
 	void deleteDocumentsByType(String documentType);
+
+	void updateIndexTupleTable(String documentType, TupleTable tupleTable);
 }

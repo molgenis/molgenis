@@ -85,8 +85,7 @@ public class ListEscapeUtils
 					{
 						char cnext = str.charAt(j + 1);
 						if (cnext != sep && cnext != esc) strBuilder.append(c);
-						else
-							isEscape = true;
+						else isEscape = true;
 					}
 					else
 					{
@@ -95,7 +94,7 @@ public class ListEscapeUtils
 				}
 				else if (c == sep)
 				{
-					list.add(strBuilder.toString());
+					list.add(strBuilder.toString().trim());
 					strBuilder.setLength(0);
 				}
 				else
@@ -109,7 +108,7 @@ public class ListEscapeUtils
 				isEscape = false;
 			}
 		}
-		list.add(strBuilder.toString());
+		list.add(strBuilder.toString().trim());
 
 		return list;
 	}

@@ -1,6 +1,7 @@
 package org.molgenis.security;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
@@ -17,19 +18,30 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SecurityUtilsTest
 {
+	private static Authentication AUTHENTICATION_PREVIOUS;
 	private Authentication authentication;
 	private UserDetails userDetails;
 
+	@BeforeClass
+	public void setUpBeforeClass()
+	{
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+		authentication = mock(Authentication.class);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
-	public void setUp()
+	public void setUpBeforeMethod()
 	{
-		authentication = mock(Authentication.class);
+		reset(authentication);
 
 		GrantedAuthority authority1 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn("authority1")
 				.getMock();
@@ -41,8 +53,14 @@ public class SecurityUtilsTest
 		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
 				Arrays.<GrantedAuthority> asList(authority1, authority2));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
+				Arrays.<GrantedAuthority> asList(authority1, authority2));
+	}
 
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
 	@Test
@@ -93,12 +111,6 @@ public class SecurityUtilsTest
 				new String[]
 				{ AUTHORITY_SU, AUTHORITY_PLUGIN_READ_PREFIX + pluginId.toUpperCase(),
 						AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase() });
-	}
-
-	@Test
-	public void getCurrentUser()
-	{
-		assertEquals(SecurityUtils.getCurrentUser(), userDetails);
 	}
 
 	@Test

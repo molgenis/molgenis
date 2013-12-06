@@ -1,4 +1,4 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
 	$(function() {
@@ -21,6 +21,16 @@
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
+				}
+				if(data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId.toLowerCase()]) {
+					$.each(data.hierarchyPermissionMap[entityId.toLowerCase()], function(idx, perm) {
+						items.push('<tr>');
+						items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
+						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
+						items.push('</tr>');					
+					});
 				}
 			});
 			return items.join('');
@@ -61,23 +71,23 @@
 		}
 		
 		$('#plugin-group-select').change(function() {
-			$.get('/plugin/permissionmanager/plugin/group/' + $(this).val(), function(data) {
+			$.get(molgenis.getContextUrl() + '/plugin/group/' + $(this).val(), function(data) {
 				$('#plugin-group-permission-table tbody').empty().html(createGroupPermissionTable(data));
 			});
 			
 		});
 		$('#plugin-user-select').change(function() {
-			$.get('/plugin/permissionmanager/plugin/user/' + $(this).val(), function(data) {
+			$.get(molgenis.getContextUrl() + '/plugin/user/' + $(this).val(), function(data) {
 				$('#plugin-user-permission-table tbody').empty().html(createUserPermissionTable(data));
 			});
 		});
 		$('#entity-class-group-select').change(function() {
-			$.get('/plugin/permissionmanager/entityclass/group/' + $(this).val(), function(data) {
+			$.get(molgenis.getContextUrl() + '/entityclass/group/' + $(this).val(), function(data) {
 				$('#entity-class-group-permission-table tbody').empty().html(createGroupPermissionTable(data));
 			});
 		});
 		$('#entity-class-user-select').change(function() {
-			$.get('/plugin/permissionmanager/entityclass/user/' + $(this).val(), function(data) {
+			$.get(molgenis.getContextUrl() + '/entityclass/user/' + $(this).val(), function(data) {
 				$('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data));
 			});
 		});
@@ -116,4 +126,4 @@
 		$('#plugin-group-select').change();
 		$('#entity-class-group-select').change();
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

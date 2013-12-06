@@ -1,7 +1,6 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
 	
@@ -40,10 +39,14 @@
 				}
 				$('#success-message').show();
 			},
-			error: function(request, textStatus, errorThrown) {
+			error: function(xhr) {
 				ns.quoteIsoDateT();
 				
-				$('#error-message-content').html(errorThrown);
+				var messages = [];
+				$.each(JSON.parse(xhr.responseText).errors, function(index, error) {
+					messages.push(error.message);
+				});
+				$('#error-message-details').html('Details: ' + messages.join('\n'));
 				$('#error-message').show();
 			}
 		});
@@ -93,4 +96,4 @@
 		
 	});
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

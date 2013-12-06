@@ -2,7 +2,7 @@ package org.molgenis.ui.form;
 
 import java.util.List;
 
-import org.molgenis.model.elements.Field;
+import org.molgenis.data.AttributeMetaData;
 
 public interface FormMetaData
 {
@@ -13,5 +13,5 @@ public interface FormMetaData
 	 * 
 	 * @return
 	 */
-	List<Field> getFields();
+	List<AttributeMetaData> getFields();
 }

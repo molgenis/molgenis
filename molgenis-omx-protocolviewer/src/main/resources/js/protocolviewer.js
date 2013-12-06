@@ -1,7 +1,7 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 
-	var ns = w.molgenis = w.molgenis || {};
+	var ns = molgenis;
 	
 	var search = false;
 	var searchQuery = null;
@@ -53,33 +53,6 @@
 				});
 			}
 		}
-
-		function onNodeSelectionChange(selectedNodes) {
-			function getSiblingPos(node) {
-				var pos = 0;
-				do {
-					node = node.getPrevSibling();
-					if (node == null)
-						break;
-					else
-						++pos;
-				} while (true);
-				return pos;
-			}
-			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				var diff = node1.getLevel() - node2.getLevel();
-				if (diff == 0) {
-					diff = getSiblingPos(node1.getParent()) - getSiblingPos(node2.getParent());
-					if (diff == 0)
-						diff = getSiblingPos(node1) - getSiblingPos(node2);
-				}
-				return diff <= 0 ? -1 : 1;
-			});
-			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder ? null : node.data.key;
-			});
-			ns.onFeatureSelectionChange(sortedFeatures);
-		}
 		
 		function updateNodesInSearch(select, node){
 			
@@ -107,10 +80,7 @@
 					if($.inArray(node.data.key, selectKeys) == -1) updatedNodes.select[node.data.key] = node;
 				}
 			}
-			else{
-				var selectKeys = Object.keys(updatedNodes.select);
-				var unselectKeys = Object.keys(updatedNodes.unselect);
-				
+			else{				
 				if(node.data.isFolder){
 					node.visit(function(subNode){
 						if(!subNode.isSelected()){
@@ -218,11 +188,11 @@
 			var nrFeatureRequests = Math.ceil(featureIds.length / batchSize);
 			var nrRequest = nrFeatureRequests + nrProtocolRequests;
 			if(nrRequest > 0){
-				var workers = [];
-				for(var i = 0 ; i < nrRequest ; i++) {
+				var workers = [], i;
+				for(i = 0 ; i < nrRequest ; i++) {
 					workers[i] = false;
 				}
-				for(var i = 0 ; i < nrRequest ; i++) {
+				for(i = 0 ; i < nrRequest ; i++) {
 					var entityType = i < nrProtocolRequests ?  "protocol" : "observablefeature";
 					var ids = i < nrProtocolRequests ?  protocolIds : featureIds;
 					var start = i < nrProtocolRequests ? i * batchSize : (i - nrProtocolRequests) * batchSize;
@@ -274,7 +244,7 @@
 				queryRules.push({
 					operator : 'LIMIT',
 					value : 10000
-				})
+				});
 				var dataSet = ns.getSelectedDataSet();
 				var searchRequest = {
 					documentType : 'protocolTree-' + hrefToId(dataSet.href),
@@ -398,11 +368,9 @@
 						}
 					});
 					
-					var nodesToHide = [];
 					$.each(hitsToHide, function(index, hit){
 						var object = hit.columnValueMap;
 						var nodes = object["path"].split(".");
-						var entityId = object["id"];
 						//split the path to get all ancestors;
 						for(var i = 0; i < nodes.length; i++) {
 							var isFeature = nodes[i].indexOf("F") === 0;
@@ -430,7 +398,8 @@
 					
 					sortNodes(topNodes);
 					rootNode.removeChildren();
-					rootNode.addChild(topNodes);
+					if(topNodes.length !== 0)
+						rootNode.addChild(topNodes[0].children);
 					
 					if($('#dataset-browser').next().length > 0) $('#dataset-browser').next().remove();
 					if(topNodes.length === 0) {
@@ -479,6 +448,8 @@
 			}
 			return;
 		}
+		var prevRenderMode = rootNode.tree.enableUpdate(false); // disable rendering
+		
 		rootNode.removeChildren();
 		rootNode.addChild(treePrevState.children);
 		
@@ -513,6 +484,8 @@
 				if(currentNode != null) currentNode.select(false);
 			});
 		}
+		
+		rootNode.tree.enableUpdate(prevRenderMode); // restore previous rendering state
 		
 		//reset variables
 		search = false;
@@ -645,6 +618,9 @@
 					categories.push($(this)[0]);
 				});
 				data["categories"] = categories;
+			},
+			error: function (xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		callback(data);
@@ -660,10 +636,11 @@
 		var table = $('<table />');
 		
 		table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
+		table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
 		$.each(getDescription(feature), function(key, val){
 			table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 		});
-
+		
 		table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 		if (feature.unit)
 			table.append('<tr><td>' + "Unit:" + '</td><td>' + feature.unit.name + '</td></tr>');
@@ -679,7 +656,7 @@
 				var row = $('<tr />');
 				$('<td />').text(category.valueCode).appendTo(row);
 				$('<td />').text(category.name).appendTo(row);
-				$('<td />').text(category.name).appendTo(row);
+				$('<td />').text(category.description).appendTo(row);
 				row.appendTo(categoryTable);
 			});
 			categoryTable.addClass('listtable');
@@ -730,15 +707,18 @@
 		}
 
 		var table = $('<table class="table table-striped table-condensed table-hover" />');
-		$('<thead />').append('<th>Group</th><th>Variable</th><th>Description</th><th>Remove</th>').appendTo(table);
+		$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 		$.each(nodes, function(i, node) {
 			if (!node.data.isFolder) {
+				var feature = restApi.get(node.data.key);
 				var protocol_name = node.parent.data.title;
-				var name = node.data.title;
-				var description = node.data.tooltip;
+				var name = feature.name;
+				var identifier = feature.identifier;
+				var description = getDescription(feature).en;
 				var row = $('<tr />').attr('id', node.data.key + "_row");
 				$('<td />').text(typeof protocol_name !== 'undefined' ? protocol_name : "").appendTo(row);
 				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
+				$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 				$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 				var deleteButton = $('<i class="icon-remove"></i>');
 				deleteButton.click($.proxy(function() {
@@ -772,7 +752,13 @@
 
 	function updateShoppingCart(features) {
 		if (features === null) {
-			$.post('/cart/empty');
+			$.ajax({
+				type : 'POST',
+				url : '/cart/empty',
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
+			});
 		} else {
 			$.ajax({
 				type : 'POST',
@@ -780,7 +766,10 @@
 				data : JSON.stringify({
 					'features' : features
 					}),
-				contentType : 'application/json'
+				contentType : 'application/json',
+				error: function (xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
 			});
 		}
 	}
@@ -805,11 +794,11 @@
 		$(document).on('molgenis-order-placed', function(e, msg) {
 			var uri = ns.getSelectedDataSet().href;
 			ns.selectDataSet(uri.substring(uri.lastIndexOf('/') + 1)); // reset catalogue
-			$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			molgenis.createAlert([{'message':msg}], 'success');
 			search = false;
 			updatedNodes = null;
 			treePrevState = null;
 			selectedAllNodes = null;
 		});
 	});
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

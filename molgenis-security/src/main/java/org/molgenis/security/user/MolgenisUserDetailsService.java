@@ -4,16 +4,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.auth.Authority;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,34 +22,33 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 public class MolgenisUserDetailsService implements UserDetailsService
 {
-	protected final Database unsecuredDatabase;
-	protected final PasswordEncoder passwordEncoder;
-	protected final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+	private final DataService dataService;
+	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
 	@Autowired
-	public MolgenisUserDetailsService(Database unsecuredDatabase, PasswordEncoder passwordEncoder,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper)
+	public MolgenisUserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
 	{
-		if (unsecuredDatabase == null) throw new IllegalArgumentException("Unsecured database is null");
-		if (passwordEncoder == null) throw new IllegalArgumentException("Password encoder is null");
-		this.passwordEncoder = passwordEncoder;
-		this.unsecuredDatabase = unsecuredDatabase;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		if (grantedAuthoritiesMapper == null) throw new IllegalArgumentException("Granted authorities mapper is null");
+		this.dataService = dataService;
 		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
 	}
 
 	@Override
+	@RunAsSystem
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
 	{
 		try
 		{
-			MolgenisUser user = MolgenisUser.findByUsername(unsecuredDatabase, username);
+			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+					new QueryImpl().eq(MolgenisUser.USERNAME, username));
+
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
 			// user authorities
@@ -80,25 +79,27 @@ public class MolgenisUserDetailsService implements UserDetailsService
 			Set<GrantedAuthority> allGrantedAuthorities = new HashSet<GrantedAuthority>();
 			if (grantedAuthorities != null) allGrantedAuthorities.addAll(grantedAuthorities);
 			if (grantedGroupAuthorities != null) allGrantedAuthorities.addAll(grantedGroupAuthorities);
-			return new User(user.getUsername(), user.getPassword(),
+			return new User(user.getUsername(), user.getPassword(), user.getActive(), true, true, true,
 					grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities));
 		}
-		catch (DatabaseException e)
+		catch (Throwable e)
 		{
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
 
-	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser) throws DatabaseException
+	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser)
 	{
-		return unsecuredDatabase.find(UserAuthority.class, new QueryRule(UserAuthority.MOLGENISUSER, Operator.EQUALS,
-				molgenisUser));
+		return dataService.findAllAsList(UserAuthority.ENTITY_NAME,
+				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser));
 	}
 
 	private List<GroupAuthority> getGroupAuthorities(MolgenisUser molgenisUser) throws DatabaseException
 	{
-		List<MolgenisGroupMember> groupMembers = unsecuredDatabase.find(MolgenisGroupMember.class, new QueryRule(
-				MolgenisGroupMember.MOLGENISUSER, Operator.EQUALS, molgenisUser));
+		List<MolgenisGroupMember> groupMembers = dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser));
+
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
 			List<MolgenisGroup> molgenisGroups = Lists.transform(groupMembers,
@@ -111,8 +112,8 @@ public class MolgenisUserDetailsService implements UserDetailsService
 						}
 					});
 
-			return unsecuredDatabase.find(GroupAuthority.class, new QueryRule(GroupAuthority.MOLGENISGROUP,
-					Operator.IN, molgenisGroups));
+			return dataService.findAllAsList(GroupAuthority.ENTITY_NAME,
+					new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups));
 		}
 		return null;
 	}

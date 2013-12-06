@@ -12,7 +12,7 @@
 	var forms = [];
 </script>
 
-<form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??>/${form.primaryKey}</#if>">
+<form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??>/${form.primaryKey?c}</#if>">
 	<#if back??>
 		<a href="${back}" class="pull-left">
 			<div id="back">
@@ -39,6 +39,7 @@
 				<div class="alert alert-error">
   					<button type="button" class="close">&times;</button>
   					<strong>Error saving ${form.title}</strong>: <span id="error-message-content"></span>
+  					<p id="error-message-details"></p>
 				</div>
 			</div>
 		</div>

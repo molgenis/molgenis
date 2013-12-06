@@ -1,7 +1,6 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
 	
-	var molgenis = w.molgenis = w.molgenis || {};
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient(false);
 	var NR_ROWS_PER_PAGE = 10;
@@ -9,7 +8,7 @@
 	var selectedEntityId = null;//Id of the selected entity in the master list
 	var search = null;
 	
-	ns.buildTableBody = function(formIndex) {
+	ns.buildTableBody = function(formIndex, isPageChange) {
 		var currentPage = currentPages[formIndex];
 		var expands = null;
 		$.each(forms[formIndex].meta.fields, function(index, field) {
@@ -69,7 +68,7 @@
 				if (entity.hasOwnProperty(fieldName)) {
 					//TODO support deeper nesting of xref fields
 					if (field.mref) {
-							
+						
 						$.each(entity[fieldName]['items'], function(index, mrefEntity) {
 							if (index > 0) {
 								value += ', ';
@@ -118,8 +117,10 @@
 		});
 			
 		$('#entity-count-' + formIndex).html(entities.total);
-		ns.updatePager(formIndex, entities.total, NR_ROWS_PER_PAGE);
-	}
+		if(!isPageChange) {
+			ns.updatePager(formIndex, entities.total, NR_ROWS_PER_PAGE);
+		}
+	};
 	
 	ns.deleteEntity = function(uri, formIndex) {
 		ns.hideAlerts();
@@ -132,13 +133,18 @@
 					$('#success-message-content').html(forms[formIndex].title + ' deleted.');
 					$('#success-message').show();
 				},
-				error: function() {
+				error: function(xhr) {
+					var messages = [];
+					$.each(JSON.parse(xhr.responseText).errors, function(index, error) {
+						messages.push(error.message);
+					});
 					$('#error-message-content').html('Could not delete ' + forms[formIndex].title + '.');
+					$('#error-message-details').html('Details: ' + messages.join('\n'));
 					$('#error-message').show();
 				}
 			});
 		}
-	}
+	};
 	
 	ns.updateSubForms = function() {
 		for (var i = 1; i < forms.length; i++) {
@@ -149,73 +155,24 @@
 			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId + '&back=' + encodeURIComponent(CURRENT_URI);
 			$('#create-' + i).attr('href', href);
 		}
-	}
+	};
 	
 	ns.hideAlerts = function() {
 		$('#success-message').hide();
 		$('#error-message').hide();
-	}
+	};
 	
-	//TODO make general pager also for dataexplorer
 	ns.updatePager = function(formIndex, nrRows, nrRowsPerPage) {
-		$('#data-table-pager-' + formIndex).empty();
-		var nrPages = Math.ceil(nrRows / nrRowsPerPage);
-		if (nrPages <= 1)
-			return;
-
-		var pager = $('#data-table-pager-' + formIndex);
-		var ul = $('<ul>');
-		pager.append(ul);
-
-		if (currentPages[formIndex] == 1) {
-			ul.append($('<li class="disabled"><span>&laquo;</span></li>'));
-		} else {
-			var prev = $('<li><a href="#">&laquo;</a></li>');
-			prev.click(function(e) {
-				currentPages[formIndex]--;
-				ns.buildTableBody(formIndex);
-				return false;
-			});
-			ul.append(prev);
-		}
-
-		for ( var i = 1; i <= nrPages; ++i) {
-			if (i == currentPages[formIndex]) {
-				ul.append($('<li class="active"><span>' + i + '</span></li>'));
-
-			} else if ((i == 1) || (i == nrPages) || ((i > currentPages[formIndex] - 3) && (i < currentPages[formIndex] + 3)) || ((i < 7) && (currentPages[formIndex] < 5))
-					|| ((i > nrPages - 6) && (currentPages[formIndex] > nrPages - 4))) {
-
-				var p = $('<li><a href="#">' + i + '</a></li>');
-				p.click((function(pageNr) {
-					return function() {
-						currentPages[formIndex] = pageNr;
-						ns.buildTableBody(formIndex);
-						return false;
-					};
-				})(i));
-
-				ul.append(p);
-			} else if ((i == 2) || (i == nrPages - 1)) {
-				ul.append($('<li class="disabled"><span>...</span></li>'));
-
+		currentPages[formIndex] = 1;
+		$('#data-table-pager-' + formIndex).pager({
+			'nrItems' : nrRows,
+			'nrItemsPerPage': nrRowsPerPage,
+			'onPageChange' : function(data) {
+				currentPages[formIndex] = data.page;
+				ns.buildTableBody(formIndex, true);
 			}
-		}
-
-		if (currentPages[formIndex] == nrPages) {
-			ul.append($('<li class="disabled"><span>&raquo;</span></li>'));
-		} else {
-			var next = $('<li><a href="#">&raquo;</a></li>');
-			next.click(function() {
-				currentPages[formIndex]++;
-				ns.buildTableBody(formIndex);
-				return false;
-			});
-			ul.append(next);
-		}
-
-		pager.append($('</ul>'));
-	}
+		});
+	};
 	
 	ns.refresh = function() {
 		//Build master tables
@@ -226,7 +183,7 @@
 		if (forms.length > 1) {
 			ns.updateSubForms();
 		}
-	}
+	};
 	
 	$(function() {
 
@@ -255,4 +212,4 @@
 		});
 	});
 	
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

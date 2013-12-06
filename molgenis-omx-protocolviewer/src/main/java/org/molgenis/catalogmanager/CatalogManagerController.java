@@ -30,7 +30,8 @@ public class CatalogManagerController extends MolgenisPluginController
 {
 	private static final Logger LOG = Logger.getLogger(CatalogManagerController.class);
 
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "catalogmanager";
+	public static final String ID = "catalogmanager";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String LOAD_LIST_URI = "/load-list";
 	public static final String VIEW_NAME = "view-catalogmanager";
 
@@ -57,10 +58,10 @@ public class CatalogManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String listCatalogs(Model model)
 	{
-		List<CatalogMeta> catalogs = catalogManagerService.findCatalogs();
-		LOG.debug("Got [" + catalogs.size() + "] catalogs from service");
+		Iterable<CatalogMeta> catalogs = catalogManagerService.findCatalogs();
+		LOG.debug("Got catalogs from service");
 
-		List<CatalogMetaModel> models = new ArrayList<CatalogMetaModel>(catalogs.size());
+		List<CatalogMetaModel> models = new ArrayList<CatalogMetaModel>();
 		for (CatalogMeta catalog : catalogs)
 		{
 			boolean catalogLoaded;
@@ -93,7 +94,8 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/load", params = "load", method = RequestMethod.POST)
-	public String loadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
+	public String loadCatalog(@RequestParam(value = "id", required = false)
+	String id, Model model)
 	{
 		try
 		{
@@ -124,7 +126,8 @@ public class CatalogManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/load", params = "unload", method = RequestMethod.POST)
-	public String unloadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
+	public String unloadCatalog(@RequestParam(value = "id", required = false)
+	String id, Model model)
 	{
 		try
 		{
@@ -156,7 +159,8 @@ public class CatalogManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getCatalog(@PathVariable String id) throws UnknownCatalogException
+	public CatalogModel getCatalog(@PathVariable
+	String id) throws UnknownCatalogException
 	{
 		Catalog catalog = catalogManagerService.getCatalog(id);
 		return CatalogModelBuilder.create(catalog);

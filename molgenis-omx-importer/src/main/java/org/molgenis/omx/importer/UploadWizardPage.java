@@ -14,36 +14,61 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.io.TableReader;
 import org.molgenis.io.TableReaderFactory;
 import org.molgenis.io.TupleReader;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.util.ApplicationUtil;
+import org.molgenis.ui.wizard.AbstractWizardPage;
+import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.tuple.Tuple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 
-public class UploadWizardPage extends WizardPage
+@Component
+public class UploadWizardPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
-
 	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
+	private final transient DataService dataService;
+	private final transient EntitiesValidator entitiesValidator;
 
-	public UploadWizardPage()
+	@Autowired
+	public UploadWizardPage(DataService dataService, EntitiesValidator entitiesValidator)
 	{
-		super("Upload file");
+		this.dataService = dataService;
+		this.entitiesValidator = entitiesValidator;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		if (entitiesValidator == null) throw new IllegalArgumentException("EntitiesValidator is null");
 	}
 
 	@Override
-	public void handleRequest(Database db, HttpServletRequest request)
+	public String getTitle()
 	{
+		return "Upload file";
+	}
+
+	@Override
+	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
+	{
+		if (!(wizard instanceof ImportWizard))
+		{
+			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
+					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
+		}
+
+		ImportWizard importWizard = (ImportWizard) wizard;
 		String entityImportOption = request.getParameter("entity_option");
 
-		ImportWizard importWizard = getWizard();
 		importWizard.setEntityImportOption(entityImportOption);
 
 		try
@@ -52,29 +77,31 @@ public class UploadWizardPage extends WizardPage
 			Part part = request.getPart("upload");
 			if (part != null)
 			{
-				file = FileUploadUtils.saveToTempFile(part);
+				file = FileUploadUtils.saveToTempFolder(part);
 			}
 
 			if (file == null)
 			{
-				getWizard().setErrorMessage("No file selected");
+				result.addError(new ObjectError("wizard", "No file selected"));
 			}
 			else
 			{
-				validateInput(db, file);
+				return validateInput(file, importWizard, result);
 			}
 		}
 		catch (Exception e)
 		{
-			getWizard().setErrorMessage("Error validating import file: " + e.getMessage());
+			result.addError(new ObjectError("wizard", "Error validating import file: " + e.getMessage()));
 			logger.error("Exception validating import file", e);
 		}
+
+		return null;
 	}
 
-	private void validateInput(Database db, File file) throws Exception
+	private String validateInput(File file, ImportWizard wizard, BindingResult result) throws Exception
 	{
 		// validate entity sheets
-		EntitiesValidationReport validationReport = ApplicationUtil.getEntitiesValidator().validate(file);
+		EntitiesValidationReport validationReport = entitiesValidator.validate(file);
 
 		// remove data sheets
 		Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();
@@ -89,7 +116,7 @@ public class UploadWizardPage extends WizardPage
 			}
 		}
 
-		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(db, file);
+		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(dataService, file);
 
 		// determine if validation succeeded
 		boolean ok = true;
@@ -114,27 +141,30 @@ public class UploadWizardPage extends WizardPage
 			}
 		}
 
+		String msg = null;
 		if (ok)
 		{
-			getWizard().setFile(file);
-			getWizard().setSuccessMessage("File is validated and can be imported.");
+			wizard.setFile(file);
+			msg = "File is validated and can be imported.";
 		}
 		else
 		{
-			getWizard().setValidationMessage(
-					"File did not pass validation see results below. Please resolve the errors and try again.");
+			wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
 		}
 
 		// if no error, set prognosis, set file, and continue
-		getWizard().setEntitiesImportable(entitiesImportable);
-		getWizard().setDataImportable(dataSetsImportable);
-		getWizard().setFieldsDetected(validationReport.getFieldsImportable());
-		getWizard().setFieldsRequired(validationReport.getFieldsRequired());
-		getWizard().setFieldsAvailable(validationReport.getFieldsAvailable());
-		getWizard().setFieldsUnknown(validationReport.getFieldsUnknown());
+		wizard.setEntitiesImportable(entitiesImportable);
+		wizard.setDataImportable(dataSetsImportable);
+		wizard.setFieldsDetected(validationReport.getFieldsImportable());
+		wizard.setFieldsRequired(validationReport.getFieldsRequired());
+		wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
+		wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
+
+		return msg;
 	}
 
-	private Map<String, Boolean> validateDataSetInstances(Database db, File file) throws IOException, DatabaseException
+	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException,
+			DatabaseException
 	{
 		TableReader tableReader = TableReaderFactory.create(file);
 		try
@@ -174,7 +204,8 @@ public class UploadWizardPage extends WizardPage
 
 					// Check if dataset is present in the excel or in the database
 					boolean canImport = datasetIdentifiers.contains(identifier)
-							|| (DataSet.findByIdentifier(db, identifier) != null);
+							|| (dataService.findOne(DataSet.ENTITY_NAME,
+									new QueryImpl().eq(DataSet.IDENTIFIER, identifier)) != null);
 
 					dataSetValidationMap.put(identifier, canImport);
 				}

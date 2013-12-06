@@ -4,20 +4,7 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "catalogmanager.js"]>
 <@header css js/>
 	<div class="row-fluid">
-		<div class="span2"></div>
-		<div class="span8">
-		<#if errorMessage??>
-			<div class="alert alert-error">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				${errorMessage}
-			</div>
-		</#if>
-		<#if successMessage??>
-			<div class="alert alert-success">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				${successMessage}
-			</div>
-		</#if>		
+		<div class="span8 offset2">
 		<#if catalogs??>	
 			<div class="well">
 				<div class="row-fluid">
@@ -74,7 +61,6 @@
 			</div>
 		</#if>
 		</div>
-		<div class="span2"></div>
 	</div>
 	<script>
 	$(function() {

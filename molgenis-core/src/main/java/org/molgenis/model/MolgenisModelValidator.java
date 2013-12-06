@@ -2,9 +2,11 @@ package org.molgenis.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
@@ -127,13 +129,13 @@ public class MolgenisModelValidator
 		for (Entity e : model.getEntities())
 		{
 			// maximum num of chars in oracle table name of column is 30
-			if (options.db_driver.toLowerCase().contains("oracle") && e.getName().length() > 30)
+			if (e.getName().length() > 30)
 			{
 				throw new MolgenisModelException(String.format("table name %s is longer than %d", e.getName(), 30));
 			}
 			for (Field f : e.getFields())
 			{
-				if (options.db_driver.toLowerCase().contains("oracle") && f.getName().length() > 30)
+				if (f.getName().length() > 30)
 				{
 					throw new MolgenisModelException(String.format("field name %s is longer than %d", f.getName(), 30));
 				}
@@ -320,7 +322,7 @@ public class MolgenisModelValidator
 					String mref_name = xref_field_from.getMrefName(); // explicit
 
 					// if mref_name longer than 30 throw error
-					if (options.db_driver.toLowerCase().contains("oracle") && mref_name.length() > 30)
+					if (mref_name.length() > 30)
 					{
 						throw new MolgenisModelException("mref_name cannot be longer then 30 characters, found: "
 								+ mref_name);
@@ -925,14 +927,12 @@ public class MolgenisModelValidator
 			throws MolgenisModelException
 	{
 		logger.debug("check for JAVA and SQL reserved words...");
-		List<String> keywords = new ArrayList<String>();
-		// keywords.addAll(Arrays.asList(MOLGENIS_KEYWORDS));
+		Set<String> keywords = new HashSet<String>();
 		keywords.addAll(Arrays.asList(JAVA_KEYWORDS));
 		keywords.addAll(Arrays.asList(JAVASCRIPT_KEYWORDS));
 		keywords.addAll(Arrays.asList(ORACLE_KEYWORDS));
-
-		if (options.db_driver.contains("mysql")) keywords.addAll(Arrays.asList(MYSQL_KEYWORDS));
-		if (options.db_driver.contains("hsql")) keywords.addAll(Arrays.asList(HSQL_KEYWORDS));
+		keywords.addAll(Arrays.asList(MYSQL_KEYWORDS));
+		// keywords.addAll(Arrays.asList(HSQL_KEYWORDS));
 
 		if (model.getName().contains(" "))
 		{

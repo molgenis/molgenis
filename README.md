@@ -1,5 +1,3 @@
-[![Build Status](http://molgenis.org/jenkins/job/new-molgenis/badge/icon)](http://molgenis.org/jenkins/job/new-molgenis/)
-
 # Welcome to MOLGENIS
 
 MOLGENIS is an collaborative open source project on a mission to generate great software infrastructure for life science research. Each app in the MOLGENIS family comes with rich data management interface and plug-in integration of analysis tools in R, Java and web services.
@@ -73,11 +71,17 @@ Give create a database with permissions to molgenis user:
 
 ## 7. Configure the default admin password
 
-Create a file called molgenis-server.properties in your home folder (so ~/molgenis-server.properties)
+Create the directory ~/.molgenis/omx and create a file called molgenis-server.properties in this folder (~ is your home folder)
 
-Add a property "admin.password" to this file, so the content becomes "admin.password=admin"
+Add user and database properties to this file, such as this example:
 
-If the property is not present the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
+    db_user=molgenis
+    db_password=molgenis
+    db_uri=jdbc:mysql://localhost/omx
+    admin.password=admin
+    user.password=admin
+
+If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
 
 ## 8. Run the OMX app (example)
 
@@ -85,16 +89,18 @@ Right click 'molgenis-app-omx' -> Run as ... -> Maven build ...
 
 In the 'goals' box type in 'jetty:start'
 
-Choose Run. Now Jetty will be started.
+Before running, go the the 'JRE' tab and add the the following VM arguments:
+
+    -XX:MaxPermSize=512M
+    -Xmx2g
+
+This will add memory for the application to use.
+
+Now go back to the previous tab and Choose Run. Jetty will be started.
 
 Open your browser at http://localhost:8080/
 
 You should see the application. Login as 'admin', 'admin' to be able to upload and view data, create users, etc etc.
-
-It is advised to add a bit more memory to run the application. Under 'Run Configurations', select the Maven Build that starts the application. Go to the 'JRE' tab, and add some VM arguments:
-
-    -XX:MaxPermSize=512M
-    -Xmx2g
 
 ## 9. Keep your code up to date
 
