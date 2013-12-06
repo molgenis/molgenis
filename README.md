@@ -18,9 +18,15 @@ Pick a folder for your Git repositories, e.g.:
 Clone your fork to this folder:
 
     git clone https://github.com/<yourname>/molgenis.git
-   
+
+Optionally select stable molgenis version:
+
+    git fetch --tags origin
+    git checkout -b <tag name: see https://github.com/molgenis/molgenis/releases>
+    
 ## 3. Install and configure eclipse
 
+Compiling MOLGENIS requires Java 7.
 MOLGENIS is created with help of Maven and Freemarker. You need a few eclipse plugins to work with those.
 
 Important: get the LATEST version of Eclipse and all plugins mentioned. For example, using Eclipse Juno Release 1 or lower might result in infinite build loops.
