@@ -54,7 +54,7 @@
 					if($('#wizardForm').data('childElements') === null || $('#wizardForm').data('childElements') === undefined)
 						$('#wizardForm').data('childElements', childElements);
 					var items = [];
-					items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message : </strong></div>');
+					items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message </strong></div>');
 					items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient</p></div></div>');
 					$('#wizardForm').html(items.join(''));
 					setTimeout(function(){
@@ -86,7 +86,7 @@
 					if(response.matchePercentage === 0){
 						var width = $(progressBarElement).width();
 						var parentWidth = $(progressBarElement).offsetParent().width();
-						var percent = 100 * width / parentWidth + 5;
+						var percent = 100 * width / parentWidth + 4;
 						$(progressBarElement).width(percent + '%');
 					}else if(response.matchePercentage === 100){
 						$(progressBarElement).width(response.matchePercentage + '%');

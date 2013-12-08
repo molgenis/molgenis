@@ -12,8 +12,6 @@
 			<div class="bar text-align-center"></div>
 		</div>
 	</div>
-	<div id="existing-mapping-div" class="row-fluid">
-	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;

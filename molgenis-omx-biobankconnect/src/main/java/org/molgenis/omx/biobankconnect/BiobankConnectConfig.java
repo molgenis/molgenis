@@ -9,6 +9,7 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
@@ -33,6 +34,7 @@ public class BiobankConnectConfig
 	}
 
 	@Bean
+	@Scope("prototype")
 	public OntologyMatcher ontologyMatcher()
 	{
 		return new AsyncOntologyMatcher();

@@ -1,6 +1,5 @@
 package org.molgenis.omx.biobankconnect.ontologymatcher;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,8 +69,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final PorterStemmer stemmer = new PorterStemmer();
-	private long totalNumber = 0;
-	private int finishedNumber = 0;
+	// private long totalNumber = 0;
+	// private int finishedNumber = 0;
 
 	@Autowired
 	@Qualifier("unsecuredDatabase")
@@ -102,12 +101,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	@Override
-	public Integer matchPercentage()
+	public Integer matchPercentage(String currentUserName)
 	{
-		DecimalFormat df = new DecimalFormat("#.##");
-		Double percentage = totalNumber == 0 ? new Double(0) : ((double) finishedNumber) / totalNumber;
-		percentage = Double.parseDouble(df.format(percentage * 100));
-		return percentage.intValue();
+		return currentUserStatus.getPercentageOfProcessForUser(currentUserName);
 	}
 
 	@Override
@@ -143,7 +139,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
 			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet,
 					queryRules, null));
-			totalNumber = result.getTotalHitCount();
+
+			currentUserStatus.setUserTotalNumberOfQueries(userName, result.getTotalHitCount());
+			// totalNumber = result.getTotalHitCount();
 
 			for (Hit hit : result.getSearchHits())
 			{
@@ -242,7 +240,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							}
 						}
 					}
-					finishedNumber++;
+					// finishedNumber++;
+					currentUserStatus.incrementFinishedNumberOfQueries(userName);
 				}
 			}
 
@@ -297,8 +296,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		{
 			runningProcesses.decrementAndGet();
 			currentUserStatus.setUserStatus(userName, false);
-			totalNumber = 0;
-			finishedNumber = 0;
+			// totalNumber = 0;
+			// finishedNumber = 0;
 		}
 	}
 

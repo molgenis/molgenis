@@ -143,10 +143,10 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(value = "/running", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Boolean> isRunning()
+	public Map<String, Boolean> isRunning() throws DatabaseException
 	{
 		Map<String, Boolean> result = new HashMap<String, Boolean>();
-		result.put("isRunning", currentUserStatus.getUserstatus(wizard.getUserName()));
+		result.put("isRunning", currentUserStatus.getUserstatus(userAccountService.getCurrentUser().getUsername()));
 		return result;
 	}
 
@@ -212,7 +212,7 @@ public class BiobankConnectController extends AbstractWizardController
 		ontologyMatcher.match(userAccountService.getCurrentUser().getUsername(), request.getSourceDataSetId(),
 				request.getSelectedDataSetIds(), request.getFeatureId());
 		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
-				ontologyMatcher.matchPercentage());
+				ontologyMatcher.matchPercentage(userAccountService.getCurrentUser().getUsername()));
 		return response;
 	}
 
@@ -220,8 +220,9 @@ public class BiobankConnectController extends AbstractWizardController
 	@ResponseBody
 	public OntologyMatcherResponse checkMatch() throws DatabaseException
 	{
-		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
-				ontologyMatcher.matchPercentage());
+		OntologyMatcherResponse response = new OntologyMatcherResponse(
+				currentUserStatus.getUserstatus(userAccountService.getCurrentUser().getUsername()),
+				ontologyMatcher.matchPercentage(userAccountService.getCurrentUser().getUsername()));
 		return response;
 	}
 

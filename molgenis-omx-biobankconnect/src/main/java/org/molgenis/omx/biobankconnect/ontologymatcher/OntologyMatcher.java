@@ -12,7 +12,7 @@ public interface OntologyMatcher
 	void match(String userName, Integer selectedCatalogue, List<Integer> cataloguesToMatch, Integer sourceDataSetId)
 			throws DatabaseException;
 
-	Integer matchPercentage();
+	Integer matchPercentage(String currentUserName);
 
 	boolean isRunning();
 
