@@ -6,15 +6,29 @@ import java.util.Map;
 
 public class CurrentUserStatus
 {
-	private final Map<String, Boolean> userStatus;
+	public static enum Stage
+	{
+		DeleteMapping, CreateMapping, StoreMapping;
+	}
+
+	private final Map<String, Stage> userCurrentStage;
+	private final Map<String, Boolean> userCurrentRunning;
 	private final Map<String, Long> totalNumberOfQueriesForUser;
 	private final Map<String, Integer> finishedNumberOfQueriesForUser;
 
 	public CurrentUserStatus()
 	{
-		userStatus = new HashMap<String, Boolean>();
+		userCurrentStage = new HashMap<String, Stage>();
+		userCurrentRunning = new HashMap<String, Boolean>();
 		totalNumberOfQueriesForUser = new HashMap<String, Long>();
 		finishedNumberOfQueriesForUser = new HashMap<String, Integer>();
+	}
+
+	public void setUserCurrentStage(String userName, Stage stage)
+	{
+		totalNumberOfQueriesForUser.remove(userName);
+		finishedNumberOfQueriesForUser.remove(userName);
+		userCurrentStage.put(userName, stage);
 	}
 
 	public void setUserTotalNumberOfQueries(String userName, Long totalNumberOfQueries)
@@ -32,7 +46,7 @@ public class CurrentUserStatus
 
 	public int getPercentageOfProcessForUser(String userName)
 	{
-		if (!getUserstatus(userName)) return 100;
+		if (!getUserIsRunning(userName)) return 100;
 		if (!totalNumberOfQueriesForUser.containsKey(userName) || !finishedNumberOfQueriesForUser.containsKey(userName)) return 0;
 
 		long totalNumber = totalNumberOfQueriesForUser.get(userName);
@@ -43,17 +57,30 @@ public class CurrentUserStatus
 		return percentage.intValue();
 	}
 
-	public Boolean getUserstatus(String userName)
+	public String getUserCurrentStage(String userName)
 	{
-		return userStatus.containsKey(userName) && userStatus.get(userName);
+		return userCurrentStage.containsKey(userName) ? userCurrentStage.get(userName).toString() : null;
 	}
 
-	public void setUserStatus(String userName, Boolean status)
+	public Boolean getUserIsRunning(String userName)
 	{
-		if (status) userStatus.put(userName, status);
-		else if (userStatus.containsKey(userName)) userStatus.remove(userName);
+		return userCurrentRunning.containsKey(userName) && userCurrentRunning.get(userName);
+	}
 
-		if (totalNumberOfQueriesForUser.containsKey(userName)) totalNumberOfQueriesForUser.remove(userName);
-		if (finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumberOfQueriesForUser.remove(userName);
+	public void setUserIsRunning(String userName, Boolean status)
+	{
+		if (status) userCurrentRunning.put(userName, status);
+		else
+		{
+			if (userCurrentRunning.containsKey(userName)) userCurrentRunning.remove(userName);
+			if (totalNumberOfQueriesForUser.containsKey(userName)) totalNumberOfQueriesForUser.remove(userName);
+			if (finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumberOfQueriesForUser.remove(userName);
+			if (userCurrentStage.containsKey(userName)) userCurrentStage.remove(userName);
+		}
+	}
+
+	public Boolean hasOtherUsers()
+	{
+		return userCurrentRunning.size() > 1;
 	}
 }

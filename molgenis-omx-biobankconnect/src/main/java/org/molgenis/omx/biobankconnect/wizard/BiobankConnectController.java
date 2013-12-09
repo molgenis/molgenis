@@ -146,7 +146,7 @@ public class BiobankConnectController extends AbstractWizardController
 	public Map<String, Boolean> isRunning() throws DatabaseException
 	{
 		Map<String, Boolean> result = new HashMap<String, Boolean>();
-		result.put("isRunning", currentUserStatus.getUserstatus(userAccountService.getCurrentUser().getUsername()));
+		result.put("isRunning", currentUserStatus.getUserIsRunning(userAccountService.getCurrentUser().getUsername()));
 		return result;
 	}
 
@@ -209,10 +209,11 @@ public class BiobankConnectController extends AbstractWizardController
 	public OntologyMatcherResponse rematch(@RequestBody
 	OntologyMatcherRequest request) throws DatabaseException
 	{
-		ontologyMatcher.match(userAccountService.getCurrentUser().getUsername(), request.getSourceDataSetId(),
-				request.getSelectedDataSetIds(), request.getFeatureId());
-		OntologyMatcherResponse response = new OntologyMatcherResponse(ontologyMatcher.isRunning(),
-				ontologyMatcher.matchPercentage(userAccountService.getCurrentUser().getUsername()));
+		String userName = userAccountService.getCurrentUser().getUsername();
+		ontologyMatcher.match(userName, request.getSourceDataSetId(), request.getSelectedDataSetIds(),
+				request.getFeatureId());
+		OntologyMatcherResponse response = new OntologyMatcherResponse(null, ontologyMatcher.isRunning(),
+				ontologyMatcher.matchPercentage(userName), null);
 		return response;
 	}
 
@@ -220,9 +221,10 @@ public class BiobankConnectController extends AbstractWizardController
 	@ResponseBody
 	public OntologyMatcherResponse checkMatch() throws DatabaseException
 	{
-		OntologyMatcherResponse response = new OntologyMatcherResponse(
-				currentUserStatus.getUserstatus(userAccountService.getCurrentUser().getUsername()),
-				ontologyMatcher.matchPercentage(userAccountService.getCurrentUser().getUsername()));
+		String userName = userAccountService.getCurrentUser().getUsername();
+		OntologyMatcherResponse response = new OntologyMatcherResponse(currentUserStatus.getUserCurrentStage(userName),
+				currentUserStatus.getUserIsRunning(userName), ontologyMatcher.matchPercentage(userName),
+				currentUserStatus.hasOtherUsers());
 		return response;
 	}
 

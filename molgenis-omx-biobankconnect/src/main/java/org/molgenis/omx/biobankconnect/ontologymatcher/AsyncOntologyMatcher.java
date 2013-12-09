@@ -23,6 +23,7 @@ import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus.Stage;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -69,8 +70,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final PorterStemmer stemmer = new PorterStemmer();
-	// private long totalNumber = 0;
-	// private int finishedNumber = 0;
 
 	@Autowired
 	@Qualifier("unsecuredDatabase")
@@ -117,14 +116,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			throws DatabaseException
 	{
 		runningProcesses.incrementAndGet();
-		currentUserStatus.setUserStatus(userName, true);
+		currentUserStatus.setUserIsRunning(userName, true);
 		dataSetsToMatch.remove(selectedDataSet);
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
 		Map<String, List<ObservationSet>> observationSetsPerDataSet = new HashMap<String, List<ObservationSet>>();
 		try
 		{
-			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
 			List<QueryRule> queryRules = new ArrayList<QueryRule>();
 			if (featureId == null)
 			{
@@ -140,8 +138,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet,
 					queryRules, null));
 
+			currentUserStatus.setUserCurrentStage(userName, Stage.DeleteMapping);
+			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
+
+			currentUserStatus.setUserCurrentStage(userName, Stage.CreateMapping);
 			currentUserStatus.setUserTotalNumberOfQueries(userName, result.getTotalHitCount());
-			// totalNumber = result.getTotalHitCount();
 
 			for (Hit hit : result.getSearchHits())
 			{
@@ -268,16 +269,20 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			listOfNewObservedValues.addAll(valuesForObservationSets);
 			database.add(listOfNewObservedValues);
 
+			currentUserStatus.setUserCurrentStage(userName, Stage.StoreMapping);
+			currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsToMatch.size());
 			if (featureId != null)
 			{
 				for (Entry<String, List<ObservationSet>> entry : observationSetsPerDataSet.entrySet())
 				{
 					searchService.updateIndexTupleTable(entry.getKey(),
 							new StoreMappingTable(entry.getKey(), entry.getValue(), database));
+					currentUserStatus.incrementFinishedNumberOfQueries(userName);
 				}
 			}
 			else
 			{
+
 				for (Integer catalogueId : dataSetsToMatch)
 				{
 					StringBuilder dataSetIdentifier = new StringBuilder();
@@ -285,6 +290,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							.append(catalogueId);
 					searchService.indexTupleTable(dataSetIdentifier.toString(),
 							new StoreMappingTable(dataSetIdentifier.toString(), database));
+					currentUserStatus.incrementFinishedNumberOfQueries(userName);
 				}
 			}
 		}
@@ -295,9 +301,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		finally
 		{
 			runningProcesses.decrementAndGet();
-			currentUserStatus.setUserStatus(userName, false);
-			// totalNumber = 0;
-			// finishedNumber = 0;
+			currentUserStatus.setUserIsRunning(userName, false);
 		}
 	}
 
@@ -314,27 +318,52 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		if (featureId == null)
 		{
 			createMappingStore(userName, selectedDataSet, dataSetsToMatch);
-			deleteExistingRecords(dataSetsForMapping);
+			deleteExistingRecords(userName, dataSetsForMapping);
 		}
 		else removeExistingMappings(featureId, dataSetsForMapping);
 	}
 
-	private void deleteExistingRecords(List<String> dataSetsForMapping) throws DatabaseException
+	private void deleteExistingRecords(String userName, List<String> dataSetsForMapping) throws DatabaseException
 	{
-		List<ObservationSet> listOfObservationSets = database.find(ObservationSet.class, new QueryRule(
-				ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.IN, dataSetsForMapping));
-		if (listOfObservationSets.size() > 0)
+		currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsForMapping.size());
+		for (String dataSetIdentifier : dataSetsForMapping)
 		{
-			List<Integer> listOfObservationIdentifiers = new ArrayList<Integer>();
-			for (ObservationSet observation : listOfObservationSets)
+			List<ObservationSet> listOfObservationSets = database.find(ObservationSet.class, new QueryRule(
+					ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS, dataSetIdentifier));
+			if (listOfObservationSets.size() > 0)
 			{
-				listOfObservationIdentifiers.add(observation.getId());
+				List<Integer> listOfObservationIdentifiers = new ArrayList<Integer>();
+				for (ObservationSet observation : listOfObservationSets)
+				{
+					listOfObservationIdentifiers.add(observation.getId());
+				}
+				List<ObservedValue> listOfObservedValues = database.find(ObservedValue.class, new QueryRule(
+						ObservedValue.OBSERVATIONSET, Operator.IN, listOfObservationIdentifiers));
+				if (listOfObservedValues.size() > 0) database.remove(listOfObservedValues);
+				database.remove(listOfObservationSets);
 			}
-			List<ObservedValue> listOfObservedValues = database.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET, Operator.IN, listOfObservationIdentifiers));
-			if (listOfObservedValues.size() > 0) database.remove(listOfObservedValues);
-			database.remove(listOfObservationSets);
+			currentUserStatus.incrementFinishedNumberOfQueries(userName);
 		}
+		// List<ObservationSet> listOfObservationSets =
+		// database.find(ObservationSet.class, new QueryRule(
+		// ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.IN,
+		// dataSetsForMapping));
+		// if (listOfObservationSets.size() > 0)
+		// {
+		// List<Integer> listOfObservationIdentifiers = new
+		// ArrayList<Integer>();
+		// for (ObservationSet observation : listOfObservationSets)
+		// {
+		// listOfObservationIdentifiers.add(observation.getId());
+		// }
+		// List<ObservedValue> listOfObservedValues =
+		// database.find(ObservedValue.class, new QueryRule(
+		// ObservedValue.OBSERVATIONSET, Operator.IN,
+		// listOfObservationIdentifiers));
+		// if (listOfObservedValues.size() > 0)
+		// database.remove(listOfObservedValues);
+		// database.remove(listOfObservationSets);
+		// }
 	}
 
 	private void removeExistingMappings(Integer featureId, List<String> dataSetsForMapping) throws DatabaseException
