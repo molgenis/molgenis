@@ -57,7 +57,7 @@ public abstract class AbstractWizardController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/**", method = GET)
-	public String init()
+	public String init(HttpServletRequest request)
 	{
 		return VIEW_NAME;
 	}

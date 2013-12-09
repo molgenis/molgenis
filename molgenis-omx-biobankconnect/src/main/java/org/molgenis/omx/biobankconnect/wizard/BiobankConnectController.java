@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
@@ -103,7 +102,7 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@Override
 	@RequestMapping(value = "/**", method = GET)
-	public String init()
+	public String init(HttpServletRequest request)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		try
@@ -113,10 +112,12 @@ public class BiobankConnectController extends AbstractWizardController
 				if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 			}
 			wizard.setDataSets(dataSets);
+			currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
+					request.getRequestedSessionId());
 		}
-		catch (Exception e)
+		catch (DatabaseException e)
 		{
-			logger.error("Exception validating import file", e);
+			logger.error("Failed to retrieve entities from database", e);
 		}
 		return VIEW_NAME;
 	}
@@ -144,12 +145,13 @@ public class BiobankConnectController extends AbstractWizardController
 	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String importFeatures(@RequestParam
 	String dataSetName, @RequestParam
-	Part file, HttpSession session, Model model) throws IOException, TableException, DatabaseException
+	Part file, HttpServletRequest request, Model model) throws IOException, TableException, DatabaseException
 	{
 		File uploadFile = FileUploadUtils.saveToTempFolder(file);
 		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
 
-		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) session.getAttribute("biobankconnect");
+		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) request.getSession().getAttribute(
+				"biobankconnect");
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		List<DataSet> allDataSets = database.find(DataSet.class);
 		for (DataSet dataSet : allDataSets)
@@ -159,10 +161,9 @@ public class BiobankConnectController extends AbstractWizardController
 		biobankConnectWizard.setDataSets(dataSets);
 		logger.error(message);
 		if (message.length() > 0) model.addAttribute("message", message);
-		return init();
+		return init(request);
 	}
 
-	// TODO : requestParam
 	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
 	public String annotate(HttpServletRequest request) throws Exception
 	{
@@ -176,15 +177,14 @@ public class BiobankConnectController extends AbstractWizardController
 			}
 			ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId(), documentTypes);
 		}
-		return init();
+		return init(request);
 	}
 
-	// TODO : requestParam
 	@RequestMapping(value = "/annotate/remove", method = RequestMethod.POST)
 	public String removeAnnotations(HttpServletRequest request) throws Exception
 	{
 		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
-		return init();
+		return init(request);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
@@ -210,10 +210,13 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(value = "/running", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Boolean> isRunning() throws DatabaseException
+	public Map<String, Boolean> isRunning(HttpServletRequest request) throws DatabaseException
 	{
 		Map<String, Boolean> result = new HashMap<String, Boolean>();
-		result.put("isRunning", currentUserStatus.getUserIsRunning(userAccountService.getCurrentUser().getUsername()));
+		result.put(
+				"isRunning",
+				currentUserStatus.isUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
+						request.getRequestedSessionId()));
 		return result;
 	}
 
@@ -223,7 +226,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		OntologyMatcherResponse response = new OntologyMatcherResponse(currentUserStatus.getUserCurrentStage(userName),
-				currentUserStatus.getUserIsRunning(userName), ontologyMatcher.matchPercentage(userName),
+				currentUserStatus.isUserMatching(userName), ontologyMatcher.matchPercentage(userName),
 				currentUserStatus.hasOtherUsers());
 		return response;
 	}

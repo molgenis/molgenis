@@ -11,15 +11,17 @@ public class CurrentUserStatus
 		DeleteMapping, CreateMapping, StoreMapping;
 	}
 
+	private final Map<String, String> currentUsers;
 	private final Map<String, Stage> userCurrentStage;
-	private final Map<String, Boolean> userCurrentRunning;
+	private final Map<String, Boolean> userCurrentMatching;
 	private final Map<String, Long> totalNumberOfQueriesForUser;
 	private final Map<String, Integer> finishedNumberOfQueriesForUser;
 
 	public CurrentUserStatus()
 	{
+		currentUsers = new HashMap<String, String>();
 		userCurrentStage = new HashMap<String, Stage>();
-		userCurrentRunning = new HashMap<String, Boolean>();
+		userCurrentMatching = new HashMap<String, Boolean>();
 		totalNumberOfQueriesForUser = new HashMap<String, Long>();
 		finishedNumberOfQueriesForUser = new HashMap<String, Integer>();
 	}
@@ -46,7 +48,7 @@ public class CurrentUserStatus
 
 	public int getPercentageOfProcessForUser(String userName)
 	{
-		if (!getUserIsRunning(userName)) return 100;
+		if (!isUserMatching(userName)) return 100;
 		if (!totalNumberOfQueriesForUser.containsKey(userName) || !finishedNumberOfQueriesForUser.containsKey(userName)) return 0;
 
 		long totalNumber = totalNumberOfQueriesForUser.get(userName);
@@ -62,25 +64,41 @@ public class CurrentUserStatus
 		return userCurrentStage.containsKey(userName) ? userCurrentStage.get(userName).toString() : null;
 	}
 
-	public Boolean getUserIsRunning(String userName)
+	public Boolean isUserLoggedIn(String userName, String requestSessionId)
 	{
-		return userCurrentRunning.containsKey(userName) && userCurrentRunning.get(userName);
+		return currentUsers.containsKey(userName) && !currentUsers.get(userName).equalsIgnoreCase(requestSessionId);
+	}
+
+	public Boolean isUserMatching(String userName)
+	{
+		return userCurrentMatching.containsKey(userName) && userCurrentMatching.get(userName);
 	}
 
 	public void setUserIsRunning(String userName, Boolean status)
 	{
-		if (status) userCurrentRunning.put(userName, status);
+		if (status) userCurrentMatching.put(userName, status);
 		else
 		{
-			if (userCurrentRunning.containsKey(userName)) userCurrentRunning.remove(userName);
+			if (userCurrentMatching.containsKey(userName)) userCurrentMatching.remove(userName);
 			if (totalNumberOfQueriesForUser.containsKey(userName)) totalNumberOfQueriesForUser.remove(userName);
 			if (finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumberOfQueriesForUser.remove(userName);
 			if (userCurrentStage.containsKey(userName)) userCurrentStage.remove(userName);
 		}
 	}
 
+	public void setUserLoggedIn(String userName, String requestSessionId)
+	{
+		if (!currentUsers.containsKey(userName)) currentUsers.put(userName, requestSessionId);
+	}
+
+	public void removeCurrentUser(String userName, String userIpAddress)
+	{
+		if (currentUsers.containsKey(userName) && currentUsers.get(userName).equals(userIpAddress)) currentUsers
+				.remove(userName);
+	}
+
 	public Boolean hasOtherUsers()
 	{
-		return userCurrentRunning.size() > 1;
+		return userCurrentMatching.size() > 1;
 	}
 }
