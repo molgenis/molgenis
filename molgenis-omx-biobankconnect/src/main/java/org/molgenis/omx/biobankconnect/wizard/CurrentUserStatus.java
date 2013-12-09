@@ -3,6 +3,7 @@ package org.molgenis.omx.biobankconnect.wizard;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class CurrentUserStatus
 {
@@ -92,14 +93,27 @@ public class CurrentUserStatus
 		if (!currentUsers.containsKey(userName)) currentUsers.put(userName, requestSessionId);
 	}
 
-	public void removeCurrentUser(String userName, String userIpAddress)
+	public void removeCurrentUserBySessionId(String sessionId)
 	{
-		if (currentUsers.containsKey(userName) && currentUsers.get(userName).equals(userIpAddress)) currentUsers
-				.remove(userName);
+		String keyToRemove = null;
+		for (Entry<String, String> entry : currentUsers.entrySet())
+		{
+			if (entry.getValue().equals(sessionId))
+			{
+				keyToRemove = entry.getKey();
+				break;
+			}
+		}
+		if (keyToRemove != null) currentUsers.remove(keyToRemove);
 	}
 
 	public Integer getTotalNumberOfUsers()
 	{
 		return userCurrentMatching.size();
+	}
+
+	public Map<String, String> getCurrentUsers()
+	{
+		return currentUsers;
 	}
 }

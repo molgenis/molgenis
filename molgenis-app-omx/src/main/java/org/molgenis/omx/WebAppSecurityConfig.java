@@ -5,10 +5,7 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.molgenis.omx.biobankconnect.utils.BiobankConnectLogoutHandler;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -24,11 +21,6 @@ import org.springframework.security.core.authority.AuthorityUtils;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
-	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
-
-	@Autowired
-	private BiobankConnectLogoutHandler biobankConnectLogoutSuccessHandler;
-
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
@@ -232,15 +224,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll();
-
-		try
-		{
-			expressionInterceptUrlRegistry.and().logout().addLogoutHandler(biobankConnectLogoutSuccessHandler);
-		}
-		catch (Exception e)
-		{
-			logger.error(e.getMessage());
-		}
 
 	}
 
