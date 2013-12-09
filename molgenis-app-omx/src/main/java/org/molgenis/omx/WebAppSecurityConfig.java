@@ -38,7 +38,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.hasAnyAuthority(
 						defaultPluginAuthorities("home", "background", "news", "references", "contact",
 								"protocolviewer", "dataexplorer", "entityexplorer", "workflowdataentry",
-								"importwizard", "useraccount", "mappingmanager", "biobankconnect", "evaluation"))
+								"importwizard", "useraccount", "mappingmanager", "biobankconnect", "evaluation", "variome"))
 
 				// main menu plugins
 				.antMatchers("/menu/main/home/**", "/plugin/home/**")
@@ -67,6 +67,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/menu/main/genomebrowser/**", "/plugin/genomebrowser/**")
 				.hasAnyAuthority(defaultPluginAuthorities("genomebrowser"))
+				
+				.antMatchers("/menu/main/variome/**", "/plugin/variome/**")
+				.hasAnyAuthority(defaultPluginAuthorities("variome"))
 
 				.antMatchers("/plugin/protocolviewer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))

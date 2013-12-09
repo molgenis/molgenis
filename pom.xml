@@ -570,5 +570,6 @@
 		<module>molgenis-data-jpa</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
+		<module>molgenis-variome</module>
 	</modules>
 </project>

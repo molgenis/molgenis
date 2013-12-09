@@ -16,6 +16,7 @@
 		<plugin id="references" name="References" url="references"/>
 		<plugin id="contact" name="Contact" url="contact"/>
         <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
+       	<plugin id="variome" name="Variome" url="variome"/>
 		<menu label="Converters" name="converters">
 			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
 		</menu>
