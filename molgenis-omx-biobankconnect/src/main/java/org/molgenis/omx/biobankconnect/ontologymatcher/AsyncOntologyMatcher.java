@@ -762,9 +762,16 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			eachTerm = eachTerm.toLowerCase().trim();
 			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm))
 			{
-				stemmer.setCurrent(eachTerm);
-				stemmer.stem();
-				eachTerm = stemmer.getCurrent().toLowerCase();
+				try
+				{
+					stemmer.setCurrent(eachTerm);
+					stemmer.stem();
+					eachTerm = stemmer.getCurrent().toLowerCase();
+				}
+				catch (Exception e)
+				{
+					logger.error("Could not stem word : " + eachTerm, e);
+				}
 				newList.add(eachTerm);
 			}
 		}
