@@ -66,6 +66,7 @@ public class CurrentUserStatus
 
 	public Boolean isUserLoggedIn(String userName, String requestSessionId)
 	{
+		setUserLoggedIn(userName, requestSessionId);
 		return currentUsers.containsKey(userName) && !currentUsers.get(userName).equalsIgnoreCase(requestSessionId);
 	}
 
@@ -97,8 +98,8 @@ public class CurrentUserStatus
 				.remove(userName);
 	}
 
-	public Boolean hasOtherUsers()
+	public Integer getTotalNumberOfUsers()
 	{
-		return userCurrentMatching.size() > 1;
+		return userCurrentMatching.size();
 	}
 }

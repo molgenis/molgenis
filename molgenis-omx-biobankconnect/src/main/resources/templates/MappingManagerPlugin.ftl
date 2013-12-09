@@ -55,38 +55,34 @@
 </form>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			<#if isRunning?? && isRunning>
-			var items = [];
-			items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message : </strong></div>');
-			items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient</p></div></div>');
-			$('#wizardForm').html(items.join(''));
-			<#else>
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
-			molgenis.setContextURL(contextUrl.replace('/mappingmanager', '/biobankconnect'));
-			var dataSetIds = [];
-			<#list dataSets as dataset>
-				dataSetIds.push('${dataset.id?c}');
-			</#list>
-			molgenis.getMappingManager().changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
-			$('#selectedDataSet').change(function(){
-				molgenis.getMappingManager().changeDataSet('${userName}', $(this).val(), dataSetIds);
-			});
-			$('#downloadButton').click(function(){
-				molgenis.getMappingManager().downloadMappings();
-				return false;
-			});
-			$('#help-button').click(function(){
-				molgenis.getMappingManager().createHelpModal();
-			});
-			
-			$('#verify-button').click(function(){
-				$('#wizardForm').attr({
-					'action' : molgenis.getContextUrl() + '/mappingmanager/verify',
-					'method' : 'POST'
-				}).submit();
-			});
-			</#if>
+			contextUrl = contextUrl.replace('/mappingmanager', '/biobankconnect')
+			molgenis.setContextURL(contextUrl);
+			molgenis.ontologyMatcherRunning(function(){
+				var dataSetIds = [];
+				<#list dataSets as dataset>
+					dataSetIds.push('${dataset.id?c}');
+				</#list>
+				molgenis.getMappingManager().changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
+				$('#selectedDataSet').change(function(){
+					molgenis.getMappingManager().changeDataSet('${userName}', $(this).val(), dataSetIds);
+				});
+				$('#downloadButton').click(function(){
+					molgenis.getMappingManager().downloadMappings();
+					return false;
+				});
+				$('#help-button').click(function(){
+					molgenis.getMappingManager().createHelpModal();
+				});
+				
+				$('#verify-button').click(function(){
+					$('#wizardForm').attr({
+						'action' : molgenis.getContextUrl() + '/mappingmanager/verify',
+						'method' : 'POST'
+					}).submit();
+				});
+			}, contextUrl);
 		});
 	</script>
 <@footer/>	

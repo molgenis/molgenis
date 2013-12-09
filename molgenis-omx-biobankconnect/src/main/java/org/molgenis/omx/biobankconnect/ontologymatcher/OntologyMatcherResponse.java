@@ -3,15 +3,15 @@ package org.molgenis.omx.biobankconnect.ontologymatcher;
 public class OntologyMatcherResponse
 {
 	private final String stage;
-	private final Boolean otherUsers;
+	private final Integer totalUsers;
 	private final Boolean isRunning;
 	private final Integer matchePercentage;
 
-	public OntologyMatcherResponse(String stage, Boolean isRunning, Integer matchePercentage, Boolean otherUsers)
+	public OntologyMatcherResponse(String stage, Boolean isRunning, Integer matchePercentage, Integer totalUsers)
 	{
 		this.stage = stage;
 		this.isRunning = isRunning;
-		this.otherUsers = otherUsers;
+		this.totalUsers = totalUsers;
 		this.matchePercentage = matchePercentage;
 	}
 
@@ -30,8 +30,8 @@ public class OntologyMatcherResponse
 		return stage;
 	}
 
-	public Boolean getOtherUsers()
+	public Integer getTotalUsers()
 	{
-		return otherUsers;
+		return totalUsers;
 	}
 }
