@@ -70,11 +70,11 @@ function patientMutationTable(data) {
 			
 			var dallianceTrack = [ {
 				name : 'Patient ' + patientName,
-				uri : 'http://'+molgenisUrl+'/das/molgenis/patient'
+				uri : '/das/molgenis/patient'
 						+ patientId + '/',
 				desc : 'Mutations observed in patient '
 						+ patientName,
-				stylesheet_uri : 'http://'+molgenisUrl+'/css/patient-track.xml'
+				stylesheet_uri : '/css/patient-track.xml'
 			} ];
 			dalliance.addTier(dallianceTrack[0]);
 	    }
