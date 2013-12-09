@@ -55,7 +55,7 @@
 						$('#wizardForm').data('childElements', childElements);
 					var items = [];
 					items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message </strong></div>');
-					items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient</p></div></div>');
+					items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient or login as another user!</p></div></div>');
 					$('#wizardForm').html(items.join(''));
 					setTimeout(function(){
 						ns.ontologyMatcherRunning(callback);

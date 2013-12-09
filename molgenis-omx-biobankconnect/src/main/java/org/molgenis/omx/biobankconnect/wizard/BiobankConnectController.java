@@ -141,15 +141,6 @@ public class BiobankConnectController extends AbstractWizardController
 		return wizard;
 	}
 
-	@RequestMapping(value = "/running", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Boolean> isRunning() throws DatabaseException
-	{
-		Map<String, Boolean> result = new HashMap<String, Boolean>();
-		result.put("isRunning", currentUserStatus.getUserIsRunning(userAccountService.getCurrentUser().getUsername()));
-		return result;
-	}
-
 	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String importFeatures(@RequestParam
 	String dataSetName, @RequestParam
@@ -215,6 +206,15 @@ public class BiobankConnectController extends AbstractWizardController
 		OntologyMatcherResponse response = new OntologyMatcherResponse(null, ontologyMatcher.isRunning(),
 				ontologyMatcher.matchPercentage(userName), null);
 		return response;
+	}
+
+	@RequestMapping(value = "/running", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Boolean> isRunning() throws DatabaseException
+	{
+		Map<String, Boolean> result = new HashMap<String, Boolean>();
+		result.put("isRunning", currentUserStatus.getUserIsRunning(userAccountService.getCurrentUser().getUsername()));
+		return result;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/match/status", produces = APPLICATION_JSON_VALUE)
