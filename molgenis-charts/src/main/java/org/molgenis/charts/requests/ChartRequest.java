@@ -2,15 +2,15 @@ package org.molgenis.charts.requests;
 
 import javax.validation.constraints.NotNull;
 
-import org.molgenis.charts.Chart;
+import org.molgenis.charts.AbstractChart;
 
 public abstract class ChartRequest
 {
 	@NotNull
 	private String entity;
 	private String title;
-	private int width = Chart.DEFAULT_WITH;
-	private int height = Chart.DEFAULT_HEIGHT;
+	private int width = AbstractChart.DEFAULT_WITH;
+	private int height = AbstractChart.DEFAULT_HEIGHT;
 
 	public String getEntity()
 	{

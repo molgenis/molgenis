@@ -3,6 +3,8 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.molgenis.charts.ChartController;
 import org.molgenis.charts.ChartDataService;
 import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.data.DataService;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 public class ChartDataServiceImpl implements ChartDataService
 {
 	private final DataService dataService;
+	private static final Logger logger = Logger.getLogger(ChartDataServiceImpl.class);
 
 	@Autowired
 	public ChartDataServiceImpl(DataService dataService)

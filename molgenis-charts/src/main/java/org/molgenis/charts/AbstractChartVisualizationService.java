@@ -2,26 +2,26 @@ package org.molgenis.charts;
 
 import java.util.List;
 
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.AbstractChartType;
 import org.springframework.ui.Model;
 
 public abstract class AbstractChartVisualizationService implements ChartVisualizationService
 {
-	private final List<ChartType> chartTypes;
+	private final List<AbstractChartType> abstractChartTypes;
 
-	public AbstractChartVisualizationService(List<ChartType> chartTypes)
+	public AbstractChartVisualizationService(List<AbstractChartType> abstractChartTypes)
 	{
-		this.chartTypes = chartTypes;
+		this.abstractChartTypes = abstractChartTypes;
 	}
 
 	@Override
-	public List<ChartType> getCapabilities()
+	public List<AbstractChartType> getCapabilities()
 	{
-		return chartTypes;
+		return this.abstractChartTypes;
 	}
 
 	@Override
-	public String renderChart(Chart chart, Model model)
+	public String renderChart(AbstractChart chart, Model model)
 	{
 		if (!getCapabilities().contains(chart.getType()))
 		{
@@ -31,6 +31,6 @@ public abstract class AbstractChartVisualizationService implements ChartVisualiz
 		return renderChartInternal(chart, model);
 	}
 
-	protected abstract String renderChartInternal(Chart chart, Model model);
+	protected abstract String renderChartInternal(AbstractChart chart, Model model);
 
 }

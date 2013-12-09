@@ -10,9 +10,7 @@ public class XYData
 	private final Object xvalue;
 	private final Object yvalue;
 
-	public XYData(@Nullable
-	Object xvalue, @Nullable
-	Object yvalue)
+	public XYData(@Nullable Object xvalue, @Nullable Object yvalue)
 	{
 		this.xvalue = xvalue;
 		this.yvalue = yvalue;

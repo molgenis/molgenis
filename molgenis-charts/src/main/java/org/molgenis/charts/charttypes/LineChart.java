@@ -9,13 +9,13 @@ public class LineChart extends XYDataChart
 {
 	public LineChart(List<XYDataSerie> data)
 	{
-		super(ChartType.LINE_CHART, data);
+		super(AbstractChartType.LINE_CHART, data);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "LineChart [data=" + getData() + ", width=" + getWidth() + ", height=" + getHeight() + "]";
+		return "LineChart [xYDataSeries=" + getXYDataSeries() + ", width=" + getWidth() + ", height=" + getHeight() + "]";
 	}
 
 }

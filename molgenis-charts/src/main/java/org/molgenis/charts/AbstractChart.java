@@ -3,17 +3,17 @@ package org.molgenis.charts;
 /**
  * Base class for the different Chart types
  */
-public abstract class Chart
+public abstract class AbstractChart
 {
-	public enum ChartType
+	public enum AbstractChartType
 	{
-		LINE_CHART, HEAT_MAP
+		LINE_CHART, SCATTER_CHART, BOXPLOT_CHART, HEAT_MAP
 	}
 
 	public static final int DEFAULT_WITH = 200;
 	public static final int DEFAULT_HEIGHT = 200;
 
-	private final ChartType type;
+	private final AbstractChartType type;
 	private int width = DEFAULT_WITH;
 	private int height = DEFAULT_HEIGHT;
 
@@ -29,12 +29,12 @@ public abstract class Chart
 		this.title = (title == null) ? "" : title;
 	}
 
-	protected Chart(ChartType type)
+	protected AbstractChart(AbstractChartType type)
 	{
 		this.type = type;
 	}
 
-	public ChartType getType()
+	public AbstractChartType getType()
 	{
 		return type;
 	}

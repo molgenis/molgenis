@@ -10,7 +10,7 @@ public class LineChartRequest extends ChartRequest
 	private String x;
 
 	@NotNull
-	private List<String> y;
+	private String y;
 
 	public String getX()
 	{
@@ -22,12 +22,12 @@ public class LineChartRequest extends ChartRequest
 		this.x = x;
 	}
 
-	public List<String> getY()
+	public String getY()
 	{
 		return y;
 	}
 
-	public void setY(List<String> y)
+	public void setY(String y)
 	{
 		this.y = y;
 	}

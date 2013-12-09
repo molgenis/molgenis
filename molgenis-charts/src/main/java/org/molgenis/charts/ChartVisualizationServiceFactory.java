@@ -3,7 +3,7 @@ package org.molgenis.charts;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.AbstractChartType;
 import org.molgenis.charts.r.RChartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,16 +33,16 @@ public class ChartVisualizationServiceFactory
 	 * @param chartType
 	 * @return
 	 */
-	public ChartVisualizationService getVisualizationService(ChartType chartType)
+	public ChartVisualizationService getVisualizationService(AbstractChartType abstractChartType)
 	{
 		for (ChartVisualizationService service : chartVisualiationServices)
 		{
-			if (service.getCapabilities().contains(chartType))
+			if (service.getCapabilities().contains(abstractChartType))
 			{
 				return service;
 			}
 		}
 
-		throw new MolgenisChartException("No service found for charttype [" + chartType + "]");
+		throw new MolgenisChartException("No service found for charttype [" + abstractChartType + "]");
 	}
 }

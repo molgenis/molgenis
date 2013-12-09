@@ -14,13 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.AbstractChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.charttypes.LineChart;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
+import org.molgenis.charts.highcharts.HighchartService;
+import org.molgenis.charts.highcharts.Options;
+import org.molgenis.charts.highcharts.dataexplorer.requestpayload.LineChartRequestPayLoad;
 import org.molgenis.charts.requests.HeatMapRequest;
-import org.molgenis.charts.requests.LineChartRequest;
 import org.molgenis.data.QueryRule;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,8 @@ import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import freemarker.template.TemplateException;
 
@@ -64,30 +68,23 @@ public class ChartController
 		return "test";
 	}
 
-	@RequestMapping("/line")
-	public String renderLineChart(@Valid
-	LineChartRequest request, Model model)
+	@RequestMapping(value = "/line", method = RequestMethod.POST, produces = "application/json")
+	@ResponseBody
+	public Options renderLineChart(@Valid LineChartRequestPayLoad request, Model model)
 	{
-		List<QueryRule> queryRules = null;// TODO
-
+		List<QueryRule> queryRules = null; // TODO JJ
+		
 		List<XYDataSerie> series = new ArrayList<XYDataSerie>();
 
-		for (int i = 0; i < request.getY().size(); i++)
-		{
-			XYDataSerie data = chartDataService.getXYDataSerie(request.getEntity(), request.getX(),
-					request.getY().get(i), queryRules);
-			series.add(data);
-		}
+		XYDataSerie xYDataSerie = chartDataService.getXYDataSerie("heatmap", "probe4",
+				"probe2", queryRules);
+		series.add(xYDataSerie);
 
-		Chart chart = new LineChart(series);
-		chart.setTitle(request.getTitle());
-		chart.setWidth(request.getWidth());
-		chart.setHeight(request.getHeight());
+		LineChart lineChart = new LineChart(series);
+		
+		HighchartService highchartService = new HighchartService();
 
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(ChartType.LINE_CHART);
-
-		return service.renderChart(chart, model);
+		return highchartService.createLine(request, lineChart, model);
 	}
 
 	/**
@@ -147,8 +144,8 @@ public class ChartController
 		chart.setHeight(request.getHeight());
 
 		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(ChartType.HEAT_MAP);
+				.getVisualizationService(AbstractChartType.HEAT_MAP);
 
-		return service.renderChart(chart, model);
+		return (String) service.renderChart(chart, model);
 	}
 }
