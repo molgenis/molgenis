@@ -18,8 +18,7 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -88,7 +87,7 @@ public class ElasticSearchServiceTest
 		searchService.updateIndex("person", entities);
 		waitForIndexUpdate();
 
-		long count = searchService.count("person", Arrays.asList(new QueryRule("name", Operator.EQUALS, "Piet")));
+		long count = searchService.count("person", new QueryImpl().eq("name", "Piet"));
 		assertEquals(count, 2);
 	}
 
@@ -131,8 +130,8 @@ public class ElasticSearchServiceTest
 		waitForIndexUpdate();
 
 		// Search1
-		SearchRequest request = new SearchRequest("fruit", Arrays.asList(new QueryRule(Operator.SEARCH, "apple")),
-				Arrays.asList("name", "color"));
+		SearchRequest request = new SearchRequest("fruit", new QueryImpl().search("apple"), Arrays.asList("name",
+				"color"));
 
 		SearchResult searchResult = searchService.search(request);
 		assertNotNull(searchResult);
@@ -152,8 +151,7 @@ public class ElasticSearchServiceTest
 		assertEquals(hits.get(0).getColumnValueMap(), objectValueMapExpected);
 
 		// Search2
-		request = new SearchRequest("fruit", Arrays.asList(new QueryRule("color", Operator.EQUALS, "orange")),
-				Arrays.asList("id"));
+		request = new SearchRequest("fruit", new QueryImpl().eq("color", "orange"), Arrays.asList("id"));
 
 		searchResult = searchService.search(request);
 		assertNotNull(searchResult);
@@ -177,8 +175,7 @@ public class ElasticSearchServiceTest
 		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
 
 		// Search3
-		request = new SearchRequest("fruit", Arrays.asList(new QueryRule(Operator.SEARCH, "banana")),
-				Arrays.asList("id"));
+		request = new SearchRequest("fruit", new QueryImpl().search("banana"), Arrays.asList("id"));
 
 		searchResult = searchService.search(request);
 		assertNotNull(searchResult);

@@ -64,6 +64,8 @@ public class DataSetTableTest
 		assertEquals("name11", cols.get(1).getLabel());
 		assertEquals("12", cols.get(2).getName());
 		assertEquals("name12", cols.get(2).getLabel());
-		assertEquals(3, cols.size());
+		assertEquals("id", cols.get(3).getName());
+		assertEquals("id", cols.get(3).getName());
+		assertEquals(4, cols.size());
 	}
 }

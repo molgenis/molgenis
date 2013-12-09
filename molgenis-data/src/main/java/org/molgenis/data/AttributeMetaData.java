@@ -13,6 +13,11 @@ public interface AttributeMetaData
 	String getName();
 
 	/**
+	 * Label of the attribute if set else returns name
+	 */
+	String getLabel();
+
+	/**
 	 * Description of the attribute
 	 */
 	String getDescription();

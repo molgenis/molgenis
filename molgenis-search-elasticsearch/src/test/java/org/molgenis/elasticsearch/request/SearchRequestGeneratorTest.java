@@ -10,8 +10,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.mockito.Matchers;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,13 +27,13 @@ public class SearchRequestGeneratorTest
 	@Test
 	public void testBuildSearchRequest()
 	{
-		SearchRequestGenerator gen = new SearchRequestGenerator(searchRequestBuilderMock);
+		SearchRequestGenerator gen = new SearchRequestGenerator();
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
-		List<QueryRule> queryRules = Arrays.asList(new QueryRule(Operator.SEARCH, "test"));
 		List<String> fieldsToReturn = Arrays.asList("field1", "field2");
 
-		gen.buildSearchRequest(entityName, searchType, queryRules, fieldsToReturn);
+		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl().search("test"),
+				fieldsToReturn);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityName);
 		verify(searchRequestBuilderMock).addFields(new String[]

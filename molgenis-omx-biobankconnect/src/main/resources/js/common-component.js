@@ -77,25 +77,13 @@
 		}
 	};
 	
-	molgenis.Pagination.prototype.createSearchRequest = function (documentType, queryArrays) {
-		var queryRules = [];
-		//todo: how to unlimit the search result
-		queryRules.push({
-			operator : 'LIMIT',
-			value : this.pager
-		});
-		queryRules.push({
-			operator : 'OFFSET',
-			value : (this.currentPage - 1) * this.pager
-		});
-		if(queryArrays !== undefined && queryArrays !== null){
-			$.each(queryArrays, function(index, query){
-				queryRules.push(query);
-			});
-		}
+	molgenis.Pagination.prototype.createSearchRequest = function (documentType, q) {
+		q.pageSize = this.pager;
+		q.offset = (this.currentPage - 1) * this.pager;
+		
 		var searchRequest = {
 			documentType : documentType,
-			queryRules : queryRules
+			query: q
 		};
 		return searchRequest;
 	};

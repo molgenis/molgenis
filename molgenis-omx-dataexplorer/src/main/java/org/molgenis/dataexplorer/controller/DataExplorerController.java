@@ -160,13 +160,7 @@ public class DataExplorerController extends MolgenisPluginController
 		logger.info("Download request: [" + searchRequest + "]");
 
 		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-
-		request.getQueryRules().add(
-				new org.molgenis.framework.db.QueryRule(org.molgenis.framework.db.QueryRule.Operator.LIMIT,
-						DOWNLOAD_SEARCH_LIMIT));
-		org.molgenis.framework.db.QueryRule offsetRule = new org.molgenis.framework.db.QueryRule(
-				org.molgenis.framework.db.QueryRule.Operator.OFFSET, 0);
-		request.getQueryRules().add(offsetRule);
+		request.getQuery().pageSize(DOWNLOAD_SEARCH_LIMIT).offset(0);
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
@@ -183,7 +177,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 			do
 			{
-				offsetRule.setValue(count);
+				request.getQuery().offset(count);
 				searchResult = searchService.search(request);
 
 				for (Hit hit : searchResult.getSearchHits())
