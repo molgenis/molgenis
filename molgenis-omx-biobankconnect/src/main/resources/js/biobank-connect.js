@@ -128,54 +128,7 @@
 				console.log(error);
 			} 
 		});
-		
-		function createProgressBar(progressBarClass){
-			var outerBar = $('<div />').addClass('progress progress-striped active offset2 span8 ' + progressBarClass);
-			var innerBar = $('<div />').addClass('bar text-align-center');
-			return outerBar.append(innerBar);
-		}
 	};
-	
-//	ns.checkMatchingStatus = function(prefix, progressBarElement) {
-//		$.ajax({
-//			type : 'GET',
-//			url : prefix + '/match/status',
-//			contentType : 'application/json',
-//			success : function(response) {
-//				$('#control-container ul.pager li').addClass('disabled');
-//				if(response.isRunning){
-//					console.log(response);
-//					if(response.matchePercentage === 0){
-//						var width = $(progressBarElement).width();
-//						var parentWidth = $(progressBarElement).offsetParent().width();
-//						var percent = 100 * width / parentWidth + 4;
-//						$(progressBarElement).width(percent + '%');
-//					}else if(response.matchePercentage === 100){
-//						$(progressBarElement).width(response.matchePercentage + '%');
-//						setTimeout(function(){
-//							$(progressBarElement).empty().append('<p style="font-size:14px;padding-top:4px;">Storing result...</p>');
-//						}, 2000);
-//					}else{
-//						var width = $(progressBarElement).width();
-//						var parentWidth = $(progressBarElement).offsetParent().width();
-//						var percent = 100 * width / parentWidth + 5;
-//						if(percent < response.matchePercentage) percent = response.matchePercentage;
-//						$(progressBarElement).width(percent + '%').empty();
-//					}
-//					setTimeout(function(){
-//						ns.checkMatchingStatus(prefix, progressBarElement)
-//					}, 3000);
-//				}else {
-//					$(progressBarElement).empty().width('100%').parents('div:eq(0)').removeClass('active');
-//					$(progressBarElement).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
-//					$('ul.pager li').removeClass('disabled');
-//				}
-//			},
-//			error : function(request, textStatus, error){
-//				console.log(error);
-//			} 
-//		});
-//	};
 	
 	ns.dataItemsTypeahead = function (type, dataSetId, query, response){
 		var queryRules = [{
