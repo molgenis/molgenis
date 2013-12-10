@@ -1,7 +1,5 @@
 package org.molgenis.omx.studymanager;
 
-import static org.molgenis.study.StudyDefinition.Status;
-
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +16,7 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
-import org.molgenis.study.StudyDefinitionMeta;
+import org.molgenis.study.StudyDefinition.Status;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
 
@@ -41,18 +39,17 @@ public class OmxStudyManagerService implements StudyManagerService
 	}
 
 	@Override
-	public List<StudyDefinitionMeta> getStudyDefinitions()
+	public List<StudyDefinition> getStudyDefinitions()
 	{
 		Iterable<StudyDataRequest> studyDataRequests = dataService.findAll(StudyDataRequest.ENTITY_NAME);
 
 		return Lists.newArrayList(Iterables.transform(studyDataRequests,
-				new Function<StudyDataRequest, StudyDefinitionMeta>()
+				new Function<StudyDataRequest, StudyDefinition>()
 				{
 					@Override
-					public StudyDefinitionMeta apply(StudyDataRequest studyDataRequest)
+					public StudyDefinition apply(StudyDataRequest studyDataRequest)
 					{
-						return new StudyDefinitionMeta(studyDataRequest.getId().toString(), studyDataRequest.getName(),
-								studyDataRequest.getMolgenisUser().getEmail(), studyDataRequest.getRequestDate());
+						return new OmxStudyDefinition(studyDataRequest, dataService);
 					}
 				}));
 	}
