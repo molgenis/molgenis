@@ -6,7 +6,7 @@
 	Catalog.getEnableSelection = function() {
 		return typeof Catalog.enableSelection !== 'undefined' ? Catalog.enableSelection : false; 
 	};
-	
+
 	Catalog.setEnableSelection = function(enableSelection) {
 		Catalog.enableSelection = enableSelection;
 	};
@@ -40,14 +40,16 @@
 				updateFeatureDetails(featureUri);
 			},
 			'onItemSelect' : function(featureUri, select) {
-				var catalogItems = catalogContainer.catalog('getSelectedItems'); //FIXME returns the selected items of the search tree when searching
-				updateShoppingCart(catalogItems, catalogId);
-				updateFeatureSelection(catalogItems);
+				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
+					updateShoppingCart(catalogItems, catalogId);
+					updateFeatureSelection(catalogItems);	
+				});
 			},
 			'onFolderSelect' : function(protocolUri, select) {
-				var catalogItems = catalogContainer.catalog('getSelectedItems'); //FIXME returns the selected items of the search tree when searching
-				updateShoppingCart(catalogItems, catalogId);
-				updateFeatureSelection(catalogItems);
+				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
+					updateShoppingCart(catalogItems, catalogId);
+					updateFeatureSelection(catalogItems);
+				});
 			}
 		});
 	};
@@ -120,37 +122,48 @@
 		callback(data);
 	};
 
-	var updateFeatureSelection = function(features) {
+	var updateFeatureSelection = function(featureUris) {
 		var selectionContainer = $('#feature-selection');
-		if (features && features.length > 0) {
-			var table = $('<table class="table table-striped table-condensed table-hover" />');
-			$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
-			$.each(features, function(i, feature) {
-				var feature = restApi.get(feature);
-				var protocolName = "FIXME";
-				var name = feature.name;
-				var identifier = feature.identifier;
-				var description = molgenis.i18n.get(feature.description);
-				var row = $('<tr />').data('key', feature.href);
-				$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
-				$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
-				$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
-				$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-				var deleteButton = $('<i class="icon-remove"></i>');
-				deleteButton.click(function() {
-					var featureUri = $(this).closest('tr').data('key');
-					catalogContainer.catalog('selectItem', {
-						'feature' : featureUri,
-						'select' : false
+		if (featureUris && featureUris.length > 0) {
+			var q = {
+				q : [ {
+					field : 'id',
+					operator : 'IN',
+					value : $.map(featureUris, function(href) {
+						// TODO code duplication from jquery.catalog.js hrefToId
+						return href.substring(href.lastIndexOf('/') + 1); 
+					})
+				} ]
+			};
+			restApi.getAsync('/api/v1/observablefeature', null, q, function(features) {
+				var table = $('<table class="table table-striped table-condensed table-hover" />');
+				$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
+				$.each(features.items, function(i, feature) {
+					var protocolName = "FIXME";
+					var name = feature.name;
+					var identifier = feature.identifier;
+					var description = molgenis.i18n.get(feature.description);
+					var row = $('<tr />').data('key', feature.href);
+					$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
+					$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
+					$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
+					$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
+					var deleteButton = $('<i class="icon-remove"></i>');
+					deleteButton.click(function() {
+						var featureUri = $(this).closest('tr').data('key');
+						catalogContainer.catalog('selectItem', {
+							'feature' : featureUri,
+							'select' : false
+						});
+						return false; // TODO do we need this?
 					});
-					return false; // TODO do we need this?
-				});
-				$('<td class="center" />').append(deleteButton).appendTo(row);
+					$('<td class="center" />').append(deleteButton).appendTo(row);
 
-				row.appendTo(table);
+					row.appendTo(table);
+				});
+				table.addClass('listtable selection-table');
+				selectionContainer.html(table);
 			});
-			table.addClass('listtable selection-table');
-			selectionContainer.html(table);
 		} else {
 			selectionContainer.html('<p>No variables selected</p>');
 		}
