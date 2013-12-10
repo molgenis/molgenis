@@ -3,7 +3,6 @@ package org.molgenis.omx;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.jpa.JpaEntitySourceRegistrator;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
@@ -13,11 +12,11 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -36,12 +35,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private DataService dataService;
 	@Autowired
 	private MolgenisUserService molgenisUserService;
-
-	@Bean
-	public ApplicationListener<?> jpaEntitySourceRegistrator()
-	{
-		return new JpaEntitySourceRegistrator(dataService);
-	}
 
 	@Bean
 	public CatalogManagerService catalogManagerService()

@@ -2,12 +2,12 @@ package org.molgenis.elasticsearch.request;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.molgenis.framework.db.QueryRule.Operator.SORTASC;
-import static org.molgenis.framework.db.QueryRule.Operator.SORTDESC;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.molgenis.framework.db.QueryRule;
+import org.molgenis.data.support.QueryImpl;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,8 +25,7 @@ public class SortGeneratorTest
 	public void testGenerateASC()
 	{
 		SortGenerator sortGen = new SortGenerator();
-		sortGen.addQueryRule(new QueryRule(SORTASC, "test"));
-		sortGen.generate(searchRequestBuilderMock);
+		sortGen.generate(searchRequestBuilderMock, new QueryImpl().sort(new Sort(Direction.ASC, "test")));
 		verify(searchRequestBuilderMock).addSort("test.sort", SortOrder.ASC);
 	}
 
@@ -34,8 +33,7 @@ public class SortGeneratorTest
 	public void testGenerateDESC()
 	{
 		SortGenerator sortGen = new SortGenerator();
-		sortGen.addQueryRule(new QueryRule(SORTDESC, "test"));
-		sortGen.generate(searchRequestBuilderMock);
+		sortGen.generate(searchRequestBuilderMock, new QueryImpl().sort(new Sort(Direction.DESC, "test")));
 		verify(searchRequestBuilderMock).addSort("test.sort", SortOrder.DESC);
 	}
 
@@ -43,9 +41,8 @@ public class SortGeneratorTest
 	public void testGenerateDESCASC()
 	{
 		SortGenerator sortGen = new SortGenerator();
-		sortGen.addQueryRule(new QueryRule(SORTDESC, "test"));
-		sortGen.addQueryRule(new QueryRule(SORTASC, "xxx"));
-		sortGen.generate(searchRequestBuilderMock);
+		sortGen.generate(searchRequestBuilderMock,
+				new QueryImpl().sort(new Sort(Direction.DESC, "test").and(new Sort(Direction.ASC, "xxx"))));
 		verify(searchRequestBuilderMock).addSort("test.sort", SortOrder.DESC);
 		verify(searchRequestBuilderMock).addSort("xxx.sort", SortOrder.ASC);
 	}

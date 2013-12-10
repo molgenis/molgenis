@@ -68,13 +68,15 @@ public class OmxDasDataSourceTest {
 		track.setIdentifier("track1");
 		
 		variant = new Variant();
+        variant.setName("name");
 		variant.setIdentifier("vatiant_identifier");
 		variant.setBpStart((long)0);
 		variant.setBpEnd((long)1000);
 		variant.setDescription("variant_description");
-		
-		variant2 = new Variant();
-		variant2.setIdentifier("vatiant_identifier2");
+
+        variant2 = new Variant();
+        variant2.setName("name2");
+        variant2.setIdentifier("vatiant_identifier2");
 		variant2.setBpStart((long)0);
 		variant2.setBpEnd((long)1000);
 		variant2.setDescription("variant_description2");
@@ -82,7 +84,7 @@ public class OmxDasDataSourceTest {
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
 		
 		dasTarget.add(new MolgenisDasTarget(variant.getIdentifier(), variant.getBpStart().intValue(), variant.getBpEnd().intValue(), variant.getDescription()));
-		dasFeature = new DasFeature("vatiant_identifier", "variant_description", new DasType("mutation", null, "?", "mutation"),
+		dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("type", null, "?", "type"),
 				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE
 				,new ArrayList<String>(),linkout,dasTarget,new ArrayList<String>(),null
@@ -195,7 +197,7 @@ public class OmxDasDataSourceTest {
 	@Test()
 	public void getTotalCountForType() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException
 	{
-		source.getTotalCountForType(new DasType("mutation", null, "?", "mutation"));
+		source.getTotalCountForType(new DasType("type", null, "?", "type"));
 		verify(dataService).count(eq(Variant.ENTITY_NAME),any(Query.class));		
 	}
 	
@@ -203,7 +205,7 @@ public class OmxDasDataSourceTest {
 	public void getTypes() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException
 	{
 		List<DasType> types = new ArrayList<DasType>();
-		types.add(new DasType("mutation", null, "?", "mutation"));
+		types.add(new DasType("type", null, "?", "type"));
 		assertEquals(types,source.getTypes());
 		
 	}

@@ -12,6 +12,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
 import org.molgenis.charts.Chart.ChartType;
@@ -106,7 +108,7 @@ public class ChartController
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name")
 	String name, @PathVariable("extension")
-	String extension, HttpServletResponse response) throws IOException
+	String extension,  HttpServletResponse response) throws IOException
 	{
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
@@ -124,7 +126,7 @@ public class ChartController
 	/**
 	 * Renders a heatmap with r
 	 * 
-	 * Returns a piece of javascript that can be retrieved by an html page with a ajax request.
+	 * Returns a piece of javascript that can be retrieved by an html page with an ajax request.
 	 * 
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
 	 * 
@@ -133,10 +135,13 @@ public class ChartController
 	 * @return
 	 * @throws IOException
 	 * @throws TemplateException
+	 * @throws FactoryConfigurationError 
+	 * @throws XMLStreamException 
 	 */
 	@RequestMapping("/heatmap")
 	public String renderHeatMap(@Valid
-	HeatMapRequest request, Model model) throws IOException, TemplateException
+	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -145,7 +150,10 @@ public class ChartController
 		chart.setTitle(request.getTitle());
 		chart.setWidth(request.getWidth());
 		chart.setHeight(request.getHeight());
-
+		chart.setxLabel(request.getxLabel());
+		chart.setyLabel(request.getyLabel());
+		chart.setScale(request.getScale());
+		
 		ChartVisualizationService service = chartVisualizationServiceFactory
 				.getVisualizationService(ChartType.HEAT_MAP);
 

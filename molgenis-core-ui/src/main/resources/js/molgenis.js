@@ -402,7 +402,8 @@ $(function() {
 
 	molgenis.SearchClient.prototype.search = function(searchRequest, callback) {
 		var jsonRequest = JSON.stringify(searchRequest);
-
+		console.log(jsonRequest);
+		
 		$.ajax({
 			type : "POST",
 			url : '/search',
