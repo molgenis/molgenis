@@ -19,13 +19,16 @@
 }
 
 #molgenis-breadcrumb {
-	margin-bottom: 10px;	
+	margin-bottom: -10px;
+	font-size:10px;
+	float:left;	
 }
 
 #plugin-container {
 	background: #F8FAFB;
 	padding: 10px;
 	margin-bottom: 10px;
+	
 }
 
 #molgenis-footer p {
