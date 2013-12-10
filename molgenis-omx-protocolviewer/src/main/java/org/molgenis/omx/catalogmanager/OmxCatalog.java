@@ -8,7 +8,6 @@ import java.util.Map;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 
 public class OmxCatalog extends OmxCatalogFolder implements Catalog
