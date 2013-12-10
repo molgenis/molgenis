@@ -16,7 +16,7 @@ mat <- matrix(
 	),
 	nrow = ${nRow?c},
 	ncol = ${nCol?c},
-	byrow = FALSE)
+	byrow = TRUE)
 
 rownames(mat) <- 
 	c(
@@ -85,6 +85,7 @@ fileName <- "${fileName}"
 # LIBRARIES #
 #############
 
+#source(wd)
 library(heatmap.plus)
 
 #################
@@ -95,7 +96,7 @@ library(heatmap.plus)
 setwd(wd)
 
 # make heatmap and store as .svg
-svg(paste(fileName, ".svg", sep=""))
+svg(paste(fileName, ".svg", sep=""), )
 
 hv <- NULL
 

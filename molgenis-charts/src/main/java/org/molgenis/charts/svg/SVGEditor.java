@@ -41,19 +41,16 @@ public class SVGEditor {
 	static final String PATH = "path";
 	static final QName ID = new QName("id");
 	
-	private XMLEventReader reader;
-	private OutputStream os;
-	private XMLEventWriter writer;
+	private File inFile;
+	private File outFile;
 	
 	/** Creates a new instance of SVGEditor.
 	 * @throws FactoryConfigurationError 
 	 * @throws XMLStreamException 
 	 * @throws FileNotFoundException */
 	public SVGEditor(File inFile, File outFile) throws FileNotFoundException, XMLStreamException, FactoryConfigurationError{
-		reader = XMLInputFactory.newInstance().createXMLEventReader(
-                new java.io.FileInputStream(inFile));
-		
-	    os = new FileOutputStream(outFile);
+		this.inFile = inFile;
+		this.outFile = outFile;
 	}
 	
 	/**
@@ -64,7 +61,7 @@ public class SVGEditor {
 	 * @param blockId	value of the id attribute to give elements in this block
 	 * @throws XMLStreamException
 	 */
-	private void annotateHeatMapBlock(int nRow, int nCol, String blockId) throws XMLStreamException{
+	private void annotateHeatMapBlock(int nRow, int nCol, String blockId, XMLEventWriter writer, XMLEventReader reader) throws XMLStreamException{
 		int counter = 0;
 		int nPath = nRow * nCol;
 		int currentRow = nRow; // elements drawn from bottom to top, so start counting at last row
@@ -102,9 +99,16 @@ public class SVGEditor {
 	 * row and col attributes to <path> elements corresponding to data points in the heatmap. 
 	 * All indexes can be calculated using nRow, nCol, nRowAnnotations and nColAnnotations.
 	 * @param chart 
+	 * @throws FactoryConfigurationError 
+	 * @throws XMLStreamException 
+	 * @throws FileNotFoundException 
 	 */
-	public void annotateHeatMap(HeatMapChart chart){
-
+	public void annotateHeatMap(HeatMapChart chart) throws XMLStreamException, FactoryConfigurationError, FileNotFoundException{
+		XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(
+                new FileInputStream(inFile));
+		
+	    OutputStream os = new FileOutputStream(outFile);
+	    XMLEventWriter writer = XMLOutputFactory.newInstance().createXMLEventWriter(os);
 		
         // get values from HeatMapChart
 		int nRow = chart.getData().getRowTargets().size();
@@ -135,18 +139,18 @@ public class SVGEditor {
             // ROW ANNOTATIONS
     		if (nRowAnnotations > 0){
     			logger.info("parsing " + nRowAnnotations + " row annotations");
-    			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation");
+    			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation", writer, reader);
     		}
     		
     		// COLUMN ANNOTATIONS
     		if (nColAnnotations > 0){
     			logger.info("parsing " + nColAnnotations + " col annotations");
-    			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation");
+    			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation", writer, reader);
     		}
     		
     		// MATRIX ANNOTATIONS
     		logger.info("parsing " + (nRow*nCol) + " matrix values");
-    		annotateHeatMapBlock(nRow, nCol, "matrix");
+    		annotateHeatMapBlock(nRow, nCol, "matrix", writer, reader);
     		
     		// COLUMN NAMES
     		logger.info("parsing " + nCol + " column names");
