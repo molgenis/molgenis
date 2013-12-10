@@ -18,7 +18,9 @@ public abstract class Chart
 	private int height = DEFAULT_HEIGHT;
 
 	private String title = "";
-
+	private String xLabel = "";
+	private String yLabel = "";
+	
 	public String getTitle()
 	{
 		return title;
@@ -27,6 +29,22 @@ public abstract class Chart
 	public void setTitle(String title)
 	{
 		this.title = (title == null) ? "" : title;
+	}
+
+	public String getxLabel() {
+		return xLabel;
+	}
+	
+	public void setxLabel(String xLabel) {
+		this.xLabel = xLabel;
+	}
+
+	public String getyLabel() {
+		return yLabel;
+	}
+
+	public void setyLabel(String yLabel) {
+		this.yLabel = yLabel;
 	}
 
 	protected Chart(ChartType type)

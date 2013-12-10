@@ -1,14 +1,12 @@
 ### R script for generating heatmaps.
 # Obligatory parameters: values, rowNames, colNames, wd
-# Optional parameters: title
+# Optional parameters: title, xLabel, yLabel
 
 ###################
 # LOAD PARAMETERS #
 ###################
 <#compress>
 mat <- matrix(
-	
-
 	c(
 		<#list chart.data.values as col>
 			<#list col as value>
@@ -18,7 +16,7 @@ mat <- matrix(
 	),
 	nrow = ${nRow?c},
 	ncol = ${nCol?c},
-	byrow = FALSE)
+	byrow = TRUE)
 
 rownames(mat) <- 
 	c(
@@ -52,18 +50,53 @@ rowAnnotations <-
 			</#list>
 		</#if>
 	)
+
+title <- "<#if chart.title??>${chart.title}</#if>"
+xLabel <- "<#if chart.xLabel??>${chart.xLabel}</#if>"
+yLabel <- "<#if chart.yLabel??>${chart.yLabel}</#if>"
+
+
+scale <- 
+<#if chart.scale??>
+	<#switch chart.scale>
+		<#case "ROW">
+			"row"
+			<#break>
+	    <#case "COL">
+	        "column"
+	        <#break>
+	      <#case "NONE">
+	        "none"
+	        <#break>
+	    <#default>
+	        "row"
+	</#switch>
+</#if>
+
+
+wd <- "${wd}"
+
+fileName <- "${fileName}"
 		
 </#compress>
+
+
+#############
+# LIBRARIES #
+#############
+
+#source(wd)
+library(heatmap.plus)
 
 #################
 # GENERATE PLOT #
 #################
 
 # set plot destination path
-setwd("${wd}")
+setwd(wd)
 
 # make heatmap and store as .svg
-svg("${fileName}.svg")
+svg(paste(fileName, ".svg", sep=""), )
 
 hv <- NULL
 
@@ -72,20 +105,19 @@ if (length(colAnnotations) != 0){
 	color.map <- function(colAnnotations) { if (colAnnotations=="ALL1/AF4") "#FF0000" else "#0000FF" }
 	colColors <- unlist(lapply(colAnnotations, color.map))
 	
-	
 	#hv <- heatmap(mat, col=topo.colors(100), ColSideColors = colColors)
 	
-	hv <- heatmap.2(mat, col=topo.colors(75), scale="none", ColSideColors=colColors,
-          key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)
+	hv <- heatmap.plus(mat, col=topo.colors(75), scale="none", ColSideColors=colColors)
 	
 	d <- dev.off() #store in d to prevent printing 
 }else{
-	# removed scale="none" property
-	#hv <- heatmap.2(mat, col=topo.colors(75),  
-    #     key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=0.5)
-     
-    hv <- heatmap(mat, col=topo.colors(75)) 
-          
+    hv <- heatmap.plus( 
+    	col=topo.colors(75),
+    	main=title,
+    	xlab=xLabel,
+    	ylab=yLabel,
+    	mat) 
+    
     d <- dev.off() #store in d to prevent printing 
 }
 
@@ -93,7 +125,7 @@ if (length(colAnnotations) != 0){
 # list with row-indexes is reversed because of bottom-to-top build-up of plot
 rowInd <- rev(hv$rowInd)
 out <- mat[rowInd, hv$colInd]
-write.csv(out, file = "${fileName}.csv", quote = TRUE, na = "NA")
+write.csv(out, file = paste(fileName, ".csv", sep=""), quote = TRUE, na = "NA")
 
 
 # print the col annotations in the reordered state, so it can be parsed in the controller 
