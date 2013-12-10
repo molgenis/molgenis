@@ -50,7 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 //FIXME
 //@ContextConfiguration
-public class OrderStudyDataServiceImplTest extends AbstractTestNGSpringContextTests
+public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTests
 {
 //	@Configuration
 //	static class Config
