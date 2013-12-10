@@ -211,44 +211,14 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
 
+		final Catalog catalog = catalogService.getCatalog(catalogId);
 		List<CatalogItem> catalogItems = Lists.transform(catalogItemIds, new Function<Integer, CatalogItem>()
 		{
 			@Nullable
 			@Override
 			public CatalogItem apply(@Nullable final Integer catalogItemId)
 			{
-				return new CatalogItem()
-				{
-					@Override
-					public String getId()
-					{
-						return catalogItemId.toString();
-					}
-
-					@Override
-					public String getName()
-					{
-						throw new UnsupportedOperationException();
-					}
-
-					@Override
-					public String getDescription()
-					{
-						throw new UnsupportedOperationException();
-					}
-
-					@Override
-					public String getCode()
-					{
-						throw new UnsupportedOperationException();
-					}
-
-					@Override
-					public String getCodeSystem()
-					{
-						throw new UnsupportedOperationException();
-					}
-				};
+				return catalog.findItem(catalogItemId.toString());
 			}
 		});
 		studyDefinition.setItems(catalogItems);
