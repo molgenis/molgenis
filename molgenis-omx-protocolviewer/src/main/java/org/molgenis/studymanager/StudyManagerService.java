@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.study.StudyDefinition;
-import org.molgenis.study.StudyDefinitionMeta;
 import org.molgenis.study.UnknownStudyDefinitionException;
 
 /**
@@ -20,7 +19,7 @@ public interface StudyManagerService
 	 * 
 	 * @return
 	 */
-	List<StudyDefinitionMeta> getStudyDefinitions();
+	List<StudyDefinition> getStudyDefinitions();
 
 	/**
 	 * Find all study definition with the given status for a user
