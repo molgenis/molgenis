@@ -1,7 +1,5 @@
 package org.molgenis.catalogmanager;
 
-import org.molgenis.catalog.Catalog;
-import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.study.UnknownStudyDefinitionException;
