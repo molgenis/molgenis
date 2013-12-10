@@ -44,13 +44,13 @@ public class MolgenisDbSettings implements MolgenisSettings
 		}
 		catch (MolgenisDataException e)
 		{
-			logger.debug(e);
+			logger.warn(e);
 			return defaultValue;
 		}
 
 		if (property == null)
 		{
-			logger.warn(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
+			logger.debug(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
 			return defaultValue;
 		}
 
