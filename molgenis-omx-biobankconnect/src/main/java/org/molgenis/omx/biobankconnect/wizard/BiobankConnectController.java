@@ -128,6 +128,19 @@ public class BiobankConnectController extends AbstractWizardController
 		try
 		{
 			wizard = new BiobankConnectWizard();
+			List<DataSet> dataSets = new ArrayList<DataSet>();
+			try
+			{
+				for (DataSet dataSet : database.find(DataSet.class))
+				{
+					if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+				}
+				wizard.setDataSets(dataSets);
+			}
+			catch (DatabaseException e)
+			{
+				logger.error("Failed to retrieve entities from database", e);
+			}
 			wizard.setUserName(userAccountService.getCurrentUser().getUsername());
 			wizard.addPage(chooseCataloguePager);
 			wizard.addPage(ontologyAnnotatorPager);

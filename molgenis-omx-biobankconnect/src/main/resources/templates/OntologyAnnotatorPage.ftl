@@ -71,15 +71,12 @@
 				});
 				
 				$('#annotate-all-dataitems').click(function(){
-					$('#spinner').modal();
-					$('#wizardForm').attr({
-						'action' : molgenis.getContextUrl() + '/annotate',
-						'method' : 'POST'
-					}).submit();
+					molgenis.getOntologyAnnotator().confirmation('Warning', 'Are you sure that you want to overwrite all pre-defined annotations?', '/annotate');
+					return false;
 				});
 				
 				$('#remove-annotations').click(function(){
-					molgenis.getOntologyAnnotator().confirmation('Confirmation');
+					molgenis.getOntologyAnnotator().confirmation('Warning', 'Are you sure that you want to remove all pre-defined annotations?', '/annotate/remove');
 					return false;
 				});
 			});

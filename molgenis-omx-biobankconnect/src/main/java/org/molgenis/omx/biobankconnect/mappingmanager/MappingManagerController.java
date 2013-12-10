@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
@@ -35,6 +36,7 @@ import org.molgenis.io.excel.ExcelReader;
 import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -77,6 +79,9 @@ public class MappingManagerController extends MolgenisPluginController
 	private final UserAccountService userAccountService;
 
 	@Autowired
+	private CurrentUserStatus currentUserStatus;
+
+	@Autowired
 	private FileStore fileStore;
 
 	@Autowired
@@ -96,7 +101,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, Model model) throws DatabaseException
+	String selectedDataSetId, HttpServletRequest request, Model model) throws DatabaseException
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : database.find(DataSet.class))
@@ -107,6 +112,8 @@ public class MappingManagerController extends MolgenisPluginController
 		model.addAttribute("userName", userAccountService.getCurrentUser().getUsername());
 		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
+		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
+				request.getRequestedSessionId());
 
 		return "MappingManagerPlugin";
 	}
@@ -145,7 +152,8 @@ public class MappingManagerController extends MolgenisPluginController
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String verify(@RequestParam
 	Integer selectedDataSet, @RequestParam
-	Part file, HttpServletResponse response, Model model) throws IOException, DatabaseException
+	Part file, HttpServletRequest request, HttpServletResponse response, Model model) throws IOException,
+			DatabaseException
 	{
 		ExcelReader reader = null;
 		TupleWriter tupleWriter = null;
@@ -264,7 +272,7 @@ public class MappingManagerController extends MolgenisPluginController
 			if (reader != null) reader.close();
 			if (tupleWriter != null) IOUtils.closeQuietly(tupleWriter);
 		}
-		return init(null, model);
+		return init(null, request, model);
 	}
 
 	private List<Integer> findFeaturesFromIndex(List<String> featureNames, Integer dataSetId)

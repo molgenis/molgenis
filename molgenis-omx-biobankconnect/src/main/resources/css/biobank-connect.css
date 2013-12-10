@@ -12,5 +12,10 @@ div#progress-bar-div {
 }
 
 .text-align-center {
-	text-align:center;
+	text-align : center;
+	display : block;
+}
+
+.font-size-medium {
+	font-size : 15px;
 }
