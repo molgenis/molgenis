@@ -28,8 +28,9 @@ public class DasPatientFilter implements Filter
 			String newQueryString = createNewQueryString(httpServletRequest, patientPart, slashIndex);
 			
 			FilteredRequest requestWrapper = new FilteredRequest(servletRequest);
-			requestWrapper.setQuery(newQueryString);		
-			
+			if(newQueryString != null){
+                requestWrapper.setQuery(newQueryString);
+            }
 			servletRequest.getRequestDispatcher(newDasURI).forward(requestWrapper, response);
 		}
 		else
@@ -47,10 +48,13 @@ public class DasPatientFilter implements Filter
 
 	private String createNewQueryString(HttpServletRequest req, String patientPart, int slashIndex)
 	{
-		String patientId = patientPart.substring(7, slashIndex);
-		String queryString = req.getQueryString();
-		String[] queryArray = queryString.split(":");
-		String newQueryString = queryArray[0]+","+patientId+":"+queryArray[1];
+        String newQueryString = null;
+        String queryString = req.getQueryString();
+        if(queryString != null){
+            String patientId = patientPart.substring(7, slashIndex);
+            String[] queryArray = queryString.split(":");
+            newQueryString = queryArray[0]+","+patientId+":"+queryArray[1];
+        }
 		return newQueryString;
 	}
 

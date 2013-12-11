@@ -84,13 +84,14 @@
 		},{
 			operator : 'SEARCH',
 			value : query
-		},{
-			operator : 'LIMIT',
-			value : 20
 		}];
+		
 		var searchRequest = {
 			documentType : 'protocolTree-' + dataSetId,
-			queryRules : queryRules
+			query:{
+				pageSize: 20,
+				rules:[queryRules]
+			}
 		};
 		
 		searchApi.search(searchRequest, function(searchReponse){

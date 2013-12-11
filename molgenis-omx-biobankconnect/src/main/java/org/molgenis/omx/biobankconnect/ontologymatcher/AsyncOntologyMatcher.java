@@ -20,9 +20,10 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
 import org.molgenis.omx.observ.Characteristic;
@@ -130,20 +131,21 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		try
 		{
 			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
-			List<QueryRule> queryRules = new ArrayList<QueryRule>();
+
+			QueryImpl q = new QueryImpl();
+			q.pageSize(100001);
+
 			if (featureId == null)
 			{
-				queryRules.add(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
+				q.addRule(new QueryRule(ENTITY_TYPE, Operator.SEARCH, ObservableFeature.class.getSimpleName()
 						.toLowerCase()));
 			}
 			else
 			{
-				queryRules.add(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
+				q.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
 			}
 
-			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet,
-					queryRules, null));
+			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, q, null));
 			totalNumber = result.getTotalHitCount();
 
 			for (Hit hit : result.getSearchHits())
@@ -151,7 +153,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
 				Integer id = DataConverter.toInt(columnValueMap.get(ObservableFeature.ID));
 				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, id);
-
 				if (feature != null)
 				{
 					Set<String> boostedOntologyTermUris = new HashSet<String>();
@@ -180,8 +181,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						}
 					}
 					else rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, description));
-					QueryRule finalQuery = new QueryRule(rules);
-					finalQuery.setOperator(Operator.DIS_MAX);
+
+					QueryRule finalQueryRule = new QueryRule(rules);
+					finalQueryRule.setOperator(Operator.DIS_MAX);
+
+					QueryImpl finalQuery = new QueryImpl();
+					finalQuery.addRule(finalQueryRule);
+
 					Set<Integer> mappedFeatureIds = new HashSet<Integer>();
 
 					for (Integer dataSetId : dataSetsToMatch)
@@ -347,11 +353,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		List<Integer> observationSets = new ArrayList<Integer>();
 		for (String dataSet : dataSetsForMapping)
 		{
-			List<QueryRule> rules = new ArrayList<QueryRule>();
-			rules.add(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, featureId));
-			rules.add(new QueryRule(Operator.LIMIT, 100000));
-			SearchRequest request = new SearchRequest(dataSet, rules, null);
+			QueryImpl q = new QueryImpl();
+			q.pageSize(100000);
+			q.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, featureId));
+
+			SearchRequest request = new SearchRequest(dataSet, q, null);
 			SearchResult searchResult = searchService.search(request);
+
 			List<String> indexIds = new ArrayList<String>();
 			for (Hit hit : searchResult.getSearchHits())
 			{
@@ -501,16 +509,14 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return allQueries;
 	}
 
-	private Iterator<Hit> searchDisMaxQuery(String dataSetId, QueryRule disMaxQuery)
+	private Iterator<Hit> searchDisMaxQuery(String dataSetId, Query q)
 	{
 		SearchResult result = null;
 		try
 		{
-			List<QueryRule> finalQuery = new ArrayList<QueryRule>();
-			finalQuery.add(disMaxQuery);
-			finalQuery.add(new QueryRule(Operator.LIMIT, 50));
+			q.pageSize(50);
 			MultiSearchRequest request = new MultiSearchRequest(Arrays.asList(CATALOGUE_PREFIX + dataSetId,
-					FEATURE_CATEGORY + dataSetId), finalQuery, null);
+					FEATURE_CATEGORY + dataSetId), q, null);
 			result = searchService.multiSearch(request);
 		}
 		catch (Exception e)
@@ -526,6 +532,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		Map<String, String> validOntologyTerm = new HashMap<String, String>();
 		Map<String, OntologyTermContainer> totalHits = new HashMap<String, OntologyTermContainer>();
+
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		for (OntologyTerm ot : definitions)
 		{
@@ -533,8 +540,15 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			rules.add(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, ot.getTermAccession()));
 			validOntologyTerm.put(ot.getTermAccession(), ot.getName());
 		}
-		rules.add(new QueryRule(Operator.LIMIT, 10000));
-		SearchRequest request = new SearchRequest(null, rules, null);
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(10000);
+		for (QueryRule rule : rules)
+		{
+			q.addRule(rule);
+		}
+
+		SearchRequest request = new SearchRequest(null, q, null);
 		SearchResult result = searchService.search(request);
 		Iterator<Hit> iterator = result.iterator();
 
@@ -584,15 +598,24 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						{
 							Map<String, OntologyTermContainer> totalHits = new HashMap<String, OntologyTermContainer>();
 							Set<String> ontologyTerms = new HashSet<String>();
+
 							List<QueryRule> rules = new ArrayList<QueryRule>();
 							for (String relatedOntologyTermUri : definition.split(","))
 							{
 								if (rules.size() != 0) rules.add(new QueryRule(Operator.OR));
 								rules.add(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, relatedOntologyTermUri));
 							}
-							rules.add(new QueryRule(Operator.LIMIT, 10000));
-							SearchRequest request = new SearchRequest(null, rules, null);
+
+							QueryImpl q = new QueryImpl();
+							q.pageSize(10000);
+							for (QueryRule rule : rules)
+							{
+								q.addRule(rule);
+							}
+
+							SearchRequest request = new SearchRequest(null, q, null);
 							SearchResult result = searchService.search(request);
+
 							Iterator<Hit> iterator = result.iterator();
 							while (iterator.hasNext())
 							{
@@ -634,11 +657,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				int parentNodeLevel = parentNodePath.split("\\.").length;
 				Boolean boost = entry.getValue();
 
-				List<QueryRule> queryRules = new ArrayList<QueryRule>();
-				queryRules.add(new QueryRule(NODE_PATH, Operator.LIKE, entry.getKey()));
-				queryRules.add(new QueryRule(Operator.LIMIT, 5000));
-
-				SearchResult result = searchService.search(new SearchRequest(documentType, queryRules, null));
+				Query q = new QueryImpl().like(NODE_PATH, entry.getKey()).pageSize(5000);
+				SearchResult result = searchService.search(new SearchRequest(documentType, q, null));
 				Iterator<Hit> iterator = result.iterator();
 
 				Pattern pattern = Pattern.compile("[0-9]+");

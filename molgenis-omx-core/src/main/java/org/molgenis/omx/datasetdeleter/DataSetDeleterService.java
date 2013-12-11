@@ -5,5 +5,6 @@ import org.molgenis.omx.observ.DataSet;
 
 public interface DataSetDeleterService
 {
-	DataSet delete(String dataSetIdentifier, boolean deleteMetaData) throws DatabaseException;
+	String deleteData(String dataSetIdentifier);
+	boolean deleteMetadata(String dataSetIdentifier);
 }

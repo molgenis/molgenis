@@ -40,9 +40,17 @@ public class QueryRule
 	@XmlElement
 	protected Object value = null;
 
+	protected List<QueryRule> nestedRules;
+
 	public QueryRule()
 	{
 
+	}
+
+	public QueryRule(List<QueryRule> nestedRules)
+	{
+		this.nestedRules = nestedRules;
+		operator = Operator.NESTED;
 	}
 
 	public QueryRule(QueryRule copy)
@@ -135,7 +143,17 @@ public class QueryRule
 		/**
 		 * enables the joining of two fields; value is a fieldname
 		 */
-		JOIN("JOIN");
+		JOIN("JOIN"),
+
+		/**
+		 * Boolean query
+		 * */
+		SHOULD("SHOULD"),
+
+		/**
+		 * Disjunction max query
+		 */
+		DIS_MAX("DIS_MAX");
 
 		private String label;
 
@@ -192,6 +210,7 @@ public class QueryRule
 	 * @param operator
 	 * @param value
 	 */
+	@SuppressWarnings("unchecked")
 	public QueryRule(Operator operator, Object value)
 	{
 		if (operator == Operator.SEARCH)
@@ -214,7 +233,7 @@ public class QueryRule
 				okay = false;
 			}
 			if (!okay) throw new IllegalArgumentException("QueryRule(NESTED, value): value should be List<QueryRule>");
-			this.value = value;
+			this.nestedRules = (List<QueryRule>) value;
 			this.operator = operator;
 		}
 		else
@@ -229,7 +248,7 @@ public class QueryRule
 		if (operator == Operator.NOT || operator == Operator.IN_SUBQUERY)
 		{
 			this.operator = operator;
-			this.value = Arrays.asList(nestedRules);
+			this.nestedRules = Arrays.asList(nestedRules);
 		}
 		else
 		{
@@ -339,25 +358,25 @@ public class QueryRule
 	 * 
 	 * @return Nested rule set
 	 */
-	@SuppressWarnings("unchecked")
 	public List<QueryRule> getNestedRules()
 	{
-		if (value == null)
+		if (nestedRules == null)
 		{
 			return Collections.emptyList();
 		}
-		return (List<QueryRule>) value;
+
+		return nestedRules;
 	}
 
 	@Override
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		if (this.getOperator().equals(Operator.NESTED))
+		if (nestedRules != null)
 		{
 			strBuilder.append('(');
 
-			for (final QueryRule rule : this.getNestedRules())
+			for (final QueryRule rule : nestedRules)
 			{
 				strBuilder.append(rule.toString());
 			}

@@ -15,7 +15,6 @@
 			<field name="AaPosition" type="int" nillable="true"/>
 			<field name="VariantLength" type="int" nillable="true"/>
 			<field name="Event" nillable="true"/>
-			<field name="Description" nillable="true"/>
 			<field name="NtChange" nillable="true"/>
 			<field name="Codonchange" nillable="true"/>
 			<field name="CdnaNotation" nillable="true"/>

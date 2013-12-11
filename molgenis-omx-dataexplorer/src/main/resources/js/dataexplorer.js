@@ -253,7 +253,6 @@
 			if (feature.description)
 				items.push('<h3>Description</h3><p>' + feature.description + '</p>');
 			items.push('<h3>Filter:</h3>');
-			var filter = null;
 			var config = featureFilters[featureUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			
@@ -358,19 +357,12 @@
 					});
 					$('.feature-filter-dialog').dialog('close');
 				});
-//				$('input[type=number]').live('keyup input', function(e) {
-//					if ((fromFilter.val() == '') && (toFilter.val() == '')) {
-//						applyButton.attr('disabled', 'disabled');
-//					} else {
-//						applyButton.removeAttr('disabled');
-//					}
-//				});
 			break;
 			case "bool":
-				$('input[name=bool-feature'+feature.identifier+']').live('change', function() {
-					applyButton.removeAttr('disabled');
+				$(applyButton).prop('disabled',true);
+				$('input[type=radio]').live('change', function() {
+					$(applyButton).prop('disabled',false);
 				});
-
 				applyButton.click(function() {
 					molgenis.updateFeatureFilter(featureUri, {
 						name : feature.name,
@@ -383,15 +375,15 @@
 			break;
 			case "categorical":
 				if (config && config.values.length > 0) {
-					applyButton.removeAttr('disabled');
+					$(applyButton).prop('disabled',false);
 				} else {
-					applyButton.attr('disabled', 'disabled');
+					$(applyButton).prop('disabled',true);
 				}
 				$('.cat-value').live('change', function() {
 					if ($('.cat-value:checked').length > 0) {
 						applyButton.removeAttr('disabled');
 					} else {
-						applyButton.attr('disabled', 'disabled');
+						$(applyButton).prop('disabled',true);
 					}
 				});
 				
@@ -455,8 +447,6 @@
             });
     }
 	};
-	
-	
 	
 	//Generic part for filter fields
 	molgenis.createGenericFeatureField = function (items,feature,config,applyButton,featureUri,wizard){
@@ -524,11 +514,11 @@
 				var toFilter;
 				
 				if (config == null) {
-					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" autofocus="autofocus" step="any">');
-					toFilter = $('<input id="to_'+feature.identifier+'" type="number" autofocus="autofocus" step="any">');	
+					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any">');
+					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any">');	
 				} else {
-					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" autofocus="autofocus" step="any" value="' + config.values[0] + '">');
-					toFilter = $('<input id="to_'+feature.identifier+'" type="number" autofocus="autofocus" step="any" value="' + config.values[1] + '">');	
+					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any" value="' + config.values[0] + '">');
+					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any" value="' + config.values[1] + '">');	
 				}
 				
 				fromFilter.on('keyup input', function() {
@@ -633,7 +623,7 @@
 			}
 
 			if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
-				$('input[type=text]').autocomplete({
+				$('#text_'+feature.identifier).autocomplete({
 					source: function( request, response ) {
 						$.ajax({
 							type : 'POST',
@@ -700,15 +690,37 @@
 		return divContainer;
 	};
 	
-	molgenis.createFeatureFilterField = function(element, featureUri){
-		var feature = restApi.get(featureUri);
+	molgenis.createFeatureFilterField = function(elements){
+		var featureIds = [];
+		$.each(elements, function (index, element) {
+	  		var href = $(element).attr('data-molgenis-url');
+	  		var id = href.substring(href.lastIndexOf('/') + 1);
+	  		featureIds.push(id);
+		});
+		
+		var features = restApi.get('/api/v1/observablefeature', null, {
+			q : [{
+				field : 'id',
+				operator : 'IN',
+				value : featureIds
+			}],
+			num : 500
+		});
+		var map = {};
+		$.each(features.items, function(index, feature){
+			map[feature.href] = feature;
+		});
+		
+		$.each(elements, function (index, element) {
 			var items = [];
-			var filter = null;
-			var config = featureFilters[featureUri];
+			var featureUri = $(element).attr('data-molgenis-url');
+			var feature = map[featureUri];
+			var config = featureFilters[feature.href];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-			var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton,featureUri,true);
+			var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton,feature.href,true);
 			var trElement = $(element).closest('tr');
-			trElement.append(divContainer);			
+			trElement.append(divContainer);	
+		});
 	};
 
 	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
@@ -756,23 +768,19 @@
 	molgenis.createSearchRequest = function(includeLimitOffset) {
 		var searchRequest = {
 			documentType : selectedDataSet.identifier,
-			queryRules : [ ]
+			query: {
+				rules : [[ ]]
+			}
 		};
 		
 		if (includeLimitOffset) {
-			searchRequest.queryRules.push({
-				operator : 'LIMIT',
-				value : resultsTable.getMaxRows()
-			});
+			searchRequest.query.pageSize = resultsTable.getMaxRows();
 			
 			if(pager != null) {
 				var page = $('#data-table-pager').pager('getPage');
 				if (page > 1) {
 					var offset = (page - 1) * resultsTable.getMaxRows();
-					searchRequest.queryRules.push({
-						operator : 'OFFSET',
-						value : offset
-					});
+					searchRequest.query.offset = offset;
 				}
 			}
 		}
@@ -781,7 +789,7 @@
 
 		if (searchQuery) {
 			if(/\S/.test(searchQuery)){	
-				searchRequest.queryRules.push({
+				searchRequest.query.rules[0].push({
 					operator : 'SEARCH',
 					value : searchQuery
 				});
@@ -791,16 +799,17 @@
 
 		$.each(featureFilters, function(featureUri, filter) {
 			if (count > 0) {
-				searchRequest.queryRules.push({
+				searchRequest.query.rules[0].push({
 					operator : 'AND'
 				});
 			}
 			$.each(filter.values, function(index, value) {
 				if (filter.range) {
+					
 					// Range filter
 					var rangeAnd = false;
 					if ((index == 0) && (value != '')) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							field : filter.identifier,
 							operator : 'GREATER_EQUAL',
 							value : value
@@ -808,12 +817,12 @@
 						rangeAnd = true;
 					}
 					if (rangeAnd) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							operator : 'AND'
 						});
 					}
 					if ((index == 1) && (value != '')) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							field : filter.identifier,
 							operator : 'LESS_EQUAL',
 							value : value
@@ -822,11 +831,11 @@
 
 				} else {
 					if (index > 0) {
-						searchRequest.queryRules.push({
+						searchRequest.query.rules[0].push({
 							operator : 'OR'
 						});
 					}
-					searchRequest.queryRules.push({
+					searchRequest.query.rules[0].push({
 						field : filter.identifier,
 						operator : 'EQUALS',
 						value : value
@@ -840,7 +849,7 @@
 
 		var sortRule = resultsTable.getSortRule();
 		if (sortRule) {
-			searchRequest.queryRules.push(sortRule);
+			searchRequest.query.sort = sortRule;
 		}
 
 		searchRequest.fieldsToReturn = [];
@@ -873,15 +882,14 @@
 			'value' : 'bool'
 		});
 		
-		queryRules.push({
-			operator : 'LIMIT',
-			value : 1000000
-		});
 		var fragments = selectedDataSet.href.split("/");
 		var searchRequest = { 
 			'documentType' : "protocolTree-" + fragments[fragments.length - 1],
 			'featureFilters' : featureFilters,
-			'queryRules' : queryRules
+			query : {
+				'rules' : [queryRules]
+			}, 
+			'pageSize' : 1000000
 		};
 		
 		searchApi.search(searchRequest, function(searchResponse) {
@@ -905,10 +913,8 @@
 	
 	molgenis.loadAggregate = function(featureId){
 		var searchRequest = molgenis.createSearchRequest();
-		searchRequest.queryRules.push({
-			'operator' : 'LIMIT',
-			'value' : 1000000
-		});
+		searchRequest.query.pageSize = 1000000;
+		
 		var feature = restApi.get('/api/v1/observablefeature/' + featureId);
 		searchRequest.fieldsToReturn = [feature.identifier];
 		var aggregateRequest = {
@@ -944,6 +950,7 @@
 				'dataSetName' : selectedDataSet.name,
 				'dataSetId' : datasetId
 		};
+
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/filterdialog',
@@ -955,14 +962,13 @@
 					
 					$('#filter-dialog-modal').show();
 				});
-
 			}
 		});
+
 	}
 	
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
-		
 		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
@@ -996,7 +1002,7 @@
 			molgenis.searchObservationSets($(this).val());
 		});
 
-		$('#filter-wizard-button').click(function (){
+		$('#wizard-button').click(function (){
 			molgenis.filterDialog();
 		});
 		

@@ -8,37 +8,15 @@ public abstract class ChartRequest
 {
 	@NotNull
 	private String entity;
-
 	private String title;
 	private String xLabel;
 	private String yLabel;
-
 	private int width = Chart.DEFAULT_WITH;
 	private int height = Chart.DEFAULT_HEIGHT;
 
 	public String getEntity()
 	{
 		return entity;
-	}
-
-	public String getxLabel()
-	{
-		return xLabel;
-	}
-
-	public void setxLabel(String xLabel)
-	{
-		this.xLabel = xLabel;
-	}
-
-	public String getyLabel()
-	{
-		return yLabel;
-	}
-
-	public void setyLabel(String yLabel)
-	{
-		this.yLabel = yLabel;
 	}
 
 	public void setEntity(String entity)
@@ -54,6 +32,22 @@ public abstract class ChartRequest
 	public void setTitle(String title)
 	{
 		this.title = title;
+	}
+
+	public String getxLabel() {
+		return xLabel;
+	}
+
+	public void setxLabel(String xLabel) {
+		this.xLabel = xLabel;
+	}
+
+	public String getyLabel() {
+		return yLabel;
+	}
+
+	public void setyLabel(String yLabel) {
+		this.yLabel = yLabel;
 	}
 
 	public int getWidth()

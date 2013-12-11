@@ -2,7 +2,7 @@ OMX · upload
 ============
 OMX
 :title: OMX upload
-:description: How to import data into OmicsConnect.
+:description: How to import data into OMX.
 :brand: MOLGENIS
 :doctype: book
 :toc:
@@ -10,8 +10,8 @@ OMX
 
 = Introduction
 
-OmicsConnect comes with a very flexible data model to describe clinical, phenotypic, genetic and experimental data sets. Next to that it comes with a more strict data model for "metadata" such as individuals, samples, panels, SNPs, genes, etc.
-OmicsConnect data model is an extension of the Observ Model tabular format. We therefore named it OMX (Observ Model eXtensions). There is an import wizard to guide you through the data loading process.
+OMX database is build in MOLGENIS and comes with a very flexible data model to describe clinical, phenotypic, genetic and experimental data sets. Next to that it comes with a more strict data model for "metadata" such as individuals, samples, panels, SNPs, genes, etc.
+OMS data model is an extension of the Observ-OM tabular format. We therefore named it OMX (Observ Model eXtensions). There is an import wizard to guide you through the data loading process.
 This document describes how format works. A typical OMX Excel contains the following tabs:
 
 dataset:: List datasets in this set, their description and what protocol was used (protocol can be reused in many datasets).

@@ -175,7 +175,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 						${name(entity)}List.clear();
 					}
 
-					if (iterationCount++ > 1000)
+					if (iterationCount++ > 100000)
 					{
 						String identifier = "";
 						String name = "";

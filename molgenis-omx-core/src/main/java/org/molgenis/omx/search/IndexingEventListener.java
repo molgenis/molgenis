@@ -28,7 +28,7 @@ public class IndexingEventListener implements ApplicationListener<ApplicationEve
 		if (event instanceof DataSetImportedEvent)
 		{
 			DataSetImportedEvent dataSetImportedEvent = (DataSetImportedEvent) event;
-			dataSetsIndexer.index(Arrays.asList(dataSetImportedEvent.getDataSetId()));
+			dataSetsIndexer.indexDataSets(Arrays.asList(dataSetImportedEvent.getDataSetId()));
 		}
 
 	}

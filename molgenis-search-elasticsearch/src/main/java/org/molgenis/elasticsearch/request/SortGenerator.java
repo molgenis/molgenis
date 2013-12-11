@@ -1,15 +1,10 @@
 package org.molgenis.elasticsearch.request;
 
-import static org.molgenis.framework.db.QueryRule.Operator.SORTASC;
-import static org.molgenis.framework.db.QueryRule.Operator.SORTDESC;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.Query;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Adds Sort to the SearchRequestBuilder object.
@@ -17,38 +12,30 @@ import org.molgenis.framework.db.QueryRule.Operator;
  * @author erwin
  * 
  */
-public class SortGenerator extends AbstractQueryRulePartGenerator
+public class SortGenerator implements QueryPartGenerator
 {
-	private static final List<Operator> SUPPORTED_OPERATORS = Arrays.asList(SORTASC, SORTDESC);
-
-	public SortGenerator()
-	{
-		super(SUPPORTED_OPERATORS);
-	}
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
 	{
-		for (QueryRule queryRule : queryRules)
+		if (query.getSort() != null)
 		{
-			if (queryRule.getValue() == null)
+			for (Sort.Order sort : query.getSort())
 			{
-				throw new IllegalArgumentException(
-						"Missing value for Sorting, for sorting QueryRule.value should be set to the fieldname where to sort on");
-			}
+				if (sort.getProperty() == null)
+				{
+					throw new IllegalArgumentException(
+							"Missing property for Sorting, for sorting property should be set to the fieldname where to sort on");
+				}
+				if (sort.getDirection() == null)
+				{
+					throw new IllegalArgumentException("Missing sort direction");
+				}
 
-			// Use the sort mapping for sorting
-			String sortField = queryRule.getValue().toString() + ".sort";
-
-			if (queryRule.getOperator() == Operator.SORTASC)
-			{
-				searchRequestBuilder.addSort(sortField, SortOrder.ASC);
-			}
-			else if (queryRule.getOperator() == Operator.SORTDESC)
-			{
-				searchRequestBuilder.addSort(sortField, SortOrder.DESC);
+				String sortField = sort.getProperty() + ".sort";
+				SortOrder sortOrder = sort.getDirection() == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
+				searchRequestBuilder.addSort(sortField, sortOrder);
 			}
 		}
 	}
-
 }

@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -21,51 +20,43 @@ import org.molgenis.util.tuple.Tuple;
  * This script is created to compare 2 excelfiles. The files are given via the arguments
  */
 
-public class ValidationChecker
+public class Validator
 {
 	private final static String IDENTIFIER = "id_sample";
+	private final static String IDENTIFIER2 = "id_individual";
 
 	public void check(String excelFile1, String file2, BufferedWriter logger) throws IOException
 	{
-		LinkedHashMap<String, String> hashCheckedValues = new LinkedHashMap<String, String>();
-
-		// Make Object Reference
 		ValidationFile excelfile = new ValidationFile();
 		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(excelFile1));
 
-		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet(0);
-		excelfile.bla(excelSheetReaderReferenceFile, IDENTIFIER);
+		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet("dataset_celiac_sprue");
+		// ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet("Sheet1");
+		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
 
-		// Make Object FileToCompare
 		ValidationFile csvFile = new ValidationFile();
 		CsvReader csvReaderFileToCompare = new CsvReader(new File(file2));
 
-		csvFile.bla(csvReaderFileToCompare, IDENTIFIER);
+		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;
-		// Make list for shared headers
-
 		List<String> listOfSharedHeaders = new ArrayList<String>();
-		// Compare the headers of Reference file with fileToCompare
-		// Add Reference headers to the listOfSharedHeaders
+
+		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("### Unique columns");
 		for (String o : excelfile.getListOfHeaders())
 		{
 			listOfSharedHeaders.add(o);
+
 			if (!csvFile.getListOfHeaders().contains(o))
 			{
+				listOfSharedHeaders.remove(o);
 				System.out.println("In file1: " + o);
 				noUniqueColums = true;
 			}
 		}
 
-		// Compare the headers of fileToCompare file with Reference
-		// Add Reference headers to the listOfSharedHeaders
 		for (String o : csvFile.getListOfHeaders())
 		{
-			if (!listOfSharedHeaders.contains(o))
-			{
-				listOfSharedHeaders.add(o);
-			}
 			if (!excelfile.getListOfHeaders().contains(o))
 			{
 				System.out.println("In file2: " + o);
@@ -75,9 +66,10 @@ public class ValidationChecker
 
 		if (noUniqueColums == false)
 		{
+
 			System.out.println("###There are no added/deleted columns\n");
 		}
-
+		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("\n###Comparing the values ");
 		System.out.println("Sample ID\tFeature\tFile1\tFile2");
 
@@ -85,25 +77,31 @@ public class ValidationChecker
 		{
 			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
 			{
-				if (csvFile.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
-				{
-					compareRows(csvFile.getHash().get(entry.getValue().getString(IDENTIFIER)), entry.getValue(),
-							listOfSharedHeaders, hashCheckedValues, logger);
-				}
-
+				compareRows(
+						"excel",
+						"csvFile",
+						entry.getValue(),
+						csvFile.getHash().get(
+								entry.getValue().getString(IDENTIFIER) + "_" + entry.getValue().getString(IDENTIFIER2)),
+						listOfSharedHeaders, logger);
 			}
 
 			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
 			{
-				if (excelfile.getHash().get(entry.getValue().getString(IDENTIFIER)) != null)
-				{
-					compareRows(entry.getValue(), excelfile.getHash().get(entry.getValue().getString(IDENTIFIER)),
-							listOfSharedHeaders, hashCheckedValues, logger);
-				}
-
+				compareRows(
+						"csvFile",
+						"excel",
+						entry.getValue(),
+						excelfile.getHash().get(
+								entry.getValue().getString(IDENTIFIER) + "_" + entry.getValue().getString(IDENTIFIER2)),
+						listOfSharedHeaders, logger);
 			}
-
+			System.out.println("-----------------------------------------------------------------------------------");
 			System.out.println("\n###Unique samples in file1");
+			if (excelfile.getHash().size() == 0)
+			{
+				System.out.println("There are no unique samples in file1");
+			}
 			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
 			{
 				if (!csvFile.getHash().containsKey(entry.getKey()))
@@ -111,7 +109,12 @@ public class ValidationChecker
 					System.out.println(entry.getKey());
 				}
 			}
+			System.out.println("-----------------------------------------------------------------------------------");
 			System.out.println("\n###Unique samples in file2 ");
+			if (csvFile.getHash().size() == 0)
+			{
+				System.out.println("There are no unique samples in file2");
+			}
 			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
 			{
 				if (!excelfile.getHash().containsKey(entry.getKey()))
@@ -128,64 +131,40 @@ public class ValidationChecker
 		}
 	}
 
-	public static void compareRows(Tuple firstTuple, Tuple secondTuple, List<String> listOfHeaders,
-			LinkedHashMap<String, String> hashCheckedValues, BufferedWriter logger) throws IOException
+	public static void compareRows(String fileName1, String fileName2, Tuple firstTuple, Tuple secondTuple,
+			List<String> listOfHeaders, BufferedWriter logger) throws IOException
 	{
 
 		for (String e : listOfHeaders)
 		{
-
+			if (firstTuple == null || secondTuple == null)
+			{
+				System.out.println("NULLLLL");
+			}
 			if (firstTuple.getString(e) == null && secondTuple.getString(e) == null)
 			{
-
+				// Do nothing
 			}
 			else if (firstTuple.getString(e) != null && secondTuple.getString(e) == null)
 			{
-				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
-				{
-					System.out.println("### " + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
-							+ (secondTuple.getString(e) == null ? ("\tAdded") : secondTuple.getString(e)) + "\t"
-							+ firstTuple.getString(e));
-					hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
 
-				}
-
+				System.out.println(fileName1 + " ### " + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
+						+ "REMOVED IN:" + fileName2 + "\t" + firstTuple.getString(e));
 			}
 			else if (firstTuple.getString(e) == null && secondTuple.getString(e) != null)
 			{
-				if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
-				{
-					System.out.println(firstTuple.getString(IDENTIFIER)
-							+ "\t"
-							+ e
-							+ "\t"
-							+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "file2") : "|"
-									+ secondTuple.getString(e)) + "|\t|" + firstTuple.getString(e) + "|");
-					hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
-				}
+				System.out.println(fileName1 + "---" + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
+						+ "\tADDED IN " + fileName2 + "|\t|" + firstTuple.getString(e) + "|");
 			}
 			else
 			{
 				if (!firstTuple.getString(e).equals(secondTuple.getString(e)))
 				{
-					if (!hashCheckedValues.containsKey(firstTuple.getString(IDENTIFIER) + e))
-					{
-
-						hashCheckedValues.put(firstTuple.getString(IDENTIFIER) + e, secondTuple.getString(e));
-						System.out.println(firstTuple.getString(IDENTIFIER)
-								+ "\t"
-								+ e
-								+ "\t"
-								+ (secondTuple.getString(e) == null ? ("\tAdded in the " + "Reference") : "|"
-										+ secondTuple.getString(e)) + "|\t|" + firstTuple.getString(e) + "|");
-					}
-
+					System.out.println(fileName1 + "-" + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
+							+ secondTuple.getString(e) + "|\t|" + firstTuple.getString(e) + "|");
 				}
-
 			}
-
 		}
-
 	}
 
 	/**
@@ -205,7 +184,7 @@ public class ValidationChecker
 							+ "args[2] /Users/Roan/logger.txt");
 			return;
 		}
-		ValidationChecker vc = new ValidationChecker();
+		Validator vc = new Validator();
 		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2])));
 		try
 		{
