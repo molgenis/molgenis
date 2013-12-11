@@ -5,6 +5,13 @@
 .nav {
 	margin-bottom: 10px;
 }
+body{
+	padding-top:50px;
+}
+
+.btn-link 	{
+	text-shadow:none;
+}
 
 .nav-tabs>li>a {
 	padding-top: 5px;
