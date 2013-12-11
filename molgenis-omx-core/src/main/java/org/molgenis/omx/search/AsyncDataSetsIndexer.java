@@ -135,7 +135,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
     @Override
     @Async
     @RunAsSystem
-    public void indexProtocol(List<Integer> protocolIds)
+    public void indexProtocols(List<Integer> protocolIds)
     {
         while (isIndexingRunning())
         {

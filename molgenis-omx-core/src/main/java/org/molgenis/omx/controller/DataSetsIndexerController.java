@@ -99,7 +99,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
         if("dataSet".equals(request.getEntity())){
 		    dataSetsIndexer.indexDataSets(ids);
         }else if("protocol".equals(request.getEntity())){
-            dataSetsIndexer.indexProtocol(ids);
+            dataSetsIndexer.indexProtocols(ids);
         }
 		return new DataSetIndexResponse(true, "");
 	}

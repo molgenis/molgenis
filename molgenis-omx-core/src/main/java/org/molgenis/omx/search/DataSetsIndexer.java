@@ -16,7 +16,7 @@ public interface DataSetsIndexer
 
 	void indexDataSets(List<Integer> datasetIds);
 
-    void indexProtocol(List<Integer> protocolIds);
+    void indexProtocols(List<Integer> protocolIds);
 
 	/**
 	 * Check if there is an indexing job running
