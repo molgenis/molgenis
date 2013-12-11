@@ -1,9 +1,13 @@
-#molgenis-header {
-	margin-bottom: 10px;
+body{
+	padding-top:50px;
 }
 
-.nav {
-	margin-bottom: 10px;
+.btn-link 	{
+	text-shadow:none;
+}
+
+.navbar .nav li{
+	margin-bottom:-5px;
 }
 
 .nav-tabs>li>a {

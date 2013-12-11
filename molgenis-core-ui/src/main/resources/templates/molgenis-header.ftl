@@ -36,22 +36,18 @@
 	</head>
 	<body>
 		<div class="container-fluid">
-			<div id="molgenis-header" class="row-fluid">
-				<a href="/"><img src="${molgenis_ui.hrefLogo?html}"></a>
-			</div>
 			<div class="row-fluid">
-			<#if menu_id??>
-				<#if !(plugin_id??)>
-					<#assign plugin_id="NULL">
-				</#if>
-					<@topmenu molgenis_ui.getMenu() plugin_id/>
-				<#if plugin_id?starts_with("form")>
-					<@submenu molgenis_ui.getMenu(menu_id) plugin_id/>
-				</#if>	
-			</#if>			
+				<#if menu_id??>
+					<#if !(plugin_id??)>
+						<#assign plugin_id="NULL">
+					</#if>
+						<@topmenu molgenis_ui.getMenu() plugin_id/>
+					<#if plugin_id?starts_with("form")>
+						<@submenu molgenis_ui.getMenu(menu_id) plugin_id/>
+					</#if>	
+				</#if>			
 			</div>
-				
-					<div id="login-modal-container-header"></div>
+			<div id="login-modal-container-header"></div>
 			<div class="row-fluid">
 				<div class="datasetsindexerAlerts"></div>
 			</div>
@@ -68,24 +64,24 @@
 				</#if>
 				<#if messageType??>
 					<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
-				</#if></div>
+				</#if>
 			</div>
-			<div class="row-fluid">
-				<div id="plugin-container" class="container-fluid">
+		</div>
+		<div class="row-fluid">
+			<div id="plugin-container" class="container-fluid">
 	</#macro>
 	<!--topmenu -->
 	<#macro topmenu menu plugin_id>
-		<div class="navbar navbar-inverse"> 
-			<div class="navbar-inner"> 	
+		<div class="navbar navbar-fixed-top"> 
+			<div class="navbar navbar-inner"> 	
 				<ul class="nav">
+					<li><a><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
 					<#list menu.items as item>
-						
 						<#if item.type != "MENU">
 							<#if item.id == plugin_id>
 								<li class="active"><a href="#">${item.name?html}</a></li>
 							<#else>
 								<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
-								
 							</#if>
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
