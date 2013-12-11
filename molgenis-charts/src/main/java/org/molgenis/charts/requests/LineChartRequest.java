@@ -1,7 +1,5 @@
 package org.molgenis.charts.requests;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 public class LineChartRequest extends ChartRequest
@@ -10,24 +8,38 @@ public class LineChartRequest extends ChartRequest
 	private String x;
 
 	@NotNull
-	private List<String> y;
+	private String y;
 
+	/**
+	 * @return the x
+	 */
 	public String getX()
 	{
 		return x;
 	}
 
+	/**
+	 * @param x
+	 *            the x to set
+	 */
 	public void setX(String x)
 	{
 		this.x = x;
 	}
 
-	public List<String> getY()
+	/**
+	 * @return the y
+	 */
+	public String getY()
 	{
 		return y;
 	}
 
-	public void setY(List<String> y)
+	/**
+	 * @param y
+	 *            the y to set
+	 */
+	public void setY(String y)
 	{
 		this.y = y;
 	}
