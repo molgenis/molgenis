@@ -16,12 +16,14 @@ import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Writable;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -31,7 +33,6 @@ import org.molgenis.security.SecurityUtils;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -181,21 +182,19 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 		try
 		{
 			List<String> header = Arrays.asList("Id", "Variable", "Description");
-			ExcelWriter excelWriter = new ExcelWriter(bos);
+			ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(bos);
 			try
 			{
-				TupleWriter sheetWriter = excelWriter.createTupleWriter(studyDataRequest.getName());
+				Writable<Entity> sheetWriter = excelWriter.createWritable(studyDataRequest.getName(), header);
 				try
 				{
-					sheetWriter.writeColNames(header);
-
 					for (ObservableFeature feature : features)
 					{
-						KeyValueTuple tuple = new KeyValueTuple();
-						tuple.set(header.get(0), feature.getIdentifier());
-						tuple.set(header.get(1), feature.getName());
-						tuple.set(header.get(2), feature.getDescription());
-						sheetWriter.write(tuple);
+						Entity entity = new MapEntity();
+						entity.set(header.get(0), feature.getIdentifier());
+						entity.set(header.get(1), feature.getName());
+						entity.set(header.get(2), feature.getDescription());
+						sheetWriter.add(entity);
 					}
 				}
 				finally

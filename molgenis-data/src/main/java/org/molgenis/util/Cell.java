@@ -1,4 +1,4 @@
-package org.molgenis.util.tuple;
+package org.molgenis.util;
 
 public interface Cell<T>
 {

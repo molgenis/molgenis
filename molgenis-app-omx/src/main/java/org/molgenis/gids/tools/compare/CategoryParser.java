@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.Repository;
+import org.molgenis.data.excel.ExcelEntitySourceFactory;
 
 public class CategoryParser
 {
@@ -29,37 +30,37 @@ public class CategoryParser
 
 	public void check(String file, String datasetMatrix) throws IOException
 	{
+		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
+		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("observablefeature");
 
-		ExcelReader excelReader = new ExcelReader(new File(file));
 		List<String> listOfCategoricalFeatures = new ArrayList<String>();
-		ExcelSheetReader readObservableFeatureSheet = excelReader.getSheet("observablefeature");
-
 		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
-		for (Tuple t : readObservableFeatureSheet)
+
+		for (Entity entity : repo)
 		{
-			if ("categorical".equals(t.getString("dataType")))
+			if ("categorical".equals(entity.getString("dataType")))
 			{
-				listOfCategoricalFeatures.add(t.getString("identifier"));
-				hashCategories.put(t.getString("identifier"), new ArrayList<String>());
+				listOfCategoricalFeatures.add(entity.getString("identifier"));
+				hashCategories.put(entity.getString("identifier"), new ArrayList<String>());
 			}
 		}
 
-		ExcelSheetReader readObservableDataMatrixSheet = excelReader.getSheet(datasetMatrix);
+		Repository<? extends Entity> readObservableDataMatrixRepo = entitySource
+				.getRepositoryByEntityName(datasetMatrix);
 
-		for (Tuple t : readObservableDataMatrixSheet)
+		for (Entity entity : readObservableDataMatrixRepo)
 		{
 			for (String category : listOfCategoricalFeatures)
 			{
 				List<String> getList = hashCategories.get(category);
-				if (!hashCategories.get(category).contains(t.getString(category)))
+				if (!hashCategories.get(category).contains(entity.getString(category)))
 				{
-					getList.add(t.getString(category));
+					getList.add(entity.getString(category));
 				}
 			}
 		}
 		printForCategoryTab(hashCategories);
-		excelReader.close();
-
+		entitySource.close();
 	}
 
 	public void printAsList(Map<String, List<String>> hashCategories)

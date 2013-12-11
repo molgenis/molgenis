@@ -19,7 +19,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
-import org.molgenis.util.tuple.Cell;
+import org.molgenis.util.Cell;
 import org.molgenis.util.tuple.Tuple;
 
 /**

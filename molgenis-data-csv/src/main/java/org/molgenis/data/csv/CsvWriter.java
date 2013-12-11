@@ -36,6 +36,12 @@ public class CsvWriter<E extends Entity> extends AbstractWritable<E>
 		this(writer, ',');
 	}
 
+	public CsvWriter(Writer writer, List<String> attributeNames) throws IOException
+	{
+		this(writer);
+		writeAttributeNames(attributeNames);
+	}
+
 	public CsvWriter(Writer writer, char separator)
 	{
 		if (writer == null) throw new IllegalArgumentException("writer is null");
@@ -77,7 +83,9 @@ public class CsvWriter<E extends Entity> extends AbstractWritable<E>
 		int i = 0;
 		String[] values = new String[cachedAttributeNames.size()];
 		for (String colName : cachedAttributeNames)
+		{
 			values[i++] = toValue(entity.get(colName));
+		}
 
 		csvWriter.writeNext(values);
 		if (csvWriter.checkError()) throw new MolgenisDataException("An exception occured writing the csv file");

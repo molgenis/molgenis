@@ -10,24 +10,25 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.csv.CsvWriter;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.io.excel.ExcelWriter.FileFormat;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.Writable;
+import org.molgenis.data.WritableFactory;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.excel.ExcelEntitySource;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.excel.ExcelWriter.FileFormat;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.io.processor.TrimProcessor;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.WritableTuple;
 
 public class SampleConverter
 {
@@ -38,7 +39,7 @@ public class SampleConverter
 	private static String IDENTIFIER = "id_sample";
 	private List<String> featureColNames = null;
 	MakeEntityNameAndIdentifier mkObsProtocol = null;
-	private HashMap<String, HashSet<String>> hashMapCategories = new HashMap<String, HashSet<String>>();
+	private final HashMap<String, HashSet<String>> hashMapCategories = new HashMap<String, HashSet<String>>();
 	MakeEntityNameAndIdentifier mkObsFeature = null;
 	List<MakeEntityNameAndIdentifier> mkObsProtocollist = new ArrayList<MakeEntityNameAndIdentifier>();
 	List<MakeEntityNameAndIdentifier> mkObsFeaturelist = new ArrayList<MakeEntityNameAndIdentifier>();
@@ -48,10 +49,12 @@ public class SampleConverter
 
 		OUTPUTDIR = outputdir;
 		PROJECT = projectName;
-		ExcelReader excelReader = new ExcelReader(in);
-		excelReader.addCellProcessor(new TrimProcessor(false, true));
-		TupleWriter csvWriter = new CsvWriter(new OutputStreamWriter(out, Charset.forName("UTF-8")));
-		csvWriter.addCellProcessor(new LowerCaseProcessor(true, false));
+
+		ExcelEntitySource entitySource = new ExcelEntitySource(in, null);
+		entitySource.addCellProcessor(new TrimProcessor(false, true));
+
+		CsvWriter<Entity> csvWriter = null;
+
 		ArrayList<String> listOfEntity = new ArrayList<String>();
 		listOfEntity.add("dataset");
 		listOfEntity.add("protocol");
@@ -60,12 +63,14 @@ public class SampleConverter
 
 		try
 		{
-			for (TupleReader sheetReader : excelReader)
+			for (String entityName : entitySource.getEntityNames())
 			{
+				Repository<? extends Entity> sheetReader = entitySource.getRepositoryByEntityName(entityName);
 				this.featureColNames = new ArrayList<String>();
-				for (Iterator<String> it = sheetReader.colNamesIterator(); it.hasNext();)
+
+				for (AttributeMetaData attr : sheetReader.getAttributes())
 				{
-					String colName = it.next();
+					String colName = attr.getName();
 					if (colName.equals(IDENTIFIER))
 					{
 						this.featureColNames.add(0, colName);
@@ -76,39 +81,39 @@ public class SampleConverter
 					}
 				}
 
-				csvWriter.writeColNames(this.featureColNames);
-				for (Iterator<Tuple> it = sheetReader.iterator(); it.hasNext();)
+				csvWriter = new CsvWriter<Entity>(new OutputStreamWriter(out, Charset.forName("UTF-8")),
+						this.featureColNames);
+
+				for (Entity entity : sheetReader)
 				{
-					Tuple row = it.next();
 					// If the sample name exists
-					if (row.getString(IDENTIFIER) != null && !row.getString(IDENTIFIER).isEmpty())
+					if (entity.getString(IDENTIFIER) != null && !entity.getString(IDENTIFIER).isEmpty())
 					{
-						String sampleId = row.getString(IDENTIFIER);
+						String sampleId = entity.getString(IDENTIFIER);
 						if (!checkIfDouble(sampleId))
 						{
-							createCategoryList(row, sampleId);
-
-							csvWriter.write(row);
+							createCategoryList(entity, sampleId);
+							csvWriter.add(entity);
 						}
-						
+
 					}
 					else
 					{
-						WritableTuple tup = new KeyValueTuple();
+						Entity entOut = new MapEntity();
 						for (String featureColName : featureColNames)
 						{
 							if (featureColName.equals(IDENTIFIER))
 							{
 								// Make a identifier for this sample
-								tup.set(featureColName, emptySample());
+								entOut.set(featureColName, emptySample());
 							}
 							else
 							{
-								tup.set(featureColName, row.getString(featureColName));
+								entOut.set(featureColName, entity.getString(featureColName));
 							}
 
 						}
-						csvWriter.write(tup);
+						csvWriter.add(entOut);
 					}
 				}
 			}
@@ -140,7 +145,7 @@ public class SampleConverter
 		{
 			try
 			{
-				excelReader.close();
+				entitySource.close();
 			}
 			catch (IOException e)
 			{
@@ -155,7 +160,7 @@ public class SampleConverter
 		}
 	}
 
-	private void createCategoryList(Tuple row, String sampleId)
+	private void createCategoryList(Entity entity, String sampleId)
 	{
 		for (String feature : this.featureColNames)
 		{
@@ -166,7 +171,7 @@ public class SampleConverter
 			}
 			else
 			{
-				hashset.add(row.getString(feature));
+				hashset.add(entity.getString(feature));
 				hashMapCategories.put(feature, hashset);
 			}
 		}
@@ -216,44 +221,46 @@ public class SampleConverter
 		}
 	}
 
-	public void mkMetadataFileProtocol(ExcelWriter excelWriterMD, String sheetName) throws IOException
+	public void mkMetadataFileProtocol(WritableFactory<Entity> writableFactoryMD, String sheetName) throws IOException
 	{
-		TupleWriter esw = excelWriterMD.createTupleWriter("protocol");
-		esw.writeColNames(Arrays.asList("identifier", "name", "features_identifier"));
+		Writable<Entity> esw = writableFactoryMD.createWritable("protocol",
+				Arrays.asList("identifier", "name", "features_identifier"));
 
 		for (MakeEntityNameAndIdentifier i : mkObsProtocollist)
 		{
-			WritableTuple kvt = new KeyValueTuple();
+			Entity kvt = new MapEntity();
 			kvt.set("identifier", i.getIdentifier());
 			kvt.set("name", i.getName());
 			kvt.set("features_identifier", i.getFeatures_Identifier());
-			esw.write(kvt);
+			esw.add(kvt);
 		}
 	}
 
-	public void mkMetadataFileObservableFeature(ExcelWriter excelWriterMD, String sheetName) throws IOException
+	public void mkMetadataFileObservableFeature(WritableFactory<Entity> writableFactoryMD, String sheetName)
+			throws IOException
 	{
-		TupleWriter esw = excelWriterMD.createTupleWriter("observableFeature");
-		esw.writeColNames(Arrays.asList("identifier", "name"));
+		Writable<Entity> esw = writableFactoryMD.createWritable("observableFeature",
+				Arrays.asList("identifier", "name"));
 
 		for (MakeEntityNameAndIdentifier m : mkObsFeaturelist)
 		{
-			WritableTuple kvt = new KeyValueTuple();
+			Entity kvt = new MapEntity();
 			kvt.set("identifier", m.getIdentifier());
 			kvt.set("name", m.getName());
-			esw.write(kvt);
+			esw.add(kvt);
 		}
 	}
 
-	public void mkMetadataFileDataSet(ExcelWriter excelWriterMD, String sheetName) throws IOException
+	public void mkMetadataFileDataSet(WritableFactory<Entity> writableFactoryMD, String sheetName) throws IOException
 	{
-		TupleWriter esw = excelWriterMD.createTupleWriter(sheetName);
-		esw.writeColNames(Arrays.asList("identifier", "name", "protocolused_identifier"));
-		WritableTuple kvt = new KeyValueTuple();
+		Writable<Entity> esw = writableFactoryMD.createWritable(sheetName,
+				Arrays.asList("identifier", "name", "protocolused_identifier"));
+
+		Entity kvt = new MapEntity();
 		kvt.set("protocolused_identifier", "protocol_" + PROJECT);
 		kvt.set("identifier", PROJECT.toLowerCase());
 		kvt.set("name", PROJECT.toLowerCase());
-		esw.write(kvt);
+		esw.add(kvt);
 	}
 
 	public void mkmetadataExcelFile(ArrayList<String> listOfEntity) throws IOException
@@ -261,7 +268,7 @@ public class SampleConverter
 
 		OutputStream osMD = new FileOutputStream(OUTPUTDIR + PROJECT + "_metadata.xls");
 
-		ExcelWriter excelWriterMD = new ExcelWriter(osMD, FileFormat.XLS);
+		ExcelWriter<Entity> excelWriterMD = new ExcelWriter<Entity>(osMD, FileFormat.XLS);
 		excelWriterMD.addCellProcessor(new LowerCaseProcessor(true, false));
 
 		for (String sheetName : listOfEntity)
@@ -284,7 +291,7 @@ public class SampleConverter
 			else
 			{
 				// create empty sheet
-				excelWriterMD.createTupleWriter(sheetName);
+				excelWriterMD.createWritable(sheetName, Collections.<String> emptyList());
 			}
 		}
 		excelWriterMD.close();

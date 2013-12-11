@@ -1,29 +1,30 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToTextValueConverter implements TupleToValueConverter<TextValue, String>
+public class EntityToTextValueConverter implements EntityToValueConverter<TextValue, String>
 {
 	@Override
-	public TextValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public TextValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new TextValue());
+		return updateFromEntity(entity, attributeName, feature, new TextValue());
 	}
 
 	@Override
-	public TextValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public TextValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof TextValue))
 		{
 			throw new ValueConverterException("value is not a " + TextValue.class.getSimpleName());
 		}
-		String text = tuple.getString(colName);
+		String text = entity.getString(attributeName);
 		if (text == null) return null;
 
 		TextValue textValue = (TextValue) value;
