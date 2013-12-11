@@ -22,10 +22,4 @@ public class MolgenisRException extends RuntimeException
 	{
 		super(message, cause);
 	}
-
-	public MolgenisRException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace)
-	{
-		super(message);
-	}
-
 }

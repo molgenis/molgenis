@@ -1,6 +1,7 @@
 <html>
 	<head>
-
+		<link rel="stylesheet" href="/css/jquery-ui-1.10.3.custom.css" />
+		<link rel="stylesheet" href="/css/jquery.qtip.min.css" />
 		<script src="/js/jquery-1.8.3.min.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 				
@@ -25,5 +26,6 @@
 	<body>
 
 		<div id="container" ></div>
+		<div id="test"> </div>
 	</body>
 </html>

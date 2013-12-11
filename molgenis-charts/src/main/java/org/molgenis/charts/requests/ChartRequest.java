@@ -18,6 +18,8 @@ public abstract class ChartRequest
 
 	// The query rules to select the rows
 	private List<QueryRule> queryRules;
+	private String xLabel;
+	private String yLabel;
 
 	/**
 	 * @return the entity
@@ -51,6 +53,22 @@ public abstract class ChartRequest
 	public void setTitle(String title)
 	{
 		this.title = title;
+	}
+	
+	public String getxLabel() {
+		return xLabel;
+	}
+
+	public void setxLabel(String xLabel) {
+		this.xLabel = xLabel;
+	}
+
+	public String getyLabel() {
+		return yLabel;
+	}
+
+	public void setyLabel(String yLabel) {
+		this.yLabel = yLabel;
 	}
 
 	/**
