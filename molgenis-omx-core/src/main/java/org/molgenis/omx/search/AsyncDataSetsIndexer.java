@@ -12,6 +12,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetTable;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.protocol.CategoryTable;
 import org.molgenis.omx.protocol.ProtocolTable;
 import org.molgenis.search.SearchService;
@@ -92,7 +93,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Override
 	@Async
 	@RunAsSystem
-	public void index(List<Integer> dataSetIds)
+	public void indexDataSets(List<Integer> dataSetIds)
 	{
 		while (isIndexingRunning())
 		{
@@ -130,5 +131,45 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			runningIndexProcesses.decrementAndGet();
 		}
 	}
+
+    @Override
+    @Async
+    @RunAsSystem
+    public void indexProtocol(List<Integer> protocolIds)
+    {
+        while (isIndexingRunning())
+        {
+            try
+            {
+                Thread.sleep(5000);
+            }
+            catch (InterruptedException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+
+        runningIndexProcesses.incrementAndGet();
+        try
+        {
+            Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME, protocolIds);
+
+            for (Protocol protocol : protocols)
+            {
+                searchService.indexTupleTable("protocolTree-" + protocol.getId(),
+                        new ProtocolTable(protocol, dataService));
+                searchService.indexTupleTable("featureCategory-" + protocol.getId(),
+                        new CategoryTable(protocol, dataService));
+            }
+        }
+        catch (Exception e)
+        {
+            LOG.error("Exception index()", e);
+        }
+        finally
+        {
+            runningIndexProcesses.decrementAndGet();
+        }
+    }
 
 }

@@ -14,6 +14,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -63,7 +64,9 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	{
 		// add data sets to model
 		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
-		model.addAttribute("dataSets", dataSets);
+        Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ROOT,true));
+        model.addAttribute("dataSets", dataSets);
+        model.addAttribute("protocols", protocols);
 		return "view-datasetsindexer";
 	}
 
@@ -76,13 +79,14 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		{
 			return new DataSetIndexResponse(false, "Indexer is already running. Please wait until finished.");
 		}
-		
+
 		List<String> dataSetIds = request.getSelectedDataSets();
+        String entity = request.getEntity();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())
 		{
 			return new DataSetIndexResponse(false, "Please select a dataset");
 		}
-		
+
 		// Convert the strings to integer
 		List<Integer> ids = new ArrayList<Integer>();
 		for (String dataSetId : dataSetIds)
@@ -92,14 +96,18 @@ public class DataSetsIndexerController extends MolgenisPluginController
 				ids.add(Integer.parseInt(dataSetId));
 			}
 		}
-		dataSetsIndexer.index(ids);
-
+        if("dataSet".equals(request.getEntity())){
+		    dataSetsIndexer.indexDataSets(ids);
+        }else if("protocol".equals(request.getEntity())){
+            dataSetsIndexer.indexProtocol(ids);
+        }
 		return new DataSetIndexResponse(true, "");
 	}
 
 	static class DataSetIndexRequest
 	{
 		private List<String> selectedDataSets;
+        private String entity;
 
 		public DataSetIndexRequest(List<String> selectedDataSets)
 		{
@@ -114,6 +122,16 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		public void setSelectedDataSets(List<String> selectedDataSets)
 		{
 			this.selectedDataSets = selectedDataSets;
+		}
+
+        public String getEntity()
+        {
+            return entity;
+        }
+
+        public void setEntity(String entity)
+        {
+            this.entity = entity;
 		}
 	}
 
