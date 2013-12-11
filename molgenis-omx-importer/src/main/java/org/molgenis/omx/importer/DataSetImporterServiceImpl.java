@@ -11,14 +11,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.io.TableReader;
-import org.molgenis.io.TableReaderFactory;
-import org.molgenis.io.TupleReader;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -26,7 +26,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,33 +58,36 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 	{ IOException.class, ValueConverterException.class })
 	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, ValueConverterException
 	{
-		TableReader tableReader = TableReaderFactory.create(file);
+		EntitySource entitySource = dataService.createEntitySource(file);
 		try
 		{
-			for (String tableName : tableReader.getTableNames())
+			for (String entityName : entitySource.getEntityNames())
 			{
-				if (dataSetEntityNames.contains(tableName))
+				if (dataSetEntityNames.contains(entityName))
 				{
-					LOG.info("importing dataset " + tableName + " from file " + file + "...");
-					TupleReader tupleReader = tableReader.getTupleReader(tableName);
+					LOG.info("importing dataset " + entityName + " from file " + file + "...");
+
+					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName(entityName);
 					try
 					{
-						importSheet(tupleReader, tableName);
+						importSheet(repo, entityName);
 					}
 					finally
 					{
-						tupleReader.close();
+						repo.close();
 					}
 				}
+
 			}
 		}
 		finally
 		{
-			tableReader.close();
+			entitySource.close();
 		}
 	}
 
-	private void importSheet(TupleReader sheetReader, String sheetName) throws IOException, ValueConverterException
+	private void importSheet(Repository<? extends Entity> repo, String sheetName) throws IOException,
+			ValueConverterException
 	{
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
@@ -94,14 +97,15 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 			throw new MolgenisDataException("dataset '" + identifier + "' does not exist in db");
 		}
 
-		Iterator<String> colIt = sheetReader.colNamesIterator();
+		Iterator<AttributeMetaData> colIt = repo.getAttributes().iterator();
 		if (colIt == null || !colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no header");
 
 		// create feature map
 		Map<String, ObservableFeature> featureMap = new LinkedHashMap<String, ObservableFeature>();
 		while (colIt.hasNext())
 		{
-			String featureIdentifier = colIt.next();
+			AttributeMetaData attr = colIt.next();
+			String featureIdentifier = attr.getName();
 			if (featureIdentifier != null && !featureIdentifier.isEmpty())
 			{
 				if (!featureIdentifier.equalsIgnoreCase(DATASET_ROW_IDENTIFIER_HEADER))
@@ -129,15 +133,15 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 		int rownr = 0;
 		int transactionRows = 10;// ;Math.max(1, 5000 / featureMap.size());
 
-		for (Tuple row : sheetReader)
+		for (Entity entity : repo)
 		{
 			// Skip empty rows
-			if (!row.isEmpty())
+			if (!EntityUtils.isEmpty(entity))
 			{
 				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 				Map<String, List<Value>> valueMap = new HashMap<String, List<Value>>();
 
-				String rowIdentifier = row.getString(DATASET_ROW_IDENTIFIER_HEADER);
+				String rowIdentifier = entity.getString(DATASET_ROW_IDENTIFIER_HEADER);
 				if (rowIdentifier == null) rowIdentifier = UUID.randomUUID().toString();
 
 				// create observation set
@@ -149,7 +153,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
 
-					Value value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
+					Value value = valueConverter.fromEntity(entity, entry.getKey(), entry.getValue());
 					if (value != null)
 					{
 						// create observed value
@@ -177,16 +181,17 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 
 			if (++rownr % transactionRows == 0)
 			{
-				CrudRepository<? extends Entity> repo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
-				repo.flush();
-				repo.clearCache();
+				CrudRepository<? extends Entity> dataSetRepo = dataService
+						.getCrudRepository(ObservationSet.ENTITY_NAME);
+				dataSetRepo.flush();
+				dataSetRepo.clearCache();
 			}
 		}
 		if (rownr % transactionRows != 0)
 		{
-			CrudRepository<? extends Entity> repo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
-			repo.flush();
-			repo.clearCache();
+			CrudRepository<? extends Entity> dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+			dataSetRepo.flush();
+			dataSetRepo.clearCache();
 		}
 	}
 }

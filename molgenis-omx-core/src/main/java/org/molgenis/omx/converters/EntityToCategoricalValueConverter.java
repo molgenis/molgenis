@@ -1,6 +1,7 @@
 package org.molgenis.omx.converters;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -9,28 +10,27 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToCategoricalValueConverter implements TupleToValueConverter<CategoricalValue, String>
+public class EntityToCategoricalValueConverter implements EntityToValueConverter<CategoricalValue, String>
 {
 	private final DataService dataService;
 
-	public TupleToCategoricalValueConverter(DataService dataService)
+	public EntityToCategoricalValueConverter(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("Database is null");
 		this.dataService = dataService;
 	}
 
 	@Override
-	public CategoricalValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
+	public CategoricalValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
 			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new CategoricalValue());
+		return updateFromEntity(entity, attributeName, feature, new CategoricalValue());
 	}
 
 	@Override
-	public CategoricalValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public CategoricalValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof CategoricalValue))
@@ -38,7 +38,7 @@ public class TupleToCategoricalValueConverter implements TupleToValueConverter<C
 			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
 		}
 
-		String categoryValueCode = tuple.getString(colName);
+		String categoryValueCode = entity.getString(attributeName);
 		if (categoryValueCode == null) return null;
 
 		Category category;

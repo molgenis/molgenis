@@ -1,34 +1,34 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public interface TupleToValueConverter<S extends Value, T>
+public interface EntityToValueConverter<S extends Value, T>
 {
 	/**
 	 * Converts a tuple column value to a value entity
 	 * 
-	 * @param tuple
-	 * @param colName
+	 * @param entity
+	 * @param attributeName
 	 * @param feature
 	 * @return
 	 * @throws ValueConverterException
 	 */
-	public S fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException;
+	public S fromEntity(Entity tuple, String attributeName, ObservableFeature feature) throws ValueConverterException;
 
 	/**
 	 * Updates an existing value by converting a tuple column
 	 * 
-	 * @param tuple
-	 * @param colName
+	 * @param entity
+	 * @param attributeName
 	 * @param feature
 	 * @param value
 	 * @return
 	 * @throws ValueConverterException
 	 */
-	public S updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public S updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException;
 
 	/**

@@ -1,22 +1,23 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToBoolValueConverter implements TupleToValueConverter<BoolValue, Boolean>
+public class EntityToBoolValueConverter implements EntityToValueConverter<BoolValue, Boolean>
 {
 	@Override
-	public BoolValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public BoolValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new BoolValue());
+		return updateFromEntity(entity, attributeName, feature, new BoolValue());
 	}
 
 	@Override
-	public BoolValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public BoolValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof BoolValue))
@@ -24,7 +25,7 @@ public class TupleToBoolValueConverter implements TupleToValueConverter<BoolValu
 			throw new ValueConverterException("value is not a " + BoolValue.class.getSimpleName());
 		}
 
-		Boolean booleanObj = tuple.getBoolean(colName);
+		Boolean booleanObj = entity.getBoolean(attributeName);
 		if (booleanObj == null) return null;
 
 		BoolValue boolValue = (BoolValue) value;
