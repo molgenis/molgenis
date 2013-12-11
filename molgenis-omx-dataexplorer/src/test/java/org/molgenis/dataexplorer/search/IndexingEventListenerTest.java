@@ -37,7 +37,7 @@ public class IndexingEventListenerTest
 		DataSetImportedEvent event = new DataSetImportedEvent(this, id);
 		context.publishEvent(event);
 
-		verify(mockDataSetsIndexer).index(Arrays.asList(id));
+		verify(mockDataSetsIndexer).indexDataSets(Arrays.asList(id));
 	}
 
 }
