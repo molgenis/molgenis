@@ -14,9 +14,9 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.charts.AbstractChart;
+import org.molgenis.charts.AbstractChart.ChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
-import org.molgenis.charts.Chart;
-import org.molgenis.charts.Chart.ChartType;
 import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.svg.SVGEditor;
@@ -54,7 +54,7 @@ public class RChartService extends AbstractChartVisualizationService
 	}
 
 	@Override
-	protected String renderChartInternal(Chart chart, Model model)
+	protected Object renderChartInternal(AbstractChart chart, Model model)
 	{
 		// For now r is only used for HeatMaps
 		HeatMapChart heatMapChart = (HeatMapChart) chart;
