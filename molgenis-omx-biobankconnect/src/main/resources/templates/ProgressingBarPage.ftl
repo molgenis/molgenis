@@ -1,7 +1,7 @@
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
 	<div class="row-fluid">
 		<div class="span12">
-			<legend><div><strong>Please be patient</strong> : this will take up to 5 mins </div><div class="text-align-center font-size-medium">If your session expires, please click on '<strong>Cureate Mappings</strong>' in the menu to see the result</div></legend>
+			<legend><div><strong>Please be patient</strong> : this will take up to 5 mins </div><div class="font-size-medium-center">If your session expires, please click on '<strong>Cureate Mappings</strong>' in the menu to see the result</div></legend>
 		</div>
 	</div>
 	<div id="delete-mapping" class="row-fluid progress-bar-hidden">
