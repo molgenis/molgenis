@@ -5,14 +5,12 @@ import javax.annotation.Nullable;
 /**
  * Data for charts that use xy point data like a linechart.
  */
-public class XYData
+public class XYData 
 {
 	private final Object xvalue;
 	private final Object yvalue;
 
-	public XYData(@Nullable
-	Object xvalue, @Nullable
-	Object yvalue)
+	public XYData(@Nullable Object xvalue, @Nullable Object yvalue)
 	{
 		this.xvalue = xvalue;
 		this.yvalue = yvalue;
@@ -33,5 +31,4 @@ public class XYData
 	{
 		return "XYData [xvalue=" + xvalue + ", yvalue=" + yvalue + "]";
 	}
-
 }

@@ -1,12 +1,14 @@
 package org.molgenis.charts;
 
 import static org.molgenis.charts.ChartController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,21 +18,29 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.ChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.charttypes.LineChart;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
+import org.molgenis.charts.highcharts.HighchartService;
+import org.molgenis.charts.highcharts.Options;
 import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.LineChartRequest;
+import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import freemarker.template.TemplateException;
 
@@ -66,30 +76,37 @@ public class ChartController
 		return "test";
 	}
 
-	@RequestMapping("/line")
-	public String renderLineChart(@Valid
-	LineChartRequest request, Model model)
+	@RequestMapping(value = "/line", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Options renderLineChart(@RequestBody LineChartRequest request, Model model)
 	{
-		List<QueryRule> queryRules = null;// TODO
-
 		List<XYDataSerie> series = new ArrayList<XYDataSerie>();
 
-		for (int i = 0; i < request.getY().size(); i++)
-		{
-			XYDataSerie data = chartDataService.getXYDataSerie(request.getEntity(), request.getX(),
-					request.getY().get(i), queryRules);
-			series.add(data);
-		}
+		// Hard coded excel data
+		//XYDataSerie xYDataSerie = chartDataService.getXYDataSerie("heatmap", "probe4", "probe2", queryRules);
+		
+		//TODO JJ
+//		String urlX = request.getX();
+//		String urlY = request.getY();
+//		chartDataService.getEntity(urlX); //TODO JJ
+		
+		//TODO REMOVE ME JJ
+		logger.info("request.getEntity() : " + request.getEntity());
+		logger.info("request.getX() : " + request.getX());
+		logger.info("request.getY() : " + request.getY());
+		logger.info("request.getQueryRules() : " + request.getQueryRules());
+		
+		XYDataSerie xYDataSerie = chartDataService.getXYDataSerie(
+				request.getEntity(),
+				request.getX(),
+				request.getY(),
+				request.getQueryRules());
+		series.add(xYDataSerie);
 
-		Chart chart = new LineChart(series);
-		chart.setTitle(request.getTitle());
-		chart.setWidth(request.getWidth());
-		chart.setHeight(request.getHeight());
-
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(ChartType.LINE_CHART);
-
-		return service.renderChart(chart, model);
+		LineChart lineChart = new LineChart(series, request.getX(), request.getY());
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(ChartType.LINE_CHART);
+		
+		return (Options) service.renderChart(lineChart, model);
 	}
 
 	/**
@@ -141,7 +158,6 @@ public class ChartController
 	@RequestMapping("/heatmap")
 	public String renderHeatMap(@Valid
 	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
-
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -157,6 +173,6 @@ public class ChartController
 		ChartVisualizationService service = chartVisualizationServiceFactory
 				.getVisualizationService(ChartType.HEAT_MAP);
 
-		return service.renderChart(chart, model);
+		return (String) service.renderChart(chart, model);
 	}
 }
