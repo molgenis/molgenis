@@ -49,9 +49,6 @@
 	        <plugin id="contact" name="Contact" url="contact"/>
         </menu>
         <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/> 
-      <!--  <menu label="Converters" name="converters">
-			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
-		</menu>--> 
         <menu label="Admin" name="admin">
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
