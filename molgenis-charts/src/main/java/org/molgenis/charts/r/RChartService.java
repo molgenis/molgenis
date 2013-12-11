@@ -12,7 +12,7 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart;
-import org.molgenis.charts.AbstractChart.AbstractChartType;
+import org.molgenis.charts.AbstractChart.ChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
 import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
@@ -38,7 +38,7 @@ public class RChartService extends AbstractChartVisualizationService
 	@Autowired
 	public RChartService(FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig, RScriptExecutor rScriptExecutor)
 	{
-		super(Arrays.asList(AbstractChartType.HEAT_MAP));
+		super(Arrays.asList(ChartType.HEAT_MAP));
 
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
 		if (freeMarkerConfig == null) throw new IllegalArgumentException("FreeMarkerConfig is null");
@@ -50,7 +50,7 @@ public class RChartService extends AbstractChartVisualizationService
 	}
 
 	@Override
-	protected String renderChartInternal(AbstractChart chart, Model model)
+	protected Object renderChartInternal(AbstractChart chart, Model model)
 	{
 		// For now r is only used for HeatMaps
 		HeatMapChart heatMapChart = (HeatMapChart) chart;

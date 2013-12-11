@@ -5,15 +5,15 @@ package org.molgenis.charts;
  */
 public abstract class AbstractChart
 {
-	public enum AbstractChartType
+	public enum ChartType
 	{
 		LINE_CHART, SCATTER_CHART, BOXPLOT_CHART, HEAT_MAP
 	}
 
-	public static final int DEFAULT_WITH = 200;
-	public static final int DEFAULT_HEIGHT = 200;
+	public static final int DEFAULT_WITH = 800;
+	public static final int DEFAULT_HEIGHT = 450;
 
-	private final AbstractChartType type;
+	private final ChartType type;
 	private int width = DEFAULT_WITH;
 	private int height = DEFAULT_HEIGHT;
 
@@ -29,12 +29,12 @@ public abstract class AbstractChart
 		this.title = (title == null) ? "" : title;
 	}
 
-	protected AbstractChart(AbstractChartType type)
+	protected AbstractChart(ChartType type)
 	{
 		this.type = type;
 	}
 
-	public AbstractChartType getType()
+	public ChartType getType()
 	{
 		return type;
 	}

@@ -6,7 +6,7 @@ public class HeatMapChart extends DataMatrixChart
 {
 	public HeatMapChart(DataMatrix data)
 	{
-		super(AbstractChartType.HEAT_MAP, data);
+		super(ChartType.HEAT_MAP, data);
 	}
 
 	@Override

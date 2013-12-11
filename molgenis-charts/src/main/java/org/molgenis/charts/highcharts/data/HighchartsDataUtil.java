@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
-import org.molgenis.charts.highcharts.ChartType;
 import org.molgenis.charts.highcharts.Series;
 
 /**
@@ -43,8 +42,8 @@ public class HighchartsDataUtil
 		{
 			List<Number> tempPoint = new ArrayList<Number>();
 			//TODO JJ
-			tempPoint.add(new BigDecimal((String) xYData.getXvalue()));
-			tempPoint.add(new BigDecimal((String) xYData.getYvalue()));
+			tempPoint.add((Number) xYData.getXvalue());
+			tempPoint.add((Number) xYData.getYvalue());
 			data.add(tempPoint);
 		}
 
