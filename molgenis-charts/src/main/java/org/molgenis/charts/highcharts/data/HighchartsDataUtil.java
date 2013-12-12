@@ -1,7 +1,8 @@
 package org.molgenis.charts.highcharts.data;
 
-import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -31,22 +32,40 @@ public class HighchartsDataUtil
 		Series series = new Series();
 		series.setName(xYDataSerie.getName());
 		series.setType(type);
-		series.setData(parseToXYDataList(xYDataSerie.getData()));
+		series.setData(parseToXYDataList(xYDataSerie.getData(), xYDataSerie.getAttributeXJavaType(), xYDataSerie.getAttributeYJavaType()));
 		return series;
 	}
 
-	public static List<Object> parseToXYDataList(List<XYData> xydata)
+	public static List<Object> parseToXYDataList(List<XYData> xydata, Class<?> xValueClass, Class<?> yValueClass)
 	{
+		 logger.info("xValueClass: " + xValueClass);
+		 logger.info("yValueClass: " + yValueClass);
+		
 		List<Object> data = new ArrayList<Object>();
 		for (XYData xYData : xydata)
 		{
-			List<Number> tempPoint = new ArrayList<Number>();
-			//TODO JJ
-			tempPoint.add((Number) xYData.getXvalue());
-			tempPoint.add((Number) xYData.getYvalue());
+			List<Object> tempPoint = new ArrayList<Object>();
+			tempPoint.add(convertValue(xValueClass, xYData.getXvalue()));
+			tempPoint.add(convertValue(yValueClass, xYData.getYvalue()));
 			data.add(tempPoint);
 		}
 
 		return data;
+	}
+
+	public static Object convertValue(Class<?> clazz, Object value)
+	{
+		if (Date.class == clazz)
+		{
+			return (Long) ((Date) value).getTime();
+		}
+		else if (Timestamp.class == clazz)
+		{
+			return (Long) ((Timestamp) value).getTime();
+		}
+		else
+		{
+			return value;
+		}
 	}
 }
