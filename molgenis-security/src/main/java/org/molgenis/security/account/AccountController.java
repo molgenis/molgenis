@@ -3,7 +3,6 @@ package org.molgenis.security.account;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
@@ -43,9 +42,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping(URI)
 public class AccountController
 {
-    public static final String URI = "/account";
+	public static final String URI = "/account";
 
-    private static final Logger logger = Logger.getLogger(AccountController.class);
+	private static final Logger logger = Logger.getLogger(AccountController.class);
 
 	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been send to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
@@ -83,8 +82,11 @@ public class AccountController
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
-	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException, BindException
+	public Map<String, String> registerUser(@Valid
+	@ModelAttribute
+	RegisterRequest registerRequest, @Valid
+	@ModelAttribute
+	CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException, BindException
 	{
 		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
@@ -95,13 +97,17 @@ public class AccountController
 			throw new BindException(RegisterRequest.class, "password does not match confirm password");
 		}
 		MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
-        String activationUri = null;
-        if(StringUtils.isEmpty(request.getHeader("X-Forwarded-Host"))) {
-            activationUri = ServletUriComponentsBuilder.fromCurrentRequest().path(URI+"/activate").build().toUriString();
-        }else{
-		    activationUri = request.getScheme()+"://"+request.getHeader("X-Forwarded-Host")+URI+"/activate";
-        }
-        accountService.createUser(molgenisUser, activationUri);
+		String activationUri = null;
+		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+		{
+			activationUri = ServletUriComponentsBuilder.fromCurrentRequest().path(URI + "/activate").build()
+					.toUriString();
+		}
+		else
+		{
+			activationUri = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
+		}
+		accountService.createUser(molgenisUser, activationUri);
 
 		String successMessage;
 		switch (accountService.getActivationMode())
