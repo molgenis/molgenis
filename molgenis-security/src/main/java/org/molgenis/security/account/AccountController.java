@@ -82,11 +82,8 @@ public class AccountController
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
-	public Map<String, String> registerUser(@Valid
-	@ModelAttribute
-	RegisterRequest registerRequest, @Valid
-	@ModelAttribute
-	CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException, BindException
+	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException, BindException
 	{
 		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
