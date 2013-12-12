@@ -4,13 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
-import org.molgenis.io.csv.CsvReader;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.data.Entity;
+import org.molgenis.data.csv.CsvRepository;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
@@ -29,19 +28,18 @@ public class OntologyLoaderApp
 			manager.loadExistingOntology(file);
 
 			Set<String> terms = new HashSet<String>();
-			CsvReader reader = null;
+			CsvRepository repo = null;
 			try
 			{
-				reader = new CsvReader(new File(variableList));
-				Iterator<Tuple> iterator = reader.iterator();
-				while (iterator.hasNext())
+				repo = new CsvRepository((new File(variableList)), null);
+				for (Entity entity : repo)
 				{
-					terms.add(iterator.next().getString("name"));
+					terms.add(entity.getString("name"));
 				}
 			}
 			finally
 			{
-				if (reader != null) reader.close();
+				if (repo != null) repo.close();
 			}
 			File outputFile = new File(file.getAbsoluteFile().getParent() + "/" + file.getName() + "_subset.owl");
 			manager.copyOntologyContent(terms);

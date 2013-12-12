@@ -47,14 +47,4 @@ public class HeatMapRequest extends ChartRequest
 		this.y = y;
 	}
 
-	public List<QueryRule> getQueryRules()
-	{
-		return queryRules;
-	}
-
-	public void setQueryRules(List<QueryRule> queryRules)
-	{
-		this.queryRules = queryRules;
-	}
-
 }

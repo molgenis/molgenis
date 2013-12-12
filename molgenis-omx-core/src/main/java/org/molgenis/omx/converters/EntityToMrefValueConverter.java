@@ -4,36 +4,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.molgenis.data.Entity;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.MrefValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValue, List<Cell<String>>>
+public class EntityToMrefValueConverter implements EntityToValueConverter<MrefValue, List<Cell<String>>>
 {
 	private final CharacteristicLoadingCache characteristicLoader;
 
-	public TupleToMrefValueConverter(CharacteristicLoadingCache characteristicLoader)
+	public EntityToMrefValueConverter(CharacteristicLoadingCache characteristicLoader)
 	{
 		if (characteristicLoader == null) throw new IllegalArgumentException("characteristic loader is null");
 		this.characteristicLoader = characteristicLoader;
 	}
 
 	@Override
-	public MrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public MrefValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new MrefValue());
+		return updateFromEntity(entity, attributeName, feature, new MrefValue());
 	}
 
 	@Override
-	public MrefValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public MrefValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof MrefValue))
@@ -47,7 +48,7 @@ public class TupleToMrefValueConverter implements TupleToValueConverter<MrefValu
 
 		try
 		{
-			xrefIdentifiersPreTrim = tuple.getList(colName);
+			xrefIdentifiersPreTrim = entity.getList(attributeName);
 		}
 		catch (RuntimeException e)
 		{

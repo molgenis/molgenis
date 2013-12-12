@@ -4,11 +4,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.value.XrefValue;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.KeyValueTuple;
+import org.molgenis.util.Cell;
 import org.testng.annotations.Test;
 
 public class TupleToXrefValueConverterTest
@@ -22,7 +23,7 @@ public class TupleToXrefValueConverterTest
 		XrefValue value = new XrefValue();
 		value.setValue(ch1);
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
-		Cell<String> cell = new TupleToXrefValueConverter(characteristicLoadingCache).toCell(value);
+		Cell<String> cell = new EntityToXrefValueConverter(characteristicLoadingCache).toCell(value);
 		assertEquals(cell.getKey(), "ch1");
 		assertEquals(cell.getValue(), "ch #1");
 	}
@@ -36,9 +37,8 @@ public class TupleToXrefValueConverterTest
 		when(characteristicLoadingCache.findCharacteristic("ch1")).thenReturn(ch1);
 		when(characteristicLoadingCache.findCharacteristic("ch2")).thenReturn(ch2);
 		String colName = "col";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, "ch1");
-		XrefValue value = new TupleToXrefValueConverter(characteristicLoadingCache).fromTuple(tuple, colName, null);
+		Entity entity = new MapEntity(colName, "ch1");
+		XrefValue value = new EntityToXrefValueConverter(characteristicLoadingCache).fromEntity(entity, colName, null);
 		assertEquals(value.getValue(), ch1);
 	}
 }
