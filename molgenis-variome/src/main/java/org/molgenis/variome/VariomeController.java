@@ -15,8 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -40,6 +42,7 @@ public class VariomeController extends MolgenisPluginController{
 	public VariomeController(VariomeService pluginVariomeService)
 	{
 		super(URI);
+		
 		if (pluginVariomeService == null) throw new IllegalArgumentException(
 				"PluginVariomeService is null");
 		this.pluginVariomeService = pluginVariomeService;
@@ -48,6 +51,12 @@ public class VariomeController extends MolgenisPluginController{
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model){
 		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/generateTable", method = RequestMethod.POST)
+	public String getInputData(@RequestParam("tableInputArea") String input, Model model) {
+		model.addAttribute("userInput", input);
+		return"view-variome";
 	}
 	
 	@ExceptionHandler(RuntimeException.class)

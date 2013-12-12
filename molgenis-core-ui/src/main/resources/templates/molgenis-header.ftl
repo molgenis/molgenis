@@ -75,7 +75,7 @@
 		<div class="navbar navbar-fixed-top"> 
 			<div class="navbar navbar-inner"> 	
 				<ul class="nav">
-					<li><a><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
+					<li><a class="logo-anchor"><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
 					<#list menu.items as item>
 						<#if item.type != "MENU">
 							<#if item.id == plugin_id>

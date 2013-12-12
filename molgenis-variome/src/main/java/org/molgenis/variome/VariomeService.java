@@ -1,13 +1,12 @@
 package org.molgenis.variome;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 /**
- * Data variables for the variome explorer plugin
+ * Interface that must be implemented by a VariomeService
+ * 
+ * @author Mark-de-Haan
+ * 
  */
-@Component
-public class VariomeService
+public interface VariomeService
 {
-
+	String getInputData(String input);
 }
