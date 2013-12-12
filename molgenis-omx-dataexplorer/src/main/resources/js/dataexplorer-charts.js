@@ -8,6 +8,8 @@
 			entity,
 			x, 
 			y, 
+			xAxisLabel,
+			yAxisLabel,
 			width, 
 			height, 
 			title, 
@@ -23,7 +25,9 @@
 			"title": title,
 			"queryRules": queryRules,
 			"x": x,
-			"y": y
+			"y": y,
+			"xAxisLabel": xAxisLabel,
+			"yAxisLabel": yAxisLabel
 			// TODO JJ
 //			"featureFilters" : featureFilters,
 //			"searchQuery" : searchQuery,
@@ -68,11 +72,11 @@
 	$(function() {
 		$('#chart-designer-modal-button').click(function () {
 			selectedFeaturesSelectOptions = null;
-			$("#selectXAxisFeature").empty();
-			$("#selectYAxisFeature").empty();
+			$("#chart-select-xaxis-feature").empty();
+			$("#chart-select-yaxis-feature").empty();
 			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
-			$("#selectXAxisFeature").append(selectedFeaturesSelectOptions);
-			$("#selectYAxisFeature").append(selectedFeaturesSelectOptions);
+			$("#chart-select-xaxis-feature").append(selectedFeaturesSelectOptions);
+			$("#chart-select-yaxis-feature").append(selectedFeaturesSelectOptions);
 		});
 	});
 	

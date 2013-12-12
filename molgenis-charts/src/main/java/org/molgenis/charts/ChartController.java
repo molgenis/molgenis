@@ -79,31 +79,25 @@ public class ChartController
 	@RequestMapping(value = "/line", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Options renderLineChart(@RequestBody LineChartRequest request, Model model)
-	{
-		List<XYDataSerie> series = new ArrayList<XYDataSerie>();
-
-		// Hard coded excel data
-		//XYDataSerie xYDataSerie = chartDataService.getXYDataSerie("heatmap", "probe4", "probe2", queryRules);
-		
-		//TODO JJ
-//		String urlX = request.getX();
-//		String urlY = request.getY();
-//		chartDataService.getEntity(urlX); //TODO JJ
-		
+	{		
 		//TODO REMOVE ME JJ
 		logger.info("request.getEntity() : " + request.getEntity());
 		logger.info("request.getX() : " + request.getX());
 		logger.info("request.getY() : " + request.getY());
+		logger.info("request.getxAxisLabel() : " + request.getxAxisLabel());
+		logger.info("request.getyAxisLabel() : " + request.getyAxisLabel());
 		logger.info("request.getQueryRules() : " + request.getQueryRules());
 		
-		XYDataSerie xYDataSerie = chartDataService.getXYDataSerie(
+		LineChart lineChart = chartDataService.getLineChart(
 				request.getEntity(),
 				request.getX(),
 				request.getY(),
 				request.getQueryRules());
-		series.add(xYDataSerie);
-
-		LineChart lineChart = new LineChart(series, request.getX(), request.getY());
+		
+		lineChart.setTitle(request.getTitle());
+		lineChart.setxAxisLabel(request.getxAxisLabel());
+		lineChart.setyAxisLabel(request.getyAxisLabel());
+		
 		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(ChartType.LINE_CHART);
 		
 		return (Options) service.renderChart(lineChart, model);

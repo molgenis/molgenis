@@ -1,7 +1,6 @@
 package org.molgenis.charts.data;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.charts.AbstractChart.ChartType;
@@ -11,6 +10,8 @@ import org.molgenis.charts.AbstractChart.ChartType;
  */
 public class XYDataSerie
 {
+	private Class<?> attributeXJavaType;
+	private Class<?> attributeYJavaType;
 	private final List<XYData> data = new ArrayList<XYData>();
 	private String name = "";
 	private ChartType type;
@@ -56,4 +57,38 @@ public class XYDataSerie
 	{
 		this.type = type;
 	}
+
+	/**
+	 * @return the attributeXJavaType
+	 */
+	public Class<?> getAttributeXJavaType()
+	{
+		return attributeXJavaType;
+	}
+
+	/**
+	 * @param attributeXJavaType the attributeXJavaType to set
+	 */
+	public void setAttributeXJavaType(Class<?> attributeXJavaType)
+	{
+		this.attributeXJavaType = attributeXJavaType;
+	}
+
+	/**
+	 * @return the attributeYJavaType
+	 */
+	public Class<?> getAttributeYJavaType()
+	{
+		return attributeYJavaType;
+	}
+
+	/**
+	 * @param attributeYJavaType the attributeYJavaType to set
+	 */
+	public void setAttributeYJavaType(Class<?> attributeYJavaType)
+	{
+		this.attributeYJavaType = attributeYJavaType;
+	}
+	
+	
 }

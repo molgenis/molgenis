@@ -2,12 +2,12 @@ package org.molgenis.charts.highcharts;
 
 public class Chart
 {
-	//Default values
+	// Default values
 	private static final Integer DEFAULT_MARGIN_BOTTOM = 100;
 	private static final Integer DEFAULT_MARGIN_LEFT = 100;
 	private static final Integer DEFAULT_MARGIN_RIGHT = 100;
 	private static final Integer DEFAULT_MARGIN_TOP = 100;
-	
+
 	Integer height;
 	Integer width;
 	Integer marginBottom = DEFAULT_MARGIN_BOTTOM;
@@ -28,9 +28,10 @@ public class Chart
 	 * @param height
 	 *            the height to set
 	 */
-	public void setHeight(Integer height)
+	public Chart setHeight(Integer height)
 	{
 		this.height = height;
+		return this;
 	}
 
 	/**
@@ -45,9 +46,10 @@ public class Chart
 	 * @param width
 	 *            the width to set
 	 */
-	public void setWidth(Integer width)
+	public Chart setWidth(Integer width)
 	{
 		this.width = width;
+		return this;
 	}
 
 	/**
@@ -62,9 +64,10 @@ public class Chart
 	 * @param marginBottom
 	 *            the marginBottom to set
 	 */
-	public void setMarginBottom(Integer marginBottom)
+	public Chart setMarginBottom(Integer marginBottom)
 	{
 		this.marginBottom = marginBottom;
+		return this;
 	}
 
 	/**
@@ -79,9 +82,10 @@ public class Chart
 	 * @param marginLeft
 	 *            the marginLeft to set
 	 */
-	public void setMarginLeft(Integer marginLeft)
+	public Chart setMarginLeft(Integer marginLeft)
 	{
 		this.marginLeft = marginLeft;
+		return this;
 	}
 
 	/**
@@ -96,9 +100,10 @@ public class Chart
 	 * @param marginRight
 	 *            the marginRight to set
 	 */
-	public void setMarginRight(Integer marginRight)
+	public Chart setMarginRight(Integer marginRight)
 	{
 		this.marginRight = marginRight;
+		return this;
 	}
 
 	/**
@@ -113,9 +118,10 @@ public class Chart
 	 * @param marginTop
 	 *            the marginTop to set
 	 */
-	public void setMarginTop(Integer marginTop)
+	public Chart setMarginTop(Integer marginTop)
 	{
 		this.marginTop = marginTop;
+		return this;
 	}
 
 	/**
@@ -130,8 +136,9 @@ public class Chart
 	 * @param type
 	 *            the type to set
 	 */
-	public void setType(String type)
+	public Chart setType(String type)
 	{
 		this.type = type;
+		return this;
 	}
 }
