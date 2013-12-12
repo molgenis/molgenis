@@ -76,7 +76,7 @@ public class DecimalField extends FieldType
 	@Override
 	public Class<?> getJavaType()
 	{
-		return Date.class;
+		return Double.class;
 	}
 
 	@Override

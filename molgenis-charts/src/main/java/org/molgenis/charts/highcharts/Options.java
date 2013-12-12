@@ -6,10 +6,11 @@ import java.util.List;
 public class Options
 {
 	private Chart chart;
-	private Title title;
+	private ChartTitle title;
 	private List<Series> series = new ArrayList<Series>();
 	private List<XAxis> xAxis = new ArrayList<XAxis>();
 	private List<YAxis> yAxis = new ArrayList<YAxis>();
+	private Credits credits;
 
 	/**
 	 * @return the chart
@@ -31,7 +32,7 @@ public class Options
 	/**
 	 * @return the title
 	 */
-	public Title getTitle()
+	public ChartTitle getTitle()
 	{
 		return title;
 	}
@@ -40,7 +41,7 @@ public class Options
 	 * @param title
 	 *            the title to set
 	 */
-	public void setTitle(Title title)
+	public void setTitle(ChartTitle title)
 	{
 		this.title = title;
 	}
@@ -112,5 +113,22 @@ public class Options
 	public void addyAxis(YAxis yAxis)
 	{
 		this.yAxis.add(yAxis);
+	}
+	
+
+	/**
+	 * @return the credits
+	 */
+	public Credits getCredits()
+	{
+		return credits;
+	}
+
+	/**
+	 * @param credits the credits to set
+	 */
+	public void setCredits(Credits credits)
+	{
+		this.credits = credits;
 	}
 }
