@@ -94,6 +94,7 @@ public class ChartController
 				request.getY(),
 				request.getQueryRules());
 		
+		lineChart.setTitle(request.getTitle());
 		lineChart.setxAxisLabel(request.getxAxisLabel());
 		lineChart.setyAxisLabel(request.getyAxisLabel());
 		

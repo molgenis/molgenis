@@ -47,8 +47,8 @@ public class ChartDataServiceImpl implements ChartDataService
 			Class<?> attributeXJavaType = repo.getAttribute(attributeNameXaxis).getDataType().getJavaType();
 			Class<?> attributeYJavaType = repo.getAttribute(attributeNameYaxis).getDataType().getJavaType();
 			
-			logger.info("CHAO attributeXJavaType: " + attributeXJavaType + " attributeNameXaxis: " + attributeNameXaxis);
-			logger.info("CHAO attributeYJavaType: " + attributeYJavaType + " attributeNameYaxis: " + attributeNameYaxis);
+			logger.info("attributeXJavaType: " + attributeXJavaType + " attributeNameXaxis: " + attributeNameXaxis);
+			logger.info("attributeYJavaType: " + attributeYJavaType + " attributeNameYaxis: " + attributeNameYaxis);
 			
 			XYDataSerie xYDataSerie = this.getXYDataSerie(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules);
 			LineChart lineChart = new LineChart(Arrays.asList(xYDataSerie), null, null, getMolgenisAxisType(attributeXJavaType), getMolgenisAxisType(attributeYJavaType));
@@ -56,10 +56,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		catch (MolgenisModelException e)
 		{
-			e.printStackTrace();
+			throw new MolgenisChartException("Error creating a line chart, error: " + e);
 		}
-		
-		return null;
 	}
 	
 	
