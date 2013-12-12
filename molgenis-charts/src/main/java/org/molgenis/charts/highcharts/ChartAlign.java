@@ -1,6 +1,6 @@
 package org.molgenis.charts.highcharts;
 
-public enum Align
+public enum ChartAlign
 {
 	LEFT("left"), 
 	CENTER("center"), 
@@ -8,7 +8,7 @@ public enum Align
 	
 	private String align;
 	
-	private Align(String align) {
+	private ChartAlign(String align) {
 		this.align = align;
 	}
 	

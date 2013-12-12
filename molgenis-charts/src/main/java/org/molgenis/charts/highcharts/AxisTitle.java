@@ -1,34 +1,32 @@
 package org.molgenis.charts.highcharts;
 
-public class Title
+public class AxisTitle
 {	
-	Align align;
+	String align;
 	Integer margin;
 	String text;
 
-	public Title()
+	public AxisTitle()
 	{
-		this.align = Align.CENTER;
+		this.align = AxisAlign.MIDDLE.toString();
 		this.margin = 15;
 		this.text = "Chart title";
 	}
 
-	public static Title getDefault()
-	{
-		return new Title()
-			.setAlign(Align.CENTER)
-			.setMargin(15)
-			.setText("Chart title");
-	}
-
-	public Align getAlign()
+	public String getAlign()
 	{
 		return align;
 	}
 
-	public Title setAlign(Align align)
+	public AxisTitle setAlign(String align)
 	{
 		this.align = align;
+		return this;
+	}
+	
+	public AxisTitle setAlign(AxisAlign align)
+	{
+		this.align = align.toString();
 		return this;
 	}
 
@@ -37,7 +35,7 @@ public class Title
 		return margin;
 	}
 
-	public Title setMargin(Integer margin)
+	public AxisTitle setMargin(Integer margin)
 	{
 		this.margin = margin;
 		return this;
@@ -48,7 +46,7 @@ public class Title
 		return text;
 	}
 
-	public Title setText(String text)
+	public AxisTitle setText(String text)
 	{
 		this.text = text;
 		return this;
