@@ -15,17 +15,18 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Writable;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.util.ShoppingCart;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -106,23 +107,21 @@ public class ProtocolViewerController extends MolgenisPluginController
 				}
 			});
 		}
-		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(response.getOutputStream());
 		try
 		{
-			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
+			Writable<Entity> sheetWriter = excelWriter.createWritable("Variables", header);
 			try
 			{
-				sheetWriter.writeColNames(header);
-
 				if (features != null)
 				{
 					for (ObservableFeature feature : features)
 					{
-						KeyValueTuple tuple = new KeyValueTuple();
-						tuple.set(header.get(0), feature.getIdentifier());
-						tuple.set(header.get(1), feature.getName());
-						tuple.set(header.get(2), feature.getDescription());
-						sheetWriter.write(tuple);
+						Entity entity = new MapEntity();
+						entity.set(header.get(0), feature.getIdentifier());
+						entity.set(header.get(1), feature.getName());
+						entity.set(header.get(2), feature.getDescription());
+						sheetWriter.add(entity);
 					}
 				}
 			}

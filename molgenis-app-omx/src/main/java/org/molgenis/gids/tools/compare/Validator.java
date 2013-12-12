@@ -11,10 +11,11 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.io.csv.CsvReader;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.Repository;
+import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.excel.ExcelEntitySourceFactory;
 
 /**
  * This script is created to compare 2 excelfiles. The files are given via the arguments
@@ -28,14 +29,13 @@ public class Validator
 	public void check(String excelFile1, String file2, BufferedWriter logger) throws IOException
 	{
 		ValidationFile excelfile = new ValidationFile();
-		ExcelReader excelReaderReferenceFile = new ExcelReader(new File(excelFile1));
-
-		ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet("dataset_celiac_sprue");
-		// ExcelSheetReader excelSheetReaderReferenceFile = excelReaderReferenceFile.getSheet("Sheet1");
+		EntitySource excelReaderReferenceFile = new ExcelEntitySourceFactory().create(new File(excelFile1));
+		Repository<? extends Entity> excelSheetReaderReferenceFile = excelReaderReferenceFile
+				.getRepositoryByEntityName("dataset_celiac_sprue");
 		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
 
 		ValidationFile csvFile = new ValidationFile();
-		CsvReader csvReaderFileToCompare = new CsvReader(new File(file2));
+		Repository<? extends Entity> csvReaderFileToCompare = new CsvRepository(new File(file2), null);
 
 		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;
@@ -75,7 +75,7 @@ public class Validator
 
 		try
 		{
-			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
+			for (Entry<String, Entity> entry : excelfile.getHash().entrySet())
 			{
 				compareRows(
 						"excel",
@@ -86,7 +86,7 @@ public class Validator
 						listOfSharedHeaders, logger);
 			}
 
-			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
+			for (Entry<String, Entity> entry : csvFile.getHash().entrySet())
 			{
 				compareRows(
 						"csvFile",
@@ -102,7 +102,7 @@ public class Validator
 			{
 				System.out.println("There are no unique samples in file1");
 			}
-			for (Entry<String, Tuple> entry : excelfile.getHash().entrySet())
+			for (Entry<String, Entity> entry : excelfile.getHash().entrySet())
 			{
 				if (!csvFile.getHash().containsKey(entry.getKey()))
 				{
@@ -115,7 +115,7 @@ public class Validator
 			{
 				System.out.println("There are no unique samples in file2");
 			}
-			for (Entry<String, Tuple> entry : csvFile.getHash().entrySet())
+			for (Entry<String, Entity> entry : csvFile.getHash().entrySet())
 			{
 				if (!excelfile.getHash().containsKey(entry.getKey()))
 				{
@@ -131,37 +131,37 @@ public class Validator
 		}
 	}
 
-	public static void compareRows(String fileName1, String fileName2, Tuple firstTuple, Tuple secondTuple,
+	public static void compareRows(String fileName1, String fileName2, Entity firstEntity, Entity secondEntity,
 			List<String> listOfHeaders, BufferedWriter logger) throws IOException
 	{
 
 		for (String e : listOfHeaders)
 		{
-			if (firstTuple == null || secondTuple == null)
+			if (firstEntity == null || secondEntity == null)
 			{
 				System.out.println("NULLLLL");
 			}
-			if (firstTuple.getString(e) == null && secondTuple.getString(e) == null)
+			if (firstEntity.getString(e) == null && secondEntity.getString(e) == null)
 			{
 				// Do nothing
 			}
-			else if (firstTuple.getString(e) != null && secondTuple.getString(e) == null)
+			else if (firstEntity.getString(e) != null && secondEntity.getString(e) == null)
 			{
 
-				System.out.println(fileName1 + " ### " + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
-						+ "REMOVED IN:" + fileName2 + "\t" + firstTuple.getString(e));
+				System.out.println(fileName1 + " ### " + firstEntity.getString(IDENTIFIER) + "\t" + e + "\t"
+						+ "REMOVED IN:" + fileName2 + "\t" + firstEntity.getString(e));
 			}
-			else if (firstTuple.getString(e) == null && secondTuple.getString(e) != null)
+			else if (firstEntity.getString(e) == null && secondEntity.getString(e) != null)
 			{
-				System.out.println(fileName1 + "---" + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
-						+ "\tADDED IN " + fileName2 + "|\t|" + firstTuple.getString(e) + "|");
+				System.out.println(fileName1 + "---" + firstEntity.getString(IDENTIFIER) + "\t" + e + "\t"
+						+ "\tADDED IN " + fileName2 + "|\t|" + firstEntity.getString(e) + "|");
 			}
 			else
 			{
-				if (!firstTuple.getString(e).equals(secondTuple.getString(e)))
+				if (!firstEntity.getString(e).equals(secondEntity.getString(e)))
 				{
-					System.out.println(fileName1 + "-" + firstTuple.getString(IDENTIFIER) + "\t" + e + "\t"
-							+ secondTuple.getString(e) + "|\t|" + firstTuple.getString(e) + "|");
+					System.out.println(fileName1 + "-" + firstEntity.getString(IDENTIFIER) + "\t" + e + "\t"
+							+ secondEntity.getString(e) + "|\t|" + firstEntity.getString(e) + "|");
 				}
 			}
 		}

@@ -5,14 +5,15 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.CategoricalValue;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.KeyValueTuple;
+import org.molgenis.util.Cell;
 import org.testng.annotations.Test;
 
 public class TupleToCategoricalValueConverterTest
@@ -29,7 +30,7 @@ public class TupleToCategoricalValueConverterTest
 		category.setName(catName);
 		CategoricalValue value = new CategoricalValue();
 		value.setValue(category);
-		Cell<String> cell = new TupleToCategoricalValueConverter(dataService).toCell(value);
+		Cell<String> cell = new EntityToCategoricalValueConverter(dataService).toCell(value);
 		assertEquals(cell.getKey(), catIdentifier);
 		assertEquals(cell.getValue(), catName);
 	}
@@ -47,9 +48,9 @@ public class TupleToCategoricalValueConverterTest
 		when(dataService.findOne(Category.ENTITY_NAME, q)).thenReturn(category);
 
 		String colName = "col";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, valueCode);
-		CategoricalValue value = new TupleToCategoricalValueConverter(dataService).fromTuple(tuple, colName, feature);
+		Entity entity = new MapEntity(colName, valueCode);
+		CategoricalValue value = new EntityToCategoricalValueConverter(dataService)
+				.fromEntity(entity, colName, feature);
 		assertEquals(value.getValue(), category);
 	}
 
@@ -66,9 +67,8 @@ public class TupleToCategoricalValueConverterTest
 
 		when(dataService.findOne(Category.ENTITY_NAME, q)).thenReturn(category);
 		String colName = "col";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, valueCode);
-		new TupleToCategoricalValueConverter(dataService).updateFromTuple(tuple, colName, feature, value);
+		Entity entity = new MapEntity(colName, valueCode);
+		new EntityToCategoricalValueConverter(dataService).updateFromEntity(entity, colName, feature, value);
 		assertEquals(value.getValue(), category);
 	}
 }

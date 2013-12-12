@@ -1,22 +1,23 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.LongValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToLongValueConverter implements TupleToValueConverter<LongValue, Long>
+public class EntityToLongValueConverter implements EntityToValueConverter<LongValue, Long>
 {
 	@Override
-	public LongValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public LongValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new LongValue());
+		return updateFromEntity(entity, attributeName, feature, new LongValue());
 	}
 
 	@Override
-	public LongValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public LongValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof LongValue))
@@ -27,7 +28,7 @@ public class TupleToLongValueConverter implements TupleToValueConverter<LongValu
 		Long longObj;
 		try
 		{
-			longObj = tuple.getLong(colName);
+			longObj = entity.getLong(attributeName);
 		}
 		catch (RuntimeException e)
 		{

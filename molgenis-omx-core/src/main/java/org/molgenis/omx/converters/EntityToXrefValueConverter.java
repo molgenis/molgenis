@@ -1,32 +1,33 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValue, String>
+public class EntityToXrefValueConverter implements EntityToValueConverter<XrefValue, String>
 {
 	private final CharacteristicLoadingCache characteristicLoader;
 
-	public TupleToXrefValueConverter(CharacteristicLoadingCache characteristicLoader)
+	public EntityToXrefValueConverter(CharacteristicLoadingCache characteristicLoader)
 	{
 		if (characteristicLoader == null) throw new IllegalArgumentException("characteristic loader is null");
 		this.characteristicLoader = characteristicLoader;
 	}
 
 	@Override
-	public XrefValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public XrefValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new XrefValue());
+		return updateFromEntity(entity, attributeName, feature, new XrefValue());
 	}
 
 	@Override
-	public XrefValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public XrefValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof XrefValue))
@@ -34,7 +35,7 @@ public class TupleToXrefValueConverter implements TupleToValueConverter<XrefValu
 			throw new ValueConverterException("value is not a " + XrefValue.class.getSimpleName());
 		}
 
-		String xrefIdentifier = tuple.getString(colName);
+		String xrefIdentifier = entity.getString(attributeName);
 		if (xrefIdentifier == null) return null;
 
 		Characteristic characteristic;
