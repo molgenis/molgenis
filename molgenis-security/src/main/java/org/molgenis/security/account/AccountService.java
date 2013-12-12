@@ -51,7 +51,7 @@ public class AccountService
 	private PasswordEncoder passwordEncoder;
 
 	@RunAsSystem
-	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri)
+	public void createUser(MolgenisUser molgenisUser, String baseActivationUri)
 	{
 		// collect activation info
 		String activationCode = UUID.randomUUID().toString();
@@ -91,7 +91,7 @@ public class AccountService
 		}
 
 		// send activation email
-		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
+		URI activationUri = URI.create(baseActivationUri+'/' + activationCode);
 
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setTo(activationEmailAddresses.toArray(new String[]
