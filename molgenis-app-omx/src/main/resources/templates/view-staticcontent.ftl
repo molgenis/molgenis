@@ -7,7 +7,7 @@
 		<div class="controls">
 			<div class="btn-group">
 			<#if editHref?has_content>
-				<a id="editBtn" href="${editHref}" class="btn">Edit page</a>
+				<a id="editBtn" href="${context_url}/edit" class="btn">Edit page</a>
 			</#if>
 			</div>
 		</div>
