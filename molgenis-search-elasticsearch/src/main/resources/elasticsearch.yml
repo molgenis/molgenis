@@ -113,6 +113,10 @@
 #
 
 index:
+	# Defaults to 1024
+	query:
+		bool:
+			max_clause_count: 131072
 	analysis:
     	analyzer: 
     		default:
@@ -128,7 +132,7 @@ index:
     		default_tokenizer:
     			type: pattern
     			pattern: ([\W\.]+)
-
+	
 index.number_of_shards: 1
 index.number_of_replicas: 0
 
