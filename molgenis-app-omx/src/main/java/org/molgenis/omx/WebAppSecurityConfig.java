@@ -6,11 +6,7 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
-import org.molgenis.ui.MolgenisUi;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -28,24 +24,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
 
-	@Autowired
-	private MolgenisPluginRegistry molgenisPluginRegistry;
-
-	@Autowired
-	private MolgenisUi molgenisUi;
-
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
-
-		System.out.println(molgenisPluginRegistry.getPlugins().size());
-
-		for (MolgenisPlugin plugin : molgenisPluginRegistry.getPlugins())
-		{
-			System.out.println(plugin);
-		}
 
 		expressionInterceptUrlRegistry
 				.antMatchers("/")
