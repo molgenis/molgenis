@@ -2,25 +2,25 @@ package org.molgenis.omx.converters;
 
 import java.text.ParseException;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DateTimeValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
+import org.molgenis.util.Cell;
 import org.molgenis.util.MolgenisDateFormat;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
 
-public class TupleToDateTimeValueConverter implements TupleToValueConverter<DateTimeValue, String>
+public class EntityToDateTimeValueConverter implements EntityToValueConverter<DateTimeValue, String>
 {
 	@Override
-	public DateTimeValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
+	public DateTimeValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
 			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new DateTimeValue());
+		return updateFromEntity(entity, attributeName, feature, new DateTimeValue());
 	}
 
 	@Override
-	public DateTimeValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public DateTimeValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof DateTimeValue))
@@ -28,7 +28,7 @@ public class TupleToDateTimeValueConverter implements TupleToValueConverter<Date
 			throw new ValueConverterException("value is not a " + DateTimeValue.class.getSimpleName());
 		}
 
-		String dateTimeStr = tuple.getString(colName);
+		String dateTimeStr = entity.getString(attributeName);
 		if (dateTimeStr == null) return null;
 
 		DateTimeValue dateTimeValue = (DateTimeValue) value;

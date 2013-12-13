@@ -24,15 +24,16 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.cbm.CbmXmlParser;
+import org.molgenis.data.Entity;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.jaxb.CbmNode;
 import org.molgenis.jaxb.CollectionProtocol;
 import org.molgenis.jaxb.Diagnosis;
 import org.molgenis.jaxb.ParticipantCollectionSummary;
 import org.molgenis.jaxb.Race;
 import org.molgenis.util.FileUploadUtils;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,8 +69,8 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public void convert(@RequestParam Part upload, HttpServletRequest request, HttpServletResponse response)
-			throws Exception
+	public void convert(@RequestParam
+	Part upload, HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		File file = null;
 		Part part = request.getPart("upload");
@@ -87,20 +88,20 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			throw new Exception("File does not of the xml type, other formats are not supported.");
 		}
 		// Create the files needed
-		CsvWriter dataCBM = new CsvWriter(new File(outputDir, "dataset_cbm.csv"));
-		CsvWriter observableFeature = new CsvWriter(new File(outputDir, "observablefeature.csv"));
-		CsvWriter dataSet = new CsvWriter(new File(outputDir, "dataset.csv"));
-		CsvWriter protocol = new CsvWriter(new File(outputDir, "protocol.csv"));
+		CsvWriter<Entity> dataCBM = new CsvWriter<Entity>(new File(outputDir, "dataset_cbm.csv"));
+		CsvWriter<Entity> observableFeature = new CsvWriter<Entity>(new File(outputDir, "observablefeature.csv"));
+		CsvWriter<Entity> dataSet = new CsvWriter<Entity>(new File(outputDir, "dataset.csv"));
+		CsvWriter<Entity> protocol = new CsvWriter<Entity>(new File(outputDir, "protocol.csv"));
 
 		try
 		{
 			// DATASET PART
-			dataSet.writeColNames(Arrays.asList("identifier", "name", "protocolused_identifier"));
-			KeyValueTuple kvtdataSet = new KeyValueTuple();
+			dataSet.writeAttributeNames(Arrays.asList("identifier", "name", "protocolused_identifier"));
+			Entity kvtdataSet = new MapEntity();
 			kvtdataSet.set("identifier", "cbm");
 			kvtdataSet.set("name", "cbm");
 			kvtdataSet.set("protocolused_identifier", "cbm_protocol");
-			dataSet.write(kvtdataSet);
+			dataSet.add(kvtdataSet);
 			// END DATASET PART
 
 			// get uploaded file and do checks
@@ -140,18 +141,18 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 					"lastName", "firstName", "fullName", "streetOrThoroughfareNameAndType", "state", "zipCode",
 					"country", "city");
 
-			dataCBM.writeColNames(listOfAllFeatures);
+			dataCBM.writeAttributeNames(listOfAllFeatures);
 
 			// FEATURE PART
-			observableFeature.writeColNames(Arrays.asList("identifier", "name"));
-			KeyValueTuple kvtFeature = new KeyValueTuple();
+			observableFeature.writeAttributeNames(Arrays.asList("identifier", "name"));
+			Entity kvtFeature = new MapEntity();
 
 			for (String feature : listOfAllFeatures)
 			{
 				kvtFeature.set("identifier", feature);
 				kvtFeature.set("name", feature);
 				listOfCollectionProtocolFeatures.add(feature);
-				observableFeature.write(kvtFeature);
+				observableFeature.add(kvtFeature);
 			}
 			// END FEATURE PART
 
@@ -171,30 +172,30 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			}
 			String ParticipantFeatures = enrollsFeatures.substring(0, enrollsFeatures.length() - 1);
 
-			protocol.writeColNames(Arrays
-					.asList("identifier", "name", "features_identifier", "subprotocols_identifier"));
+			protocol.writeAttributeNames(Arrays.asList("identifier", "name", "features_identifier",
+					"subprotocols_identifier"));
 
 			// Big protocol containing both the subprotocols
-			KeyValueTuple protocolFeat_kvt = new KeyValueTuple();
+			Entity protocolFeat_kvt = new MapEntity();
 			protocolFeat_kvt.set("identifier", "cbm_protocol");
 			protocolFeat_kvt.set("name", "cbm_protocol");
 			protocolFeat_kvt.set("subprotocols_identifier", "collection_prot,participant_prot");
-			protocol.write(protocolFeat_kvt);
+			protocol.add(protocolFeat_kvt);
 
 			// create protocol collectionProtocols , containing a list of
 			// features (allFeat) and the subprotocol is pcs
-			protocolFeat_kvt = new KeyValueTuple();
+			protocolFeat_kvt = new MapEntity();
 			protocolFeat_kvt.set("identifier", "collection_prot");
 			protocolFeat_kvt.set("name", "collection_prot");
 			protocolFeat_kvt.set("features_identifier", collectionFeatures);
-			protocol.write(protocolFeat_kvt);
+			protocol.add(protocolFeat_kvt);
 			// create protocol collectionProtocols , containing a list of
 			// features (allFeat) and the subprotocol is pcs
-			protocolFeat_kvt = new KeyValueTuple();
+			protocolFeat_kvt = new MapEntity();
 			protocolFeat_kvt.set("identifier", "participant_prot");
 			protocolFeat_kvt.set("name", "participant_prot");
 			protocolFeat_kvt.set("features_identifier", ParticipantFeatures);
-			protocol.write(protocolFeat_kvt);
+			protocol.add(protocolFeat_kvt);
 
 			// END PROTOCOL PART
 
@@ -209,7 +210,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 						.getParticipantCollectionSummary())
 				{
 
-					KeyValueTuple kvtdataSetCBM = new KeyValueTuple();
+					Entity kvtdataSetCBM = new MapEntity();
 
 					kvtdataSetCBM.set("pcs", "pcs_id_" + pcsummary.getId());
 					kvtdataSetCBM.set("gender", pcsummary.getGender());
@@ -348,7 +349,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 							.toString());
 
 					// write participant file
-					dataCBM.write(kvtdataSetCBM);
+					dataCBM.add(kvtdataSetCBM);
 
 				}
 

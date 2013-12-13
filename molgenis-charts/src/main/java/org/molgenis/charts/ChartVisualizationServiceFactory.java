@@ -3,7 +3,8 @@ package org.molgenis.charts;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.ChartType;
+import org.molgenis.charts.highcharts.HighchartService;
 import org.molgenis.charts.r.RChartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,10 +20,11 @@ public class ChartVisualizationServiceFactory
 	private final List<ChartVisualizationService> chartVisualiationServices;
 
 	@Autowired
-	public ChartVisualizationServiceFactory(RChartService rChartService)
+	public ChartVisualizationServiceFactory(RChartService rChartService, HighchartService highchartsService)
 	{
 		chartVisualiationServices = new ArrayList<ChartVisualizationService>();
 		chartVisualiationServices.add(rChartService);
+		chartVisualiationServices.add(highchartsService);
 	}
 
 	/**

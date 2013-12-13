@@ -86,7 +86,7 @@ public class ExcelEntitySource implements EntitySource
 		this(null, url, cellProcessors);
 	}
 
-	protected ExcelEntitySource(InputStream is, List<CellProcessor> cellProcessors)
+	public ExcelEntitySource(InputStream is, List<CellProcessor> cellProcessors)
 	{
 		this(is, null, cellProcessors);
 	}
