@@ -1,6 +1,11 @@
 package org.molgenis.omx.protocol;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -86,7 +91,20 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 	public Iterator<Tuple> iterator()
 	{
 		List<Tuple> tuples = new ArrayList<Tuple>();
-		// TODO discuss whether we want to index the input (=root) protocol
+
+		// index root protocol
+		String description = protocol.getDescription() == null ? StringUtils.EMPTY : I18nTools
+				.get(protocol.getDescription()).replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase();
+
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
+		tuple.set(FIELD_ID, protocol.getId());
+		tuple.set(FIELD_IDENTIFIER, protocol.getIdentifier());
+		tuple.set(FIELD_NAME, protocol.getName());
+		tuple.set(FIELD_DESCRIPTION, description);
+		tuple.set(FIELD_PATH, protocol.getId().toString());
+		tuples.add(tuple);
+
 		createTuplesRec(protocol.getId().toString(), protocol, tuples);
 		return tuples.iterator();
 	}
@@ -182,7 +200,7 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 	@Override
 	public int getCount() throws TableException
 	{
-		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger count = new AtomicInteger(1); // add one for root protocol
 		countTuplesRec(protocol, count);
 		return count.get();
 	}

@@ -4,7 +4,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,7 +75,7 @@ public class ProtocolTableTest
 	@Test
 	public void getCount() throws TableException
 	{
-		assertEquals(protocolTable.getCount(), 5);
+		assertEquals(protocolTable.getCount(), 6);
 	}
 
 	@Test
@@ -89,7 +91,7 @@ public class ProtocolTableTest
 		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
 		when(protocol.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTable(protocol, dataService).getCount(), 1); // excluding root protocol
+		assertEquals(new ProtocolTable(protocol, dataService).getCount(), 2);
 	}
 
 	@Test
@@ -108,7 +110,7 @@ public class ProtocolTableTest
 		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
 		when(protocol0.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTable(protocol0, dataService).getCount(), 2); // excluding root protocol
+		assertEquals(new ProtocolTable(protocol0, dataService).getCount(), 3);
 	}
 
 	@Test
@@ -117,29 +119,34 @@ public class ProtocolTableTest
 		Iterator<Tuple> it = protocolTable.iterator();
 		assertTrue(it.hasNext());
 		Tuple tuple0 = it.next();
-		assertEquals(tuple0.get("name"), "p1");
+		assertEquals(tuple0.get("name"), "p0");
 		assertEquals(tuple0.get("type"), Protocol.class.getSimpleName().toLowerCase());
-		assertEquals(tuple0.get("path"), "0.1");
+		assertEquals(tuple0.get("path"), "0");
 		assertTrue(it.hasNext());
 		Tuple tuple1 = it.next();
-		assertEquals(tuple1.get("name"), "f10");
-		assertEquals(tuple1.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple1.get("path"), "0.1.F10");
+		assertEquals(tuple1.get("name"), "p1");
+		assertEquals(tuple1.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple1.get("path"), "0.1");
 		assertTrue(it.hasNext());
 		Tuple tuple2 = it.next();
-		assertEquals(tuple2.get("name"), "f11");
+		assertEquals(tuple2.get("name"), "f10");
 		assertEquals(tuple2.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple2.get("path"), "0.1.F11");
+		assertEquals(tuple2.get("path"), "0.1.F10");
 		assertTrue(it.hasNext());
 		Tuple tuple3 = it.next();
-		assertEquals(tuple3.get("name"), "p2");
-		assertEquals(tuple3.get("type"), Protocol.class.getSimpleName().toLowerCase());
-		assertEquals(tuple3.get("path"), "0.2");
+		assertEquals(tuple3.get("name"), "f11");
+		assertEquals(tuple3.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple3.get("path"), "0.1.F11");
 		assertTrue(it.hasNext());
 		Tuple tuple4 = it.next();
-		assertEquals(tuple4.get("name"), "f12");
-		assertEquals(tuple4.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple4.get("path"), "0.2.F12");
+		assertEquals(tuple4.get("name"), "p2");
+		assertEquals(tuple4.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple4.get("path"), "0.2");
+		assertTrue(it.hasNext());
+		Tuple tuple5 = it.next();
+		assertEquals(tuple5.get("name"), "f12");
+		assertEquals(tuple5.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple5.get("path"), "0.2.F12");
 	}
 
 	@Test
@@ -162,14 +169,19 @@ public class ProtocolTableTest
 		Iterator<Tuple> it = protocolTable.iterator();
 		assertTrue(it.hasNext());
 		Tuple tuple0 = it.next();
-		assertEquals(tuple0.get("name"), "p1");
+		assertEquals(tuple0.get("name"), "p0");
 		assertEquals(tuple0.get("type"), Protocol.class.getSimpleName().toLowerCase());
-		assertEquals(tuple0.get("path"), "0.1");
+		assertEquals(tuple0.get("path"), "0");
 		assertTrue(it.hasNext());
 		Tuple tuple1 = it.next();
-		assertEquals(tuple1.get("name"), "f10");
-		assertEquals(tuple1.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple1.get("path"), "0.F10");
+		assertEquals(tuple1.get("name"), "p1");
+		assertEquals(tuple1.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple1.get("path"), "0.1");
+		assertTrue(it.hasNext());
+		Tuple tuple2 = it.next();
+		assertEquals(tuple2.get("name"), "f10");
+		assertEquals(tuple2.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple2.get("path"), "0.F10");
 		assertFalse(it.hasNext());
 	}
 
@@ -189,7 +201,15 @@ public class ProtocolTableTest
 		ProtocolTable protocolTable2 = new ProtocolTable(protocol, dataService);
 		Iterator<Tuple> it = protocolTable2.iterator();
 		assertTrue(it.hasNext());
-		assertEquals(it.next().getString("path"), protocolId + ".F" + featureId);
+		Tuple tuple0 = it.next();
+		assertEquals(tuple0.get("name"), "p0");
+		assertEquals(tuple0.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple0.get("path"), String.valueOf(protocolId));
+		assertTrue(it.hasNext());
+		Tuple tuple1 = it.next();
+		assertEquals(tuple1.get("name"), "f10");
+		assertEquals(tuple1.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple1.get("path"), protocolId + ".F" + featureId);
 		assertFalse(it.hasNext());
 	}
 }
