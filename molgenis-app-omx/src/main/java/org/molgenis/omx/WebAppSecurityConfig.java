@@ -6,7 +6,11 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
+import org.molgenis.ui.MolgenisUi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -24,11 +28,25 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
 
+	@Autowired
+	private MolgenisPluginRegistry molgenisPluginRegistry;
+
+	@Autowired
+	private MolgenisUi molgenisUi;
+
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
+
+		System.out.println(molgenisPluginRegistry.getPlugins().size());
+
+		for (MolgenisPlugin plugin : molgenisPluginRegistry.getPlugins())
+		{
+			System.out.println(plugin);
+		}
+
 		expressionInterceptUrlRegistry
 				.antMatchers("/")
 				.permitAll()
@@ -44,16 +62,16 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/home/**", "/plugin/home/**")
 				.hasAnyAuthority(defaultPluginAuthorities("home"))
 
-				.antMatchers("/menu/main/news/**", "/plugin/news/**")
+				.antMatchers("/menu/background/news/**", "/plugin/news/**")
 				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
-				.antMatchers("/menu/main/background/**", "/plugin/background/**")
+				.antMatchers("/menu/background/background/**", "/plugin/background/**")
 				.hasAnyAuthority(defaultPluginAuthorities("background"))
 
-				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
+				.antMatchers("/menu/background/contact/**", "/plugin/contact/**")
 				.hasAnyAuthority(defaultPluginAuthorities("contact"))
 
-				.antMatchers("/menu/main/references/**", "/plugin/references/**")
+				.antMatchers("/menu/background/references/**", "/plugin/references/**")
 				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
 				.antMatchers("/menu/main/protocolviewer/**", "/plugin/protocolviewer/**")
@@ -80,16 +98,16 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
 				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
 
-				.antMatchers("/menu/main/biobankconnect/**", "/plugin/biobankconnect/**")
+				.antMatchers("/menu/biobankconnect/biobankconnect/**", "/plugin/biobankconnect/**")
 				.hasAnyAuthority(defaultPluginAuthorities("biobankconnect"))
 
-				.antMatchers("/menu/main/mappingmanager/**", "/plugin/mappingmanager/**")
+				.antMatchers("/menu/biobankconnect/mappingmanager/**", "/plugin/mappingmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("mappingmanager"))
 
-				.antMatchers("/menu/main/evaluation/**", "/plugin/evaluation/**")
+				.antMatchers("/menu/biobankconnect/evaluation/**", "/plugin/evaluation/**")
 				.hasAnyAuthority(defaultPluginAuthorities("evaluation"))
 
-				.antMatchers("/menu/main/ontologyindexer/**", "/plugin/ontologyindexer/**")
+				.antMatchers("/menu/biobankconnect/ontologyindexer/**", "/plugin/ontologyindexer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("ontologyindexer"))
 
 				// converters menu
