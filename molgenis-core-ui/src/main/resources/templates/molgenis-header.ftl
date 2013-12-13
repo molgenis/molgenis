@@ -79,7 +79,7 @@
 					<#list menu.items as item>
 						<#if item.type != "MENU">
 							<#if item.name=="Home">
-								<li><a href="#"><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
+								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
 							<#else>
 								<#if item.id == plugin_id>
 									<li class="active"><a href="#">${item.name?html}</a></li>
