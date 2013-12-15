@@ -3,37 +3,29 @@ package org.molgenis.omx.biobankconnect.mappingmanager;
 import static org.molgenis.omx.biobankconnect.mappingmanager.MappingManagerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Writable;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.csv.CsvWriter;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;
@@ -46,11 +38,7 @@ import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -149,149 +137,6 @@ public class MappingManagerController extends MolgenisPluginController
 		}
 	}
 
-	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public String verify(@RequestParam
-	Integer selectedDataSet, @RequestParam
-	Part file, HttpServletResponse response, Model model) throws IOException
-	{
-		ExcelReader reader = null;
-		TupleWriter tupleWriter = null;
-
-		try
-		{
-			File uploadFile = fileStore.store(file.getInputStream(), file.getName());
-
-			response.setContentType("text/csv");
-			response.addHeader("Content-Disposition", "attachment; filename="
-					+ getCsvFileName(file.getName() + "-ranks.csv"));
-
-			reader = new ExcelReader(uploadFile);
-			tupleWriter = new CsvWriter(response.getWriter());
-			ExcelSheetReader sheet = reader.getSheet(0);
-			Iterator<String> columnIterator = sheet.colNamesIterator();
-
-			List<String> biobankNames = new ArrayList<String>();
-			while (columnIterator.hasNext())
-			{
-				biobankNames.add(columnIterator.next());
-			}
-			String firstColumn = biobankNames.get(0);
-			tupleWriter.write(new ValueTuple(biobankNames));
-			biobankNames.remove(0);
-
-			Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
-			Iterator<Tuple> iterator = sheet.iterator();
-			while (iterator.hasNext())
-			{
-				Tuple row = iterator.next();
-				String variableName = row.getString(firstColumn);
-				if (!maunalMappings.containsKey(variableName)) maunalMappings.put(variableName,
-						new HashMap<String, List<String>>());
-				for (String biobank : biobankNames)
-				{
-					if (row.get(biobank) != null)
-					{
-						String mappingString = row.get(biobank).toString();
-						if (!maunalMappings.containsKey(variableName))
-						{
-							maunalMappings.put(variableName, new HashMap<String, List<String>>());
-						}
-						if (!maunalMappings.get(variableName).containsKey(biobank.toLowerCase()))
-						{
-							maunalMappings.get(variableName).put(biobank.toLowerCase(), new ArrayList<String>());
-						}
-						maunalMappings.get(variableName).get(biobank.toLowerCase())
-								.addAll(Arrays.asList(mappingString.split(",")));
-					}
-				}
-			}
-
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
-					new QueryImpl().in(DataSet.NAME, biobankNames));
-
-			for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
-			{
-				String variableName = entry.getKey();
-				List<String> ranks = new ArrayList<String>();
-				ranks.add(variableName);
-				Map<String, List<String>> mappingDetail = entry.getValue();
-				List<ObservableFeature> features = dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
-						new QueryImpl().eq(ObservableFeature.NAME, variableName));
-
-				if (!features.isEmpty())
-				{
-					for (DataSet dataSet : dataSets)
-					{
-						StringBuilder outputRank = new StringBuilder();
-						if (mappingDetail.containsKey(dataSet.getName().toLowerCase()))
-						{
-							List<Integer> mappedFeatureIds = findFeaturesFromIndex(
-									mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
-
-							String mappingDataSetIdentifier = selectedDataSet + "-" + dataSet.getId();
-
-							Query q = new QueryImpl().eq("store_mapping_feature", features.get(0).getId()).sort(
-									new Sort(Direction.DESC, "store_mapping_score"));
-
-							SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
-							SearchResult result = searchService.search(searchRequest);
-
-							double previousScore = -1;
-							int rank = 0;
-							for (Hit hit : result.getSearchHits())
-							{
-								Map<String, Object> columnValueMap = hit.getColumnValueMap();
-								String mappedFeatureId = columnValueMap.get("store_mapping_mapped_feature").toString();
-								String score = columnValueMap.get("store_mapping_score").toString();
-
-								if (previousScore != Double.parseDouble(score))
-								{
-									previousScore = Double.parseDouble(score);
-									rank++;
-								}
-								if (mappedFeatureIds.contains(Integer.parseInt(mappedFeatureId)))
-								{
-									if (outputRank.length() != 0) outputRank.append(',');
-									outputRank.append(rank);
-								}
-							}
-						}
-						ranks.add(outputRank.toString());
-					}
-				}
-				tupleWriter.write(new ValueTuple(ranks));
-			}
-		}
-		finally
-		{
-			if (reader != null) reader.close();
-			if (tupleWriter != null) IOUtils.closeQuietly(tupleWriter);
-		}
-		return init(null, model);
-	}
-
-	private List<Integer> findFeaturesFromIndex(List<String> featureNames, Integer dataSetId)
-	{
-		QueryImpl q = new QueryImpl();
-		q.pageSize(10000);
-
-		for (String featureName : featureNames)
-		{
-			if (q.getRules().size() > 0) q.addRule(new QueryRule(Operator.OR));
-			q.addRule(new QueryRule("name", Operator.EQUALS, featureName));
-		}
-
-		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, q, null));
-
-		List<Integer> featureIds = new ArrayList<Integer>();
-		for (Hit hit : result.getSearchHits())
-		{
-			String featureId = hit.getColumnValueMap().get("id").toString();
-			featureIds.add(Integer.parseInt(featureId));
-		}
-		return featureIds;
-	}
-
 	@RequestMapping(value = "/download", method = RequestMethod.POST)
 	public void download(@RequestParam("request")
 	String requestString, HttpServletResponse response) throws IOException, TableException
@@ -304,11 +149,10 @@ public class MappingManagerController extends MolgenisPluginController
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
 
-		TupleWriter tupleWriter = null;
+		Writable<Entity> writer = null;
 		try
 		{
 			Set<Integer> featureIds = new HashSet<Integer>();
-			tupleWriter = new CsvWriter(response.getWriter());
 			Integer selectedDataSetId = request.getDataSetId();
 			DataSet mappingDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId);
 			List<DataSet> storeMappingDataSet = dataService.findAllAsList(DataSet.ENTITY_NAME,
@@ -359,7 +203,7 @@ public class MappingManagerController extends MolgenisPluginController
 				featureMap.put(feature.getId(), feature);
 			}
 
-			tupleWriter.write(new ValueTuple(dataSetNames));
+			writer = new CsvWriter<Entity>(response.getWriter(), dataSetNames);
 
 			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId,
 					new QueryImpl().pageSize(1000000), null);
@@ -367,11 +211,12 @@ public class MappingManagerController extends MolgenisPluginController
 			SearchResult featureSearchResult = searchService.search(searchFeatures);
 			for (Hit hit : featureSearchResult.getSearchHits())
 			{
-				List<String> values = new ArrayList<String>();
+				Entity entity = new MapEntity();
 				Map<String, Object> map = hit.getColumnValueMap();
 				String featureName = map.get(FEATURE_NAME).toString();
 				Integer featureId = Integer.parseInt(map.get(FEATURE_ID).toString());
-				values.add(featureName);
+				entity.set(dataSetNames.get(0), featureName);
+				int i = 1;
 				for (DataSet dataSet : storeMappingDataSet)
 				{
 					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
@@ -394,15 +239,15 @@ public class MappingManagerController extends MolgenisPluginController
 								}
 							}
 						}
-						values.add(value.toString());
+						entity.set(dataSetNames.get(i++), value.toString());
 					}
 				}
-				tupleWriter.write(new ValueTuple(values));
+				writer.add(entity);
 			}
 		}
 		finally
 		{
-			IOUtils.closeQuietly(tupleWriter);
+			IOUtils.closeQuietly(writer);
 		}
 	}
 

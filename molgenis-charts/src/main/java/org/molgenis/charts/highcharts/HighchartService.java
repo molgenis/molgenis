@@ -40,26 +40,34 @@ public class HighchartService extends AbstractChartVisualizationService
 		Options options = new Options();
 		
 		Chart chart = new Chart();
-		chart.setType("scatter");
-		chart.setWidth(lineChart.getWidth());
-		chart.setHeight(lineChart.getHeight());
-		
-		Title title = new Title();
-		title.setText(lineChart.getTitle());
+		chart.setType("scatter")
+			.setWidth(lineChart.getWidth())
+			.setHeight(lineChart.getHeight());
 		
 		XAxis xAxis = new XAxis();
-		xAxis.setTitle(new Title()).setText(lineChart.getxAxisLabel());
+		xAxis
+			.setTitle(new AxisTitle()
+				.setText(lineChart.getxAxisLabel())
+				.setAlign(AxisAlign.MIDDLE))
+			.setType(AxisType.valueOf(lineChart.getxAxisType().name()));
 		
 		YAxis yAxis = new YAxis();
-		yAxis.setTitle(new Title()).setText(lineChart.getxYxisLabel());
+		yAxis
+			.setTitle(new AxisTitle()
+				.setText(lineChart.getyAxisLabel())
+				.setAlign(AxisAlign.MIDDLE))
+			.setType(AxisType.valueOf(lineChart.getyAxisType().name()));
+		
+		ChartTitle title = new ChartTitle()
+			.setText(lineChart.getTitle())
+			.setAlign(ChartAlign.CENTER);
 		
 		options.setSeries(HighchartsDataUtil.parseToSeriesList(lineChart.getData(), "scatter"));
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
 		options.addyAxis(yAxis);
-		
-		logger.info("lineChart.getxAxisLabel(): " + lineChart.getxAxisLabel());
+		options.setCredits(new Credits());
 
 		return options;
 	}

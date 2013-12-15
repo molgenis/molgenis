@@ -1,29 +1,30 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToStringValueConverter implements TupleToValueConverter<StringValue, String>
+public class EntityToStringValueConverter implements EntityToValueConverter<StringValue, String>
 {
 	@Override
-	public StringValue fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public StringValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new StringValue());
+		return updateFromEntity(entity, attributeName, feature, new StringValue());
 	}
 
 	@Override
-	public StringValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public StringValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof StringValue))
 		{
 			throw new ValueConverterException("value is not a " + StringValue.class.getSimpleName());
 		}
-		String str = tuple.getString(colName);
+		String str = entity.getString(attributeName);
 		if (str == null) return null;
 
 		StringValue stringValue = (StringValue) value;

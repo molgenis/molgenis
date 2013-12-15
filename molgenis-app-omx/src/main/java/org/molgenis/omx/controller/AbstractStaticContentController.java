@@ -14,11 +14,11 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	private static final Logger logger = Logger.getLogger(AbstractStaticContentController.class);
 	private static final String ERRORMESSAGE_PAGE = "There is an error occurred trying loading this page.";
 	private static final String ERRORMESSAGE_SUBMIT = "There is an error occurred trying to save the content.";
-	
+
 	@Autowired
 	private StaticContentService staticContentService;
 	private final String uniqueReference;
-	
+
 	public AbstractStaticContentController(final String uniqueReference, final String uri)
 	{
 		super(uri);
@@ -28,47 +28,50 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(final Model model)
 	{
-		try 
+		try
 		{
+
 			model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
 			model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit());
-			model.addAttribute("editHref", "/menu/main/" + this.uniqueReference + "/edit");
 		}
-		catch (RuntimeException re) 
+		catch (RuntimeException re)
 		{
 			logger.error(re);
-			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);	
+			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
 		}
-		
+
 		return "view-staticcontent";
 	}
-	
+
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/edit", method = RequestMethod.GET)
 	public String initEditView(final Model model)
 	{
-		try 
+		try
 		{
 			model.addAttribute("content", this.staticContentService.getContent(this.uniqueReference));
-			model.addAttribute("cancelHref", "/menu/main/" + this.uniqueReference);
-		} catch (RuntimeException re) {
+		}
+		catch (RuntimeException re)
+		{
 			logger.error(re);
 			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
 		}
-		
+
 		return "view-staticcontent-edit";
 	}
-	
+
 	@RequestMapping(value = "/edit", method = RequestMethod.POST)
-	public String submitContent(@RequestParam(value = "content", required = true) final String content, final Model model)
+	public String submitContent(@RequestParam(value = "content", required = true)
+	final String content, final Model model)
 	{
-		try 
+		try
 		{
 			this.staticContentService.submitContent(this.uniqueReference, content);
-		} 
-		catch(RuntimeException re) {
+		}
+		catch (RuntimeException re)
+		{
 			logger.error(re);
-			model.addAttribute("errorMessage", ERRORMESSAGE_SUBMIT);	
+			model.addAttribute("errorMessage", ERRORMESSAGE_SUBMIT);
 		}
 		return this.initEditView(model);
 	}

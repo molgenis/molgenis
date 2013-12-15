@@ -2,33 +2,34 @@ package org.molgenis.charts.highcharts;
 
 public class Axis
 {
-	AxisType type;
-	Title title;
+	String type;
+	AxisTitle title;
 
-	public AxisType getType()
+	public String getType()
 	{
 		return type;
 	}
 
-	public void setType(AxisType type)
+	public Axis setType(String type)
 	{
 		this.type = type;
+		return this;
 	}
 	
-	/**
-	 * @return the title
-	 */
-	public Title getTitle()
+	public Axis setType(AxisType type)
+	{
+		this.type = type.toString();
+		return this;
+	}
+	
+	public AxisTitle getTitle()
 	{
 		return title;
 	}
 
-	/**
-	 * @param title the title to set
-	 */
-	public Title setTitle(Title title)
+	public Axis setTitle(AxisTitle title)
 	{
 		this.title = title;
-		return this.title;
+		return this;
 	}
 }

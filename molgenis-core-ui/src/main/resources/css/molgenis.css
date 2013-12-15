@@ -1,6 +1,15 @@
+#molgenisheader {
+   margin-bottom: 10px;
+ }
+ 
+ .nav {
+   margin-bottom: 10px;
+ }
+
+/*TODO: put this back when topmenu issue is solved
 body{
-	padding-top:50px;
-}
+	padding-top:60px;
+}*/
 
 .btn-link 	{
 	text-shadow:none;
@@ -8,6 +17,10 @@ body{
 
 .navbar .nav li{
 	margin-bottom:-5px;
+}
+
+.navbar .nav li img {
+	margin-top:-5px;
 }
 
 .nav-tabs>li>a {

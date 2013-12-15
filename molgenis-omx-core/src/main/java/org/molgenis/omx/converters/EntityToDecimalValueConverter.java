@@ -1,23 +1,23 @@
 package org.molgenis.omx.converters;
 
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
-public class TupleToDecimalValueConverter implements TupleToValueConverter<DecimalValue, Double>
+public class EntityToDecimalValueConverter implements EntityToValueConverter<DecimalValue, Double>
 {
 	@Override
-	public DecimalValue fromTuple(Tuple tuple, String colName, ObservableFeature feature)
+	public DecimalValue fromEntity(Entity entity, String colName, ObservableFeature feature)
 			throws ValueConverterException
 	{
-		return updateFromTuple(tuple, colName, feature, new DecimalValue());
+		return updateFromEntity(entity, colName, feature, new DecimalValue());
 	}
 
 	@Override
-	public DecimalValue updateFromTuple(Tuple tuple, String colName, ObservableFeature feature, Value value)
+	public DecimalValue updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
 			throws ValueConverterException
 	{
 		if (!(value instanceof DecimalValue))
@@ -28,7 +28,7 @@ public class TupleToDecimalValueConverter implements TupleToValueConverter<Decim
 		Double doubleObj;
 		try
 		{
-			doubleObj = tuple.getDouble(colName);
+			doubleObj = entity.getDouble(attributeName);
 		}
 		catch (RuntimeException e)
 		{

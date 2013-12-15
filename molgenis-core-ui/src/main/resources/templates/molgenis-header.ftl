@@ -72,16 +72,20 @@
 	</#macro>
 	<!--topmenu -->
 	<#macro topmenu menu plugin_id>
-		<div class="navbar navbar-fixed-top"> 
+		<#--TODO: put navbar-fixed-top back-->
+		<div class="navbar"> 
 			<div class="navbar navbar-inner"> 	
 				<ul class="nav">
-					<li><a><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
 					<#list menu.items as item>
 						<#if item.type != "MENU">
-							<#if item.id == plugin_id>
-								<li class="active"><a href="#">${item.name?html}</a></li>
+							<#if item.name=="Home">
+								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
 							<#else>
-								<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
+								<#if item.id == plugin_id>
+									<li class="active"><a href="#">${item.name?html}</a></li>
+								<#else>
+									<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
+								</#if>
 							</#if>
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
@@ -92,7 +96,7 @@
 										<#if subitem.type != "MENU">
 											<li><a href="/menu/${sub_menu.id?html}/${subitem.url?html}">${subitem.name?html}</a></li>
 										<#elseif subitem.type == "MENU">
-											<li >
+											<li>
 												<a tabindex="-1" href="/menu/${subitem.id?html}">${subitem.name?html}</a>
 											</li>
 										</#if>
@@ -132,7 +136,7 @@
 								<#if item.type != "MENU">
 									<li><a href="/menu/${sub_menu.id?html}/${item.url?html}">${item.name?html}</a></li>
 								<#elseif item.type == "MENU">
-										<a tabindex="-1" href="/menu/${item.id?html}">${item.name?html}</a>
+									<a tabindex="-1" href="/menu/${item.id?html}">${item.name?html}</a>
 								</#if>
 							</#list>
 						</ul>
@@ -145,9 +149,9 @@
 			<ul id="molgenis-breadcrumb" class="breadcrumb">
 				<#list breadcrumb as menu>
 					<#if menu_has_next>
-							<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
+						<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
 					<#else>
-							<li class="active">${menu.name?html}</li>
+						<li class="active">${menu.name?html}</li>
 					</#if>	
 				</#list>
 			</ul>

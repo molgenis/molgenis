@@ -8,7 +8,13 @@ public class LineChartRequest extends ChartRequest
 	private String x;
 
 	@NotNull
+	private String xAxisLabel;
+
+	@NotNull
 	private String y;
+
+	@NotNull
+	private String yAxisLabel;
 
 	/**
 	 * @return the x
@@ -28,6 +34,23 @@ public class LineChartRequest extends ChartRequest
 	}
 
 	/**
+	 * @return the xAxisLabel
+	 */
+	public String getxAxisLabel()
+	{
+		return xAxisLabel;
+	}
+
+	/**
+	 * @param xAxisLabel
+	 *            the xAxisLabel to set
+	 */
+	public void setxAxisLabel(String xAxisLabel)
+	{
+		this.xAxisLabel = xAxisLabel;
+	}
+
+	/**
 	 * @return the y
 	 */
 	public String getY()
@@ -42,6 +65,23 @@ public class LineChartRequest extends ChartRequest
 	public void setY(String y)
 	{
 		this.y = y;
+	}
+
+	/**
+	 * @return the yAxisLabel
+	 */
+	public String getyAxisLabel()
+	{
+		return yAxisLabel;
+	}
+
+	/**
+	 * @param yAxisLabel
+	 *            the yAxisLabel to set
+	 */
+	public void setyAxisLabel(String yAxisLabel)
+	{
+		this.yAxisLabel = yAxisLabel;
 	}
 
 }

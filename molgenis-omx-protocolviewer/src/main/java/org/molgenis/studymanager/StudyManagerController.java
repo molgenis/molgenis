@@ -19,17 +19,18 @@ import org.molgenis.catalog.CatalogModel;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Writable;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
 import org.molgenis.study.StudyDefinitionMeta;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -131,8 +132,8 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException
+	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable
+	String id) throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
@@ -141,8 +142,8 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getCatalogWithStudyDefinition(@PathVariable String id) throws UnknownCatalogException,
-			UnknownStudyDefinitionException
+	public CatalogModel getCatalogWithStudyDefinition(@PathVariable
+	String id) throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
@@ -152,9 +153,10 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateStudyDefinition(@PathVariable String id,
-			@Valid @RequestBody StudyDefinitionUpdateRequest updateRequest) throws UnknownStudyDefinitionException,
-			UnknownCatalogException
+	public void updateStudyDefinition(@PathVariable
+	String id, @Valid
+	@RequestBody
+	StudyDefinitionUpdateRequest updateRequest) throws UnknownStudyDefinitionException, UnknownCatalogException
 	{
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
@@ -191,8 +193,8 @@ public class StudyManagerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/load", method = RequestMethod.POST)
-	public String loadStudyDefinition(@RequestParam(value = "id", required = false) String id, Model model)
-			throws DatabaseException
+	public String loadStudyDefinition(@RequestParam(value = "id", required = false)
+	String id, Model model) throws DatabaseException
 	{
 		try
 		{
@@ -216,8 +218,8 @@ public class StudyManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
-	public void downloadStudyDefinition(@PathVariable String id, HttpServletResponse response)
-			throws UnknownStudyDefinitionException, IOException
+	public void downloadStudyDefinition(@PathVariable
+	String id, HttpServletResponse response) throws UnknownStudyDefinitionException, IOException
 	{
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 
@@ -241,20 +243,19 @@ public class StudyManagerController extends MolgenisPluginController
 				}
 			});
 		}
-		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(response.getOutputStream());
 		try
 		{
-			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
+			Writable<Entity> sheetWriter = excelWriter.createWritable("Variables", header);
 			try
 			{
-				sheetWriter.writeColNames(header);
 				for (CatalogItem catalogItem : catalogItems)
 				{
-					KeyValueTuple tuple = new KeyValueTuple();
-					tuple.set(header.get(0), catalogItem.getId());
-					tuple.set(header.get(1), catalogItem.getName());
-					tuple.set(header.get(2), catalogItem.getDescription());
-					sheetWriter.write(tuple);
+					Entity entity = new MapEntity();
+					entity.set(header.get(0), catalogItem.getId());
+					entity.set(header.get(1), catalogItem.getName());
+					entity.set(header.get(2), catalogItem.getDescription());
+					sheetWriter.add(entity);
 				}
 			}
 			finally
