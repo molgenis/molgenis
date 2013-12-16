@@ -18,7 +18,6 @@ import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +55,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 	public static class Config
 	{
 		@Bean
-		public CatalogManagerController catalogManagerController() throws DatabaseException
+		public CatalogManagerController catalogManagerController()
 		{
 			return new CatalogManagerController(catalogManagerService());
 		}

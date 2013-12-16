@@ -29,6 +29,7 @@ import org.molgenis.io.TupleWriter;
 import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
@@ -62,7 +63,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Autowired
 	private StudyManagerService studyManagerService;
 	@Autowired
-	private org.molgenis.security.user.MolgenisUserService molgenisUserService;
+	private MolgenisUserService molgenisUserService;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
