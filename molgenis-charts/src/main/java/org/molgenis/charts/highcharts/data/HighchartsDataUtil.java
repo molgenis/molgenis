@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
+import org.molgenis.charts.highcharts.ChartType;
 import org.molgenis.charts.highcharts.Series;
 
 /**
@@ -17,21 +18,21 @@ public class HighchartsDataUtil
 {
 	private static final Logger logger = Logger.getLogger(HighchartsDataUtil.class);
 
-	public static List<Series> parseToSeriesList(List<XYDataSerie> xYDataSeries, String type)
+	public static List<Series> parseToSeriesList(List<XYDataSerie> xYDataSeries, ChartType chartType)
 	{
 		List<Series> series = new ArrayList<Series>();
 		for (XYDataSerie xYDataSerie : xYDataSeries)
 		{
-			series.add(parseToSeries(xYDataSerie, type));
+			series.add(parseToSeries(xYDataSerie, chartType));
 		}
 		return series;
 	}
 
-	public static Series parseToSeries(XYDataSerie xYDataSerie, String type)
+	public static Series parseToSeries(XYDataSerie xYDataSerie, ChartType chartType)
 	{
 		Series series = new Series();
 		series.setName(xYDataSerie.getName());
-		series.setType(type);
+		series.setType(chartType);
 		series.setData(parseToXYDataList(xYDataSerie.getData(), xYDataSerie.getAttributeXJavaType(), xYDataSerie.getAttributeYJavaType()));
 		return series;
 	}

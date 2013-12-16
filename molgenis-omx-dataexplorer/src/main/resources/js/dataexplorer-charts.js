@@ -12,26 +12,21 @@
 			yAxisLabel,
 			width, 
 			height, 
-			title, 
-			featureFilters,
-			searchQuery, 
-			searchRequest,
-			queryRules) {
+			title,
+			type,
+			query) {
 		
 		return {
 			"entity" : entity,
 			"width": width,
 			"height": height,
 			"title": title,
-			"queryRules": queryRules,
+			"type": type,
+			"query": query,
 			"x": x,
 			"y": y,
 			"xAxisLabel": xAxisLabel,
 			"yAxisLabel": yAxisLabel
-			// TODO JJ
-//			"featureFilters" : featureFilters,
-//			"searchQuery" : searchQuery,
-//			"searchRequest": searchRequest,
 		};
 	};
 	
@@ -43,9 +38,6 @@
 			}
 			return null;
 		});
-		
-		console.log("features");
-		console.log(features);
 		
 		return features;
 	};
@@ -79,45 +71,5 @@
 			$("#chart-select-yaxis-feature").append(selectedFeaturesSelectOptions);
 		});
 	});
-	
-//	ns.getSelectedFeatures = function() {
-//		var tree = $('#feature-selection').dynatree('getTree');
-//		
-//		//console.log(tree);
-//		
-//		var features = $.map(tree.getSelectedNodes(), function(node) {
-//			if(!node.data.isFolder){
-//				console.log(node.data);
-//				console.log(node.data.key);
-//				return {node.data};
-////				var uri = node.data.key;
-////				return {feature: uri.substring(uri.lastIndexOf('/') + 1)};
-//			}
-//			return null;
-//		});
-//		
-//		console.log("features");
-//		console.log(features);
-//		
-//		return features;
-//	};
-
-//TODO Client selectie		
-//	function getFeaturesSelectItems(data) {
-//		var listItems = [];
-//		
-//		console.log(data);
-//		
-//		$.each(data, function (index) {		
-//			listItems.push("<option value=''>" + data[index]selectFeatureForXAxis + "</option>");
-//		});
-//		return listItems.join('');
-//	}
-//	
-//	$('#selectFeatureForXAxis').change(function () {
-//		alert("selectFeatureForXAxis");
-//	});
-//	
-//	$('#selectFeatureForXAxis').append(getFeaturesSelectItems(selectedFeatures));
 	
 })($, window.top.molgenis = window.top.molgenis || {});

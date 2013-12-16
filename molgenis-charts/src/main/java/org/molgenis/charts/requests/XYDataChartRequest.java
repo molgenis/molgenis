@@ -2,7 +2,7 @@ package org.molgenis.charts.requests;
 
 import javax.validation.constraints.NotNull;
 
-public class LineChartRequest extends ChartRequest
+public class XYDataChartRequest extends ChartRequest
 {
 	@NotNull
 	private String x;

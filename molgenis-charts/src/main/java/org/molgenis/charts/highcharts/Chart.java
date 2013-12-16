@@ -136,9 +136,9 @@ public class Chart
 	 * @param type
 	 *            the type to set
 	 */
-	public Chart setType(String type)
+	public Chart setType(ChartType type)
 	{
-		this.type = type;
+		this.type = type.toString();
 		return this;
 	}
 }

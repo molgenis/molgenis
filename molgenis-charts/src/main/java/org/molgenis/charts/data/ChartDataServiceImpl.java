@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.charts.ChartDataService;
 import org.molgenis.charts.MolgenisAxisType;
 import org.molgenis.charts.MolgenisChartException;
-import org.molgenis.charts.charttypes.LineChart;
+import org.molgenis.charts.XYDataChart;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -38,7 +38,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public LineChart getLineChart(String entityName, String attributeNameXaxis, String attributeNameYaxis, List<QueryRule> queryRules) 
+	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis, List<QueryRule> queryRules) 
 	{
 		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
 		
@@ -51,8 +51,8 @@ public class ChartDataServiceImpl implements ChartDataService
 			logger.info("attributeYJavaType: " + attributeYJavaType + " attributeNameYaxis: " + attributeNameYaxis);
 			
 			XYDataSerie xYDataSerie = this.getXYDataSerie(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules);
-			LineChart lineChart = new LineChart(Arrays.asList(xYDataSerie), null, null, getMolgenisAxisType(attributeXJavaType), getMolgenisAxisType(attributeYJavaType));
-			return lineChart;
+			XYDataChart xYDataChart = new XYDataChart(Arrays.asList(xYDataSerie), getMolgenisAxisType(attributeXJavaType), getMolgenisAxisType(attributeYJavaType));
+			return xYDataChart;
 		}
 		catch (MolgenisModelException e)
 		{
@@ -86,6 +86,9 @@ public class ChartDataServiceImpl implements ChartDataService
 			{
 				queryRules = new ArrayList<QueryRule>();
 			}
+			
+			logger.info("queryRules: " + queryRules);
+			
 			Query q = new QueryImpl(queryRules);
 			Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 			q.sort(sort);

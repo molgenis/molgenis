@@ -3,7 +3,7 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.charts.AbstractChart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar
@@ -14,7 +14,7 @@ public class XYDataSerie
 	private Class<?> attributeYJavaType;
 	private final List<XYData> data = new ArrayList<XYData>();
 	private String name = "";
-	private ChartType type;
+	private MolgenisChartType type;
 
 	public void addData(XYData point)
 	{
@@ -45,7 +45,7 @@ public class XYDataSerie
 	/**
 	 * @return the type
 	 */
-	public ChartType getType()
+	public MolgenisChartType getType()
 	{
 		return type;
 	}
@@ -53,7 +53,7 @@ public class XYDataSerie
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(ChartType type)
+	public void setType(MolgenisChartType type)
 	{
 		this.type = type;
 	}
