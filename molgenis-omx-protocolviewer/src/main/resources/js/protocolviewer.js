@@ -21,8 +21,6 @@
 			url : molgenis.getContextUrl() + '/selection/' + catalogId,
 			success : function(selection) {
 				updateCatalog(catalogId, selection);
-				updateFeatureDetails(null);
-				updateFeatureSelection(selection);
 			},
 			error : function(xhr) {
 				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
@@ -39,17 +37,21 @@
 			'onItemClick' : function(featureUri) {
 				updateFeatureDetails(featureUri);
 			},
-			'onItemSelect' : function(featureUri, select) {
+			'onItemSelect' : function(featureUri, path, select) {
 				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
 					updateShoppingCart(catalogItems, catalogId);
 					updateFeatureSelection(catalogItems);	
 				});
 			},
-			'onFolderSelect' : function(protocolUri, select) {
+			'onFolderSelect' : function(protocolUri, path, select) {
 				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
 					updateShoppingCart(catalogItems, catalogId);
 					updateFeatureSelection(catalogItems);
 				});
+			},
+			'.onInit' : function() {
+				updateFeatureDetails(null);
+				updateFeatureSelection(selection);
 			}
 		});
 	};
@@ -139,7 +141,7 @@
 				var table = $('<table class="table table-striped table-condensed table-hover" />');
 				$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 				$.each(features.items, function(i, feature) {
-					var protocolName = "FIXME";
+					var protocolName = catalogContainer.catalog('getItemParent', feature.href).name;
 					var name = feature.name;
 					var identifier = feature.identifier;
 					var description = molgenis.i18n.get(feature.description);

@@ -4,45 +4,79 @@
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
 
+	function hrefToId(href) {
+		return parseInt(href.substring(href.lastIndexOf('/') + 1));
+	}
+
 	function createTreeConfig(settings, callback) {
-		function createChildren(node, callback) {
-			// TODO deal with multiple entity pages
-			restApi.getAsync(node.data.key, [ 'features', 'subprotocols' ], null, function(protocol) {
-				var children = [];
-				if (protocol.subprotocols) {
-					if (settings.sort) {
-						protocol.subprotocols.items.sort(settings.sort);
-					}
-					// TODO deal with multiple entity pages
-					$.each(protocol.subprotocols.items, function() {
-						children.push({
-							key : this.href,
-							title : this.name,
-							tooltip : molgenis.i18n.get(this.description),
-							isFolder : true,
-							isLazy : true,
-							select: node.isSelected()
+		function createTreeNodes(tree, subTrees, treeConfig, callback) {
+			function createTreeNodesRec(tree, selectedNodes, parentNode) {
+				$.each(tree, function(protocolId, subTree) {
+					var protocolUri = '/api/v1/protocol/' + protocolId;
+					var protocol = restApi.get(protocolUri, subTree ? ['features'] : []);
+					
+					// create protocol node
+					var node = {
+						key : protocolUri,
+						title : protocol.name,
+						isFolder : true,
+						isLazy: subTree === null,
+						expand: subTree !== null
+					};
+					if (protocol.description)
+						node.tooltip = molgenis.i18n.get(protocol.description);
+					
+					// determine whether node is lazy or not
+					if(subTree) {
+						node.children = [];
+						
+						var features = {};
+						if(protocol.features.items) {
+							$.each(protocol.features.items, function() {
+								features[hrefToId(this.href)] = this;
+							});
+						}
+						// create feature nodes
+						$.each(subTree, function(key, val) {
+							if(key.charAt(0) === 'F') {
+								var feature = features[key.substring(1)];
+								var featureNode = {
+									key : feature.href,
+									title : feature.name,
+									isFolder : false,
+									select: selectedNodes.hasOwnProperty(feature.href)
+								};
+								if (feature.description)
+									featureNode.tooltip = molgenis.i18n.get(feature.description);
+								node.children.push(featureNode);
+							}
 						});
-					});
-				}
-				if (protocol.features) {
-					if (settings.sort) {
-						protocol.features.items.sort(settings.sort);
-					}
-					// TODO deal with multiple entity pages
-					$.each(protocol.features.items, function() {
-						children.push({
-							key : this.href,
-							title : this.name,
-							tooltip : molgenis.i18n.get(this.description),
-							select: node.isSelected()
+						// recurse for subprotocols
+						$.each(subTree, function(key, val) {
+							if(key.charAt(0) !== 'F') {
+								var subTree = {};
+								subTree[key] = subTrees.hasOwnProperty(key) ? subTrees[key] : null;
+								createTreeNodesRec(subTree, selectedNodes, node.children);
+							}
 						});
-					});
-				}
-				callback(children);
+					}
+					
+					// append protocol node
+					parentNode.push(node);
+				});
+			}
+			
+			var nodes = [];
+			var selectedNodes = {};
+			$.each(settings.selectedItems, function() {
+				selectedNodes[this] = null;
 			});
+			console.log(tree);
+			createTreeNodesRec(tree, selectedNodes, nodes);
+			treeConfig.children = nodes;
+			callback(treeConfig);
 		}
-		
+			
 		var treeConfig = {
 			selectMode : 3,
 			minExpandLevel : 2,
@@ -50,7 +84,39 @@
 			checkbox: settings.selection,
 			onLazyRead: function(node){
 				node.setLazyNodeStatus(DTNodeStatus_Loading);
-				createChildren(node, function(children) {
+				
+				// TODO deal with multiple entity pages
+				restApi.getAsync(node.data.key, [ 'features', 'subprotocols' ], null, function(protocol) {
+					var children = [];
+					if (protocol.subprotocols) {
+						if (settings.sort)
+							protocol.subprotocols.items.sort(settings.sort);
+						// TODO deal with multiple entity pages
+						$.each(protocol.subprotocols.items, function() {
+							children.push({
+								key : this.href,
+								title : this.name,
+								tooltip : molgenis.i18n.get(this.description),
+								isFolder : true,
+								isLazy : true,
+								select: node.isSelected()
+							});
+						});
+					}
+					if (protocol.features) {
+						if (settings.sort)
+							protocol.features.items.sort(settings.sort);
+						// TODO deal with multiple entity pages
+						$.each(protocol.features.items, function() {
+							children.push({
+								key : this.href,
+								title : this.name,
+								tooltip : molgenis.i18n.get(this.description),
+								select: node.isSelected()
+							});
+						});
+					}
+					
 					node.setLazyNodeStatus(DTNodeStatus_Ok);
 					node.addChild(children);
 				});
@@ -58,45 +124,124 @@
 			onClick : function(node, event) {
 				if (node.getEventTargetType(event) === 'title' || node.getEventTargetType(event) === 'icon') {
 					if (node.data.isFolder) {
-						if (settings.onFolderClick) {
+						if (settings.onFolderClick)
 							settings.onFolderClick(node.data.key);
-						}
 					} else {
-						if (settings.onItemClick) {
+						if (settings.onItemClick)
 							settings.onItemClick(node.data.key);
-						}
 					}
 				}
 			},
-			onSelect : function(select, node) {				
+			onSelect : function(select, node) {
 				if (node.data.isFolder) {
-					if (settings.onFolderSelect) {
+					if (settings.onFolderSelect)
 						settings.onFolderSelect(node.data.key, select);
-					}
 				} else {
-					if (settings.onItemSelect) {
+					if (settings.onItemSelect)
 						settings.onItemSelect(node.data.key, select);
-					}
 				}
 			}
 		};
 		
+		// displayedItems: yes
+		     // selectedItems: yes
+		         // displaySiblings: yes
+		         // displaySiblings: no
+		     // selectedItems: no
+		         // displaySiblings: yes
+                 // displaySiblings: no
+		// displayedItems: no
+	         // selectedItems: yes
+	             // displaySiblings: yes
+	             // displaySiblings: no
+	         // selectedItems: no
+		         // displaySiblings: yes
+                 // displaySiblings: no
+		if(settings.displayedItems.length > 0) {
+			// FIXME search API does not support IN query
+			var searchRequest = {
+				documentType : 'protocolTree-' + settings.protocolId,
+				query : {
+					rules :	(function() {
+							var queryRules = [];
+							$.each(settings.displayedItems, function(i, item) {
+								if (i > 0) {
+									queryRules.push({
+										operator : 'OR'
+									});
+								}
+								queryRules.push({
+									field : 'id',
+									operator : 'EQUALS',
+									value : hrefToId(item)
+								});
+							});
+							return [queryRules];
+						}())
+				}
+			};
+			searchApi.search(searchRequest, function(searchResponse) {				
+				var tree = {};
+				var subTrees = {};
+				$.each(searchResponse.searchHits, function() {
+					var subTree = tree;
+					$.each(this.columnValueMap.path.split('.'), function() {
+						var isFeature = this.charAt(0) === 'F';
+						if (!subTree[this])
+							subTree[this] = isFeature ? null : {};
+						subTree = subTree[this];
+						if (!isFeature)
+							subTrees[this] = subTree;
+					});
+				});
+				if (settings.displaySiblings) {
+					var entityIds = Object.keys(subTrees);
+					if(entityIds.length > 0) {
+						var q = { q: [ {
+							field : 'id',
+							operator : 'IN',
+							value : Object.keys(subTrees)
+						} ]};
+						restApi.getAsync('/api/v1/protocol', [ 'features', 'subprotocols' ], q, function(protocols) {
+							$.each(protocols.items, function(i, protocol) {
+								var subTree = subTrees[hrefToId(protocol.href)];
+								$.each(protocol.features.items, function(i, feature) {
+									if(!subTree['F' + hrefToId(feature.href)])
+										subTree['F' + hrefToId(feature.href)] = null;
+								});
+								$.each(protocol.subprotocols.items, function(i, subprotocol) {
+									if(!subTree[hrefToId(subprotocol.href)])
+										subTree[hrefToId(subprotocol.href)] = null;
+								});
+							});
+							createTreeNodes(tree, subTrees, treeConfig, callback);
+						});
+					} else {
+						createTreeNodes(tree, subTrees, treeConfig, callback);
+					}
+				} else {
+					createTreeNodes(tree, subTrees, treeConfig, callback);
+				}
+			});
+		}
+			
+			
 		// TODO deal with multiple entity pages
-		restApi.getAsync('/api/v1/protocol/' + settings.protocolId, [ 'features', 'subprotocols' ], null, function(protocol) {
-			treeConfig.children = [ {
-				key : protocol.href,
-				title : protocol.name,
-				icon : false,
-				isFolder : true,
-				isLazy : true,
-				hideCheckbox: true
-			}];
-			callback(treeConfig);
-		});
+//		restApi.getAsync('/api/v1/protocol/' + settings.protocolId, [ 'features', 'subprotocols' ], null, function(protocol) {
+//			treeConfig.children = [ {
+//				key : protocol.href,
+//				title : protocol.name,
+//				icon : false,
+//				isFolder : true,
+//				isLazy : true,
+//				hideCheckbox: settings.selection
+//			}];
+//			callback(treeConfig);
+//		});
 		
 	};
 	
-	function createSearchTreeConfig(query, settings, treeContainer, callback) {
+	function createSearchTreeConfig(query, settings, treeContainer, callback) {		
 		if (query) {
 			var searchRequest;
 			
@@ -120,19 +265,20 @@
 				queryRules : queryRules
 			};			
 			searchApi.search(searchRequest, function(searchResponse){
-				var selectedItems = {};
-				$.each(settings.selectedItems, function(i, item) {
-					selectedItems[item] = null;
+				var visibleItems = {};
+				$.each(settings.selectedItems, function() {
+					visibleItems[this] = null;
 				});
-				$.each(searchResponse.searchHits, function(i, hit) {
-					selectedItems[searchHits.id] = null;
+				$.each(searchResponse.searchHits, function() {
+					visibleItems[this.id] = null;
 				});
-				var treeSettings = { selectedItems: Object.keys(selectedItems), showSelectedOnly: false };
-				createTreeConfig('/api/v1/protocol/' + settings.protocolId, treeSettings, callback);
+				var treeSettings = $.extend({}, settings, { displayedItems: Object.keys(visibleItems), displaySiblings: false });
+				createTreeConfig(treeSettings, callback);
 			});
 		}	
 	};
 	
+	// default pager settings
 	$.fn.catalog = function(options) {
 		var container = this;
 		
@@ -177,7 +323,7 @@
 			 * Dynatree does not expand lazy nodes on selection, so we retrieve all descendant features 
 			 * of lazy protocol nodes through the entity REST API. 
 			 */
-			getSelectedItems : function(callback) {
+			'getSelectedItems' : function(callback) {
 				
 				function getSelectedItemsRec(protocolUris, selectedItems, callback) {
 					function hrefToId(href) {
@@ -247,6 +393,10 @@
 			},
 			selectItem : function(options) {
 				catalogTree.dynatree('getTree').getNodeByKey(options.feature).select(options.select);
+			},
+			getItemParent : function(feature) {
+				var node = catalogTree.dynatree('getTree').getNodeByKey(feature).getParent();
+				return {key : node.data.key, name : node.data.title};
 			}
 		});
 
@@ -282,17 +432,18 @@
 		});
 		
 		// create tree
-		createTreeConfig($.extend({}, settings, {showSelectedOnly: false}), function(treeConfig) {
+		var displayedItems = settings.selectedItems.length > 0 ? settings.selectedItems : ['/api/v1/protocol/' + settings.protocolId];
+		createTreeConfig($.extend({}, settings, {displayedItems: displayedItems, displaySiblings: true}), function(treeConfig) {
 			catalogTree.dynatree(treeConfig);
 			// expand one level of nodes
-			var children = catalogTree.dynatree('getRoot').getChildren();
-			if(children != null) {
-				$.each(children, function() {
-					if (!this.isExpanded()) {
-						this.toggleExpand();
-					}
-				});
-			}
+//			var children = catalogTree.dynatree('getRoot').getChildren();
+//			if(children != null) {
+//				$.each(children, function() {
+//					if (!this.isExpanded()) {
+//						this.toggleExpand();
+//					}
+//				});
+//			}
 		});
 
 		return this;
@@ -304,6 +455,7 @@
 		'selection' : false,
 		'selectedItems' : null,
 		'sort' : null,
+		'onInit' : null,
 		'onFolderClick' : null,
 		'onItemClick' : null,
 		'onFolderSelect' : null,
