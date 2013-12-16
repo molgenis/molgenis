@@ -10,18 +10,24 @@ import org.molgenis.charts.data.XYDataSerie;
 public class XYDataChart extends AbstractChart
 {
 	private String xAxisLabel;
-	private String xYxisLabel;
+	private String yAxisLabel;
+	private MolgenisAxisType xAxisType;
+	private MolgenisAxisType yAxisType;
 	private final List<XYDataSerie> data;
 
-	protected XYDataChart(ChartType type, List<XYDataSerie> data, String xAxisLabel, String xYxisLabel)
+	public XYDataChart(
+			ChartType type,
+			List<XYDataSerie> data,
+			MolgenisAxisType xAxisType, 
+			MolgenisAxisType yAxisType)
 	{
 		super(type);
 		if (data == null) throw new IllegalArgumentException("data is null");
-		if (xAxisLabel == null) throw new IllegalArgumentException("xAxisLabel is null");
-		if (xYxisLabel == null) throw new IllegalArgumentException("xYxisLabel is null");
+		if (xAxisType == null) throw new IllegalArgumentException("xAxisType is null");
+		if (yAxisType == null) throw new IllegalArgumentException("yAxisType is null");
 		this.data = data;
-		this.xAxisLabel = xAxisLabel;
-		this.xYxisLabel = xYxisLabel;
+		this.xAxisType = xAxisType;
+		this.yAxisType = yAxisType;
 	}
 
 	/**
@@ -33,8 +39,7 @@ public class XYDataChart extends AbstractChart
 	}
 
 	/**
-	 * @param xAxisLabel
-	 *            the xAxisLabel to set
+	 * @param xAxisLabel the xAxisLabel to set
 	 */
 	public void setxAxisLabel(String xAxisLabel)
 	{
@@ -42,20 +47,51 @@ public class XYDataChart extends AbstractChart
 	}
 
 	/**
-	 * @return the xYxisLabel
+	 * @return the yAxisLabel
 	 */
-	public String getxYxisLabel()
+	public String getyAxisLabel()
 	{
-		return xYxisLabel;
+		return yAxisLabel;
 	}
 
 	/**
-	 * @param xYxisLabel
-	 *            the xYxisLabel to set
+	 * @param yAxisLabel the yAxisLabel to set
 	 */
-	public void setxYxisLabel(String xYxisLabel)
+	public void setyAxisLabel(String yAxisLabel)
 	{
-		this.xYxisLabel = xYxisLabel;
+		this.yAxisLabel = yAxisLabel;
+	}
+
+	/**
+	 * @return the xAxisType
+	 */
+	public MolgenisAxisType getxAxisType()
+	{
+		return xAxisType;
+	}
+
+	/**
+	 * @param xAxisType the xAxisType to set
+	 */
+	public void setxAxisType(MolgenisAxisType xAxisType)
+	{
+		this.xAxisType = xAxisType;
+	}
+
+	/**
+	 * @return the yAxisType
+	 */
+	public MolgenisAxisType getyAxisType()
+	{
+		return yAxisType;
+	}
+
+	/**
+	 * @param yAxisType the yAxisType to set
+	 */
+	public void setyAxisType(MolgenisAxisType yAxisType)
+	{
+		this.yAxisType = yAxisType;
 	}
 
 	/**
@@ -65,5 +101,5 @@ public class XYDataChart extends AbstractChart
 	{
 		return data;
 	}
-
+	
 }

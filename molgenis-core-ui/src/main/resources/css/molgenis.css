@@ -7,8 +7,8 @@
  }
 
 /*TODO: put this back when topmenu issue is solved
-//body{
-//	padding-top:60px;
+body{
+	padding-top:60px;
 }*/
 
 .btn-link 	{
@@ -17,6 +17,10 @@
 
 .navbar .nav li {
 	margin-bottom:-5px;
+}
+
+.navbar .nav li img {
+	margin-top:-5px;
 }
 
 .nav-tabs>li>a {

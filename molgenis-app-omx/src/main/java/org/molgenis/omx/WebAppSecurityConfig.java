@@ -29,6 +29,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	protected void configureUrlAuthorization(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
+
 		expressionInterceptUrlRegistry
 				.antMatchers("/")
 				.permitAll()
@@ -44,16 +45,16 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/home/**", "/plugin/home/**")
 				.hasAnyAuthority(defaultPluginAuthorities("home"))
 
-				.antMatchers("/menu/main/news/**", "/plugin/news/**")
+				.antMatchers("/menu/background/news/**", "/plugin/news/**")
 				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
-				.antMatchers("/menu/main/background/**", "/plugin/background/**")
+				.antMatchers("/menu/background/background/**", "/plugin/background/**")
 				.hasAnyAuthority(defaultPluginAuthorities("background"))
 
-				.antMatchers("/menu/main/contact/**", "/plugin/contact/**")
+				.antMatchers("/menu/background/contact/**", "/plugin/contact/**")
 				.hasAnyAuthority(defaultPluginAuthorities("contact"))
 
-				.antMatchers("/menu/main/references/**", "/plugin/references/**")
+				.antMatchers("/menu/background/references/**", "/plugin/references/**")
 				.hasAnyAuthority(defaultPluginAuthorities("news"))
 
 				.antMatchers("/menu/main/protocolviewer/**", "/plugin/protocolviewer/**")
@@ -83,16 +84,16 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
 				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
 
-				.antMatchers("/menu/main/biobankconnect/**", "/plugin/biobankconnect/**")
+				.antMatchers("/menu/biobankconnect/biobankconnect/**", "/plugin/biobankconnect/**")
 				.hasAnyAuthority(defaultPluginAuthorities("biobankconnect"))
 
-				.antMatchers("/menu/main/mappingmanager/**", "/plugin/mappingmanager/**")
+				.antMatchers("/menu/biobankconnect/mappingmanager/**", "/plugin/mappingmanager/**")
 				.hasAnyAuthority(defaultPluginAuthorities("mappingmanager"))
 
-				.antMatchers("/menu/main/evaluation/**", "/plugin/evaluation/**")
+				.antMatchers("/menu/biobankconnect/evaluation/**", "/plugin/evaluation/**")
 				.hasAnyAuthority(defaultPluginAuthorities("evaluation"))
 
-				.antMatchers("/menu/main/ontologyindexer/**", "/plugin/ontologyindexer/**")
+				.antMatchers("/menu/biobankconnect/ontologyindexer/**", "/plugin/ontologyindexer/**")
 				.hasAnyAuthority(defaultPluginAuthorities("ontologyindexer"))
 
 				// converters menu
