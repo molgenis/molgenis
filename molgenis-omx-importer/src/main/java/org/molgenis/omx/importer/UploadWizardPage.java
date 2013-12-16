@@ -187,7 +187,9 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 			finally
 			{
-				repo.close();
+                if(repo!=null){
+				    repo.close();
+                }
 			}
 
 			// validate dataset matrices
