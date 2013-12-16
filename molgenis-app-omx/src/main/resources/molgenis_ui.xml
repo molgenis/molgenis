@@ -6,7 +6,6 @@
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
 		<plugin id="importwizard" name="Upload" url="importwizard"/>
-        <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
        	<plugin id="variome" name="Variome" url="variome"/>
         <menu label="Admin" name="admin">
 	        <menu label="Entities" name ="entities">

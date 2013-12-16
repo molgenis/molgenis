@@ -11,11 +11,11 @@
 			<div class="row-fluid">
 			
 				<div class="span4">
-					<form role="form" action="${context_url}/generateTable" method="post">
+					<form role="form" action="${context_url}/upload" method="post" enctype="multipart/form-data">
 						
 						<div class="form-group">
 							<label>
-								<textarea class="form-control" name="tableInputArea" autofocus placeholder="input data"><#if userInput?exists>${userInput}</#if></textarea>
+								<input class="form-control" type="file" name="file"></input>
 							</label>
 						</div>
 						
@@ -26,8 +26,8 @@
 			</div>
 			
 			<div class="row-fluid">
-				<#if userInput?exists>
-						${userInput}
+				<#if path?exists>
+						${path}
 				</#if>	
 			</div>
 			

@@ -5,17 +5,22 @@ package org.molgenis.variome;
 
 import static org.molgenis.variome.VariomeController.URI;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.servlet.http.Part;
+
 import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,10 +58,21 @@ public class VariomeController extends MolgenisPluginController{
 		return "view-variome";
 	}
 	
-	@RequestMapping(value = "/generateTable", method = RequestMethod.POST)
-	public String getInputData(@RequestParam("tableInputArea") String input, Model model) {
-		model.addAttribute("userInput", input);
-		return"view-variome";
+	@RequestMapping(value = "/upload", method = RequestMethod.POST)
+	public String submitMyForm(@RequestParam("file") Part part, Model model) throws IOException {
+ 
+		if (!part.equals(null) && part.getSize() > 5000000){ // 5mb limit
+			throw new RuntimeException("File too large");
+		}
+ 
+		File file = FileUploadUtils.saveToTempFolder(part);
+		if(file == null){
+			new ObjectError("variome", "No file selected");
+		}else{ 
+			pluginVariomeService.vcfFile(file, model);
+		}
+ 
+		return "view-variome";
 	}
 	
 	@ExceptionHandler(RuntimeException.class)
