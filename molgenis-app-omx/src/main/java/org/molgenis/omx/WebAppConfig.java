@@ -12,11 +12,11 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -37,6 +37,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private MolgenisUserService molgenisUserService;
 
 	@Bean
+	@Qualifier("catalogService")
 	public CatalogManagerService catalogManagerService()
 	{
 		return new OmxCatalogManagerService(dataService);

@@ -36,6 +36,7 @@ import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -53,6 +54,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 {
 	private static final Logger logger = Logger.getLogger(ProtocolViewerServiceImpl.class);
 	@Autowired
+	@Qualifier("catalogService")
 	private CatalogService catalogService;
 	@Autowired
 	private JavaMailSender mailSender;
