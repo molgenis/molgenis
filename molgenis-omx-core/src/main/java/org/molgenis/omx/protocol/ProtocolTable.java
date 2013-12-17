@@ -49,7 +49,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 	}
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
-	private static final String FIELD_SIBLINGS = "siblingIds";
 	private static final String FIELD_IDENTIFIER = "identifier";
 	private static final String FIELD_NAME = "name";
 	private static final String FIELD_DESCRIPTION = "description";
@@ -76,7 +75,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 		List<Field> columns = new ArrayList<Field>();
 		columns.add(new Field(FIELD_TYPE));
 		columns.add(new Field(FIELD_ID));
-		columns.add(new Field(FIELD_SIBLINGS));
 		columns.add(new Field(FIELD_IDENTIFIER));
 		columns.add(new Field(FIELD_NAME));
 		columns.add(new Field(FIELD_DESCRIPTION));
@@ -143,7 +141,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				tuple.set(FIELD_NAME, name);
 				tuple.set(FIELD_DESCRIPTION, description);
 				tuple.set(FIELD_PATH, path);
-				tuple.set(FIELD_SIBLINGS, StringUtils.join(siblingIds, ","));
 				tuples.add(tuple);
 
 				// recurse
@@ -187,10 +184,8 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				tuple.set(FIELD_PATH, path);
 				tuple.set(DATA_TYPE, feature.getDataType());
 				tuple.set(FIELD_CATEGORY, categoryValue.toString().toLowerCase());
-				tuple.set(FIELD_SIBLINGS, StringUtils.join(siblingIds, ","));
 				tuples.add(tuple);
 			}
-
 		}
 	}
 
