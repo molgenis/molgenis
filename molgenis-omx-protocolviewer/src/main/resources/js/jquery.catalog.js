@@ -4,10 +4,6 @@
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
 
-	function hrefToId(href) {
-		return parseInt(href.substring(href.lastIndexOf('/') + 1));
-	}
-
 	function createTreeConfig(settings, callback) {
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
@@ -33,7 +29,7 @@
 						var features = {};
 						if(protocol.features.items) {
 							$.each(protocol.features.items, function() {
-								features[hrefToId(this.href)] = this;
+								features[parseInt(restApi.getPrimaryKeyFromHref(this.href))] = this;
 							});
 						}
 						// create feature nodes
@@ -176,7 +172,7 @@
 								queryRules.push({
 									field : 'id',
 									operator : 'EQUALS',
-									value : hrefToId(item)
+									value : parseInt(restApi.getPrimaryKeyFromHref(item))
 								});
 							});
 							return [queryRules];
@@ -205,16 +201,17 @@
 							operator : 'IN',
 							value : Object.keys(subTrees)
 						} ]};
+						// TODO deal with multiple entity pages
 						restApi.getAsync('/api/v1/protocol', [ 'features', 'subprotocols' ], q, function(protocols) {
 							$.each(protocols.items, function(i, protocol) {
-								var subTree = subTrees[hrefToId(protocol.href)];
+								var subTree = subTrees[parseInt(restApi.getPrimaryKeyFromHref(protocol.href))];
 								$.each(protocol.features.items, function(i, feature) {
-									if(!subTree['F' + hrefToId(feature.href)])
-										subTree['F' + hrefToId(feature.href)] = null;
+									if(!subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)])
+										subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)] = null;
 								});
 								$.each(protocol.subprotocols.items, function(i, subprotocol) {
-									if(!subTree[hrefToId(subprotocol.href)])
-										subTree[hrefToId(subprotocol.href)] = null;
+									if(!subTree[parseInt(restApi.getPrimaryKeyFromHref(subprotocol.href))])
+										subTree[parseInt(restApi.getPrimaryKeyFromHref(subprotocol.href))] = null;
 								});
 							});
 							createTreeNodes(tree, subTrees, treeConfig, callback);
@@ -312,17 +309,12 @@
 			 * of lazy protocol nodes through the entity REST API. 
 			 */
 			'getSelectedItems' : function(callback) {
-				
-				function getSelectedItemsRec(protocolUris, selectedItems, callback) {
-					function hrefToId(href) {
-						return href.substring(href.lastIndexOf('/') + 1);
-					}
-					
+				function getSelectedItemsRec(protocolUris, selectedItems, callback) {					
 					var q = { q: [ {
-						field : "id",
-						operator : "IN",
+						field : 'id',
+						operator : 'IN',
 						value : $.map(protocolUris, function(protocolUri) {
-							return hrefToId(protocolUri);
+							return parseInt(restApi.getPrimaryKeyFromHref(protocolUri));
 						})
 					} ]};
 					// TODO deal with multiple entity pages
@@ -331,15 +323,16 @@
 							var subprotocolUris = [];
 							$.each(protocols.items,
 									function() {
-										if (this.subprotocols && this.subprotocols.items
-												&& this.subprotocols.items.length > 0) {
-											$.each(this.subprotocols.items, function() {
+										var self = this;
+										if (self.subprotocols && self.subprotocols.items
+												&& self.subprotocols.items.length > 0) {
+											$.each(self.subprotocols.items, function() {
 												subprotocolUris.push(this.href);
 											});
 										}
-										if (this.features && this.features.items && this.features.items.length > 0) {
-											$.each(this.features.items, function() {
-												selectedItems.push(this.href);
+										if (self.features && self.features.items && self.features.items.length > 0) {
+											$.each(self.features.items, function() {
+												selectedItems.push({'item': this.href, 'parent': self.href});
 											});
 										}
 									});
@@ -364,7 +357,7 @@
 								selectedLazyNodes.push(this);
 							}
 						} else {
-							selectedItems.push(this.data.key);
+							selectedItems.push({'item': this.data.key, 'parent': this.getParent().data.key});
 						}
 					});
 					if(selectedLazyNodes.length == 0) {
@@ -380,11 +373,8 @@
 				}
 			},
 			selectItem : function(options) {
+				// TODO if item does not exist load item
 				catalogTree.dynatree('getTree').getNodeByKey(options.feature).select(options.select);
-			},
-			getItemParent : function(feature) {
-				var node = catalogTree.dynatree('getTree').getNodeByKey(feature).getParent();
-				return {key : node.data.key, name : node.data.title};
 			}
 		});
 
@@ -423,15 +413,6 @@
 		var displayedItems = settings.selectedItems.length > 0 ? settings.selectedItems : ['/api/v1/protocol/' + settings.protocolId];
 		createTreeConfig($.extend({}, settings, {displayedItems: displayedItems, displaySiblings: true}), function(treeConfig) {
 			catalogTree.dynatree(treeConfig);
-			// expand one level of nodes
-//			var children = catalogTree.dynatree('getRoot').getChildren();
-//			if(children != null) {
-//				$.each(children, function() {
-//					if (!this.isExpanded()) {
-//						this.toggleExpand();
-//					}
-//				});
-//			}
 		});
 
 		return this;

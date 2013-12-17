@@ -376,8 +376,7 @@ $(function() {
 	};
 
 	molgenis.RestClient.prototype.getPrimaryKeyFromHref = function(href) {
-		var uriParts = href.split("/");
-		return uriParts[uriParts.length - 1];
+		return href.substring(href.lastIndexOf('/') + 1);
 	};
 
 	molgenis.RestClient.prototype.remove = function(href, callback) {

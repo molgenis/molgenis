@@ -50,8 +50,10 @@
 				});
 			},
 			'onInit' : function() {
-				updateFeatureDetails(null);
-				updateFeatureSelection(selection);
+				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
+					updateShoppingCart(catalogItems, catalogId);
+					updateFeatureSelection(catalogItems);	
+				});
 			}
 		});
 	};
@@ -124,47 +126,89 @@
 		callback(data);
 	};
 
-	var updateFeatureSelection = function(featureUris) {
+	var updateFeatureSelection = function(catalogItems) {
 		var selectionContainer = $('#feature-selection');
-		if (featureUris && featureUris.length > 0) {
+		if (catalogItems && catalogItems.length > 0) {
+			// get features
 			var q = {
 				q : [ {
 					field : 'id',
 					operator : 'IN',
-					value : $.map(featureUris, function(href) {
+					value : $.map(catalogItems, function(catalogItem) {
 						// TODO code duplication from jquery.catalog.js hrefToId
+						var href = catalogItem.item;
 						return href.substring(href.lastIndexOf('/') + 1); 
 					})
 				} ]
 			};
+			// TODO deal with multiple entity pages
 			restApi.getAsync('/api/v1/observablefeature', null, q, function(features) {
-				var table = $('<table class="table table-striped table-condensed table-hover" />');
-				$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
-				$.each(features.items, function(i, feature) {
-					var protocolName = catalogContainer.catalog('getItemParent', feature.href).name;
-					var name = feature.name;
-					var identifier = feature.identifier;
-					var description = molgenis.i18n.get(feature.description);
-					var row = $('<tr />').data('key', feature.href);
-					$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
-					$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
-					$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
-					$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-					var deleteButton = $('<i class="icon-remove"></i>');
-					deleteButton.click(function() {
-						var featureUri = $(this).closest('tr').data('key');
-						catalogContainer.catalog('selectItem', {
-							'feature' : featureUri,
-							'select' : false
-						});
-						return false; // TODO do we need this?
+				// get feature protocols
+				q = {
+						q : [ {
+							field : 'id',
+							operator : 'IN',
+							value : $.map(catalogItems, function(catalogItem) { // FIXME dedup
+								// TODO code duplication from jquery.catalog.js hrefToId
+								var href = catalogItem.parent;
+								return href.substring(href.lastIndexOf('/') + 1); 
+							})
+						} ]
+					};
+				// TODO deal with multiple entity pages
+				restApi.getAsync('/api/v1/protocol', null, q, function(protocols) {
+					var featureMap = {};
+					$.each(features.items, function() {
+						featureMap[this.href] = this;
 					});
-					$('<td class="center" />').append(deleteButton).appendTo(row);
+					var protocolMap = {};
+					$.each(protocols.items, function() {
+						protocolMap[this.href] = this;
+					});
+					var table = $('<table class="table table-striped table-condensed table-hover" />');
+					$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
+					$.each(catalogItems, function() {
+						var feature = featureMap[this.item];
+						//FIXME getAsynx return max 100 results per page
+						if(typeof feature === 'undefined') {
+							console.log("the shit hit the fan");
+							console.log(featureMap);
+							console.log(feature);
+							console.log(this.item);
+						}
+						var protocol = protocolMap[this.parent];
+						if(typeof protocol === 'undefined') {
+							console.log("the shit hit the fan");
+							console.log(protocolMap);
+							console.log(protocol);
+							console.log(this.parent);
+						}
+						
+						var protocolName = protocol.name;
+						var name = feature.name;
+						var identifier = feature.identifier;
+						var description = molgenis.i18n.get(feature.description);
+						var row = $('<tr />').data('key', feature.href);
+						$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
+						$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
+						$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
+						$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
+						var deleteButton = $('<i class="icon-remove"></i>');
+						deleteButton.click(function() {
+							var featureUri = $(this).closest('tr').data('key');
+							catalogContainer.catalog('selectItem', {
+								'feature' : featureUri,
+								'select' : false
+							});
+							return false; // TODO do we need this?
+						});
+						$('<td class="center" />').append(deleteButton).appendTo(row);
 
-					row.appendTo(table);
+						row.appendTo(table);
+					});
+					table.addClass('listtable selection-table');
+					selectionContainer.html(table);
 				});
-				table.addClass('listtable selection-table');
-				selectionContainer.html(table);
 			});
 		} else {
 			selectionContainer.html('<p>No variables selected</p>');
@@ -186,9 +230,10 @@
 				url : molgenis.getContextUrl() + '/cart/replace/' + catalogId,
 				data : JSON.stringify({
 					'features' : $.map(catalogItems, function(catalogItem) {
+						var href = catalogItem.item;
 						return {
-							'feature' : catalogItem.substring(catalogItem.lastIndexOf('/') + 1)
-						// TODO href --> id mapping not elegant
+							// TODO code duplication from jquery.catalog.js hrefToId
+							'feature' : href.substring(href.lastIndexOf('/') + 1)
 						};
 					})
 				}),
