@@ -167,7 +167,7 @@ public class ExcelEntitySource implements EntitySource
 	}
 
 	@Override
-	public Repository<ExcelEntity> getRepositoryByEntityName(String entityName)
+	public Repository<ExcelEntity> getRepositoryByEntityName(String entityName) throws UnknownEntityException
 	{
 		Sheet poiSheet = workbook.getSheet(entityName);
 		if (poiSheet == null)
