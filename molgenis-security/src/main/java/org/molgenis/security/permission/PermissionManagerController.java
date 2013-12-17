@@ -195,6 +195,6 @@ public class PermissionManagerController extends MolgenisPluginController
 	{
 		logger.error(null, e);
 		return Collections.singletonMap("errorMessage",
-				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }

@@ -50,7 +50,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 		if (property == null)
 		{
-			logger.warn(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
+			logger.debug(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
 			return defaultValue;
 		}
 

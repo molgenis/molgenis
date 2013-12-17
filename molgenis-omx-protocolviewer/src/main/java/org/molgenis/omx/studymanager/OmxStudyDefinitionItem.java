@@ -20,7 +20,7 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	@Override
 	public String getId()
 	{
-		return observableFeature.getIdentifier();
+		return observableFeature.getId().toString();
 	}
 
 	@Override
