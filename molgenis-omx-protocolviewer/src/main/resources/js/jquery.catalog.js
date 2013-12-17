@@ -71,7 +71,6 @@
 			$.each(settings.selectedItems, function() {
 				selectedNodes[this] = null;
 			});
-			console.log(tree);
 			createTreeNodesRec(tree, selectedNodes, nodes);
 			treeConfig.children = nodes;
 			callback(treeConfig);
@@ -81,8 +80,12 @@
 			selectMode : 3,
 			minExpandLevel : 2,
 			debugLevel : 0,
-			checkbox: settings.selection,
-			onLazyRead: function(node){
+			checkbox : settings.selection,
+			onPostInit : function() {
+				if (settings.onInit)
+					settings.onInit();
+			},
+			onLazyRead : function(node) {
 				node.setLazyNodeStatus(DTNodeStatus_Loading);
 				
 				// TODO deal with multiple entity pages
@@ -223,22 +226,7 @@
 					createTreeNodes(tree, subTrees, treeConfig, callback);
 				}
 			});
-		}
-			
-			
-		// TODO deal with multiple entity pages
-//		restApi.getAsync('/api/v1/protocol/' + settings.protocolId, [ 'features', 'subprotocols' ], null, function(protocol) {
-//			treeConfig.children = [ {
-//				key : protocol.href,
-//				title : protocol.name,
-//				icon : false,
-//				isFolder : true,
-//				isLazy : true,
-//				hideCheckbox: settings.selection
-//			}];
-//			callback(treeConfig);
-//		});
-		
+		}		
 	};
 	
 	function createSearchTreeConfig(query, settings, treeContainer, callback) {		

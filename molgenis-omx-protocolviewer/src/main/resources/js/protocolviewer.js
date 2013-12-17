@@ -49,7 +49,7 @@
 					updateFeatureSelection(catalogItems);
 				});
 			},
-			'.onInit' : function() {
+			'onInit' : function() {
 				updateFeatureDetails(null);
 				updateFeatureSelection(selection);
 			}
