@@ -276,7 +276,7 @@
 				if (divContainer.find('#'+jqSelector('text_'+feature.identifier)).val() == "") {
 					 $(applyButton).prop('disabled',true);
 				}
-				divContainer.find('#text_'+feature.identifier).keyup(function(e){
+				divContainer.find('#'+jqSelector('text_'+feature.identifier)).keyup(function(e){
                     if (divContainer.find('#'+jqSelector('text_'+feature.identifier)).val() == "") {
                     	$(applyButton).prop('disabled',true);
                     } else {
