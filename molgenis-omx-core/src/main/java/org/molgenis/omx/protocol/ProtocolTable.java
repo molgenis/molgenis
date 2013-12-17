@@ -124,7 +124,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 		List<Protocol> subProtocols = protocol.getSubprotocols();
 		if (subProtocols != null && !subProtocols.isEmpty())
 		{
-			List<Integer> siblingIds = createEntityIds(subProtocols);
 			for (Protocol p : subProtocols)
 			{
 				StringBuilder pathBuilder = new StringBuilder();
@@ -150,8 +149,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 		List<ObservableFeature> features = protocol.getFeatures();
 		if (features != null && !features.isEmpty())
 		{
-			List<Integer> siblingIds = createEntityIds(features);
-
 			for (ObservableFeature feature : features)
 			{
 				StringBuilder pathBuilder = new StringBuilder();
