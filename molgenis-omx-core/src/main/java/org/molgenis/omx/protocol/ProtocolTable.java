@@ -15,15 +15,11 @@ import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.util.tuple.KeyValueTuple;
 import org.molgenis.util.tuple.Tuple;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 
 public class ProtocolTable extends AbstractFilterableTupleTable
 {
@@ -105,18 +101,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 
 		createTuplesRec(protocol.getId().toString(), protocol, tuples);
 		return tuples.iterator();
-	}
-
-	private List<Integer> createEntityIds(List<? extends Characteristic> entities)
-	{
-		return Lists.transform(entities, new Function<Characteristic, Integer>()
-		{
-			@Override
-			public Integer apply(Characteristic entity)
-			{
-				return entity.getId();
-			}
-		});
 	}
 
 	private void createTuplesRec(String protocolPath, Protocol protocol, List<Tuple> tuples)
