@@ -18,7 +18,6 @@ import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +55,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 	public static class Config
 	{
 		@Bean
-		public CatalogManagerController catalogManagerController() throws DatabaseException
+		public CatalogManagerController catalogManagerController()
 		{
 			return new CatalogManagerController(catalogManagerService());
 		}
@@ -79,7 +78,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		boolean isLoaded2 = false;
 		CatalogMeta catalogMeta1 = new CatalogMeta(catalogId1, catalogName1);
 		CatalogMeta catalogMeta2 = new CatalogMeta(catalogId2, catalogName2);
-		when(catalogManagerService.findCatalogs()).thenReturn(Arrays.asList(catalogMeta1, catalogMeta2));
+		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogMeta1, catalogMeta2));
 		when(catalogManagerService.isCatalogLoaded(catalogId1)).thenReturn(isLoaded1);
 		when(catalogManagerService.isCatalogLoaded(catalogId2)).thenReturn(isLoaded2);
 		this.mockMvc
@@ -100,7 +99,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		String catalogName = "name";
 		boolean isLoaded = false;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
-		when(catalogManagerService.findCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
+		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded, !isLoaded);
 
 		this.mockMvc
@@ -122,7 +121,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		String catalogName = "name";
 		boolean isLoaded = true;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
-		when(catalogManagerService.findCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
+		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded);
 
 		this.mockMvc
@@ -156,7 +155,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		String catalogName = "name1";
 		boolean isLoaded = true;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
-		when(catalogManagerService.findCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
+		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded);
 
 		this.mockMvc
@@ -178,7 +177,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		String catalogName = "name1";
 		boolean isLoaded = false;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
-		when(catalogManagerService.findCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
+		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded);
 		this.mockMvc
 				.perform(
