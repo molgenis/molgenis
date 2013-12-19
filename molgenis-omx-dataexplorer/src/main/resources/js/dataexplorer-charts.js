@@ -57,11 +57,11 @@
 		var selectedNodes = tree.getSelectedNodes();
 		var listItems = [];
 		var tempData;
-		listItems.push("<option value="+ '-1' +">select</option>");
+		listItems.push('<option value='+ '-1' +'>select</option>');
 		$.each(selectedNodes, function (index) {
 			tempData = selectedNodes[index].data;
 			if(!tempData.isFolder){
-				listItems.push("<option value=" + tempData.key + ">" + tempData.title + "</option>");
+				listItems.push('<option value=' + tempData.key + '>' + tempData.title + '</option>');
 			}
 			tempData = null;
 		});
@@ -83,11 +83,11 @@
 	
 	//Scatter Plot
 	ns.makeScatterPlotChartRequest = function (entity, restApi) {
-		var xAxisFeature = ns.getFeatureByRestApi($("#scatterplot-select-xaxis-feature").val(), restApi);
-		var yAxisFeature = ns.getFeatureByRestApi($("#scatterplot-select-yaxis-feature").val(), restApi);
-		var splitFeature = ns.getFeatureByRestApi($("#scatterplot-select-split-feature").val(), restApi);
-		var width = 1400;
-		var height = 800; 
+		var xAxisFeature = ns.getFeatureByRestApi($('#scatterplot-select-xaxis-feature').val(), restApi);
+		var yAxisFeature = ns.getFeatureByRestApi($('#scatterplot-select-yaxis-feature').val(), restApi);
+		var splitFeature = ns.getFeatureByRestApi($('#scatterplot-select-split-feature').val(), restApi);
+		var width = 1024;
+		var height = 576; 
 		var title = $('#scatterplot-title').val();
 		var searchRequest = molgenis.createSearchRequest();
 		var query = searchRequest.query;
@@ -129,7 +129,10 @@
 				console.log(options);
 				$('#tabs a:last').tab('show');
 			 	$('#chart-container').highcharts(options);
-				//$('#chart-container').highcharts("StockChart", options);
+				/**
+				 * TODO implement type chart detection
+				 * $('#chart-container').highcharts('StockChart', options);
+				 */
 			}
 		});
 		
@@ -137,11 +140,11 @@
 	
 	//Box Plot
 	ns.makeBoxPlotChartRequest = function (entity, restApi) {
-		var feature = ns.getFeatureByRestApi($("#boxplot-select-feature").val(), restApi);
-		var splitFeature = ns.getFeatureByRestApi($("#boxplot-select-split-feature").val(), restApi);
+		var feature = ns.getFeatureByRestApi($('#boxplot-select-feature').val(), restApi);
+		var splitFeature = ns.getFeatureByRestApi($('#boxplot-select-split-feature').val(), restApi);
 		var title = $('#boxplot-title').val();
-		var width = 1400;
-		var height = 800;
+		var width = 1024;
+		var height = 576;
 		var searchRequest = molgenis.createSearchRequest();
 		var query = searchRequest.query;
 		var featureIdentifier, splitIdentifier;
@@ -179,24 +182,24 @@
 	};
 	
 	$(function() {
-		$('#chart-designer-modal-scatterplot-button').click(function () {
+		$("#chart-designer-modal-scatterplot-button').click(function () {
 			selectedFeaturesSelectOptions = null;
-			$("#scatterplot-select-xaxis-feature").empty();
-			$("#scatterplot-select-yaxis-feature").empty();
-			$("#scatterplot-select-split-feature").empty();
+			$('#scatterplot-select-xaxis-feature').empty();
+			$('#scatterplot-select-yaxis-feature').empty();
+			$('#scatterplot-select-split-feature').empty();
 			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
-			$("#scatterplot-select-xaxis-feature").append(selectedFeaturesSelectOptions);
-			$("#scatterplot-select-yaxis-feature").append(selectedFeaturesSelectOptions);
-			$("#scatterplot-select-split-feature").append(selectedFeaturesSelectOptions);
+			$('#scatterplot-select-xaxis-feature').append(selectedFeaturesSelectOptions);
+			$('#scatterplot-select-yaxis-feature').append(selectedFeaturesSelectOptions);
+			$('#scatterplot-select-split-feature').append(selectedFeaturesSelectOptions);
 		});
 		
 		$('#chart-designer-modal-boxplot-button').click(function () {
 			selectedFeaturesSelectOptions = null;
-			$("#boxplot-select-feature").empty();
-			$("#boxplot-select-split-feature").empty();
+			$('#boxplot-select-feature').empty();
+			$('#boxplot-select-split-feature').empty();
 			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
-			$("#boxplot-select-feature").append(selectedFeaturesSelectOptions);
-			$("#boxplot-select-split-feature").append(selectedFeaturesSelectOptions);
+			$('#boxplot-select-feature').append(selectedFeaturesSelectOptions);
+			$('#boxplot-select-split-feature').append(selectedFeaturesSelectOptions);
 		});
 	});
 	

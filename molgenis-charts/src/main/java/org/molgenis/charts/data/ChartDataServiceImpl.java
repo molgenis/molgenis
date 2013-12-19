@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.ChartDataService;
@@ -49,20 +50,17 @@ public class ChartDataServiceImpl implements ChartDataService
 		
 		try
 		{			
-			Class<?> attributeXJavaType = repo.getAttribute(attributeNameXaxis).getDataType().getJavaType();
-			Class<?> attributeYJavaType = repo.getAttribute(attributeNameYaxis).getDataType().getJavaType();
-			
+			final Class<?> attributeXJavaType = repo.getAttribute(attributeNameXaxis).getDataType().getJavaType();
+			final Class<?> attributeYJavaType = repo.getAttribute(attributeNameYaxis).getDataType().getJavaType();
 			final List<XYDataSerie> xYDataSeries;
-			if(null == split || split.isEmpty()){
+			if(StringUtils.isNotBlank(split)){
 				logger.info("getXYDataChart() --- without split");
 				xYDataSeries = Arrays.asList(this.getXYDataSerie(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules));
 			}else{
 				logger.info("getXYDataChart() --- with split");
 				xYDataSeries = this.getXYDataSeries(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, split, queryRules);
-				
-			}
-			XYDataChart xYDataChart = new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXJavaType), MolgenisAxisType.getType(attributeYJavaType));
-			return xYDataChart;
+			} 
+			return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXJavaType), MolgenisAxisType.getType(attributeYJavaType));
 		}
 		catch (MolgenisModelException e)
 		{
@@ -145,7 +143,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split)
 	{	
 		final List<BoxPlotSerie> boxPlotSeries;
-		if(null == split || split.isEmpty())
+		if(StringUtils.isNotBlank(split))
 		{
 			boxPlotSeries = Arrays.asList(getBoxPlotSerie(entityName, attributeName, queryRules));
 		} 
