@@ -33,12 +33,22 @@
 	
 	ns.createBoxPlotChartRequestPayLoad = function (
 			entity,
-			featureIdentifier) {
+			width, 
+			height,
+			title,
+			featureIdentifier,
+			splitIdentifier,
+			query) {
 		
 		return {
-			"entity" : entity,
-			"type" : "BOXPLOT_CHART",
-			"observableFeature": featureIdentifier
+			"entity": entity,
+			"width": width,
+			"height": height,
+			"title": title,
+			"type": "BOXPLOT_CHART",
+			"observableFeature": featureIdentifier,
+			"split": splitIdentifier,
+			"query":query
 		};
 	};
 	
@@ -127,15 +137,34 @@
 	
 	//Box Plot
 	ns.makeBoxPlotChartRequest = function (entity, restApi) {
-		var feature = restApi.get($("#boxplot-select-feature").val());
-		var featureIdentifier = feature.identifier;
+		var feature = ns.getFeatureByRestApi($("#boxplot-select-feature").val(), restApi);
+		var splitFeature = ns.getFeatureByRestApi($("#boxplot-select-split-feature").val(), restApi);
+		var title = $('#boxplot-title').val();
+		var width = 1400;
+		var height = 800;
+		var searchRequest = molgenis.createSearchRequest();
+		var query = searchRequest.query;
+		var featureIdentifier, splitIdentifier;
+		
+		if(feature) {
+			featureIdentifier = feature.identifier;		
+		}
+		
+		if(splitFeature) {
+			splitIdentifier = splitFeature.identifier;
+		}
 		
 		$.ajax({
 			type : "POST",
 			url : "/charts/boxplot",
 			data : JSON.stringify(molgenis.charts.dataexplorer.createBoxPlotChartRequestPayLoad(
 					entity,
-					featureIdentifier
+					width,
+					height,
+					title,
+					featureIdentifier,
+					splitIdentifier,
+					query
 			)),
 			contentType : "application/json; charset=utf-8",
 			cache: false,
@@ -164,8 +193,10 @@
 		$('#chart-designer-modal-boxplot-button').click(function () {
 			selectedFeaturesSelectOptions = null;
 			$("#boxplot-select-feature").empty();
+			$("#boxplot-select-split-feature").empty();
 			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
 			$("#boxplot-select-feature").append(selectedFeaturesSelectOptions);
+			$("#boxplot-select-split-feature").append(selectedFeaturesSelectOptions);
 		});
 	});
 	

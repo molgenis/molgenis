@@ -96,7 +96,16 @@ public class ChartController
 	@ResponseBody
 	public Options renderPlotBoxChart(@RequestBody BoxPlotChartRequest request, Model model)
 	{
-		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(), null);
+		BoxPlotChart chart = chartDataService.getBoxPlotChart(
+				request.getEntity(), 
+				request.getObservableFeature(), 
+				request.getQuery().getRules(), 
+				request.getSplit());
+		
+		chart.setHeight(request.getHeight());
+		chart.setWidth(request.getWidth());
+		chart.setTitle(request.getTitle());
+		
 		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.BOXPLOT_CHART);
 		return (Options) service.renderChart(chart, model);
 	}

@@ -51,16 +51,13 @@ public class HighchartsDataUtil
 	public static Series parseToSeries(BoxPlotSerie boxPlotSerie)
 	{
 		Series series = new Series();
-		series.setName("TEST");
+		series.setName(boxPlotSerie.getName());
 		series.setData(new ArrayList<Object>(boxPlotSerie.getData()));
 		return series;
 	}
 
 	public static List<Object> parseToXYDataList(List<XYData> xydata, Class<?> xValueClass, Class<?> yValueClass)
-	{
-		 logger.info("xValueClass: " + xValueClass);
-		 logger.info("yValueClass: " + yValueClass);
-		
+	{		
 		List<Object> data = new ArrayList<Object>();
 		for (XYData xYData : xydata)
 		{

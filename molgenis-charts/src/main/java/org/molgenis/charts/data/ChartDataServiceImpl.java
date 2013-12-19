@@ -115,26 +115,26 @@ public class ChartDataServiceImpl implements ChartDataService
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
 		
-		Map<String, XYDataSerie> xYDataSeries = new HashMap<String, XYDataSerie>();
+		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
 		for (Entity entity : iterable)
 		{
 			String splitValue = split + "__" + entity.get(split);
-			if(!xYDataSeries.containsKey(splitValue))
+			if(!xYDataSeriesMap.containsKey(splitValue))
 			{
 				XYDataSerie serie = new XYDataSerie();
 				serie.setName(splitValue);
 				serie.setAttributeXJavaType(attributeXJavaType);
 				serie.setAttributeYJavaType(attributeYJavaType);
-				xYDataSeries.put(splitValue, serie);
+				xYDataSeriesMap.put(splitValue, serie);
 			}
 			
 			Object x = getJavaEntityValue(entity, attributeNameXaxis, attributeXJavaType);
 			Object y = getJavaEntityValue(entity, attributeNameYaxis, attributeYJavaType);
-			xYDataSeries.get(splitValue).addData(new XYData(x, y));
+			xYDataSeriesMap.get(splitValue).addData(new XYData(x, y));
 		}
 		
 		List<XYDataSerie> series = new ArrayList<XYDataSerie>();
-		for(Entry<String, XYDataSerie> serie: xYDataSeries.entrySet()) {
+		for(Entry<String, XYDataSerie> serie: xYDataSeriesMap.entrySet()) {
 			series.add(serie.getValue());
 		}
 
@@ -142,8 +142,27 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 	
 	@Override
-	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules)
+	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split)
 	{	
+		final List<BoxPlotSerie> boxPlotSeries;
+		if(null == split || split.isEmpty())
+		{
+			boxPlotSeries = Arrays.asList(getBoxPlotSerie(entityName, attributeName, queryRules));
+		} 
+		else 
+		{
+			boxPlotSeries = getBoxPlotSeries(entityName, attributeName, queryRules, split);
+		}
+		
+		return new BoxPlotChart(boxPlotSeries);
+	}
+	
+	@Override
+	public BoxPlotSerie getBoxPlotSerie(
+			String entityName,
+			String attributeName,
+			List<QueryRule> queryRules
+			){
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
 		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
 		List<Double> list = new ArrayList<Double>(); 
@@ -152,14 +171,43 @@ public class ChartDataServiceImpl implements ChartDataService
 			list.add(entity.getDouble(attributeName));
 		}
 		
-		Double[] data = BoxPlotCalcUtil.calcPlotBoxValues(list);
-		
-		
+		Double[] data = BoxPlotCalcUtil.calcPlotBoxValues(list);		
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
 		boxPlotSerie.getData().add(data);
-		BoxPlotChart boxPlotChart = new BoxPlotChart(Arrays.asList(boxPlotSerie));
+		return boxPlotSerie;
+	}
+	
+	@Override
+	public List<BoxPlotSerie> getBoxPlotSeries(String entityName,
+			String attributeName,
+			List<QueryRule> queryRules,
+			String split)
+	{
+		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
+		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
 		
-		return boxPlotChart;
+		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
+		for (Entity entity : iterable)
+		{
+			String splitValue = split + "__" + entity.get(split);
+			if(!boxPlotDataListMap.containsKey(splitValue)){
+				boxPlotDataListMap.put(splitValue,  new ArrayList<Double>());
+			}
+			
+			boxPlotDataListMap.get(splitValue).add(entity.getDouble(attributeName));
+		}
+		
+		List<BoxPlotSerie> boxPlotSeries = new ArrayList<BoxPlotSerie>();
+		for (Entry<String, List<Double>> entry : boxPlotDataListMap.entrySet()){
+			Double[] data = BoxPlotCalcUtil.calcPlotBoxValues(entry.getValue());		
+			BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
+			boxPlotSerie.getData().add(data);
+			boxPlotSerie.setName(entry.getKey());
+			boxPlotSeries.add(boxPlotSerie);
+		}
+		
+		return boxPlotSeries;
+		
 	}
 	
 	private Iterable<? extends Entity> getIterable(String entityName, List<QueryRule> queryRules, Sort sort){

@@ -72,7 +72,7 @@ public class HighchartService extends AbstractChartVisualizationService
 		YAxis yAxis = new YAxis();
 		
 		ChartTitle title = new ChartTitle()
-			.setText("TEST")
+			.setText(boxPlotChart.getTitle())
 			.setAlign(ChartAlign.CENTER);
 		
 		options.setSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
