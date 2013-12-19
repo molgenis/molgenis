@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.model.elements.Field;
@@ -24,19 +23,6 @@ import org.molgenis.util.tuple.Tuple;
 
 public class ProtocolTable extends AbstractFilterableTupleTable
 {
-	private static final String FIELD_TYPE = "type";
-	private static final String FIELD_ID = "id";
-	private static final String FIELD_IDENTIFIER = "identifier";
-	private static final String FIELD_NAME = "name";
-	private static final String FIELD_DESCRIPTION = "description";
-	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
-	private static final String FIELD_PATH = "path";
-	private static final String FIELD_BOOST_ONTOLOGYTERM = "boostOntologyTerms";
-	private static final String DATA_TYPE = "dataType";
-	private static final String FIELD_CATEGORY = "category";
-
-	private final Protocol protocol;
-	private final DataService dataService;
 	public static final Set<String> STOPWORDSLIST;
 	static
 	{
@@ -57,6 +43,18 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				"why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've",
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
+	private static final String FIELD_TYPE = "type";
+	private static final String FIELD_ID = "id";
+	private static final String FIELD_IDENTIFIER = "identifier";
+	private static final String FIELD_NAME = "name";
+	private static final String FIELD_DESCRIPTION = "description";
+	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
+	private static final String FIELD_PATH = "path";
+	private static final String FIELD_BOOST_ONTOLOGYTERM = "boostOntologyTerms";
+	private static final String DATA_TYPE = "dataType";
+	private static final String FIELD_CATEGORY = "category";
+	private final Protocol protocol;
+	private final DataService dataService;
 
 	public ProtocolTable(Protocol protocol, DataService dataService) throws TableException
 	{
@@ -87,19 +85,25 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 	public Iterator<Tuple> iterator()
 	{
 		List<Tuple> tuples = new ArrayList<Tuple>();
-		try
-		{
-			// TODO discuss whether we want to index the input (=root) protocol
-			createTuplesRec(protocol.getId().toString(), protocol, tuples);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
+		// index root protocol
+		String description = protocol.getDescription() == null ? StringUtils.EMPTY : I18nTools
+				.get(protocol.getDescription()).replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase();
+
+		KeyValueTuple tuple = new KeyValueTuple();
+		tuple.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
+		tuple.set(FIELD_ID, protocol.getId());
+		tuple.set(FIELD_IDENTIFIER, protocol.getIdentifier());
+		tuple.set(FIELD_NAME, protocol.getName());
+		tuple.set(FIELD_DESCRIPTION, description);
+		tuple.set(FIELD_PATH, protocol.getId().toString());
+		tuples.add(tuple);
+
+		createTuplesRec(protocol.getId().toString(), protocol, tuples);
 		return tuples.iterator();
 	}
 
-	private void createTuplesRec(String protocolPath, Protocol protocol, List<Tuple> tuples) throws DatabaseException
+	private void createTuplesRec(String protocolPath, Protocol protocol, List<Tuple> tuples)
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
 		if (subProtocols != null && !subProtocols.isEmpty())
@@ -163,7 +167,6 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				tuple.set(FIELD_CATEGORY, categoryValue.toString().toLowerCase());
 				tuples.add(tuple);
 			}
-
 		}
 	}
 
@@ -173,19 +176,12 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 	@Override
 	public int getCount() throws TableException
 	{
-		AtomicInteger count = new AtomicInteger(0);
-		try
-		{
-			countTuplesRec(protocol, count);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		AtomicInteger count = new AtomicInteger(1); // add one for root protocol
+		countTuplesRec(protocol, count);
 		return count.get();
 	}
 
-	private void countTuplesRec(Protocol protocol, AtomicInteger count) throws DatabaseException
+	private void countTuplesRec(Protocol protocol, AtomicInteger count)
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
 		if (subProtocols != null && !subProtocols.isEmpty())

@@ -121,6 +121,7 @@
 			<field name="RequiredFeatures" type="mref" nillable="true" xref_entity="ObservableFeature"
 				description=".........." />
 			<field name="root" type="boolean" default="false" description="Indicator whether this protocol defines a workflow (e.g is the first protocol of a workflow)." />
+            <field name="active" type="bool" default="true" description="whether this protocol is considered active/inactive"/>
 		</entity>
 		<entity name="DataSet" extends="Characteristic">
 			<description>Container for one or more observations that are measured
@@ -135,7 +136,6 @@
 				description="time when the protocol started." />
 			<field auto="true" name="endTime" type="datetime" nillable="true"
 				description="(Optional) time when the protocol ended." />
-			<field name="active" type="bool" default="true" description="whether this data set is considered active/inactive"/>
 		</entity>
 		<entity name="ObservationSet" implements="Autoid" xref_label="Identifier">
 			<description>In practice: Observation is one row within a DataSet.

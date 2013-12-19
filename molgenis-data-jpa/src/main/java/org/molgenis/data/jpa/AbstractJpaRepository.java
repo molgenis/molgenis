@@ -22,6 +22,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
@@ -74,18 +75,24 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	{
 		if (entityClass.isAssignableFrom(entity.getClass()))
 		{
+			if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
 			getEntityManager().persist(entity);
+			if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
+					+ entity.getIdValue() + "]");
 		}
 		else
 		{
 			E jpaEntity = BeanUtils.instantiateClass(entityClass);
 			jpaEntity.set(entity);
+			if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
 			getEntityManager().persist(jpaEntity);
+			if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
+					+ jpaEntity.getIdValue() + "]");
 		}
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void add(Iterable<E> entities)
 	{
 		for (E e : entities)
@@ -122,13 +129,17 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		createWhere(q, from, cq, cb);
 
 		// execute the query
-		return em.createQuery(cq).getSingleResult();
+		TypedQuery<Long> tq = em.createQuery(cq);
+		if (logger.isDebugEnabled()) logger.debug("execute count query " + q);
+		return tq.getSingleResult();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public E findOne(Integer id)
 	{
+		if (logger.isDebugEnabled()) logger
+				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
 		return getEntityManager().find(getEntityClass(), id);
 	}
 
@@ -149,7 +160,12 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		Root<E> from = cq.from(getEntityClass());
 		cq.select(from).where(from.get(idAttrName).in(Lists.newArrayList(ids)));
 
-		return em.createQuery(cq).getResultList();
+		TypedQuery<E> tq = em.createQuery(cq);
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
+		}
+		return tq.getResultList();
 	}
 
 	@Override
@@ -170,7 +186,10 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 		if (q.getPageSize() > 0) tq.setMaxResults(q.getPageSize());
 		if (q.getOffset() > 0) tq.setFirstResult(q.getOffset());
-
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("finding " + getEntityClass().getSimpleName() + " " + q);
+		}
 		return tq.getResultList();
 	}
 
@@ -193,7 +212,12 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	public void update(E entity)
 	{
 		EntityManager em = getEntityManager();
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("merging" + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
+		}
 		em.merge(entity);
+		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -206,17 +230,23 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		int batchCount = 0;
 		for (E r : entities)
 		{
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
+			}
 			em.merge(r);
 			batchCount++;
 			if (batchCount == batchSize)
 			{
+				if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 				em.flush();
+				if (logger.isDebugEnabled()) logger.debug("clearing entity manager");
 				em.clear();
 				batchCount = 0;
 			}
 		}
+		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
-
 	}
 
 	@Override
@@ -505,6 +535,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	@Transactional
 	public void deleteById(Integer id)
 	{
+		if (logger.isDebugEnabled()) logger.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
 		delete(findOne(id));
 	}
 
@@ -513,7 +544,12 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	public void delete(E entity)
 	{
 		EntityManager em = getEntityManager();
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
+		}
 		em.remove(entity);
+		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -524,8 +560,15 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		EntityManager em = getEntityManager();
 
 		for (E r : entities)
+		{
 			em.remove(r);
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
+			}
+		}
 
+		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
 
@@ -691,12 +734,14 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	@Transactional(readOnly = true)
 	public void flush()
 	{
+		logger.debug("flushing entity manager");
 		getEntityManager().flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
+		logger.debug("clearing entity manager");
 		getEntityManager().clear();
 	}
 
