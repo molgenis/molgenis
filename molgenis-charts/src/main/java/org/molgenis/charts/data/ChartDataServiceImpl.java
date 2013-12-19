@@ -54,8 +54,10 @@ public class ChartDataServiceImpl implements ChartDataService
 			
 			final List<XYDataSerie> xYDataSeries;
 			if(null == split || split.isEmpty()){
+				logger.info("getXYDataChart() --- without split");
 				xYDataSeries = Arrays.asList(this.getXYDataSerie(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules));
 			}else{
+				logger.info("getXYDataChart() --- with split");
 				xYDataSeries = this.getXYDataSeries(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, split, queryRules);
 				
 			}

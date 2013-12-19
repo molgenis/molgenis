@@ -3,12 +3,17 @@ package org.molgenis.charts;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+import org.molgenis.charts.data.ChartDataServiceImpl;
+
 public enum MolgenisAxisType
 {
 	LINEAR, 
 	LOGARITHMIC, 
 	DATETIME,
 	CATEGORY;
+	
+	private static final Logger logger = Logger.getLogger(MolgenisAxisType.class);
 	
 	private MolgenisAxisType() {}
 	
@@ -20,6 +25,7 @@ public enum MolgenisAxisType
 	 */
 	public static MolgenisAxisType getType(Class<?> javaType)
 	{	
+		logger.info("javaType: " + javaType);
 		if(Double.class == javaType)
 		{
 			return MolgenisAxisType.LINEAR;
@@ -37,7 +43,7 @@ public enum MolgenisAxisType
 			return MolgenisAxisType.DATETIME;
 		}
 		else {
-			return null;
+			return MolgenisAxisType.CATEGORY;
 		}
 	}
 }
