@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
+import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.highcharts.data.HighchartsDataUtil;
 import org.springframework.stereotype.Component;
@@ -42,9 +43,7 @@ public class HighchartService extends AbstractChartVisualizationService
 		}
 		else if (MolgenisChartType.BOXPLOT_CHART.equals(chart.getType()))
 		{
-			//return this.createLineChart((LineChart) chart, model);
-			//TODO NOT SUPPORTED
-			return null;
+			return this.createBoxPlotChart((BoxPlotChart) chart, model);
 		}
 		return null;
 	}
@@ -57,6 +56,34 @@ public class HighchartService extends AbstractChartVisualizationService
 	private Options createLineChart(XYDataChart lineChart, Model model)
 	{
 		return createXYDataChart(lineChart, model);
+	}
+	
+	private Options createBoxPlotChart(BoxPlotChart boxPlotChart, Model model)
+	{
+		Options options = new Options();
+		
+		Chart chart = new Chart();
+		chart.setType(ChartType.BOXPLOT)
+			.setWidth(boxPlotChart.getWidth())
+			.setHeight(boxPlotChart.getHeight());
+		
+		XAxis xAxis = new XAxis();
+		
+		YAxis yAxis = new YAxis();
+		
+		ChartTitle title = new ChartTitle()
+			.setText("TEST")
+			.setAlign(ChartAlign.CENTER);
+		
+		options.setSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
+				boxPlotChart.getSeries()));
+		options.setChart(chart);
+		options.setTitle(title);
+		options.addxAxis(xAxis);
+		options.addyAxis(yAxis);
+		options.setCredits(new Credits());
+
+		return options;
 	}
 	
 	private Options createXYDataChart(XYDataChart xYDataChart, Model model)

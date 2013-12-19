@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +19,9 @@ import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.data.DataMatrix;
+import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.Options;
+import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.XYDataChartRequest;
 import org.molgenis.util.FileStore;
@@ -66,23 +69,15 @@ public class ChartController
 		return "test";
 	}
 
-	@RequestMapping(value = "/line", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Options renderXYDataChart(@RequestBody XYDataChartRequest request, Model model)
 	{		
-		//TODO REMOVE ME JJ
-		logger.info("request.getEntity() : " + request.getEntity());
-		logger.info("request.getX() : " + request.getX());
-		logger.info("request.getY() : " + request.getY());
-		logger.info("request.getxAxisLabel() : " + request.getxAxisLabel());
-		logger.info("request.getyAxisLabel() : " + request.getyAxisLabel());
-		logger.info("request.getQuery() : " + request.getQuery());
-		logger.info("request.getType(): " + request.getType());
-		
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(
 				request.getEntity(),
 				request.getX(),
 				request.getY(),
+				request.getSplit(),
 				request.getQuery().getRules());
 		
 		xYDataChart.setTitle(request.getTitle());
@@ -95,6 +90,15 @@ public class ChartController
 		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.valueOf(request.getType()));
 		
 		return (Options) service.renderChart(xYDataChart, model);
+	}
+	
+	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Options renderPlotBoxChart(@RequestBody BoxPlotChartRequest request, Model model)
+	{
+		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(), null);
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.BOXPLOT_CHART);
+		return (Options) service.renderChart(chart, model);
 	}
 
 	/**

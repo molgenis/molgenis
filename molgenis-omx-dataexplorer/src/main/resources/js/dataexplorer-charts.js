@@ -4,7 +4,7 @@
 	var ns = molgenis.charts.dataexplorer = molgenis.charts.dataexplorer || {};
 	var selectedFeaturesSelectOptions;
 	
-	ns.createXYLineChartRequestPayLoad = function (
+	ns.createScatterPlotChartRequestPayLoad = function (
 			entity,
 			x, 
 			y, 
@@ -13,20 +13,32 @@
 			width, 
 			height, 
 			title,
-			type,
-			query) {
+			query,
+			splitFeature) {
 		
 		return {
 			"entity" : entity,
 			"width": width,
 			"height": height,
 			"title": title,
-			"type": type,
+			"type": "SCATTER_CHART",
 			"query": query,
 			"x": x,
 			"y": y,
 			"xAxisLabel": xAxisLabel,
-			"yAxisLabel": yAxisLabel
+			"yAxisLabel": yAxisLabel,
+			"split": splitFeature
+		};
+	};
+	
+	ns.createBoxPlotChartRequestPayLoad = function (
+			entity,
+			featureIdentifier) {
+		
+		return {
+			"entity" : entity,
+			"type" : "BOXPLOT_CHART",
+			"observableFeature": featureIdentifier
 		};
 	};
 	
@@ -62,13 +74,22 @@
 	};
 	
 	$(function() {
-		$('#chart-designer-modal-button').click(function () {
+		$('#chart-designer-modal-scatterplot-button').click(function () {
 			selectedFeaturesSelectOptions = null;
-			$("#chart-select-xaxis-feature").empty();
-			$("#chart-select-yaxis-feature").empty();
+			$("#scatterplot-select-xaxis-feature").empty();
+			$("#scatterplot-select-yaxis-feature").empty();
+			$("#scatterplot-select-split-feature").empty();
 			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
-			$("#chart-select-xaxis-feature").append(selectedFeaturesSelectOptions);
-			$("#chart-select-yaxis-feature").append(selectedFeaturesSelectOptions);
+			$("#scatterplot-select-xaxis-feature").append(selectedFeaturesSelectOptions);
+			$("#scatterplot-select-yaxis-feature").append(selectedFeaturesSelectOptions);
+			$("#scatterplot-select-split-feature").append(selectedFeaturesSelectOptions);
+		});
+		
+		$('#chart-designer-modal-boxplot-button').click(function () {
+			selectedFeaturesSelectOptions = null;
+			$("#boxplot-select-feature").empty();
+			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
+			$("#boxplot-select-feature").append(selectedFeaturesSelectOptions);
 		});
 	});
 	

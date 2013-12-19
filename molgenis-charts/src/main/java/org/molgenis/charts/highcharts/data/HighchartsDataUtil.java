@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.ChartType;
@@ -27,6 +28,16 @@ public class HighchartsDataUtil
 		}
 		return series;
 	}
+	
+	public static List<Series> parseToBoxPlotSeriesList(List<BoxPlotSerie> boxPlotSeries)
+	{
+		List<Series> series = new ArrayList<Series>();
+		for (BoxPlotSerie boxPlotSerie : boxPlotSeries)
+		{
+			series.add(parseToSeries(boxPlotSerie));
+		}
+		return series;
+	}
 
 	public static Series parseToSeries(XYDataSerie xYDataSerie, ChartType chartType)
 	{
@@ -34,6 +45,14 @@ public class HighchartsDataUtil
 		series.setName(xYDataSerie.getName());
 		series.setType(chartType);
 		series.setData(parseToXYDataList(xYDataSerie.getData(), xYDataSerie.getAttributeXJavaType(), xYDataSerie.getAttributeYJavaType()));
+		return series;
+	}
+	
+	public static Series parseToSeries(BoxPlotSerie boxPlotSerie)
+	{
+		Series series = new Series();
+		series.setName("TEST");
+		series.setData(new ArrayList<Object>(boxPlotSerie.getData()));
 		return series;
 	}
 

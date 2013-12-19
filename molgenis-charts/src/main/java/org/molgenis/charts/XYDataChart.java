@@ -27,7 +27,7 @@ public class XYDataChart extends AbstractChart
 		this.xAxisType = xAxisType;
 		this.yAxisType = yAxisType;
 	}
-
+	
 	/**
 	 * @return the xAxisLabel
 	 */
@@ -100,4 +100,11 @@ public class XYDataChart extends AbstractChart
 		return data;
 	}
 	
+	/**
+	 * @return the data
+	 */
+	public void setData(List<XYDataSerie> data)
+	{
+		this.data = data;
+	}
 }

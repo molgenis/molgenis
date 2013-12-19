@@ -3,18 +3,15 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.charts.AbstractChart.MolgenisChartType;
-
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar
  */
 public class XYDataSerie
 {
+	private String name = "";
 	private Class<?> attributeXJavaType;
 	private Class<?> attributeYJavaType;
 	private final List<XYData> data = new ArrayList<XYData>();
-	private String name = "";
-	private MolgenisChartType type;
 
 	public void addData(XYData point)
 	{
@@ -42,22 +39,6 @@ public class XYDataSerie
 		this.name = name;
 	}
 	
-	/**
-	 * @return the type
-	 */
-	public MolgenisChartType getType()
-	{
-		return type;
-	}
-
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(MolgenisChartType type)
-	{
-		this.type = type;
-	}
-
 	/**
 	 * @return the attributeXJavaType
 	 */

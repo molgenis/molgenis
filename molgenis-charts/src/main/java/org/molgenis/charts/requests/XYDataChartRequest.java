@@ -1,6 +1,10 @@
 package org.molgenis.charts.requests;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
+
+import org.molgenis.data.QueryRule;
 
 public class XYDataChartRequest extends ChartRequest
 {
@@ -15,6 +19,8 @@ public class XYDataChartRequest extends ChartRequest
 
 	@NotNull
 	private String yAxisLabel;
+	
+	private String split;
 
 	/**
 	 * @return the x
@@ -82,6 +88,23 @@ public class XYDataChartRequest extends ChartRequest
 	public void setyAxisLabel(String yAxisLabel)
 	{
 		this.yAxisLabel = yAxisLabel;
+	}
+
+	/**
+	 * @param split
+	 */
+	public String getSplit()
+	{
+		return this.split;
+	}
+	
+	/**
+	 * @param split
+	 *            the split to set
+	 */
+	public void setSplit(String split)
+	{
+		this.split = split;
 	}
 
 }
