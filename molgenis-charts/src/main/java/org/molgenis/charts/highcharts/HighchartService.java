@@ -70,6 +70,8 @@ public class HighchartService extends AbstractChartVisualizationService
 		XAxis xAxis = new XAxis();
 		
 		YAxis yAxis = new YAxis();
+		yAxis.setTitle(new AxisTitle()
+			.setText(boxPlotChart.getyLabel()));
 		
 		ChartTitle title = new ChartTitle()
 			.setText(boxPlotChart.getTitle())

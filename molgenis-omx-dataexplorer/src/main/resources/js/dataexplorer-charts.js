@@ -182,7 +182,7 @@
 	};
 	
 	$(function() {
-		$("#chart-designer-modal-scatterplot-button').click(function () {
+		$('#chart-designer-modal-scatterplot-button').click(function () {
 			selectedFeaturesSelectOptions = null;
 			$('#scatterplot-select-xaxis-feature').empty();
 			$('#scatterplot-select-yaxis-feature').empty();

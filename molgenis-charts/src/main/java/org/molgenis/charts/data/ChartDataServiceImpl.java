@@ -40,25 +40,23 @@ public class ChartDataServiceImpl implements ChartDataService
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		this.dataService = dataService;
-
 	}
 	
 	@Override
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis, String split, List<QueryRule> queryRules) 
 	{
 		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
-		
 		try
 		{			
 			final Class<?> attributeXJavaType = repo.getAttribute(attributeNameXaxis).getDataType().getJavaType();
 			final Class<?> attributeYJavaType = repo.getAttribute(attributeNameYaxis).getDataType().getJavaType();
 			final List<XYDataSerie> xYDataSeries;
-			if(StringUtils.isNotBlank(split)){
+			if(!StringUtils.isNotBlank(split)){
 				logger.info("getXYDataChart() --- without split");
-				xYDataSeries = Arrays.asList(this.getXYDataSerie(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules));
+				xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules));
 			}else{
 				logger.info("getXYDataChart() --- with split");
-				xYDataSeries = this.getXYDataSeries(entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, split, queryRules);
+				xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis, attributeXJavaType, attributeYJavaType, split, queryRules);
 			} 
 			return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXJavaType), MolgenisAxisType.getType(attributeYJavaType));
 		}
@@ -71,15 +69,14 @@ public class ChartDataServiceImpl implements ChartDataService
 	
 	@Override
 	public XYDataSerie getXYDataSerie(
+			Repository<? extends Entity> repo,
 			String entityName, 
 			String attributeNameXaxis, 
 			String attributeNameYaxis,
 			Class<?> attributeXJavaType,
 			Class<?> attributeYJavaType,
 			List<QueryRule> queryRules)
-	{		
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
-
+	{
 		XYDataSerie serie = new XYDataSerie();
 		serie.setName(
 				repo.getAttribute(attributeNameXaxis).getLabel() + 
@@ -89,7 +86,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		serie.setAttributeYJavaType(attributeYJavaType);		
 
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
-		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
+		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		for (Entity entity : iterable)
 		{
 			Object x = getJavaEntityValue(entity, attributeNameXaxis, attributeXJavaType);
@@ -102,6 +99,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	
 	@Override
 	public List<XYDataSerie> getXYDataSeries(
+			Repository<? extends Entity> repo,
 			String entityName, 
 			String attributeNameXaxis, 
 			String attributeNameYaxis,
@@ -111,7 +109,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			List<QueryRule> queryRules)
 	{		
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
-		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
+		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		
 		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
 		for (Entity entity : iterable)
@@ -142,48 +140,56 @@ public class ChartDataServiceImpl implements ChartDataService
 	@Override
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split)
 	{	
+		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
 		final List<BoxPlotSerie> boxPlotSeries;
-		if(StringUtils.isNotBlank(split))
+		if(!StringUtils.isNotBlank(split))
 		{
-			boxPlotSeries = Arrays.asList(getBoxPlotSerie(entityName, attributeName, queryRules));
+			logger.info("getBoxPlotChart() --- without split");
+			boxPlotSeries = Arrays.asList(getBoxPlotSerie(repo, entityName, attributeName, queryRules));
 		} 
 		else 
 		{
-			boxPlotSeries = getBoxPlotSeries(entityName, attributeName, queryRules, split);
+			logger.info("getBoxPlotChart() --- with split");
+			boxPlotSeries = getBoxPlotSeries(repo, entityName, attributeName, queryRules, split);
 		}
 		
-		return new BoxPlotChart(boxPlotSeries);
+		BoxPlotChart boxPlotChart = new BoxPlotChart(boxPlotSeries);
+		boxPlotChart.setyLabel(repo.getAttribute(attributeName).getLabel());
+		return boxPlotChart;
 	}
 	
 	@Override
 	public BoxPlotSerie getBoxPlotSerie(
+			Repository<? extends Entity> repo,
 			String entityName,
 			String attributeName,
-			List<QueryRule> queryRules
-			){
+			List<QueryRule> queryRules)
+	{
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
-		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
+		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		List<Double> list = new ArrayList<Double>(); 
 		for (Entity entity : iterable)
 		{
 			list.add(entity.getDouble(attributeName));
 		}
 		
-		Double[] data = BoxPlotCalcUtil.calcPlotBoxValues(list);		
+		Double[] data = BoxPlotCalcUtil.calcPlotBoxValues(list);
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
+		boxPlotSerie.setName(repo.getAttribute(attributeName).getLabel());
 		boxPlotSerie.getData().add(data);
 		return boxPlotSerie;
 	}
 	
 	@Override
-	public List<BoxPlotSerie> getBoxPlotSeries(String entityName,
+	public List<BoxPlotSerie> getBoxPlotSeries(
+			Repository<? extends Entity> repo,
+			String entityName,
 			String attributeName,
 			List<QueryRule> queryRules,
 			String split)
 	{
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
-		Iterable<? extends Entity> iterable = getIterable(entityName, queryRules, sort);
-		
+		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
 		for (Entity entity : iterable)
 		{
@@ -208,9 +214,12 @@ public class ChartDataServiceImpl implements ChartDataService
 		
 	}
 	
-	private Iterable<? extends Entity> getIterable(String entityName, List<QueryRule> queryRules, Sort sort){
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
-
+	private Iterable<? extends Entity> getIterable(
+			String entityName,
+			Repository<? extends Entity> repo, 
+			List<QueryRule> queryRules, 
+			Sort sort)
+	{
 		if (!(repo instanceof Queryable))
 		{
 			throw new MolgenisChartException("entity: " + entityName + " is not queryable and is not supported");
