@@ -2,20 +2,20 @@ package org.molgenis.charts;
 
 import java.util.List;
 
-import org.molgenis.charts.AbstractChart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.springframework.ui.Model;
 
 public abstract class AbstractChartVisualizationService implements ChartVisualizationService
 {
-	private final List<ChartType> chartTypes;
+	private final List<MolgenisChartType> chartTypes;
 
-	public AbstractChartVisualizationService(List<ChartType> chartTypes)
+	public AbstractChartVisualizationService(List<MolgenisChartType> chartTypes)
 	{
 		this.chartTypes = chartTypes;
 	}
 
 	@Override
-	public List<ChartType> getCapabilities()
+	public List<MolgenisChartType> getCapabilities()
 	{
 		return this.chartTypes;
 	}

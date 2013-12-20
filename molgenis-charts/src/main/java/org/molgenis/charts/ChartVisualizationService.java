@@ -2,7 +2,7 @@ package org.molgenis.charts;
 
 import java.util.List;
 
-import org.molgenis.charts.AbstractChart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.springframework.ui.Model;
 
 /**
@@ -17,7 +17,7 @@ public interface ChartVisualizationService
 	 * 
 	 * @return
 	 */
-	List<ChartType> getCapabilities();
+	List<MolgenisChartType> getCapabilities();
 
 	/**
 	 * Renders the chart

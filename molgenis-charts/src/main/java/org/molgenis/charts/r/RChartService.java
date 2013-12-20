@@ -15,7 +15,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart;
-import org.molgenis.charts.AbstractChart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
 import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
@@ -42,7 +42,7 @@ public class RChartService extends AbstractChartVisualizationService
 	@Autowired
 	public RChartService(FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig, RScriptExecutor rScriptExecutor)
 	{
-		super(Arrays.asList(ChartType.HEAT_MAP));
+		super(Arrays.asList(MolgenisChartType.HEAT_MAP));
 
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
 		if (freeMarkerConfig == null) throw new IllegalArgumentException("FreeMarkerConfig is null");
