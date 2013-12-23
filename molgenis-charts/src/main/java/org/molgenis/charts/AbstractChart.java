@@ -5,7 +5,7 @@ package org.molgenis.charts;
  */
 public abstract class AbstractChart
 {
-	public enum ChartType
+	public enum MolgenisChartType
 	{
 		LINE_CHART, SCATTER_CHART, BOXPLOT_CHART, HEAT_MAP
 	}
@@ -13,7 +13,7 @@ public abstract class AbstractChart
 	public static final int DEFAULT_WITH = 800;
 	public static final int DEFAULT_HEIGHT = 450;
 
-	private final ChartType type;
+	private MolgenisChartType type;
 	private int width = DEFAULT_WITH;
 	private int height = DEFAULT_HEIGHT;
 
@@ -21,10 +21,7 @@ public abstract class AbstractChart
 	private String xLabel = "";
 	private String yLabel = "";
 	
-	protected AbstractChart(ChartType type)
-	{
-		this.type = type;
-	}
+	protected AbstractChart(){}
 	
 	public String getTitle()
 	{
@@ -52,10 +49,16 @@ public abstract class AbstractChart
 		this.yLabel = yLabel;
 	}
 
-	public ChartType getType()
+	public MolgenisChartType getType()
 	{
 		return type;
 	}
+	
+	public void setType(MolgenisChartType type)
+	{
+		this.type = type;
+	}
+
 
 	public int getWidth()
 	{

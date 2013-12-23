@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import org.molgenis.charts.AbstractChart;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.support.QueryImpl;
 
 public abstract class ChartRequest
 {
@@ -13,11 +14,16 @@ public abstract class ChartRequest
 	private String entity;
 	
 	private String title;
+	private String type;
 	private Integer width = AbstractChart.DEFAULT_WITH;
 	private Integer height = AbstractChart.DEFAULT_HEIGHT;
 
 	// The query rules to select the rows
 	private List<QueryRule> queryRules;
+	
+	// The query that is used  to select the rows
+	private QueryImpl query;
+	
 	private String xLabel;
 	private String yLabel;
 
@@ -122,4 +128,36 @@ public abstract class ChartRequest
 		this.queryRules = queryRules;
 	}
 
+	/**
+	 * @return the query
+	 */
+	public QueryImpl getQuery()
+	{
+		return query;
+	}
+
+	/**
+	 * @param query
+	 *            the query to set
+	 */
+	public void setQuery(QueryImpl query)
+	{
+		this.query = query;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType()
+	{
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(String type)
+	{
+		this.type = type;
+	}
 }

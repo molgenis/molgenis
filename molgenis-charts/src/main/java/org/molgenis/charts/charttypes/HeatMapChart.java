@@ -8,7 +8,7 @@ public class HeatMapChart extends DataMatrixChart
 	
 	public HeatMapChart(DataMatrix data)
 	{
-		super(ChartType.HEAT_MAP, data);
+		super(MolgenisChartType.HEAT_MAP, data);
 	}
 
 	public HeatMapScale getScale() {
