@@ -71,7 +71,7 @@ public class ChartController
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderXYDataChart(@RequestBody XYDataChartRequest request, Model model)
+	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{		
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(
 				request.getEntity(),
@@ -94,13 +94,14 @@ public class ChartController
 	
 	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderPlotBoxChart(@RequestBody BoxPlotChartRequest request, Model model)
+	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(
 				request.getEntity(), 
 				request.getObservableFeature(), 
 				request.getQuery().getRules(), 
-				request.getSplit());
+				request.getSplit(),
+				request.getMultiplyIQR());
 		
 		chart.setHeight(request.getHeight());
 		chart.setWidth(request.getWidth());
@@ -156,23 +157,24 @@ public class ChartController
 	 * @throws FactoryConfigurationError 
 	 * @throws XMLStreamException 
 	 */
-	@RequestMapping("/heatmap")
-	public String renderHeatMap(@Valid
-	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
-		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
-				request.getQueryRules());
-
-		HeatMapChart chart = new HeatMapChart(matrix);
-		chart.setTitle(request.getTitle());
-		chart.setWidth(request.getWidth());
-		chart.setHeight(request.getHeight());
-		chart.setxLabel(request.getxLabel());
-		chart.setyLabel(request.getyLabel());
-		chart.setScale(request.getScale());
-		
-		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.HEAT_MAP);
-
-		return (String) service.renderChart(chart, model);
+//		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
+//				request.getQueryRules());
+//
+//		HeatMapChart chart = new HeatMapChart(matrix);
+//		chart.setTitle(request.getTitle());
+//		chart.setWidth(request.getWidth());
+//		chart.setHeight(request.getHeight());
+//		chart.setxLabel(request.getxLabel());
+//		chart.setyLabel(request.getyLabel());
+//		chart.setScale(request.getScale());
+//		
+//		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.HEAT_MAP);
+//
+//		return (String) service.renderChart(chart, model);
+		return "{test: 'test'}";
 	}
 }

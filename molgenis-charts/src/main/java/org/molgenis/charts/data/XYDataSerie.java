@@ -3,42 +3,55 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.charts.MolgenisSerieType;
+import org.molgenis.charts.highcharts.ChartType;
+
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar
  */
-public class XYDataSerie
+public class XYDataSerie extends MolgenisSerie
 {
-	private String name = "";
 	private Class<?> attributeXJavaType;
 	private Class<?> attributeYJavaType;
-	private final List<XYData> data = new ArrayList<XYData>();
-
-	public void addData(XYData point)
+	private List<XYData> data = new ArrayList<XYData>();
+	
+	public XYDataSerie()
 	{
-		data.add(point);
+		this.setType(MolgenisSerieType.SCATTER);
 	}
 
+	/**
+	 * @return the data
+	 */
 	public List<XYData> getData()
 	{
-		return this.data;
+		return data;
 	}
 
-	@Override
-	public String toString()
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(List<XYData> data)
 	{
-		return "XYDataSerie [data=" + data + "]";
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
+		this.data = data;
 	}
 	
+	/**
+	 * @param xYData the xYData point to add
+	 */
+	public void addData(XYData xYData)
+	{
+		this.data.add(xYData);
+	}
+	
+	/**
+	 * @param xYData the xYData point to add
+	 */
+	public void addData(List<XYData> xYData)
+	{
+		this.data.addAll(xYData);
+	}
+
 	/**
 	 * @return the attributeXJavaType
 	 */
@@ -70,6 +83,4 @@ public class XYDataSerie
 	{
 		this.attributeYJavaType = attributeYJavaType;
 	}
-	
-	
 }

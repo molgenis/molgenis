@@ -62,6 +62,17 @@ public class Options
 	{
 		this.series = series;
 	}
+	
+	/**
+	 * @param series
+	 *            the series to add
+	 */
+	public void addSeries(List<Series> series)
+	{
+		for(Series serie: series) {
+			this.series.add(serie);
+		}
+	}
 
 	/**
 	 * @return the xAxis

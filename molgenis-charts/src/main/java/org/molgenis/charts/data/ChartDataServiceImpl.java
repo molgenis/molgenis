@@ -15,6 +15,7 @@ import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.ChartDataService;
 import org.molgenis.charts.MolgenisAxisType;
 import org.molgenis.charts.MolgenisChartException;
+import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
 import org.molgenis.data.DataService;
@@ -138,23 +139,23 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 	
 	@Override
-	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split)
+	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split, Double multiplyIQR)
 	{	
 		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
-		final List<BoxPlotSerie> boxPlotSeries;
-		if(!StringUtils.isNotBlank(split))
-		{
-			logger.info("getBoxPlotChart() --- without split");
-			boxPlotSeries = Arrays.asList(getBoxPlotSerie(repo, entityName, attributeName, queryRules));
-		} 
-		else 
-		{
-			logger.info("getBoxPlotChart() --- with split");
-			boxPlotSeries = getBoxPlotSeries(repo, entityName, attributeName, queryRules, split);
-		}
-		
-		BoxPlotChart boxPlotChart = new BoxPlotChart(boxPlotSeries);
+//		final List<BoxPlotSerie> boxPlotSeries;
+//		if(!StringUtils.isNotBlank(split))
+//		{
+//			logger.info("getBoxPlotChart() --- without split");
+//			boxPlotSeries = Arrays.asList(getBoxPlotSerie(repo, entityName, attributeName, queryRules));
+//		} 
+//		else 
+//		{
+//			logger.info("getBoxPlotChart() --- with split");
+//			boxPlotSeries = getBoxPlotSeries(repo, entityName, attributeName, queryRules, split);
+//		}
+		BoxPlotChart boxPlotChart = new BoxPlotChart();
 		boxPlotChart.setyLabel(repo.getAttribute(attributeName).getLabel());
+		setBoxPlotSeriesWithOutliers(boxPlotChart, repo, entityName, attributeName, queryRules, split, multiplyIQR);
 		return boxPlotChart;
 	}
 	
@@ -212,6 +213,78 @@ public class ChartDataServiceImpl implements ChartDataService
 		
 		return boxPlotSeries;
 		
+	}
+	
+	
+	@Override
+	public void setBoxPlotSeriesWithOutliers(
+			BoxPlotChart boxPlotChart,
+			Repository<? extends Entity> repo,
+			String entityName,
+			String attributeName,
+			List<QueryRule> queryRules,
+			String split,
+			Double multiplyIQR)
+	{
+		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
+		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
+		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
+		for (Entity entity : iterable)
+		{
+			String splitValue = split + "__" + entity.get(split);
+			if(!boxPlotDataListMap.containsKey(splitValue)){
+				boxPlotDataListMap.put(splitValue,  new ArrayList<Double>());
+			}
+			
+			boxPlotDataListMap.get(splitValue).add(entity.getDouble(attributeName));
+		}
+		
+		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
+		boxPlotSerie.setType(MolgenisSerieType.BOXPLOT);
+		boxPlotSerie.setName("Boxplot");
+		
+		XYDataSerie xYDataSerie = new XYDataSerie();
+		xYDataSerie.setType(MolgenisSerieType.SCATTER);
+		xYDataSerie.setName("Outliers");
+		
+		List<String> categories = new ArrayList<String>();
+		
+		int count = 0;
+		for (Entry<String, List<Double>> entry : boxPlotDataListMap.entrySet()){
+			
+			List<Double> list = entry.getValue();
+			categories.add(entry.getKey());
+			Double[] data = BoxPlotCalcUtil.calcPlotBoxValues(entry.getValue());		
+			double iqr = BoxPlotCalcUtil.iqr(data[3], data[1]);
+			logger.info("iqr: " + iqr);
+			double scale = multiplyIQR;
+			double step = iqr * scale;
+			logger.info("step: " + step);
+			double highBorder = step + data[3];
+			logger.info("highBorder: " + highBorder);
+			double lowBorder =  data[1] - step;
+			logger.info("lowBorder: " + lowBorder);
+			
+			List<XYData> outlierList = new ArrayList<XYData>();
+			List<Double> normalList = new ArrayList<Double>();
+			for(Double o: list){
+				if(o < lowBorder || o > highBorder){
+					logger.info(entry.getKey());
+					outlierList.add(new XYData(count, o));
+				} else {
+					normalList.add(o);
+				}
+			}
+			
+			xYDataSerie.addData(outlierList);
+			data = BoxPlotCalcUtil.calcPlotBoxValues(normalList);
+			boxPlotSerie.addData(data);
+			count++;
+		}
+		
+		boxPlotChart.addBoxPlotSerie(boxPlotSerie);
+		boxPlotChart.addXYDataSerie(xYDataSerie);
+		boxPlotChart.setCategories(categories);
 	}
 	
 	private Iterable<? extends Entity> getIterable(

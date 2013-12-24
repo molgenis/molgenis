@@ -17,8 +17,6 @@ public interface ChartDataService
 	XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules);
 	
-	BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split);
-	
 	DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules);
 
@@ -35,4 +33,10 @@ public interface ChartDataService
 	XYDataSerie getXYDataSerie(Repository<? extends Entity> repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, Class<?> attributeXJavaType, Class<?> attributeYJavaType,
 			List<QueryRule> queryRules);
+
+	void setBoxPlotSeriesWithOutliers(BoxPlotChart boxPlotChart, Repository<? extends Entity> repo, String entityName,
+			String attributeName, List<QueryRule> queryRules, String split, Double multiplyIQR);
+
+	BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split,
+			Double multiplyIQR);
 }

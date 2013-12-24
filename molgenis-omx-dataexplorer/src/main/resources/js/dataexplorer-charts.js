@@ -2,7 +2,6 @@
 	"use strict";
 	molgenis.charts = molgenis.charts || {};
 	var ns = molgenis.charts.dataexplorer = molgenis.charts.dataexplorer || {};
-	var selectedFeaturesSelectOptions;
 	
 	ns.createScatterPlotChartRequestPayLoad = function (
 			entity,
@@ -48,6 +47,27 @@
 			"type": "BOXPLOT_CHART",
 			"observableFeature": featureIdentifier,
 			"split": splitIdentifier,
+			"query":query,
+			"multiplyIQR" : 0.1
+		};
+	};
+	
+	ns.createHeatMapRequestPayLoad = function (
+			entity,
+			x, 
+			xAxisLabel,
+			width,
+			height,
+			title,
+			query) {
+		
+		return {
+			"entity": entity,
+			"width": width,
+			"height": height,
+			"title": title,
+			"y": x,
+			"yLabel":xAxisLabel,
 			"query":query
 		};
 	};
@@ -181,9 +201,46 @@
 		
 	};
 	
+	//Heatmap
+	ns.makeHeatMapChartRequest = function (entity, restApi) {
+		var xAxisFeature = ns.getFeatureByRestApi($('#heatmap-select-xaxis-feature').val(), restApi);
+		var width = 1024;
+		var height = 576; 
+		var title = $('#heatmap-title').val();
+		var searchRequest = molgenis.createSearchRequest();
+		var query = searchRequest.query;
+		var x, xAxisLabel;
+		
+		if(xAxisFeature) {
+			x = xAxisFeature.identifier;
+			xAxisLabel = xAxisFeature.name;
+		} 
+		
+		$.ajax({
+			type : "POST",
+			url : "/charts/heatmap",
+			data : JSON.stringify(molgenis.charts.dataexplorer.createHeatMapRequestPayLoad(
+					entity,
+					x, 
+					xAxisLabel,
+					width,
+					height,
+					title,
+					query
+			)),
+			contentType : "application/json; charset=utf-8",
+			cache: false,
+			async: true,
+			success : function(response){
+				alert(response);
+			}
+		});
+		
+	};
+	
 	$(function() {
 		$('#chart-designer-modal-scatterplot-button').click(function () {
-			selectedFeaturesSelectOptions = null;
+			var selectedFeaturesSelectOptions = null;
 			$('#scatterplot-select-xaxis-feature').empty();
 			$('#scatterplot-select-yaxis-feature').empty();
 			$('#scatterplot-select-split-feature').empty();
@@ -194,12 +251,19 @@
 		});
 		
 		$('#chart-designer-modal-boxplot-button').click(function () {
-			selectedFeaturesSelectOptions = null;
+			var selectedFeaturesSelectOptions = null;
 			$('#boxplot-select-feature').empty();
 			$('#boxplot-select-split-feature').empty();
 			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
 			$('#boxplot-select-feature').append(selectedFeaturesSelectOptions);
 			$('#boxplot-select-split-feature').append(selectedFeaturesSelectOptions);
+		});
+		
+		$('#chart-designer-modal-heatmap-button').click(function () {
+			var selectedFeaturesSelectOptions = null;
+			$('#heatmap-select-xaxis-feature').empty();
+			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
+			$('#heatmap-select-xaxis-feature').append(selectedFeaturesSelectOptions);
 		});
 	});
 	

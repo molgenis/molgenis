@@ -20,6 +20,18 @@ public class BoxPlotCalcUtil
 		return plotBoxValues;
 	}
 	
+	/**
+	 * IQR inner quartile range
+	 * 
+	 * @param thirdQuantile
+	 * @param firstQuantile
+	 * @return
+	 */
+	public final static double iqr(double thirdQuantile, double firstQuantile)
+	{
+		return thirdQuantile - firstQuantile;
+	}
+	
 	public final static Double minimum(List<Double> sortedDataAscendingOrder){
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, (double) 0);
 	}

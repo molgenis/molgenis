@@ -8,6 +8,23 @@ public class BoxPlotChartRequest extends ChartRequest
 	private String observableFeature;
 
 	private String split;
+	private Double multiplyIQR;
+
+	/**
+	 * @return the multiplyIQR
+	 */
+	public Double getMultiplyIQR()
+	{
+		return multiplyIQR;
+	}
+
+	/**
+	 * @param multiplyIQR the multiplyIQR to set
+	 */
+	public void setMultiplyIQR(Double multiplyIQR)
+	{
+		this.multiplyIQR = multiplyIQR;
+	}
 
 	/**
 	 * @return the observableFeature

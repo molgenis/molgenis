@@ -3,9 +3,8 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoxPlotSerie
+public class BoxPlotSerie extends MolgenisSerie
 {
-	private String name = "";
 	private List<Double[]> data = new ArrayList<Double[]>();
 	
 	/**
@@ -24,21 +23,13 @@ public class BoxPlotSerie
 	{
 		this.data = data;
 	}
-
+	
 	/**
-	 * @return the name
+	 * @param data
+	 *            the data to add
 	 */
-	public String getName()
+	public void addData(Double[] data)
 	{
-		return name;
-	}
-
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name)
-	{
-		this.name = name;
+		this.data.add(data);
 	}
 }
