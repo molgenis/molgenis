@@ -1,5 +1,6 @@
 package org.molgenis.omx.protocol;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,20 +10,22 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.I18nTools;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
 
-public class ProtocolTable extends AbstractFilterableTupleTable
+public class ProtocolTreeRepository extends AbstractRepository<Entity> implements Countable
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
@@ -58,48 +61,83 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public ProtocolTable(Protocol protocol, DataService dataService) throws TableException
+	public ProtocolTreeRepository(Protocol protocol, DataService dataService)
 	{
-		if (protocol == null) throw new TableException("protocol cannot be null");
+		if (protocol == null) throw new IllegalArgumentException("protocol cannot be null");
 		this.protocol = protocol;
-		if (dataService == null) throw new TableException("dataService cannot be null");
+		if (dataService == null) throw new IllegalArgumentException("dataService cannot be null");
 		this.dataService = dataService;
-		setFirstColumnFixed(false);
 	}
 
 	@Override
-	public List<Field> getAllColumns() throws TableException
+	public long count()
 	{
-		List<Field> columns = new ArrayList<Field>();
-		columns.add(new Field(FIELD_TYPE));
-		columns.add(new Field(FIELD_ID));
-		columns.add(new Field(FIELD_IDENTIFIER));
-		columns.add(new Field(FIELD_NAME));
-		columns.add(new Field(FIELD_DESCRIPTION));
-		columns.add(new Field(FIELD_DESCRIPTION_STOPWORDS));
-		columns.add(new Field(FIELD_BOOST_ONTOLOGYTERM));
-		columns.add(new Field(FIELD_PATH));
-		columns.add(new Field(FIELD_CATEGORY));
-		return columns;
+		AtomicInteger count = new AtomicInteger(0);
+		countEntities(protocol, count);
+
+		return count.get();
 	}
 
 	@Override
-	public Iterator<Tuple> iterator()
+	public Class<? extends Entity> getEntityClass()
 	{
-		List<Tuple> tuples = new ArrayList<Tuple>();
-		try
-		{
-			// TODO discuss whether we want to index the input (=root) protocol
-			createTuplesRec(protocol.getId().toString(), protocol, tuples);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		return tuples.iterator();
+		return MapEntity.class;
 	}
 
-	private void createTuplesRec(String protocolPath, Protocol protocol, List<Tuple> tuples) throws DatabaseException
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		createEntities(protocol.getId().toString(), protocol, entities);
+
+		return entities.iterator();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		// Nothing
+	}
+
+	@Override
+	protected EntityMetaData getEntityMetaData()
+	{
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("protocolTree-" + protocol.getId());
+
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_IDENTIFIER, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_NAME, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_DESCRIPTION, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_DESCRIPTION_STOPWORDS,
+				FieldTypeEnum.STRING));
+		entityMetaData
+				.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_BOOST_ONTOLOGYTERM, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_PATH, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_CATEGORY, FieldTypeEnum.STRING));
+
+		return entityMetaData;
+	}
+
+	private void countEntities(Protocol protocol, AtomicInteger count)
+	{
+		List<Protocol> subProtocols = protocol.getSubprotocols();
+		if (subProtocols != null && !subProtocols.isEmpty())
+		{
+			for (Protocol p : subProtocols)
+			{
+				count.incrementAndGet();
+				countEntities(p, count);
+			}
+		}
+		List<ObservableFeature> features = protocol.getFeatures();
+		if (features != null && !features.isEmpty())
+		{
+			count.addAndGet(features.size());
+		}
+	}
+
+	private void createEntities(String protocolPath, Protocol protocol, List<Entity> entities)
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
 		if (subProtocols != null && !subProtocols.isEmpty())
@@ -113,17 +151,17 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				String description = p.getDescription() == null ? StringUtils.EMPTY : I18nTools.get(p.getDescription())
 						.replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase();
 
-				KeyValueTuple tuple = new KeyValueTuple();
-				tuple.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
-				tuple.set(FIELD_ID, p.getId());
-				tuple.set(FIELD_IDENTIFIER, p.getIdentifier());
-				tuple.set(FIELD_NAME, name);
-				tuple.set(FIELD_DESCRIPTION, description);
-				tuple.set(FIELD_PATH, path);
-				tuples.add(tuple);
+				Entity entity = new MapEntity();
+				entity.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
+				entity.set(FIELD_ID, p.getId());
+				entity.set(FIELD_IDENTIFIER, p.getIdentifier());
+				entity.set(FIELD_NAME, name);
+				entity.set(FIELD_DESCRIPTION, description);
+				entity.set(FIELD_PATH, path);
+				entities.add(entity);
 
 				// recurse
-				createTuplesRec(pathBuilder.toString(), p, tuples);
+				createEntities(pathBuilder.toString(), p, entities);
 			}
 		}
 		List<ObservableFeature> features = protocol.getFeatures();
@@ -150,56 +188,20 @@ public class ProtocolTable extends AbstractFilterableTupleTable
 				Set<String> descriptionStopWords = new HashSet<String>(Arrays.asList(description.split(" +")));
 				descriptionStopWords.removeAll(STOPWORDSLIST);
 
-				KeyValueTuple tuple = new KeyValueTuple();
-				tuple.set(FIELD_TYPE, ObservableFeature.class.getSimpleName().toLowerCase());
-				tuple.set(FIELD_ID, feature.getId());
-				tuple.set(FIELD_IDENTIFIER, feature.getIdentifier());
-				tuple.set(FIELD_NAME, name);
-				tuple.set(FIELD_DESCRIPTION, description);
-				tuple.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
-				tuple.set(FIELD_BOOST_ONTOLOGYTERM, StringUtils.EMPTY);
-				tuple.set(FIELD_PATH, path);
-				tuple.set(DATA_TYPE, feature.getDataType());
-				tuple.set(FIELD_CATEGORY, categoryValue.toString().toLowerCase());
-				tuples.add(tuple);
+				Entity entity = new MapEntity();
+				entity.set(FIELD_TYPE, ObservableFeature.class.getSimpleName().toLowerCase());
+				entity.set(FIELD_ID, feature.getId());
+				entity.set(FIELD_IDENTIFIER, feature.getIdentifier());
+				entity.set(FIELD_NAME, name);
+				entity.set(FIELD_DESCRIPTION, description);
+				entity.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
+				entity.set(FIELD_BOOST_ONTOLOGYTERM, StringUtils.EMPTY);
+				entity.set(FIELD_PATH, path);
+				entity.set(DATA_TYPE, feature.getDataType());
+				entity.set(FIELD_CATEGORY, categoryValue.toString().toLowerCase());
+				entities.add(entity);
 			}
 
-		}
-	}
-
-	/**
-	 * Count the number of protocols and features of this protocol (excluding this protocol itself)
-	 */
-	@Override
-	public int getCount() throws TableException
-	{
-		AtomicInteger count = new AtomicInteger(0);
-		try
-		{
-			countTuplesRec(protocol, count);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		return count.get();
-	}
-
-	private void countTuplesRec(Protocol protocol, AtomicInteger count) throws DatabaseException
-	{
-		List<Protocol> subProtocols = protocol.getSubprotocols();
-		if (subProtocols != null && !subProtocols.isEmpty())
-		{
-			for (Protocol p : subProtocols)
-			{
-				count.incrementAndGet();
-				countTuplesRec(p, count);
-			}
-		}
-		List<ObservableFeature> features = protocol.getFeatures();
-		if (features != null && !features.isEmpty())
-		{
-			count.addAndGet(features.size());
 		}
 	}
 }

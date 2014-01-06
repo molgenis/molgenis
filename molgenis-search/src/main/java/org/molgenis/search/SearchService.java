@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.framework.tupletable.TupleTable;
 
 /**
@@ -23,12 +24,11 @@ public interface SearchService
 	boolean documentTypeExists(String documentType);
 
 	/**
-	 * Insert or update entities in the index of a documentType
+	 * Indexes all entities in a repository
 	 * 
-	 * @param documentType
-	 * @param entities
+	 * @param repository
 	 */
-	void updateIndex(String documentType, Iterable<? extends Entity> entities);
+	void indexRepository(Repository<? extends Entity> repository);
 
 	/**
 	 * delete documents by Ids
@@ -54,6 +54,7 @@ public interface SearchService
 	 *            , teh documentType name
 	 * @param tupleTable
 	 */
+	@Deprecated
 	void indexTupleTable(String documentType, TupleTable tupleTable);
 
 	/**
@@ -83,5 +84,6 @@ public interface SearchService
 	 */
 	void deleteDocumentsByType(String documentType);
 
+	@Deprecated
 	void updateIndexTupleTable(String documentType, TupleTable tupleTable);
 }

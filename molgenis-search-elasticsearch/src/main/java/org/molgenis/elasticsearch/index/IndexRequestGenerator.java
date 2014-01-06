@@ -15,11 +15,15 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.base.Joiner;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.model.elements.Field;
 import org.molgenis.util.Cell;
+import org.molgenis.util.RepositoryUtils;
 import org.molgenis.util.tuple.Tuple;
 
 /**
@@ -50,39 +54,19 @@ public class IndexRequestGenerator
 		this.indexName = indexName;
 	}
 
-	public BulkRequestBuilder buildIndexRequest(String documentName, Iterable<? extends Entity> entities)
+	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository<? extends Entity> repository)
 	{
-		BulkRequestBuilder bulkRequest = client.prepareBulk();
-
-		int count = 0;
-		for (Entity entity : entities)
+		return new Iterable<BulkRequestBuilder>()
 		{
-			Object id = entity.getIdValue();
-			Map<String, Object> doc = new HashMap<String, Object>();
-			for (String field : entity.getAttributeNames())
+			@Override
+			public Iterator<BulkRequestBuilder> iterator()
 			{
-				doc.put(field, entity.get(field));
-
+				return indexRequestIterator(repository);
 			}
-
-			IndexRequestBuilder request;
-			if (id == null)
-			{
-				request = client.prepareIndex(indexName, documentName);
-			}
-			else
-			{
-				request = client.prepareIndex(indexName, documentName, id + "");
-			}
-
-			request.setSource(doc);
-			bulkRequest.add(request);
-			LOG.info("Added [" + (++count) + "] documents");
-		}
-
-		return bulkRequest;
+		};
 	}
 
+	@Deprecated
 	public Iterable<BulkRequestBuilder> buildIndexRequest(final String documentName, final TupleTable tupleTable)
 	{
 		return new Iterable<BulkRequestBuilder>()
@@ -102,6 +86,122 @@ public class IndexRequestGenerator
 		};
 	}
 
+	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository<? extends Entity> repository)
+	{
+		final Set<String> xrefAndMrefColumns = new HashSet<String>();
+		for (AttributeMetaData attr : repository.getAttributes())
+		{
+			FieldTypeEnum fieldType = attr.getDataType().getEnumType();
+			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
+			if (isXrefOrMref) xrefAndMrefColumns.add(attr.getName());
+		}
+
+		return new Iterator<BulkRequestBuilder>()
+		{
+			private final long rows = RepositoryUtils.count(repository);
+			private static final int docsPerBulk = 1000;
+			private final Iterator<? extends Entity> it = repository.iterator();
+			private int row = 0;
+
+			@Override
+			public boolean hasNext()
+			{
+				return it.hasNext();
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public BulkRequestBuilder next()
+			{
+				BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+				final long maxRow = Math.min(row + docsPerBulk, rows);
+				for (; row < maxRow; ++row)
+				{
+					Entity entity = it.next();
+					Map<String, Object> doc = new HashMap<String, Object>();
+
+					for (String attrName : entity.getAttributeNames())
+					{
+						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on
+						// list fields
+						Object key = null;
+						Object value = entity.get(attrName);
+						if (value instanceof Cell)
+						{
+							Cell<?> cell = (Cell<?>) value;
+							key = cell.getKey();
+							value = cell.getValue();
+						}
+						if (value instanceof Collection)
+						{
+							Collection<?> values = (Collection<?>) value;
+							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
+							{
+								List<String> mrefKeys = null;
+								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
+								{
+									String cellKey = it.next().getKey();
+									if (cellKey != null)
+									{
+										if (mrefKeys == null) mrefKeys = new ArrayList<String>();
+										mrefKeys.add(cellKey);
+									}
+								}
+								if (mrefKeys != null) key = mrefKeys;
+							}
+							value = Joiner.on(" , ").join((Collection<?>) value);
+						}
+
+						if (key != null) doc.put("key-" + attrName, key);
+						doc.put(attrName, value);
+					}
+
+					Set<String> xrefAndMrefValues = new HashSet<String>();
+					for (String attrName : entity.getAttributeNames())
+					{
+						if (xrefAndMrefColumns.contains(attrName))
+						{
+							Object value = entity.get(attrName);
+							if (value instanceof Cell)
+							{
+								Cell<?> cell = (Cell<?>) value;
+								if (cell.getValue() instanceof Collection<?>)
+								{
+									for (Cell<?> mrefCell : (Collection<Cell<?>>) cell.getValue())
+									{
+										xrefAndMrefValues.add(mrefCell.getKey());
+									}
+								}
+								else
+								{
+									xrefAndMrefValues.add(cell.getKey());
+								}
+							}
+						}
+					}
+					doc.put("_xrefvalue", xrefAndMrefValues);
+					IndexRequestBuilder request = client.prepareIndex(indexName,
+							MapperTypeSanitizer.sanitizeMapperType(repository.getName()));
+
+					request.setSource(doc);
+					bulkRequest.add(request);
+					if ((row + 1) % 100 == 0) LOG.info("Added [" + (row + 1) + "] documents");
+				}
+				LOG.info("Added [" + row + "] documents");
+
+				return bulkRequest;
+			}
+
+			@Override
+			public void remove()
+			{
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+
+	@Deprecated
 	private Iterator<BulkRequestBuilder> indexRequestIterator(final String documentName, final TupleTable tupleTable)
 			throws TableException
 	{

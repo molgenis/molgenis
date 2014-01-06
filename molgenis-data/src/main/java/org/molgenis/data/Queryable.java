@@ -3,13 +3,8 @@ package org.molgenis.data;
 /**
  * Source of entities that can be queried
  */
-public interface Queryable<E extends Entity>
+public interface Queryable<E extends Entity> extends Countable
 {
-	/**
-	 * return number of entities
-	 */
-	long count();
-
 	/**
 	 * return number of entities matched by query
 	 **/

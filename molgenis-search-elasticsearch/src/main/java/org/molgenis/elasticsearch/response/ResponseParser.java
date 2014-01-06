@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.search.SearchHit;
@@ -72,23 +71,10 @@ public class ResponseParser
 				else columnValueMap.put("score", hit.getScore());
 			}
 
-			searchHits.add(new Hit(hit.id(), hit.type(), createHref(hit.id(), hit.type()), columnValueMap));
+			searchHits.add(new Hit(hit.id(), hit.type(), columnValueMap));
 		}
 
 		return new SearchResult(totalCount, searchHits);
 	}
 
-	private String createHref(String id, String type)
-	{
-		// TODO how do we now if it is an entity, so has a rest url?
-		// for now assume numeric id is entity
-
-		if (StringUtils.isNumeric(id))
-		{
-
-			return apiBaseUrl + "/" + type + "/" + id;
-		}
-
-		return null;
-	}
 }
