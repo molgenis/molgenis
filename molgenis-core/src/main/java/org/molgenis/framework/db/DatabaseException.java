@@ -6,6 +6,7 @@ package org.molgenis.framework.db;
  * @author ?
  * 
  */
+@Deprecated
 public class DatabaseException extends Exception
 {
 	String message = "";

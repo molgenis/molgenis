@@ -34,9 +34,9 @@ public class SampleConverter
 {
 
 	private final Set<String> listOfDoubleSamples = new HashSet<String>();
-	private static String OUTPUTDIR = null;
-	private static String PROJECT = null;
-	private static String IDENTIFIER = "id_sample";
+	private String OUTPUTDIR = null;
+	private String PROJECT = null;
+	private String IDENTIFIER = "id_sample";
 	private List<String> featureColNames = null;
 	MakeEntityNameAndIdentifier mkObsProtocol = null;
 	private final HashMap<String, HashSet<String>> hashMapCategories = new HashMap<String, HashSet<String>>();

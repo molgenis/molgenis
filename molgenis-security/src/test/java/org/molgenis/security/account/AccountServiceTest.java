@@ -150,7 +150,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	{
 		MolgenisUser molgenisUser = new MolgenisUser();
 		molgenisUser.setEmail("user@molgenis.org");
-		accountService.createUser(molgenisUser, new URI("http://molgenis.org/activate"));
+		accountService.createUser(molgenisUser, "http://molgenis.org/activate");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
 		verify(dataService).add(eq(MolgenisUser.ENTITY_NAME), argument.capture());
 		assertFalse(argument.getValue().getActive());

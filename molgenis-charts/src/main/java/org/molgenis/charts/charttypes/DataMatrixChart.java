@@ -7,9 +7,9 @@ public class DataMatrixChart extends AbstractChart
 {
 	private final DataMatrix data;
 
-	protected DataMatrixChart(ChartType type, DataMatrix data)
+	protected DataMatrixChart(MolgenisChartType type, DataMatrix data)
 	{
-		super(type);
+		super.setType(type);
 		if (data == null) throw new IllegalArgumentException("data is null");
 		this.data = data;
 	}

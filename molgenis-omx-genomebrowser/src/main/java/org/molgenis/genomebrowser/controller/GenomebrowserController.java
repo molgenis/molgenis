@@ -38,6 +38,7 @@ public class GenomebrowserController extends MolgenisPluginController
 	public static final String BROWSERLINKS = "browserLinks";
 	public static final String SEARCHENDPOINT = "searchEndpoint";
 	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
+    public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	private final MolgenisSettings molgenisSettings;
 	public MutationService mutationService;
@@ -61,6 +62,7 @@ public class GenomebrowserController extends MolgenisPluginController
 		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
 		model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
 		model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
+        model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
 
 		return "view-genomebrowser";
 	}
@@ -77,7 +79,15 @@ public class GenomebrowserController extends MolgenisPluginController
 			mutationId = "";
 		}
 		List<Map<String, String>> result = mutationService.getPatientMutationData(segmentId, mutationId);
-		System.out.println(result);
 		return result;
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/mutationdata", produces =
+		{ MediaType.APPLICATION_JSON_VALUE })
+		public @ResponseBody
+		List<Map<String, String>> MutationData(HttpServletResponse response) throws ParseException, IOException
+		{
+			List<Map<String, String>> result = mutationService.getMutationData();
+			return result;
+		}
 }

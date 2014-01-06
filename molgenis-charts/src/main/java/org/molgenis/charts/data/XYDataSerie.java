@@ -1,19 +1,17 @@
 package org.molgenis.charts.data;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import org.molgenis.charts.AbstractChart.ChartType;
 
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar
  */
 public class XYDataSerie
 {
-	private final List<XYData> data = new ArrayList<XYData>();
 	private String name = "";
-	private ChartType type;
+	private Class<?> attributeXJavaType;
+	private Class<?> attributeYJavaType;
+	private final List<XYData> data = new ArrayList<XYData>();
 
 	public void addData(XYData point)
 	{
@@ -42,18 +40,36 @@ public class XYDataSerie
 	}
 	
 	/**
-	 * @return the type
+	 * @return the attributeXJavaType
 	 */
-	public ChartType getType()
+	public Class<?> getAttributeXJavaType()
 	{
-		return type;
+		return attributeXJavaType;
 	}
 
 	/**
-	 * @param type the type to set
+	 * @param attributeXJavaType the attributeXJavaType to set
 	 */
-	public void setType(ChartType type)
+	public void setAttributeXJavaType(Class<?> attributeXJavaType)
 	{
-		this.type = type;
+		this.attributeXJavaType = attributeXJavaType;
 	}
+
+	/**
+	 * @return the attributeYJavaType
+	 */
+	public Class<?> getAttributeYJavaType()
+	{
+		return attributeYJavaType;
+	}
+
+	/**
+	 * @param attributeYJavaType the attributeYJavaType to set
+	 */
+	public void setAttributeYJavaType(Class<?> attributeYJavaType)
+	{
+		this.attributeYJavaType = attributeYJavaType;
+	}
+	
+	
 }

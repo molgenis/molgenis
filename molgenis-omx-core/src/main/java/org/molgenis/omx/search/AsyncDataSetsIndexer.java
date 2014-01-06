@@ -28,12 +28,10 @@ import org.springframework.scheduling.annotation.Async;
 public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 {
 	private static final Logger LOG = Logger.getLogger(AsyncDataSetsIndexer.class);
-
+	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 	@Autowired
 	private DataService dataService;
-
 	private SearchService searchService;
-	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
 	@Autowired
 	public void setSearchService(SearchService searchService)
