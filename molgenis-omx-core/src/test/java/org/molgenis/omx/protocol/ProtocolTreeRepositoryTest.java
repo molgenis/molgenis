@@ -77,7 +77,7 @@ public class ProtocolTreeRepositoryTest
 	@Test
 	public void count()
 	{
-		assertEquals(protocolTable.count(), 5);
+		assertEquals(protocolTable.count(), 6);
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class ProtocolTreeRepositoryTest
 		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
 		when(protocol.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTreeRepository(protocol, dataService).count(), 1); // excluding root protocol
+		assertEquals(new ProtocolTreeRepository(protocol, dataService).count(), 2);
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class ProtocolTreeRepositoryTest
 		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
 		when(protocol0.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTreeRepository(protocol0, dataService).count(), 2); // excluding root protocol
+		assertEquals(new ProtocolTreeRepository(protocol0, dataService).count(), 3);
 	}
 
 	@Test

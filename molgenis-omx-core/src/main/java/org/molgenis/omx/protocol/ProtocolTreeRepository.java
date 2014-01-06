@@ -72,7 +72,7 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 	@Override
 	public long count()
 	{
-		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger count = new AtomicInteger(1);// add one for root protocol
 		countEntities(protocol, count);
 
 		return count.get();
