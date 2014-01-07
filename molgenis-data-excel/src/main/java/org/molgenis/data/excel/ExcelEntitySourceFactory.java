@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.EntitySource;
+import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractFileBasedEntitySourceFactory;
-import org.molgenis.io.processor.CellProcessor;
-import org.molgenis.io.processor.LowerCaseProcessor;
-import org.molgenis.io.processor.TrimProcessor;
 import org.springframework.stereotype.Component;
 
 /**
