@@ -26,7 +26,7 @@ import com.google.common.collect.Iterables;
 public class ProtocolTreeRepositoryTest
 {
 	private DataService dataService;
-	private ProtocolTreeRepository protocolTable;
+	private ProtocolTreeRepository protocolTreeRepository;
 
 	@BeforeMethod
 	public void setUp()
@@ -57,25 +57,25 @@ public class ProtocolTreeRepositoryTest
 		when(dataService.findAll(Category.ENTITY_NAME, new QueryImpl().eq(anyString(), any(ObservableFeature.class))))
 				.thenReturn(Collections.<Entity> emptyList());
 
-		protocolTable = new ProtocolTreeRepository(protocol, dataService);
+		protocolTreeRepository = new ProtocolTreeRepository(protocol, dataService, "test");
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void ProtocolTable()
+	public void ProtocolTreeRepository()
 	{
-		new ProtocolTreeRepository(null, null);
+		new ProtocolTreeRepository(null, null, null);
 	}
 
 	@Test
-	public void getAttributes()
+	public void getAllColumns()
 	{
-		assertEquals(Iterables.size(protocolTable.getAttributes()), 9);
+		assertEquals(Iterables.size(protocolTreeRepository.getAttributes()), 9);
 	}
 
 	@Test
 	public void count()
 	{
-		assertEquals(protocolTable.count(), 6);
+		assertEquals(protocolTreeRepository.count(), 6);
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class ProtocolTreeRepositoryTest
 		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
 		when(protocol.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTreeRepository(protocol, dataService).count(), 2);
+		assertEquals(new ProtocolTreeRepository(protocol, dataService, "test").count(), 2);
 	}
 
 	@Test
@@ -110,38 +110,43 @@ public class ProtocolTreeRepositoryTest
 		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
 		when(protocol0.getName()).thenReturn("p0");
 
-		assertEquals(new ProtocolTreeRepository(protocol0, dataService).count(), 3);
+		assertEquals(new ProtocolTreeRepository(protocol0, dataService, "test").count(), 3);
 	}
 
 	@Test
 	public void iterator()
 	{
-		Iterator<Entity> it = protocolTable.iterator();
+		Iterator<Entity> it = protocolTreeRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity tuple0 = it.next();
-		assertEquals(tuple0.get("name"), "p1");
+		assertEquals(tuple0.get("name"), "p0");
 		assertEquals(tuple0.get("type"), Protocol.class.getSimpleName().toLowerCase());
-		assertEquals(tuple0.get("path"), "0.1");
+		assertEquals(tuple0.get("path"), "0");
 		assertTrue(it.hasNext());
 		Entity tuple1 = it.next();
-		assertEquals(tuple1.get("name"), "f10");
-		assertEquals(tuple1.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple1.get("path"), "0.1.F10");
+		assertEquals(tuple1.get("name"), "p1");
+		assertEquals(tuple1.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple1.get("path"), "0.1");
 		assertTrue(it.hasNext());
 		Entity tuple2 = it.next();
-		assertEquals(tuple2.get("name"), "f11");
+		assertEquals(tuple2.get("name"), "f10");
 		assertEquals(tuple2.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple2.get("path"), "0.1.F11");
+		assertEquals(tuple2.get("path"), "0.1.F10");
 		assertTrue(it.hasNext());
 		Entity tuple3 = it.next();
-		assertEquals(tuple3.get("name"), "p2");
-		assertEquals(tuple3.get("type"), Protocol.class.getSimpleName().toLowerCase());
-		assertEquals(tuple3.get("path"), "0.2");
+		assertEquals(tuple3.get("name"), "f11");
+		assertEquals(tuple3.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple3.get("path"), "0.1.F11");
 		assertTrue(it.hasNext());
 		Entity tuple4 = it.next();
-		assertEquals(tuple4.get("name"), "f12");
-		assertEquals(tuple4.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple4.get("path"), "0.2.F12");
+		assertEquals(tuple4.get("name"), "p2");
+		assertEquals(tuple4.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple4.get("path"), "0.2");
+		assertTrue(it.hasNext());
+		Entity tuple5 = it.next();
+		assertEquals(tuple5.get("name"), "f12");
+		assertEquals(tuple5.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple5.get("path"), "0.2.F12");
 	}
 
 	@Test
@@ -160,18 +165,23 @@ public class ProtocolTreeRepositoryTest
 		when(protocol0.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature1));
 		when(protocol0.getName()).thenReturn("p0");
 
-		ProtocolTreeRepository protocolTable = new ProtocolTreeRepository(protocol0, dataService);
-		Iterator<Entity> it = protocolTable.iterator();
+		ProtocolTreeRepository protocolTreeRepository = new ProtocolTreeRepository(protocol0, dataService, "test");
+		Iterator<Entity> it = protocolTreeRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity tuple0 = it.next();
-		assertEquals(tuple0.get("name"), "p1");
+		assertEquals(tuple0.get("name"), "p0");
 		assertEquals(tuple0.get("type"), Protocol.class.getSimpleName().toLowerCase());
-		assertEquals(tuple0.get("path"), "0.1");
+		assertEquals(tuple0.get("path"), "0");
 		assertTrue(it.hasNext());
 		Entity tuple1 = it.next();
-		assertEquals(tuple1.get("name"), "f10");
-		assertEquals(tuple1.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
-		assertEquals(tuple1.get("path"), "0.F10");
+		assertEquals(tuple1.get("name"), "p1");
+		assertEquals(tuple1.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple1.get("path"), "0.1");
+		assertTrue(it.hasNext());
+		Entity tuple2 = it.next();
+		assertEquals(tuple2.get("name"), "f10");
+		assertEquals(tuple2.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple2.get("path"), "0.F10");
 		assertFalse(it.hasNext());
 	}
 
@@ -188,10 +198,18 @@ public class ProtocolTreeRepositoryTest
 		when(protocol.getFeatures()).thenReturn(Arrays.<ObservableFeature> asList(feature));
 		when(protocol.getName()).thenReturn("p0");
 
-		ProtocolTreeRepository protocolTable2 = new ProtocolTreeRepository(protocol, dataService);
-		Iterator<Entity> it = protocolTable2.iterator();
+		ProtocolTreeRepository protocolTreeRepository2 = new ProtocolTreeRepository(protocol, dataService, "test");
+		Iterator<Entity> it = protocolTreeRepository2.iterator();
 		assertTrue(it.hasNext());
-		assertEquals(it.next().getString("path"), protocolId + ".F" + featureId);
+		Entity tuple0 = it.next();
+		assertEquals(tuple0.get("name"), "p0");
+		assertEquals(tuple0.get("type"), Protocol.class.getSimpleName().toLowerCase());
+		assertEquals(tuple0.get("path"), String.valueOf(protocolId));
+		assertTrue(it.hasNext());
+		Entity tuple1 = it.next();
+		assertEquals(tuple1.get("name"), "f10");
+		assertEquals(tuple1.get("type"), ObservableFeature.class.getSimpleName().toLowerCase());
+		assertEquals(tuple1.get("path"), protocolId + ".F" + featureId);
 		assertFalse(it.hasNext());
 	}
 }

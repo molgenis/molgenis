@@ -40,6 +40,7 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 
 	private final Protocol protocol;
 	private final DataService dataService;
+	private final String name;
 	public static final Set<String> STOPWORDSLIST;
 	static
 	{
@@ -61,12 +62,14 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public ProtocolTreeRepository(Protocol protocol, DataService dataService)
+	public ProtocolTreeRepository(Protocol protocol, DataService dataService, String name)
 	{
 		if (protocol == null) throw new IllegalArgumentException("protocol cannot be null");
 		this.protocol = protocol;
 		if (dataService == null) throw new IllegalArgumentException("dataService cannot be null");
 		this.dataService = dataService;
+		if (name == null) throw new IllegalArgumentException("name cannot be null");
+		this.name = name;
 	}
 
 	@Override
@@ -88,6 +91,20 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
+
+		// index root protocol
+		String description = protocol.getDescription() == null ? StringUtils.EMPTY : I18nTools
+				.get(protocol.getDescription()).replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase();
+
+		Entity entity = new MapEntity();
+		entity.set(FIELD_TYPE, Protocol.class.getSimpleName().toLowerCase());
+		entity.set(FIELD_ID, protocol.getId());
+		entity.set(FIELD_IDENTIFIER, protocol.getIdentifier());
+		entity.set(FIELD_NAME, protocol.getName());
+		entity.set(FIELD_DESCRIPTION, description);
+		entity.set(FIELD_PATH, protocol.getId().toString());
+		entities.add(entity);
+
 		createEntities(protocol.getId().toString(), protocol, entities);
 
 		return entities.iterator();
@@ -102,7 +119,7 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 	@Override
 	protected EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("protocolTree-" + protocol.getId());
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
 
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));

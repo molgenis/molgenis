@@ -26,9 +26,9 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelEntitySource;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
+import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.io.processor.LowerCaseProcessor;
-import org.molgenis.io.processor.TrimProcessor;
 
 public class SampleConverter
 {

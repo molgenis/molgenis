@@ -1,5 +1,6 @@
-package org.molgenis.io.processor;
+package org.molgenis.data.processor;
 
+import org.molgenis.data.processor.LowerCaseProcessor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

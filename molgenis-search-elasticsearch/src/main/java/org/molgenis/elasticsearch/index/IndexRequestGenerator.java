@@ -92,6 +92,7 @@ public class IndexRequestGenerator
 				BulkRequestBuilder bulkRequest = client.prepareBulk();
 
 				final long maxRow = Math.min(row + docsPerBulk, rows);
+
 				for (; row < maxRow; ++row)
 				{
 					Entity entity = it.next();

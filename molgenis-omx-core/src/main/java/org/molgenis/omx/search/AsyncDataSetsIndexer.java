@@ -63,9 +63,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 			for (DataSet dataSet : dataSets)
 			{
-
 				searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
-				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService));
+				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
+						"protocolTree-" + dataSet.getId()));
 				searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
 						dataService));
 			}
@@ -105,7 +105,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			for (DataSet dataSet : dataSets)
 			{
 				searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
-				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService));
+				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
+						"protocolTree-" + dataSet.getId()));
 				searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
 						dataService));
 			}
@@ -144,7 +145,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 			for (Protocol protocol : protocols)
 			{
-				searchService.indexRepository(new ProtocolTreeRepository(protocol, dataService));
+				searchService.indexRepository(new ProtocolTreeRepository(protocol, dataService, "protocolTree-"
+						+ protocol.getId()));
 				searchService.indexRepository(new CategoryRepository(protocol, protocol.getId(), dataService));
 			}
 		}

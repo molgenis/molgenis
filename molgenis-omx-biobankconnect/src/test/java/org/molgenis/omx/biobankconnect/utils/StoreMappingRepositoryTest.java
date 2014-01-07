@@ -76,7 +76,8 @@ public class StoreMappingRepositoryTest
 
 		Query q2 = new QueryImpl();
 		q2.eq(ObservationSet.PARTOFDATASET, dataSet);
-		when(dataService.findAll(ObservationSet.ENTITY_NAME, q2)).thenReturn(Arrays.<Entity> asList(observationSet));
+		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME, q2)).thenReturn(
+				Arrays.<Entity> asList(observationSet));
 
 		ObservedValue observedValue1 = mock(ObservedValue.class);
 		when(observedValue1.getObservationSet()).thenReturn(observationSet);

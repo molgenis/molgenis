@@ -1,4 +1,4 @@
-package org.molgenis.io.processor;
+package org.molgenis.data.processor;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -7,6 +7,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

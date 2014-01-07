@@ -1,4 +1,4 @@
-package org.molgenis.io.processor;
+package org.molgenis.data.processor;
 
 public class MissingValueProcessor extends AbstractCellProcessor
 {
