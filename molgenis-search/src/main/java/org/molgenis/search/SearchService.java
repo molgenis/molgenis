@@ -5,7 +5,6 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.tupletable.TupleTable;
 
 /**
  * Interface that a concrete SearchService must implement.
@@ -30,6 +29,8 @@ public interface SearchService
 	 */
 	void indexRepository(Repository<? extends Entity> repository);
 
+	void updateRepositoryIndex(Repository<? extends Entity> repository);
+
 	/**
 	 * delete documents by Ids
 	 * 
@@ -46,16 +47,6 @@ public interface SearchService
 	 * @param updateScript
 	 */
 	void updateDocumentById(String documentType, String documentId, String updateScript);
-
-	/**
-	 * Index a TupleTable
-	 * 
-	 * @param documentType
-	 *            , teh documentType name
-	 * @param tupleTable
-	 */
-	@Deprecated
-	void indexTupleTable(String documentType, TupleTable tupleTable);
 
 	/**
 	 * Search the index
@@ -84,6 +75,4 @@ public interface SearchService
 	 */
 	void deleteDocumentsByType(String documentType);
 
-	@Deprecated
-	void updateIndexTupleTable(String documentType, TupleTable tupleTable);
 }

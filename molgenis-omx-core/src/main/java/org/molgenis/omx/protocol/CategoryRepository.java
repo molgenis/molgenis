@@ -1,5 +1,6 @@
 package org.molgenis.omx.protocol;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,19 +10,23 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.AbstractFilterableTupleTable;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.model.elements.Field;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.I18nTools;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
 
-public class CategoryTable extends AbstractFilterableTupleTable
+import com.google.common.collect.Iterables;
+
+public class CategoryRepository extends AbstractRepository<Entity> implements Countable
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
@@ -31,6 +36,7 @@ public class CategoryTable extends AbstractFilterableTupleTable
 
 	private final Protocol protocol;
 	private final DataService dataService;
+	private final Integer id;
 	public static final Set<String> STOPWORDSLIST;
 	static
 	{
@@ -52,50 +58,88 @@ public class CategoryTable extends AbstractFilterableTupleTable
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public CategoryTable(Protocol protocol, DataService dataService) throws TableException
+	public CategoryRepository(Protocol protocol, Integer id, DataService dataService)
 	{
-		if (protocol == null) throw new TableException("protocol cannot be null");
+		if (protocol == null) throw new IllegalArgumentException("protocol cannot be null");
 		this.protocol = protocol;
-		if (dataService == null) throw new TableException("dataService cannot be null");
+		if (dataService == null) throw new IllegalArgumentException("dataService cannot be null");
 		this.dataService = dataService;
-		setFirstColumnFixed(false);
+		if (id == null) throw new IllegalArgumentException("id cannot be null");
+		this.id = id;
 	}
 
 	@Override
-	public List<Field> getAllColumns() throws TableException
+	public long count()
 	{
-		List<Field> columns = new ArrayList<Field>();
-		columns.add(new Field(FIELD_TYPE));
-		columns.add(new Field(FIELD_ID));
-		columns.add(new Field(FIELD_NAME));
-		columns.add(new Field(FIELD_DESCRIPTION));
-		columns.add(new Field(FIELD_DESCRIPTION_STOPWORDS));
-		return columns;
+		AtomicInteger count = new AtomicInteger(0);
+		countEntities(protocol, count);
+
+		return count.get();
 	}
 
 	@Override
-	public Iterator<Tuple> iterator()
+	public Class<? extends Entity> getEntityClass()
 	{
-		List<Tuple> tuples = new ArrayList<Tuple>();
-		try
-		{
-			createTuplesRec(protocol, tuples);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		return tuples.iterator();
+		return MapEntity.class;
 	}
 
-	private void createTuplesRec(Protocol protocol, List<Tuple> tuples) throws DatabaseException
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		createEntities(protocol, entities);
+
+		return entities.iterator();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		// Nothing
+	}
+
+	@Override
+	protected EntityMetaData getEntityMetaData()
+	{
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id);
+
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_NAME, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_DESCRIPTION, FieldTypeEnum.STRING));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_DESCRIPTION_STOPWORDS,
+				FieldTypeEnum.STRING));
+
+		return entityMetaData;
+	}
+
+	private void countEntities(Protocol protocol, AtomicInteger count)
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
 		if (!subProtocols.isEmpty())
 		{
 			for (Protocol p : subProtocols)
 			{
-				createTuplesRec(p, tuples);
+				countEntities(p, count);
+			}
+		}
+		else
+		{
+			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()));
+
+			count.addAndGet(Iterables.size(categories));
+		}
+	}
+
+	private void createEntities(Protocol protocol, List<Entity> entities)
+	{
+		List<Protocol> subProtocols = protocol.getSubprotocols();
+		if (!subProtocols.isEmpty())
+		{
+			for (Protocol p : subProtocols)
+			{
+				createEntities(p, entities);
 			}
 		}
 		else
@@ -112,51 +156,15 @@ public class CategoryTable extends AbstractFilterableTupleTable
 				Set<String> descriptionStopWords = new HashSet<String>(Arrays.asList(description.split(" +")));
 				descriptionStopWords.removeAll(STOPWORDSLIST);
 
-				KeyValueTuple tuple = new KeyValueTuple();
-				tuple.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
-				tuple.set(FIELD_ID, c.getObservableFeature().getId());
-				tuple.set(FIELD_NAME, name);
-				tuple.set(FIELD_DESCRIPTION, name);
-				tuple.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
-				tuples.add(tuple);
+				Entity entity = new MapEntity();
+				entity.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
+				entity.set(FIELD_ID, c.getObservableFeature().getId());
+				entity.set(FIELD_NAME, name);
+				entity.set(FIELD_DESCRIPTION, name);
+				entity.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
+				entities.add(entity);
 			}
 		}
 
-	}
-
-	/**
-	 * Count the number of protocols and features of this protocol (excluding this protocol itself)
-	 */
-	@Override
-	public int getCount() throws TableException
-	{
-		AtomicInteger count = new AtomicInteger(0);
-		try
-		{
-			countTuplesRec(protocol, count);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		return count.get();
-	}
-
-	private void countTuplesRec(Protocol protocol, AtomicInteger count) throws DatabaseException
-	{
-		List<Protocol> subProtocols = protocol.getSubprotocols();
-		if (!subProtocols.isEmpty())
-		{
-			for (Protocol p : subProtocols)
-			{
-				countTuplesRec(p, count);
-			}
-		}
-		else
-		{
-			List<Category> categories = dataService.findAllAsList(Category.ENTITY_NAME,
-					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()));
-			if (!categories.isEmpty()) count.addAndGet(categories.size());
-		}
 	}
 }

@@ -6,12 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.protocol.CategoryTable;
+import org.molgenis.omx.protocol.CategoryRepository;
 import org.molgenis.omx.protocol.ProtocolTreeRepository;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
@@ -53,9 +51,6 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 	/**
 	 * Index all datasets
-	 * 
-	 * @throws DatabaseException
-	 * @throws TableException
 	 */
 	@Override
 	@Async
@@ -71,9 +66,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 
 				searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
 				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService));
-
-				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
-						new CategoryTable(dataSet.getProtocolUsed(), dataService));
+				searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
+						dataService));
 			}
 		}
 		catch (Exception e)
@@ -112,9 +106,8 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
 				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService));
-
-				searchService.indexTupleTable("featureCategory-" + dataSet.getId(),
-						new CategoryTable(dataSet.getProtocolUsed(), dataService));
+				searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
+						dataService));
 			}
 		}
 		catch (Exception e)
@@ -152,9 +145,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			for (Protocol protocol : protocols)
 			{
 				searchService.indexRepository(new ProtocolTreeRepository(protocol, dataService));
-
-				searchService.indexTupleTable("featureCategory-" + protocol.getId(), new CategoryTable(protocol,
-						dataService));
+				searchService.indexRepository(new CategoryRepository(protocol, protocol.getId(), dataService));
 			}
 		}
 		catch (Exception e)

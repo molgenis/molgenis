@@ -15,8 +15,6 @@ import java.util.Iterator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -31,7 +29,7 @@ public class ProtocolTreeRepositoryTest
 	private ProtocolTreeRepository protocolTable;
 
 	@BeforeMethod
-	public void setUp() throws DatabaseException, TableException
+	public void setUp()
 	{
 		dataService = mock(DataService.class);
 

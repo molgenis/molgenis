@@ -32,8 +32,6 @@ import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -197,56 +195,6 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	@Deprecated
-	public void indexTupleTable(String documentType, TupleTable tupleTable)
-	{
-		try
-		{
-			if (tupleTable.getCount() == 0)
-			{
-				return;
-			}
-		}
-		catch (TableException e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		LOG.info("Going to create mapping for documentType [" + documentType + "]");
-		createMappings(documentTypeSantized, tupleTable);
-
-		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
-		deleteDocumentsByType(documentTypeSantized);
-
-		LOG.info("Going to insert documents of type [" + documentType + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
-
-		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
-		for (BulkRequestBuilder request : requests)
-		{
-			LOG.info("Request created");
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("BulkRequest:" + request);
-			}
-
-			BulkResponse response = request.execute().actionGet();
-			LOG.info("Request done");
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("BulkResponse:" + response);
-			}
-
-			if (response.hasFailures())
-			{
-				throw new ElasticSearchException(response.buildFailureMessage());
-			}
-		}
-	}
-
-	@Override
 	public boolean documentTypeExists(String documentType)
 	{
 		String documentTypeSantized = sanitizeMapperType(documentType);
@@ -300,29 +248,28 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void updateIndexTupleTable(String documentType, TupleTable tupleTable)
+	public void updateRepositoryIndex(Repository<? extends Entity> repository)
 	{
+		if (!repository.iterator().hasNext())
+		{
+			return;
+		}
+
 		try
 		{
-			if (tupleTable.getCount() == 0)
-			{
-				return;
-			}
+			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
+			createMappings(repository);
 		}
-		catch (TableException e)
+		catch (IOException e)
 		{
-			throw new RuntimeException(e);
+			String msg = "Exception creating mapping for repository [" + repository.getName() + "]";
+			LOG.error(msg, e);
+			throw new ElasticSearchException(msg, e);
 		}
 
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		LOG.info("Going to create mapping for documentType [" + documentType + "]");
-		createMappings(documentTypeSantized, tupleTable);
-
-		LOG.info("Going to insert documents of type [" + documentType + "]");
+		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
-
-		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
+		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
 			LOG.info("Request created");
@@ -395,40 +342,4 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Mapping for documentType [" + repository.getName() + "] created");
 	}
 
-	@Deprecated
-	private void createMappings(String documentType, TupleTable tupleTable)
-	{
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		XContentBuilder jsonBuilder;
-		try
-		{
-			jsonBuilder = MappingsBuilder.buildMapping(documentTypeSantized, tupleTable);
-		}
-		catch (Exception e)
-		{
-			String msg = "Exception creating mapping for documentType [" + documentType + "]";
-			LOG.error(msg, e);
-			throw new ElasticSearchException(msg, e);
-		}
-
-		try
-		{
-			LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
-		}
-		catch (IOException e)
-		{
-			LOG.error(e);
-		}
-
-		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
-				.setType(documentTypeSantized).setSource(jsonBuilder).execute().actionGet();
-
-		if (!response.isAcknowledged())
-		{
-			throw new ElasticSearchException("Creation of mapping for documentType [" + documentType
-					+ "] failed. Response=" + response);
-		}
-		LOG.info("Mapping for documentType [" + documentType + "] created");
-	}
 }
