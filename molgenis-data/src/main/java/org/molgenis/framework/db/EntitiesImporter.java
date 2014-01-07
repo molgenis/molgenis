@@ -24,8 +24,8 @@ public interface EntitiesImporter
 	 */
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException;
 
-	/**
-	 * Import entities from a {@link org.molgenis.io.TupleReader}
+/**
+	 * Import entities from a {@link org.molgenis.data.Repository
 	 * 
 	 * @param tupleReader
 	 * @param entityName
@@ -38,7 +38,7 @@ public interface EntitiesImporter
 			DatabaseAction dbAction) throws IOException;
 
 	/**
-	 * Import entities from a {@link org.molgenis.io.TableReader}
+	 * Import entities from a {@link org.molgenis.data.EntitySource}
 	 * 
 	 * @param tupleReader
 	 * @param entityName

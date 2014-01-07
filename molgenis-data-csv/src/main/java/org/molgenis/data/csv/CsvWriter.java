@@ -13,9 +13,9 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.util.ListEscapeUtils;
 
 public class CsvWriter<E extends Entity> extends AbstractWritable<E>
