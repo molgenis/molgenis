@@ -1,5 +1,0 @@
-step,protocol,dependencies
-step0,protocols/step0.sh,
-step1,protocols/step1.sh,step0
-step2,protocols/step2.sh,strings=step1.out
-step3,protocols/step3.sh,step2;mytool=tool

@@ -10,6 +10,10 @@
 	border-spacing: 0px;
 }
 
+ul.dynatree-container {
+	height: auto;
+}
+
 .box-title {
 	font-size: 10pt;
 	font-weight: bold;
@@ -18,7 +22,11 @@
 	background-color: #BDCDDA;
 }
 
-#dataset-browser {
+#search-text {
+	height: 26px;	
+}
+
+#catalog-container {
 	max-height: 500px;
 	overflow-y: auto;
 }

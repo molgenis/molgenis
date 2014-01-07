@@ -1,7 +1,5 @@
 package org.molgenis.generators;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,13 +17,11 @@ import org.molgenis.fieldtypes.ImageField;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.io.csv.CsvReader;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.model.elements.Unique;
-import org.molgenis.util.tuple.Tuple;
 
 public class GeneratorHelper
 {
@@ -50,8 +46,7 @@ public class GeneratorHelper
 	{
 		if (string == null) return " NULL ";
 		if (string.length() > 0) return string.substring(0, 1).toUpperCase() + string.substring(1);
-		else
-			return " ERROR[STRING EMPTY] ";
+		else return " ERROR[STRING EMPTY] ";
 	}
 
 	/**
@@ -162,15 +157,13 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * Creates a default value based on the default values set in the model. If
-	 * no defaultValue is provided and if the field is not "automatic" then the
-	 * default value is set to "null" so the user has to decide.
+	 * Creates a default value based on the default values set in the model. If no defaultValue is provided and if the
+	 * field is not "automatic" then the default value is set to "null" so the user has to decide.
 	 * 
 	 * @param model
 	 *            Meta model
 	 * @param field
-	 *            Meta model of a field (question: couldn't we ask the field for
-	 *            this??)
+	 *            Meta model of a field (question: couldn't we ask the field for this??)
 	 * @return the default value as String
 	 * @throws Exception
 	 */
@@ -239,8 +232,7 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * Get the fields that participate in an insert (so excluding automatic
-	 * fields).
+	 * Get the fields that participate in an insert (so excluding automatic fields).
 	 * 
 	 * @param e
 	 * @param includeKey
@@ -389,8 +381,7 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * The queryable fields of the entity (in case of inheritance from the view
-	 * join)
+	 * The queryable fields of the entity (in case of inheritance from the view join)
 	 * 
 	 * @param e
 	 * @param type
@@ -490,8 +481,7 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * Return all secondary key fields. If two secondary keys share a field, its
-	 * only returned once.
+	 * Return all secondary key fields. If two secondary keys share a field, its only returned once.
 	 * 
 	 * @param keys
 	 *            list of Unique definitions
@@ -538,10 +528,8 @@ public class GeneratorHelper
 	}
 
 	/**
-	 * A table can only contain the keys for columns that are actually in the
-	 * table. In subclass_per_table mapping this requirement is not satisfied.
-	 * These keys are ommited, and a warning is shown that these keys are not
-	 * enforced.
+	 * A table can only contain the keys for columns that are actually in the table. In subclass_per_table mapping this
+	 * requirement is not satisfied. These keys are ommited, and a warning is shown that these keys are not enforced.
 	 * 
 	 * @param e
 	 * @return Vector of Unique (singular or complex keys)
@@ -568,9 +556,8 @@ public class GeneratorHelper
 					}
 				}
 				if (inTable) table_keys.add(aKey);
-				else
-					logger.warn("key " + aKey + " cannot be enforced on entity " + e.getName() + ": column '" + field
-							+ "' is not in the subclass table.");
+				else logger.warn("key " + aKey + " cannot be enforced on entity " + e.getName() + ": column '" + field
+						+ "' is not in the subclass table.");
 			}
 		}
 
@@ -637,7 +624,7 @@ public class GeneratorHelper
 				result.addAll(getSubclasses(e, m));
 			}
 		}
-		// logger.debug("found "+result.size()+ " subclases");
+
 		return result;
 	}
 
@@ -645,60 +632,12 @@ public class GeneratorHelper
 	{
 		List<Entity> result = new ArrayList<Entity>(subclass.getAllAncestors());
 		result.add(subclass);
-		// Collections.reverse(result);
 		return result;
 	}
 
 	public String pluralOf(String string)
 	{
 		return string + "s";
-		// return Noun.pluralOf(string,Locale.ENGLISH);
-	}
-
-	/**
-	 * Thank you, AndroMDA project... Linguistically pluralizes a singular noun.
-	 * <p/>
-	 * <ul>
-	 * <li><code>noun</code> becomes <code>nouns</code></li>
-	 * <li><code>key</code> becomes <code>keys</code></li>
-	 * <li><code>word</code> becomes <code>words</code></li>
-	 * <li><code>property</code> becomes <code>properties</code></li>
-	 * <li><code>bus</code> becomes <code>busses</code></li>
-	 * <li><code>boss</code> becomes <code>bosses</code></li>
-	 * </ul>
-	 * <p>
-	 * Whitespace as well as <code>null></code> arguments will return an empty
-	 * String.
-	 * </p>
-	 * 
-	 * @param singularNoun
-	 *            A singularNoun to pluralize
-	 * @return The plural of the argument singularNoun
-	 */
-	public static String pluralize(String singularNoun)
-	{
-		throw new UnsupportedOperationException();
-		// return Pluralizer.getInstance().pluralize(singularNoun);
-
-		/*
-		 * String pluralNoun = singularNoun;
-		 * 
-		 * int nounLength = pluralNoun.length();
-		 * 
-		 * if (nounLength == 1) { pluralNoun = pluralNoun + 's'; } else if
-		 * (nounLength > 1) { char secondToLastChar =
-		 * pluralNoun.charAt(nounLength - 2);
-		 * 
-		 * if (pluralNoun.endsWith("y")) { switch (secondToLastChar) { case 'a'
-		 * : // fall-through case 'e' : // fall-through case 'i' : //
-		 * fall-through case 'o' : // fall-through case 'u' : pluralNoun =
-		 * pluralNoun + 's'; break; default : pluralNoun =
-		 * pluralNoun.substring(0, nounLength - 1) + "ies"; } } else if
-		 * (pluralNoun.endsWith("s")) { switch (secondToLastChar) { case 's' :
-		 * pluralNoun = pluralNoun + "es"; break; default : pluralNoun =
-		 * pluralNoun + "ses"; } } else { pluralNoun = pluralNoun + 's'; } }
-		 * return pluralNoun;
-		 */
 	}
 
 	public String parseQueryOperator(String label)
@@ -764,22 +703,6 @@ public class GeneratorHelper
 					imports.add(fullClassName);
 				}
 			}
-
-			// import link tables
-			// if (f.getType().equals(Field.Type.XREF_MULTIPLE))
-			// {
-			//
-			// Entity linktable = m.getEntity(f.getMrefName());
-			// if(linktable != null)
-			// {
-			// String fullClassName = linktable.getNamespace() + subPkg
-			// + this.firstToUpper(linktable.getName())+sfx;
-			// if (!imports.contains(fullClassName))
-			// {
-			// imports.add(fullClassName);
-			// }
-			// }
-			// }
 		}
 
 		// import self
@@ -789,79 +712,11 @@ public class GeneratorHelper
 			imports.add(fullClassName);
 		}
 
-		// import parents
-		// for(String superclass: e.getParents())
-		// {
-		// Entity parentEntity = m.getEntity(superclass);
-		// fullClassName = parentEntity.getNamespace() + subPkg +
-		// this.firstToUpper(parentEntity.getName())+sfx;
-		// if (!imports.contains(fullClassName))
-		// {
-		// imports.add(fullClassName);
-		// }
-		// }
-
 		StringBuilder strBuilder = new StringBuilder();
 		for (String i : imports)
 		{
 			strBuilder.append("import ").append(i).append(";\n");
 		}
-		return strBuilder.toString();
-	}
-
-	public List<Tuple> loadExampleData(String fileName) throws IOException
-	{
-		final List<Tuple> result = new ArrayList<Tuple>();
-
-		File dir = new File(this.options.example_data_dir);
-		if (dir.exists())
-		{
-			File file = new File(dir.getAbsoluteFile() + "/" + fileName);
-			if (file.exists())
-			{
-				CsvReader csvReader = new CsvReader(file);
-				try
-				{
-					for (Tuple tuple : csvReader)
-					{
-						result.add(tuple);
-					}
-
-				}
-				finally
-				{
-					csvReader.close();
-				}
-			}
-		}
-
-		return result;
-	}
-
-	public String renderExampleData(String fileName) throws IOException
-	{
-		List<Tuple> source = this.loadExampleData(fileName);
-		StringBuilder strBuilder = new StringBuilder();
-
-		if (!source.isEmpty())
-		{
-			Iterable<String> fields = source.get(0).getColNames();
-			for (String field : fields)
-			{
-				strBuilder.append(field).append('\t');
-			}
-			strBuilder.append('\n');
-
-			for (Tuple t : source)
-			{
-				for (String field : fields)
-				{
-					strBuilder.append(t.getString(field)).append('\t');
-				}
-				strBuilder.append('\n');
-			}
-		}
-
 		return strBuilder.toString();
 	}
 

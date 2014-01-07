@@ -19,20 +19,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.Database.DatabaseAction;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.Repository;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.db.EntityImporter;
-import org.molgenis.io.TableReader;
-import org.molgenis.io.TableReaderFactory;
-import org.molgenis.io.TupleReader;
 
 <#list entities as entity>
 <#if !entity.abstract && !entity.system>
@@ -42,16 +39,17 @@ import ${entity.namespace}.db.${JavaName(entity)}EntityImporter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class EntitiesImporterImpl implements EntitiesImporter
 {
 	/** importable entity names (lowercase) */
-	private static final Map<String, EntityImporter> ENTITIES_IMPORTABLE;
+	private static final Map<String, EntityImporter<? extends Entity>> ENTITIES_IMPORTABLE;
 	
 	static {
 		// entities added in import order
-		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter>();
+		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter<? extends Entity>>();
 	<#list entities as entity>
 		<#if !entity.abstract && !entity.system>
 		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", new ${JavaName(entity)}EntityImporter());
@@ -59,110 +57,100 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	</#list>
 	}
 	
-	private Database database;
-	
+	private final DataService dataService;
+
 	@Autowired
-	public EntitiesImporterImpl(Database database)
+	public EntitiesImporterImpl(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");
-		this.database = database;
-	}
-	
-	@Override
-	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException
-	{
-		return importEntities(TableReaderFactory.create(file), dbAction);
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		this.dataService = dataService;
 	}
 
 	@Override
-	public EntityImportReport importEntities(List<File> files, DatabaseAction dbAction) throws IOException,
-			DatabaseException
+	@Transactional(rollbackFor =
+	{ IOException.class})
+	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException
 	{
-		return importEntities(TableReaderFactory.create(files), dbAction);
+		return importEntities(dataService.createEntitySource(file), dbAction);
 	}
 	
 	@Override
-	public EntityImportReport importEntities(TupleReader tupleReader, String entityName, DatabaseAction dbAction) throws IOException, DatabaseException
+	@Transactional(rollbackFor =
+	{ IOException.class})
+	public EntityImportReport importEntities(final Repository<? extends Entity> repository, final String entityName,
+			DatabaseAction dbAction) throws IOException
 	{
-		final TupleReader reader = tupleReader;
-		final String name = entityName;
-		return importEntities(new TableReader()
+
+		return importEntities(new EntitySource()
 		{
+
 			@Override
-			public Iterator<TupleReader> iterator()
+			public Iterable<String> getEntityNames()
 			{
-				return Collections.singletonList(reader).iterator();
+				return Collections.singleton(entityName);
+			}
+
+			@Override
+			public Repository<? extends Entity> getRepositoryByEntityName(String name)
+			{
+				return repository;
 			}
 
 			@Override
 			public void close() throws IOException
 			{
-				reader.close();
+				repository.close();
 			}
 
 			@Override
-			public TupleReader getTupleReader(String tableName) throws IOException
+			public String getUrl()
 			{
-				return name.equals(tableName) ? reader : null;
+				return null;
 			}
 
-			@Override
-			public Iterable<String> getTableNames() throws IOException
-			{
-				return Collections.singletonList(name);
-			}
 		}, dbAction);
 	}
-		
-	@Override	
-	public EntityImportReport importEntities(TableReader tableReader, DatabaseAction dbAction) throws IOException,
-			DatabaseException
+
+	@Override
+	@Transactional(rollbackFor =
+	{ IOException.class})
+	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException
 	{
 		EntityImportReport importReport = new EntityImportReport();
 
-		boolean doTx = !database.inTx();
 		try
 		{
-			// map entity names on tuple readers
-			Map<String, TupleReader> tupleReaderMap = new HashMap<String, TupleReader>();
-			for (String tableName : tableReader.getTableNames())
+			// map entity names on repositories
+			Map<String, Repository<? extends Entity>> repositoryMap = new HashMap<String, Repository<? extends Entity>>();
+			for (String entityName : entitySource.getEntityNames())
 			{
-				tupleReaderMap.put(tableName.toLowerCase(), tableReader.getTupleReader(tableName));
+				repositoryMap.put(entityName.toLowerCase(), entitySource.getRepositoryByEntityName(entityName));
 			}
 
-			if (doTx) database.beginTx();
-
 			// import entities in order defined by entities map
-			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
+			for (Map.Entry<String, EntityImporter<? extends Entity>> entry : ENTITIES_IMPORTABLE.entrySet())
 			{
 				String entityName = entry.getKey();
-				TupleReader tupleReader = tupleReaderMap.get(entityName);
-				if (tupleReader != null)
+				Repository<? extends Entity> repository = repositoryMap.get(entityName);
+				if (repository != null)
 				{
-					EntityImporter entityImporter = entry.getValue();
-					int nr = entityImporter.importEntity(tupleReader, database, dbAction);
-					if (nr > 0) {
-						importReport.getMessages().put(entry.getKey(), "imported " + nr + " " + entityName + " entities");
+					EntityImporter<? extends Entity> entityImporter = entry.getValue();
+					int nr = entityImporter.importEntity(repository, dataService, dbAction);
+					if (nr > 0)
+					{
+						importReport.getMessages().put(entry.getKey(),
+								"imported " + nr + " " + entityName + " entities");
 						importReport.addNrImported(nr);
 					}
 				}
+
 			}
-			if (doTx) database.commitTx();
-		}
-		catch (IOException e)
-		{
-			if (doTx) database.rollbackTx();
-			throw e;
-		}
-		catch (DatabaseException e)
-		{
-			if (doTx) database.rollbackTx();
-			throw e;
 		}
 		finally
 		{
-			tableReader.close();
+			entitySource.close();
 		}
+
 		return importReport;
 	}
 }

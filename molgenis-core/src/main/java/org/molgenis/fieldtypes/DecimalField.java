@@ -6,9 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.ui.html.DecimalInput;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 
 public class DecimalField extends FieldType
@@ -65,12 +62,6 @@ public class DecimalField extends FieldType
 	}
 
 	@Override
-	public HtmlInput<?> createInput(String name, String xrefEntityClassName) throws HtmlInputException
-	{
-		return new DecimalInput(name);
-	}
-
-	@Override
 	public String getCppJavaPropertyType()
 	{
 		return "Ljava/lang/Double;";
@@ -85,7 +76,7 @@ public class DecimalField extends FieldType
 	@Override
 	public Class<?> getJavaType()
 	{
-		return Date.class;
+		return Double.class;
 	}
 
 	@Override

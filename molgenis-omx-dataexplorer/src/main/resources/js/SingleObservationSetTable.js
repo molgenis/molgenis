@@ -1,7 +1,5 @@
-(function($, w) {
+(function($, molgenis) {
 	"use strict";
-
-	var molgenis = w.molgenis = w.molgenis || {};
 
 	molgenis.ResultsTable = function ResultsTable() {
 	};
@@ -40,7 +38,7 @@
 			items.push('<tr>');
 			items.push('<td>' + feature.name + '</td>');
 			if ((value != null) && (value != undefined)) {
-				items.push('<td>' + molgenis.formatValue(value, feature.dataType) + '</td>');
+				items.push('<td>' + formatTableCellValue(value, feature.dataType) + '</td>');
 			} else {
 				items.push('<td></td>');
 			}
@@ -53,4 +51,4 @@
 		$('.show-popover').popover({trigger:'hover', placement: 'right'});
 	};
 
-}($, window.top));
+}($, window.top.molgenis = window.top.molgenis || {}));

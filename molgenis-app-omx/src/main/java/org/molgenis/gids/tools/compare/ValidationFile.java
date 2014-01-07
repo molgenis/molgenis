@@ -7,9 +7,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.molgenis.io.csv.CsvReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 /**
  * 
@@ -19,39 +22,33 @@ public class ValidationFile
 
 {
 	private final List<String> listOfHeaders = new ArrayList<String>();
-	private final LinkedHashMap<String, Tuple> hash = new LinkedHashMap<String, Tuple>();
+	private final LinkedHashMap<String, Entity> hash = new LinkedHashMap<String, Entity>();
 
-	public void bla(ExcelSheetReader excelSheetReader, String identifier) throws IOException
-
+	public void readFile(Repository<? extends Entity> excelSheetReader, String identifier, String identifier2)
+			throws IOException
 	{
-		Iterator<String> iterableFileToCompare = excelSheetReader.colNamesIterator();
+		Iterable<String> iterableFileToCompare = Iterables.transform(excelSheetReader.getAttributes(),
+				new Function<AttributeMetaData, String>()
+				{
+					@Override
+					public String apply(AttributeMetaData input)
+					{
+						return input.getName();
+					}
 
-		while (iterableFileToCompare.hasNext())
+				});
+
+		Iterator<String> iteratorFileToCompare = iterableFileToCompare.iterator();
+
+		while (iteratorFileToCompare.hasNext())
 		{
-			String header = iterableFileToCompare.next().toLowerCase();
+			String header = iteratorFileToCompare.next().toLowerCase();
 			listOfHeaders.add(header);
 		}
 
-		for (Tuple t : excelSheetReader)
+		for (Entity entity : excelSheetReader)
 		{
-			hash.put(t.getString(identifier), t);
-		}
-	}
-
-	public void bla(CsvReader csvSheetReader, String identifier) throws IOException
-
-	{
-		Iterator<String> iterableFileToCompare = csvSheetReader.colNamesIterator();
-
-		while (iterableFileToCompare.hasNext())
-		{
-			String header = iterableFileToCompare.next().toLowerCase();
-			listOfHeaders.add(header);
-		}
-
-		for (Tuple t : csvSheetReader)
-		{
-			hash.put(t.getString(identifier), t);
+			hash.put(entity.getString(identifier) + "_" + entity.getString(identifier2), entity);
 		}
 	}
 
@@ -60,7 +57,7 @@ public class ValidationFile
 		return listOfHeaders;
 	}
 
-	public HashMap<String, Tuple> getHash()
+	public HashMap<String, Entity> getHash()
 	{
 		return hash;
 	}

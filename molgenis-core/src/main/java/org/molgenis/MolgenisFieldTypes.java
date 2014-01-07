@@ -22,8 +22,6 @@ import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.framework.ui.html.HtmlInput;
-import org.molgenis.framework.ui.html.HtmlInputException;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
 
@@ -35,8 +33,9 @@ import org.molgenis.model.elements.Field;
  */
 public class MolgenisFieldTypes
 {
+	private static final Logger logger = Logger.getLogger(MolgenisFieldTypes.class);
+
 	private static Map<String, FieldType> types = new TreeMap<String, FieldType>();
-	private static Logger logger = Logger.getLogger(MolgenisFieldTypes.class);
 	private static boolean init = false;
 
 	public enum FieldTypeEnum
@@ -77,17 +76,11 @@ public class MolgenisFieldTypes
 		types.put(ft.getClass().getSimpleName().toLowerCase(), ft);
 	}
 
-	public static HtmlInput<?> createInput(String type, String name, String xrefEntityClassName)
-			throws HtmlInputException
-	{
-		return getType(type).createInput(name, xrefEntityClassName);
-	}
-
 	public static FieldType getType(String name)
 	{
 		init();
 
-		FieldType fieldType = types.get(name + "field");
+		FieldType fieldType = types.get(name.replaceAll("[_]", "") + "field");
 		if (fieldType != null)
 		{
 			try

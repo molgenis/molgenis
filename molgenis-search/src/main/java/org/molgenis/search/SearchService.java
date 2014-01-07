@@ -2,9 +2,9 @@ package org.molgenis.search;
 
 import java.util.List;
 
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.util.Entity;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 
 /**
  * Interface that a concrete SearchService must implement.
@@ -23,21 +23,30 @@ public interface SearchService
 	boolean documentTypeExists(String documentType);
 
 	/**
-	 * Insert or update entities in the index of a documentType
+	 * Indexes all entities in a repository
 	 * 
-	 * @param documentType
-	 * @param entities
+	 * @param repository
 	 */
-	void updateIndex(String documentType, Iterable<? extends Entity> entities);
+	void indexRepository(Repository<? extends Entity> repository);
+
+	void updateRepositoryIndex(Repository<? extends Entity> repository);
 
 	/**
-	 * Index a TupleTable
+	 * delete documents by Ids
 	 * 
 	 * @param documentType
-	 *            , teh documentType name
-	 * @param tupleTable
+	 * @param documentId
 	 */
-	void indexTupleTable(String documentType, TupleTable tupleTable);
+	void deleteDocumentByIds(String documentType, List<String> documentIds);
+
+	/**
+	 * update document by Id
+	 * 
+	 * @param documentType
+	 * @param documentId
+	 * @param updateScript
+	 */
+	void updateDocumentById(String documentType, String documentId, String updateScript);
 
 	/**
 	 * Search the index
@@ -47,6 +56,8 @@ public interface SearchService
 	 */
 	SearchResult search(SearchRequest request);
 
+	SearchResult multiSearch(MultiSearchRequest request);
+
 	/**
 	 * Get the total hit count
 	 * 
@@ -54,5 +65,14 @@ public interface SearchService
 	 * @param queryRules
 	 * @return
 	 */
-	long count(String documentType, List<QueryRule> queryRules);
+	long count(String documentType, Query q);
+
+	/**
+	 * delete documentType from index
+	 * 
+	 * @param indexname
+	 * @return boolean succeeded
+	 */
+	void deleteDocumentsByType(String documentType);
+
 }

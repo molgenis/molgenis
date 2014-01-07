@@ -1,0 +1,59 @@
+.accordion-group {
+	max-height : 400px;
+	background-color: #5B82A4;
+}
+
+.accordion-body {
+	max-height : 350px;
+	background-color: white;
+}
+
+.accordion-toggle {
+	color: white;
+}
+
+.accordion-heading h5{
+	color : white;
+	padding-left : 10px;
+}
+
+div#alert-message {
+	height : 40px;
+	margin-top : 10px;
+}
+
+div#catalogue-container{
+	display : none;
+}
+
+.float-right {
+	float : right;
+	margin-right : 5px;
+}
+
+.justify-text {
+	padding : 10px;
+	text-align : justify;
+}
+
+ol.action-list, ol.action-list li{
+	padding : 4px;
+	padding-left : 5px;
+}
+
+dl{
+	font-size : 16px;
+}
+
+dt {
+	padding-bottom : 5px;
+}
+
+dd {
+	padding-bottom : 10px;
+}
+
+legend.ontology-matcher-legend {
+	margin-top : -16px;
+	font-size : 18px;
+}

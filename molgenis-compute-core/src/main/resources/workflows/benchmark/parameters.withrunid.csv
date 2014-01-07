@@ -1,3 +1,0 @@
-input
-<#noparse>${runid}</#noparse>hello
-<#noparse>${runid}</#noparse>bye

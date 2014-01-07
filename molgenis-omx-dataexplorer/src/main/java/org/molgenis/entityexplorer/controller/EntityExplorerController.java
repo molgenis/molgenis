@@ -3,58 +3,77 @@ package org.molgenis.entityexplorer.controller;
 import static org.molgenis.entityexplorer.controller.EntityExplorerController.URI;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseAccessException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
-import org.molgenis.util.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
-public class EntityExplorerController
+public class EntityExplorerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(EntityExplorerController.class);
 
-	public static final String URI = "/plugin/entityexplorer";
+	private static final String KEY_APP_HREF_CSS = "app.href.css";
+
+	public static final String ID = "entityexplorer";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
-	private Database database;
+	private MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+	public EntityExplorerController()
+	{
+		super(URI);
+	}
+
+	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public ModelAndView init(@RequestParam(required = false) String entity,
-			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query)
+	public String init(@RequestParam(required = false) String entity,
+			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
 			throws Exception
 	{
+		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only if the user has permission to see the
+		// plugin
+		if (molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.READ)
+				|| molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.WRITE))
+		{
+			model.addAttribute("dataExplorerUrl", DataExplorerController.ID);
+		}
+
 		// select all characteristic entities
-		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(database.getEntityClasses(),
+		Iterable<Class<? extends Entity>> entityClazzes = Iterables.filter(dataService.getEntityClasses(),
 				new Predicate<Class<? extends Entity>>()
 				{
 					@Override
-					public boolean apply(@Nullable Class<? extends Entity> clazz)
+					public boolean apply(Class<? extends Entity> clazz)
 					{
 						return clazz != null && Characteristic.class.isAssignableFrom(clazz)
 								&& !clazz.equals(Characteristic.class);
@@ -63,62 +82,68 @@ public class EntityExplorerController
 
 		Map<String, Class<? extends Characteristic>> clazzMap = new LinkedHashMap<String, Class<? extends Characteristic>>();
 		for (Class<? extends Entity> clazz : entityClazzes)
-			clazzMap.put(clazz.getSimpleName(), (Class<? extends Characteristic>) clazz);
+		{
+			if (dataService.count(clazz.getSimpleName(), new QueryImpl()) > 0)
+			{
+				clazzMap.put(clazz.getSimpleName(), (Class<? extends Characteristic>) clazz);
+			}
+		}
 
 		// select initial entity
 		Class<? extends Characteristic> selectedClazz = clazzMap.get(entity);
-		if (selectedClazz == null) selectedClazz = clazzMap.entrySet().iterator().next().getValue();
+		if (selectedClazz == null)
+		{
+			if (!clazzMap.isEmpty()) selectedClazz = clazzMap.entrySet().iterator().next().getValue();
+		}
+
+		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
+		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
+		model.addAttribute("selectedQuery", query);
+		ArrayList<String> entities = new ArrayList<String>(clazzMap.keySet());
+		Collections.sort(entities);
+		model.addAttribute("entities", entities);
 
 		// determine instances for selected entity
-		List<? extends Characteristic> characteristics = database.find(selectedClazz);
-		Characteristic selectedCharacteristic = null;
-		if (identifier != null)
+		if (selectedClazz != null)
 		{
-			List<? extends Characteristic> selectedCharacteristics = database.find(selectedClazz, new QueryRule(
-					Characteristic.IDENTIFIER, Operator.EQUALS, identifier));
-			if (selectedCharacteristics != null && !selectedCharacteristics.isEmpty())
+			List<? extends Characteristic> characteristics = dataService.findAllAsList(selectedClazz.getSimpleName(),
+					new QueryImpl());
+			Collections.sort(characteristics, new Comparator<Characteristic>()
 			{
-				selectedCharacteristic = selectedCharacteristics.get(0);
+				@Override
+				public int compare(Characteristic o1, Characteristic o2)
+				{
+					return o1.getName().compareTo(o2.getName());
+				}
+
+			});
+
+			Characteristic selectedCharacteristic = null;
+			if (identifier != null)
+			{
+				List<? extends Characteristic> selectedCharacteristics = dataService.findAllAsList(
+						selectedClazz.getSimpleName(), new QueryImpl().eq(Characteristic.IDENTIFIER, identifier));
+
+				if (selectedCharacteristics != null && !selectedCharacteristics.isEmpty())
+				{
+					selectedCharacteristic = selectedCharacteristics.get(0);
+				}
+				else
+				{
+					logger.warn(selectedClazz.getSimpleName() + " with identifier " + identifier + " does not exist");
+				}
 			}
 			else
 			{
-				logger.warn(selectedClazz.getSimpleName() + " with identifier " + identifier + " does not exist");
+				if (characteristics != null && !characteristics.isEmpty()) selectedCharacteristic = characteristics
+						.get(0);
 			}
+
+			model.addAttribute("selectedEntity", selectedClazz.getSimpleName());
+			model.addAttribute("entityInstances", characteristics);
+			model.addAttribute("selectedEntityInstance", selectedCharacteristic);
 		}
-		else
-		{
-			if (characteristics != null && !characteristics.isEmpty()) selectedCharacteristic = characteristics.get(0);
-		}
 
-		List<String> characteristicIdentifiers = Lists.transform(characteristics,
-				new Function<Characteristic, String>()
-				{
-					@Override
-					@Nullable
-					public String apply(@Nullable Characteristic characteristic)
-					{
-						return characteristic != null ? characteristic.getIdentifier() : null;
-					}
-				});
-
-		// select initial instance
-		String selectedIdentifier = characteristicIdentifiers.contains(identifier) ? identifier : null;
-		if (selectedIdentifier == null && !characteristicIdentifiers.isEmpty()) selectedIdentifier = characteristicIdentifiers
-				.get(0);
-
-		ModelAndView model = new ModelAndView("entityexplorer");
-		model.addObject("entities", new ArrayList<String>(clazzMap.keySet()));
-		model.addObject("selectedEntity", selectedClazz.getSimpleName());
-		model.addObject("entityInstances", characteristics);
-		model.addObject("selectedEntityInstance", selectedCharacteristic);
-		model.addObject("selectedQuery", query);
-
-		return model;
-	}
-
-	@ExceptionHandler(DatabaseAccessException.class)
-	public String handleNotAuthenticated()
-	{
-		return "redirect:/";
+		return "view-entityexplorer";
 	}
 }

@@ -15,11 +15,12 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.base.Joiner;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.model.elements.Field;
-import org.molgenis.util.Entity;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
+import org.molgenis.util.Cell;
+import org.molgenis.util.RepositoryUtils;
 
 /**
  * Creates an IndexRequest for indexing entities with ElasticSearch
@@ -49,74 +50,33 @@ public class IndexRequestGenerator
 		this.indexName = indexName;
 	}
 
-	public BulkRequestBuilder buildIndexRequest(String documentName, Iterable<? extends Entity> entities)
-	{
-		BulkRequestBuilder bulkRequest = client.prepareBulk();
-
-		int count = 0;
-		for (Entity entity : entities)
-		{
-			Object id = entity.getIdValue();
-			Map<String, Object> doc = new HashMap<String, Object>();
-			for (String field : entity.getFields())
-			{
-				doc.put(field, entity.get(field));
-
-			}
-
-			IndexRequestBuilder request;
-			if (id == null)
-			{
-				request = client.prepareIndex(indexName, documentName);
-			}
-			else
-			{
-				request = client.prepareIndex(indexName, documentName, id + "");
-			}
-
-			request.setSource(doc);
-			bulkRequest.add(request);
-			LOG.info("Added [" + (++count) + "] documents");
-		}
-
-		return bulkRequest;
-	}
-
-	public Iterable<BulkRequestBuilder> buildIndexRequest(final String documentName, final TupleTable tupleTable)
+	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository<? extends Entity> repository)
 	{
 		return new Iterable<BulkRequestBuilder>()
 		{
 			@Override
 			public Iterator<BulkRequestBuilder> iterator()
 			{
-				try
-				{
-					return indexRequestIterator(documentName, tupleTable);
-				}
-				catch (TableException e)
-				{
-					throw new RuntimeException(e);
-				}
+				return indexRequestIterator(repository);
 			}
 		};
 	}
 
-	private Iterator<BulkRequestBuilder> indexRequestIterator(final String documentName, final TupleTable tupleTable)
-			throws TableException
+	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository<? extends Entity> repository)
 	{
-		final Set<String> xrefColumns = new HashSet<String>();
-		for (Field field : tupleTable.getColumns())
+		final Set<String> xrefAndMrefColumns = new HashSet<String>();
+		for (AttributeMetaData attr : repository.getAttributes())
 		{
-			boolean isXref = field.getType().getEnumType().equals(FieldTypeEnum.XREF);
-			if (isXref) xrefColumns.add(field.getName());
+			FieldTypeEnum fieldType = attr.getDataType().getEnumType();
+			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
+			if (isXrefOrMref) xrefAndMrefColumns.add(attr.getName());
 		}
 
 		return new Iterator<BulkRequestBuilder>()
 		{
-			private final int rows = tupleTable.getCount();
-			private final int docsPerBulk = 1000;
-			private final Iterator<Tuple> it = tupleTable.iterator();
-
+			private final long rows = RepositoryUtils.count(repository);
+			private static final int docsPerBulk = 1000;
+			private final Iterator<? extends Entity> it = repository.iterator();
 			private int row = 0;
 
 			@Override
@@ -125,39 +85,81 @@ public class IndexRequestGenerator
 				return it.hasNext();
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public BulkRequestBuilder next()
 			{
 				BulkRequestBuilder bulkRequest = client.prepareBulk();
 
-				final int maxRow = Math.min(row + docsPerBulk, rows);
+				final long maxRow = Math.min(row + docsPerBulk, rows);
+
 				for (; row < maxRow; ++row)
 				{
-					Tuple tuple = it.next();
+					Entity entity = it.next();
 					Map<String, Object> doc = new HashMap<String, Object>();
-					for (String columnName : tuple.getColNames())
+
+					for (String attrName : entity.getAttributeNames())
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on
-						// list
-						// fields
-						Object value = tuple.get(columnName);
+						// list fields
+						Object key = null;
+						Object value = entity.get(attrName);
+						if (value instanceof Cell)
+						{
+							Cell<?> cell = (Cell<?>) value;
+							key = cell.getKey();
+							value = cell.getValue();
+						}
 						if (value instanceof Collection)
 						{
+							Collection<?> values = (Collection<?>) value;
+							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
+							{
+								List<String> mrefKeys = null;
+								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
+								{
+									String cellKey = it.next().getKey();
+									if (cellKey != null)
+									{
+										if (mrefKeys == null) mrefKeys = new ArrayList<String>();
+										mrefKeys.add(cellKey);
+									}
+								}
+								if (mrefKeys != null) key = mrefKeys;
+							}
 							value = Joiner.on(" , ").join((Collection<?>) value);
 						}
 
-						doc.put(columnName, value);
+						if (key != null) doc.put("key-" + attrName, key);
+						doc.put(attrName, value);
 					}
 
-					List<Object> xrefValues = new ArrayList<Object>();
-					for (String columnName : tuple.getColNames())
+					Set<String> xrefAndMrefValues = new HashSet<String>();
+					for (String attrName : entity.getAttributeNames())
 					{
-						if (xrefColumns.contains(columnName)) xrefValues.add(tuple.get(columnName));
-
+						if (xrefAndMrefColumns.contains(attrName))
+						{
+							Object value = entity.get(attrName);
+							if (value instanceof Cell)
+							{
+								Cell<?> cell = (Cell<?>) value;
+								if (cell.getValue() instanceof Collection<?>)
+								{
+									for (Cell<?> mrefCell : (Collection<Cell<?>>) cell.getValue())
+									{
+										xrefAndMrefValues.add(mrefCell.getKey());
+									}
+								}
+								else
+								{
+									xrefAndMrefValues.add(cell.getKey());
+								}
+							}
+						}
 					}
-					doc.put("_xrefvalue", xrefValues);
-
-					IndexRequestBuilder request = client.prepareIndex(indexName, documentName);
+					doc.put("_xrefvalue", xrefAndMrefValues);
+					IndexRequestBuilder request = client.prepareIndex(indexName,
+							MapperTypeSanitizer.sanitizeMapperType(repository.getName()));
 
 					request.setSource(doc);
 					bulkRequest.add(request);
@@ -175,4 +177,5 @@ public class IndexRequestGenerator
 			}
 		};
 	}
+
 }

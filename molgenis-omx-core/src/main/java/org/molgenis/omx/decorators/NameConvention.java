@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.molgenis.omx.core.Identifiable;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.omx.core.Identifiable;
 
 /**
- * This class contains functions to enforce the XGAP naming policy for entities
- * and storing files that belong to certain entities.
+ * This class contains functions to enforce the XGAP naming policy for entities and storing files that belong to certain
+ * entities.
  * 
  * @author joerivandervelde
  * 
@@ -17,14 +17,11 @@ import org.molgenis.framework.db.DatabaseException;
 public class NameConvention
 {
 	/**
-	 * Converts file name into its safe version, so that they can be safely
-	 * stored on any file system. Trims, then converts uppercase alphabetic
-	 * characters to lowercase. Then only leaves alphabetic characters, numbers
-	 * and underscore in the output. The output is then truncated at 50
-	 * characters. If the output ends up with length 0, a DatabaseException is
-	 * thrown. Note that filenames are allowed to start with numerals, while
-	 * entitynames are not. In practice however, to-be filenames are already
-	 * checked as being valid entitynames first.
+	 * Converts file name into its safe version, so that they can be safely stored on any file system. Trims, then
+	 * converts uppercase alphabetic characters to lowercase. Then only leaves alphabetic characters, numbers and
+	 * underscore in the output. The output is then truncated at 50 characters. If the output ends up with length 0, a
+	 * DatabaseException is thrown. Note that filenames are allowed to start with numerals, while entitynames are not.
+	 * In practice however, to-be filenames are already checked as being valid entitynames first.
 	 * 
 	 * @param input
 	 * @return
@@ -40,24 +37,25 @@ public class NameConvention
 
 		// remove bad characters
 		Pattern p1 = Pattern.compile("([a-z_0-9])");
-		String output = "";
+		StringBuilder strBuilder = new StringBuilder();
 		for (char s : name.toCharArray())
 		{
 			Matcher m = p1.matcher(s + "");
 			if (m.matches())
 			{
-				output += m.group();
+				strBuilder.append(m.group());
 			}
 		}
 
 		// truncate at 50 chars
+		String output = strBuilder.toString();
 		if (output.length() > 50)
 		{
 			output = output.substring(0, 50);
 		}
 
 		// check final length, may not be empty
-		if (output.length() == 0)
+		if (output.isEmpty())
 		{
 			throw new DatabaseException("Escaped filename of '" + name + "' is an empty string.");
 		}
@@ -66,13 +64,11 @@ public class NameConvention
 	}
 
 	/**
-	 * Converts an entity name into its safe version, so that they can be used
-	 * in contexts such as programming environments where strict names are
-	 * needed. Trims, then leaves only alphabetic characters, numerals and
-	 * underscores. Then removes any heading numerals. A DatabaseException is
-	 * thrown if the final output has length 0. Eg. "123name" becomes "name",
-	 * "x123nAmE" stays "x123nAmE", and "@#23" becomes "", which will throw an
-	 * exception. This is the inverse of 'validateEntityNameStrict'.
+	 * Converts an entity name into its safe version, so that they can be used in contexts such as programming
+	 * environments where strict names are needed. Trims, then leaves only alphabetic characters, numerals and
+	 * underscores. Then removes any heading numerals. A DatabaseException is thrown if the final output has length 0.
+	 * Eg. "123name" becomes "name", "x123nAmE" stays "x123nAmE", and "@#23" becomes "", which will throw an exception.
+	 * This is the inverse of 'validateEntityNameStrict'.
 	 * 
 	 * @param name
 	 * @return
@@ -84,16 +80,17 @@ public class NameConvention
 		name = name.trim();
 
 		// remove bad characters
-		String output = "";
+		StringBuilder strBuilder = new StringBuilder();
 		Pattern p1 = Pattern.compile("([a-zA-Z0-9_])");
 		for (char s : name.toCharArray())
 		{
 			Matcher m = p1.matcher(s + "");
 			if (m.matches())
 			{
-				output += m.group();
+				strBuilder.append(m.group());
 			}
 		}
+		String output = strBuilder.toString();
 
 		// remove any heading numerals
 		Pattern p2 = Pattern.compile("^[0-9]+(.+)");
@@ -116,7 +113,7 @@ public class NameConvention
 		}
 
 		// check final length, may not be empty
-		if (output.length() == 0)
+		if (output.isEmpty())
 		{
 			throw new DatabaseException("Escaped name of '" + name + "' is an empty string.");
 		}
@@ -125,13 +122,10 @@ public class NameConvention
 	}
 
 	/**
-	 * Validates a file name, so that they can be safely stored on any file
-	 * system. Throws a DatabaseException when input is empty or untrimmed, if
-	 * other characters than lowercase alphabetics, numbers or underscore are
-	 * used, or when the name is longer than 50 characters. Note that filenames
-	 * are allowed to start with numerals, while entitynames are not. In
-	 * practice however, to-be filenames are already checked as being valid
-	 * entitynames first.
+	 * Validates a file name, so that they can be safely stored on any file system. Throws a DatabaseException when
+	 * input is empty or untrimmed, if other characters than lowercase alphabetics, numbers or underscore are used, or
+	 * when the name is longer than 50 characters. Note that filenames are allowed to start with numerals, while
+	 * entitynames are not. In practice however, to-be filenames are already checked as being valid entitynames first.
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -166,8 +160,7 @@ public class NameConvention
 	}
 
 	/**
-	 * Validates an entity name, checking that only characters from the set
-	 * [<>/a-zA-Z0-9_\\s\\-:.(),;\\+] are used.
+	 * Validates an entity name, checking that only characters from the set [<>/a-zA-Z0-9_\\s\\-:.(),;\\+] are used.
 	 * 
 	 * @param name
 	 * @throws DatabaseException
@@ -201,11 +194,9 @@ public class NameConvention
 	}
 
 	/**
-	 * Validates an entity name, so that they can be used in contexts such as
-	 * programming environments where strict names are needed. Throws a
-	 * DatabaseException when this name is empty or untrimmed, if other
-	 * characters than alphabetics, numerals or underscore are used, or when the
-	 * name starts with a numeral.
+	 * Validates an entity name, so that they can be used in contexts such as programming environments where strict
+	 * names are needed. Throws a DatabaseException when this name is empty or untrimmed, if other characters than
+	 * alphabetics, numerals or underscore are used, or when the name starts with a numeral.
 	 * 
 	 * @param name
 	 * @throws DatabaseException
@@ -246,8 +237,7 @@ public class NameConvention
 	}
 
 	/**
-	 * Validate names of Entities by wrapping
-	 * NameConvention.validateEntityName(name)
+	 * Validate names of Entities by wrapping NameConvention.validateEntityName(name)
 	 * 
 	 * @param <E>
 	 * @param entities
@@ -263,8 +253,7 @@ public class NameConvention
 	}
 
 	/**
-	 * Validate names of Entities by wrapping
-	 * NameConvention.validateEntityNameStrict(name)
+	 * Validate names of Entities by wrapping NameConvention.validateEntityNameStrict(name)
 	 * 
 	 * @param <E>
 	 * @param entities

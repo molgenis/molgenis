@@ -2,9 +2,11 @@ package org.molgenis.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +23,6 @@ import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
 import org.molgenis.model.elements.Module;
-import org.molgenis.model.elements.UISchema;
 import org.molgenis.model.elements.Unique;
 import org.molgenis.model.elements.View;
 import org.molgenis.util.Pair;
@@ -72,9 +73,8 @@ public class MolgenisModelValidator
 	}
 
 	/**
-	 * As mrefs are a linking table between to other tables, interfaces cannot
-	 * be part of mrefs (as they don't have a linking table). To solve this
-	 * issue, mrefs will be removed from interface class and copied to subclass.
+	 * As mrefs are a linking table between to other tables, interfaces cannot be part of mrefs (as they don't have a
+	 * linking table). To solve this issue, mrefs will be removed from interface class and copied to subclass.
 	 * 
 	 * @throws MolgenisModelException
 	 */
@@ -115,8 +115,8 @@ public class MolgenisModelValidator
 	}
 
 	/**
-	 * Subclasses can override fields of superclasses. This should only be used
-	 * with caution! Only good motivation is to limit xref type.
+	 * Subclasses can override fields of superclasses. This should only be used with caution! Only good motivation is to
+	 * limit xref type.
 	 */
 	public static void validateOveride(Model model)
 	{
@@ -129,26 +129,18 @@ public class MolgenisModelValidator
 		for (Entity e : model.getEntities())
 		{
 			// maximum num of chars in oracle table name of column is 30
-			if (options.db_driver.toLowerCase().contains("oracle") && e.getName().length() > 30)
+			if (e.getName().length() > 30)
 			{
 				throw new MolgenisModelException(String.format("table name %s is longer than %d", e.getName(), 30));
 			}
 			for (Field f : e.getFields())
 			{
-				if (options.db_driver.toLowerCase().contains("oracle") && f.getName().length() > 30)
+				if (f.getName().length() > 30)
 				{
 					throw new MolgenisModelException(String.format("field name %s is longer than %d", f.getName(), 30));
 				}
 			}
 		}
-	}
-
-	public static void validateUI(Model model, MolgenisOptions options) throws MolgenisModelException,
-			DatabaseException
-	{
-		logger.debug("validating UI and adding defaults:");
-
-		validateHideFields(model);
 	}
 
 	public static void validateHideFields(Model model) throws MolgenisModelException
@@ -221,8 +213,7 @@ public class MolgenisModelValidator
 	}
 
 	/**
-	 * Default xref labels can come from: - the xref_entity (or one of its
-	 * superclasses)
+	 * Default xref labels can come from: - the xref_entity (or one of its superclasses)
 	 * 
 	 * @param model
 	 * @throws MolgenisModelException
@@ -253,9 +244,8 @@ public class MolgenisModelValidator
 	}
 
 	/**
-	 * In each entity of an entity subclass hierarchy a 'type' field is added to
-	 * enable filtering. This method adds this type as 'enum' field such that
-	 * all subclasses are an enum option.
+	 * In each entity of an entity subclass hierarchy a 'type' field is added to enable filtering. This method adds this
+	 * type as 'enum' field such that all subclasses are an enum option.
 	 * 
 	 * @param model
 	 * @throws MolgenisModelException
@@ -332,7 +322,7 @@ public class MolgenisModelValidator
 					String mref_name = xref_field_from.getMrefName(); // explicit
 
 					// if mref_name longer than 30 throw error
-					if (options.db_driver.toLowerCase().contains("oracle") && mref_name.length() > 30)
+					if (mref_name.length() > 30)
 					{
 						throw new MolgenisModelException("mref_name cannot be longer then 30 characters, found: "
 								+ mref_name);
@@ -766,7 +756,7 @@ public class MolgenisModelValidator
 				try
 				{
 					Field pkeyField = null;
-					if (iface.getKeyFields(Entity.PRIMARY_KEY).size() == 1)
+					if (iface.getKeys().size() == 1)
 					{
 						pkeyField = iface.getKeyFields(Entity.PRIMARY_KEY).get(0);
 						// if not already exists
@@ -937,14 +927,12 @@ public class MolgenisModelValidator
 			throws MolgenisModelException
 	{
 		logger.debug("check for JAVA and SQL reserved words...");
-		List<String> keywords = new ArrayList<String>();
-		// keywords.addAll(Arrays.asList(MOLGENIS_KEYWORDS));
+		Set<String> keywords = new HashSet<String>();
 		keywords.addAll(Arrays.asList(JAVA_KEYWORDS));
 		keywords.addAll(Arrays.asList(JAVASCRIPT_KEYWORDS));
 		keywords.addAll(Arrays.asList(ORACLE_KEYWORDS));
-
-		if (options.db_driver.contains("mysql")) keywords.addAll(Arrays.asList(MYSQL_KEYWORDS));
-		if (options.db_driver.contains("hsql")) keywords.addAll(Arrays.asList(HSQL_KEYWORDS));
+		keywords.addAll(Arrays.asList(MYSQL_KEYWORDS));
+		// keywords.addAll(Arrays.asList(HSQL_KEYWORDS));
 
 		if (model.getName().contains(" "))
 		{
@@ -1072,17 +1060,6 @@ public class MolgenisModelValidator
 				}
 			}
 		}
-
-		for (UISchema screen : model.getUserinterface().getAllChildren())
-		{
-			if (screen.getName().contains(" "))
-			{
-				throw new MolgenisModelException(
-						"ui element '"
-								+ screen.getName()
-								+ "illegal: it cannot contain spaces. If you want to have a name with spaces use the 'label' attribute");
-			}
-		}
 	}
 
 	/** test for case sensitivity */
@@ -1154,10 +1131,9 @@ public class MolgenisModelValidator
 	}
 
 	/**
-	 * Copy fields to subclasses (redundantly) so this field can be part of an
-	 * extra constraint. E.g. a superclass has non-unique field 'name'; in the
-	 * subclass it is said to be unique and a copy is made to capture this
-	 * constraint in the table for the subclass.
+	 * Copy fields to subclasses (redundantly) so this field can be part of an extra constraint. E.g. a superclass has
+	 * non-unique field 'name'; in the subclass it is said to be unique and a copy is made to capture this constraint in
+	 * the table for the subclass.
 	 * 
 	 * @param model
 	 * @throws MolgenisModelException
@@ -1192,9 +1168,6 @@ public class MolgenisModelValidator
 			}
 		}
 	}
-
-	private static final String[] MOLGENIS_KEYWORDS =
-	{ "entity", "field", "form", "menu", "screen", "plugin" };
 
 	private static final String[] HSQL_KEYWORDS =
 	{ "ALIAS", "ALTER", "AUTOCOMMIT", "CALL", "CHECKPOINT", "COMMIT", "CONNECT", "CREATE", "COLLATION", "COUNT",
@@ -1231,8 +1204,7 @@ public class MolgenisModelValidator
 			"VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "X509",
 			"XOR", "YEAR_MONTH", "ZEROFILL" };
 	/**
-	 * https://cis.med.ucalgary.ca/http/java.sun.com/docs/books/tutorial/java/
-	 * nutsandbolts/_keywords.html
+	 * https://cis.med.ucalgary.ca/http/java.sun.com/docs/books/tutorial/java/ nutsandbolts/_keywords.html
 	 */
 	private static final String[] JAVA_KEYWORDS =
 	{ "abstract", "continue", "for", "new", "switch", "assert", "default", "goto", "package", "synchronized",

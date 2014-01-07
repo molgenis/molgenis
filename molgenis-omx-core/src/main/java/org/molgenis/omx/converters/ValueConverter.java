@@ -6,8 +6,9 @@ import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.framework.db.Database;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.CategoricalValue;
@@ -23,7 +24,7 @@ import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.Cell;
 
 /**
  * Converts tuple column values to value entities
@@ -50,19 +51,20 @@ public class ValueConverter
 		VALUE_FIELDTYPE_MAP.put(XrefValue.class, FieldTypeEnum.XREF);
 	}
 
-	private final Database database;
-	private final Map<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>> tupleConverters;
+	private final DataService dataService;
+	private final Map<FieldTypeEnum, EntityToValueConverter<? extends Value, ?>> tupleConverters;
 	private CharacteristicLoadingCache characteristicLoadingCache;
 
-	public ValueConverter(Database database)
+	public ValueConverter(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
-		this.database = database;
-		this.tupleConverters = new EnumMap<FieldTypeEnum, TupleToValueConverter<? extends Value, ?>>(
+		if (dataService == null) throw new IllegalArgumentException("Database is null");
+		this.dataService = dataService;
+		this.tupleConverters = new EnumMap<FieldTypeEnum, EntityToValueConverter<? extends Value, ?>>(
 				FieldTypeEnum.class);
 	}
 
-	public Value fromTuple(Tuple tuple, String colName, ObservableFeature feature) throws ValueConverterException
+	public Value fromEntity(Entity entity, String attributeName, ObservableFeature feature)
+			throws ValueConverterException
 	{
 		FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
 		if (fieldType == null)
@@ -70,16 +72,24 @@ public class ValueConverter
 			throw new ValueConverterException("data type is not a molgenis field type [" + feature.getDataType() + "]");
 		}
 
-		TupleToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
-		if (converter == null)
-		{
-			throw new IllegalArgumentException("unsupported field type [" + fieldType.getEnumType() + "]");
-		}
-
-		return converter.fromTuple(tuple, colName, feature);
+		EntityToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
+		return converter.fromEntity(entity, attributeName, feature);
 	}
 
-	public Object extractValue(Value value) throws ValueConverterException
+	public Value updateFromEntity(Entity entity, String attributeName, ObservableFeature feature, Value value)
+			throws ValueConverterException
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(feature.getDataType());
+		if (fieldType == null)
+		{
+			throw new ValueConverterException("data type is not a molgenis field type [" + feature.getDataType() + "]");
+		}
+
+		EntityToValueConverter<? extends Value, ?> converter = getTupleConverter(fieldType.getEnumType());
+		return converter.updateFromEntity(entity, attributeName, feature, value);
+	}
+
+	public Cell<?> toCell(Value value) throws ValueConverterException
 	{
 		if (value == null) return null;
 
@@ -88,60 +98,56 @@ public class ValueConverter
 		{
 			throw new ValueConverterException("unknown value type [" + value.getClass().getSimpleName() + "]");
 		}
-		TupleToValueConverter<? extends Value, ?> valueConverter = getTupleConverter(fieldTypeEnum);
-		if (valueConverter == null)
-		{
-			throw new ValueConverterException("unsupported value type [" + value.getClass().getSimpleName() + "]");
-		}
-		return valueConverter.extractValue(value);
+		EntityToValueConverter<? extends Value, ?> valueConverter = getTupleConverter(fieldTypeEnum);
+		return valueConverter.toCell(value);
 	}
 
-	private TupleToValueConverter<? extends Value, ?> getTupleConverter(FieldTypeEnum fieldTypeEnum)
+	private EntityToValueConverter<? extends Value, ?> getTupleConverter(FieldTypeEnum fieldTypeEnum)
 	{
-		TupleToValueConverter<? extends Value, ?> tupleConverter = tupleConverters.get(fieldTypeEnum);
+		EntityToValueConverter<? extends Value, ?> tupleConverter = tupleConverters.get(fieldTypeEnum);
 		if (tupleConverter == null)
 		{
 			// lazy initialization of tuple converters
 			switch (fieldTypeEnum)
 			{
 				case BOOL:
-					tupleConverter = new TupleToBoolValueConverter();
+					tupleConverter = new EntityToBoolValueConverter();
 					break;
 				case CATEGORICAL:
-					tupleConverter = new TupleToCategoricalValueConverter(database);
+					tupleConverter = new EntityToCategoricalValueConverter(dataService);
 					break;
 				case DATE:
-					tupleConverter = new TupleToDateValueConverter();
+					tupleConverter = new EntityToDateValueConverter();
 					break;
 				case DATE_TIME:
-					tupleConverter = new TupleToDateTimeValueConverter();
+					tupleConverter = new EntityToDateTimeValueConverter();
 					break;
 				case DECIMAL:
-					tupleConverter = new TupleToDecimalValueConverter();
+					tupleConverter = new EntityToDecimalValueConverter();
 					break;
 				case EMAIL:
-					tupleConverter = new TupleToEmailValueConverter();
+					tupleConverter = new EntityToEmailValueConverter();
 					break;
 				case HYPERLINK:
-					tupleConverter = new TupleToHyperlinkValueConverter();
+					tupleConverter = new EntityToHyperlinkValueConverter();
 					break;
 				case INT:
-					tupleConverter = new TupleToIntValueConverter();
+					tupleConverter = new EntityToIntValueConverter();
 					break;
 				case LONG:
-					tupleConverter = new TupleToLongValueConverter();
+					tupleConverter = new EntityToLongValueConverter();
 					break;
 				case MREF:
-					tupleConverter = new TupleToMrefValueConverter(getCharacteristicLoadingCache());
+					tupleConverter = new EntityToMrefValueConverter(getCharacteristicLoadingCache());
 					break;
 				case STRING:
-					tupleConverter = new TupleToStringValueConverter();
+					tupleConverter = new EntityToStringValueConverter();
 					break;
 				case TEXT:
-					tupleConverter = new TupleToTextValueConverter();
+					tupleConverter = new EntityToTextValueConverter();
 					break;
 				case XREF:
-					tupleConverter = new TupleToXrefValueConverter(getCharacteristicLoadingCache());
+					tupleConverter = new EntityToXrefValueConverter(getCharacteristicLoadingCache());
 					break;
 				// $CASES-OMITTED$
 				default:
@@ -156,7 +162,7 @@ public class ValueConverter
 	{
 		if (characteristicLoadingCache == null)
 		{
-			characteristicLoadingCache = new CharacteristicLoadingCache(database);
+			characteristicLoadingCache = new CharacteristicLoadingCache(dataService);
 		}
 		return characteristicLoadingCache;
 	}

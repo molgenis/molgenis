@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="study">
+		<description>
+			Model extension to make it possible to store a DataSetFilter that is linked to a user
+		</description>
+		
+		<entity name="StudyDataRequest" implements="Identifiable" decorator="org.molgenis.omx.study.StudyDataRequestDecorator">
+			<field name="RequestForm" type="string" description="request form filename"/>
+			<field name="Features" type="mref" xref_entity="ObservableFeature"/>
+			<field name="Protocol" type="xref" xref_entity="Protocol" description="protocol used to create request"/>
+			<field name="MolgenisUser" type="xref" xref_entity="MolgenisUser"/>
+			<field name="RequestDate" type="datetime" description="request date"/>
+			<field name="RequestStatus" type="enum" enum_options="[draft,submitted,approved,rejected]"/>
+		</entity>
+	</module>
+</molgenis>

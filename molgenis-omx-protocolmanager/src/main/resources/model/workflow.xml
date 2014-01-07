@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="workflow">
+		<description>
+			
+		</description>
+		<!--  TODO rename to WorkflowElementConnection or ProtocolConnection? -->
+		<entity name="ProtocolFlow" implements="Autoid" >
+			<field name="inputFeature" type="xref" xref_entity="ObservableFeature" description="" />
+			<field name="outputFeature" type="xref" xref_entity="ObservableFeature" description="" />
+			<field name="source" type="xref" xref_entity="Protocol" description="" />
+			<field name="destination" type="xref" xref_entity="Protocol" description="" />
+		</entity>
+		<!--  TODO rename to WorkflowElementDataRowConnection or OberservationSetConnection? -->
+		<entity name="ObservationSetFlow" implements="Autoid" >
+			<field name="source" type="xref" xref_entity="ObservationSet" description="" />
+			<field name="destination" type="xref" xref_entity="ObservationSet" description="" />
+		</entity>
+	</module>
+</molgenis>

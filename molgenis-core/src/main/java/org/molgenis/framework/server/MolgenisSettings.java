@@ -2,9 +2,17 @@ package org.molgenis.framework.server;
 
 public interface MolgenisSettings
 {
-	public String getProperty(String key);
+	String getProperty(String key);
 
-	public String getProperty(String key, String defaultValue);
+	String getProperty(String key, String defaultValue);
 
-	public void setProperty(String key, String value);
+	void setProperty(String key, String value);
+
+	Boolean getBooleanProperty(String key);
+
+	boolean getBooleanProperty(String key, boolean defaultValue);
+	
+	boolean updateProperty(String key, String value);
+
+	boolean propertyExists(String key);
 }

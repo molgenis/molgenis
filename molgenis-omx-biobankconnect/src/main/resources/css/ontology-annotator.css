@@ -1,0 +1,92 @@
+.accordion-group {
+	background-color: #5B82A4;
+}
+
+.accordion-body {
+	background-color: white;
+}
+
+.accordion-toggle {
+	color: white;
+}
+
+.accordion-heading h5{
+	color : white;
+	padding-left : 10px;
+}
+div#div-search {
+	margin-bottom : 10px;
+}
+
+#toggle-select {
+	margin-top : -20px;
+}
+
+table#dataitem-table {
+	border : 1px solid #5B82A4;
+}
+
+table thead th {	
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
+    color: white;
+}
+
+th.feature-detail-th {
+	width : 30%;
+}
+
+td.feature-detail-td {
+	width : 70%;
+}
+
+.float-right {
+	float : right;
+	margin-right : 5px;
+}
+
+.float-right a{
+	cursor: hand; 
+	cursor: pointer;
+}
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
+}
+
+.popover-content{
+	max-height: 500px;
+    overflow-y: auto;
+}
+
+.float-right{
+	float : right;
+	right : 20px;
+	cursor: hand; 
+	cursor: pointer;
+}
+
+.overflow-y-visible {
+	overflow-y : visible;
+}
+
+ol.action-list, ol.action-list li{
+	padding : 3px;
+	padding-left : 5px;
+}
+
+dl{
+	font-size : 16px;
+	margin-top : -5px;
+}
+
+dd {
+	margin-left : -2px;
+	padding-left : 2px;
+}
+
+
+h3 {
+	color : #3079C2;
+}

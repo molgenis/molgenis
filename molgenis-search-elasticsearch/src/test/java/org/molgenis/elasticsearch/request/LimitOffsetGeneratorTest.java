@@ -4,8 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -23,33 +22,15 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateSize()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.addQueryRule(new QueryRule(Operator.LIMIT, 20));
-		gen.generate(searchRequestBuilderMock);
+		gen.generate(searchRequestBuilderMock, new QueryImpl().pageSize(20));
 		verify(searchRequestBuilderMock).setSize(20);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void testGenerateSizeWithInvalidValue()
-	{
-		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.addQueryRule(new QueryRule(Operator.LIMIT, "20"));
-		gen.generate(searchRequestBuilderMock);
 	}
 
 	@Test
 	public void testGenerateFrom()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.addQueryRule(new QueryRule(Operator.OFFSET, 20));
-		gen.generate(searchRequestBuilderMock);
+		gen.generate(searchRequestBuilderMock, new QueryImpl().offset(20));
 		verify(searchRequestBuilderMock).setFrom(20);
-	}
-
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void testGenerateFromeWithInvalidValue()
-	{
-		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.addQueryRule(new QueryRule(Operator.OFFSET, "20"));
-		gen.generate(searchRequestBuilderMock);
 	}
 }

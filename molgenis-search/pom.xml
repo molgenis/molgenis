@@ -3,7 +3,7 @@
 	<parent>
 	  <groupId>org.molgenis</groupId>
 	  <artifactId>molgenis</artifactId>
-	  <version>0.0.1-SNAPSHOT</version>
+	  <version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-search</artifactId>
 	<packaging>jar</packaging>
@@ -12,17 +12,27 @@
       	<dependency>
       		<groupId>org.molgenis</groupId>
 	  		<artifactId>molgenis-core</artifactId>
-	  		<version>0.0.1-SNAPSHOT</version>
+	  		<version>1.0.0-SNAPSHOT</version>
+      	</dependency>
+		<dependency>
+      		<groupId>org.molgenis</groupId>
+	  		<artifactId>molgenis-security</artifactId>
+	  		<version>1.0.0-SNAPSHOT</version>
+      	</dependency>
+      	<dependency>
+      		<groupId>org.molgenis</groupId>
+	  		<artifactId>molgenis-data</artifactId>
+	  		<version>1.0.0-SNAPSHOT</version>
       	</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>3.2.3.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>3.2.3.RELEASE</version>
+			<version>${spring.version}</version>
 		</dependency>
     </dependencies>
 </project>
