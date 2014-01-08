@@ -24,6 +24,9 @@ import org.testng.annotations.Test;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.TextConstruct;
+import com.google.gdata.data.spreadsheet.Cell;
+import com.google.gdata.data.spreadsheet.CellEntry;
+import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
@@ -32,13 +35,15 @@ import com.google.gdata.util.ServiceException;
 public class GoogleSpreadsheetRepositoryTest
 {
 	private GoogleSpreadsheetRepository spreadsheetRepository;
+	private SpreadsheetService spreadsheetService;
+	private ListFeed listFeed;
+	private CellFeed cellFeed;
 
-	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp() throws IOException, ServiceException
 	{
-		SpreadsheetService spreadsheetService = mock(SpreadsheetService.class);
-		ListFeed listFeed = mock(ListFeed.class);
+		spreadsheetService = mock(SpreadsheetService.class);
+		listFeed = mock(ListFeed.class);
 		TextConstruct textConstruct = when(mock(TextConstruct.class).getPlainText()).thenReturn("name").getMock();
 		when(listFeed.getTitle()).thenReturn(textConstruct);
 		List<ListEntry> entries = new ArrayList<ListEntry>();
@@ -51,7 +56,26 @@ public class GoogleSpreadsheetRepositoryTest
 		when(entry.getCustomElements()).thenReturn(customElements);
 		entries.add(entry);
 		when(listFeed.getEntries()).thenReturn(entries);
-		when(spreadsheetService.getFeed(any(URL.class), (Class<ListFeed>) any(Class.class))).thenReturn(listFeed);
+		cellFeed = mock(CellFeed.class);
+		List<CellEntry> cells = new ArrayList<CellEntry>();
+
+		Cell cell1 = mock(Cell.class);
+		when(cell1.getRow()).thenReturn(1);
+		when(cell1.getValue()).thenReturn("col1");
+		Cell cell2 = mock(Cell.class);
+		when(cell2.getRow()).thenReturn(1);
+		when(cell2.getValue()).thenReturn("col2");
+		Cell cell3 = mock(Cell.class);
+		when(cell3.getRow()).thenReturn(1);
+		when(cell3.getValue()).thenReturn("col3");
+		CellEntry entry1 = when(mock(CellEntry.class).getCell()).thenReturn(cell1).getMock();
+		CellEntry entry2 = when(mock(CellEntry.class).getCell()).thenReturn(cell2).getMock();
+		CellEntry entry3 = when(mock(CellEntry.class).getCell()).thenReturn(cell3).getMock();
+		cells.add(entry1);
+		cells.add(entry2);
+		cells.add(entry3);
+		when(cellFeed.getEntries()).thenReturn(cells);
+		when(cellFeed.getTitle()).thenReturn(textConstruct);
 		spreadsheetRepository = new GoogleSpreadsheetRepository(spreadsheetService, "key", "id");
 	}
 
@@ -67,9 +91,11 @@ public class GoogleSpreadsheetRepositoryTest
 		assertEquals(MapEntity.class, spreadsheetRepository.getEntityClass());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void iterator()
+	public void iterator() throws IOException, ServiceException
 	{
+		when(spreadsheetService.getFeed(any(URL.class), (Class<ListFeed>) any(Class.class))).thenReturn(listFeed);
 		Iterator<Entity> it = spreadsheetRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity entity = it.next();
@@ -79,9 +105,11 @@ public class GoogleSpreadsheetRepositoryTest
 		assertFalse(it.hasNext());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void getEntityMetaData()
+	public void getEntityMetaData() throws IOException, ServiceException
 	{
+		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
 		EntityMetaData entityMetaData = spreadsheetRepository.getEntityMetaData();
 		assertEquals(entityMetaData.getName(), "name");
 		Iterator<AttributeMetaData> it = entityMetaData.getAttributes().iterator();
