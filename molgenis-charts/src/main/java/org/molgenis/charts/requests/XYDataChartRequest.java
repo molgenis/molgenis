@@ -1,10 +1,6 @@
 package org.molgenis.charts.requests;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
-import org.molgenis.data.QueryRule;
 
 public class XYDataChartRequest extends ChartRequest
 {

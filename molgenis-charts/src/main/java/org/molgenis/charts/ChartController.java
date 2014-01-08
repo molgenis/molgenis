@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.data.DataMatrix;
-import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.Options;
 import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
@@ -66,12 +64,12 @@ public class ChartController
 	public String test(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("queryString", request.getQueryString());
-		return "test";
+		return "test"; //TODO
 	}
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderXYDataChart(@RequestBody XYDataChartRequest request, Model model)
+	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{		
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(
 				request.getEntity(),
@@ -94,13 +92,14 @@ public class ChartController
 	
 	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderPlotBoxChart(@RequestBody BoxPlotChartRequest request, Model model)
+	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(
 				request.getEntity(), 
 				request.getObservableFeature(), 
 				request.getQuery().getRules(), 
-				request.getSplit());
+				request.getSplit(),
+				request.getScale());
 		
 		chart.setHeight(request.getHeight());
 		chart.setWidth(request.getWidth());
@@ -156,9 +155,9 @@ public class ChartController
 	 * @throws FactoryConfigurationError 
 	 * @throws XMLStreamException 
 	 */
-	@RequestMapping("/heatmap")
-	public String renderHeatMap(@Valid
-	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());

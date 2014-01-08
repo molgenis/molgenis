@@ -1,36 +1,86 @@
 package org.molgenis.charts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.charts.data.BoxPlotSerie;
+import org.molgenis.charts.data.XYDataSerie;
 
 /**
  * A Molgenis Box Plot Chart
  */
 public class BoxPlotChart extends AbstractChart
 {
-	private List<BoxPlotSerie> series;
+	private List<XYDataSerie> xYDataSeries = new ArrayList<XYDataSerie>();
+	private List<BoxPlotSerie> boxPlotSeries = new ArrayList<BoxPlotSerie>();
+	private List<String> categories = new ArrayList<String>();
 
-	public BoxPlotChart(List<BoxPlotSerie> series)
+	public BoxPlotChart()
 	{
-		if (series == null) throw new IllegalArgumentException("data is null");
-		this.series = series;
 		this.setType(MolgenisChartType.BOXPLOT_CHART);
 	}
 	
 	/**
+	 * @return the categories
+	 */
+	public List<String> getCategories()
+	{
+		return categories;
+	}
+
+	/**
+	 * @param categories the categories to set
+	 */
+	public void setCategories(List<String> categories)
+	{
+		this.categories = categories;
+	}
+
+
+
+	/**
+	 * @return the xYDataSeries
+	 */
+	public List<XYDataSerie> getxYDataSeries()
+	{
+		return xYDataSeries;
+	}
+
+	/**
+	 * @param xYDataSeries the xYDataSeries to set
+	 */
+	public void setxYDataSeries(List<XYDataSerie> xYDataSeries)
+	{
+		this.xYDataSeries = xYDataSeries;
+	}
+
+	/**
 	 * @return the boxPlotSeries
 	 */
-	public List<BoxPlotSerie> getSeries()
+	public List<BoxPlotSerie> getBoxPlotSeries()
 	{
-		return series;
+		return boxPlotSeries;
 	}
 
 	/**
 	 * @param boxPlotSeries the boxPlotSeries to set
 	 */
-	public void setSeries(List<BoxPlotSerie> series)
+	public void setBoxPlotSeries(List<BoxPlotSerie> boxPlotSeries)
 	{
-		this.series = series;
+		this.boxPlotSeries = boxPlotSeries;
+	}
+	
+	/**
+	 * @param boxPlotSerie the boxPlotSerie to add
+	 */
+	public void addBoxPlotSerie(BoxPlotSerie boxPlotSerie){
+		this.boxPlotSeries.add(boxPlotSerie);
+	}
+	
+	/**
+	 * @param xYDataSerie the xYDataSerie to add
+	 */
+	public void addXYDataSerie(XYDataSerie xYDataSerie){
+		this.xYDataSeries.add(xYDataSerie);
 	}
 }
