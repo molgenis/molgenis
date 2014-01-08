@@ -51,7 +51,7 @@
 							</div>
 							<div class="accordion-body collapse in">
 								<div class="accordion-inner" id="feature-selection"></div>
-								<div id="data-options">	
+								<div id="data-options"> 
 									<a href="#filter-dialog-modal" id="wizard-button" class="btn btn-small" id="filter-wizard-button" data-toggle="modal"><img src="/img/filter-bw.png"></img>wizard</a>
 								</div>
 							</div>
