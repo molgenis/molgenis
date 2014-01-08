@@ -16,6 +16,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
+import org.molgenis.charts.charttypes.HeatMapChart;
+import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.highcharts.Options;
 import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
@@ -157,20 +159,19 @@ public class ChartController
 	@ResponseBody
 	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
-//		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
-//				request.getQueryRules());
-//
-//		HeatMapChart chart = new HeatMapChart(matrix);
-//		chart.setTitle(request.getTitle());
-//		chart.setWidth(request.getWidth());
-//		chart.setHeight(request.getHeight());
-//		chart.setxLabel(request.getxLabel());
-//		chart.setyLabel(request.getyLabel());
-//		chart.setScale(request.getScale());
-//		
-//		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.HEAT_MAP);
-//
-//		return (String) service.renderChart(chart, model);
-		return "{test: 'test'}";
+		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
+				request.getQueryRules());
+
+		HeatMapChart chart = new HeatMapChart(matrix);
+		chart.setTitle(request.getTitle());
+		chart.setWidth(request.getWidth());
+		chart.setHeight(request.getHeight());
+		chart.setxLabel(request.getxLabel());
+		chart.setyLabel(request.getyLabel());
+		chart.setScale(request.getScale());
+		
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.HEAT_MAP);
+
+		return (String) service.renderChart(chart, model);
 	}
 }
