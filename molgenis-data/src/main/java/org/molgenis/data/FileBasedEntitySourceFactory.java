@@ -3,7 +3,7 @@ package org.molgenis.data;
 import java.io.File;
 import java.util.List;
 
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 
 /**
  * EntitySourceFactory for tabular file base data like excel and xsc

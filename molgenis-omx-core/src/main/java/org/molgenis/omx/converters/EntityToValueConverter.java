@@ -8,7 +8,7 @@ import org.molgenis.util.Cell;
 public interface EntityToValueConverter<S extends Value, T>
 {
 	/**
-	 * Converts a tuple column value to a value entity
+	 * Converts an entity column value to a value entity
 	 * 
 	 * @param entity
 	 * @param attributeName
@@ -16,10 +16,10 @@ public interface EntityToValueConverter<S extends Value, T>
 	 * @return
 	 * @throws ValueConverterException
 	 */
-	public S fromEntity(Entity tuple, String attributeName, ObservableFeature feature) throws ValueConverterException;
+	public S fromEntity(Entity entity, String attributeName, ObservableFeature feature) throws ValueConverterException;
 
 	/**
-	 * Updates an existing value by converting a tuple column
+	 * Updates an existing value by converting an entity column
 	 * 
 	 * @param entity
 	 * @param attributeName
