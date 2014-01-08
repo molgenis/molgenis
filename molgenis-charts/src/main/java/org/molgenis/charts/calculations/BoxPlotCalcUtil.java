@@ -2,12 +2,28 @@ package org.molgenis.charts.calculations;
 
 import java.util.List;
 
+import org.molgenis.charts.MolgenisChartException;
+
 public class BoxPlotCalcUtil
 {
-	public final static Double[] calcPlotBoxValues(List<Double> sortedDataAscendingOrder){
-		if(null != sortedDataAscendingOrder 
-				&& sortedDataAscendingOrder.size() < 5) {
-			//TODO JJ throws exception
+	/**
+	 * calculates the 5 values needed to create a box plot and returns them in an 5 item sized array.
+	 * 
+	 * Double[0] = minimum;
+	 * Double[1] = firstQuantile;	
+     * Double[2] = median;
+	 * Double[3] = thirdQuantile;
+	 * Double[4] = maximum;
+	 * @param sortedDataAscendingOrder
+	 * @return Double[]
+	 */
+	public final static Double[] calcBoxPlotValues(List<Double> sortedDataAscendingOrder){
+		if(null == sortedDataAscendingOrder) {
+			throw new MolgenisChartException("The sortedDataAscendingOrder list is null");
+		}
+		
+		if(sortedDataAscendingOrder.isEmpty()) {
+			throw new MolgenisChartException("The sortedDataAscendingOrder list is empty");
 		}
 		
 		Double[] plotBoxValues = new Double[5];
@@ -32,28 +48,60 @@ public class BoxPlotCalcUtil
 		return thirdQuantile - firstQuantile;
 	}
 	
+	/**
+	 * Get the minimum value thru linear interpolations
+	 * 
+	 * @param sortedDataAscendingOrder
+	 * @return Double
+	 */
 	public final static Double minimum(List<Double> sortedDataAscendingOrder){
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, (double) 0);
 	}
 	
+	/**
+	 * Get the maximum value thru linear interpolations
+	 * 
+	 * @param sortedDataAscendingOrder
+	 * @return Double
+	 */
 	public final static Double maximum(List<Double> sortedDataAscendingOrder){
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, (double) 1);
 	}
 	
+	/**
+	 * Get the median value thru linear interpolations
+	 * 
+	 * @param sortedDataAscendingOrder
+	 * @return Double
+	 */
 	public final static Double median(List<Double> sortedDataAscendingOrder){
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, 0.50);
 	}
 	
+	/**
+	 * Get the firstQuantile value thru linear interpolations
+	 * 
+	 * @param sortedDataAscendingOrder
+	 * @return Double
+	 */
 	public final static Double firstQuantile(List<Double> sortedDataAscendingOrder){
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, 0.25);
 	}
 	
+	/**
+	 * Get the thirdQuantile value thru linear interpolations
+	 * 
+	 * @param sortedDataAscendingOrder
+	 * @return Double
+	 */
 	public final static Double thirdQuantile(List<Double> sortedDataAscendingOrder){
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, 0.75);
 	}
 	
 	/**
 	 * Interpolate linearly an quantile
+	 * 
+	 * Inspired on: http://msenux.redwoods.edu/math/R/boxplot.php
 	 * 
 	 * @param sortedDataAscendingOrder sorted data in ascending order (NOT NULL) 
 	 * @param p percentage

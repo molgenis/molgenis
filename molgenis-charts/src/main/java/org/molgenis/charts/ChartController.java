@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,9 +16,6 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
-import org.molgenis.charts.charttypes.HeatMapChart;
-import org.molgenis.charts.data.DataMatrix;
-import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.Options;
 import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
@@ -66,7 +62,7 @@ public class ChartController
 	public String test(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("queryString", request.getQueryString());
-		return "test";
+		return "test"; //TODO
 	}
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -101,7 +97,7 @@ public class ChartController
 				request.getObservableFeature(), 
 				request.getQuery().getRules(), 
 				request.getSplit(),
-				request.getMultiplyIQR());
+				request.getScale());
 		
 		chart.setHeight(request.getHeight());
 		chart.setWidth(request.getWidth());
