@@ -26,17 +26,16 @@
 						</div>
 					</div>
 					-->
-					
-					<div class="control-group">
-						<label class="control-label" for="scatterplot-select-xaxis-feature">X axis</label>
-						<div class="controls">
-							<select id="scatterplot-select-xaxis-feature" data-placeholder="ObservableValue" name="chart-select-xaxis-feature" class="chosen-select"></select>
-						</div>
-					</div>
 					<div class="control-group">
 						<label class="control-label" for="scatterplot-select-yaxis-feature">Y axis</label>
 						<div class="controls">
 							<select id="scatterplot-select-yaxis-feature" data-placeholder="ObservableValue" name="scatterplot-select-yaxis-feature" class="chosen-select"></select>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="scatterplot-select-xaxis-feature">X axis</label>
+						<div class="controls">
+							<select id="scatterplot-select-xaxis-feature" data-placeholder="ObservableValue" name="chart-select-xaxis-feature" class="chosen-select"></select>
 						</div>
 					</div>
 					<div class="control-group">
