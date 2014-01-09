@@ -25,7 +25,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
-import org.molgenis.omx.biobankconnect.utils.StoreMappingTable;
+import org.molgenis.omx.biobankconnect.utils.StoreMappingRepository;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -284,8 +284,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			{
 				for (Entry<String, List<ObservationSet>> entry : observationSetsPerDataSet.entrySet())
 				{
-					searchService.updateIndexTupleTable(entry.getKey(),
-							new StoreMappingTable(entry.getKey(), entry.getValue(), dataService));
+					searchService.updateRepositoryIndex(new StoreMappingRepository(entry.getKey(), entry.getValue(),
+							dataService));
 				}
 			}
 			else
@@ -295,8 +295,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					StringBuilder dataSetIdentifier = new StringBuilder();
 					dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
 							.append(catalogueId);
-					searchService.indexTupleTable(dataSetIdentifier.toString(),
-							new StoreMappingTable(dataSetIdentifier.toString(), dataService));
+
+					searchService
+							.indexRepository(new StoreMappingRepository(dataSetIdentifier.toString(), dataService));
+
 				}
 			}
 		}

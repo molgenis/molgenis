@@ -173,10 +173,10 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 					}
 
 				}
-				dataService.add(ObservedValue.ENTITY_NAME, obsValueList);
-
 				for (Map.Entry<String, List<Value>> entry : valueMap.entrySet())
 					dataService.add(entry.getKey(), entry.getValue());
+
+				dataService.add(ObservedValue.ENTITY_NAME, obsValueList);
 			}
 
 			if (++rownr % transactionRows == 0)

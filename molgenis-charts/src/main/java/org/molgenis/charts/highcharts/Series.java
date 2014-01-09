@@ -54,8 +54,8 @@ public class Series
 	 * @param type
 	 *            the type to set
 	 */
-	public void setType(String type)
+	public void setType(SeriesType type)
 	{
-		this.type = type;
+		this.type = type.toString();
 	}
 }

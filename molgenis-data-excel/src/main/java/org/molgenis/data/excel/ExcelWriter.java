@@ -15,7 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 
 /**
  * Creates new Excel sheets

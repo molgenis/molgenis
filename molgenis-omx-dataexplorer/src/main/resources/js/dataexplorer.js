@@ -1015,9 +1015,16 @@
 		$('#download-button').click(function() {
 			molgenis.download();
 		});
-
-		// fire event handler
-		$('#dataset-select').change();
+		
+		$('#scatterplot-designer-modal-create-button').click(function(){
+			molgenis.charts.dataexplorer.makeScatterPlotChartRequest(selectedDataSet.identifier, restApi);
+		});
+		$('#boxplot-designer-modal-create-button').click(function(){
+			molgenis.charts.dataexplorer.makeBoxPlotChartRequest(selectedDataSet.identifier, restApi);
+		});
+		$('#heatmap-designer-modal-create-button').click(function(){
+			molgenis.charts.dataexplorer.makeHeatMapChartRequest(selectedDataSet.identifier, restApi);
+		});
 	});
 
     function jqSelector(str)

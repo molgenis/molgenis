@@ -23,10 +23,12 @@ import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Writable;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -34,7 +36,6 @@ import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
@@ -74,7 +75,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		return Iterables.filter(catalogService.getCatalogs(), new Predicate<CatalogMeta>()
 		{
 			@Override
-			public boolean apply(@Nullable CatalogMeta catalogMeta)
+			public boolean apply(@Nullable
+			CatalogMeta catalogMeta)
 			{
 				try
 				{
@@ -219,7 +221,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		{
 			@Nullable
 			@Override
-			public CatalogItem apply(@Nullable final Integer catalogItemId)
+			public CatalogItem apply(@Nullable
+			final Integer catalogItemId)
 			{
 				return catalog.findItem(catalogItemId.toString());
 			}
@@ -293,29 +296,28 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 				}
 			});
 		}
-		ExcelWriter excelWriter = new ExcelWriter(outputStream);
+
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(outputStream);
 		try
 		{
-			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
+			Writable<Entity> writable = excelWriter.createWritable("Variables", header);
 			try
 			{
-				sheetWriter.writeColNames(header);
-
 				if (catalogItems != null)
 				{
 					for (CatalogItem catalogItem : catalogItems)
 					{
-						KeyValueTuple tuple = new KeyValueTuple();
-						tuple.set(header.get(0), catalogItem.getId());
-						tuple.set(header.get(1), catalogItem.getName());
-						tuple.set(header.get(2), catalogItem.getDescription());
-						sheetWriter.write(tuple);
+						Entity entity = new MapEntity();
+						entity.set(header.get(0), catalogItem.getId());
+						entity.set(header.get(1), catalogItem.getName());
+						entity.set(header.get(2), catalogItem.getDescription());
+						writable.add(entity);
 					}
 				}
 			}
 			finally
 			{
-				sheetWriter.close();
+				writable.close();
 			}
 		}
 		finally

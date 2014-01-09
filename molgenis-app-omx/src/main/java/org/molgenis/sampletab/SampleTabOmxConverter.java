@@ -132,7 +132,7 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	// Copy the values from one file to the other by using Tuple
+	// Copy the values from one file to the other by using Entity
 	private void addSDataSetMatrix(WritableFactory<Entity> writableFactory, Repository<? extends Entity> inputSheet,
 			List<String> listOfObservableFeatures) throws IOException
 	{

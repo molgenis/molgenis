@@ -9,8 +9,8 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.omx.biobankconnect.utils.OntologyTable;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermTable;
+import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
+import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.SearchService;
@@ -61,8 +61,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		{
 			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model));
-			searchService.indexTupleTable("ontologyTerm-" + ontologyUri, new OntologyTermTable(model));
+			searchService.indexRepository(new OntologyRepository(model, "ontology-" + ontologyUri));
+			searchService.indexRepository(new OntologyTermRepository(model, "ontologyTerm-" + ontologyUri));
 		}
 		catch (OWLOntologyCreationException e)
 		{

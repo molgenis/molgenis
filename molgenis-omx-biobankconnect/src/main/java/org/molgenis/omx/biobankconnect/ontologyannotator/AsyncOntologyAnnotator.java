@@ -97,20 +97,26 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 		List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
 
-		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.ID, listOfFeatureIds));
-		for (ObservableFeature feature : features)
+		if (!listOfFeatureIds.isEmpty())
 		{
-			List<OntologyTerm> definitions = feature.getDefinitions();
-			if (definitions != null && definitions.size() > 0)
+			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().in(ObservableFeature.ID, listOfFeatureIds));
+			for (ObservableFeature feature : features)
 			{
-				ObservableFeature newFeature = copyObject(feature);
-				newFeature.setDefinitions(new ArrayList<OntologyTerm>());
-				featuresToUpdate.add(newFeature);
+				List<OntologyTerm> definitions = feature.getDefinitions();
+				if (definitions != null && definitions.size() > 0)
+				{
+					ObservableFeature newFeature = copyObject(feature);
+					newFeature.setDefinitions(new ArrayList<OntologyTerm>());
+					featuresToUpdate.add(newFeature);
+				}
 			}
 		}
-		dataService.update(ObservableFeature.ENTITY_NAME, featuresToUpdate);
 
+		if (!featuresToUpdate.isEmpty())
+		{
+			dataService.update(ObservableFeature.ENTITY_NAME, featuresToUpdate);
+		}
 	}
 
 	public ObservableFeature copyObject(ObservableFeature feature)

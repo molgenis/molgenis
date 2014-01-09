@@ -8,7 +8,7 @@ import java.util.List;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.springframework.util.StringUtils;
 
 public abstract class AbstractFileBasedEntitySourceFactory implements FileBasedEntitySourceFactory
@@ -54,9 +54,7 @@ public abstract class AbstractFileBasedEntitySourceFactory implements FileBasedE
 	@Override
 	public EntitySource create(File file)
 	{
-		System.out.println("file:" + file.getAbsolutePath());
 		String extension = StringUtils.getFilenameExtension(file.getName());
-		System.out.println("Extension:" + extension);
 		if (!fileExtensions.contains(extension))
 		{
 			throw new MolgenisDataException("Unsupported file extension [" + extension + "]");

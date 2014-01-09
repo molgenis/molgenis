@@ -3,7 +3,7 @@ package org.molgenis.charts;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.charts.AbstractChart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.highcharts.HighchartService;
 import org.molgenis.charts.r.RChartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class ChartVisualizationServiceFactory
 	 * @param chartType
 	 * @return
 	 */
-	public ChartVisualizationService getVisualizationService(ChartType chartType)
+	public ChartVisualizationService getVisualizationService(MolgenisChartType chartType)
 	{
 		for (ChartVisualizationService service : chartVisualiationServices)
 		{

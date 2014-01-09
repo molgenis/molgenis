@@ -53,6 +53,7 @@ $.ajax({
 	var importedSVGRootElement = document.importNode(svgDoc.documentElement,true);
 	//append the imported SVG root element to the appropriate HTML element
 	$("#container").append(importedSVGRootElement);
+	
 }
 );
 

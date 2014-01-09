@@ -1,20 +1,11 @@
 package org.molgenis.charts.highcharts;
 
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
+
 public enum ChartType
 {
-	LINE("line"),
-	SPLINE("spline"),
-	AREA("area"),
-	AREASPLINE("areaspline"),
-	COLUMN("column"),
-	BAR("bar"),
-	PIE("pie"),
 	SCATTER("scatter"),
-	BOXPLOT("boxplot"),
-	GAUGE("gauge"),
-	AREARANGE("arearange"),
-	AREASPLINERANGE("areasplinerange"),
-	COLUMNRANGE("columnrange");
+	BOXPLOT("boxplot");
 	
 	private String type;
 	
@@ -24,5 +15,22 @@ public enum ChartType
 	
 	public String toString(){
 		return this.type;
+	}
+	
+
+	public static ChartType getChartType(MolgenisChartType molgenisChartType)
+	{
+		if (MolgenisChartType.SCATTER_CHART.equals(molgenisChartType))
+		{
+			return ChartType.SCATTER;
+		}
+		else if (MolgenisChartType.BOXPLOT_CHART.equals(molgenisChartType))
+		{
+			return ChartType.BOXPLOT;
+		}
+		else
+		{
+			return null;
+		}
 	}
 }

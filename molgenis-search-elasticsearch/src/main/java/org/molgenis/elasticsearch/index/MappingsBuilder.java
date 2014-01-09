@@ -2,13 +2,15 @@ package org.molgenis.elasticsearch.index;
 
 import java.io.IOException;
 
+import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.TupleTable;
-import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.elements.Field;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 
 /**
  * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one
@@ -19,42 +21,42 @@ import org.molgenis.model.elements.Field;
  */
 public class MappingsBuilder
 {
-	public static XContentBuilder buildMapping(String documentType, TupleTable tupleTable) throws IOException,
-			TableException
+	public static XContentBuilder buildMapping(Repository<? extends Entity> repository) throws IOException
 	{
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(repository.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("properties");
 
-		for (Field field : tupleTable.getAllColumns())
+		for (AttributeMetaData attr : repository.getAttributes())
 		{
-			String esType = getType(field);
+			String esType = getType(attr);
 			if (esType.equals("string"))
 			{
 
-				jsonBuilder.startObject(field.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(field.getName()).field("type", "string").endObject().startObject("sort")
+				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
+						.startObject(attr.getName()).field("type", "string").endObject().startObject("sort")
 						.field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject();
 
 			}
 			else if (esType.equals("date"))
 			{
 				String dateFormat;
-				if (field.getType().getEnumType() == FieldTypeEnum.DATE) dateFormat = "date"; // yyyy-MM-dd
-				else if (field.getType().getEnumType() == FieldTypeEnum.DATE_TIME) dateFormat = "date_time_no_millis"; // yyyy-MM-dd’T’HH:mm:ssZZ
+				if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE) dateFormat = "date"; // yyyy-MM-dd
+				else if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME) dateFormat = "date_time_no_millis"; // yyyy-MM-dd’T’HH:mm:ssZZ
 				else
 				{
-					throw new TableException("invalid molgenis field type for elasticsearch date format ["
-							+ field.getType().getEnumType() + "]");
+					throw new MolgenisDataException("invalid molgenis field type for elasticsearch date format ["
+							+ attr.getDataType().getEnumType() + "]");
 				}
 
-				jsonBuilder.startObject(field.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(field.getName()).field("type", "date").endObject().startObject("sort")
+				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
+						.startObject(attr.getName()).field("type", "date").endObject().startObject("sort")
 						.field("type", "date").field("format", dateFormat).endObject().endObject().endObject();
 			}
 			else
 			{
-				jsonBuilder.startObject(field.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(field.getName()).field("type", esType).endObject().startObject("sort")
+				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
+						.startObject(attr.getName()).field("type", esType).endObject().startObject("sort")
 						.field("type", esType).endObject().endObject().endObject();
 
 			}
@@ -65,14 +67,9 @@ public class MappingsBuilder
 		return jsonBuilder;
 	}
 
-	/**
-	 * Gets the elasticsearch field type for a molgenis field type
-	 * 
-	 * @throws TableException
-	 */
-	private static String getType(Field field) throws TableException
+	private static String getType(AttributeMetaData attr)
 	{
-		FieldTypeEnum enumType = field.getType().getEnumType();
+		FieldTypeEnum enumType = attr.getDataType().getEnumType();
 		switch (enumType)
 		{
 			case BOOL:
@@ -97,19 +94,12 @@ public class MappingsBuilder
 			case MREF:
 			case XREF:
 			{
-				try
-				{
-					// return type of referenced field
-					return getType(field.getXrefField());
-				}
-				catch (MolgenisModelException e)
-				{
-					throw new RuntimeException(e);
-				}
+				// return type of referenced label field
+				return getType(attr.getRefEntity().getLabelAttribute());
 			}
 			case FILE:
 			case IMAGE:
-				throw new TableException("indexing of molgenis field type [" + enumType + "] not supported");
+				throw new ElasticSearchException("indexing of molgenis field type [" + enumType + "] not supported");
 			default:
 				return "string";
 		}

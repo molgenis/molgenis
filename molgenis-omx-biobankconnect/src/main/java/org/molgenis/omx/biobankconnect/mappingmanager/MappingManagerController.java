@@ -24,7 +24,6 @@ import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
@@ -139,7 +138,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/download", method = RequestMethod.POST)
 	public void download(@RequestParam("request")
-	String requestString, HttpServletResponse response) throws IOException, TableException
+	String requestString, HttpServletResponse response) throws IOException
 	{
 		requestString = URLDecoder.decode(requestString, "UTF-8");
 		logger.info("Download request: [" + requestString + "]");
