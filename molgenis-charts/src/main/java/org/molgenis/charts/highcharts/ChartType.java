@@ -4,19 +4,8 @@ import org.molgenis.charts.AbstractChart.MolgenisChartType;
 
 public enum ChartType
 {
-	LINE("line"),
-	SPLINE("spline"),
-	AREA("area"),
-	AREASPLINE("areaspline"),
-	COLUMN("column"),
-	BAR("bar"),
-	PIE("pie"),
 	SCATTER("scatter"),
-	BOXPLOT("boxplot"),
-	GAUGE("gauge"),
-	AREARANGE("arearange"),
-	AREASPLINERANGE("areasplinerange"),
-	COLUMNRANGE("columnrange");
+	BOXPLOT("boxplot");
 	
 	private String type;
 	
@@ -31,11 +20,7 @@ public enum ChartType
 
 	public static ChartType getChartType(MolgenisChartType molgenisChartType)
 	{
-		if (MolgenisChartType.LINE_CHART.equals(molgenisChartType))
-		{
-			return ChartType.LINE;
-		}
-		else if (MolgenisChartType.SCATTER_CHART.equals(molgenisChartType))
+		if (MolgenisChartType.SCATTER_CHART.equals(molgenisChartType))
 		{
 			return ChartType.SCATTER;
 		}

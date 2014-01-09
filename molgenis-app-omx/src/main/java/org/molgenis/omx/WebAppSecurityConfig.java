@@ -1,21 +1,27 @@
 package org.molgenis.omx;
 
-import static org.molgenis.security.SecurityUtils.defaultPluginAuthorities;
 import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
 
 @Configuration
 @EnableWebSecurity
@@ -24,204 +30,26 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
 
+	@Autowired
+	private MolgenisAccessDecisionVoter molgenisAccessDecisionVoter;
+
+	@Autowired
+	private RoleVoter roleVoter;
+
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
+		@SuppressWarnings("rawtypes")
+		List<AccessDecisionVoter> listOfVoters = new ArrayList<AccessDecisionVoter>();
+		listOfVoters.add(new WebExpressionVoter());
+		listOfVoters.add(new MolgenisAccessDecisionVoter());
+		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
-		expressionInterceptUrlRegistry
-				.antMatchers("/")
-				.permitAll()
-
-				// main menu
-				.antMatchers("/menu/main")
-				.hasAnyAuthority(
-						defaultPluginAuthorities("home", "background", "news", "references", "contact",
-								"protocolviewer", "dataexplorer", "entityexplorer", "workflowdataentry",
-								"importwizard", "useraccount", "mappingmanager", "biobankconnect", "evaluation"))
-
-				// main menu plugins
-				.antMatchers("/menu/main/home/**", "/plugin/home/**")
-				.hasAnyAuthority(defaultPluginAuthorities("home"))
-
-				.antMatchers("/menu/background/news/**", "/plugin/news/**")
-				.hasAnyAuthority(defaultPluginAuthorities("news"))
-
-				.antMatchers("/menu/background/background/**", "/plugin/background/**")
-				.hasAnyAuthority(defaultPluginAuthorities("background"))
-
-				.antMatchers("/menu/background/contact/**", "/plugin/contact/**")
-				.hasAnyAuthority(defaultPluginAuthorities("contact"))
-
-				.antMatchers("/menu/background/references/**", "/plugin/references/**")
-				.hasAnyAuthority(defaultPluginAuthorities("news"))
-
-				.antMatchers("/menu/main/protocolviewer/**", "/plugin/protocolviewer/**")
-				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
-
-				.antMatchers("/menu/main/dataexplorer/**", "/plugin/dataexplorer/**")
-				.hasAnyAuthority(defaultPluginAuthorities("dataexplorer"))
-
-				.antMatchers("/menu/main/entityexplorer/**", "/plugin/entityexplorer/**")
-				.hasAnyAuthority(defaultPluginAuthorities("entityexplorer"))
-
-				.antMatchers("/menu/main/genomebrowser/**", "/plugin/genomebrowser/**")
-				.hasAnyAuthority(defaultPluginAuthorities("genomebrowser"))
-
-				.antMatchers("/plugin/protocolviewer/**")
-				.hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
-
-				.antMatchers("/menu/main/workflowdataentry/**", "/plugin/workflowdataentry/**")
-				.hasAnyAuthority(defaultPluginAuthorities("workflowdataentry"))
-
-				.antMatchers("/menu/main/importwizard/**", "/plugin/importwizard/**")
-				.hasAnyAuthority(defaultPluginAuthorities("importwizard"))
-
-				.antMatchers("/menu/main/useraccount/**", "/plugin/useraccount/**")
-				.hasAnyAuthority(defaultPluginAuthorities("useraccount"))
-
-				.antMatchers("/menu/biobankconnect/biobankconnect/**", "/plugin/biobankconnect/**")
-				.hasAnyAuthority(defaultPluginAuthorities("biobankconnect"))
-
-				.antMatchers("/menu/biobankconnect/mappingmanager/**", "/plugin/mappingmanager/**")
-				.hasAnyAuthority(defaultPluginAuthorities("mappingmanager"))
-
-				.antMatchers("/menu/biobankconnect/evaluation/**", "/plugin/evaluation/**")
-				.hasAnyAuthority(defaultPluginAuthorities("evaluation"))
-
-				.antMatchers("/menu/biobankconnect/ontologyindexer/**", "/plugin/ontologyindexer/**")
-				.hasAnyAuthority(defaultPluginAuthorities("ontologyindexer"))
-
-				// converters menu
-				.antMatchers("/menu/converters")
-				.hasAnyAuthority(defaultPluginAuthorities("cbmtoomxconverter"))
-
-				// converters menu plugins
-				.antMatchers("/menu/converters/cbmtoomxconverter/**", "/plugin/cbmtoomxconverter/**")
-				.hasAnyAuthority(defaultPluginAuthorities("cbmtoomxconverter"))
-
-				// entities menu
-				.antMatchers("/menu/entities")
-				.hasAnyAuthority(
-						defaultPluginAuthorities("formdataSet", "formprotocol", "formobservablefeature",
-								"formcategory", "formstudydatarequest", "formruntimeproperty", "formmolgenisuser",
-								"formmolgenisgroup"))
-
-				// entities menu plugins
-				.antMatchers("/menu/entities/form.DataSet/**", "/plugin/form.DataSet/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formdataSet"))
-
-				.antMatchers("/menu/entities/form.Protocol/**", "/plugin/form.Protocol/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formprotocol"))
-
-				.antMatchers("/menu/entities/form.ProtocolFlow/**", "/plugin/form.ProtocolFlow/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formprotocolflow"))
-
-				.antMatchers("/menu/entities/form.ObservationSetFlow/**", "/plugin/form.ObservationSetFlow/**")
-				.hasAnyAuthority(defaultPluginAuthorities("observationsetflow"))
-
-				.antMatchers("/menu/entities/form.ObservableFeature/**", "/plugin/form.ObservableFeature/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formobservablefeature"))
-
-				.antMatchers("/menu/entities/form.Category/**", "/plugin/form.Category/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formcategory"))
-
-				.antMatchers("/menu/entities/form.StudyDataRequest/**", "/plugin/form.StudyDataRequest/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formstudydatarequest"))
-
-				.antMatchers("/menu/entities/form.RuntimeProperty/**", "/plugin/form.RuntimeProperty/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formruntimeproperty"))
-
-				.antMatchers("/menu/entities/form.MolgenisUser/**", "/plugin/form.MolgenisUser/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisuser"))
-
-				.antMatchers("/menu/entities/form.MolgenisGroup/**", "/plugin/form.MolgenisGroup/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formmolgenisgroup"))
-
-				// values menu
-				.antMatchers("/menu/values")
-				.hasAnyAuthority(
-						defaultPluginAuthorities("formboolvalue", "formcategoricalvalue", "formdatevalue",
-								"formdatetimevalue", "formdecimalvalue", "formemailvalue", "formhtmlvalue",
-								"formhyperlinkvalue", "formintvalue", "formlongvalue", "formmrefvalue",
-								"formstringvalue", "formtextvalue", "formxrefvalue"))
-
-				// values menu plugins
-				.antMatchers("/menu/values/form.BoolValue/**", "/plugin/form.BoolValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formboolvalue"))
-
-				.antMatchers("/menu/values/form.CategoricalValue/**", "/plugin/form.CategoricalValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formcategoricalvalue"))
-
-				.antMatchers("/menu/values/form.DateValue/**", "/plugin/form.DateValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formdatevalue"))
-
-				.antMatchers("/menu/values/form.DateTimeValue/**", "/plugin/form.DateTimeValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formdatetimevalue"))
-
-				.antMatchers("/menu/values/form.DecimalValue/**", "/plugin/form.DecimalValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formdecimalvalue"))
-
-				.antMatchers("/menu/values/form.EmailValue/**", "/plugin/form.EmailValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formemailvalue"))
-
-				.antMatchers("/menu/values/form.HtmlValue/**", "/plugin/form.HtmlValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formhtmlvalue"))
-
-				.antMatchers("/menu/values/form.HyperlinkValue/**", "/plugin/form.HyperlinkValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formhyperlinkvalue"))
-
-				.antMatchers("/menu/values/form.IntValue/**", "/plugin/form.IntValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formintvalue"))
-
-				.antMatchers("/menu/values/form.LongValue/**", "/plugin/form.LongValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formlongvalue"))
-
-				.antMatchers("/menu/values/form.MrefValue/**", "/plugin/form.MrefValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formmrefvalue"))
-
-				.antMatchers("/menu/values/form.StringValue/**", "/plugin/form.StringValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formstringvalue"))
-
-				.antMatchers("/menu/values/form.TextValue/**", "/plugin/form.TextValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formtextvalue"))
-
-				.antMatchers("/menu/values/form.XrefValue/**", "/plugin/form.XrefValue/**")
-				.hasAnyAuthority(defaultPluginAuthorities("formxrefvalue"))
-
-				// admin menu
-				.antMatchers("/menu/admin")
-				.hasAnyAuthority(
-						defaultPluginAuthorities("permissionmanager", "usermanager", "catalogmanager", "studymanager",
-								"dataindexer", "datasetdeleter"))
-
-				// admin menu plugins
-				.antMatchers("/menu/admin/permissionmanager/**", "/plugin/permissionmanager/**")
-				.hasAnyAuthority(defaultPluginAuthorities("permissionmanager"))
-
-				.antMatchers("/menu/admin/usermanager/**", "/plugin/usermanager/**")
-				.hasAnyAuthority(defaultPluginAuthorities("usermanager"))
-
-				.antMatchers("/menu/admin/catalogmanager/**", "/plugin/catalogmanager/**")
-				.hasAnyAuthority(defaultPluginAuthorities("catalogmanager"))
-
-				.antMatchers("/menu/admin/studymanager/**", "/plugin/studymanager/**")
-				.hasAnyAuthority(defaultPluginAuthorities("studymanager"))
-
-				.antMatchers("/menu/admin/dataindexer/**", "/plugin/dataindexer/**")
-				.hasAnyAuthority(defaultPluginAuthorities("dataindexer"))
-
-				.antMatchers("/menu/admin/datasetdeleter/**", "/plugin/datasetdeleter/**")
-				.hasAnyAuthority(defaultPluginAuthorities("datasetdeleter"))
-
-				// protocol viewer plugin dependencies
-				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
-
-				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
-
-				// DAS datasource uses the database, unautheticated users can
-				// not see any data
+		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
+		// DAS datasource uses the database, unautheticated users can
+		// not see any data
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()
@@ -321,5 +149,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		RoleHierarchyImpl roleHierarchyImpl = new RoleHierarchyImpl();
 		roleHierarchyImpl.setHierarchy(hierarchyBuilder.toString());
 		return roleHierarchyImpl;
+	}
+
+	@Bean
+	public MolgenisAccessDecisionVoter molgenisAccessDecisionVoter()
+	{
+		return new MolgenisAccessDecisionVoter();
 	}
 }

@@ -3,7 +3,6 @@ package org.molgenis.charts.requests;
 import java.util.List;
 
 import org.molgenis.charts.charttypes.HeatMapScale;
-import org.molgenis.data.QueryRule;
 
 public class HeatMapRequest extends ChartRequest
 {
@@ -12,9 +11,6 @@ public class HeatMapRequest extends ChartRequest
 
 	// The row label attribute name
 	private String y;
-
-	// The query rules to select the rows
-	private List<QueryRule> queryRules;
 	
 	// Option to set scaling of rows or columns (or none)
 	private HeatMapScale scale;

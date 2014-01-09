@@ -11,6 +11,10 @@
 	var searchApi = new molgenis.SearchClient();
 	var aggregateView = false;
 	
+	molgenis.getSelectedDataSetIdentifier = function() {
+		return selectedDataSet.identifier;
+	};
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -1015,9 +1019,6 @@
 		$('#download-button').click(function() {
 			molgenis.download();
 		});
-
-		// fire event handler
-		$('#dataset-select').change();
 	});
 
     function jqSelector(str)
