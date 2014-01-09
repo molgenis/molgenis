@@ -8,6 +8,23 @@ public class BoxPlotChartRequest extends ChartRequest
 	private String observableFeature;
 
 	private String split;
+	private Double scale;
+
+	/**
+	 * @return the multiplyIQR
+	 */
+	public Double getScale()
+	{
+		return scale;
+	}
+
+	/**
+	 * @param multiply the IQR with scale
+	 */
+	public void setScale(Double scale)
+	{
+		this.scale = scale;
+	}
 
 	/**
 	 * @return the observableFeature

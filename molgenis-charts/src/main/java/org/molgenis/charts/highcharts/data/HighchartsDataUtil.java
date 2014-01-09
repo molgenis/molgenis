@@ -9,22 +9,19 @@ import org.apache.log4j.Logger;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
-import org.molgenis.charts.highcharts.ChartType;
 import org.molgenis.charts.highcharts.Series;
+import org.molgenis.charts.highcharts.SeriesType;
 
-/**
- * @author jonathanjetten
- */
 public class HighchartsDataUtil
 {
 	private static final Logger logger = Logger.getLogger(HighchartsDataUtil.class);
 
-	public static List<Series> parseToSeriesList(List<XYDataSerie> xYDataSeries, ChartType chartType)
+	public static List<Series> parseToXYDataSeriesList(List<XYDataSerie> xYDataSeries)
 	{
 		List<Series> series = new ArrayList<Series>();
 		for (XYDataSerie xYDataSerie : xYDataSeries)
 		{
-			series.add(parseToSeries(xYDataSerie, chartType));
+			series.add(parseToSeries(xYDataSerie));
 		}
 		return series;
 	}
@@ -39,11 +36,11 @@ public class HighchartsDataUtil
 		return series;
 	}
 
-	public static Series parseToSeries(XYDataSerie xYDataSerie, ChartType chartType)
+	public static Series parseToSeries(XYDataSerie xYDataSerie)
 	{
 		Series series = new Series();
 		series.setName(xYDataSerie.getName());
-		series.setType(chartType);
+		series.setType(SeriesType.getSeriesType(xYDataSerie.getType()));
 		series.setData(parseToXYDataList(xYDataSerie.getData(), xYDataSerie.getAttributeXJavaType(), xYDataSerie.getAttributeYJavaType()));
 		return series;
 	}
@@ -79,6 +76,11 @@ public class HighchartsDataUtil
 		else if (Timestamp.class == clazz)
 		{
 			return (Long) ((Timestamp) value).getTime();
+		}
+		else if (String.class == clazz)
+		{
+			//Highcharts uses the string value of the x axis as the name of the point
+			return value;
 		}
 		else
 		{

@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.molgenis.charts.data.ChartDataServiceImpl;
 
 public enum MolgenisAxisType
 {
@@ -25,7 +24,6 @@ public enum MolgenisAxisType
 	 */
 	public static MolgenisAxisType getType(Class<?> javaType)
 	{	
-		logger.info("javaType: " + javaType);
 		if(Double.class == javaType)
 		{
 			return MolgenisAxisType.LINEAR;

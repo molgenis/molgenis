@@ -12,11 +12,6 @@ import org.molgenis.charts.highcharts.data.HighchartsDataUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
-/**
- * 
- * @author jonathanjetten
- * 
- */
 @Component
 public class HighchartService extends AbstractChartVisualizationService
 {
@@ -31,13 +26,7 @@ public class HighchartService extends AbstractChartVisualizationService
 	@Override
 	protected Object renderChartInternal(AbstractChart chart, Model model)
 	{
-		logger.info("renderChartInternal() --- chart.getType(): " + chart.getType());
-		
-		if (MolgenisChartType.LINE_CHART.equals(chart.getType()))
-		{
-			return this.createLineChart((XYDataChart) chart, model);
-		}
-		else if (MolgenisChartType.SCATTER_CHART.equals(chart.getType()))
+		if (MolgenisChartType.SCATTER_CHART.equals(chart.getType()))
 		{
 			return this.createScatterChart((XYDataChart) chart, model);
 		}
@@ -53,11 +42,6 @@ public class HighchartService extends AbstractChartVisualizationService
 		return createXYDataChart(scatterChart, model);
 	}
 	
-	private Options createLineChart(XYDataChart lineChart, Model model)
-	{
-		return createXYDataChart(lineChart, model);
-	}
-	
 	private Options createBoxPlotChart(BoxPlotChart boxPlotChart, Model model)
 	{
 		Options options = new Options();
@@ -68,6 +52,7 @@ public class HighchartService extends AbstractChartVisualizationService
 			.setHeight(boxPlotChart.getHeight());
 		
 		XAxis xAxis = new XAxis();
+		xAxis.setCategories(boxPlotChart.getCategories());
 		
 		YAxis yAxis = new YAxis();
 		yAxis.setTitle(new AxisTitle()
@@ -77,8 +62,10 @@ public class HighchartService extends AbstractChartVisualizationService
 			.setText(boxPlotChart.getTitle())
 			.setAlign(ChartAlign.CENTER);
 		
-		options.setSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
-				boxPlotChart.getSeries()));
+		options.addSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
+				boxPlotChart.getBoxPlotSeries()));
+		options.addSeries(HighchartsDataUtil.parseToXYDataSeriesList(
+				boxPlotChart.getxYDataSeries()));
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
@@ -115,9 +102,8 @@ public class HighchartService extends AbstractChartVisualizationService
 			.setText(xYDataChart.getTitle())
 			.setAlign(ChartAlign.CENTER);
 		
-		options.setSeries(HighchartsDataUtil.parseToSeriesList(
-				xYDataChart.getData(), 
-				ChartType.getChartType(xYDataChart.getType())));
+		options.setSeries(HighchartsDataUtil.parseToXYDataSeriesList(
+				xYDataChart.getData()));
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
