@@ -22,7 +22,7 @@
 					<div class="control-group">
 						<label class="control-label" for="boxplot-scale">Outliers scale</label>
 						<div class="controls">
-							<input type="text" id="boxplot-scale" placeholder="default is zero (double)">
+							<input type="text" id="boxplot-scale" placeholder="default is 1.5">
 						</div>
 					</div>
 					<div class="control-group">
