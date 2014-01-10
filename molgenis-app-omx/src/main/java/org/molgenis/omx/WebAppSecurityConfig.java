@@ -1,21 +1,27 @@
 package org.molgenis.omx;
 
-import static org.molgenis.security.SecurityUtils.defaultPluginAuthorities;
 import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +29,12 @@ import org.springframework.security.core.authority.AuthorityUtils;
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
 	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
+
+	@Autowired
+	private MolgenisAccessDecisionVoter molgenisAccessDecisionVoter;
+
+	@Autowired
+	private RoleVoter roleVoter;
 
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
@@ -221,10 +233,21 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				// protocol viewer plugin dependencies
 				.antMatchers("/plugin/study/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
 
-				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"))
+				.antMatchers("/cart/**").hasAnyAuthority(defaultPluginAuthorities("protocolviewer"));
 
 				// DAS datasource uses the database, unautheticated users can
 				// not see any data
+
+		@SuppressWarnings("rawtypes")
+		List<AccessDecisionVoter> listOfVoters = new ArrayList<AccessDecisionVoter>();
+		listOfVoters.add(new WebExpressionVoter());
+		listOfVoters.add(new MolgenisAccessDecisionVoter());
+		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
+
+		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
+		// DAS datasource uses the database, unautheticated users can
+		// not see any data
+
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()
@@ -324,5 +347,11 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		RoleHierarchyImpl roleHierarchyImpl = new RoleHierarchyImpl();
 		roleHierarchyImpl.setHierarchy(hierarchyBuilder.toString());
 		return roleHierarchyImpl;
+	}
+
+	@Bean
+	public MolgenisAccessDecisionVoter molgenisAccessDecisionVoter()
+	{
+		return new MolgenisAccessDecisionVoter();
 	}
 }

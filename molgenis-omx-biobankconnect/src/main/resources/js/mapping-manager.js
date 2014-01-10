@@ -228,7 +228,7 @@
 			$.each(tuple, function(index, mappings){
 				if(mappings.length > 1){
 					mappings.sort(function(a,b){
-						return naturalSort(b.score, a.score);
+						return molgenis.naturalSort(b.score, a.score);
 					});
 				}
 			});
@@ -791,7 +791,7 @@
 			$.each(map, function(score, mappings){
 				if(mappings.length > 1 && score > 0){
 					mappings.sort(function(a,b){
-						return naturalSort(b.comparedScore, a.comparedScore);
+						return molgenis.naturalSort(b.comparedScore, a.comparedScore);
 					});
 				}
 				topTenOrder = topTenOrder.concat(mappings);

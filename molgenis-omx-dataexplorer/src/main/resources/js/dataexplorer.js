@@ -11,6 +11,10 @@
 	var searchApi = new molgenis.SearchClient();
 	var aggregateView = false;
 	
+	molgenis.getSelectedDataSetIdentifier = function() {
+		return selectedDataSet.identifier;
+	};
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -273,11 +277,11 @@
 			case "text":
 			case "string":
 
-				if (divContainer.find('#text_'+feature.identifier).val() == "") {
+				if (divContainer.find('#'+jqSelector('text_'+feature.identifier)).val() == "") {
 					 $(applyButton).prop('disabled',true);
 				}
-				divContainer.find('#text_'+feature.identifier).keyup(function(e){
-                    if (divContainer.find('#text_'+feature.identifier).val() == "") {
+				divContainer.find('#'+jqSelector('text_'+feature.identifier)).keyup(function(e){
+                    if (divContainer.find('#'+jqSelector('text_'+feature.identifier)).val() == "") {
                     	$(applyButton).prop('disabled',true);
                     } else {
                     	$(applyButton).prop('disabled',false);
@@ -289,7 +293,7 @@
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $('#text_'+feature.identifier).val() ]
+						values : [ $('#'+jqSelector('text_'+feature.identifier)).val() ]
 					});
 					$('.feature-filter-dialog').dialog('close');
 				});
@@ -352,7 +356,7 @@
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [ $('#from_'+feature.identifier).val(), $('#to_'+feature.identifier).val() ],
+						values : [ $('#'+jqSelector('from_'+feature.identifier)).val(), $('#'+jqSelector('to_'+feature.identifier)).val() ],
 						range : true
 					});
 					$('.feature-filter-dialog').dialog('close');
@@ -469,7 +473,7 @@
 				}
 				divContainer.append(filter);
 				if(wizard){
-					$('#text_'+feature.identifier).change( function() {
+					$('#'+jqSelector('text_'+feature.identifier)).change( function() {
 						molgenis.updateFeatureFilter(featureUri, {
 							name : feature.name,
 							identifier : feature.identifier,
@@ -492,7 +496,7 @@
 				}
 				
 				datePickerFrom.on('changeDate', function(e) {
-					$('#date-feature-to_'+feature.identifier+'').val($('#date-feature-from_'+feature.identifier+'').val());
+					$('#'+jqSelector('date-feature-to_'+feature.identifier+'')).val($('#'+jqSelector('date-feature-from_'+feature.identifier+'')).val());
 				});
 
 				var datePickerTo = $('<div id="to_'+feature.identifier+'" class="input-append date" />');
@@ -523,30 +527,30 @@
 				
 				fromFilter.on('keyup input', function() {
 					// If 'from' changed set 'to' at the same value
-					$('#to_'+feature.identifier+'').val($('#from_'+feature.identifier+'').val());
+					$('#'+jqSelector('to_'+feature.identifier+'')).val($('#'+jqSelector('from_'+feature.identifier+'')).val());
 				});
 	
 				filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
 				
 				divContainer.append(filter);
 				if(wizard){
-					divContainer.find('#from_'+feature.identifier).change(function() {
+					divContainer.find('#'+jqSelector('from_'+feature.identifier)).change(function() {
 						
 						molgenis.updateFeatureFilter(featureUri, {
 							name : feature.name,
 							identifier : feature.identifier,
 							type : feature.dataType,
-							values : [ $('#from_'+feature.identifier).val(), $('#to_'+feature.identifier).val() ],
+							values : [ $('#'+jqSelector('from_'+feature.identifier)).val(), $('#'+jqSelector('to_'+feature.identifier)).val() ],
 							range : true
 						});
 					
 					});
-					divContainer.find('#to_'+feature.identifier).change(function() {
+					divContainer.find('#'+jqSelector('to_'+feature.identifier)).change(function() {
 						molgenis.updateFeatureFilter(featureUri, {
 							name : feature.name,
 							identifier : feature.identifier,
 							type : feature.dataType,
-							values : [ $('#from_'+feature.identifier).val(), $('#to_'+feature.identifier).val() ],
+							values : [ $('#'+jqSelector('from_'+feature.identifier)).val(), $('#'+jqSelector('to_'+feature.identifier)).val() ],
 							range : true
 						});
 					});
@@ -623,7 +627,7 @@
 			}
 
 			if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
-				$('#text_'+feature.identifier).autocomplete({
+				$('#'+jqSelector('text_'+feature.identifier)).autocomplete({
 					source: function( request, response ) {
 						$.ajax({
 							type : 'POST',
@@ -663,7 +667,7 @@
 							identifier : feature.identifier,
 							type : feature.dataType,
 							range: true,
-							values : [ $('#date-feature-from_'+feature.identifier+'').val(), $('#date-feature-to_'+feature.identifier+'').val()]
+							values : [ $('#'+jqSelector('date-feature-from_'+feature.identifier+'')).val(), $('#date-feature-to_'+feature.identifier+'').val()]
 						});
 				    });
 				}
@@ -681,7 +685,7 @@
 							identifier : feature.identifier,
 							type : feature.dataType,
 							range: true,
-							values : [ $('#date-feature-from_'+feature.identifier+'').val().replace("'T'", "T"), $('#date-feature-to_'+feature.identifier+'').val().replace("'T'", "T")]
+							values : [ $('#'+jqSelector('date-feature-from_'+feature.identifier+'')).val().replace("'T'", "T"), $('#'+jqSelector('date-feature-to_'+feature.identifier+'')).val().replace("'T'", "T")]
 						});
 					});	
 				}
@@ -1015,8 +1019,10 @@
 		$('#download-button').click(function() {
 			molgenis.download();
 		});
-
-		// fire event handler
-		$('#dataset-select').change();
 	});
+
+    function jqSelector(str)
+    {
+        return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
+    }
 }($, window.top.molgenis = window.top.molgenis || {}));

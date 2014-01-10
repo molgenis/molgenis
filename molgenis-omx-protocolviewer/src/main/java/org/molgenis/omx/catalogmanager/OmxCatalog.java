@@ -8,47 +8,15 @@ import java.util.Map;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 
-public class OmxCatalog implements Catalog
+public class OmxCatalog extends OmxCatalogFolder implements Catalog
 {
-	private final DataSet dataSet;
 	private transient Map<String, CatalogItem> catalogItemIndex;
 
-	public OmxCatalog(DataSet dataSet)
+	public OmxCatalog(Protocol protocol)
 	{
-		if (dataSet == null) throw new IllegalArgumentException("Data set is null");
-		this.dataSet = dataSet;
-	}
-
-	@Override
-	public String getId()
-	{
-		return dataSet.getIdentifier();
-	}
-
-	@Override
-	public String getName()
-	{
-		return dataSet.getName();
-	}
-
-	@Override
-	public String getDescription()
-	{
-		return dataSet.getDescription();
-	}
-
-	@Override
-	public List<CatalogFolder> getChildren()
-	{
-		return Collections.<CatalogFolder> singletonList(new OmxCatalogFolder(dataSet.getProtocolUsed()));
-	}
-
-	@Override
-	public List<CatalogItem> getItems()
-	{
-		return Collections.emptyList();
+		super(protocol);
 	}
 
 	@Override

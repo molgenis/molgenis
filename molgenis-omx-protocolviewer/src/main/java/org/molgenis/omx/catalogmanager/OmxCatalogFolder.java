@@ -23,7 +23,7 @@ public class OmxCatalogFolder implements CatalogFolder
 	@Override
 	public String getId()
 	{
-		return protocol.getIdentifier();
+		return protocol.getId().toString();
 	}
 
 	@Override

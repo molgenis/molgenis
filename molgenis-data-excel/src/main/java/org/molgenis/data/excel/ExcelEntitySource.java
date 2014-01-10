@@ -18,7 +18,7 @@ import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 
 /**
  * Excel file EntitySource. Is a wrapper around an excel workbook.
@@ -76,7 +76,12 @@ public class ExcelEntitySource implements EntitySource
 		this.cellProcessors = cellProcessors;
 	}
 
-	protected ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
+	public ExcelEntitySource(File file) throws IOException
+	{
+		this(file, null);
+	}
+
+	public ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
 	{
 		this(new FileInputStream(file), EXCEL_ENTITYSOURCE_URL_PREFIX + file.getAbsolutePath(), cellProcessors);
 	}

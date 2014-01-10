@@ -13,15 +13,13 @@ public class XYDataChart extends AbstractChart
 	private String yAxisLabel;
 	private MolgenisAxisType xAxisType;
 	private MolgenisAxisType yAxisType;
-	private final List<XYDataSerie> data;
+	private List<XYDataSerie> data;
 
 	public XYDataChart(
-			ChartType type,
 			List<XYDataSerie> data,
 			MolgenisAxisType xAxisType, 
 			MolgenisAxisType yAxisType)
 	{
-		super(type);
 		if (data == null) throw new IllegalArgumentException("data is null");
 		if (xAxisType == null) throw new IllegalArgumentException("xAxisType is null");
 		if (yAxisType == null) throw new IllegalArgumentException("yAxisType is null");
@@ -29,7 +27,7 @@ public class XYDataChart extends AbstractChart
 		this.xAxisType = xAxisType;
 		this.yAxisType = yAxisType;
 	}
-
+	
 	/**
 	 * @return the xAxisLabel
 	 */
@@ -102,4 +100,11 @@ public class XYDataChart extends AbstractChart
 		return data;
 	}
 	
+	/**
+	 * @return the data
+	 */
+	public void setData(List<XYDataSerie> data)
+	{
+		this.data = data;
+	}
 }

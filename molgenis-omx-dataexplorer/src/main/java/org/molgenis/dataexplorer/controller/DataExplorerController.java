@@ -30,7 +30,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
@@ -50,6 +49,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.Lists;
 
 //import org.molgenis.data.csv
 
@@ -114,8 +115,7 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.ACTIVE, true));
+		List<DataSet> dataSets = Lists.<DataSet> newArrayList(dataService.<DataSet> findAll(DataSet.ENTITY_NAME));
 
 		model.addAttribute("dataSets", dataSets);
 
@@ -156,7 +156,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/download", method = POST)
 	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");

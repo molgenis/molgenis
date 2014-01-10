@@ -20,7 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.poi.util.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
