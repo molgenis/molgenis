@@ -18,7 +18,6 @@ public class VariomeServiceImpl implements VariomeService
 	public File vcfFile(File vcfFile, Model model) {
 		// TODO Parse vcf file into list for html table
 		
-		
 		model.addAttribute("parsed", vcfFile);
 		
 		return null;

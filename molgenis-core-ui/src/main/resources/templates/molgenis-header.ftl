@@ -79,7 +79,6 @@
 		<div class="navbar"> 
 			<div class="navbar navbar-inner"> 	
 				<ul class="nav">
-					<li><a class="logo-anchor"><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
 					<#list menu.items as item>
 						<#if item.type != "MENU">
 							<#if item.name=="Home">

@@ -58,8 +58,8 @@ public class VariomeController extends MolgenisPluginController{
 		return "view-variome";
 	}
 	
-	@RequestMapping(value = "/upload", method = RequestMethod.POST)
-	public String submitMyForm(@RequestParam("file") Part part, Model model) throws IOException {
+	@RequestMapping(value = "/upload-vcf", method = RequestMethod.POST)
+	public String handleVcfInput(@RequestParam("file") Part part, Model model) throws IOException {
  
 		if (!part.equals(null) && part.getSize() > 5000000){ // 5mb limit
 			throw new RuntimeException("File too large");
@@ -73,6 +73,24 @@ public class VariomeController extends MolgenisPluginController{
 		}
  
 		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/upload-pasted-vcf", method = RequestMethod.POST)
+	public String handleManualInput() {
+		
+		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/upload-zip", method = RequestMethod.POST)
+	public String handleZipInput() {
+		
+		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/execute-variant-app", method = RequestMethod.POST)
+	public String filterMyVariants() {
+		
+		return "view-result-page";
 	}
 	
 	@ExceptionHandler(RuntimeException.class)

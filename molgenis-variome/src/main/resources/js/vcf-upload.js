@@ -1,4 +1,4 @@
-(function fileSelected() {
+function fileSelected() {
         var file = document.getElementById('fileToUpload').files[0];
         if (file) {
           var fileSize = 0;
@@ -47,4 +47,4 @@
       function uploadCanceled(evt) {
         alert("The upload has been canceled by the user or the browser dropped the connection.");
       };
-);
+
