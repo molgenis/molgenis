@@ -87,6 +87,12 @@ public class VariomeController extends MolgenisPluginController{
 		return "view-variome";
 	}
 	
+	@RequestMapping(value = "/upload-pasted-gene-list", method = RequestMethod.POST)
+	public String handlePastedGeneList() {
+		
+		return "view-variome";
+	}
+	
 	@RequestMapping(value = "/execute-variant-app", method = RequestMethod.POST)
 	public String filterMyVariants() {
 		
