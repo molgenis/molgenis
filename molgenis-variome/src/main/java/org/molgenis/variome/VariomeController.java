@@ -88,7 +88,25 @@ public class VariomeController extends MolgenisPluginController{
 	}
 	
 	@RequestMapping(value = "/upload-pasted-gene-list", method = RequestMethod.POST)
-	public String handlePastedGeneList() {
+	public String handleGeneInput() {
+		
+		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/upload-region-filter", method = RequestMethod.POST)
+	public String handleRegionInput() {
+		
+		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/upload-bed", method = RequestMethod.POST)
+	public String handleBedInput() {
+		
+		return "view-variome";
+	}
+	
+	@RequestMapping(value = "/upload-phenotype-filter", method = RequestMethod.POST)
+	public String handlePhenotypeInput() {
 		
 		return "view-variome";
 	}
