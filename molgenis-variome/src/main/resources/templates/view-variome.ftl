@@ -21,90 +21,88 @@
 				    <li><a href="#panel-1-tab-4"><span>Database select</span></a></li>
 			  	</ul>
 			  	
-			  	<div class="panel-1-tab-1">
-				  	<div id="panel-1-tab-1">
-				    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data">
-							<div class="form-group">
-    							<div class="fileupload fileupload-new" data-provides="fileupload">
-        							<div class="input-group">
-            							
-            							<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
-                							<span class="fileupload-preview"></span>
-            							</div>
-            							
-            							<div class="input-group-btn">
-							                
-							                <a class="btn btn-default btn-file">
-							                    <span class="fileupload-new">Select file</span>
-							                    <span class="fileupload-exists">Change</span>
-							                    <input type="file" class="file-input"/>
-							            	</a>
-							            	
-							                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
-							                	Remove
-							                </a>
-							                
-							            </div>
-							        </div>
-							    </div>
-							</div>
-					
-							<button type="submit" class="btn">Add</button>	
-						</form>
-				  	</div>
-				  	
-				  	<div id="panel-1-tab-2">
-				  		<h5>Copy paste your variants in the text box below</h5>
-				  		<form role="form" action="${context_url}/upload-pasted-vcf" method="post">
-				  			<label>
-				    			<textarea class="input-block-level" rows="3"></textarea>
-				    		</label>
-				    	
-				    		<button type="submit" class="btn">Add</button>
-				    	</form>	
-				  	</div>
-				  	
-				  	<div id="panel-1-tab-3">
-				    	<div class="form-group">
-    							<div class="fileupload fileupload-new" data-provides="fileupload">
-        							<div class="input-group">
+			  	<div id="panel-1-tab-1">
+			    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data">
+						<div class="form-group">
+							<div class="fileupload fileupload-new" data-provides="fileupload">
+    							<div class="input-group">
         							
-            							<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
-                							<span class="fileupload-preview"></span>
-            							</div>
-            							
-            							<div class="input-group-btn">
-							                
-							                <a class="btn btn-default btn-file">
-							                    <span class="fileupload-new">Select file</span>
-							                    <span class="fileupload-exists">Change</span>
-							                    <input type="file" class="file-input"/>
-							                </a>
-							                
-							                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
-							                	Remove
-							                </a>
-							                
-							            </div>
-							        </div>
-							    </div>
-							</div>
-					
-							<button type="submit" class="btn">Add</button>
+        							<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
+            							<span class="fileupload-preview"></span>
+        							</div>
+        							
+        							<div class="input-group-btn">
+						                
+						                <a class="btn btn-default btn-file">
+						                    <span class="fileupload-new">Select file</span>
+						                    <span class="fileupload-exists">Change</span>
+						                    <input type="file" class="file-input"/>
+						            	</a>
+						            	
+						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
+						                	Remove
+						                </a>
+						                
+						            </div>
+						        </div>
+						    </div>
+						</div>
+				
+						<button type="submit" class="btn">Add</button>	
+					</form>
+			  	</div>
+			  	
+			  	<div id="panel-1-tab-2">
+			  		<h5>Copy paste your variants in the text box below</h5>
+			  		<form role="form" action="${context_url}/upload-pasted-vcf" method="post">
+			  			<label>
+			    			<textarea class="input-block-level" rows="3"></textarea>
+			    		</label>
+			    	
+			    		<button type="submit" class="btn">Add</button>
+			    	</form>	
+			  	</div>
+			  	
+			  	<div id="panel-1-tab-3">
+			    	<div class="form-group">
+							<div class="fileupload fileupload-new" data-provides="fileupload">
+    							<div class="input-group">
+    							
+        							<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
+            							<span class="fileupload-preview"></span>
+        							</div>
+        							
+        							<div class="input-group-btn">
+						                
+						                <a class="btn btn-default btn-file">
+						                    <span class="fileupload-new">Select file</span>
+						                    <span class="fileupload-exists">Change</span>
+						                    <input type="file" class="file-input"/>
+						                </a>
+						                
+						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
+						                	Remove
+						                </a>
+						                
+						            </div>
+						        </div>
+						    </div>
+						</div>
+				
+						<button type="submit" class="btn">Add</button>
+				</div>
+				
+				<div id="panel-1-tab-4">
+			    	<div class="checkbox">
+						<label>
+  							<input type="checkbox"> GoNL Variant Database
+						</label>
 					</div>
 					
-					<div id="panel-1-tab-4">
-				    	<div class="checkbox">
-    						<label>
-      							<input type="checkbox"> GoNL Variant Database
-    						</label>
-  						</div>
-  						
-  						<div class="checkbox">
-    						<label>
-      							<input type="checkbox"> 1000 Genome Variant Database
-    						</label>
-  						</div>
+					<div class="checkbox">
+						<label>
+  							<input type="checkbox"> 1000 Genome Variant Database
+						</label>
 					</div>
 				</div>
 			</div>	
