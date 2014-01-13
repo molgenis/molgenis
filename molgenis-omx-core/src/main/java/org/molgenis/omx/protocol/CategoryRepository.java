@@ -99,7 +99,7 @@ public class CategoryRepository extends AbstractRepository<Entity> implements Co
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id);
 

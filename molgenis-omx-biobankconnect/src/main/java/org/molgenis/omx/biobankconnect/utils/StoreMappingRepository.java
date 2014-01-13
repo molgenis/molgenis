@@ -137,7 +137,7 @@ public class StoreMappingRepository extends AbstractRepository<Entity> implement
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (metaData == null)
 		{

@@ -128,7 +128,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository<Entity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
 		{
