@@ -186,11 +186,4 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	{
 		return decoratedRepository.getEntityClass();
 	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return decoratedRepository.getEntityMetaData();
-	}
-
 }

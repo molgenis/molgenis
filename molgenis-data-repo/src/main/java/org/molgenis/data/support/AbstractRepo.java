@@ -36,15 +36,15 @@ public abstract class AbstractRepo extends AbstractRepository<Entity> implements
 		return (Iterable<E>) new ConvertingIterable<E>(entityClass, repository);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return repository.getEntityMetaData();
-	}
-
 	public AbstractRepo()
 	{
 		super();
+	}
+	
+	@Override
+	protected EntityMetaData getEntityMetaData()
+	{
+		return this.repository;
 	}
 
 }

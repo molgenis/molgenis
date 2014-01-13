@@ -50,6 +50,6 @@ public abstract class AbstractRepository<E extends Entity> implements Repository
 		return getEntityMetaData().getAttribute(attributeName);
 	}
 
-	public abstract EntityMetaData getEntityMetaData();
+	protected abstract EntityMetaData getEntityMetaData();
 
 }

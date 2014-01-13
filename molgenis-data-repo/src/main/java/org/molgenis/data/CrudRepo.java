@@ -1,8 +1,5 @@
 package org.molgenis.data;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 
 /**
  * Generic <Entity> version of the Repository api. This alternative api doesn't require extensive use of '<Xyz>'
