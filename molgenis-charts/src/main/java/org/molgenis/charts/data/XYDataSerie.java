@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.charts.MolgenisSerieType;
-import org.molgenis.charts.highcharts.ChartType;
 
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar

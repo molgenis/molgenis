@@ -1,16 +1,20 @@
 package org.molgenis.charts.highcharts.data;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
+import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
-import org.molgenis.charts.highcharts.Series;
-import org.molgenis.charts.highcharts.SeriesType;
+import org.molgenis.charts.highcharts.basic.Marker;
+import org.molgenis.charts.highcharts.basic.Series;
+import org.molgenis.charts.highcharts.basic.SeriesType;
 
 public class HighchartsDataUtil
 {
@@ -42,6 +46,14 @@ public class HighchartsDataUtil
 		series.setName(xYDataSerie.getName());
 		series.setType(SeriesType.getSeriesType(xYDataSerie.getType()));
 		series.setData(parseToXYDataList(xYDataSerie.getData(), xYDataSerie.getAttributeXJavaType(), xYDataSerie.getAttributeYJavaType()));
+		
+		if(MolgenisSerieType.SCATTER.equals(xYDataSerie.getType()) 
+				&& Date.class.equals(xYDataSerie.getAttributeXJavaType())){
+			series.setLineWidth(0);
+			series.setMarker(new Marker(true, 4));
+			series.setType(SeriesType.getSeriesType(MolgenisSerieType.LINE));
+		}
+		
 		return series;
 	}
 	
@@ -71,12 +83,16 @@ public class HighchartsDataUtil
 	{
 		if (Date.class == clazz)
 		{
-			return (Long) ((Date) value).getTime();
+			return (Long) (convertDateToMilliseconds((Date) value));
 		}
-		else if (Timestamp.class == clazz)
-		{
-			return (Long) ((Timestamp) value).getTime();
-		}
+		//TODO this does not works
+//		else if (Timestamp.class == clazz)
+//		{
+//			logger.info("Timestamp to convert value");
+//			logger.info(value);
+//			logger.info(((Date) value).getTime());
+//			return (Long) (convertTimeStampToMilliseconds((Timestamp) value));
+//		}
 		else if (String.class == clazz)
 		{
 			//Highcharts uses the string value of the x axis as the name of the point
@@ -86,5 +102,32 @@ public class HighchartsDataUtil
 		{
 			return value;
 		}
+	}
+	
+	/**
+	 * Convert date to long keeping the timezone valued date.
+	 * When asking the time of a Date object java return the milliseconds from the begin of counting.
+	 *  	"Returns the number of milliseconds since 
+	 *  		January 1, 1970, 00:00:00 GMT represented by this Timestamp object."
+	 *  
+	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and ..
+	 */
+	public static long convertDateToMilliseconds(Date date)
+	{
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		
+		Calendar calendarConverted = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
+		calendarConverted.clear();
+		
+		calendarConverted.set(
+				calendar.get(Calendar.YEAR), 
+				calendar.get(Calendar.MONTH), 
+				calendar.get(Calendar.DATE), 
+				calendar.get(Calendar.HOUR_OF_DAY), 
+				calendar.get(Calendar.MINUTE), 
+				calendar.get(Calendar.SECOND));
+		
+		return calendarConverted.getTimeInMillis();
 	}
 }

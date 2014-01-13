@@ -1,4 +1,4 @@
-package org.molgenis.charts.highcharts;
+package org.molgenis.charts.highcharts.basic;
 
 import java.util.List;
 
@@ -7,6 +7,41 @@ public class Series
 	String name;
 	List<Object> data;
 	String type;
+	Integer lineWidth;
+	Marker marker;
+
+	/**
+	 * @return the marker
+	 */
+	public Marker getMarker()
+	{
+		return marker;
+	}
+
+	/**
+	 * @param marker the marker to set
+	 */
+	public void setMarker(Marker marker)
+	{
+		this.marker = marker;
+	}
+
+	/**
+	 * @return the lineWidth
+	 */
+	public Integer getLineWidth()
+	{
+		return lineWidth;
+	}
+
+	/**
+	 * @param lineWidth
+	 *            the lineWidth to set
+	 */
+	public void setLineWidth(Integer lineWidth)
+	{
+		this.lineWidth = lineWidth;
+	}
 
 	/**
 	 * @return the name

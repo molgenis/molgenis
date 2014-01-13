@@ -1,6 +1,5 @@
 package org.molgenis.charts.data;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -46,13 +45,17 @@ public class ChartDataServiceImpl implements ChartDataService
 	@Override
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
-	{
+	{	
 		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
+		System.out.println(repo);
+		System.out.println(repo.iterator().next());
+		
 		try
 		{
 			final Class<?> attributeXJavaType = repo.getAttribute(attributeNameXaxis).getDataType().getJavaType();
 			final Class<?> attributeYJavaType = repo.getAttribute(attributeNameYaxis).getDataType().getJavaType();
 			final List<XYDataSerie> xYDataSeries;
+			
 			if (!StringUtils.isNotBlank(split))
 			{
 				xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis,
@@ -63,6 +66,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
 						attributeXJavaType, attributeYJavaType, split, queryRules);
 			}
+			
 			return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXJavaType),
 					MolgenisAxisType.getType(attributeYJavaType));
 		}
@@ -82,7 +86,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				+ repo.getAttribute(attributeNameYaxis).getLabel());
 		serie.setAttributeXJavaType(attributeXJavaType);
 		serie.setAttributeYJavaType(attributeYJavaType);
-
+		
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		for (Entity entity : iterable)
@@ -91,7 +95,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			Object y = getJavaEntityValue(entity, attributeNameYaxis, attributeYJavaType);
 			serie.addData(new XYData(x, y));
 		}
-
+		
 		return serie;
 	}
 
@@ -305,15 +309,12 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else if (Date.class == attributeJavaType)
 		{
+			logger.info("attributeJavaType: " + attributeJavaType);
 			return entity.getDate(attributeName);
 		}
 		else if (String.class == attributeJavaType)
 		{
 			return entity.getString(attributeName);
-		}
-		else if (Timestamp.class == attributeJavaType)
-		{
-			return entity.getTimestamp(attributeName);
 		}
 		else
 		{
