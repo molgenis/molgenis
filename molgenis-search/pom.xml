@@ -19,6 +19,11 @@
 	  		<artifactId>molgenis-security</artifactId>
 	  		<version>1.0.0-SNAPSHOT</version>
       	</dependency>
+      	<dependency>
+      		<groupId>org.molgenis</groupId>
+	  		<artifactId>molgenis-data</artifactId>
+	  		<version>1.0.0-SNAPSHOT</version>
+      	</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>

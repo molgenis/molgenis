@@ -15,19 +15,18 @@ import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
-import org.molgenis.io.TableReader;
-import org.molgenis.io.TableReaderFactory;
-import org.molgenis.io.TupleReader;
-import org.molgenis.io.processor.LowerCaseProcessor;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileUploadUtils;
-import org.molgenis.util.tuple.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -166,37 +165,38 @@ public class UploadWizardPage extends AbstractWizardPage
 	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException,
 			DatabaseException
 	{
-		TableReader tableReader = TableReaderFactory.create(file);
+		EntitySource entitySource = dataService.createEntitySource(file);
 		try
 		{
-			TupleReader dataSetReader = tableReader.getTupleReader(DATASET_PREFIX);
-
 			// get dataset identifiers (case insensitive)
 			Set<String> datasetIdentifiers = new HashSet<String>();
 
-			if (dataSetReader != null)
+			Repository<? extends Entity> repo = null;
+			try
 			{
-				try
+				repo = entitySource.getRepositoryByEntityName(DATASET_PREFIX);
+				for (Entity entity : repo)
 				{
-					dataSetReader.addCellProcessor(new LowerCaseProcessor(true, false));
-					for (Tuple tuple : dataSetReader)
-					{
-						String identifier = tuple.getString(DataSet.IDENTIFIER.toLowerCase());
-						if (identifier != null) datasetIdentifiers.add(identifier);
-					}
+					String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
+					if (identifier != null) datasetIdentifiers.add(identifier);
 				}
-				finally
-				{
-
-					dataSetReader.close();
-				}
+			}
+			catch (UnknownEntityException e)
+			{
+				// Ok, no dataset sheet
+			}
+			finally
+			{
+                if(repo!=null){
+				    repo.close();
+                }
 			}
 
 			// validate dataset matrices
 			Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
 
 			// determine if dataset matrices can be imported
-			for (String tableName : tableReader.getTableNames())
+			for (String tableName : entitySource.getEntityNames())
 			{
 				if (tableName.toLowerCase().startsWith(DATASET_PREFIX + "_"))
 				{
@@ -215,7 +215,7 @@ public class UploadWizardPage extends AbstractWizardPage
 		}
 		finally
 		{
-			tableReader.close();
+			entitySource.close();
 		}
 	}
 

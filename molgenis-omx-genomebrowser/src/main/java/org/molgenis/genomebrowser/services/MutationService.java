@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.patient.Patient;
 import org.molgenis.omx.xgap.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +30,49 @@ public class MutationService
 		this.dataService = dataService;
 	}
 
-	public List<Map<String, String>> getPatientMutationData(String segmentId, String mutationId) throws ParseException,
+	public List<Map<String, String>> getMutationData() throws ParseException,
 			IOException
 	{
-		List<Patient> patientQueryResult = null;
 		List<Map<String, String>> variantArray = new ArrayList<Map<String, String>>();
 
-		patientQueryResult = queryPatients(segmentId, mutationId);
-
-		for (Patient patient : patientQueryResult)
+		List<Entity> variantQueryResult = dataService.findAllAsList(Variant.ENTITY_NAME, new QueryImpl());
+		for (Entity entity : variantQueryResult)
 		{
-			createPatientFields(variantArray, patient);
-		}
-
+            Map<String, String> valueMap = new HashMap<String, String>();
+            for (String field : entity.getAttributeNames())
+			{
+				if (entity.get(field) != null)
+				{
+					if("Chromosome".equals(field)||"Track".equals(field)){
+                        valueMap.put(field, ((Characteristic) entity.get(field)).getName());
+                    }
+                    else{
+                        valueMap.put(field, entity.get(field).toString());
+				    }
+                }
+				else valueMap.put(field, "");
+			}
+            variantArray.add(valueMap);
+        }
 		return variantArray;
 
+	}
+	
+	public List<Map<String, String>> getPatientMutationData(String segmentId, String mutationId) throws ParseException,
+	IOException
+	{
+	List<Patient> patientQueryResult = null;
+	List<Map<String, String>> variantArray = new ArrayList<Map<String, String>>();
+	
+	patientQueryResult = queryPatients(segmentId, mutationId);
+	
+	for (Patient patient : patientQueryResult)
+	{
+		createPatientFields(variantArray, patient);
+	}
+	
+	return variantArray;
+	
 	}
 
 	private List<Patient> queryPatients(String segmentId, String mutationId)

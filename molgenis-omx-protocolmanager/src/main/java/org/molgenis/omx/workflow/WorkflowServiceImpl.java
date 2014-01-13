@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
@@ -19,7 +21,6 @@ import org.molgenis.omx.observ.value.MrefValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -240,8 +241,7 @@ public class WorkflowServiceImpl implements WorkflowService
 						.eq(ObservedValue.FEATURE, observableFeature));
 
 		String colName = "key";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, rawValue);
+		Entity entity = new MapEntity(colName, rawValue);
 
 		if (observedValues.isEmpty())
 		{
@@ -258,13 +258,13 @@ public class WorkflowServiceImpl implements WorkflowService
 				characteristic.setName(rawValue);
 				dataService.add(Characteristic.ENTITY_NAME, characteristic);
 
-				tuple.set(colName, characteristicIdentifier);
+				entity.set(colName, characteristicIdentifier);
 			}
 
 			Value value;
 			try
 			{
-				value = new ValueConverter(dataService).fromTuple(tuple, colName, observableFeature);
+				value = new ValueConverter(dataService).fromEntity(entity, colName, observableFeature);
 			}
 			catch (ValueConverterException e)
 			{
@@ -293,7 +293,7 @@ public class WorkflowServiceImpl implements WorkflowService
 			{
 				try
 				{
-					new ValueConverter(dataService).updateFromTuple(tuple, colName, observableFeature, value);
+					new ValueConverter(dataService).updateFromEntity(entity, colName, observableFeature, value);
 				}
 				catch (ValueConverterException e)
 				{

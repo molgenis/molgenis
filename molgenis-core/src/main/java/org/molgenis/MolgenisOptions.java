@@ -69,10 +69,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "import_model_database", param = Option.Param.COLLECTION, type = Option.Type.REQUIRED_ARGUMENT, usage = "File with data structure specification (in MOLGENIS DSL). Default: new ArrayList<String>()")
 	public ArrayList<String> import_model_database = new ArrayList<String>();
 
-	/** directory where example data lives (used for test and documentation) */
-	@Option(name = "example_data_dir", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Directory where example data lives. Default: 'data'")
-	public String example_data_dir = "data";
-
 	@Option(name = "output_dir", param = Option.Param.DIRPATH, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Directory where all generated code is stored")
 	public String output_dir = "generated";
 

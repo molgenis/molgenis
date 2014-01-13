@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,17 +20,17 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -40,8 +41,6 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,6 +49,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.Lists;
+
+//import org.molgenis.data.csv
 
 /**
  * Controller class for the data explorer.
@@ -112,8 +115,7 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.ACTIVE, true));
+		List<DataSet> dataSets = Lists.<DataSet> newArrayList(dataService.<DataSet> findAll(DataSet.ENTITY_NAME));
 
 		model.addAttribute("dataSets", dataSets);
 
@@ -154,7 +156,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/download", method = POST)
 	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException, TableException
+	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -165,13 +167,26 @@ public class DataExplorerController extends MolgenisPluginController
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
 
-		TupleWriter tupleWriter = null;
+		CsvWriter<Entity> writer = null;
 		try
 		{
-			tupleWriter = new CsvWriter(response.getWriter());
+			writer = new CsvWriter<Entity>(response.getWriter());
 
 			// The fieldsToReturn contain identifiers, we need the names
-			tupleWriter.write(getFeatureNames(request.getFieldsToReturn()));
+			Map<String, String> nameByIdentifier = getFeatureNames(request.getFieldsToReturn());
+
+			// Keep order
+			List<String> names = new ArrayList<String>();
+			for (String identifier : request.getFieldsToReturn())
+			{
+				String name = nameByIdentifier.get(identifier);
+				if (name != null)
+				{
+					names.add(name);
+				}
+			}
+
+			writer.writeAttributeNames(names);
 			int count = 0;
 			SearchResult searchResult;
 
@@ -182,13 +197,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 				for (Hit hit : searchResult.getSearchHits())
 				{
-					List<Object> values = new ArrayList<Object>();
+					Entity entity = new MapEntity();
 					for (String field : request.getFieldsToReturn())
 					{
-						values.add(hit.getColumnValueMap().get(field));
+						entity.set(nameByIdentifier.get(field), hit.getColumnValueMap().get(field));
 					}
-
-					tupleWriter.write(new ValueTuple(values));
+					writer.add(entity);
 				}
 
 				count += searchResult.getSearchHits().size();
@@ -197,7 +211,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		finally
 		{
-			IOUtils.closeQuietly(tupleWriter);
+			IOUtils.closeQuietly(writer);
 		}
 	}
 
@@ -278,26 +292,19 @@ public class DataExplorerController extends MolgenisPluginController
 		return "view-filter-dialog";
 	}
 
-	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
+	// Get feature names by feature identifiers
+	private Map<String, String> getFeatureNames(List<String> identifiers)
 	{
-
 		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers));
 
-		// Keep order the same
-		Map<String, String> nameByIdentifier = new HashMap<String, String>();
+		Map<String, String> nameByIdentifier = new LinkedHashMap<String, String>();
 		for (ObservableFeature feature : features)
 		{
 			nameByIdentifier.put(feature.getIdentifier(), feature.getName());
 		}
 
-		List<String> names = new ArrayList<String>();
-		for (String identifier : identifiers)
-		{
-			names.add(nameByIdentifier.get(identifier));
-		}
-
-		return new ValueTuple(names);
+		return nameByIdentifier;
 	}
 
 	private String getCsvFileName(String dataSetName)

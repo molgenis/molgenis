@@ -577,7 +577,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleEntityNotFoundException(EntityNotFoundException e)
 	{
-		logger.debug(e);
+		logger.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -586,7 +586,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		logger.error(e);
+		logger.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -595,7 +595,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
-		logger.info(e);
+		logger.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 	
@@ -604,7 +604,7 @@ public class ${entity.name}Controller
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		logger.error(e);		
+		logger.error("", e);		
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 }
