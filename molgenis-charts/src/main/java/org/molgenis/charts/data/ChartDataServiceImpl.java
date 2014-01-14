@@ -48,10 +48,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{	
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
-		System.out.println(repo);
-		System.out.println(repo.iterator().next());
-		
+		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);		
 		final FieldTypeEnum attributeXFieldTypeEnum = repo.getAttribute(attributeNameXaxis).getDataType().getEnumType();
 		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
 		final List<XYDataSerie> xYDataSeries;
