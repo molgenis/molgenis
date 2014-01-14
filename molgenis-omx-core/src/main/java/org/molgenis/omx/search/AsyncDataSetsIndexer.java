@@ -65,7 +65,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 			{
 				searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
 				searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
-						"protocolTree-" + dataSet.getProtocolUsed().getId()));
+						"protocolTree-" + dataSet.getId()));
 				searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
 						dataService));
 			}
