@@ -10,5 +10,4 @@ public class MolgenisDateFormat
 	{
 		return new SimpleDateFormat(DATEFORMAT_DATETIME);
 	}
-
 }

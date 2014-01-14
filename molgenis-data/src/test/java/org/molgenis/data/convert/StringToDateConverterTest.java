@@ -16,10 +16,18 @@ public class StringToDateConverterTest
 		String s = MolgenisDateFormat.getDateFormat().format(d);
 		assertEquals(new StringToDateConverter().convert(s).getTime(), d.getTime(), 1000);
 	}
-
+	
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void convertWrongFormat()
+	public void convertDateWrongFormat()
 	{
-		new StringToDateConverter().convert("99-12-2008");
+		StringToDateConverter stringToDateConverter = new StringToDateConverter();
+		stringToDateConverter.convert("2014-12-31");
+	}
+	
+	@Test
+	public void convertDate()
+	{
+		StringToDateConverter stringToDateConverter = new StringToDateConverter();
+		stringToDateConverter.convert("2014-12-31T00:00:00+0100");
 	}
 }

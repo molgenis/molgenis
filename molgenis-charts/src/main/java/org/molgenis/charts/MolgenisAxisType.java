@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 
 public enum MolgenisAxisType
 {
@@ -22,21 +23,19 @@ public enum MolgenisAxisType
 	 * @param attributeJavaType Class<?>
 	 * @return MolgenisAxisType
 	 */
-	public static MolgenisAxisType getType(Class<?> javaType)
+	public static MolgenisAxisType getType(FieldTypeEnum attributeFieldTypeEnum)
 	{	
-		if(Double.class == javaType)
+		if(FieldTypeEnum.DECIMAL.equals(attributeFieldTypeEnum)
+				|| FieldTypeEnum.INT.equals(attributeFieldTypeEnum)
+					|| FieldTypeEnum.LONG.equals(attributeFieldTypeEnum))
 		{
 			return MolgenisAxisType.LINEAR;
 		} 
-		else if (Date.class == javaType) 
+		else if (FieldTypeEnum.DATE.equals(attributeFieldTypeEnum))
 		{
 			return MolgenisAxisType.DATETIME;
 		}
-		else if (String.class == javaType) 
-		{
-			return MolgenisAxisType.CATEGORY;
-		} 
-		else if (Timestamp.class == javaType) 
+		else if (FieldTypeEnum.DATE_TIME.equals(attributeFieldTypeEnum))
 		{
 			return MolgenisAxisType.DATETIME;
 		}
