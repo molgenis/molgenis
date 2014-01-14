@@ -1,12 +1,13 @@
-package org.molgenis.charts.highcharts;
+package org.molgenis.charts.highcharts.basic;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Options
 {
-	private Chart chart;
+	private BasicChart chart;
 	private ChartTitle title;
+	private Legend legend;
 	private List<Series> series = new ArrayList<Series>();
 	private List<XAxis> xAxis = new ArrayList<XAxis>();
 	private List<YAxis> yAxis = new ArrayList<YAxis>();
@@ -15,7 +16,7 @@ public class Options
 	/**
 	 * @return the chart
 	 */
-	public Chart getChart()
+	public BasicChart getChart()
 	{
 		return chart;
 	}
@@ -24,7 +25,7 @@ public class Options
 	 * @param chart
 	 *            the chart to set
 	 */
-	public void setChart(Chart chart)
+	public void setChart(BasicChart chart)
 	{
 		this.chart = chart;
 	}
@@ -141,5 +142,21 @@ public class Options
 	public void setCredits(Credits credits)
 	{
 		this.credits = credits;
+	}
+	
+	/**
+	 * @return the legend
+	 */
+	public Legend getLegend()
+	{
+		return legend;
+	}
+
+	/**
+	 * @param legend the legend to set
+	 */
+	public void setLegend(Legend legend)
+	{
+		this.legend = legend;
 	}
 }

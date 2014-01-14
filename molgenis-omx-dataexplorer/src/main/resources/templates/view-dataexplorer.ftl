@@ -101,12 +101,16 @@
 						</div>
 					</div>
 					<div class="tab-pane" id="chart-container">
-						<div class="row-fluid>		
+						<div class="row-fluid">		
 							<div class="btn-group" class="span9">
 								<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
 								<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
-								<a href="#chart-designer-modal-heatmap" id="chart-designer-modal-heatmap-button" role="button" class="btn" data-toggle="modal">Heat map <i class="icon-plus"></i></a>
+								<!-- TODO Heat map
+									<a href="#chart-designer-modal-heatmap" id="chart-designer-modal-heatmap-button" role="button" class="btn" data-toggle="modal">Heat map <i class="icon-plus"></i></a>
+								-->							
 							</div>
+						</div>
+						<div class="row-fluid">
 							<div id="chart-view" class="span9"></div>
 						</div>
 					</div>

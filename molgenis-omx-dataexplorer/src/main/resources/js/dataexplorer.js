@@ -11,6 +11,10 @@
 	var searchApi = new molgenis.SearchClient();
 	var aggregateView = false;
 	
+	molgenis.getSelectedDataSetIdentifier = function() {
+		return selectedDataSet.identifier;
+	};
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri + '/subprotocols?num=500');
@@ -1014,16 +1018,6 @@
 		
 		$('#download-button').click(function() {
 			molgenis.download();
-		});
-		
-		$('#scatterplot-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeScatterPlotChartRequest(selectedDataSet.identifier, restApi);
-		});
-		$('#boxplot-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeBoxPlotChartRequest(selectedDataSet.identifier, restApi);
-		});
-		$('#heatmap-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeHeatMapChartRequest(selectedDataSet.identifier, restApi);
 		});
 	});
 

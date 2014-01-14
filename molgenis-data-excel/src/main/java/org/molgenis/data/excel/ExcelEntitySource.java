@@ -76,7 +76,12 @@ public class ExcelEntitySource implements EntitySource
 		this.cellProcessors = cellProcessors;
 	}
 
-	protected ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
+	public ExcelEntitySource(File file) throws IOException
+	{
+		this(file, null);
+	}
+
+	public ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
 	{
 		this(new FileInputStream(file), EXCEL_ENTITYSOURCE_URL_PREFIX + file.getAbsolutePath(), cellProcessors);
 	}

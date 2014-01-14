@@ -1,14 +1,18 @@
-package org.molgenis.charts.highcharts;
+package org.molgenis.charts.highcharts.basic;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 import org.molgenis.charts.AbstractChart;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.XYDataChart;
+import org.molgenis.charts.highcharts.chart.Chart;
 import org.molgenis.charts.highcharts.data.HighchartsDataUtil;
+import org.molgenis.charts.highcharts.stockchart.StockChart;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
@@ -46,7 +50,7 @@ public class HighchartService extends AbstractChartVisualizationService
 	{
 		Options options = new Options();
 		
-		Chart chart = new Chart();
+		BasicChart chart = new BasicChart();
 		chart.setType(ChartType.BOXPLOT)
 			.setWidth(boxPlotChart.getWidth())
 			.setHeight(boxPlotChart.getHeight());
@@ -62,15 +66,22 @@ public class HighchartService extends AbstractChartVisualizationService
 			.setText(boxPlotChart.getTitle())
 			.setAlign(ChartAlign.CENTER);
 		
-		options.addSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
-				boxPlotChart.getBoxPlotSeries()));
-		options.addSeries(HighchartsDataUtil.parseToXYDataSeriesList(
-				boxPlotChart.getxYDataSeries()));
+		Legend legend = new Legend()
+			.setEnabled(true)
+			.setAlign("center")
+			.setLayout("horizontal")
+			.setVerticalAlign("bottom");
+		
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
 		options.addyAxis(yAxis);
 		options.setCredits(new Credits());
+		options.setLegend(legend);
+		options.addSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
+				boxPlotChart.getBoxPlotSeries()));
+		options.addSeries(HighchartsDataUtil.parseToXYDataSeriesList(
+				boxPlotChart.getxYDataSeries()));
 
 		return options;
 	}
@@ -79,7 +90,15 @@ public class HighchartService extends AbstractChartVisualizationService
 	{
 		Options options = new Options();
 		
-		Chart chart = new Chart();
+		final BasicChart chart;
+		
+		if(Date.class.equals(xYDataChart.getxAxisType())
+				|| DateTime.class.equals(xYDataChart.getxAxisType())) {
+			chart = new StockChart();
+		} else {
+			chart = new Chart();
+		}
+		
 		chart.setType(ChartType.getChartType(xYDataChart.getType()))
 			.setWidth(xYDataChart.getWidth())
 			.setHeight(xYDataChart.getHeight());
@@ -89,7 +108,8 @@ public class HighchartService extends AbstractChartVisualizationService
 			.setTitle(new AxisTitle()
 				.setText(xYDataChart.getxAxisLabel())
 				.setAlign(AxisAlign.MIDDLE))
-			.setType(AxisType.valueOf(xYDataChart.getxAxisType().name()));
+			.setType(AxisType.valueOf(xYDataChart.getxAxisType().name()))
+			.setOrdinal(false);
 		
 		YAxis yAxis = new YAxis();
 		yAxis
@@ -102,13 +122,20 @@ public class HighchartService extends AbstractChartVisualizationService
 			.setText(xYDataChart.getTitle())
 			.setAlign(ChartAlign.CENTER);
 		
-		options.setSeries(HighchartsDataUtil.parseToXYDataSeriesList(
-				xYDataChart.getData()));
+		Legend legend = new Legend()
+			.setEnabled(true)
+			.setAlign("center")
+			.setLayout("horizontal")
+			.setVerticalAlign("bottom");
+		
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
 		options.addyAxis(yAxis);
 		options.setCredits(new Credits());
+		options.setLegend(legend);
+		options.setSeries(HighchartsDataUtil.parseToXYDataSeriesList(
+				xYDataChart.getData()));
 
 		return options;
 	}

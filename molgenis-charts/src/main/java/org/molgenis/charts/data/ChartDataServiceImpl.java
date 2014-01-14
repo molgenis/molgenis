@@ -1,6 +1,5 @@
 package org.molgenis.charts.data;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,6 +10,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.ChartDataService;
 import org.molgenis.charts.MolgenisAxisType;
@@ -24,6 +24,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
+import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,59 +47,54 @@ public class ChartDataServiceImpl implements ChartDataService
 	@Override
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
-	{
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
-		try
+	{	
+		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);		
+		final FieldTypeEnum attributeXFieldTypeEnum = repo.getAttribute(attributeNameXaxis).getDataType().getEnumType();
+		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
+		final List<XYDataSerie> xYDataSeries;
+		
+		if (!StringUtils.isNotBlank(split))
 		{
-			final Class<?> attributeXJavaType = repo.getAttribute(attributeNameXaxis).getDataType().getJavaType();
-			final Class<?> attributeYJavaType = repo.getAttribute(attributeNameYaxis).getDataType().getJavaType();
-			final List<XYDataSerie> xYDataSeries;
-			if (!StringUtils.isNotBlank(split))
-			{
-				xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis,
-						attributeNameYaxis, attributeXJavaType, attributeYJavaType, queryRules));
-			}
-			else
-			{
-				xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
-						attributeXJavaType, attributeYJavaType, split, queryRules);
-			}
-			return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXJavaType),
-					MolgenisAxisType.getType(attributeYJavaType));
+			xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis,
+					attributeNameYaxis, attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
 		}
-		catch (MolgenisModelException e)
+		else
 		{
-			throw new MolgenisChartException("Error creating a xYDataChart, error: " + e);
+			xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
+					attributeXFieldTypeEnum, attributeYFieldTypeEnum, split, queryRules);
 		}
+		
+		return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXFieldTypeEnum),
+				MolgenisAxisType.getType(attributeYFieldTypeEnum));
 	}
 
 	@Override
 	public XYDataSerie getXYDataSerie(Repository<? extends Entity> repo, String entityName, String attributeNameXaxis,
-			String attributeNameYaxis, Class<?> attributeXJavaType, Class<?> attributeYJavaType,
+			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
 		XYDataSerie serie = new XYDataSerie();
 		serie.setName(repo.getAttribute(attributeNameXaxis).getLabel() + " vs "
 				+ repo.getAttribute(attributeNameYaxis).getLabel());
-		serie.setAttributeXJavaType(attributeXJavaType);
-		serie.setAttributeYJavaType(attributeYJavaType);
-
+		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
+		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
+		
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		for (Entity entity : iterable)
 		{
-			Object x = getJavaEntityValue(entity, attributeNameXaxis, attributeXJavaType);
-			Object y = getJavaEntityValue(entity, attributeNameYaxis, attributeYJavaType);
+			Object x = getJavaValue(entity, attributeNameXaxis, attributeXFieldTypeEnum);
+			Object y = getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
 			serie.addData(new XYData(x, y));
 		}
-
+		
 		return serie;
 	}
 
 	@Override
 	public List<XYDataSerie> getXYDataSeries(Repository<? extends Entity> repo, String entityName,
-			String attributeNameXaxis, String attributeNameYaxis, Class<?> attributeXJavaType,
-			Class<?> attributeYJavaType, String split, List<QueryRule> queryRules)
+			String attributeNameXaxis, String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, 
+			FieldTypeEnum attributeYFieldTypeEnum, String split, List<QueryRule> queryRules)
 	{
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
@@ -111,13 +107,13 @@ public class ChartDataServiceImpl implements ChartDataService
 			{
 				XYDataSerie serie = new XYDataSerie();
 				serie.setName(splitValue);
-				serie.setAttributeXJavaType(attributeXJavaType);
-				serie.setAttributeYJavaType(attributeYJavaType);
+				serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
+				serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 				xYDataSeriesMap.put(splitValue, serie);
 			}
 
-			Object x = getJavaEntityValue(entity, attributeNameXaxis, attributeXJavaType);
-			Object y = getJavaEntityValue(entity, attributeNameYaxis, attributeYJavaType);
+			Object x = getJavaValue(entity, attributeNameXaxis, attributeXFieldTypeEnum);
+			Object y = getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
 			xYDataSeriesMap.get(splitValue).addData(new XYData(x, y));
 		}
 
@@ -297,27 +293,31 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @param attributeJavaType
 	 * @return value (Object)
 	 */
-	private Object getJavaEntityValue(Entity entity, String attributeName, Class<?> attributeJavaType)
-	{
-		if (Double.class == attributeJavaType)
+	private Object getJavaValue(Entity entity, String attributeName, FieldTypeEnum attributeFieldTypeEnum)
+	{	
+		if(FieldTypeEnum.DECIMAL.equals(attributeFieldTypeEnum))
 		{
 			return entity.getDouble(attributeName);
 		}
-		else if (Date.class == attributeJavaType)
+		else if (FieldTypeEnum.INT.equals(attributeFieldTypeEnum))
+		{
+			return entity.getInt(attributeName);
+		}
+		else if (FieldTypeEnum.LONG.equals(attributeFieldTypeEnum))
+		{
+			return entity.getLong(attributeName);
+		}
+		else if (FieldTypeEnum.DATE_TIME.equals(attributeFieldTypeEnum))
+		{
+			return entity.getUtilDate(attributeName);
+		}
+		else if (FieldTypeEnum.DATE.equals(attributeFieldTypeEnum))
 		{
 			return entity.getDate(attributeName);
 		}
-		else if (String.class == attributeJavaType)
-		{
-			return entity.getString(attributeName);
-		}
-		else if (Timestamp.class == attributeJavaType)
-		{
-			return entity.getTimestamp(attributeName);
-		}
 		else
 		{
-			return null;
+			return entity.getString(attributeName);
 		}
 	}
 

@@ -70,11 +70,18 @@ public class DataConverter
 		return convert(source, Double.class);
 	}
 
-	public static Date toDate(Object source)
+	public static java.sql.Date toDate(Object source)
 	{
 		if (source == null) return null;
-		if (source instanceof Date) return (Date) source;
-		return convert(source, Date.class);
+		if (source instanceof java.sql.Date) return (java.sql.Date) source;
+		return convert(source, java.sql.Date.class);
+	}
+	
+	public static java.util.Date toUtilDate(Object source)
+	{
+		if (source == null) return null;
+		if (source instanceof java.util.Date) return (java.util.Date) source;
+		return convert(source, java.util.Date.class);
 	}
 
 	public static Timestamp toTimestamp(Object source)
