@@ -12,4 +12,7 @@ $(function() {
 		
 		return false;
 	});
+
+	//Getting the indexer error alert!
+	molgenis.createDatasetsindexerAlert();
 });
