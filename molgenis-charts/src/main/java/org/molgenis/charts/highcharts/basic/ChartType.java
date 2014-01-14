@@ -1,11 +1,12 @@
-package org.molgenis.charts.highcharts;
+package org.molgenis.charts.highcharts.basic;
 
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 
 public enum ChartType
 {
 	SCATTER("scatter"),
-	BOXPLOT("boxplot");
+	BOXPLOT("boxplot"),
+	LINE("line");
 	
 	private String type;
 	
@@ -27,6 +28,10 @@ public enum ChartType
 		else if (MolgenisChartType.BOXPLOT_CHART.equals(molgenisChartType))
 		{
 			return ChartType.BOXPLOT;
+		}
+		else if (MolgenisChartType.LINE_CHART.equals(molgenisChartType))
+		{
+			return ChartType.LINE;
 		}
 		else
 		{

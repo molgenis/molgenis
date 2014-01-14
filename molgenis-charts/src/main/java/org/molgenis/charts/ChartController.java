@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
 import org.molgenis.charts.data.DataMatrix;
-import org.molgenis.charts.highcharts.Options;
+import org.molgenis.charts.highcharts.basic.Options;
 import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.XYDataChartRequest;

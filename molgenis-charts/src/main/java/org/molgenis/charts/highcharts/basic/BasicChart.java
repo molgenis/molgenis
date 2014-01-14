@@ -1,20 +1,14 @@
-package org.molgenis.charts.highcharts;
+package org.molgenis.charts.highcharts.basic;
 
-public class Chart
+public class BasicChart
 {
-	// Default values
-	private static final Integer DEFAULT_MARGIN_BOTTOM = 100;
-	private static final Integer DEFAULT_MARGIN_LEFT = 100;
-	private static final Integer DEFAULT_MARGIN_RIGHT = 100;
-	private static final Integer DEFAULT_MARGIN_TOP = 100;
-
-	Integer height;
-	Integer width;
-	Integer marginBottom = DEFAULT_MARGIN_BOTTOM;
-	Integer marginLeft = DEFAULT_MARGIN_LEFT;
-	Integer marginRight = DEFAULT_MARGIN_RIGHT;
-	Integer marginTop = DEFAULT_MARGIN_TOP;
-	String type;
+	private Integer height;
+	private Integer width;
+	private Integer marginBottom;
+	private Integer marginLeft;
+	private Integer marginRight;
+	private Integer marginTop;
+	private String type;
 
 	/**
 	 * @return the height
@@ -28,7 +22,7 @@ public class Chart
 	 * @param height
 	 *            the height to set
 	 */
-	public Chart setHeight(Integer height)
+	public BasicChart setHeight(Integer height)
 	{
 		this.height = height;
 		return this;
@@ -46,7 +40,7 @@ public class Chart
 	 * @param width
 	 *            the width to set
 	 */
-	public Chart setWidth(Integer width)
+	public BasicChart setWidth(Integer width)
 	{
 		this.width = width;
 		return this;
@@ -64,7 +58,7 @@ public class Chart
 	 * @param marginBottom
 	 *            the marginBottom to set
 	 */
-	public Chart setMarginBottom(Integer marginBottom)
+	public BasicChart setMarginBottom(Integer marginBottom)
 	{
 		this.marginBottom = marginBottom;
 		return this;
@@ -82,7 +76,7 @@ public class Chart
 	 * @param marginLeft
 	 *            the marginLeft to set
 	 */
-	public Chart setMarginLeft(Integer marginLeft)
+	public BasicChart setMarginLeft(Integer marginLeft)
 	{
 		this.marginLeft = marginLeft;
 		return this;
@@ -100,7 +94,7 @@ public class Chart
 	 * @param marginRight
 	 *            the marginRight to set
 	 */
-	public Chart setMarginRight(Integer marginRight)
+	public BasicChart setMarginRight(Integer marginRight)
 	{
 		this.marginRight = marginRight;
 		return this;
@@ -118,7 +112,7 @@ public class Chart
 	 * @param marginTop
 	 *            the marginTop to set
 	 */
-	public Chart setMarginTop(Integer marginTop)
+	public BasicChart setMarginTop(Integer marginTop)
 	{
 		this.marginTop = marginTop;
 		return this;
@@ -136,7 +130,7 @@ public class Chart
 	 * @param type
 	 *            the type to set
 	 */
-	public Chart setType(ChartType type)
+	public BasicChart setType(ChartType type)
 	{
 		this.type = type.toString();
 		return this;

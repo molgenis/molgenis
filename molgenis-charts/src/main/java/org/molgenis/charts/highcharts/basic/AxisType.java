@@ -1,4 +1,4 @@
-package org.molgenis.charts.highcharts;
+package org.molgenis.charts.highcharts.basic;
 
 public enum AxisType
 {

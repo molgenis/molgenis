@@ -5,7 +5,8 @@ package org.molgenis.charts;
 public enum MolgenisSerieType
 {
 	SCATTER,
-	BOXPLOT;
+	BOXPLOT,
+	LINE;
 
 	private MolgenisSerieType() {}
 }

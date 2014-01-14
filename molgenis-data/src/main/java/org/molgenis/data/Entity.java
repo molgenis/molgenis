@@ -67,7 +67,12 @@ public interface Entity extends Serializable
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Date}.
 	 */
-	public Date getDate(String attributeName);
+	public java.sql.Date getDate(String attributeName);
+	
+	/**
+	 * Retrieves the value of the designated column as {@link java.util.Date}.
+	 */
+	public java.util.Date getUtilDate(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Timestamp}.
