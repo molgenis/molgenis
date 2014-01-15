@@ -627,7 +627,7 @@
 			}
 
 			if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
-				$('#'+jqSelector('text_'+feature.identifier)).autocomplete({
+				divContainer.find('#'+jqSelector('text_'+feature.identifier)).autocomplete({
 					source: function( request, response ) {
 						$.ajax({
 							type : 'POST',
