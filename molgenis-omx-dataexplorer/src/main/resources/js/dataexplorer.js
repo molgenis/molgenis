@@ -155,6 +155,11 @@
 					// target type null is filter icon
 					if ((node.getEventTargetType(event) === "title" || node.getEventTargetType(event) === "icon" || node.getEventTargetType(event) === null) && !node.data.isFolder)
 						molgenis.openFeatureFilterDialog(node.data.key);
+					
+					//Clean the select boxes of the charts designer
+					if(molgenis.charts.dataexplorer){
+						molgenis.charts.dataexplorer.resetAllSelectBoxes();
+					}
 				},
 				onSelect : function(select, node) {
 					// workaround for dynatree lazy parent node select bug
@@ -167,6 +172,11 @@
 				}
 			});
 		});
+
+		//Clean the select boxes of the charts designer
+		if(molgenis.charts.dataexplorer){
+			molgenis.charts.dataexplorer.resetAllSelectBoxes();
+		}
 	};
 
 	molgenis.onDataSetSelectionChange = function(dataSetUri) {

@@ -53,19 +53,34 @@ public class ChartDataServiceImpl implements ChartDataService
 		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
 		final List<XYDataSerie> xYDataSeries;
 		
-		if (!StringUtils.isNotBlank(split))
+		//Sanity check
+		if(FieldTypeEnum.DECIMAL.equals(attributeXFieldTypeEnum)
+				|| FieldTypeEnum.INT.equals(attributeXFieldTypeEnum)
+				|| FieldTypeEnum.LONG.equals(attributeXFieldTypeEnum)
+				|| FieldTypeEnum.DATE.equals(attributeXFieldTypeEnum)
+				|| FieldTypeEnum.DATE_TIME.equals(attributeXFieldTypeEnum)
+				|| FieldTypeEnum.DECIMAL.equals(attributeYFieldTypeEnum)
+				|| FieldTypeEnum.INT.equals(attributeYFieldTypeEnum)
+				|| FieldTypeEnum.LONG.equals(attributeYFieldTypeEnum)
+				|| FieldTypeEnum.DATE.equals(attributeYFieldTypeEnum)
+				|| FieldTypeEnum.DATE_TIME.equals(attributeYFieldTypeEnum))
 		{
-			xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis,
-					attributeNameYaxis, attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
+			if (!StringUtils.isNotBlank(split))
+			{
+				xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis,
+						attributeNameYaxis, attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
+			}
+			else
+			{
+				xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
+						attributeXFieldTypeEnum, attributeYFieldTypeEnum, split, queryRules);
+			}
+			
+			return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXFieldTypeEnum),
+					MolgenisAxisType.getType(attributeYFieldTypeEnum));
+		}else{
+			throw new MolgenisChartException("For the x and the y axis selected datatype are wrong. Scatterplots can only handle Continuous data");
 		}
-		else
-		{
-			xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
-					attributeXFieldTypeEnum, attributeYFieldTypeEnum, split, queryRules);
-		}
-		
-		return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXFieldTypeEnum),
-				MolgenisAxisType.getType(attributeYFieldTypeEnum));
 	}
 
 	@Override
@@ -113,7 +128,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			}
 
 			Object x = getJavaValue(entity, attributeNameXaxis, attributeXFieldTypeEnum);
-			Object y = getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
+			Number y = (Number) getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
 			xYDataSeriesMap.get(splitValue).addData(new XYData(x, y));
 		}
 

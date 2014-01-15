@@ -11,6 +11,15 @@
 	var ns = molgenis.charts.dataexplorer = molgenis.charts.dataexplorer || {};
 	var restApi = new molgenis.RestClient();
 	
+	ns.resetAllSelectBoxes = function(message){
+		$('#scatterplot-select-xaxis-feature').empty();
+		$('#scatterplot-select-yaxis-feature').empty();
+		$('#scatterplot-select-split-feature').empty();	
+		
+		$('#boxplot-select-feature').empty();
+		$('#boxplot-select-split-feature').empty();
+	};
+	
 	ns.createScatterPlotChartRequestPayLoad = function (
 			entity,
 			x, 
@@ -317,28 +326,34 @@
 		$('#chart-designer-modal-scatterplot-button').click(function () {
 			var allSelectedFeatures = ns.getSelectedFeatures();
 			
-			$('#scatterplot-select-xaxis-feature').empty();
-			$('#scatterplot-select-yaxis-feature').empty();
-			$('#scatterplot-select-split-feature').empty();	
+			if($('#scatterplot-select-xaxis-feature').has('option').length===0){
+				$('#scatterplot-select-xaxis-feature').append(ns.getSelectedFeaturesSelectOptions(
+						ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
+			}
+
+			if($('#scatterplot-select-yaxis-feature').has('option').length===0){
+				$('#scatterplot-select-yaxis-feature').append(
+						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
+			}
 			
-			$('#scatterplot-select-xaxis-feature').append(
-					ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
-			$('#scatterplot-select-yaxis-feature').append(
-					ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
-			$('#scatterplot-select-split-feature').append(
-					ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures)));
+			if($('#scatterplot-select-split-feature').has('option').length===0){
+				$('#scatterplot-select-split-feature').append(
+						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures)));
+			}
 		});
 		
 		$('#chart-designer-modal-boxplot-button').click(function () {
 			var allSelectedFeatures = ns.getSelectedFeatures();
 			
-			$('#boxplot-select-feature').empty();
-			$('#boxplot-select-split-feature').empty();
+			if($('#boxplot-select-feature').has('option').length===0){
+				$('#boxplot-select-feature').append(
+						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int"])));
+			}
 			
-			$('#boxplot-select-feature').append(
-					ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int"])));
-			$('#boxplot-select-split-feature').append(
-					ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures)));
+			if($('#boxplot-select-split-feature').has('option').length===0){
+				$('#boxplot-select-split-feature').append(
+						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures)));
+			}
 		});
 
 // TODO Heatmap		
