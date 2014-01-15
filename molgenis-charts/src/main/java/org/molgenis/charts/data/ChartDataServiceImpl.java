@@ -128,7 +128,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			}
 
 			Object x = getJavaValue(entity, attributeNameXaxis, attributeXFieldTypeEnum);
-			Number y = (Number) getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
+			Object y = getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
 			xYDataSeriesMap.get(splitValue).addData(new XYData(x, y));
 		}
 

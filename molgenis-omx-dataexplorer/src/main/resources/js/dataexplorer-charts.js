@@ -11,13 +11,15 @@
 	var ns = molgenis.charts.dataexplorer = molgenis.charts.dataexplorer || {};
 	var restApi = new molgenis.RestClient();
 	
-	ns.resetAllSelectBoxes = function(message){
+	ns.resetChartDesigners = function(message){
 		$('#scatterplot-select-xaxis-feature').empty();
 		$('#scatterplot-select-yaxis-feature').empty();
-		$('#scatterplot-select-split-feature').empty();	
+		$('#scatterplot-select-split-feature').empty();
+		$("#scatterplot-designer-modal-create-button").prop('disabled', true);
 		
 		$('#boxplot-select-feature').empty();
 		$('#boxplot-select-split-feature').empty();
+		$("#boxplot-designer-modal-create-button").prop('disabled', true);
 	};
 	
 	ns.createScatterPlotChartRequestPayLoad = function (
@@ -277,6 +279,32 @@
 		});
 		
 	};
+	
+	
+	ns.activateDesignerSubmitButtonScatterPlot = function (){
+		var disabled = true;
+		var valueOne  = $('#scatterplot-select-yaxis-feature').val();
+		var valueTwo  = $('#scatterplot-select-xaxis-feature').val();
+
+		if(valueOne && (valueOne !== "-1")
+			&& valueTwo && (valueTwo !== "-1")){
+			disabled = false;
+		}
+		
+		$("#scatterplot-designer-modal-create-button").prop('disabled', disabled);
+	}
+	
+	ns.activateDesignerSubmitButtonBoxPlot = function (){
+		var disabled = true;
+		var valueOne = $('#boxplot-select-feature').val();
+
+		if(valueOne && (valueOne !== "-1")){
+			disabled = false;
+		}
+		
+		$('#boxplot-designer-modal-create-button').prop('disabled', disabled);
+	}
+
 
 // TODO heatmap
 //
@@ -370,9 +398,18 @@
 		$('#scatterplot-designer-modal-create-button').click(function(){
 			molgenis.charts.dataexplorer.makeScatterPlot(molgenis.getSelectedDataSetIdentifier());
 		});
+		
 		$('#boxplot-designer-modal-create-button').click(function(){
 			molgenis.charts.dataexplorer.makeBoxPlot(molgenis.getSelectedDataSetIdentifier());
 		});
+		
+		//Scatter plot
+		$('#scatterplot-select-xaxis-feature').change(ns.activateDesignerSubmitButtonScatterPlot);
+		$('#scatterplot-select-yaxis-feature').change(ns.activateDesignerSubmitButtonScatterPlot);
+		
+		//Box plot
+		$('#boxplot-select-feature').change(ns.activateDesignerSubmitButtonBoxPlot);
+		
 		// TODO heat map
 		//$('#heatmap-designer-modal-create-button').click(function(){
 		//	molgenis.charts.dataexplorer.makeHeatMap(molgenis.getSelectedDataSetIdentifier());

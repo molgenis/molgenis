@@ -158,7 +158,7 @@
 					
 					//Clean the select boxes of the charts designer
 					if(molgenis.charts.dataexplorer){
-						molgenis.charts.dataexplorer.resetAllSelectBoxes();
+						molgenis.charts.dataexplorer.resetChartDesigners();
 					}
 				},
 				onSelect : function(select, node) {
@@ -175,7 +175,7 @@
 
 		//Clean the select boxes of the charts designer
 		if(molgenis.charts.dataexplorer){
-			molgenis.charts.dataexplorer.resetAllSelectBoxes();
+			molgenis.charts.dataexplorer.resetChartDesigners();
 		}
 	};
 
