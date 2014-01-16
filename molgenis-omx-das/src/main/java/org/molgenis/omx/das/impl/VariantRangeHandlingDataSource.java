@@ -2,11 +2,7 @@ package org.molgenis.omx.das.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 
@@ -56,7 +52,7 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
     }
 
 	// for unit test
-	public VariantRangeHandlingDataSource(DataService dataService) throws DataSourceException
+	VariantRangeHandlingDataSource(DataService dataService) throws DataSourceException
 	{
 		this.dataService = dataService;
         this.dataset = "test";
@@ -186,13 +182,11 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 		return new Long(dataService.count(Variant.ENTITY_NAME, new QueryImpl())).intValue();
 	}
 
-	@Override
-	public Collection<DasType> getTypes() throws DataSourceException
-	{
-		List<DasType> types = new ArrayList<DasType>();
-		types.add(mutationType);
-		return types;
-	}
+    @Override
+    public Collection<DasType> getTypes() throws DataSourceException
+    {
+        return Collections.singleton(mutationType);
+    }
 
 	protected Chromosome getChromosome(String segmentId)
 	{

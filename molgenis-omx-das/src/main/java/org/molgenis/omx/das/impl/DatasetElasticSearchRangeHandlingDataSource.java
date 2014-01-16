@@ -40,7 +40,7 @@ public class DatasetElasticSearchRangeHandlingDataSource extends RangeHandlingDa
 	}
 
 	// for unit test
-	public DatasetElasticSearchRangeHandlingDataSource(SearchService searchService, DasType dasType, DasMethod method) throws DataSourceException
+	DatasetElasticSearchRangeHandlingDataSource(SearchService searchService, DasType dasType, DasMethod method) throws DataSourceException
 	{
 		this.searchService = searchService;
 		this.type = "type";
@@ -167,11 +167,9 @@ public class DatasetElasticSearchRangeHandlingDataSource extends RangeHandlingDa
 		return 1000;
 	}
 
-	@Override
-	public Collection<DasType> getTypes() throws DataSourceException
-	{
-		List<DasType> types = new ArrayList<DasType>();
-		types.add(mutationType);
-		return types;
-	}
+    @Override
+    public Collection<DasType> getTypes() throws DataSourceException
+    {
+        return Collections.singleton(mutationType);
+    }
 }

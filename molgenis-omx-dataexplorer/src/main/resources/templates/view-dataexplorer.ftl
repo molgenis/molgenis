@@ -102,14 +102,14 @@
 				<div class="tab-content">
 					<div class="tab-pane active" id="dataset-data-container">
 						<div id="dataexplorer-grid-data">
-                            <div class="accordion" id="genomebrowser" style="visibility: hidden">
+                            <div class="accordion" id="genomebrowser">
                                 <div class="accordion-group">
                                     <div class="accordion-heading">
                                         <a class="accordion-toggle" data-toggle="collapse" href="#dalliance"><i class="icon-chevron-down"></i> Genome Browser</a>
                                     </div>
                                     <div id="dalliance" class="accordion-body collapse in">
                                         <div class="accordion-inner">
-                                            <div id="svgHolder" style="width:1180px"></div>
+                                            <div id="svgHolder"></div>
                                             <div class="pull-right"><a id="genomebrowser-filter-button" class="btn btn-small"><img src="/img/filter-bw.png"> apply filter</a></div>
                                         </div>
                                     </div>

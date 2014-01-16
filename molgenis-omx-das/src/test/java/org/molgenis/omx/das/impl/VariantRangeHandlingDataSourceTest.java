@@ -189,10 +189,7 @@ public class VariantRangeHandlingDataSourceTest {
 	@Test()
 	public void getTypes() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException, CoordinateErrorException
 	{
-		List<DasType> types = new ArrayList<DasType>();
-		types.add(new DasType("type", null, "?", "type"));
-		assertEquals(types,source.getTypes());
-		
+        assertEquals(Collections.singleton(new DasType("type", null, "?", "type")),source.getTypes());
 	}
 	@Test(expectedExceptions = UnimplementedFeatureException.class)
 	public void getFeatures() throws UnimplementedFeatureException, DataSourceException

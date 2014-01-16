@@ -38,7 +38,7 @@ public class DatasetRangeHandlingDataSource extends RangeHandlingDataSource impl
     }
 
     // for unit test
-    public DatasetRangeHandlingDataSource(DataService dataService, DasType mutationType, DasMethod method) throws DataSourceException
+    DatasetRangeHandlingDataSource(DataService dataService, DasType mutationType, DasMethod method) throws DataSourceException
     {
         this.dataService = dataService;
         this.type = "type";
@@ -112,10 +112,11 @@ public class DatasetRangeHandlingDataSource extends RangeHandlingDataSource impl
                     valueLink = value.getValue().getString("value");
                 }
             }
-            feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
+            if(valueStart!=null && valueIdentifier !=null){
+                feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
                     valueLink, mutationType, method);
-
-            features.add(feature);
+                features.add(feature);
+            }
         }
 
         DasAnnotatedSegment segment = new DasAnnotatedSegment(segmentId, start, stop, "1.00", segmentId, features);
@@ -180,8 +181,6 @@ public class DatasetRangeHandlingDataSource extends RangeHandlingDataSource impl
     @Override
     public Collection<DasType> getTypes() throws DataSourceException
     {
-        List<DasType> types = new ArrayList<DasType>();
-        types.add(mutationType);
-        return types;
+        return Collections.singleton(mutationType);
     }
 }

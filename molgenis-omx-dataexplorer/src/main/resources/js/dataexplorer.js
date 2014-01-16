@@ -415,7 +415,6 @@
 				});
 			break;
 			default:
-				console.log("TODO: '" + feature.dataType + "' not supported");
 				return;
 			
 		}
@@ -739,7 +738,7 @@
 	};
 
 	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
-        var start = molgenis.getFeatureByIdentifier('start nucleotide');
+        var start = molgenis.getFeatureByIdentifier('start_nucleotide');
         var chromosome = molgenis.getFeatureByIdentifier('chromosome');
         if(start!=undefined && chromosome != undefined){
             if(featureUri == start.href){
@@ -1030,7 +1029,7 @@
     }
 
     molgenis.setDallianceFilter = function(){
-        var start = molgenis.getFeatureByIdentifier('start nucleotide');
+        var start = molgenis.getFeatureByIdentifier('start_nucleotide');
         var chromosome = molgenis.getFeatureByIdentifier('chromosome');
         molgenis.updateFeatureFilter(start.href, {
             name : start.name,

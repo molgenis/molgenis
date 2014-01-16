@@ -90,8 +90,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
 	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
-    public static final String MUTATION_START_POSITION = "start nucleotide";
-    public static final String MUTATION_ID = "mutation id";
+    public static final String MUTATION_START_POSITION = "start_nucleotide";
+    public static final String MUTATION_ID = "mutation_id";
     public static final String MUTATION_CHROMOSOME = "chromosome";
 
 
@@ -207,8 +207,8 @@ public class DataExplorerController extends MolgenisPluginController
             List<ObservableFeature> features = protocol.getFeatures();
 			for (ObservableFeature feature : features) {
                 if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
-                if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
-                if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
+                else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
+                else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
             }
             if(hasStartPosition && hasChromosome && hasId){
                 hasGenomeBrowserprotocol = true;
