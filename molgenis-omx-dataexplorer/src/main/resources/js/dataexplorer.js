@@ -189,10 +189,11 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-		
+
 		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+            molgenis.updateGenomeBrowser(dataSet);
 		});
 	};
 
@@ -414,7 +415,6 @@
 				});
 			break;
 			default:
-				console.log("TODO: '" + feature.dataType + "' not supported");
 				return;
 			
 		}
@@ -528,11 +528,11 @@
 				var toFilter;
 				
 				if (config == null) {
-					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any">');
-					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any">');	
+					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any" style="width:100px">');
+					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any" style="width:100px">');
 				} else {
-					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any" value="' + config.values[0] + '">');
-					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any" value="' + config.values[1] + '">');	
+					fromFilter = $('<input id="from_'+feature.identifier+'" type="number" step="any" style="width:100px" value="' + config.values[0] + '">');
+					toFilter = $('<input id="to_'+feature.identifier+'" type="number" step="any" style="width:100px" value="' + config.values[1] + '">');
 				}
 				
 				fromFilter.on('keyup input', function() {
@@ -738,7 +738,16 @@
 	};
 
 	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
-		featureFilters[featureUri] = featureFilter;
+        var start = molgenis.getFeatureByIdentifier('start_nucleotide');
+        var chromosome = molgenis.getFeatureByIdentifier('chromosome');
+        if(start!=undefined && chromosome != undefined){
+            if(featureUri == start.href){
+                dalliance.setLocation(dalliance.chr, featureFilter.values[0],featureFilter.values[1]);
+            }else if(featureUri == chromosome.href){
+                dalliance.setLocation(featureFilter.values[0], dalliance.viewStart,dalliance.viewEnd);
+            }
+        }
+        featureFilters[featureUri] = featureFilter;
 		molgenis.onFeatureFilterChange(featureFilters);
 	};
 
@@ -876,8 +885,7 @@
 
 		return searchRequest;
 	};
-	
-	
+
 	molgenis.initializeAggregate = function(dataSetUri){
 		selectedDataSet = restApi.get(dataSetUri, null, null);
 		var queryRules = [];
@@ -978,7 +986,6 @@
 				});
 			}
 		});
-
 	}
 	
 	molgenis.download = function() {
@@ -987,7 +994,75 @@
 		$.download(molgenis.getContextUrl() + '/download',{searchRequest :  jsonRequest});
 		parent.hideSpinner();
 	};
-		
+
+    //--BEGIN genome browser--
+    molgenis.updateGenomeBrowser = function(dataSet){
+        if(dataSet.identifier in genomeBrowserDataSets){
+            document.getElementById('genomebrowser').style.display='block';
+            document.getElementById('genomebrowser').style.visibility='visible';
+            dalliance.reset();
+            console.log("dataSet.identifier:"+dataSet.identifier);
+            var dallianceTrack = [{
+                name : dataSet.name,
+                uri : '/das/molgenis/dataset_'+dataSet.identifier+'/',
+                desc : "Selected dataset",
+                stylesheet_uri : '/css/selected_dataset-track.xml'
+            }
+            ];
+            dalliance.addTier(dallianceTrack[0]);
+            $.each(genomeBrowserDataSets, function(dataSetIdentifier, dataSetName){
+                if(dataSetIdentifier != molgenis.getSelectedDataSetIdentifier()){
+                    var dallianceTrack = [{
+                        name : dataSetName,
+                        uri : '/das/molgenis/dataset_'+dataSetIdentifier+'/',
+                        desc : "unselected dataset",
+                        stylesheet_uri : '/css/not_selected_dataset-track.xml'
+                    }
+                    ];
+                    dalliance.addTier(dallianceTrack[0]);
+                }
+            });
+        }
+        else{
+            document.getElementById('genomebrowser').style.display='none';
+        }
+    }
+
+    molgenis.setDallianceFilter = function(){
+        var start = molgenis.getFeatureByIdentifier('start_nucleotide');
+        var chromosome = molgenis.getFeatureByIdentifier('chromosome');
+        molgenis.updateFeatureFilter(start.href, {
+            name : start.name,
+            identifier : start.identifier,
+            type : start.dataType,
+            range: true,
+            values : [Math.floor(dalliance.viewStart).toString(),Math.floor(dalliance.viewEnd).toString()]
+        });
+        molgenis.updateFeatureFilter(chromosome.href, {
+            name : chromosome.name,
+            identifier : chromosome.identifier,
+            type : chromosome.dataType,
+            values : [ dalliance.chr ]
+        });
+    }
+    molgenis.getFeatureByIdentifier = function(identifier){
+        var feature;
+        var searchHit = restApi.get('/api/v1/observablefeature', null, {
+            q : [{
+                field : 'identifier',
+                operator : 'EQUALS',
+                value : identifier
+            }],
+            num : 500
+        });
+        if(searchHit.items.length>0){
+            feature = searchHit.items[0];
+        }
+        return feature;
+    }
+    //--END genome browser--
+
+
 	// on document ready
 	$(function() {
 		// use chosen plugin for data set select
@@ -1029,6 +1104,13 @@
 		$('#download-button').click(function() {
 			molgenis.download();
 		});
+
+        $('#genomebrowser-filter-button').click(function() {
+            molgenis.setDallianceFilter();
+        });
+
+        // fire event handler
+        $('#dataset-select').change();
 	});
 
     function jqSelector(str)

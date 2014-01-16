@@ -1,12 +1,8 @@
-package org.molgenis.omx.das;
+package org.molgenis.omx.das.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 
@@ -36,15 +32,15 @@ import uk.ac.ebi.mydas.model.DasTarget;
 import uk.ac.ebi.mydas.model.DasType;
 import uk.ac.ebi.mydas.model.Range;
 
-public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
+public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDataSource
 {
 	private final DataService dataService;
 	private DasType mutationType;
 	private DasMethod method;
-	private String dataset;
     private String type;
+    private String dataset;
 
-	@Override
+    @Override
 	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
 			DataSourceConfiguration dataSourceConfig) throws DataSourceException
 	{
@@ -56,7 +52,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
     }
 
 	// for unit test
-	public DasOmxDataSource(DataService dataService) throws DataSourceException
+	VariantRangeHandlingDataSource(DataService dataService) throws DataSourceException
 	{
 		this.dataService = dataService;
         this.dataset = "test";
@@ -65,7 +61,7 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
         method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 	}
 
-	public DasOmxDataSource() throws DataSourceException
+	public VariantRangeHandlingDataSource() throws DataSourceException
 	{
 		dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
 	}
@@ -95,16 +91,18 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 	{
 
 		String[] segmentParts = segmentId.split(",");
-		String patient = null;
-		Patient patientObject = null;
+		Patient patient = null;
+        String customParam;
 		if (segmentParts.length > 1)
 		{
 			segmentId = segmentParts[0];
-			patient = segmentParts[1];
-			patientObject = findPatient(patient);
+			customParam = segmentParts[1];
+            if(customParam.indexOf("patient_")!=-1) {
+			    patient = findPatient(customParam.substring(8));
+            }
 		}
 		if (maxbins == null) maxbins = -1;
-		List<Variant> variants = queryVariants(segmentId, start, stop, patientObject);
+		List<Variant> variants = queryVariants(segmentId, start, stop, patient);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
 		for (Variant variant : variants)
@@ -184,13 +182,11 @@ public class DasOmxDataSource implements RangeHandlingAnnotationDataSource
 		return new Long(dataService.count(Variant.ENTITY_NAME, new QueryImpl())).intValue();
 	}
 
-	@Override
-	public Collection<DasType> getTypes() throws DataSourceException
-	{
-		List<DasType> types = new ArrayList<DasType>();
-		types.add(mutationType);
-		return types;
-	}
+    @Override
+    public Collection<DasType> getTypes() throws DataSourceException
+    {
+        return Collections.singleton(mutationType);
+    }
 
 	protected Chromosome getChromosome(String segmentId)
 	{

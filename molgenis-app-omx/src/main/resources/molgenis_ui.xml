@@ -40,7 +40,6 @@
 	        <plugin id="evaluation" name="Evaluation" url="evaluation"/>
 	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
         </menu>
-        <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
         <plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
         <menu label="Background" name="background">    
 	        <plugin id="news" name="News" url="news"/>
