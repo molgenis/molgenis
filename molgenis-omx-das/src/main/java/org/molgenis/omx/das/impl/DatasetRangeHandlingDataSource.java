@@ -91,23 +91,23 @@ public class DatasetRangeHandlingDataSource extends RangeHandlingDataSource impl
                 {
                     valueStart = value.getValue().getInt("value");
                 }
-                if (MUTATION_STOP_POSITION.equals(value.getFeature().getIdentifier()))
+                else if (MUTATION_STOP_POSITION.equals(value.getFeature().getIdentifier()))
                 {
                     valueStop = value.getValue().getInt("value");
                 }
-                if (MUTATION_DESCRIPTION.equals(value.getFeature().getIdentifier()))
+                else if (MUTATION_DESCRIPTION.equals(value.getFeature().getIdentifier()))
                 {
                     valueDescription = value.getValue().getString("value");
                 }
-                if (MUTATION_ID.equals(value.getFeature().getIdentifier()))
+                else if (MUTATION_ID.equals(value.getFeature().getIdentifier()))
                 {
                     valueIdentifier = value.getValue().getString("value");
                 }
-                if (MUTATION_NAME.equals(value.getFeature().getIdentifier()))
+                else if (MUTATION_NAME.equals(value.getFeature().getIdentifier()))
                 {
                     valueName = value.getValue().getString("value");
                 }
-                if (MUTATION_LINK.equals(value.getFeature().getIdentifier()))
+                else if (MUTATION_LINK.equals(value.getFeature().getIdentifier()))
                 {
                     valueLink = value.getValue().getString("value");
                 }
