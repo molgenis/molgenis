@@ -1,9 +1,8 @@
-package org.molgenis.googlespreadsheet;
+package org.molgenis.gaf;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -15,10 +14,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.gaf.GafListValidator.GafListValidationReport;
+import org.molgenis.googlespreadsheet.GoogleSpreadsheetRepository.Visibility;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,9 +30,10 @@ import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
 
-public class GoogleSpreadsheetRepositoryTest
+public class GafListRepositoryTest
 {
-	private GoogleSpreadsheetRepository spreadsheetRepository;
+	private GafListRepository spreadsheetRepository;
+	private GafListValidationReport report;
 	private SpreadsheetService spreadsheetService;
 	private ListFeed listFeed;
 	private CellFeed cellFeed;
@@ -50,7 +49,7 @@ public class GoogleSpreadsheetRepositoryTest
 		ListEntry entry = mock(ListEntry.class);
 		CustomElementCollection customElements = mock(CustomElementCollection.class);
 		when(customElements.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList("col1", "col2", "col3")));
-		when(customElements.getValue("col1")).thenReturn("val1");
+		when(customElements.getValue(GafListValidator.COL_RUN)).thenReturn("1");
 		when(customElements.getValue("col2")).thenReturn("val2");
 		when(customElements.getValue("col3")).thenReturn("val3");
 		when(entry.getCustomElements()).thenReturn(customElements);
@@ -61,7 +60,7 @@ public class GoogleSpreadsheetRepositoryTest
 
 		Cell cell1 = mock(Cell.class);
 		when(cell1.getRow()).thenReturn(1);
-		when(cell1.getValue()).thenReturn("col1");
+		when(cell1.getValue()).thenReturn(GafListValidator.COL_RUN);
 		Cell cell2 = mock(Cell.class);
 		when(cell2.getRow()).thenReturn(1);
 		when(cell2.getValue()).thenReturn("col2");
@@ -76,49 +75,35 @@ public class GoogleSpreadsheetRepositoryTest
 		cells.add(entry3);
 		when(cellFeed.getEntries()).thenReturn(cells);
 		when(cellFeed.getTitle()).thenReturn(textConstruct);
-		spreadsheetRepository = new GoogleSpreadsheetRepository(spreadsheetService, "key", "id");
+		report = mock(GafListValidationReport.class);
+		spreadsheetRepository = new GafListRepository(spreadsheetService, "key", "id", Visibility.PUBLIC, report);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void GoogleSpreadsheetRepository() throws IOException, ServiceException
+	public void GafListRepository() throws IOException, ServiceException
 	{
-		new GoogleSpreadsheetRepository(null, null, null);
-	}
-
-	@Test
-	public void getEntityClass() throws IOException, ServiceException
-	{
-		assertEquals(MapEntity.class, spreadsheetRepository.getEntityClass());
+		new GafListRepository(null, null, null, null, null);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void iterator() throws IOException, ServiceException
 	{
+		when(report.hasErrors("1")).thenReturn(false);
 		when(spreadsheetService.getFeed(any(URL.class), any(Class.class))).thenReturn(cellFeed).thenReturn(listFeed);
 		Iterator<Entity> it = spreadsheetRepository.iterator();
 		assertTrue(it.hasNext());
-		Entity entity = it.next();
-		assertEquals(entity.getString("col1"), "val1");
-		assertEquals(entity.getString("col2"), "val2");
-		assertEquals(entity.getString("col3"), "val3");
+		it.next();
 		assertFalse(it.hasNext());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void getEntityMetaData() throws IOException, ServiceException
+	public void iterator_errors() throws IOException, ServiceException
 	{
-		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
-		EntityMetaData entityMetaData = spreadsheetRepository.getEntityMetaData();
-		assertEquals(entityMetaData.getName(), "name");
-		Iterator<AttributeMetaData> it = entityMetaData.getAttributes().iterator();
-		assertTrue(it.hasNext());
-		assertEquals(it.next().getName(), "col1");
-		assertTrue(it.hasNext());
-		assertEquals(it.next().getName(), "col2");
-		assertTrue(it.hasNext());
-		assertEquals(it.next().getName(), "col3");
+		when(report.hasErrors("1")).thenReturn(true);
+		when(spreadsheetService.getFeed(any(URL.class), any(Class.class))).thenReturn(cellFeed).thenReturn(listFeed);
+		Iterator<Entity> it = spreadsheetRepository.iterator();
 		assertFalse(it.hasNext());
 	}
 }
