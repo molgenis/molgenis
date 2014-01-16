@@ -1,21 +1,13 @@
-package org.molgenis.omx.das;
+package org.molgenis.omx.das.impl;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
@@ -35,17 +27,10 @@ import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
 import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
-import uk.ac.ebi.mydas.model.DasEntryPoint;
-import uk.ac.ebi.mydas.model.DasEntryPointOrientation;
-import uk.ac.ebi.mydas.model.DasFeature;
-import uk.ac.ebi.mydas.model.DasFeatureOrientation;
-import uk.ac.ebi.mydas.model.DasMethod;
-import uk.ac.ebi.mydas.model.DasPhase;
-import uk.ac.ebi.mydas.model.DasTarget;
-import uk.ac.ebi.mydas.model.DasType;
+import uk.ac.ebi.mydas.model.*;
 
-public class OmxDasDataSourceTest {
-	DasOmxDataSource source;
+public class VariantRangeHandlingDataSourceTest {
+	VariantRangeHandlingDataSource source;
 	private Variant variant;
 	private DasFeature dasFeature;
 	private DasEntryPoint expectedEntryPoint;
@@ -90,7 +75,7 @@ public class OmxDasDataSourceTest {
 				,new ArrayList<String>(),linkout,dasTarget,new ArrayList<String>(),null
 				);
 		expectedEntryPoint = new DasEntryPoint("Chromosome_name", new Integer(0), new Integer(48000000), "Chromosome", "VERSION", DasEntryPointOrientation.NO_INTRINSIC_ORIENTATION, "test", false);
-		source = new DasOmxDataSource(dataService);
+		source = new VariantRangeHandlingDataSource(dataService);
 
 		chromosome = mock(Chromosome.class);
 		patient = mock(Patient.class);
@@ -154,7 +139,7 @@ public class OmxDasDataSourceTest {
 		when(patient.getAllele2()).thenReturn(null);
 		when(dataService.findOne(eq(Patient.ENTITY_NAME), any(Query.class))).thenReturn(patient);
 		
-		source.getFeatures("segment,123",1,100000,100);
+		source.getFeatures("segment,patient_123",1,100000,100);
 		
 		verify(dataService).findAllAsList(Variant.ENTITY_NAME, new QueryImpl()
 				.ge(Variant.BPSTART, 1)
@@ -171,7 +156,7 @@ public class OmxDasDataSourceTest {
 		when(patient.getAllele2()).thenReturn(variant2);
 		when(dataService.findOne(eq(Patient.ENTITY_NAME), any(Query.class))).thenReturn(patient);
 		
-		source.getFeatures("segment,123",1,100000,100);
+		source.getFeatures("segment,patient_123",1,100000,100);
 		
 		
 		verify(dataService).findAllAsList(Variant.ENTITY_NAME, new QueryImpl()
@@ -189,7 +174,7 @@ public class OmxDasDataSourceTest {
 		when(patient.getAllele1()).thenReturn(null);
 		when(patient.getAllele2()).thenReturn(null);
 		when(dataService.findOne(eq(Patient.ENTITY_NAME), any(Query.class))).thenReturn(patient);	
-		source.getFeatures("segment,123",1,100000,100);
+		source.getFeatures("segment,patient_123",1,100000,100);
 
 		verify(dataService,times(0)).findAllAsList(eq(Variant.ENTITY_NAME), any(Query.class));
 	}

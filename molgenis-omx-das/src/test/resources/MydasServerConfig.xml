@@ -18,7 +18,7 @@
                     mapmaster="http://mapmaster.esemblTest">
 			<maintainer email="molgenis@gmail.org" />
 			<version uri="molgenis" created="2013-10-01">
-	            <class>org.molgenis.omx.das.DasOmxDataSource</class>
+	            <class>org.molgenis.omx.das.impl.VariantRangeHandlingDataSource</class>
 				<coordinates 	uri="http://www.dasregistry.org/dasregistry/coordsys/CS_DS94"
 								source="Gene_ID"
 								authority="Ensembl"
