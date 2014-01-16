@@ -157,7 +157,7 @@
 						molgenis.openFeatureFilterDialog(node.data.key);
 					
 					//Clean the select boxes of the charts designer
-					if(molgenis.charts.dataexplorer){
+					if(molgenis.charts){
 						molgenis.charts.dataexplorer.resetChartDesigners();
 					}
 				},
@@ -174,7 +174,7 @@
 		});
 
 		//Clean the select boxes of the charts designer
-		if(molgenis.charts.dataexplorer){
+		if(molgenis.charts){
 			molgenis.charts.dataexplorer.resetChartDesigners();
 		}
 	};

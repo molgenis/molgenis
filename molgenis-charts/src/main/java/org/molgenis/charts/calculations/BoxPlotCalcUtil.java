@@ -23,7 +23,7 @@ public class BoxPlotCalcUtil
 		}
 		
 		if(sortedDataAscendingOrder.isEmpty()) {
-			throw new MolgenisChartException("The sortedDataAscendingOrder list is empty");
+			return new Double[]{0d,0d,0d,0d,0d};
 		}
 		
 		Double[] plotBoxValues = new Double[5];
