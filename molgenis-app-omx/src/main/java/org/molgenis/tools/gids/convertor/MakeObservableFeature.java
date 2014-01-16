@@ -1,4 +1,4 @@
-package org.molgenis.gids.tools.convertor;
+package org.molgenis.tools.gids.convertor;
 
 public class MakeObservableFeature
 {

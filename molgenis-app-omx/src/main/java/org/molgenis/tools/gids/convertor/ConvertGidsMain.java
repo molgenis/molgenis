@@ -1,4 +1,4 @@
-package org.molgenis.gids.tools.convertor;
+package org.molgenis.tools.gids.convertor;
 
 import java.io.File;
 import java.io.FileInputStream;

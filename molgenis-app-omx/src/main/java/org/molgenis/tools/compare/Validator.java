@@ -1,4 +1,4 @@
-package org.molgenis.gids.tools.compare;
+package org.molgenis.tools.compare;
 
 import java.io.BufferedWriter;
 import java.io.File;
