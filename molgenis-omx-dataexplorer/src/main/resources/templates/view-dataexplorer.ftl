@@ -145,6 +145,8 @@
 									<a href="#chart-designer-modal-heatmap" id="chart-designer-modal-heatmap-button" role="button" class="btn" data-toggle="modal">Heat map <i class="icon-plus"></i></a>
 								-->							
 							</div>
+                        </div>
+                        <div class="row-fluid">
 							<div id="chart-view" class="span9"></div>
 						</div>
 					</div>
