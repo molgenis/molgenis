@@ -72,6 +72,7 @@ public class GafListValidator
 	public static final String COL_BARCODE_TYPE;
 
 	static final String LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY = "Finished Successfully";
+	static final String BARCODE_NONE = "None";
 
 	static
 	{
@@ -310,42 +311,13 @@ public class GafListValidator
 						laneEntityRowPairs = new ArrayList<EntityRowPair>();
 						laneMap.put(lane, laneEntityRowPairs);
 					}
-					laneEntityRowPairs.add(new EntityRowPair(laneEntity, row));
+					laneEntityRowPairs.add(new EntityRowPair(laneEntity, entityRowPair.getRow()));
 				}
 			}
 
 			for (Map.Entry<String, List<EntityRowPair>> laneEntry : laneMap.entrySet())
 			{
 				List<EntityRowPair> laneEntityRowPairs = laneEntry.getValue();
-
-				// all lanes in a run have the same prepkit
-				String lanePrepKit = null;
-				for (EntityRowPair laneEntityRowPair : laneEntityRowPairs)
-				{
-					Entity laneEntity = laneEntityRowPair.getEntity();
-					String prepKit = laneEntity.getString(COL_PREP_KIT);
-					if (lanePrepKit == null) lanePrepKit = prepKit;
-					else if (!lanePrepKit.equals(prepKit))
-					{
-						report.addEntry(runId, new GafListValidationError(laneEntityRowPair.getRow(), COL_PREP_KIT,
-								prepKit, "run lane has different " + COL_PREP_KIT + " (expected: " + lanePrepKit + ")"));
-					}
-				}
-
-				// all lanes in a run have the same capturingkit
-				String laneCapturingKit = null;
-				for (EntityRowPair laneEntityRowPair : laneEntityRowPairs)
-				{
-					Entity laneEntity = laneEntityRowPair.getEntity();
-					String capturingKit = laneEntity.getString(COL_CAPTURING_KIT);
-					if (laneCapturingKit == null) laneCapturingKit = capturingKit;
-					else if (!laneCapturingKit.equals(capturingKit))
-					{
-						report.addEntry(runId, new GafListValidationError(laneEntityRowPair.getRow(),
-								COL_CAPTURING_KIT, capturingKit, "run lane has different " + COL_CAPTURING_KIT
-										+ " (expected: " + laneCapturingKit + ")"));
-					}
-				}
 
 				// all lanes in a run have the same barcodetype
 				String laneBarcodeType = null;
@@ -362,16 +334,19 @@ public class GafListValidator
 					}
 				}
 
-				// all lanes in a run have a different barcode
+				// all lanes in a run have a different barcode or 'None'
 				Set<String> barcodes = new HashSet<String>();
 				for (EntityRowPair laneEntityRowPair : laneEntityRowPairs)
 				{
 					Entity laneEntity = laneEntityRowPair.getEntity();
 					String barcode = laneEntity.getString(COL_BARCODE);
-					if (barcodes.contains(barcode)) report.addEntry(runId,
-							new GafListValidationError(laneEntityRowPair.getRow(), COL_BARCODE, barcode,
-									"run lane has duplicate " + COL_BARCODE));
-					else barcodes.add(barcode);
+					if (!barcode.equals(BARCODE_NONE))
+					{
+						if (barcodes.contains(barcode)) report.addEntry(runId, new GafListValidationError(
+								laneEntityRowPair.getRow(), COL_BARCODE, barcode, "run lane has duplicate "
+										+ COL_BARCODE));
+						else barcodes.add(barcode);
+					}
 				}
 			}
 		}
@@ -460,7 +435,7 @@ public class GafListValidator
 		}
 		else if (colName.equalsIgnoreCase(COL_SEQUENCING_START_DATE))
 		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
 		else if (colName.equalsIgnoreCase(COL_RUN))
 		{
