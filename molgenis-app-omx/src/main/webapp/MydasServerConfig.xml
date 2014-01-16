@@ -9,6 +9,7 @@
         <slash-das-points-to-dsn>true</slash-das-points-to-dsn>
         <default-stylesheet>TEST.style</default-stylesheet>
     </global>
+        <datasources>
             <datasource uri="molgenis"
                     title="molgenis"
                     description="Data source test using the molgenis database"
