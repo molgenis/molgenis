@@ -61,6 +61,10 @@
 	float: right;
 }
 
+#genomebrowser {
+    visibility: hidden
+}
+
 .pagination {
 	margin: 0px;
 }

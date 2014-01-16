@@ -1,4 +1,4 @@
-package org.molgenis.omx.das;
+package org.molgenis.omx.das.impl;
 
 import java.util.EnumSet;
 

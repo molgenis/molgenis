@@ -1,4 +1,4 @@
-package org.molgenis.omx.das;
+package org.molgenis.omx.das.impl;
 
 import java.io.IOException;
 
@@ -19,13 +19,15 @@ public class DasPatientFilter implements Filter
 
 		HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
 		String requestURI = httpServletRequest.getRequestURI();
-		int patientIndex = requestURI.indexOf("patient");
+        int patientIndex = requestURI.indexOf("patient_");
+        int datasetIndex = requestURI.indexOf("dataset_");
 		if (patientIndex != -1)
 		{
 			String patientPart = requestURI.substring(patientIndex);
-			int slashIndex = patientPart.indexOf("/");			
-			String newDasURI = createNewRequestURI(requestURI, patientPart, slashIndex);	
-			String newQueryString = createNewQueryString(httpServletRequest, patientPart, slashIndex);
+			int slashIndex = patientPart.indexOf("/");
+            String patientId = patientPart.substring(0, slashIndex);
+            String newDasURI = requestURI.replace(patientId+"/", "");
+            String newQueryString = createNewQueryString(httpServletRequest, patientId);
 			
 			FilteredRequest requestWrapper = new FilteredRequest(servletRequest);
 			if(newQueryString != null){
@@ -33,27 +35,33 @@ public class DasPatientFilter implements Filter
             }
 			servletRequest.getRequestDispatcher(newDasURI).forward(requestWrapper, response);
 		}
+        if (datasetIndex != -1)
+        {
+            String dataSetURLPart = requestURI.substring(datasetIndex);
+            int slashIndex = dataSetURLPart.indexOf("/");
+            String dataset = dataSetURLPart.substring(0, slashIndex);
+            String newDasURI = requestURI.replace(dataset+"/", "");
+            String newQueryString = createNewQueryString(httpServletRequest, dataset);
+
+            FilteredRequest requestWrapper = new FilteredRequest(servletRequest);
+            if(newQueryString != null){
+                requestWrapper.setQuery(newQueryString);
+            }
+            servletRequest.getRequestDispatcher(newDasURI).forward(requestWrapper, response);
+        }
 		else
 		{
 			chain.doFilter(servletRequest, response);
 		}
 	}
 
-	private String createNewRequestURI(String requestURI, String patientPart, int slashIndex)
-	{
-		String URIPatientPart = patientPart.substring(0, slashIndex + 1);
-		String newDasURI = requestURI.replace(URIPatientPart, "");
-		return newDasURI;
-	}
-
-	private String createNewQueryString(HttpServletRequest req, String patientPart, int slashIndex)
+	private String createNewQueryString(HttpServletRequest req, String argument)
 	{
         String newQueryString = null;
         String queryString = req.getQueryString();
         if(queryString != null){
-            String patientId = patientPart.substring(7, slashIndex);
             String[] queryArray = queryString.split(":");
-            newQueryString = queryArray[0]+","+patientId+":"+queryArray[1];
+            newQueryString = queryArray[0]+","+argument+":"+queryArray[1];
         }
 		return newQueryString;
 	}

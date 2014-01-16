@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
+import static org.molgenis.dataexplorer.controller.DataExplorerController.MUTATION_ID;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -84,7 +86,21 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
 	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
 
-	@Autowired
+	public static final String INITLOCATION = "initLocation";
+	public static final String COORDSYSTEM = "coordSystem";
+	public static final String CHAINS = "chains";
+	public static final String SOURCES = "sources";
+	public static final String BROWSERLINKS = "browserLinks";
+	public static final String SEARCHENDPOINT = "searchEndpoint";
+	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
+	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
+
+    public static final String MUTATION_START_POSITION = "start_nucleotide";
+    public static final String MUTATION_ID = "mutation_id";
+    public static final String MUTATION_CHROMOSOME = "chromosome";
+
+
+    @Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -112,7 +128,9 @@ public class DataExplorerController extends MolgenisPluginController
 	public String init(@RequestParam(value = "dataset", required = false)
 	String selectedDataSetIdentifier, Model model) throws Exception
 	{
-		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
+        Map<String,String> genomeBrowserSets = new HashMap<String, String>();
+
+        // set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
 		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
 				|| molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE))
@@ -148,6 +166,12 @@ public class DataExplorerController extends MolgenisPluginController
 				selectedDataSet = dataSets.iterator().next();
 			}
 			model.addAttribute("selectedDataSet", selectedDataSet);
+            for (DataSet dataSet:dataSets) {
+                if(isGenomeBrowserDataSet(dataSet)){
+                    genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
+                }
+            }
+			model.addAttribute("genomeBrowserSets", genomeBrowserSets);
 		}
 
 		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
@@ -160,7 +184,48 @@ public class DataExplorerController extends MolgenisPluginController
 		Boolean appIncludeCharts = molgenisSettings.getBooleanProperty(KEY_APP_INCLUDE_CHARTS, INCLUDE_CHARTS_MODULE);
 		model.addAttribute(MODEL_APP_INCLUDE_CHARTS, appIncludeCharts);
 
+		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
+		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
+		model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
+		model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
+		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
+		model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
+		model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
+		model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
+
 		return "view-dataexplorer";
+	}
+
+	private boolean isGenomeBrowserDataSet(DataSet selectedDataSet)
+	{
+		Collection<Protocol> protocols = new ArrayList<Protocol>();
+		protocols.add(selectedDataSet.getProtocolUsed());
+		return containsGenomeBrowserProtocol(protocols);
+	}
+
+	private boolean containsGenomeBrowserProtocol(Collection<Protocol> protocols)
+	{
+		boolean hasStartPosition = false;
+		boolean hasChromosome = false;
+		boolean hasId = false;
+        boolean hasGenomeBrowserprotocol = false;
+		boolean hasGenomeBrowserSubprotocol = false;
+
+		for (Protocol protocol : protocols)
+		{
+            List<ObservableFeature> features = protocol.getFeatures();
+			for (ObservableFeature feature : features) {
+                if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
+                else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
+                else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
+            }
+            if(hasStartPosition && hasChromosome && hasId){
+                hasGenomeBrowserprotocol = true;
+            }else{
+			    hasGenomeBrowserSubprotocol = containsGenomeBrowserProtocol(protocol.getSubprotocols());
+		    }
+        }
+		return hasGenomeBrowserprotocol || hasGenomeBrowserSubprotocol;
 	}
 
 	@RequestMapping(value = "/download", method = POST)

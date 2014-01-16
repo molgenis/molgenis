@@ -1,4 +1,4 @@
-package org.molgenis.gids.tools.compare;
+package org.molgenis.tools.compare;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +21,9 @@ public class CategoryParser
 	{
 		if (args.length != 2)
 		{
-			System.err.println("2 arguments please 1) filename 2) name of datamatrix tabs");
+			System.err.println("2 arguments please 1) filename 2) name of datamatrix tab\n"
+					+ "example:\n/Users/Roan/Work/GIDS_Imported_30_august_2013/Omx_Import_CeliacSprue_metadata.xls"
+					+ "dataset_celiac_sprue");
 			return;
 		}
 		CategoryParser vc = new CategoryParser();
@@ -38,7 +40,7 @@ public class CategoryParser
 
 		for (Entity entity : repo)
 		{
-			if ("categorical".equals(entity.getString("dataType")))
+			if ("categorical".equals(entity.getString("datatype")))
 			{
 				listOfCategoricalFeatures.add(entity.getString("identifier"));
 				hashCategories.put(entity.getString("identifier"), new ArrayList<String>());
@@ -73,6 +75,7 @@ public class CategoryParser
 
 	public void printForCategoryTab(Map<String, List<String>> hashCategories)
 	{
+		System.out.println("identifier\tname\tvalueCode\tobservablefeature_identifier");
 		for (Entry<String, List<String>> entry : hashCategories.entrySet())
 		{
 			for (String valueCode : entry.getValue())
