@@ -87,7 +87,7 @@
 		}
 		if(sortRule !== null)
 		{
-			q.sort.orders = [sortRule];
+			q.sort = sortRule;
 		}
 
 		searchApi.search(pagination.createSearchRequest(documentType, q), function(searchResponse) {
@@ -127,7 +127,7 @@
 			var headerRow = $('<tr />');
 			var firstColumn = $('<th>Name</th>').css('width', '30%').appendTo(headerRow);
 			if (sortRule) {
-				if (sortRule.direction == 'ASC') {
+				if (sortRule.orders[0].direction == 'ASC') {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 				} else {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -139,15 +139,19 @@
 			
 			// Sort click
 			$(firstColumn).find('.ui-icon').click(function() {
-				if (sortRule && sortRule.direction == 'ASC') {
+				if (sortRule && sortRule.orders[0].direction == 'ASC') {
 					sortRule = {
-						property : 'name',
-						direction : 'DESC'
+							orders: [{
+								property: 'name',
+								direction: 'DESC'
+							}]
 					};
 				} else {
 					sortRule = {
-						property : 'name',
-						direction : 'SORTASC'
+							orders: [{
+								property: 'name',
+								direction: 'ASC'
+							}]
 					};
 				}
 				ns.CatalogueChooser.prototype.createMatrixForDataItems();

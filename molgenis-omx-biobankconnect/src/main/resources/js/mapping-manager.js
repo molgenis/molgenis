@@ -106,7 +106,7 @@
 			}
 			if(sortRule !== null)
 			{
-				q.sort.orders = [sortRule];
+				q.sort = sortRule;
 			}
 			
 			searchApi.search(pagination.createSearchRequest(documentType, q),function(searchResponse) {
@@ -293,7 +293,7 @@
 				if(i === 0){
 					firstColumn = $('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', '40%').appendTo(dataSetRow);
 					if (sortRule) {
-						if (sortRule.operator == 'SORTASC') {
+						if (sortRule.orders[0].direction == 'ASC') {
 							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 						} else {
 							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -310,15 +310,19 @@
 			
 			if(firstColumn !== null){
 				$(firstColumn).find('.ui-icon').click(function() {
-					if (sortRule && sortRule.operator == 'SORTASC') {
+					if (sortRule && sortRule.orders[0].direction == 'ASC') {
 						sortRule = {
-							value : 'name',
-							operator : 'SORTDESC'
+								orders: [{
+									property: 'name',
+									direction: 'DESC'
+								}]
 						};
 					} else {
 						sortRule = {
-							value : 'name',
-							operator : 'SORTASC'
+								orders: [{
+									property: 'name',
+									direction: 'ASC'
+								}]
 						};
 					}
 					ns.MappingManager.prototype.createMatrixForDataItems();
