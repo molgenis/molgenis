@@ -2,6 +2,7 @@ package org.molgenis.charts;
 
 import java.util.List;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.data.Entity;
@@ -20,11 +21,11 @@ public interface ChartDataService
 			List<QueryRule> queryRules);
 
 	List<XYDataSerie> getXYDataSeries(Repository<? extends Entity> repo, String entityName, String attributeNameXaxis,
-			String attributeNameYaxis, Class<?> attributeXJavaType, Class<?> attributeYJavaType, String split,
+			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum, String split,
 			List<QueryRule> queryRules);
 
 	XYDataSerie getXYDataSerie(Repository<? extends Entity> repo, String entityName, String attributeNameXaxis,
-			String attributeNameYaxis, Class<?> attributeXJavaType, Class<?> attributeYJavaType,
+			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules);
 
 	BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules, String split,

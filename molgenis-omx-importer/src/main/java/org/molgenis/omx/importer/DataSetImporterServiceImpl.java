@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataSetImporterServiceImpl implements DataSetImporterService
 {
 	private static final Logger LOG = Logger.getLogger(DataSetImporterServiceImpl.class);
-	private static final String DATASET_SHEET_PREFIX = "dataset_";
+	public static final String DATASET_SHEET_PREFIX = "dataset_";
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
 	private final DataService dataService;
 	private final ValueConverter valueConverter;
@@ -86,7 +86,8 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 		}
 	}
 
-	private void importSheet(Repository<? extends Entity> repo, String sheetName) throws IOException,
+	@Override
+	public void importSheet(Repository<? extends Entity> repo, String sheetName) throws IOException,
 			ValueConverterException
 	{
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
