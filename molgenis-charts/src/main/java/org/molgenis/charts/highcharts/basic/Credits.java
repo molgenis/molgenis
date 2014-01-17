@@ -4,7 +4,7 @@ public class Credits
 {
 	boolean enabled = true;
 	String href = "http://www.molgenis.org";
-	String text = "Molgneis";
+	String text = "Molgenis";
 	
 	/**
 	 * @return the enabled

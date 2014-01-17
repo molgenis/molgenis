@@ -82,8 +82,8 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 	
 	//Including excluding the charts module
-	private static final boolean INCLUDE_CHARTS_MODULE = true;
-	private static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
+	public static final boolean INCLUDE_CHARTS_MODULE = true;
+	public static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
 	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
 
 	public static final String INITLOCATION = "initLocation";
