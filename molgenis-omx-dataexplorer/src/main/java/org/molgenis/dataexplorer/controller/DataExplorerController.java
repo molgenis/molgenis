@@ -80,6 +80,11 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
 	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
+	
+	//Including excluding the charts module
+	private static final boolean INCLUDE_CHARTS_MODULE = true;
+	private static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
+	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
 
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
@@ -174,6 +179,10 @@ public class DataExplorerController extends MolgenisPluginController
 
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
+		
+		//including/excluding charts
+		Boolean appIncludeCharts = molgenisSettings.getBooleanProperty(KEY_APP_INCLUDE_CHARTS, INCLUDE_CHARTS_MODULE);
+		model.addAttribute(MODEL_APP_INCLUDE_CHARTS, appIncludeCharts);
 
 		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
 		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));

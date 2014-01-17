@@ -73,7 +73,7 @@
 		<div class="row-fluid">
 			<div id="plugin-container" class="container-fluid">
 	</#macro>
-	<!--topmenu -->
+	<#--topmenu -->
 	<#macro topmenu menu plugin_id>
 		<#--TODO: put navbar-fixed-top back-->
 		<div class="navbar"> 
@@ -119,7 +119,7 @@
 			</div>
 		</div>
 	</#macro>
-	<!--submenu -->
+<#--submenu -->
 	<#macro submenu menu plugin_id>
 	<div id="submenu">
 		<ul id="submenu-menu" class="nav nav-tabs">
