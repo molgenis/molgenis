@@ -1,4 +1,4 @@
-package org.molgenis.security.permission;
+package org.molgenis.omx;
 
 import java.util.Collection;
 
@@ -58,3 +58,5 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		return urlFragments.length > 0 ? urlFragments[urlFragments.length - 1] : requestUrl;
 	}
 }
+
+
