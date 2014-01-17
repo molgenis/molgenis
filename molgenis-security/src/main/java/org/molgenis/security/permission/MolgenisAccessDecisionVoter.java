@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.security.permission;
 
 import java.util.Collection;
 
