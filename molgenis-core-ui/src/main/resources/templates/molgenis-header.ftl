@@ -119,7 +119,7 @@
 			</div>
 		</div>
 	</#macro>
-<!--submenu -->
+	<!--submenu -->
 	<#macro submenu menu plugin_id>
 	<div id="submenu">
 		<ul id="submenu-menu" class="nav nav-tabs">
