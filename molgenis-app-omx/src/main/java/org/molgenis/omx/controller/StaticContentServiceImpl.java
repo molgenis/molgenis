@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StaticContentServiceImpl implements StaticContentService
 {
-	public static final String DEFAULT_CONTENT = "<p>Place here some content!</p>";
+	public static final String DEFAULT_CONTENT = "<p>Place some content!</p>";
 	public static final String PREFIX_KEY = "app.";
 			
 	private final MolgenisSettings molgenisSettings;
@@ -35,8 +35,10 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
-	public boolean submitContent(final String uniqueReference, final String content)
+	public boolean submitContent(final String uniqueReference, String content)
 	{
+		if(null == content) content = "";
+		
 		boolean succes;
 		if(this.molgenisSettings.propertyExists(PREFIX_KEY + uniqueReference)){
 			succes = this.molgenisSettings.updateProperty(PREFIX_KEY + uniqueReference, content);
@@ -57,9 +59,9 @@ public class StaticContentServiceImpl implements StaticContentService
 	{
 		String content = this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference, DEFAULT_CONTENT);
 
-		if (null == content || content.isEmpty())
+		if (null == content)
 		{
-			throw new MolgenisDataException("content is null or empty");
+			throw new MolgenisDataException("Content is null");
 		}
 
 		return content;

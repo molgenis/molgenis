@@ -15,7 +15,7 @@ public class StringToDateConverter implements Converter<String, Date>
 		{
 			return MolgenisDateFormat.getDateFormat().parse(source);
 		}
-		catch (ParseException e)
+		catch (ParseException pe)
 		{
 			throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
 					+ MolgenisDateFormat.DATEFORMAT_DATETIME);

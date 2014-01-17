@@ -9,9 +9,9 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.Database.DatabaseAction;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.observ.DataSet;
@@ -30,18 +30,18 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
-	private final Database database;
+	private final DataService dataService;
 	private final EntitiesImporter entitiesImporter;
 	private final DataSetImporterService dataSetImporterService;
 
 	@Autowired
-	public ValidationResultWizardPage(Database database, EntitiesImporter entitiesImporter,
+	public ValidationResultWizardPage(DataService dataService, EntitiesImporter entitiesImporter,
 			DataSetImporterService dataSetImporterService)
 	{
-		this.database = database;
+		this.dataService = dataService;
 		this.entitiesImporter = entitiesImporter;
 		this.dataSetImporterService = dataSetImporterService;
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (entitiesImporter == null) throw new IllegalArgumentException("EntitiesImporter is null");
 		if (dataSetImporterService == null) throw new IllegalArgumentException("DataSetImporterService is null");
 	}
@@ -66,25 +66,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 		if (entityImportOption != null)
 		{
-			try
-			{
-				return doImport(entityImportOption, result, importWizard);
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-			catch (DatabaseException e)
-			{
-				throw new RuntimeException(e);
-			}
+			return doImport(entityImportOption, result, importWizard);
 		}
 
 		return null;
 	}
 
-	private String doImport(String entityAction, BindingResult result, ImportWizard importWizard) throws IOException,
-			DatabaseException
+	private String doImport(String entityAction, BindingResult result, ImportWizard importWizard)
 	{
 
 		File file = importWizard.getFile();
@@ -109,27 +97,16 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			}
 
 			// publish dataset imported event(s)
-			try
-			{
-				for (DataSet dataSet : database.find(DataSet.class))
-					ApplicationContextProvider.getApplicationContext().publishEvent(
-							new DataSetImportedEvent(this, dataSet.getId()));
-			}
-			catch (DatabaseException e)
-			{
-				logger.error("Error publishing " + DataSet.class.getSimpleName() + " imported event(s)");
-				throw e;
-			}
+
+			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+			for (DataSet dataSet : dataSets)
+				ApplicationContextProvider.getApplicationContext().publishEvent(
+						new DataSetImportedEvent(this, dataSet.getId()));
 
 			return "File successfully imported.";
 
 		}
-		catch (IOException e)
-		{
-			logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityAction + "]", e);
-			result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
-		}
-		catch (DatabaseException e)
+		catch (Exception e)
 		{
 			logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityAction + "]", e);
 			result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));

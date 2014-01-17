@@ -13,6 +13,11 @@ public interface AttributeMetaData
 	String getName();
 
 	/**
+	 * Label of the attribute if set else returns name
+	 */
+	String getLabel();
+
+	/**
 	 * Description of the attribute
 	 */
 	String getDescription();
@@ -51,10 +56,5 @@ public interface AttributeMetaData
 	 * When getDataType=xref/mref, get other end of xref
 	 */
 	EntityMetaData getRefEntity();
-
-	/**
-	 * When getDataType=xref/mref, get other end of xref
-	 */
-	AttributeMetaData getRefAttribute();
 
 }

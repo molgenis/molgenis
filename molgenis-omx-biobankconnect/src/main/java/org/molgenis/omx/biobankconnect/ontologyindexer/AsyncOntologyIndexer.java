@@ -6,27 +6,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.omx.biobankconnect.utils.OntologyTable;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermTable;
+import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
+import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.runas.RunAsSystem;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 
 public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 {
 	@Autowired
-	@Qualifier("unsecuredDatabase")
-	private Database database;
+	private DataService dataService;
 	private SearchService searchService;
 	private String ontologyUri = null;
 	private boolean isCorrectOntology = true;
@@ -52,7 +49,9 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		return (runningIndexProcesses.get() > 0);
 	}
 
+	@Override
 	@Async
+	@RunAsSystem
 	public void index(String ontologyName, File ontologyFile)
 	{
 		isCorrectOntology = true;
@@ -62,8 +61,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		{
 			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexTupleTable("ontology-" + ontologyUri, new OntologyTable(model, database));
-			searchService.indexTupleTable("ontologyTerm-" + ontologyUri, new OntologyTermTable(model, database));
+			searchService.indexRepository(new OntologyRepository(model, "ontology-" + ontologyUri));
+			searchService.indexRepository(new OntologyTermRepository(model, "ontologyTerm-" + ontologyUri));
 		}
 		catch (OWLOntologyCreationException e)
 		{
@@ -77,32 +76,30 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		}
 	}
 
+	@Override
+	@RunAsSystem
 	public void removeOntology(String ontologyURI)
 	{
-		try
-		{
-			List<Ontology> ontologies = database.find(Ontology.class, new QueryRule(Ontology.IDENTIFIER,
-					Operator.EQUALS, ontologyURI));
-			if (ontologies.size() > 0)
-			{
-				for (Ontology ontology : ontologies)
-				{
-					List<OntologyTerm> ontologyTerms = database.find(OntologyTerm.class, new QueryRule(
-							OntologyTerm.ONTOLOGY_IDENTIFIER, Operator.EQUALS, ontology.getIdentifier()));
+		List<Ontology> ontologies = dataService.findAllAsList(Ontology.ENTITY_NAME,
+				new QueryImpl().eq(Ontology.IDENTIFIER, ontologyURI));
 
-					if (ontologyTerms.size() > 0) database.remove(ontologyTerms);
-				}
-				database.remove(ontologies);
-			}
-		}
-		catch (DatabaseException e)
+		if (ontologies.size() > 0)
 		{
-			new RuntimeException(e);
+			for (Ontology ontology : ontologies)
+			{
+				List<OntologyTerm> ontologyTerms = dataService.findAllAsList(OntologyTerm.ENTITY_NAME,
+						new QueryImpl().eq(OntologyTerm.ONTOLOGY, ontology));
+
+				if (ontologyTerms.size() > 0) dataService.delete(OntologyTerm.ENTITY_NAME, ontologyTerms);
+			}
+			dataService.delete(Ontology.ENTITY_NAME, ontologies);
 		}
+
 		searchService.deleteDocumentsByType("ontology-" + ontologyURI);
 		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyURI);
 	}
 
+	@Override
 	public String getOntologyUri()
 	{
 		return ontologyUri;

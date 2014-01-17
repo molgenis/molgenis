@@ -1,71 +1,87 @@
 package org.molgenis.omx.studymanager;
 
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.log4j.Logger;
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.catalog.UnknownCatalogException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
-import org.molgenis.study.StudyDefinitionMeta;
+import org.molgenis.study.StudyDefinition.Status;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class OmxStudyManagerService implements StudyManagerService
 {
-	private final Database database;
+	private static final Logger logger = Logger.getLogger(OmxStudyManagerService.class);
+	private final DataService dataService;
+	private final MolgenisUserService molgenisUserService;
 
-	public OmxStudyManagerService(Database database)
+	public OmxStudyManagerService(DataService dataService, MolgenisUserService molgenisUserService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");
-		this.database = database;
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		if (molgenisUserService == null) throw new IllegalArgumentException("MolgenisUserService is null");
+		this.dataService = dataService;
+		this.molgenisUserService = molgenisUserService;
 	}
 
 	@Override
-	public List<StudyDefinitionMeta> getStudyDefinitions()
+	public List<StudyDefinition> getStudyDefinitions()
 	{
-		List<StudyDataRequest> studyDataRequests;
-		try
-		{
-			studyDataRequests = database.find(StudyDataRequest.class);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		if (studyDataRequests == null) return Collections.emptyList();
+		Iterable<StudyDataRequest> studyDataRequests = dataService.findAll(StudyDataRequest.ENTITY_NAME);
 
-		return Lists.transform(studyDataRequests, new Function<StudyDataRequest, StudyDefinitionMeta>()
-		{
-			@Override
-			public StudyDefinitionMeta apply(StudyDataRequest studyDataRequest)
-			{
-				return new StudyDefinitionMeta(studyDataRequest.getIdentifier(), studyDataRequest.getName(),
-						studyDataRequest.getMolgenisUser().getEmail(), studyDataRequest.getRequestDate());
-			}
-		});
+		return Lists.newArrayList(Iterables.transform(studyDataRequests,
+				new Function<StudyDataRequest, StudyDefinition>()
+				{
+					@Override
+					public StudyDefinition apply(StudyDataRequest studyDataRequest)
+					{
+						return new OmxStudyDefinition(studyDataRequest, dataService);
+					}
+				}));
+	}
+
+	@Override
+	public List<StudyDefinition> getStudyDefinitions(String username, Status status)
+	{
+		MolgenisUser user = molgenisUserService.getUser(username);
+		Iterable<StudyDataRequest> studyDataRequest = dataService.findAll(
+				StudyDataRequest.ENTITY_NAME,
+				new QueryImpl().eq(StudyDataRequest.MOLGENISUSER, user).and()
+						.eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase()));
+		return Lists.newArrayList(Iterables.transform(studyDataRequest,
+				new Function<StudyDataRequest, StudyDefinition>()
+				{
+					@Override
+					public StudyDefinition apply(StudyDataRequest studyDataRequest)
+					{
+						return new OmxStudyDefinition(studyDataRequest, dataService);
+					}
+				}));
 	}
 
 	@Override
 	public StudyDefinition getStudyDefinition(String id) throws UnknownStudyDefinitionException
 	{
-		StudyDataRequest studyDataRequest;
-		try
-		{
-			studyDataRequest = StudyDataRequest.findByIdentifier(database, id);
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
+				new QueryImpl().eq(StudyDataRequest.ID, id));
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		return new OmxStudyDefinition(studyDataRequest);
+
+		return new OmxStudyDefinition(studyDataRequest, dataService);
 	}
 
 	@Override
@@ -98,20 +114,39 @@ public class OmxStudyManagerService implements StudyManagerService
 	}
 
 	@Override
+	public StudyDefinition createStudyDefinition(String username, String catalogId)
+	{
+		return createStudyDefinition(username, catalogId, UUID.randomUUID().toString());
+	}
+
+	public StudyDefinition createStudyDefinition(String username, String catalogId, String omxIdentifier)
+	{
+		MolgenisUser user = molgenisUserService.getUser(username);
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogId));
+
+		StudyDataRequest studyDataRequest = new StudyDataRequest();
+		studyDataRequest.setIdentifier(omxIdentifier);
+		studyDataRequest.setName(Status.DRAFT.toString());
+		studyDataRequest.setProtocol(protocol);
+		studyDataRequest.setMolgenisUser(user);
+		studyDataRequest.setRequestDate(new Date());
+		studyDataRequest.setRequestStatus(Status.DRAFT.toString().toLowerCase());
+		studyDataRequest.setRequestForm("placeholder");
+		dataService.add(StudyDataRequest.ENTITY_NAME, studyDataRequest);
+
+		return new OmxStudyDefinition(studyDataRequest, dataService);
+	}
+
+	@Override
 	public void updateStudyDefinition(StudyDefinition studyDefinition) throws UnknownStudyDefinitionException
 	{
 		String id = studyDefinition.getId();
-		StudyDataRequest studyDataRequest;
-		try
+		Query q = new QueryImpl().eq(StudyDataRequest.ID, id);
+		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME, q);
+		if (studyDataRequest == null)
 		{
-			studyDataRequest = StudyDataRequest.findByIdentifier(database, id);
+			throw new UnknownStudyDefinitionException("Study definition [" + id + "] does not exist");
 		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
-		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
-				+ "] does not exist");
 
 		studyDataRequest.setName(studyDataRequest.getName());
 		studyDataRequest.setFeatures(Lists.newArrayList(Lists.transform(studyDefinition.getItems(),
@@ -122,36 +157,37 @@ public class OmxStudyManagerService implements StudyManagerService
 					public ObservableFeature apply(CatalogItem catalogItem)
 					{
 						String id = catalogItem.getId();
-						ObservableFeature feature;
-						try
-						{
-							feature = ObservableFeature.findByIdentifier(database, id);
-						}
-						catch (DatabaseException e)
-						{
-							throw new RuntimeException(e);
-						}
+						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+								new QueryImpl().eq(ObservableFeature.ID, id));
 						if (feature == null)
 						{
 							throw new RuntimeException("Observable feature does not exist identifier: " + id);
 						}
+
 						return feature;
 					}
 				})));
-		try
-		{
-			database.update(studyDataRequest); // FIXME Duplicate entry '...' for key 'PRIMARY' exceptions
-		}
-		catch (DatabaseException e)
-		{
-			throw new RuntimeException(e);
-		}
+
+		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
 
 	@Override
-	public StudyDefinition persistStudyDefinition(StudyDefinition studyDefinition)
+	public void submitStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
 	{
-		// do nothing, at the moment study definitions are persisted in OrderStudyDataService
-		return studyDefinition;
+		Query q = new QueryImpl().eq(StudyDataRequest.ID, id);
+		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME, q);
+		if (studyDataRequest == null)
+		{
+			throw new UnknownStudyDefinitionException("Study definition [" + id + "] does not exist");
+		}
+
+		if (!studyDataRequest.getRequestStatus().equalsIgnoreCase(Status.DRAFT.toString()))
+		{
+			throw new RuntimeException("Study data request with status '" + studyDataRequest.getRequestStatus()
+					+ "' is not submittable");
+		}
+		studyDataRequest.setRequestStatus(Status.SUBMITTED.toString().toLowerCase());
+		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
 }

@@ -33,11 +33,13 @@
 			}).items;
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
-				queryRules : [{
-					field : 'type',
-					operator : 'EQUALS',
-					value : 'observablefeature'
-				}]
+				query:{
+					rules :[[{
+						field : 'type',
+						operator : 'EQUALS',
+						value : 'observablefeature'
+					}]]
+				}
 			};
 			searchApi.search(request, function(searchResponse){
 				sortRule = null;
@@ -83,23 +85,31 @@
 		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
 			var documentType = 'protocolTree-' + dataSetMapping.items[0].identifier.split('-')[1];
-			var query = [{
-				operator : 'SEARCH',
-				value : 'observablefeature'
-			}];
+			
+			var q = {
+					rules : [[{
+						operator : 'SEARCH',
+						value : 'observablefeature'
+					}]]
+			}
+			
 			var queryText = $('#search-dataitem').val();
 			if(queryText !== ''){
-				query.push({
+				q.rules[0].push({
 					operator : 'AND'
 				});
-				query.push({
+				q.rules[0].push({
 					operator : 'SEARCH',
 					value : queryText
 				});
 				pagination.reset();
 			}
-			if(sortRule !== null) query.push(sortRule);
-			searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
+			if(sortRule !== null)
+			{
+				q.sort.orders = [sortRule];
+			}
+			
+			searchApi.search(pagination.createSearchRequest(documentType, q),function(searchResponse) {
 				createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
 					$('#dataitem-table').empty().append(createDynamicTableHeader(involedDataSets)).append(tableBody);
 					pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
@@ -152,16 +162,15 @@
 				});
 				allFeatureCollection.push(hitInfo.id);
 			});
-			queryRules.push({
-				operator : 'LIMIT',
-				value : 100000 
-			});
 			
 			$.each(dataSets, function(index, dataSet){
 				var tuple = {};
 				var searchRequest = {
 					documentType : dataSet.identifier,
-					queryRules :queryRules
+					query : {
+						pageSize: 10000,
+						rules: [queryRules]
+					}
 				};	
 				searchApi.search(searchRequest, function(searchResponse) {
 					var searchHits = searchResponse.searchHits;	
@@ -218,7 +227,7 @@
 			$.each(tuple, function(index, mappings){
 				if(mappings.length > 1){
 					mappings.sort(function(a,b){
-						return naturalSort(b.score, a.score);
+						return molgenis.naturalSort(b.score, a.score);
 					});
 				}
 			});
@@ -582,11 +591,13 @@
 			function replaceMappingInTable(feature){
 				var searchRequest = {
 					'documentType' : 'protocolTree-' + ns.MappingManager.prototype.getSelectedDataSet(),
-					'queryRules' : [{
-						'field' : 'id',
-						'operator' : 'EQUALS',
-						'value' : ns.hrefToId(feature.href).toString()
-					}]
+					'query' : {
+						'rules':[[{
+							'field' : 'id',
+							'operator' : 'EQUALS',
+							'value' : ns.hrefToId(feature.href).toString()
+						}]]
+					}
 				}
 				searchApi.search(searchRequest, function(searchResponse){
 					var storedRowInfo = $('body').data('clickedRow');
@@ -798,7 +809,7 @@
 			$.each(map, function(score, mappings){
 				if(mappings.length > 1 && score > 0){
 					mappings.sort(function(a,b){
-						return naturalSort(b.comparedScore, a.comparedScore);
+						return molgenis.naturalSort(b.comparedScore, a.comparedScore);
 					});
 				}
 				topTenOrder = topTenOrder.concat(mappings);
@@ -833,9 +844,10 @@
 							}]
 						});
 					}
+					
 					var observedValue = restApi.get('/api/v1/observedvalue', ['value'], {
 						q : [{
-							field : 'observationset',
+							field : 'observationSet',
 							operator : 'EQUALS',
 							value : eachMapping.observationSet
 						},{

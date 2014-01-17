@@ -242,12 +242,22 @@ input[type=number] {
 	height: 26px;
 	float: left;
 	width: 90px;
-	border-radius: 5px;
-	margin-left: 5px;
+}
+
+#filter-nav-content{
+	margin-top: 25px;
+}
+
+#feature-select-container{	
+	margin-bottom: 20px;
+}
+
+#filter-nav li a:hover{
+	cursor: default
 }
 
 #feature-select {
-	padding-bottom: 20px;
+	position:absolute;
 }
 
 #nrOfDataItems {
@@ -255,15 +265,15 @@ input[type=number] {
 	margin-bottom: 8px;
 	margin-top: 4px;
 }
-
-.notselected {
-	border: none;
-	background: transparant;
-	color: black;
+#filter-dialog-modal-container{
+	overflow-y: scroll; 
 }
 
-.selected {
-	border: 1px solid black;
-	box-shadow: 0px 0px 10px #5B82A4;
-	color: black;
+#filter-dialog-modal-container .modal{
+	width:700px;
+}
+
+#wizard-button{
+	color:white;
+	background:#5B82A4
 }

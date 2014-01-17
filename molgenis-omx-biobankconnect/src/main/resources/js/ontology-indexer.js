@@ -37,20 +37,16 @@
 	};
 	
 	ns.createSearchRequest = function() {
-		var queryRules = [];
-		//todo: how to unlimit the search result
-		queryRules.push({
-			operator : 'LIMIT',
-			value : 1000000
-		});
-		queryRules.push({
-			operator : 'SEARCH',
-			value : 'indexedOntology'
-		});
 		
 		var searchRequest = {
 			documentType : null,
-			queryRules : queryRules
+			query : {
+				pageSize: 1000000,
+				rules : [[{
+					operator : 'SEARCH',
+					value : 'indexedOntology'
+				}]]
+			}
 		};
 		return searchRequest;
 	};

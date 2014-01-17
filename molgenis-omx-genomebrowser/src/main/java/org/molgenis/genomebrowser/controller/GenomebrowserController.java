@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.genomebrowser.services.MutationService;
@@ -39,6 +38,7 @@ public class GenomebrowserController extends MolgenisPluginController
 	public static final String BROWSERLINKS = "browserLinks";
 	public static final String SEARCHENDPOINT = "searchEndpoint";
 	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
+    public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	private final MolgenisSettings molgenisSettings;
 	public MutationService mutationService;
@@ -62,6 +62,7 @@ public class GenomebrowserController extends MolgenisPluginController
 		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
 		model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
 		model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
+        model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
 
 		return "view-genomebrowser";
 	}
@@ -69,15 +70,24 @@ public class GenomebrowserController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET, value = "/data", produces =
 	{ MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody
-	List<Map<String, String>> getAll(HttpServletResponse response,
-			@RequestParam(value = "mutation", required = false) String mutationId,
-			@RequestParam(value = "segment", required = true) String segmentId) throws ParseException,
-			DatabaseException, IOException
+	List<Map<String, String>> getAll(HttpServletResponse response, @RequestParam(value = "mutation", required = false)
+	String mutationId, @RequestParam(value = "segment", required = true)
+	String segmentId) throws ParseException, IOException
 	{
 		if (mutationId == null)
 		{
 			mutationId = "";
 		}
-		return mutationService.getPatientMutationData(segmentId, mutationId);
+		List<Map<String, String>> result = mutationService.getPatientMutationData(segmentId, mutationId);
+		return result;
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/mutationdata", produces =
+		{ MediaType.APPLICATION_JSON_VALUE })
+		public @ResponseBody
+		List<Map<String, String>> MutationData(HttpServletResponse response) throws ParseException, IOException
+		{
+			List<Map<String, String>> result = mutationService.getMutationData();
+			return result;
+		}
 }

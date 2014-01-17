@@ -9,35 +9,38 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.tupletable.TableException;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.csv.CsvWriter;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.tuple.Tuple;
-import org.molgenis.util.tuple.ValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +49,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.Lists;
+
+//import org.molgenis.data.csv
 
 /**
  * Controller class for the data explorer.
@@ -73,10 +80,10 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
-	
+	private DataService dataService;
+
 	@Autowired
-	private Database database;
+	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -97,16 +104,19 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedDataSetIdentifier, Model model) throws Exception
 	{
-		//set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the plugin
-		if(molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)||
-			molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE)){		
+		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
+		// plugin
+		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
+				|| molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE))
+		{
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
-		
-		List<DataSet> dataSets = database.query(DataSet.class).equals(DataSet.ACTIVE, true).find();
+
+		List<DataSet> dataSets = Lists.<DataSet> newArrayList(dataService.<DataSet> findAll(DataSet.ENTITY_NAME));
+
 		model.addAttribute("dataSets", dataSets);
 
 		if (dataSets != null && !dataSets.isEmpty())
@@ -145,45 +155,54 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
-			throws IOException, DatabaseException, TableException
+	public void download(@RequestParam("searchRequest")
+	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
 
 		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-		request.getQueryRules().add(new QueryRule(Operator.LIMIT, DOWNLOAD_SEARCH_LIMIT));
-
-		QueryRule offsetRule = new QueryRule(Operator.OFFSET, 0);
-		request.getQueryRules().add(offsetRule);
+		request.getQuery().pageSize(DOWNLOAD_SEARCH_LIMIT).offset(0);
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
 
-		TupleWriter tupleWriter = null;
+		CsvWriter<Entity> writer = null;
 		try
 		{
-			tupleWriter = new CsvWriter(response.getWriter());
+			writer = new CsvWriter<Entity>(response.getWriter());
 
 			// The fieldsToReturn contain identifiers, we need the names
-			tupleWriter.write(getFeatureNames(request.getFieldsToReturn()));
+			Map<String, String> nameByIdentifier = getFeatureNames(request.getFieldsToReturn());
+
+			// Keep order
+			List<String> names = new ArrayList<String>();
+			for (String identifier : request.getFieldsToReturn())
+			{
+				String name = nameByIdentifier.get(identifier);
+				if (name != null)
+				{
+					names.add(name);
+				}
+			}
+
+			writer.writeAttributeNames(names);
 			int count = 0;
 			SearchResult searchResult;
 
 			do
 			{
-				offsetRule.setValue(count);
+				request.getQuery().offset(count);
 				searchResult = searchService.search(request);
 
 				for (Hit hit : searchResult.getSearchHits())
 				{
-					List<Object> values = new ArrayList<Object>();
+					Entity entity = new MapEntity();
 					for (String field : request.getFieldsToReturn())
 					{
-						values.add(hit.getColumnValueMap().get(field));
+						entity.set(nameByIdentifier.get(field), hit.getColumnValueMap().get(field));
 					}
-
-					tupleWriter.write(new ValueTuple(values));
+					writer.add(entity);
 				}
 
 				count += searchResult.getSearchHits().size();
@@ -192,13 +211,14 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		finally
 		{
-			IOUtils.closeQuietly(tupleWriter);
+			IOUtils.closeQuietly(writer);
 		}
 	}
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@RequestBody
+	AggregateRequest request)
 	{
 
 		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
@@ -207,11 +227,16 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (request.getDataType().equals("categorical"))
 			{
-				List<Category> listOfCategories = database.find(Category.class, new QueryRule(
-						Category.OBSERVABLEFEATURE, Operator.EQUALS, request.getFeatureId()));
-				for (Category category : listOfCategories)
+				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
+				if (feature != null)
 				{
-					hashCounts.put(category.getName(), 0);
+					Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+
+					for (Category category : categories)
+					{
+						hashCounts.put(category.getName(), 0);
+					}
 				}
 			}
 			else if (request.getDataType().equals("bool"))
@@ -224,7 +249,7 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new RuntimeException("Illegal datatype");
 			}
 
-			ObservableFeature feature = database.findById(ObservableFeature.class, request.getFeatureId());
+			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
 			SearchResult searchResult = searchService.search(request.getSearchRequest());
 
 			for (Hit hit : searchResult.getSearchHits())
@@ -242,7 +267,7 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			logger.info(e);
 
@@ -251,25 +276,35 @@ public class DataExplorerController extends MolgenisPluginController
 
 	}
 
-	private Tuple getFeatureNames(List<String> identifiers) throws DatabaseException
+	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+	public String filterwizard(@RequestBody
+	@Valid
+	@NotNull
+	FilterWizardRequest request, Model model)
 	{
-		List<ObservableFeature> features = database.query(ObservableFeature.class)
-				.in(ObservableFeature.IDENTIFIER, identifiers).find();
+		String dataSetIdentifier = request.getDataSetIdentifier();
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
 
-		// Keep order the same
-		Map<String, String> nameByIdentifier = new HashMap<String, String>();
+		model.addAttribute("listOfallProtocols", listOfallProtocols);
+		model.addAttribute("identifier", dataSetIdentifier);
+		return "view-filter-dialog";
+	}
+
+	// Get feature names by feature identifiers
+	private Map<String, String> getFeatureNames(List<String> identifiers)
+	{
+		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers));
+
+		Map<String, String> nameByIdentifier = new LinkedHashMap<String, String>();
 		for (ObservableFeature feature : features)
 		{
 			nameByIdentifier.put(feature.getIdentifier(), feature.getName());
 		}
 
-		List<String> names = new ArrayList<String>();
-		for (String identifier : identifiers)
-		{
-			names.add(nameByIdentifier.get(identifier));
-		}
-
-		return new ValueTuple(names);
+		return nameByIdentifier;
 	}
 
 	private String getCsvFileName(String dataSetName)

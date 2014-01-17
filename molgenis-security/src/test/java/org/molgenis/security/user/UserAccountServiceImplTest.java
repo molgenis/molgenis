@@ -9,11 +9,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
-
-import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.Query;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.UserAccountServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -33,8 +28,6 @@ import org.testng.annotations.Test;
 { Config.class })
 public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	private static Authentication AUTHENTICATION_PREVIOUS;
-
 	@Configuration
 	static class Config
 	{
@@ -45,34 +38,37 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public Database database()
-		{
-			return mock(Database.class);
-		}
-
-		@Bean
 		public PasswordEncoder passwordEncoder()
 		{
 			return mock(PasswordEncoder.class);
 		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
+		}
 	}
+
+	private static final String USERNAME_USER = "username";
+	private static Authentication AUTHENTICATION_PREVIOUS;
+	private Authentication authentication;
 
 	@Autowired
 	private UserAccountServiceImpl userAccountServiceImpl;
 
 	@Autowired
-	private Database database;
+	private MolgenisUserService molgenisUserService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@BeforeClass
-	public static void setUpBeforeClass()
+	public void setUpBeforeClass()
 	{
 		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
-		UserDetails userDetails = when(mock(UserDetails.class).getUsername()).thenReturn("username").getMock();
-		Authentication authentication = when(mock(Authentication.class).getPrincipal()).thenReturn(userDetails)
-				.getMock();
+		authentication = mock(Authentication.class);
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
@@ -82,42 +78,25 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getCurrentUser() throws DatabaseException
 	{
+		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
+
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
-		when(existingMolgenisUser.getId()).thenReturn(1);
-		when(existingMolgenisUser.getUsername()).thenReturn("username");
-		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
-
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
-		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
-
-		assertEquals("username", userAccountServiceImpl.getCurrentUser().getUsername());
+		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
+		assertEquals(userAccountServiceImpl.getCurrentUser(), existingMolgenisUser);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void updateCurrentUser() throws DatabaseException
+	public void updateCurrentUser()
 	{
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
 		when(existingMolgenisUser.getId()).thenReturn(1);
-		when(existingMolgenisUser.getUsername()).thenReturn("username");
+		when(existingMolgenisUser.getUsername()).thenReturn(USERNAME_USER);
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
-		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
+		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);
@@ -128,7 +107,6 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		verify(passwordEncoder, never()).encode("encrypted-password");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test(expectedExceptions = RuntimeException.class)
 	public void updateCurrentUser_wrongUser() throws DatabaseException
 	{
@@ -136,13 +114,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(existingMolgenisUser.getId()).thenReturn(1);
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
-		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
+		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);
@@ -152,7 +124,6 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		userAccountServiceImpl.updateCurrentUser(updatedMolgenisUser);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void updateCurrentUser_changePassword() throws DatabaseException
 	{
@@ -162,13 +133,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 		when(existingMolgenisUser.getUsername()).thenReturn("username");
 
-		Query<MolgenisUser> queryUser = mock(Query.class);
-		Query<MolgenisUser> queryUserSuccess = mock(Query.class);
-		when(database.query(MolgenisUser.class)).thenReturn(queryUser);
-		when(queryUser.eq(MolgenisUser.ID, 1)).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.USERNAME, "username")).thenReturn(queryUserSuccess);
-		when(queryUser.eq(MolgenisUser.ID, -1)).thenReturn(queryUser);
-		when(queryUserSuccess.find()).thenReturn(Arrays.<MolgenisUser> asList(existingMolgenisUser));
+		when(molgenisUserService.getUser(USERNAME_USER)).thenReturn(existingMolgenisUser);
 
 		MolgenisUser updatedMolgenisUser = mock(MolgenisUser.class);
 		when(updatedMolgenisUser.getId()).thenReturn(1);

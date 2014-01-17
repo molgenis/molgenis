@@ -16,9 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.tupletable.TableException;
+import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
@@ -57,14 +56,16 @@ public class BiobankConnectController extends AbstractWizardController
 	private final OntologyMatcherPage ontologyMatcherPager;
 	private final MappingManagerPage mappingManagerPager;
 	private final ProgressingBarPage progressingBarPager;
-	private final UserAccountService userAccountService;
 
 	private BiobankConnectWizard wizard;
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private static final String VIEW_NAME = "view-wizard";
 
 	@Autowired
-	private Database database;
+	private DataService dataService;
+
+	@Autowired
+	private UserAccountService userAccountService;
 
 	@Autowired
 	private OntologyAnnotator ontologyAnnotator;
@@ -81,8 +82,7 @@ public class BiobankConnectController extends AbstractWizardController
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
 			OntologyAnnotatorPage ontologyAnnotatorPager, OntologyMatcherPage ontologyMatcherPager,
-			MappingManagerPage mappingManagerPager, ProgressingBarPage progressingBarPager,
-			UserAccountService userAccountService)
+			MappingManagerPage mappingManagerPager, ProgressingBarPage progressingBarPager)
 	{
 		super(URI, "biobankconnect");
 		if (chooseCataloguePager == null) throw new IllegalArgumentException("ChooseCataloguePager is null");
@@ -90,13 +90,11 @@ public class BiobankConnectController extends AbstractWizardController
 		if (ontologyMatcherPager == null) throw new IllegalArgumentException("OntologyMatcherPager is null");
 		if (mappingManagerPager == null) throw new IllegalArgumentException("MappingManagerPager is null");
 		if (progressingBarPager == null) throw new IllegalArgumentException("ProgressingBarPager is null");
-		if (userAccountService == null) throw new IllegalArgumentException("userAccountService is null");
 		this.chooseCataloguePager = chooseCataloguePager;
 		this.ontologyAnnotatorPager = ontologyAnnotatorPager;
 		this.ontologyMatcherPager = ontologyMatcherPager;
 		this.mappingManagerPager = mappingManagerPager;
 		this.progressingBarPager = progressingBarPager;
-		this.userAccountService = userAccountService;
 		this.wizard = new BiobankConnectWizard();
 	}
 
@@ -105,60 +103,43 @@ public class BiobankConnectController extends AbstractWizardController
 	public String init(HttpServletRequest request)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		try
+
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		for (DataSet dataSet : allDataSets)
 		{
-			for (DataSet dataSet : database.find(DataSet.class))
-			{
-				if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
-			}
-			wizard.setDataSets(dataSets);
-			currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
-					request.getRequestedSessionId());
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
-		catch (DatabaseException e)
-		{
-			logger.error("Failed to retrieve entities from database", e);
-		}
+		wizard.setDataSets(dataSets);
+		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
+				request.getRequestedSessionId());
+
 		return VIEW_NAME;
 	}
 
 	@Override
 	protected Wizard createWizard()
 	{
-		try
+		wizard = new BiobankConnectWizard();
+		List<DataSet> dataSets = new ArrayList<DataSet>();
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		for (DataSet dataSet : allDataSets)
 		{
-			wizard = new BiobankConnectWizard();
-			List<DataSet> dataSets = new ArrayList<DataSet>();
-			try
-			{
-				for (DataSet dataSet : database.find(DataSet.class))
-				{
-					if (!dataSet.getProtocolUsed_Identifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
-				}
-				wizard.setDataSets(dataSets);
-			}
-			catch (DatabaseException e)
-			{
-				logger.error("Failed to retrieve entities from database", e);
-			}
-			wizard.setUserName(userAccountService.getCurrentUser().getUsername());
-			wizard.addPage(chooseCataloguePager);
-			wizard.addPage(ontologyAnnotatorPager);
-			wizard.addPage(ontologyMatcherPager);
-			wizard.addPage(progressingBarPager);
-			wizard.addPage(mappingManagerPager);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
-		catch (DatabaseException e)
-		{
-			logger.error("Could not get current user", e);
-		}
+		wizard.setDataSets(dataSets);
+		wizard.setUserName(userAccountService.getCurrentUser().getUsername());
+		wizard.addPage(chooseCataloguePager);
+		wizard.addPage(ontologyAnnotatorPager);
+		wizard.addPage(ontologyMatcherPager);
+		wizard.addPage(progressingBarPager);
+		wizard.addPage(mappingManagerPager);
 		return wizard;
 	}
 
 	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String importFeatures(@RequestParam
 	String dataSetName, @RequestParam
-	Part file, HttpServletRequest request, Model model) throws IOException, TableException, DatabaseException
+	Part file, HttpServletRequest request, Model model) throws IOException
 	{
 		File uploadFile = FileUploadUtils.saveToTempFolder(file);
 		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
@@ -166,7 +147,7 @@ public class BiobankConnectController extends AbstractWizardController
 		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) request.getSession().getAttribute(
 				"biobankconnect");
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		List<DataSet> allDataSets = database.find(DataSet.class);
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -178,7 +159,7 @@ public class BiobankConnectController extends AbstractWizardController
 	}
 
 	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
-	public String annotate(HttpServletRequest request) throws Exception
+	public String annotate(HttpServletRequest request)
 	{
 		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
 		if (request.getParameter("selectedOntologies") != null)
@@ -211,7 +192,7 @@ public class BiobankConnectController extends AbstractWizardController
 	@RequestMapping(method = RequestMethod.POST, value = "/rematch", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public OntologyMatcherResponse rematch(@RequestBody
-	OntologyMatcherRequest request) throws DatabaseException
+	OntologyMatcherRequest request)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		ontologyMatcher.match(userName, request.getSourceDataSetId(), request.getSelectedDataSetIds(),
@@ -223,7 +204,7 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(value = "/running", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Boolean> isRunning(HttpServletRequest request) throws DatabaseException
+	public Map<String, Boolean> isRunning(HttpServletRequest request)
 	{
 		Map<String, Boolean> result = new HashMap<String, Boolean>();
 		result.put(
@@ -235,7 +216,7 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.GET, value = "/match/status", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public OntologyMatcherResponse checkMatch() throws DatabaseException
+	public OntologyMatcherResponse checkMatch()
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		OntologyMatcherResponse response = new OntologyMatcherResponse(currentUserStatus.getUserCurrentStage(userName),

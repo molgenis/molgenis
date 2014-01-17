@@ -1,5 +1,6 @@
 package org.molgenis.study;
 
+import java.util.Date;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
@@ -9,10 +10,13 @@ public class StudyDefinitionImpl implements StudyDefinition
 	private String id;
 	private String name;
 	private String description;
-	private String catalogVersion;
+	private String version;
+	private Date dateCreated;
+	private Status status;
 	private List<String> authors;
 	private String authorEmail;
 	private List<CatalogItem> items;
+	private String requestForm;
 
 	public StudyDefinitionImpl()
 	{
@@ -24,10 +28,13 @@ public class StudyDefinitionImpl implements StudyDefinition
 		setId(studyDefinition.getId());
 		setName(studyDefinition.getName());
 		setDescription(studyDefinition.getDescription());
-		setCatalogVersion(studyDefinition.getCatalogVersion());
+		setVersion(studyDefinition.getVersion());
+		setDateCreated(studyDefinition.getDateCreated());
+		setStatus(studyDefinition.getStatus());
 		setAuthors(studyDefinition.getAuthors());
 		setAuthorEmail(studyDefinition.getAuthorEmail());
 		setItems(studyDefinition.getItems());
+		setRequestForm(studyDefinition.getRequestProposalForm());
 	}
 
 	@Override
@@ -65,14 +72,36 @@ public class StudyDefinitionImpl implements StudyDefinition
 	}
 
 	@Override
-	public String getCatalogVersion()
+	public String getVersion()
 	{
-		return catalogVersion;
+		return version;
 	}
 
-	public void setCatalogVersion(String catalogVersion)
+	public void setVersion(String version)
 	{
-		this.catalogVersion = catalogVersion;
+		this.version = version;
+	}
+
+	@Override
+	public Date getDateCreated()
+	{
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated)
+	{
+		this.dateCreated = dateCreated;
+	}
+
+	@Override
+	public Status getStatus()
+	{
+		return status;
+	}
+
+	public void setStatus(Status status)
+	{
+		this.status = status;
 	}
 
 	@Override
@@ -95,6 +124,17 @@ public class StudyDefinitionImpl implements StudyDefinition
 	public void setAuthorEmail(String authorEmail)
 	{
 		this.authorEmail = authorEmail;
+	}
+
+	@Override
+	public String getRequestProposalForm()
+	{
+		return requestForm;
+	}
+
+	public void setRequestForm(String requestForm)
+	{
+		this.requestForm = requestForm;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.molgenis.catalogmanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.molgenis.catalog.CatalogModel;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -58,10 +60,10 @@ public class CatalogManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String listCatalogs(Model model)
 	{
-		List<CatalogMeta> catalogs = catalogManagerService.findCatalogs();
-		LOG.debug("Got [" + catalogs.size() + "] catalogs from service");
+		Iterable<CatalogMeta> catalogs = catalogManagerService.getCatalogs();
+		LOG.debug("Got catalogs from service");
 
-		List<CatalogMetaModel> models = new ArrayList<CatalogMetaModel>(catalogs.size());
+		List<CatalogMetaModel> models = new ArrayList<CatalogMetaModel>();
 		for (CatalogMeta catalog : catalogs)
 		{
 			boolean catalogLoaded;
@@ -165,6 +167,7 @@ public class CatalogManagerController extends MolgenisPluginController
 
 	@ExceptionHandler(
 	{ Exception.class, RuntimeException.class })
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleException(Exception e, HttpServletRequest request)
 	{
 		LOG.error("An exception occured in the " + CatalogManagerController.class.getSimpleName(), e);
@@ -176,8 +179,12 @@ public class CatalogManagerController extends MolgenisPluginController
 	}
 
 	@ExceptionHandler(UnknownCatalogException.class)
+	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public void handleUnknownCatalogException()
+	public ErrorMessageResponse handleUnknownCatalogException(UnknownCatalogException e)
 	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(
+				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 }

@@ -14,9 +14,9 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.io.processor.CellProcessor;
-import org.molgenis.io.processor.LowerCaseProcessor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

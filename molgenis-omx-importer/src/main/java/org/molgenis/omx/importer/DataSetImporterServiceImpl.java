@@ -11,11 +11,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.io.TableReader;
-import org.molgenis.io.TableReaderFactory;
-import org.molgenis.io.TupleReader;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -23,7 +26,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,15 +37,15 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 	private static final Logger LOG = Logger.getLogger(DataSetImporterServiceImpl.class);
 	private static final String DATASET_SHEET_PREFIX = "dataset_";
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
-	private final Database database;
+	private final DataService dataService;
 	private final ValueConverter valueConverter;
 
 	@Autowired
-	public DataSetImporterServiceImpl(Database database)
+	public DataSetImporterServiceImpl(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException();
-		this.database = database;
-		this.valueConverter = new ValueConverter(database);
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		this.dataService = dataService;
+		this.valueConverter = new ValueConverter(dataService);
 	}
 
 	/*
@@ -52,61 +55,67 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 	 */
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
-	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, DatabaseException
+	{ IOException.class, ValueConverterException.class })
+	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, ValueConverterException
 	{
-		TableReader tableReader = TableReaderFactory.create(file);
+		EntitySource entitySource = dataService.createEntitySource(file);
 		try
 		{
-			for (String tableName : tableReader.getTableNames())
+			for (String entityName : entitySource.getEntityNames())
 			{
-				if (dataSetEntityNames.contains(tableName))
+				if (dataSetEntityNames.contains(entityName))
 				{
-					LOG.info("importing dataset " + tableName + " from file " + file + "...");
-					TupleReader tupleReader = tableReader.getTupleReader(tableName);
+					LOG.info("importing dataset " + entityName + " from file " + file + "...");
+
+					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName(entityName);
 					try
 					{
-						importSheet(tupleReader, tableName);
+						importSheet(repo, entityName);
 					}
 					finally
 					{
-						tupleReader.close();
+						repo.close();
 					}
 				}
+
 			}
 		}
 		finally
 		{
-			tableReader.close();
+			entitySource.close();
 		}
 	}
 
-	private void importSheet(TupleReader sheetReader, String sheetName) throws DatabaseException, IOException
+	private void importSheet(Repository<? extends Entity> repo, String sheetName) throws IOException,
+			ValueConverterException
 	{
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
-		DataSet dataSet = DataSet.findByIdentifier(database, identifier);
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier));
 		if (dataSet == null)
 		{
-			throw new DatabaseException("dataset '" + identifier + "' does not exist in db");
+			throw new MolgenisDataException("dataset '" + identifier + "' does not exist in db");
 		}
 
-		Iterator<String> colIt = sheetReader.colNamesIterator();
+		Iterator<AttributeMetaData> colIt = repo.getAttributes().iterator();
 		if (colIt == null || !colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no header");
 
 		// create feature map
 		Map<String, ObservableFeature> featureMap = new LinkedHashMap<String, ObservableFeature>();
 		while (colIt.hasNext())
 		{
-			String featureIdentifier = colIt.next();
+			AttributeMetaData attr = colIt.next();
+			String featureIdentifier = attr.getName();
 			if (featureIdentifier != null && !featureIdentifier.isEmpty())
 			{
 				if (!featureIdentifier.equalsIgnoreCase(DATASET_ROW_IDENTIFIER_HEADER))
 				{
-					ObservableFeature feature = ObservableFeature.findByIdentifier(database, featureIdentifier);
+					ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+							new QueryImpl().eq(ObservableFeature.IDENTIFIER, featureIdentifier));
+
 					if (feature == null)
 					{
-						throw new DatabaseException(
+						throw new MolgenisDataException(
 								ObservableFeature.class.getSimpleName()
 										+ " with identifier '"
 										+ featureIdentifier
@@ -117,76 +126,72 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 					featureMap.put(featureIdentifier, feature);
 				}
 			}
-			else throw new DatabaseException("sheet '" + sheetName + "' contains empty column header");
+			else throw new MolgenisDataException("sheet '" + sheetName + "' contains empty column header");
 		}
-		if (featureMap.isEmpty()) throw new DatabaseException("sheet '" + sheetName + "' contains no header");
+		if (featureMap.isEmpty()) throw new MolgenisDataException("sheet '" + sheetName + "' contains no header");
 
 		int rownr = 0;
-		int transactionRows = Math.max(1, 5000 / featureMap.size());
+		int transactionRows = 10;// ;Math.max(1, 5000 / featureMap.size());
 
-		for (Tuple row : sheetReader)
+		for (Entity entity : repo)
 		{
 			// Skip empty rows
-			if (!row.isEmpty())
+			if (!EntityUtils.isEmpty(entity))
 			{
 				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
-				Map<Class<? extends Value>, List<Value>> valueMap = new HashMap<Class<? extends Value>, List<Value>>();
+				Map<String, List<Value>> valueMap = new HashMap<String, List<Value>>();
 
-				String rowIdentifier = row.getString(DATASET_ROW_IDENTIFIER_HEADER);
+				String rowIdentifier = entity.getString(DATASET_ROW_IDENTIFIER_HEADER);
 				if (rowIdentifier == null) rowIdentifier = UUID.randomUUID().toString();
 
 				// create observation set
 				ObservationSet observationSet = new ObservationSet();
 				observationSet.setIdentifier(rowIdentifier);
 				observationSet.setPartOfDataSet(dataSet);
-				database.add(observationSet);
+				dataService.add(ObservationSet.ENTITY_NAME, observationSet);
 
 				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
-					Value value;
-					try
-					{
-						value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
-						if (value != null)
-						{
-							// create observed value
-							ObservedValue observedValue = new ObservedValue();
-							observedValue.setFeature(entry.getValue());
-							observedValue.setValue(value);
-							observedValue.setObservationSet(observationSet);
 
-							List<Value> valueList = valueMap.get(value.getClass());
-							if (valueList == null)
-							{
-								valueList = new ArrayList<Value>();
-								valueMap.put(value.getClass(), valueList);
-							}
-							valueList.add(value);
-							obsValueList.add(observedValue);
-						}
-					}
-					catch (ValueConverterException e)
+					Value value = valueConverter.fromEntity(entity, entry.getKey(), entry.getValue());
+					if (value != null)
 					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						// create observed value
+						ObservedValue observedValue = new ObservedValue();
+						observedValue.setFeature(entry.getValue());
+						observedValue.setValue(value);
+						observedValue.setObservationSet(observationSet);
+
+						List<Value> valueList = valueMap.get(value.getEntityName());
+						if (valueList == null)
+						{
+							valueList = new ArrayList<Value>();
+							valueMap.put(value.getEntityName(), valueList);
+						}
+						valueList.add(value);
+						obsValueList.add(observedValue);
 					}
 
 				}
-				database.add(obsValueList);
-				for (Map.Entry<Class<? extends Value>, List<Value>> entry : valueMap.entrySet())
-					database.add(entry.getValue());
+				for (Map.Entry<String, List<Value>> entry : valueMap.entrySet())
+					dataService.add(entry.getKey(), entry.getValue());
+
+				dataService.add(ObservedValue.ENTITY_NAME, obsValueList);
 			}
 
 			if (++rownr % transactionRows == 0)
 			{
-				database.getEntityManager().flush();
-				database.getEntityManager().clear();
+				CrudRepository<? extends Entity> dataSetRepo = dataService
+						.getCrudRepository(ObservationSet.ENTITY_NAME);
+				dataSetRepo.flush();
+				dataSetRepo.clearCache();
 			}
 		}
 		if (rownr % transactionRows != 0)
 		{
-			database.getEntityManager().flush();
-			database.getEntityManager().clear();
+			CrudRepository<? extends Entity> dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+			dataSetRepo.flush();
+			dataSetRepo.clearCache();
 		}
 	}
 }

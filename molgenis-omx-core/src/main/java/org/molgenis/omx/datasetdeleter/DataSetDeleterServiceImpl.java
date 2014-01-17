@@ -3,10 +3,9 @@ package org.molgenis.omx.datasetdeleter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
@@ -23,35 +22,47 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DataSetDeleterServiceImpl implements DataSetDeleterService
 {
-	private final Database database;
+	private final DataService dataService;
 	private final SearchService searchService;
 
 	@Autowired
-	public DataSetDeleterServiceImpl(Database database, SearchService searchService)
+	public DataSetDeleterServiceImpl(DataService dataService, SearchService searchService)
 	{
-		if (database == null) throw new IllegalArgumentException("Database is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (searchService == null) throw new IllegalArgumentException("Search service is null");
-		this.database = database;
+		this.dataService = dataService;
 		this.searchService = searchService;
 	}
 
 	@Override
-	@Transactional(rollbackFor = DatabaseException.class)
-	public DataSet delete(String dataSetIdentifier, boolean deleteMetaData) throws DatabaseException
+	@Transactional
+	public String deleteData(String dataSetIdentifier)
 	{
-		DataSet dataSet = DataSet.findByIdentifier(database, dataSetIdentifier);
-
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
 		deleteData(dataSet);
-		if (deleteMetaData)
-		{
-			List<Protocol> allProtocols = database.find(Protocol.class);
-			Protocol protocolUsed = dataSet.getProtocolUsed();
-			database.remove(dataSet);
-			deleteProtocol(protocolUsed, allProtocols);
-		}
 		searchService.deleteDocumentsByType(dataSet.getIdentifier());
 
-		return dataSet;
+		return dataSet.getName();
+	}
+	
+	@Override
+	@Transactional
+	public boolean deleteMetadata(String dataSetIdentifier)
+	{
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+
+			List<Entity> entitiesList = dataService.findAllAsList(ObservedValue.ENTITY_NAME, new QueryImpl());
+			entitiesList.addAll(dataService.findAllAsList(Protocol.ENTITY_NAME, new QueryImpl()));
+			entitiesList.addAll(dataService.findAllAsList(DataSet.ENTITY_NAME, new QueryImpl()));
+			entitiesList.remove(dataSet);
+			
+			Protocol protocolUsed = dataSet.getProtocolUsed();
+			dataService.delete(DataSet.ENTITY_NAME, dataSet);
+			deleteProtocol(protocolUsed, entitiesList);
+		
+		return true;
 	}
 
 	/**
@@ -62,28 +73,32 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * @param the
 	 *            DataSet from which the data should be deleted
 	 */
-	void deleteData(DataSet dataset) throws DatabaseException
+	void deleteData(DataSet dataset)
 	{
 		int count = 0;
-		List<ObservationSet> observationSets = database.find(ObservationSet.class, new QueryRule(
-				ObservationSet.PARTOFDATASET, Operator.EQUALS, dataset.getIdValue()));
+		List<ObservationSet> observationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset));
+
 		List<ObservedValue> observedValues = new ArrayList<ObservedValue>();
 		for (ObservationSet observationSet : observationSets)
 		{
-			observedValues.addAll(database.find(ObservedValue.class, new QueryRule(
-					ObservedValue.OBSERVATIONSET_IDENTIFIER, Operator.EQUALS, observationSet.getIdentifier())));
+			List<ObservedValue> list = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
+					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet));
+
+			observedValues.addAll(list);
+
 			if (count % 20 == 0)
 			{
-				database.remove(observedValues);
+				dataService.delete(ObservedValue.ENTITY_NAME, observedValues);
 				observedValues = new ArrayList<ObservedValue>();
 			}
 			count++;
 		}
 		if (observedValues.size() != 0)
 		{
-			database.remove(observedValues);
+			dataService.delete(ObservedValue.ENTITY_NAME, observedValues);
 		}
-		database.remove(observationSets);
+		dataService.delete(ObservationSet.ENTITY_NAME, observationSets);
 	}
 
 	/**
@@ -94,42 +109,48 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * @param the
 	 *            protocols that should be deleted
 	 */
-	List<Protocol> deleteProtocol(Protocol protocol, List<Protocol> allProtocols) throws DatabaseException
+	List<Entity> deleteProtocol(Protocol protocol, List<Entity> entitiesList)
 	{
 		boolean deleteInBatch = true;
-		List<Protocol> subprotocols = protocol.getSubprotocols();
+		List<Protocol> subprotocolsToDelete = protocol.getSubprotocols();
+		List<Protocol> subprotocolsToKeep = new ArrayList<Protocol>();
+		
 		// check if any of the subprotocols had subprotocols of its own
-		for (Protocol subprotocol : subprotocols)
+		for (Protocol subprotocol : subprotocolsToDelete)
 		{
 			if (subprotocol.getSubprotocols().size() > 0) deleteInBatch = false;
 		}
-		for (Protocol subprotocol : subprotocols)
+		for (Protocol subprotocol : subprotocolsToDelete)
 		{
-			int superprotocolcount = countReferringProtocols(subprotocol, allProtocols);
-			// only delete if there is only one parent protocol
-			if (superprotocolcount <= 1)
+			int superprotocolcount = countReferringEntities(subprotocol, entitiesList);
+			if (superprotocolcount == 1)
 			{
 				if (!deleteInBatch)
 				{
-					allProtocols = deleteProtocol(subprotocol, allProtocols);
+					entitiesList = deleteProtocol(subprotocol, entitiesList);
 				}
 				else
 				{
-					List<ObservableFeature> features = subprotocol.getFeatures();
-					deleteFeatures(features, allProtocols);
+					List<ObservableFeature> subFeatures = subprotocol.getFeatures();
+					deleteFeatures(subFeatures, entitiesList);
 				}
 			}
+			else
+			{
+				subprotocolsToKeep.add(subprotocol);
+			}
 		}
-		List<ObservableFeature> features = protocol.getFeatures();
 		if (deleteInBatch)
 		{
-			database.remove(subprotocols);
-			allProtocols.removeAll(subprotocols);
+			subprotocolsToDelete.removeAll(subprotocolsToKeep);
+			dataService.delete(Protocol.ENTITY_NAME, subprotocolsToDelete);
+			entitiesList.removeAll(subprotocolsToDelete);
 		}
-		database.remove(protocol);
-		deleteFeatures(features, allProtocols);
-		allProtocols.remove(protocol);
-		return allProtocols;
+			List<ObservableFeature> features = protocol.getFeatures();
+			dataService.delete(Protocol.ENTITY_NAME, protocol);
+			entitiesList.remove(protocol);
+			deleteFeatures(features, entitiesList);
+		return entitiesList;
 	}
 
 	/**
@@ -140,22 +161,23 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * @param the
 	 *            features that should be deleted
 	 */
-	void deleteFeatures(List<ObservableFeature> features, List<Protocol> allProtocols) throws DatabaseException
+	void deleteFeatures(List<ObservableFeature> features, List<Entity> entitiesList)
 	{
 		List<ObservableFeature> removableFeatures = new ArrayList<ObservableFeature>();
 
 		for (ObservableFeature feature : features)
 		{
-			List<Category> categories = database.find(Category.class, new QueryRule(Category.OBSERVABLEFEATURE,
-					Operator.EQUALS, feature.getIdValue()));
+			List<Category> categories = dataService.findAllAsList(Category.ENTITY_NAME,
+					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
 			deleteCategories(categories);
-			int protocolcount = countReferringProtocols(feature, allProtocols);
-			if (protocolcount <= 1)
+
+			int entityCount = countReferringEntities(feature, entitiesList);
+			if (entityCount <= 1)
 			{
 				removableFeatures.add(feature);
 			}
 		}
-		database.remove(removableFeatures);
+		dataService.delete(ObservableFeature.ENTITY_NAME, removableFeatures);
 	}
 
 	/**
@@ -164,17 +186,18 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * @param categories
 	 * @throws DatabaseException
 	 */
-	void deleteCategories(List<Category> categories) throws DatabaseException
+	void deleteCategories(List<Category> categories)
 	{
 		for (Category category : categories)
 		{
-			List<CategoricalValue> categoricalValues = database.find(CategoricalValue.class, new QueryRule(
-					CategoricalValue.VALUE, Operator.EQUALS, category.getIdValue()));
+			List<CategoricalValue> categoricalValues = dataService.findAllAsList(CategoricalValue.ENTITY_NAME,
+					new QueryImpl().eq(CategoricalValue.VALUE, category));
+
 			for (CategoricalValue cat : categoricalValues)
 			{
-				database.remove(cat);
+				dataService.delete(CategoricalValue.ENTITY_NAME, cat);
 			}
-			database.remove(category);
+			dataService.delete(Category.ENTITY_NAME, category);
 		}
 	}
 
@@ -188,19 +211,40 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * 
 	 * @return the number of referring protocols
 	 */
-	int countReferringProtocols(Characteristic characteristic, List<Protocol> allProtocols)
+	int countReferringEntities(Characteristic characteristic, List<Entity> entitiesList)
 	{
-		int protocolcount = 0;
+		int entityCount = 0;
 		Class<? extends Characteristic> clazz = characteristic.getClass();
-		for (Protocol p : allProtocols)
+
+		for (Entity entity : entitiesList)
 		{
-			if ((clazz.equals(ObservableFeature.class) && p.getFeatures_Id().contains(characteristic.getId()) || (clazz
-					.equals(Protocol.class) && p.getSubprotocols_Id().contains(characteristic.getId()))))
+			if (entity.getClass().equals(Protocol.class))
 			{
-				System.out.println(p.getIdentifier());
-				protocolcount++;
+				Protocol protocol = (Protocol) entity;
+				if ((clazz.equals(ObservableFeature.class) && protocol.getFeatures().contains(characteristic) || (clazz
+						.equals(Protocol.class) && protocol.getSubprotocols().contains(characteristic))))
+				{
+					entityCount++;
+				}
+			}
+			if (entity.getClass().equals(DataSet.class))
+			{
+				DataSet dataSet = (DataSet) entity;
+				if ((clazz.equals(Protocol.class) && dataSet.getProtocolUsed().getIdentifier()
+						.equals(characteristic.getIdentifier())))
+				{
+					entityCount++;
+				}
+			}
+			if (entity.getClass().equals(ObservedValue.class))
+			{
+				ObservedValue value = (ObservedValue) entity;			
+				if (clazz.equals(ObservableFeature.class) && value.getFeature().equals(characteristic))
+				{
+					entityCount++;
+				}
 			}
 		}
-		return protocolcount;
+		return entityCount;
 	}
 }

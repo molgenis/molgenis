@@ -33,34 +33,30 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.generators.DataTypeGen;
+import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
+import org.molgenis.generators.JpaEntitySourceGen;
+import org.molgenis.generators.JpaRepositoryGen;
 import org.molgenis.generators.R.RApiGen;
 import org.molgenis.generators.R.REntityGen;
 import org.molgenis.generators.R.RMatrixGen;
-import org.molgenis.generators.cpp.CPPCassette;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
-import org.molgenis.generators.db.JpaDatabaseGen;
-import org.molgenis.generators.db.JpaMapperGen;
-import org.molgenis.generators.db.MapperDecoratorGen;
-import org.molgenis.generators.db.MapperSecurityDecoratorGen;
+import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
 import org.molgenis.generators.doc.DotDocModuleDependencyGen;
 import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
-import org.molgenis.generators.python.PythonDataTypeGen;
 import org.molgenis.generators.server.EntityRestApiGen;
 import org.molgenis.generators.server.EntityServiceGen;
 import org.molgenis.generators.server.RdfApiGen;
 import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
-import org.molgenis.generators.sql.CountPerEntityGen;
-import org.molgenis.generators.sql.CountPerTableGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
 
@@ -196,10 +192,6 @@ public class Molgenis
 
 		options.output_src = outputPath != null ? outputPath + options.output_src : options.output_src;
 		if (!options.output_src.endsWith("/")) options.output_src = options.output_src.endsWith("/") + "/";
-		options.output_python = outputPath != null ? outputPath + options.output_python : options.output_python;
-		if (!options.output_python.endsWith("/")) options.output_python = options.output_python + "/";
-		options.output_cpp = outputPath != null ? outputPath + options.output_cpp : options.output_cpp;
-		if (!options.output_cpp.endsWith("/")) options.output_cpp = options.output_cpp + "/";
 		options.output_hand = outputPath != null ? outputPath + options.output_hand : options.output_hand;
 		if (!options.output_hand.endsWith("/")) options.output_hand = options.output_hand + "/";
 		options.output_sql = outputPath != null ? outputPath + options.output_sql : options.output_sql;
@@ -238,44 +230,37 @@ public class Molgenis
 			logger.info("Skipping documentation ....");
 		}
 
-		if (options.generate_cpp)
+		if (options.mapper_implementation.equals(MapperImplementation.JPA))
 		{
-			generators.add(new CPPCassette());
-		}
-
-		if (options.generate_sql)
-		{
-			if (options.mapper_implementation.equals(MapperImplementation.JPA))
+			if (options.generate_db)
 			{
-				if (options.generate_db)
-				{
-					generators.add(new JpaDatabaseGen());
-					generators.add(new JDBCMetaDatabaseGen());
-					generators.add(new DatabaseConfigGen());
-				}
-				generators.add(new DataTypeGen());
-				generators.add(new EntityServiceGen());
-				generators.add(new JpaMapperGen());
-
-				if (options.generate_persistence)
-				{
-					generators.add(new PersistenceGen());
-				}
+				generators.add(new DatabaseConfigGen());
 			}
-			else
+			generators.add(new DataTypeGen());
+			generators.add(new EntityMetaDataGen());
+			generators.add(new JpaRepositoryGen());
+			generators.add(new EntityServiceGen());
+			generators.add(new EntityImporterGen());
+
+			// Temp remove when omx is migrated to DataApi
+			generators.add(new JDBCMetaDatabaseGen());
+
+			if (options.generate_jpa_entity_source)
 			{
-				// SQL
-				generators.add(new CountPerEntityGen());
-				generators.add(new CountPerTableGen());
+				generators.add(new JpaEntitySourceGen());
 			}
 
-			// authorization
-			generators.add(new MapperSecurityDecoratorGen());
+			if (options.generate_persistence)
+			{
+				generators.add(new PersistenceGen());
+			}
 
 			// decorators
 			if (options.generate_decorators)
 			{
-				generators.add(new MapperDecoratorGen());
+				// authorization
+				generators.add(new CrudRepositorySecurityDecoratorGen());
+
 			}
 		}
 		else
@@ -283,23 +268,12 @@ public class Molgenis
 			logger.info("SEVERE: Skipping ALL SQL ....");
 		}
 
-		generators.add(new EntityImporterGen());
-
 		if (options.generate_entityio)
 		{
 			generators.add(new EntitiesImporterGen());
 			generators.add(new EntitiesValidatorGen());
 			// generators.add(new CsvEntityExporterGen());
 			// generators.add(new ExcelEntityExporterGen());
-		}
-
-		if (options.generate_Python)
-		{
-			generators.add(new PythonDataTypeGen());
-		}
-		else
-		{
-			logger.info("Skipping Python interface ....");
 		}
 
 		// R

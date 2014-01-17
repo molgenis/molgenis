@@ -26,9 +26,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.db.Database;
-import org.molgenis.framework.db.Database.DatabaseAction;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.framework.db.EntityImporter;
@@ -47,11 +45,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class EntitiesImporterImpl implements EntitiesImporter
 {
 	/** importable entity names (lowercase) */
-	private static final Map<String, EntityImporter> ENTITIES_IMPORTABLE;
+	private static final Map<String, EntityImporter<? extends Entity>> ENTITIES_IMPORTABLE;
 	
 	static {
 		// entities added in import order
-		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter>();
+		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter<? extends Entity>>();
 	<#list entities as entity>
 		<#if !entity.abstract && !entity.system>
 		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", new ${JavaName(entity)}EntityImporter());
@@ -59,31 +57,28 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	</#list>
 	}
 	
-	private final Database database;
 	private final DataService dataService;
 
 	@Autowired
-	public EntitiesImporterImpl(Database database, DataService dataService)
+	public EntitiesImporterImpl(DataService dataService)
 	{
-		if (database == null) throw new IllegalArgumentException("database is null");
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.database = database;
 		this.dataService = dataService;
 	}
 
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
-	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException, DatabaseException
+	{ IOException.class})
+	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException
 	{
 		return importEntities(dataService.createEntitySource(file), dbAction);
 	}
 	
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
+	{ IOException.class})
 	public EntityImportReport importEntities(final Repository<? extends Entity> repository, final String entityName,
-			DatabaseAction dbAction) throws IOException, DatabaseException
+			DatabaseAction dbAction) throws IOException
 	{
 
 		return importEntities(new EntitySource()
@@ -118,9 +113,8 @@ public class EntitiesImporterImpl implements EntitiesImporter
 
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class, DatabaseException.class })
-	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException,
-			DatabaseException
+	{ IOException.class})
+	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException
 	{
 		EntityImportReport importReport = new EntityImportReport();
 
@@ -134,14 +128,14 @@ public class EntitiesImporterImpl implements EntitiesImporter
 			}
 
 			// import entities in order defined by entities map
-			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
+			for (Map.Entry<String, EntityImporter<? extends Entity>> entry : ENTITIES_IMPORTABLE.entrySet())
 			{
 				String entityName = entry.getKey();
 				Repository<? extends Entity> repository = repositoryMap.get(entityName);
 				if (repository != null)
 				{
-					EntityImporter entityImporter = entry.getValue();
-					int nr = entityImporter.importEntity(repository, database, dbAction);
+					EntityImporter<? extends Entity> entityImporter = entry.getValue();
+					int nr = entityImporter.importEntity(repository, dataService, dbAction);
 					if (nr > 0)
 					{
 						importReport.getMessages().put(entry.getKey(),

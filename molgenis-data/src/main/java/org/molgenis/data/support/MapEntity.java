@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
@@ -8,15 +8,41 @@ import org.molgenis.data.Entity;
 /**
  * Simple Entity implementation based on a Map
  */
-public class MapEntity implements Entity
+public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
-	private final Map<String, Object> values = new HashMap<String, Object>();
+	private Map<String, Object> values = new LinkedHashMap<String, Object>();
+	private String idAttributeName = null;
+
+	public MapEntity()
+	{
+	}
+
+	public MapEntity(String idAttributeName)
+	{
+		this.idAttributeName = idAttributeName;
+	}
+
+	public MapEntity(Map<String, Object> values)
+	{
+		this.values = values;
+	}
+
+	public MapEntity(String attributeName, Object value)
+	{
+		values.put(attributeName, value);
+	}
 
 	@Override
 	public Object get(String attributeName)
 	{
-		return values.get(attributeName);
+		Object value = values.get(attributeName);
+		if (value == null)
+		{
+			value = values.get(attributeName.toLowerCase());
+		}
+
+		return value;
 	}
 
 	@Override
@@ -34,7 +60,12 @@ public class MapEntity implements Entity
 	@Override
 	public Integer getIdValue()
 	{
-		return null;
+		if (idAttributeName == null)
+		{
+			return null;
+		}
+
+		return (Integer) get(idAttributeName);
 	}
 
 	@Override
@@ -43,10 +74,20 @@ public class MapEntity implements Entity
 		return null;
 	}
 
+	public String getIdAttributeName()
+	{
+		return idAttributeName;
+	}
+
 	@Override
 	public String toString()
 	{
 		return values.toString();
 	}
 
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return values.keySet();
+	}
 }

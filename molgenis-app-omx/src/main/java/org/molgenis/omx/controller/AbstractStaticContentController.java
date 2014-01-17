@@ -1,5 +1,6 @@
 package org.molgenis.omx.controller;
 
+import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,10 +11,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public abstract class AbstractStaticContentController extends MolgenisPluginController
 {
+	private static final Logger logger = Logger.getLogger(AbstractStaticContentController.class);
+	private static final String ERRORMESSAGE_PAGE = "There is an error occurred trying loading this page.";
+	private static final String ERRORMESSAGE_SUBMIT = "There is an error occurred trying to save the content.";
+
 	@Autowired
 	private StaticContentService staticContentService;
 	private final String uniqueReference;
-	
+
 	public AbstractStaticContentController(final String uniqueReference, final String uri)
 	{
 		super(uri);
@@ -23,39 +28,51 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(final Model model)
 	{
-		return this.initModelAndView(this.uniqueReference, model);
-	}
-	
-	@RequestMapping(value = "/edit", method = RequestMethod.GET)
-	public String initEdit(final Model model)
-	{
-		if(this.staticContentService.isCurrentUserCanEdit()){
-			return this.initEditModelAndView(uniqueReference, model);
-		}else{
-			return this.initModelAndView(uniqueReference, model);
+		try
+		{
+
+			model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
+			model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit());
 		}
-	}
-	
-	@RequestMapping(value = "/edit", method = RequestMethod.POST)
-	public String submitContent(@RequestParam(value = "content", required = true) final String content, final Model model)
-	{
-		this.staticContentService.submitContent(this.uniqueReference, content);
-		return this.initEditModelAndView(this.uniqueReference, model);
-	}
-	
-	private String initModelAndView(final String uniqueReference, final Model model)
-	{
-		model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
-		model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit());
-		model.addAttribute("editHref", "/menu/main/" + uniqueReference + "/edit");
+		catch (RuntimeException re)
+		{
+			logger.error(re);
+			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
+		}
+
 		return "view-staticcontent";
 	}
-	
+
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	private String initEditModelAndView(final String uniqueReference, final Model model)
+	@RequestMapping(value = "/edit", method = RequestMethod.GET)
+	public String initEditView(final Model model)
 	{
-		model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
-		model.addAttribute("cancelHref", "/menu/main/" + uniqueReference);
+		try
+		{
+			model.addAttribute("content", this.staticContentService.getContent(this.uniqueReference));
+		}
+		catch (RuntimeException re)
+		{
+			logger.error(re);
+			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
+		}
+
 		return "view-staticcontent-edit";
+	}
+
+	@RequestMapping(value = "/edit", method = RequestMethod.POST)
+	public String submitContent(@RequestParam(value = "content", required = true)
+	final String content, final Model model)
+	{
+		try
+		{
+			this.staticContentService.submitContent(this.uniqueReference, content);
+		}
+		catch (RuntimeException re)
+		{
+			logger.error(re);
+			model.addAttribute("errorMessage", ERRORMESSAGE_SUBMIT);
+		}
+		return this.initEditView(model);
 	}
 }

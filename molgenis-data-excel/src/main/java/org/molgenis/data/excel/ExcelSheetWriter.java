@@ -9,15 +9,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.util.ListEscapeUtils;
 
 /**
  * Writable implementation for an excel sheet
  */
-public class ExcelSheetWriter extends AbstractWritable
+public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
 {
 	private final Sheet sheet;
 	private int row;
@@ -114,6 +114,18 @@ public class ExcelSheetWriter extends AbstractWritable
 
 	@Override
 	public void close() throws IOException
+	{
+		// Nothing
+	}
+
+	@Override
+	public void flush()
+	{
+		// Nothing
+	}
+
+	@Override
+	public void clearCache()
 	{
 		// Nothing
 	}

@@ -13,12 +13,13 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 
 /**
  * ExcelSheet Repository implementation
@@ -157,5 +158,11 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	public void close() throws IOException
 	{
 		// Nothing
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return ExcelEntity.class;
 	}
 }

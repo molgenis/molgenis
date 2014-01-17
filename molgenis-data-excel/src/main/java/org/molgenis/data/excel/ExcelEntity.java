@@ -10,9 +10,9 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.support.AbstractMetaDataEntity;
 
 /**
  * Entity implementation for Excel.
@@ -20,7 +20,7 @@ import org.molgenis.io.processor.CellProcessor;
  * All attributes are of type String, values are processed using the given CellProcessors
  * 
  */
-public class ExcelEntity extends AbstractEntity
+public class ExcelEntity extends AbstractMetaDataEntity
 {
 	private static final long serialVersionUID = 8928375571009145452L;
 	private final transient Row row;

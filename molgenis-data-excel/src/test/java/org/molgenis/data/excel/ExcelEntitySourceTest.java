@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.molgenis.data.Entity;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
