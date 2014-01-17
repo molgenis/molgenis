@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.genomebrowser.controller.GenomebrowserController;
@@ -138,6 +139,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
 		runtimePropertyMap.put(GenomebrowserController.KARYOTYPEENDPOINT,
 				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
+		
+		// Charts include/exclude charts
+		runtimePropertyMap.put(DataExplorerController.KEY_APP_INCLUDE_CHARTS, DataExplorerController.INCLUDE_CHARTS_MODULE + "");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
