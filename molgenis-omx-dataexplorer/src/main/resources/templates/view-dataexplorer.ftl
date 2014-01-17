@@ -89,15 +89,21 @@
 				</div>
 			</div>
 			
-			<#include "/charts-forms/view-scatterplot.ftl" parse=false>
-			<#include "/charts-forms/view-boxplot.ftl" parse=false>
-			<#include "/charts-forms/view-heatmap.ftl" parse=false>
+			<!--Charts-->
+			<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
+				<#include "/charts-forms/view-scatterplot.ftl" parse=false>
+				<#include "/charts-forms/view-boxplot.ftl" parse=false>
+				<#include "/charts-forms/view-heatmap.ftl" parse=false>
+			</#if>
 				
 			<div class="tabbable">
 				<ul id="tabs" class="nav nav-tabs">
 					<li class="active"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>  
 					<li><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
-					<li><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
+					<!--Charts-->
+					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
+						<li><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
+					</#if>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="dataset-data-container">
@@ -136,20 +142,23 @@
 							<div id="aggregate-table-container"></div>
 						</div>
 					</div>
-					<div class="tab-pane" id="chart-container">
-						<div class="row-fluid">
-							<div class="btn-group" class="span9">
-								<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
-								<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
-								<!-- TODO Heat map
-									<a href="#chart-designer-modal-heatmap" id="chart-designer-modal-heatmap-button" role="button" class="btn" data-toggle="modal">Heat map <i class="icon-plus"></i></a>
-								-->							
+					<!--Charts-->
+					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
+						<div class="tab-pane" id="chart-container">
+							<div class="row-fluid">		
+								<div class="btn-group" class="span9">
+									<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
+									<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
+									<!-- TODO Heat map
+										<a href="#chart-designer-modal-heatmap" id="chart-designer-modal-heatmap-button" role="button" class="btn" data-toggle="modal">Heat map <i class="icon-plus"></i></a>
+									-->							
+								</div>
 							</div>
-                        </div>
-                        <div class="row-fluid">
-							<div id="chart-view" class="span9"></div>
+							<div class="row-fluid">
+								<div id="chart-view" class="span9"></div>
+							</div>
 						</div>
-					</div>
+					</#if>
 				</div>
 			</div>
 		</div>
