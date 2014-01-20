@@ -193,7 +193,7 @@
                             //only include data that was found in a dataset where the current protocol is part of
                             if(datasets.indexOf(searchHit.columnValueMap['partOfDataset'])!=-1){
                                 if(typeof ns.dataExplorerUrl !== 'undefined'){
-                                    items.push('<td><a href="'+ns.dataExplorerUrl+'?dataset=' + searchHit.documentType + '" target="_blank">View data set</a></td>');
+                                    items.push('<td><a href="'+ns.dataExplorerUrl+'?dataset=' + searchHit.documentType + '">View data set</a></td>');
                                 }
                             }
 						});
