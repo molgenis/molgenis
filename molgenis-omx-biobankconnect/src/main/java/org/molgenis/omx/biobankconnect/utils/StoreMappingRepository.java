@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -28,47 +27,31 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 
-public class StoreMappingRepository extends AbstractRepository<Entity> implements Countable
+import com.google.common.collect.Lists;
+
+public class StoreMappingRepository extends AbstractRepository<Entity>
 {
-	private DataService dataService;
-	private final List<ObservationSet> observationSets;
+	private final Iterable<ObservedValue> observedValues;
 	private final ValueConverter valueConverter;
-	private Integer numberOfRows = null;
 	private final DataSet dataSet;
 	private DefaultEntityMetaData metaData = null;
 
 	public StoreMappingRepository(DataSet dataSet, DataService dataService)
 	{
 		this.dataSet = dataSet;
-		Iterable<ObservationSet> iterableObservationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
+		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
-		observationSets = new ArrayList<ObservationSet>();
-		for (ObservationSet observationSet : iterableObservationSets)
-		{
-			observationSets.add(observationSet);
-		}
+		observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
+				new QueryImpl().in(ObservedValue.OBSERVATIONSET, Lists.newArrayList(observationSets)));
 		valueConverter = new ValueConverter(dataService);
-		this.dataService = dataService;
+
 	}
 
-	public StoreMappingRepository(String dataSetIdentifier, List<ObservationSet> observationSets,
-			DataService dataService)
+	public StoreMappingRepository(DataSet dataSet, List<ObservedValue> observedValues, DataService dataService)
 	{
-		this.dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
-		this.observationSets = observationSets;
+		this.dataSet = dataSet;
+		this.observedValues = observedValues;
 		this.valueConverter = new ValueConverter(dataService);
-	}
-
-	@Override
-	public long count()
-	{
-		if (numberOfRows == null)
-		{
-			numberOfRows = observationSets.size();
-		}
-
-		return numberOfRows;
 	}
 
 	@Override
@@ -82,33 +65,26 @@ public class StoreMappingRepository extends AbstractRepository<Entity> implement
 	{
 		List<Entity> entities = new ArrayList<Entity>();
 
-		if (!observationSets.isEmpty())
+		try
 		{
-			try
+			Map<Integer, Entity> storeMapping = new HashMap<Integer, Entity>();
+
+			for (ObservedValue ov : observedValues)
 			{
-				Map<Integer, Entity> storeMapping = new HashMap<Integer, Entity>();
-
-				Iterable<ObservedValue> values = dataService.findAll(ObservedValue.ENTITY_NAME,
-						new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets));
-
-				for (ObservedValue ov : values)
-				{
-					Entity entity = null;
-					Integer observationId = ov.getObservationSet().getId();
-					if (storeMapping.containsKey(observationId)) entity = storeMapping.get(observationId);
-					else entity = new MapEntity();
-					entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue()));
-					storeMapping.put(observationId, entity);
-				}
-
-				for (Entity entity : storeMapping.values())
-					entities.add(entity);
+				Entity entity = null;
+				Integer observationId = ov.getObservationSet().getId();
+				if (storeMapping.containsKey(observationId)) entity = storeMapping.get(observationId);
+				else entity = new MapEntity();
+				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue()));
+				storeMapping.put(observationId, entity);
 			}
-			catch (ValueConverterException e)
-			{
-				new RuntimeException("Failed to index mapping table : " + dataSet.getName() + " error : "
-						+ e.getMessage());
-			}
+
+			for (Entity entity : storeMapping.values())
+				entities.add(entity);
+		}
+		catch (ValueConverterException e)
+		{
+			new RuntimeException("Failed to index mapping table : " + dataSet.getName() + " error : " + e.getMessage());
 		}
 
 		return entities.iterator();

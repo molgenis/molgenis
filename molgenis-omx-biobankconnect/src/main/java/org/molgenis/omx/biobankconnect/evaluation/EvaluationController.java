@@ -43,7 +43,6 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.SecurityUtils;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +62,6 @@ public class EvaluationController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
-	private final UserAccountService userAccountService;
 	private final SearchService searchService;
 	private final DataService dataService;
 
@@ -71,15 +69,12 @@ public class EvaluationController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService,
-			UserAccountService userAccountService, DataService dataService)
+	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService, DataService dataService)
 	{
 		super(URI);
 		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (dataService == null) throw new IllegalArgumentException("Dataservice is null");
-		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
-		this.userAccountService = userAccountService;
 		this.searchService = searchService;
 		this.dataService = dataService;
 	}
@@ -190,7 +185,7 @@ public class EvaluationController extends MolgenisPluginController
 						lowerCaseBiobankNames.add(element.toLowerCase());
 					}
 
-					List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
+					Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
 							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames));
 
 					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
@@ -205,13 +200,13 @@ public class EvaluationController extends MolgenisPluginController
 						List<String> ranks = new ArrayList<String>();
 						ranks.add(variableName);
 						Map<String, List<String>> mappingDetail = entry.getValue();
-						List<ObservableFeature> features = dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
+						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
 								new QueryImpl().eq(ObservableFeature.NAME, variableName));
-						String description = features.get(0).getDescription();
+						String description = feature == null ? StringUtils.EMPTY : feature.getDescription();
 						if (!rankCollection.containsKey(description)) rankCollection.put(description,
 								new HashMap<String, List<Integer>>());
 
-						if (!features.isEmpty())
+						if (feature != null)
 						{
 							Entity row = new MapEntity();
 							row.set(firstColumn.toLowerCase(), description);
@@ -227,8 +222,8 @@ public class EvaluationController extends MolgenisPluginController
 									String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
 											+ selectedDataSetId + "-" + dataSet.getId();
 
-									Query q = new QueryImpl().eq("store_mapping_feature", features.get(0).getId())
-											.pageSize(50).sort(new Sort(Direction.DESC, "store_mapping_score"));
+									Query q = new QueryImpl().eq("store_mapping_feature", feature.getId()).pageSize(50)
+											.sort(new Sort(Direction.DESC, "store_mapping_score"));
 
 									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
 
