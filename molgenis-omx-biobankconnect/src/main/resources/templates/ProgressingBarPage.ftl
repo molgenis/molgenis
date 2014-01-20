@@ -37,7 +37,6 @@
 			currentStatus['StoreMapping'] = $('#store-mapping');
 			$('.progress-bar-hidden').hide();
 			molgenis.checkMatchingStatus('${context_url}', $('#wizardForm'), currentStatus);
-			//molgenis.checkMatchingStatus('${context_url}', $('#progress-bar-div').find('div.bar:eq(0)'));
 			$('li.cancel').addClass('disabled').click(function(){
 				if(!$(this).hasClass('disabled')){
 					$('form').attr({
