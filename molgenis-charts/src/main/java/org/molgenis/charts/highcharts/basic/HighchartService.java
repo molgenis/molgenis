@@ -46,7 +46,7 @@ public class HighchartService extends AbstractChartVisualizationService
 		return createXYDataChart(scatterChart, model);
 	}
 	
-	private Options createBoxPlotChart(BoxPlotChart boxPlotChart, Model model)
+	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart, Model model)
 	{
 		Options options = new Options();
 		
@@ -86,7 +86,7 @@ public class HighchartService extends AbstractChartVisualizationService
 		return options;
 	}
 	
-	private Options createXYDataChart(XYDataChart xYDataChart, Model model)
+	public Options createXYDataChart(XYDataChart xYDataChart, Model model)
 	{
 		Options options = new Options();
 		
