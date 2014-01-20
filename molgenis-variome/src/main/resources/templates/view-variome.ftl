@@ -197,18 +197,33 @@
 			  		<div class="checkbox">
 						<label>
   							<input type="checkbox"> Onco Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known onco diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
 						</label>
   					</div>
   					
   					<div class="checkbox">
 						<label>
   							<input type="checkbox"> Cardiac Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known cardiac diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
 						</label>
   					</div>
   					
   					<div class="checkbox">
 						<label>
   							<input type="checkbox"> Preconception Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known preconception diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
 						</label>
 					</div>
 			  	</div>
@@ -283,8 +298,9 @@
 	<hr></hr>
 	
 	<div>
-		<form role="form" action="${context_url}/execute-variant-app" method="post">
-			<button type="submit" class="btn">Go</button>
+		<#--action="${context_url}/execute-variant-app-demo"-->
+		<form role="form" action="http://localhost:8080/menu/main/dataexplorer" method="get">
+			<button type="submit" href="http://localhost:8080/menu/main/dataexplorer" action="http://localhost:8080/menu/main/dataexplorer" class="btn">Go</button>
 		</form>
 	</div>
 </div>	
@@ -294,6 +310,7 @@
 	$("#variant-selection-tabs").tabs();
 	$("#region-selection-tabs").tabs();
 	$(".phenotypeSelect	").chosen();
+	$(".icon-question-sign").tooltip();
 </script>
 
 <@footer />
