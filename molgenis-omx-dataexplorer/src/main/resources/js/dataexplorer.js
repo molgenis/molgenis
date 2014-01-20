@@ -909,9 +909,9 @@
 			'documentType' : "protocolTree-" + fragments[fragments.length - 1],
 			'featureFilters' : featureFilters,
 			query : {
-				'rules' : [queryRules]
-			}, 
-			'pageSize' : 1000000
+				'rules' : [queryRules],
+                'pageSize' : 1000000
+			}
 		};
 		
 		searchApi.search(searchRequest, function(searchResponse) {
@@ -1000,6 +1000,8 @@
         if(dataSet.identifier in genomeBrowserDataSets){
             document.getElementById('genomebrowser').style.display='block';
             document.getElementById('genomebrowser').style.visibility='visible';
+            //width of the panel is zero when hidden, resulting in badly draw genomebrowser if it is not refreshed on "show"
+            dalliance.featurePanelWidth = dalliance.tierHolder.getBoundingClientRect().width;
             dalliance.reset();
             console.log("dataSet.identifier:"+dataSet.identifier);
             var dallianceTrack = [{
