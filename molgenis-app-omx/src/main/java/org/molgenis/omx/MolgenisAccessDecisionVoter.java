@@ -58,3 +58,5 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		return urlFragments.length > 0 ? urlFragments[urlFragments.length - 1] : requestUrl;
 	}
 }
+
+

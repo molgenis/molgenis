@@ -18,6 +18,11 @@ public class MapEntity extends AbstractEntity
 	{
 	}
 
+	public MapEntity(Entity other)
+	{
+		set(other);
+	}
+
 	public MapEntity(String idAttributeName)
 	{
 		this.idAttributeName = idAttributeName;
@@ -54,7 +59,10 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public void set(Entity other)
 	{
-		throw new UnsupportedOperationException();
+		for (String attributeName : other.getAttributeNames())
+		{
+			set(attributeName, other.get(attributeName));
+		}
 	}
 
 	@Override

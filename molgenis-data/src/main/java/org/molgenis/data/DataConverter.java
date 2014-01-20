@@ -39,6 +39,8 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
+		if (conversionService == null) return source.toString();
+
 		return convert(source, String.class);
 	}
 
