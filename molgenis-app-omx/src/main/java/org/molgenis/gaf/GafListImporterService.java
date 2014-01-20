@@ -47,10 +47,10 @@ public class GafListImporterService
 	public static final String GAF_SHEET_ID = "0AmTxcrav-hTbdFNhSEZxZVIxQVRwbTZ6SE5lUUIyVEE";
 	public static final String GAF_WORKBOOK_ID = "6";
 
-	@Value("${google.account.username}")
+	@Value("${google.account.username:@null}")
 	private String googleAccountUsername;
 
-	@Value("${google.account.password}")
+	@Value("${google.account.password:@null}")
 	private String googleAccountPassword;
 
 	@Autowired
@@ -94,7 +94,7 @@ public class GafListImporterService
 		if (googleAccountUsername == null || googleAccountPassword == null)
 		{
 			throw new IllegalArgumentException(
-					"missing required google.account.username and google.account.password (please specify in molgenis-server.properties");
+					"missing required google.account.username and google.account.password (please specify in molgenis-server.properties)");
 		}
 
 		logger.info("running scheduled gaf list import task ...");
