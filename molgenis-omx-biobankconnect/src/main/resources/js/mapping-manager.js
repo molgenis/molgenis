@@ -275,11 +275,6 @@
 						}
 					}
 				});
-//				$.each(biobankDataSets, function(index, dataSet){
-//					if(ns.hrefToId(dataSet.href) === ns.hrefToId(selectedDataSet.href))
-//						sortedDataSets.splice(0, 0, dataSet);
-//					else sortedDataSets.push(dataSet);
-//				});
 				return sortedDataSets;
 			}
 		}
