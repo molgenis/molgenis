@@ -30,7 +30,7 @@ public class StoreMappingRepositoryTest
 {
 	StoreMappingRepository repository;
 	DataService dataService;
-	private static final String dataSetIdentifer = "test-set";
+	private static final String dataSetIdentifier = "test-set";
 	private static final String OBSERVATION_SET = "observation_set";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
@@ -62,11 +62,11 @@ public class StoreMappingRepositoryTest
 		when(p.getFeatures()).thenReturn(Arrays.asList(feature1, feature2, feature3));
 
 		DataSet dataSet = mock(DataSet.class);
-		when(dataSet.getIdentifier()).thenReturn(dataSetIdentifer);
+		when(dataSet.getIdentifier()).thenReturn(dataSetIdentifier);
 		when(dataSet.getProtocolUsed()).thenReturn(p);
 
 		Query q = new QueryImpl();
-		q.eq(DataSet.IDENTIFIER, dataSetIdentifer);
+		q.eq(DataSet.IDENTIFIER, dataSetIdentifier);
 		when(dataService.findOne(DataSet.ENTITY_NAME, q)).thenReturn(dataSet);
 
 		ObservationSet observationSet = mock(ObservationSet.class);
