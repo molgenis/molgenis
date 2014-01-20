@@ -364,35 +364,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		else removeExistingMappings(featureId, dataSetsForMapping);
 	}
 
-	// <<<<<<< HEAD
-	// private void deleteExistingRecords(String userName, List<String>
-	// dataSetsForMapping) throws DatabaseException
-	// {
-	// currentUserStatus.setUserTotalNumberOfQueries(userName, (long)
-	// dataSetsForMapping.size());
-	// for (String dataSetIdentifier : dataSetsForMapping)
-	// {
-	// List<ObservationSet> listOfObservationSets =
-	// database.find(ObservationSet.class, new QueryRule(
-	// ObservationSet.PARTOFDATASET_IDENTIFIER, Operator.EQUALS,
-	// dataSetIdentifier));
-	// if (listOfObservationSets.size() > 0)
-	// {
-	// List<Integer> listOfObservationIdentifiers = new ArrayList<Integer>();
-	// for (ObservationSet observation : listOfObservationSets)
-	// {
-	// listOfObservationIdentifiers.add(observation.getId());
-	// }
-	// List<ObservedValue> listOfObservedValues =
-	// database.find(ObservedValue.class, new QueryRule(
-	// ObservedValue.OBSERVATIONSET, Operator.IN,
-	// listOfObservationIdentifiers));
-	// if (listOfObservedValues.size() > 0)
-	// database.remove(listOfObservedValues);
-	// database.remove(listOfObservationSets);
-	// }
-	// currentUserStatus.incrementFinishedNumberOfQueries(userName);
-	// =======
 	private void deleteExistingRecords(String userName, List<String> dataSetsForMapping)
 	{
 		currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsForMapping.size());
