@@ -15,7 +15,6 @@
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
-	var scoreMappingAbsoluteScore = "store_mapping_absolute_score";
 	
 	ns.MappingManager = function MappingManager(){
 		
@@ -107,7 +106,7 @@
 			}
 			if(sortRule !== null)
 			{
-				q.sort.orders = [sortRule];
+				q.sort = sortRule;
 			}
 			
 			searchApi.search(pagination.createSearchRequest(documentType, q),function(searchResponse) {
@@ -239,7 +238,6 @@
 			//create table header
 			var involvedDataSetIds = [];
 			var involvedDataSetNames = [];
-			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
 			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
 					var dataSetIdArray = dataSet.identifier.split('-');
@@ -247,6 +245,7 @@
 				}
 			});
 			involvedDataSetIds.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
+			biobankDataSets = sortOrderOfDataSets(biobankDataSets, involvedDataSetIds);
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
 				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
@@ -264,6 +263,25 @@
 				tableBody.append(createRowForMappingTable(mappingPerStudy, mappingDataSets, featureId, cachedFeatures));
 			});
 			callback(tableBody, involvedDataSetNames);
+			
+			function sortOrderOfDataSets(biobankDataSets, involvedDataSetIds){
+				var sortedDataSets = [];
+				$.each(involvedDataSetIds, function(index, dataSetId){
+					for(var i = 0; i < biobankDataSets.length; i++){
+						var currentDataSet = biobankDataSets[i];
+						if(ns.hrefToId(currentDataSet.href) === dataSetId){
+							sortedDataSets.splice(index, 0, currentDataSet);
+							break;
+						}
+					}
+				});
+//				$.each(biobankDataSets, function(index, dataSet){
+//					if(ns.hrefToId(dataSet.href) === ns.hrefToId(selectedDataSet.href))
+//						sortedDataSets.splice(0, 0, dataSet);
+//					else sortedDataSets.push(dataSet);
+//				});
+				return sortedDataSets;
+			}
 		}
 		
 		function createDynamicTableHeader(involedDataSets){
@@ -275,7 +293,7 @@
 				if(i === 0){
 					firstColumn = $('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', '40%').appendTo(dataSetRow);
 					if (sortRule) {
-						if (sortRule.operator == 'SORTASC') {
+						if (sortRule.orders[0].direction == 'ASC') {
 							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 						} else {
 							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -292,15 +310,19 @@
 			
 			if(firstColumn !== null){
 				$(firstColumn).find('.ui-icon').click(function() {
-					if (sortRule && sortRule.operator == 'SORTASC') {
+					if (sortRule && sortRule.orders[0].direction == 'ASC') {
 						sortRule = {
-							value : 'name',
-							operator : 'SORTDESC'
+								orders: [{
+									property: 'name',
+									direction: 'DESC'
+								}]
 						};
 					} else {
 						sortRule = {
-							value : 'name',
-							operator : 'SORTASC'
+								orders: [{
+									property: 'name',
+									direction: 'ASC'
+								}]
 						};
 					}
 					ns.MappingManager.prototype.createMatrixForDataItems();
@@ -907,8 +929,13 @@
 	
 	ns.MappingManager.prototype.downloadMappings = function(){
 		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
+		var mappedDataSetIds = [];
+		$.each(biobankDataSets, function(index, dataSet){
+			if(ns.hrefToId(dataSet.href) !== selectedDataSet) mappedDataSetIds.push(ns.hrefToId(dataSet.href));
+		});
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
+			'matchedDataSetIds' : mappedDataSetIds,
 			'documentType' : dataSet.identifier
 		};
 		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});

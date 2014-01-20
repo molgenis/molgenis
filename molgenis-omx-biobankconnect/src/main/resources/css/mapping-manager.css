@@ -21,6 +21,10 @@
 	cursor: pointer;
 }
 
+#data-table-container {
+	overflow : auto;
+}
+
 table#dataitem-table {
 	border : 1px solid #5B82A4;
 }
