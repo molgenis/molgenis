@@ -96,17 +96,17 @@
                 var rootProtocol = restApi.get(rootProtocolUri, ["subprotocols"]);
                 //check if the protocol was already found in another dataset
                 //add dataset to list of datasets in which the protocol occurs
-                var datasetIdentifiers = protocolsMap[rootProtocol];
+                var datasetIdentifiers = protocolsMap[rootProtocol.identifier];
                 if(!datasetIdentifiers) {
                     datasetIdentifiers = [];
                 }
                 datasetIdentifiers.push(datasetIdentifier);
                 protocolsMap[rootProtocol.identifier] = datasetIdentifiers;
-                $.each(rootProtocol.subprotocols.items, function(key, protocol) {
-                      if(protocol.subprotocols.length>0){
-                          protocolsMap = getSubProtocols(datasetIdentifier, protocol.href, protocolsMap);
-                      }
-                });
+                if(rootProtocol.subprotocols.items.length>0){
+                    $.each(rootProtocol.subprotocols.items, function(key, protocol) {
+                         protocolsMap = getSubProtocols(datasetIdentifier, protocol.href, protocolsMap);
+                    });
+                }
                 return protocolsMap;
             }
 
@@ -220,13 +220,19 @@
 	};
 
 	ns.createSearchRequest = function(entity) {
-		var searchRequest = {
-			queryRules : [ {
-				field : '_xrefvalue',
-				operator : 'EQUALS',
-				value : entity.identifier
-			} ]
-		};
+        var queryRules = [];
+        queryRules.push({
+            field : '_xrefvalue',
+            operator : 'EQUALS',
+            value : entity.identifier
+        });
+
+        var searchRequest = {
+            query : {
+                'rules' : [queryRules],
+                'pageSize' : 1000000
+            }
+        };
 		return searchRequest;
 	};
 
