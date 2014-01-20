@@ -41,12 +41,18 @@ public class HighchartsDataUtil
 		return series;
 	}
 
+	/**
+	 * Parse the xYDataSerie to a Series object computable with the Highcharts standard.
+	 * 
+	 * @param xYDataSerie
+	 * @return Series
+	 */
 	public static Series parseToSeries(XYDataSerie xYDataSerie)
 	{
 		Series series = new Series();
 		series.setName(xYDataSerie.getName());
 		series.setType(SeriesType.getSeriesType(xYDataSerie.getType()));
-		series.setData(parseToXYDataList(xYDataSerie.getData(), xYDataSerie.getAttributeXFieldTypeEnum(),
+		series.setData(parseXYDataToList(xYDataSerie.getData(), xYDataSerie.getAttributeXFieldTypeEnum(),
 				xYDataSerie.getAttributeYFieldTypeEnum()));
 
 		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType())
@@ -66,18 +72,25 @@ public class HighchartsDataUtil
 		series.setData(new ArrayList<Object>(boxPlotSerie.getData()));
 		return series;
 	}
-
-	public static List<Object> parseToXYDataList(List<XYData> xydata, FieldTypeEnum xValue, FieldTypeEnum yValue)
+	
+	/**
+	 * Parse the x and y data-objects to object computable with the Highcharts scatter plot standard.
+	 * 
+	 * @param xydata
+	 * @param xValueFieldTypeEnum
+	 * @param yValueFieldTypeEnum
+	 * @return List<Object>
+	 */
+	public static List<Object> parseXYDataToList(List<XYData> xydata, FieldTypeEnum xValueFieldTypeEnum, FieldTypeEnum yValueFieldTypeEnum)
 	{
 		List<Object> data = new ArrayList<Object>();
 		for (XYData xYData : xydata)
 		{
-			List<Object> tempPoint = new ArrayList<Object>();
-			tempPoint.add(convertValue(xValue, xYData.getXvalue()));
-			tempPoint.add(convertValue(yValue, xYData.getYvalue()));
-			data.add(tempPoint);
+			List<Object> list = new ArrayList<Object>();
+			list.add(convertValue(xValueFieldTypeEnum, xYData.getXvalue()));
+			list.add(convertValue(yValueFieldTypeEnum, xYData.getYvalue()));
+			data.add(list);
 		}
-
 		return data;
 	}
 
@@ -110,12 +123,9 @@ public class HighchartsDataUtil
 	{
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-
 		Calendar calendarConverted = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
 		calendarConverted.clear();
-
 		calendarConverted.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
-
 		return calendarConverted.getTimeInMillis();
 	}
 

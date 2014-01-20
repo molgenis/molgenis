@@ -2,7 +2,6 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
-		
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
 		<plugin id="importwizard" name="Upload" url="importwizard"/>
@@ -40,7 +39,6 @@
 	        <plugin id="evaluation" name="Evaluation" url="evaluation"/>
 	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
         </menu>
-        <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
         <plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
         <menu label="Background" name="background">    
 	        <plugin id="news" name="News" url="news"/>
@@ -56,6 +54,7 @@
 			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
 			<plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
 			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
+			<plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>

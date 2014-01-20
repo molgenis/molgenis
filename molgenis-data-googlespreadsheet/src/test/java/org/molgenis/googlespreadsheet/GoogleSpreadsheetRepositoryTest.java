@@ -95,7 +95,7 @@ public class GoogleSpreadsheetRepositoryTest
 	@Test
 	public void iterator() throws IOException, ServiceException
 	{
-		when(spreadsheetService.getFeed(any(URL.class), (Class<ListFeed>) any(Class.class))).thenReturn(listFeed);
+		when(spreadsheetService.getFeed(any(URL.class), any(Class.class))).thenReturn(cellFeed).thenReturn(listFeed);
 		Iterator<Entity> it = spreadsheetRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity entity = it.next();

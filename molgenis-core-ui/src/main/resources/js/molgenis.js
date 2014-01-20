@@ -70,6 +70,7 @@
 
 		function showDatasetsindexerStatusMessage() {
 			$.get("/dataindexerstatus", function(response) {
+				//console.log("showDatasetsindexerStatusMessage" + new Date()); //activate voor bugfixing
 				$('.datasetsindexerAlerts').empty();
 				if (response.isRunning === true) {
 					setTimeout(showDatasetsindexerStatusMessage, 3000);
@@ -78,8 +79,7 @@
 					'message' : response.message
 				} ], response.type, $('.datasetsindexerAlerts'));
 			});
-		}
-		;
+		};
 	};
 
 	/*

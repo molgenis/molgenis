@@ -82,6 +82,7 @@
                         'entity' : 'dataSet'
                     };
                 }
+                
                 $.ajax({
 					type : 'POST',
 					url : '${context_url}/index',

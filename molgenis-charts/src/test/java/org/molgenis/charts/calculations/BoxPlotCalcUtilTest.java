@@ -67,11 +67,11 @@ public class BoxPlotCalcUtilTest
 		BoxPlotCalcUtil.calcBoxPlotValues(sortedDataAscendingOrder);
 	}
 	
-	@Test(expectedExceptions = MolgenisChartException.class)
+	@Test()
 	public void testCalcPlotBoxValuesListIsEmpty()
 	{	
 		List<Double> sortedDataAscendingOrder = new ArrayList<Double>();
-		BoxPlotCalcUtil.calcBoxPlotValues(sortedDataAscendingOrder);
+		assertEquals(BoxPlotCalcUtil.calcBoxPlotValues(sortedDataAscendingOrder), new Double[]{0d,0d,0d,0d,0d});
 	}
 }
 
