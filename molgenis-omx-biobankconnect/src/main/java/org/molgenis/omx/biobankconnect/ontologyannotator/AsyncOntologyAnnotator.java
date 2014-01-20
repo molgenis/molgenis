@@ -87,7 +87,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public String uploadFeatures(File uploadFile, String datasetName) throws IOException
 	{
 		CsvRepository csvRepository = null;
-		// CsvReader reader = null;
 		try
 		{
 			boolean existingDataSet = dataService.findOne(DataSet.ENTITY_NAME,

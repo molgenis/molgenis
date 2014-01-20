@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -26,7 +27,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingRepository;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
-import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus.Stage;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus.STAGE;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -143,10 +144,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, q, null));
 
-			currentUserStatus.setUserCurrentStage(userName, Stage.DeleteMapping);
+			currentUserStatus.setUserCurrentStage(userName, STAGE.DeleteMapping);
 			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
 
-			currentUserStatus.setUserCurrentStage(userName, Stage.CreateMapping);
+			currentUserStatus.setUserCurrentStage(userName, STAGE.CreateMapping);
 			currentUserStatus.setUserTotalNumberOfQueries(userName, result.getTotalHitCount());
 
 			for (Hit hit : result.getSearchHits())
@@ -308,7 +309,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			listOfNewObservedValues.addAll(valuesForObservationSets);
 			dataService.add(ObservedValue.ENTITY_NAME, listOfNewObservedValues);
 
-			currentUserStatus.setUserCurrentStage(userName, Stage.StoreMapping);
+			currentUserStatus.setUserCurrentStage(userName, STAGE.StoreMapping);
 			currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsToMatch.size());
 			if (featureId != null)
 			{
@@ -806,7 +807,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					stemmer.stem();
 					eachTerm = stemmer.getCurrent().toLowerCase();
 				}
-				catch (Exception e)
+				catch (RuntimeException e)
 				{
 					logger.error("Could not stem word : " + eachTerm, e);
 				}
@@ -827,37 +828,37 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 			ObservableFeature feature = new ObservableFeature();
 			feature.setIdentifier(STORE_MAPPING_FEATURE);
-			feature.setDataType("int");
+			feature.setDataType(MolgenisFieldTypes.FieldTypeEnum.INT.toString().toLowerCase());
 			feature.setName("Features");
 			features.add(feature);
 
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
-			mappedFeature.setDataType("int");
+			mappedFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.INT.toString().toLowerCase());
 			mappedFeature.setName("Mapped features");
 			features.add(mappedFeature);
 
 			ObservableFeature mappedFeatureScore = new ObservableFeature();
 			mappedFeatureScore.setIdentifier(STORE_MAPPING_SCORE);
-			mappedFeatureScore.setDataType("decimal");
+			mappedFeatureScore.setDataType(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString().toLowerCase());
 			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
 			features.add(mappedFeatureScore);
 
 			ObservableFeature observationSetFeature = new ObservableFeature();
 			observationSetFeature.setIdentifier(OBSERVATION_SET);
-			observationSetFeature.setDataType("int");
+			observationSetFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.INT.toString().toLowerCase());
 			observationSetFeature.setName(OBSERVATION_SET);
 			features.add(observationSetFeature);
 
 			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
-			mappedFeatureAbsoluteScore.setDataType("decimal");
+			mappedFeatureAbsoluteScore.setDataType(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString().toLowerCase());
 			mappedFeatureAbsoluteScore.setName(STORE_MAPPING_ABSOLUTE_SCORE);
 			features.add(mappedFeatureAbsoluteScore);
 
 			ObservableFeature confirmMapping = new ObservableFeature();
 			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
-			confirmMapping.setDataType("bool");
+			confirmMapping.setDataType(MolgenisFieldTypes.FieldTypeEnum.BOOL.toString().toLowerCase());
 			confirmMapping.setName("Mapping confirmed");
 			features.add(confirmMapping);
 

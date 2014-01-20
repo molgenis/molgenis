@@ -7,13 +7,13 @@ import java.util.Map.Entry;
 
 public class CurrentUserStatus
 {
-	public static enum Stage
+	public static enum STAGE
 	{
 		DeleteMapping, CreateMapping, StoreMapping;
 	}
 
 	private final Map<String, String> currentUsers;
-	private final Map<String, Stage> userCurrentStage;
+	private final Map<String, STAGE> userCurrentStage;
 	private final Map<String, Boolean> userCurrentMatching;
 	private final Map<String, Long> totalNumberOfQueriesForUser;
 	private final Map<String, Integer> finishedNumberOfQueriesForUser;
@@ -21,13 +21,13 @@ public class CurrentUserStatus
 	public CurrentUserStatus()
 	{
 		currentUsers = new HashMap<String, String>();
-		userCurrentStage = new HashMap<String, Stage>();
+		userCurrentStage = new HashMap<String, STAGE>();
 		userCurrentMatching = new HashMap<String, Boolean>();
 		totalNumberOfQueriesForUser = new HashMap<String, Long>();
 		finishedNumberOfQueriesForUser = new HashMap<String, Integer>();
 	}
 
-	public void setUserCurrentStage(String userName, Stage stage)
+	public void setUserCurrentStage(String userName, STAGE stage)
 	{
 		totalNumberOfQueriesForUser.remove(userName);
 		finishedNumberOfQueriesForUser.remove(userName);

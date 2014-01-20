@@ -35,7 +35,6 @@ import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -69,10 +68,9 @@ public class EvaluationController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService, DataService dataService)
+	public EvaluationController(SearchService searchService, DataService dataService)
 	{
 		super(URI);
-		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (dataService == null) throw new IllegalArgumentException("Dataservice is null");
 		this.searchService = searchService;

@@ -84,7 +84,8 @@ public class StoreMappingRepository extends AbstractRepository<Entity>
 		}
 		catch (ValueConverterException e)
 		{
-			new RuntimeException("Failed to index mapping table : " + dataSet.getName() + " error : " + e.getMessage());
+			throw new RuntimeException("Failed to index mapping table : " + dataSet.getName() + " error : "
+					+ e.getMessage());
 		}
 
 		return entities.iterator();

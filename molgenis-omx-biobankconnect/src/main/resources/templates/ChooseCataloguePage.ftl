@@ -82,7 +82,7 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		$(document).ready(function(){
+		$(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.ontologyMatcherRunning(function(){
 				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());

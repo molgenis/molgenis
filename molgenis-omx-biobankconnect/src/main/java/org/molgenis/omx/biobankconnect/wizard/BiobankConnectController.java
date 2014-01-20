@@ -104,7 +104,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -121,7 +121,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		wizard = new BiobankConnectWizard();
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);

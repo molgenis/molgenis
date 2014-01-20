@@ -58,7 +58,7 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		$(document).ready(function(){
+		$(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.ontologyMatcherRunning();
 		});
