@@ -75,8 +75,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		return Iterables.filter(catalogService.getCatalogs(), new Predicate<CatalogMeta>()
 		{
 			@Override
-			public boolean apply(@Nullable
-			CatalogMeta catalogMeta)
+			public boolean apply(CatalogMeta catalogMeta)
 			{
 				try
 				{
@@ -221,8 +220,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		{
 			@Nullable
 			@Override
-			public CatalogItem apply(@Nullable
-			final Integer catalogItemId)
+			public CatalogItem apply(@Nullable final Integer catalogItemId)
 			{
 				return catalog.findItem(catalogItemId.toString());
 			}
