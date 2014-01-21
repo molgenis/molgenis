@@ -189,12 +189,9 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-
-		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
-			selectedDataSet = dataSet;
-			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-            molgenis.updateGenomeBrowser(dataSet);
-		});
+        selectedDataSet = restApi.get(dataSetUri);
+        molgenis.createFeatureSelection(selectedDataSet.protocolUsed.href);
+        molgenis.updateGenomeBrowser(dataSet);
 	};
 
 	molgenis.onFeatureSelectionChange = function(featureUris) {
