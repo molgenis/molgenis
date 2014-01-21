@@ -75,8 +75,7 @@ public class EntityExplorerController extends MolgenisPluginController
 					@Override
 					public boolean apply(Class<? extends Entity> clazz)
 					{
-						return clazz != null && Characteristic.class.isAssignableFrom(clazz)
-								&& !clazz.equals(Characteristic.class);
+						return clazz != null && Characteristic.class.isAssignableFrom(clazz);
 					}
 				});
 
@@ -90,8 +89,9 @@ public class EntityExplorerController extends MolgenisPluginController
 		}
 
 		// select initial entity
-		Class<? extends Characteristic> selectedClazz = clazzMap.get(entity);
-		if (selectedClazz == null)
+        Class<? extends Characteristic> selectedClazz;
+        selectedClazz = clazzMap.get(entity);
+        if (selectedClazz == null)
 		{
 			if (!clazzMap.isEmpty()) selectedClazz = clazzMap.entrySet().iterator().next().getValue();
 		}
