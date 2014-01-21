@@ -9,6 +9,7 @@ import org.molgenis.charts.AbstractChart;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
 import org.molgenis.charts.BoxPlotChart;
+import org.molgenis.charts.MolgenisAxisType;
 import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.highcharts.chart.Chart;
 import org.molgenis.charts.highcharts.data.HighchartsDataUtil;
@@ -41,22 +42,30 @@ public class HighchartService extends AbstractChartVisualizationService
 		return null;
 	}
 	
-	private Options createScatterChart(XYDataChart scatterChart, Model model)
+	public Options createScatterChart(XYDataChart scatterChart, Model model)
 	{
-		return createXYDataChart(scatterChart, model);
+		ChartConstructorType chartConstructorType;
+		if(MolgenisAxisType.DATETIME.equals(scatterChart.getxAxisType())) {
+			chartConstructorType = ChartConstructorType.STOCKCHART;
+		} else {
+			chartConstructorType = ChartConstructorType.CHART;
+		}
+		return createXYDataChart(scatterChart, chartConstructorType, model);
 	}
 	
 	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart, Model model)
 	{
 		Options options = new Options();
 		
-		BasicChart chart = new BasicChart();
+		Chart chart = new Chart();
 		chart.setType(ChartType.BOXPLOT)
 			.setWidth(boxPlotChart.getWidth())
 			.setHeight(boxPlotChart.getHeight());
 		
 		XAxis xAxis = new XAxis();
 		xAxis.setCategories(boxPlotChart.getCategories());
+		xAxis.setTitle(new AxisTitle()
+			.setText(boxPlotChart.getxLabel()));
 		
 		YAxis yAxis = new YAxis();
 		yAxis.setTitle(new AxisTitle()
@@ -86,17 +95,15 @@ public class HighchartService extends AbstractChartVisualizationService
 		return options;
 	}
 	
-	public Options createXYDataChart(XYDataChart xYDataChart, Model model)
+	protected Options createXYDataChart(XYDataChart xYDataChart, ChartConstructorType chartConstructorType, Model model)
 	{
 		Options options = new Options();
 		
 		final BasicChart chart;
-		
-		if(Date.class.equals(xYDataChart.getxAxisType())
-				|| DateTime.class.equals(xYDataChart.getxAxisType())) {
-			chart = new StockChart();
-		} else {
+		if(ChartConstructorType.CHART.equals(chartConstructorType)) {
 			chart = new Chart();
+		} else {
+			chart = new StockChart();
 		}
 		
 		chart.setType(ChartType.getChartType(xYDataChart.getType()))
