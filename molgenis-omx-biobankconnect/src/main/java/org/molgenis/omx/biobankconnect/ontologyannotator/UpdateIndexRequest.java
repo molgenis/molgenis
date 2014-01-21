@@ -6,18 +6,20 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class UpdateIndexRequest
 {
-	private Integer dataSetId;
-	private String documentType;
-	private List<String> documentIds;
-	private String updateScript;
+	private final Integer dataSetId;
+	private final String documentType;
+	private final List<Integer> matchedDataSetIds;
+	private final List<String> documentIds;
+	private final String updateScript;
 
-	public UpdateIndexRequest(Integer dataSetId, String documentType, List<String> documentIds,
-			String updateScript)
+	public UpdateIndexRequest(Integer dataSetId, String documentType, List<Integer> matchedDataSetIds,
+			List<String> documentIds, String updateScript)
 	{
 		this.dataSetId = dataSetId;
 		this.documentType = documentType;
 		this.documentIds = documentIds;
 		this.updateScript = updateScript;
+		this.matchedDataSetIds = matchedDataSetIds;
 	}
 
 	public Integer getDataSetId()
@@ -44,5 +46,10 @@ public class UpdateIndexRequest
 	public String toString()
 	{
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public List<Integer> getMatchedDataSetIds()
+	{
+		return matchedDataSetIds;
 	}
 }
