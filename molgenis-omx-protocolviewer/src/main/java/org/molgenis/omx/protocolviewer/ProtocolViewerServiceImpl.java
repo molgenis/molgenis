@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
@@ -218,9 +217,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		final Catalog catalog = catalogService.getCatalog(catalogId);
 		List<CatalogItem> catalogItems = Lists.transform(catalogItemIds, new Function<Integer, CatalogItem>()
 		{
-			@Nullable
 			@Override
-			public CatalogItem apply(@Nullable final Integer catalogItemId)
+			public CatalogItem apply(final Integer catalogItemId)
 			{
 				return catalog.findItem(catalogItemId.toString());
 			}
