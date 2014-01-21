@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataSetsIndexerController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(DataSetsIndexerController.class);
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "dataindexer";
 
 	public DataSetsIndexerController()
@@ -64,9 +61,10 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	{
 		// add data sets to model
 		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
-        Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ROOT,true));
-        model.addAttribute("dataSets", dataSets);
-        model.addAttribute("protocols", protocols);
+		Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
+				new QueryImpl().eq(Protocol.ROOT, true));
+		model.addAttribute("dataSets", dataSets);
+		model.addAttribute("protocols", protocols);
 		return "view-datasetsindexer";
 	}
 
@@ -81,7 +79,6 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		}
 
 		List<String> dataSetIds = request.getSelectedDataSets();
-        String entity = request.getEntity();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())
 		{
 			return new DataSetIndexResponse(false, "Please select a dataset");
@@ -96,18 +93,21 @@ public class DataSetsIndexerController extends MolgenisPluginController
 				ids.add(Integer.parseInt(dataSetId));
 			}
 		}
-        if("dataSet".equals(request.getEntity())){
-		    dataSetsIndexer.indexDataSets(ids);
-        }else if("protocol".equals(request.getEntity())){
-            dataSetsIndexer.indexProtocols(ids);
-        }
+		if ("dataSet".equals(request.getEntity()))
+		{
+			dataSetsIndexer.indexDataSets(ids);
+		}
+		else if ("protocol".equals(request.getEntity()))
+		{
+			dataSetsIndexer.indexProtocols(ids);
+		}
 		return new DataSetIndexResponse(true, "");
 	}
 
 	static class DataSetIndexRequest
 	{
 		private List<String> selectedDataSets;
-        private String entity;
+		private String entity;
 
 		public DataSetIndexRequest(List<String> selectedDataSets)
 		{
@@ -124,14 +124,14 @@ public class DataSetsIndexerController extends MolgenisPluginController
 			this.selectedDataSets = selectedDataSets;
 		}
 
-        public String getEntity()
-        {
-            return entity;
-        }
+		public String getEntity()
+		{
+			return entity;
+		}
 
-        public void setEntity(String entity)
-        {
-            this.entity = entity;
+		public void setEntity(String entity)
+		{
+			this.entity = entity;
 		}
 	}
 

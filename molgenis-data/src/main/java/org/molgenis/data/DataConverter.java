@@ -10,6 +10,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
 {
 	private static ConversionService conversionService;
@@ -39,6 +40,8 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
+		if (conversionService == null) return source.toString();
+
 		return convert(source, String.class);
 	}
 
@@ -76,7 +79,7 @@ public class DataConverter
 		if (source instanceof java.sql.Date) return (java.sql.Date) source;
 		return convert(source, java.sql.Date.class);
 	}
-	
+
 	public static java.util.Date toUtilDate(Object source)
 	{
 		if (source == null) return null;

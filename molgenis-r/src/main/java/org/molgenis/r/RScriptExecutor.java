@@ -1,8 +1,10 @@
 package org.molgenis.r;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 import org.apache.log4j.Logger;
 import org.springframework.util.FileCopyUtils;
@@ -40,7 +42,7 @@ public class RScriptExecutor
 
 		try
 		{
-			FileCopyUtils.copy(script, new FileWriter(file));
+			FileCopyUtils.copy(script, new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8")));
 		}
 		catch (IOException e)
 		{

@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
+import org.molgenis.omx.biobankconnect.applicationevent.SessionExpireListener;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
@@ -48,5 +49,6 @@ public class WebAppInitializer implements WebApplicationInitializer
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
+		servletContext.addListener(new SessionExpireListener());
 	}
 }
