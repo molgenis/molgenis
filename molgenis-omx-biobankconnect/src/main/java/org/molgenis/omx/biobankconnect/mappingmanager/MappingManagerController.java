@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -27,6 +28,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -68,6 +70,9 @@ public class MappingManagerController extends MolgenisPluginController
 	private final UserAccountService userAccountService;
 
 	@Autowired
+	private CurrentUserStatus currentUserStatus;
+
+	@Autowired
 	private FileStore fileStore;
 
 	@Autowired
@@ -87,20 +92,20 @@ public class MappingManagerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, Model model)
+	String selectedDataSetId, HttpServletRequest request, Model model)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
-
 		model.addAttribute("dataSets", dataSets);
 		model.addAttribute("userName", SecurityUtils.getCurrentUsername());
 		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);
 		model.addAttribute("isRunning", ontologyMatcher.isRunning());
+		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
+				request.getRequestedSessionId());
 
 		return "MappingManagerPlugin";
 	}
@@ -154,94 +159,94 @@ public class MappingManagerController extends MolgenisPluginController
 			Set<Integer> featureIds = new HashSet<Integer>();
 			Integer selectedDataSetId = request.getDataSetId();
 			DataSet mappingDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId);
+			@SuppressWarnings("deprecation")
 			List<DataSet> storeMappingDataSet = dataService.findAllAsList(DataSet.ENTITY_NAME,
 					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId.toString()));
-
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(mappingDataSet.getName());
 			Map<Integer, Map<Integer, MappingClass>> dataSetMappings = new HashMap<Integer, Map<Integer, MappingClass>>();
-
-			for (DataSet dataSet : storeMappingDataSet)
+			if (storeMappingDataSet.size() > 0)
 			{
-				Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
-				if (dataSet.getIdentifier().startsWith(SecurityUtils.getCurrentUsername() + "-" + selectedDataSetId)
-						&& !mappedDataSetId.equals(selectedDataSetId))
-				{
-					DataSet mappedDataSet = dataService.findOne(DataSet.ENTITY_NAME, mappedDataSetId);
-					dataSetNames.add(mappedDataSet.getName());
-
-					SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(),
-							new QueryImpl().pageSize(1000000), null);
-
-					SearchResult result = searchService.search(searchRequest);
-
-					Map<Integer, MappingClass> storeMappings = new HashMap<Integer, MappingClass>();
-					for (Hit hit : result.getSearchHits())
-					{
-						Map<String, Object> map = hit.getColumnValueMap();
-						Integer storeMappingFeatureId = Integer.parseInt(map.get(STORE_MAPPING_FEATURE).toString());
-						Integer storeMappingMappedFeatureId = Integer.parseInt(map.get(STORE_MAPPING_MAPPED_FEATURE)
-								.toString());
-						boolean confirmation = (Boolean) map.get(STORE_MAPPING_CONFIRM_MAPPING);
-						if (!storeMappings.containsKey(storeMappingFeatureId)) storeMappings.put(storeMappingFeatureId,
-								new MappingClass());
-						storeMappings.get(storeMappingFeatureId).addMapping(storeMappingFeatureId,
-								storeMappingMappedFeatureId, confirmation);
-						featureIds.add(storeMappingFeatureId);
-						featureIds.add(storeMappingMappedFeatureId);
-					}
-					dataSetMappings.put(mappedDataSetId, storeMappings);
-				}
-			}
-
-			Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
-			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().in(ObservableFeature.ID, new ArrayList<Integer>(featureIds)));
-			for (ObservableFeature feature : features)
-			{
-				featureMap.put(feature.getId(), feature);
-			}
-
-			writer = new CsvWriter<Entity>(response.getWriter(), dataSetNames);
-
-			SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId,
-					new QueryImpl().pageSize(1000000), null);
-
-			SearchResult featureSearchResult = searchService.search(searchFeatures);
-			for (Hit hit : featureSearchResult.getSearchHits())
-			{
-				Entity entity = new MapEntity();
-				Map<String, Object> map = hit.getColumnValueMap();
-				String featureName = map.get(FEATURE_NAME).toString();
-				Integer featureId = Integer.parseInt(map.get(FEATURE_ID).toString());
-				entity.set(dataSetNames.get(0), featureName);
-				int i = 1;
 				for (DataSet dataSet : storeMappingDataSet)
 				{
 					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
-					if (!mappedDataSetId.equals(selectedDataSetId))
+					if (dataSet.getIdentifier().startsWith(
+							userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
+							&& !mappedDataSetId.equals(selectedDataSetId))
 					{
-						StringBuilder value = new StringBuilder();
-						Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
-						if (storeMappings.containsKey(featureId))
+						DataSet mappedDataSet = dataService.findOne(DataSet.ENTITY_NAME, mappedDataSetId);
+						dataSetNames.add(mappedDataSet.getName());
+						SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(),
+								new QueryImpl().pageSize(1000000), null);
+						SearchResult result = searchService.search(searchRequest);
+						Map<Integer, MappingClass> storeMappings = new HashMap<Integer, MappingClass>();
+						for (Hit hit : result.getSearchHits())
 						{
-							List<Integer> candidateIds = null;
-							MappingClass mappingClass = storeMappings.get(featureId);
-							if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
-							else candidateIds = mappingClass.getCandidateMappings();
-							for (Integer id : candidateIds)
-							{
-								if (featureMap.containsKey(id))
-								{
-									value.append(featureMap.get(id).getName());
-									value.append(',');
-								}
-							}
+							Map<String, Object> map = hit.getColumnValueMap();
+							Integer storeMappingFeatureId = Integer.parseInt(map.get(STORE_MAPPING_FEATURE).toString());
+							Integer storeMappingMappedFeatureId = Integer.parseInt(map
+									.get(STORE_MAPPING_MAPPED_FEATURE).toString());
+							boolean confirmation = (Boolean) map.get(STORE_MAPPING_CONFIRM_MAPPING);
+							if (!storeMappings.containsKey(storeMappingFeatureId)) storeMappings.put(
+									storeMappingFeatureId, new MappingClass());
+							storeMappings.get(storeMappingFeatureId).addMapping(storeMappingFeatureId,
+									storeMappingMappedFeatureId, confirmation);
+							featureIds.add(storeMappingFeatureId);
+							featureIds.add(storeMappingMappedFeatureId);
 						}
-						entity.set(dataSetNames.get(i++), value.toString());
+						dataSetMappings.put(mappedDataSetId, storeMappings);
 					}
 				}
-				writer.add(entity);
+
+				Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
+				Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().in(ObservableFeature.ID, new ArrayList<Integer>(featureIds)));
+				for (ObservableFeature feature : features)
+				{
+					featureMap.put(feature.getId(), feature);
+				}
+
+				writer = new CsvWriter<Entity>(response.getWriter(), dataSetNames);
+
+				SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId,
+						new QueryImpl().pageSize(1000000), null);
+				SearchResult featureSearchResult = searchService.search(searchFeatures);
+				for (Hit hit : featureSearchResult.getSearchHits())
+				{
+					Entity entity = new MapEntity();
+					Map<String, Object> map = hit.getColumnValueMap();
+					String featureName = map.get(FEATURE_NAME).toString();
+					Integer featureId = Integer.parseInt(map.get(FEATURE_ID).toString());
+					entity.set(dataSetNames.get(0), featureName);
+					int i = 1;
+					for (DataSet dataSet : storeMappingDataSet)
+					{
+						Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
+						if (!mappedDataSetId.equals(selectedDataSetId))
+						{
+							StringBuilder value = new StringBuilder();
+							Map<Integer, MappingClass> storeMappings = dataSetMappings.get(mappedDataSetId);
+							if (storeMappings.containsKey(featureId))
+							{
+								List<Integer> candidateIds = new ArrayList<Integer>();
+								MappingClass mappingClass = storeMappings.get(featureId);
+								if (mappingClass.isConfirmation()) candidateIds = mappingClass.getFinalizedMapping();
+								else candidateIds = mappingClass.getCandidateMappings();
+								for (Integer id : candidateIds)
+								{
+									if (featureMap.containsKey(id))
+									{
+										if (value.length() > 0) value.append(',').append('\r');
+										value.append(featureMap.get(id).getName()).append(':')
+												.append(featureMap.get(id).getDescription());
+									}
+								}
+							}
+							entity.set(dataSetNames.get(i++), value.toString());
+						}
+					}
+					writer.add(entity);
+				}
 			}
 		}
 		finally
@@ -259,7 +264,6 @@ public class MappingManagerController extends MolgenisPluginController
 	static class MappingClass
 	{
 		private Integer featureId = null;
-		private boolean confirmation = false;
 		private List<Integer> finalizedMapping = null;
 		private List<Integer> candidateMappings = null;
 
@@ -268,7 +272,6 @@ public class MappingManagerController extends MolgenisPluginController
 			if (this.featureId == null) this.featureId = featureId;
 			if (this.finalizedMapping == null) this.finalizedMapping = new ArrayList<Integer>();
 			if (this.candidateMappings == null) this.candidateMappings = new ArrayList<Integer>();
-			this.confirmation = confirmation;
 			this.candidateMappings.add(singleMappedFeatureId);
 			if (confirmation) finalizedMapping.add(singleMappedFeatureId);
 		}
@@ -280,7 +283,7 @@ public class MappingManagerController extends MolgenisPluginController
 
 		public boolean isConfirmation()
 		{
-			return confirmation;
+			return finalizedMapping.size() > 0;
 		}
 
 		public List<Integer> getFinalizedMapping()
