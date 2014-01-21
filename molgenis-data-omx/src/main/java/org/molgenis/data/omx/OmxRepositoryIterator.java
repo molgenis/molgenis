@@ -79,11 +79,12 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		MapEntity entity = new MapEntity();
 		Map<String, Object> values = hit.getColumnValueMap();
 
-		for (String attr : values.keySet())
+		for (Map.Entry<String, Object> entry : values.entrySet())
 		{
+			String attr = entry.getKey();
 			if (attributeNames.contains(attr))
 			{
-				entity.set(attr.toLowerCase(), values.get(attr));
+				entity.set(attr.toLowerCase(), entry.getValue());
 			}
 		}
 
