@@ -115,7 +115,7 @@
 		</div>
 		
 		<#--Panel 2: Input gene panels or genomic locations-->
-		<h3>Filter by: Genomic locations / Gene panels / Clinical Databases</h3>
+		<h3>Filter by: Genome</h3>
 		<div>
 			<div id="region-selection-tabs">
 				<ul>
@@ -238,7 +238,7 @@
 		</div>
 		
 		<#--Panel 3: Phenotype selection-->
-		<h3>Filter by: Disease / Phenotype / Symptoms</h3>
+		<h3>Filter by: Phenome</h3>
 		<div>
 			<form class="form-horizontal" role="form" action="${context_url}/upload-phenotype-filter" method="post">
 				<h6>Select a phenotype database</h6>
@@ -267,7 +267,7 @@
 		</div>
 		
 		<#--Panel 4: Annotation tool / database selection-->
-		<h3>Select variant annotation columns</h3>
+		<h3>Add annotations</h3>
 		<div>
 			<div class="checkbox">
 				<label>
