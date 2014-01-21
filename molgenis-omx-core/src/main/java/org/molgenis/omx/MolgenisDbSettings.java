@@ -10,6 +10,7 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);

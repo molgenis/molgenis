@@ -55,6 +55,7 @@ public class StudyDefinitionImpl implements StudyDefinition
 		return name;
 	}
 
+	@Override
 	public void setName(String name)
 	{
 		this.name = name;
@@ -85,12 +86,12 @@ public class StudyDefinitionImpl implements StudyDefinition
 	@Override
 	public Date getDateCreated()
 	{
-		return dateCreated;
+		return dateCreated != null ? new Date(dateCreated.getTime()) : null;
 	}
 
 	public void setDateCreated(Date dateCreated)
 	{
-		this.dateCreated = dateCreated;
+		this.dateCreated = dateCreated != null ? new Date(dateCreated.getTime()) : null;
 	}
 
 	@Override
@@ -143,6 +144,7 @@ public class StudyDefinitionImpl implements StudyDefinition
 		return items;
 	}
 
+	@Override
 	public void setItems(List<CatalogItem> items)
 	{
 		this.items = items;

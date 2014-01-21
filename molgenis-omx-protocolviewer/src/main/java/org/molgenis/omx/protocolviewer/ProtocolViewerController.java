@@ -99,9 +99,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 			{
 				selectedFeatureUris = Lists.transform(studyDefinition.getItems(), new Function<CatalogItem, String>()
 				{
-					@Nullable
 					@Override
-					public String apply(@Nullable CatalogItem catalogItem)
+					public String apply(CatalogItem catalogItem)
 					{
 						return "/api/v1/observablefeature/" + catalogItem.getId();
 					}

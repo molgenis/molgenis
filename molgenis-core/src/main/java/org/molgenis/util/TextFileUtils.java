@@ -11,15 +11,14 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SR_NOT_CHECKED", justification = "Checking the actual number of skipped bytes on line 36 is not required")
 public class TextFileUtils
 {
 
 	/**
-	 * Count number of lines in the file. Add 1 extra because this only counts
-	 * newlines, therefore 1 newline = 2 lines in the file. Consider using
-	 * fileEndsWithNewlineChar() in combination with this function. See:
-	 * http://stackoverflow
-	 * .com/questions/453018/number-of-lines-in-a-file-in-java
+	 * Count number of lines in the file. Add 1 extra because this only counts newlines, therefore 1 newline = 2 lines
+	 * in the file. Consider using fileEndsWithNewlineChar() in combination with this function. See:
+	 * http://stackoverflow .com/questions/453018/number-of-lines-in-a-file-in-java
 	 * 
 	 * @param inFile
 	 * 
@@ -42,8 +41,7 @@ public class TextFileUtils
 	}
 
 	/**
-	 * Find out if the source file ends with a newline character. Useful in
-	 * combination with getNumberOfLines().
+	 * Find out if the source file ends with a newline character. Useful in combination with getNumberOfLines().
 	 * 
 	 * @param inFile
 	 * 
@@ -73,13 +71,10 @@ public class TextFileUtils
 	}
 
 	/**
-	 * Get the amount of newline characters at the end of a file. Can be of
-	 * great help when you want to judge the amount of elements in a file based
-	 * on the number of lines, when the file might contain (many) empty trailing
-	 * newlines. The amount of \r and \n terminators are counted. The
-	 * combination \r\n is reduced to \n before counting. You will probably want
-	 * to use this in combination with the more lightweight check of
-	 * fileEndsWithNewlineChar().
+	 * Get the amount of newline characters at the end of a file. Can be of great help when you want to judge the amount
+	 * of elements in a file based on the number of lines, when the file might contain (many) empty trailing newlines.
+	 * The amount of \r and \n terminators are counted. The combination \r\n is reduced to \n before counting. You will
+	 * probably want to use this in combination with the more lightweight check of fileEndsWithNewlineChar().
 	 * 
 	 * @param inFile
 	 * 
