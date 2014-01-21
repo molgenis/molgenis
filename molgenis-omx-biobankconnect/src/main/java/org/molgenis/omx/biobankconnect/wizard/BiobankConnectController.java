@@ -2,7 +2,6 @@ package org.molgenis.omx.biobankconnect.wizard;
 
 import static org.molgenis.omx.biobankconnect.wizard.BiobankConnectController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +58,6 @@ public class BiobankConnectController extends AbstractWizardController
 
 	private BiobankConnectWizard wizard;
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
-	private static final String VIEW_NAME = "view-wizard";
 
 	@Autowired
 	private DataService dataService;
@@ -99,8 +97,7 @@ public class BiobankConnectController extends AbstractWizardController
 	}
 
 	@Override
-	@RequestMapping(value = "/**", method = GET)
-	public String init(HttpServletRequest request)
+	public void onInit(HttpServletRequest request)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 
@@ -112,8 +109,6 @@ public class BiobankConnectController extends AbstractWizardController
 		wizard.setDataSets(dataSets);
 		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
 				request.getRequestedSessionId());
-
-		return VIEW_NAME;
 	}
 
 	@Override
@@ -139,13 +134,15 @@ public class BiobankConnectController extends AbstractWizardController
 	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String importFeatures(@RequestParam
 	String dataSetName, @RequestParam
-	Part file, HttpServletRequest request, Model model) throws IOException
+	Part file, @ModelAttribute("wizard")
+	BiobankConnectWizard biobankConnectWizard, HttpServletRequest request, Model model) throws IOException
 	{
 		File uploadFile = FileUploadUtils.saveToTempFolder(file);
 		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
 
-		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) request.getSession().getAttribute(
-				"biobankconnect");
+		// BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard)
+		// request.getSession().getAttribute(
+		// "biobankconnect");
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 		for (DataSet dataSet : allDataSets)
