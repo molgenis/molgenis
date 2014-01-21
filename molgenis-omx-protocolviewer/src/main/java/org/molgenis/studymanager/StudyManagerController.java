@@ -245,13 +245,16 @@ public class StudyManagerController extends MolgenisPluginController
 			Writable<Entity> sheetWriter = excelWriter.createWritable("Variables", header);
 			try
 			{
-				for (CatalogItem catalogItem : catalogItems)
+				if (catalogItems != null)
 				{
-					Entity entity = new MapEntity();
-					entity.set(header.get(0), catalogItem.getId());
-					entity.set(header.get(1), catalogItem.getName());
-					entity.set(header.get(2), catalogItem.getDescription());
-					sheetWriter.add(entity);
+					for (CatalogItem catalogItem : catalogItems)
+					{
+						Entity entity = new MapEntity();
+						entity.set(header.get(0), catalogItem.getId());
+						entity.set(header.get(1), catalogItem.getName());
+						entity.set(header.get(2), catalogItem.getDescription());
+						sheetWriter.add(entity);
+					}
 				}
 			}
 			finally
