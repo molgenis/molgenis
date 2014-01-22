@@ -61,12 +61,24 @@ public class MolgenisDbSettings implements MolgenisSettings
 	@Override
 	public void setProperty(String key, String value)
 	{
-		RuntimeProperty property = new RuntimeProperty();
-		property.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + key);
-		property.setName(key);
-		property.setValue(value);
+		String identifier = RuntimeProperty.class.getSimpleName() + '_' + key;
 
-		dataService.add(RuntimeProperty.ENTITY_NAME, property);
+		RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME,
+				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, identifier));
+
+		if (property == null)
+		{
+			property = new RuntimeProperty();
+			property.setIdentifier(identifier);
+			property.setName(key);
+			property.setValue(value);
+			dataService.add(RuntimeProperty.ENTITY_NAME, property);
+		}
+		else
+		{
+			property.setValue(value);
+			dataService.update(RuntimeProperty.ENTITY_NAME, property);
+		}
 	}
 
 	@Override

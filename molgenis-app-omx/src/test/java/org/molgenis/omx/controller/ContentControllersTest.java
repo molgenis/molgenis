@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -219,6 +221,18 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		public StaticContentService staticContentService()
 		{
 			return mock(StaticContentService.class);
+		}
+
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
+		}
+
+		@Bean
+		public MolgenisSettings molgenisSettings()
+		{
+			return mock(MolgenisSettings.class);
 		}
 	}
 }

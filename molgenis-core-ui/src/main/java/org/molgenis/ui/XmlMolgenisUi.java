@@ -10,7 +10,7 @@ public class XmlMolgenisUi implements MolgenisUi
 {
 	static final String DEFAULT_APP_HREF_LOGO = "/img/logo_molgenis_small.png";
 	static final String KEY_APP_NAME = "app.name";
-	static final String KEY_APP_HREF_LOGO = "app.href.logo";
+	public static final String KEY_APP_HREF_LOGO = "app.href.logo";
 	static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	private final Molgenis molgenisUi;
