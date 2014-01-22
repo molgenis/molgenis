@@ -11,7 +11,7 @@
 				<label class="control-label" for="dataset-select">Choose a dataset:</label>
 				<select data-placeholder="Choose a Dataset to delete" id="dataset-select" name="dataset">
 				</select><br>
-				<input type="checkbox" name="deletemetadata" checked> Delete the metadata of this dataset.
+				<input type="checkbox" name="deletemetadata"> Delete the metadata of this dataset.
 			</form>
 			</div>
 			<a id="delete-button" class="btn">Delete</a>
