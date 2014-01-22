@@ -1,10 +1,8 @@
 package org.molgenis.charts.highcharts.basic;
 
 import java.util.Arrays;
-import java.util.Date;
 
 import org.apache.log4j.Logger;
-import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 import org.molgenis.charts.AbstractChart;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
