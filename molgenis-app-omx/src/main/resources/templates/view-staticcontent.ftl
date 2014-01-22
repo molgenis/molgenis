@@ -6,7 +6,15 @@
    <div class="control-group">
 		<div class="controls">
 			<div class="btn-group">
-			<a id="editBtn" href="${context_url}/edit" class="btn">Edit page</a>
+				<ul>
+					<li>
+						<form action="${context_url}/upload-logo" method="POST" enctype="multipart/form-data">
+							<input type="file" name="logo" />
+							<input type="submit" value="Upload logo" class="btn" />
+						</form>
+					</li>
+					<li><a id="editBtn" href="${context_url}/edit" class="btn">Edit page</a></li>
+				<ul>
 			</div>
 		</div>
 	</div>	
