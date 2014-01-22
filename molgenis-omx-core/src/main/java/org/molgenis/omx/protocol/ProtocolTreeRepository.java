@@ -117,7 +117,7 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
 

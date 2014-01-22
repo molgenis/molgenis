@@ -559,5 +559,6 @@
 		<module>molgenis-data-jpa</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
+		<module>molgenis-data-repo</module>
 	</modules>
 </project>
