@@ -172,7 +172,7 @@ public class OntologyLoader
 		}
 		catch (Exception e)
 		{
-			new RuntimeException("Failed to get label for OWLClass " + cls);
+			throw new RuntimeException("Failed to get label for OWLClass " + cls);
 		}
 		return labelValue;
 	}

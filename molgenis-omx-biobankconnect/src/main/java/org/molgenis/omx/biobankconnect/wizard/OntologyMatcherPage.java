@@ -47,7 +47,7 @@ public class OntologyMatcherPage extends AbstractWizardPage
 		}
 		catch (Exception e)
 		{
-			new RuntimeException("Error occurs when matching dataset " + selectedDataSetId + " with datasets "
+			throw new RuntimeException("Error occurs when matching dataset " + selectedDataSetId + " with datasets "
 					+ selectedTargetDataSetIds);
 		}
 		return null;
