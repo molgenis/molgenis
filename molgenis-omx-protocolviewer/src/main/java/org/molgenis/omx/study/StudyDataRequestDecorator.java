@@ -45,16 +45,16 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public void add(E entity)
+	public Integer add(Entity entity)
 	{
 		checkEntitiesPermission(entity);
-		super.add(entity);
+		return super.add(entity);
 	}
 
 	@Override
-	public void add(Iterable<E> entities)
+	public void add(Iterable<? extends Entity> entities)
 	{
-		for (StudyDataRequest entity : entities)
+		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
@@ -62,16 +62,16 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public void update(E entity)
+	public void update(Entity entity)
 	{
 		checkEntitiesPermission(entity);
 		super.update(entity);
 	}
 
 	@Override
-	public void update(Iterable<E> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
-		for (StudyDataRequest entity : entities)
+		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
@@ -79,9 +79,9 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public void update(List<E> entities, DatabaseAction dbAction, String... keyName)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
-		for (StudyDataRequest entity : entities)
+		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
@@ -96,7 +96,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public void delete(E entity)
+	public void delete(Entity entity)
 	{
 		checkEntitiesPermission(entity);
 		super.delete(entity);
@@ -110,9 +110,9 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public void delete(Iterable<E> entities)
+	public void delete(Iterable<? extends Entity> entities)
 	{
-		for (StudyDataRequest request : entities)
+		for (Entity request : entities)
 		{
 			checkEntitiesPermission(request);
 		}
@@ -183,7 +183,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 		q.eq(StudyDataRequest.MOLGENISUSER, user);
 	}
 
-	private void checkEntitiesPermission(StudyDataRequest request)
+	private void checkEntitiesPermission(Entity request)
 	{
 		MolgenisUser user = getCurrentUser();
 		if (!user.getSuperuser())
@@ -195,10 +195,12 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 		}
 	}
 
-	private boolean hasEntityPermission(StudyDataRequest request)
+	private boolean hasEntityPermission(Entity request)
 	{
 		MolgenisUser user = getCurrentUser();
-		if (!user.getId().equals(request.getMolgenisUser().getId()))
+		StudyDataRequest sdr = (StudyDataRequest) request;
+
+		if (!user.getId().equals(sdr.getMolgenisUser().getId()))
 		{
 			return false;
 		}

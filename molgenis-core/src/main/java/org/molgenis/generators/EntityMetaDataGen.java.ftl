@@ -47,9 +47,11 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setLabelAttribute(true);
 			</#if>
 		</#list>	
+		<#if f.hidden || f.system>
+		${name(f)}.setVisible(false);
+		</#if>
 		
-		addAttributeMetaData(${name(f)});
-			
+		addAttributeMetaData(${name(f)});	
 </#list>
 		
 	}

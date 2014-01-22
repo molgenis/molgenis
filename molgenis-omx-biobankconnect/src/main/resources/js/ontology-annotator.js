@@ -95,7 +95,7 @@
 		}
 		if(sortRule !== null)
 		{
-			q.sort.orders = [sortRule];
+			q.sort = sortRule;
 		}
 		
 		searchApi.search(pagination.createSearchRequest(documentType, q), function(searchResponse) {
@@ -166,7 +166,7 @@
 			var headerRow = $('<tr />');
 			var firstColumn = $('<th>Name</th>').css('width', '15%').appendTo(headerRow);
 			if (sortRule) {
-				if (sortRule.operator == 'SORTASC') {
+				if (sortRule.orders[0].direction == 'ASC') {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 				} else {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -179,15 +179,19 @@
 			
 			// Sort click
 			$(firstColumn).find('.ui-icon').click(function() {
-				if (sortRule && sortRule.operator == 'SORTASC') {
+				if (sortRule && sortRule.orders[0].direction == 'ASC') {
 					sortRule = {
-						value : 'name',
-						operator : 'SORTDESC'
+							orders: [{
+								property: 'name',
+								direction: 'DESC'
+							}]
 					};
 				} else {
 					sortRule = {
-						value : 'name',
-						operator : 'SORTASC'
+							orders: [{
+								property: 'name',
+								direction: 'ASC'
+							}]
 					};
 				}
 				ns.OntologyAnnotator.prototype.createMatrixForDataItems();
@@ -319,17 +323,17 @@
 		}
 	};
 
-	ns.OntologyAnnotator.prototype.confirmation = function(title){
+	ns.OntologyAnnotator.prototype.confirmation = function(title, message, action){
 		standardModal.createModalCallback(title, function(modal){
 			var confirmButton = $('<button type="btn" class="btn btn-primary">Confirm</button>').click(function(){
 				modal.modal('hide');
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.getContextUrl() + '/annotate/remove',
+					'action' : molgenis.getContextUrl() + action,
 					'method' : 'POST'
 				}).submit();
 			});
-			modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove all annotations?</strong></p>');
+			modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>' + message + '</strong></p>');
 			modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
 			modal.css({
 				'margin-top' : 200

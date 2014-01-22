@@ -1,6 +1,5 @@
 package org.molgenis.dataexplorer.controller;
 
-import static org.molgenis.dataexplorer.controller.DataExplorerController.MUTATION_ID;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -8,12 +7,12 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -28,7 +27,6 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -44,6 +42,8 @@ import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,8 +80,8 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
 	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
-	
-	//Including excluding the charts module
+
+	// Including excluding the charts module
 	public static final boolean INCLUDE_CHARTS_MODULE = true;
 	public static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
 	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
@@ -95,12 +95,11 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
 	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
-    public static final String MUTATION_START_POSITION = "start_nucleotide";
-    public static final String MUTATION_ID = "mutation_id";
-    public static final String MUTATION_CHROMOSOME = "chromosome";
+	public static final String MUTATION_START_POSITION = "start_nucleotide";
+	public static final String MUTATION_ID = "mutation_id";
+	public static final String MUTATION_CHROMOSOME = "chromosome";
 
-
-    @Autowired
+	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -125,12 +124,12 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
+			throws Exception
 	{
-        Map<String,String> genomeBrowserSets = new HashMap<String, String>();
+		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
 
-        // set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
+		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
 		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
 				|| molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE))
@@ -138,7 +137,8 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = Lists.<DataSet> newArrayList(dataService.<DataSet> findAll(DataSet.ENTITY_NAME));
+		List<DataSet> dataSets = Lists.<DataSet> newArrayList(dataService.<DataSet> findAll(DataSet.ENTITY_NAME,
+				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME))));
 
 		model.addAttribute("dataSets", dataSets);
 
@@ -166,11 +166,13 @@ public class DataExplorerController extends MolgenisPluginController
 				selectedDataSet = dataSets.iterator().next();
 			}
 			model.addAttribute("selectedDataSet", selectedDataSet);
-            for (DataSet dataSet:dataSets) {
-                if(isGenomeBrowserDataSet(dataSet)){
-                    genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
-                }
-            }
+			for (DataSet dataSet : dataSets)
+			{
+				if (isGenomeBrowserDataSet(dataSet))
+				{
+					genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
+				}
+			}
 			model.addAttribute("genomeBrowserSets", genomeBrowserSets);
 		}
 
@@ -179,8 +181,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
-		
-		//including/excluding charts
+
+		// including/excluding charts
 		Boolean appIncludeCharts = molgenisSettings.getBooleanProperty(KEY_APP_INCLUDE_CHARTS, INCLUDE_CHARTS_MODULE);
 		model.addAttribute(MODEL_APP_INCLUDE_CHARTS, appIncludeCharts);
 
@@ -208,29 +210,33 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean hasStartPosition = false;
 		boolean hasChromosome = false;
 		boolean hasId = false;
-        boolean hasGenomeBrowserprotocol = false;
+		boolean hasGenomeBrowserprotocol = false;
 		boolean hasGenomeBrowserSubprotocol = false;
 
 		for (Protocol protocol : protocols)
 		{
-            List<ObservableFeature> features = protocol.getFeatures();
-			for (ObservableFeature feature : features) {
-                if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
-                else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
-                else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
-            }
-            if(hasStartPosition && hasChromosome && hasId){
-                hasGenomeBrowserprotocol = true;
-            }else{
-			    hasGenomeBrowserSubprotocol = containsGenomeBrowserProtocol(protocol.getSubprotocols());
-		    }
-        }
+			List<ObservableFeature> features = protocol.getFeatures();
+			for (ObservableFeature feature : features)
+			{
+				if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
+				else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
+				else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
+			}
+			if (hasStartPosition && hasChromosome && hasId)
+			{
+				hasGenomeBrowserprotocol = true;
+			}
+			else
+			{
+				hasGenomeBrowserSubprotocol = containsGenomeBrowserProtocol(protocol.getSubprotocols());
+			}
+		}
 		return hasGenomeBrowserprotocol || hasGenomeBrowserSubprotocol;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException, DatabaseException
+	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
+			throws IOException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -291,8 +297,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody
-	AggregateRequest request)
+	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
 	{
 
 		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
@@ -351,10 +356,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public String filterwizard(@RequestBody
-	@Valid
-	@NotNull
-	FilterWizardRequest request, Model model)
+	public String filterwizard(@RequestBody @Valid @NotNull FilterWizardRequest request, Model model)
 	{
 		String dataSetIdentifier = request.getDataSetIdentifier();
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,

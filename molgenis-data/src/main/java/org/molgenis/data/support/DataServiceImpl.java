@@ -165,45 +165,52 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> void add(String entityName, E entity)
+	public Integer add(String entityName, Entity entity)
 	{
-		Writable<E> writable = getWritable(entityName);
-		writable.add(entity);
+		Writable writable = getWritable(entityName);
+		return writable.add(entity);
 	}
 
 	@Override
-	public <E extends Entity> void add(String entityName, Iterable<E> entities)
+	public void add(String entityName, Iterable<? extends Entity> entities)
 	{
-		Writable<E> writable = getWritable(entityName);
+		Writable writable = getWritable(entityName);
 		writable.add(entities);
 	}
 
 	@Override
-	public <E extends Entity> void update(String entityName, E entity)
+	public void update(String entityName, Entity entity)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
+		Updateable updateable = getUpdateable(entityName);
 		updateable.update(entity);
 	}
 
 	@Override
-	public <E extends Entity> void update(String entityName, Iterable<E> entities)
+	public void update(String entityName, Iterable<? extends Entity> entities)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
+		Updateable updateable = getUpdateable(entityName);
 		updateable.update(entities);
 	}
 
 	@Override
-	public <E extends Entity> void delete(String entityName, E entity)
+	public void delete(String entityName, Entity entity)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
+		Updateable updateable = getUpdateable(entityName);
 		updateable.delete(entity);
 	}
 
 	@Override
-	public <E extends Entity> void delete(String entityName, Iterable<E> entities)
+	public void delete(String entityName, Iterable<? extends Entity> entities)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
+		Updateable updateable = getUpdateable(entityName);
 		updateable.delete(entities);
+	}
+
+	@Override
+	public void delete(String entityName, int id)
+	{
+		Updateable updateable = getUpdateable(entityName);
+		updateable.deleteById(id);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -218,8 +225,7 @@ public class DataServiceImpl implements DataService
 		return (Queryable<E>) repo;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E extends Entity> Writable<E> getWritable(String entityName)
+	private Writable getWritable(String entityName)
 	{
 		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Writable))
@@ -227,11 +233,10 @@ public class DataServiceImpl implements DataService
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't writable");
 		}
 
-		return (Writable<E>) repo;
+		return (Writable) repo;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E extends Entity> Updateable<E> getUpdateable(String entityName)
+	private Updateable getUpdateable(String entityName)
 	{
 		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Updateable))
@@ -239,7 +244,7 @@ public class DataServiceImpl implements DataService
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't updateable");
 		}
 
-		return (Updateable<E>) repo;
+		return (Updateable) repo;
 	}
 
 	@Override

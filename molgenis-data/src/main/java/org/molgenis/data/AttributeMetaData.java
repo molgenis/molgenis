@@ -38,6 +38,11 @@ public interface AttributeMetaData
 	boolean isReadonly();
 
 	/**
+	 * Should this attribute be visible to the user?
+	 */
+	boolean isVisible();
+
+	/**
 	 * Default value
 	 */
 	Object getDefaultValue();

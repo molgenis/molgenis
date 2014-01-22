@@ -17,7 +17,7 @@ import org.molgenis.util.ListEscapeUtils;
 /**
  * Writable implementation for an excel sheet
  */
-public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
+public class ExcelSheetWriter<E extends Entity> extends AbstractWritable
 {
 	private final Sheet sheet;
 	private int row;
@@ -44,7 +44,7 @@ public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
 	 * Add a new row to the sheet
 	 */
 	@Override
-	public void add(Entity entity)
+	public Integer add(Entity entity)
 	{
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
@@ -57,6 +57,8 @@ public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
 			Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
 			cell.setCellValue(toValue(entity.get(attributeName)));
 		}
+
+		return entity.getIdValue();
 	}
 
 	/**
