@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
@@ -92,7 +93,7 @@ public class DataConverter
 		if (source == null) return null;
 		else if (source instanceof Timestamp) return (Timestamp) source;
 		else if (source instanceof Date) return new Timestamp(((Date) source).getTime());
-		return new Timestamp(convert(source, Date.class).getTime());
+		return new Timestamp(convert(source, java.util.Date.class).getTime());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -104,18 +105,31 @@ public class DataConverter
 		else return ListEscapeUtils.toList(source.toString());
 	}
 
-	// TODO: Improve code of getIntList (maybe merge with getList above?)
 	public static List<Integer> toIntList(Object source)
 	{
 		if (source == null) return null;
+		else if (source instanceof String)
+		{
+			List<String> stringList = ListEscapeUtils.toList((String) source);
+			List<Integer> intList = new ArrayList<Integer>();
+			for (String s : stringList)
+			{
+				if (!StringUtils.isNumeric(s))
+				{
+					throw new IllegalArgumentException(s + " is not an integer");
+				}
+				intList.add(Integer.parseInt(s));
+			}
+
+			return intList;
+		}
 		else if (source instanceof List<?>)
 		{
 			// it seems we need explicit cast to Int sometimes
 			ArrayList<Integer> intList = new ArrayList<Integer>();
 			for (Object o : (List<?>) source)
 			{
-				if (o instanceof Integer) intList.add((Integer) o);
-				else if (o instanceof String) intList.add(Integer.parseInt((String) o));
+				intList.add(toInt(o));
 			}
 			return intList;
 		}

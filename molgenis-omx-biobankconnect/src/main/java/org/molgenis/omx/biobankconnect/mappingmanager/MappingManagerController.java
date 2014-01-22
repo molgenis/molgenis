@@ -153,7 +153,7 @@ public class MappingManagerController extends MolgenisPluginController
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
 
-		Writable<Entity> writer = null;
+		Writable writer = null;
 		try
 		{
 			Set<Integer> featureIds = new HashSet<Integer>();

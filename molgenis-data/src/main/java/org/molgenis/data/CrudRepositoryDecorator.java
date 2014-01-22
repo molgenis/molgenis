@@ -26,9 +26,9 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public void add(E entity)
+	public Integer add(Entity entity)
 	{
-		decoratedRepository.add(entity);
+		return decoratedRepository.add(entity);
 	}
 
 	@Override
@@ -38,19 +38,19 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public void update(E entity)
+	public void update(Entity entity)
 	{
 		decoratedRepository.update(entity);
 	}
 
 	@Override
-	public void add(Iterable<E> entities)
+	public void add(Iterable<? extends Entity> entities)
 	{
 		decoratedRepository.add(entities);
 	}
 
 	@Override
-	public void update(Iterable<E> records)
+	public void update(Iterable<? extends Entity> records)
 	{
 		decoratedRepository.update(records);
 	}
@@ -80,7 +80,7 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public void delete(E entity)
+	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
 	}
@@ -98,7 +98,7 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public void delete(Iterable<E> entities)
+	public void delete(Iterable<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -158,7 +158,7 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public void update(List<E> entities, DatabaseAction dbAction, String... keyName)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 		decoratedRepository.update(entities, dbAction, keyName);
 	}

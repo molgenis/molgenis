@@ -8,5 +8,5 @@ import java.util.List;
  */
 public interface WritableFactory<E extends Entity> extends Closeable
 {
-	Writable<E> createWritable(String entityName, List<String> attributeNames);
+	Writable createWritable(String entityName, List<String> attributeNames);
 }

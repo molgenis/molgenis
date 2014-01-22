@@ -145,7 +145,7 @@ public class BbmriToOmxConverter
 	{
 		Map<String, String> instituteMap = new HashMap<String, String>();
 
-		Writable<Entity> writable = writableFactory.createWritable(Institute.class.getSimpleName(), Arrays.asList(
+		Writable writable = writableFactory.createWritable(Institute.class.getSimpleName(), Arrays.asList(
 				Institute.IDENTIFIER, Institute.NAME, Institute.ADDRESS, Institute.PHONE, Institute.EMAIL,
 				Institute.FAX, Institute.TOLLFREEPHONE, Institute.CITY, Institute.COUNTRY));
 
@@ -193,11 +193,10 @@ public class BbmriToOmxConverter
 	{
 		Map<String, String> personMap = new HashMap<String, String>();
 
-		Writable<Entity> writable = outputWriter.createWritable(Person.class.getSimpleName(), Arrays.asList(
-				Person.IDENTIFIER, Person.NAME, Person.ADDRESS, Person.PHONE, Person.EMAIL, Person.FAX,
-				Person.TOLLFREEPHONE, Person.CITY, Person.COUNTRY, Person.FIRSTNAME, Person.MIDINITIALS,
-				Person.LASTNAME, Person.TITLE, Person.AFFILIATION + "_" + Institute.NAME, Person.DEPARTMENT,
-				Person.ROLES + "_" + PersonRole.IDENTIFIER));
+		Writable writable = outputWriter.createWritable(Person.class.getSimpleName(), Arrays.asList(Person.IDENTIFIER,
+				Person.NAME, Person.ADDRESS, Person.PHONE, Person.EMAIL, Person.FAX, Person.TOLLFREEPHONE, Person.CITY,
+				Person.COUNTRY, Person.FIRSTNAME, Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION
+						+ "_" + Institute.NAME, Person.DEPARTMENT, Person.ROLES + "_" + PersonRole.IDENTIFIER));
 
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("biobankcoordinator.xls"));
 		try
@@ -252,7 +251,7 @@ public class BbmriToOmxConverter
 	{
 		Map<String, String> personRoleMap = new HashMap<String, String>();
 
-		Writable<Entity> writable = writableFactory.createWritable(PersonRole.class.getSimpleName(),
+		Writable writable = writableFactory.createWritable(PersonRole.class.getSimpleName(),
 				Arrays.asList(PersonRole.IDENTIFIER, PersonRole.NAME));
 		try
 		{
@@ -296,7 +295,7 @@ public class BbmriToOmxConverter
 	{
 		Map<String, String> ontologyMap = new HashMap<String, String>();
 
-		Writable<Entity> writable = writableFactory.createWritable(OntologyTerm.class.getSimpleName(),
+		Writable writable = writableFactory.createWritable(OntologyTerm.class.getSimpleName(),
 				Arrays.asList(OntologyTerm.IDENTIFIER, OntologyTerm.NAME));
 		try
 		{
@@ -439,7 +438,7 @@ public class BbmriToOmxConverter
 			final Map<String, String> institutionMap) throws IOException
 	{
 
-		Writable<Entity> writable = writableFactory.createWritable(DataSet.class.getSimpleName().toLowerCase() + '_'
+		Writable writable = writableFactory.createWritable(DataSet.class.getSimpleName().toLowerCase() + '_'
 				+ dataSetIdentifier,
 				Lists.transform(Arrays.asList(FeatureDescription.values()), new Function<FeatureDescription, String>()
 				{
@@ -543,7 +542,7 @@ public class BbmriToOmxConverter
 
 	private void writeFeatures(WritableFactory<Entity> writableFactory) throws IOException
 	{
-		Writable<Entity> writable = writableFactory.createWritable(ObservableFeature.class.getSimpleName(),
+		Writable writable = writableFactory.createWritable(ObservableFeature.class.getSimpleName(),
 				Arrays.asList(ObservableFeature.IDENTIFIER, ObservableFeature.NAME, ObservableFeature.DATATYPE));
 		try
 		{
@@ -564,7 +563,7 @@ public class BbmriToOmxConverter
 
 	private void writeProtocol(WritableFactory<Entity> writableFactory, String identifier) throws IOException
 	{
-		Writable<Entity> writable = writableFactory.createWritable(
+		Writable writable = writableFactory.createWritable(
 				Protocol.class.getSimpleName(),
 				Arrays.asList(Protocol.IDENTIFIER, Protocol.NAME, Protocol.FEATURES + "_"
 						+ ObservableFeature.IDENTIFIER));
@@ -596,7 +595,7 @@ public class BbmriToOmxConverter
 	private void writeDataSet(WritableFactory<Entity> writableFactory, String identifier, String protocolIdentifier)
 			throws IOException
 	{
-		Writable<Entity> writable = writableFactory.createWritable(Dataset.class.getSimpleName(),
+		Writable writable = writableFactory.createWritable(Dataset.class.getSimpleName(),
 				Arrays.asList(DataSet.IDENTIFIER, DataSet.NAME, DataSet.PROTOCOLUSED + "_" + Protocol.IDENTIFIER));
 		try
 		{
