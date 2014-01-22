@@ -36,7 +36,7 @@ public class SampleConverter
 	private final Set<String> listOfDoubleSamples = new HashSet<String>();
 	private String OUTPUTDIR = null;
 	private String PROJECT = null;
-	private String IDENTIFIER = "id_sample";
+	private final String IDENTIFIER = "id_sample";
 	private List<String> featureColNames = null;
 	MakeEntityNameAndIdentifier mkObsProtocol = null;
 	private final HashMap<String, HashSet<String>> hashMapCategories = new HashMap<String, HashSet<String>>();
@@ -223,7 +223,7 @@ public class SampleConverter
 
 	public void mkMetadataFileProtocol(WritableFactory<Entity> writableFactoryMD, String sheetName) throws IOException
 	{
-		Writable<Entity> esw = writableFactoryMD.createWritable("protocol",
+		Writable esw = writableFactoryMD.createWritable("protocol",
 				Arrays.asList("identifier", "name", "features_identifier"));
 
 		for (MakeEntityNameAndIdentifier i : mkObsProtocollist)
@@ -239,8 +239,7 @@ public class SampleConverter
 	public void mkMetadataFileObservableFeature(WritableFactory<Entity> writableFactoryMD, String sheetName)
 			throws IOException
 	{
-		Writable<Entity> esw = writableFactoryMD.createWritable("observableFeature",
-				Arrays.asList("identifier", "name"));
+		Writable esw = writableFactoryMD.createWritable("observableFeature", Arrays.asList("identifier", "name"));
 
 		for (MakeEntityNameAndIdentifier m : mkObsFeaturelist)
 		{
@@ -253,7 +252,7 @@ public class SampleConverter
 
 	public void mkMetadataFileDataSet(WritableFactory<Entity> writableFactoryMD, String sheetName) throws IOException
 	{
-		Writable<Entity> esw = writableFactoryMD.createWritable(sheetName,
+		Writable esw = writableFactoryMD.createWritable(sheetName,
 				Arrays.asList("identifier", "name", "protocolused_identifier"));
 
 		Entity kvt = new MapEntity();

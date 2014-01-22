@@ -40,22 +40,19 @@ import org.molgenis.generators.JpaRepositoryGen;
 import org.molgenis.generators.R.RApiGen;
 import org.molgenis.generators.R.REntityGen;
 import org.molgenis.generators.R.RMatrixGen;
+import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
-import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
 import org.molgenis.generators.doc.DotDocModuleDependencyGen;
 import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
-import org.molgenis.generators.server.EntityRestApiGen;
-import org.molgenis.generators.server.EntityServiceGen;
 import org.molgenis.generators.server.RdfApiGen;
-import org.molgenis.generators.server.SoapApiGen;
 import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
@@ -194,8 +191,6 @@ public class Molgenis
 		if (!options.output_src.endsWith("/")) options.output_src = options.output_src.endsWith("/") + "/";
 		options.output_hand = outputPath != null ? outputPath + options.output_hand : options.output_hand;
 		if (!options.output_hand.endsWith("/")) options.output_hand = options.output_hand + "/";
-		options.output_sql = outputPath != null ? outputPath + options.output_sql : options.output_sql;
-		if (!options.output_sql.endsWith("/")) options.output_sql = options.output_sql + "/";
 		options.output_web = outputPath != null ? outputPath + options.output_web : options.output_web;
 		if (!options.output_web.endsWith("/")) options.output_web = options.output_web + "/";
 		options.output_doc = outputPath != null ? outputPath + options.output_doc : options.output_doc;
@@ -239,7 +234,6 @@ public class Molgenis
 			generators.add(new DataTypeGen());
 			generators.add(new EntityMetaDataGen());
 			generators.add(new JpaRepositoryGen());
-			generators.add(new EntityServiceGen());
 			generators.add(new EntityImporterGen());
 
 			// Temp remove when omx is migrated to DataApi
@@ -272,8 +266,6 @@ public class Molgenis
 		{
 			generators.add(new EntitiesImporterGen());
 			generators.add(new EntitiesValidatorGen());
-			// generators.add(new CsvEntityExporterGen());
-			// generators.add(new ExcelEntityExporterGen());
 		}
 
 		// R
@@ -286,25 +278,6 @@ public class Molgenis
 		else
 		{
 			logger.info("Skipping R interface ....");
-		}
-
-		// SOAP
-		if (options.generate_soap)
-		{
-			generators.add(new SoapApiGen());
-		}
-		else
-		{
-			logger.info("Skipping SOAP API ....");
-		}
-
-		if (options.generate_rest)
-		{
-			generators.add(new EntityRestApiGen());
-		}
-		else
-		{
-			logger.info("Skipping SOAP API ....");
 		}
 
 		if (options.generate_rdf)

@@ -130,10 +130,10 @@ public class EvaluationController extends MolgenisPluginController
 				excelWriterRanks = new ExcelWriter<Entity>(response.getOutputStream());
 				excelWriterRanks.addCellProcessor(new LowerCaseProcessor(true, false));
 
-				Writable<Entity> sheetWriterRank = null;
-				Writable<Entity> sheetWriterRankStatistics = null;
-				Writable<Entity> sheetWriteBiobankRanks = null;
-				Writable<Entity> sheetWriteSpssInput = null;
+				Writable sheetWriterRank = null;
+				Writable sheetWriterRankStatistics = null;
+				Writable sheetWriteBiobankRanks = null;
+				Writable sheetWriteSpssInput = null;
 
 				reader = new ExcelEntitySourceFactory().create(uploadFile);
 				Repository<? extends Entity> inputSheet = reader.getRepositoryByEntityName("Sheet1");

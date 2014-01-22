@@ -3,13 +3,13 @@ package org.molgenis.data.support;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 
-public abstract class AbstractWritable<E extends Entity> implements Writable<E>
+public abstract class AbstractWritable implements Writable
 {
 
 	@Override
-	public void add(Iterable<E> entities)
+	public void add(Iterable<? extends Entity> entities)
 	{
-		for (E entity : entities)
+		for (Entity entity : entities)
 		{
 			add(entity);
 		}

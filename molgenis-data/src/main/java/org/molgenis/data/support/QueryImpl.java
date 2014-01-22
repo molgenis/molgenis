@@ -37,13 +37,11 @@ public class QueryImpl implements Query
 		this.sort = q.getSort();
 	}
 
-	@Deprecated
 	public QueryImpl(QueryRule queryRule)
 	{
 		this(Arrays.asList(queryRule));
 	}
 
-	@Deprecated
 	public QueryImpl(List<QueryRule> queryRules)
 	{
 		this.rules.add(new ArrayList<QueryRule>(queryRules));
