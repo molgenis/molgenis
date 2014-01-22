@@ -557,6 +557,7 @@
         <module>molgenis-data-omx</module>
 		<module>molgenis-data</module>
 		<module>molgenis-data-jpa</module>
+		<module>molgenis-data-rest</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
 	</modules>

@@ -79,33 +79,43 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * Adds an entity to it's repository
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Writable
+	 * 
+	 * @return the id of the entity
 	 */
-	<E extends Entity> void add(String entityName, E entity);
+	Integer add(String entityName, Entity entity);
 
-	<E extends Entity> void add(String entityName, Iterable<E> entities);
+	void add(String entityName, Iterable<? extends Entity> entities);
 
 	/**
 	 * Updates an entity
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
-	<E extends Entity> void update(String entityName, E entity);
+	void update(String entityName, Entity entity);
 
-	<E extends Entity> void update(String entityName, Iterable<E> entities);
+	void update(String entityName, Iterable<? extends Entity> entities);
 
 	/**
 	 * Deletes an entity
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
-	<E extends Entity> void delete(String entityName, E entity);
+	void delete(String entityName, Entity entity);
 
 	/**
 	 * Deletes entities
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
-	<E extends Entity> void delete(String entityName, Iterable<E> entity);
+	void delete(String entityName, Iterable<? extends Entity> entity);
+
+	/**
+	 * Deletes an entity by it's id
+	 * 
+	 * @param entityName
+	 * @param id
+	 */
+	void delete(String entityName, int id);
 
 	/**
 	 * Get a CrudRepository by entity name

@@ -63,8 +63,8 @@ public class SampleTabOmxConverter
 
 	private void addOntologyTermTab(WritableFactory<Entity> writableFactory) throws IOException
 	{
-		Writable<Entity> ontologyTermSheet = writableFactory.createWritable("ontologyTerm",
-				Arrays.asList("identifier", "name"));
+		Writable ontologyTermSheet = writableFactory
+				.createWritable("ontologyTerm", Arrays.asList("identifier", "name"));
 		try
 		{
 			for (Entry<String, String> entry : unitOntologyTermsForFeatures.entrySet())
@@ -87,7 +87,7 @@ public class SampleTabOmxConverter
 			throws IOException
 	{
 		List<String> headers = Arrays.asList("identifier", "name", "unit_Identifier");
-		Writable<Entity> observableFeatureSheet = writableFactory.createWritable("observableFeature", headers);
+		Writable observableFeatureSheet = writableFactory.createWritable("observableFeature", headers);
 		try
 		{
 			for (String eachFeature : listOfObservableFeatures)
@@ -110,7 +110,7 @@ public class SampleTabOmxConverter
 			throws IOException
 	{
 		List<String> headers = Arrays.asList("identifier", "name", "features_Identifier");
-		Writable<Entity> protocolSheet = writableFactory.createWritable("protocol", headers);
+		Writable protocolSheet = writableFactory.createWritable("protocol", headers);
 		try
 		{
 			Entity row = new MapEntity();
@@ -140,7 +140,7 @@ public class SampleTabOmxConverter
 		for (String originalHeader : listOfObservableFeatures)
 			headerMapper.put(originalHeader, createIdentifier(pattenMatchExtractFeature(originalHeader)));
 
-		Writable<Entity> writable = writableFactory.createWritable("dataset_" + submissionID + "-dataset",
+		Writable writable = writableFactory.createWritable("dataset_" + submissionID + "-dataset",
 				new ArrayList<String>(headerMapper.values()));
 		try
 		{
@@ -167,7 +167,7 @@ public class SampleTabOmxConverter
 
 	private void addDataSet(WritableFactory<Entity> writableFactory) throws IOException
 	{
-		Writable<Entity> writable = writableFactory.createWritable("dataset",
+		Writable writable = writableFactory.createWritable("dataset",
 				Arrays.asList("identifier", "name", "protocolused_identifier"));
 		try
 		{

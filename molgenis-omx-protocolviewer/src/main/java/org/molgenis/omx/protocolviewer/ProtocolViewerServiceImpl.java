@@ -296,7 +296,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(outputStream);
 		try
 		{
-			Writable<Entity> writable = excelWriter.createWritable("Variables", header);
+			Writable writable = excelWriter.createWritable("Variables", header);
 			try
 			{
 				if (catalogItems != null)

@@ -22,10 +22,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean labelAttribute = false;
 	private String refEntityName = null;
 	private String label = null;
+	private boolean visible = true;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		if (fieldType == null) throw new IllegalArgumentException("FieldType cannot be null");
 		this.name = name;
 		this.fieldType = fieldType;
 	}
@@ -111,6 +113,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public EntityMetaData getRefEntity()
 	{
+		if (refEntityName == null)
+		{
+			return null;
+		}
+
 		return EntityMetaDataCache.get(refEntityName);
 	}
 
@@ -128,6 +135,17 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public void setLabel(String label)
 	{
 		this.label = label;
+	}
+
+	@Override
+	public boolean isVisible()
+	{
+		return visible;
+	}
+
+	public void setVisible(boolean visible)
+	{
+		this.visible = visible;
 	}
 
 }

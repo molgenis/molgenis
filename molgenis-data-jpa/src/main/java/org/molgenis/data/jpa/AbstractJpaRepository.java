@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -71,31 +72,23 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional
-	public void add(E entity)
+	public Integer add(Entity entity)
 	{
-		if (entityClass.isAssignableFrom(entity.getClass()))
-		{
-			if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
-			getEntityManager().persist(entity);
-			if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
-					+ entity.getIdValue() + "]");
-		}
-		else
-		{
-			E jpaEntity = BeanUtils.instantiateClass(entityClass);
-			jpaEntity.set(entity);
-			if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
-			getEntityManager().persist(jpaEntity);
-			if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
-					+ jpaEntity.getIdValue() + "]");
-		}
+		E jpaEntity = getTypedEntity(entity);
+
+		if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
+		getEntityManager().persist(jpaEntity);
+		if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
+				+ jpaEntity.getIdValue() + "]");
+
+		return jpaEntity.getIdValue();
 	}
 
 	@Override
 	@Transactional
-	public void add(Iterable<E> entities)
+	public void add(Iterable<? extends Entity> entities)
 	{
-		for (E e : entities)
+		for (Entity e : entities)
 			add(e);
 	}
 
@@ -209,37 +202,39 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional
-	public void update(E entity)
+	public void update(Entity entity)
 	{
 		EntityManager em = getEntityManager();
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("merging" + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
-		}
-		em.merge(entity);
+
+		if (logger.isDebugEnabled()) logger.debug("merging" + getEntityClass().getSimpleName() + " ["
+				+ entity.getIdValue() + "]");
+		em.merge(getTypedEntity(entity));
+
 		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
 
 	@Override
 	@Transactional
-	public void update(Iterable<E> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
 		int batchCount = 0;
-		for (E r : entities)
+		for (Entity r : entities)
 		{
-			if (logger.isDebugEnabled())
-			{
-				logger.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
-			}
-			em.merge(r);
+			E entity = getTypedEntity(r);
+
+			if (logger.isDebugEnabled()) logger.debug("merging" + getEntityClass().getSimpleName() + " ["
+					+ r.getIdValue() + "]");
+			em.merge(entity);
+
 			batchCount++;
 			if (batchCount == batchSize)
 			{
 				if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 				em.flush();
+
 				if (logger.isDebugEnabled()) logger.debug("clearing entity manager");
 				em.clear();
 				batchCount = 0;
@@ -251,7 +246,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional
-	public void update(List<E> entities, DatabaseAction dbAction, String... keyNames)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 
@@ -263,7 +258,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 		// create maps to store key values and entities
 		// key is a concat of all key values for an entity
-		Map<String, E> entityIndex = new LinkedHashMap<String, E>();
+		Map<String, Entity> entityIndex = new LinkedHashMap<String, Entity>();
 		// list of all keys, each list item a map of a (composite) key for one
 		// entity e.g. investigation_name + name
 		List<Map<String, Object>> keyIndex = new ArrayList<Map<String, Object>>();
@@ -272,7 +267,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		// for nulls) the key values are set
 		// otherwise skipped
 		boolean keysMissing = false;
-		for (E entity : entities)
+		for (Entity entity : entities)
 		{
 			// get all the value of all keys (composite key)
 			// use an index to hash the entities
@@ -324,11 +319,11 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		}
 
 		// split lists in new and existing entities, but only if keys are set
-		List<E> newEntities = entities;
+		List<? extends Entity> newEntities = entities;
 		List<E> existingEntities = new ArrayList<E>();
 		if (!keysMissing && keyIndex.size() > 0)
 		{
-			newEntities = new ArrayList<E>();
+			newEntities = new ArrayList<Entity>();
 			QueryImpl q = new QueryImpl();
 
 			// in case of one field key, simply query
@@ -371,7 +366,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 				existingEntities.add(p);
 			}
 			// copy remaining to newEntities
-			newEntities = new ArrayList<E>(entityIndex.values());
+			newEntities = new ArrayList<Entity>(entityIndex.values());
 		}
 
 		// if existingEntities are going to be updated, they will need to
@@ -487,12 +482,12 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		}
 	}
 
-	private void matchByNameAndUpdateFields(List<E> existingEntities, List<E> entities)
+	private void matchByNameAndUpdateFields(List<E> existingEntities, List<? extends Entity> entities)
 	{
 		// List<E> updatedDbEntities = new ArrayList<E>();
 		for (E entityInDb : existingEntities)
 		{
-			for (E newEntity : entities)
+			for (Entity newEntity : entities)
 			{
 				boolean match = false;
 				// check if there are any label fields otherwise check impossible
@@ -516,7 +511,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 					try
 					{
 						MapEntity mapEntity = new MapEntity();
-						for (String field : newEntity.getLabelAttributeNames())
+						for (String field : entityInDb.getLabelAttributeNames())
 						{
 							mapEntity.set(field, newEntity.get(field));
 						}
@@ -541,27 +536,27 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional
-	public void delete(E entity)
+	public void delete(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
 		}
-		em.remove(entity);
+		em.remove(getTypedEntity(entity));
 		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
 
 	@Override
 	@Transactional
-	public void delete(Iterable<E> entities)
+	public void delete(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 
-		for (E r : entities)
+		for (Entity r : entities)
 		{
-			em.remove(r);
+			em.remove(getTypedEntity(r));
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
@@ -745,4 +740,18 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		getEntityManager().clear();
 	}
 
+	// If the entity is of the correct type return it, else convert it to the correct type
+	@SuppressWarnings("unchecked")
+	private E getTypedEntity(Entity entity)
+	{
+		if (entityClass.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E jpaEntity = BeanUtils.instantiateClass(entityClass);
+		jpaEntity.set(entity);
+
+		return jpaEntity;
+	}
 }

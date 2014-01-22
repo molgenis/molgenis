@@ -1,4 +1,4 @@
-package org.molgenis.framework.server;
+package org.molgenis.data.rest;
 
 import java.util.List;
 
