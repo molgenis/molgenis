@@ -41,7 +41,7 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 
 		SearchResult result = searchService.search(request);
-		totalCount = q.getPageSize() == 0 ? result.getTotalHitCount() : q.getPageSize();
+		totalCount = result.getTotalHitCount();
 		hits = result.iterator();
 	}
 
