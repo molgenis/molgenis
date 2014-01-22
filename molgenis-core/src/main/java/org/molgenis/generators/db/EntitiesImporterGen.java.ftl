@@ -138,8 +138,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 					int nr = entityImporter.importEntity(repository, dataService, dbAction);
 					if (nr > 0)
 					{
-						importReport.getMessages().put(entry.getKey(),
-								"imported " + nr + " " + entityName + " entities");
+						importReport.addEntityCount(entry.getKey(), nr);
 						importReport.addNrImported(nr);
 					}
 				}
