@@ -36,6 +36,11 @@ input#ontologyName {
 	margin-bottom : 20px;
 }
 
+.float-right {
+	float : right;
+	margin-right : 5px;
+}
+
 .icon-remove {
 	cursor: hand; 
 	cursor: pointer;

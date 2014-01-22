@@ -122,17 +122,6 @@ public abstract class Generator
 	}
 
 	/**
-	 * Generate the path for the generated sql code.
-	 * 
-	 * @param options
-	 * @return path string
-	 */
-	public String getSqlPath(MolgenisOptions options)
-	{
-		return options.output_sql;
-	}
-
-	/**
 	 * Extension varies based on output type, i.e., .java, R, sql etc. Should include the leading "."
 	 */
 	public String getExtension()

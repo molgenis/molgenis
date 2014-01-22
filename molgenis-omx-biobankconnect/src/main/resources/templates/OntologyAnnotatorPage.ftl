@@ -54,32 +54,31 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.getOntologyAnnotator().changeDataSet('${wizard.selectedDataSet.id?c}');
-			molgenis.getOntologyAnnotator().searchOntologies();
-			molgenis.setContextURL('${context_url}');
-			$('#toggle-select').click(function(){
-				if($(this).hasClass('select-all')){
-					$('#ontology-list').find('input').empty().attr('checked', false);
-					$(this).removeClass('select-all').addClass('remove-all').empty().append('Select all');
-				}else{
-					$('#ontology-list').find('input').empty().attr('checked', true);
-					$(this).removeClass('remove-all').addClass('select-all').empty().append('Deselect all');
-				}
+			molgenis.ontologyMatcherRunning(function(){
+				molgenis.getOntologyAnnotator().changeDataSet('${wizard.selectedDataSet.id?c}');
 				molgenis.getOntologyAnnotator().searchOntologies();
-				return false;
-			});
-			
-			$('#annotate-all-dataitems').click(function(){
-				$('#spinner').modal();
-				$('#wizardForm').attr({
-					'action' : molgenis.getContextUrl() + '/annotate',
-					'method' : 'POST'
-				}).submit();
-			});
-			
-			$('#remove-annotations').click(function(){
-				molgenis.getOntologyAnnotator().confirmation('Confirmation');
-				return false;
+				molgenis.setContextURL('${context_url}');
+				$('#toggle-select').click(function(){
+					if($(this).hasClass('select-all')){
+						$('#ontology-list').find('input').empty().attr('checked', false);
+						$(this).removeClass('select-all').addClass('remove-all').empty().append('Select all');
+					}else{
+						$('#ontology-list').find('input').empty().attr('checked', true);
+						$(this).removeClass('remove-all').addClass('select-all').empty().append('Deselect all');
+					}
+					molgenis.getOntologyAnnotator().searchOntologies();
+					return false;
+				});
+				
+				$('#annotate-all-dataitems').click(function(){
+					molgenis.getOntologyAnnotator().confirmation('Warning', 'Are you sure that you want to overwrite all pre-defined annotations?', '/annotate');
+					return false;
+				});
+				
+				$('#remove-annotations').click(function(){
+					molgenis.getOntologyAnnotator().confirmation('Warning', 'Are you sure that you want to remove all pre-defined annotations?', '/annotate/remove');
+					return false;
+				});
 			});
 		});
 	</script>

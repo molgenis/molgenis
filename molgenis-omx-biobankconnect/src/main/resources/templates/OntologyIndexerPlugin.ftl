@@ -67,7 +67,8 @@
 							<div class="span12">
 								<div>
 									<p><strong>1. Please name the ontology</strong></p>
-									<input id="ontologyName" name="ontologyName" type="text" /> 
+									<input id="ontologyName" name="ontologyName" type="text" />
+									<div class="float-right"><a href="/html/custom_ontology.owl.zip">Download example ontology</a></div> 
 								</div>
 								<p><strong>2. Please upload ontology file</strong></p>
 								<div class="fileupload fileupload-new" data-provides="fileupload">

@@ -5,19 +5,19 @@ import java.util.List;
 /* 
  * Updateable repository
  */
-public interface Updateable<E extends Entity> extends Writable<E>
+public interface Updateable extends Writable
 {
 	/* Update one entity */
-	void update(E entity);
+	void update(Entity entity);
 
 	/* Streaming update multiple entities */
-	void update(Iterable<E> records);
+	void update(Iterable<? extends Entity> records);
 
 	/* Delete one entity */
-	void delete(E entity);
+	void delete(Entity entity);
 
 	/* Streaming delete multiple entities */
-	void delete(Iterable<E> entities);
+	void delete(Iterable<? extends Entity> entities);
 
 	/* Delete one entity based on id */
 	void deleteById(Integer id);
@@ -40,5 +40,5 @@ public interface Updateable<E extends Entity> extends Writable<E>
 	 * @param keyName
 	 *            key field name, or list of composite key fields, you want to use. For example: experiment, name
 	 */
-	void update(List<E> entities, DatabaseAction dbAction, String... keyName);
+	void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName);
 }
