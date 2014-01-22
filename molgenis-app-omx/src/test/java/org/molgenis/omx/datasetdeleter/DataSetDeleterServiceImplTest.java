@@ -78,7 +78,6 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Captor
 	private final ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSetsArrayList = new ArgumentCaptor<ArrayList<ObservationSet>>();
 
-	
 	@SuppressWarnings("deprecation")
 	@Captor
 	private final ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
@@ -180,7 +179,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		observationSet0 = new ObservationSet();
 		observationSet0.setId(0);
 		observationSet0.setPartOfDataSet(dataset);
-		
+
 		observationSets0 = new ArrayList<Entity>();
 		observationSets0.add(observationSet0);
 
@@ -254,21 +253,21 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void delete() throws IOException
 	{
-		when(dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(dataset);
-		
-		dataSetDeleterServiceImpl.deleteMetadata("dataset1");
+		when(dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(
+				dataset);
+
+		dataSetDeleterServiceImpl.deleteData("dataset1", true);
 		verify(dataService).delete(DataSet.ENTITY_NAME, dataset);
 	}
 
 	@Test
 	public void deleteNoMetadata() throws IOException
 	{
-		when(dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(dataset);
-		
-		dataSetDeleterServiceImpl.deleteData("dataset1");
-		verify(dataService, Mockito.times(0)).delete(DataSet.ENTITY_NAME, dataset);
+		when(dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(
+				dataset);
+
+		dataSetDeleterServiceImpl.deleteData("dataset1", false);
+		verify(dataService, Mockito.times(1)).delete(DataSet.ENTITY_NAME, dataset);
 	}
 
 	@Test
@@ -281,13 +280,14 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteData()
 	{
-		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset))).thenReturn(observationSets0);
+		when(
+				dataService.findAllAsList(ObservationSet.ENTITY_NAME,
+						new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset))).thenReturn(observationSets0);
 		dataSetDeleterServiceImpl.deleteData(dataset);
 		// verify that only observationsets and abservedvalues belonging to the dataset are removed
-		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservationSet.ENTITY_NAME), captorObservationSetsArrayList.capture());
-		
-		
+		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservationSet.ENTITY_NAME),
+				captorObservationSetsArrayList.capture());
+
 		assertEquals(new Integer(0), captorObservationSetsArrayList.getValue().get(0).getId());
 		assertEquals(1, captorObservationSetsArrayList.getValue().size());
 	}
