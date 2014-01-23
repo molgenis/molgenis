@@ -8,7 +8,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -272,8 +271,7 @@ public class StorageHandler
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	private File getFileStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException,
-			DatabaseException
+	private File getFileStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException
 	{
 		URI loc = getURIStorageRoot(mustBeValid, dataService);
 		if (loc == null)
@@ -291,8 +289,7 @@ public class StorageHandler
 	 * @param mustBeValid
 	 * @return
 	 */
-	private URI getURIStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException,
-			DatabaseException
+	private URI getURIStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException
 	{
 		RuntimeProperty path = getRuntimeProperty(RUNTIME_FILE_STORAGE_PATH, dataService);
 		RuntimeProperty valid = getRuntimeProperty(RUNTIME_FILE_STORAGE_VALIDATED, dataService);

@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.util.CountryCodes;
@@ -57,7 +56,7 @@ public class UserAccountController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest) throws DatabaseException
+	public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest)
 	{
 		// validate new password
 		String newPassword = updateRequest.getNewpwd();
@@ -112,15 +111,6 @@ public class UserAccountController extends MolgenisPluginController
 		}
 
 		userAccountService.updateCurrentUser(user);
-	}
-
-	@ExceptionHandler(DatabaseException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	private ErrorMessageResponse handleDatabaseException(DatabaseException e)
-	{
-		logger.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
 	@ExceptionHandler(MolgenisUserException.class)

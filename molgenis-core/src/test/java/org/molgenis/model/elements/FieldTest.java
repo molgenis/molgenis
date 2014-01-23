@@ -10,7 +10,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Vector;
 
-import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;

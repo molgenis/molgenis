@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
@@ -697,12 +696,12 @@ public class Field implements Serializable
 		}
 	}
 
-	public List<Field> getXrefLabelPath(String label) throws MolgenisModelException, DatabaseException
+	public List<Field> getXrefLabelPath(String label) throws MolgenisModelException
 	{
 		return this.allPossibleXrefLabels().get(label);
 	}
 
-	public List<Field> getXrefLabels() throws DatabaseException, MolgenisModelException
+	public List<Field> getXrefLabels() throws MolgenisModelException
 	{
 		List<Field> result = new ArrayList<Field>();
 
@@ -1100,7 +1099,7 @@ public class Field implements Serializable
 
 	}
 
-	public Map<String, List<Field>> allPossibleXrefLabels() throws MolgenisModelException, DatabaseException
+	public Map<String, List<Field>> allPossibleXrefLabels() throws MolgenisModelException
 	{
 		if (!(this.getType() instanceof XrefField) && !(this.getType() instanceof MrefField))
 		{
