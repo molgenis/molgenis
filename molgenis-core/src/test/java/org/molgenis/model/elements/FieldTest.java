@@ -405,7 +405,7 @@ public class FieldTest
 	// }
 
 	@Test
-	public void testAllPossibleXrefLabels_noXrefKeys() throws MolgenisModelException, DatabaseException
+	public void testAllPossibleXrefLabels_noXrefKeys() throws MolgenisModelException
 	{
 		Vector<Unique> keys = new Vector<Unique>();
 
