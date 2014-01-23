@@ -1,4 +1,4 @@
-package org.molgenis.charts.highcharts.data;
+package org.molgenis.charts.highcharts.convert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.data.BoxPlotSerie;
@@ -16,38 +15,57 @@ import org.molgenis.charts.data.XYDataSerie;
 import org.molgenis.charts.highcharts.basic.Marker;
 import org.molgenis.charts.highcharts.basic.Series;
 import org.molgenis.charts.highcharts.basic.SeriesType;
+import org.springframework.stereotype.Component;
 
-public class HighchartsDataUtil
+/**
+ * This data util is made for converting the Molgenis charts structure to the Highchart structure
+ * 
+ * @author jjetten
+ */
+@Component
+public class HighchartSeriesUtil
 {
-	private static final Logger logger = Logger.getLogger(HighchartsDataUtil.class);
-
-	public static List<Series> parseToXYDataSeriesList(List<XYDataSerie> xYDataSeries)
+	/**
+	 * Parse the xyDataSeries objects list to a Series objects list.
+	 * The new series object can be used for xy data charts (like scatter plot)
+	 * 
+	 * @param xYDataSeries
+	 * @return Series
+	 */
+	public List<Series> parseToXYDataSeriesList(List<XYDataSerie> xYDataSeries)
 	{
 		List<Series> series = new ArrayList<Series>();
 		for (XYDataSerie xYDataSerie : xYDataSeries)
 		{
-			series.add(parseToSeries(xYDataSerie));
-		}
-		return series;
-	}
-
-	public static List<Series> parseToBoxPlotSeriesList(List<BoxPlotSerie> boxPlotSeries)
-	{
-		List<Series> series = new ArrayList<Series>();
-		for (BoxPlotSerie boxPlotSerie : boxPlotSeries)
-		{
-			series.add(parseToSeries(boxPlotSerie));
+			series.add(parsexYDataSerieToSeries(xYDataSerie));
 		}
 		return series;
 	}
 
 	/**
-	 * Parse the xYDataSerie to a Series object computable with the Highcharts standard.
+	 * Parse the boxPlotSeries objects list to a Series objects list.
+	 * The new series object can be used only for BoxPlotSeries
+	 * 
+	 * @param boxPlotSeries
+	 * @return series
+	 */
+	public List<Series> parseToBoxPlotSeriesList(List<BoxPlotSerie> boxPlotSeries)
+	{
+		List<Series> series = new ArrayList<Series>();
+		for (BoxPlotSerie boxPlotSerie : boxPlotSeries)
+		{
+			series.add(parseBoxPlotSerieToSeries(boxPlotSerie));
+		}
+		return series;
+	}
+
+	/**
+	 * Parse the xYDataSerie to a Series object computable with the Highcharts xy series standard.
 	 * 
 	 * @param xYDataSerie
 	 * @return Series
 	 */
-	public static Series parseToSeries(XYDataSerie xYDataSerie)
+	public Series parsexYDataSerieToSeries(XYDataSerie xYDataSerie)
 	{
 		Series series = new Series();
 		series.setName(xYDataSerie.getName());
@@ -65,7 +83,14 @@ public class HighchartsDataUtil
 		return series;
 	}
 
-	public static Series parseToSeries(BoxPlotSerie boxPlotSerie)
+	
+	/**
+	 * Parse the boxPlotSerie to a Series object computable with the Highcharts box plot series standard
+	 * 
+	 * @param boxPlotSerie
+	 * @return series
+	 */
+	public Series parseBoxPlotSerieToSeries(BoxPlotSerie boxPlotSerie)
 	{
 		Series series = new Series();
 		series.setName(boxPlotSerie.getName());
@@ -81,7 +106,7 @@ public class HighchartsDataUtil
 	 * @param yValueFieldTypeEnum
 	 * @return List<Object>
 	 */
-	public static List<Object> parseXYDataToList(List<XYData> xydata, FieldTypeEnum xValueFieldTypeEnum, FieldTypeEnum yValueFieldTypeEnum)
+	public List<Object> parseXYDataToList(List<XYData> xydata, FieldTypeEnum xValueFieldTypeEnum, FieldTypeEnum yValueFieldTypeEnum)
 	{
 		List<Object> data = new ArrayList<Object>();
 		for (XYData xYData : xydata)
@@ -94,7 +119,14 @@ public class HighchartsDataUtil
 		return data;
 	}
 
-	public static Object convertValue(FieldTypeEnum fieldTypeEnum, Object value)
+	/**
+	 * Convert values to match the Highcharts demand when using json 
+	 * 
+	 * @param fieldTypeEnum
+	 * @param value
+	 * @return Object
+	 */
+	public Object convertValue(FieldTypeEnum fieldTypeEnum, Object value)
 	{
 		if (FieldTypeEnum.DATE_TIME.equals(fieldTypeEnum))
 		{
@@ -119,7 +151,7 @@ public class HighchartsDataUtil
 	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
 	 * ..
 	 */
-	public static long convertDateToMilliseconds(Date date)
+	public Long convertDateToMilliseconds(Date date)
 	{
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
@@ -137,7 +169,7 @@ public class HighchartsDataUtil
 	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
 	 * ..
 	 */
-	public static long convertDateTimeToMilliseconds(Date date)
+	public long convertDateTimeToMilliseconds(Date date)
 	{
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);

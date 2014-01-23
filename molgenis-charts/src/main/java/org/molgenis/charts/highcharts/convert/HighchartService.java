@@ -1,4 +1,4 @@
-package org.molgenis.charts.highcharts.basic;
+package org.molgenis.charts.highcharts.convert;
 
 import java.util.Arrays;
 
@@ -9,9 +9,22 @@ import org.molgenis.charts.AbstractChartVisualizationService;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.MolgenisAxisType;
 import org.molgenis.charts.XYDataChart;
+import org.molgenis.charts.highcharts.basic.AxisAlign;
+import org.molgenis.charts.highcharts.basic.AxisTitle;
+import org.molgenis.charts.highcharts.basic.AxisType;
+import org.molgenis.charts.highcharts.basic.BasicChart;
+import org.molgenis.charts.highcharts.basic.ChartAlign;
+import org.molgenis.charts.highcharts.basic.ChartConstructorType;
+import org.molgenis.charts.highcharts.basic.ChartTitle;
+import org.molgenis.charts.highcharts.basic.ChartType;
+import org.molgenis.charts.highcharts.basic.Credits;
+import org.molgenis.charts.highcharts.basic.Legend;
+import org.molgenis.charts.highcharts.basic.Options;
+import org.molgenis.charts.highcharts.basic.XAxis;
+import org.molgenis.charts.highcharts.basic.YAxis;
 import org.molgenis.charts.highcharts.chart.Chart;
-import org.molgenis.charts.highcharts.data.HighchartsDataUtil;
 import org.molgenis.charts.highcharts.stockchart.StockChart;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
@@ -19,6 +32,9 @@ import org.springframework.ui.Model;
 public class HighchartService extends AbstractChartVisualizationService
 {
 	private static final Logger logger = Logger.getLogger(HighchartService.class);
+	
+	@Autowired
+	private HighchartSeriesUtil highchartSeriesUtil;
 
 	public HighchartService()
 	{
@@ -27,20 +43,28 @@ public class HighchartService extends AbstractChartVisualizationService
 	}
 
 	@Override
-	protected Object renderChartInternal(AbstractChart chart, Model model)
+	public Object renderChartInternal(AbstractChart chart, Model model)
 	{
 		if (MolgenisChartType.SCATTER_CHART.equals(chart.getType()))
 		{
-			return this.createScatterChart((XYDataChart) chart, model);
+			return this.createScatterChart((XYDataChart) chart);
 		}
 		else if (MolgenisChartType.BOXPLOT_CHART.equals(chart.getType()))
 		{
-			return this.createBoxPlotChart((BoxPlotChart) chart, model);
+			return this.createBoxPlotChart((BoxPlotChart) chart);
 		}
 		return null;
 	}
 	
-	public Options createScatterChart(XYDataChart scatterChart, Model model)
+	/**
+	 * Create a scatter plot
+	 * 
+	 * When the xAxisType equals MolgenisAxisType.DATETIME then the Highcharts Stockchart will be used to create a plot
+	 * 
+	 * @param scatterChart
+	 * @return Options
+	 */
+	public Options createScatterChart(XYDataChart scatterChart)
 	{
 		ChartConstructorType chartConstructorType;
 		if(MolgenisAxisType.DATETIME.equals(scatterChart.getxAxisType())) {
@@ -48,10 +72,17 @@ public class HighchartService extends AbstractChartVisualizationService
 		} else {
 			chartConstructorType = ChartConstructorType.CHART;
 		}
-		return createXYDataChart(scatterChart, chartConstructorType, model);
+		return createXYDataChart(scatterChart, chartConstructorType);
 	}
 	
-	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart, Model model)
+	/**
+	 * Create the Highcharts options from the given BoxPlotChart
+	 * 
+	 * @param boxPlotChart
+	 * @param model
+	 * @return Options
+	 */
+	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart)
 	{
 		Options options = new Options();
 		
@@ -85,15 +116,23 @@ public class HighchartService extends AbstractChartVisualizationService
 		options.addyAxis(yAxis);
 		options.setCredits(new Credits());
 		options.setLegend(legend);
-		options.addSeries(HighchartsDataUtil.parseToBoxPlotSeriesList(
+		options.addSeries(highchartSeriesUtil.parseToBoxPlotSeriesList(
 				boxPlotChart.getBoxPlotSeries()));
-		options.addSeries(HighchartsDataUtil.parseToXYDataSeriesList(
+		options.addSeries(highchartSeriesUtil.parseToXYDataSeriesList(
 				boxPlotChart.getxYDataSeries()));
 
 		return options;
 	}
 	
-	protected Options createXYDataChart(XYDataChart xYDataChart, ChartConstructorType chartConstructorType, Model model)
+	/**
+	 * Create the Highcharts options from the given XYDataChart.
+	 * 
+	 * @param xYDataChart
+	 * @param chartConstructorType - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
+	 * @param model - is not used
+	 * @return Options
+	 */
+	protected Options createXYDataChart(XYDataChart xYDataChart, ChartConstructorType chartConstructorType)
 	{
 		Options options = new Options();
 		
@@ -139,7 +178,7 @@ public class HighchartService extends AbstractChartVisualizationService
 		options.addyAxis(yAxis);
 		options.setCredits(new Credits());
 		options.setLegend(legend);
-		options.setSeries(HighchartsDataUtil.parseToXYDataSeriesList(
+		options.setSeries(highchartSeriesUtil.parseToXYDataSeriesList(
 				xYDataChart.getData()));
 
 		return options;
