@@ -177,7 +177,6 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * Note: package-private for testability
 	 * 
 	 * @param categories
-	 * @throws DatabaseException
 	 */
 	void deleteCategories(List<Category> categories)
 	{

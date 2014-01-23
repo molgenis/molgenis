@@ -54,7 +54,6 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 * @throws UnknownCatalogException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
@@ -93,7 +92,6 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * @param id
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/load", params = "load", method = RequestMethod.POST)
 	public String loadCatalog(@RequestParam(value = "id", required = false) String id, Model model)

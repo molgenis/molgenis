@@ -19,12 +19,12 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.generators.GeneratorHelper;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.util.SimpleTree;
@@ -1167,69 +1167,6 @@ public class Field implements Serializable
 		return result;
 	}
 
-	/**
-	 * Helper method to find labels within the same entity that point to the same endpoint. E.g. suppose fields
-	 * protocol_investigation_name maps to same entity as investigatio_name
-	 * 
-	 * @param xrefField
-	 * @return
-	 * @throws MolgenisModelException
-	 * @throws DatabaseException
-	 */
-	// public List<String> labelsToSameEndpoint(String xref_label) throws
-	// MolgenisModelException, DatabaseException
-	// {
-	// List<String> result = new ArrayList<String>();
-	//
-	// // get the endpoint, if any
-	// List<Field> pathToEndpoint =
-	// this.allPossibleXrefLabels().get(xref_label);
-	// if (pathToEndpoint == null)
-	// {
-	// String knownLabels = "";
-	// for (String label : this.allPossibleXrefLabels().keySet())
-	// knownLabels += ", "+label;
-	// throw new MolgenisModelException("xref_label '" + xref_label +
-	// "'unknown for field "
-	// + this.getEntity().getName() + "." + this.getName() +
-	// ". Known labels are " + knownLabels);
-	// }
-	// else
-	// {
-	// Field endpoint = pathToEndpoint.get(pathToEndpoint.size() - 1);
-	//
-	// for (Field otherField : getEntity().getAllFields())
-	// {
-	// // check the the other xref fields
-	// if (otherField.getType() instanceof XrefField && otherField != this)
-	// {
-	// // check all the labels of this other field
-	// Map<String, List<Field>> all_xref_labels =
-	// otherField.allPossibleXrefLabels();
-	// for (String other_label : all_xref_labels.keySet())
-	// {
-	// // check endpoint
-	// List<Field> pathToOtherEndpoint = all_xref_labels.get(other_label);
-	// Field otherEndPoint = pathToOtherEndpoint.get(pathToOtherEndpoint.size()
-	// - 1);
-	//
-	// if (endpoint.getName().equals(otherEndPoint.getName())
-	// &&
-	// endpoint.getEntity().getName().equals(otherEndPoint.getEntity().getName()))
-	// {
-	// logger.debug("FOUND " + otherEndPoint.getEntity().getName() + "."
-	// + otherEndPoint.getName() + " EQUALS " + endpoint.getEntity().getName() +
-	// "."
-	// + endpoint.getName());
-	// result.add(otherField.getName().toLowerCase() + "_" + other_label);
-	// }
-	// }
-	// }
-	// }
-	// }
-	//
-	// return result;
-	// }
 	public Integer getLength() throws MolgenisModelException
 	{
 		if (this.getType() instanceof StringField)

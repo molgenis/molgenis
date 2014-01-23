@@ -1,7 +1,7 @@
 package org.molgenis.omx.converters;
 
 import org.molgenis.data.Entity;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.Value;
@@ -43,7 +43,7 @@ public class EntityToXrefValueConverter implements EntityToValueConverter<XrefVa
 		{
 			characteristic = characteristicLoader.findCharacteristic(xrefIdentifier);
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			throw new ValueConverterException(e);
 		}

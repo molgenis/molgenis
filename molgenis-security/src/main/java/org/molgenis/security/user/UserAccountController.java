@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.DatabaseException;
+import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.util.CountryCodes;
@@ -47,7 +47,7 @@ public class UserAccountController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String showAccount(Model model) throws DatabaseException
+	public String showAccount(Model model)
 	{
 		model.addAttribute("user", userAccountService.getCurrentUser());
 		model.addAttribute("countries", CountryCodes.get());

@@ -9,7 +9,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.UserAccountServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getCurrentUser() throws DatabaseException
+	public void getCurrentUser()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 
@@ -108,7 +107,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)
-	public void updateCurrentUser_wrongUser() throws DatabaseException
+	public void updateCurrentUser_wrongUser()
 	{
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
 		when(existingMolgenisUser.getId()).thenReturn(1);
@@ -125,7 +124,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void updateCurrentUser_changePassword() throws DatabaseException
+	public void updateCurrentUser_changePassword()
 	{
 		when(passwordEncoder.matches("new-password", "encrypted-password")).thenReturn(true);
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
@@ -145,7 +144,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void validateCurrentUserPassword() throws DatabaseException
+	public void validateCurrentUserPassword()
 	{
 		MolgenisUser existingMolgenisUser = mock(MolgenisUser.class);
 		when(existingMolgenisUser.getId()).thenReturn(1);

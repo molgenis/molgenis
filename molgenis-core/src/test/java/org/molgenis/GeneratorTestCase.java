@@ -10,7 +10,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.generators.DataTypeGen;
 import org.molgenis.generators.Generator;
 import org.molgenis.model.MolgenisModel;
@@ -109,7 +108,7 @@ public abstract class GeneratorTestCase
 		if (returnCode != 0) throw new IOException("compilation failed: " + javaPaths);
 	}
 
-	private static Model getModel() throws MolgenisModelException, DatabaseException
+	private static Model getModel() throws MolgenisModelException
 	{
 		String xml = "<molgenis name=\"org.molgenis\">\n"
 				+ "	<module name=\"model\">\n"

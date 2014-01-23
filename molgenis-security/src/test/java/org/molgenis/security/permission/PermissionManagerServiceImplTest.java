@@ -10,11 +10,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.persistence.exceptions.DatabaseException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.GroupAuthority;
@@ -83,7 +83,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@SuppressWarnings(
 	{ "deprecation" })
 	@BeforeMethod
-	public void setUp() throws DatabaseException
+	public void setUp()
 	{
 		reset(dataService);
 

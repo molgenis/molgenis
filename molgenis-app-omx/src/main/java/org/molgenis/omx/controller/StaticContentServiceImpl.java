@@ -1,7 +1,6 @@
 package org.molgenis.omx.controller;
 
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,9 @@ public class StaticContentServiceImpl implements StaticContentService
 {
 	public static final String DEFAULT_CONTENT = "<p>Place some content!</p>";
 	public static final String PREFIX_KEY = "app.";
-			
+
 	private final MolgenisSettings molgenisSettings;
-	
+
 	@Autowired
 	public StaticContentServiceImpl(final MolgenisSettings molgenisSettings)
 	{
@@ -34,21 +33,25 @@ public class StaticContentServiceImpl implements StaticContentService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional(readOnly = true, rollbackFor = DatabaseException.class)
+	@Transactional(readOnly = true)
 	public boolean submitContent(final String uniqueReference, String content)
 	{
-		if(null == content) content = "";
-		
+		if (null == content) content = "";
+
 		boolean succes;
-		if(this.molgenisSettings.propertyExists(PREFIX_KEY + uniqueReference)){
+		if (this.molgenisSettings.propertyExists(PREFIX_KEY + uniqueReference))
+		{
 			succes = this.molgenisSettings.updateProperty(PREFIX_KEY + uniqueReference, content);
-		}else{
+		}
+		else
+		{
 			this.molgenisSettings.setProperty(PREFIX_KEY + uniqueReference, content);
 			succes = true;
 		}
 		return succes;
 	}
 
+	@Override
 	public boolean isCurrentUserCanEdit()
 	{
 		return SecurityUtils.currentUserIsAuthenticated() && SecurityUtils.currentUserIsSu();
