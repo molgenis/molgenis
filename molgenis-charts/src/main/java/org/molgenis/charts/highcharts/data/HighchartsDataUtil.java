@@ -57,7 +57,7 @@ public class HighchartsDataUtil
 
 		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType())
 				&& (FieldTypeEnum.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || FieldTypeEnum.DATE_TIME.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
-		{
+		{	
 			series.setLineWidth(0);
 			series.setMarker(new Marker(true, 4));
 			series.setType(SeriesType.getSeriesType(MolgenisSerieType.LINE));

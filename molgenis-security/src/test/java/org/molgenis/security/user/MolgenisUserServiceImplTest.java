@@ -6,7 +6,6 @@ import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +71,7 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 	}
 
 	@Test
-	public void getUser() throws DatabaseException
+	public void getUser()
 	{
 		String username = "username";
 

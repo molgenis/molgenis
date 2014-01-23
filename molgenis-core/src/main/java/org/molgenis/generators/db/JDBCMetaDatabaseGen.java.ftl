@@ -28,10 +28,10 @@
  */
 package ${package};
 
+import java.lang.RuntimeException;
 import java.util.Arrays;
 import java.util.Vector;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
@@ -47,7 +47,7 @@ public class JDBCMetaDatabase extends Model
 {
 	private static final long serialVersionUID = 1L;
 	
-	public JDBCMetaDatabase() throws DatabaseException
+	public JDBCMetaDatabase()
 	{
 		super("${model.name}");
 		<#if entities?size gt 0>
@@ -105,7 +105,7 @@ public class JDBCMetaDatabase extends Model
 			</#list>
 		} catch (MolgenisModelException e)
 		{
-			throw new DatabaseException(e);
+			throw new RuntimeException(e);
 		}
 		</#if>
 	}

@@ -121,7 +121,6 @@ public class DataExplorerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return the view name
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)

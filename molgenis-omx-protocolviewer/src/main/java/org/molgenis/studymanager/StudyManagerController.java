@@ -78,7 +78,6 @@ public class StudyManagerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String getStudyDefinitions(Model model)
@@ -91,7 +90,6 @@ public class StudyManagerController extends MolgenisPluginController
 	 * Returns a list of meta data for each study definition
 	 * 
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
@@ -130,8 +128,8 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable
-	String id) throws UnknownCatalogException, UnknownStudyDefinitionException
+	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
 	{
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
@@ -140,8 +138,8 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getCatalogWithStudyDefinition(@PathVariable
-	String id) throws UnknownCatalogException, UnknownStudyDefinitionException
+	public CatalogModel getCatalogWithStudyDefinition(@PathVariable String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
 	{
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
@@ -151,10 +149,9 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateStudyDefinition(@PathVariable
-	String id, @Valid
-	@RequestBody
-	StudyDefinitionUpdateRequest updateRequest) throws UnknownStudyDefinitionException, UnknownCatalogException
+	public void updateStudyDefinition(@PathVariable String id,
+			@Valid @RequestBody StudyDefinitionUpdateRequest updateRequest) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
 	{
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
@@ -188,11 +185,9 @@ public class StudyManagerController extends MolgenisPluginController
 	 * @param id
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/load", method = RequestMethod.POST)
-	public String loadStudyDefinition(@RequestParam(value = "id", required = false)
-	String id, Model model)
+	public String loadStudyDefinition(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
@@ -216,8 +211,8 @@ public class StudyManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
-	public void downloadStudyDefinition(@PathVariable
-	String id, HttpServletResponse response) throws UnknownStudyDefinitionException, IOException
+	public void downloadStudyDefinition(@PathVariable String id, HttpServletResponse response)
+			throws UnknownStudyDefinitionException, IOException
 	{
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 

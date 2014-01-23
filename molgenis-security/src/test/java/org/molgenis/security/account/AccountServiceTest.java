@@ -10,7 +10,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
@@ -21,7 +20,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -112,7 +110,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void activateUser() throws DatabaseException
+	public void activateUser()
 	{
 		when(
 				dataService.findOne(MolgenisUser.ENTITY_NAME,
@@ -129,13 +127,13 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class)
-	public void activateUser_invalidActivationCode() throws DatabaseException
+	public void activateUser_invalidActivationCode()
 	{
 		accountService.activateUser("invalid");
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class)
-	public void activateUser_alreadyActivated() throws DatabaseException
+	public void activateUser_alreadyActivated()
 	{
 		when(
 				dataService.findOne(MolgenisUser.ENTITY_NAME,
@@ -146,7 +144,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void createUser() throws URISyntaxException, DatabaseException
+	public void createUser() throws URISyntaxException
 	{
 		MolgenisUser molgenisUser = new MolgenisUser();
 		molgenisUser.setEmail("user@molgenis.org");
@@ -159,7 +157,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void resetPassword() throws DatabaseException
+	public void resetPassword()
 	{
 		MolgenisUser molgenisUser = mock(MolgenisUser.class);
 		when(molgenisUser.getPassword()).thenReturn("password");
@@ -175,7 +173,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class)
-	public void resetPassword_invalidEmailAddress() throws DatabaseException
+	public void resetPassword_invalidEmailAddress()
 	{
 		MolgenisUser molgenisUser = mock(MolgenisUser.class);
 		when(molgenisUser.getPassword()).thenReturn("password");
