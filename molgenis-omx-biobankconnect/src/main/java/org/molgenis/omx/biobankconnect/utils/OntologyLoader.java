@@ -87,7 +87,7 @@ public class OntologyLoader
 		{
 			axioms.add(factory.getOWLAnnotationAssertionAxiom(cls.getIRI(), annotation));
 		}
-		return axioms == null ? new HashSet<OWLAnnotationAssertionAxiom>() : axioms;
+		return axioms;
 	}
 
 	public Set<OWLClass> getTopClasses()
