@@ -39,6 +39,7 @@ abstract class AbstractOmxConvertor
 		if (file.exists())
 		{
 			EntitySource entitySource = null;
+			ExcelWriter<Entity> writer = null;
 			try
 			{
 				entitySource = new ExcelEntitySourceFactory().create(file);
@@ -55,7 +56,6 @@ abstract class AbstractOmxConvertor
 				if (entitySource != null) entitySource.close();
 			}
 
-			ExcelWriter<Entity> writer = null;
 			try
 			{
 				writer = new ExcelWriter<Entity>(new File(file.getAbsolutePath() + "_OMX.xls"));

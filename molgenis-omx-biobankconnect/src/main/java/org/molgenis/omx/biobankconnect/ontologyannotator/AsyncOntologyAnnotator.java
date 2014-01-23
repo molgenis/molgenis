@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -431,11 +432,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			{
 				identifiers.add(uri);
 			}
-
-			// if (!definitions.contains(definition))
-			// {
-			// definitions.add(definition);
-			// }
 		}
 
 		if (mapUriTerm.size() > 0)
@@ -457,16 +453,17 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			String ontologyName = data.get("ontologyName").toString();
 			ontologyInfo.put(ontologyUri, ontologyName);
 
-			String ontologyLabel = data.get("ontologyLabel").toString();
-			String oontologyTermSynonym = data.get("ontologyTermSynonym").toString();
-			String term = ontologyLabel == null ? oontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
-					+ oontologyTermSynonym.toLowerCase();
-			String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
+			String ontologyLabel = data.get("ontologyLabel") == null ? StringUtils.EMPTY : data.get("ontologyLabel")
+					.toString();
+			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString();
+			String term = ontologyLabel.isEmpty() ? ontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
+					+ ontologyTermSynonym.toLowerCase();
+			String termIdentifier = ontologyLabel.isEmpty() ? uri : ontologyLabel + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
 			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);
 			ot.setName(term);
-			ot.setDefinition(oontologyTermSynonym);
+			ot.setDefinition(ontologyTermSynonym);
 
 			Ontology ontology = dataService.findOne(Ontology.ENTITY_NAME,
 					new QueryImpl().eq(Ontology.IDENTIFIER, ontologyUri));
@@ -478,12 +475,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (listOfOntologyTerms.size() > 0) addOntologies(ontologyInfo);
 		if (listOfOntologyTerms.size() > 0) dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
 
-		if (identifiers.isEmpty())
-		{
-			return Collections.emptyList();
-		}
-
-		System.out.println(identifiers);
+		if (identifiers.isEmpty()) return Collections.emptyList();
 		List<OntologyTerm> definitions = dataService.findAllAsList(OntologyTerm.ENTITY_NAME,
 				new QueryImpl().in(OntologyTerm.IDENTIFIER, identifiers));
 
