@@ -23,6 +23,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String refEntityName = null;
 	private String label = null;
 	private boolean visible = true;
+	private boolean unique = false;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -146,6 +147,17 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public void setVisible(boolean visible)
 	{
 		this.visible = visible;
+	}
+
+	@Override
+	public boolean isUnique()
+	{
+		return unique;
+	}
+
+	public void setUnique(boolean unique)
+	{
+		this.unique = unique;
 	}
 
 }
