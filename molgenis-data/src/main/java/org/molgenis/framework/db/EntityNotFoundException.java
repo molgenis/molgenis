@@ -1,6 +1,6 @@
 package org.molgenis.framework.db;
 
-public class EntityNotFoundException extends DatabaseException
+public class EntityNotFoundException extends Exception
 {
 	private static final long serialVersionUID = 1L;
 

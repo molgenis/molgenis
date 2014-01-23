@@ -31,7 +31,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.model.MolgenisModelException;
@@ -105,10 +104,6 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		{
 			throw new IOException(e);
 		}
-		catch (DatabaseException e)
-		{
-			throw new IOException(e);
-		}
 		finally
 		{
 			entitySource.close();
@@ -119,7 +114,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 
 	private void validateTable(String entityName, Repository<? extends org.molgenis.data.Entity> repository,
 			Class<? extends Entity> entityClazz, EntitiesValidationReport validationReport)
-			throws MolgenisModelException, DatabaseException, IOException
+			throws MolgenisModelException, IOException
 	{
 		List<Field> entityFields = new JDBCMetaDatabase().getEntity(entityClazz.getSimpleName()).getAllFields();
 
@@ -206,7 +201,8 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		validationReport.getFieldsRequired().put(entityName, requiredFields.keySet());
 		validationReport.getFieldsAvailable().put(entityName, availableFields.keySet());
 	}
-	private List<String> getXrefNames(Field field) throws MolgenisModelException, DatabaseException
+	
+	private List<String> getXrefNames(Field field) throws MolgenisModelException
 	{
 		if (!field.isXRef()) return Collections.emptyList();
 

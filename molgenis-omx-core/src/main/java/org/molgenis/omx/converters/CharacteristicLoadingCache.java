@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 
 import com.google.common.base.Function;
@@ -46,7 +46,7 @@ class CharacteristicLoadingCache
 				});
 	}
 
-	public Characteristic findCharacteristic(String identifier) throws DatabaseException
+	public Characteristic findCharacteristic(String identifier)
 	{
 		Integer primaryKey;
 		try
@@ -55,13 +55,13 @@ class CharacteristicLoadingCache
 		}
 		catch (ExecutionException e)
 		{
-			throw new DatabaseException(e);
+			throw new MolgenisDataException(e);
 		}
 
 		return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey);
 	}
 
-	public List<Characteristic> findCharacteristics(List<String> identifiers) throws DatabaseException
+	public List<Characteristic> findCharacteristics(List<String> identifiers)
 	{
 		final ImmutableMap<String, Integer> characteristicIdMap;
 		try
@@ -70,7 +70,7 @@ class CharacteristicLoadingCache
 		}
 		catch (ExecutionException e)
 		{
-			throw new DatabaseException(e);
+			throw new MolgenisDataException(e);
 		}
 
 		return Lists.transform(identifiers, new Function<String, Characteristic>()
@@ -84,7 +84,7 @@ class CharacteristicLoadingCache
 		});
 	}
 
-	private Integer findCharacteristicId(String identifier) throws DatabaseException, ValueConverterException
+	private Integer findCharacteristicId(String identifier) throws ValueConverterException
 	{
 		Characteristic characteristic = dataService.findOne(Characteristic.ENTITY_NAME,
 				new QueryImpl().eq(Characteristic.IDENTIFIER, identifier));
@@ -97,7 +97,7 @@ class CharacteristicLoadingCache
 	}
 
 	private Map<String, Integer> findCharacteristicIds(Iterable<? extends String> identifiersIterable)
-			throws DatabaseException, ValueConverterException
+			throws ValueConverterException
 	{
 		List<String> identifiers = Lists.newArrayList(identifiersIterable);
 		List<Characteristic> values = dataService.findAllAsList(Characteristic.ENTITY_NAME,

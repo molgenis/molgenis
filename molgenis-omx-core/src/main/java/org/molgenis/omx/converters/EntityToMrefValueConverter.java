@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.MrefValue;
@@ -81,7 +81,7 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 				mrefValue.setValue(characteristicLoader.findCharacteristics(xrefIdentifiers));
 			}
 		}
-		catch (DatabaseException e)
+		catch (MolgenisDataException e)
 		{
 			throw new ValueConverterException(e);
 		}

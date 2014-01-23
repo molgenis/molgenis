@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.omx.search.IndexingEventListener;
 import org.molgenis.util.DataSetImportedEvent;
@@ -30,7 +29,7 @@ public class IndexingEventListenerTest
 	}
 
 	@Test
-	public void onApplicationEventDataSetImportedEvent() throws DatabaseException
+	public void onApplicationEventDataSetImportedEvent()
 	{
 		Integer id = 2;
 		DataSetImportedEvent event = new DataSetImportedEvent(this, id);

@@ -54,7 +54,6 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return the view name
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception

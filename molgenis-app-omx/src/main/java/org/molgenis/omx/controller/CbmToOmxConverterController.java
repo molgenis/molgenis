@@ -69,8 +69,8 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public void convert(@RequestParam
-	Part upload, HttpServletRequest request, HttpServletResponse response) throws Exception
+	public void convert(@RequestParam Part upload, HttpServletRequest request, HttpServletResponse response)
+			throws Exception
 	{
 		File file = null;
 		Part part = request.getPart("upload");
@@ -364,7 +364,8 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			IOUtils.closeQuietly(dataSet);
 			IOUtils.closeQuietly(observableFeature);
 
-			file.delete();
+			boolean ok = file.delete();
+			if (!ok) logger.warn("unable to delete " + file.getPath());
 		}
 
 		File zipFile = new File(outputDir, "cbm.zip");
@@ -375,24 +376,35 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 
 		FileOutputStream fout = new FileOutputStream(zipFile);
 		ZipOutputStream zout = new ZipOutputStream(fout);
-
-		for (File f : sourceFiles)
+		try
 		{
-
-			logger.info("Adding " + f.getAbsolutePath());
-			FileInputStream fin = new FileInputStream(f);
-			zout.putNextEntry(new ZipEntry(f.getName()));
-			byte[] b = new byte[1024];
-			int length;
-			while ((length = fin.read(b)) > 0)
+			for (File f : sourceFiles)
 			{
-				zout.write(b, 0, length);
+
+				logger.info("Adding " + f.getAbsolutePath());
+				FileInputStream fin = new FileInputStream(f);
+				try
+				{
+					zout.putNextEntry(new ZipEntry(f.getName()));
+					byte[] b = new byte[1024];
+					int length;
+					while ((length = fin.read(b)) > 0)
+					{
+						zout.write(b, 0, length);
+					}
+					zout.closeEntry();
+				}
+				finally
+				{
+					fin.close();
+				}
 			}
-			zout.closeEntry();
-			fin.close();
 		}
-		zout.close();
-		fout.close();
+		finally
+		{
+			IOUtils.closeQuietly(zout);
+			IOUtils.closeQuietly(fout);
+		}
 
 		URL localURL = zipFile.toURI().toURL();
 		URLConnection conn = localURL.openConnection();

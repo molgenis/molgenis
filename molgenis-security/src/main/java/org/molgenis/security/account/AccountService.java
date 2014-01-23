@@ -22,7 +22,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class AccountService
@@ -91,7 +90,7 @@ public class AccountService
 		}
 
 		// send activation email
-		URI activationUri = URI.create(baseActivationUri+'/' + activationCode);
+		URI activationUri = URI.create(baseActivationUri + '/' + activationCode);
 
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setTo(activationEmailAddresses.toArray(new String[]
@@ -107,7 +106,6 @@ public class AccountService
 	 * Activate a registered user
 	 * 
 	 * @param activationCode
-	 * @throws DatabaseException
 	 */
 	@RunAsSystem
 	public void activateUser(String activationCode)

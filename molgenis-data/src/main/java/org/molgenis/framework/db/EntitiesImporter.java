@@ -20,7 +20,6 @@ public interface EntitiesImporter
 	 * @param dbAction
 	 * @return
 	 * @throws IOException
-	 * @throws DatabaseException
 	 */
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException;
 
@@ -32,7 +31,6 @@ public interface EntitiesImporter
 	 * @param dbAction
 	 * @return
 	 * @throws IOException
-	 * @throws DatabaseException
 	 */
 	public EntityImportReport importEntities(Repository<? extends Entity> repository, String entityName,
 			DatabaseAction dbAction) throws IOException;
@@ -45,7 +43,6 @@ public interface EntitiesImporter
 	 * @param dbAction
 	 * @return
 	 * @throws IOException
-	 * @throws DatabaseException
 	 */
 	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException;
 }

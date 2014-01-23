@@ -14,7 +14,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.GroupAuthority;
@@ -83,7 +82,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@SuppressWarnings(
 	{ "deprecation" })
 	@BeforeMethod
-	public void setUp() throws DatabaseException
+	public void setUp()
 	{
 		reset(dataService);
 
@@ -235,7 +234,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void getUsers() throws DatabaseException
+	public void getUsers()
 	{
 		when(dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryImpl())).thenReturn(
 				Arrays.<Entity> asList(user1, user2, user3));
@@ -243,19 +242,19 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getGroups() throws DatabaseException
+	public void getGroups()
 	{
 		assertEquals(pluginPermissionManagerService.getGroups(), Arrays.asList(group1));
 	}
 
 	@Test
-	public void getPlugins() throws DatabaseException
+	public void getPlugins()
 	{
 		assertEquals(pluginPermissionManagerService.getPlugins(), Arrays.asList(plugin1, plugin2, plugin3));
 	}
 
 	@Test
-	public void getGroupEntityClassPermissions() throws DatabaseException
+	public void getGroupEntityClassPermissions()
 	{
 		Permissions permissions = pluginPermissionManagerService.getGroupEntityClassPermissions(1);
 		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
@@ -269,7 +268,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getGroupPluginPermissions() throws DatabaseException
+	public void getGroupPluginPermissions()
 	{
 		MolgenisGroup group1 = when(mock(MolgenisGroup.class).getId()).thenReturn(1).getMock();
 		when(group1.getName()).thenReturn("group1");
@@ -286,7 +285,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getUserEntityClassPermissions_noGroup() throws DatabaseException
+	public void getUserEntityClassPermissions_noGroup()
 	{
 		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions(1);
 		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
@@ -299,7 +298,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getUserEntityClassPermissions_inGroup() throws DatabaseException
+	public void getUserEntityClassPermissions_inGroup()
 	{
 		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions(2);
 
@@ -320,7 +319,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getUserPluginPermissions_noGroup() throws DatabaseException
+	public void getUserPluginPermissions_noGroup()
 	{
 		Permissions permissions = pluginPermissionManagerService.getUserPluginPermissions(1);
 		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
@@ -333,7 +332,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void getUserPluginPermissions_inGroup() throws DatabaseException
+	public void getUserPluginPermissions_inGroup()
 	{
 		Permissions permissions = pluginPermissionManagerService.getUserPluginPermissions(2);
 
@@ -354,7 +353,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void replaceGroupEntityClassPermissions() throws DatabaseException
+	public void replaceGroupEntityClassPermissions()
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
 		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, 1);
@@ -364,7 +363,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void replaceGroupPluginPermissions() throws DatabaseException
+	public void replaceGroupPluginPermissions()
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
 		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, 1);
@@ -374,7 +373,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void replaceUserEntityClassPermissions() throws DatabaseException
+	public void replaceUserEntityClassPermissions()
 	{
 		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
 		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, 1);
@@ -384,7 +383,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Test
-	public void replaceUserPluginPermissions() throws DatabaseException
+	public void replaceUserPluginPermissions()
 	{
 		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
 		pluginPermissionManagerService.replaceUserPluginPermissions(authorities, 1);
