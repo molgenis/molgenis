@@ -5,7 +5,7 @@ import org.molgenis.charts.highcharts.basic.BasicChart;
 public class StockChart extends BasicChart
 {
 	// Default values
-	private static final Integer MARGIN_BOTTOM = 50;
+	private static final Integer MARGIN_BOTTOM = 100;
 	private static final Integer MARGIN_LEFT = 100;
 	private static final Integer MARGIN_RIGHT = 50;
 	private static final Integer MARGIN_TOP = 50;
