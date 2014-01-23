@@ -20,7 +20,6 @@ import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.omx.observ.DataSet;
@@ -162,8 +161,7 @@ public class UploadWizardPage extends AbstractWizardPage
 		return msg;
 	}
 
-	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException,
-			DatabaseException
+	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException
 	{
 		EntitySource entitySource = dataService.createEntitySource(file);
 		try

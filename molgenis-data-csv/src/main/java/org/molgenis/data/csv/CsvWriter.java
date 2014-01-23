@@ -21,7 +21,7 @@ import org.molgenis.util.ListEscapeUtils;
 public class CsvWriter<E extends Entity> extends AbstractWritable
 {
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	public static final char DEFAULT_SEPARATOR = ',';
 
