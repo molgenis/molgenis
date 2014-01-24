@@ -1,4 +1,4 @@
-package org.molgenis.charts.highcharts.basic;
+package org.molgenis.charts.highcharts.convert;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -21,6 +21,12 @@ import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
+import org.molgenis.charts.highcharts.basic.AxisAlign;
+import org.molgenis.charts.highcharts.basic.AxisType;
+import org.molgenis.charts.highcharts.basic.ChartAlign;
+import org.molgenis.charts.highcharts.basic.ChartType;
+import org.molgenis.charts.highcharts.basic.Options;
+import org.molgenis.charts.highcharts.basic.SeriesType;
 import org.molgenis.charts.highcharts.chart.Chart;
 import org.molgenis.charts.highcharts.stockchart.StockChart;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +48,19 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		{
 			return new HighchartService();
 		}
+		
+		@Bean
+		public HighchartSeriesUtil highchartSeriesUtil()
+		{
+			return new HighchartSeriesUtil();
+		}
 	}
 
 	@Autowired
 	private HighchartService highchartService;
+	
+	@Autowired
+	private HighchartService highchartSeriesUtil;
 	
 	@Test
 	public void renderChartInternalScatterPlot() {
