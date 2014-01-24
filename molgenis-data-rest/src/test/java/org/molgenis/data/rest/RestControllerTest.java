@@ -140,7 +140,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"name\":\"name\",\"fieldType\":\"STRING\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"label\":\"name\",\"visible\":true}}}"));
+								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"name\":\"name\",\"fieldType\":\"STRING\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"label\":\"name\",\"visible\":true,\"unique\":false}}}"));
 
 	}
 
