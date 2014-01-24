@@ -56,6 +56,7 @@ import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
@@ -477,6 +478,15 @@ public class RestController
 	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
 	{
 		logger.debug("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(ConversionException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleConversionException(ConversionException e)
+	{
+		logger.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
