@@ -46,7 +46,9 @@ public class OntologyIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/index", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public String indexOntology(@RequestParam String ontologyName, @RequestParam Part file, Model model)
+	public String indexOntology(@RequestParam
+	String ontologyName, @RequestParam
+	Part file, Model model)
 	{
 		try
 		{
@@ -64,7 +66,8 @@ public class OntologyIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/remove", method = RequestMethod.POST)
-	public String removeOntology(@RequestParam String ontologyUri, Model model)
+	public String removeOntology(@RequestParam
+	String ontologyUri, Model model)
 	{
 		try
 		{
