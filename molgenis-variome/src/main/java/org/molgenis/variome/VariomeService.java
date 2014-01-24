@@ -1,6 +1,7 @@
 package org.molgenis.variome;
 
 import java.io.File;
+import java.util.List;
 
 import org.springframework.ui.Model;
 
@@ -12,5 +13,5 @@ import org.springframework.ui.Model;
  */
 public interface VariomeService
 {
-	File vcfFile(File vcfFile, Model model);
+	File[] vcfFile(List<File> listOfFiles, Model model);
 }

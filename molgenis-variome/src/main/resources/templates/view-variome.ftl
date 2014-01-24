@@ -22,21 +22,22 @@
 			  	</ul>
 			  	
 			  	<div id="panel-1-tab-1">
-			    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data">
+			    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data" boundary="_FPSEP91465b27654aa128979fb2_">
 						<div class="form-group">
 							<div class="fileupload fileupload-new" data-provides="fileupload">
     							<div class="input-group">
         							
         							<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
             							<span class="fileupload-preview"></span>
+            							
         							</div>
-        							
+				
         							<div class="input-group-btn">
-						                
+						         
 						                <a class="btn btn-default btn-file">
 						                    <span class="fileupload-new">Select file</span>
 						                    <span class="fileupload-exists">Change</span>
-						                    <input type="file" class="file-input"/>
+						                    <input name="vcf-file-input-field" type="file" class="file-input"/>
 						            	</a>
 						            	
 						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
@@ -77,7 +78,7 @@
 						                <a class="btn btn-default btn-file">
 						                    <span class="fileupload-new">Select file</span>
 						                    <span class="fileupload-exists">Change</span>
-						                    <input type="file" class="file-input"/>
+						                    <input name="zip-file-input-field" type="file" class="file-input"/>
 						                </a>
 						                
 						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
@@ -110,7 +111,17 @@
 			<hr></hr>
 			
 			<h5>Selected Variant Sources</h5>
-			<span><h7>No variants selected</h7></span>
+			<span>
+				<h7>
+					<#if parsed?has_content>
+						<#list parsed as file>
+							${file}
+						</#list>
+					<#else>
+						There are no Variant resources selected
+					</#if>
+				</h7>
+			</span>
 			
 		</div>
 		

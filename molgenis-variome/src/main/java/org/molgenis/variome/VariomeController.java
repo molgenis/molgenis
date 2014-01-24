@@ -7,7 +7,9 @@ import static org.molgenis.variome.VariomeController.URI;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Part;
@@ -58,18 +60,22 @@ public class VariomeController extends MolgenisPluginController{
 		return "view-variome";
 	}
 	
-	@RequestMapping(value = "/upload-vcf", method = RequestMethod.POST)
-	public String handleVcfInput(@RequestParam("file") Part part, Model model) throws IOException {
+	@RequestMapping(value = "/upload-vcf", headers = "content-type=multipart/*",  method = RequestMethod.POST)
+	public String handleVcfInput(@RequestParam("vcf-file-input-field") Part part, Model model) throws IOException {
  
 		if (!part.equals(null) && part.getSize() > 5000000){ // 5mb limit
 			throw new RuntimeException("File too large");
 		}
  
 		File file = FileUploadUtils.saveToTempFolder(part);
+		
+		List<File> listOfFiles = new ArrayList<File>();
+		listOfFiles.add(file);
+		
 		if(file == null){
 			new ObjectError("variome", "No file selected");
 		}else{ 
-			pluginVariomeService.vcfFile(file, model);
+			pluginVariomeService.vcfFile(listOfFiles, model);
 		}
  
 		return "view-variome";

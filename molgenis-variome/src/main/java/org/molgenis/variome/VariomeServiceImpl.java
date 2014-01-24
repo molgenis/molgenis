@@ -1,6 +1,7 @@
 package org.molgenis.variome;
 
 import java.io.File;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -15,7 +16,7 @@ import org.springframework.ui.Model;
 public class VariomeServiceImpl implements VariomeService
 {
 	@Override
-	public File vcfFile(File vcfFile, Model model) {
+	public File[] vcfFile(List<File> vcfFile, Model model) {
 		// TODO Parse vcf file into list for html table
 		
 		model.addAttribute("parsed", vcfFile);
