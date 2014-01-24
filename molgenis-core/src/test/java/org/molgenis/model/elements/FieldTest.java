@@ -15,7 +15,6 @@ import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.model.MolgenisModelException;
 import org.testng.annotations.Test;
 
@@ -372,7 +371,7 @@ public class FieldTest
 	// }
 
 	@Test(expectedExceptions = MolgenisModelException.class)
-	public void testGetXrefLabels_noXrefField() throws DatabaseException, MolgenisModelException
+	public void testGetXrefLabels_noXrefField() throws MolgenisModelException
 	{
 		Field field = new Field(mock(Entity.class), "field", mock(FieldType.class));
 		field.setXRefEntity("xrefEntity");
@@ -406,7 +405,7 @@ public class FieldTest
 	// }
 
 	@Test
-	public void testAllPossibleXrefLabels_noXrefKeys() throws MolgenisModelException, DatabaseException
+	public void testAllPossibleXrefLabels_noXrefKeys() throws MolgenisModelException
 	{
 		Vector<Unique> keys = new Vector<Unique>();
 
@@ -420,7 +419,7 @@ public class FieldTest
 	}
 
 	@Test(expectedExceptions = MolgenisModelException.class)
-	public void testAllPossibleXrefLabels_noXrefField() throws DatabaseException, MolgenisModelException
+	public void testAllPossibleXrefLabels_noXrefField() throws MolgenisModelException
 	{
 		Field field = new Field(mock(Entity.class), "field", mock(FieldType.class));
 		field.setXRefEntity("xrefEntity");

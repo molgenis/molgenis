@@ -39,6 +39,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setIdAttribute(${(entity.primaryKey.name == f.name)?string('true', 'false')});
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
+		${name(f)}.setUnique(${f.unique?string('true', 'false')});
 		<#if f.isXRef()>
 		${name(f)}.setRefEntityName("${f.xrefEntity.name}");
 		</#if>

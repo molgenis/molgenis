@@ -18,7 +18,6 @@ import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Model;
@@ -31,7 +30,7 @@ public class MolgenisModelValidator
 {
 	private static final Logger logger = Logger.getLogger(MolgenisModelValidator.class.getSimpleName());
 
-	public static void validate(Model model, MolgenisOptions options) throws MolgenisModelException, DatabaseException
+	public static void validate(Model model, MolgenisOptions options) throws MolgenisModelException
 	{
 		logger.debug("validating model and adding defaults:");
 
@@ -498,9 +497,8 @@ public class MolgenisModelValidator
 	 * 
 	 * @param model
 	 * @throws MolgenisModelException
-	 * @throws DatabaseException
 	 */
-	public static void validateForeignKeys(Model model) throws MolgenisModelException, DatabaseException
+	public static void validateForeignKeys(Model model) throws MolgenisModelException
 	{
 		logger.debug("validate xref_field and xref_label references...");
 

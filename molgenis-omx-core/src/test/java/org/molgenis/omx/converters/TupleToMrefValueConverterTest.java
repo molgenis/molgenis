@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.value.MrefValue;
 import org.molgenis.util.Cell;
@@ -48,7 +47,7 @@ public class TupleToMrefValueConverterTest
 	}
 
 	@Test
-	public void fromTuple() throws ValueConverterException, DatabaseException
+	public void fromTuple() throws ValueConverterException
 	{
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
 		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();

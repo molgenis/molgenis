@@ -104,8 +104,6 @@ public abstract class ForEachEntityGenerator extends Generator
 					templateArgs.put("file", targetDir + "/" + GeneratorHelper.getJavaName(entity.getName())
 							+ getType() + templatePostFix + getExtension());
 					templateArgs.put("package", packageName);
-
-					templateArgs.put("databaseImp", options.mapper_implementation);
 					templateArgs.put("jpa_use_sequence", options.jpa_use_sequence);
 
 					OutputStream targetOut = new FileOutputStream(targetFile);

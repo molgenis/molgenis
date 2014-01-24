@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutionException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 import org.testng.annotations.Test;
 
@@ -25,7 +24,7 @@ public class CharacteristicLoadingCacheTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void findCharacteristic() throws DatabaseException, ExecutionException
+	public void findCharacteristic() throws ExecutionException
 	{
 		DataService dataService = mock(DataService.class);
 
@@ -47,7 +46,7 @@ public class CharacteristicLoadingCacheTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void findCharacteristics() throws DatabaseException
+	public void findCharacteristics()
 	{
 		DataService dataService = mock(DataService.class);
 		CharacteristicLoadingCache characteristicLoadingCache = new CharacteristicLoadingCache(dataService);

@@ -1,6 +1,5 @@
 package org.molgenis.omx.config;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.search.AsyncDataSetsIndexer;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.omx.search.IndexingEventListener;
@@ -46,11 +45,9 @@ public class DataExplorerConfig
 
 	/**
 	 * Indexes datasets at 4 am every night
-	 * 
-	 * @throws DatabaseException
 	 */
 	@Scheduled(cron = "0 0 4 * * ?")
-	public void indexDataSets() throws DatabaseException
+	public void indexDataSets()
 	{
 		dataSetsIndexer().index();
 	}

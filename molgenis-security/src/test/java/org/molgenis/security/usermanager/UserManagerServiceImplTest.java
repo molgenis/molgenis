@@ -12,7 +12,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -51,13 +50,13 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
-		public DataService dataService() throws DatabaseException
+		public DataService dataService()
 		{
 			return mock(DataService.class);
 		}
 
 		@Bean
-		public UserManagerService userManagerService() throws DatabaseException
+		public UserManagerService userManagerService()
 		{
 			return new UserManagerServiceImpl(dataService());
 		}
@@ -108,42 +107,42 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getAllMolgenisUsersSu() throws DatabaseException
+	public void getAllMolgenisUsersSu()
 	{
 		this.setSecurityContextSuperUser();
 		this.userManagerService.getAllMolgenisUsers();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getAllMolgenisUsersNonSu() throws DatabaseException
+	public void getAllMolgenisUsersNonSu()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getAllMolgenisUsers();
 	}
 
 	@Test
-	public void getAllMolgenisGroupsSu() throws DatabaseException
+	public void getAllMolgenisGroupsSu()
 	{
 		this.setSecurityContextSuperUser();
 		this.userManagerService.getAllMolgenisGroups();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getAllMolgenisGroups_Non_SU() throws DatabaseException
+	public void getAllMolgenisGroups_Non_SU()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getAllMolgenisGroups();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getGroupsWhereUserIsMemberNonUs() throws DatabaseException
+	public void getGroupsWhereUserIsMemberNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getGroupsWhereUserIsMember(Integer.valueOf("1"));
 	}
 
 	@Test
-	public void getGroupsWhereUserIsMemberSu() throws DatabaseException
+	public void getGroupsWhereUserIsMemberSu()
 	{
 		this.setSecurityContextSuperUser();
 
@@ -170,14 +169,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getUsersMemberInGroupNonUs() throws DatabaseException
+	public void getUsersMemberInGroupNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getUsersMemberInGroup(Integer.valueOf("22"));
 	}
 
 	@Test
-	public void getUsersMemberInGroup() throws DatabaseException
+	public void getUsersMemberInGroup()
 	{
 		this.setSecurityContextSuperUser();
 
@@ -202,14 +201,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getGroupsWhereUserIsNotMemberNonUs() throws DatabaseException
+	public void getGroupsWhereUserIsNotMemberNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getGroupsWhereUserIsNotMember(Integer.valueOf("1"));
 	}
 
 	@Test
-	public void getGroupsWhereUserIsNotMemberUs() throws DatabaseException
+	public void getGroupsWhereUserIsNotMemberUs()
 	{
 		setSecurityContextSuperUser();
 
@@ -236,21 +235,21 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void addUserToGroupSu() throws NumberFormatException, DatabaseException
+	public void addUserToGroupSu() throws NumberFormatException
 	{
 		setSecurityContextSuperUser();
 		this.userManagerService.addUserToGroup(Integer.valueOf("22"), Integer.valueOf("1"));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void addUserToGroupNonSu() throws NumberFormatException, DatabaseException
+	public void addUserToGroupNonSu() throws NumberFormatException
 	{
 		setSecurityContextNonSuperUserWrite();
 		this.userManagerService.addUserToGroup(Integer.valueOf("22"), Integer.valueOf("1"));
 	}
 
 	@Test
-	public void removeUserFromGroupSu() throws NumberFormatException, DatabaseException
+	public void removeUserFromGroupSu() throws NumberFormatException
 	{
 		setSecurityContextSuperUser();
 
@@ -273,7 +272,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void removeUserFromGroupNonSu() throws NumberFormatException, DatabaseException
+	public void removeUserFromGroupNonSu() throws NumberFormatException
 	{
 		setSecurityContextNonSuperUserWrite();
 		this.userManagerService.removeUserFromGroup(Integer.valueOf("22"), Integer.valueOf("1"));
