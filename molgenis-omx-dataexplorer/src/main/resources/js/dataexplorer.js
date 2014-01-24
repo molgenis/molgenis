@@ -55,7 +55,7 @@
 						key : this.href,
 						title : this.name,
 						tooltip : this.description,
-						icon : "../../img/filter-bw.png",
+						icon : "../../img/filter-bw.png"
 					}, featureOpts));
 				});
 
@@ -325,30 +325,27 @@
 			case "string" :
 
 				if (divContainer.find(
-						'#' + jqSelector('text_' + feature.identifier)).val() == "") {
+                    $("[id='text_" + feature.identifier+"']")).val() == "") {
 					$(applyButton).prop('disabled', true);
 				}
 				divContainer.find(
-						'#' + jqSelector('text_' + feature.identifier)).keyup(
-						function(e) {
-							if (divContainer.find(
-									'#'
-											+ jqSelector('text_'
-													+ feature.identifier))
-									.val() == "") {
-								$(applyButton).prop('disabled', true);
-							} else {
-								$(applyButton).prop('disabled', false);
-							}
-						});
+                    $("[id='text_" + feature.identifier + "']")).keyup(
+                        function (e) {
+                            if (divContainer.find(
+                                $("[id='text_" + feature.identifier + "']")
+                                    .val() == "")) {
+                                $(applyButton).prop('disabled', true);
+                            } else {
+                                $(applyButton).prop('disabled', false);
+                            }
+                        });
 
 				applyButton.click(function() {
 					molgenis.updateFeatureFilter(featureUri, {
 						name : feature.name,
 						identifier : feature.identifier,
 						type : feature.dataType,
-						values : [$(
-								'#' + jqSelector('text_' + feature.identifier))
+						values : [$("[id='text_" + feature.identifier+"']")
 								.val()]
 					});
 					$('.feature-filter-dialog').dialog('close');
@@ -427,9 +424,9 @@
 					identifier : feature.identifier,
 					type : feature.dataType,
 					values : [
-							$('#' + jqSelector('from_' + feature.identifier))
+							$("[id='from_" + feature.identifier+"']")
 									.val(),
-							$('#' + jqSelector('to_' + feature.identifier))
+							$("[id='to_" + feature.identifier+"']")
 									.val()],
 					range : true
 				});
@@ -553,7 +550,7 @@
 				}
 				divContainer.append(filter);
 				if (wizard) {
-					$('#' + jqSelector('text_' + feature.identifier)).change(
+                    $("[id='text_" + feature.identifier+"']").change(
 							function() {
 								molgenis.updateFeatureFilter(featureUri, {
 									name : feature.name,
@@ -586,14 +583,10 @@
 				}
 
 				datePickerFrom.on('changeDate', function(e) {
-					$(
-							'#'
-									+ jqSelector('date-feature-to_'
-											+ feature.identifier + '')).val(
-							$(
-									'#'
-											+ jqSelector('date-feature-from_'
-													+ feature.identifier + ''))
+                    $("[id='date-feature-to_"
+											+ feature.identifier+"']").val(
+                            $("[id='date-feature-from_"
+													+ feature.identifier+"']")
 									.val());
 				});
 
@@ -643,11 +636,9 @@
 
 				fromFilter.on('keyup input', function() {
 					// If 'from' changed set 'to' at the same value
-					$('#' + jqSelector('to_' + feature.identifier + '')).val(
-							$(
-									'#'
-											+ jqSelector('from_'
-													+ feature.identifier + ''))
+					$("[id='to_" + feature.identifier+"']").val(
+							$("[id='from_"
+													+ feature.identifier + '')
 									.val());
 				});
 
@@ -658,9 +649,8 @@
 				if (wizard) {
 					divContainer
 							.find(
-									'#'
-											+ jqSelector('from_'
-													+ feature.identifier))
+                            $("[id='from_"
+													+ feature.identifier+"']"))
 							.change(
 									function() {
 
@@ -673,21 +663,19 @@
 															type : feature.dataType,
 															values : [
 																	$(
-																			'#'
-																					+ jqSelector('from_'
-																							+ feature.identifier))
+                                                                        $("[id='from_"
+																							+ feature.identifier+"']"))
 																			.val(),
 																	$(
-																			'#'
-																					+ jqSelector('to_'
-																							+ feature.identifier))
+                                                                        $("[id='to_"
+																							+ feature.identifier+"']"))
 																			.val()],
 															range : true
 														});
 
 									});
 					divContainer
-							.find('#' + jqSelector('to_' + feature.identifier))
+							.find($("[id='to_" + feature.identifier+"']"))
 							.change(
 									function() {
 										molgenis
@@ -699,14 +687,12 @@
 															type : feature.dataType,
 															values : [
 																	$(
-																			'#'
-																					+ jqSelector('from_'
-																							+ feature.identifier))
+                                                                        $("[id='from_"
+																							+ feature.identifier+"']"))
 																			.val(),
 																	$(
-																			'#'
-																					+ jqSelector('to_'
-																							+ feature.identifier))
+                                                                        $("[id='to_"
+																							+ feature.identifier+"']"))
 																			.val()],
 															range : true
 														});
@@ -833,7 +819,7 @@
 
 		if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
 			divContainer
-					.find('#' + jqSelector('text_' + feature.identifier))
+					.find($("[id='text_" + feature.identifier+"']"))
 					.autocomplete(
 							{
 								source : function(request, response) {
@@ -888,16 +874,12 @@
 														type : feature.dataType,
 														range : true,
 														values : [
-																$(
-																		'#'
-																				+ jqSelector('date-feature-from_'
-																						+ feature.identifier
-																						+ ''))
+																    $("[id='date-feature-from_"+ feature.identifier
+                                                                        +"']")
 																		.val(),
-																$(
-																		'#date-feature-to_'
+                                                                $("[id='date-feature-to_"
 																				+ feature.identifier
-																				+ '')
+                                                                            +"']")
 																		.val()]
 													});
 								});
@@ -922,20 +904,13 @@
 														type : feature.dataType,
 														range : true,
 														values : [
-																$(
-																		'#'
-																				+ jqSelector('date-feature-from_'
-																						+ feature.identifier
-																						+ ''))
+																$("[id='date-feature-from_"+feature.identifier+"']")
+
 																		.val()
 																		.replace(
 																				"'T'",
 																				"T"),
-																$(
-																		'#'
-																				+ jqSelector('date-feature-to_'
-																						+ feature.identifier
-																						+ ''))
+																$("[id='date-feature-to_"+ feature.identifier+"']")
 																		.val()
 																		.replace(
 																				"'T'",
@@ -1398,8 +1373,4 @@
 		// fire event handler
 		$('#dataset-select').change();
 	});
-
-	function jqSelector(str) {
-		return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, '\\$1');
-	}
 }($, window.top.molgenis = window.top.molgenis || {}));

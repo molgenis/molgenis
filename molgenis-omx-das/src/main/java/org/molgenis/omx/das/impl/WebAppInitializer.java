@@ -20,7 +20,6 @@ public class WebAppInitializer implements WebApplicationInitializer
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException
 	{
-		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		//Filter is needed to alter the urls used to serve patient specific URLs
 		javax.servlet.FilterRegistration.Dynamic filter = servletContext.addFilter("dasFilter", new DasPatientFilter());
 		if (filter == null)

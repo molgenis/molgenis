@@ -96,7 +96,7 @@ public class DatasetElasticSearchRangeHandlingDataSource extends RangeHandlingDa
             }
             //no end position? assume mutation of 1 position, so stop == start
             valueStop = valueMap.get(MUTATION_STOP_POSITION)==null?valueStart:(Integer)valueMap.get(MUTATION_STOP_POSITION);
-            valueDescription = valueMap.get(MUTATION_DESCRIPTION)==""?null:(String)valueMap.get(MUTATION_DESCRIPTION);
+            valueDescription = valueMap.get(MUTATION_DESCRIPTION)==null?"":(String)valueMap.get(MUTATION_DESCRIPTION);
             valueName = valueMap.get(MUTATION_NAME)==null?"":(String)valueMap.get(MUTATION_NAME);
             valueLink = valueMap.get(MUTATION_LINK)==null?"":(String)valueMap.get(MUTATION_LINK);
             if((valueStart>=start&&valueStart<=stop)||(valueStop>=start&&valueStop<=stop)){
