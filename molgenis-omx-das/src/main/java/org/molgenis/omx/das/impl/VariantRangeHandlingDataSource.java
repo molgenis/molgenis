@@ -101,8 +101,8 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 			    patient = findPatient(customParam.substring(8));
             }
 		}
-		if (maxbins == null) maxbins = -1;
-		List<Variant> variants = queryVariants(segmentId, start, stop, patient);
+
+        List<Variant> variants = queryVariants(segmentId, start, stop, patient);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
 		for (Variant variant : variants)
@@ -179,7 +179,7 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 	@Override
 	public Integer getTotalCountForType(DasType type) throws DataSourceException
 	{
-		return new Long(dataService.count(Variant.ENTITY_NAME, new QueryImpl())).intValue();
+		return (int) dataService.count(Variant.ENTITY_NAME, new QueryImpl());
 	}
 
     @Override
