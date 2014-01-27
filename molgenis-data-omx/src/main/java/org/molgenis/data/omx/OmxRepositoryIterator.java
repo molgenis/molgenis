@@ -26,7 +26,7 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	private final SearchService searchService;
 	private Iterator<Hit> hits;
 	private final Set<String> attributeNames;
-	private final long totalCount;
+	private final long pageSize;
 	private int count;
 	private final Query query;
 
@@ -41,14 +41,15 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 
 		SearchResult result = searchService.search(request);
-		totalCount = result.getTotalHitCount();
+		pageSize = q.getPageSize() == 0 ? result.getTotalHitCount() : q.getPageSize();
+
 		hits = result.iterator();
 	}
 
 	@Override
 	public boolean hasNext()
 	{
-		return count < totalCount;
+		return count < pageSize;
 	}
 
 	@Override
