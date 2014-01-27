@@ -76,7 +76,7 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 
 	private Entity hitToEntity(Hit hit)
 	{
-		MapEntity entity = new MapEntity();
+		MapEntity entity = new MapEntity("id");
 		Map<String, Object> values = hit.getColumnValueMap();
 
 		for (Map.Entry<String, Object> entry : values.entrySet())
