@@ -186,5 +186,4 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	{
 		return decoratedRepository.getEntityClass();
 	}
-
 }

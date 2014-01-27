@@ -73,7 +73,7 @@ public class OntologyTermRepository extends AbstractRepository<Entity> implement
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));

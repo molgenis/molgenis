@@ -43,7 +43,7 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public abstract class AbstractJpaRepository<E extends JpaEntity> extends AbstractRepository<E> implements
+public abstract class AbstractJpaRepository<E extends Entity> extends AbstractRepository<E> implements
 		CrudRepository<E>
 {
 	@PersistenceContext
@@ -57,6 +57,17 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		Type t = getClass().getGenericSuperclass();
 		ParameterizedType pt = (ParameterizedType) t;
 		entityClass = (Class<E>) pt.getActualTypeArguments()[0];
+	}
+	
+	public AbstractJpaRepository(Class<E> entityClass)
+	{
+		this.entityClass = entityClass;
+	}
+	
+	public AbstractJpaRepository(EntityManager em, Class<E> entityClass)
+	{
+		this(entityClass);
+		this.entityManager = em;
 	}
 
 	@Override

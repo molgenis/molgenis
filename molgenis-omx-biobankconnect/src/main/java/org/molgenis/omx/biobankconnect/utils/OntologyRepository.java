@@ -61,7 +61,7 @@ public class OntologyRepository extends AbstractRepository<Entity> implements Co
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_URL, FieldTypeEnum.STRING));

@@ -50,7 +50,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (metaData == null)
 		{

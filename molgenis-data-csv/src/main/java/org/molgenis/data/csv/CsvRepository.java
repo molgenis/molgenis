@@ -76,6 +76,11 @@ public class CsvRepository extends AbstractRepository<Entity>
 		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), StringUtils.stripFilenameExtension(file
 				.getName()), cellProcessors);
 	}
+	
+	public CsvRepository(File file) throws FileNotFoundException
+	{
+		this(file, CsvEntitySourceFactory.CELLPROCESSORS);
+	}
 
 	public CsvRepository(File file, char separator, List<CellProcessor> cellProcessors) throws FileNotFoundException
 	{
@@ -172,7 +177,7 @@ public class CsvRepository extends AbstractRepository<Entity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		try
 		{
