@@ -2,7 +2,7 @@
 <div id="orderlist-modal" class="modal hide" tabindex="-1">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="#orderlist-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    <h3>Your Orders</h3>
+    <h3>Your Submissions</h3>
   </div>
   <div class="modal-body">
   	<div id="order-list-container"></div>

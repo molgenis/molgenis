@@ -6,6 +6,7 @@
 		<version>0.0.4</version>
 	</parent>
 	<artifactId>molgenis-omx-protocolviewer</artifactId>
+	<version>0.0.5</version>
 	<packaging>jar</packaging>
 	
 	<build>

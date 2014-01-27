@@ -123,7 +123,7 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 		helper.setTo(molgenisUser.getEmail());
 		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
 		{}));
-		helper.setSubject("Order confirmation from " + appName);
+		helper.setSubject("Submission confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(studyDataRequest, appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
 		helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
@@ -161,8 +161,8 @@ public class OrderStudyDataServiceImpl implements OrderStudyDataService
 	{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("Dear Researcher,\n\n");
-		strBuilder.append("Thank you for ordering at ").append(appName)
-				.append(", attached are the details of your order.\n");
+		strBuilder.append("Thank you for submitting to ").append(appName)
+				.append(", attached are the details of your submission.\n");
 		strBuilder.append("The ").append(appName)
 				.append(" Research Office will contact you upon receiving your application.\n\n");
 		strBuilder.append("Sincerely,\n");
