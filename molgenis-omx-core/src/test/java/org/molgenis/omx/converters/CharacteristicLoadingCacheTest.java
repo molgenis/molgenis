@@ -22,7 +22,6 @@ public class CharacteristicLoadingCacheTest
 		new CharacteristicLoadingCache(null);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void findCharacteristic() throws ExecutionException
 	{
@@ -44,7 +43,6 @@ public class CharacteristicLoadingCacheTest
 		assertEquals(characteristicLoadingCache.findCharacteristic("ch1"), ch1);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void findCharacteristics()
 	{
