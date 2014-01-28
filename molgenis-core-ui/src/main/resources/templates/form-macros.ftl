@@ -152,7 +152,7 @@
 							}
 								
 							<#if form.primaryKey??>
-							if (apiResponse.items[0].href.endsWith('${form.primaryKey}')) {
+							if (apiResponse.items[0].href.endsWith('${form.primaryKey?c}')) {
 								return 'true'; //Update
 							}
 							</#if>
