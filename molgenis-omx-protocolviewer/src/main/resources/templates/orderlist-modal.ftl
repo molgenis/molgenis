@@ -3,7 +3,7 @@
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="#orderlist-modal" data-backdrop="true"
                 aria-hidden="true">&times;</button>
-        <h3>Your Orders</h3>
+        <h3>Your Submissions</h3>
     </div>
     <div class="modal-body">
         <div id="order-list-container"></div>
@@ -30,7 +30,7 @@
                     var items = [];
                     if (data.orders.length > 0) {
                         items.push('<table class="table">');
-                        items.push('<thead><th>#<th>Study</th><th>Order Date</th><th>Status</th><th></th></thead><tbody>');
+                        items.push('<thead><th>#<th>Study</th><th>Submission Date</th><th>Status</th><th></th></thead><tbody>');
                         $.each(data.orders, function (i, order) {
                             var clazz;
                             if (order.orderStatus === 'approved') clazz = 'success';
