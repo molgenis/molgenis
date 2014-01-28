@@ -20,18 +20,17 @@ import org.testng.annotations.Test;
 
 public class ExcelWriterTest
 {
-	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ExcelWriter()
 	{
-		new ExcelWriter((OutputStream) null);
+		new ExcelWriter<Entity>((OutputStream) null);
 	}
 
 	@Test
 	public void ExcelWriterFileFormat_default() throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		new ExcelWriter(bos).close();
+		new ExcelWriter<Entity>(bos).close();
 		byte[] b = bos.toByteArray();
 		assertEquals(b[0] & 0xff, 0xD0);
 		assertEquals(b[1] & 0xff, 0xCF);
@@ -43,7 +42,7 @@ public class ExcelWriterTest
 	public void ExcelWriterFileFormat_XLS() throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		new ExcelWriter(bos, FileFormat.XLS).close();
+		new ExcelWriter<Entity>(bos, FileFormat.XLS).close();
 		byte[] b = bos.toByteArray();
 		assertEquals(b[0] & 0xff, 0xD0);
 		assertEquals(b[1] & 0xff, 0xCF);
@@ -55,7 +54,7 @@ public class ExcelWriterTest
 	public void ExcelWriterFileFormat_XLSX() throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		new ExcelWriter(bos, FileFormat.XLSX).close();
+		new ExcelWriter<Entity>(bos, FileFormat.XLSX).close();
 		byte[] b = bos.toByteArray();
 		assertEquals(b[0] & 0xff, 0x50);
 		assertEquals(b[1] & 0xff, 0x4B);
@@ -69,7 +68,7 @@ public class ExcelWriterTest
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
 
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(os);
 		excelWriter.addCellProcessor(processor);
 		try
 		{
@@ -88,7 +87,7 @@ public class ExcelWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(os);
 		excelWriter.addCellProcessor(processor);
 		try
 		{
@@ -110,7 +109,7 @@ public class ExcelWriterTest
 	public void close() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(os);
 		excelWriter.close();
 		verify(os).close();
 	}
@@ -119,7 +118,7 @@ public class ExcelWriterTest
 	public void createSheet() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(os);
 		try
 		{
 			assertNotNull(excelWriter.createWritable("sheet", null));
@@ -134,7 +133,7 @@ public class ExcelWriterTest
 	public void createSheet_null() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(os);
 		try
 		{
 			assertNotNull(excelWriter.createWritable(null, null));

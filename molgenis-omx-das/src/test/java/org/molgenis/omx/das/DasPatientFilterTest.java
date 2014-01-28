@@ -36,7 +36,6 @@ public class DasPatientFilterTest
 	private HttpServletResponse responseNoPatient;
 	private RequestDispatcher requestDispatcher;
 
-	@SuppressWarnings("unchecked")
 	@BeforeTest
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
