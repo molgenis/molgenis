@@ -36,6 +36,7 @@
 	    <menu label="BiobankConnect" name="biobankconnect">    
 		   	<plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
 	        <plugin id="mappingmanager" name="Curate mappings" url="mappingmanager"/>
+		   	<plugin id="algorithmeditor" name="Algorithm Editor" url="algorithm"/>
 	        <plugin id="evaluation" name="Evaluation" url="evaluation"/>
 	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
         </menu>

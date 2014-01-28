@@ -140,9 +140,6 @@ public class BiobankConnectController extends AbstractWizardController
 		File uploadFile = FileUploadUtils.saveToTempFolder(file);
 		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
 
-		// BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard)
-		// request.getSession().getAttribute(
-		// "biobankconnect");
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
 		for (DataSet dataSet : allDataSets)
