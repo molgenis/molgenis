@@ -170,7 +170,7 @@
 			    processData: false,
 			    success: function () {
 					hideSpinner();
-					$(document).trigger('molgenis-order-placed', 'Your order has been placed');
+					$(document).trigger('molgenis-order-placed', 'Your submission has been received');
 					modal.modal('hide');
 			    },
 			    error: function(xhr) {
