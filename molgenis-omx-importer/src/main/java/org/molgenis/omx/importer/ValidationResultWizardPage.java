@@ -9,10 +9,15 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntitySource;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
+import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.EntityImportedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -61,6 +66,20 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				EntityImportReport importReport = omxImporterService.doImport(repository,
 						importWizard.getDataImportable(), entityDbAction);
 				importWizard.setImportResult(importReport);
+
+				// publish dataset imported event(s)
+				Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME);
+				for (DataSet dataSet : dataSets)
+					ApplicationContextProvider.getApplicationContext().publishEvent(
+							new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+
+				// publish protocol imported event(s)
+				Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
+						new QueryImpl().eq(Protocol.ROOT, true));
+				for (Protocol protocol : protocols)
+					ApplicationContextProvider.getApplicationContext().publishEvent(
+							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
+
 				return "File successfully imported.";
 			}
 			catch (RuntimeException e)
