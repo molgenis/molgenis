@@ -44,6 +44,7 @@ public class VariomeController extends MolgenisPluginController{
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "variome";
 
 	private final VariomeService pluginVariomeService;
+	public List<File> listOfFiles = new ArrayList<File>();
 	
 	@Autowired
 	public VariomeController(VariomeService pluginVariomeService)
@@ -68,8 +69,6 @@ public class VariomeController extends MolgenisPluginController{
 		}
  
 		File file = FileUploadUtils.saveToTempFolder(part);
-		
-		List<File> listOfFiles = new ArrayList<File>();
 		listOfFiles.add(file);
 		
 		// CURRENT FUNCTION: CALLING DATASET ANNOTATER TO TEST
