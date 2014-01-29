@@ -13,55 +13,56 @@ import org.testng.annotations.Test;
 
 public class EmailValueDecoratorTest
 {
+	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void EmailValueDecorator()
 	{
-		new EmailValueDecorator<EmailValue>(null);
+		new EmailValueDecorator(null);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("resource")
 	@Test
 	public void add()
 	{
-		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
+		CrudRepository mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("a1@b.org");
 		EmailValue value2 = new EmailValue();
 		value2.setValue("a2@b.org");
-		new EmailValueDecorator<EmailValue>(mapper).add(Arrays.asList(value1, value2));
+		new EmailValueDecorator(mapper).add(Arrays.asList(value1, value2));
 		verify(mapper).add(Arrays.asList(value1, value2));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("resource")
 	@Test(expectedExceptions = ValidationException.class)
 	public void add_InvalidEmail()
 	{
-		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
+		CrudRepository mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("not an email address");
-		new EmailValueDecorator<EmailValue>(mapper).add(Arrays.asList(value1));
+		new EmailValueDecorator(mapper).add(Arrays.asList(value1));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("resource")
 	@Test
 	public void update()
 	{
-		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
+		CrudRepository mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("a1@b.org");
 		EmailValue value2 = new EmailValue();
 		value2.setValue("a2@b.org");
-		new EmailValueDecorator<EmailValue>(mapper).update(Arrays.asList(value1, value2));
+		new EmailValueDecorator(mapper).update(Arrays.asList(value1, value2));
 		verify(mapper).update(Arrays.asList(value1, value2));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("resource")
 	@Test(expectedExceptions = ValidationException.class)
 	public void update_InvalidEmail()
 	{
-		CrudRepository<EmailValue> mapper = mock(CrudRepository.class);
+		CrudRepository mapper = mock(CrudRepository.class);
 		EmailValue value1 = new EmailValue();
 		value1.setValue("not an email address");
-		new EmailValueDecorator<EmailValue>(mapper).update(Arrays.asList(value1));
+		new EmailValueDecorator(mapper).update(Arrays.asList(value1));
 	}
 }

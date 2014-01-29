@@ -37,7 +37,7 @@ import au.com.bytecode.opencsv.CSVReader;
  * 
  * The filename without the extension is considered to be the entityname
  */
-public class CsvRepository extends AbstractRepository<Entity>
+public class CsvRepository extends AbstractRepository
 {
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	public static final char DEFAULT_SEPARATOR = ',';
@@ -76,7 +76,7 @@ public class CsvRepository extends AbstractRepository<Entity>
 		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), StringUtils.stripFilenameExtension(file
 				.getName()), cellProcessors);
 	}
-	
+
 	public CsvRepository(File file) throws FileNotFoundException
 	{
 		this(file, CsvEntitySourceFactory.CELLPROCESSORS);

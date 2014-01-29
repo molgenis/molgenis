@@ -30,7 +30,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
  * 
  * 
  */
-public class ExcelRepository extends AbstractRepository<Entity>
+public class ExcelRepository extends AbstractRepository
 {
 	private final Sheet sheet;
 

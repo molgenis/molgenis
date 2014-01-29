@@ -169,7 +169,7 @@ public class UploadWizardPage extends AbstractWizardPage
 			// get dataset identifiers (case insensitive)
 			Set<String> datasetIdentifiers = new HashSet<String>();
 
-			Repository<? extends Entity> repo = null;
+			Repository repo = null;
 			try
 			{
 				repo = entitySource.getRepositoryByEntityName(DATASET_PREFIX);

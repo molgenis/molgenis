@@ -24,7 +24,7 @@ import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
 
-public class GoogleSpreadsheetRepository extends AbstractRepository<Entity>
+public class GoogleSpreadsheetRepository extends AbstractRepository
 {
 	public enum Visibility
 	{

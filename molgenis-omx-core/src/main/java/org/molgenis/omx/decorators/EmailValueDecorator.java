@@ -8,11 +8,11 @@ import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.value.EmailValue;
 
-public class EmailValueDecorator<E extends Entity> extends CrudRepositoryDecorator<E>
+public class EmailValueDecorator extends CrudRepositoryDecorator
 {
 	private final EmailValidator emailValidator;
 
-	public EmailValueDecorator(CrudRepository<E> generatedRepository)
+	public EmailValueDecorator(CrudRepository generatedRepository)
 	{
 		super(generatedRepository);
 		emailValidator = new EmailValidator();

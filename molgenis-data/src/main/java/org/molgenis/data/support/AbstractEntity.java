@@ -12,6 +12,13 @@ public abstract class AbstractEntity implements Entity
 	private static final long serialVersionUID = 1L;
 
 	@Override
+	public void set(Entity entity, boolean strict)
+	{
+		this.set(entity);
+
+	}
+
+	@Override
 	public String getString(String attributeName)
 	{
 		return DataConverter.toString(get(attributeName));
@@ -46,7 +53,7 @@ public abstract class AbstractEntity implements Entity
 	{
 		return DataConverter.toDate(get(attributeName));
 	}
-	
+
 	@Override
 	public java.util.Date getUtilDate(String attributeName)
 	{

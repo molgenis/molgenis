@@ -87,7 +87,7 @@ public interface Entity extends Serializable
 	 * Retrieves the value of the designated column as List<Integer>
 	 */
 	public List<Integer> getIntList(String attributeName);
-	
+
 	List<String> getLabelAttributeNames();
 
 	void set(Entity entity, boolean strict);

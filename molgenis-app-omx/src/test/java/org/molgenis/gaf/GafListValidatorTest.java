@@ -44,9 +44,8 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	private Repository<Entity> repository;
+	private Repository repository;
 
-	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{
@@ -95,11 +94,12 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 
 		Query q = new QueryImpl().eq(ObservableFeature.IDENTIFIER, GafListValidator.COL_LAB_STATUS_PHASE);
 		ObservableFeature feature = mock(ObservableFeature.class);
-		when(dataService.findOne(ObservableFeature.ENTITY_NAME, q)).thenReturn(feature);
+		when(dataService.findOne(ObservableFeature.ENTITY_NAME, q, ObservableFeature.class)).thenReturn(feature);
 		Category category1 = mock(Category.class);
 		when(category1.getValueCode()).thenReturn(GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		when(dataService.findAll(Category.ENTITY_NAME, new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature)))
-				.thenReturn(Arrays.<Entity> asList(category1));
+		when(
+				dataService.findAll(Category.ENTITY_NAME, new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature),
+						Category.class)).thenReturn(Arrays.asList(category1));
 
 	}
 

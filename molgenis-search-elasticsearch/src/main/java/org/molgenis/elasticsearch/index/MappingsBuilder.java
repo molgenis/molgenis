@@ -7,7 +7,6 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
@@ -21,7 +20,7 @@ import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
  */
 public class MappingsBuilder
 {
-	public static XContentBuilder buildMapping(Repository<? extends Entity> repository) throws IOException
+	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(repository.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)

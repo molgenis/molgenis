@@ -59,9 +59,9 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	public String init(Model model) throws Exception
 	{
 		// add data sets to model
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 		Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.ROOT, true));
+				new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
 		model.addAttribute("dataSets", dataSets);
 		model.addAttribute("protocols", protocols);
 		return "view-datasetsindexer";
@@ -69,7 +69,8 @@ public class DataSetsIndexerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
+	public DataSetIndexResponse index(@RequestBody
+	DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
 
 		if (dataSetsIndexer.isIndexingRunning())

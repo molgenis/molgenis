@@ -14,7 +14,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -110,13 +109,23 @@ public class ExcelEntitySource implements EntitySource
 	public ExcelRepository getSheet(int i)
 	{
 		Sheet poiSheet = workbook.getSheetAt(i);
-		return poiSheet != null ? new ExcelRepository(poiSheet, cellProcessors) : null;
+		if (poiSheet == null)
+		{
+			return null;
+		}
+
+		return new ExcelRepository(poiSheet, cellProcessors);
 	}
 
 	public ExcelRepository getSheet(String sheetName)
 	{
 		Sheet poiSheet = workbook.getSheet(sheetName);
-		return poiSheet != null ? new ExcelRepository(poiSheet, cellProcessors) : null;
+		if (poiSheet == null)
+		{
+			return null;
+		}
+
+		return new ExcelRepository(poiSheet, cellProcessors);
 	}
 
 	public void addCellProcessor(CellProcessor cellProcessor)
@@ -173,7 +182,7 @@ public class ExcelEntitySource implements EntitySource
 	}
 
 	@Override
-	public Repository<Entity> getRepositoryByEntityName(String entityName) throws UnknownEntityException
+	public Repository getRepositoryByEntityName(String entityName) throws UnknownEntityException
 	{
 		Sheet poiSheet = workbook.getSheet(entityName);
 		if (poiSheet == null)

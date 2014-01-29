@@ -27,6 +27,7 @@ import org.molgenis.data.Writable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -53,7 +54,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Repository<? extends Entity> getRepositoryByEntityName(String entityName)
+	public Repository getRepositoryByEntityName(String entityName)
 	{
 		EntitySourceFactory factory = entitySourceFactoryByEntityName.get(entityName);
 		if (factory == null)
@@ -124,65 +125,58 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName)
+	public Iterable<Entity> findAll(String entityName)
 	{
 		return findAll(entityName, new QueryImpl());
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
+	public Iterable<Entity> findAll(String entityName, Query q)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findAll(q);
+		return getQueryable(entityName).findAll(q);
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids)
+	public Iterable<Entity> findAll(String entityName, Iterable<Integer> ids)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findAll(ids);
+		return getQueryable(entityName).findAll(ids);
 	}
 
 	@Override
-	public <E extends Entity> List<E> findAllAsList(String entityName, Query q)
+	public List<Entity> findAllAsList(String entityName, Query q)
 	{
-		Iterable<E> iterable = findAll(entityName, q);
+		Iterable<Entity> iterable = findAll(entityName, q);
 		return Lists.newArrayList(iterable);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Integer id)
+	public Entity findOne(String entityName, Integer id)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findOne(id);
+		return getQueryable(entityName).findOne(id);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Query q)
+	public Entity findOne(String entityName, Query q)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findOne(q);
+		return getQueryable(entityName).findOne(q);
 	}
 
 	@Override
 	public Integer add(String entityName, Entity entity)
 	{
-		Writable writable = getWritable(entityName);
-		return writable.add(entity);
+		return getWritable(entityName).add(entity);
 	}
 
 	@Override
 	public void add(String entityName, Iterable<? extends Entity> entities)
 	{
-		Writable writable = getWritable(entityName);
-		writable.add(entities);
+		getWritable(entityName).add(entities);
 	}
 
 	@Override
 	public void update(String entityName, Entity entity)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.update(entity);
+		getUpdateable(entityName).update(entity);
 	}
 
 	@Override
@@ -202,32 +196,29 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Iterable<? extends Entity> entities)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.delete(entities);
+		getUpdateable(entityName).delete(entities);
 	}
 
 	@Override
 	public void delete(String entityName, int id)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.deleteById(id);
+		getUpdateable(entityName).deleteById(id);
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E extends Entity> Queryable<E> getQueryable(String entityName)
+	private <E extends Entity> Queryable getQueryable(String entityName)
 	{
-		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Queryable))
 		{
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
 		}
 
-		return (Queryable<E>) repo;
+		return (Queryable) repo;
 	}
 
 	private Writable getWritable(String entityName)
 	{
-		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Writable))
 		{
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't writable");
@@ -238,7 +229,7 @@ public class DataServiceImpl implements DataService
 
 	private Updateable getUpdateable(String entityName)
 	{
-		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Updateable))
 		{
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't updateable");
@@ -265,14 +256,13 @@ public class DataServiceImpl implements DataService
 		return factory.create(file);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> CrudRepository<E> getCrudRepository(String entityName)
+	public CrudRepository getCrudRepository(String entityName)
 	{
-		Repository<? extends Entity> repository = getRepositoryByEntityName(entityName);
+		Repository repository = getRepositoryByEntityName(entityName);
 		if (repository instanceof CrudRepository)
 		{
-			return (CrudRepository<E>) repository;
+			return (CrudRepository) repository;
 		}
 
 		throw new MolgenisDataException("Repository [" + repository.getName() + "] isn't a CrudRepository");
@@ -281,8 +271,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public EntitySource getEntitySource(String url)
 	{
-		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
-		return entitySourceFactory.create(url);
+		return getEntitySourcefactory(url).create(url);
 	}
 
 	private EntitySourceFactory getEntitySourcefactory(String url)
@@ -309,10 +298,54 @@ public class DataServiceImpl implements DataService
 		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
 		for (String entityName : getEntityNames())
 		{
-			Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+			Repository repo = getRepositoryByEntityName(entityName);
 			entityClasses.add(repo.getEntityClass());
 		}
 
 		return entityClasses;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz)
+	{
+		return getQueryable(entityName).findAll(q, clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz)
+	{
+		return getQueryable(entityName).findAll(ids, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz)
+	{
+		Iterable<E> entities = findAll(entityName, ImmutableList.of(id), clazz);
+		Iterator<E> it = entities.iterator();
+		if (it.hasNext())
+		{
+			return it.next();
+		}
+
+		return null;
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
+	{
+		Iterable<E> entities = findAll(entityName, q, clazz);
+		Iterator<E> it = entities.iterator();
+		if (it.hasNext())
+		{
+			return it.next();
+		}
+
+		return null;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
+	{
+		return findAll(entityName, new QueryImpl(), clazz);
 	}
 }

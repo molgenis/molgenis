@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,20 +135,19 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public List<String> getLabelAttributeNames()
 	{
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
 	public void set(Entity entity, boolean strict)
 	{
-		// TODO Auto-generated method stub
-
+		set(entity);
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		throw new UnsupportedOperationException("please implement");
+		return null;
 	}
 
 }

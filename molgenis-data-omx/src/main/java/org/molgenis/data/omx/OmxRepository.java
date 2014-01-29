@@ -6,6 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.dataset.AbstractDataSetMatrixRepository;
 import org.molgenis.omx.observ.ObservationSet;
@@ -16,7 +17,7 @@ import org.molgenis.search.SearchService;
  * 
  * Uses the DataService to get the metadata and the SearchService to get the actual data itself
  */
-public class OmxRepository extends AbstractDataSetMatrixRepository implements Queryable<Entity>
+public class OmxRepository extends AbstractDataSetMatrixRepository implements Queryable
 {
 	private final SearchService searchService;
 
@@ -82,6 +83,18 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	{
 		Query q = new QueryImpl().in(ObservationSet.ID, ids);
 		return findAll(q);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(q));
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 }

@@ -25,7 +25,7 @@ import org.molgenis.omx.observ.Protocol;
 /**
  * Base class for DataSetMatrixRepository and OmxRepository
  */
-public abstract class AbstractDataSetMatrixRepository extends AbstractRepository<Entity>
+public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 {
 	protected final String dataSetIdentifier;
 	protected final DataService dataService;
@@ -111,7 +111,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	protected DataSet getDataSet()
 	{
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
 
 		if (dataSet == null)
 		{

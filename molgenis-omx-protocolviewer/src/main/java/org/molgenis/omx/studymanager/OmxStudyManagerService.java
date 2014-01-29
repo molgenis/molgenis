@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.data.DataService;
@@ -26,7 +25,6 @@ import com.google.common.collect.Lists;
 
 public class OmxStudyManagerService implements StudyManagerService
 {
-	private static final Logger logger = Logger.getLogger(OmxStudyManagerService.class);
 	private final DataService dataService;
 	private final MolgenisUserService molgenisUserService;
 
@@ -41,7 +39,8 @@ public class OmxStudyManagerService implements StudyManagerService
 	@Override
 	public List<StudyDefinition> getStudyDefinitions()
 	{
-		Iterable<StudyDataRequest> studyDataRequests = dataService.findAll(StudyDataRequest.ENTITY_NAME);
+		Iterable<StudyDataRequest> studyDataRequests = dataService.findAll(StudyDataRequest.ENTITY_NAME,
+				StudyDataRequest.class);
 
 		return Lists.newArrayList(Iterables.transform(studyDataRequests,
 				new Function<StudyDataRequest, StudyDefinition>()
@@ -61,7 +60,8 @@ public class OmxStudyManagerService implements StudyManagerService
 		Iterable<StudyDataRequest> studyDataRequest = dataService.findAll(
 				StudyDataRequest.ENTITY_NAME,
 				new QueryImpl().eq(StudyDataRequest.MOLGENISUSER, user).and()
-						.eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase()));
+						.eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase()), StudyDataRequest.class);
+
 		return Lists.newArrayList(Iterables.transform(studyDataRequest,
 				new Function<StudyDataRequest, StudyDefinition>()
 				{
@@ -77,7 +77,7 @@ public class OmxStudyManagerService implements StudyManagerService
 	public StudyDefinition getStudyDefinition(String id) throws UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.ID, id));
+				new QueryImpl().eq(StudyDataRequest.ID, id), StudyDataRequest.class);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
 
@@ -122,7 +122,8 @@ public class OmxStudyManagerService implements StudyManagerService
 	public StudyDefinition createStudyDefinition(String username, String catalogId, String omxIdentifier)
 	{
 		MolgenisUser user = molgenisUserService.getUser(username);
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogId));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogId),
+				Protocol.class);
 
 		StudyDataRequest studyDataRequest = new StudyDataRequest();
 		studyDataRequest.setIdentifier(omxIdentifier);
@@ -142,7 +143,8 @@ public class OmxStudyManagerService implements StudyManagerService
 	{
 		String id = studyDefinition.getId();
 		Query q = new QueryImpl().eq(StudyDataRequest.ID, id);
-		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME, q);
+		StudyDataRequest studyDataRequest = dataService
+				.findOne(StudyDataRequest.ENTITY_NAME, q, StudyDataRequest.class);
 		if (studyDataRequest == null)
 		{
 			throw new UnknownStudyDefinitionException("Study definition [" + id + "] does not exist");
@@ -158,7 +160,7 @@ public class OmxStudyManagerService implements StudyManagerService
 					{
 						String id = catalogItem.getId();
 						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-								new QueryImpl().eq(ObservableFeature.ID, id));
+								new QueryImpl().eq(ObservableFeature.ID, id), ObservableFeature.class);
 						if (feature == null)
 						{
 							throw new RuntimeException("Observable feature does not exist identifier: " + id);
@@ -176,7 +178,8 @@ public class OmxStudyManagerService implements StudyManagerService
 			UnknownCatalogException
 	{
 		Query q = new QueryImpl().eq(StudyDataRequest.ID, id);
-		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME, q);
+		StudyDataRequest studyDataRequest = dataService
+				.findOne(StudyDataRequest.ENTITY_NAME, q, StudyDataRequest.class);
 		if (studyDataRequest == null)
 		{
 			throw new UnknownStudyDefinitionException("Study definition [" + id + "] does not exist");

@@ -9,11 +9,11 @@ import java.util.List;
  * 
  * In subclass override the methods you want to decorate
  */
-public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository<E>
+public class CrudRepositoryDecorator implements CrudRepository
 {
-	private final CrudRepository<E> decoratedRepository;
+	private final CrudRepository decoratedRepository;
 
-	public CrudRepositoryDecorator(CrudRepository<E> decoratedRepository)
+	public CrudRepositoryDecorator(CrudRepository decoratedRepository)
 	{
 		if (decoratedRepository == null) throw new IllegalArgumentException("decoratedRepository is null");
 		this.decoratedRepository = decoratedRepository;
@@ -56,7 +56,7 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public Iterable<E> findAll(Query q)
+	public Iterable<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
 	}
@@ -86,7 +86,7 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public E findOne(Query q)
+	public Entity findOne(Query q)
 	{
 		return decoratedRepository.findOne(q);
 	}
@@ -116,13 +116,13 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public Iterator<E> iterator()
+	public Iterator<Entity> iterator()
 	{
 		return decoratedRepository.iterator();
 	}
 
 	@Override
-	public E findOne(Integer id)
+	public Entity findOne(Integer id)
 	{
 		return decoratedRepository.findOne(id);
 	}
@@ -146,7 +146,7 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	}
 
 	@Override
-	public Iterable<E> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
 		return decoratedRepository.findAll(ids);
 	}
@@ -185,5 +185,23 @@ public class CrudRepositoryDecorator<E extends Entity> implements CrudRepository
 	public Class<? extends Entity> getEntityClass()
 	{
 		return decoratedRepository.getEntityClass();
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		return decoratedRepository.iterator(clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return decoratedRepository.findAll(q, clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	{
+		return decoratedRepository.findAll(ids, clazz);
 	}
 }

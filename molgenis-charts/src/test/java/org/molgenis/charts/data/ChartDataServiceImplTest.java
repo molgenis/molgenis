@@ -49,13 +49,13 @@ public class ChartDataServiceImplTest
 		e2.set("probe", 1.6);
 		entities.add(e2);
 
-		final Repository<Entity> repo = mock(Repository.class);
+		final Repository repo = mock(Repository.class);
 		when(repo.iterator()).thenReturn(entities.iterator());
 
-		when(dataServiceMock.getRepositoryByEntityName(entityName)).thenAnswer(new Answer<Repository<Entity>>()
+		when(dataServiceMock.getRepositoryByEntityName(entityName)).thenAnswer(new Answer<Repository>()
 		{
 			@Override
-			public Repository<Entity> answer(InvocationOnMock invocation) throws Throwable
+			public Repository answer(InvocationOnMock invocation) throws Throwable
 			{
 				return repo;
 			}

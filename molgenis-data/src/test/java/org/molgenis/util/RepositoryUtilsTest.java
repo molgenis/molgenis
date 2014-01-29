@@ -16,16 +16,15 @@ import org.testng.annotations.Test;
 public class RepositoryUtilsTest
 {
 	@Test
-	@SuppressWarnings("unchecked")
 	public void count()
 	{
 		Countable countable = mock(Countable.class, withSettings().extraInterfaces(Repository.class));
 		when(countable.count()).thenReturn(100l);
-		long count = RepositoryUtils.count((Repository<Entity>) countable);
+		long count = RepositoryUtils.count((Repository) countable);
 		assertEquals(count, 100);
 
-		Repository<MapEntity> repo = mock(Repository.class);
-		when(repo.iterator()).thenReturn(Arrays.asList(new MapEntity()).iterator());
+		Repository repo = mock(Repository.class);
+		when(repo.iterator()).thenReturn(Arrays.<Entity> asList(new MapEntity()).iterator());
 		count = RepositoryUtils.count(repo);
 		assertEquals(count, 1);
 	}

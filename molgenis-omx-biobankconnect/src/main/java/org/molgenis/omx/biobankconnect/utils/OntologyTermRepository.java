@@ -17,7 +17,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.semanticweb.owlapi.model.OWLClass;
 
-public class OntologyTermRepository extends AbstractRepository<Entity> implements Countable
+public class OntologyTermRepository extends AbstractRepository implements Countable
 {
 	private final OntologyLoader loader;
 	private final String ontologyIRI;

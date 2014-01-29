@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntitySource;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
@@ -53,7 +52,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 
 		// publish dataset imported event(s)
 
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : dataSets)
 			ApplicationContextProvider.getApplicationContext().publishEvent(
 					new DataSetImportedEvent(this, dataSet.getId()));

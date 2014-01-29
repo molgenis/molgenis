@@ -45,11 +45,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class EntitiesImporterImpl implements EntitiesImporter
 {
 	/** importable entity names (lowercase) */
-	private static final Map<String, EntityImporter<? extends Entity>> ENTITIES_IMPORTABLE;
+	private static final Map<String, EntityImporter> ENTITIES_IMPORTABLE;
 	
 	static {
 		// entities added in import order
-		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter<? extends Entity>>();
+		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter>();
 	<#list entities as entity>
 		<#if !entity.abstract && !entity.system>
 		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", new ${JavaName(entity)}EntityImporter());
@@ -77,7 +77,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 	@Override
 	@Transactional(rollbackFor =
 	{ IOException.class})
-	public EntityImportReport importEntities(final Repository<? extends Entity> repository, final String entityName,
+	public EntityImportReport importEntities(final Repository repository, final String entityName,
 			DatabaseAction dbAction) throws IOException
 	{
 
@@ -91,7 +91,7 @@ public class EntitiesImporterImpl implements EntitiesImporter
 			}
 
 			@Override
-			public Repository<? extends Entity> getRepositoryByEntityName(String name)
+			public Repository getRepositoryByEntityName(String name)
 			{
 				return repository;
 			}
@@ -121,20 +121,20 @@ public class EntitiesImporterImpl implements EntitiesImporter
 		try
 		{
 			// map entity names on repositories
-			Map<String, Repository<? extends Entity>> repositoryMap = new HashMap<String, Repository<? extends Entity>>();
+			Map<String, Repository> repositoryMap = new HashMap<String, Repository>();
 			for (String entityName : entitySource.getEntityNames())
 			{
 				repositoryMap.put(entityName.toLowerCase(), entitySource.getRepositoryByEntityName(entityName));
 			}
 
 			// import entities in order defined by entities map
-			for (Map.Entry<String, EntityImporter<? extends Entity>> entry : ENTITIES_IMPORTABLE.entrySet())
+			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
 			{
 				String entityName = entry.getKey();
-				Repository<? extends Entity> repository = repositoryMap.get(entityName);
+				Repository repository = repositoryMap.get(entityName);
 				if (repository != null)
 				{
-					EntityImporter<? extends Entity> entityImporter = entry.getValue();
+					EntityImporter entityImporter = entry.getValue();
 					int nr = entityImporter.importEntity(repository, dataService, dbAction);
 					if (nr > 0)
 					{

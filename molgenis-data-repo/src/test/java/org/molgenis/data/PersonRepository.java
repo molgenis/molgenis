@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
-import org.molgenis.data.jpa.AbstractJpaRepository;
+import org.molgenis.data.jpa.JpaRepository;
 import org.molgenis.data.support.EntityMetaDataCache;
 
-public class PersonRepository extends AbstractJpaRepository<Person>
+public class PersonRepository extends JpaRepository<Person>
 {	
 	public PersonRepository()
 	{

@@ -26,7 +26,7 @@ import org.molgenis.omx.utils.I18nTools;
 
 import com.google.common.collect.Iterables;
 
-public class CategoryRepository extends AbstractRepository<Entity> implements Countable
+public class CategoryRepository extends AbstractRepository implements Countable
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
@@ -126,7 +126,7 @@ public class CategoryRepository extends AbstractRepository<Entity> implements Co
 		else
 		{
 			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()));
+					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()), Category.class);
 
 			count.addAndGet(Iterables.size(categories));
 		}
@@ -145,7 +145,7 @@ public class CategoryRepository extends AbstractRepository<Entity> implements Co
 		else
 		{
 			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()));
+					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()), Category.class);
 
 			for (Category c : categories)
 			{

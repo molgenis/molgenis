@@ -20,6 +20,11 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 		this.metaData = metaData;
 	}
 
+	public EntityMetaData getEntityMetaData()
+	{
+		return metaData;
+	}
+
 	@Override
 	public void set(Entity entity)
 	{
@@ -31,13 +36,6 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 				set(attribute.getName(), value);
 			}
 		}
-	}
-	
-	@Override
-	public void set(Entity entity, boolean strict)
-	{
-		this.set(entity);
-		
 	}
 
 	@Override
@@ -76,7 +74,8 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	@Override
 	public List<String> getLabelAttributeNames()
 	{
-		return Arrays.asList(new String[]{getLabelValue()});
+		return Arrays.asList(new String[]
+		{ getLabelValue() });
 	}
 
 }
