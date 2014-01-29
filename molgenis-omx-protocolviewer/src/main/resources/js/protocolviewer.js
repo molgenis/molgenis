@@ -71,7 +71,6 @@
 				$.each(molgenis.i18n.getAll(feature.description), function(key, val) {
 					table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 				});
-
 				table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 				if (feature.unit)
 					table.append('<tr><td>' + "Unit:" + '</td><td>' + (feature.unit.name ? feature.unit.name : '') + '</td></tr>');
