@@ -2,14 +2,12 @@ package org.molgenis.charts.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.ChartDataService;
@@ -24,9 +22,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -35,7 +31,6 @@ import org.springframework.stereotype.Component;
 public class ChartDataServiceImpl implements ChartDataService
 {
 	private final DataService dataService;
-	private static final Logger logger = Logger.getLogger(ChartDataServiceImpl.class);
 
 	@Autowired
 	public ChartDataServiceImpl(DataService dataService)
@@ -47,15 +42,14 @@ public class ChartDataServiceImpl implements ChartDataService
 	@Override
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
-	{	
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);		
+	{
+		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
 		final FieldTypeEnum attributeXFieldTypeEnum = repo.getAttribute(attributeNameXaxis).getDataType().getEnumType();
 		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
 		final List<XYDataSerie> xYDataSeries;
-		
-		//Sanity check
-		if(FieldTypeEnum.DECIMAL.equals(attributeXFieldTypeEnum)
-				|| FieldTypeEnum.INT.equals(attributeXFieldTypeEnum)
+
+		// Sanity check
+		if (FieldTypeEnum.DECIMAL.equals(attributeXFieldTypeEnum) || FieldTypeEnum.INT.equals(attributeXFieldTypeEnum)
 				|| FieldTypeEnum.LONG.equals(attributeXFieldTypeEnum)
 				|| FieldTypeEnum.DATE.equals(attributeXFieldTypeEnum)
 				|| FieldTypeEnum.DATE_TIME.equals(attributeXFieldTypeEnum)
@@ -75,11 +69,14 @@ public class ChartDataServiceImpl implements ChartDataService
 				xYDataSeries = this.getXYDataSeries(repo, entityName, attributeNameXaxis, attributeNameYaxis,
 						attributeXFieldTypeEnum, attributeYFieldTypeEnum, split, queryRules);
 			}
-			
+
 			return new XYDataChart(xYDataSeries, MolgenisAxisType.getType(attributeXFieldTypeEnum),
 					MolgenisAxisType.getType(attributeYFieldTypeEnum));
-		}else{
-			throw new MolgenisChartException("For the x and the y axis selected datatype are wrong. Scatterplots can only handle Continuous data");
+		}
+		else
+		{
+			throw new MolgenisChartException(
+					"For the x and the y axis selected datatype are wrong. Scatterplots can only handle Continuous data");
 		}
 	}
 
@@ -93,7 +90,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				+ repo.getAttribute(attributeNameYaxis).getLabel());
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
-		
+
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		for (Entity entity : iterable)
@@ -102,13 +99,13 @@ public class ChartDataServiceImpl implements ChartDataService
 			Object y = getJavaValue(entity, attributeNameYaxis, attributeYFieldTypeEnum);
 			serie.addData(new XYData(x, y));
 		}
-		
+
 		return serie;
 	}
 
 	@Override
 	public List<XYDataSerie> getXYDataSeries(Repository<? extends Entity> repo, String entityName,
-			String attributeNameXaxis, String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, 
+			String attributeNameXaxis, String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum,
 			FieldTypeEnum attributeYFieldTypeEnum, String split, List<QueryRule> queryRules)
 	{
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
@@ -233,7 +230,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	{
 		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
 		final boolean splitList = StringUtils.isNotBlank(split);
-		
+
 		if (splitList)
 		{
 			for (Entity entity : iterable)
@@ -273,7 +270,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @return
 	 */
 	@SuppressWarnings(
-	{ "deprecation", "unchecked" })
+	{ "unchecked" })
 	private Iterable<? extends Entity> getIterable(String entityName, Repository<? extends Entity> repo,
 			List<QueryRule> queryRules, Sort sort)
 	{
@@ -309,8 +306,8 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @return value (Object)
 	 */
 	private Object getJavaValue(Entity entity, String attributeName, FieldTypeEnum attributeFieldTypeEnum)
-	{	
-		if(FieldTypeEnum.DECIMAL.equals(attributeFieldTypeEnum))
+	{
+		if (FieldTypeEnum.DECIMAL.equals(attributeFieldTypeEnum))
 		{
 			return entity.getDouble(attributeName);
 		}
