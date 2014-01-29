@@ -10,6 +10,7 @@
 	var catalogueChooser = new ns.CatalogueChooser();
 	var ontologyAnnotator = new ns.OntologyAnnotator();
 	var mappingManager = new ns.MappingManager();
+	var algorithmEditor = new ns.AlgorithmEditor();
 
 	ns.setContextURL = function(CONTEXT_URL){
 		this.CONTEXT_URL = CONTEXT_URL;
@@ -41,6 +42,10 @@
 	
 	ns.getMappingManager = function() {
 		return mappingManager;
+	};
+	
+	ns.getAlgorithmEditor = function() {
+		return algorithmEditor;
 	};
 	
 	ns.ontologyMatcherRunning = function(callback, contextUrl) {

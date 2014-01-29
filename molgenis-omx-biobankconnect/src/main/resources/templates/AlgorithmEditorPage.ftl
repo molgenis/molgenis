@@ -3,21 +3,8 @@
 		<div class="span12">
 			<div class="row-fluid">
 				<div id="div-info" class="span12 well">	
+					<legend>Curate mappings for : <strong>${wizard.selectedDataSet.name}</strong></legend>
 					<div class="row-fluid">
-						<div class="span9"><legend class="legend">
-							Browse catalogue : 
-							<select id="selectedDataSetId" name="selectedDataSetId">
-								<#if wizard.selectedDataSet??>
-									<#list wizard.dataSets as dataset>
-										<option value="${dataset.id?c}"<#if dataset.id?c == wizard.selectedDataSet.id?c> selected</#if>>${dataset.name}</option>
-									</#list>
-								<#else>
-									<#list wizard.dataSets as dataset>
-										<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
-									</#list>
-								</#if>
-							</select>
-						</div>
 						<div  id="div-search" class="span3">
 							<div><strong>Search data items :</strong></div>
 							<div class="input-append">
@@ -46,54 +33,18 @@
 			</div>
 		</div>
 	</div>
-	<div class="row-fluid">
-		<div id="import-features-modal" class="modal hide">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3>Import features</h3>
-			</div>
-			<div class="modal-body">
-				<div><strong>Please input dataSet name</strong></div>
-				<div><input type="text" id="dataSetName" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div><br>
-				<div><strong>Please upload features</strong></div>
-				<div>
-					<div class="fileupload fileupload-new" data-provides="fileupload">
-						<div class="input-append">
-							<div class="uneditable-input">
-								<i class="icon-file fileupload-exists"></i>
-								<span class="fileupload-preview"></span>
-							</div>
-							<span class="btn btn-file btn-info">
-								<span class="fileupload-new">Select file</span>
-								<span class="fileupload-exists">Change</span>
-								<input type="file" id="uploadedOntology" name="file" required/>
-							</span>
-							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
-						</div>
-						<div class="float-right"><a href="/html/example-data.csv">Download example data</a></div>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<a href="#" class="btn" data-dismiss="modal">Close</a>
-				<a href="#" class="btn btn-primary" id="import-features">Import features</a>
-			</div>
-		</div>
-	</div>
+	<script src="/js/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript">
 		$(function(){
+			var dataSetIds = [];
+			<#list wizard.selectedBiobanks as dataSetId>
+				dataSetIds.push('${dataSetId?c}');
+			</#list>
 			var molgenis = window.top.molgenis;
-			
-			molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+			molgenis.setContextURL('${context_url}');
+			molgenis.getAlgorithmEditor().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			$('#selectedDataSetId').change(function(){
-				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
-			});
-			if($('#selectedDataSetId option').length === 0){
-				$('.pager li.next').addClass('disabled');
-			}
-			$('#import-data-button').click(function(){
-				$('#import-features-modal').modal('show');
-				return false;
+				molgenis.getAlgorithmEditor().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			});
 		});
 	</script>

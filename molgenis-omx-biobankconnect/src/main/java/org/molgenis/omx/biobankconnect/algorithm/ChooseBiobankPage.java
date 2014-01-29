@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 @Component
-public class ChooseBiobanksPage extends AbstractWizardPage
+public class ChooseBiobankPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
 

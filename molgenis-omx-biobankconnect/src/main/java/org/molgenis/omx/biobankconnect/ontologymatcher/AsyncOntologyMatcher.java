@@ -2,6 +2,7 @@ package org.molgenis.omx.biobankconnect.ontologymatcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -198,7 +199,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								.append(dataSetId);
 						if (featureId != null) observationValuesPerDataSet.put(dataSetIdentifier.toString(),
 								new ArrayList<ObservedValue>());
-						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(dataSetId.toString(), finalQuery);
+						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(dataSetId.toString(), finalQuery)
+								.iterator();
 						while (mappedFeatureHits.hasNext())
 						{
 							Hit mappedFeatureHit = mappedFeatureHits.next();
@@ -347,6 +349,64 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 	}
 
+	@Override
+	public SearchResult generateMapping(String userName, Integer selectedDataSet, Integer dataSetToMatch,
+			Integer featureId)
+	{
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100001);
+		q.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
+		SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, q, null));
+		List<Hit> searchHits = result.getSearchHits();
+		if (searchHits.size() > 0)
+		{
+			Hit hit = searchHits.get(0);
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			Integer id = DataConverter.toInt(columnValueMap.get(ObservableFeature.ID));
+			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, id);
+			if (feature != null)
+			{
+				Set<String> boostedOntologyTermUris = new HashSet<String>();
+				for (String ontolgoyTermUri : columnValueMap.get(FIELD_BOOST_ONTOLOGYTERM).toString().split(","))
+				{
+					boostedOntologyTermUris.add(ontolgoyTermUri);
+				}
+				String description = feature.getDescription() == null || feature.getDescription().isEmpty() ? feature
+						.getName() : feature.getDescription();
+				description = description.replaceAll("[^a-zA-Z0-9 ]", " ");
+				List<OntologyTerm> definitions = feature.getDefinitions();
+
+				List<QueryRule> rules = new ArrayList<QueryRule>();
+				if (definitions != null && definitions.size() > 0)
+				{
+					Map<String, OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(definitions,
+							boostedOntologyTermUris);
+					rules.addAll(makeQueryForOntologyTerms(createQueryRules(description, ontologyTermContainers)));
+
+					for (Map<Integer, List<BoostTermContainer>> alternativeDefinition : addAlternativeDefinition(ontologyTermContainers))
+					{
+						QueryRule queryRule = new QueryRule(makeQueryForOntologyTerms(alternativeDefinition));
+						queryRule.setOperator(Operator.DIS_MAX);
+						queryRule.setValue(0.6);
+						rules.add(queryRule);
+					}
+				}
+				else rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, description));
+
+				QueryRule finalQueryRule = new QueryRule(rules);
+				finalQueryRule.setOperator(Operator.DIS_MAX);
+
+				QueryImpl finalQuery = new QueryImpl();
+				finalQuery.addRule(finalQueryRule);
+				StringBuilder dataSetIdentifier = new StringBuilder();
+				dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
+						.append(dataSetToMatch);
+				return searchDisMaxQuery(dataSetToMatch.toString(), finalQuery);
+			}
+		}
+		return new SearchResult(0, Collections.<Hit> emptyList());
+	}
+
 	private void preprocessing(String userName, Integer featureId, Integer selectedDataSet,
 			List<Integer> dataSetsToMatch)
 	{
@@ -372,10 +432,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				new QueryImpl().in(DataSet.IDENTIFIER, dataSetsForMapping));
 		for (DataSet dataSet : dataSets)
 		{
+			@SuppressWarnings("deprecation")
 			List<ObservationSet> listOfObservationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
 					new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
 			if (listOfObservationSets.size() > 0)
 			{
+				@SuppressWarnings("deprecation")
 				List<ObservedValue> listOfObservedValues = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
 						new QueryImpl().in(ObservedValue.OBSERVATIONSET, listOfObservationSets));
 
@@ -410,9 +472,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 		if (observationSets.size() > 0)
 		{
+			@SuppressWarnings("deprecation")
 			List<ObservationSet> existingObservationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
 					new QueryImpl().in(ObservationSet.ID, observationSets));
 
+			@SuppressWarnings("deprecation")
 			List<ObservedValue> existingObservedValues = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
 					new QueryImpl().in(ObservedValue.OBSERVATIONSET, existingObservationSets));
 
@@ -548,7 +612,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return allQueries;
 	}
 
-	private Iterator<Hit> searchDisMaxQuery(String dataSetId, Query q)
+	private SearchResult searchDisMaxQuery(String dataSetId, Query q)
 	{
 		SearchResult result = null;
 		try
@@ -563,7 +627,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			result = new SearchResult(e.getMessage());
 			logger.error("Exception failed to search the request " + result, e);
 		}
-		return result.iterator();
+		return result;
 	}
 
 	private Map<String, OntologyTermContainer> collectOntologyTermInfo(List<OntologyTerm> definitions,
@@ -904,6 +968,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			throw new MolgenisDataException("Unknown DataSet [" + dataSetIdentifier + "]");
 		}
 
+		@SuppressWarnings("deprecation")
 		List<ObservationSet> listOfObservationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
 		if (listOfObservationSets.size() > 0) return true;
@@ -950,8 +1015,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		private final HashMap<String, String> alternativeDefinitions;
 		private final Map<String, Boolean> allPaths;
 		private final Set<String> selectedOntologyTerms;
-
-		// private final Map<String, String>
 
 		public OntologyTermContainer(String ontologyIRI)
 		{

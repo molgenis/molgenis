@@ -169,7 +169,7 @@
 			q.sort.orders = [sortRule];
 		}
 		
-		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
+		searchApi.search(pagination.createSearchRequest(documentType, q), function(searchResponse) {
 			var searchHits = searchResponse.searchHits;
 			var tableObject = $('#dataitem-table');
 			var tableBody = $('<tbody />');

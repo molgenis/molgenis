@@ -225,7 +225,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
 				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
-				"simple_statistics.js", "biobank-connect.js");
+				"simple_statistics.js", "algorithm-editor.js", "biobank-connect.js");
 	}
 
 	@Override
@@ -233,6 +233,7 @@ public class BiobankConnectController extends AbstractWizardController
 	public List<String> getStylesheets()
 	{
 		return Arrays.asList("bootstrap-fileupload.min.css", "jquery-ui-1.9.2.custom.min.css", "biobank-connect.css",
-				"catalogue-chooser.css", "ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css");
+				"catalogue-chooser.css", "ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css",
+				"algorithm-editor.css");
 	}
 }

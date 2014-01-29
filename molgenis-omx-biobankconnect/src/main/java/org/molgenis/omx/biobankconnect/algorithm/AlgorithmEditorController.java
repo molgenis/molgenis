@@ -1,9 +1,11 @@
 package org.molgenis.omx.biobankconnect.algorithm;
 
 import static org.molgenis.omx.biobankconnect.algorithm.AlgorithmEditorController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,19 +13,24 @@ import javax.servlet.http.HttpServletRequest;
 import org.molgenis.data.DataService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
 import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
-import org.molgenis.omx.biobankconnect.wizard.OntologyMatcherPage;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.search.Hit;
+import org.molgenis.search.SearchResult;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
@@ -45,21 +52,21 @@ public class AlgorithmEditorController extends AbstractWizardController
 
 	private BiobankConnectWizard wizard;
 	private final AlgorithmEditorPage algorithmEditorPage;
-	private final OntologyMatcherPage ontologyMatcherPage;
+	private final ChooseBiobankPage chooseBiobanksPage;
 	private final ChooseCataloguePage chooseCataloguePage;
 	private final OntologyAnnotatorPage ontologyAnnotatorPage;
 
 	@Autowired
-	public AlgorithmEditorController(AlgorithmEditorPage algorithmEditorPage, OntologyMatcherPage ontologyMatcherPage,
+	public AlgorithmEditorController(AlgorithmEditorPage algorithmEditorPage, ChooseBiobankPage chooseBiobanksPage,
 			ChooseCataloguePage chooseCataloguePage, OntologyAnnotatorPage ontologyAnnotatorPage)
 	{
 		super(URI, ID);
 		if (algorithmEditorPage == null) throw new IllegalArgumentException("algorithmEditorPage is null!");
-		if (ontologyMatcherPage == null) throw new IllegalArgumentException("algorithmSourcePage is null!");
+		if (chooseBiobanksPage == null) throw new IllegalArgumentException("chooseBiobanksPage is null!");
 		if (chooseCataloguePage == null) throw new IllegalArgumentException("chooseCataloguePage is null!");
 		if (ontologyAnnotatorPage == null) throw new IllegalArgumentException("ontologyAnnotatorPage is null!");
 		this.algorithmEditorPage = algorithmEditorPage;
-		this.ontologyMatcherPage = ontologyMatcherPage;
+		this.chooseBiobanksPage = chooseBiobanksPage;
 		this.chooseCataloguePage = chooseCataloguePage;
 		this.ontologyAnnotatorPage = ontologyAnnotatorPage;
 	}
@@ -93,9 +100,24 @@ public class AlgorithmEditorController extends AbstractWizardController
 		wizard.setUserName(userAccountService.getCurrentUser().getUsername());
 		wizard.addPage(chooseCataloguePage);
 		wizard.addPage(ontologyAnnotatorPage);
-		wizard.addPage(ontologyMatcherPage);
+		wizard.addPage(chooseBiobanksPage);
 		wizard.addPage(algorithmEditorPage);
 		return wizard;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/createmapping", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public SearchResult createMappings(@RequestBody
+	OntologyMatcherRequest request)
+	{
+		String userName = userAccountService.getCurrentUser().getUsername();
+		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
+		if (selectedDataSetIds.size() > 0)
+		{
+			return ontologyMatcher.generateMapping(userName, request.getSourceDataSetId(), selectedDataSetIds.get(0),
+					request.getFeatureId());
+		}
+		return new SearchResult(0, Collections.<Hit> emptyList());
 	}
 
 	@Override
@@ -104,7 +126,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 	{
 		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
 				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
-				"simple_statistics.js", "biobank-connect.js", "algorithm-editor.js");
+				"simple_statistics.js", "algorithm-editor.js", "biobank-connect.js");
 	}
 
 	@Override

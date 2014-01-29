@@ -160,11 +160,10 @@
 		this.modal.appendTo('body');
 		this.modal.addClass('modal hide');
 		this.modal.attr('id', 'annotation-modal');
-		this.modal.attr('data-backdrop', false);
 		
 		var header = $('<div />').css('cursor','pointer');
 		header.addClass('modal-header');
-		header.append('<button type="button" name="annotation-btn-close" class="close" data-dismiss="#annotation-modal" data-backdrop="true" aria-hidden="true">&times;</button>');
+		header.append('<button type="button" name="annotation-btn-close" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
 		header.append('<h3>' + title + '</h3>');
 		
 		var body = $('<div />');
@@ -172,16 +171,14 @@
 	
 		var footer = $('<div />');
 		footer.addClass('modal-footer');
-		footer.append('<button name="annotation-btn-close" class="btn" data-dismiss="#annotation-modal" aria-hidden="true">Close</button>');
+		footer.append('<button name="annotation-btn-close" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>');
 
 		this.modal.append(header);
 		this.modal.append(body);
 		this.modal.append(footer);
 		this.modal.modal({
+			'backdrop' : true,
 			'show' : false
-		}).draggable();
-		$('button[name="annotation-btn-close"]').click(function(){
-			$('#annotation-modal').remove();
 		});
 		callback(this.modal);
 	};
