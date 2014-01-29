@@ -84,8 +84,7 @@
 					$('<thead />').append('<th>Code</th><th>Label</th><th>Description</th>').appendTo(categoryTable);
 					feature.categories.sort(function(category1, category2) {
 						return molgenis.naturalSort(category1.valueCode, category2.valueCode);
-					});
-					
+					});			
 					$.each(feature.categories, function(i, category) {
 						var row = $('<tr />');
 						$('<td />').text(category.valueCode).appendTo(row);
