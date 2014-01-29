@@ -1167,6 +1167,7 @@ public class MolgenisModelValidator
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static final String[] HSQL_KEYWORDS =
 	{ "ALIAS", "ALTER", "AUTOCOMMIT", "CALL", "CHECKPOINT", "COMMIT", "CONNECT", "CREATE", "COLLATION", "COUNT",
 			"DATABASE", "DEFRAG", "DELAY", "DELETE", "DISCONNECT", "DROP", "END", "EXPLAIN", "EXTRACT", "GRANT",

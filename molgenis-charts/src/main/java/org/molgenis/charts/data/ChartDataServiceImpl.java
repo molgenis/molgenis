@@ -44,6 +44,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			String split, List<QueryRule> queryRules)
 	{
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
+
 		final FieldTypeEnum attributeXFieldTypeEnum = repo.getAttribute(attributeNameXaxis).getDataType().getEnumType();
 		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
 		final List<XYDataSerie> xYDataSeries;
@@ -107,6 +108,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public List<XYDataSerie> getXYDataSeries(Repository repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules)
+
 	{
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
@@ -269,6 +271,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 *            (Sort)
 	 * @return
 	 */
+
 	private Iterable<Entity> getIterable(String entityName, Repository repo, List<QueryRule> queryRules, Sort sort)
 	{
 		if (!(repo instanceof Queryable))

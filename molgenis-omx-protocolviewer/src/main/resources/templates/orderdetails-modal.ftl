@@ -4,7 +4,7 @@
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="#orderdetails-${order.id}-modal" data-backdrop="true"
                 aria-hidden="true">&times;</button>
-        <h3>Order details</h3>
+        <h3>Submission details</h3>
     </div>
     <div class="modal-body">
         <h5>Project title: ${order.name}</h5>
