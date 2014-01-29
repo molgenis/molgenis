@@ -72,10 +72,13 @@ public class VariomeController extends MolgenisPluginController{
 		List<File> listOfFiles = new ArrayList<File>();
 		listOfFiles.add(file);
 		
+		// CURRENT FUNCTION: CALLING DATASET ANNOTATER TO TEST
+		// TODO: CHANGE THIS INTO A FULLY FUNCTIONAL SINGLE FILE UPLOAD CONTROLLER
+		
 		if(file == null){
 			new ObjectError("variome", "No file selected");
 		}else{ 
-			pluginVariomeService.vcfFile(listOfFiles, model);
+			pluginVariomeService.dataSetAnnotater();
 		}
  
 		return "view-variome";
