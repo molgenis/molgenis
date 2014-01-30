@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Characteristic;
 
 import com.google.common.base.Function;
@@ -46,7 +46,7 @@ class CharacteristicLoadingCache
 				});
 	}
 
-	public Characteristic findCharacteristic(String identifier) throws DatabaseException
+	public Characteristic findCharacteristic(String identifier)
 	{
 		Integer primaryKey;
 		try
@@ -55,13 +55,13 @@ class CharacteristicLoadingCache
 		}
 		catch (ExecutionException e)
 		{
-			throw new DatabaseException(e);
+			throw new MolgenisDataException(e);
 		}
 
-		return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey);
+		return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey, Characteristic.class);
 	}
 
-	public List<Characteristic> findCharacteristics(List<String> identifiers) throws DatabaseException
+	public List<Characteristic> findCharacteristics(List<String> identifiers)
 	{
 		final ImmutableMap<String, Integer> characteristicIdMap;
 		try
@@ -70,7 +70,7 @@ class CharacteristicLoadingCache
 		}
 		catch (ExecutionException e)
 		{
-			throw new DatabaseException(e);
+			throw new MolgenisDataException(e);
 		}
 
 		return Lists.transform(identifiers, new Function<String, Characteristic>()
@@ -79,15 +79,15 @@ class CharacteristicLoadingCache
 			public Characteristic apply(String identifier)
 			{
 				Integer primaryKey = characteristicIdMap.get(identifier);
-				return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey);
+				return dataService.findOne(Characteristic.ENTITY_NAME, primaryKey, Characteristic.class);
 			}
 		});
 	}
 
-	private Integer findCharacteristicId(String identifier) throws DatabaseException, ValueConverterException
+	private Integer findCharacteristicId(String identifier) throws ValueConverterException
 	{
 		Characteristic characteristic = dataService.findOne(Characteristic.ENTITY_NAME,
-				new QueryImpl().eq(Characteristic.IDENTIFIER, identifier));
+				new QueryImpl().eq(Characteristic.IDENTIFIER, identifier), Characteristic.class);
 
 		if (characteristic == null)
 		{
@@ -97,22 +97,25 @@ class CharacteristicLoadingCache
 	}
 
 	private Map<String, Integer> findCharacteristicIds(Iterable<? extends String> identifiersIterable)
-			throws DatabaseException, ValueConverterException
+			throws ValueConverterException
 	{
 		List<String> identifiers = Lists.newArrayList(identifiersIterable);
-		List<Characteristic> values = dataService.findAllAsList(Characteristic.ENTITY_NAME,
-				new QueryImpl().in(Characteristic.IDENTIFIER, identifiers));
+		Iterable<Characteristic> values = dataService.findAll(Characteristic.ENTITY_NAME,
+				new QueryImpl().in(Characteristic.IDENTIFIER, identifiers), Characteristic.class);
+		List<Characteristic> valueList = Lists.newArrayList(values);
 
 		final int nrIdentifiers = identifiers.size();
-		if (nrIdentifiers != values.size())
+		if (nrIdentifiers != valueList.size())
 		{
 			String identifiersStr = StringUtils.join(identifiers, ',');
 			throw new ValueConverterException("one or more characteristics do not exist [" + identifiersStr + "]");
 		}
 
 		Map<String, Integer> characteristicMap = Maps.<String, Integer> newHashMapWithExpectedSize(nrIdentifiers);
+
 		for (int i = 0; i < nrIdentifiers; ++i)
-			characteristicMap.put(identifiers.get(i), values.get(i).getId());
+			characteristicMap.put(identifiers.get(i), valueList.get(i).getId());
+
 		return characteristicMap;
 	}
 }

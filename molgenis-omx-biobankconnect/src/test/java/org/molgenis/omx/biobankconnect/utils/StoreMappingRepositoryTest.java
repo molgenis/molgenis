@@ -15,14 +15,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverterException;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.BoolValue;
-import org.molgenis.omx.observ.value.XrefValue;
+import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.omx.utils.ValueCell;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,7 +30,7 @@ public class StoreMappingRepositoryTest
 {
 	StoreMappingRepository repository;
 	DataService dataService;
-	private static final String dataSetIdentifer = "test-set";
+	private static final String dataSetIdentifier = "test-set";
 	private static final String OBSERVATION_SET = "observation_set";
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
@@ -63,12 +62,12 @@ public class StoreMappingRepositoryTest
 		when(p.getFeatures()).thenReturn(Arrays.asList(feature1, feature2, feature3));
 
 		DataSet dataSet = mock(DataSet.class);
-		when(dataSet.getIdentifier()).thenReturn(dataSetIdentifer);
+		when(dataSet.getIdentifier()).thenReturn(dataSetIdentifier);
 		when(dataSet.getProtocolUsed()).thenReturn(p);
 
 		Query q = new QueryImpl();
-		q.eq(DataSet.IDENTIFIER, dataSetIdentifer);
-		when(dataService.findOne(DataSet.ENTITY_NAME, q)).thenReturn(dataSet);
+		q.eq(DataSet.IDENTIFIER, dataSetIdentifier);
+		when(dataService.findOne(DataSet.ENTITY_NAME, q, DataSet.class)).thenReturn(dataSet);
 
 		ObservationSet observationSet = mock(ObservationSet.class);
 		when(observationSet.getId()).thenReturn(1);
@@ -76,8 +75,8 @@ public class StoreMappingRepositoryTest
 
 		Query q2 = new QueryImpl();
 		q2.eq(ObservationSet.PARTOFDATASET, dataSet);
-		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME, q2)).thenReturn(
-				Arrays.<Entity> asList(observationSet));
+		when(dataService.findAll(ObservationSet.ENTITY_NAME, q2, ObservationSet.class)).thenReturn(
+				Arrays.asList(observationSet));
 
 		ObservedValue observedValue1 = mock(ObservedValue.class);
 		when(observedValue1.getObservationSet()).thenReturn(observationSet);
@@ -86,21 +85,15 @@ public class StoreMappingRepositoryTest
 		when(observedValue1.getValue()).thenReturn(value1);
 		when(observedValue1.getFeature()).thenReturn(feature3);
 
-		Characteristic ch2 = mock(Characteristic.class);
-		when(ch2.getId()).thenReturn(2);
-		XrefValue value2 = new XrefValue();
-		value2.setValue(ch2);
-
+		IntValue value2 = new IntValue();
+		value2.setValue(1230);
 		ObservedValue observedValue2 = mock(ObservedValue.class);
 		when(observedValue2.getObservationSet()).thenReturn(observationSet);
 		when(observedValue2.getValue()).thenReturn(value2);
 		when(observedValue2.getFeature()).thenReturn(feature1);
 
-		Characteristic ch3 = mock(Characteristic.class);
-		when(ch3.getId()).thenReturn(3);
-		XrefValue value3 = new XrefValue();
-		value3.setValue(ch3);
-
+		IntValue value3 = new IntValue();
+		value3.setValue(2134);
 		ObservedValue observedValue3 = mock(ObservedValue.class);
 		when(observedValue3.getObservationSet()).thenReturn(observationSet);
 		when(observedValue3.getValue()).thenReturn(value3);
@@ -108,10 +101,10 @@ public class StoreMappingRepositoryTest
 
 		Query q4 = new QueryImpl();
 		q4.in(ObservedValue.OBSERVATIONSET, Arrays.asList(observationSet));
-		when(dataService.findAll(ObservedValue.ENTITY_NAME, q4)).thenReturn(
-				Arrays.<Entity> asList(observedValue1, observedValue2, observedValue3));
+		when(dataService.findAll(ObservedValue.ENTITY_NAME, q4, ObservedValue.class)).thenReturn(
+				Arrays.asList(observedValue1, observedValue2, observedValue3));
 
-		repository = new StoreMappingRepository(dataSetIdentifer, dataService);
+		repository = new StoreMappingRepository(dataSet, dataService);
 	}
 
 	@Test
@@ -124,19 +117,13 @@ public class StoreMappingRepositoryTest
 	}
 
 	@Test
-	public void count()
-	{
-		assertEquals(repository.count(), 1);
-	}
-
-	@Test
 	public void iterator()
 	{
 		Iterator<Entity> iterator = repository.iterator();
 		assertTrue(iterator.hasNext());
 		Entity tuple1 = iterator.next();
-		assertEquals(tuple1.get(STORE_MAPPING_FEATURE), 2);
-		assertEquals(tuple1.get(STORE_MAPPING_MAPPED_FEATURE), 3);
+		assertEquals(Integer.parseInt(tuple1.get(STORE_MAPPING_FEATURE).toString()), 1230);
+		assertEquals(Integer.parseInt(tuple1.get(STORE_MAPPING_MAPPED_FEATURE).toString()), 2134);
 		@SuppressWarnings("unchecked")
 		ValueCell<BoolValue> cell = (ValueCell<BoolValue>) tuple1.get(STORE_MAPPING_CONFIRM_MAPPING);
 		assertEquals(cell.getValue(), Boolean.FALSE);

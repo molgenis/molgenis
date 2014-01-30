@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.core.Identifiable;
 
 /**
@@ -27,7 +26,7 @@ public class NameConvention
 	 * @return
 	 * @throws Exception
 	 */
-	public static String escapeFileName(String name) throws DatabaseException
+	public static String escapeFileName(String name)
 	{
 		// trim whitespace
 		name = name.trim();
@@ -57,7 +56,7 @@ public class NameConvention
 		// check final length, may not be empty
 		if (output.isEmpty())
 		{
-			throw new DatabaseException("Escaped filename of '" + name + "' is an empty string.");
+			throw new IllegalArgumentException("Escaped filename of '" + name + "' is an empty string.");
 		}
 
 		return output;
@@ -74,7 +73,7 @@ public class NameConvention
 	 * @return
 	 * @throws Exception
 	 */
-	public static String escapeEntityNameStrict(String name) throws DatabaseException
+	public static String escapeEntityNameStrict(String name)
 	{
 		// trim whitespace
 		name = name.trim();
@@ -115,7 +114,7 @@ public class NameConvention
 		// check final length, may not be empty
 		if (output.isEmpty())
 		{
-			throw new DatabaseException("Escaped name of '" + name + "' is an empty string.");
+			throw new IllegalArgumentException("Escaped name of '" + name + "' is an empty string.");
 		}
 
 		return output;
@@ -126,24 +125,22 @@ public class NameConvention
 	 * input is empty or untrimmed, if other characters than lowercase alphabetics, numbers or underscore are used, or
 	 * when the name is longer than 50 characters. Note that filenames are allowed to start with numerals, while
 	 * entitynames are not. In practice however, to-be filenames are already checked as being valid entitynames first.
-	 * 
-	 * @throws DatabaseException
 	 */
-	public static void validateFileName(String name) throws DatabaseException
+	public static void validateFileName(String name)
 	{
 		if (name.length() == 0)
 		{
-			throw new DatabaseException("File name is empty.");
+			throw new IllegalArgumentException("File name is empty.");
 		}
 
 		if (name.length() != name.trim().length())
 		{
-			throw new DatabaseException("File name '" + name + "' is untrimmed.");
+			throw new IllegalArgumentException("File name '" + name + "' is untrimmed.");
 		}
 
 		if (name.length() > 50)
 		{
-			throw new DatabaseException("File name is longer than 50 characters.");
+			throw new IllegalArgumentException("File name is longer than 50 characters.");
 		}
 
 		// check for illegal characters
@@ -153,7 +150,7 @@ public class NameConvention
 			Matcher m = p1.matcher(s + "");
 			if (!m.matches())
 			{
-				throw new DatabaseException("Illegal character (" + s + ") in file name '" + name
+				throw new IllegalArgumentException("Illegal character (" + s + ") in file name '" + name
 						+ "'. Use only a-z, 0-9, and underscore.");
 			}
 		}
@@ -163,21 +160,20 @@ public class NameConvention
 	 * Validates an entity name, checking that only characters from the set [<>/a-zA-Z0-9_\\s\\-:.(),;\\+] are used.
 	 * 
 	 * @param name
-	 * @throws DatabaseException
 	 */
-	public static void validateEntityName(String name) throws DatabaseException
+	public static void validateEntityName(String name)
 	{
 		// pattern for bbmri ([a-zA-Z0-9_\\s\\-:.(),;\\+])
 		String pattern = "([<>/a-zA-Z0-9_\\s\\-:.(),;\\+\\*])";
 
 		if (name == null || name.length() == 0)
 		{
-			throw new DatabaseException("Name is empty.");
+			throw new IllegalArgumentException("Name is empty.");
 		}
 
 		if (name.length() != name.trim().length())
 		{
-			throw new DatabaseException("Name '" + name + "' is untrimmed.");
+			throw new IllegalArgumentException("Name '" + name + "' is untrimmed.");
 		}
 
 		// check for illegal characters
@@ -187,7 +183,7 @@ public class NameConvention
 			Matcher m2 = p2.matcher(s + "");
 			if (!m2.matches())
 			{
-				throw new DatabaseException("Illegal character (" + s + ") in name '" + name
+				throw new IllegalArgumentException("Illegal character (" + s + ") in name '" + name
 						+ "'. Use only allowed characters from the set " + pattern);
 			}
 		}
@@ -199,18 +195,17 @@ public class NameConvention
 	 * alphabetics, numerals or underscore are used, or when the name starts with a numeral.
 	 * 
 	 * @param name
-	 * @throws DatabaseException
 	 */
-	public static void validateEntityNameStrict(String name) throws DatabaseException
+	public static void validateEntityNameStrict(String name)
 	{
 		if (name.length() == 0)
 		{
-			throw new DatabaseException("Name is empty.");
+			throw new IllegalArgumentException("Name is empty.");
 		}
 
 		if (name.length() != name.trim().length())
 		{
-			throw new DatabaseException("Name '" + name + "' is untrimmed.");
+			throw new IllegalArgumentException("Name '" + name + "' is untrimmed.");
 		}
 
 		// check if first character is a number
@@ -219,8 +214,8 @@ public class NameConvention
 		Matcher m1 = p1.matcher(firstChar);
 		if (m1.matches())
 		{
-			throw new DatabaseException("Name '" + name + "' is not allowed to start with a numeral (" + firstChar
-					+ ").");
+			throw new IllegalArgumentException("Name '" + name + "' is not allowed to start with a numeral ("
+					+ firstChar + ").");
 		}
 
 		// check for illegal characters
@@ -230,7 +225,7 @@ public class NameConvention
 			Matcher m2 = p2.matcher(s + "");
 			if (!m2.matches())
 			{
-				throw new DatabaseException("Illegal character (" + s + ") in name '" + name
+				throw new IllegalArgumentException("Illegal character (" + s + ") in name '" + name
 						+ "'. Use only a-z, A-Z, 0-9, and underscore.");
 			}
 		}
@@ -241,9 +236,8 @@ public class NameConvention
 	 * 
 	 * @param <E>
 	 * @param entities
-	 * @throws DatabaseException
 	 */
-	public static <E extends Identifiable> void validateEntityNames(List<E> entities) throws DatabaseException
+	public static <E extends Identifiable> void validateEntityNames(List<E> entities)
 	{
 		for (E i : entities)
 		{
@@ -257,9 +251,8 @@ public class NameConvention
 	 * 
 	 * @param <E>
 	 * @param entities
-	 * @throws DatabaseException
 	 */
-	public static <E extends Identifiable> void validateEntityNamesStrict(List<E> entities) throws DatabaseException
+	public static <E extends Identifiable> void validateEntityNamesStrict(List<E> entities)
 	{
 		for (E i : entities)
 		{

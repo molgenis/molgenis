@@ -20,7 +20,6 @@ import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.omx.observ.DataSet;
@@ -162,8 +161,7 @@ public class UploadWizardPage extends AbstractWizardPage
 		return msg;
 	}
 
-	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException,
-			DatabaseException
+	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException
 	{
 		EntitySource entitySource = dataService.createEntitySource(file);
 		try
@@ -171,7 +169,7 @@ public class UploadWizardPage extends AbstractWizardPage
 			// get dataset identifiers (case insensitive)
 			Set<String> datasetIdentifiers = new HashSet<String>();
 
-			Repository<? extends Entity> repo = null;
+			Repository repo = null;
 			try
 			{
 				repo = entitySource.getRepositoryByEntityName(DATASET_PREFIX);
@@ -187,9 +185,10 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 			finally
 			{
-                if(repo!=null){
-				    repo.close();
-                }
+				if (repo != null)
+				{
+					repo.close();
+				}
 			}
 
 			// validate dataset matrices

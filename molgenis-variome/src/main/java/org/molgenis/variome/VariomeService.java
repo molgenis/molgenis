@@ -1,9 +1,5 @@
 package org.molgenis.variome;
 
-import java.io.File;
-
-import org.springframework.ui.Model;
-
 /**
  * Interface that must be implemented by a VariomeService
  * 
@@ -12,5 +8,5 @@ import org.springframework.ui.Model;
  */
 public interface VariomeService
 {
-	File vcfFile(File vcfFile, Model model);
+	void dataSetAnnotater();
 }

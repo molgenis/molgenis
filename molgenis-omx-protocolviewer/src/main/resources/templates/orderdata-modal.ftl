@@ -3,7 +3,7 @@
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="#orderdata-modal" data-backdrop="true"
                 aria-hidden="true">&times;</button>
-        <h3>Order Study Data</h3>
+        <h3>Submit Study Request</h3>
     </div>
     <div class="modal-body">
     <#-- order data form -->
@@ -29,7 +29,7 @@
     </div>
     <div class="modal-footer">
         <a href="#" id="orderdata-btn-close" class="btn" aria-hidden="true">Cancel</a>
-        <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Order</a>
+        <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Submit</a>
     </div>
 </div>
 <script type="text/javascript">
@@ -174,7 +174,7 @@
                 processData: false,
                 success: function () {
                     hideSpinner();
-                    $(document).trigger('molgenis-order-placed', 'Your order has been placed');
+                    $(document).trigger('molgenis-order-placed', 'Your submission has been received');
                     modal.modal('hide');
                 },
                 error: function (xhr) {

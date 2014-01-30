@@ -32,10 +32,10 @@
 		    	ns.fillDataSetSelect();
 		    	parent.hideSpinner();
 		    },
-		    error:function (xhr, ajaxOptions, thrownError){ 
+		    error: function (xhr) {
 		    	parent.hideSpinner();
-		    	$('#plugin-container').before($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>An error occurred while deleting the dataset</div>'));  
-		 } 
-	});
-};
+		    	molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+			}  
+		 }); 
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));

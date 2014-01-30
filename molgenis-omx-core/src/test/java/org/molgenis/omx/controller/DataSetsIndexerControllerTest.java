@@ -7,10 +7,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.controller.DataSetsIndexerController.DataSetIndexRequest;
 import org.molgenis.omx.controller.DataSetsIndexerControllerTest.Config;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,9 @@ public class DataSetsIndexerControllerTest extends AbstractTestNGSpringContextTe
 	@Autowired
 	private DataSetsIndexerController dataSetsIndexerController;
 
+	@Autowired
+	private DataService dataService;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
@@ -56,6 +63,10 @@ public class DataSetsIndexerControllerTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void init() throws Exception
 	{
+		when(dataService.findAll(DataSet.ENTITY_NAME, DataSet.class)).thenReturn(Collections.<DataSet> emptyList());
+		when(dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ROOT, true), Protocol.class))
+				.thenReturn(Collections.<Protocol> emptyList());
+
 		mockMvc.perform(get(DataSetsIndexerController.URI)).andExpect(status().isOk());
 	}
 

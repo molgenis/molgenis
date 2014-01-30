@@ -29,27 +29,35 @@ public class OntologyMatcherPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
-		BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
-		Integer selectedDataSetId = biobankConnectWizard.getSelectedDataSet().getId();
-		List<Integer> selectedTargetDataSetIds = new ArrayList<Integer>();
-
-		for (String id : request.getParameter("selectedTargetDataSets").split(","))
+		if (wizard instanceof BiobankConnectWizard)
 		{
-			selectedTargetDataSetIds.add(Integer.parseInt(id));
-		}
-		biobankConnectWizard.setSelectedBiobanks(selectedTargetDataSetIds);
+			BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
+			Integer selectedDataSetId = ((BiobankConnectWizard) wizard).getSelectedDataSet().getId();
+			List<Integer> selectedTargetDataSetIds = new ArrayList<Integer>();
 
-		try
-		{
-			ontologyMatcher
-					.match(biobankConnectWizard.getUserName(), selectedDataSetId, selectedTargetDataSetIds, null);
+			for (String id : request.getParameter("selectedTargetDataSets").split(","))
+			{
+				selectedTargetDataSetIds.add(Integer.parseInt(id));
+			}
+			biobankConnectWizard.setSelectedBiobanks(selectedTargetDataSetIds);
 
+			try
+			{
+				ontologyMatcher.match(biobankConnectWizard.getUserName(), selectedDataSetId, selectedTargetDataSetIds,
+						null);
+
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException("Error occurs when matching dataset " + selectedDataSetId
+						+ " with datasets " + selectedTargetDataSetIds);
+			}
 		}
-		catch (Exception e)
+		else
 		{
-			new RuntimeException("Error occurs when matching dataset " + selectedDataSetId + " with datasets "
-					+ selectedTargetDataSetIds);
+			throw new RuntimeException("The generic wizard has gone wrong");
 		}
+
 		return null;
 	}
 }

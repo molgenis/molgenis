@@ -9,10 +9,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -51,13 +49,13 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
-		public DataService dataService() throws DatabaseException
+		public DataService dataService()
 		{
 			return mock(DataService.class);
 		}
 
 		@Bean
-		public UserManagerService userManagerService() throws DatabaseException
+		public UserManagerService userManagerService()
 		{
 			return new UserManagerServiceImpl(dataService());
 		}
@@ -108,42 +106,42 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getAllMolgenisUsersSu() throws DatabaseException
+	public void getAllMolgenisUsersSu()
 	{
 		this.setSecurityContextSuperUser();
 		this.userManagerService.getAllMolgenisUsers();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getAllMolgenisUsersNonSu() throws DatabaseException
+	public void getAllMolgenisUsersNonSu()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getAllMolgenisUsers();
 	}
 
 	@Test
-	public void getAllMolgenisGroupsSu() throws DatabaseException
+	public void getAllMolgenisGroupsSu()
 	{
 		this.setSecurityContextSuperUser();
 		this.userManagerService.getAllMolgenisGroups();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getAllMolgenisGroups_Non_SU() throws DatabaseException
+	public void getAllMolgenisGroups_Non_SU()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getAllMolgenisGroups();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getGroupsWhereUserIsMemberNonUs() throws DatabaseException
+	public void getGroupsWhereUserIsMemberNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getGroupsWhereUserIsMember(Integer.valueOf("1"));
 	}
 
 	@Test
-	public void getGroupsWhereUserIsMemberSu() throws DatabaseException
+	public void getGroupsWhereUserIsMemberSu()
 	{
 		this.setSecurityContextSuperUser();
 
@@ -159,25 +157,25 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		molgenisGroupMemberTwo.setMolgenisGroup(group21);
 		molgenisGroupMemberTwo.setMolgenisUser(user1);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1)).thenReturn(user1);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1, MolgenisUser.class)).thenReturn(user1);
 		when(
-				dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1))).thenReturn(
-				Arrays.<Entity> asList(molgenisGroupMemberOne, molgenisGroupMemberTwo));
+				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
+				.thenReturn(Arrays.asList(molgenisGroupMemberOne, molgenisGroupMemberTwo));
 		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsMember(1);
 
 		assertEquals(groups.size(), 2);
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getUsersMemberInGroupNonUs() throws DatabaseException
+	public void getUsersMemberInGroupNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getUsersMemberInGroup(Integer.valueOf("22"));
 	}
 
 	@Test
-	public void getUsersMemberInGroup() throws DatabaseException
+	public void getUsersMemberInGroup()
 	{
 		this.setSecurityContextSuperUser();
 
@@ -191,25 +189,25 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, 22)).thenReturn(group22);
+		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, 22, MolgenisGroup.class)).thenReturn(group22);
 		when(
-				dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, group22))).thenReturn(
-				Arrays.<Entity> asList(molgenisGroupMember));
+				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, group22), MolgenisGroupMember.class))
+				.thenReturn(Arrays.asList(molgenisGroupMember));
 
 		List<MolgenisUserViewData> users = this.userManagerService.getUsersMemberInGroup(22);
 		assertEquals(users.size(), 1);
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getGroupsWhereUserIsNotMemberNonUs() throws DatabaseException
+	public void getGroupsWhereUserIsNotMemberNonUs()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getGroupsWhereUserIsNotMember(Integer.valueOf("1"));
 	}
 
 	@Test
-	public void getGroupsWhereUserIsNotMemberUs() throws DatabaseException
+	public void getGroupsWhereUserIsNotMemberUs()
 	{
 		setSecurityContextSuperUser();
 
@@ -222,35 +220,35 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1)).thenReturn(user1);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1, MolgenisUser.class)).thenReturn(user1);
 
 		when(
-				dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1))).thenReturn(
-				Arrays.<Entity> asList(molgenisGroupMember));
-		when(dataService.findAllAsList(MolgenisGroup.ENTITY_NAME, new QueryImpl())).thenReturn(
-				Arrays.<Entity> asList(group22, group33, group44));
+				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
+				.thenReturn(Arrays.asList(molgenisGroupMember));
+		when(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class)).thenReturn(
+				Arrays.asList(group22, group33, group44));
 
 		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsNotMember(1);
 		assertEquals(groups.size(), 2);
 	}
 
 	@Test
-	public void addUserToGroupSu() throws NumberFormatException, DatabaseException
+	public void addUserToGroupSu() throws NumberFormatException
 	{
 		setSecurityContextSuperUser();
 		this.userManagerService.addUserToGroup(Integer.valueOf("22"), Integer.valueOf("1"));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void addUserToGroupNonSu() throws NumberFormatException, DatabaseException
+	public void addUserToGroupNonSu() throws NumberFormatException
 	{
 		setSecurityContextNonSuperUserWrite();
 		this.userManagerService.addUserToGroup(Integer.valueOf("22"), Integer.valueOf("1"));
 	}
 
 	@Test
-	public void removeUserFromGroupSu() throws NumberFormatException, DatabaseException
+	public void removeUserFromGroupSu() throws NumberFormatException
 	{
 		setSecurityContextSuperUser();
 
@@ -260,20 +258,20 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1)).thenReturn(user1);
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, 22)).thenReturn(group22);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, 1, MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, 22, MolgenisGroup.class)).thenReturn(group22);
 
 		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1).and()
 				.eq(MolgenisGroupMember.MOLGENISGROUP, group22);
 
-		when(dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME, q)).thenReturn(
-				Arrays.<Entity> asList(molgenisGroupMember));
+		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME, q, MolgenisGroupMember.class)).thenReturn(
+				Arrays.asList(molgenisGroupMember));
 
 		this.userManagerService.removeUserFromGroup(22, 1);
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void removeUserFromGroupNonSu() throws NumberFormatException, DatabaseException
+	public void removeUserFromGroupNonSu() throws NumberFormatException
 	{
 		setSecurityContextNonSuperUserWrite();
 		this.userManagerService.removeUserFromGroup(Integer.valueOf("22"), Integer.valueOf("1"));

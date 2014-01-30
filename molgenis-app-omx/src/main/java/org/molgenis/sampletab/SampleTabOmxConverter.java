@@ -32,11 +32,11 @@ public class SampleTabOmxConverter
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
 
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(inputFilePath));
-		WritableFactory<Entity> writableFactory = new ExcelWriter<Entity>(new File(inputFilePath + ".Omx.xls"));
+		WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
 
 		try
 		{
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName(sheetName);
+			Repository repo = entitySource.getRepositoryByEntityName(sheetName);
 			try
 			{
 				// Collect headers as features to be imported in Omx-format
@@ -61,10 +61,10 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	private void addOntologyTermTab(WritableFactory<Entity> writableFactory) throws IOException
+	private void addOntologyTermTab(WritableFactory writableFactory) throws IOException
 	{
-		Writable<Entity> ontologyTermSheet = writableFactory.createWritable("ontologyTerm",
-				Arrays.asList("identifier", "name"));
+		Writable ontologyTermSheet = writableFactory
+				.createWritable("ontologyTerm", Arrays.asList("identifier", "name"));
 		try
 		{
 			for (Entry<String, String> entry : unitOntologyTermsForFeatures.entrySet())
@@ -83,11 +83,11 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	private void addObserableFeatureTab(WritableFactory<Entity> writableFactory, List<String> listOfObservableFeatures)
+	private void addObserableFeatureTab(WritableFactory writableFactory, List<String> listOfObservableFeatures)
 			throws IOException
 	{
 		List<String> headers = Arrays.asList("identifier", "name", "unit_Identifier");
-		Writable<Entity> observableFeatureSheet = writableFactory.createWritable("observableFeature", headers);
+		Writable observableFeatureSheet = writableFactory.createWritable("observableFeature", headers);
 		try
 		{
 			for (String eachFeature : listOfObservableFeatures)
@@ -106,11 +106,11 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	private void addProtocolTab(WritableFactory<Entity> writableFactory, List<String> listOfObservableFeatures)
+	private void addProtocolTab(WritableFactory writableFactory, List<String> listOfObservableFeatures)
 			throws IOException
 	{
 		List<String> headers = Arrays.asList("identifier", "name", "features_Identifier");
-		Writable<Entity> protocolSheet = writableFactory.createWritable("protocol", headers);
+		Writable protocolSheet = writableFactory.createWritable("protocol", headers);
 		try
 		{
 			Entity row = new MapEntity();
@@ -133,14 +133,14 @@ public class SampleTabOmxConverter
 	}
 
 	// Copy the values from one file to the other by using Entity
-	private void addSDataSetMatrix(WritableFactory<Entity> writableFactory, Repository<? extends Entity> inputSheet,
+	private void addSDataSetMatrix(WritableFactory writableFactory, Repository inputSheet,
 			List<String> listOfObservableFeatures) throws IOException
 	{
 		Map<String, String> headerMapper = new HashMap<String, String>();
 		for (String originalHeader : listOfObservableFeatures)
 			headerMapper.put(originalHeader, createIdentifier(pattenMatchExtractFeature(originalHeader)));
 
-		Writable<Entity> writable = writableFactory.createWritable("dataset_" + submissionID + "-dataset",
+		Writable writable = writableFactory.createWritable("dataset_" + submissionID + "-dataset",
 				new ArrayList<String>(headerMapper.values()));
 		try
 		{
@@ -165,9 +165,9 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	private void addDataSet(WritableFactory<Entity> writableFactory) throws IOException
+	private void addDataSet(WritableFactory writableFactory) throws IOException
 	{
-		Writable<Entity> writable = writableFactory.createWritable("dataset",
+		Writable writable = writableFactory.createWritable("dataset",
 				Arrays.asList("identifier", "name", "protocolused_identifier"));
 		try
 		{
@@ -203,7 +203,7 @@ public class SampleTabOmxConverter
 		return listOfObservableFeatures;
 	}
 
-	private List<String> collectColumns(Repository<? extends Entity> repo) throws IOException
+	private List<String> collectColumns(Repository repo) throws IOException
 	{
 		List<String> listOfFeatures = new ArrayList<String>();
 		for (AttributeMetaData attr : repo.getAttributes())

@@ -7,33 +7,34 @@ import javax.validation.ValidationException;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.value.HyperlinkValue;
 
-public class HyperlinkValueDecorator<E extends HyperlinkValue> extends CrudRepositoryDecorator<E>
+public class HyperlinkValueDecorator extends CrudRepositoryDecorator
 {
-	public HyperlinkValueDecorator(CrudRepository<E> generatedRepository)
+	public HyperlinkValueDecorator(CrudRepository generatedRepository)
 	{
 		super(generatedRepository);
 	}
 
 	@Override
-	public void add(E entity)
+	public Integer add(Entity entity)
 	{
-		String uri = entity.getValue();
+		String uri = entity.getString(HyperlinkValue.VALUE);
 		if (!isValidURI(uri))
 		{
 			throw new ValidationException("not a hyperlink [" + uri + "]");
 		}
 
-		super.add(entity);
+		return super.add(entity);
 	}
 
 	@Override
-	public void add(Iterable<E> entities)
+	public void add(Iterable<? extends Entity> entities)
 	{
-		for (E entity : entities)
+		for (Entity entity : entities)
 		{
-			String uri = entity.getValue();
+			String uri = entity.getString(HyperlinkValue.VALUE);
 			if (!isValidURI(uri))
 			{
 				throw new ValidationException("not a hyperlink [" + uri + "]");
@@ -44,9 +45,9 @@ public class HyperlinkValueDecorator<E extends HyperlinkValue> extends CrudRepos
 	}
 
 	@Override
-	public void update(E entity)
+	public void update(Entity entity)
 	{
-		String uri = entity.getValue();
+		String uri = entity.getString(HyperlinkValue.VALUE);
 		if (!isValidURI(uri))
 		{
 			throw new ValidationException("not a hyperlink [" + uri + "]");
@@ -56,11 +57,11 @@ public class HyperlinkValueDecorator<E extends HyperlinkValue> extends CrudRepos
 	}
 
 	@Override
-	public void update(Iterable<E> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
-		for (E entity : entities)
+		for (Entity entity : entities)
 		{
-			String uri = entity.getValue();
+			String uri = entity.getString(HyperlinkValue.VALUE);
 			if (!isValidURI(uri))
 			{
 				throw new ValidationException("not a hyperlink [" + uri + "]");

@@ -5,24 +5,25 @@ import javax.validation.ValidationException;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.value.EmailValue;
 
-public class EmailValueDecorator<E extends EmailValue> extends CrudRepositoryDecorator<E>
+public class EmailValueDecorator extends CrudRepositoryDecorator
 {
 	private final EmailValidator emailValidator;
 
-	public EmailValueDecorator(CrudRepository<E> generatedRepository)
+	public EmailValueDecorator(CrudRepository generatedRepository)
 	{
 		super(generatedRepository);
 		emailValidator = new EmailValidator();
 	}
 
 	@Override
-	public void add(Iterable<E> entities)
+	public void add(Iterable<? extends Entity> entities)
 	{
-		for (EmailValue entity : entities)
+		for (Entity entity : entities)
 		{
-			String email = entity.getValue();
+			String email = entity.getString(EmailValue.VALUE);
 			if (!emailValidator.isValid(email, null))
 			{
 				throw new ValidationException("not an email address [" + email + "]");
@@ -33,21 +34,21 @@ public class EmailValueDecorator<E extends EmailValue> extends CrudRepositoryDec
 	}
 
 	@Override
-	public void add(E entity)
+	public Integer add(Entity entity)
 	{
-		String email = entity.getValue();
+		String email = entity.getString(EmailValue.VALUE);
 		if (!emailValidator.isValid(email, null))
 		{
 			throw new ValidationException("not an email address [" + email + "]");
 		}
 
-		super.add(entity);
+		return super.add(entity);
 	}
 
 	@Override
-	public void update(E entity)
+	public void update(Entity entity)
 	{
-		String email = entity.getValue();
+		String email = entity.getString(EmailValue.VALUE);
 		if (!emailValidator.isValid(email, null))
 		{
 			throw new ValidationException("not an email address [" + email + "]");
@@ -57,11 +58,11 @@ public class EmailValueDecorator<E extends EmailValue> extends CrudRepositoryDec
 	}
 
 	@Override
-	public void update(Iterable<E> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
-		for (E entity : entities)
+		for (Entity entity : entities)
 		{
-			String email = entity.getValue();
+			String email = entity.getString(EmailValue.VALUE);
 			if (!emailValidator.isValid(email, null))
 			{
 				throw new ValidationException("not an email address [" + email + "]");

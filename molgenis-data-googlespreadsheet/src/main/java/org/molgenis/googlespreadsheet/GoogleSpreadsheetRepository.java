@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Iterator;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
@@ -23,7 +24,7 @@ import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
 
-public class GoogleSpreadsheetRepository extends AbstractRepository<Entity>
+public class GoogleSpreadsheetRepository extends AbstractRepository
 {
 	public enum Visibility
 	{
@@ -71,6 +72,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository<Entity>
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		if (entityMetaData == null) entityMetaData = getEntityMetaData();
+
 		ListFeed feed;
 		try
 		{
@@ -105,9 +108,12 @@ public class GoogleSpreadsheetRepository extends AbstractRepository<Entity>
 			{
 				MapEntity entity = new MapEntity();
 				CustomElementCollection customElements = it.next().getCustomElements();
-				for (String colName : customElements.getTags())
+				for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
 				{
-					String value = customElements.getValue(colName);
+					// see remark in getEntityMetaData
+					String colName = attributeMetaData.getLabel();
+					String normalizedColName = colName.replaceAll("_", "").toLowerCase();
+					String value = customElements.getValue(normalizedColName);
 					entity.set(colName, value);
 				}
 				return entity;
@@ -128,7 +134,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository<Entity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
 		{

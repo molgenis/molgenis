@@ -18,8 +18,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -27,7 +25,7 @@ import org.molgenis.omx.observ.Protocol;
 /**
  * Base class for DataSetMatrixRepository and OmxRepository
  */
-public abstract class AbstractDataSetMatrixRepository extends AbstractRepository<Entity>
+public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 {
 	protected final String dataSetIdentifier;
 	protected final DataService dataService;
@@ -52,7 +50,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (metaData == null)
 		{
@@ -70,21 +68,16 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 				for (ObservableFeature feature : features)
 				{
 					FieldTypeEnum fieldType = MolgenisFieldTypes.getType(feature.getDataType()).getEnumType();
+					if (fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF))
+					{
+						fieldType = FieldTypeEnum.STRING;
+					}
 					DefaultAttributeMetaData attr = new DefaultAttributeMetaData(feature.getIdentifier(), fieldType);
 
 					attr.setDescription(feature.getDescription());
 					attr.setLabel(feature.getName());
 					attr.setIdAttribute(false);
 					attr.setLabelAttribute(false);// TODO??
-
-					if (fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF))
-					{
-						attr.setRefEntityName(Characteristic.ENTITY_NAME);
-					}
-					else if (fieldType.equals(FieldTypeEnum.CATEGORICAL))
-					{
-						attr.setRefEntityName(Category.ENTITY_NAME);
-					}
 
 					metaData.addAttributeMetaData(attr);
 				}
@@ -95,6 +88,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 				attr.setLabel("id");
 				attr.setIdAttribute(true);
 				attr.setLabelAttribute(false);
+				attr.setVisible(false);
 				metaData.addAttributeMetaData(attr);
 			}
 		}
@@ -117,7 +111,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	protected DataSet getDataSet()
 	{
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
 
 		if (dataSet == null)
 		{

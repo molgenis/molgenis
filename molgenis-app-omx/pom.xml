@@ -196,9 +196,20 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-googlespreadsheet</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>org.mortbay.jetty</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-jpa</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-omx</artifactId>
@@ -217,6 +228,11 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-charts</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-rest</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

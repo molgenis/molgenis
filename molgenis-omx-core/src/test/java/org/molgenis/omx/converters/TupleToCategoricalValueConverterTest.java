@@ -9,7 +9,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.value.CategoricalValue;
@@ -36,7 +35,7 @@ public class TupleToCategoricalValueConverterTest
 	}
 
 	@Test
-	public void fromTuple() throws ValueConverterException, DatabaseException
+	public void fromTuple() throws ValueConverterException
 	{
 		Category category = new Category();
 		String valueCode = "code1";
@@ -45,7 +44,7 @@ public class TupleToCategoricalValueConverterTest
 
 		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
 
-		when(dataService.findOne(Category.ENTITY_NAME, q)).thenReturn(category);
+		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 
 		String colName = "col";
 		Entity entity = new MapEntity(colName, valueCode);
@@ -55,7 +54,7 @@ public class TupleToCategoricalValueConverterTest
 	}
 
 	@Test
-	public void updateFromTuple() throws ValueConverterException, DatabaseException
+	public void updateFromTuple() throws ValueConverterException
 	{
 		CategoricalValue value = new CategoricalValue();
 		Category category = new Category();
@@ -65,7 +64,7 @@ public class TupleToCategoricalValueConverterTest
 
 		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
 
-		when(dataService.findOne(Category.ENTITY_NAME, q)).thenReturn(category);
+		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 		String colName = "col";
 		Entity entity = new MapEntity(colName, valueCode);
 		new EntityToCategoricalValueConverter(dataService).updateFromEntity(entity, colName, feature, value);

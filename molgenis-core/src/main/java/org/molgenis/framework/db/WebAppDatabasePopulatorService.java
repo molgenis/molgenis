@@ -1,10 +1,8 @@
 package org.molgenis.framework.db;
 
-import org.molgenis.framework.db.DatabaseException;
-
 public interface WebAppDatabasePopulatorService
 {
-	void populateDatabase() throws DatabaseException;
+	void populateDatabase();
 
-	boolean isDatabasePopulated() throws DatabaseException;
+	boolean isDatabasePopulated();
 }

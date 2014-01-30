@@ -10,6 +10,7 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class MolgenisDbSettings implements MolgenisSettings
 {
 	private static final Logger logger = Logger.getLogger(MolgenisDbSettings.class);
@@ -40,7 +41,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		RuntimeProperty property;
 		try
 		{
-			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule);
+			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule, RuntimeProperty.class);
 		}
 		catch (MolgenisDataException e)
 		{
@@ -60,12 +61,24 @@ public class MolgenisDbSettings implements MolgenisSettings
 	@Override
 	public void setProperty(String key, String value)
 	{
-		RuntimeProperty property = new RuntimeProperty();
-		property.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + key);
-		property.setName(key);
-		property.setValue(value);
+		String identifier = RuntimeProperty.class.getSimpleName() + '_' + key;
 
-		dataService.add(RuntimeProperty.ENTITY_NAME, property);
+		RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME,
+				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, identifier), RuntimeProperty.class);
+
+		if (property == null)
+		{
+			property = new RuntimeProperty();
+			property.setIdentifier(identifier);
+			property.setName(key);
+			property.setValue(value);
+			dataService.add(RuntimeProperty.ENTITY_NAME, property);
+		}
+		else
+		{
+			property.setValue(value);
+			dataService.update(RuntimeProperty.ENTITY_NAME, property);
+		}
 	}
 
 	@Override
@@ -104,7 +117,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		Query query = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_' + key);
 		try
 		{
-			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query);
+			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query, RuntimeProperty.class);
 			if (property != null)
 			{
 				property.setValue(content);

@@ -11,7 +11,6 @@ import java.net.URLEncoder;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.util.DetectOS;
 
@@ -32,19 +31,8 @@ public class StorageHandler
 	{
 		report = new Report();
 
-		RuntimeProperty pathRp = null;
-		RuntimeProperty validRp = null;
-
-		try
-		{
-			pathRp = getRuntimeProperty(RUNTIME_FILE_STORAGE_PATH, dataService);
-			validRp = getRuntimeProperty(RUNTIME_FILE_STORAGE_VALIDATED, dataService);
-		}
-		catch (DatabaseException e)
-		{
-			// tables do not exist (yet)
-			// that's OK, see below
-		}
+		RuntimeProperty pathRp = getRuntimeProperty(RUNTIME_FILE_STORAGE_PATH, dataService);
+		RuntimeProperty validRp = getRuntimeProperty(RUNTIME_FILE_STORAGE_VALIDATED, dataService);
 
 		if (pathRp == null && validRp == null)
 		{
@@ -174,7 +162,7 @@ public class StorageHandler
 	{
 		report = new Report();
 
-		if (filesource == null || filesource.equals("") || filesource.equals("null")) throw new DatabaseException(
+		if (filesource == null || filesource.equals("") || filesource.equals("null")) throw new IllegalArgumentException(
 				"Empty path not allowed");
 
 		filesource = addSepIfneeded(filesource);
@@ -200,7 +188,7 @@ public class StorageHandler
 		}
 		else
 		{
-			throw new DatabaseException("Could not set file storage: Properties already present. Please delete first.");
+			throw new RuntimeException("Could not set file storage: Properties already present. Please delete first.");
 		}
 	}
 
@@ -281,11 +269,9 @@ public class StorageHandler
 	 * 
 	 * @param mustBeValid
 	 * @return
-	 * @throws DatabaseException
 	 * @throws UnsupportedEncodingException
 	 */
-	private File getFileStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException,
-			DatabaseException
+	private File getFileStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException
 	{
 		URI loc = getURIStorageRoot(mustBeValid, dataService);
 		if (loc == null)
@@ -303,8 +289,7 @@ public class StorageHandler
 	 * @param mustBeValid
 	 * @return
 	 */
-	private URI getURIStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException,
-			DatabaseException
+	private URI getURIStorageRoot(boolean mustBeValid, DataService dataService) throws UnsupportedEncodingException
 	{
 		RuntimeProperty path = getRuntimeProperty(RUNTIME_FILE_STORAGE_PATH, dataService);
 		RuntimeProperty valid = getRuntimeProperty(RUNTIME_FILE_STORAGE_VALIDATED, dataService);
@@ -338,12 +323,11 @@ public class StorageHandler
 	 * Helper function
 	 * 
 	 * @return
-	 * @throws DatabaseException
 	 */
-	private RuntimeProperty getRuntimeProperty(String propName, DataService dataService) throws DatabaseException
+	private RuntimeProperty getRuntimeProperty(String propName, DataService dataService)
 	{
 		Query q = new QueryImpl().eq(RuntimeProperty.NAME, propName);
-		return dataService.findOne(RuntimeProperty.NAME, q);
+		return dataService.findOne(RuntimeProperty.NAME, q, RuntimeProperty.class);
 	}
 
 	/**

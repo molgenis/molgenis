@@ -4,14 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.OutputStream;
-import java.util.Calendar;
 import java.util.Iterator;
-import java.util.ListIterator;
 
 import javax.xml.namespace.QName;
-import javax.xml.parsers.*;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
@@ -20,16 +16,12 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.charts.MolgenisChartException;
 import org.molgenis.charts.charttypes.HeatMapChart;
-import org.molgenis.charts.r.RChartService;
 
 public class SVGEditor {
 
@@ -118,110 +110,94 @@ public class SVGEditor {
 		int nRowAnnotations = 0;
 		int nColAnnotations = 0;
 		
-		try {
-			writer = XMLOutputFactory.newInstance().createXMLEventWriter(os);
-			
-        	// skip the headers and <def> bit until we reach <g id="">
-            while (true){
-            	XMLEvent event = (XMLEvent) reader.next();
-            	if (event.isStartElement()){
-            		StartElement se = event.asStartElement();
-	            	if (se.getName().getLocalPart().equals(G) && se.getAttributeByName(ID) != null){
-            			logger.info("<g id=\"\"> reached");
-            			writer.add(event);
-            			break;
-	            	}
+    	// skip the headers and <def> bit until we reach <g id="">
+        while (true){
+        	XMLEvent event = (XMLEvent) reader.next();
+        	if (event.isStartElement()){
+        		StartElement se = event.asStartElement();
+            	if (se.getName().getLocalPart().equals(G) && se.getAttributeByName(ID) != null){
+        			logger.info("<g id=\"\"> reached");
+        			writer.add(event);
+        			break;
             	}
-            	writer.add(event);
-            }
-            
-            // annotation begins here 
-            // ROW ANNOTATIONS
-    		if (nRowAnnotations > 0){
-    			logger.info("parsing " + nRowAnnotations + " row annotations");
-    			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation", writer, reader);
-    		}
-    		
-    		// COLUMN ANNOTATIONS
-    		if (nColAnnotations > 0){
-    			logger.info("parsing " + nColAnnotations + " col annotations");
-    			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation", writer, reader);
-    		}
-    		
-    		// MATRIX ANNOTATIONS
-    		logger.info("parsing " + (nRow*nCol) + " matrix values");
-    		annotateHeatMapBlock(nRow, nCol, "matrix", writer, reader);
-    		
-    		// COLUMN NAMES
-    		logger.info("parsing " + nCol + " column names");
-    		int counter = 0;
-    		while (counter < nCol){
-    			XMLEvent event = (XMLEvent) reader.next();
-    			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G)){
-    				
-    				@SuppressWarnings("unchecked")
-					Iterator<Attribute> attributes = event.asStartElement().getAttributes();
-    				
-    				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
-    				writer.add(newSe);
-    				writer.add(eventFactory.createAttribute(ID, "colName"));
-    				writer.add(eventFactory.createAttribute(new QName("col"), Integer.toString(counter+1)));
-    				
-    				
-    				counter++;
-    			}else{
-    				writer.add(event);
-    			}
-    		}
-    		
-    		// ROW NAMES
-    		logger.info("parsing " + nRow + " row names");
-    		counter = 0;
-    		while (counter < nRow){
-    			XMLEvent event = (XMLEvent) reader.next();
-    			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G)){
-    				
-    				@SuppressWarnings("unchecked")
-					Iterator<Attribute> attributes = event.asStartElement().getAttributes();
-    				
-    				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
-    				writer.add(newSe);
-    				writer.add(eventFactory.createAttribute(ID, "rowName"));
-    				writer.add(eventFactory.createAttribute(new QName("row"), Integer.toString(nRow-counter)));
-    				counter++;
-    			
-    			}else{
-    				writer.add(event);
-    			}
-    		}
-    		
-    		// finish rest of file
-            while (reader.hasNext()){	
-            	XMLEvent event = (XMLEvent) reader.next();
-            	if (event.isEndElement()){
-            		// close the <g id=""> tag, right before the </svg> end element
-            		if (event.asEndElement().getName().getLocalPart().equals(new QName("svg"))){
-            			EndElement newEe = eventFactory.createEndElement(new QName(G), null);
-                		writer.add(newEe);
-            		}
-            	}
-            	writer.add(event);
-            }
-
-           
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            throw new MolgenisChartException(ex);
-        }finally{
-        	try {
-				writer.close();
-			} catch (XMLStreamException e) {
-				logger.error(e.getMessage());
-				throw new MolgenisChartException(e);
-			}
-
+        	}
+        	writer.add(event);
         }
-
+        
+        // annotation begins here 
+        // ROW ANNOTATIONS
+		if (nRowAnnotations > 0){
+			logger.info("parsing " + nRowAnnotations + " row annotations");
+			annotateHeatMapBlock(nRow, nRowAnnotations, "rowAnnotation", writer, reader);
+		}
+		
+		// COLUMN ANNOTATIONS
+		if (nColAnnotations > 0){
+			logger.info("parsing " + nColAnnotations + " col annotations");
+			annotateHeatMapBlock(nColAnnotations, nCol, "colAnnotatation", writer, reader);
+		}
+		
+		// MATRIX ANNOTATIONS
+		logger.info("parsing " + (nRow*nCol) + " matrix values");
+		annotateHeatMapBlock(nRow, nCol, "matrix", writer, reader);
+		
+		// COLUMN NAMES
+		logger.info("parsing " + nCol + " column names");
+		int counter = 0;
+		while (counter < nCol){
+			XMLEvent event = (XMLEvent) reader.next();
+			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G)){
+				
+				@SuppressWarnings("unchecked")
+				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+				
+				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
+				writer.add(newSe);
+				writer.add(eventFactory.createAttribute(ID, "colName"));
+				writer.add(eventFactory.createAttribute(new QName("col"), Integer.toString(counter+1)));
+				
+				
+				counter++;
+			}else{
+				writer.add(event);
+			}
+		}
+		
+		// ROW NAMES
+		logger.info("parsing " + nRow + " row names");
+		counter = 0;
+		while (counter < nRow){
+			XMLEvent event = (XMLEvent) reader.next();
+			if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals(G)){
+				
+				@SuppressWarnings("unchecked")
+				Iterator<Attribute> attributes = event.asStartElement().getAttributes();
+				
+				StartElement newSe = eventFactory.createStartElement(new QName(G), attributes, null);
+				writer.add(newSe);
+				writer.add(eventFactory.createAttribute(ID, "rowName"));
+				writer.add(eventFactory.createAttribute(new QName("row"), Integer.toString(nRow-counter)));
+				counter++;
+			
+			}else{
+				writer.add(event);
+			}
+		}
+		
+		// finish rest of file
+        while (reader.hasNext()){	
+        	XMLEvent event = (XMLEvent) reader.next();
+        	if (event.isEndElement()){
+        		// close the <g id=""> tag, right before the </svg> end element
+        		if (event.asEndElement().getName().getLocalPart().equals(new QName("svg"))){
+        			EndElement newEe = eventFactory.createEndElement(new QName(G), null);
+            		writer.add(newEe);
+        		}
+        	}
+        	writer.add(event);
+        }
+        
+		writer.close();
 	}
 
 }

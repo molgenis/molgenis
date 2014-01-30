@@ -1,9 +1,9 @@
 package org.molgenis.charts.r;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
@@ -34,6 +35,7 @@ import freemarker.template.TemplateException;
 @Component
 public class RChartService extends AbstractChartVisualizationService
 {
+	private static final String HEATMAP_FILE_CHARSETNAME = "UTF-8";
 	private static final Logger logger = Logger.getLogger(RChartService.class);
 	private final FileStore fileStore;
 	private final FreeMarkerConfigurer freeMarkerConfig;
@@ -76,7 +78,8 @@ public class RChartService extends AbstractChartVisualizationService
 		return "heatmap";
 	}
 
-	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+	private String renderHeatMap(HeatMapChart chart) throws IOException, TemplateException, XMLStreamException,
+			FactoryConfigurationError
 	{
 		String fileName = UUID.randomUUID().toString();
 
@@ -90,15 +93,15 @@ public class RChartService extends AbstractChartVisualizationService
 
 		File script = generateScript("R_heatmap.ftl", data, fileName + ".r");
 		runScript(script);
-		
+
 		// annotate the SVG here
 		File in = fileStore.getFile(fileName + ".svg");
-		
+
 		File out = new File(fileStore.getStorageDir() + "/" + fileName + "_annotated.svg");
-		
+
 		SVGEditor svge = new SVGEditor(in, out);
-		svge.annotateHeatMap(chart);			
-		
+		svge.annotateHeatMap(chart);
+
 		return fileName;
 	}
 
@@ -124,7 +127,9 @@ public class RChartService extends AbstractChartVisualizationService
 		File rScriptFile = fileStore.getFile(scriptName);
 
 		Template template = freeMarkerConfig.getConfiguration().getTemplate(templateName);
-		Writer w = new FileWriter(rScriptFile);
+		Charset charset = Charset.forName(HEATMAP_FILE_CHARSETNAME);
+		Writer w = new FileWriterWithEncoding(rScriptFile, charset);
+
 		try
 		{
 			template.process(parameters, w);

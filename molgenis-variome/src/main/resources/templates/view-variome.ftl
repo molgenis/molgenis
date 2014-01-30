@@ -22,21 +22,22 @@
 			  	</ul>
 			  	
 			  	<div id="panel-1-tab-1">
-			    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data">
+			    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data" boundary="_FPSEP91465b27654aa128979fb2_">
 						<div class="form-group">
 							<div class="fileupload fileupload-new" data-provides="fileupload">
     							<div class="input-group">
         							
         							<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
             							<span class="fileupload-preview"></span>
+            							
         							</div>
-        							
+				
         							<div class="input-group-btn">
-						                
+						         
 						                <a class="btn btn-default btn-file">
 						                    <span class="fileupload-new">Select file</span>
 						                    <span class="fileupload-exists">Change</span>
-						                    <input type="file" class="file-input"/>
+						                    <input name="vcf-file-input-field" type="file" class="file-input"/>
 						            	</a>
 						            	
 						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
@@ -77,7 +78,7 @@
 						                <a class="btn btn-default btn-file">
 						                    <span class="fileupload-new">Select file</span>
 						                    <span class="fileupload-exists">Change</span>
-						                    <input type="file" class="file-input"/>
+						                    <input name="zip-file-input-field" type="file" class="file-input"/>
 						                </a>
 						                
 						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
@@ -110,12 +111,22 @@
 			<hr></hr>
 			
 			<h5>Selected Variant Sources</h5>
-			<span><h7>No variants selected</h7></span>
+			<span>
+				<h7>
+					<#if parsed?has_content>
+						<#list parsed as file>
+							${file}
+						</#list>
+					<#else>
+						There are no Variant resources selected
+					</#if>
+				</h7>
+			</span>
 			
 		</div>
 		
 		<#--Panel 2: Input gene panels or genomic locations-->
-		<h3>Filter by: Genomic locations / Gene panels / Clinical Databases</h3>
+		<h3>Filter by: Genome</h3>
 		<div>
 			<div id="region-selection-tabs">
 				<ul>
@@ -197,18 +208,33 @@
 			  		<div class="checkbox">
 						<label>
   							<input type="checkbox"> Onco Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known onco diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
 						</label>
   					</div>
   					
   					<div class="checkbox">
 						<label>
   							<input type="checkbox"> Cardiac Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known cardiac diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
 						</label>
   					</div>
   					
   					<div class="checkbox">
 						<label>
   							<input type="checkbox"> Preconception Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known preconception diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
 						</label>
 					</div>
 			  	</div>
@@ -223,7 +249,7 @@
 		</div>
 		
 		<#--Panel 3: Phenotype selection-->
-		<h3>Filter by: Disease / Phenotype / Symptoms</h3>
+		<h3>Filter by: Phenome</h3>
 		<div>
 			<form class="form-horizontal" role="form" action="${context_url}/upload-phenotype-filter" method="post">
 				<h6>Select a phenotype database</h6>
@@ -252,7 +278,7 @@
 		</div>
 		
 		<#--Panel 4: Annotation tool / database selection-->
-		<h3>Select variant annotation columns</h3>
+		<h3>Add annotations</h3>
 		<div>
 			<div class="checkbox">
 				<label>
@@ -283,8 +309,9 @@
 	<hr></hr>
 	
 	<div>
+		<#--"http://localhost:8080/menu/main/dataexplorer"-->
 		<form role="form" action="${context_url}/execute-variant-app" method="post">
-			<button type="submit" class="btn">Go</button>
+			<button type="submit" href="http://localhost:8080/menu/main/dataexplorer" action="http://localhost:8080/menu/main/dataexplorer" class="btn">Go</button>
 		</form>
 	</div>
 </div>	
@@ -294,6 +321,7 @@
 	$("#variant-selection-tabs").tabs();
 	$("#region-selection-tabs").tabs();
 	$(".phenotypeSelect	").chosen();
+	$(".icon-question-sign").tooltip();
 </script>
 
 <@footer />

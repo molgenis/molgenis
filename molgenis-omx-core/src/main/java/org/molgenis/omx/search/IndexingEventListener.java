@@ -2,7 +2,9 @@ package org.molgenis.omx.search;
 
 import java.util.Arrays;
 
-import org.molgenis.util.DataSetImportedEvent;
+import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.util.EntityImportedEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
@@ -25,11 +27,18 @@ public class IndexingEventListener implements ApplicationListener<ApplicationEve
 	@Override
 	public void onApplicationEvent(ApplicationEvent event)
 	{
-		if (event instanceof DataSetImportedEvent)
+		if (event instanceof EntityImportedEvent)
 		{
-			DataSetImportedEvent dataSetImportedEvent = (DataSetImportedEvent) event;
-			dataSetsIndexer.indexDataSets(Arrays.asList(dataSetImportedEvent.getDataSetId()));
+			EntityImportedEvent entityImportedEvent = (EntityImportedEvent) event;
+			String entityName = entityImportedEvent.getEntityName();
+			if (entityName.equals(DataSet.ENTITY_NAME))
+			{
+				dataSetsIndexer.indexDataSets(Arrays.asList(entityImportedEvent.getEntityId()));
+			}
+			else if (entityName.equals(Protocol.ENTITY_NAME))
+			{
+				dataSetsIndexer.indexProtocols(Arrays.asList(entityImportedEvent.getEntityId()));
+			}
 		}
-
 	}
 }

@@ -17,7 +17,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.semanticweb.owlapi.model.OWLClass;
 
-public class OntologyTermRepository extends AbstractRepository<Entity> implements Countable
+public class OntologyTermRepository extends AbstractRepository implements Countable
 {
 	private final OntologyLoader loader;
 	private final String ontologyIRI;
@@ -73,7 +73,7 @@ public class OntologyTermRepository extends AbstractRepository<Entity> implement
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));

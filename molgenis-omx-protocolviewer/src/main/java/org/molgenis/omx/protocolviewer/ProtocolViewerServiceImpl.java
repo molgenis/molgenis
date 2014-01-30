@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
@@ -70,13 +69,13 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@Transactional(readOnly = true)
 	public Iterable<CatalogMeta> getCatalogs()
 	{
 		return Iterables.filter(catalogService.getCatalogs(), new Predicate<CatalogMeta>()
 		{
 			@Override
-			public boolean apply(@Nullable
-			CatalogMeta catalogMeta)
+			public boolean apply(CatalogMeta catalogMeta)
 			{
 				try
 				{
@@ -93,6 +92,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@Transactional(readOnly = true)
 	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
 
@@ -125,6 +125,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
+	@Transactional
 	public StudyDefinition createStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
 		return studyManagerService.createStudyDefinition(SecurityUtils.getCurrentUsername(), catalogId);
@@ -132,6 +133,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@Transactional(readOnly = true)
 	public List<StudyDefinition> getStudyDefinitionsForCurrentUser()
 	{
 		List<StudyDefinition> studyDefinitions = new ArrayList<StudyDefinition>();
@@ -145,6 +147,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@Transactional(readOnly = true)
 	public StudyDefinition getStudyDefinitionForCurrentUser(Integer id) throws UnknownStudyDefinitionException
 	{
 		MolgenisUser user = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
@@ -159,7 +162,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor =
-	{ MessagingException.class, IOException.class })
+	{ MessagingException.class, IOException.class, UnknownCatalogException.class, UnknownStudyDefinitionException.class })
 	public void submitStudyDefinitionDraftForCurrentUser(String studyName, Part requestForm, String catalogId)
 			throws MessagingException, IOException, UnknownCatalogException, UnknownStudyDefinitionException
 	{
@@ -198,7 +201,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		helper.setTo(molgenisUser.getEmail());
 		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
 		{}));
-		helper.setSubject("Order confirmation from " + appName);
+		helper.setSubject("Submission confirmation from " + appName);
 		helper.setText(createOrderConfirmationEmailText(appName));
 		helper.addAttachment(fileName, new FileSystemResource(orderFile));
 		helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
@@ -207,6 +210,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
+	@Transactional(rollbackFor = UnknownCatalogException.class)
 	public void updateStudyDefinitionDraftForCurrentUser(List<Integer> catalogItemIds, String catalogId)
 			throws UnknownCatalogException
 	{
@@ -219,10 +223,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		final Catalog catalog = catalogService.getCatalog(catalogId);
 		List<CatalogItem> catalogItems = Lists.transform(catalogItemIds, new Function<Integer, CatalogItem>()
 		{
-			@Nullable
 			@Override
-			public CatalogItem apply(@Nullable
-			final Integer catalogItemId)
+			public CatalogItem apply(final Integer catalogItemId)
 			{
 				return catalog.findItem(catalogItemId.toString());
 			}
@@ -242,6 +244,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
+	@Transactional(rollbackFor =
+	{ IOException.class, UnknownCatalogException.class })
 	public void createStudyDefinitionDraftXlsForCurrentUser(OutputStream outputStream, String catalogId)
 			throws IOException, UnknownCatalogException
 	{
@@ -254,8 +258,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append("Dear Researcher,\n\n");
-		strBuilder.append("Thank you for ordering at ").append(appName)
-				.append(", attached are the details of your order.\n");
+		strBuilder.append("Thank you for submitting to ").append(appName)
+				.append(", attached are the details of your submission.\n");
 		strBuilder.append("The ").append(appName)
 				.append(" Research Office will contact you upon receiving your application.\n\n");
 		strBuilder.append("Sincerely,\n");
@@ -297,10 +301,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			});
 		}
 
-		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(outputStream);
+		ExcelWriter excelWriter = new ExcelWriter(outputStream);
 		try
 		{
-			Writable<Entity> writable = excelWriter.createWritable("Variables", header);
+			Writable writable = excelWriter.createWritable("Variables", header);
 			try
 			{
 				if (catalogItems != null)

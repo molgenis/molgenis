@@ -39,6 +39,7 @@ abstract class AbstractOmxConvertor
 		if (file.exists())
 		{
 			EntitySource entitySource = null;
+			ExcelWriter writer = null;
 			try
 			{
 				entitySource = new ExcelEntitySourceFactory().create(file);
@@ -55,10 +56,9 @@ abstract class AbstractOmxConvertor
 				if (entitySource != null) entitySource.close();
 			}
 
-			ExcelWriter<Entity> writer = null;
 			try
 			{
-				writer = new ExcelWriter<Entity>(new File(file.getAbsolutePath() + "_OMX.xls"));
+				writer = new ExcelWriter(new File(file.getAbsolutePath() + "_OMX.xls"));
 				writeToPhenoFormat(writer);
 			}
 			finally
@@ -68,12 +68,12 @@ abstract class AbstractOmxConvertor
 		}
 	}
 
-	public void writeToPhenoFormat(WritableFactory<Entity> writer) throws IOException
+	public void writeToPhenoFormat(WritableFactory writer) throws IOException
 	{
 		String protocolIdentifier = studyName + "_protocol";
 		StringBuilder listOfFeatureIdentifier = new StringBuilder();
 		// Create sheet for investigation
-		Writable<Entity> dataSet = null;
+		Writable dataSet = null;
 		try
 		{
 			dataSet = writer.createWritable("dataset", Arrays.asList("identifier", "name", "protocolUsed_identifier"));
@@ -88,7 +88,7 @@ abstract class AbstractOmxConvertor
 			if (dataSet != null) dataSet.close();
 		}
 		// Create sheet for category
-		Writable<Entity> categorySheet = null;
+		Writable categorySheet = null;
 
 		try
 		{
@@ -116,7 +116,7 @@ abstract class AbstractOmxConvertor
 		}
 
 		// Create sheet for variable
-		Writable<Entity> featureWriter = null;
+		Writable featureWriter = null;
 		try
 		{
 			featureWriter = writer.createWritable("observablefeature",
@@ -156,7 +156,7 @@ abstract class AbstractOmxConvertor
 		}
 
 		// Create sheet for protocol
-		Writable<Entity> protocolSheet = null;
+		Writable protocolSheet = null;
 		try
 		{
 			protocolSheet = writer.createWritable("protocol",

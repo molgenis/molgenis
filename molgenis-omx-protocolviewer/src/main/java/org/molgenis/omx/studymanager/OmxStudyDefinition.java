@@ -103,7 +103,7 @@ public class OmxStudyDefinition implements StudyDefinition
 						{
 							return Integer.valueOf(catalogItem.getId());
 						}
-					}));
+					}), ObservableFeature.class);
 			features = Lists.newArrayList(featuresIterable);
 		}
 		else

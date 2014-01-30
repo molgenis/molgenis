@@ -3,16 +3,16 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.charts.MolgenisSerieType;
-import org.molgenis.charts.highcharts.ChartType;
 
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar
  */
 public class XYDataSerie extends MolgenisSerie
 {
-	private Class<?> attributeXJavaType;
-	private Class<?> attributeYJavaType;
+	private FieldTypeEnum attributeXFieldTypeEnum;
+	private FieldTypeEnum attributeYFieldTypeEnum;
 	private List<XYData> data = new ArrayList<XYData>();
 	
 	public XYDataSerie()
@@ -53,34 +53,34 @@ public class XYDataSerie extends MolgenisSerie
 	}
 
 	/**
-	 * @return the attributeXJavaType
+	 * @return the attributeXFieldTypeEnum
 	 */
-	public Class<?> getAttributeXJavaType()
+	public FieldTypeEnum getAttributeXFieldTypeEnum()
 	{
-		return attributeXJavaType;
+		return attributeXFieldTypeEnum;
 	}
 
 	/**
-	 * @param attributeXJavaType the attributeXJavaType to set
+	 * @param attributeXFieldTypeEnum the attributeXFieldTypeEnum to set
 	 */
-	public void setAttributeXJavaType(Class<?> attributeXJavaType)
+	public void setAttributeXFieldTypeEnum(FieldTypeEnum attributeXFieldTypeEnum)
 	{
-		this.attributeXJavaType = attributeXJavaType;
+		this.attributeXFieldTypeEnum = attributeXFieldTypeEnum;
 	}
 
 	/**
-	 * @return the attributeYJavaType
+	 * @return the attributeYFieldTypeEnum
 	 */
-	public Class<?> getAttributeYJavaType()
+	public FieldTypeEnum getAttributeYFieldTypeEnum()
 	{
-		return attributeYJavaType;
+		return attributeYFieldTypeEnum;
 	}
 
 	/**
-	 * @param attributeYJavaType the attributeYJavaType to set
+	 * @param attributeYFieldTypeEnum the attributeYFieldTypeEnum to set
 	 */
-	public void setAttributeYJavaType(Class<?> attributeYJavaType)
+	public void setAttributeYFieldTypeEnum(FieldTypeEnum attributeYFieldTypeEnum)
 	{
-		this.attributeYJavaType = attributeYJavaType;
+		this.attributeYFieldTypeEnum = attributeYFieldTypeEnum;
 	}
 }

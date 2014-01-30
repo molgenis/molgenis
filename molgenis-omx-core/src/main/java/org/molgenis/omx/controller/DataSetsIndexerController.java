@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
@@ -23,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.Lists;
 
 /**
  * Controller class for the data explorer.
@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class DataSetsIndexerController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(DataSetsIndexerController.class);
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "dataindexer";
 
 	public DataSetsIndexerController()
@@ -57,22 +56,24 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return the view name
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception
 	{
 		// add data sets to model
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
-        Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ROOT,true));
-        model.addAttribute("dataSets", dataSets);
-        model.addAttribute("protocols", protocols);
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
+		Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
+				new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
+
+		model.addAttribute("dataSets", Lists.newArrayList(dataSets));
+		model.addAttribute("protocols", Lists.newArrayList(protocols));
 		return "view-datasetsindexer";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
+	public DataSetIndexResponse index(@RequestBody
+	DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
 
 		if (dataSetsIndexer.isIndexingRunning())
@@ -81,7 +82,6 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		}
 
 		List<String> dataSetIds = request.getSelectedDataSets();
-        String entity = request.getEntity();
 		if ((dataSetIds == null) || dataSetIds.isEmpty())
 		{
 			return new DataSetIndexResponse(false, "Please select a dataset");
@@ -96,18 +96,21 @@ public class DataSetsIndexerController extends MolgenisPluginController
 				ids.add(Integer.parseInt(dataSetId));
 			}
 		}
-        if("dataSet".equals(request.getEntity())){
-		    dataSetsIndexer.indexDataSets(ids);
-        }else if("protocol".equals(request.getEntity())){
-            dataSetsIndexer.indexProtocols(ids);
-        }
+		if ("dataSet".equals(request.getEntity()))
+		{
+			dataSetsIndexer.indexDataSets(ids);
+		}
+		else if ("protocol".equals(request.getEntity()))
+		{
+			dataSetsIndexer.indexProtocols(ids);
+		}
 		return new DataSetIndexResponse(true, "");
 	}
 
 	static class DataSetIndexRequest
 	{
 		private List<String> selectedDataSets;
-        private String entity;
+		private String entity;
 
 		public DataSetIndexRequest(List<String> selectedDataSets)
 		{
@@ -124,14 +127,14 @@ public class DataSetsIndexerController extends MolgenisPluginController
 			this.selectedDataSets = selectedDataSets;
 		}
 
-        public String getEntity()
-        {
-            return entity;
-        }
+		public String getEntity()
+		{
+			return entity;
+		}
 
-        public void setEntity(String entity)
-        {
-            this.entity = entity;
+		public void setEntity(String entity)
+		{
+			this.entity = entity;
 		}
 	}
 

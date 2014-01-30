@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
-import org.molgenis.charts.highcharts.HighchartService;
+import org.molgenis.charts.highcharts.convert.HighchartService;
 import org.molgenis.charts.r.RChartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

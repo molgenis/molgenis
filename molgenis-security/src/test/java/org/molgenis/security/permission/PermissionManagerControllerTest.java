@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -60,7 +59,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	private MolgenisGroup group1, group2;
 
 	@BeforeMethod
-	public void setUp() throws DatabaseException
+	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(permissionManagerController)
 				.setMessageConverters(new GsonHttpMessageConverter()).build();

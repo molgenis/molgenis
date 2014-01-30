@@ -1,9 +1,9 @@
 package org.molgenis.variome;
 
-import java.io.File;
-
+import org.molgenis.data.DataService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service implementation for the variome service
@@ -11,15 +11,16 @@ import org.springframework.ui.Model;
  * @author Mark-de-Haan
  * 
  */
+
 @Service
 public class VariomeServiceImpl implements VariomeService
 {
+	@Autowired
+	DataService dataService;
+	
 	@Override
-	public File vcfFile(File vcfFile, Model model) {
-		// TODO Parse vcf file into list for html table
+	@Transactional
+	public void dataSetAnnotater() {
 		
-		model.addAttribute("parsed", vcfFile);
-		
-		return null;
 	}
 }

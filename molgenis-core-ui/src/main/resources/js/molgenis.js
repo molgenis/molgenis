@@ -70,6 +70,7 @@
 
 		function showDatasetsindexerStatusMessage() {
 			$.get("/dataindexerstatus", function(response) {
+				//console.log("showDatasetsindexerStatusMessage" + new Date()); //activate voor bugfixing
 				$('.datasetsindexerAlerts').empty();
 				if (response.isRunning === true) {
 					setTimeout(showDatasetsindexerStatusMessage, 3000);
@@ -78,8 +79,7 @@
 					'message' : response.message
 				} ], response.type, $('.datasetsindexerAlerts'));
 			});
-		}
-		;
+		};
 	};
 
 	/*
@@ -401,7 +401,6 @@ $(function() {
 
 	molgenis.SearchClient.prototype.search = function(searchRequest, callback) {
 		var jsonRequest = JSON.stringify(searchRequest);
-		console.log(jsonRequest);
 		
 		$.ajax({
 			type : "POST",
@@ -520,19 +519,24 @@ function toggleCssClass(cssClass) {
 	}
 }
 
-function showSpinner() {
+function showSpinner(callback) {
 	var spinner = $('#spinner');
 	if (spinner.length === 0) {
 		var items = [];
-		items
-				.push('<div id="spinner" class="modal hide fade" data-backdrop="">');
+		items.push('<div id="spinner" class="modal hide fade" data-backdrop="">');
 		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
-		items
-				.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
+		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 	}
+	
+	if (callback) {
+		$('#spinner').on('shown', function() {
+			callback();
+		});
+	}
+	
 	spinner.modal('show');
 }
 

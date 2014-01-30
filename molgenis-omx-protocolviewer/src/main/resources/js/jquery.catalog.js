@@ -239,15 +239,14 @@
 					value : term
 				});
 			});
-			//FIXME get unlimited number of search results
-			queryRules.push({
-				operator : 'LIMIT',
-				value : 1000000
-			});
 
 			searchRequest = {
 				documentType : 'protocolTree-' + settings.protocolId,
-				queryRules : queryRules
+				query : {
+					'rules' : [queryRules],
+					//FIXME get unlimited number of search results
+					'pageSize' : 1000000
+				}
 			};			
 			searchApi.search(searchRequest, function(searchResponse){
 				var visibleItems = {};

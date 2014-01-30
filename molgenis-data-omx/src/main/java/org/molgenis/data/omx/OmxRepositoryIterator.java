@@ -26,7 +26,7 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	private final SearchService searchService;
 	private Iterator<Hit> hits;
 	private final Set<String> attributeNames;
-	private final long totalCount;
+	private final long pageSize;
 	private int count;
 	private final Query query;
 
@@ -41,14 +41,15 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 
 		SearchResult result = searchService.search(request);
-		totalCount = q.getPageSize() == 0 ? result.getTotalHitCount() : q.getPageSize();
+		pageSize = q.getPageSize() == 0 ? result.getTotalHitCount() : q.getPageSize();
+
 		hits = result.iterator();
 	}
 
 	@Override
 	public boolean hasNext()
 	{
-		return count < totalCount;
+		return count < pageSize;
 	}
 
 	@Override
@@ -76,14 +77,15 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 
 	private Entity hitToEntity(Hit hit)
 	{
-		MapEntity entity = new MapEntity();
+		MapEntity entity = new MapEntity("id");
 		Map<String, Object> values = hit.getColumnValueMap();
 
-		for (String attr : values.keySet())
+		for (Map.Entry<String, Object> entry : values.entrySet())
 		{
+			String attr = entry.getKey();
 			if (attributeNames.contains(attr))
 			{
-				entity.set(attr.toLowerCase(), values.get(attr));
+				entity.set(attr.toLowerCase(), entry.getValue());
 			}
 		}
 

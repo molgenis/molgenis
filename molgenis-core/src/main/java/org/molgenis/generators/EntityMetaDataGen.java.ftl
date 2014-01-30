@@ -39,17 +39,24 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setIdAttribute(${(entity.primaryKey.name == f.name)?string('true', 'false')});
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
+		${name(f)}.setUnique(${f.unique?string('true', 'false')});
 		<#if f.isXRef()>
-		${name(f)}.setRefEntityName("${f.xrefEntity.name}");
+			<#if f.xrefEntity.name == entity.name>
+		${name(f)}.setRefEntity(this);	
+			<#else>
+		${name(f)}.setRefEntity(new ${f.xrefEntity.namespace?lower_case}.${JavaName(f.xrefEntity)}MetaData());
+			</#if>
 		</#if>
 		<#list entity.getXrefLabels() as xrefLabel>
 			<#if xrefLabel == f.name>
 		${name(f)}.setLabelAttribute(true);
 			</#if>
 		</#list>	
+		<#if f.hidden || f.system>
+		${name(f)}.setVisible(false);
+		</#if>
 		
-		addAttributeMetaData(${name(f)});
-			
+		addAttributeMetaData(${name(f)});	
 </#list>
 		
 	}

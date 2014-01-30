@@ -35,7 +35,6 @@ import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -43,7 +42,6 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.SecurityUtils;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +61,6 @@ public class EvaluationController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
-	private final UserAccountService userAccountService;
 	private final SearchService searchService;
 	private final DataService dataService;
 
@@ -71,15 +68,11 @@ public class EvaluationController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService,
-			UserAccountService userAccountService, DataService dataService)
+	public EvaluationController(SearchService searchService, DataService dataService)
 	{
 		super(URI);
-		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (dataService == null) throw new IllegalArgumentException("Dataservice is null");
-		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
-		this.userAccountService = userAccountService;
 		this.searchService = searchService;
 		this.dataService = dataService;
 	}
@@ -88,7 +81,7 @@ public class EvaluationController extends MolgenisPluginController
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
 	String selectedDataSetId, Model model)
 	{
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : allDataSets)
@@ -103,7 +96,7 @@ public class EvaluationController extends MolgenisPluginController
 		{
 			model.addAttribute("selectedDataSet", selectedDataSetId);
 			Iterable<DataSet> it = dataService.findAll(DataSet.ENTITY_NAME,
-					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId));
+					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId), DataSet.class);
 			for (DataSet dataSet : it)
 			{
 				if (dataSet.getIdentifier().startsWith(SecurityUtils.getCurrentUsername() + "-" + selectedDataSetId))
@@ -123,7 +116,7 @@ public class EvaluationController extends MolgenisPluginController
 	Part file, HttpServletResponse response, Model model) throws IOException
 	{
 		EntitySource reader = null;
-		ExcelWriter<Entity> excelWriterRanks = null;
+		ExcelWriter excelWriterRanks = null;
 
 		try
 		{
@@ -134,16 +127,16 @@ public class EvaluationController extends MolgenisPluginController
 				response.setContentType("application/vnd.ms-excel");
 				response.addHeader("Content-Disposition", "attachment; filename="
 						+ getCsvFileName(file.getName() + "-ranks"));
-				excelWriterRanks = new ExcelWriter<Entity>(response.getOutputStream());
+				excelWriterRanks = new ExcelWriter(response.getOutputStream());
 				excelWriterRanks.addCellProcessor(new LowerCaseProcessor(true, false));
 
-				Writable<Entity> sheetWriterRank = null;
-				Writable<Entity> sheetWriterRankStatistics = null;
-				Writable<Entity> sheetWriteBiobankRanks = null;
-				Writable<Entity> sheetWriteSpssInput = null;
+				Writable sheetWriterRank = null;
+				Writable sheetWriterRankStatistics = null;
+				Writable sheetWriteBiobankRanks = null;
+				Writable sheetWriteSpssInput = null;
 
 				reader = new ExcelEntitySourceFactory().create(uploadFile);
-				Repository<? extends Entity> inputSheet = reader.getRepositoryByEntityName("Sheet1");
+				Repository inputSheet = reader.getRepositoryByEntityName("Sheet1");
 
 				List<String> biobankNames = new ArrayList<String>();
 				for (AttributeMetaData attr : inputSheet.getAttributes())
@@ -154,7 +147,8 @@ public class EvaluationController extends MolgenisPluginController
 				biobankNames.remove(0);
 
 				// First column has to correspond to the selected dataset
-				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId));
+				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId),
+						DataSet.class);
 
 				if (ds.getName().equalsIgnoreCase(firstColumn))
 				{
@@ -190,8 +184,8 @@ public class EvaluationController extends MolgenisPluginController
 						lowerCaseBiobankNames.add(element.toLowerCase());
 					}
 
-					List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames));
+					Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
+							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames), DataSet.class);
 
 					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
 					sheetWriterRank = excelWriterRanks.createWritable("result", lowerCaseBiobankNames);
@@ -205,13 +199,13 @@ public class EvaluationController extends MolgenisPluginController
 						List<String> ranks = new ArrayList<String>();
 						ranks.add(variableName);
 						Map<String, List<String>> mappingDetail = entry.getValue();
-						List<ObservableFeature> features = dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
-								new QueryImpl().eq(ObservableFeature.NAME, variableName));
-						String description = features.get(0).getDescription();
+						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+								new QueryImpl().eq(ObservableFeature.NAME, variableName), ObservableFeature.class);
+						String description = feature == null ? StringUtils.EMPTY : feature.getDescription();
 						if (!rankCollection.containsKey(description)) rankCollection.put(description,
 								new HashMap<String, List<Integer>>());
 
-						if (!features.isEmpty())
+						if (feature != null)
 						{
 							Entity row = new MapEntity();
 							row.set(firstColumn.toLowerCase(), description);
@@ -227,8 +221,8 @@ public class EvaluationController extends MolgenisPluginController
 									String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
 											+ selectedDataSetId + "-" + dataSet.getId();
 
-									Query q = new QueryImpl().eq("store_mapping_feature", features.get(0).getId())
-											.pageSize(50).sort(new Sort(Direction.DESC, "store_mapping_score"));
+									Query q = new QueryImpl().eq("store_mapping_feature", feature.getId()).pageSize(50)
+											.sort(new Sort(Direction.DESC, "store_mapping_score"));
 
 									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
 

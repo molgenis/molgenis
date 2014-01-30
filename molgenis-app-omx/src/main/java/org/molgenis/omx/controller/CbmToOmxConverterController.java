@@ -88,10 +88,10 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			throw new Exception("File does not of the xml type, other formats are not supported.");
 		}
 		// Create the files needed
-		CsvWriter<Entity> dataCBM = new CsvWriter<Entity>(new File(outputDir, "dataset_cbm.csv"));
-		CsvWriter<Entity> observableFeature = new CsvWriter<Entity>(new File(outputDir, "observablefeature.csv"));
-		CsvWriter<Entity> dataSet = new CsvWriter<Entity>(new File(outputDir, "dataset.csv"));
-		CsvWriter<Entity> protocol = new CsvWriter<Entity>(new File(outputDir, "protocol.csv"));
+		CsvWriter dataCBM = new CsvWriter(new File(outputDir, "dataset_cbm.csv"));
+		CsvWriter observableFeature = new CsvWriter(new File(outputDir, "observablefeature.csv"));
+		CsvWriter dataSet = new CsvWriter(new File(outputDir, "dataset.csv"));
+		CsvWriter protocol = new CsvWriter(new File(outputDir, "protocol.csv"));
 
 		try
 		{
@@ -364,7 +364,8 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			IOUtils.closeQuietly(dataSet);
 			IOUtils.closeQuietly(observableFeature);
 
-			file.delete();
+			boolean ok = file.delete();
+			if (!ok) logger.warn("unable to delete " + file.getPath());
 		}
 
 		File zipFile = new File(outputDir, "cbm.zip");
@@ -375,24 +376,35 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 
 		FileOutputStream fout = new FileOutputStream(zipFile);
 		ZipOutputStream zout = new ZipOutputStream(fout);
-
-		for (File f : sourceFiles)
+		try
 		{
-
-			logger.info("Adding " + f.getAbsolutePath());
-			FileInputStream fin = new FileInputStream(f);
-			zout.putNextEntry(new ZipEntry(f.getName()));
-			byte[] b = new byte[1024];
-			int length;
-			while ((length = fin.read(b)) > 0)
+			for (File f : sourceFiles)
 			{
-				zout.write(b, 0, length);
+
+				logger.info("Adding " + f.getAbsolutePath());
+				FileInputStream fin = new FileInputStream(f);
+				try
+				{
+					zout.putNextEntry(new ZipEntry(f.getName()));
+					byte[] b = new byte[1024];
+					int length;
+					while ((length = fin.read(b)) > 0)
+					{
+						zout.write(b, 0, length);
+					}
+					zout.closeEntry();
+				}
+				finally
+				{
+					fin.close();
+				}
 			}
-			zout.closeEntry();
-			fin.close();
 		}
-		zout.close();
-		fout.close();
+		finally
+		{
+			IOUtils.closeQuietly(zout);
+			IOUtils.closeQuietly(fout);
+		}
 
 		URL localURL = zipFile.toURI().toURL();
 		URLConnection conn = localURL.openConnection();

@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 public class CsvRepositoryTest
 {
+	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CsvRepository()
 	{
