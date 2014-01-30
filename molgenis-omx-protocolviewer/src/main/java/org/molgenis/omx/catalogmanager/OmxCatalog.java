@@ -45,7 +45,7 @@ public class OmxCatalog extends OmxCatalogFolder implements Catalog
 		// TODO verify that the catalog item is part of this catalog.
 		// this check was removed because of bad performance (worst case the full protocol tree needs to be pruned).
 		ObservableFeature observableFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.ID, catalogItemId));
+				new QueryImpl().eq(ObservableFeature.ID, catalogItemId), ObservableFeature.class);
 		if (observableFeature == null) throw new IllegalArgumentException("catalogItemId does not exist");
 		return new OmxCatalogItem(observableFeature);
 	}
