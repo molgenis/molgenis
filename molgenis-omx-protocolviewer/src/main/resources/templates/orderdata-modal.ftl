@@ -34,6 +34,7 @@
 </div>
 <script type="text/javascript">
     $(function () {
+    	var nrFeatures = 0;
         var deletedFeatures = [];
         var modal = $('#orderdata-modal');
         var submitBtn = $('#orderdata-btn');
@@ -59,8 +60,9 @@
                 type: 'GET',
                 url: pluginUri + '/selection/' + catalogId,
                 success: function (selection) {
+                	nrFeatures = selection.length;
                     var container = $('#orderdata-selection-table-container');
-                    if (selection.length === 0) {
+                    if (nrFeatures === 0) {
                         container.append('<p>no variables selected</p>');
                     } else {
                     	submitBtn.removeClass('disabled');
@@ -72,10 +74,6 @@
                         	var feature = molgenis.Catalog.getFeature(featureUri);
                             var row = $('<tr>');
                             row.append('<td>' + feature.name + '</td>');
-                            console.log(feature.description);
-                            console.log(molgenis);
-                            console.log(molgenis.i18n);
-                            console.log(molgenis.i18n.get(feature.description));
                             row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
 
                             var deleteCol = $('<td class="center">');
@@ -85,6 +83,11 @@
                                     'feature': feature.id
                                 });
                                 row.remove();
+                                --nrFeatures;
+                                if(nrFeatures === 0) {
+                                	submitBtn.addClass('disabled');
+                                	container.html('<p>no variables selected</p>');
+                                }
                                 // restore focus
                                 form.find('input:visible:first').focus();
                             });
