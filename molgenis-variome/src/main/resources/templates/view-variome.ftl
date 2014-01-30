@@ -309,8 +309,8 @@
 	<hr></hr>
 	
 	<div>
-		<#--action="${context_url}/execute-variant-app-demo"-->
-		<form role="form" action="http://localhost:8080/menu/main/dataexplorer" method="get">
+		<#--"http://localhost:8080/menu/main/dataexplorer"-->
+		<form role="form" action="${context_url}/execute-variant-app" method="post">
 			<button type="submit" href="http://localhost:8080/menu/main/dataexplorer" action="http://localhost:8080/menu/main/dataexplorer" class="btn">Go</button>
 		</form>
 	</div>

@@ -5,12 +5,11 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.omx.observ.value.StringValue;
@@ -23,6 +22,7 @@ import org.molgenis.omx.observ.value.StringValue;
  * and observable values for each observable set into a existing data set
  * 
  * */
+@Component
 public class ExampleRepositoryAnnotator implements RepositoryAnnotator {
 
 	@Autowired
@@ -30,22 +30,22 @@ public class ExampleRepositoryAnnotator implements RepositoryAnnotator {
 	
 	@Override
 	@Transactional
-	public Repository<? extends Entity> annotate (Repository<? extends Entity> source) {
+	public Repository annotate (Repository source) {
 		
 		//Create a new Observable feature (column)
 		ObservableFeature newFeature = new ObservableFeature();
 		
 		//Set the identifier and name of the new Observable feature
 		//Name cannot be NULL
-		newFeature.setIdentifier("qwert");
-		newFeature.setName("testColumn");
+		newFeature.setIdentifier("c1");
+		newFeature.setName("c1_test");
 		
 		//Add this new Observable feature to the dataService
 		dataService.add(ObservableFeature.ENTITY_NAME, newFeature);
 		
 		//Load the protocol (collection of column names) of the selected repository (a data set shown in the data explorer)
 		Protocol repositoryProtocol = dataService.findOne(Protocol.ENTITY_NAME, 
-				new QueryImpl().eq(Protocol.IDENTIFIER, "car_batch123_protocol"));
+				new QueryImpl().eq(Protocol.IDENTIFIER, "car_batch123_protocol"), Protocol.class);
 		
 		//Add the new Observable feature to the protocol
 		repositoryProtocol.getFeatures().add(newFeature);
@@ -55,11 +55,11 @@ public class ExampleRepositoryAnnotator implements RepositoryAnnotator {
 		
 		//Select the data set (repository) 
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, 
-				new QueryImpl().eq(DataSet.IDENTIFIER, "CAR_Batch123"));
+				new QueryImpl().eq(DataSet.IDENTIFIER, "CAR_Batch123"), DataSet.class);
 		
 		//Iterate over all the Observation sets (rows) that are part of the selected data set
 		Iterable<ObservationSet> osSet = dataService.findAll(ObservationSet.ENTITY_NAME, 
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
 		
 		//For every observation set (row)
 		for (ObservationSet os :osSet)
@@ -67,8 +67,7 @@ public class ExampleRepositoryAnnotator implements RepositoryAnnotator {
 			//Create a new string value and add it to the data service 
 			//This is done to make it a known value, so an observable value can get this value
 			StringValue sv = new StringValue();
-			sv.setValue("Test");
-			
+			sv.setValue("c1_test");
 			dataService.add(StringValue.ENTITY_NAME, sv);
 			
 			// Create a new observation value

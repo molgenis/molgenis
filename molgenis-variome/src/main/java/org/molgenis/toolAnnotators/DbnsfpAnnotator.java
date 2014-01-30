@@ -14,8 +14,7 @@ import org.molgenis.data.Repository;
 public class DbnsfpAnnotator implements VariantAnnotator {
 
 	@Override
-	public Repository<? extends Entity> annotate(
-			Repository<? extends Entity> source) {
+	public Repository annotate(Repository source) {
 		
 		// TODO: go through repository row by row
 		// For every row call dbnsfp????
