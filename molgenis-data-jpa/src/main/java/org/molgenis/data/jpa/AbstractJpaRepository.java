@@ -568,7 +568,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void deleteAll()
 	{
 		delete(this);
