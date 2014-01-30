@@ -43,6 +43,8 @@ public class ErrorMessageResponse
 
 	public static class ErrorMessage
 	{
+        private static final String DEFAULT_ERROR_MESSAGE = "Unknown error";
+
 		private final String message;
 		private final Integer code;
 
@@ -53,8 +55,7 @@ public class ErrorMessageResponse
 
 		public ErrorMessage(String message, Integer code)
 		{
-			if (message == null) throw new IllegalArgumentException("message is null");
-			this.message = message;
+			this.message = message != null ? message : DEFAULT_ERROR_MESSAGE;
 			this.code = code;
 		}
 

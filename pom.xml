@@ -50,22 +50,10 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.2.4.RELEASE</spring.version>
-		<spring.security.version>3.2.0.RC2</spring.security.version>
-		<mysql.connector.java.version>5.1.26</mysql.connector.java.version>
+		<spring.version>3.2.6.RELEASE</spring.version>
+		<spring.security.version>3.2.0.RELEASE</spring.security.version>
+		<mysql.connector.java.version>5.1.28</mysql.connector.java.version>
 	</properties>
-
-	<repositories>
-		<repository>
-			<id>enonic</id>
-			<url>http://repo.enonic.com/public/</url>
-		</repository>
-		<repository>
-			<id>repository.springsource.milestone</id>
-			<name>SpringSource Milestone Repository</name>
-			<url>http://repo.springsource.org/milestone</url>
-		</repository>
-	</repositories>
 
 	<build>
 		<!-- include *.ftl in src folder -->
@@ -565,8 +553,11 @@
 		<module>molgenis-security</module>
 		<module>molgenis-data-excel</module>
 		<module>molgenis-data-csv</module>
+		<module>molgenis-data-googlespreadsheet</module>
+        <module>molgenis-data-omx</module>
 		<module>molgenis-data</module>
 		<module>molgenis-data-jpa</module>
+		<module>molgenis-data-rest</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
 	</modules>

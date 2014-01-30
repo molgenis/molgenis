@@ -22,12 +22,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.springframework.util.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -37,7 +37,7 @@ import au.com.bytecode.opencsv.CSVReader;
  * 
  * The filename without the extension is considered to be the entityname
  */
-public class CsvRepository extends AbstractRepository<Entity>
+public class CsvRepository extends AbstractRepository
 {
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	public static final char DEFAULT_SEPARATOR = ',';
@@ -75,6 +75,11 @@ public class CsvRepository extends AbstractRepository<Entity>
 	{
 		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), StringUtils.stripFilenameExtension(file
 				.getName()), cellProcessors);
+	}
+
+	public CsvRepository(File file) throws FileNotFoundException
+	{
+		this(file, CsvEntitySourceFactory.CELLPROCESSORS);
 	}
 
 	public CsvRepository(File file, char separator, List<CellProcessor> cellProcessors) throws FileNotFoundException
@@ -172,7 +177,7 @@ public class CsvRepository extends AbstractRepository<Entity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		try
 		{

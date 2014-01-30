@@ -38,6 +38,16 @@ public interface AttributeMetaData
 	boolean isReadonly();
 
 	/**
+	 * Wether attribute should have an unique value for each entity
+	 */
+	boolean isUnique();
+
+	/**
+	 * Should this attribute be visible to the user?
+	 */
+	boolean isVisible();
+
+	/**
 	 * Default value
 	 */
 	Object getDefaultValue();

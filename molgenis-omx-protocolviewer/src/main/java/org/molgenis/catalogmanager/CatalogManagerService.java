@@ -1,7 +1,6 @@
 package org.molgenis.catalogmanager;
 
-import org.molgenis.catalog.Catalog;
-import org.molgenis.catalog.CatalogMeta;
+import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.study.UnknownStudyDefinitionException;
 
@@ -10,34 +9,8 @@ import org.molgenis.study.UnknownStudyDefinitionException;
  * 
  * @author Dennis
  */
-public interface CatalogManagerService
+public interface CatalogManagerService extends CatalogService
 {
-	/**
-	 * Gets all available catalogs
-	 * 
-	 * @return Iterable of CatalogInfo
-	 */
-	Iterable<CatalogMeta> findCatalogs();
-
-	/**
-	 * Returns the catalog with the given id
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 */
-	Catalog getCatalog(String id) throws UnknownCatalogException;
-
-	/**
-	 * Returns the catalog of the study definition with the given id
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 * @throws UnknownStudyDefinitionException
-	 */
-	Catalog getCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
-
 	/**
 	 * Retrieves a catalog and store it in the database
 	 * 
@@ -53,15 +26,6 @@ public interface CatalogManagerService
 	 * @throws UnknownCatalogException
 	 */
 	void unloadCatalog(String id) throws UnknownCatalogException;
-
-	/**
-	 * Returns whether the catalog with the given id is loaded
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 */
-	boolean isCatalogLoaded(String id) throws UnknownCatalogException;
 
 	/**
 	 * Retrieves a catalog of a study definition and store it in the database
@@ -80,14 +44,4 @@ public interface CatalogManagerService
 	 * @throws UnknownStudyDefinitionException
 	 */
 	void unloadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
-
-	/**
-	 * Returns whether the catalog for the study definition with the given id is loaded
-	 * 
-	 * @param id
-	 * @return
-	 * @throws UnknownCatalogException
-	 * @throws UnknownStudyDefinitionException
-	 */
-	boolean isCatalogOfStudyDefinitionLoaded(String id) throws UnknownCatalogException, UnknownStudyDefinitionException;
 }

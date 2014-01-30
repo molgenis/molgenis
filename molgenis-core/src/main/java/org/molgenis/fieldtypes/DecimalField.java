@@ -2,7 +2,6 @@ package org.molgenis.fieldtypes;
 
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -76,7 +75,7 @@ public class DecimalField extends FieldType
 	@Override
 	public Class<?> getJavaType()
 	{
-		return Date.class;
+		return Double.class;
 	}
 
 	@Override

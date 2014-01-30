@@ -37,8 +37,8 @@ public class OmxRepositoryIteratorTest
 		columnValueMap.put("attr1", 2);
 		columnValueMap.put("bogus", "bogus");
 
-		Hit hit = new Hit("id", dataSetIdentifier, null, columnValueMap);
-		SearchResult result = new SearchResult(100, Arrays.asList(hit));
+		Hit hit = new Hit("id", dataSetIdentifier, columnValueMap);
+		SearchResult result = new SearchResult(1, Arrays.asList(hit));
 		when(searchServiceMock.search(new SearchRequest(dataSetIdentifier, q, null))).thenReturn(result);
 
 		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchServiceMock, q, attributeNames);

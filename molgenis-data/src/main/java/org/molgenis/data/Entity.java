@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -67,7 +66,12 @@ public interface Entity extends Serializable
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Date}.
 	 */
-	public Date getDate(String attributeName);
+	public java.sql.Date getDate(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as {@link java.util.Date}.
+	 */
+	public java.util.Date getUtilDate(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Timestamp}.
@@ -83,4 +87,10 @@ public interface Entity extends Serializable
 	 * Retrieves the value of the designated column as List<Integer>
 	 */
 	public List<Integer> getIntList(String attributeName);
+
+	List<String> getLabelAttributeNames();
+
+	void set(Entity entity, boolean strict);
+
+	EntityMetaData getEntityMetaData();
 }

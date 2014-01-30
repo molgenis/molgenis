@@ -17,7 +17,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisOptions.MapperImplementation;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.DatetimeField;
@@ -37,26 +36,18 @@ import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
 import org.molgenis.generators.JpaEntitySourceGen;
 import org.molgenis.generators.JpaRepositoryGen;
-import org.molgenis.generators.R.RApiGen;
-import org.molgenis.generators.R.REntityGen;
-import org.molgenis.generators.R.RMatrixGen;
+import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
-import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
 import org.molgenis.generators.doc.DotDocMinimalGen;
 import org.molgenis.generators.doc.DotDocModuleDependencyGen;
 import org.molgenis.generators.doc.FileFormatDocGen;
 import org.molgenis.generators.doc.ObjectModelDocGen;
-import org.molgenis.generators.server.EntityRestApiGen;
-import org.molgenis.generators.server.EntityServiceGen;
-import org.molgenis.generators.server.RdfApiGen;
-import org.molgenis.generators.server.SoapApiGen;
-import org.molgenis.generators.server.UsedMolgenisOptionsGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
 
@@ -131,12 +122,14 @@ public class Molgenis
 		this(new MolgenisOptions(propertiesFile), outputPath, generatorsToUse);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Molgenis(String propertiesFile) throws Exception
 	{
 		this(new MolgenisOptions(propertiesFile), null, new Class[]
 		{});
 	}
 
+	@SuppressWarnings("unchecked")
 	public Molgenis(String propertiesFile, String outputPath) throws Exception
 	{
 		this(new MolgenisOptions(propertiesFile), outputPath, new Class[]
@@ -194,18 +187,10 @@ public class Molgenis
 		if (!options.output_src.endsWith("/")) options.output_src = options.output_src.endsWith("/") + "/";
 		options.output_hand = outputPath != null ? outputPath + options.output_hand : options.output_hand;
 		if (!options.output_hand.endsWith("/")) options.output_hand = options.output_hand + "/";
-		options.output_sql = outputPath != null ? outputPath + options.output_sql : options.output_sql;
-		if (!options.output_sql.endsWith("/")) options.output_sql = options.output_sql + "/";
 		options.output_web = outputPath != null ? outputPath + options.output_web : options.output_web;
 		if (!options.output_web.endsWith("/")) options.output_web = options.output_web + "/";
 		options.output_doc = outputPath != null ? outputPath + options.output_doc : options.output_doc;
 		if (!options.output_doc.endsWith("/")) options.output_doc = options.output_doc + "/";
-
-		// USED MOLGENIS OPTIONS
-		if (options.generate_options)
-		{
-			generators.add(new UsedMolgenisOptionsGen());
-		}
 
 		// DOCUMENTATION
 		if (options.generate_doc)
@@ -230,19 +215,17 @@ public class Molgenis
 			logger.info("Skipping documentation ....");
 		}
 
-		if (options.mapper_implementation.equals(MapperImplementation.JPA))
+		if (options.generate_jpa)
 		{
 			if (options.generate_db)
 			{
 				generators.add(new DatabaseConfigGen());
 			}
+
 			generators.add(new DataTypeGen());
 			generators.add(new EntityMetaDataGen());
 			generators.add(new JpaRepositoryGen());
-			generators.add(new EntityServiceGen());
 			generators.add(new EntityImporterGen());
-
-			// Temp remove when omx is migrated to DataApi
 			generators.add(new JDBCMetaDatabaseGen());
 
 			if (options.generate_jpa_entity_source)
@@ -272,51 +255,7 @@ public class Molgenis
 		{
 			generators.add(new EntitiesImporterGen());
 			generators.add(new EntitiesValidatorGen());
-			// generators.add(new CsvEntityExporterGen());
-			// generators.add(new ExcelEntityExporterGen());
 		}
-
-		// R
-		if (options.generate_R)
-		{
-			generators.add(new REntityGen());
-			generators.add(new RMatrixGen());
-			generators.add(new RApiGen());
-		}
-		else
-		{
-			logger.info("Skipping R interface ....");
-		}
-
-		// SOAP
-		if (options.generate_soap)
-		{
-			generators.add(new SoapApiGen());
-		}
-		else
-		{
-			logger.info("Skipping SOAP API ....");
-		}
-
-		if (options.generate_rest)
-		{
-			generators.add(new EntityRestApiGen());
-		}
-		else
-		{
-			logger.info("Skipping SOAP API ....");
-		}
-
-		if (options.generate_rdf)
-		{
-			generators.add(new RdfApiGen());
-		}
-		else
-		{
-			logger.info("Skipping SOAP API ....");
-		}
-
-		// FIXME use configuration to add the generators
 
 		// clean out generators
 		List<Generator> use = new ArrayList<Generator>();

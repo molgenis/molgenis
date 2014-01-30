@@ -2,7 +2,7 @@ package org.molgenis.charts;
 
 import java.util.List;
 
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.springframework.ui.Model;
 
 /**
@@ -17,7 +17,7 @@ public interface ChartVisualizationService
 	 * 
 	 * @return
 	 */
-	List<ChartType> getCapabilities();
+	List<MolgenisChartType> getCapabilities();
 
 	/**
 	 * Renders the chart
@@ -28,5 +28,5 @@ public interface ChartVisualizationService
 	 *            , the Spring controller model
 	 * @return the name of the freemarker template
 	 */
-	String renderChart(Chart chart, Model model);
+	Object renderChart(AbstractChart chart, Model model);
 }

@@ -1,5 +1,6 @@
 package org.molgenis.study;
 
+import java.util.Date;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
@@ -10,9 +11,12 @@ public class StudyDefinitionImpl implements StudyDefinition
 	private String name;
 	private String description;
 	private String version;
+	private Date dateCreated;
+	private Status status;
 	private List<String> authors;
 	private String authorEmail;
 	private List<CatalogItem> items;
+	private String requestForm;
 
 	public StudyDefinitionImpl()
 	{
@@ -25,9 +29,12 @@ public class StudyDefinitionImpl implements StudyDefinition
 		setName(studyDefinition.getName());
 		setDescription(studyDefinition.getDescription());
 		setVersion(studyDefinition.getVersion());
+		setDateCreated(studyDefinition.getDateCreated());
+		setStatus(studyDefinition.getStatus());
 		setAuthors(studyDefinition.getAuthors());
 		setAuthorEmail(studyDefinition.getAuthorEmail());
 		setItems(studyDefinition.getItems());
+		setRequestForm(studyDefinition.getRequestProposalForm());
 	}
 
 	@Override
@@ -48,6 +55,7 @@ public class StudyDefinitionImpl implements StudyDefinition
 		return name;
 	}
 
+	@Override
 	public void setName(String name)
 	{
 		this.name = name;
@@ -76,6 +84,28 @@ public class StudyDefinitionImpl implements StudyDefinition
 	}
 
 	@Override
+	public Date getDateCreated()
+	{
+		return dateCreated != null ? new Date(dateCreated.getTime()) : null;
+	}
+
+	public void setDateCreated(Date dateCreated)
+	{
+		this.dateCreated = dateCreated != null ? new Date(dateCreated.getTime()) : null;
+	}
+
+	@Override
+	public Status getStatus()
+	{
+		return status;
+	}
+
+	public void setStatus(Status status)
+	{
+		this.status = status;
+	}
+
+	@Override
 	public List<String> getAuthors()
 	{
 		return authors;
@@ -98,11 +128,23 @@ public class StudyDefinitionImpl implements StudyDefinition
 	}
 
 	@Override
+	public String getRequestProposalForm()
+	{
+		return requestForm;
+	}
+
+	public void setRequestForm(String requestForm)
+	{
+		this.requestForm = requestForm;
+	}
+
+	@Override
 	public List<CatalogItem> getItems()
 	{
 		return items;
 	}
 
+	@Override
 	public void setItems(List<CatalogItem> items)
 	{
 		this.items = items;

@@ -51,7 +51,7 @@ public class UserAccountServiceImpl implements UserAccountService
 			updatedCurrentUser.setPassword(encodedPassword);
 		}
 
-		userService.update(currentUser);
+		userService.update(updatedCurrentUser);
 	}
 
 	@Override

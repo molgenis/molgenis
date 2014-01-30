@@ -10,10 +10,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetWriter;
-import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.util.tuple.KeyValueTuple;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
+import org.molgenis.data.Writable;
+import org.molgenis.data.WritableFactory;
+import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.support.MapEntity;
 
 abstract class AbstractOmxConvertor
 {
@@ -35,23 +38,24 @@ abstract class AbstractOmxConvertor
 		File file = new File(fileString);
 		if (file.exists())
 		{
-			ExcelReader reader = null;
+			EntitySource entitySource = null;
+			ExcelWriter writer = null;
 			try
 			{
-				reader = new ExcelReader(file, true);
+				entitySource = new ExcelEntitySourceFactory().create(file);
+
 				// Handle category sheet first
-				collectCategoryInfo(reader);
+				collectCategoryInfo(entitySource);
 				// Handle variable sheet second
-				collectVariableInfo(reader);
+				collectVariableInfo(entitySource);
 				// Handle protocol sheet second
-				collectProtocolInfo(reader);
+				collectProtocolInfo(entitySource);
 			}
 			finally
 			{
-				if (reader != null) reader.close();
+				if (entitySource != null) entitySource.close();
 			}
 
-			ExcelWriter writer = null;
 			try
 			{
 				writer = new ExcelWriter(new File(file.getAbsolutePath() + "_OMX.xls"));
@@ -64,35 +68,32 @@ abstract class AbstractOmxConvertor
 		}
 	}
 
-	public void writeToPhenoFormat(ExcelWriter writer) throws IOException
+	public void writeToPhenoFormat(WritableFactory writer) throws IOException
 	{
 		String protocolIdentifier = studyName + "_protocol";
 		StringBuilder listOfFeatureIdentifier = new StringBuilder();
 		// Create sheet for investigation
-		ExcelSheetWriter dataSet = null;
-		// CSVWriter dataSet = null;
+		Writable dataSet = null;
 		try
 		{
-			dataSet = (ExcelSheetWriter) writer.createTupleWriter("dataset");
-			dataSet.writeColNames(Arrays.asList("identifier", "name", "protocolUsed_identifier"));
-			KeyValueTuple row = new KeyValueTuple();
-			row.set("identifier", studyName);
-			row.set("name", studyName);
-			row.set("protocolUsed_identifier", protocolIdentifier);
-			dataSet.write(row);
+			dataSet = writer.createWritable("dataset", Arrays.asList("identifier", "name", "protocolUsed_identifier"));
+			Entity entity = new MapEntity();
+			entity.set("identifier", studyName);
+			entity.set("name", studyName);
+			entity.set("protocolUsed_identifier", protocolIdentifier);
+			dataSet.add(entity);
 		}
 		finally
 		{
 			if (dataSet != null) dataSet.close();
 		}
 		// Create sheet for category
-		ExcelSheetWriter categorySheet = null;
+		Writable categorySheet = null;
 
 		try
 		{
-			categorySheet = (ExcelSheetWriter) writer.createTupleWriter("category");
-			categorySheet.writeColNames(Arrays
-					.asList("identifier", "name", "valueCode", "observablefeature_identifier"));
+			categorySheet = writer.createWritable("category",
+					Arrays.asList("identifier", "name", "valueCode", "observablefeature_identifier"));
 
 			for (Entry<String, List<UniqueCategory>> entry : featureCategoryLinks.entrySet())
 			{
@@ -100,12 +101,12 @@ abstract class AbstractOmxConvertor
 				List<UniqueCategory> categoriesPerFeature = entry.getValue();
 				for (UniqueCategory eachCategory : categoriesPerFeature)
 				{
-					KeyValueTuple eachRow = new KeyValueTuple();
-					eachRow.set("identifier", eachCategory.getIdentifier());
-					eachRow.set("name", eachCategory.getLabel());
-					eachRow.set("valueCode", eachCategory.getCode());
-					eachRow.set("observablefeature_identifier", featureIdentifier);
-					categorySheet.write(eachRow);
+					Entity entity = new MapEntity();
+					entity.set("identifier", eachCategory.getIdentifier());
+					entity.set("name", eachCategory.getLabel());
+					entity.set("valueCode", eachCategory.getCode());
+					entity.set("observablefeature_identifier", featureIdentifier);
+					categorySheet.add(entity);
 				}
 			}
 		}
@@ -115,16 +116,15 @@ abstract class AbstractOmxConvertor
 		}
 
 		// Create sheet for variable
-		ExcelSheetWriter featureWriter = null;
+		Writable featureWriter = null;
 		try
 		{
-			featureWriter = (ExcelSheetWriter) writer.createTupleWriter("observablefeature");
-			featureWriter.writeColNames(Arrays.asList("identifier", "name", "description", "dataType",
-					"unit_Identifier"));
+			featureWriter = writer.createWritable("observablefeature",
+					Arrays.asList("identifier", "name", "description", "dataType", "unit_Identifier"));
 			int count = 0;
 			for (UniqueVariable eachVariable : variableInfo.values())
 			{
-				KeyValueTuple eachRow = new KeyValueTuple();
+				Entity eachRow = new MapEntity();
 				String name = eachVariable.getVariable();
 				String dataType = eachVariable.getDataType();
 				String identifier = eachVariable.getIdentifier();
@@ -146,7 +146,7 @@ abstract class AbstractOmxConvertor
 				eachRow.set("name", name);
 				eachRow.set("description", eachVariable.getLabel());
 				eachRow.set("dataType", dataType);
-				featureWriter.write(eachRow);
+				featureWriter.add(eachRow);
 				System.out.println(++count);
 			}
 		}
@@ -156,13 +156,13 @@ abstract class AbstractOmxConvertor
 		}
 
 		// Create sheet for protocol
-		ExcelSheetWriter protocolSheet = null;
+		Writable protocolSheet = null;
 		try
 		{
-			protocolSheet = (ExcelSheetWriter) writer.createTupleWriter("protocol");
-			protocolSheet.writeColNames(Arrays.asList("identifier", "name", "features_identifier",
-					"subprotocols_identifier"));
-			KeyValueTuple protocol = new KeyValueTuple();
+			protocolSheet = writer.createWritable("protocol",
+					Arrays.asList("identifier", "name", "features_identifier", "subprotocols_identifier"));
+
+			Entity protocol = new MapEntity();
 			protocol.set("identifier", protocolIdentifier);
 			protocol.set("name", protocolIdentifier);
 			List<String> subProtocolIdentifiers = new ArrayList<String>();
@@ -179,17 +179,17 @@ abstract class AbstractOmxConvertor
 				{
 					String subProtocolName = entry.getKey();
 					String subProtocolIdentifier = createProtocolIdentifier(subProtocolName);
-					KeyValueTuple subProtocol = new KeyValueTuple();
+					Entity subProtocol = new MapEntity();
 					subProtocol.set("identifier", subProtocolIdentifier);
 					subProtocol.set("name", subProtocolName);
 					subProtocol.set("features_identifier", StringUtils.join(entry.getValue(), ','));
-					protocolSheet.write(subProtocol);
+					protocolSheet.add(subProtocol);
 
 					subProtocolIdentifiers.add(subProtocolIdentifier);
 				}
 			}
 			protocol.set("subprotocols_identifier", StringUtils.join(subProtocolIdentifiers, ','));
-			protocolSheet.write(protocol);
+			protocolSheet.add(protocol);
 		}
 		finally
 		{
@@ -197,11 +197,11 @@ abstract class AbstractOmxConvertor
 		}
 	}
 
-	public abstract void collectProtocolInfo(ExcelReader reader) throws IOException;
+	public abstract void collectProtocolInfo(EntitySource entitySource) throws IOException;
 
-	public abstract void collectVariableInfo(ExcelReader reader) throws IOException;
+	public abstract void collectVariableInfo(EntitySource entitySource) throws IOException;
 
-	public abstract void collectCategoryInfo(ExcelReader reader) throws IOException;
+	public abstract void collectCategoryInfo(EntitySource entitySource) throws IOException;
 
 	public String createFeatureIdentifier(String featureName)
 	{

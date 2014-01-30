@@ -11,8 +11,8 @@ import java.io.Writer;
 import java.util.Arrays;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.io.processor.CellProcessor;
 import org.testng.annotations.Test;
 
 public class CsvWriterTest

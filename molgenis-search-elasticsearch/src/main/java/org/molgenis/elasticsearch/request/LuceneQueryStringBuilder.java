@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 
+import com.google.common.math.DoubleMath;
+
 /**
  * Builds a Lucene query from molgenis QueryRules
  * 
@@ -138,10 +140,23 @@ public class LuceneQueryStringBuilder
 	private static Object getValue(QueryRule queryRule)
 	{
 		Object value = null;
-		if (queryRule.getValue() != null)
+		Object valueObj = queryRule.getValue();
+		if (valueObj != null)
 		{
-			value = queryRule.getValue() instanceof String ? escapeValue((String) queryRule.getValue()) : queryRule
-					.getValue();
+			if (valueObj instanceof String)
+			{
+				value = escapeValue((String) queryRule.getValue());
+			}
+			else if (valueObj instanceof Double)
+			{
+				// store Double as Integer if integer value of the double is the same as the double
+				double doubleValue = ((Double) valueObj).doubleValue();
+				value = DoubleMath.isMathematicalInteger(doubleValue) ? Integer.valueOf((int) doubleValue) : valueObj;
+			}
+			else
+			{
+				value = valueObj;
+			}
 		}
 
 		return value;

@@ -20,19 +20,11 @@ public class WebAppDatabasePopulator implements ApplicationListener<ContextRefre
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		try
+		if (!webAppDatabasePopulatorService.isDatabasePopulated())
 		{
-			if (!webAppDatabasePopulatorService.isDatabasePopulated())
-			{
-				logger.info("initializing application database");
-				webAppDatabasePopulatorService.populateDatabase();
-				logger.info("initialized application database");
-			}
-		}
-		catch (DatabaseException e)
-		{
-			logger.error(e);
-			throw new RuntimeException(e);
+			logger.info("initializing application database");
+			webAppDatabasePopulatorService.populateDatabase();
+			logger.info("initialized application database");
 		}
 	}
 }

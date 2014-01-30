@@ -2,25 +2,10 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
-		<plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
-		<plugin id="mappingmanager" name="Curate mappings" url="mappingmanager"/>
-		<plugin id="evaluation" name="Evaluation" url="evaluation"/>
-		<plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
-		<plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
-		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
-		<plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
+		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
 		<plugin id="importwizard" name="Upload" url="importwizard"/>
-		<plugin id="news" name="News" url="news"/>
-		<plugin id="background" name="Background" url="background"/>
-		<plugin id="references" name="References" url="references"/>
-		<plugin id="contact" name="Contact" url="contact"/>
-        <plugin id="genomebrowser" name="Genome Browser" url="genomebrowser"/>
-		<menu label="Converters" name="converters">
-			<plugin id="cbmtoomxconverter" name="CBM converter" url="cbmtoomxconverter"/>
-		</menu>
-        <menu label="Admin" name="admin">
-	        <menu label="Entities" name ="entities">
+		<menu label="Entities" name ="entities">
         		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>
         		<plugin id="form.Protocol" name="Protocol" url="form.Protocol?subForms=DataSet.ProtocolUsed"/>
         		<plugin id="form.ProtocolFlow" name="ProtocolFlow" url="form.ProtocolFlow"/>
@@ -48,12 +33,28 @@
         		<plugin id="form.MolgenisUser" name="MolgenisUser" url="form.MolgenisUser"/>
         		<plugin id="form.MolgenisGroup" name="MolgenisGroup" url="form.MolgenisGroup"/>
 	        </menu>
+	    <menu label="BiobankConnect" name="biobankconnect">    
+		   	<plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
+	        <plugin id="mappingmanager" name="Curate mappings" url="mappingmanager"/>
+	        <plugin id="evaluation" name="Evaluation" url="evaluation"/>
+	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
+        </menu>
+        <plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
+        <menu label="Background" name="background">    
+	        <plugin id="news" name="News" url="news"/>
+	        <plugin id="background" name="Background" url="background"/>
+	        <plugin id="references" name="References" url="references"/>
+	        <plugin id="contact" name="Contact" url="contact"/>
+        </menu>
+        <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/> 
+        <menu label="Admin" name="admin">
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
         	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
 			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
 			<plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
 			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
+			<plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>

@@ -5,7 +5,6 @@ import static org.molgenis.security.usermanager.UserManagerController.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,14 +39,14 @@ public class UserManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(Model model) throws DatabaseException
+	public String init(Model model)
 	{
 		return refreshUserManagerView(Integer.valueOf("-1"), Integer.valueOf("-1"), model);
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	public String updateView(@RequestParam Integer userId,
-			@RequestParam(value = "groupId", required = false) Integer groupId, Model model) throws DatabaseException
+			@RequestParam(value = "groupId", required = false) Integer groupId, Model model)
 	{
 		return refreshUserManagerView(userId, groupId, model);
 	}
@@ -55,7 +54,6 @@ public class UserManagerController extends MolgenisPluginController
 	@RequestMapping(value = "/users/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
 	public List<MolgenisUserViewData> getUsersMemberInGroup(@PathVariable Integer groupId, Model model)
-			throws DatabaseException
 	{
 		this.selectedGroupId = groupId;
 		model.addAttribute("group_selected_id", this.selectedGroupId);
@@ -72,7 +70,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/addusertogroup/{groupToAddId}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public void addUserToGroup(@PathVariable Integer groupToAddId) throws DatabaseException
+	public void addUserToGroup(@PathVariable Integer groupToAddId)
 	{
 		if (isValidId(this.selectedUserId) && isValidId(groupToAddId))
 		{
@@ -82,7 +80,7 @@ public class UserManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/removeuserfromgroup/{groupToRemoveId}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public void removeUserFromGroup(@PathVariable Integer groupToRemoveId) throws DatabaseException
+	public void removeUserFromGroup(@PathVariable Integer groupToRemoveId)
 	{
 		if (isValidId(this.selectedUserId) && isValidId(groupToRemoveId))
 		{
@@ -95,7 +93,7 @@ public class UserManagerController extends MolgenisPluginController
 		return null != id && !Integer.valueOf("-1").equals(id);
 	}
 
-	private String refreshUserManagerView(Integer userId, Integer groupId, Model model) throws DatabaseException
+	private String refreshUserManagerView(Integer userId, Integer groupId, Model model)
 	{
 
 		if (null != userId)

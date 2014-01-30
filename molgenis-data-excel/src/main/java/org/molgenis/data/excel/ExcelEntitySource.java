@@ -18,7 +18,7 @@ import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 
 /**
  * Excel file EntitySource. Is a wrapper around an excel workbook.
@@ -76,7 +76,12 @@ public class ExcelEntitySource implements EntitySource
 		this.cellProcessors = cellProcessors;
 	}
 
-	protected ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
+	public ExcelEntitySource(File file) throws IOException
+	{
+		this(file, null);
+	}
+
+	public ExcelEntitySource(File file, List<CellProcessor> cellProcessors) throws IOException
 	{
 		this(new FileInputStream(file), EXCEL_ENTITYSOURCE_URL_PREFIX + file.getAbsolutePath(), cellProcessors);
 	}
@@ -86,7 +91,7 @@ public class ExcelEntitySource implements EntitySource
 		this(null, url, cellProcessors);
 	}
 
-	protected ExcelEntitySource(InputStream is, List<CellProcessor> cellProcessors)
+	public ExcelEntitySource(InputStream is, List<CellProcessor> cellProcessors)
 	{
 		this(is, null, cellProcessors);
 	}
@@ -104,13 +109,23 @@ public class ExcelEntitySource implements EntitySource
 	public ExcelRepository getSheet(int i)
 	{
 		Sheet poiSheet = workbook.getSheetAt(i);
-		return poiSheet != null ? new ExcelRepository(poiSheet, cellProcessors) : null;
+		if (poiSheet == null)
+		{
+			return null;
+		}
+
+		return new ExcelRepository(poiSheet, cellProcessors);
 	}
 
 	public ExcelRepository getSheet(String sheetName)
 	{
 		Sheet poiSheet = workbook.getSheet(sheetName);
-		return poiSheet != null ? new ExcelRepository(poiSheet, cellProcessors) : null;
+		if (poiSheet == null)
+		{
+			return null;
+		}
+
+		return new ExcelRepository(poiSheet, cellProcessors);
 	}
 
 	public void addCellProcessor(CellProcessor cellProcessor)
@@ -167,7 +182,7 @@ public class ExcelEntitySource implements EntitySource
 	}
 
 	@Override
-	public Repository<ExcelEntity> getRepositoryByEntityName(String entityName)
+	public Repository getRepositoryByEntityName(String entityName) throws UnknownEntityException
 	{
 		Sheet poiSheet = workbook.getSheet(entityName);
 		if (poiSheet == null)

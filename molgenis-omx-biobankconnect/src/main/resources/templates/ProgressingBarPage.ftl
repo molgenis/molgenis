@@ -1,23 +1,42 @@
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
 	<div class="row-fluid">
 		<div class="span12">
-			<legend><div><strong>Please be patient</strong> : this will take up to 5 mins</div></legend>
+			<legend><div><strong>Please be patient</strong> : this will take up to 5 mins </div><div class="font-size-medium-center">If your session expires, please click on '<strong>Cureate Mappings</strong>' in the menu to see the result</div></legend>
 		</div>
 	</div>
-	<div id="progress-bar-div" class="row-fluid">
-		<div class="offset2 span8">
-			When finished, click next!
+	<div id="delete-mapping" class="row-fluid progress-bar-hidden">
+		<div class="offset2 span10">
+			Deleting existing mappings
+		</div>
+		<div class="progress progress-striped progress-warning active offset2 span8">
+			<div class="bar text-align-center"></div>
+		</div>
+	</div>
+	<div id="create-mapping" class="row-fluid progress-bar-hidden">
+		<div class="offset2 span10">
+			Create mappings
 		</div>
 		<div class="progress progress-striped active offset2 span8">
 			<div class="bar text-align-center"></div>
 		</div>
 	</div>
-	<div id="existing-mapping-div" class="row-fluid">
+	<div id="store-mapping" class="row-fluid progress-bar-hidden">
+		<div class="offset2 span10">
+			Store mappings
+		</div>
+		<div class="progress progress-striped progress-success active offset2 span8">
+			<div class="bar text-align-center"></div>
+		</div>
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.checkMatchingStatus('${context_url}', $('#progress-bar-div').find('div.bar:eq(0)'));
+			var currentStatus = {};
+			currentStatus['DeleteMapping'] = $('#delete-mapping');
+			currentStatus['CreateMapping'] = $('#create-mapping');
+			currentStatus['StoreMapping'] = $('#store-mapping');
+			$('.progress-bar-hidden').hide();
+			molgenis.checkMatchingStatus('${context_url}', $('#wizardForm'), currentStatus);
 			$('li.cancel').addClass('disabled').click(function(){
 				if(!$(this).hasClass('disabled')){
 					$('form').attr({

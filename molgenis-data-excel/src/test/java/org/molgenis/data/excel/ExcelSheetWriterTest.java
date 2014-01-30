@@ -17,8 +17,8 @@ import java.util.Iterator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.io.processor.CellProcessor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -78,7 +78,7 @@ public class ExcelSheetWriterTest
 		try
 		{
 			entitySource = new ExcelEntitySource(new ByteArrayInputStream(bos.toByteArray()), null);
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("sheet");
+			Repository repo = entitySource.getRepositoryByEntityName("sheet");
 
 			assertNotNull(repo.getAttribute("col1"));
 			assertNotNull(repo.getAttribute("col2"));

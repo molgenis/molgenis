@@ -13,15 +13,15 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.util.ListEscapeUtils;
 
-public class CsvWriter<E extends Entity> extends AbstractWritable<E>
+public class CsvWriter extends AbstractWritable
 {
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	public static final char DEFAULT_SEPARATOR = ',';
 
@@ -34,6 +34,12 @@ public class CsvWriter<E extends Entity> extends AbstractWritable<E>
 	public CsvWriter(Writer writer)
 	{
 		this(writer, ',');
+	}
+
+	public CsvWriter(Writer writer, List<String> attributeNames) throws IOException
+	{
+		this(writer);
+		writeAttributeNames(attributeNames);
 	}
 
 	public CsvWriter(Writer writer, char separator)
@@ -69,7 +75,7 @@ public class CsvWriter<E extends Entity> extends AbstractWritable<E>
 	}
 
 	@Override
-	public void add(Entity entity)
+	public Integer add(Entity entity)
 	{
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
 				"No attribute names defined call writeAttributeNames first");
@@ -77,11 +83,14 @@ public class CsvWriter<E extends Entity> extends AbstractWritable<E>
 		int i = 0;
 		String[] values = new String[cachedAttributeNames.size()];
 		for (String colName : cachedAttributeNames)
+		{
 			values[i++] = toValue(entity.get(colName));
+		}
 
 		csvWriter.writeNext(values);
 		if (csvWriter.checkError()) throw new MolgenisDataException("An exception occured writing the csv file");
 
+		return entity.getIdValue();
 	}
 
 	public void writeAttributeNames(Iterable<String> attributeNames) throws IOException

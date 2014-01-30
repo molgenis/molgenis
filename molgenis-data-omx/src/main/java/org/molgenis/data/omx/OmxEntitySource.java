@@ -33,20 +33,20 @@ public class OmxEntitySource implements EntitySource
 	@RunAsSystem
 	public Iterable<String> getEntityNames()
 	{
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME);
+		Iterable<Entity> dataSets = dataService.findAll(DataSet.ENTITY_NAME);
 
-		return Iterables.transform(dataSets, new Function<DataSet, String>()
+		return Iterables.transform(dataSets, new Function<Entity, String>()
 		{
 			@Override
-			public String apply(DataSet dataSet)
+			public String apply(Entity dataSet)
 			{
-				return dataSet.getIdentifier();
+				return dataSet.getString(DataSet.IDENTIFIER);
 			}
 		});
 	}
 
 	@Override
-	public Repository<? extends Entity> getRepositoryByEntityName(String name)
+	public Repository getRepositoryByEntityName(String name)
 	{
 		return new OmxRepository(dataService, searchService, name);
 	}

@@ -1,34 +1,37 @@
 package org.molgenis.charts;
 
 import static org.molgenis.charts.ChartController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
-import org.molgenis.charts.Chart.ChartType;
+import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.charttypes.HeatMapChart;
-import org.molgenis.charts.charttypes.LineChart;
 import org.molgenis.charts.data.DataMatrix;
-import org.molgenis.charts.data.XYDataSerie;
+import org.molgenis.charts.highcharts.basic.Options;
+import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
-import org.molgenis.charts.requests.LineChartRequest;
-import org.molgenis.data.QueryRule;
+import org.molgenis.charts.requests.XYDataChartRequest;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import freemarker.template.TemplateException;
 
@@ -61,33 +64,49 @@ public class ChartController
 	public String test(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("queryString", request.getQueryString());
-		return "test";
+		return "test"; //TODO
 	}
 
-	@RequestMapping("/line")
-	public String renderLineChart(@Valid
-	LineChartRequest request, Model model)
+	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
+	{		
+		XYDataChart xYDataChart = chartDataService.getXYDataChart(
+				request.getEntity(),
+				request.getX(),
+				request.getY(),
+				request.getSplit(),
+				request.getQuery().getRules());
+		
+		xYDataChart.setTitle(request.getTitle());
+		xYDataChart.setHeight(request.getHeight());
+		xYDataChart.setWidth(request.getWidth());
+		xYDataChart.setType(MolgenisChartType.valueOf(request.getType()));
+		xYDataChart.setxAxisLabel(request.getxAxisLabel());
+		xYDataChart.setyAxisLabel(request.getyAxisLabel());
+		
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.valueOf(request.getType()));
+		
+		return (Options) service.renderChart(xYDataChart, model);
+	}
+	
+	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
-		List<QueryRule> queryRules = null;// TODO
-
-		List<XYDataSerie> series = new ArrayList<XYDataSerie>();
-
-		for (int i = 0; i < request.getY().size(); i++)
-		{
-			XYDataSerie data = chartDataService.getXYDataSerie(request.getEntity(), request.getX(),
-					request.getY().get(i), queryRules);
-			series.add(data);
-		}
-
-		Chart chart = new LineChart(series);
-		chart.setTitle(request.getTitle());
-		chart.setWidth(request.getWidth());
+		BoxPlotChart chart = chartDataService.getBoxPlotChart(
+				request.getEntity(), 
+				request.getObservableFeature(), 
+				request.getQuery().getRules(), 
+				request.getSplit(),
+				request.getScale());
+		
 		chart.setHeight(request.getHeight());
-
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(ChartType.LINE_CHART);
-
-		return service.renderChart(chart, model);
+		chart.setWidth(request.getWidth());
+		chart.setTitle(request.getTitle());
+		
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.BOXPLOT_CHART);
+		return (Options) service.renderChart(chart, model);
 	}
 
 	/**
@@ -106,7 +125,7 @@ public class ChartController
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name")
 	String name, @PathVariable("extension")
-	String extension, HttpServletResponse response) throws IOException
+	String extension,  HttpServletResponse response) throws IOException
 	{
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
@@ -124,7 +143,7 @@ public class ChartController
 	/**
 	 * Renders a heatmap with r
 	 * 
-	 * Returns a piece of javascript that can be retrieved by an html page with a ajax request.
+	 * Returns a piece of javascript that can be retrieved by an html page with an ajax request.
 	 * 
 	 * The page must have an element with id named 'container'. The svg image will be added to this container element.
 	 * 
@@ -133,10 +152,12 @@ public class ChartController
 	 * @return
 	 * @throws IOException
 	 * @throws TemplateException
+	 * @throws FactoryConfigurationError 
+	 * @throws XMLStreamException 
 	 */
-	@RequestMapping("/heatmap")
-	public String renderHeatMap(@Valid
-	HeatMapRequest request, Model model) throws IOException, TemplateException
+	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -145,10 +166,12 @@ public class ChartController
 		chart.setTitle(request.getTitle());
 		chart.setWidth(request.getWidth());
 		chart.setHeight(request.getHeight());
+		chart.setxLabel(request.getxLabel());
+		chart.setyLabel(request.getyLabel());
+		chart.setScale(request.getScale());
+		
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.HEAT_MAP);
 
-		ChartVisualizationService service = chartVisualizationServiceFactory
-				.getVisualizationService(ChartType.HEAT_MAP);
-
-		return service.renderChart(chart, model);
+		return (String) service.renderChart(chart, model);
 	}
 }

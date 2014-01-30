@@ -1,6 +1,5 @@
 package org.molgenis.data.support;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -11,6 +10,13 @@ import org.springframework.beans.BeanUtils;
 public abstract class AbstractEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
+
+	@Override
+	public void set(Entity entity, boolean strict)
+	{
+		this.set(entity);
+
+	}
 
 	@Override
 	public String getString(String attributeName)
@@ -43,9 +49,15 @@ public abstract class AbstractEntity implements Entity
 	}
 
 	@Override
-	public Date getDate(String attributeName)
+	public java.sql.Date getDate(String attributeName)
 	{
 		return DataConverter.toDate(get(attributeName));
+	}
+
+	@Override
+	public java.util.Date getUtilDate(String attributeName)
+	{
+		return DataConverter.toUtilDate(get(attributeName));
 	}
 
 	@Override

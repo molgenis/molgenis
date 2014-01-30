@@ -236,7 +236,7 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 			{
 				indent += "    ";
 			}
-			for (Tree element : getChildren())
+			for (Tree<T> element : getChildren())
 			{
 				strBuilder.append('\n').append(indent).append(element.toString(true, level + 1)).append(',');
 			}

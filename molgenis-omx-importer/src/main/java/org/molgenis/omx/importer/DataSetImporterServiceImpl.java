@@ -1,6 +1,5 @@
 package org.molgenis.omx.importer;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,16 +8,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.io.TableReader;
-import org.molgenis.io.TableReaderFactory;
-import org.molgenis.io.TupleReader;
+import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -26,7 +27,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DataSetImporterServiceImpl implements DataSetImporterService
 {
-	private static final Logger LOG = Logger.getLogger(DataSetImporterServiceImpl.class);
-	private static final String DATASET_SHEET_PREFIX = "dataset_";
+	public static final String DATASET_SHEET_PREFIX = "dataset_";
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
 	private final DataService dataService;
 	private final ValueConverter valueConverter;
@@ -56,58 +56,68 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 	@Override
 	@Transactional(rollbackFor =
 	{ IOException.class, ValueConverterException.class })
-	public void importDataSet(File file, List<String> dataSetEntityNames) throws IOException, ValueConverterException
+	public EntityImportReport importDataSet(EntitySource entitySource, List<String> dataSetEntityNames,
+			DatabaseAction databaseAction) throws IOException, ValueConverterException
 	{
-		TableReader tableReader = TableReaderFactory.create(file);
+		// TODO use databaseAction (see http://www.molgenis.org/ticket/1933)
+
+		EntityImportReport importReport = new EntityImportReport();
 		try
 		{
-			for (String tableName : tableReader.getTableNames())
+			for (String entityName : entitySource.getEntityNames())
 			{
-				if (dataSetEntityNames.contains(tableName))
+				if (dataSetEntityNames.contains(entityName))
 				{
-					LOG.info("importing dataset " + tableName + " from file " + file + "...");
-					TupleReader tupleReader = tableReader.getTupleReader(tableName);
+					Repository repo = entitySource.getRepositoryByEntityName(entityName);
 					try
 					{
-						importSheet(tupleReader, tableName);
+						EntityImportReport sheetImportReport = importSheet(repo, entityName);
+						importReport.addEntityImportReport(sheetImportReport);
 					}
 					finally
 					{
-						tupleReader.close();
+						repo.close();
 					}
 				}
 			}
 		}
 		finally
 		{
-			tableReader.close();
+			entitySource.close();
 		}
+		return importReport;
 	}
 
-	private void importSheet(TupleReader sheetReader, String sheetName) throws IOException, ValueConverterException
+	@Override
+	public EntityImportReport importSheet(Repository repo, String sheetName) throws IOException,
+			ValueConverterException
 	{
+		EntityImportReport importReport = new EntityImportReport();
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier));
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier),
+				DataSet.class);
 		if (dataSet == null)
 		{
 			throw new MolgenisDataException("dataset '" + identifier + "' does not exist in db");
 		}
 
-		Iterator<String> colIt = sheetReader.colNamesIterator();
+		Iterator<AttributeMetaData> colIt = repo.getAttributes().iterator();
 		if (colIt == null || !colIt.hasNext()) throw new IOException("sheet '" + sheetName + "' contains no header");
 
 		// create feature map
 		Map<String, ObservableFeature> featureMap = new LinkedHashMap<String, ObservableFeature>();
 		while (colIt.hasNext())
 		{
-			String featureIdentifier = colIt.next();
+			AttributeMetaData attr = colIt.next();
+			String featureIdentifier = attr.getName();
 			if (featureIdentifier != null && !featureIdentifier.isEmpty())
 			{
 				if (!featureIdentifier.equalsIgnoreCase(DATASET_ROW_IDENTIFIER_HEADER))
 				{
 					ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-							new QueryImpl().eq(ObservableFeature.IDENTIFIER, featureIdentifier));
+							new QueryImpl().eq(ObservableFeature.IDENTIFIER, featureIdentifier),
+							ObservableFeature.class);
 
 					if (feature == null)
 					{
@@ -128,16 +138,19 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 
 		int rownr = 0;
 		int transactionRows = 10;// ;Math.max(1, 5000 / featureMap.size());
+		int nrObservationSets = 0;
+		int nrObservedValues = 0;
+		Map<String, AtomicInteger> nrValuesMap = new HashMap<String, AtomicInteger>();
 
-		for (Tuple row : sheetReader)
+		for (Entity entity : repo)
 		{
 			// Skip empty rows
-			if (!row.isEmpty())
+			if (!EntityUtils.isEmpty(entity))
 			{
 				List<ObservedValue> obsValueList = new ArrayList<ObservedValue>();
 				Map<String, List<Value>> valueMap = new HashMap<String, List<Value>>();
 
-				String rowIdentifier = row.getString(DATASET_ROW_IDENTIFIER_HEADER);
+				String rowIdentifier = entity.getString(DATASET_ROW_IDENTIFIER_HEADER);
 				if (rowIdentifier == null) rowIdentifier = UUID.randomUUID().toString();
 
 				// create observation set
@@ -145,11 +158,12 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 				observationSet.setIdentifier(rowIdentifier);
 				observationSet.setPartOfDataSet(dataSet);
 				dataService.add(ObservationSet.ENTITY_NAME, observationSet);
+				++nrObservationSets;
 
 				for (Map.Entry<String, ObservableFeature> entry : featureMap.entrySet())
 				{
 
-					Value value = valueConverter.fromTuple(row, entry.getKey(), entry.getValue());
+					Value value = valueConverter.fromEntity(entity, entry.getKey(), entry.getValue());
 					if (value != null)
 					{
 						// create observed value
@@ -169,24 +183,46 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 					}
 
 				}
-				dataService.add(ObservedValue.ENTITY_NAME, obsValueList);
-
 				for (Map.Entry<String, List<Value>> entry : valueMap.entrySet())
-					dataService.add(entry.getKey(), entry.getValue());
+				{
+					String entityName = entry.getKey();
+					List<Value> values = entry.getValue();
+					dataService.add(entityName, values);
+					AtomicInteger valueCounter = nrValuesMap.get(entityName);
+					if (valueCounter == null)
+					{
+						valueCounter = new AtomicInteger(0);
+						nrValuesMap.put(entityName, valueCounter);
+					}
+					valueCounter.addAndGet(values.size());
+				}
+
+				dataService.add(ObservedValue.ENTITY_NAME, obsValueList);
+				nrObservedValues += obsValueList.size();
 			}
 
 			if (++rownr % transactionRows == 0)
 			{
-				CrudRepository<? extends Entity> repo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
-				repo.flush();
-				repo.clearCache();
+				CrudRepository dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+				dataSetRepo.flush();
+				dataSetRepo.clearCache();
 			}
 		}
 		if (rownr % transactionRows != 0)
 		{
-			CrudRepository<? extends Entity> repo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
-			repo.flush();
-			repo.clearCache();
+			CrudRepository dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+			dataSetRepo.flush();
+			dataSetRepo.clearCache();
 		}
+
+		if (nrObservationSets > 0) importReport.addEntityCount(ObservationSet.ENTITY_NAME, nrObservationSets);
+		if (nrObservedValues > 0) importReport.addEntityCount(ObservedValue.ENTITY_NAME, nrObservedValues);
+		if (!nrValuesMap.isEmpty())
+		{
+			for (Map.Entry<String, AtomicInteger> entry : nrValuesMap.entrySet())
+				importReport.addEntityCount(entry.getKey(), entry.getValue().get());
+		}
+
+		return importReport;
 	}
 }

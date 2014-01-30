@@ -19,11 +19,10 @@ import java.util.zip.ZipFile;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.io.processor.CellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 
 import com.google.common.collect.Lists;
 
@@ -119,7 +118,7 @@ public class CsvEntitySource implements EntitySource
 	}
 
 	@Override
-	public Repository<? extends Entity> getRepositoryByEntityName(String entityName)
+	public Repository getRepositoryByEntityName(String entityName)
 	{
 		ZipEntry zipEntry = zipEntryMap.get(entityName);
 		InputStream in = null;

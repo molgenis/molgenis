@@ -22,7 +22,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class AccountService
@@ -51,7 +50,7 @@ public class AccountService
 	private PasswordEncoder passwordEncoder;
 
 	@RunAsSystem
-	public void createUser(MolgenisUser molgenisUser, URI baseActivationUri)
+	public void createUser(MolgenisUser molgenisUser, String baseActivationUri)
 	{
 		// collect activation info
 		String activationCode = UUID.randomUUID().toString();
@@ -81,7 +80,7 @@ public class AccountService
 
 		// add user to group
 		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP));
+				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP), MolgenisGroup.class);
 		if (group != null)
 		{
 			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
@@ -91,7 +90,7 @@ public class AccountService
 		}
 
 		// send activation email
-		URI activationUri = UriComponentsBuilder.fromUri(baseActivationUri).path('/' + activationCode).build().toUri();
+		URI activationUri = URI.create(baseActivationUri + '/' + activationCode);
 
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setTo(activationEmailAddresses.toArray(new String[]
@@ -107,13 +106,13 @@ public class AccountService
 	 * Activate a registered user
 	 * 
 	 * @param activationCode
-	 * @throws DatabaseException
 	 */
 	@RunAsSystem
 	public void activateUser(String activationCode)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode));
+				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode),
+				MolgenisUser.class);
 
 		if (molgenisUser != null)
 		{
@@ -137,7 +136,7 @@ public class AccountService
 	public void resetPassword(String userEmail)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.EMAIL, userEmail));
+				new QueryImpl().eq(MolgenisUser.EMAIL, userEmail), MolgenisUser.class);
 
 		if (molgenisUser != null)
 		{

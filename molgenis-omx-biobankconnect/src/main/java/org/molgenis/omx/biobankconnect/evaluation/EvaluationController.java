@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,18 +20,21 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySource;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Repository;
+import org.molgenis.data.Writable;
+import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.io.processor.LowerCaseProcessor;
-import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -40,10 +42,8 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.SecurityUtils;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
+import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -61,7 +61,6 @@ public class EvaluationController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
-	private final UserAccountService userAccountService;
 	private final SearchService searchService;
 	private final DataService dataService;
 
@@ -69,15 +68,11 @@ public class EvaluationController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	public EvaluationController(OntologyMatcher ontologyMatcher, SearchService searchService,
-			UserAccountService userAccountService, DataService dataService)
+	public EvaluationController(SearchService searchService, DataService dataService)
 	{
 		super(URI);
-		if (ontologyMatcher == null) throw new IllegalArgumentException("OntologyMatcher is null");
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (dataService == null) throw new IllegalArgumentException("Dataservice is null");
-		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
-		this.userAccountService = userAccountService;
 		this.searchService = searchService;
 		this.dataService = dataService;
 	}
@@ -86,7 +81,7 @@ public class EvaluationController extends MolgenisPluginController
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
 	String selectedDataSetId, Model model)
 	{
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : allDataSets)
@@ -101,7 +96,7 @@ public class EvaluationController extends MolgenisPluginController
 		{
 			model.addAttribute("selectedDataSet", selectedDataSetId);
 			Iterable<DataSet> it = dataService.findAll(DataSet.ENTITY_NAME,
-					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId));
+					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId), DataSet.class);
 			for (DataSet dataSet : it)
 			{
 				if (dataSet.getIdentifier().startsWith(SecurityUtils.getCurrentUsername() + "-" + selectedDataSetId))
@@ -120,47 +115,46 @@ public class EvaluationController extends MolgenisPluginController
 	String selectedDataSetId, @RequestParam
 	Part file, HttpServletResponse response, Model model) throws IOException
 	{
-		ExcelReader reader = null;
+		EntitySource reader = null;
 		ExcelWriter excelWriterRanks = null;
 
 		try
 		{
 			if (selectedDataSetId != null)
 			{
-				File uploadFile = fileStore.store(file.getInputStream(), file.getName());
+				String origFileName = FileUploadUtils.getOriginalFileName(file);
+				File uploadFile = fileStore.store(file.getInputStream(), origFileName);
 				response.setContentType("application/vnd.ms-excel");
 				response.addHeader("Content-Disposition", "attachment; filename="
 						+ getCsvFileName(file.getName() + "-ranks"));
 				excelWriterRanks = new ExcelWriter(response.getOutputStream());
 				excelWriterRanks.addCellProcessor(new LowerCaseProcessor(true, false));
 
-				TupleWriter sheetWriterRank = excelWriterRanks.createTupleWriter("result");
-				TupleWriter sheetWriterRankStatistics = excelWriterRanks.createTupleWriter("rank statistics");
-				TupleWriter sheetWriteBiobankRanks = excelWriterRanks.createTupleWriter("biobank average ranks");
-				TupleWriter sheetWriteSpssInput = excelWriterRanks.createTupleWriter("spss ranks");
+				Writable sheetWriterRank = null;
+				Writable sheetWriterRankStatistics = null;
+				Writable sheetWriteBiobankRanks = null;
+				Writable sheetWriteSpssInput = null;
 
-				reader = new ExcelReader(uploadFile);
-				ExcelSheetReader inputSheet = reader.getSheet(0);
-				Iterator<String> columnIterator = inputSheet.colNamesIterator();
+				reader = new ExcelEntitySourceFactory().create(uploadFile);
+				Repository inputSheet = reader.getRepositoryByEntityName("Sheet1");
 
 				List<String> biobankNames = new ArrayList<String>();
-				while (columnIterator.hasNext())
+				for (AttributeMetaData attr : inputSheet.getAttributes())
 				{
-					biobankNames.add(columnIterator.next());
+					biobankNames.add(attr.getName());
 				}
 				String firstColumn = biobankNames.get(0);
 				biobankNames.remove(0);
 
 				// First column has to correspond to the selected dataset
-				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId));
+				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId),
+						DataSet.class);
 
 				if (ds.getName().equalsIgnoreCase(firstColumn))
 				{
 					Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
-					Iterator<Tuple> iterator = inputSheet.iterator();
-					while (iterator.hasNext())
+					for (Entity row : inputSheet)
 					{
-						Tuple row = iterator.next();
 						String variableName = row.getString(firstColumn);
 						if (!maunalMappings.containsKey(variableName)) maunalMappings.put(variableName,
 								new HashMap<String, List<String>>());
@@ -190,11 +184,11 @@ public class EvaluationController extends MolgenisPluginController
 						lowerCaseBiobankNames.add(element.toLowerCase());
 					}
 
-					List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames));
+					Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
+							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames), DataSet.class);
 
 					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
-					sheetWriterRank.writeColNames(lowerCaseBiobankNames);
+					sheetWriterRank = excelWriterRanks.createWritable("result", lowerCaseBiobankNames);
 
 					Map<String, Map<String, List<Integer>>> rankCollection = new HashMap<String, Map<String, List<Integer>>>();
 					List<Object> allRanks = new ArrayList<Object>();
@@ -205,15 +199,15 @@ public class EvaluationController extends MolgenisPluginController
 						List<String> ranks = new ArrayList<String>();
 						ranks.add(variableName);
 						Map<String, List<String>> mappingDetail = entry.getValue();
-						List<ObservableFeature> features = dataService.findAllAsList(ObservableFeature.ENTITY_NAME,
-								new QueryImpl().eq(ObservableFeature.NAME, variableName));
-						String description = features.get(0).getDescription();
+						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+								new QueryImpl().eq(ObservableFeature.NAME, variableName), ObservableFeature.class);
+						String description = feature == null ? StringUtils.EMPTY : feature.getDescription();
 						if (!rankCollection.containsKey(description)) rankCollection.put(description,
 								new HashMap<String, List<Integer>>());
 
-						if (!features.isEmpty())
+						if (feature != null)
 						{
-							KeyValueTuple row = new KeyValueTuple();
+							Entity row = new MapEntity();
 							row.set(firstColumn.toLowerCase(), description);
 
 							for (DataSet dataSet : dataSets)
@@ -227,8 +221,8 @@ public class EvaluationController extends MolgenisPluginController
 									String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
 											+ selectedDataSetId + "-" + dataSet.getId();
 
-									Query q = new QueryImpl().eq("store_mapping_feature", features.get(0).getId())
-											.pageSize(50).sort(new Sort(Direction.DESC, "store_mapping_score"));
+									Query q = new QueryImpl().eq("store_mapping_feature", feature.getId()).pageSize(50)
+											.sort(new Sort(Direction.DESC, "store_mapping_score"));
 
 									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
 
@@ -292,18 +286,20 @@ public class EvaluationController extends MolgenisPluginController
 
 								rankCollection.get(description).put(dataSet.getName().toLowerCase(), ranksBiobank);
 							}
-							sheetWriterRank.write(row);
+							sheetWriterRank.add(row);
 						}
 					}
 
 					Map<String, List<Integer>> rankCollectionPerBiobank = new HashMap<String, List<Integer>>();
 					{
-						sheetWriterRankStatistics.writeColNames(Arrays.asList(firstColumn.toLowerCase(),
-								"average rank", "round-up rank", "median rank", "minium", "maximum"));
+						sheetWriterRankStatistics = excelWriterRanks.createWritable("rank statistics", Arrays.asList(
+								firstColumn.toLowerCase(), "average rank", "round-up rank", "median rank", "minium",
+								"maximum"));
+
 						for (Entry<String, Map<String, List<Integer>>> entry : rankCollection.entrySet())
 						{
 							String variableName = entry.getKey();
-							KeyValueTuple row = new KeyValueTuple();
+							Entity row = new MapEntity();
 							row.set(firstColumn.toLowerCase(), variableName);
 							List<Integer> rankAllBiobanks = new ArrayList<Integer>();
 							for (Entry<String, List<Integer>> rankBiobanks : entry.getValue().entrySet())
@@ -317,41 +313,46 @@ public class EvaluationController extends MolgenisPluginController
 							row.set("average rank", averageRank(rankAllBiobanks));
 							row.set("round-up rank", Math.ceil(averageRank(rankAllBiobanks)));
 							Collections.sort(rankAllBiobanks);
-							row.set("minium", rankAllBiobanks.get(0));
-							row.set("maximum", rankAllBiobanks.get(rankAllBiobanks.size() - 1));
-							double medianRank = 0;
-							if (rankAllBiobanks.size() % 2 == 0)
+							if (!rankAllBiobanks.isEmpty())
 							{
-								medianRank = (double) (rankAllBiobanks.get(rankAllBiobanks.size() / 2 - 1) + rankAllBiobanks
-										.get(rankAllBiobanks.size() / 2)) / 2;
+								row.set("minium", rankAllBiobanks.get(0));
+								row.set("maximum", rankAllBiobanks.get(rankAllBiobanks.size() - 1));
+
+								double medianRank = 0;
+								if (rankAllBiobanks.size() % 2 == 0)
+								{
+									medianRank = (double) (rankAllBiobanks.get(rankAllBiobanks.size() / 2 - 1) + rankAllBiobanks
+											.get(rankAllBiobanks.size() / 2)) / 2;
+								}
+								else
+								{
+									medianRank = rankAllBiobanks.get(rankAllBiobanks.size() / 2);
+								}
+								row.set("median rank", medianRank);
 							}
-							else
-							{
-								medianRank = rankAllBiobanks.get(rankAllBiobanks.size() / 2);
-							}
-							row.set("median rank", medianRank);
-							sheetWriterRankStatistics.write(row);
+
+							sheetWriterRankStatistics.add(row);
 						}
 					}
 
 					{
 						lowerCaseBiobankNames.remove(0);
-						sheetWriteBiobankRanks.writeColNames(lowerCaseBiobankNames);
-						KeyValueTuple tuple = new KeyValueTuple();
+						sheetWriteBiobankRanks = excelWriterRanks.createWritable("biobank average ranks",
+								lowerCaseBiobankNames);
+						Entity entity = new MapEntity();
 						for (Entry<String, List<Integer>> entry : rankCollectionPerBiobank.entrySet())
 						{
-							tuple.set(entry.getKey(), averageRank(entry.getValue()));
+							entity.set(entry.getKey(), averageRank(entry.getValue()));
 						}
-						sheetWriteBiobankRanks.write(tuple);
+						sheetWriteBiobankRanks.add(entity);
 					}
 
 					{
-						sheetWriteSpssInput.writeColNames(Arrays.asList("rank"));
+						sheetWriteSpssInput = excelWriterRanks.createWritable("spss ranks", Arrays.asList("rank"));
 						for (Object rank : allRanks)
 						{
-							KeyValueTuple tuple = new KeyValueTuple();
-							tuple.set("rank", rank);
-							sheetWriteSpssInput.write(tuple);
+							Entity entity = new MapEntity("rank", rank);
+							sheetWriteSpssInput.add(entity);
 						}
 					}
 				}

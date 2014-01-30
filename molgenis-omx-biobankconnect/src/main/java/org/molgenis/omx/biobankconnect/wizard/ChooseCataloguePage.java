@@ -41,7 +41,7 @@ public class ChooseCataloguePage extends AbstractWizardPage
 		{
 			BiobankConnectWizard biobankConnectWizard = (BiobankConnectWizard) wizard;
 			Integer selectedDataSetId = Integer.parseInt(request.getParameter("selectedDataSetId"));
-			DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId);
+			DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId, DataSet.class);
 			if (dataSet == null)
 			{
 				throw new RuntimeException("Could not find dataset based on id : " + selectedDataSetId

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @org.springframework.stereotype.Repository
 public class JpaEntitySourceImpl implements JpaEntitySource
 {
-	private final Map<String, CrudRepository<? extends Entity>> repos = new LinkedHashMap<String, CrudRepository<? extends Entity>>();
+	private final Map<String, CrudRepository> repos = new LinkedHashMap<String, CrudRepository>();
 	
 	@Override
 	public String getUrl()
@@ -28,14 +28,14 @@ public class JpaEntitySourceImpl implements JpaEntitySource
 	<#if !entity.abstract>
 	@Autowired
 	@Qualifier("${JavaName(entity)}Repository")
-	public void set${JavaName(entity)}Repository(CrudRepository<${entity.namespace}.${JavaName(entity)}> ${name(entity)}Repository)
+	public void set${JavaName(entity)}Repository(CrudRepository ${name(entity)}Repository)
 	{	
 		<#if disable_decorators>
 		repos.put("${entity.name}", ${name(entity)}Repository);
 		<#elseif entity.decorator?exists>
-		repos.put("${entity.name}", new ${entity.decorator}<${entity.namespace}.${JavaName(entity)}>(new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator<${entity.namespace}.${JavaName(entity)}>(${name(entity)}Repository)));	
+		repos.put("${entity.name}", new ${entity.decorator}(new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator(${name(entity)}Repository)));	
 		<#else>
-		repos.put("${entity.name}", new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator<${entity.namespace}.${JavaName(entity)}>(${name(entity)}Repository));	
+		repos.put("${entity.name}", new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator(${name(entity)}Repository));	
 		</#if>
 	}
 	</#if>
@@ -48,9 +48,9 @@ public class JpaEntitySourceImpl implements JpaEntitySource
 	}
 
 	@Override
-	public Repository<? extends Entity> getRepositoryByEntityName(String entityName)
+	public Repository getRepositoryByEntityName(String entityName)
 	{
-		Repository<? extends Entity> repo = repos.get(entityName);
+		Repository repo = repos.get(entityName);
 		if (repo == null)
 		{
 			throw new MolgenisDataException("Unknown jpa entity [" + entityName + "]");

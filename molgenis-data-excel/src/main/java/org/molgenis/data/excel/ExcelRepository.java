@@ -15,11 +15,11 @@ import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 
 /**
  * ExcelSheet Repository implementation
@@ -30,7 +30,7 @@ import org.molgenis.io.processor.CellProcessor;
  * 
  * 
  */
-public class ExcelRepository extends AbstractRepository<ExcelEntity>
+public class ExcelRepository extends AbstractRepository
 {
 	private final Sheet sheet;
 
@@ -58,10 +58,10 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	}
 
 	@Override
-	public Iterator<ExcelEntity> iterator()
+	public Iterator<Entity> iterator()
 	{
 		final Iterator<Row> it = sheet.iterator();
-		if (!it.hasNext()) return Collections.<ExcelEntity> emptyList().iterator();
+		if (!it.hasNext()) return Collections.<Entity> emptyList().iterator();
 
 		// create column header index once and reuse
 		Row headerRow = it.next();
@@ -70,9 +70,9 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 			colNamesMap = toColNamesMap(headerRow);
 		}
 
-		if (!it.hasNext()) return Collections.<ExcelEntity> emptyList().iterator();
+		if (!it.hasNext()) return Collections.<Entity> emptyList().iterator();
 
-		return new Iterator<ExcelEntity>()
+		return new Iterator<Entity>()
 		{
 			@Override
 			public boolean hasNext()
@@ -101,7 +101,7 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
 		{
