@@ -274,4 +274,26 @@ public class ${clazzName} extends CrudRepositoryDecorator
 		
 		return super.findAll(ids, clazz);
 	}
+	
+	@Override
+	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.findOne(id, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.findOne(q, clazz);
+	}
 }

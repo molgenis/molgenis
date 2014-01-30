@@ -204,4 +204,16 @@ public class CrudRepositoryDecorator implements CrudRepository
 	{
 		return decoratedRepository.findAll(ids, clazz);
 	}
+
+	@Override
+	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	{
+		return decoratedRepository.findOne(id, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		return decoratedRepository.findOne(q, clazz);
+	}
 }

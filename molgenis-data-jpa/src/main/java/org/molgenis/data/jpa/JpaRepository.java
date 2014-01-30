@@ -782,4 +782,44 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 		return new ConvertingIterable<E>(clazz, findAll(q));
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	{
+		Entity entity = findOne(id);
+		if (entity == null)
+		{
+			return null;
+		}
+
+		if (clazz.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E e = BeanUtils.instantiate(clazz);
+		e.set(entity);
+		return e;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		Entity entity = findOne(q);
+		if (entity == null)
+		{
+			return null;
+		}
+
+		if (clazz.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E e = BeanUtils.instantiate(clazz);
+		e.set(entity);
+		return e;
+	}
+
 }

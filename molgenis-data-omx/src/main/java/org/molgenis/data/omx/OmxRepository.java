@@ -11,6 +11,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.dataset.AbstractDataSetMatrixRepository;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.search.SearchService;
+import org.springframework.beans.BeanUtils;
 
 /**
  * Repository around an omx DataSet matrix.
@@ -95,6 +96,46 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	{
+		Entity entity = findOne(id);
+		if (entity == null)
+		{
+			return null;
+		}
+
+		if (clazz.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E e = BeanUtils.instantiate(clazz);
+		e.set(entity);
+		return e;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		Entity entity = findOne(q);
+		if (entity == null)
+		{
+			return null;
+		}
+
+		if (clazz.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E e = BeanUtils.instantiate(clazz);
+		e.set(entity);
+		return e;
 	}
 
 }

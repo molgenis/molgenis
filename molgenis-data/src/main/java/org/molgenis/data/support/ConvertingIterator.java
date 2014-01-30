@@ -3,12 +3,13 @@ package org.molgenis.data.support;
 import java.util.Iterator;
 
 import org.molgenis.data.Entity;
+import org.springframework.beans.BeanUtils;
 
 public class ConvertingIterator<E extends Entity> implements Iterator<E>
 {
-	private Iterator<Entity> iterator;
-	private Class<E> entityClass;
-	
+	private final Iterator<Entity> iterator;
+	private final Class<E> entityClass;
+
 	public ConvertingIterator(Class<E> entityClass, Iterator<Entity> iterator)
 	{
 		this.iterator = iterator;
@@ -26,25 +27,14 @@ public class ConvertingIterator<E extends Entity> implements Iterator<E>
 	public E next()
 	{
 		Entity next = iterator.next();
-		if(next.getClass().equals(entityClass))
+		if (entityClass.isAssignableFrom(next.getClass()))
 		{
-			return (E)next;
+			return (E) next;
 		}
-		else
-		{
-			E e;
-			try
-			{
-				e = entityClass.newInstance();
-				e.set(next);
-				return e;
-			}
-			catch (Exception e1)
-			{
-				throw new RuntimeException(e1);
-			}
 
-		}
+		E e = BeanUtils.instantiate(entityClass);
+		e.set(next);
+		return e;
 	}
 
 	@Override
@@ -52,5 +42,5 @@ public class ConvertingIterator<E extends Entity> implements Iterator<E>
 	{
 		iterator.remove();
 	}
-	
+
 }

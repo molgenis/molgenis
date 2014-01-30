@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.common.collect.Maps;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -37,6 +36,8 @@ import uk.ac.ebi.mydas.model.DasMethod;
 import uk.ac.ebi.mydas.model.DasPhase;
 import uk.ac.ebi.mydas.model.DasTarget;
 import uk.ac.ebi.mydas.model.DasType;
+
+import com.google.common.collect.Maps;
 
 public class DataSetRangeHandlingDataSourceTest
 {

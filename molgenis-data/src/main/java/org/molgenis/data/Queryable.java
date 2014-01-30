@@ -43,4 +43,11 @@ public interface Queryable extends Countable
 	 * type-safe find entities that match a stream of ids
 	 */
 	<E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz);
+
+	<E extends Entity> E findOne(Integer id, Class<E> clazz);
+
+	/**
+	 * type-save find an entity by it's id
+	 */
+	<E extends Entity> E findOne(Query q, Class<E> clazz);
 }

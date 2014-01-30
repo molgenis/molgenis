@@ -27,7 +27,6 @@ import org.molgenis.data.Writable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -320,27 +319,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz)
 	{
-		Iterable<E> entities = findAll(entityName, ImmutableList.of(id), clazz);
-		Iterator<E> it = entities.iterator();
-		if (it.hasNext())
-		{
-			return it.next();
-		}
-
-		return null;
+		return getQueryable(entityName).findOne(id, clazz);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
 	{
-		Iterable<E> entities = findAll(entityName, q, clazz);
-		Iterator<E> it = entities.iterator();
-		if (it.hasNext())
-		{
-			return it.next();
-		}
-
-		return null;
+		return getQueryable(entityName).findOne(q, clazz);
 	}
 
 	@Override
