@@ -26,9 +26,9 @@ import org.molgenis.data.DatabaseAction;
 /**
  * TODO add column level security filters
  */
-public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
+public class ${clazzName} extends CrudRepositoryDecorator
 {
-	public ${clazzName}(CrudRepository<E> repository)
+	public ${clazzName}(CrudRepository repository)
 	{
 		super(repository);
 	}
@@ -100,7 +100,7 @@ public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
 	}
 
 	@Override
-	public Iterable<E> findAll(Query q)
+	public Iterable<Entity> findAll(Query q)
 	{
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
@@ -133,7 +133,7 @@ public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
 	}
 
 	@Override
-	public E findOne(Query q)
+	public Entity findOne(Query q)
 	{
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
@@ -177,7 +177,7 @@ public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
 	}
 
 	@Override
-	public Iterator<E> iterator()
+	public Iterator<Entity> iterator()
 	{
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
@@ -188,7 +188,7 @@ public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
 	}
 
 	@Override
-	public E findOne(Integer id)
+	public Entity findOne(Integer id)
 	{
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
@@ -210,7 +210,7 @@ public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
 	}
 
 	@Override
-	public Iterable<E> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
 		{
@@ -240,5 +240,60 @@ public class ${clazzName}<E extends Entity> extends CrudRepositoryDecorator<E>
 		}
 		
 		super.update(entities, dbAction, keyName);
+	}
+	
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.iterator(clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.findAll(q, clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.findAll(ids, clazz);
+	}
+	
+	@Override
+	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.findOne(id, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		{
+			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+		}
+		
+		return super.findOne(q, clazz);
 	}
 }

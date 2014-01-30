@@ -32,24 +32,26 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		List<MolgenisUser> superUsers = dataService.findAllAsList(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.SUPERUSER, true));
+		Iterable<MolgenisUser> superUsers = dataService.findAll(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.SUPERUSER, true), MolgenisUser.class);
 
-		return superUsers != null ? Lists.transform(superUsers, new Function<MolgenisUser, String>()
-		{
-			@Override
-			public String apply(MolgenisUser molgenisUser)
-			{
-				return molgenisUser.getEmail();
-			}
-		}) : Collections.<String> emptyList();
+		return superUsers != null ? Lists.transform(Lists.newArrayList(superUsers),
+				new Function<MolgenisUser, String>()
+				{
+					@Override
+					public String apply(MolgenisUser molgenisUser)
+					{
+						return molgenisUser.getEmail();
+					}
+				}) : Collections.<String> emptyList();
 	}
 
 	@Override
 	@RunAsSystem
 	public MolgenisUser getUser(String username)
 	{
-		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username));
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username),
+				MolgenisUser.class);
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package org.molgenis.data.jpa;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,10 +26,12 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.BeanUtils;
@@ -43,24 +43,28 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public abstract class AbstractJpaRepository<E extends JpaEntity> extends AbstractRepository<E> implements
-		CrudRepository<E>
+public class JpaRepository extends AbstractRepository implements CrudRepository
 {
 	@PersistenceContext
 	private EntityManager entityManager;
-	private final Class<E> entityClass;
+	private final Class<? extends Entity> entityClass;
+	private final EntityMetaData entityMetaData;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	@SuppressWarnings("unchecked")
-	public AbstractJpaRepository()
+	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
 	{
-		Type t = getClass().getGenericSuperclass();
-		ParameterizedType pt = (ParameterizedType) t;
-		entityClass = (Class<E>) pt.getActualTypeArguments()[0];
+		this.entityClass = entityClass;
+		this.entityMetaData = entityMetaData;
+	}
+
+	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	{
+		this(entityClass, entityMetaData);
+		this.entityManager = entityManager;
 	}
 
 	@Override
-	public Class<E> getEntityClass()
+	public Class<? extends Entity> getEntityClass()
 	{
 		return entityClass;
 	}
@@ -74,7 +78,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	@Transactional
 	public Integer add(Entity entity)
 	{
-		E jpaEntity = getTypedEntity(entity);
+		Entity jpaEntity = getTypedEntity(entity);
 
 		if (logger.isDebugEnabled()) logger.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
 		getEntityManager().persist(jpaEntity);
@@ -94,7 +98,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterator<E> iterator()
+	public Iterator<Entity> iterator()
 	{
 		return findAll(new QueryImpl()).iterator();
 	}
@@ -115,7 +119,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 		// gonna produce a number
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-		Root<E> from = cq.from(getEntityClass());
+		Root<? extends Entity> from = cq.from(getEntityClass());
 		cq.select(cb.count(from));
 
 		// add filters
@@ -129,7 +133,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional(readOnly = true)
-	public E findOne(Integer id)
+	public Entity findOne(Integer id)
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
@@ -138,7 +142,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<E> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
 		String idAttrName = getIdAttribute().getName();
 
@@ -149,11 +153,14 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		EntityManager em = getEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		CriteriaQuery<E> cq = cb.createQuery(getEntityClass());
-		Root<E> from = cq.from(getEntityClass());
+		@SuppressWarnings("unchecked")
+		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(getEntityClass());
+
+		@SuppressWarnings("unchecked")
+		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
 		cq.select(from).where(from.get(idAttrName).in(Lists.newArrayList(ids)));
 
-		TypedQuery<E> tq = em.createQuery(cq);
+		TypedQuery<Entity> tq = em.createQuery(cq);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
@@ -163,19 +170,22 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<E> findAll(Query q)
+	public Iterable<Entity> findAll(Query q)
 	{
 		EntityManager em = getEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		CriteriaQuery<E> cq = cb.createQuery(getEntityClass());
-		Root<E> from = cq.from(getEntityClass());
+		@SuppressWarnings("unchecked")
+		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(getEntityClass());
+
+		@SuppressWarnings("unchecked")
+		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
 		cq.select(from);
 
 		// add filters
 		createWhere(q, from, cq, cb);
 
-		TypedQuery<E> tq = em.createQuery(cq);
+		TypedQuery<Entity> tq = em.createQuery(cq);
 
 		if (q.getPageSize() > 0) tq.setMaxResults(q.getPageSize());
 		if (q.getOffset() > 0) tq.setFirstResult(q.getOffset());
@@ -188,10 +198,10 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 	@Override
 	@Transactional(readOnly = true)
-	public E findOne(Query q)
+	public Entity findOne(Query q)
 	{
-		Iterable<E> result = findAll(q);
-		Iterator<E> it = result.iterator();
+		Iterable<Entity> result = findAll(q);
+		Iterator<Entity> it = result.iterator();
 		if (it.hasNext())
 		{
 			return it.next();
@@ -223,7 +233,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		int batchCount = 0;
 		for (Entity r : entities)
 		{
-			E entity = getTypedEntity(r);
+			Entity entity = getTypedEntity(r);
 
 			if (logger.isDebugEnabled()) logger.debug("merging" + getEntityClass().getSimpleName() + " ["
 					+ r.getIdValue() + "]");
@@ -320,7 +330,7 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 
 		// split lists in new and existing entities, but only if keys are set
 		List<? extends Entity> newEntities = entities;
-		List<E> existingEntities = new ArrayList<E>();
+		List<Entity> existingEntities = new ArrayList<Entity>();
 		if (!keysMissing && keyIndex.size() > 0)
 		{
 			newEntities = new ArrayList<Entity>();
@@ -350,10 +360,10 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 					}
 				}
 			}
-			Iterable<E> selectForUpdate = findAll(q);
+			Iterable<Entity> selectForUpdate = findAll(q);
 
 			// separate existing from new entities
-			for (E p : selectForUpdate)
+			for (Entity p : selectForUpdate)
 			{
 				// reconstruct composite key so we can use the entityIndex
 				StringBuilder combinedKeyBuilder = new StringBuilder();
@@ -482,10 +492,10 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 		}
 	}
 
-	private void matchByNameAndUpdateFields(List<E> existingEntities, List<? extends Entity> entities)
+	private void matchByNameAndUpdateFields(List<? extends Entity> existingEntities, List<? extends Entity> entities)
 	{
 		// List<E> updatedDbEntities = new ArrayList<E>();
-		for (E entityInDb : existingEntities)
+		for (Entity entityInDb : existingEntities)
 		{
 			for (Entity newEntity : entities)
 			{
@@ -741,17 +751,75 @@ public abstract class AbstractJpaRepository<E extends JpaEntity> extends Abstrac
 	}
 
 	// If the entity is of the correct type return it, else convert it to the correct type
-	@SuppressWarnings("unchecked")
-	private E getTypedEntity(Entity entity)
+	private Entity getTypedEntity(Entity entity)
 	{
 		if (entityClass.isAssignableFrom(entity.getClass()))
 		{
-			return (E) entity;
+			return entity;
 		}
 
-		E jpaEntity = BeanUtils.instantiateClass(entityClass);
+		Entity jpaEntity = BeanUtils.instantiateClass(entityClass);
 		jpaEntity.set(entity);
 
 		return jpaEntity;
 	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(ids));
+	}
+
+	@Override
+	protected EntityMetaData getEntityMetaData()
+	{
+		return entityMetaData;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(q));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	{
+		Entity entity = findOne(id);
+		if (entity == null)
+		{
+			return null;
+		}
+
+		if (clazz.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E e = BeanUtils.instantiate(clazz);
+		e.set(entity);
+		return e;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entity> E findOne(Query q, Class<E> clazz)
+	{
+		Entity entity = findOne(q);
+		if (entity == null)
+		{
+			return null;
+		}
+
+		if (clazz.isAssignableFrom(entity.getClass()))
+		{
+			return (E) entity;
+		}
+
+		E e = BeanUtils.instantiate(clazz);
+		e.set(entity);
+		return e;
+	}
+
 }

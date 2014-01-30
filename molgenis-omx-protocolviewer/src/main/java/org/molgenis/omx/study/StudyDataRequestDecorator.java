@@ -1,16 +1,14 @@
 package org.molgenis.omx.study;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.SecurityUtils;
@@ -23,10 +21,9 @@ import org.springframework.context.ApplicationContextException;
  * decorator for StudyDataRequest, Checks for every read, update and delete operation if the user requesting the
  * operation matches the user owning the StudyDataRequest on which the operation is requested
  */
-public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudRepositoryDecorator<E> implements
-		CrudRepository<E>
+public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 {
-	public StudyDataRequestDecorator(CrudRepositoryDecorator<E> crudRepositoryDecorator)
+	public StudyDataRequestDecorator(CrudRepositoryDecorator crudRepositoryDecorator)
 	{
 		super(crudRepositoryDecorator);
 	}
@@ -89,7 +86,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public Iterable<E> findAll(Query q)
+	public Iterable<Entity> findAll(Query q)
 	{
 		addUserRule(q);
 		return super.findAll(q);
@@ -103,7 +100,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public E findOne(Query q)
+	public Entity findOne(Query q)
 	{
 		addUserRule(q);
 		return super.findOne(q);
@@ -123,22 +120,22 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	@Override
 	public void deleteById(Integer id)
 	{
-		E entity = super.findOne(id);
+		Entity entity = super.findOne(id);
 		checkEntitiesPermission(entity);
 
 		super.deleteById(id);
 	}
 
 	@Override
-	public Iterator<E> iterator()
+	public Iterator<Entity> iterator()
 	{
 		return findAll(new QueryImpl()).iterator();
 	}
 
 	@Override
-	public E findOne(Integer id)
+	public Entity findOne(Integer id)
 	{
-		E entity = super.findOne(id);
+		Entity entity = super.findOne(id);
 		checkEntitiesPermission(entity);
 
 		return entity;
@@ -147,7 +144,7 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	@Override
 	public void deleteById(Iterable<Integer> ids)
 	{
-		for (E entity : super.findAll(ids))
+		for (Entity entity : super.findAll(ids))
 		{
 			checkEntitiesPermission(entity);
 		}
@@ -156,10 +153,10 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	}
 
 	@Override
-	public Iterable<E> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
-		Iterable<E> entities = super.findAll(ids);
-		for (E entity : entities)
+		Iterable<Entity> entities = super.findAll(ids);
+		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
@@ -171,6 +168,24 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 	public void deleteAll()
 	{
 		super.delete(findAll(new QueryImpl()));
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		return findAll(new QueryImpl(), clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(q));
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 	public void addUserRule(Query q)
@@ -222,71 +237,4 @@ public class StudyDataRequestDecorator<E extends StudyDataRequest> extends CrudR
 		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 	}
 
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return super.getEntityClass();
-	}
-
-	@Override
-	public String getName()
-	{
-		return super.getName();
-	}
-
-	@Override
-	public String getLabel()
-	{
-		return super.getLabel();
-	}
-
-	@Override
-	public String getDescription()
-	{
-		return super.getDescription();
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getAttributes()
-	{
-		return super.getAttributes();
-	}
-
-	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		return super.getIdAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		return super.getLabelAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		return super.getAttribute(attributeName);
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		super.close();
-
-	}
-
-	@Override
-	public void flush()
-	{
-		super.flush();
-
-	}
-
-	@Override
-	public void clearCache()
-	{
-		super.clearCache();
-	}
 }

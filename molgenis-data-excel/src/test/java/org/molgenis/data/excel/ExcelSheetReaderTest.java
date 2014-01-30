@@ -44,6 +44,7 @@ public class ExcelSheetReaderTest
 		IOUtils.closeQuietly(is);
 	}
 
+	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ExcelSheetReader()
 	{
@@ -139,7 +140,7 @@ public class ExcelSheetReaderTest
 	@Test
 	public void iterator()
 	{
-		Iterator<ExcelEntity> it = excelSheetReader.iterator();
+		Iterator<Entity> it = excelSheetReader.iterator();
 		assertTrue(it.hasNext());
 
 		Entity row1 = it.next();
@@ -173,7 +174,7 @@ public class ExcelSheetReaderTest
 		assertTrue(headerIt.hasNext());
 		assertEquals(headerIt.next().getName(), "col2");
 
-		Iterator<ExcelEntity> it = excelSheetReader.iterator();
+		Iterator<Entity> it = excelSheetReader.iterator();
 		assertTrue(it.hasNext());
 
 		Entity row1 = it.next();

@@ -25,7 +25,6 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
@@ -147,7 +146,7 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void indexRepository(Repository<? extends Entity> repository)
+	public void indexRepository(Repository repository)
 	{
 		if (!repository.iterator().hasNext())
 		{
@@ -248,7 +247,7 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void updateRepositoryIndex(Repository<? extends Entity> repository)
+	public void updateRepositoryIndex(Repository repository)
 	{
 		if (!repository.iterator().hasNext())
 		{
@@ -325,7 +324,7 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
-	private void createMappings(Repository<? extends Entity> repository) throws IOException
+	private void createMappings(Repository repository) throws IOException
 	{
 		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(repository);
 		LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");

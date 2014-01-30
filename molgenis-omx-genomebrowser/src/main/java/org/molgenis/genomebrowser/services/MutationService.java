@@ -18,6 +18,8 @@ import org.molgenis.omx.xgap.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
+
 @Service
 public class MutationService
 {
@@ -30,49 +32,50 @@ public class MutationService
 		this.dataService = dataService;
 	}
 
-	public List<Map<String, String>> getMutationData() throws ParseException,
-			IOException
+	public List<Map<String, String>> getMutationData() throws ParseException, IOException
 	{
 		List<Map<String, String>> variantArray = new ArrayList<Map<String, String>>();
 
-		List<Entity> variantQueryResult = dataService.findAllAsList(Variant.ENTITY_NAME, new QueryImpl());
+		Iterable<Entity> variantQueryResult = dataService.findAll(Variant.ENTITY_NAME);
 		for (Entity entity : variantQueryResult)
 		{
-            Map<String, String> valueMap = new HashMap<String, String>();
-            for (String field : entity.getAttributeNames())
+			Map<String, String> valueMap = new HashMap<String, String>();
+			for (String field : entity.getAttributeNames())
 			{
 				if (entity.get(field) != null)
 				{
-					if("Chromosome".equals(field)||"Track".equals(field)){
-                        valueMap.put(field, ((Characteristic) entity.get(field)).getName());
-                    }
-                    else{
-                        valueMap.put(field, entity.get(field).toString());
-				    }
-                }
+					if ("Chromosome".equals(field) || "Track".equals(field))
+					{
+						valueMap.put(field, ((Characteristic) entity.get(field)).getName());
+					}
+					else
+					{
+						valueMap.put(field, entity.get(field).toString());
+					}
+				}
 				else valueMap.put(field, "");
 			}
-            variantArray.add(valueMap);
-        }
+			variantArray.add(valueMap);
+		}
 		return variantArray;
 
 	}
-	
+
 	public List<Map<String, String>> getPatientMutationData(String segmentId, String mutationId) throws ParseException,
-	IOException
+			IOException
 	{
-	List<Patient> patientQueryResult = null;
-	List<Map<String, String>> variantArray = new ArrayList<Map<String, String>>();
-	
-	patientQueryResult = queryPatients(segmentId, mutationId);
-	
-	for (Patient patient : patientQueryResult)
-	{
-		createPatientFields(variantArray, patient);
-	}
-	
-	return variantArray;
-	
+		List<Patient> patientQueryResult = null;
+		List<Map<String, String>> variantArray = new ArrayList<Map<String, String>>();
+
+		patientQueryResult = queryPatients(segmentId, mutationId);
+
+		for (Patient patient : patientQueryResult)
+		{
+			createPatientFields(variantArray, patient);
+		}
+
+		return variantArray;
+
 	}
 
 	private List<Patient> queryPatients(String segmentId, String mutationId)
@@ -84,7 +87,7 @@ public class MutationService
 		}
 		else
 		{
-			patientQueryResult = dataService.findAllAsList(Patient.ENTITY_NAME, new QueryImpl());
+			patientQueryResult = Lists.newArrayList(dataService.findAll(Patient.ENTITY_NAME, Patient.class));
 		}
 
 		return patientQueryResult;
@@ -146,13 +149,14 @@ public class MutationService
 
 	private List<Patient> queryPatientsByMutation(String segmentId, String mutationId)
 	{
-		Variant allele = dataService.findOne(Variant.ENTITY_NAME, new QueryImpl().eq(Variant.IDENTIFIER, mutationId));
+		Variant allele = dataService.findOne(Variant.ENTITY_NAME, new QueryImpl().eq(Variant.IDENTIFIER, mutationId),
+				Variant.class);
 		if (allele == null)
 		{
 			return Collections.emptyList();
 		}
 
 		Query q = new QueryImpl().eq(Patient.ALLELE1, allele).or().eq(Patient.ALLELE2, allele);
-		return dataService.findAllAsList(Patient.ENTITY_NAME, q);
+		return Lists.newArrayList(dataService.findAll(Patient.ENTITY_NAME, q, Patient.class));
 	}
 }

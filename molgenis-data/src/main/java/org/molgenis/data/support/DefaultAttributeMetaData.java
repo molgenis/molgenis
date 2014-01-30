@@ -20,7 +20,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private Object defaultValue = null;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
-	private String refEntityName = null;
+	private EntityMetaData refEntity = null;
 	private String label = null;
 	private boolean visible = true;
 	private boolean unique = false;
@@ -114,17 +114,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public EntityMetaData getRefEntity()
 	{
-		if (refEntityName == null)
-		{
-			return null;
-		}
-
-		return EntityMetaDataCache.get(refEntityName);
+		return refEntity;
 	}
 
-	public void setRefEntityName(String refEntityName)
+	public void setRefEntity(EntityMetaData refEntity)
 	{
-		this.refEntityName = refEntityName;
+		this.refEntity = refEntity;
 	}
 
 	@Override

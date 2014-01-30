@@ -119,7 +119,7 @@ public class BbmriToOmxConverter
 	{
 		Map<String, File> entityFileMap = getEntityFileMap(inputFolder);
 
-		WritableFactory<Entity> outputWriter = new ExcelWriter<Entity>(outputFile);
+		WritableFactory outputWriter = new ExcelWriter(outputFile);
 		try
 		{
 			String dataSetIdentifier = "biobank";
@@ -140,7 +140,7 @@ public class BbmriToOmxConverter
 		}
 	}
 
-	private Map<String, String> writeInstitutes(WritableFactory<Entity> writableFactory, Map<String, File> entityFileMap)
+	private Map<String, String> writeInstitutes(WritableFactory writableFactory, Map<String, File> entityFileMap)
 			throws IOException
 	{
 		Map<String, String> instituteMap = new HashMap<String, String>();
@@ -152,7 +152,7 @@ public class BbmriToOmxConverter
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("institutes.xls"));
 		try
 		{
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankInstitute");
+			Repository repo = entitySource.getRepositoryByEntityName("BiobankInstitute");
 			try
 			{
 				for (Entity inputEntity : repo)
@@ -188,7 +188,7 @@ public class BbmriToOmxConverter
 		return instituteMap;
 	}
 
-	private Map<String, String> writePersons(WritableFactory<Entity> outputWriter, Map<String, File> entityFileMap,
+	private Map<String, String> writePersons(WritableFactory outputWriter, Map<String, File> entityFileMap,
 			Map<String, String> ontologyMap) throws IOException
 	{
 		Map<String, String> personMap = new HashMap<String, String>();
@@ -202,7 +202,7 @@ public class BbmriToOmxConverter
 		try
 		{
 
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankCoordinator");
+			Repository repo = entitySource.getRepositoryByEntityName("BiobankCoordinator");
 			try
 			{
 				for (Entity entity : repo)
@@ -246,8 +246,8 @@ public class BbmriToOmxConverter
 		return personMap;
 	}
 
-	private Map<String, String> writePersonRoles(WritableFactory<Entity> writableFactory,
-			Map<String, File> entityFileMap) throws IOException
+	private Map<String, String> writePersonRoles(WritableFactory writableFactory, Map<String, File> entityFileMap)
+			throws IOException
 	{
 		Map<String, String> personRoleMap = new HashMap<String, String>();
 
@@ -258,7 +258,7 @@ public class BbmriToOmxConverter
 			EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("personrole.xls"));
 			try
 			{
-				Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankPersonRole");
+				Repository repo = entitySource.getRepositoryByEntityName("BiobankPersonRole");
 				try
 				{
 					for (Entity inputEntity : repo)
@@ -290,8 +290,8 @@ public class BbmriToOmxConverter
 		return personRoleMap;
 	}
 
-	private Map<String, String> writeOntologyTerms(WritableFactory<Entity> writableFactory,
-			Map<String, File> entityFileMap) throws IOException
+	private Map<String, String> writeOntologyTerms(WritableFactory writableFactory, Map<String, File> entityFileMap)
+			throws IOException
 	{
 		Map<String, String> ontologyMap = new HashMap<String, String>();
 
@@ -306,7 +306,7 @@ public class BbmriToOmxConverter
 
 				try
 				{
-					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankDataType");
+					Repository repo = entitySource.getRepositoryByEntityName("BiobankDataType");
 					try
 					{
 						for (Entity entity : repo)
@@ -337,7 +337,7 @@ public class BbmriToOmxConverter
 				EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("categories.xls"));
 				try
 				{
-					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankCategory");
+					Repository repo = entitySource.getRepositoryByEntityName("BiobankCategory");
 					try
 					{
 						for (Entity entity : repo)
@@ -369,7 +369,7 @@ public class BbmriToOmxConverter
 						.get("subcategories.xls"));
 				try
 				{
-					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankSubCategory");
+					Repository repo = entitySource.getRepositoryByEntityName("BiobankSubCategory");
 					try
 					{
 						for (Entity entity : repo)
@@ -400,7 +400,7 @@ public class BbmriToOmxConverter
 				EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("topics.xls"));
 				try
 				{
-					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("BiobankTopic");
+					Repository repo = entitySource.getRepositoryByEntityName("BiobankTopic");
 					try
 					{
 						for (Entity entity : repo)
@@ -433,7 +433,7 @@ public class BbmriToOmxConverter
 		return ontologyMap;
 	}
 
-	private void writeDataSetMatrix(WritableFactory<Entity> writableFactory, String dataSetIdentifier,
+	private void writeDataSetMatrix(WritableFactory writableFactory, String dataSetIdentifier,
 			Map<String, File> entityFileMap, Map<String, String> ontologyMap, final Map<String, String> personMap,
 			final Map<String, String> institutionMap) throws IOException
 	{
@@ -452,7 +452,7 @@ public class BbmriToOmxConverter
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("cohorts.xls"));
 		try
 		{
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Biobank");
+			Repository repo = entitySource.getRepositoryByEntityName("Biobank");
 			try
 			{
 				for (Entity inputEntity : repo)
@@ -540,7 +540,7 @@ public class BbmriToOmxConverter
 		}
 	}
 
-	private void writeFeatures(WritableFactory<Entity> writableFactory) throws IOException
+	private void writeFeatures(WritableFactory writableFactory) throws IOException
 	{
 		Writable writable = writableFactory.createWritable(ObservableFeature.class.getSimpleName(),
 				Arrays.asList(ObservableFeature.IDENTIFIER, ObservableFeature.NAME, ObservableFeature.DATATYPE));
@@ -561,7 +561,7 @@ public class BbmriToOmxConverter
 		}
 	}
 
-	private void writeProtocol(WritableFactory<Entity> writableFactory, String identifier) throws IOException
+	private void writeProtocol(WritableFactory writableFactory, String identifier) throws IOException
 	{
 		Writable writable = writableFactory.createWritable(
 				Protocol.class.getSimpleName(),
@@ -592,7 +592,7 @@ public class BbmriToOmxConverter
 		}
 	}
 
-	private void writeDataSet(WritableFactory<Entity> writableFactory, String identifier, String protocolIdentifier)
+	private void writeDataSet(WritableFactory writableFactory, String identifier, String protocolIdentifier)
 			throws IOException
 	{
 		Writable writable = writableFactory.createWritable(Dataset.class.getSimpleName(),
