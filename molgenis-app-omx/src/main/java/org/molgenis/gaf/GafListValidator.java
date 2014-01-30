@@ -125,7 +125,7 @@ public class GafListValidator
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	public GafListValidationReport validate(Repository<Entity> repository) throws IOException
+	public GafListValidationReport validate(Repository repository) throws IOException
 	{
 		GafListValidationReport report = new GafListValidationReport();
 
@@ -142,9 +142,10 @@ public class GafListValidator
 		for (String colName : COLUMNS)
 		{
 			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().eq(ObservableFeature.IDENTIFIER, colName));
+					new QueryImpl().eq(ObservableFeature.IDENTIFIER, colName), ObservableFeature.class);
+
 			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature), Category.class);
 			if (categories != null)
 			{
 				Set<String> lookupList = new HashSet<String>();
@@ -161,7 +162,7 @@ public class GafListValidator
 		return report;
 	}
 
-	private void validateCellValues(Repository<Entity> repository, Map<String, Pattern> patternMap,
+	private void validateCellValues(Repository repository, Map<String, Pattern> patternMap,
 			Map<String, Set<String>> lookupLists, GafListValidationReport report)
 	{
 		int row = 2;
@@ -197,7 +198,7 @@ public class GafListValidator
 	 * @param repository
 	 * @param report
 	 */
-	private void validateInternalSampleId(Repository<Entity> repository, GafListValidationReport report)
+	private void validateInternalSampleId(Repository repository, GafListValidationReport report)
 	{
 		Integer previousInternalSampleId = null;
 		int row = 2;
@@ -240,7 +241,7 @@ public class GafListValidator
 	 * @param lookupLists
 	 * @param report
 	 */
-	private void validateRun(Repository<Entity> repository, GafListValidationReport report)
+	private void validateRun(Repository repository, GafListValidationReport report)
 	{
 		// group rows by run
 		Map<String, List<EntityRowPair>> runMap = new HashMap<String, List<EntityRowPair>>();

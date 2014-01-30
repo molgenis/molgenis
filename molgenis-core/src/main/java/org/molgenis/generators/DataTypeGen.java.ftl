@@ -21,12 +21,13 @@ import java.util.Set;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 
+
 /**
  * ${Name(entity)}: ${entity.description}.
  * @author MOLGENIS generator
  */
 <#if entity.abstract>
-public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list><#else>org.molgenis.data.jpa.JpaEntity</#if>
+public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list><#else>org.molgenis.data.Entity</#if>
 <#else>
 <#-- disables many-to-many relationships (makes it compatible with no-JPA database)   -->
 	<#if !entity.description?contains("Link table for many-to-many relationship") >
@@ -54,7 +55,7 @@ public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list 
 		</#if>
 	</#if>
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
-public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getAncestor().namespace}.${JavaName(entity.getAncestor())}<#else>org.molgenis.data.support.AbstractEntity</#if> implements org.molgenis.data.jpa.JpaEntity<#if entity.hasImplements()>,<#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list></#if>
+public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getAncestor().namespace}.${JavaName(entity.getAncestor())}<#else>org.molgenis.data.support.AbstractEntity</#if> implements org.molgenis.data.Entity<#if entity.hasImplements()>,<#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list></#if>
 </#if>
 {
 <#if entity.abstract>
@@ -461,6 +462,12 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	</#list>
 </#list>
 		return result;
+	}
+	
+	@Override
+	public org.molgenis.data.EntityMetaData getEntityMetaData()
+	{
+		return new ${JavaName(entity)}MetaData();
 	}
 </#if>
 }

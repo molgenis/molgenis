@@ -12,10 +12,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.Category;
+import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.testng.annotations.BeforeMethod;
@@ -23,11 +25,13 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
 
+@SuppressWarnings("resource")
 public class ProtocolTreeRepositoryTest
 {
 	private DataService dataService;
 	private ProtocolTreeRepository protocolTreeRepository;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{
@@ -54,8 +58,11 @@ public class ProtocolTreeRepositoryTest
 		when(protocol.getSubprotocols()).thenReturn(Arrays.asList(subProtocol1, subProtocol2));
 		when(protocol.getName()).thenReturn("p0");
 
-		when(dataService.findAll(Category.ENTITY_NAME, new QueryImpl().eq(anyString(), any(ObservableFeature.class))))
-				.thenReturn(Collections.<Entity> emptyList());
+		when(
+				dataService.findAll(Category.ENTITY_NAME,
+						new QueryImpl().eq(anyString(), any(ObservableFeature.class)),
+						Matchers.notNull(Characteristic.class.getClass()))).thenReturn(
+				Collections.<Category> emptyList());
 
 		protocolTreeRepository = new ProtocolTreeRepository(protocol, dataService, "test");
 	}

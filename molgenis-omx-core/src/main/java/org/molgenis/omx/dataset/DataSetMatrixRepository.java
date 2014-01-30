@@ -40,7 +40,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 		{
 			private final ValueConverter valueConverter = new ValueConverter(dataService);
 			private final Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-					new QueryImpl().eq(ObservationSet.PARTOFDATASET, getDataSet()));
+					new QueryImpl().eq(ObservationSet.PARTOFDATASET, getDataSet()), ObservationSet.class);
 			private final Iterator<ObservationSet> it = observationSets.iterator();
 
 			@Override
@@ -59,7 +59,8 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 				try
 				{
 					Query q = new QueryImpl().eq(ObservedValue.OBSERVATIONSET, currentRowToGet);
-					Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME, q);
+					Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME, q,
+							ObservedValue.class);
 
 					for (ObservedValue v : observedValues)
 					{

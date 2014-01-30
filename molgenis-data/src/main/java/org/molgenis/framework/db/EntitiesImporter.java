@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
 
@@ -32,8 +31,8 @@ public interface EntitiesImporter
 	 * @return
 	 * @throws IOException
 	 */
-	public EntityImportReport importEntities(Repository<? extends Entity> repository, String entityName,
-			DatabaseAction dbAction) throws IOException;
+	public EntityImportReport importEntities(Repository repository, String entityName, DatabaseAction dbAction)
+			throws IOException;
 
 	/**
 	 * Import entities from a {@link org.molgenis.data.EntitySource}

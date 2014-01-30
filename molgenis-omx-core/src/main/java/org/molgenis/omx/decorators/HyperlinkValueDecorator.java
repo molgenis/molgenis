@@ -10,9 +10,9 @@ import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.value.HyperlinkValue;
 
-public class HyperlinkValueDecorator<E extends Entity> extends CrudRepositoryDecorator<E>
+public class HyperlinkValueDecorator extends CrudRepositoryDecorator
 {
-	public HyperlinkValueDecorator(CrudRepository<E> generatedRepository)
+	public HyperlinkValueDecorator(CrudRepository generatedRepository)
 	{
 		super(generatedRepository);
 	}

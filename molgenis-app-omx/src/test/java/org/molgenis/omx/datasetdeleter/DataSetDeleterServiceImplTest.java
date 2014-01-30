@@ -76,7 +76,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 
 	@SuppressWarnings("deprecation")
 	@Captor
-	private final ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSetsArrayList = new ArgumentCaptor<ArrayList<ObservationSet>>();
+	private final ArgumentCaptor<List<ObservationSet>> captorObservationSetsArrayList = new ArgumentCaptor<List<ObservationSet>>();
 
 	@SuppressWarnings("deprecation")
 	@Captor
@@ -253,8 +253,9 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void delete() throws IOException
 	{
-		when(dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(
-				dataset);
+		when(
+				dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"),
+						DataSet.class)).thenReturn(dataset);
 
 		dataSetDeleterServiceImpl.deleteData("dataset1", true);
 		verify(dataService).delete(DataSet.ENTITY_NAME, dataset);
@@ -263,8 +264,9 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteNoMetadata() throws IOException
 	{
-		when(dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(
-				dataset);
+		when(
+				dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"),
+						DataSet.class)).thenReturn(dataset);
 
 		dataSetDeleterServiceImpl.deleteData("dataset1", false);
 		verify(dataService, Mockito.times(1)).delete(DataSet.ENTITY_NAME, dataset);

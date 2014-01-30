@@ -43,7 +43,8 @@ public class ChartDataServiceImpl implements ChartDataService
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
+
 		final FieldTypeEnum attributeXFieldTypeEnum = repo.getAttribute(attributeNameXaxis).getDataType().getEnumType();
 		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
 		final List<XYDataSerie> xYDataSeries;
@@ -81,7 +82,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public XYDataSerie getXYDataSerie(Repository<? extends Entity> repo, String entityName, String attributeNameXaxis,
+	public XYDataSerie getXYDataSerie(Repository repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
@@ -104,9 +105,10 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public List<XYDataSerie> getXYDataSeries(Repository<? extends Entity> repo, String entityName,
-			String attributeNameXaxis, String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum,
-			FieldTypeEnum attributeYFieldTypeEnum, String split, List<QueryRule> queryRules)
+	public List<XYDataSerie> getXYDataSeries(Repository repo, String entityName, String attributeNameXaxis,
+			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
+			String split, List<QueryRule> queryRules)
+
 	{
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeNameXaxis, attributeNameYaxis);
 		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
@@ -159,12 +161,12 @@ public class ChartDataServiceImpl implements ChartDataService
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
 		boxPlotChart.setyLabel(repo.getAttribute(attributeName).getLabel());
 
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
-		Iterable<? extends Entity> iterable = getIterable(entityName, repo, queryRules, sort);
+		Iterable<Entity> iterable = getIterable(entityName, repo, queryRules, sort);
 		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(repo, iterable, attributeName, split);
 
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
@@ -225,8 +227,8 @@ public class ChartDataServiceImpl implements ChartDataService
 	 *            (String) if null or empty String will not split
 	 * @return map (Map<String, List<Double>>)
 	 */
-	private Map<String, List<Double>> getBoxPlotDataListMap(Repository<? extends Entity> repo,
-			Iterable<? extends Entity> iterable, String attributeName, String split)
+	private Map<String, List<Double>> getBoxPlotDataListMap(Repository repo, Iterable<Entity> iterable,
+			String attributeName, String split)
 	{
 		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
 		final boolean splitList = StringUtils.isNotBlank(split);
@@ -269,10 +271,8 @@ public class ChartDataServiceImpl implements ChartDataService
 	 *            (Sort)
 	 * @return
 	 */
-	@SuppressWarnings(
-	{ "unchecked" })
-	private Iterable<? extends Entity> getIterable(String entityName, Repository<? extends Entity> repo,
-			List<QueryRule> queryRules, Sort sort)
+
+	private Iterable<Entity> getIterable(String entityName, Repository repo, List<QueryRule> queryRules, Sort sort)
 	{
 		if (!(repo instanceof Queryable))
 		{
@@ -294,7 +294,7 @@ public class ChartDataServiceImpl implements ChartDataService
 			q.sort(sort);
 		}
 
-		return ((Queryable<? extends Entity>) repo).findAll(q);
+		return ((Queryable) repo).findAll(q);
 	}
 
 	/**
@@ -333,15 +333,11 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules)
 	{
-		// dataService
-		// .registerEntitySource("excel:///Users/erwin/projects/molgenis/molgenis-charts/src/test/resources/heatmap.xlsx");
-
-		Iterable<? extends Entity> iterable = dataService.getRepositoryByEntityName(entityName);
+		Iterable<Entity> iterable = dataService.getRepositoryByEntityName(entityName);
 
 		if (queryRules != null && !queryRules.isEmpty())
 		{
@@ -357,7 +353,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				q.addRule(queryRule);
 			}
 
-			iterable = ((Queryable<? extends Entity>) iterable).findAll(q);
+			iterable = ((Queryable) iterable).findAll(q);
 		}
 
 		List<Target> rowTargets = new ArrayList<Target>();

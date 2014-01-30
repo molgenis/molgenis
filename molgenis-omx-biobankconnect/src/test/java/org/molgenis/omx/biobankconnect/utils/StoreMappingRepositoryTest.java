@@ -67,7 +67,7 @@ public class StoreMappingRepositoryTest
 
 		Query q = new QueryImpl();
 		q.eq(DataSet.IDENTIFIER, dataSetIdentifier);
-		when(dataService.findOne(DataSet.ENTITY_NAME, q)).thenReturn(dataSet);
+		when(dataService.findOne(DataSet.ENTITY_NAME, q, DataSet.class)).thenReturn(dataSet);
 
 		ObservationSet observationSet = mock(ObservationSet.class);
 		when(observationSet.getId()).thenReturn(1);
@@ -75,7 +75,8 @@ public class StoreMappingRepositoryTest
 
 		Query q2 = new QueryImpl();
 		q2.eq(ObservationSet.PARTOFDATASET, dataSet);
-		when(dataService.findAll(ObservationSet.ENTITY_NAME, q2)).thenReturn(Arrays.<Entity> asList(observationSet));
+		when(dataService.findAll(ObservationSet.ENTITY_NAME, q2, ObservationSet.class)).thenReturn(
+				Arrays.asList(observationSet));
 
 		ObservedValue observedValue1 = mock(ObservedValue.class);
 		when(observedValue1.getObservationSet()).thenReturn(observationSet);
@@ -100,8 +101,8 @@ public class StoreMappingRepositoryTest
 
 		Query q4 = new QueryImpl();
 		q4.in(ObservedValue.OBSERVATIONSET, Arrays.asList(observationSet));
-		when(dataService.findAll(ObservedValue.ENTITY_NAME, q4)).thenReturn(
-				Arrays.<Entity> asList(observedValue1, observedValue2, observedValue3));
+		when(dataService.findAll(ObservedValue.ENTITY_NAME, q4, ObservedValue.class)).thenReturn(
+				Arrays.asList(observedValue1, observedValue2, observedValue3));
 
 		repository = new StoreMappingRepository(dataSet, dataService);
 	}
