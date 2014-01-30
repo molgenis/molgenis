@@ -41,7 +41,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		RuntimeProperty property;
 		try
 		{
-			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule);
+			property = dataService.findOne(RuntimeProperty.ENTITY_NAME, propertyRule, RuntimeProperty.class);
 		}
 		catch (MolgenisDataException e)
 		{
@@ -64,7 +64,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		String identifier = RuntimeProperty.class.getSimpleName() + '_' + key;
 
 		RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME,
-				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, identifier));
+				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, identifier), RuntimeProperty.class);
 
 		if (property == null)
 		{
@@ -117,7 +117,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 		Query query = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_' + key);
 		try
 		{
-			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query);
+			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query, RuntimeProperty.class);
 			if (property != null)
 			{
 				property.setValue(content);

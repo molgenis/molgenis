@@ -39,7 +39,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	public String deleteData(String dataSetIdentifier, boolean deleteMetadata)
 	{
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
 		deleteData(dataSet);
 		searchService.deleteDocumentsByType(dataSet.getIdentifier());
 

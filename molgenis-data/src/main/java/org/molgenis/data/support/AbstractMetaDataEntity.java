@@ -1,5 +1,8 @@
 package org.molgenis.data.support;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
@@ -15,6 +18,11 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	{
 		if (metaData == null) throw new IllegalArgumentException("EntityMetaData cannot be null");
 		this.metaData = metaData;
+	}
+
+	public EntityMetaData getEntityMetaData()
+	{
+		return metaData;
 	}
 
 	@Override
@@ -61,6 +69,13 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 		Object label = get(labelAttribute.getName());
 
 		return DataConverter.convert(label, String.class);
+	}
+
+	@Override
+	public List<String> getLabelAttributeNames()
+	{
+		return Arrays.asList(new String[]
+		{ getLabelValue() });
 	}
 
 }

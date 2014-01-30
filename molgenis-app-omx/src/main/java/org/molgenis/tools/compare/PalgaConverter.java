@@ -30,7 +30,7 @@ public class PalgaConverter
 	public void convertTo256Characters(String file) throws IOException
 	{
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("ontologyterm");
+		Repository repo = entitySource.getRepositoryByEntityName("ontologyterm");
 
 		for (Entity entity : repo)
 		{
@@ -51,10 +51,9 @@ public class PalgaConverter
 	public void check(String file) throws IOException
 	{
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("dataset_palga");
+		Repository repo = entitySource.getRepositoryByEntityName("dataset_palga");
 		List<String> list = null;
 		List<List<String>> listOfLists = new ArrayList<List<String>>();
-		int count = 1;
 		for (Entity entity : repo)
 		{
 			list = new ArrayList<String>();
@@ -65,13 +64,8 @@ public class PalgaConverter
 				{
 					list.add(code[i]);
 				}
-				else
-				{
-					// System.out.println(count + 1);
-				}
 			}
 			listOfLists.add(list);
-			count++;
 		}
 		for (List<String> all : listOfLists)
 		{

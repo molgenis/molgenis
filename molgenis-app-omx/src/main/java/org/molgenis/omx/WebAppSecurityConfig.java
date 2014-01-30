@@ -5,7 +5,6 @@ import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,8 +27,6 @@ import org.springframework.security.web.access.expression.WebExpressionVoter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
-	private static final Logger logger = Logger.getLogger(WebAppSecurityConfig.class);
-
 	@Autowired
 	private MolgenisAccessDecisionVoter molgenisAccessDecisionVoter;
 

@@ -1,7 +1,6 @@
 package org.molgenis.util;
 
 import org.molgenis.data.Countable;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 
 import com.google.common.collect.Iterables;
@@ -16,7 +15,7 @@ public class RepositoryUtils
 	 * @param repository
 	 * @return
 	 */
-	public static long count(Repository<? extends Entity> repository)
+	public static long count(Repository repository)
 	{
 		if (repository instanceof Countable)
 		{

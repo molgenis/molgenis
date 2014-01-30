@@ -153,7 +153,7 @@ public class GafListImporterService
 			String dataSetIdentifier = UUID.randomUUID().toString();
 
 			Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
-					new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST));
+					new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST), Protocol.class);
 			DataSet dataSet = new DataSet();
 			dataSet.setIdentifier(dataSetIdentifier);
 			dataSet.setName("GAF list " + dateStr);
