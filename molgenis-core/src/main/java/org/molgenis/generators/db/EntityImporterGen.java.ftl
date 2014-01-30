@@ -39,7 +39,7 @@ import ${entity.namespace}.${JavaName(entity)};
 /**
  * Reads ${JavaName(entity)} from a delimited (csv) file, resolving xrefs to ids where needed, that is the tricky bit ;-)
  */
-public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaName(entity)}>
+public class ${JavaName(entity)}EntityImporter implements EntityImporter
 {
 	private static final Logger logger = Logger.getLogger(${JavaName(entity)}EntityImporter.class);
 	private static int BATCH_SIZE = 10000;
@@ -55,7 +55,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 	 * @return number of elements imported
 	 */
 	@Override
-	public int importEntity(Repository<? extends Entity> repository, DataService dataService, DatabaseAction dbAction)
+	public int importEntity(Repository repository, DataService dataService, DatabaseAction dbAction)
 	{
 		//wrapper to count
 		final AtomicInteger total = new AtomicInteger(0);
@@ -70,7 +70,7 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 			List<${JavaName(entity)}> ${name(entity)}List = new ArrayList<${JavaName(entity)}>(BATCH_SIZE); // FIXME
 			List<Entity> entityList = new ArrayList<Entity>(BATCH_SIZE);
 
-			CrudRepository<${JavaName(entity)}> crudRepository = dataService.getCrudRepository("${entity.name}");
+			CrudRepository crudRepository = dataService.getCrudRepository("${entity.name}");
 		
 			for (Entity entity : repository)
 			{

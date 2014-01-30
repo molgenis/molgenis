@@ -81,7 +81,7 @@ public class EvaluationController extends MolgenisPluginController
 	public String init(@RequestParam(value = "selectedDataSet", required = false)
 	String selectedDataSetId, Model model)
 	{
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 		for (DataSet dataSet : allDataSets)
@@ -96,7 +96,7 @@ public class EvaluationController extends MolgenisPluginController
 		{
 			model.addAttribute("selectedDataSet", selectedDataSetId);
 			Iterable<DataSet> it = dataService.findAll(DataSet.ENTITY_NAME,
-					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId));
+					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId), DataSet.class);
 			for (DataSet dataSet : it)
 			{
 				if (dataSet.getIdentifier().startsWith(SecurityUtils.getCurrentUsername() + "-" + selectedDataSetId))
@@ -116,7 +116,7 @@ public class EvaluationController extends MolgenisPluginController
 	Part file, HttpServletResponse response, Model model) throws IOException
 	{
 		EntitySource reader = null;
-		ExcelWriter<Entity> excelWriterRanks = null;
+		ExcelWriter excelWriterRanks = null;
 
 		try
 		{
@@ -127,7 +127,7 @@ public class EvaluationController extends MolgenisPluginController
 				response.setContentType("application/vnd.ms-excel");
 				response.addHeader("Content-Disposition", "attachment; filename="
 						+ getCsvFileName(file.getName() + "-ranks"));
-				excelWriterRanks = new ExcelWriter<Entity>(response.getOutputStream());
+				excelWriterRanks = new ExcelWriter(response.getOutputStream());
 				excelWriterRanks.addCellProcessor(new LowerCaseProcessor(true, false));
 
 				Writable sheetWriterRank = null;
@@ -136,7 +136,7 @@ public class EvaluationController extends MolgenisPluginController
 				Writable sheetWriteSpssInput = null;
 
 				reader = new ExcelEntitySourceFactory().create(uploadFile);
-				Repository<? extends Entity> inputSheet = reader.getRepositoryByEntityName("Sheet1");
+				Repository inputSheet = reader.getRepositoryByEntityName("Sheet1");
 
 				List<String> biobankNames = new ArrayList<String>();
 				for (AttributeMetaData attr : inputSheet.getAttributes())
@@ -147,7 +147,8 @@ public class EvaluationController extends MolgenisPluginController
 				biobankNames.remove(0);
 
 				// First column has to correspond to the selected dataset
-				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId));
+				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId),
+						DataSet.class);
 
 				if (ds.getName().equalsIgnoreCase(firstColumn))
 				{
@@ -184,7 +185,7 @@ public class EvaluationController extends MolgenisPluginController
 					}
 
 					Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
-							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames));
+							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames), DataSet.class);
 
 					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
 					sheetWriterRank = excelWriterRanks.createWritable("result", lowerCaseBiobankNames);
@@ -199,7 +200,7 @@ public class EvaluationController extends MolgenisPluginController
 						ranks.add(variableName);
 						Map<String, List<String>> mappingDetail = entry.getValue();
 						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-								new QueryImpl().eq(ObservableFeature.NAME, variableName));
+								new QueryImpl().eq(ObservableFeature.NAME, variableName), ObservableFeature.class);
 						String description = feature == null ? StringUtils.EMPTY : feature.getDescription();
 						if (!rankCollection.containsKey(description)) rankCollection.put(description,
 								new HashMap<String, List<Integer>>());

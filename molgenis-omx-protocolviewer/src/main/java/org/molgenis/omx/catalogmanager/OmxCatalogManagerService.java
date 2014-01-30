@@ -27,7 +27,7 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	public Iterable<CatalogMeta> getCatalogs()
 	{
 		Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.ROOT, true));
+				new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
 
 		return Iterables.transform(protocols, new Function<Protocol, CatalogMeta>()
 		{
@@ -44,7 +44,8 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	@Override
 	public Catalog getCatalog(String id) throws UnknownCatalogException
 	{
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
 		return new OmxCatalog(protocol, dataService);
 	}
@@ -54,7 +55,7 @@ public class OmxCatalogManagerService implements CatalogManagerService
 			UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)));
+				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)), StudyDataRequest.class);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
 		Protocol protocol = studyDataRequest.getProtocol();
@@ -65,7 +66,8 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	@Override
 	public void loadCatalog(String id) throws UnknownCatalogException
 	{
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
 		setProtocolActive(protocol, true);
 	}
@@ -73,7 +75,8 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	@Override
 	public void unloadCatalog(String id) throws UnknownCatalogException
 	{
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
 		setProtocolActive(protocol, false);
 	}
@@ -81,7 +84,8 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	@Override
 	public boolean isCatalogLoaded(String id) throws UnknownCatalogException
 	{
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
 		return protocol.getActive();
 	}
@@ -90,10 +94,11 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)));
+				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)), StudyDataRequest.class);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
 		setProtocolActive(protocol, true);
 	}
@@ -103,10 +108,11 @@ public class OmxCatalogManagerService implements CatalogManagerService
 			UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)));
+				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)), StudyDataRequest.class);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
 		setProtocolActive(protocol, false);
 	}
@@ -116,10 +122,11 @@ public class OmxCatalogManagerService implements CatalogManagerService
 			UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)));
+				new QueryImpl().eq(StudyDataRequest.ID, Integer.valueOf(id)), StudyDataRequest.class);
 		if (studyDataRequest == null) throw new UnknownStudyDefinitionException("Study definition [" + id
 				+ "] does not exist");
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("No catalog defined for study definition [" + id + "]");
 		return protocol.getActive();
 	}

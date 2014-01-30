@@ -110,7 +110,7 @@ public class RestController
 	String entityNameRaw)
 	{
 		String entityName = getEntityName(entityNameRaw);
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
 
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getName());
 		meta.setDescription(repo.getDescription());
@@ -132,7 +132,7 @@ public class RestController
 
 				if (attr.getRefEntity() != null)
 				{
-					copy.setRefEntityName(attr.getRefEntity().getName());
+					copy.setRefEntity(attr.getRefEntity());
 				}
 
 				copy.setVisible(attr.isVisible());
@@ -625,7 +625,6 @@ public class RestController
 	}
 
 	// Handles a Query
-	@SuppressWarnings("unchecked")
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
 			EntityCollectionRequest request, Set<String> expandFields)
 	{
@@ -637,7 +636,7 @@ public class RestController
 				request.getStart());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
-		Long count = ((Queryable<Entity>) meta).count(q);
+		Long count = ((Queryable) meta).count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();

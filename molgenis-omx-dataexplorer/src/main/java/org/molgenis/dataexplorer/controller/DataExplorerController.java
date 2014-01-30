@@ -123,8 +123,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedDataSetIdentifier, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedDataSetIdentifier, Model model) throws Exception
 	{
 		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
 
@@ -136,8 +136,8 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = Lists.<DataSet> newArrayList(dataService.<DataSet> findAll(DataSet.ENTITY_NAME,
-				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME))));
+		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
+				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
 
 		model.addAttribute("dataSets", dataSets);
 
@@ -234,8 +234,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
-			throws IOException
+	public void download(@RequestParam("searchRequest")
+	String searchRequest, HttpServletResponse response) throws IOException
 	{
 		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
 		logger.info("Download request: [" + searchRequest + "]");
@@ -246,10 +246,10 @@ public class DataExplorerController extends MolgenisPluginController
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
 
-		CsvWriter<Entity> writer = null;
+		CsvWriter writer = null;
 		try
 		{
-			writer = new CsvWriter<Entity>(response.getWriter());
+			writer = new CsvWriter(response.getWriter());
 
 			// The fieldsToReturn contain identifiers, we need the names
 			Map<String, String> nameByIdentifier = getFeatureNames(request.getFieldsToReturn());
@@ -296,7 +296,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@RequestBody
+	AggregateRequest request)
 	{
 
 		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
@@ -305,11 +306,12 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (request.getDataType().equals("categorical"))
 			{
-				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
+				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
+						ObservableFeature.class);
 				if (feature != null)
 				{
 					Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature), Category.class);
 
 					for (Category category : categories)
 					{
@@ -327,7 +329,8 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new RuntimeException("Illegal datatype");
 			}
 
-			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId());
+			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
+					ObservableFeature.class);
 			SearchResult searchResult = searchService.search(request.getSearchRequest());
 
 			for (Hit hit : searchResult.getSearchHits())
@@ -355,11 +358,14 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public String filterwizard(@RequestBody @Valid @NotNull FilterWizardRequest request, Model model)
+	public String filterwizard(@RequestBody
+	@Valid
+	@NotNull
+	FilterWizardRequest request, Model model)
 	{
 		String dataSetIdentifier = request.getDataSetIdentifier();
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
+				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
 		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
 
 		model.addAttribute("listOfallProtocols", listOfallProtocols);
@@ -371,7 +377,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getFeatureNames(List<String> identifiers)
 	{
 		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers));
+				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers), ObservableFeature.class);
 
 		Map<String, String> nameByIdentifier = new LinkedHashMap<String, String>();
 		for (ObservableFeature feature : features)

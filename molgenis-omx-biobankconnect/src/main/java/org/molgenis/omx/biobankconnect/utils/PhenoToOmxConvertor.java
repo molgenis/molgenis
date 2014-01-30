@@ -21,7 +21,7 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	{
 		try
 		{
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Protocol");
+			Repository repo = entitySource.getRepositoryByEntityName("Protocol");
 			for (Entity entity : repo)
 			{
 				String name = entity.getString("name");
@@ -48,7 +48,7 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	@Override
 	public void collectVariableInfo(EntitySource entitySource) throws IOException
 	{
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Measurement");
+		Repository repo = entitySource.getRepositoryByEntityName("Measurement");
 		for (Entity entity : repo)
 		{
 			String featureName = entity.getString("name");
@@ -80,7 +80,7 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	@Override
 	public void collectCategoryInfo(EntitySource entitySource) throws IOException
 	{
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Category");
+		Repository repo = entitySource.getRepositoryByEntityName("Category");
 		for (Entity entity : repo)
 		{
 			String name = entity.getString("name");

@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
@@ -84,6 +85,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		complete = false;
 	}
 
+	@Override
 	@Transactional
 	public String uploadFeatures(File uploadFile, String datasetName) throws IOException
 	{
@@ -166,7 +168,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (featureIdentifiers.size() > 0)
 		{
 			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().in(ObservableFeature.IDENTIFIER, new ArrayList<String>(featureIdentifiers)));
+					new QueryImpl().in(ObservableFeature.IDENTIFIER, new ArrayList<String>(featureIdentifiers)),
+					ObservableFeature.class);
 
 			for (ObservableFeature feature : features)
 			{
@@ -180,7 +183,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	@Transactional
 	public void removeAnnotations(Integer dataSetId)
 	{
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId);
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
 
 		QueryImpl q = new QueryImpl();
 		q.pageSize(100000);
@@ -203,7 +206,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (!listOfFeatureIds.isEmpty())
 		{
 			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().in(ObservableFeature.ID, listOfFeatureIds));
+					new QueryImpl().in(ObservableFeature.ID, listOfFeatureIds), ObservableFeature.class);
 			for (ObservableFeature feature : features)
 			{
 				List<OntologyTerm> definitions = feature.getDefinitions();
@@ -256,7 +259,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				Hit hit = iterator.next();
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get("id").toString());
 
-				ObservableFeature f = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId);
+				ObservableFeature f = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
+						ObservableFeature.class);
 				ObservableFeature feature = toObservableFeature(f);
 
 				String name = hit.getColumnValueMap().get("name").toString().toLowerCase()
@@ -437,7 +441,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (mapUriTerm.size() > 0)
 		{
 			Iterable<OntologyTerm> ots = dataService.findAll(OntologyTerm.ENTITY_NAME,
-					new QueryImpl().in(OntologyTerm.IDENTIFIER, new ArrayList<String>(mapUriTerm.keySet())));
+					new QueryImpl().in(OntologyTerm.IDENTIFIER, new ArrayList<String>(mapUriTerm.keySet())),
+					OntologyTerm.class);
 
 			for (OntologyTerm ot : ots)
 				mapUriTerm.remove(ot.getIdentifier());
@@ -466,7 +471,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			ot.setDefinition(ontologyTermSynonym);
 
 			Ontology ontology = dataService.findOne(Ontology.ENTITY_NAME,
-					new QueryImpl().eq(Ontology.IDENTIFIER, ontologyUri));
+					new QueryImpl().eq(Ontology.IDENTIFIER, ontologyUri), Ontology.class);
 
 			ot.setOntology(ontology);
 
@@ -476,10 +481,10 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (listOfOntologyTerms.size() > 0) dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
 
 		if (identifiers.isEmpty()) return Collections.emptyList();
-		List<OntologyTerm> definitions = dataService.findAllAsList(OntologyTerm.ENTITY_NAME,
-				new QueryImpl().in(OntologyTerm.IDENTIFIER, identifiers));
+		Iterable<OntologyTerm> definitions = dataService.findAll(OntologyTerm.ENTITY_NAME,
+				new QueryImpl().in(OntologyTerm.IDENTIFIER, identifiers), OntologyTerm.class);
 
-		return definitions;
+		return Lists.newArrayList(definitions);
 	}
 
 	private void addOntologies(Map<String, String> ontologyInfo)
@@ -488,7 +493,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		List<Ontology> listOfOntologies = new ArrayList<Ontology>();
 
 		Iterable<Ontology> ontologies = dataService.findAll(Ontology.ENTITY_NAME,
-				new QueryImpl().in(Ontology.ONTOLOGYURI, new ArrayList<String>(ontologyInfo.keySet())));
+				new QueryImpl().in(Ontology.ONTOLOGYURI, new ArrayList<String>(ontologyInfo.keySet())), Ontology.class);
 
 		for (Ontology ontology : ontologies)
 		{

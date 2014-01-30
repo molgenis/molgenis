@@ -50,7 +50,7 @@ public class IndexRequestGenerator
 		this.indexName = indexName;
 	}
 
-	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository<? extends Entity> repository)
+	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository repository)
 	{
 		return new Iterable<BulkRequestBuilder>()
 		{
@@ -62,7 +62,7 @@ public class IndexRequestGenerator
 		};
 	}
 
-	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository<? extends Entity> repository)
+	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository repository)
 	{
 		final Set<String> xrefAndMrefColumns = new HashSet<String>();
 		for (AttributeMetaData attr : repository.getAttributes())

@@ -301,7 +301,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			});
 		}
 
-		ExcelWriter<Entity> excelWriter = new ExcelWriter<Entity>(outputStream);
+		ExcelWriter excelWriter = new ExcelWriter(outputStream);
 		try
 		{
 			Writable writable = excelWriter.createWritable("Variables", header);

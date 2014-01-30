@@ -48,6 +48,5 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		}
 
 		return importReport;
-
 	}
 }

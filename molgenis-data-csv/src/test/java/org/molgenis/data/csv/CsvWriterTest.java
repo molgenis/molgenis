@@ -22,7 +22,7 @@ public class CsvWriterTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CsvWriter()
 	{
-		new CsvWriter<Entity>((Writer) null);
+		new CsvWriter((Writer) null);
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class CsvWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
 
-		CsvWriter<Entity> csvWriter = new CsvWriter<Entity>(new StringWriter());
+		CsvWriter csvWriter = new CsvWriter(new StringWriter());
 		try
 		{
 			csvWriter.addCellProcessor(processor);
@@ -53,7 +53,7 @@ public class CsvWriterTest
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
-		CsvWriter<Entity> csvWriter = new CsvWriter<Entity>(new StringWriter());
+		CsvWriter csvWriter = new CsvWriter(new StringWriter());
 		try
 		{
 			csvWriter.addCellProcessor(processor);
@@ -72,7 +72,7 @@ public class CsvWriterTest
 	public void add() throws IOException
 	{
 		StringWriter strWriter = new StringWriter();
-		CsvWriter<Entity> csvWriter = new CsvWriter<Entity>(strWriter);
+		CsvWriter csvWriter = new CsvWriter(strWriter);
 		try
 		{
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
