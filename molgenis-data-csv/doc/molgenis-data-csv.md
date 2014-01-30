@@ -25,7 +25,7 @@ With a `CsvWriter` you can write entities to a csv file.
 ***Read entities from a csv file***
 
 ```
-Repository<Entity> repo = new CsvRepository(new File("/Users/test/test.csv"), null);
+Repository repo = new CsvRepository(new File("/Users/test/test.csv"), null);
 try
 {
 	for (Entity entity : repo)
@@ -67,7 +67,7 @@ dataService.registerEntitySource("csv:///users/test/test.csv");
 ***Write entities to a csv file***
 
 ```
-Writable<Entity> writable = new CsvWriter<Entity>(new OutputStreamWriter(new FileOutputStream(file), Arrays.asList("col1", col2));
+Writable writable = new CsvWriter(new OutputStreamWriter(new FileOutputStream(file), Arrays.asList("col1", col2));
 try
 {
 	Entity entity = new MapEntity();
