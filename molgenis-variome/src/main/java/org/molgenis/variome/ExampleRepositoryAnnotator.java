@@ -8,7 +8,6 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryAnnotator;
@@ -22,7 +21,6 @@ import org.molgenis.omx.observ.value.StringValue;
  * and observable values for each observable set into a existing data set
  * 
  * */
-@Component
 public class ExampleRepositoryAnnotator implements RepositoryAnnotator {
 
 	@Autowired

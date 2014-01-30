@@ -15,8 +15,10 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.StringValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class CaddAnnotator implements VariantAnnotator {
 
 	@Autowired
@@ -74,9 +76,11 @@ public class CaddAnnotator implements VariantAnnotator {
 			//Add this new Observable feature to the dataService
 			dataService.add(ObservableFeature.ENTITY_NAME, newFeature);
 			
+			System.out.println(dataSet.getProtocolUsed().get("name"));
+			
 			//Load the protocol (collection of column names) of the selected repository (a data set shown in the data explorer)
 			Protocol repositoryProtocol = dataService.findOne(Protocol.ENTITY_NAME, 
-					new QueryImpl().eq(Protocol.IDENTIFIER, dataSet.getProtocolUsed()), Protocol.class);
+					new QueryImpl().eq(Protocol.IDENTIFIER, dataSet.getProtocolUsed().get("name")), Protocol.class);
 			
 			//Add the new Observable feature to the protocol
 			repositoryProtocol.getFeatures().add(newFeature);
@@ -89,11 +93,16 @@ public class CaddAnnotator implements VariantAnnotator {
 					new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
 			
 			//For every observation set (row)
-			for (ObservationSet os :osSet)
+			for (ObservationSet os : osSet)
 			{
+				System.out.println(os);
+				
 				//Create a new string value and add it to the data service 
 				//This is done to make it a known value, so an observable value can get this value
 				StringValue sv = new StringValue();
+				
+				System.out.println(os.get("start_nucleotide"));
+				System.out.println(os.get("ALT"));
 				
 				Integer location = Integer.parseInt(os.get("start_nucleotide").toString());
 				String alt = os.get("ALT").toString();
