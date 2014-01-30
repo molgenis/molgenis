@@ -494,7 +494,6 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	private void matchByNameAndUpdateFields(List<? extends Entity> existingEntities, List<? extends Entity> entities)
 	{
-		// List<E> updatedDbEntities = new ArrayList<E>();
 		for (Entity entityInDb : existingEntities)
 		{
 			for (Entity newEntity : entities)
@@ -516,12 +515,13 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 						break;
 					}
 				}
+
 				if (match)
 				{
 					try
 					{
 						MapEntity mapEntity = new MapEntity();
-						for (String field : entityInDb.getLabelAttributeNames())
+						for (String field : entityInDb.getAttributeNames())
 						{
 							mapEntity.set(field, newEntity.get(field));
 						}
@@ -532,6 +532,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 						throw new MolgenisDataException(ex);
 					}
 				}
+
 			}
 		}
 	}
@@ -578,7 +579,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void deleteAll()
 	{
 		delete(this);
@@ -628,7 +629,6 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 						in.value(o);
 					}
 					andPredicates.add(in);
-					// andPredicates.add(from.get(r.getJpaAttribute()).in(Lists.newArrayList(r.getValue())));
 					break;
 				case LIKE:
 					String like = "%" + r.getValue() + "%";
