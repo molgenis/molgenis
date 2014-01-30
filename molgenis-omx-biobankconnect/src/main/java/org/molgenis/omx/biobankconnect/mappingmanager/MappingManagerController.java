@@ -95,7 +95,7 @@ public class MappingManagerController extends MolgenisPluginController
 	String selectedDataSetId, HttpServletRequest request, Model model)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -158,7 +158,7 @@ public class MappingManagerController extends MolgenisPluginController
 		{
 			Set<Integer> featureIds = new HashSet<Integer>();
 			Integer selectedDataSetId = request.getDataSetId();
-			DataSet mappingDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId);
+			DataSet mappingDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId, DataSet.class);
 			@SuppressWarnings("deprecation")
 			List<DataSet> storeMappingDataSet = dataService.findAllAsList(DataSet.ENTITY_NAME,
 					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId.toString()));
@@ -174,7 +174,8 @@ public class MappingManagerController extends MolgenisPluginController
 							userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
 							&& !mappedDataSetId.equals(selectedDataSetId))
 					{
-						DataSet mappedDataSet = dataService.findOne(DataSet.ENTITY_NAME, mappedDataSetId);
+						DataSet mappedDataSet = dataService
+								.findOne(DataSet.ENTITY_NAME, mappedDataSetId, DataSet.class);
 						dataSetNames.add(mappedDataSet.getName());
 						SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(),
 								new QueryImpl().pageSize(1000000), null);
@@ -200,13 +201,14 @@ public class MappingManagerController extends MolgenisPluginController
 
 				Map<Integer, ObservableFeature> featureMap = new HashMap<Integer, ObservableFeature>();
 				Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-						new QueryImpl().in(ObservableFeature.ID, new ArrayList<Integer>(featureIds)));
+						new QueryImpl().in(ObservableFeature.ID, new ArrayList<Integer>(featureIds)),
+						ObservableFeature.class);
 				for (ObservableFeature feature : features)
 				{
 					featureMap.put(feature.getId(), feature);
 				}
 
-				writer = new CsvWriter<Entity>(response.getWriter(), dataSetNames);
+				writer = new CsvWriter(response.getWriter(), dataSetNames);
 
 				SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId,
 						new QueryImpl().pageSize(1000000), null);

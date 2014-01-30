@@ -47,7 +47,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 		try
 		{
 			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-					new QueryImpl().eq(MolgenisUser.USERNAME, username));
+					new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
 
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
@@ -95,16 +95,24 @@ public class MolgenisUserDetailsService implements UserDetailsService
 
 	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser)
 	{
-		return dataService.findAllAsList(UserAuthority.ENTITY_NAME,
-				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser));
+		Iterable<UserAuthority> it = dataService.findAll(UserAuthority.ENTITY_NAME,
+				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class);
+		return it == null ? Lists.<UserAuthority> newArrayList() : Lists.newArrayList(it);
 	}
 
 	private List<GroupAuthority> getGroupAuthorities(MolgenisUser molgenisUser)
 	{
-		List<MolgenisGroupMember> groupMembers = dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser));
+		Iterable<MolgenisGroupMember> groupMembersIt = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class);
 
-		if (groupMembers != null && !groupMembers.isEmpty())
+		if (groupMembersIt == null)
+		{
+			return Lists.newArrayList();
+		}
+
+		List<MolgenisGroupMember> groupMembers = Lists.newArrayList(groupMembersIt);
+
+		if (!groupMembers.isEmpty())
 		{
 			List<MolgenisGroup> molgenisGroups = Lists.transform(groupMembers,
 					new Function<MolgenisGroupMember, MolgenisGroup>()
@@ -116,8 +124,8 @@ public class MolgenisUserDetailsService implements UserDetailsService
 						}
 					});
 
-			return dataService.findAllAsList(GroupAuthority.ENTITY_NAME,
-					new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups));
+			return Lists.newArrayList(dataService.findAll(GroupAuthority.ENTITY_NAME,
+					new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class));
 		}
 		return null;
 	}

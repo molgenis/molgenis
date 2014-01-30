@@ -68,14 +68,14 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				importWizard.setImportResult(importReport);
 
 				// publish dataset imported event(s)
-				Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME);
+				Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 				for (DataSet dataSet : dataSets)
 					ApplicationContextProvider.getApplicationContext().publishEvent(
 							new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
 
 				// publish protocol imported event(s)
 				Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
-						new QueryImpl().eq(Protocol.ROOT, true));
+						new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
 				for (Protocol protocol : protocols)
 					ApplicationContextProvider.getApplicationContext().publishEvent(
 							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));

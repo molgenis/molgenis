@@ -68,7 +68,7 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 			{
 				if (dataSetEntityNames.contains(entityName))
 				{
-					Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName(entityName);
+					Repository repo = entitySource.getRepositoryByEntityName(entityName);
 					try
 					{
 						EntityImportReport sheetImportReport = importSheet(repo, entityName);
@@ -89,13 +89,14 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 	}
 
 	@Override
-	public EntityImportReport importSheet(Repository<? extends Entity> repo, String sheetName) throws IOException,
+	public EntityImportReport importSheet(Repository repo, String sheetName) throws IOException,
 			ValueConverterException
 	{
 		EntityImportReport importReport = new EntityImportReport();
 		String identifier = sheetName.substring(DATASET_SHEET_PREFIX.length());
 
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier));
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier),
+				DataSet.class);
 		if (dataSet == null)
 		{
 			throw new MolgenisDataException("dataset '" + identifier + "' does not exist in db");
@@ -115,7 +116,8 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 				if (!featureIdentifier.equalsIgnoreCase(DATASET_ROW_IDENTIFIER_HEADER))
 				{
 					ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-							new QueryImpl().eq(ObservableFeature.IDENTIFIER, featureIdentifier));
+							new QueryImpl().eq(ObservableFeature.IDENTIFIER, featureIdentifier),
+							ObservableFeature.class);
 
 					if (feature == null)
 					{
@@ -201,15 +203,14 @@ public class DataSetImporterServiceImpl implements DataSetImporterService
 
 			if (++rownr % transactionRows == 0)
 			{
-				CrudRepository<? extends Entity> dataSetRepo = dataService
-						.getCrudRepository(ObservationSet.ENTITY_NAME);
+				CrudRepository dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
 				dataSetRepo.flush();
 				dataSetRepo.clearCache();
 			}
 		}
 		if (rownr % transactionRows != 0)
 		{
-			CrudRepository<? extends Entity> dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
+			CrudRepository dataSetRepo = dataService.getCrudRepository(ObservationSet.ENTITY_NAME);
 			dataSetRepo.flush();
 			dataSetRepo.clearCache();
 		}

@@ -69,8 +69,8 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public void convert(@RequestParam Part upload, HttpServletRequest request, HttpServletResponse response)
-			throws Exception
+	public void convert(@RequestParam
+	Part upload, HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		File file = null;
 		Part part = request.getPart("upload");
@@ -88,10 +88,10 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 			throw new Exception("File does not of the xml type, other formats are not supported.");
 		}
 		// Create the files needed
-		CsvWriter<Entity> dataCBM = new CsvWriter<Entity>(new File(outputDir, "dataset_cbm.csv"));
-		CsvWriter<Entity> observableFeature = new CsvWriter<Entity>(new File(outputDir, "observablefeature.csv"));
-		CsvWriter<Entity> dataSet = new CsvWriter<Entity>(new File(outputDir, "dataset.csv"));
-		CsvWriter<Entity> protocol = new CsvWriter<Entity>(new File(outputDir, "protocol.csv"));
+		CsvWriter dataCBM = new CsvWriter(new File(outputDir, "dataset_cbm.csv"));
+		CsvWriter observableFeature = new CsvWriter(new File(outputDir, "observablefeature.csv"));
+		CsvWriter dataSet = new CsvWriter(new File(outputDir, "dataset.csv"));
+		CsvWriter protocol = new CsvWriter(new File(outputDir, "protocol.csv"));
 
 		try
 		{

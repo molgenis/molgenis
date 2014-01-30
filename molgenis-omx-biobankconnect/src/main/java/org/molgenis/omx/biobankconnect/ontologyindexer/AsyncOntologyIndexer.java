@@ -1,11 +1,11 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
@@ -80,17 +80,17 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 	@RunAsSystem
 	public void removeOntology(String ontologyURI)
 	{
-		List<Ontology> ontologies = dataService.findAllAsList(Ontology.ENTITY_NAME,
-				new QueryImpl().eq(Ontology.IDENTIFIER, ontologyURI));
+		Iterable<Ontology> ontologies = dataService.findAll(Ontology.ENTITY_NAME,
+				new QueryImpl().eq(Ontology.IDENTIFIER, ontologyURI), Ontology.class);
 
-		if (ontologies.size() > 0)
+		if (Iterables.size(ontologies) > 0)
 		{
 			for (Ontology ontology : ontologies)
 			{
-				List<OntologyTerm> ontologyTerms = dataService.findAllAsList(OntologyTerm.ENTITY_NAME,
-						new QueryImpl().eq(OntologyTerm.ONTOLOGY, ontology));
+				Iterable<OntologyTerm> ontologyTerms = dataService.findAll(OntologyTerm.ENTITY_NAME,
+						new QueryImpl().eq(OntologyTerm.ONTOLOGY, ontology), OntologyTerm.class);
 
-				if (ontologyTerms.size() > 0) dataService.delete(OntologyTerm.ENTITY_NAME, ontologyTerms);
+				if (Iterables.size(ontologyTerms) > 0) dataService.delete(OntologyTerm.ENTITY_NAME, ontologyTerms);
 			}
 			dataService.delete(Ontology.ENTITY_NAME, ontologies);
 		}

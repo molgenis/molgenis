@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.collect.Lists;
+
 /**
  * Controller class for the data explorer.
  * 
@@ -59,17 +61,19 @@ public class DataSetsIndexerController extends MolgenisPluginController
 	public String init(Model model) throws Exception
 	{
 		// add data sets to model
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.ROOT, true));
-		model.addAttribute("dataSets", dataSets);
-		model.addAttribute("protocols", protocols);
+				new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
+
+		model.addAttribute("dataSets", Lists.newArrayList(dataSets));
+		model.addAttribute("protocols", Lists.newArrayList(protocols));
 		return "view-datasetsindexer";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/index", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public DataSetIndexResponse index(@RequestBody DataSetIndexRequest request) throws UnsupportedEncodingException
+	public DataSetIndexResponse index(@RequestBody
+	DataSetIndexRequest request) throws UnsupportedEncodingException
 	{
 
 		if (dataSetsIndexer.isIndexingRunning())

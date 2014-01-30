@@ -53,7 +53,7 @@ public class SampleConverter
 		ExcelEntitySource entitySource = new ExcelEntitySource(in, null);
 		entitySource.addCellProcessor(new TrimProcessor(false, true));
 
-		CsvWriter<Entity> csvWriter = null;
+		CsvWriter csvWriter = null;
 
 		ArrayList<String> listOfEntity = new ArrayList<String>();
 		listOfEntity.add("dataset");
@@ -65,7 +65,7 @@ public class SampleConverter
 		{
 			for (String entityName : entitySource.getEntityNames())
 			{
-				Repository<? extends Entity> sheetReader = entitySource.getRepositoryByEntityName(entityName);
+				Repository sheetReader = entitySource.getRepositoryByEntityName(entityName);
 				this.featureColNames = new ArrayList<String>();
 
 				for (AttributeMetaData attr : sheetReader.getAttributes())
@@ -81,8 +81,7 @@ public class SampleConverter
 					}
 				}
 
-				csvWriter = new CsvWriter<Entity>(new OutputStreamWriter(out, Charset.forName("UTF-8")),
-						this.featureColNames);
+				csvWriter = new CsvWriter(new OutputStreamWriter(out, Charset.forName("UTF-8")), this.featureColNames);
 
 				for (Entity entity : sheetReader)
 				{
@@ -221,7 +220,7 @@ public class SampleConverter
 		}
 	}
 
-	public void mkMetadataFileProtocol(WritableFactory<Entity> writableFactoryMD, String sheetName) throws IOException
+	public void mkMetadataFileProtocol(WritableFactory writableFactoryMD, String sheetName) throws IOException
 	{
 		Writable esw = writableFactoryMD.createWritable("protocol",
 				Arrays.asList("identifier", "name", "features_identifier"));
@@ -236,8 +235,7 @@ public class SampleConverter
 		}
 	}
 
-	public void mkMetadataFileObservableFeature(WritableFactory<Entity> writableFactoryMD, String sheetName)
-			throws IOException
+	public void mkMetadataFileObservableFeature(WritableFactory writableFactoryMD, String sheetName) throws IOException
 	{
 		Writable esw = writableFactoryMD.createWritable("observableFeature", Arrays.asList("identifier", "name"));
 
@@ -250,7 +248,7 @@ public class SampleConverter
 		}
 	}
 
-	public void mkMetadataFileDataSet(WritableFactory<Entity> writableFactoryMD, String sheetName) throws IOException
+	public void mkMetadataFileDataSet(WritableFactory writableFactoryMD, String sheetName) throws IOException
 	{
 		Writable esw = writableFactoryMD.createWritable(sheetName,
 				Arrays.asList("identifier", "name", "protocolused_identifier"));
@@ -267,7 +265,7 @@ public class SampleConverter
 
 		OutputStream osMD = new FileOutputStream(OUTPUTDIR + PROJECT + "_metadata.xls");
 
-		ExcelWriter<Entity> excelWriterMD = new ExcelWriter<Entity>(osMD, FileFormat.XLS);
+		ExcelWriter excelWriterMD = new ExcelWriter(osMD, FileFormat.XLS);
 		excelWriterMD.addCellProcessor(new LowerCaseProcessor(true, false));
 
 		for (String sheetName : listOfEntity)

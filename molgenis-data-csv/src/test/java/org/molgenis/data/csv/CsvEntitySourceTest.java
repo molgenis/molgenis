@@ -116,7 +116,7 @@ public class CsvEntitySourceTest
 		EntitySource entitySource = new CsvEntitySource(ZIP_FILE, null);
 		try
 		{
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("0");
+			Repository repo = entitySource.getRepositoryByEntityName("0");
 			assertNotNull(repo);
 			assertEquals(repo.getName(), "0");
 		}
@@ -159,7 +159,7 @@ public class CsvEntitySourceTest
 			assertEquals(it.next(), "testdata");
 			assertFalse(it.hasNext());
 
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("testdata");
+			Repository repo = entitySource.getRepositoryByEntityName("testdata");
 			assertNotNull(repo);
 
 			Iterator<AttributeMetaData> itMeta = repo.getAttributes().iterator();
@@ -208,7 +208,7 @@ public class CsvEntitySourceTest
 			assertEquals(it.next(), "testdata");
 			assertFalse(it.hasNext());
 
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("testdata");
+			Repository repo = entitySource.getRepositoryByEntityName("testdata");
 			assertNotNull(repo);
 
 			Iterator<AttributeMetaData> itMeta = repo.getAttributes().iterator();

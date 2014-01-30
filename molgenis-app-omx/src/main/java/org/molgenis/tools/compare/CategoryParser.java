@@ -33,7 +33,7 @@ public class CategoryParser
 	public void check(String file, String datasetMatrix) throws IOException
 	{
 		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("observablefeature");
+		Repository repo = entitySource.getRepositoryByEntityName("observablefeature");
 
 		List<String> listOfCategoricalFeatures = new ArrayList<String>();
 		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
@@ -47,8 +47,7 @@ public class CategoryParser
 			}
 		}
 
-		Repository<? extends Entity> readObservableDataMatrixRepo = entitySource
-				.getRepositoryByEntityName(datasetMatrix);
+		Repository readObservableDataMatrixRepo = entitySource.getRepositoryByEntityName(datasetMatrix);
 
 		for (Entity entity : readObservableDataMatrixRepo)
 		{

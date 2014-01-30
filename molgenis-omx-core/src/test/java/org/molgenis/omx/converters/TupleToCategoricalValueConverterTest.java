@@ -44,7 +44,7 @@ public class TupleToCategoricalValueConverterTest
 
 		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
 
-		when(dataService.findOne(Category.ENTITY_NAME, q)).thenReturn(category);
+		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 
 		String colName = "col";
 		Entity entity = new MapEntity(colName, valueCode);
@@ -64,7 +64,7 @@ public class TupleToCategoricalValueConverterTest
 
 		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
 
-		when(dataService.findOne(Category.ENTITY_NAME, q)).thenReturn(category);
+		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 		String colName = "col";
 		Entity entity = new MapEntity(colName, valueCode);
 		new EntityToCategoricalValueConverter(dataService).updateFromEntity(entity, colName, feature, value);

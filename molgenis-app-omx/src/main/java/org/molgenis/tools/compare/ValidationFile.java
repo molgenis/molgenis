@@ -24,8 +24,7 @@ public class ValidationFile
 	private final List<String> listOfHeaders = new ArrayList<String>();
 	private final LinkedHashMap<String, Entity> hash = new LinkedHashMap<String, Entity>();
 
-	public void readFile(Repository<? extends Entity> excelSheetReader, String identifier, String identifier2)
-			throws IOException
+	public void readFile(Repository excelSheetReader, String identifier, String identifier2) throws IOException
 	{
 		Iterable<String> iterableFileToCompare = Iterables.transform(excelSheetReader.getAttributes(),
 				new Function<AttributeMetaData, String>()

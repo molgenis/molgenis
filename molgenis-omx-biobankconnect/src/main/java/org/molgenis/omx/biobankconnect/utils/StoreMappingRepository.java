@@ -19,8 +19,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
-import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.omx.observ.CategoryMetaData;
+import org.molgenis.omx.observ.CharacteristicMetaData;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -29,7 +29,7 @@ import org.molgenis.omx.observ.Protocol;
 
 import com.google.common.collect.Lists;
 
-public class StoreMappingRepository extends AbstractRepository<Entity>
+public class StoreMappingRepository extends AbstractRepository
 {
 	private final Iterable<ObservedValue> observedValues;
 	private final ValueConverter valueConverter;
@@ -40,9 +40,10 @@ public class StoreMappingRepository extends AbstractRepository<Entity>
 	{
 		this.dataSet = dataSet;
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
 		observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
-				new QueryImpl().in(ObservedValue.OBSERVATIONSET, Lists.newArrayList(observationSets)));
+				new QueryImpl().in(ObservedValue.OBSERVATIONSET, Lists.newArrayList(observationSets)),
+				ObservedValue.class);
 		valueConverter = new ValueConverter(dataService);
 
 	}
@@ -98,7 +99,7 @@ public class StoreMappingRepository extends AbstractRepository<Entity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (metaData == null)
 		{
@@ -124,11 +125,11 @@ public class StoreMappingRepository extends AbstractRepository<Entity>
 
 					if (fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF))
 					{
-						attr.setRefEntityName(Characteristic.ENTITY_NAME);
+						attr.setRefEntity(new CharacteristicMetaData());
 					}
 					else if (fieldType.equals(FieldTypeEnum.CATEGORICAL))
 					{
-						attr.setRefEntityName(Category.ENTITY_NAME);
+						attr.setRefEntity(new CategoryMetaData());
 					}
 
 					metaData.addAttributeMetaData(attr);

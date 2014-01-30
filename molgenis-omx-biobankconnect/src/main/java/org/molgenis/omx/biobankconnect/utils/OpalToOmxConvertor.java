@@ -24,7 +24,7 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	@Override
 	public void collectVariableInfo(EntitySource entitySource) throws IOException
 	{
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Variables");
+		Repository repo = entitySource.getRepositoryByEntityName("Variables");
 		for (Entity entity : repo)
 		{
 			String variableName = entity.getString("name");
@@ -46,7 +46,7 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	@Override
 	public void collectCategoryInfo(EntitySource entitySource) throws IOException
 	{
-		Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Categories");
+		Repository repo = entitySource.getRepositoryByEntityName("Categories");
 		for (Entity entity : repo)
 		{
 			String featureID = entity.getString("variable");

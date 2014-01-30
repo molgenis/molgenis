@@ -46,7 +46,7 @@ public class EntityToCategoricalValueConverter implements EntityToValueConverter
 		{
 			Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and()
 					.eq(Category.VALUECODE, categoryValueCode);
-			category = dataService.findOne(Category.ENTITY_NAME, q);
+			category = dataService.findOne(Category.ENTITY_NAME, q, Category.class);
 			if (category == null)
 			{
 				throw new ValueConverterException("unknown category value code [" + categoryValueCode + ']');

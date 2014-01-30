@@ -327,7 +327,7 @@ public class StorageHandler
 	private RuntimeProperty getRuntimeProperty(String propName, DataService dataService)
 	{
 		Query q = new QueryImpl().eq(RuntimeProperty.NAME, propName);
-		return dataService.findOne(RuntimeProperty.NAME, q);
+		return dataService.findOne(RuntimeProperty.NAME, q, RuntimeProperty.class);
 	}
 
 	/**

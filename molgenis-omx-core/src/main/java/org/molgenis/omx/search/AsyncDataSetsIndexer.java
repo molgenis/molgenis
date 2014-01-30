@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
@@ -60,7 +59,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 			for (DataSet dataSet : dataSets)
 			{
 				searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
@@ -100,7 +99,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, dataSetIds);
+			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, dataSetIds, DataSet.class);
 
 			for (DataSet dataSet : dataSets)
 			{
@@ -141,7 +140,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
-			Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME, protocolIds);
+			Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME, protocolIds, Protocol.class);
 
 			for (Protocol protocol : protocols)
 			{
