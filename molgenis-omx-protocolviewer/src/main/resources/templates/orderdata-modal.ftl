@@ -53,19 +53,17 @@
 
     <#-- modal events -->
         modal.on('show', function () {
-            submitBtn.attr('disabled', false);
-            cancelBtn.attr('disabled', false);
+        	submitBtn.addClass('disabled');
             deletedFeatures = [];
             $.ajax({
                 type: 'GET',
                 url: pluginUri + '/selection/' + catalogId,
                 success: function (selection) {
                     var container = $('#orderdata-selection-table-container');
-                    if (selection.length == 0) {
-                        submitBtn.addClass('disabled');
+                    if (selection.length === 0) {
                         container.append('<p>no variables selected</p>');
                     } else {
-                        submitBtn.removeClass('disabled');
+                    	submitBtn.removeClass('disabled');
                         var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
                         table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
                         var body = $('<tbody>');
@@ -119,7 +117,7 @@
                 modal.modal('hide');
             }
         });
-        $('#orderdata-btn-close').click(function () {
+        cancelBtn.click(function () {
             modal.modal('hide');
         });
 
@@ -151,7 +149,8 @@
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
-            form.submit();
+            if(!submitBtn.hasClass('disabled'))
+            	form.submit();
         });
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
             if (e.which == 13) {
@@ -163,8 +162,7 @@
 
         function order() {
             showSpinner();
-            submitBtn.attr('disabled', true);
-            cancelBtn.attr('disabled', true);
+            submitBtn.addClass('disabled');
             $.ajax({
                 type: 'POST',
                 url: pluginUri + '/order',
