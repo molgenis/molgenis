@@ -131,6 +131,7 @@
 	var updateFeatureSelection = function(catalogItems) {
 		var selectionContainer = $('#feature-selection');
 		if (catalogItems && catalogItems.length > 0) {
+			$('#orderdata-href-btn').removeClass('disabled');
 			// get features
 			var q = {
 				q : [ {
@@ -213,6 +214,7 @@
 				});
 			});
 		} else {
+			$('#orderdata-href-btn').addClass('disabled');
 			selectionContainer.html('<p>No variables selected</p>');
 		}
 	};
