@@ -580,7 +580,7 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public void deleteAll()
 	{
 		delete(this);

@@ -47,7 +47,7 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
 				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return new OmxCatalog(protocol);
+		return new OmxCatalog(protocol, dataService);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class OmxCatalogManagerService implements CatalogManagerService
 				+ "] does not exist");
 		Protocol protocol = studyDataRequest.getProtocol();
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return new OmxCatalog(protocol);
+		return new OmxCatalog(protocol, dataService);
 	}
 
 	@Override
