@@ -18,8 +18,9 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.FileUploadUtils;
-import org.molgenis.webserviceAnnotators.EbiServiceAnnotator;
+import org.molgenis.webserviceAnnotators.OmxDataSetAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -51,9 +52,12 @@ public class VariomeController extends MolgenisPluginController{
 	
 	@Autowired
 	DataService dataService;
+	
+	@Autowired
+	DataSetsIndexer indexer;
 
 	@Autowired
-	RepositoryAnnotator ebiWebService;
+	RepositoryAnnotator ebiServiceAnnotator;
 	
 	@Autowired
 	public VariomeController(VariomeService pluginVariomeService)
@@ -138,8 +142,8 @@ public class VariomeController extends MolgenisPluginController{
 		
 		//TODO: Check which tools are selected, run annotators based on selection via scheduler
 		// Each tool will add to the feature and value lists 
-		
-		ebiWebService.annotate(dataService.getRepositoryByEntityName("uniprotTest"));
+		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, indexer);
+		omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
 		//caddAnnotator.annotate(dataService.getRepositoryByEntityName("CAR_Batch123"));
 		
 		return "view-result-page";
