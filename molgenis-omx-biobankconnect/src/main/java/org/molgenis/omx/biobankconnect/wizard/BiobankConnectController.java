@@ -189,7 +189,7 @@ public class BiobankConnectController extends AbstractWizardController
 	OntologyMatcherRequest request)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
-		ontologyMatcher.match(userName, request.getSourceDataSetId(), request.getSelectedDataSetIds(),
+		ontologyMatcher.match(userName, request.getTargetDataSetId(), request.getSelectedDataSetIds(),
 				request.getFeatureId());
 		OntologyMatcherResponse response = new OntologyMatcherResponse(null, ontologyMatcher.isRunning(),
 				ontologyMatcher.matchPercentage(userName), null);

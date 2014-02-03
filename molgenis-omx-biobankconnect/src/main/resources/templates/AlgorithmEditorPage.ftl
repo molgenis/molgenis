@@ -21,7 +21,7 @@
 					<div class="row-fluid">
 						<div class="span12">
 							<div class="data-table-container">
-								<table id="dataitem-table" class="table table-striped table-condensed">
+								<table id="algorithm-table" class="table table-bordered">
 								</table>
 								<div class="pagination pagination-centered">
 									<ul></ul>
@@ -34,6 +34,7 @@
 		</div>
 	</div>
 	<script src="/js/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/js/ace-min/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript">
 		$(function(){
 			var dataSetIds = [];

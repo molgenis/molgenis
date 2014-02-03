@@ -1,5 +1,17 @@
-#algorithmEditorDiv {
-	height : 295px;
-	border-style:solid;
-	border-width:1px;
+tbody tr:hover {
+	background: #CEECF5; 
+}
+
+th {	
+    background-color: #5B82A4; 
+    color: white;
+}
+
+th.text-align-center{
+	text-align:center;
+}
+
+.alert {
+	margin-top : -10px;
+	margin-bottom : 10px;
 }

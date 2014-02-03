@@ -10,9 +10,7 @@
 	var selectedDataSetId = null;
 	var sortRule = null;
 	
-	ns.OntologyAnnotator = function OntologyAnnotator(){
-		
-	};
+	ns.OntologyAnnotator = function OntologyAnnotator(){};
 	
 	ns.OntologyAnnotator.prototype.changeDataSet = function(selectedDataSetId){
 		if(selectedDataSetId !== ''){

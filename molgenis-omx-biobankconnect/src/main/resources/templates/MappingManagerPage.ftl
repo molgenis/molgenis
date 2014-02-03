@@ -22,7 +22,7 @@
 			<div class="row-fluid">
 				<div class="span12">
 					<div id="data-table-container" class="row-fluid data-table-container">
-						<table id="dataitem-table" class="table table-striped table-condensed show-border">
+						<table id="dataitem-table" class="table table-condensed show-border">
 						</table>
 					</div>
 					<div class="pagination pagination-centered">

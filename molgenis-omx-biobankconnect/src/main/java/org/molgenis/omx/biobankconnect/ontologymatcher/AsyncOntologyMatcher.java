@@ -38,6 +38,7 @@ import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.IntValue;
+import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.search.Hit;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
@@ -59,6 +60,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
 	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
+	private static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
 	private static final String CATALOGUE_PREFIX = "protocolTree-";
 	private static final String FEATURE_CATEGORY = "featureCategory-";
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
@@ -194,10 +196,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 					for (Integer dataSetId : dataSetsToMatch)
 					{
-						StringBuilder dataSetIdentifier = new StringBuilder();
-						dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
-								.append(dataSetId);
-						if (featureId != null) observationValuesPerDataSet.put(dataSetIdentifier.toString(),
+						String dataSetIdentifier = createMappingDataSetIdentifier(userName, selectedDataSet, dataSetId);
+						if (featureId != null) observationValuesPerDataSet.put(dataSetIdentifier,
 								new ArrayList<ObservedValue>());
 						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(dataSetId.toString(), finalQuery)
 								.iterator();
@@ -205,18 +205,18 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						{
 							Hit mappedFeatureHit = mappedFeatureHits.next();
 							Map<String, Object> columValueMap = mappedFeatureHit.getColumnValueMap();
-							Integer mappedId = Integer.parseInt(columValueMap.get(ENTITY_ID).toString());
+							Integer mappedFeatureId = Integer.parseInt(columValueMap.get(ENTITY_ID).toString());
 							Double score = Double.parseDouble(columValueMap.get(LUCENE_SCORE).toString());
-							if (!mappedFeatureIds.contains(mappedId))
+							if (!mappedFeatureIds.contains(mappedFeatureId))
 							{
-								mappedFeatureIds.add(mappedId);
+								mappedFeatureIds.add(mappedFeatureId);
 
 								ObservationSet observation = new ObservationSet();
-								observation.setIdentifier(userName + "-" + feature.getId() + "-" + mappedId
+								observation.setIdentifier(userName + "-" + feature.getId() + "-" + mappedFeatureId
 										+ "-identifier");
 
 								DataSet ds = dataService.findOne(DataSet.ENTITY_NAME,
-										new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier.toString()));
+										new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier));
 
 								observation.setPartOfDataSet(ds);
 								listOfNewObservationSets.add(observation);
@@ -232,11 +232,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								valueForFeature.setFeature(smf);
 								valueForFeature.setValue(xrefForFeature);
 								listOfNewObservedValues.add(valueForFeature);
-								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier.toString())
-										.add(valueForFeature);
+								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier).add(
+										valueForFeature);
 
 								IntValue xrefForMappedFeature = new IntValue();
-								xrefForMappedFeature.setValue(mappedId);
+								xrefForMappedFeature.setValue(mappedFeatureId);
 								dataService.add(IntValue.ENTITY_NAME, xrefForMappedFeature);
 
 								ObservedValue valueForMappedFeature = new ObservedValue();
@@ -246,8 +246,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								valueForMappedFeature.setObservationSet(observation);
 								valueForMappedFeature.setValue(xrefForMappedFeature);
 								listOfNewObservedValues.add(valueForMappedFeature);
-								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier.toString())
-										.add(valueForMappedFeature);
+								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier).add(
+										valueForMappedFeature);
 
 								DecimalValue decimalForScore = new DecimalValue();
 								decimalForScore.setValue(score);
@@ -260,8 +260,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								valueForMappedFeatureScore.setObservationSet(observation);
 								valueForMappedFeatureScore.setValue(decimalForScore);
 								listOfNewObservedValues.add(valueForMappedFeatureScore);
-								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier.toString())
-										.add(valueForMappedFeatureScore);
+								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier).add(
+										valueForMappedFeatureScore);
 
 								BoolValue boolValue = new BoolValue();
 								boolValue.setValue(false);
@@ -275,8 +275,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								confirmMappingValue.setObservationSet(observation);
 								confirmMappingValue.setValue(boolValue);
 								listOfNewObservedValues.add(confirmMappingValue);
-								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier.toString())
-										.add(confirmMappingValue);
+								if (featureId != null) observationValuesPerDataSet.get(dataSetIdentifier).add(
+										confirmMappingValue);
 							}
 						}
 					}
@@ -350,20 +350,18 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	@Override
-	public SearchResult generateMapping(String userName, Integer selectedDataSet, Integer dataSetToMatch,
-			Integer featureId)
+	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSet, Integer sourceDataSet)
 	{
-		QueryImpl q = new QueryImpl();
-		q.pageSize(100001);
-		q.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
-		SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, q, null));
+		QueryImpl query = new QueryImpl();
+		query.pageSize(100000);
+		query.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
+		SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + targetDataSet, query, null));
 		List<Hit> searchHits = result.getSearchHits();
 		if (searchHits.size() > 0)
 		{
 			Hit hit = searchHits.get(0);
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			Integer id = DataConverter.toInt(columnValueMap.get(ObservableFeature.ID));
-			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, id);
+			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId);
 			if (feature != null)
 			{
 				Set<String> boostedOntologyTermUris = new HashSet<String>();
@@ -382,7 +380,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					Map<String, OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(definitions,
 							boostedOntologyTermUris);
 					rules.addAll(makeQueryForOntologyTerms(createQueryRules(description, ontologyTermContainers)));
-
 					for (Map<Integer, List<BoostTermContainer>> alternativeDefinition : addAlternativeDefinition(ontologyTermContainers))
 					{
 						QueryRule queryRule = new QueryRule(makeQueryForOntologyTerms(alternativeDefinition));
@@ -398,28 +395,22 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 				QueryImpl finalQuery = new QueryImpl();
 				finalQuery.addRule(finalQueryRule);
-				StringBuilder dataSetIdentifier = new StringBuilder();
-				dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
-						.append(dataSetToMatch);
-				return searchDisMaxQuery(dataSetToMatch.toString(), finalQuery);
+				return searchDisMaxQuery(sourceDataSet.toString(), finalQuery);
 			}
 		}
 		return new SearchResult(0, Collections.<Hit> emptyList());
 	}
 
-	private void preprocessing(String userName, Integer featureId, Integer selectedDataSet,
-			List<Integer> dataSetsToMatch)
+	private void preprocessing(String userName, Integer featureId, Integer targetDataSet, List<Integer> sourceDataSets)
 	{
 		List<String> dataSetsForMapping = new ArrayList<String>();
-		for (Integer catalogueId : dataSetsToMatch)
+		for (Integer sourceDataSet : sourceDataSets)
 		{
-			StringBuilder dataSetIdentifier = new StringBuilder();
-			dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-').append(catalogueId);
-			dataSetsForMapping.add(dataSetIdentifier.toString());
+			dataSetsForMapping.add(createMappingDataSetIdentifier(userName, targetDataSet, sourceDataSet));
 		}
 		if (featureId == null)
 		{
-			createMappingStore(userName, selectedDataSet, dataSetsToMatch);
+			createMappingStore(userName, targetDataSet, sourceDataSets);
 			deleteExistingRecords(userName, dataSetsForMapping);
 		}
 		else removeExistingMappings(featureId, dataSetsForMapping);
@@ -914,6 +905,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			observationSetFeature.setName(OBSERVATION_SET);
 			features.add(observationSetFeature);
 
+			ObservableFeature algorithmScriptFeature = new ObservableFeature();
+			algorithmScriptFeature.setIdentifier(STORE_MAPPING_ALGORITHM_SCRIPT);
+			algorithmScriptFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase());
+			algorithmScriptFeature.setName(STORE_MAPPING_ALGORITHM_SCRIPT);
+			features.add(algorithmScriptFeature);
+
 			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
 			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
 			mappedFeatureAbsoluteScore.setDataType(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString().toLowerCase());
@@ -973,6 +970,143 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet));
 		if (listOfObservationSets.size() > 0) return true;
 		return false;
+	}
+
+	@Override
+	@RunAsSystem
+	@Transactional
+	public Map<String, String> updateScript(String userName, OntologyMatcherRequest request)
+	{
+		Map<String, String> updateResult = new HashMap<String, String>();
+		// check if the dataset for mappings has been created
+		createMappingStore(userName, request.getTargetDataSetId(), request.getSelectedDataSetIds());
+
+		// check if the mapping that needs to be updated has been created
+		String mappingDataSetIdentifier = createMappingDataSetIdentifier(userName, request.getTargetDataSetId(),
+				request.getSelectedDataSetIds().get(0));
+
+		// update the existing mappings
+		if (updateExistingMapping(mappingDataSetIdentifier, request))
+		{
+			updateResult.put("message", "the script has been updated!");
+			return updateResult;
+		}
+
+		// add the new mappings
+		addNewMappingToDatabase(mappingDataSetIdentifier, request);
+		updateResult.put("message", "the script has been added to the database!");
+		return updateResult;
+	}
+
+	private void extractVariablesFromScript(String algorithmScript)
+	{
+
+	}
+
+	private void addNewMappingToDatabase(String mappingDataSetIdentifier, OntologyMatcherRequest request)
+	{
+		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
+
+		DataSet storingMappingDataSet = dataService.findOne(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.IDENTIFIER, mappingDataSetIdentifier));
+		ObservationSet observationSet = new ObservationSet();
+		observationSet.setIdentifier(mappingDataSetIdentifier + "-" + request.getFeatureId());
+		observationSet.setPartOfDataSet(storingMappingDataSet);
+		dataService.add(ObservationSet.ENTITY_NAME, observationSet);
+
+		IntValue xrefForFeature = new IntValue();
+		xrefForFeature.setValue(request.getFeatureId());
+		dataService.add(IntValue.ENTITY_NAME, xrefForFeature);
+
+		ObservedValue valueForFeature = new ObservedValue();
+		valueForFeature.setObservationSet(observationSet);
+		ObservableFeature smf = dataService.findOne(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_FEATURE));
+		valueForFeature.setFeature(smf);
+		valueForFeature.setValue(xrefForFeature);
+		listOfNewObservedValues.add(valueForFeature);
+
+		StringValue algorithmScriptValue = new StringValue();
+		algorithmScriptValue.setValue(request.getAlgorithmScript());
+		dataService.add(StringValue.ENTITY_NAME, algorithmScriptValue);
+
+		ObservedValue algorithmScriptObservedValue = new ObservedValue();
+		algorithmScriptObservedValue.setObservationSet(observationSet);
+		ObservableFeature algorithmScriptFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_ALGORITHM_SCRIPT));
+
+		algorithmScriptObservedValue.setFeature(algorithmScriptFeature);
+		algorithmScriptObservedValue.setValue(algorithmScriptValue);
+		listOfNewObservedValues.add(algorithmScriptObservedValue);
+
+		IntValue observationSetIntValue = new IntValue();
+		observationSetIntValue.setValue(observationSet.getId());
+		dataService.add(IntValue.ENTITY_NAME, observationSetIntValue);
+
+		ObservedValue valueForObservationSet = new ObservedValue();
+		ObservableFeature observationSetFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().eq(ObservableFeature.IDENTIFIER, OBSERVATION_SET));
+		valueForObservationSet.setFeature(observationSetFeature);
+		valueForObservationSet.setObservationSet(observationSet);
+		valueForObservationSet.setValue(observationSetIntValue);
+		listOfNewObservedValues.add(valueForObservationSet);
+
+		dataService.add(ObservedValue.ENTITY_NAME, listOfNewObservedValues);
+		searchService.updateRepositoryIndex(new StoreMappingRepository(storingMappingDataSet, listOfNewObservedValues,
+				dataService));
+	}
+
+	private boolean updateExistingMapping(String mappingDataSetIdentifier, OntologyMatcherRequest request)
+	{
+		QueryImpl query = new QueryImpl();
+		query.pageSize(100000);
+		query.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, request.getFeatureId()));
+		SearchResult result = searchService.search(new SearchRequest(mappingDataSetIdentifier, query, null));
+
+		if (result.getTotalHitCount() > 0)
+		{
+			Hit hit = result.getSearchHits().get(0);
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+
+			// Check if the new script is same as old script
+			if (columnValueMap.get(STORE_MAPPING_ALGORITHM_SCRIPT) != null
+					&& columnValueMap.get(STORE_MAPPING_ALGORITHM_SCRIPT).toString().trim()
+							.equalsIgnoreCase(request.getAlgorithmScript().trim())) return true;
+
+			// Update database
+			ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME,
+					Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
+			if (observationSet == null) return false;
+
+			ObservableFeature storeMappingAlgorithmScriptFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_ALGORITHM_SCRIPT));
+
+			ObservedValue algorithmScriptObservedValue = dataService.findOne(
+					ObservedValue.ENTITY_NAME,
+					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
+							.eq(ObservedValue.FEATURE, storeMappingAlgorithmScriptFeature));
+
+			if (algorithmScriptObservedValue.getValue() instanceof StringValue)
+			{
+				StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
+				algorithmScriptValue.setValue(request.getAlgorithmScript());
+				dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
+
+				// Update index
+				StringBuilder updateScriptBuilder = new StringBuilder();
+				updateScriptBuilder.append(STORE_MAPPING_ALGORITHM_SCRIPT).append('=').append("\"")
+						.append(request.getAlgorithmScript()).append("\"");
+				searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(), updateScriptBuilder.toString());
+			}
+		}
+		return result.getTotalHitCount() > 0;
+	}
+
+	private String createMappingDataSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId)
+	{
+		StringBuilder dataSetIdentifier = new StringBuilder();
+		dataSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-').append(sourceDataSetId);
+		return dataSetIdentifier.toString();
 	}
 
 	public class BoostTermContainer

@@ -33,18 +33,21 @@ table#dataitem-table {
 	border : 1px solid #5B82A4;
 }
 
-table thead th {	
+table thead th, table th {	
     background-color: #5B82A4; 
-    border:2px solid #5B82A4;
     color: white;
 }
 
-th.text-align-center{
+table#dataitem-table tr:hover {
+	background: #CEECF5; 
+}
+
+table#dataitem-table th.text-align-center{
 	border:2px solid white;
 	text-align:center;
 }
 
-td.add-border {
+table#dataitem-table td.add-border {
 	border:2px solid #5B82A4;
 }
 

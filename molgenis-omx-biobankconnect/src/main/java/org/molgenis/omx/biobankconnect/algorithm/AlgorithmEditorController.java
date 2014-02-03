@@ -6,7 +6,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -114,10 +116,23 @@ public class AlgorithmEditorController extends AbstractWizardController
 		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
 		if (selectedDataSetIds.size() > 0)
 		{
-			return ontologyMatcher.generateMapping(userName, request.getSourceDataSetId(), selectedDataSetIds.get(0),
-					request.getFeatureId());
+			return ontologyMatcher.generateMapping(userName, request.getFeatureId(), request.getTargetDataSetId(),
+					selectedDataSetIds.get(0));
 		}
 		return new SearchResult(0, Collections.<Hit> emptyList());
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/savescript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, String> saveScript(@RequestBody
+	OntologyMatcherRequest request)
+	{
+		String userName = userAccountService.getCurrentUser().getUsername();
+		if (request.getSelectedDataSetIds().size() > 0)
+		{
+			return ontologyMatcher.updateScript(userName, request);
+		}
+		return new HashMap<String, String>();
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "biobank-connect.css", "mapping-manager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js", "biobank-connect.js", "simple_statistics.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js","algorithm-editor.js", "biobank-connect.js"]>
 <@header css js/>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
@@ -42,7 +42,7 @@
 			<div class="row-fluid">
 				<div class="span12">
 					<div id="data-table-container" class="row-fluid data-table-container">
-						<table id="dataitem-table" class="table table-striped table-condensed show-border">
+						<table id="dataitem-table" class="table table-condensed show-border">
 						</table>
 					</div>
 					<div class="pagination pagination-centered">

@@ -703,7 +703,7 @@
 			var selectedFeatures = [];
 			var tableDiv = $('<div />').addClass('span7').css('margin-right', -100);
 			$('<div />').append('<h4>' + mappedDataSet.name + '</h4>').appendTo(tableDiv);
-			var mappingTable = $('<table />').addClass('table table-bordered table-striped'); 
+			var mappingTable = $('<table />').addClass('table table-bordered'); 
 			var header = $('<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>');
 			mappingTable.append(header);
 			
