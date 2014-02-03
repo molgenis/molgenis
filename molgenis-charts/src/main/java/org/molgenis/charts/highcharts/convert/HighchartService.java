@@ -2,7 +2,6 @@ package org.molgenis.charts.highcharts.convert;
 
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
 import org.molgenis.charts.AbstractChart;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.AbstractChartVisualizationService;
@@ -31,8 +30,7 @@ import org.springframework.ui.Model;
 @Component
 public class HighchartService extends AbstractChartVisualizationService
 {
-	private static final Logger logger = Logger.getLogger(HighchartService.class);
-	
+
 	@Autowired
 	private HighchartSeriesUtil highchartSeriesUtil;
 
@@ -55,7 +53,7 @@ public class HighchartService extends AbstractChartVisualizationService
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Create a scatter plot
 	 * 
@@ -67,14 +65,17 @@ public class HighchartService extends AbstractChartVisualizationService
 	public Options createScatterChart(XYDataChart scatterChart)
 	{
 		ChartConstructorType chartConstructorType;
-		if(MolgenisAxisType.DATETIME.equals(scatterChart.getxAxisType())) {
+		if (MolgenisAxisType.DATETIME.equals(scatterChart.getxAxisType()))
+		{
 			chartConstructorType = ChartConstructorType.STOCKCHART;
-		} else {
+		}
+		else
+		{
 			chartConstructorType = ChartConstructorType.CHART;
 		}
 		return createXYDataChart(scatterChart, chartConstructorType);
 	}
-	
+
 	/**
 	 * Create the Highcharts options from the given BoxPlotChart
 	 * 
@@ -85,101 +86,81 @@ public class HighchartService extends AbstractChartVisualizationService
 	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart)
 	{
 		Options options = new Options();
-		
+
 		Chart chart = new Chart();
-		chart.setType(ChartType.BOXPLOT)
-			.setWidth(boxPlotChart.getWidth())
-			.setHeight(boxPlotChart.getHeight());
-		
+		chart.setType(ChartType.BOXPLOT).setWidth(boxPlotChart.getWidth()).setHeight(boxPlotChart.getHeight());
+
 		XAxis xAxis = new XAxis();
 		xAxis.setCategories(boxPlotChart.getCategories());
-		xAxis.setTitle(new AxisTitle()
-			.setText(boxPlotChart.getxLabel()));
-		
+		xAxis.setTitle(new AxisTitle().setText(boxPlotChart.getxLabel()));
+
 		YAxis yAxis = new YAxis();
-		yAxis.setTitle(new AxisTitle()
-			.setText(boxPlotChart.getyLabel()));
-		
-		ChartTitle title = new ChartTitle()
-			.setText(boxPlotChart.getTitle())
-			.setAlign(ChartAlign.CENTER);
-		
-		Legend legend = new Legend()
-			.setEnabled(true)
-			.setAlign("center")
-			.setLayout("horizontal")
-			.setVerticalAlign("bottom");
-		
+		yAxis.setTitle(new AxisTitle().setText(boxPlotChart.getyLabel()));
+
+		ChartTitle title = new ChartTitle().setText(boxPlotChart.getTitle()).setAlign(ChartAlign.CENTER);
+
+		Legend legend = new Legend().setEnabled(true).setAlign("center").setLayout("horizontal")
+				.setVerticalAlign("bottom");
+
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
 		options.addyAxis(yAxis);
 		options.setCredits(new Credits());
 		options.setLegend(legend);
-		options.addSeries(highchartSeriesUtil.parseToBoxPlotSeriesList(
-				boxPlotChart.getBoxPlotSeries()));
-		options.addSeries(highchartSeriesUtil.parseToXYDataSeriesList(
-				boxPlotChart.getxYDataSeries()));
+		options.addSeries(highchartSeriesUtil.parseToBoxPlotSeriesList(boxPlotChart.getBoxPlotSeries()));
+		options.addSeries(highchartSeriesUtil.parseToXYDataSeriesList(boxPlotChart.getxYDataSeries()));
 
 		return options;
 	}
-	
+
 	/**
 	 * Create the Highcharts options from the given XYDataChart.
 	 * 
 	 * @param xYDataChart
-	 * @param chartConstructorType - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
-	 * @param model - is not used
+	 * @param chartConstructorType
+	 *            - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
+	 * @param model
+	 *            - is not used
 	 * @return Options
 	 */
 	protected Options createXYDataChart(XYDataChart xYDataChart, ChartConstructorType chartConstructorType)
 	{
 		Options options = new Options();
-		
+
 		final BasicChart chart;
-		if(ChartConstructorType.CHART.equals(chartConstructorType)) {
+		if (ChartConstructorType.CHART.equals(chartConstructorType))
+		{
 			chart = new Chart();
-		} else {
+		}
+		else
+		{
 			chart = new StockChart();
 		}
-		
-		chart.setType(ChartType.getChartType(xYDataChart.getType()))
-			.setWidth(xYDataChart.getWidth())
-			.setHeight(xYDataChart.getHeight());
-		
+
+		chart.setType(ChartType.getChartType(xYDataChart.getType())).setWidth(xYDataChart.getWidth())
+				.setHeight(xYDataChart.getHeight());
+
 		XAxis xAxis = new XAxis();
-		xAxis
-			.setTitle(new AxisTitle()
-				.setText(xYDataChart.getxAxisLabel())
-				.setAlign(AxisAlign.MIDDLE))
-			.setType(AxisType.valueOf(xYDataChart.getxAxisType().name()))
-			.setOrdinal(false);
-		
+		xAxis.setTitle(new AxisTitle().setText(xYDataChart.getxAxisLabel()).setAlign(AxisAlign.MIDDLE))
+				.setType(AxisType.valueOf(xYDataChart.getxAxisType().name())).setOrdinal(false);
+
 		YAxis yAxis = new YAxis();
-		yAxis
-			.setTitle(new AxisTitle()
-				.setText(xYDataChart.getyAxisLabel())
-				.setAlign(AxisAlign.MIDDLE))
-			.setType(AxisType.valueOf(xYDataChart.getyAxisType().name()));
-		
-		ChartTitle title = new ChartTitle()
-			.setText(xYDataChart.getTitle())
-			.setAlign(ChartAlign.CENTER);
-		
-		Legend legend = new Legend()
-			.setEnabled(true)
-			.setAlign("center")
-			.setLayout("horizontal")
-			.setVerticalAlign("bottom");
-		
+		yAxis.setTitle(new AxisTitle().setText(xYDataChart.getyAxisLabel()).setAlign(AxisAlign.MIDDLE)).setType(
+				AxisType.valueOf(xYDataChart.getyAxisType().name()));
+
+		ChartTitle title = new ChartTitle().setText(xYDataChart.getTitle()).setAlign(ChartAlign.CENTER);
+
+		Legend legend = new Legend().setEnabled(true).setAlign("center").setLayout("horizontal")
+				.setVerticalAlign("bottom");
+
 		options.setChart(chart);
 		options.setTitle(title);
 		options.addxAxis(xAxis);
 		options.addyAxis(yAxis);
 		options.setCredits(new Credits());
 		options.setLegend(legend);
-		options.setSeries(highchartSeriesUtil.parseToXYDataSeriesList(
-				xYDataChart.getData()));
+		options.setSeries(highchartSeriesUtil.parseToXYDataSeriesList(xYDataChart.getData()));
 
 		return options;
 	}

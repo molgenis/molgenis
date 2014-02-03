@@ -16,7 +16,6 @@ import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
@@ -101,7 +100,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME);
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -116,7 +115,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		wizard = new BiobankConnectWizard();
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME);
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -141,7 +140,7 @@ public class BiobankConnectController extends AbstractWizardController
 		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
 
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);

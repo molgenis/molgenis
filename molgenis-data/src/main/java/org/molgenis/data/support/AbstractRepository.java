@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 
-public abstract class AbstractRepository<E extends Entity> implements Repository<E>
+public abstract class AbstractRepository implements Repository
 {
 
 	@Override
@@ -48,6 +48,12 @@ public abstract class AbstractRepository<E extends Entity> implements Repository
 	public AttributeMetaData getAttribute(String attributeName)
 	{
 		return getEntityMetaData().getAttribute(attributeName);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		return (Iterable<E>) new ConvertingIterable<E>(clazz, this);
 	}
 
 	protected abstract EntityMetaData getEntityMetaData();

@@ -52,7 +52,7 @@ This class will registers the jpa entity source if it is in your spring context.
 ```
 DataService dataService = ...;
 Query q = new QueryImpl().eq(Person.NAME, "Piet");
-Person person = dataService.findOne(Person.ENTITY_NAME, q);
+Person person = dataService.findOne(Person.ENTITY_NAME, q, Person.class);
 ```
 
 

@@ -2,7 +2,12 @@ package org.molgenis.omx.das.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 
@@ -37,28 +42,28 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 	private final DataService dataService;
 	private DasType mutationType;
 	private DasMethod method;
-    private String type;
-    private String dataset;
+	private String type;
+	private String dataset;
 
-    @Override
+	@Override
 	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
 			DataSourceConfiguration dataSourceConfig) throws DataSourceException
 	{
 		this.dataset = dataSourceConfig.getDataSourceProperties().get("dataset").getValue();
-        this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
-        this.mutationType = new DasType(type, null, "?", type);
-        this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
+		this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
+		this.mutationType = new DasType(type, null, "?", type);
+		this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 
-    }
+	}
 
 	// for unit test
 	VariantRangeHandlingDataSource(DataService dataService) throws DataSourceException
 	{
 		this.dataService = dataService;
-        this.dataset = "test";
-        this.type = "type";
-        mutationType = new DasType(type, null, "?", type);
-        method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
+		this.dataset = "test";
+		this.type = "type";
+		mutationType = new DasType(type, null, "?", type);
+		method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 	}
 
 	public VariantRangeHandlingDataSource() throws DataSourceException
@@ -92,17 +97,18 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 
 		String[] segmentParts = segmentId.split(",");
 		Patient patient = null;
-        String customParam;
+		String customParam;
 		if (segmentParts.length > 1)
 		{
 			segmentId = segmentParts[0];
 			customParam = segmentParts[1];
-            if(customParam.indexOf("patient_")!=-1) {
-			    patient = findPatient(customParam.substring(8));
-            }
+			if (customParam.indexOf("patient_") != -1)
+			{
+				patient = findPatient(customParam.substring(8));
+			}
 		}
 
-        List<Variant> variants = queryVariants(segmentId, start, stop, patient);
+		List<Variant> variants = queryVariants(segmentId, start, stop, patient);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
 		for (Variant variant : variants)
@@ -126,14 +132,15 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 
 	protected Patient findPatient(String patient)
 	{
-		return dataService.findOne(Patient.ENTITY_NAME, new QueryImpl().eq(Patient.ID, patient));
+		return dataService.findOne(Patient.ENTITY_NAME, new QueryImpl().eq(Patient.ID, patient), Patient.class);
 	}
 
 	protected List<Variant> queryVariants(String segmentId, int start, int stop, Patient patientObject)
 	{
 		List<Variant> variants = new ArrayList<Variant>();
 		Chromosome chromosome = getChromosome(segmentId);
-		Track track = dataService.findOne(Track.ENTITY_NAME, new QueryImpl().eq(Track.IDENTIFIER, dataset));
+		Track track = dataService
+				.findOne(Track.ENTITY_NAME, new QueryImpl().eq(Track.IDENTIFIER, dataset), Track.class);
 
 		QueryImpl variantQuery = new QueryImpl();
 		variantQuery.ge(Variant.BPSTART, start);
@@ -169,10 +176,10 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 		dasTarget.add(new MolgenisDasTarget(variant.getIdentifier(), variant.getBpStart().intValue(), variant
 				.getBpEnd().intValue(), variant.getDescription()));
 		List<String> parents = new ArrayList<String>();
-		DasFeature feature = new DasFeature(variant.getIdentifier().toString(), variant.getName()+","+variant.getDescription(), mutationType,
-				method, variant.getBpStart().intValue(), variant.getBpEnd().intValue(), new Double(0),
-				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
-				dasTarget, parents, null);
+		DasFeature feature = new DasFeature(variant.getIdentifier().toString(), variant.getName() + ","
+				+ variant.getDescription(), mutationType, method, variant.getBpStart().intValue(), variant.getBpEnd()
+				.intValue(), new Double(0), DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE,
+				DasPhase.PHASE_NOT_APPLICABLE, notes, linkout, dasTarget, parents, null);
 		return feature;
 	}
 
@@ -182,15 +189,16 @@ public class VariantRangeHandlingDataSource implements RangeHandlingAnnotationDa
 		return (int) dataService.count(Variant.ENTITY_NAME, new QueryImpl());
 	}
 
-    @Override
-    public Collection<DasType> getTypes() throws DataSourceException
-    {
-        return Collections.singleton(mutationType);
-    }
+	@Override
+	public Collection<DasType> getTypes() throws DataSourceException
+	{
+		return Collections.singleton(mutationType);
+	}
 
 	protected Chromosome getChromosome(String segmentId)
 	{
-		return dataService.findOne(Chromosome.ENTITY_NAME, new QueryImpl().eq(Chromosome.IDENTIFIER, segmentId));
+		return dataService.findOne(Chromosome.ENTITY_NAME, new QueryImpl().eq(Chromosome.IDENTIFIER, segmentId),
+				Chromosome.class);
 	}
 
 	// unimplemented functions

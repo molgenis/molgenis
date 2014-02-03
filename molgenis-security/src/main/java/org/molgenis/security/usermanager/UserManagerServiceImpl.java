@@ -1,6 +1,7 @@
 package org.molgenis.security.usermanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.data.DataService;
@@ -39,7 +40,9 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisUserViewData> getAllMolgenisUsers()
 	{
-		List<MolgenisUser> users = dataService.findAllAsList(MolgenisUser.ENTITY_NAME, new QueryImpl());
+		Iterable<MolgenisUser> users = dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class);
+		if (users == null) users = Collections.emptyList();
+
 		return this.parseToMolgenisUserViewData(users);
 	}
 
@@ -48,7 +51,14 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisGroup> getAllMolgenisGroups()
 	{
-		return dataService.findAllAsList(MolgenisGroup.ENTITY_NAME, new QueryImpl());
+
+		Iterable<MolgenisGroup> groups = dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class);
+		if (groups == null)
+		{
+			return Collections.emptyList();
+		}
+
+		return Lists.newArrayList(groups);
 	}
 
 	@Override
@@ -69,30 +79,33 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	private List<MolgenisGroup> getMolgenisGroups(Integer userId)
 	{
-		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId);
+		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 
 		if (molgenisUser == null)
 		{
 			throw new RuntimeException("unknown user id [" + userId + "]");
 		}
 
-		final List<MolgenisGroupMember> groupMembers = dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser));
+		final List<MolgenisGroupMember> groupMembers = Lists.newArrayList(dataService.findAll(
+				MolgenisGroupMember.ENTITY_NAME, new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser),
+				MolgenisGroupMember.class));
 
 		return this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
 	}
 
 	private List<MolgenisUser> getMolgenisUsers(final Integer groupId)
 	{
-		final MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId);
+		final MolgenisGroup molgenisGroup = dataService
+				.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 
 		if (molgenisGroup == null)
 		{
 			throw new RuntimeException("unknown user id [" + groupId + "]");
 		}
 
-		final List<MolgenisGroupMember> groupMembers = dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup));
+		final List<MolgenisGroupMember> groupMembers = Lists.newArrayList(dataService.findAll(
+				MolgenisGroupMember.ENTITY_NAME, new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup),
+				MolgenisGroupMember.class));
 
 		return this.getAllMolgenisUsersFromGroupMembers(groupMembers);
 	}
@@ -102,15 +115,16 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisGroup> getGroupsWhereUserIsNotMember(final Integer userId)
 	{
-		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId);
+		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 
 		if (molgenisUser == null)
 		{
 			throw new RuntimeException("unknown user id [" + userId + "]");
 		}
 
-		final List<MolgenisGroupMember> groupMembers = dataService.findAllAsList(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser));
+		final List<MolgenisGroupMember> groupMembers = Lists.newArrayList(dataService.findAll(
+				MolgenisGroupMember.ENTITY_NAME, new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser),
+				MolgenisGroupMember.class));
 
 		final List<MolgenisGroup> groupsWhereUserIsMember = this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
 
@@ -125,8 +139,8 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void addUserToGroup(Integer molgenisGroupId, Integer molgenisUserId)
 	{
-		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME, molgenisGroupId);
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId);
+		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME, molgenisGroupId, MolgenisGroup.class);
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId, MolgenisUser.class);
 
 		MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
 		molgenisGroupMember.setMolgenisGroup(group);
@@ -139,14 +153,16 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void removeUserFromGroup(Integer molgenisGroupId, Integer molgenisUserId)
 	{
-		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId);
+		final MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId,
+				MolgenisUser.class);
 
 		if (molgenisUser == null)
 		{
 			throw new RuntimeException("unknown user id [" + molgenisUserId + "]");
 		}
 
-		final MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, molgenisGroupId);
+		final MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, molgenisGroupId,
+				MolgenisGroup.class);
 
 		if (molgenisGroup == null)
 		{
@@ -156,8 +172,8 @@ public class UserManagerServiceImpl implements UserManagerService
 		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser).and()
 				.eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup);
 
-		final List<MolgenisGroupMember> molgenisGroupMembers = dataService.findAllAsList(
-				MolgenisGroupMember.ENTITY_NAME, q);
+		final List<MolgenisGroupMember> molgenisGroupMembers = Lists.newArrayList(dataService.findAll(
+				MolgenisGroupMember.ENTITY_NAME, q, MolgenisGroupMember.class));
 
 		if (null == molgenisGroupMembers || molgenisGroupMembers.isEmpty())
 		{
@@ -247,7 +263,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	}
 
-	private List<MolgenisUserViewData> parseToMolgenisUserViewData(List<MolgenisUser> users)
+	private List<MolgenisUserViewData> parseToMolgenisUserViewData(Iterable<MolgenisUser> users)
 	{
 		List<MolgenisUserViewData> results = new ArrayList<MolgenisUserViewData>();
 		for (MolgenisUser user : users)

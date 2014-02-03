@@ -71,7 +71,6 @@
 				$.each(molgenis.i18n.getAll(feature.description), function(key, val) {
 					table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 				});
-
 				table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 				if (feature.unit)
 					table.append('<tr><td>' + "Unit:" + '</td><td>' + (feature.unit.name ? feature.unit.name : '') + '</td></tr>');
@@ -83,6 +82,9 @@
 				if (feature.categories && feature.categories.length > 0) {
 					var categoryTable = $('<table class="table table-striped table-condensed" />');
 					$('<thead />').append('<th>Code</th><th>Label</th><th>Description</th>').appendTo(categoryTable);
+					feature.categories.sort(function(category1, category2) {
+						return molgenis.naturalSort(category1.valueCode, category2.valueCode);
+					});			
 					$.each(feature.categories, function(i, category) {
 						var row = $('<tr />');
 						$('<td />').text(category.valueCode).appendTo(row);
@@ -129,6 +131,7 @@
 	var updateFeatureSelection = function(catalogItems) {
 		var selectionContainer = $('#feature-selection');
 		if (catalogItems && catalogItems.length > 0) {
+			$('#orderdata-href-btn').removeClass('disabled');
 			// get features
 			var q = {
 				q : [ {
@@ -211,6 +214,7 @@
 				});
 			});
 		} else {
+			$('#orderdata-href-btn').addClass('disabled');
 			selectionContainer.html('<p>No variables selected</p>');
 		}
 	};

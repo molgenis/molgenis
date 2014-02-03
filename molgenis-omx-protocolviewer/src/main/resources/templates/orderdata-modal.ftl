@@ -34,6 +34,7 @@
 </div>
 <script type="text/javascript">
     $(function () {
+    	var nrFeatures = 0;
         var deletedFeatures = [];
         var modal = $('#orderdata-modal');
         var submitBtn = $('#orderdata-btn');
@@ -53,19 +54,18 @@
 
     <#-- modal events -->
         modal.on('show', function () {
-            submitBtn.attr('disabled', false);
-            cancelBtn.attr('disabled', false);
+        	submitBtn.addClass('disabled');
             deletedFeatures = [];
             $.ajax({
                 type: 'GET',
                 url: pluginUri + '/selection/' + catalogId,
                 success: function (selection) {
+                	nrFeatures = selection.length;
                     var container = $('#orderdata-selection-table-container');
-                    if (selection.length == 0) {
-                        submitBtn.addClass('disabled');
+                    if (nrFeatures === 0) {
                         container.append('<p>no variables selected</p>');
                     } else {
-                        submitBtn.removeClass('disabled');
+                    	submitBtn.removeClass('disabled');
                         var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
                         table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
                         var body = $('<tbody>');
@@ -74,10 +74,6 @@
                         	var feature = molgenis.Catalog.getFeature(featureUri);
                             var row = $('<tr>');
                             row.append('<td>' + feature.name + '</td>');
-                            console.log(feature.description);
-                            console.log(molgenis);
-                            console.log(molgenis.i18n);
-                            console.log(molgenis.i18n.get(feature.description));
                             row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
 
                             var deleteCol = $('<td class="center">');
@@ -87,6 +83,11 @@
                                     'feature': feature.id
                                 });
                                 row.remove();
+                                --nrFeatures;
+                                if(nrFeatures === 0) {
+                                	submitBtn.addClass('disabled');
+                                	container.html('<p>no variables selected</p>');
+                                }
                                 // restore focus
                                 form.find('input:visible:first').focus();
                             });
@@ -119,7 +120,7 @@
                 modal.modal('hide');
             }
         });
-        $('#orderdata-btn-close').click(function () {
+        cancelBtn.click(function () {
             modal.modal('hide');
         });
 
@@ -151,7 +152,8 @@
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
-            form.submit();
+            if(!submitBtn.hasClass('disabled'))
+            	form.submit();
         });
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
             if (e.which == 13) {
@@ -163,8 +165,7 @@
 
         function order() {
             showSpinner();
-            submitBtn.attr('disabled', true);
-            cancelBtn.attr('disabled', true);
+            submitBtn.addClass('disabled');
             $.ajax({
                 type: 'POST',
                 url: pluginUri + '/order',
@@ -174,7 +175,7 @@
                 processData: false,
                 success: function () {
                     hideSpinner();
-                    $(document).trigger('molgenis-order-placed', 'Your order has been placed');
+                    $(document).trigger('molgenis-order-placed', 'Your submission has been received');
                     modal.modal('hide');
                 },
                 error: function (xhr) {

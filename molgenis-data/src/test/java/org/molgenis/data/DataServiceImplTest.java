@@ -19,12 +19,10 @@ public class DataServiceImplTest
 {
 	private final String url = "test://";
 	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2");
-	@SuppressWarnings("rawtypes")
 	private Repository repo;
 	private EntitySource entitySource;
 	private DataServiceImpl dataService;
 
-	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{

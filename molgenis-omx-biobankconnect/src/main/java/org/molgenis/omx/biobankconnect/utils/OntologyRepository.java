@@ -14,7 +14,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-public class OntologyRepository extends AbstractRepository<Entity> implements Countable
+public class OntologyRepository extends AbstractRepository implements Countable
 {
 	private final OntologyLoader loader;
 	private final static String ONTOLOGY_URL = "url";
@@ -61,7 +61,7 @@ public class OntologyRepository extends AbstractRepository<Entity> implements Co
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_URL, FieldTypeEnum.STRING));

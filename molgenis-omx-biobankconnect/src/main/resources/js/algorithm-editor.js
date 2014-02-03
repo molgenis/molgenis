@@ -381,7 +381,7 @@
 			            	console.log(searchResponse);
 		                    callback(null, searchResponse.searchHits.map(function(hit) {
 		                    	var map = hit.columnValueMap;
-		                        return {name: '$(' + map.name + ')', value: '$(' + map.name + ')', score: map.score, meta: mappedDataSet.name};
+		                        return {name: '$(\'' + map.name + '\')', value: '$(\'' + map.name + '\')', score: map.score, meta: mappedDataSet.name};
 		                    }));
 			            });
 			        }
@@ -422,6 +422,22 @@
 				$('<div class="span7"></div>').append(testStatisticsButton).append(' ').append(suggestScriptButtion).append(' ').append(saveScriptButton).appendTo(parentDiv);
 				testStatisticsButton.click(function(){
 					console.log('The testStatisticsButton button has been clicked!');
+					var ontologyMatcherRequest = $.extend(parentDiv.data('searchRequest'), {
+						'algorithmScript' : editor.getValue()
+					});
+					$.ajax({
+						type : 'POST',
+						url : molgenis.getContextURL() + '/testscript',
+						async : false,
+						data : JSON.stringify(ontologyMatcherRequest),
+						contentType : 'application/json',
+						success : function(data, textStatus, request) {	
+							console.log(data);
+						},
+						error : function(request, textStatus, error){
+							console.log(error);
+						}
+					});
 				});
 				suggestScriptButtion.click(function(){
 					console.log('The suggestScript button has been clicked!');

@@ -17,7 +17,7 @@ import org.molgenis.util.ListEscapeUtils;
 /**
  * Writable implementation for an excel sheet
  */
-public class ExcelSheetWriter<E extends Entity> extends AbstractWritable
+public class ExcelSheetWriter extends AbstractWritable
 {
 	private final Sheet sheet;
 	private int row;

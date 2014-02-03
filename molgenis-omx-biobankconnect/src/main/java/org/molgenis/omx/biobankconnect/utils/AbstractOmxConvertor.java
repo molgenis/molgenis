@@ -39,7 +39,7 @@ abstract class AbstractOmxConvertor
 		if (file.exists())
 		{
 			EntitySource entitySource = null;
-			ExcelWriter<Entity> writer = null;
+			ExcelWriter writer = null;
 			try
 			{
 				entitySource = new ExcelEntitySourceFactory().create(file);
@@ -58,7 +58,7 @@ abstract class AbstractOmxConvertor
 
 			try
 			{
-				writer = new ExcelWriter<Entity>(new File(file.getAbsolutePath() + "_OMX.xls"));
+				writer = new ExcelWriter(new File(file.getAbsolutePath() + "_OMX.xls"));
 				writeToPhenoFormat(writer);
 			}
 			finally
@@ -68,7 +68,7 @@ abstract class AbstractOmxConvertor
 		}
 	}
 
-	public void writeToPhenoFormat(WritableFactory<Entity> writer) throws IOException
+	public void writeToPhenoFormat(WritableFactory writer) throws IOException
 	{
 		String protocolIdentifier = studyName + "_protocol";
 		StringBuilder listOfFeatureIdentifier = new StringBuilder();

@@ -25,15 +25,15 @@ import org.testng.annotations.Test;
 
 public class ExcelSheetWriterTest
 {
-	private ExcelWriter<Entity> excelWriter;
+	private ExcelWriter excelWriter;
 	private ByteArrayOutputStream bos;
-	private ExcelSheetWriter<Entity> excelSheetWriter;
+	private ExcelSheetWriter excelSheetWriter;
 
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
 		bos = new ByteArrayOutputStream();
-		excelWriter = new ExcelWriter<Entity>(bos);
+		excelWriter = new ExcelWriter(bos);
 		excelSheetWriter = excelWriter.createWritable("sheet", Arrays.asList("col1", "col2"));
 	}
 
@@ -78,7 +78,7 @@ public class ExcelSheetWriterTest
 		try
 		{
 			entitySource = new ExcelEntitySource(new ByteArrayInputStream(bos.toByteArray()), null);
-			Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("sheet");
+			Repository repo = entitySource.getRepositoryByEntityName("sheet");
 
 			assertNotNull(repo.getAttribute("col1"));
 			assertNotNull(repo.getAttribute("col2"));

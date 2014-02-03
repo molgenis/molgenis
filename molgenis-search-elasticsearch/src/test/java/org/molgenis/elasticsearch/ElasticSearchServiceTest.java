@@ -41,9 +41,8 @@ public class ElasticSearchServiceTest
 {
 	private Client client;
 	private ElasticSearchService searchService;
-	private Repository<Entity> repoMock;
+	private Repository repoMock;
 
-	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{

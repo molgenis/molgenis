@@ -9,23 +9,34 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
 import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
+import org.molgenis.omx.converters.ValueConverter;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.ObservationSet;
+import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
+import org.mozilla.javascript.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -44,8 +55,6 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 
 	@Autowired
-	private DataService dataService;
-	@Autowired
 	private OntologyMatcher ontologyMatcher;
 	@Autowired
 	private UserAccountService userAccountService;
@@ -53,24 +62,30 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private CurrentUserStatus currentUserStatus;
 
 	private BiobankConnectWizard wizard;
+	private final DataService dataService;
 	private final AlgorithmEditorPage algorithmEditorPage;
 	private final ChooseBiobankPage chooseBiobanksPage;
 	private final ChooseCataloguePage chooseCataloguePage;
 	private final OntologyAnnotatorPage ontologyAnnotatorPage;
+	private ValueConverter valueConverter;
 
 	@Autowired
 	public AlgorithmEditorController(AlgorithmEditorPage algorithmEditorPage, ChooseBiobankPage chooseBiobanksPage,
-			ChooseCataloguePage chooseCataloguePage, OntologyAnnotatorPage ontologyAnnotatorPage)
+			ChooseCataloguePage chooseCataloguePage, OntologyAnnotatorPage ontologyAnnotatorPage,
+			DataService dataService)
 	{
 		super(URI, ID);
 		if (algorithmEditorPage == null) throw new IllegalArgumentException("algorithmEditorPage is null!");
 		if (chooseBiobanksPage == null) throw new IllegalArgumentException("chooseBiobanksPage is null!");
 		if (chooseCataloguePage == null) throw new IllegalArgumentException("chooseCataloguePage is null!");
 		if (ontologyAnnotatorPage == null) throw new IllegalArgumentException("ontologyAnnotatorPage is null!");
+		if (dataService == null) throw new IllegalArgumentException("dataService is null!");
 		this.algorithmEditorPage = algorithmEditorPage;
 		this.chooseBiobanksPage = chooseBiobanksPage;
 		this.chooseCataloguePage = chooseCataloguePage;
 		this.ontologyAnnotatorPage = ontologyAnnotatorPage;
+		this.dataService = dataService;
+		valueConverter = new ValueConverter(dataService);
 	}
 
 	@Override
@@ -78,7 +93,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
 
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME);
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -93,7 +108,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 	{
 		wizard = new BiobankConnectWizard();
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME);
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
 			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
@@ -122,6 +137,39 @@ public class AlgorithmEditorController extends AbstractWizardController
 		return new SearchResult(0, Collections.<Hit> emptyList());
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, List<Object>> testScrpit(@RequestBody
+	OntologyMatcherRequest request) throws ValueConverterException
+	{
+		List<String> featureName = extractFeatureName(request.getAlgorithmScript());
+		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.NAME, featureName), ObservableFeature.class);
+		Iterable<ObservedValue> observedValueIterators = dataService.findAll(ObservedValue.ENTITY_NAME,
+				new QueryImpl().in(ObservedValue.FEATURE, featureIterators), ObservedValue.class);
+
+		Map<ObservationSet, MapEntity> eachIndividualValues = new HashMap<ObservationSet, MapEntity>();
+		for (ObservedValue value : observedValueIterators)
+		{
+			ObservationSet observationSet = value.getObservationSet();
+			if (!eachIndividualValues.containsKey(observationSet)) eachIndividualValues.put(observationSet,
+					new MapEntity());
+			eachIndividualValues.get(observationSet).set(value.getFeature().getName(),
+					Double.parseDouble(value.getValue().get("value").toString()));
+		}
+
+		List<Object> results = new ArrayList<Object>();
+		for (MapEntity mapEntity : eachIndividualValues.values())
+		{
+			Object result = ScriptEvaluator.eval(request.getAlgorithmScript(), mapEntity);
+			Object untypedResult = new Double(Context.toNumber(result));
+			results.add(untypedResult);
+		}
+		Map<String, List<Object>> jsonResults = new HashMap<String, List<Object>>();
+		jsonResults.put("results", results);
+		return jsonResults;
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/savescript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, String> saveScript(@RequestBody
@@ -133,6 +181,26 @@ public class AlgorithmEditorController extends AbstractWizardController
 			return ontologyMatcher.updateScript(userName, request);
 		}
 		return new HashMap<String, String>();
+	}
+
+	private List<String> extractFeatureName(String algorithmScript)
+	{
+		List<String> featureNames = new ArrayList<String>();
+		Pattern pattern = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
+		Matcher matcher = pattern.matcher(algorithmScript);
+		while (matcher.find())
+		{
+			featureNames.add(matcher.group(1));
+		}
+		if (featureNames.size() > 0) return featureNames;
+
+		pattern = Pattern.compile("\\$\\(([^\\$\\(\\)]*)\\)");
+		matcher = pattern.matcher(algorithmScript);
+		while (matcher.find())
+		{
+			featureNames.add(matcher.group(1));
+		}
+		return featureNames;
 	}
 
 	@Override
