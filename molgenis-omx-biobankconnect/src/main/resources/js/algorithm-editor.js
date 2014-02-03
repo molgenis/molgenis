@@ -229,7 +229,7 @@
 			if(!mapping.mappingScript) mapping.mappingScript = '';
 			var newCell = $('<td />').css('cursor','pointer').click(function(){
 				standardModal.createModalCallback('Algorithm editor', function(modal){
-					modal.find('div.modal-body:eq(0)').data('clickedCell', newCell).data('mapping', mapping);
+					$(document).data('clickedCell', newCell).data('mapping', mapping);
 					var mappedDataSet = restApi.get('/api/v1/dataset/' + mappedDataSetId);
 					createAlgorithmEditorContent(feature, mappedDataSet, modal);
 					modal.attr('data-backdrop', true).css({
@@ -255,7 +255,7 @@
 				'margin-left' : '30%'
 			});
 			if(mappingScript === '') algorithmStatusDiv.append('<strong>Edit algorithm</strong>');
-			else algorithmStatusDiv.append('<strong>Complete</strong>').css('color', '#04B4AE');
+			else algorithmStatusDiv.append('<strong>Complete</strong>').css('color','#04B4AE');
 			return $('<div />').addClass('row-fluid').append(algorithmStatusDiv).append(iconHolderDiv);
 		}
 		
@@ -266,12 +266,13 @@
 				sourceDataSetId : molgenis.hrefToId(selectedDataSet.href),
 				selectedDataSetIds : [molgenis.hrefToId(mappedDataSet.href)]
 			};
+			$(document).data('searchRequest', searchRequest);
 			var tableDiv = $('<div class="span5"></div>');
 			var metaInfoDiv = $('<div class="span7"></div>');
-			var body = modal.find('.modal-body:eq(0)').css('max-height', '100%');
+			var body = modal.find('.modal-body:eq(0)').css('max-height','100%');
 			var featureInfoDiv = $('<div class="row-fluid"></div>').after('</br>').appendTo(body);
 			$('<div class="row-fluid"></div>').append(metaInfoDiv).append(tableDiv).appendTo(body);
-			var controlDiv = $('<div class="row-fluid"></div>').appendTo(body).data('searchRequest', searchRequest);
+			var controlDiv = $('<div class="row-fluid"></div>').appendTo(body);
 			
 			$.ajax({
 				type : 'POST',
@@ -371,7 +372,15 @@
 				editor.setOptions({
 				    enableBasicAutocompletion: true
 				});
-				editor.setValue(parentDiv.parents('div.modal-body:eq(0)').data('mapping').mappingScript);
+				var script = null;
+				if($(document).data('previousScript')){
+					script = $(document).data('previousScript');
+					$(document).removeData('previousScript');
+				}
+				if(script === null) {
+					script = $(document).data('mapping').mappingScript	
+				}
+				editor.setValue(script);
 				editor.setTheme("ace/theme/chrome");
 				editor.getSession().setMode("ace/mode/javascript");
 				var algorithmEditorCompleter = {
@@ -422,7 +431,8 @@
 				$('<div class="span7"></div>').append(testStatisticsButton).append(' ').append(suggestScriptButtion).append(' ').append(saveScriptButton).appendTo(parentDiv);
 				testStatisticsButton.click(function(){
 					console.log('The testStatisticsButton button has been clicked!');
-					var ontologyMatcherRequest = $.extend(parentDiv.data('searchRequest'), {
+					var modalBody = parentDiv.parents('.modal-body:eq(0)');
+					var ontologyMatcherRequest = $.extend($(document).data('searchRequest'), {
 						'algorithmScript' : editor.getValue()
 					});
 					$.ajax({
@@ -431,8 +441,25 @@
 						async : false,
 						data : JSON.stringify(ontologyMatcherRequest),
 						contentType : 'application/json',
-						success : function(data, textStatus, request) {	
-							console.log(data);
+						success : function(data, textStatus, request){	
+							if(data.results.length === 0) return;
+							var graphDivId = 'featureId-' + ontologyMatcherRequest['featureId'];
+							var statisticsDivHeight = modalBody.height()/4*3;
+							modalBody.data('originalContent', modalBody.children());
+							modalBody.children().remove();
+							var backButton = $('<button />').addClass('btn btn-primary').append('Go back');
+							var featureObject = restApi.get('/api/v1/observablefeature/' + ontologyMatcherRequest['featureId']);
+							var dataSetObject = restApi.get('/api/v1/dataset/' + ontologyMatcherRequest['selectedDataSetIds'][0]);
+							var algorithmDiv = $('<div />').addClass('offset3 span6 well text-align-center').append('Test for variable <strong>' + featureObject.name + '</strong> in dataset <strong>' + dataSetObject.name + '</strong>');
+							var tableDiv = $('<div />').addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data.results));
+							var graphDiv = $('<div />').attr('id', graphDivId).addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results);
+							$('<div />').addClass('row-fluid').append(algorithmDiv).appendTo(modalBody);
+							$('<div />').addClass('row-fluid').append(tableDiv).append(graphDiv).appendTo(modalBody);
+							modalBody.next('div:eq(0)').prepend(backButton);
+							backButton.click(function(){
+								$(document).data('previousScript',editor.getValue());
+								$(document).data('clickedCell').click();
+							});
 						},
 						error : function(request, textStatus, error){
 							console.log(error);
@@ -444,7 +471,8 @@
 				});
 				saveScriptButton.click(function(){
 					console.log('The saveScriptButton button has been clicked!' + editor.getValue());
-					var ontologyMatcherRequest = $.extend(parentDiv.data('searchRequest'), {
+					var modalBody = parentDiv.parents('.modal-body:eq(0)');
+					var ontologyMatcherRequest = $.extend($(document).data('searchRequest'), {
 						'algorithmScript' : editor.getValue()
 					});
 					$.ajax({
@@ -457,11 +485,10 @@
 							console.log(data);
 							var alerts = [];
 							alerts.push(data);
-							var modalBody = parentDiv.parents('div.modal-body:eq(0)');
 							modalBody.find('.alert').remove();
 							molgenis.createAlert(alerts, 'success', modalBody);
-							modalBody.data('clickedCell').empty().append(createCellInMappingPanel(editor.getValue()));
-							modalBody.data('mapping').mappingScript = editor.getValue();
+							$(document).data('clickedCell').empty().append(createCellInMappingPanel(editor.getValue()));
+							$(document).data('mapping').mappingScript = editor.getValue();
 						},
 						error : function(request, textStatus, error){
 							console.log(error);
@@ -477,6 +504,15 @@
 				feature.description = '{"en":"' + (feature.description === null ? '' : feature.description.replace(new RegExp('"','gm'), '')) +'"}';
 			}
 			return eval('(' + feature.description + ')');
+		}
+		
+		function statisticsTable(array){
+			var table = $('<table />').addClass('table table-bordered');
+			table.append('<tr><th>Number of values</th><td>' + array.length + '</td></tr>');
+			table.append('<tr><th>Mean</th><td>' + jStat.mean(array) + '</td></tr>');
+			table.append('<tr><th>Median</th><td>' + jStat.median(array) + '</td></tr>');
+			table.append('<tr><th>Standard Deviation</th><td>' + jStat.stdev(array) + '</td></tr>');
+			return table;
 		}
 	};
 	

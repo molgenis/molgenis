@@ -7,11 +7,19 @@ th {
     color: white;
 }
 
-th.text-align-center{
+th.text-align-center,.text-align-center{
 	text-align:center;
 }
 
 .alert {
 	margin-top : -10px;
 	margin-bottom : 10px;
+}
+
+.legend-align-center{
+	text-align: center;
+	display: block;
+	font-weight:bold;
+	margin-bottom: 20px;
+	border-bottom : 1px solid;
 }

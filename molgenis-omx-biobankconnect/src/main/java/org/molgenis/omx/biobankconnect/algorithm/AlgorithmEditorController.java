@@ -25,8 +25,6 @@ import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
 import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
-import org.molgenis.omx.converters.ValueConverter;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -67,7 +65,6 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private final ChooseBiobankPage chooseBiobanksPage;
 	private final ChooseCataloguePage chooseCataloguePage;
 	private final OntologyAnnotatorPage ontologyAnnotatorPage;
-	private ValueConverter valueConverter;
 
 	@Autowired
 	public AlgorithmEditorController(AlgorithmEditorPage algorithmEditorPage, ChooseBiobankPage chooseBiobanksPage,
@@ -85,7 +82,6 @@ public class AlgorithmEditorController extends AbstractWizardController
 		this.chooseCataloguePage = chooseCataloguePage;
 		this.ontologyAnnotatorPage = ontologyAnnotatorPage;
 		this.dataService = dataService;
-		valueConverter = new ValueConverter(dataService);
 	}
 
 	@Override
@@ -140,7 +136,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 	@RequestMapping(method = RequestMethod.POST, value = "/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, List<Object>> testScrpit(@RequestBody
-	OntologyMatcherRequest request) throws ValueConverterException
+	OntologyMatcherRequest request)
 	{
 		List<String> featureName = extractFeatureName(request.getAlgorithmScript());
 		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
@@ -209,7 +205,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 	{
 		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
 				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
-				"simple_statistics.js", "algorithm-editor.js", "biobank-connect.js");
+				"algorithm-editor.js", "biobank-connect.js", "jstat.min.js", "d3.min.js", "vega.min.js",
+				"biobankconnect-graph.js");
 	}
 
 	@Override
