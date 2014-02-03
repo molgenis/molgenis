@@ -33,13 +33,9 @@ import org.codehaus.jackson.type.TypeReference;
 
 /**
  * <p>
- * This class reads a data set row by row and calls the EBI Chembl webservice with UniProt Identifiers. The webservice
- * returns a json object with a map. This map is translated to a HashMap and you can retrieve desired annotations by
- * using them as key values.
- * </p>
- * 
- * <p>
- * Any new features are added to the protocol of the Repository that is used to call this class.
+ * This class calls the EBI Chembl web service with UniProt ID's located in the repository that is
+ * passed on from the controller. The features that Chembl returns are used to create a new protocol. 
+ * Values for each observed set are added to the repository
  * </p>
  * 
  * <p>
@@ -58,6 +54,7 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 {
 
 	// EBI service is dependant on this ID when the web service is called
+	// If Uniprot ID is not in a data set, the web service cannot be used
 	private static final String UNIPROT_ID = "uniprot_id";
 
 	@Autowired
