@@ -16,6 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.NonValidatingEntityValidator;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.testng.annotations.AfterMethod;
@@ -34,7 +35,7 @@ public class JpaRepositoryTest
 	public void beforeMethod()
 	{
 		entityManager = Persistence.createEntityManagerFactory("molgenis").createEntityManager();
-		repo = new JpaRepository(entityManager, Person.class, new PersonMetaData());
+		repo = new JpaRepository(entityManager, Person.class, new PersonMetaData(), new NonValidatingEntityValidator());
 		entityManager.getTransaction().begin();
 	}
 

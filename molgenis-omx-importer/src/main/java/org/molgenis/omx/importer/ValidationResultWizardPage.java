@@ -10,6 +10,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -81,6 +83,19 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
 
 				return "File successfully imported.";
+			}
+			catch (MolgenisValidationException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+
+				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br />");
+				for (ConstraintViolation violation : e.getViolations())
+				{
+					sb.append(violation.getMessage()).append("<br />");
+				}
+
+				result.addError(new ObjectError("wizard", sb.toString()));
 			}
 			catch (RuntimeException e)
 			{
