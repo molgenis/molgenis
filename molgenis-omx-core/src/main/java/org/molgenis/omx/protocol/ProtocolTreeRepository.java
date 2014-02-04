@@ -25,7 +25,7 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.I18nTools;
 
-public class ProtocolTreeRepository extends AbstractRepository<Entity> implements Countable
+public class ProtocolTreeRepository extends AbstractRepository implements Countable
 {
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
@@ -117,7 +117,7 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
 
@@ -194,7 +194,7 @@ public class ProtocolTreeRepository extends AbstractRepository<Entity> implement
 				StringBuilder categoryValue = new StringBuilder();
 
 				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-						new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature));
+						new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature), Category.class);
 
 				for (Category c : categories)
 				{

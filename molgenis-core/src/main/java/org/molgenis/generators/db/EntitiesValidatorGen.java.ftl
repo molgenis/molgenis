@@ -82,8 +82,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		{
 			for (String entityName : entitySource.getEntityNames())
 			{
-				Repository<? extends org.molgenis.data.Entity> repository = entitySource
-						.getRepositoryByEntityName(entityName);
+				Repository repository = entitySource.getRepositoryByEntityName(entityName);
 				try
 				{
 					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(entityName.toLowerCase());
@@ -112,7 +111,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		return validationReport;
 	}
 
-	private void validateTable(String entityName, Repository<? extends org.molgenis.data.Entity> repository,
+	private void validateTable(String entityName, Repository repository,
 			Class<? extends Entity> entityClazz, EntitiesValidationReport validationReport)
 			throws MolgenisModelException, IOException
 	{

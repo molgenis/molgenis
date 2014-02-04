@@ -30,12 +30,12 @@ public class Validator
 	{
 		ValidationFile excelfile = new ValidationFile();
 		EntitySource excelReaderReferenceFile = new ExcelEntitySourceFactory().create(new File(excelFile1));
-		Repository<? extends Entity> excelSheetReaderReferenceFile = excelReaderReferenceFile
+		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile
 				.getRepositoryByEntityName("dataset_celiac_sprue");
 		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
 
 		ValidationFile csvFile = new ValidationFile();
-		Repository<? extends Entity> csvReaderFileToCompare = new CsvRepository(new File(file2), null);
+		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), null);
 
 		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;

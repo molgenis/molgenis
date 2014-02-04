@@ -48,11 +48,21 @@ If you add an `EntitySourceFactory` to the Spring application context it will au
 ## DataService usage examples
 
 	
-**Iterate over all entities in a repository:**
+**Iterate over all entities in a repository typed:**
 	
 ```
-Iterable<Person> persons = dataService.findAll("Person");
+Iterable<Person> persons = dataService.findAll("Person", Person.class);
 for (Person person : persons)
+{
+	... do something with person
+}
+```
+
+**Iterate over all entities in a repository untyped:**
+	
+```
+Iterable<Entity> persons = dataService.findAll("Person");
+for (Entity person : persons)
 {
 	... do something with person
 }
@@ -61,7 +71,7 @@ for (Person person : persons)
 **Find an entity by it's id:**
 
 ```
-Person person = dataService.findOne("Person", 5);
+Entity person = dataService.findOne("Person", 5);
 if (person != null)
 {
 }
@@ -71,12 +81,12 @@ if (person != null)
 
 ```
 Query query = new QueryImpl().eq("firstName", "Piet"); 
-Iterable<Person> persons = dataService.findAll("Person", query);
+Iterable<Person> persons = dataService.findAll("Person", query, Person.class);
 ```
 
 ```
 Query query = new QueryImpl().eq("firstName", "Piet").and().eq("lastName", "Jansen")
-Person person = dataService.findOne("Person" query);
+Person person = dataService.findOne("Person" query, Person.class);
 ```
 
 **Get a query count:**

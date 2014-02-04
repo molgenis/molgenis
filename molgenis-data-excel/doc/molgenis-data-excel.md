@@ -49,7 +49,7 @@ finally
 EntitySource entitySource = new ExcelEntitySource(new File("/users/test/test.xls"));
 try
 {
-	Repository<? extends Entity> repo = entitySource.getRepositoryByEntityName("Sheetname");
+	Repository repo = entitySource.getRepositoryByEntityName("Sheetname");
 	try
 	{
 		for (Entity entity : repo)
@@ -78,10 +78,10 @@ dataService.registerEntitySource("excel:///users/test/test.xls");
 **Create a new excelfile, create a sheet and write entities (rows) to it**
 
 ```
-WritableFactory<Entity> writableFactory = new ExcelWriter<Entity>(new File("/users/test/test.xls"));
+WritableFactory writableFactory = new ExcelWriter(new File("/users/test/test.xls"));
 try
 {
-	Writable<Entity> writable = writableFactory.createWritable("SheetName", Arrays.asList("ColName"));
+	Writable writable = writableFactory.createWritable("SheetName", Arrays.asList("ColName"));
 	try
 	{
 		writable.add(new MapEntity("ColName", "test"));

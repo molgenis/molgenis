@@ -38,9 +38,9 @@ public class MolgenisUserDetailsServiceTest
 		when(userUser.getUsername()).thenReturn("user");
 		when(userUser.getPassword()).thenReturn("password");
 		Query qAdmin = new QueryImpl().eq(MolgenisUser.USERNAME, "admin");
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qAdmin)).thenReturn(adminUser);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qAdmin, MolgenisUser.class)).thenReturn(adminUser);
 		Query qUser = new QueryImpl().eq(MolgenisUser.USERNAME, "user");
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qUser)).thenReturn(userUser);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qUser, MolgenisUser.class)).thenReturn(userUser);
 		GrantedAuthoritiesMapper authoritiesMapper = new GrantedAuthoritiesMapper()
 		{
 			@Override

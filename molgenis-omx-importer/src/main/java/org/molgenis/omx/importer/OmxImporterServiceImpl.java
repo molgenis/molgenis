@@ -9,13 +9,9 @@ import java.util.Map.Entry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntitySource;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
-import org.molgenis.omx.observ.DataSet;
-import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.DataSetImportedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,14 +47,6 @@ public class OmxImporterServiceImpl implements OmxImporterService
 			importReport.addEntityImportReport(dataSetImportReport);
 		}
 
-		// publish dataset imported event(s)
-
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
-		for (DataSet dataSet : dataSets)
-			ApplicationContextProvider.getApplicationContext().publishEvent(
-					new DataSetImportedEvent(this, dataSet.getId()));
-
 		return importReport;
-
 	}
 }

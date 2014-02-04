@@ -2,7 +2,6 @@ package org.molgenis.search;
 
 import java.util.List;
 
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 
@@ -27,9 +26,9 @@ public interface SearchService
 	 * 
 	 * @param repository
 	 */
-	void indexRepository(Repository<? extends Entity> repository);
+	void indexRepository(Repository repository);
 
-	void updateRepositoryIndex(Repository<? extends Entity> repository);
+	void updateRepositoryIndex(Repository repository);
 
 	/**
 	 * delete documents by Ids
