@@ -1,4 +1,4 @@
-package org.molgenis.webserviceAnnotators;
+package org.molgenis.annotationServices;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -62,9 +62,8 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
 		HttpClient httpClient = new DefaultHttpClient();
-
-
 		List<Entity> results = new ArrayList<Entity>();
+		
 		while (source.hasNext())
 		{	
 			Entity entity = source.next();
