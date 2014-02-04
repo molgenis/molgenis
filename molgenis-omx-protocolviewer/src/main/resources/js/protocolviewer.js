@@ -51,8 +51,7 @@
 			},
 			'onInit' : function() {
 				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
-					updateShoppingCart(catalogItems, catalogId);
-					updateFeatureSelection(catalogItems);	
+					updateFeatureSelection(catalogItems);
 				});
 			}
 		});
