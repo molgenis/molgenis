@@ -4,7 +4,7 @@
 		var mean = jStat.mean(array);
 		var stdev = jStat.stdev(array);
 		var cdfValues = array.map(function(element){
-			return jStat.normal.cdf(element, mean, stdev);
+			return jStat.normal.pdf(element, mean, stdev);
 		});
 		var data = { "points" : [] };
 		var graphId = this.attr('id');

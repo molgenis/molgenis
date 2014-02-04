@@ -25,6 +25,7 @@ import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
 import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -150,8 +151,17 @@ public class AlgorithmEditorController extends AbstractWizardController
 			ObservationSet observationSet = value.getObservationSet();
 			if (!eachIndividualValues.containsKey(observationSet)) eachIndividualValues.put(observationSet,
 					new MapEntity());
-			eachIndividualValues.get(observationSet).set(value.getFeature().getName(),
-					Double.parseDouble(value.getValue().get("value").toString()));
+			Object valueObject = value.getValue().get("value");
+
+			if (valueObject instanceof Integer) eachIndividualValues.get(observationSet).set(
+					value.getFeature().getName(), Integer.parseInt(value.getValue().get("value").toString()));
+
+			if (valueObject instanceof Double) eachIndividualValues.get(observationSet).set(
+					value.getFeature().getName(), Double.parseDouble(value.getValue().get("value").toString()));
+
+			if (valueObject instanceof Category) eachIndividualValues.get(observationSet).set(
+					value.getFeature().getName(),
+					Integer.parseInt(((Category) value.getValue().get("value")).getValueCode()));
 		}
 
 		List<Object> results = new ArrayList<Object>();
