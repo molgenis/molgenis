@@ -451,7 +451,7 @@
 							var featureObject = restApi.get('/api/v1/observablefeature/' + ontologyMatcherRequest['featureId']);
 							var dataSetObject = restApi.get('/api/v1/dataset/' + ontologyMatcherRequest['selectedDataSetIds'][0]);
 							var algorithmDiv = $('<div />').addClass('offset3 span6 well text-align-center').append('Test for variable <strong>' + featureObject.name + '</strong> in dataset <strong>' + dataSetObject.name + '</strong>');
-							var tableDiv = $('<div />').addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data.results));
+							var tableDiv = $('<div />').addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data));
 							var graphDiv = $('<div />').attr('id', graphDivId).addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results);
 							$('<div />').addClass('row-fluid').append(algorithmDiv).appendTo(modalBody);
 							$('<div />').addClass('row-fluid').append(tableDiv).append(graphDiv).appendTo(modalBody);
@@ -468,6 +468,21 @@
 				});
 				suggestScriptButtion.click(function(){
 					console.log('The suggestScript button has been clicked!');
+					$.ajax({
+						type : 'POST',
+						url : molgenis.getContextURL() + '/suggestscript',
+						async : false,
+						data : JSON.stringify($(document).data('searchRequest')),
+						contentType : 'application/json',
+						success : function(data, textStatus, request) {	
+							if(data.suggestedScript){
+								editor.setValue(data.suggestedScript);
+							}
+						},
+						error : function(request, textStatus, error){
+							console.log(error);
+						}
+					});
 				});
 				saveScriptButton.click(function(){
 					console.log('The saveScriptButton button has been clicked!' + editor.getValue());
@@ -506,9 +521,11 @@
 			return eval('(' + feature.description + ')');
 		}
 		
-		function statisticsTable(array){
+		function statisticsTable(data){
+			var array = data.results;
 			var table = $('<table />').addClass('table table-bordered');
-			table.append('<tr><th>Number of values</th><td>' + array.length + '</td></tr>');
+			table.append('<tr><th>Total cases</th><td>' + data.totalCounts + '</td></tr>');
+			table.append('<tr><th>Valid cases</th><td>' + array.length + '</td></tr>');
 			table.append('<tr><th>Mean</th><td>' + jStat.mean(array) + '</td></tr>');
 			table.append('<tr><th>Median</th><td>' + jStat.median(array) + '</td></tr>');
 			table.append('<tr><th>Standard Deviation</th><td>' + jStat.stdev(array) + '</td></tr>');

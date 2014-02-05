@@ -39,7 +39,8 @@ public class OntologyLoader
 	{
 		synonymsProperties = new HashSet<String>(Arrays.asList(
 				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN",
-				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90"));
+				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90",
+				"http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"));
 	}
 	private Set<String> owlObjectProperties;
 	{

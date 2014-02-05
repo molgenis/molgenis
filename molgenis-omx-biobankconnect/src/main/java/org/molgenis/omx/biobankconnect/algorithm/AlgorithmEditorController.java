@@ -44,6 +44,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.collect.Iterables;
+
 @Controller
 @RequestMapping(URI)
 public class AlgorithmEditorController extends AbstractWizardController
@@ -59,6 +61,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private UserAccountService userAccountService;
 	@Autowired
 	private CurrentUserStatus currentUserStatus;
+	@Autowired
+	private AlgorithmUnitConverter algorithmUnitConverter;
 
 	private BiobankConnectWizard wizard;
 	private final DataService dataService;
@@ -134,32 +138,74 @@ public class AlgorithmEditorController extends AbstractWizardController
 		return new SearchResult(0, Collections.<Hit> emptyList());
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/suggestscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, List<Object>> testScrpit(@RequestBody
+	public Map<String, Object> suggestScript(@RequestBody
 	OntologyMatcherRequest request)
 	{
-		List<String> featureName = extractFeatureName(request.getAlgorithmScript());
-		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.NAME, featureName), ObservableFeature.class);
-		Iterable<ObservedValue> observedValueIterators = dataService.findAll(ObservedValue.ENTITY_NAME,
-				new QueryImpl().in(ObservedValue.FEATURE, featureIterators), ObservedValue.class);
+		Map<String, Object> jsonResults = new HashMap<String, Object>();
+		String userName = userAccountService.getCurrentUser().getUsername();
+		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
+		if (selectedDataSetIds.size() > 0)
+		{
+			SearchResult searchResult = ontologyMatcher.generateMapping(userName, request.getFeatureId(),
+					request.getTargetDataSetId(), selectedDataSetIds.get(0));
+			if (searchResult.getSearchHits().size() > 0)
+			{
+				Hit hit = searchResult.getSearchHits().get(0);
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
 
-		Map<ObservationSet, MapEntity> eachIndividualValues = new HashMap<ObservationSet, MapEntity>();
+				ObservableFeature standardFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+						request.getFeatureId(), ObservableFeature.class);
+				ObservableFeature customFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+						Integer.parseInt(columnValueMap.get("id").toString()), ObservableFeature.class);
+
+				String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
+						customFeature.getUnit());
+
+				StringBuilder suggestedScript = new StringBuilder();
+				suggestedScript.append("$('").append(customFeature.getName()).append("')").append(conversionScript);
+				jsonResults.put("suggestedScript", suggestedScript.toString());
+			}
+		}
+		return jsonResults;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> testScrpit(@RequestBody
+	OntologyMatcherRequest request)
+	{
+		if (request.getSelectedDataSetIds().size() == 0 || request.getAlgorithmScript().isEmpty()) return Collections
+				.emptyMap();
+
+		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, request.getSelectedDataSetIds().get(0),
+				DataSet.class);
+		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
+		List<String> featureNames = extractFeatureName(request.getAlgorithmScript());
+		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.NAME, featureNames), ObservableFeature.class);
+		Iterable<ObservedValue> observedValueIterators = dataService.findAll(
+				ObservedValue.ENTITY_NAME,
+				new QueryImpl().and().in(ObservedValue.FEATURE, featureIterators).and()
+						.in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
+
+		Map<Integer, MapEntity> eachIndividualValues = new HashMap<Integer, MapEntity>();
 		for (ObservedValue value : observedValueIterators)
 		{
 			ObservationSet observationSet = value.getObservationSet();
-			if (!eachIndividualValues.containsKey(observationSet)) eachIndividualValues.put(observationSet,
+			Integer observationSetId = observationSet.getId();
+			if (!eachIndividualValues.containsKey(observationSetId)) eachIndividualValues.put(observationSetId,
 					new MapEntity());
 			Object valueObject = value.getValue().get("value");
-
-			if (valueObject instanceof Integer) eachIndividualValues.get(observationSet).set(
+			if (valueObject instanceof Integer) eachIndividualValues.get(observationSetId).set(
 					value.getFeature().getName(), Integer.parseInt(value.getValue().get("value").toString()));
 
-			if (valueObject instanceof Double) eachIndividualValues.get(observationSet).set(
+			if (valueObject instanceof Double) eachIndividualValues.get(observationSetId).set(
 					value.getFeature().getName(), Double.parseDouble(value.getValue().get("value").toString()));
 
-			if (valueObject instanceof Category) eachIndividualValues.get(observationSet).set(
+			if (valueObject instanceof Category) eachIndividualValues.get(observationSetId).set(
 					value.getFeature().getName(),
 					Integer.parseInt(((Category) value.getValue().get("value")).getValueCode()));
 		}
@@ -167,12 +213,14 @@ public class AlgorithmEditorController extends AbstractWizardController
 		List<Object> results = new ArrayList<Object>();
 		for (MapEntity mapEntity : eachIndividualValues.values())
 		{
+			if (Iterables.size(mapEntity.getAttributeNames()) != featureNames.size()) continue;
 			Object result = ScriptEvaluator.eval(request.getAlgorithmScript(), mapEntity);
 			Object untypedResult = new Double(Context.toNumber(result));
 			results.add(untypedResult);
 		}
-		Map<String, List<Object>> jsonResults = new HashMap<String, List<Object>>();
+		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		jsonResults.put("results", results);
+		jsonResults.put("totalCounts", Iterables.size(observationSets));
 		return jsonResults;
 	}
 

@@ -1006,11 +1006,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return updateResult;
 	}
 
-	private void extractVariablesFromScript(String algorithmScript)
-	{
-
-	}
-
 	private void addNewMappingToDatabase(String mappingDataSetIdentifier, OntologyMatcherRequest request)
 	{
 		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
