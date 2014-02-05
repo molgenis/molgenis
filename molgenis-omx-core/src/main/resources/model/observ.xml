@@ -123,7 +123,7 @@
 			<field name="root" type="boolean" default="false" description="Indicator whether this protocol defines a workflow (e.g is the first protocol of a workflow)." />
             <field name="active" type="bool" default="true" description="whether this protocol is considered active/inactive"/>
 		</entity>
-		<entity name="DataSet" extends="Characteristic">
+		<entity name="DataSet" extends="Characteristic" decorator="org.molgenis.omx.decorators.DataSetRepositoryDecorator">
 			<description>Container for one or more observations that are measured
 				using the same protocol and by the same performer(s). The data set
 				may be a file (having the same identifier) but in most cases it is a
