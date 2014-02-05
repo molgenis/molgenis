@@ -127,7 +127,7 @@
 			for(var i = 1; i < iterations; i++){
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
-				var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', ['unit'], {
 					q : [{
 						field : 'id',
 						operator : 'IN',
@@ -267,8 +267,8 @@
 				selectedDataSetIds : [molgenis.hrefToId(mappedDataSet.href)]
 			};
 			$(document).data('searchRequest', searchRequest);
-			var tableDiv = $('<div class="span5"></div>');
-			var metaInfoDiv = $('<div class="span7"></div>');
+			var tableDiv = $('<div class="span6"></div>');
+			var metaInfoDiv = $('<div class="span6"></div>');
 			var body = modal.find('.modal-body:eq(0)').css('max-height','100%');
 			var featureInfoDiv = $('<div class="row-fluid"></div>').after('</br>').appendTo(body);
 			$('<div class="row-fluid"></div>').append(metaInfoDiv).append(tableDiv).appendTo(body);
@@ -297,6 +297,9 @@
 			function createFeatureInfoPanel(feature, parentDiv){
 				var infoDiv = $('<div />').addClass('span3');
 				$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
+				if(feature.unit !== undefined && feature.unit !== null){
+					$('<div />').append('<span class="info"><strong>Unit : </strong></span>').append('<span>' + feature.unit.name + '</span>').appendTo(infoDiv);
+				}
 				$('<div />').append('<span class="info"><strong>Data type : </strong></span>').append('<span>' + feature.dataType + '</span>').appendTo(infoDiv);
 				$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 				var middleDiv = $('<div />').addClass('span9');
@@ -317,14 +320,19 @@
 					return;
 				}
 				var tableForSuggestedMappings = $('<table />').addClass('table table-bordered'); 
-				var header = $('<thead><tr><th>Name</th><th>Description</th><th>Data type</th>/tr></thead>');
+				var header = $('<thead><tr><th>Name</th><th>Description</th><th>Data type</th><th>Unit</th>/tr></thead>');
 				tableForSuggestedMappings.append(header);
 				$.each(searchHits, function(index, hit){
 					var row = $('<tr />');
 					var featureId = hit.columnValueMap.id;
-					var featureEntity = restApi.get('/api/v1/observablefeature/' + featureId);
+					var featureEntity = restApi.get('/api/v1/observablefeature/' + featureId, ['unit']);
 					row.append('<td>' + featureEntity.name + '</td>');
 					row.append('<td>' + featureEntity.description + '</td>');
+					if(featureEntity.unit !== undefined && featureEntity.unit !== null){
+						row.append('<td>' + featureEntity.unit.name + '</td>');
+					}else{
+						row.append('<td />');
+					}
 					row.append('<td>' + featureEntity.dataType + '</td>');
 					tableForSuggestedMappings.append(row);
 					row.css('cursor', 'pointer').click(function(){
@@ -341,6 +349,9 @@
 				var detailInfoTable = $('<table class="table table-bordered"></table>');
 				detailInfoTable.append('<tr><th>Id</th><td>' + molgenis.hrefToId(featureEntity.href) + '</td></tr>');
 				detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.name + '</td></tr>');
+				if(featureEntity.unit !== undefined && featureEntity.unit !== null){
+					detailInfoTable.append('<tr><th>Unit</th><td>' + featureEntity.unit.name + '</td></tr>');
+				}
 				detailInfoTable.append('<tr><th>Data type</th><td>' + featureEntity.dataType + '</td></tr>');
 				detailInfoTable.append('<tr><th>Description</th><td>' + featureEntity.description + '</td></tr>');
 				var categories = getCategoriesByFeatureId(molgenis.hrefToId(featureEntity.href));

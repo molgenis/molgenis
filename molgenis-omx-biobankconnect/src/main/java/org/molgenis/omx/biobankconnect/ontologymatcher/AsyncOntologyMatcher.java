@@ -61,7 +61,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
 	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
-	private static final String STORE_MAPPING_ABSOLUTE_SCORE = "store_mapping_absolute_score";
 	private static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
 	private static final String CATALOGUE_PREFIX = "protocolTree-";
 	private static final String FEATURE_CATEGORY = "featureCategory-";
@@ -919,12 +918,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			algorithmScriptFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase());
 			algorithmScriptFeature.setName(STORE_MAPPING_ALGORITHM_SCRIPT);
 			features.add(algorithmScriptFeature);
-
-			ObservableFeature mappedFeatureAbsoluteScore = new ObservableFeature();
-			mappedFeatureAbsoluteScore.setIdentifier(STORE_MAPPING_ABSOLUTE_SCORE);
-			mappedFeatureAbsoluteScore.setDataType(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString().toLowerCase());
-			mappedFeatureAbsoluteScore.setName(STORE_MAPPING_ABSOLUTE_SCORE);
-			features.add(mappedFeatureAbsoluteScore);
 
 			ObservableFeature confirmMapping = new ObservableFeature();
 			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);

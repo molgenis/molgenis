@@ -19,6 +19,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
@@ -57,6 +58,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
+	@Autowired
+	private OntologyAnnotator ontologyAnnotator;
 	@Autowired
 	private UserAccountService userAccountService;
 	@Autowired
@@ -121,6 +124,29 @@ public class AlgorithmEditorController extends AbstractWizardController
 		wizard.addPage(chooseBiobanksPage);
 		wizard.addPage(algorithmEditorPage);
 		return wizard;
+	}
+
+	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
+	public String annotate(HttpServletRequest request)
+	{
+		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
+		if (request.getParameter("selectedOntologies") != null)
+		{
+			List<String> documentTypes = new ArrayList<String>();
+			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
+			{
+				documentTypes.add("ontologyTerm-" + ontologyUri);
+			}
+			ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId(), documentTypes);
+		}
+		return init(request);
+	}
+
+	@RequestMapping(value = "/annotate/remove", method = RequestMethod.POST)
+	public String removeAnnotations(HttpServletRequest request) throws Exception
+	{
+		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
+		return init(request);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/createmapping", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
