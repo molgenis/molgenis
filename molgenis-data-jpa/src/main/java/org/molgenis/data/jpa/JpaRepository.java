@@ -30,10 +30,11 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,7 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractRepository implements CrudRepository
+public class JpaRepository extends AbstractCrudRepository implements CrudRepository
 {
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -51,15 +52,17 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	private final EntityMetaData entityMetaData;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData, EntityValidator validator)
 	{
+		super(validator);
 		this.entityClass = entityClass;
 		this.entityMetaData = entityMetaData;
 	}
 
-	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass,
+			EntityMetaData entityMetaData, EntityValidator validator)
 	{
-		this(entityClass, entityMetaData);
+		this(entityClass, entityMetaData, validator);
 		this.entityManager = entityManager;
 	}
 
@@ -75,8 +78,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public Integer add(Entity entity)
+	protected Integer addInternal(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -89,8 +91,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void add(Iterable<? extends Entity> entities)
+	protected void addInternal(Iterable<? extends Entity> entities)
 	{
 		for (Entity e : entities)
 			add(e);
@@ -137,6 +138,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
+
 		return getEntityManager().find(getEntityClass(), id);
 	}
 
@@ -211,8 +213,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(Entity entity)
+	protected void updateInternal(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 
@@ -225,8 +226,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	protected void updateInternal(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
@@ -255,8 +255,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
+	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 
@@ -765,6 +764,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
@@ -777,6 +777,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(q));
@@ -784,6 +785,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
@@ -804,6 +806,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		Entity entity = findOne(q);

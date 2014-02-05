@@ -20,12 +20,15 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
@@ -40,6 +43,8 @@ import ${entity.namespace}.db.${JavaName(entity)}EntityImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Lists;
 
 @Component
 public class EntitiesImporterImpl implements EntitiesImporter
@@ -126,7 +131,10 @@ public class EntitiesImporterImpl implements EntitiesImporter
 			{
 				repositoryMap.put(entityName.toLowerCase(), entitySource.getRepositoryByEntityName(entityName));
 			}
-
+			
+			List<ConstraintViolation> violations = Lists.newArrayList();
+			
+			
 			// import entities in order defined by entities map
 			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
 			{
@@ -135,14 +143,36 @@ public class EntitiesImporterImpl implements EntitiesImporter
 				if (repository != null)
 				{
 					EntityImporter entityImporter = entry.getValue();
-					int nr = entityImporter.importEntity(repository, dataService, dbAction);
-					if (nr > 0)
+					
+					try
 					{
-						importReport.addEntityCount(entry.getKey(), nr);
-						importReport.addNrImported(nr);
+						int nr = entityImporter.importEntity(repository, dataService, dbAction);
+						if (nr > 0)
+						{
+							importReport.addEntityCount(entry.getKey(), nr);
+							importReport.addNrImported(nr);
+						}
+					} 
+					catch (MolgenisValidationException e)
+					{
+						for (ConstraintViolation violation : e.getViolations())
+						{
+							violation.setImportInfo(String.format("Sheet: '%s'", entityName));
+							violations.add(violation);
+						}
+
+						// Stop if 10 exceptions
+						if (violations.size() >= 10)
+						{
+							throw new MolgenisValidationException(violations);
+						}
 					}
 				}
-
+			}
+			
+			if (!violations.isEmpty())
+			{
+				throw new MolgenisValidationException(violations);
 			}
 		}
 		finally

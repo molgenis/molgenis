@@ -13,13 +13,16 @@ package ${package};
 
 import org.molgenis.data.jpa.JpaRepository;
 import org.springframework.stereotype.Component;
+import org.molgenis.data.validation.EntityValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Component("${JavaName(entity)}Repository")
 public class ${JavaName(entity)}Repository extends JpaRepository
 {	
-	public ${JavaName(entity)}Repository()
+	@Autowired
+	public ${JavaName(entity)}Repository(EntityValidator entityValidator)
 	{
-		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData());
+		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData(), entityValidator);
 	}
 	
 }
