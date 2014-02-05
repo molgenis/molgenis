@@ -43,10 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @version EBI: database version 17, prepared on 29th August 2013
  * 
  * */
-@Component
+@Component("ebiService")
 public class EbiServiceAnnotator implements RepositoryAnnotator
 {
-
 	// Web url to call the EBI web service
 	private static final String EBI_CHEMBLWS_URL = "https://www.ebi.ac.uk/chemblws/targets/uniprot/";
 

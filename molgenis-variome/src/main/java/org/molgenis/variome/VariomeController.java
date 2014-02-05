@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
@@ -56,8 +57,11 @@ public class VariomeController extends MolgenisPluginController{
 	@Autowired
 	DataSetsIndexer indexer;
 
-	@Autowired
+	@Resource(name = "ebiService")
 	RepositoryAnnotator ebiServiceAnnotator;
+	
+	@Resource(name = "caddService")
+	RepositoryAnnotator caddServiceAnnotator;
 	
 	@Autowired
 	public VariomeController(VariomeService pluginVariomeService)
@@ -142,9 +146,11 @@ public class VariomeController extends MolgenisPluginController{
 		
 		//TODO: Check which tools are selected, run annotators based on selection via scheduler
 		// Each tool will add to the feature and value lists 
+		
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, indexer);
-		omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
-		//caddAnnotator.annotate(dataService.getRepositoryByEntityName("CAR_Batch123"));
+		
+		//omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
+		omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variant"), false);
 		
 		return "view-result-page";
 	}
