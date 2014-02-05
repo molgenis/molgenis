@@ -138,10 +138,8 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
-		Entity e = getEntityManager().find(getEntityClass(), id);
-		System.out.println(e);
 
-		return e;
+		return getEntityManager().find(getEntityClass(), id);
 	}
 
 	@Override
@@ -766,6 +764,7 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
@@ -778,6 +777,7 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(q));
@@ -785,6 +785,7 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
@@ -805,6 +806,7 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		Entity entity = findOne(q);

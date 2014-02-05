@@ -2,8 +2,8 @@ package org.molgenis.data.validation;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
+import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -13,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Component
 public class DefaultEntityValidator implements EntityValidator
 {
 	private final DataService dataService;
+	private EmailValidator emailValidator;
 
 	@Autowired
 	public DefaultEntityValidator(DataService dataService)
@@ -29,16 +29,80 @@ public class DefaultEntityValidator implements EntityValidator
 	@Override
 	public void validate(Iterable<? extends Entity> entities, EntityMetaData meta) throws MolgenisValidationException
 	{
-		Set<ConstraintViolation> violations = checkUniques(entities, meta);
+		List<ConstraintViolation> violations = checkUniques(entities, meta);
+		violations.addAll(checkDatatypes(entities, meta));
+
 		if (!violations.isEmpty())
 		{
 			throw new MolgenisValidationException(violations);
 		}
 	}
 
-	private Set<ConstraintViolation> checkUniques(Iterable<? extends Entity> entities, EntityMetaData meta)
+	private List<ConstraintViolation> checkDatatypes(Iterable<? extends Entity> entities, EntityMetaData meta)
 	{
-		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
+		List<ConstraintViolation> violations = Lists.newArrayList();
+		for (AttributeMetaData attr : meta.getAttributes())
+		{
+			for (Entity entity : entities)
+			{
+				ConstraintViolation violation = null;
+				switch (attr.getDataType().getEnumType())
+				{
+					case EMAIL:
+						violation = checkEmail(entity, attr, meta);
+						break;
+					case BOOL:
+						violation = checkBoolean(entity, attr, meta);
+						break;
+					default:
+						break;
+				}
+
+				if (violation != null)
+				{
+					violations.add(violation);
+				}
+			}
+		}
+
+		return violations;
+	}
+
+	private ConstraintViolation checkEmail(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	{
+		if (emailValidator == null)
+		{
+			emailValidator = new EmailValidator();
+		}
+
+		String email = entity.getString(attribute.getName());
+		if (emailValidator.isValid(email, null))
+		{
+			return null;
+		}
+
+		String message = String.format("Invalid email value '%s'.", email);
+		return new ConstraintViolation(message, email, entity, attribute, meta);
+	}
+
+	private ConstraintViolation checkBoolean(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	{
+		try
+		{
+			entity.getBoolean(attribute.getName());
+			return null;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			String message = String.format("Invalid boolean value '%s'.", entity.getString(attribute.getName()));
+			return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta);
+		}
+	}
+
+	private List<ConstraintViolation> checkUniques(Iterable<? extends Entity> entities, EntityMetaData meta)
+	{
+		List<ConstraintViolation> violations = Lists.newArrayList();
 
 		for (AttributeMetaData attr : meta.getAttributes())
 		{

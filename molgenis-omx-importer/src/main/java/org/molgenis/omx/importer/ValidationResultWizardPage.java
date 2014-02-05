@@ -89,10 +89,18 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				File file = importWizard.getFile();
 				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
 
-				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br />");
+				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br /><br />");
 				for (ConstraintViolation violation : e.getViolations())
 				{
-					sb.append(violation.getMessage()).append("<br />");
+					sb.append(violation.getMessage());
+
+					if (violation.getImportInfo() != null)
+					{
+						sb.append(" ").append(violation.getImportInfo());
+					}
+
+					sb.append("<br />");
+
 				}
 
 				result.addError(new ObjectError("wizard", sb.toString()));

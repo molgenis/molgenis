@@ -11,6 +11,7 @@ public class ConstraintViolation
 	private final Entity entity;
 	private final AttributeMetaData violatedAttribute;
 	private final EntityMetaData entityMetaData;
+	private String importInfo;
 
 	public ConstraintViolation(String message, Object invalidValue, Entity entity, AttributeMetaData violatedAttribute,
 			EntityMetaData entityMetaData)
@@ -47,6 +48,16 @@ public class ConstraintViolation
 		return entityMetaData;
 	}
 
+	public String getImportInfo()
+	{
+		return importInfo;
+	}
+
+	public void setImportInfo(String importInfo)
+	{
+		this.importInfo = importInfo;
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -54,6 +65,7 @@ public class ConstraintViolation
 		int result = 1;
 		result = prime * result + ((entity == null) ? 0 : entity.hashCode());
 		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
+		result = prime * result + ((importInfo == null) ? 0 : importInfo.hashCode());
 		result = prime * result + ((invalidValue == null) ? 0 : invalidValue.hashCode());
 		result = prime * result + ((message == null) ? 0 : message.hashCode());
 		result = prime * result + ((violatedAttribute == null) ? 0 : violatedAttribute.hashCode());
@@ -77,6 +89,11 @@ public class ConstraintViolation
 			if (other.entityMetaData != null) return false;
 		}
 		else if (!entityMetaData.equals(other.entityMetaData)) return false;
+		if (importInfo == null)
+		{
+			if (other.importInfo != null) return false;
+		}
+		else if (!importInfo.equals(other.importInfo)) return false;
 		if (invalidValue == null)
 		{
 			if (other.invalidValue != null) return false;
