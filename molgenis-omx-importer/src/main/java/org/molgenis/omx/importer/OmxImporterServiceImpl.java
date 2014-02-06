@@ -11,7 +11,6 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntitySource;
 import org.molgenis.framework.db.EntitiesImporter;
 import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +25,10 @@ public class OmxImporterServiceImpl implements OmxImporterService
 	@Autowired
 	private DataSetImporterService dataSetImporterService;
 
-	@Transactional(rollbackFor =
-	{ IOException.class, ValueConverterException.class })
+	@Transactional(rollbackFor = IOException.class)
 	@Override
 	public EntityImportReport doImport(EntitySource entitySource, Map<String, Boolean> dataImportableMap,
-			DatabaseAction databaseAction) throws IOException, ValueConverterException
+			DatabaseAction databaseAction) throws IOException
 	{
 		// import entities
 		EntityImportReport importReport = entitiesImporter.importEntities(entitySource, databaseAction);
@@ -39,6 +37,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		if (dataImportableMap != null)
 		{
 			List<String> dataSetSheetNames = new ArrayList<String>();
+
 			for (Entry<String, Boolean> entry : dataImportableMap.entrySet())
 				if (entry.getValue() == true) dataSetSheetNames.add("dataset_" + entry.getKey());
 
