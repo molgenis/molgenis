@@ -316,6 +316,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 			listOfNewObservedValues.addAll(valuesForObservationSets);
 			dataService.add(ObservedValue.ENTITY_NAME, listOfNewObservedValues);
+			dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
 
 			currentUserStatus.setUserCurrentStage(userName, STAGE.StoreMapping);
 			currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsToMatch.size());
@@ -935,8 +936,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			protocol.setIdentifier(PROTOCOL_IDENTIFIER);
 			protocol.setName(PROTOCOL_IDENTIFIER);
 			protocol.setFeatures(features);
-			Integer id = dataService.add(Protocol.ENTITY_NAME, protocol);
-			System.out.println(id);
+			dataService.add(Protocol.ENTITY_NAME, protocol);
+
+			dataService.getCrudRepository(ObservableFeature.ENTITY_NAME).flush();
 		}
 
 		for (Integer dataSetId : dataSetsToMatch)
@@ -957,6 +959,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 				dataSet.setDescription("");
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
+
+				dataService.getCrudRepository(DataSet.ENTITY_NAME).flush();
 			}
 		}
 	}
@@ -1054,6 +1058,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		listOfNewObservedValues.add(valueForObservationSet);
 
 		dataService.add(ObservedValue.ENTITY_NAME, listOfNewObservedValues);
+		dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
+
 		searchService.updateRepositoryIndex(new StoreMappingRepository(storingMappingDataSet, listOfNewObservedValues,
 				dataService));
 	}
@@ -1094,7 +1100,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
 				algorithmScriptValue.setValue(request.getAlgorithmScript());
 				dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
-
+				dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
 				// Update index
 				StringBuilder updateScriptBuilder = new StringBuilder();
 				updateScriptBuilder.append(STORE_MAPPING_ALGORITHM_SCRIPT).append('=').append("\"")

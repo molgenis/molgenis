@@ -143,6 +143,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			dataService.add(ObservableFeature.ENTITY_NAME, fList);
 			dataService.add(Protocol.ENTITY_NAME, prot);
 			dataService.add(DataSet.ENTITY_NAME, dataSet);
+			dataService.getCrudRepository(ObservableFeature.ENTITY_NAME).flush();
 
 			searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
 					"protocolTree-" + dataSet.getId()));
@@ -159,7 +160,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (csvRepository != null) csvRepository.close();
 		}
 
-		return "";
+		return StringUtils.EMPTY;
 	}
 
 	private List<String> checkExistingFeatures(List<String> featureIdentifiers)
@@ -236,6 +237,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	}
 
 	@Override
+	@Transactional
 	public void annotate(Integer dataSetId, List<String> documentTypes)
 	{
 		runningProcesses.incrementAndGet();
@@ -476,8 +478,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 			listOfOntologyTerms.add(ot);
 		}
-		if (listOfOntologyTerms.size() > 0) addOntologies(ontologyInfo);
-		if (listOfOntologyTerms.size() > 0) dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
+
+		if (listOfOntologyTerms.size() > 0)
+		{
+			addOntologies(ontologyInfo);
+			dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
+			dataService.getCrudRepository(OntologyTerm.ENTITY_NAME).flush();
+		}
 
 		if (identifiers.isEmpty()) return Collections.emptyList();
 		Iterable<OntologyTerm> definitions = dataService.findAll(OntologyTerm.ENTITY_NAME,
@@ -513,7 +520,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				listOfOntologies.add(ontology);
 			}
 		}
-		if (listOfOntologies.size() != 0) dataService.add(Ontology.ENTITY_NAME, listOfOntologies);
+		if (listOfOntologies.size() != 0)
+		{
+			dataService.add(Ontology.ENTITY_NAME, listOfOntologies);
+			dataService.getCrudRepository(Ontology.ENTITY_NAME).flush();
+		}
 	}
 
 	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
