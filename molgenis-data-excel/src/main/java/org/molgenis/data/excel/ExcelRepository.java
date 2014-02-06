@@ -22,13 +22,13 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 /**
- * ExcelSheet Repository implementation
+ * ExcelSheet {@link org.molgenis.data.Repository} implementation
  * 
  * It is assumed that the first row of the sheet is the header row.
  * 
  * All attributes will be of the string type. The cell values are converted to string.
  * 
- * 
+ * The url of this Repository is defined as excel://${filename}/${sheetname}
  */
 public class ExcelRepository extends AbstractRepository
 {
