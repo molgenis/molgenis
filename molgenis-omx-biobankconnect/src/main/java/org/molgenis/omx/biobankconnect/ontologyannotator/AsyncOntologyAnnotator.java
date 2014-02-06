@@ -271,9 +271,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 				for (String documentType : documentTypes)
 				{
-					addIfNotExists(definitions, (annotateDataItem(dataService, documentType, feature, name, stemmer)));
-					addIfNotExists(definitions,
-							(annotateDataItem(dataService, documentType, feature, description, stemmer)));
+					addIfNotExists(definitions, (annotateDataItem(documentType, feature, name, stemmer)));
+					addIfNotExists(definitions, (annotateDataItem(documentType, feature, description, stemmer)));
 				}
 				addIfNotExists(definitions, feature.getDefinitions());
 
@@ -355,8 +354,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return newFeature;
 	}
 
-	public List<OntologyTerm> annotateDataItem(DataService dataService, String documentType, ObservableFeature feature,
-			String description, PorterStemmer stemmer)
+	public List<OntologyTerm> annotateDataItem(String documentType, ObservableFeature feature, String description,
+			PorterStemmer stemmer)
 	{
 		Set<String> uniqueTerms = new HashSet<String>();
 		for (String eachTerm : Arrays.asList(description.split(" +")))
@@ -403,17 +402,17 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		for (TermComparison termComparision : listOfHits)
 		{
 			Hit hit = termComparision.getHit();
-			Map<String, Object> data = hit.getColumnValueMap();
-			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			String ontologyTermSynonym = columnValueMap.get("ontologyTermSynonym").toString().toLowerCase();
+			String ontologyTerm = columnValueMap.get("ontologyTerm").toString().toLowerCase();
 			if (ontologyTerm.equals(ontologyTermSynonym) || !addedCandidates.contains(ontologyTermSynonym))
 			{
 				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer, positionFilter))
 				{
-					String uri = data.get("ontologyTermIRI").toString();
-					String ontologyLabel = data.get("ontologyLabel").toString();
+					String uri = columnValueMap.get("ontologyTermIRI").toString();
+					String ontologyLabel = columnValueMap.get("ontologyLabel").toString();
 					String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
-					mapUriTerm.put(termIdentifier, data);
+					mapUriTerm.put(termIdentifier, columnValueMap);
 					addedCandidates.add(ontologyTermSynonym);
 				}
 			}

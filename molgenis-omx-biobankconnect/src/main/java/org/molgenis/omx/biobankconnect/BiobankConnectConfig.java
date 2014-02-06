@@ -1,5 +1,6 @@
 package org.molgenis.omx.biobankconnect;
 
+import org.molgenis.omx.biobankconnect.algorithm.AlgorithmScriptLibrary;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmUnitConverter;
 import org.molgenis.omx.biobankconnect.ontologyannotator.AsyncOntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
@@ -45,6 +46,12 @@ public class BiobankConnectConfig
 	public AlgorithmUnitConverter algorithmUnitConverter() throws IllegalArgumentException, IllegalAccessException
 	{
 		return new AlgorithmUnitConverter();
+	}
+
+	@Bean
+	public AlgorithmScriptLibrary algorithmScriptLibrary()
+	{
+		return new AlgorithmScriptLibrary();
 	}
 
 	@Bean

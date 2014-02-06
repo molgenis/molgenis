@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -66,6 +68,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private CurrentUserStatus currentUserStatus;
 	@Autowired
 	private AlgorithmUnitConverter algorithmUnitConverter;
+	@Autowired
+	private AlgorithmScriptLibrary algorithmScriptLibrary;
 
 	private BiobankConnectWizard wizard;
 	private final DataService dataService;
@@ -176,22 +180,46 @@ public class AlgorithmEditorController extends AbstractWizardController
 		{
 			SearchResult searchResult = ontologyMatcher.generateMapping(userName, request.getFeatureId(),
 					request.getTargetDataSetId(), selectedDataSetIds.get(0));
-			if (searchResult.getSearchHits().size() > 0)
+			ObservableFeature standardFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+					request.getFeatureId(), ObservableFeature.class);
+			String scriptTemplate = algorithmScriptLibrary.findScriptTemplate(standardFeature);
+			if (scriptTemplate.isEmpty())
 			{
-				Hit hit = searchResult.getSearchHits().get(0);
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				if (searchResult.getTotalHitCount() > 0)
+				{
+					Hit hit = searchResult.getSearchHits().get(0);
+					ObservableFeature customFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+							Integer.parseInt(hit.getColumnValueMap().get("id").toString()), ObservableFeature.class);
 
-				ObservableFeature standardFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-						request.getFeatureId(), ObservableFeature.class);
-				ObservableFeature customFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-						Integer.parseInt(columnValueMap.get("id").toString()), ObservableFeature.class);
+					String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
+							customFeature.getUnit());
+					StringBuilder suggestedScript = new StringBuilder();
+					suggestedScript.append("$('").append(customFeature.getName()).append("')").append(conversionScript);
+					jsonResults.put("suggestedScript", suggestedScript.toString());
+				}
+			}
+			else
+			{
+				for (String standardFeatureName : extractFeatureName(scriptTemplate))
+				{
+					SearchResult result = algorithmScriptLibrary.findOntologyTerm(Arrays.asList(standardFeatureName));
+					if (result.getTotalHitCount() > 0)
+					{
+						for (String synonyms : algorithmScriptLibrary.findOntologyTermSynonyms(result.getSearchHits()
+								.get(0)))
+						{
 
-				String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
-						customFeature.getUnit());
+						}
+					}
 
-				StringBuilder suggestedScript = new StringBuilder();
-				suggestedScript.append("$('").append(customFeature.getName()).append("')").append(conversionScript);
-				jsonResults.put("suggestedScript", suggestedScript.toString());
+					QueryImpl query = new QueryImpl();
+					for (Hit hit : searchResult)
+					{
+						if (query.getRules().size() > 0) query.addRule(new QueryRule(Operator.OR));
+						query.addRule(new QueryRule("id", Operator.EQUALS, hit.getColumnValueMap().get("id")));
+					}
+					query.pageSize(100);
+				}
 			}
 		}
 		return jsonResults;

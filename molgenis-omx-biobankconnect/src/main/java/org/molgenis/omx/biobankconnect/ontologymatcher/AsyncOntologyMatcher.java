@@ -356,6 +356,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	@Override
+	@Transactional
 	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSet, Integer sourceDataSet)
 	{
 		QueryImpl query = new QueryImpl();
@@ -395,7 +396,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						rules.add(queryRule);
 					}
 				}
-				else rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, description));
+				else
+				{
+					rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, description));
+				}
 
 				QueryRule finalQueryRule = new QueryRule(rules);
 				finalQueryRule.setOperator(Operator.DIS_MAX);
@@ -504,8 +508,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					List<QueryRule> rules = new ArrayList<QueryRule>();
 					for (String term : boostTermContainer.getTerms())
 					{
-						rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, term.trim()));
-						rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, term.trim()));
+						rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, term.trim()));
+						rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, term.trim()));
 					}
 					if (!boost) boost = boostTermContainer.isBoost();
 					QueryRule queryRule = new QueryRule(rules);
@@ -547,8 +551,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						{
 							if (!term.isEmpty())
 							{
-								rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, term.trim()));
-								rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, term.trim()));
+								rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, term.trim()));
+								rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, term.trim()));
 							}
 						}
 						QueryRule queryRule = new QueryRule(rules);
@@ -583,9 +587,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							}
 							else boostedSynonym.append(term);
 
-							rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.SEARCH, boostedSynonym
+							rules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, boostedSynonym
 									.toString()));
-							rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.SEARCH, boostedSynonym
+							rules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, boostedSynonym
 									.toString()));
 						}
 					}
@@ -643,14 +647,14 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			validOntologyTerm.put(ot.getTermAccession(), ot.getName());
 		}
 
-		QueryImpl q = new QueryImpl();
-		q.pageSize(10000);
+		QueryImpl query = new QueryImpl();
+		query.pageSize(10000);
 		for (QueryRule rule : rules)
 		{
-			q.addRule(rule);
+			query.addRule(rule);
 		}
 
-		SearchRequest request = new SearchRequest(null, q, null);
+		SearchRequest request = new SearchRequest(null, query, null);
 		SearchResult result = searchService.search(request);
 		Iterator<Hit> iterator = result.iterator();
 
@@ -759,8 +763,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				int parentNodeLevel = parentNodePath.split("\\.").length;
 				Boolean boost = entry.getValue();
 
-				Query q = new QueryImpl().like(NODE_PATH, entry.getKey()).pageSize(5000);
-				SearchResult result = searchService.search(new SearchRequest(documentType, q, null));
+				Query query = new QueryImpl().eq(NODE_PATH, entry.getKey()).pageSize(5000);
+				SearchResult result = searchService.search(new SearchRequest(documentType, query, null));
 				Iterator<Hit> iterator = result.iterator();
 
 				Pattern pattern = Pattern.compile("[0-9]+");
@@ -931,12 +935,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			protocol.setIdentifier(PROTOCOL_IDENTIFIER);
 			protocol.setName(PROTOCOL_IDENTIFIER);
 			protocol.setFeatures(features);
-			dataService.add(Protocol.ENTITY_NAME, protocol);
+			Integer id = dataService.add(Protocol.ENTITY_NAME, protocol);
+			System.out.println(id);
 		}
 
 		for (Integer dataSetId : dataSetsToMatch)
 		{
-			String identifier = userName + "-" + selectedDataSet + "-" + dataSetId;
+			String identifier = createMappingDataSetIdentifier(userName, selectedDataSet, dataSetId);
 			DataSet existing = dataService.findOne(DataSet.ENTITY_NAME,
 					new QueryImpl().eq(DataSet.IDENTIFIER, identifier), DataSet.class);
 
