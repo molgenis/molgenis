@@ -18,8 +18,6 @@ import org.molgenis.gaf.GafListValidator.GafListValidationReport;
 import org.molgenis.googlespreadsheet.GoogleSpreadsheetRepository;
 import org.molgenis.googlespreadsheet.GoogleSpreadsheetRepository.Visibility;
 import org.molgenis.omx.converters.ValueConverterException;
-import org.molgenis.omx.importer.DataSetImporterService;
-import org.molgenis.omx.importer.DataSetImporterServiceImpl;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
@@ -61,9 +59,6 @@ public class GafListImporterService
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	private DataSetImporterService dataSetImporterService;
 
 	@Autowired
 	private DataSetsIndexer dataSetIndexer;
@@ -160,9 +155,8 @@ public class GafListImporterService
 			dataSet.setProtocolUsed(protocol);
 			dataService.add(DataSet.ENTITY_NAME, dataSet);
 			dataSetId = dataSet.getId();
+			dataService.add(dataSetIdentifier, gafListRepository);
 
-			dataSetImporterService.importSheet(gafListRepository, DataSetImporterServiceImpl.DATASET_SHEET_PREFIX
-					+ dataSetIdentifier);
 			logger.debug("finished importing valid gaf list runs");
 		}
 		finally
