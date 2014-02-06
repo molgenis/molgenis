@@ -13,11 +13,9 @@
 </#list>
 	    <properties>
           <property name="javax.persistence.validation.mode" value="none"/>
-          
           <property name="eclipselink.target-database" value="MySQL" />
           <property name="eclipselink.jdbc.batch-writing" value="jdbc"/>
           <property name="eclipselink.jdbc.batch-writing.size" value="100"/>
-          <property name="eclipselink.persistence-context.flush-mode" value="commit"/>
           <property name="eclipselink.persistence-context.close-on-commit" value="true"/>
           <property name="eclipselink.persistence-context.persist-on-commit" value="false"/>
           <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
