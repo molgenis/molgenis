@@ -35,7 +35,7 @@ public class ExcelSheetReaderTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		Workbook workbook = WorkbookFactory.create(is);
-		excelSheetReader = new ExcelRepository(workbook.getSheet("test"));
+		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"));
 	}
 
 	@AfterMethod

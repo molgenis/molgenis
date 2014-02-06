@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -31,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
 @ContextConfiguration(classes =
 { Config.class })
@@ -143,10 +143,6 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(dataService.findOne(MolgenisUser.ENTITY_NAME, user2Id, MolgenisUser.class)).thenReturn(user2);
 		when(dataService.findOne(MolgenisUser.ENTITY_NAME, user3Id, MolgenisUser.class)).thenReturn(user3);
 
-		EntitySource entitySource = when(mock(EntitySource.class).getEntityNames()).thenReturn(
-				Arrays.asList("entity1", "entity2", "entity3")).getMock();
-		when(dataService.getEntitySource("jpa://")).thenReturn(entitySource);
-
 		when(
 				dataService.findAll(GroupAuthority.ENTITY_NAME,
 						new QueryImpl().in(GroupAuthority.MOLGENISGROUP, Arrays.<Entity> asList(group1)),
@@ -176,6 +172,8 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
 		when(plugin3.getName()).thenReturn("plugin3n");
 		when(molgenisPluginRegistry.getPlugins()).thenReturn(Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3));
+
+		when(dataService.getEntityNames()).thenReturn(Lists.<String> newArrayList());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)

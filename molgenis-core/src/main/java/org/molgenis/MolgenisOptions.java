@@ -97,9 +97,6 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
 	public boolean generate_db = true;
 
-	@Option(name = "generate_jpa_entity_source", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate JpaEntitySource. Default: false")
-	public boolean generate_jpa_entity_source = false;
-
 	/** Advanced option: skip entities marked as 'system="true"' */
 	@Option(name = "exclude_system", param = Option.Param.BOOLEAN, type = Option.Type.REQUIRED_ARGUMENT, usage = "Expert option: Whether system tables should be excluded from generation. Default: true")
 	public boolean exclude_system = true;

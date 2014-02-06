@@ -40,6 +40,7 @@ import com.google.common.cache.LoadingCache;
  */
 public class OmxRepository extends AbstractDataSetMatrixRepository implements Queryable, Writable
 {
+	public static final String BASE_URL = "omx://";
 	private static int FLUSH_SIZE = 20;
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
 	private final SearchService searchService;
@@ -48,7 +49,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 
 	public OmxRepository(DataService dataService, SearchService searchService, String dataSetIdentifier)
 	{
-		super(dataService, dataSetIdentifier);
+		super(BASE_URL + dataSetIdentifier, dataService, dataSetIdentifier);
 		this.searchService = searchService;
 		this.valueConverter = new ValueConverter(dataService);
 	}

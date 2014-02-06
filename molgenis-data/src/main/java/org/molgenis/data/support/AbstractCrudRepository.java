@@ -13,8 +13,9 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 {
 	private final EntityValidator validator;
 
-	public AbstractCrudRepository(EntityValidator validator)
+	public AbstractCrudRepository(String url, EntityValidator validator)
 	{
+		super(url);
 		this.validator = validator;
 	}
 

@@ -216,4 +216,10 @@ public class CrudRepositoryDecorator implements CrudRepository
 	{
 		return decoratedRepository.findOne(q, clazz);
 	}
+
+	@Override
+	public String getUrl()
+	{
+		return decoratedRepository.getUrl();
+	}
 }
