@@ -18,6 +18,11 @@ import org.molgenis.data.support.FileRepositorySource;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
+/**
+ * Read an excel file and iterate through the sheets.
+ * 
+ * A sheet is exposed as a {@link org.molgenis.data.Repository} with the sheetname as the Repository name
+ */
 public class ExcelRepositorySource extends FileRepositorySource
 {
 	public static final Set<String> EXTENSIONS = ImmutableSet.of("xls", "xlsx");

@@ -20,13 +20,10 @@ A repository is a collection of entities. The `Repository` interface describes t
 
 A `CrudRepository` is capable of doing create/update/delete and is queryable (for example a database table)
 
+Each repository has a unique url.
 
 ### RepositoryCollection
 A `RepositoryCollection` is a collection of repositories that you can iterate over.
-
-
-### EntitySource
-A `EntitySource` is a `RepositoryCollection` that is identified by an unique url. Examples are 'an Excel file' or 'a database'. You can create a specific `EntitySource` using an `EntitySourceFactory`.
 
 
 ### Writable / Updateable
@@ -38,7 +35,7 @@ If a Repository implmements the `Queryable` interface you can query it using `Qu
 
 
 ### DataService
-The dataservice is a collection of `EntitySource` and acts as a facade of the data api. Clients of the data api typically only interact with this class. You can add new entitysources to the dataservice by first registering an `EntitySourceFactory`, then you can register an `EntitySource` with a unique url that is understood by the factory.
+The dataservice is a collection of `Repository` and acts as a facade of the data api. Clients of the data api typically only interact with this class. You must add repositories to it so these can be used ad data backend. 
 
 If you add an `EntitySourceFactory` to the Spring application context it will automatically picked up and be used to create an entitysource and register it by the dataservice.
 
