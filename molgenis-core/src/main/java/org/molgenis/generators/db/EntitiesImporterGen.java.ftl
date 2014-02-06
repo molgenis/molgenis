@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.Repository;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -73,111 +73,67 @@ public class EntitiesImporterImpl implements EntitiesImporter
 
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class})
+	{ IOException.class })
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException
 	{
-		return importEntities(dataService.createEntitySource(file), dbAction);
-	}
-	
-	@Override
-	@Transactional(rollbackFor =
-	{ IOException.class})
-	public EntityImportReport importEntities(final Repository repository, final String entityName,
-			DatabaseAction dbAction) throws IOException
-	{
-
-		return importEntities(new EntitySource()
-		{
-
-			@Override
-			public Iterable<String> getEntityNames()
-			{
-				return Collections.singleton(entityName);
-			}
-
-			@Override
-			public Repository getRepositoryByEntityName(String name)
-			{
-				return repository;
-			}
-
-			@Override
-			public void close() throws IOException
-			{
-				repository.close();
-			}
-
-			@Override
-			public String getUrl()
-			{
-				return null;
-			}
-
-		}, dbAction);
+		return importEntities(dataService.createFileRepositorySource(file).getRepositories(), dbAction);
 	}
 
 	@Override
 	@Transactional(rollbackFor =
-	{ IOException.class})
-	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException
+	{ IOException.class })
+	public EntityImportReport importEntities(List<Repository> sourceRepositories, DatabaseAction dbAction)
+			throws IOException
 	{
 		EntityImportReport importReport = new EntityImportReport();
 
-		try
+		// map entity names on repositories
+		Map<String, Repository> repositoryMap = new HashMap<String, Repository>();
+		for (Repository repository : sourceRepositories)
 		{
-			// map entity names on repositories
-			Map<String, Repository> repositoryMap = new HashMap<String, Repository>();
-			for (String entityName : entitySource.getEntityNames())
-			{
-				repositoryMap.put(entityName.toLowerCase(), entitySource.getRepositoryByEntityName(entityName));
-			}
-			
-			List<ConstraintViolation> violations = Lists.newArrayList();
-			
-			
-			// import entities in order defined by entities map
-			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
-			{
-				String entityName = entry.getKey();
-				Repository repository = repositoryMap.get(entityName);
-				if (repository != null)
-				{
-					EntityImporter entityImporter = entry.getValue();
-					
-					try
-					{
-						int nr = entityImporter.importEntity(repository, dataService, dbAction);
-						if (nr > 0)
-						{
-							importReport.addEntityCount(entry.getKey(), nr);
-							importReport.addNrImported(nr);
-						}
-					} 
-					catch (MolgenisValidationException e)
-					{
-						for (ConstraintViolation violation : e.getViolations())
-						{
-							violation.setImportInfo(String.format("Sheet: '%s'", entityName));
-							violations.add(violation);
-						}
+			repositoryMap.put(repository.getName().toLowerCase(), repository);
+		}
 
-						// Stop if 10 exceptions
-						if (violations.size() >= 10)
-						{
-							throw new MolgenisValidationException(violations);
-						}
+		List<ConstraintViolation> violations = Lists.newArrayList();
+
+		// import entities in order defined by entities map
+		for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
+		{
+			String entityName = entry.getKey();
+			Repository repository = repositoryMap.get(entityName);
+			if (repository != null)
+			{
+				EntityImporter entityImporter = entry.getValue();
+
+				try
+				{
+					int nr = entityImporter.importEntity(repository, dataService, dbAction);
+					if (nr > 0)
+					{
+						importReport.addEntityCount(entry.getKey(), nr);
+						importReport.addNrImported(nr);
+					}
+				}
+				catch (MolgenisValidationException e)
+				{
+					for (ConstraintViolation violation : e.getViolations())
+					{
+						violation.setImportInfo(String.format("Sheet: '%s'", entityName));
+						violations.add(violation);
+					}
+
+					// Stop if 10 exceptions
+					if (violations.size() >= 10)
+					{
+						throw new MolgenisValidationException(violations);
 					}
 				}
 			}
-			
-			if (!violations.isEmpty())
-			{
-				throw new MolgenisValidationException(violations);
-			}
 		}
-		finally
+
+		if (!violations.isEmpty())
 		{
-			entitySource.close();
+			throw new MolgenisValidationException(violations);
 		}
 
 		return importReport;

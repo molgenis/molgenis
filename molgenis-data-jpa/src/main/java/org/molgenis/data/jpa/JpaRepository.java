@@ -46,6 +46,8 @@ import com.google.common.collect.Lists;
  */
 public class JpaRepository extends AbstractCrudRepository implements CrudRepository
 {
+	public static final String BASE_URL = "jpa://";
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 	private final Class<? extends Entity> entityClass;
@@ -54,7 +56,7 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 
 	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData, EntityValidator validator)
 	{
-		super(validator);
+		super(BASE_URL + entityClass.getName(), validator);
 		this.entityClass = entityClass;
 		this.entityMetaData = entityMetaData;
 	}
