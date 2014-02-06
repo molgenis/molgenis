@@ -11,25 +11,15 @@
  */
 package ${package};
 
-import org.molgenis.data.DataService;
 import org.molgenis.data.jpa.JpaRepository;
-import org.springframework.stereotype.Component;
-import org.molgenis.data.validation.EntityValidator;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-@Component("${JavaName(entity)}Repository")
+@Repository("${JavaName(entity)}Repository")
 public class ${JavaName(entity)}Repository extends JpaRepository
 {	
-	@Autowired(required = false)
-	public void setDataService(DataService dataService)
+	public ${JavaName(entity)}Repository()
 	{
-		dataService.addRepository(this);
-	}
-	
-	@Autowired
-	public ${JavaName(entity)}Repository(EntityValidator entityValidator)
-	{
-		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData(), entityValidator);
+		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData());
 	}
 	
 }
