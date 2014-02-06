@@ -44,13 +44,6 @@ public class ExcelSheetReaderTest
 		IOUtils.closeQuietly(is);
 	}
 
-	@SuppressWarnings("resource")
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void ExcelSheetReader()
-	{
-		new ExcelRepository(null, null);
-	}
-
 	@Test
 	public void addCellProcessor_header()
 	{
