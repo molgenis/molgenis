@@ -4,26 +4,36 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.zip.ZipException;
+import java.io.InputStream;
 
-import org.molgenis.data.EntitySource;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
-public class CsvEntitySourceFactoryTest
+public class CsvRepositorySourceTest
 {
-	private static File ZIP_FILE;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws URISyntaxException, ZipException, IOException
+	@Test
+	public void getRepositoriesCsv() throws FileNotFoundException, IOException, InvalidFormatException
 	{
-		ZIP_FILE = File.createTempFile("file", ".zip");
+		InputStream in = getClass().getResourceAsStream("/testdata.csv");
+		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
+		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		FileOutputStream fos = new FileOutputStream(ZIP_FILE);
+		CsvRepositorySource repo = new CsvRepositorySource(csvFile);
+		assertNotNull(repo.getRepositories());
+		assertEquals(repo.getRepositories().size(), 1);
+		assertEquals(repo.getRepositories().get(0).getName(), "testdata");
+	}
+
+	public void getRepositoriesZip() throws IOException, InvalidFormatException
+	{
+		File zip = File.createTempFile("file", ".zip");
+		FileOutputStream fos = new FileOutputStream(zip);
 		try
 		{
 			fos.write(new byte[]
@@ -65,26 +75,12 @@ public class CsvEntitySourceFactoryTest
 		{
 			fos.close();
 		}
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws IOException
-	{
-		ZIP_FILE.delete();
-	}
-
-	@Test
-	public void create()
-	{
-		String url = "csv://" + ZIP_FILE.getAbsolutePath();
-		EntitySource entitySource = new CsvEntitySourceFactory().create(url);
-		assertNotNull(entitySource);
-		assertEquals(entitySource.getUrl(), url);
-	}
-
-	@Test
-	public void getUrlPrefix()
-	{
-		assertNotNull(new CsvEntitySourceFactory().getUrlPrefix());
+		CsvRepositorySource repo = new CsvRepositorySource(zip);
+		assertNotNull(repo.getRepositories());
+		assertEquals(repo.getRepositories().size(), 3);
+		assertNotNull(repo.getRepository("0"));
+		assertNotNull(repo.getRepository("1"));
+		assertNotNull(repo.getRepository("2"));
 	}
 }

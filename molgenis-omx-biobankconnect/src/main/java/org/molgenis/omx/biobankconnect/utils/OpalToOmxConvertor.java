@@ -4,27 +4,28 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 
 public class OpalToOmxConvertor extends AbstractOmxConvertor
 {
-	public OpalToOmxConvertor(String studyName, String filePath) throws IOException
+	public OpalToOmxConvertor(String studyName, String filePath) throws IOException, InvalidFormatException
 	{
 		super(studyName, filePath);
 	}
 
 	@Override
-	public void collectProtocolInfo(EntitySource entitySource) throws IOException
+	public void collectProtocolInfo(RepositorySource repositorySource) throws IOException
 	{
 		System.out.println("No protocol involved in OPAL format!");
 	}
 
 	@Override
-	public void collectVariableInfo(EntitySource entitySource) throws IOException
+	public void collectVariableInfo(RepositorySource repositorySource) throws IOException
 	{
-		Repository repo = entitySource.getRepositoryByEntityName("Variables");
+		Repository repo = repositorySource.getRepository("Variables");
 		for (Entity entity : repo)
 		{
 			String variableName = entity.getString("name");
@@ -44,9 +45,9 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectCategoryInfo(EntitySource entitySource) throws IOException
+	public void collectCategoryInfo(RepositorySource repositorySource) throws IOException
 	{
-		Repository repo = entitySource.getRepositoryByEntityName("Categories");
+		Repository repo = repositorySource.getRepository("Categories");
 		for (Entity entity : repo)
 		{
 			String featureID = entity.getString("variable");
@@ -75,8 +76,9 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	/**
 	 * @param args
 	 * @throws IOException
+	 * @throws InvalidFormatException
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 		new OpalToOmxConvertor(args[0], args[1]);
 	}

@@ -31,8 +31,9 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	protected final DataService dataService;
 	private DefaultEntityMetaData metaData = null;
 
-	public AbstractDataSetMatrixRepository(DataService dataService, String dataSetIdentifier)
+	public AbstractDataSetMatrixRepository(String url, DataService dataService, String dataSetIdentifier)
 	{
+		super(url);
 		this.dataService = dataService;
 		this.dataSetIdentifier = dataSetIdentifier;
 	}

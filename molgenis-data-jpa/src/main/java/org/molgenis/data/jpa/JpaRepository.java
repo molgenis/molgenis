@@ -30,11 +30,10 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.EntityValidator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,25 +43,26 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractCrudRepository implements CrudRepository
+public class JpaRepository extends AbstractRepository implements CrudRepository
 {
+	public static final String BASE_URL = "jpa://";
+
 	@PersistenceContext
 	private EntityManager entityManager;
 	private final Class<? extends Entity> entityClass;
 	private final EntityMetaData entityMetaData;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData, EntityValidator validator)
+	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
 	{
-		super(validator);
+		super(BASE_URL + entityClass.getName());
 		this.entityClass = entityClass;
 		this.entityMetaData = entityMetaData;
 	}
 
-	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass,
-			EntityMetaData entityMetaData, EntityValidator validator)
+	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
 	{
-		this(entityClass, entityMetaData, validator);
+		this(entityClass, entityMetaData);
 		this.entityManager = entityManager;
 	}
 
@@ -78,7 +78,8 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
-	protected Integer addInternal(Entity entity)
+	@Transactional
+	public Integer add(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -91,7 +92,8 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
-	protected void addInternal(Iterable<? extends Entity> entities)
+	@Transactional
+	public void add(Iterable<? extends Entity> entities)
 	{
 		for (Entity e : entities)
 			add(e);
@@ -213,7 +215,8 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
-	protected void updateInternal(Entity entity)
+	@Transactional
+	public void update(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 
@@ -226,7 +229,8 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
-	protected void updateInternal(Iterable<? extends Entity> entities)
+	@Transactional
+	public void update(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
@@ -255,7 +259,8 @@ public class JpaRepository extends AbstractCrudRepository implements CrudReposit
 	}
 
 	@Override
-	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
+	@Transactional
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 

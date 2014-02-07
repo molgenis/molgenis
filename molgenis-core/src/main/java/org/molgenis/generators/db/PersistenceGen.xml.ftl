@@ -13,7 +13,6 @@
 </#list>
 	    <properties>
           <property name="javax.persistence.validation.mode" value="none"/>
-          
           <property name="eclipselink.target-database" value="MySQL" />
           <property name="eclipselink.jdbc.batch-writing" value="jdbc"/>
           <property name="eclipselink.jdbc.batch-writing.size" value="100"/>

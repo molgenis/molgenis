@@ -17,13 +17,15 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.excel.ExcelEntitySource;
+import org.molgenis.data.excel.ExcelRepositorySource;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.processor.LowerCaseProcessor;
@@ -44,15 +46,14 @@ public class SampleConverter
 	List<MakeEntityNameAndIdentifier> mkObsProtocollist = new ArrayList<MakeEntityNameAndIdentifier>();
 	List<MakeEntityNameAndIdentifier> mkObsFeaturelist = new ArrayList<MakeEntityNameAndIdentifier>();
 
-	public void convert(InputStream in, OutputStream out, String outputdir, String projectName) throws IOException
+	public void convert(InputStream in, OutputStream out, String outputdir, String projectName) throws IOException,
+			InvalidFormatException
 	{
 
 		OUTPUTDIR = outputdir;
 		PROJECT = projectName;
 
-		ExcelEntitySource entitySource = new ExcelEntitySource(in, null);
-		entitySource.addCellProcessor(new TrimProcessor(false, true));
-
+		RepositorySource repositorySource = new ExcelRepositorySource(projectName, in, new TrimProcessor(false, true));
 		CsvWriter csvWriter = null;
 
 		ArrayList<String> listOfEntity = new ArrayList<String>();
@@ -63,12 +64,11 @@ public class SampleConverter
 
 		try
 		{
-			for (String entityName : entitySource.getEntityNames())
+			for (Repository repo : repositorySource.getRepositories())
 			{
-				Repository sheetReader = entitySource.getRepositoryByEntityName(entityName);
 				this.featureColNames = new ArrayList<String>();
 
-				for (AttributeMetaData attr : sheetReader.getAttributes())
+				for (AttributeMetaData attr : repo.getAttributes())
 				{
 					String colName = attr.getName();
 					if (colName.equals(IDENTIFIER))
@@ -83,7 +83,7 @@ public class SampleConverter
 
 				csvWriter = new CsvWriter(new OutputStreamWriter(out, Charset.forName("UTF-8")), this.featureColNames);
 
-				for (Entity entity : sheetReader)
+				for (Entity entity : repo)
 				{
 					// If the sample name exists
 					if (entity.getString(IDENTIFIER) != null && !entity.getString(IDENTIFIER).isEmpty())
@@ -142,13 +142,6 @@ public class SampleConverter
 		}
 		finally
 		{
-			try
-			{
-				entitySource.close();
-			}
-			catch (IOException e)
-			{
-			}
 			try
 			{
 				csvWriter.close();
