@@ -1,5 +1,6 @@
 package org.molgenis.omx.biobankconnect;
 
+import org.molgenis.omx.biobankconnect.algorithm.AlgorithmGenerator;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmScriptLibrary;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmUnitConverter;
 import org.molgenis.omx.biobankconnect.ontologyannotator.AsyncOntologyAnnotator;
@@ -52,6 +53,12 @@ public class BiobankConnectConfig
 	public AlgorithmScriptLibrary algorithmScriptLibrary()
 	{
 		return new AlgorithmScriptLibrary();
+	}
+
+	@Bean
+	public AlgorithmGenerator algorithmGenerator()
+	{
+		return new AlgorithmGenerator();
 	}
 
 	@Bean

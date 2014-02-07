@@ -5,22 +5,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
@@ -28,17 +23,14 @@ import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
 import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
-import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
-import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
-import org.mozilla.javascript.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -70,29 +62,34 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private AlgorithmUnitConverter algorithmUnitConverter;
 	@Autowired
 	private AlgorithmScriptLibrary algorithmScriptLibrary;
+	@Autowired
+	private AlgorithmGenerator algorithmGenerator;
 
 	private BiobankConnectWizard wizard;
 	private final DataService dataService;
-	private final AlgorithmEditorPage algorithmEditorPage;
 	private final ChooseBiobankPage chooseBiobanksPage;
-	private final ChooseCataloguePage chooseCataloguePage;
 	private final OntologyAnnotatorPage ontologyAnnotatorPage;
+	private final ChooseCataloguePage chooseCataloguePage;
+	private final AlgorithmEditorPage algorithmEditorPage;
+	private final AlgorithmGeneratorPage algorithmGeneratorPage;
 
 	@Autowired
-	public AlgorithmEditorController(AlgorithmEditorPage algorithmEditorPage, ChooseBiobankPage chooseBiobanksPage,
-			ChooseCataloguePage chooseCataloguePage, OntologyAnnotatorPage ontologyAnnotatorPage,
-			DataService dataService)
+	public AlgorithmEditorController(ChooseBiobankPage chooseBiobanksPage, OntologyAnnotatorPage ontologyAnnotatorPage,
+			ChooseCataloguePage chooseCataloguePage, AlgorithmEditorPage algorithmEditorPage,
+			AlgorithmGeneratorPage algorithmGeneratorPage, DataService dataService)
 	{
 		super(URI, ID);
 		if (algorithmEditorPage == null) throw new IllegalArgumentException("algorithmEditorPage is null!");
 		if (chooseBiobanksPage == null) throw new IllegalArgumentException("chooseBiobanksPage is null!");
 		if (chooseCataloguePage == null) throw new IllegalArgumentException("chooseCataloguePage is null!");
 		if (ontologyAnnotatorPage == null) throw new IllegalArgumentException("ontologyAnnotatorPage is null!");
+		if (algorithmGeneratorPage == null) throw new IllegalArgumentException("algorithmGeneratorPage is null!");
 		if (dataService == null) throw new IllegalArgumentException("dataService is null!");
-		this.algorithmEditorPage = algorithmEditorPage;
 		this.chooseBiobanksPage = chooseBiobanksPage;
-		this.chooseCataloguePage = chooseCataloguePage;
 		this.ontologyAnnotatorPage = ontologyAnnotatorPage;
+		this.chooseCataloguePage = chooseCataloguePage;
+		this.algorithmEditorPage = algorithmEditorPage;
+		this.algorithmGeneratorPage = algorithmGeneratorPage;
 		this.dataService = dataService;
 	}
 
@@ -127,6 +124,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 		wizard.addPage(ontologyAnnotatorPage);
 		wizard.addPage(chooseBiobanksPage);
 		wizard.addPage(algorithmEditorPage);
+		wizard.addPage(algorithmGeneratorPage);
 		return wizard;
 	}
 
@@ -200,26 +198,31 @@ public class AlgorithmEditorController extends AbstractWizardController
 			}
 			else
 			{
-				for (String standardFeatureName : extractFeatureName(scriptTemplate))
-				{
-					SearchResult result = algorithmScriptLibrary.findOntologyTerm(Arrays.asList(standardFeatureName));
-					if (result.getTotalHitCount() > 0)
-					{
-						for (String synonyms : algorithmScriptLibrary.findOntologyTermSynonyms(result.getSearchHits()
-								.get(0)))
-						{
-
-						}
-					}
-
-					QueryImpl query = new QueryImpl();
-					for (Hit hit : searchResult)
-					{
-						if (query.getRules().size() > 0) query.addRule(new QueryRule(Operator.OR));
-						query.addRule(new QueryRule("id", Operator.EQUALS, hit.getColumnValueMap().get("id")));
-					}
-					query.pageSize(100);
-				}
+				// for (String standardFeatureName :
+				// extractFeatureName(scriptTemplate))
+				// {
+				// SearchResult result =
+				// algorithmScriptLibrary.findOntologyTerm(Arrays.asList(standardFeatureName));
+				// if (result.getTotalHitCount() > 0)
+				// {
+				// for (String synonyms :
+				// algorithmScriptLibrary.findOntologyTermSynonyms(result.getSearchHits()
+				// .get(0)))
+				// {
+				//
+				// }
+				// }
+				//
+				// QueryImpl query = new QueryImpl();
+				// for (Hit hit : searchResult)
+				// {
+				// if (query.getRules().size() > 0) query.addRule(new
+				// QueryRule(Operator.OR));
+				// query.addRule(new QueryRule("id", Operator.EQUALS,
+				// hit.getColumnValueMap().get("id")));
+				// }
+				// query.pageSize(100);
+				// }
 			}
 		}
 		return jsonResults;
@@ -232,47 +235,16 @@ public class AlgorithmEditorController extends AbstractWizardController
 	{
 		if (request.getSelectedDataSetIds().size() == 0 || request.getAlgorithmScript().isEmpty()) return Collections
 				.emptyMap();
+		Map<String, Object> jsonResults = new HashMap<String, Object>();
 
 		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, request.getSelectedDataSetIds().get(0),
 				DataSet.class);
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
-		List<String> featureNames = extractFeatureName(request.getAlgorithmScript());
-		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.NAME, featureNames), ObservableFeature.class);
-		Iterable<ObservedValue> observedValueIterators = dataService.findAll(
-				ObservedValue.ENTITY_NAME,
-				new QueryImpl().and().in(ObservedValue.FEATURE, featureIterators).and()
-						.in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
 
-		Map<Integer, MapEntity> eachIndividualValues = new HashMap<Integer, MapEntity>();
-		for (ObservedValue value : observedValueIterators)
-		{
-			ObservationSet observationSet = value.getObservationSet();
-			Integer observationSetId = observationSet.getId();
-			if (!eachIndividualValues.containsKey(observationSetId)) eachIndividualValues.put(observationSetId,
-					new MapEntity());
-			Object valueObject = value.getValue().get("value");
-			if (valueObject instanceof Integer) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(), Integer.parseInt(value.getValue().get("value").toString()));
+		Collection<Object> results = algorithmGenerator.createValueFromAlgorithm(
+				request.getSelectedDataSetIds().get(0), request.getAlgorithmScript()).values();
 
-			if (valueObject instanceof Double) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(), Double.parseDouble(value.getValue().get("value").toString()));
-
-			if (valueObject instanceof Category) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(),
-					Integer.parseInt(((Category) value.getValue().get("value")).getValueCode()));
-		}
-
-		List<Object> results = new ArrayList<Object>();
-		for (MapEntity mapEntity : eachIndividualValues.values())
-		{
-			if (Iterables.size(mapEntity.getAttributeNames()) != featureNames.size()) continue;
-			Object result = ScriptEvaluator.eval(request.getAlgorithmScript(), mapEntity);
-			Object untypedResult = new Double(Context.toNumber(result));
-			results.add(untypedResult);
-		}
-		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		jsonResults.put("results", results);
 		jsonResults.put("totalCounts", Iterables.size(observationSets));
 		return jsonResults;
@@ -291,24 +263,16 @@ public class AlgorithmEditorController extends AbstractWizardController
 		return new HashMap<String, String>();
 	}
 
-	private List<String> extractFeatureName(String algorithmScript)
+	@RequestMapping(method = RequestMethod.GET, value = "/progress", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> progress(@RequestBody
+	OntologyMatcherRequest request)
 	{
-		List<String> featureNames = new ArrayList<String>();
-		Pattern pattern = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
-		Matcher matcher = pattern.matcher(algorithmScript);
-		while (matcher.find())
-		{
-			featureNames.add(matcher.group(1));
-		}
-		if (featureNames.size() > 0) return featureNames;
-
-		pattern = Pattern.compile("\\$\\(([^\\$\\(\\)]*)\\)");
-		matcher = pattern.matcher(algorithmScript);
-		while (matcher.find())
-		{
-			featureNames.add(matcher.group(1));
-		}
-		return featureNames;
+		Map<String, Object> jsonResults = new HashMap<String, Object>();
+		String userName = userAccountService.getCurrentUser().getUsername();
+		jsonResults.put("isRunning", currentUserStatus.isUserMatching(userName));
+		jsonResults.put("percentage", currentUserStatus.getPercentageOfProcessForUser(userName));
+		return jsonResults;
 	}
 
 	@Override
