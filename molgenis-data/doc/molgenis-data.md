@@ -41,6 +41,8 @@ If you add an `EntitySourceFactory` to the Spring application context it will au
 
 `DataService` is annotated with the Spring `@Component` annotation so it automatically added to the Spring application context.
 
+The dataservice can also act as a `FileRepositorySource` factory. Use `void addFileRepositorySourceClass(Class<? extends FileRepositorySource> clazz, Set<String> fileExtensions);` to register a factory for a set of file extensions. 
+`FileRepositorySource createFileRepositorySource(File file);` instanciates and calls the correct FileRepositorySource class according to the extension of the file. Examples are excel and csv files.
 
 ## DataService usage examples
 
@@ -120,7 +122,6 @@ dataService.update("Person", person);
 Person person = ...;
 dataService.delete("Person", person);
 ``` 
-	
 	
 
 

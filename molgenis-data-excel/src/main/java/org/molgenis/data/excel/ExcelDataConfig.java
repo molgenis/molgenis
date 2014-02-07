@@ -12,6 +12,10 @@ public class ExcelDataConfig
 	@Autowired
 	private DataService dataService;
 
+	/**
+	 * Registers the ExcelRepositorySource factory so it can be used by DataService.createFileRepositorySource(File
+	 * file);
+	 */
 	@PostConstruct
 	public void registerExcelRepositorySource()
 	{
