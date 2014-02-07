@@ -2,23 +2,14 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -172,13 +163,14 @@ public class UploadWizardPage extends AbstractWizardPage
 		try
 		{
 			repo = repositorySource.getRepository(DATASET_PREFIX);
-            if(repo!=null){
-                for (Entity entity : repo)
-                {
-                    String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
-                    if (identifier != null) datasetIdentifiers.add(identifier);
-                }
-            }
+			if (repo != null)
+			{
+				for (Entity entity : repo)
+				{
+					String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
+					if (identifier != null) datasetIdentifiers.add(identifier);
+				}
+			}
 		}
 		catch (UnknownEntityException e)
 		{
