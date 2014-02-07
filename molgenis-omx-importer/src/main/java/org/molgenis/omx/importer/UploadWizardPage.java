@@ -172,11 +172,13 @@ public class UploadWizardPage extends AbstractWizardPage
 		try
 		{
 			repo = repositorySource.getRepository(DATASET_PREFIX);
-			for (Entity entity : repo)
-			{
-				String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
-				if (identifier != null) datasetIdentifiers.add(identifier);
-			}
+            if(repo!=null){
+                for (Entity entity : repo)
+                {
+                    String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
+                    if (identifier != null) datasetIdentifiers.add(identifier);
+                }
+            }
 		}
 		catch (UnknownEntityException e)
 		{
