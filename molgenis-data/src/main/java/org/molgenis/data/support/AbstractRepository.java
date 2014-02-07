@@ -57,5 +57,4 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	protected abstract EntityMetaData getEntityMetaData();
-
 }

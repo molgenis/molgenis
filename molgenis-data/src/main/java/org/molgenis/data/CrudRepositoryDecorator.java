@@ -132,6 +132,13 @@ public class CrudRepositoryDecorator implements CrudRepository
 	{
 		return decoratedRepository.getAttributes();
 	}
+	
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public void close() throws IOException

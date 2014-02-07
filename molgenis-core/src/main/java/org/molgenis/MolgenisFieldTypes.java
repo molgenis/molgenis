@@ -13,6 +13,7 @@ import org.molgenis.fieldtypes.EmailField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.FileField;
+import org.molgenis.fieldtypes.HasField;
 import org.molgenis.fieldtypes.HtmlField;
 import org.molgenis.fieldtypes.HyperlinkField;
 import org.molgenis.fieldtypes.ImageField;
@@ -40,7 +41,7 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CATEGORICAL, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF
+		BOOL, CATEGORICAL, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF, HAS
 	}
 
 	/** Initialize default field types */
@@ -65,6 +66,8 @@ public class MolgenisFieldTypes
 			addType(new StringField());
 			addType(new TextField());
 			addType(new XrefField());
+			addType(new HasField());
+
 
 			init = true;
 		}

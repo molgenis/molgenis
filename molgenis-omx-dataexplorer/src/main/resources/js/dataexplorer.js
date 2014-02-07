@@ -15,6 +15,152 @@
 		return selectedDataSet.identifier;
 	};
 
+	//TODO NEW CODE GENERIC DATAEXPLORER
+	molgenis.createFeatureSelectionTree = function(entityUri) {
+		alert("entityUri: " + entityUri);
+		
+		
+		restApi.getAsync("/api/v1/celiacsprue/meta/tree/level/1", null, null, 
+			function(entityMetaData) {
+				var container = $('#feature-selection');
+				
+				// Clean #feature-selection
+				if (container.children('ul').length > 0) {
+					container.dynatree('destroy');
+				}
+				container.empty();
+				
+				// Error message
+				if (!entityMetaData) {
+					container.append("<p>No features available</p>"); 
+					return;
+				}
+
+				console.log("START CONTAINER.DYNATREE");
+				console.log(container.dynatree);
+				
+				// render tree and open first branch
+				container.dynatree({
+					checkbox : !aggregateView,
+					selectMode : 3,
+					minExpandLevel : 2,
+					debugLevel : 0,
+					children : [{
+						key : entityMetaData.name,
+						title : entityMetaData.label,
+						icon : false,
+						isFolder : true,
+						isLazy : true,
+						children : createChildren(entityMetaData.name, {select : true}, {})
+					}],
+					onLazyRead : function(node) {
+						// workaround for dynatree lazy parent node select bug
+						var opts = node.isSelected() ? {expand : true, select : true} : {};
+						
+						console.log("node.data.key: " + node.data.key);
+						console.log(node.data);
+						
+						var children = createChildren(node.data.key, opts, opts);
+						node.setLazyNodeStatus(DTNodeStatus_Ok);
+						node.addChild(children);
+					},
+					onClick : function(node, event) {
+						// target type null is filter icon
+						if ((node.getEventTargetType(event) === "title"
+								|| node.getEventTargetType(event) === "icon" 
+									|| node.getEventTargetType(event) === null)
+							&& !node.data.isFolder){
+							molgenis.openFeatureFilterDialogNew(node.data.key);
+						}
+						
+						//Clean the select boxes of the charts designer
+						if (molgenis.charts) {
+							molgenis.charts.dataexplorer.resetChartDesigners();
+						}
+					}
+					
+					//TODO IMPLEMET
+//					},
+//					onSelect : function(select, node) {
+//						// workaround for dynatree lazy parent node select bug
+//						if (select) expandNodeRec(node);
+//						onNodeSelectionChange(this.getSelectedNodes());
+//					},
+//					onPostInit : function() {
+//						onNodeSelectionChange(this.getSelectedNodes());
+//					}
+				});
+			}
+		);
+					
+		function createChildren(entityUniqueName, featureOpts, protocolOpts) {
+			var children = [];
+			var entityUri = "/api/v1/" + entityUniqueName + "/meta/tree/level/1";
+			var attributes = restApi.get(entityUri).attributes;
+			
+			// ALLEEN VOOR DEBUG
+			console.log("START");
+			console.log(entityUri);
+			console.log(attributes);
+			console.log(featureOpts);
+			console.log(protocolOpts);
+			console.log("END");
+				
+			Object.keys(attributes).map(function(prop) {
+				console.log(attributes[prop]);
+				console.log(attributes[prop].fieldType);
+				
+				// HAS Attributes
+				if(attributes[prop].fieldType === "HAS"){
+					children.push($.extend({
+						key : attributes[prop].refEntity["name"],
+						title : attributes[prop].label,
+						tooltip : attributes[prop].description,
+						isFolder : true,
+						isLazy : protocolOpts.expand != true,
+						children : protocolOpts.expand ? createChildren(
+								attributes[prop].refEntity["name"], featureOpts, protocolOpts) : null
+					}, protocolOpts));
+				}
+				else {
+					children.push($.extend({
+						key : attributes[prop].name,
+						title : attributes[prop].label,
+						tooltip : attributes[prop].description,
+						icon : "../../img/filter-bw.png",
+						isFolder : false
+					}, featureOpts));
+				}
+			});
+
+			return children;		
+		}
+	};
+	
+	//TODO NEW CODE GENERIC DATAEXPLORER
+	molgenis.openFeatureFilterDialogNew = function(featureUniqueName) {
+		var featureUri = "/api/v1/" + featureUniqueName;
+		restApi.getAsync(featureUri, null, null,
+			function(feature) {
+				var items = [];
+				if (feature.description)
+					items.push('<h3>Description</h3><p>'
+							+ feature.description + '</p>');
+				items.push('<h3>Filter:</h3>');
+				var config = featureFilters[featureUri];
+				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
+
+				var divContainer = molgenis
+						.createGenericFeatureField(items, feature,
+								config, applyButton, featureUri,
+								false);
+				molgenis.createSpecificFeatureField(items,
+						divContainer, feature, config, applyButton,
+						featureUri);
+			}
+		);
+	};
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri
@@ -35,8 +181,7 @@
 				});
 			}
 
-			var featureNodes = createFeatureNodes(protocolUri + '/features',
-					featureOpts);
+			var featureNodes = createFeatureNodes(protocolUri + '/features', featureOpts);
 			$.each(featureNodes, function() {
 				children.push(this);
 			});
@@ -215,11 +360,16 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
-			selectedDataSet = dataSet;
-			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-			molgenis.updateGenomeBrowser(dataSet);
-		});
+		
+		//TODO NEW CODE GENERIC DATAEXPLORER
+		molgenis.createFeatureSelectionTree(dataSetUri);
+		
+		//TODO OUDE CODE
+//		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
+//			selectedDataSet = dataSet;
+//			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+//			molgenis.updateGenomeBrowser(dataSet);
+//		});
 	};
 
 	molgenis.onFeatureSelectionChange = function(featureUris) {
@@ -1316,21 +1466,22 @@
 		$('#dataset-select')
 				.change(
 						function() {
-							var checkDataViewer = $('#dataexplorer-grid-data')
-									.is(':visible');
-							restApi
-									.getAsync(
+							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+							restApi.getAsync(
 											$('#dataset-select').val(),
 											null,
 											null,
 											function(dataSet) {
 												selectedDataSet = dataSet;
-												molgenis
-														.createFeatureSelection(dataSet.protocolUsed.href);
+												
+												//TODO NIEUWE CODE
+												molgenis.createFeatureSelectionTree(dataSet);
+												
+												//TODO OUDE CODE
+												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
 											});
 							if (checkDataViewer)
-								molgenis
-										.onDataSetSelectionChange($(this).val());
+								molgenis.onDataSetSelectionChange($(this).val());
 							else
 								molgenis.initializeAggregate($(this).val());
 						});

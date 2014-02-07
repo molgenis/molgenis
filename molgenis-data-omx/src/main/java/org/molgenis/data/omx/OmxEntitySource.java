@@ -1,12 +1,15 @@
 package org.molgenis.data.omx;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 
@@ -31,18 +34,21 @@ public class OmxEntitySource implements EntitySource
 
 	@Override
 	@RunAsSystem
+	//TODO JJ Find Iterable<String> a solution for collecting the data
 	public Iterable<String> getEntityNames()
 	{
-		Iterable<Entity> dataSets = dataService.findAll(DataSet.ENTITY_NAME);
+		List<String> result = new ArrayList<String>();
 
-		return Iterables.transform(dataSets, new Function<Entity, String>()
+		for (Entity e : dataService.findAll(DataSet.ENTITY_NAME))
 		{
-			@Override
-			public String apply(Entity dataSet)
-			{
-				return dataSet.getString(DataSet.IDENTIFIER);
-			}
-		});
+			result.add(e.getString(DataSet.IDENTIFIER));
+		}
+		for (Entity e : dataService.findAll(Protocol.ENTITY_NAME))
+		{
+			result.add(e.getString(Protocol.IDENTIFIER));
+		}
+
+		return result;
 	}
 
 	@Override

@@ -145,6 +145,57 @@ public class RestController
 	}
 
 	/**
+	 * TODO JJ 
+	 * Gets the metadata for an entity
+	 * 
+	 * Example url: /api/v1/person/meta
+	 * 
+	 * @param entityNameRaw
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/tree/level/1", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityMetaData getMetaDataTreeLevelOne(@PathVariable("entityName") String entityNameRaw)
+	{
+		String entityName = getEntityName(entityNameRaw);
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		
+		//TODO JJ REMOVE
+		logger.info("TODO REMOVE DEBUG INFO!!! entityNameRaw: " + entityNameRaw);
+
+		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getName());
+		meta.setDescription(repo.getDescription());
+		meta.setLabel(repo.getLabel());
+
+		for (AttributeMetaData attr : repo.getLevelOneAttributes())
+		{
+			if (attr.isVisible() && !attr.getName().equals("__Type"))
+			{
+				DefaultAttributeMetaData copy = new DefaultAttributeMetaData(attr.getName(), attr.getDataType()
+						.getEnumType());
+				copy.setDefaultValue(attr.getDefaultValue());
+				copy.setDescription(attr.getDescription());
+				copy.setIdAttribute(attr.isIdAtrribute());
+				copy.setLabel(attr.getLabel());
+				copy.setLabelAttribute(attr.isLabelAttribute());
+				copy.setNillable(attr.isNillable());
+				copy.setReadOnly(attr.isReadonly());
+
+				if (attr.getRefEntity() != null)
+				{
+					copy.setRefEntity(attr.getRefEntity());
+				}
+
+				copy.setVisible(attr.isVisible());
+
+				meta.addAttributeMetaData(copy);
+			}
+		}
+		return meta;
+
+	}
+
+	/**
 	 * Get's an entity by it's id
 	 * 
 	 * Examples:
@@ -273,10 +324,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName")
-	String entityNameRaw, @Valid
-	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
-	String... expandFields)
+	public EntityCollectionResponse retrieveEntityCollection(
+			@PathVariable("entityName") String entityNameRaw, 
+			@Valid EntityCollectionRequest request, 
+			@RequestParam(value = "expand", required = false) String... expandFields)
 	{
 		try
 		{
