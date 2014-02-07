@@ -130,6 +130,9 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "block_webspiders", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Block webcrawler user agents in FrontController")
 	public boolean block_webspiders = false;
 
+	@Option(name = "generate_jpa_repository_source", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate JpaRepositorySource. Default: false")
+	public boolean generate_jpa_repository_source = false;
+
 	/**
 	 * Initialize with the defaults
 	 */
