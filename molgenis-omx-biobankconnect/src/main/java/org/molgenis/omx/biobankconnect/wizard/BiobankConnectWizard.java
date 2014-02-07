@@ -15,6 +15,8 @@ public class BiobankConnectWizard extends Wizard
 
 	private List<Integer> selectedBiobanks;
 
+	private DataSet derivedDataSet;
+
 	private String userName;
 
 	public List<DataSet> getDataSets()
@@ -55,5 +57,15 @@ public class BiobankConnectWizard extends Wizard
 	public void setUserName(String userName)
 	{
 		this.userName = userName;
+	}
+
+	public DataSet getDerivedDataSet()
+	{
+		return derivedDataSet;
+	}
+
+	public void setDerivedDataSet(DataSet derivedDataSet)
+	{
+		this.derivedDataSet = derivedDataSet;
 	}
 }

@@ -45,19 +45,21 @@ public class AlgorithmUnitConverter
 
 	}
 
-	public String convert(OntologyTerm standardUnit, OntologyTerm customUnit)
+	public String convert(OntologyTerm standardUnitOT, OntologyTerm customUnitOT)
 	{
-		if (standardUnit == null || customUnit == null) return StringUtils.EMPTY;
-		String unitConversionScript = compare(getUnit(retrieveUnits(standardUnit.getName())),
-				getUnit(retrieveUnits(customUnit.getName())));
+		if (standardUnitOT == null || customUnitOT == null) return StringUtils.EMPTY;
+		Unit<?> standardUnit = getUnit(retrieveUnits(standardUnitOT.getName()));
+		Unit<?> customUnit = getUnit(retrieveUnits(customUnitOT.getName()));
+		if (standardUnit == null || customUnit == null || standardUnit.equals(customUnit)) return StringUtils.EMPTY;
+		String unitConversionScript = compare(standardUnit, customUnit);
 		if (unitConversionScript.isEmpty())
 		{
-			unitConversionScript = compareAdvanced(retrieveUnits(standardUnit.getName()),
-					retrieveUnits(customUnit.getName()));
+			unitConversionScript = compareAdvanced(retrieveUnits(standardUnitOT.getName()),
+					retrieveUnits(customUnitOT.getName()));
 		}
 		if (!unitConversionScript.isEmpty())
 		{
-			logger.info("Unit conversion from : " + standardUnit + " to : " + customUnit + " -------> "
+			logger.info("Unit conversion from : " + standardUnitOT + " to : " + customUnitOT + " -------> "
 					+ unitConversionScript);
 		}
 		return unitConversionScript;
@@ -90,7 +92,6 @@ public class AlgorithmUnitConverter
 	private static String compare(Unit<?> unit1, Unit<?> unit2)
 	{
 		StringBuilder conversionScript = new StringBuilder();
-		if (unit1 == null || unit2 == null || unit1.equals(unit2)) return conversionScript.toString();
 		if (unit1.isCompatible(unit2))
 		{
 			Amount<?> value2 = Amount.valueOf(1, unit2);

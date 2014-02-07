@@ -96,14 +96,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 	@Override
 	public void onInit(HttpServletRequest request)
 	{
-		List<DataSet> dataSets = new ArrayList<DataSet>();
-
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
-		for (DataSet dataSet : allDataSets)
-		{
-			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
-		}
-		wizard.setDataSets(dataSets);
+		wizard.setDataSets(getBiobankDataSets());
 		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
 				request.getRequestedSessionId());
 	}
@@ -112,13 +105,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 	protected Wizard createWizard()
 	{
 		wizard = new BiobankConnectWizard();
-		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
-		for (DataSet dataSet : allDataSets)
-		{
-			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
-		}
-		wizard.setDataSets(dataSets);
+		wizard.setDataSets(getBiobankDataSets());
 		wizard.setUserName(userAccountService.getCurrentUser().getUsername());
 		wizard.addPage(chooseCataloguePage);
 		wizard.addPage(ontologyAnnotatorPage);
@@ -126,6 +113,19 @@ public class AlgorithmEditorController extends AbstractWizardController
 		wizard.addPage(algorithmEditorPage);
 		wizard.addPage(algorithmGeneratorPage);
 		return wizard;
+	}
+
+	private List<DataSet> getBiobankDataSets()
+	{
+		List<DataSet> dataSets = new ArrayList<DataSet>();
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
+		for (DataSet dataSet : allDataSets)
+		{
+			if (dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) continue;
+			if (dataSet.getIdentifier().matches("^" + userAccountService.getCurrentUser().getUsername() + ".*derived$")) continue;
+			dataSets.add(dataSet);
+		}
+		return dataSets;
 	}
 
 	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
