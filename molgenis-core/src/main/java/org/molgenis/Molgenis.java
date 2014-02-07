@@ -35,6 +35,7 @@ import org.molgenis.generators.DataTypeGen;
 import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
 import org.molgenis.generators.JpaRepositoryGen;
+import org.molgenis.generators.JpaRepositorySourceGen;
 import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
@@ -237,7 +238,11 @@ public class Molgenis
 			{
 				// authorization
 				generators.add(new CrudRepositorySecurityDecoratorGen());
+			}
 
+			if (options.generate_jpa_repository_source)
+			{
+				generators.add(new JpaRepositorySourceGen());
 			}
 		}
 		else

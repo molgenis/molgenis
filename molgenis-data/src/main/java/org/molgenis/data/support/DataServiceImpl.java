@@ -14,6 +14,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
@@ -296,4 +297,14 @@ public class DataServiceImpl implements DataService
 
 		return BeanUtils.instantiateClass(ctor, file);
 	}
+
+	@Override
+	public void addRepositories(RepositorySource repositorySource)
+	{
+		for (Repository repository : repositorySource.getRepositories())
+		{
+			addRepository(repository);
+		}
+	}
+
 }

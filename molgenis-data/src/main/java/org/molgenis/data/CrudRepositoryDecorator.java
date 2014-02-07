@@ -1,7 +1,5 @@
 package org.molgenis.data;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -9,13 +7,13 @@ import java.util.List;
  * 
  * In subclass override the methods you want to decorate
  */
-public class CrudRepositoryDecorator implements CrudRepository
+public class CrudRepositoryDecorator extends RepositoryDecorator implements CrudRepository
 {
 	private final CrudRepository decoratedRepository;
 
 	public CrudRepositoryDecorator(CrudRepository decoratedRepository)
 	{
-		if (decoratedRepository == null) throw new IllegalArgumentException("decoratedRepository is null");
+		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
 	}
 
@@ -62,12 +60,6 @@ public class CrudRepositoryDecorator implements CrudRepository
 	}
 
 	@Override
-	public String getName()
-	{
-		return decoratedRepository.getName();
-	}
-
-	@Override
 	public void flush()
 	{
 		decoratedRepository.flush();
@@ -92,12 +84,6 @@ public class CrudRepositoryDecorator implements CrudRepository
 	}
 
 	@Override
-	public String getLabel()
-	{
-		return decoratedRepository.getLabel();
-	}
-
-	@Override
 	public void delete(Iterable<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
@@ -110,33 +96,9 @@ public class CrudRepositoryDecorator implements CrudRepository
 	}
 
 	@Override
-	public void deleteById(Integer id)
-	{
-		decoratedRepository.deleteById(id);
-	}
-
-	@Override
-	public Iterator<Entity> iterator()
-	{
-		return decoratedRepository.iterator();
-	}
-
-	@Override
 	public Entity findOne(Integer id)
 	{
 		return decoratedRepository.findOne(id);
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getAttributes()
-	{
-		return decoratedRepository.getAttributes();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepository.close();
 	}
 
 	@Override
@@ -164,36 +126,6 @@ public class CrudRepositoryDecorator implements CrudRepository
 	}
 
 	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		return decoratedRepository.getIdAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		return decoratedRepository.getLabelAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		return decoratedRepository.getAttribute(attributeName);
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return decoratedRepository.getEntityClass();
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		return decoratedRepository.iterator(clazz);
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
 		return decoratedRepository.findAll(q, clazz);
@@ -218,8 +150,9 @@ public class CrudRepositoryDecorator implements CrudRepository
 	}
 
 	@Override
-	public String getUrl()
+	public void deleteById(Integer id)
 	{
-		return decoratedRepository.getUrl();
+		decoratedRepository.deleteById(id);
 	}
+
 }
