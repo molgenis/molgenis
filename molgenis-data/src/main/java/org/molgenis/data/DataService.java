@@ -24,6 +24,13 @@ public interface DataService extends RepositoryCollection
 	void addRepository(Repository repository);
 
 	/**
+	 * Add all repositories of a RepositorySource
+	 * 
+	 * @param repositorySource
+	 */
+	void addRepositories(RepositorySource repositorySource);
+
+	/**
 	 * return number of entities matched by query
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
