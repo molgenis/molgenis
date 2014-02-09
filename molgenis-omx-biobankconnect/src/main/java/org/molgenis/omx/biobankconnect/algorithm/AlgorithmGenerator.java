@@ -223,6 +223,7 @@ public class AlgorithmGenerator
 
 	public Map<Integer, Object> createValueFromAlgorithm(Integer sourceDataSetId, String algorithmScript)
 	{
+		if (algorithmScript.isEmpty()) return Collections.emptyMap();
 		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
