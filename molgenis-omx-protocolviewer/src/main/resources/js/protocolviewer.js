@@ -38,30 +38,22 @@
 			'onItemClick' : function(featureUri) {
 				updateFeatureDetails(featureUri);
 			},
-			'onItemSelect' : function(featureUri, path, select) {
+			'onItemSelect' : function(featureUri, select) {
 				showSpinner();
-				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
-					updateShoppingCart(catalogItems, catalogId, function() {
-						updateFeatureSelection(catalogId);
-						hideSpinner();
-					});
-				});
-			},
-			'onFolderSelect' : function(protocolUri, path, select) {
-				showSpinner();
-				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
-					updateShoppingCart(catalogItems, catalogId, function() {
-						updateFeatureSelection(catalogId);
-						hideSpinner();
-					});
-				});
-			},
-			'onInit' : function() {
-				showSpinner();
-				catalogContainer.catalog('getSelectedItems', function(catalogItems) {
+				updateShoppingCart(featureUri, select, catalogId, function() {
 					updateFeatureSelection(catalogId);
 					hideSpinner();
 				});
+			},
+			'onFolderSelect' : function(protocolUri, select) {
+				showSpinner();
+				updateShoppingCart(protocolUri, select, catalogId, function() {
+					updateFeatureSelection(catalogId);
+					hideSpinner();
+				});
+			},
+			'onInit' : function() {
+				updateFeatureSelection(catalogId);
 			}
 		});
 	};
@@ -197,7 +189,7 @@
 										operator : 'IN',
 										value : $.map(catalogItems, function(catalogItem) { // FIXME dedup
 											// TODO code duplication from jquery.catalog.js hrefToId
-											var href = catalogItem.protocol;
+											var href = catalogItem.path[catalogItem.path.length - 1];
 	//										var href = catalogItem.parent;
 											return href.substring(href.lastIndexOf('/') + 1); 
 										})
@@ -223,22 +215,23 @@
 								$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 								$.each(catalogItems, function() {
 									var feature = featureMap[this.feature];
-									var protocol = protocolMap[this.protocol];
+									var protocol = protocolMap[this.path[this.path.length - 1]];
 									
 									var protocolName = protocol.name;
 									var name = feature.name;
 									var identifier = feature.identifier;
 									var description = molgenis.i18n.get(feature.description);
-									var row = $('<tr />').data('key', feature.href);
+									var row = $('<tr />').data('key', this);
 									$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
 									$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
 									$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 									$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 									var deleteButton = $('<i class="icon-remove"></i>');
 									deleteButton.click(function() {
-										var featureUri = $(this).closest('tr').data('key');
+										var item = $(this).closest('tr').data('key');
 										catalogContainer.catalog('selectItem', {
-											'feature' : featureUri,
+											'feature' : item.feature,
+											'path' : item.path,
 											'select' : false
 										});
 										return false; // TODO do we need this?
@@ -262,43 +255,21 @@
 		// create selection table with pager
 		updateFeatureSelectionContainer();
 	};
-
-	var updateShoppingCart = function(catalogItems, catalogId, callback) {
-		if (catalogItems === null) {
-			$.ajax({
-				type : 'POST',
-				url : molgenis.getContextUrl() + '/cart/empty',
-				success: function() {
-					callback();
-				},
-				error : function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-					callback();
-				}
-			});
-		} else {
-			$.ajax({
-				type : 'POST',
-				url : molgenis.getContextUrl() + '/cart/replace/' + catalogId,
-				data : JSON.stringify({
-					'features' : $.map(catalogItems, function(catalogItem) {
-						var href = catalogItem.item;
-						return {
-							// TODO code duplication from jquery.catalog.js hrefToId
-							'feature' : href.substring(href.lastIndexOf('/') + 1)
-						};
-					})
-				}),
-				contentType : 'application/json',
-				success: function() {
-					callback();
-				},
-				error : function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-					callback();
-				}
-			});
-		}
+	
+	var updateShoppingCart = function(resourceUri, select, catalogId, callback) {
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/cart/' + (select ? 'add' : 'remove') + '/' + catalogId,
+			data : JSON.stringify({'href' : resourceUri}),
+			contentType : 'application/json',
+			success: function() {
+				callback();
+			},
+			error : function(xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				callback();
+			}
+		});
 	};
 
 	$(function() {
