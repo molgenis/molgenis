@@ -6,10 +6,11 @@
 	var maxItems = 10000;
 	
 	function createTreeConfig(settings, callback) {
+		console.log(settings);
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
 				$.each(tree, function(protocolId, subTree) {
-					var protocolUri = '/api/v1/protocol/' + protocolId;
+					var protocolUri = restApi.getHref('protocol', protocolId);
 					var protocol = restApi.get(protocolUri, subTree ? ['features'] : []);
 					
 					// create protocol node
@@ -18,7 +19,7 @@
 						title : protocol.name,
 						folder : true,
 						lazy: subTree === null,
-						expanded: subTree !== null
+						expanded: !settings.displaySiblings
 					};
 					if (protocol.description)
 						node.tooltip = molgenis.i18n.get(protocol.description);
@@ -73,6 +74,7 @@
 			// disable checkboxes of root nodes
 			$.each(nodes, function(i, node) {
 				node.hideCheckbox = true;
+				node.expanded = true;
 			});
 			treeConfig.source = nodes;
 			callback(treeConfig);
@@ -220,7 +222,7 @@
 							} ],
 							num : maxItems
 						};
-						restApi.getAsync('/api/v1/protocol', [ 'features', 'subprotocols' ], q, function(protocols) {
+						restApi.getAsync(restApi.getHref('protocol'), [ 'features', 'subprotocols' ], q, function(protocols) {
 							if(protocols.total > protocols.num) {
 								molgenis.createAlert([ {
 									'message' : 'Maximum number of protocols reached (' + protocols.num + ')'
@@ -274,13 +276,10 @@
 			};			
 			searchApi.search(searchRequest, function(searchResponse){
 				var visibleItems = {};
-				$.each(settings.selectedItems, function() {
-					visibleItems[this] = null;
-				});
 				$.each(searchResponse.searchHits, function() {
 					visibleItems[this.columnValueMap.id] = null;
 				});
-				var treeSettings = $.extend({}, settings, { displayedItems: '/api/v1/protocol/' + Object.keys(visibleItems), displaySiblings: false });
+				var treeSettings = $.extend({}, settings, { displayedItems: $.map(Object.keys(visibleItems), function(visibleItem){ return restApi.getHref('protocol', visibleItem);}), displaySiblings: false });
 				createTreeConfig(treeSettings, callback);
 			});
 		}
@@ -371,15 +370,15 @@
 		searchClearBtn.click(function(e) {
 			e.preventDefault();
 			if(!catalogSearchTree.is(':empty')) {
-				if(catalogSearchTree.is(':visible')) catalogTree.hide();
+				if(catalogSearchTree.is(':visible')) catalogSearchTree.hide();
 				catalogSearchTree.fancytree('destroy');
 				catalogSearchTree.empty();
-				if(catalogTree.is(':hidden')) catalogSearchTree.show();
+				if(catalogTree.is(':hidden')) catalogTree.show();
 			}
 		});
 		
 		// create tree
-		var displayedItems = settings.selectedItems.length > 0 ? settings.selectedItems : ['/api/v1/protocol/' + settings.protocolId];
+		var displayedItems = settings.selectedItems.length > 0 ? settings.selectedItems : [restApi.getHref('protocol', settings.protocolId)];
 		createTreeConfig($.extend({}, settings, {displayedItems: displayedItems, displaySiblings: true}), function(treeConfig) {
 			catalogTree.fancytree(treeConfig);
 		});
