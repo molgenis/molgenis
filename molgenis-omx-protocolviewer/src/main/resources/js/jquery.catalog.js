@@ -373,6 +373,7 @@
 				if(catalogSearchTree.is(':visible')) catalogSearchTree.hide();
 				catalogSearchTree.fancytree('destroy');
 				catalogSearchTree.empty();
+				searchText.val('');
 				if(catalogTree.is(':hidden')) catalogTree.show();
 			}
 		});
