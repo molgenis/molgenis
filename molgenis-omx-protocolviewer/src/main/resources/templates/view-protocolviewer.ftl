@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["ui.dynatree.css", "chosen.css", "protocolviewer.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "protocolviewer.js", "jquery.dynatree.min.js", "jquery.catalog.js", "jquery.bootstrap.pager.js", "jquery.validate.min.js"]>
+<#assign css=["ui.fancytree.min.css", "chosen.css", "protocolviewer.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "protocolviewer.js", "jquery.fancytree.min.js", "jquery.catalog.js", "jquery.bootstrap.pager.js", "jquery.validate.min.js"]>
 <@header css js/>
 <#if authenticated>	
 	<script>
