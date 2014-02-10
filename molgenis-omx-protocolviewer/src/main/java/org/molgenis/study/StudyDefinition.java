@@ -23,9 +23,9 @@ public interface StudyDefinition
 
 	Status getStatus();
 
-	List<CatalogItem> getItems();
+	Iterable<CatalogItem> getItems();
 
-	void setItems(List<CatalogItem> items);
+	void setItems(Iterable<CatalogItem> items);
 
 	boolean containsItem(CatalogItem item);
 
