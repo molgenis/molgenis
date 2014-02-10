@@ -16,11 +16,11 @@
 	};
 
 	//TODO NEW CODE GENERIC DATAEXPLORER
-	molgenis.createFeatureSelectionTree = function(entityUri) {
+	molgenis.createFeatureSelectionTree = function(entityName) {
+		var entityUri = "/api/v1/" + entityName + "/meta/tree"
 		alert("entityUri: " + entityUri);
 		
-		
-		restApi.getAsync("/api/v1/celiacsprue/meta/tree/level/1", null, null, 
+		restApi.getAsync("/api/v1/celiacsprue/meta/tree", null, null, 
 			function(entityMetaData) {
 				var container = $('#feature-selection');
 				
@@ -139,24 +139,18 @@
 	
 	//TODO NEW CODE GENERIC DATAEXPLORER
 	molgenis.openFeatureFilterDialogNew = function(featureUniqueName) {
-		var featureUri = "/api/v1/" + featureUniqueName;
+		var featureUri = "/api/v1/" + featureUniqueName + "/meta";
 		restApi.getAsync(featureUri, null, null,
 			function(feature) {
 				var items = [];
-				if (feature.description)
-					items.push('<h3>Description</h3><p>'
-							+ feature.description + '</p>');
+				if (feature.description) {
+					items.push('<h3>Description</h3><p>' + feature.description + '</p>');
+				}
 				items.push('<h3>Filter:</h3>');
 				var config = featureFilters[featureUri];
 				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-
-				var divContainer = molgenis
-						.createGenericFeatureField(items, feature,
-								config, applyButton, featureUri,
-								false);
-				molgenis.createSpecificFeatureField(items,
-						divContainer, feature, config, applyButton,
-						featureUri);
+				var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton, featureUri, false);
+				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, featureUri);
 			}
 		);
 	};

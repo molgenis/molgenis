@@ -36,7 +36,7 @@
 				<div class="controls">
 					<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
 						<#list entitiesNames as entityName>
-							<option value="/api/v1/${entityName}/meta/tree/level/1" <#if entityName == selectedEntityName> selected</#if>>${entityName}</option>
+							<option value="${entityName}" <#if entityName == selectedEntityName> selected</#if>>${entityName}</option>
 						</#list>
 					</select>
 				</div>

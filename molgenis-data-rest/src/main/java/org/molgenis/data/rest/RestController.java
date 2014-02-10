@@ -153,15 +153,15 @@ public class RestController
 	 * @param entityNameRaw
 	 * @return EntityMetaData
 	 */
-	@RequestMapping(value = "/{entityName}/meta/tree/level/1", method = GET, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/{entityName}/meta/tree", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaData getMetaDataTreeLevelOne(@PathVariable("entityName") String entityNameRaw)
+	public EntityMetaData getMetaDataTree(@PathVariable("entityName") String inputEntityName)
 	{
-		String entityName = getEntityName(entityNameRaw);
+		String entityName = getEntityName(inputEntityName);
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
 		
 		//TODO JJ REMOVE
-		logger.info("TODO REMOVE DEBUG INFO!!! entityNameRaw: " + entityNameRaw);
+		logger.info("TODO REMOVE DEBUG INFO!!! entityNameRaw: " + entityName);
 
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getName());
 		meta.setDescription(repo.getDescription());
