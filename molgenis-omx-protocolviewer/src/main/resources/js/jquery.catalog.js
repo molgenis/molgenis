@@ -368,13 +368,19 @@
 				if(node) node.setSelected(selected);
 				else {
 					catalogTree.fancytree('getTree').loadKeyPath(keyPath, function(node, status){
-						if(node.key === key)
-							node.setSelected(options.select);
+						if(node.key === key) node.setSelected(selected);
 					});
 				}
 			}
 			
+			// connect search tree events to catalog tree events
 			var treeSettings = $.extend({}, settings, {
+				selectedItems : (function() {
+					var nodes = catalogTree.fancytree('getTree').getSelectedNodes();
+					return $.map(nodes, function(node) {
+						return node.key;
+					});
+				})(),
 				onFolderSelect : selectNode,
 				onItemSelect : selectNode
 			});
