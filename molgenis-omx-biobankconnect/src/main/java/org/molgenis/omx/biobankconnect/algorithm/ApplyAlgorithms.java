@@ -25,6 +25,7 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.omx.observ.value.StringValue;
@@ -155,6 +156,17 @@ public class ApplyAlgorithms
 			dataService.add(StringValue.ENTITY_NAME, stringValue);
 			observedValue.setValue(stringValue);
 		}
+		else if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString()))
+		{
+			Category category = dataService.findOne(
+					Category.ENTITY_NAME,
+					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and()
+							.eq(Category.VALUECODE, value.toString()), Category.class);
+			CategoricalValue categoricalValue = new CategoricalValue();
+			categoricalValue.setValue(category);
+			dataService.add(CategoricalValue.ENTITY_NAME, categoricalValue);
+			observedValue.setValue(categoricalValue);
+		}
 		else
 		{
 			// TODO : implement the rest of data types
@@ -253,9 +265,11 @@ public class ApplyAlgorithms
 			else if (valueObject instanceof Double) eachIndividualValues.get(observationSetId).set(
 					value.getFeature().getName(), Double.parseDouble(value.getValue().get("value").toString()));
 
-			else if (valueObject instanceof Category) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(),
-					Integer.parseInt(((Category) value.getValue().get("value")).getValueCode()));
+			else if (valueObject instanceof Category)
+			{
+				eachIndividualValues.get(observationSetId).set(value.getFeature().getName(),
+						Integer.parseInt(((Category) value.getValue().get("value")).getValueCode()));
+			}
 		}
 
 		Map<Integer, Object> results = new HashMap<Integer, Object>();
@@ -263,8 +277,7 @@ public class ApplyAlgorithms
 		{
 			if (Iterables.size(entry.getValue().getAttributeNames()) != featureNames.size()) continue;
 			Object result = ScriptEvaluator.eval(algorithmScript, entry.getValue());
-			Object untypedResult = new Double(Context.toString(result));
-			results.put(entry.getKey(), untypedResult);
+			results.put(entry.getKey(), Context.toString(result));
 		}
 		return results;
 	}
