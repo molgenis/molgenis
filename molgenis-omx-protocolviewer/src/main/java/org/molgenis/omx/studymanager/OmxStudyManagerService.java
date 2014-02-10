@@ -135,6 +135,10 @@ public class OmxStudyManagerService implements StudyManagerService
 		studyDataRequest.setRequestForm("placeholder");
 		dataService.add(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 
+		// workaround when you want to create and update a study definition in one transaction and you can't perform a
+		// flush because don't have a reference to DataService
+		dataService.getCrudRepository(StudyDataRequest.ENTITY_NAME).flush();
+
 		return new OmxStudyDefinition(studyDataRequest, dataService);
 	}
 
@@ -151,7 +155,7 @@ public class OmxStudyManagerService implements StudyManagerService
 		}
 
 		studyDataRequest.setName(studyDataRequest.getName());
-		studyDataRequest.setFeatures(Lists.newArrayList(Lists.transform(studyDefinition.getItems(),
+		studyDataRequest.setFeatures(Lists.newArrayList(Iterables.transform(studyDefinition.getItems(),
 				new Function<CatalogItem, ObservableFeature>()
 				{
 
