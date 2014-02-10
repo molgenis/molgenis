@@ -66,7 +66,7 @@ public class AlgorithmGenerator
 							Integer.parseInt(hit.getColumnValueMap().get("id").toString()), ObservableFeature.class);
 					String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
 							customFeature.getUnit());
-					suggestedScript.append(createJavascriptName(customFeature.getName(), conversionScript));
+					suggestedScript.append(createJavascriptName(customFeature.getName(), conversionScript, false));
 				}
 				else
 				{
@@ -96,8 +96,8 @@ public class AlgorithmGenerator
 								String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
 										mappedFeature.getUnit());
 								String mappedFeatureJavaScriptName = createJavascriptName(bestMatchedFeature
-										.getColumnValueMap().get("name").toString(), conversionScript);
-								String standardJavaScriptName = createJavascriptName(standardFeatureName, null);
+										.getColumnValueMap().get("name").toString(), conversionScript, true);
+								String standardJavaScriptName = createJavascriptName(standardFeatureName, null, true);
 								scriptTemplate = scriptTemplate.replaceAll(standardJavaScriptName,
 										mappedFeatureJavaScriptName);
 							}
@@ -111,11 +111,11 @@ public class AlgorithmGenerator
 		return suggestedScript.toString();
 	}
 
-	private String createJavascriptName(String featureName, String suffix)
+	private String createJavascriptName(String mappedFeatureName, String suffix, boolean escaped)
 	{
 		StringBuilder javaScriptName = new StringBuilder();
-		javaScriptName.append("\\$\\('").append(featureName).append("'\\)");
-		if (suffix != null) javaScriptName.insert(0, "\\(").append(suffix).append("\\)");
+		javaScriptName.append(escaped ? "\\$\\('" : "$('").append(mappedFeatureName).append(escaped ? "'\\)" : "')");
+		if (suffix != null && !suffix.isEmpty()) javaScriptName.append(suffix);
 		return javaScriptName.toString();
 	}
 
