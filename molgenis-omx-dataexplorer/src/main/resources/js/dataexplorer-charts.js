@@ -392,9 +392,6 @@
 //			$('#heatmap-select-xaxis-feature').append(selectedFeaturesSelectOptions);
 //		});
 		
-		// fire event handler
-		$('#dataset-select').change();
-		
 		$('#scatterplot-designer-modal-create-button').click(function(){
 			molgenis.charts.dataexplorer.makeScatterPlot(molgenis.getSelectedDataSetIdentifier());
 		});

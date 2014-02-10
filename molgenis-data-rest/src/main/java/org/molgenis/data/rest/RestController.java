@@ -44,9 +44,12 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntityNotFoundException;
@@ -108,7 +111,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
-		return new EntityMetaDataResponse(meta);
+		return new EntityMetaDataResponse(meta, meta.getAttributes());
 	}
 
 	/**
@@ -122,44 +125,11 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/tree", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaData getMetaDataTree(@PathVariable("entityName") String inputEntityName)
+	public EntityMetaDataResponse getMetaDataTree(@PathVariable("entityName") String inputEntityName)
 	{
 		String entityName = getEntityName(inputEntityName);
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
-		
-		//TODO JJ REMOVE
-		logger.info("TODO REMOVE DEBUG INFO!!! entityNameRaw: " + entityName);
-
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getName());
-		meta.setDescription(repo.getDescription());
-		meta.setLabel(repo.getLabel());
-
-		for (AttributeMetaData attr : repo.getLevelOneAttributes())
-		{
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
-			{
-				DefaultAttributeMetaData copy = new DefaultAttributeMetaData(attr.getName(), attr.getDataType()
-						.getEnumType());
-				copy.setDefaultValue(attr.getDefaultValue());
-				copy.setDescription(attr.getDescription());
-				copy.setIdAttribute(attr.isIdAtrribute());
-				copy.setLabel(attr.getLabel());
-				copy.setLabelAttribute(attr.isLabelAttribute());
-				copy.setNillable(attr.isNillable());
-				copy.setReadOnly(attr.isReadonly());
-
-				if (attr.getRefEntity() != null)
-				{
-					copy.setRefEntity(attr.getRefEntity());
-				}
-
-				copy.setVisible(attr.isVisible());
-
-				meta.addAttributeMetaData(copy);
-			}
-		}
-		return meta;
-
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		return new EntityMetaDataResponse(meta, meta.getLevelOneAttributes());
 	}
 
 	/**
