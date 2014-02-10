@@ -6,7 +6,6 @@
 	var maxItems = 10000;
 	
 	function createTreeConfig(settings, callback) {
-		console.log(settings);
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
 				$.each(tree, function(protocolId, subTree) {
@@ -281,15 +280,12 @@
 					visibleItems[this.columnValueMap.id] = null;
 				});
 				
-				var searchSettings = {
+				var treeSettings = $.extend({}, settings, {
 					displayedItems : $.map(Object.keys(visibleItems), function(visibleItem) {
 						return restApi.getHref('protocol', visibleItem);
 					}),
 					displaySiblings : false,
-				};
-				
-				var treeSettings = $.extend({}, settings, searchSettings);
-				console.log(treeSettings);
+				});
 				createTreeConfig(treeSettings, callback);
 			});
 		}
