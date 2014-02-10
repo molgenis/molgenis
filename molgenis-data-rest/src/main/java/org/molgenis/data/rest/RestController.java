@@ -278,19 +278,11 @@ public class RestController
 	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
 	String... expandFields)
 	{
-		try
-		{
-			String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-			Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
-					Arrays.asList(expandFields));
+		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
+		Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
+				Arrays.asList(expandFields));
 
-			return retrieveEntityCollectionInternal(entityName, request, expandFieldSet);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return retrieveEntityCollectionInternal(entityName, request, expandFieldSet);
 	}
 
 	/**
