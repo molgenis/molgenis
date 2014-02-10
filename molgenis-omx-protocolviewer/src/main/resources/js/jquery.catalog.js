@@ -151,10 +151,10 @@
 				var node = data.node;
 				if (node.folder) {
 					if (settings.onFolderSelect)
-						settings.onFolderSelect(node.key, node.selected);
+						settings.onFolderSelect(node.key, node.selected, node.getKeyPath());
 				} else {
 					if (settings.onItemSelect)
-						settings.onItemSelect(node.key, node.selected);
+						settings.onItemSelect(node.key, node.selected, node.getKeyPath());
 				}
 			}
 		};
@@ -273,13 +273,23 @@
 					//FIXME get unlimited number of search results
 					'pageSize' : 1000000
 				}
-			};			
+			};
+			
 			searchApi.search(searchRequest, function(searchResponse){
 				var visibleItems = {};
 				$.each(searchResponse.searchHits, function() {
 					visibleItems[this.columnValueMap.id] = null;
 				});
-				var treeSettings = $.extend({}, settings, { displayedItems: $.map(Object.keys(visibleItems), function(visibleItem){ return restApi.getHref('protocol', visibleItem);}), displaySiblings: false });
+				
+				var searchSettings = {
+					displayedItems : $.map(Object.keys(visibleItems), function(visibleItem) {
+						return restApi.getHref('protocol', visibleItem);
+					}),
+					displaySiblings : false,
+				};
+				
+				var treeSettings = $.extend({}, settings, searchSettings);
+				console.log(treeSettings);
 				createTreeConfig(treeSettings, callback);
 			});
 		}
@@ -356,7 +366,24 @@
 
 		searchBtn.click(function(e) {
 			e.preventDefault();
-			createSearchTreeConfig(searchText.val(), settings, container, function(treeConfig) {				
+			
+			function selectNode(key, selected, keyPath) {
+				var node = catalogTree.fancytree('getTree').getNodeByKey(key);
+				if(node) node.setSelected(selected);
+				else {
+					catalogTree.fancytree('getTree').loadKeyPath(keyPath, function(node, status){
+						if(node.key === key)
+							node.setSelected(options.select);
+					});
+				}
+			}
+			
+			var treeSettings = $.extend({}, settings, {
+				onFolderSelect : selectNode,
+				onItemSelect : selectNode
+			});
+			
+			createSearchTreeConfig(searchText.val(), treeSettings, container, function(treeConfig) {				
 				if(!catalogSearchTree.is(':empty')) {
 					catalogSearchTree.fancytree('destroy');
 					catalogSearchTree.empty();
