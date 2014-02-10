@@ -379,8 +379,8 @@ $(function() {
 		return href.substring(href.lastIndexOf('/') + 1);
 	};
 
-	molgenis.RestClient.prototype.getHrefForPrimaryKey = function(entityName, primaryKey) {
-		return '/api/v1/' + entityName + '/' + primaryKey;
+	molgenis.RestClient.prototype.getHref = function(entityName, primaryKey) {
+		return '/api/v1/' + entityName + (primaryKey ? '/' + primaryKey : '');
 	};
 	
 	molgenis.RestClient.prototype.remove = function(href, callback) {
