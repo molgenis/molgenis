@@ -25,6 +25,7 @@ public class OntologyRepository extends AbstractRepository implements Countable
 
 	public OntologyRepository(OntologyLoader loader, String name)
 	{
+		super("ontology://" + name);
 		this.loader = loader;
 		this.name = name;
 	}

@@ -37,6 +37,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 
 	public OntologyTermRepository(OntologyLoader loader, String name)
 	{
+		super("ontologyterm://" + name);
 		this.loader = loader;
 		this.ontologyName = this.loader.getOntologyName();
 		this.ontologyIRI = this.loader.getOntologyIRI();

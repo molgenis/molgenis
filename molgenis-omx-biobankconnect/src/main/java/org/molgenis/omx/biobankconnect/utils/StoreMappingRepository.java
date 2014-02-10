@@ -39,6 +39,8 @@ public class StoreMappingRepository extends AbstractRepository
 
 	public StoreMappingRepository(DataSet dataSet, DataService dataService)
 	{
+		super("mapping://" + dataSet.getIdentifier());
+
 		this.dataSet = dataSet;
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
@@ -51,6 +53,8 @@ public class StoreMappingRepository extends AbstractRepository
 
 	public StoreMappingRepository(DataSet dataSet, List<ObservedValue> observedValues, DataService dataService)
 	{
+		super("mapping://" + dataSet.getIdentifier());
+
 		this.dataSet = dataSet;
 		this.observedValues = observedValues;
 		this.valueConverter = new ValueConverter(dataService);
