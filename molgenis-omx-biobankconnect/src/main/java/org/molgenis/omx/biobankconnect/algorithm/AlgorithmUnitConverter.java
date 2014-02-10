@@ -1,6 +1,8 @@
 package org.molgenis.omx.biobankconnect.algorithm;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -48,43 +50,65 @@ public class AlgorithmUnitConverter
 	public String convert(OntologyTerm standardUnitOT, OntologyTerm customUnitOT)
 	{
 		if (standardUnitOT == null || customUnitOT == null) return StringUtils.EMPTY;
-		Unit<?> standardUnit = getUnit(retrieveUnits(standardUnitOT.getName()));
-		Unit<?> customUnit = getUnit(retrieveUnits(customUnitOT.getName()));
-		if (standardUnit == null || customUnit == null || standardUnit.equals(customUnit)) return StringUtils.EMPTY;
-		String unitConversionScript = compare(standardUnit, customUnit);
-		if (unitConversionScript.isEmpty())
+		StringBuilder unitConvertScript = new StringBuilder();
+		for (String standardUnitName : findCompositeUnitNames(retrieveUnits(standardUnitOT)))
 		{
-			unitConversionScript = compareAdvanced(retrieveUnits(standardUnitOT.getName()),
-					retrieveUnits(customUnitOT.getName()));
+			for (String customeUnitName : findCompositeUnitNames(retrieveUnits(customUnitOT)))
+			{
+				unitConvertScript.append(convert(standardUnitName, customeUnitName));
+				if (unitConvertScript.length() != 0) return unitConvertScript.toString();
+			}
 		}
-		if (!unitConversionScript.isEmpty())
-		{
-			logger.info("Unit conversion from : " + standardUnitOT + " to : " + customUnitOT + " -------> "
-					+ unitConversionScript);
-		}
-		return unitConversionScript;
+		return unitConvertScript.toString();
 	}
 
-	private String compareAdvanced(Set<String> unitSet1, Set<String> unitSet2)
+	private Set<String> findCompositeUnitNames(Set<String> unitNames)
+	{
+		if (unitNames.size() == 0) Collections.emptySet();
+		Set<String> newUnitNames = new HashSet<String>();
+		newUnitNames.addAll(unitNames);
+		for (String unitName : unitNames)
+		{
+			if (unitName.contains("/"))
+			{
+				newUnitNames.addAll(Arrays.asList(unitName.split("/")));
+			}
+		}
+		return newUnitNames;
+	}
+
+	private String convert(String standardUnitName, String customUnitName)
+	{
+		StringBuilder unitConversionScript = new StringBuilder();
+		unitConversionScript.append(compare(getUnit(standardUnitName), getUnit(customUnitName)));
+		if (unitConversionScript.length() != 0) return unitConversionScript.toString();
+		if (unitConversionScript.length() == 0)
+		{
+			unitConversionScript.append(compareAdvanced(standardUnitName, customUnitName));
+		}
+
+		return unitConversionScript.toString();
+	}
+
+	private String compareAdvanced(String unitName1, String unitName2)
 	{
 		StringBuilder algorithmScript = new StringBuilder();
-		String unitName1 = null;
-		if (findExponentUnit(unitSet1) != null)
+		Matcher matcherUnitSet1 = findExponentUnit(unitName1);
+		if (matcherUnitSet1.find())
 		{
-			unitName1 = findExponentUnit(unitSet1).group(1);
-			algorithmScript.append(".pow(").append(findExponentUnit(unitSet1).group(2)).append(")");
+			unitName1 = matcherUnitSet1.group(1);
+			algorithmScript.append(".pow(").append(matcherUnitSet1.group(2)).append(")");
 		}
-		String unitName2 = null;
-		if (findExponentUnit(unitSet2) != null)
+		Matcher matcherUnitSet2 = findExponentUnit(unitName2);
+		if (matcherUnitSet2.find())
 		{
-			unitName2 = findExponentUnit(unitSet1).group(1);
-			algorithmScript.append(".root(").append(findExponentUnit(unitSet2).group(2)).append(")");
+			unitName2 = matcherUnitSet2.group(1);
+			algorithmScript.append(".root(").append(matcherUnitSet2.group(2)).append(")");
 		}
 		if (unitName1 != null && unitName2 != null && algorithmScript.length() != 0)
 		{
-			String compare = compare(getUnit(unitSet1), getUnit(unitSet2));
-			if (!unitSet1.equals(unitSet2) && compare.isEmpty()) algorithmScript.delete(0, algorithmScript.length());
-			else algorithmScript.insert(0, compare);
+			String compare = convert(unitName1, unitName2);
+			algorithmScript.delete(0, algorithmScript.length()).insert(0, compare);
 		}
 		return algorithmScript.toString();
 	}
@@ -92,7 +116,7 @@ public class AlgorithmUnitConverter
 	private static String compare(Unit<?> unit1, Unit<?> unit2)
 	{
 		StringBuilder conversionScript = new StringBuilder();
-		if (unit1.isCompatible(unit2))
+		if (unit1 != null && unit2 != null && unit1.isCompatible(unit2) && !unit1.equals(unit2))
 		{
 			Amount<?> value2 = Amount.valueOf(1, unit2);
 			Amount<?> value1 = value2.to(unit1);
@@ -108,50 +132,64 @@ public class AlgorithmUnitConverter
 				conversionScript.append(".div(").append(value2.divide(value1).getEstimatedValue()).append(")");
 			}
 		}
-
 		return conversionScript.toString();
 	}
 
-	private Set<String> retrieveUnits(String unitName)
+	private Set<String> retrieveUnits(OntologyTerm ot)
 	{
 		Set<String> extractedUnitObjects = new HashSet<String>();
 		QueryImpl query = new QueryImpl();
 		query.pageSize(10000);
-		query.addRule(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, ONTOLOGY_TERM_IRI));
+		query.addRule(new QueryRule(ONTOLOGY_TERM_IRI, Operator.EQUALS, ot.getTermAccession()));
 		SearchRequest searchRequest = new SearchRequest(UNIT_DOCUMENT_TYPE, query, null);
 		SearchResult result = searchService.search(searchRequest);
 		for (Hit hit : result.getSearchHits())
 		{
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			extractedUnitObjects.add(columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().toLowerCase());
+			extractedUnitObjects
+					.add(processUnitName(columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().toLowerCase()));
 		}
-		if (!extractedUnitObjects.contains(unitName))
+		if (!extractedUnitObjects.contains(ot.getName()))
 		{
-			extractedUnitObjects.add(unitName);
+			extractedUnitObjects.add(processUnitName(ot.getName()));
 		}
 		return extractedUnitObjects;
 	}
 
-	private Matcher findExponentUnit(Set<String> unitNames)
+	private String processUnitName(String unitName)
 	{
-		Pattern pattern = Pattern.compile("(\\w*)\\^\\[(\\d*)\\]");
-		Matcher matcher = null;
-		for (String unitName : unitNames)
+		Pattern pattern = Pattern.compile("([a-zA-Z]+\\s+\\d+)");
+		Matcher matcher = pattern.matcher(unitName);
+		if (matcher.find())
 		{
-			matcher = pattern.matcher(unitName);
-			if (matcher.find()) break;
+			String modifiedPart = matcher.group(1).trim();
+			modifiedPart = modifiedPart.replaceAll(" +", "^[");
+			modifiedPart += "]";
+			unitName = unitName.replaceAll(matcher.group(1), modifiedPart);
 		}
+		pattern = Pattern.compile("([a-zA-Z]+\\s+[a-zA-Z]+)\\^\\[\\d+\\]");
+		matcher = pattern.matcher(unitName);
+		if (matcher.find())
+		{
+			String modifiedPart = matcher.group(1).trim();
+			modifiedPart = modifiedPart.replaceAll(" +", "/");
+			unitName = unitName.replaceAll(matcher.group(1), modifiedPart);
+		}
+		return unitName;
+	}
+
+	private Matcher findExponentUnit(String unitName)
+	{
+		Pattern pattern = Pattern.compile("(\\w+)\\^\\[(\\d+)\\]");
+		Matcher matcher = pattern.matcher(unitName);
 		return matcher;
 	}
 
-	private static Unit<?> getUnit(Set<String> unitNames)
+	private static Unit<?> getUnit(String unitName)
 	{
-		for (String unitName : unitNames)
+		if (UnitMap.containsKey(superscript(unitName.toLowerCase())))
 		{
-			if (UnitMap.containsKey(superscript(unitName.toLowerCase())))
-			{
-				return UnitMap.get(superscript(unitName.toLowerCase()));
-			}
+			return UnitMap.get(superscript(unitName.toLowerCase()));
 		}
 		return null;
 	}
@@ -163,6 +201,7 @@ public class AlgorithmUnitConverter
 			Unit<?> unit = (Unit<?>) field.get(null);
 			UnitMap.put(unit.toString().toLowerCase(), unit);
 			UnitMap.put(field.getName().toLowerCase(), unit);
+
 		}
 		for (Field field : NonSI.class.getFields())
 		{

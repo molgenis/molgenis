@@ -24,10 +24,10 @@ import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
+import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
@@ -64,6 +64,10 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private AlgorithmScriptLibrary algorithmScriptLibrary;
 	@Autowired
 	private AlgorithmGenerator algorithmGenerator;
+	@Autowired
+	private ApplyAlgorithms applyAlgorithms;
+	@Autowired
+	private SearchService searchService;
 
 	private BiobankConnectWizard wizard;
 	private final DataService dataService;
@@ -173,58 +177,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 	{
 		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		String userName = userAccountService.getCurrentUser().getUsername();
-		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
-		if (selectedDataSetIds.size() > 0)
-		{
-			SearchResult searchResult = ontologyMatcher.generateMapping(userName, request.getFeatureId(),
-					request.getTargetDataSetId(), selectedDataSetIds.get(0));
-			ObservableFeature standardFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-					request.getFeatureId(), ObservableFeature.class);
-			String scriptTemplate = algorithmScriptLibrary.findScriptTemplate(standardFeature);
-			if (scriptTemplate.isEmpty())
-			{
-				if (searchResult.getTotalHitCount() > 0)
-				{
-					Hit hit = searchResult.getSearchHits().get(0);
-					ObservableFeature customFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-							Integer.parseInt(hit.getColumnValueMap().get("id").toString()), ObservableFeature.class);
-
-					String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
-							customFeature.getUnit());
-					StringBuilder suggestedScript = new StringBuilder();
-					suggestedScript.append("$('").append(customFeature.getName()).append("')").append(conversionScript);
-					jsonResults.put("suggestedScript", suggestedScript.toString());
-				}
-			}
-			else
-			{
-				// for (String standardFeatureName :
-				// extractFeatureName(scriptTemplate))
-				// {
-				// SearchResult result =
-				// algorithmScriptLibrary.findOntologyTerm(Arrays.asList(standardFeatureName));
-				// if (result.getTotalHitCount() > 0)
-				// {
-				// for (String synonyms :
-				// algorithmScriptLibrary.findOntologyTermSynonyms(result.getSearchHits()
-				// .get(0)))
-				// {
-				//
-				// }
-				// }
-				//
-				// QueryImpl query = new QueryImpl();
-				// for (Hit hit : searchResult)
-				// {
-				// if (query.getRules().size() > 0) query.addRule(new
-				// QueryRule(Operator.OR));
-				// query.addRule(new QueryRule("id", Operator.EQUALS,
-				// hit.getColumnValueMap().get("id")));
-				// }
-				// query.pageSize(100);
-				// }
-			}
-		}
+		String suggestedScript = algorithmGenerator.generateAlgorithm(userName, request);
+		jsonResults.put("suggestedScript", suggestedScript);
 		return jsonResults;
 	}
 
@@ -242,8 +196,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
 
-		Collection<Object> results = algorithmGenerator.createValueFromAlgorithm(
-				request.getSelectedDataSetIds().get(0), request.getAlgorithmScript()).values();
+		Collection<Object> results = applyAlgorithms.createValueFromAlgorithm(request.getSelectedDataSetIds().get(0),
+				request.getAlgorithmScript()).values();
 
 		jsonResults.put("results", results);
 		jsonResults.put("totalCounts", Iterables.size(observationSets));

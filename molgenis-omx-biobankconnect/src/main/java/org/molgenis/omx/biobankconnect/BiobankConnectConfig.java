@@ -3,6 +3,7 @@ package org.molgenis.omx.biobankconnect;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmGenerator;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmScriptLibrary;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmUnitConverter;
+import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
 import org.molgenis.omx.biobankconnect.ontologyannotator.AsyncOntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
@@ -53,6 +54,12 @@ public class BiobankConnectConfig
 	public AlgorithmScriptLibrary algorithmScriptLibrary()
 	{
 		return new AlgorithmScriptLibrary();
+	}
+
+	@Bean
+	public ApplyAlgorithms applyAlgorithms()
+	{
+		return new ApplyAlgorithms();
 	}
 
 	@Bean

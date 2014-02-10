@@ -23,7 +23,7 @@ public class AlgorithmEditorPage extends AbstractWizardPage
 	private DataService dataService;
 
 	@Autowired
-	private AlgorithmGenerator algorithmGenerator;
+	private ApplyAlgorithms algorithmGenerator;
 
 	private static final long serialVersionUID = 1L;
 
