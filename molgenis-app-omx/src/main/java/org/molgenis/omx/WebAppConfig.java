@@ -1,6 +1,5 @@
 package org.molgenis.omx;
 
-import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
@@ -27,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
+{ WebAppSecurityConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
 		DataExplorerConfig.class, SearchSecurityConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
