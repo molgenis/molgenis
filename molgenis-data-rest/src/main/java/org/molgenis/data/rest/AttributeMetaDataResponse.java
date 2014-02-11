@@ -13,10 +13,12 @@ public class AttributeMetaDataResponse
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
 	private Href refEntity = null;
+	private String refThis = null;
 	private String label = null;
 	private boolean unique = false;
+	private String identifier = null;
 
-	public AttributeMetaDataResponse(AttributeMetaData attr)
+	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
 		fieldType = attr.getDataType().getEnumType();
 		description = attr.getDescription();
@@ -25,11 +27,14 @@ public class AttributeMetaDataResponse
 		defaultValue = attr.getDefaultValue();
 		idAttribute = attr.isIdAtrribute();
 		labelAttribute = attr.isLabelAttribute();
+		identifier = attr.getName();
 
 		if (attr.getRefEntity() != null)
 		{
 			String href = String.format("%s/%s/meta", RestController.BASE_URI, attr.getRefEntity().getName());
 			refEntity = new Href(href);
+		} else {
+			setRefThis(String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attr.getName()));
 		}
 
 		label = attr.getLabel();
@@ -84,6 +89,26 @@ public class AttributeMetaDataResponse
 	public boolean isUnique()
 	{
 		return unique;
+	}
+
+	public String getRefThis()
+	{
+		return refThis;
+	}
+
+	public void setRefThis(String refThis)
+	{
+		this.refThis = refThis;
+	}
+
+	public String getIdentifier()
+	{
+		return identifier;
+	}
+
+	public void setIdentifier(String identifier)
+	{
+		this.identifier = identifier;
 	}
 
 }

@@ -45,7 +45,7 @@ public class EntityMetaDataResponse
 		{
 			if (attr.isVisible() && !attr.getName().equals("__Type"))
 			{
-				attributes.put(attr.getName(), new AttributeMetaDataResponse(attr));
+				attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
 			}
 		}
 	}

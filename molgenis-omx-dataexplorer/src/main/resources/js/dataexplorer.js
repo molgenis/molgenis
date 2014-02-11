@@ -121,7 +121,7 @@
 				}
 				else {
 					children.push($.extend({
-						key : attributes[prop].name,
+						key : attributes[prop].refThis,
 						title : attributes[prop].label,
 						tooltip : attributes[prop].description,
 						icon : "../../img/filter-bw.png",

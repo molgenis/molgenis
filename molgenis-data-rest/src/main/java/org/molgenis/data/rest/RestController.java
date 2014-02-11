@@ -131,6 +131,32 @@ public class RestController
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		return new EntityMetaDataResponse(meta, meta.getLevelOneAttributes());
 	}
+	
+	/**
+	 * TODO JJ 
+	 * Gets the metadata for an entity
+	 * 
+	 * Example url: /api/v1/person/meta
+	 * 
+	 * @param entityNameRaw
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponse getAttributeMetaData(
+			@PathVariable("entityName") String inputEntityParentName,
+			@PathVariable("attributeName") String inputAttributeParentName)
+	{
+		String entityName = getEntityName(inputEntityParentName);
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		for(AttributeMetaData attributeMetaData : meta.getLevelOneAttributes())
+		{
+			if(attributeMetaData.getName().equals(inputAttributeParentName)){
+				return new AttributeMetaDataResponse(inputEntityParentName, attributeMetaData);
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Get's an entity by it's id
