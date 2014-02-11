@@ -1,4 +1,4 @@
-package org.molgenis.dataSetAnnotators;
+package org.molgenis.data.omx.annotation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * This class uses a repository and calls
+ * This class uses a repository and calls an annotation service to add
+ * features and values to an existing data set.
  * </p>
  * 
  * @author mdehaan
@@ -59,7 +60,17 @@ public class OmxDataSetAnnotator
 
 	/**
 	 * <p>
-	 * This method...
+	 * This method calls an annotation service and creates an entity of annotations based on one 
+	 * or more columns. Input and output meta data is collected for the creating Observable features.
+	 * The protocol holding the added features from the annotator and the annotation values are then
+	 * added to the data set of the supplied repository. 
+	 * </p>
+	 * <p>
+	 * The resulting annotated data set is then indexed so users or admins do not have to re-index
+	 * manually.
+	 * </p>
+	 * <p>
+	 * <b>TODO:</b> Create-a-Copy function to retain the original repository
 	 * </p>
 	 * 
 	 * @param RepositoryAnnotator

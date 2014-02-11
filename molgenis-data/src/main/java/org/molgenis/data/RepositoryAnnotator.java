@@ -8,5 +8,6 @@ public interface RepositoryAnnotator {
 	EntityMetaData getOutputMetaData ();
 	EntityMetaData getInputMetaData ();
 	Boolean canAnnotate ();
+	String getName();
 	
 }

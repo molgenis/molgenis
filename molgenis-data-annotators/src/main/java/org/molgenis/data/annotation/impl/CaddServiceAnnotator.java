@@ -1,4 +1,4 @@
-package org.molgenis.annotationServices;
+package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
  * </p>
  * 
  * <p>
- * CADD returns: CADD score Absolute, CADD score Scaled
+ * <b>CADD returns:</b> CADD score Absolute, CADD score Scaled
  * </p>
  * 
  * @author mdehaan
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator implements RepositoryAnnotator
 {
-	// the cadd service is dependant on these three values,
+	// the cadd service is dependant on these four values,
 	// without them no CADD score can be returned
 	private static final String CHROMOSOME = "chrom";
 	private static final String POSITION = "pos";
@@ -58,6 +58,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 	 * This method...
 	 * </p>
 	 * 
+	 * @param Iterator<Entity>
 	 * @return Iterator<Entity>
 	 * 
 	 * */
@@ -162,6 +163,12 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 	public Boolean canAnnotate()
 	{
 		return true;
+	}
+
+	@Override
+	public String getName()
+	{
+		return "CADD";
 	}
 
 }

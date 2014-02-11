@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.molgenis.variome;
 
 import static org.molgenis.variome.VariomeController.URI;
@@ -18,7 +15,7 @@ import javax.servlet.http.Part;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryAnnotator;
-import org.molgenis.dataSetAnnotators.OmxDataSetAnnotator;
+import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.FileUploadUtils;
@@ -150,7 +147,7 @@ public class VariomeController extends MolgenisPluginController{
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, indexer);
 		
 		//omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
-		omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variant"), false);
+		omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
 		
 		return "view-result-page";
 	}

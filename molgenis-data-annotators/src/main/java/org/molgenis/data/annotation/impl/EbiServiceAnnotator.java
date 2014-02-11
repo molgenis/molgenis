@@ -1,4 +1,4 @@
-package org.molgenis.annotationServices;
+package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,13 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  * 
  * <p>
- * EBI returns: {target={targetType, chemblId, geneNames, description, compoundCount, bioactivityCount,
+ * <b>EBI returns:</b> {target={targetType, chemblId, geneNames, description, compoundCount, bioactivityCount,
  * proteinAccession, synonyms, organism, preferredName}}
  * </p>
  * 
  * @author mdehaan
- * @param Iterator<Entity>
- * @return Iterator<Entity>
+ * 
  * @version EBI: database version 17, prepared on 29th August 2013
  * 
  * */
@@ -56,6 +55,15 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	@Autowired
 	DataService dataService;
 
+	/**
+	 * <p>
+	 * This method...
+	 * </p>
+	 * 
+	 * @param Iterator<Entity>
+	 * @return Iterator<Entity>
+	 * 
+	 * */
 	@Override
 	@Transactional
 	public Iterator<Entity> annotate(Iterator<Entity> source)
@@ -139,4 +147,11 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 		//TODO implement!
 		return true;
 	}
+	
+	@Override
+	public String getName()
+	{
+		return "EBI-CHeMBL";
+	}
+
 }

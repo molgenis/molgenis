@@ -551,6 +551,7 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
+		<module>molgenis-data-annotators</module>
 		<module>molgenis-data-excel</module>
 		<module>molgenis-data-csv</module>
 		<module>molgenis-data-googlespreadsheet</module>
@@ -562,5 +563,6 @@
 		<module>molgenis-charts</module>
 		<module>molgenis-variome</module>
 		<module>molgenis-js</module>
+		
 	</modules>
 </project>
