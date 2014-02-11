@@ -136,6 +136,7 @@
 	
 	//TODO NEW CODE GENERIC DATAEXPLORER
 	molgenis.openFeatureFilterDialogNew = function(attributeUri) {
+		console.log(attributeUri);
 		restApi.getAsync(attributeUri, null, null,
 			function(feature) {
 				var items = [];
@@ -314,7 +315,7 @@
 													.getEventTargetType(event) === null)
 													&& !node.data.isFolder)
 												molgenis
-														.openFeatureFilterDialog(node.data.key);
+														.openFeatureFilterDialogNew(node.data.key);
 
 											//Clean the select boxes of the charts designer
 											if (molgenis.charts) {
@@ -456,25 +457,24 @@
 
 	//Filter dialog for one feature
 	molgenis.createSpecificFeatureField = function(items, divContainer,
-			feature, config, applyButton, featureUri) {
-		switch (feature.dataType) {
-			case "html" :
-			case "mref" :
-			case "xref" :
-			case "email" :
-			case "hyperlink" :
-			case "text" :
-			case "string" :
-
+			attribute, config, applyButton, featureUri) {
+		switch (attribute.fieldType) {
+			case "HTML" :
+			case "MREF" :
+			case "XREF" :
+			case "EMAIL" :
+			case "HYPERLINK" :
+			case "TEXT" :
+			case "STRING" :
 				if (divContainer.find(
-                    $("[id='text_" + feature.identifier+"']")).val() == "") {
+                    $("[id='text_" + attribute.name +"']")).val() === "") {
 					$(applyButton).prop('disabled', true);
 				}
 				divContainer.find(
-                    $("[id='text_" + feature.identifier + "']")).keyup(
+                    $("[id='text_" + attribute.name + "']")).keyup(
                         function (e) {
                             if (divContainer.find(
-                                $("[id='text_" + feature.identifier + "']")
+                                $("[id='text_" + attribute.name + "']")
                                     .val() == "")) {
                                 $(applyButton).prop('disabled', true);
                             } else {
@@ -484,10 +484,10 @@
 
 				applyButton.click(function() {
 					molgenis.updateFeatureFilter(featureUri, {
-						name : feature.name,
-						identifier : feature.identifier,
-						type : feature.dataType,
-						values : [$("[id='text_" + feature.identifier+"']")
+						name : attribute.label,
+						identifier : attribute.name,
+						type : attribute.fieldType,
+						values : [$("[id='text_" + attribute.name + "']")
 								.val()]
 					});
 					$('.feature-filter-dialog').dialog('close');
@@ -495,8 +495,8 @@
 
 				break;
 
-			case "date" :
-			case "datetime" :
+			case "DATE" :
+			case "DATE_TIME" :
 				var datePickerFrom = $('<div id="from" class="input-append date" />');
 				var filterFrom;
 
@@ -541,9 +541,9 @@
 				applyButton.click(function() {
 					molgenis.updateFeatureFilter(featureUri,
 							{
-								name : feature.name,
-								identifier : feature.identifier,
-								type : feature.dataType,
+								name : attribute.label,
+								identifier : attribute.name,
+								type : attribute.fieldType,
 								range : true,
 								values : [
 										$('#date-feature-from').val().replace(
@@ -556,43 +556,42 @@
 
 				break;
 			break;
-		case "long" :
-		case "integer" :
-		case "int" :
-		case "decimal" :
+		case "LONG" :
+		case "INT" :
+		case "DECIMAL" :
 			applyButton.click(function() {
 				molgenis.updateFeatureFilter(featureUri, {
-					name : feature.name,
-					identifier : feature.identifier,
-					type : feature.dataType,
+					name : attribute.label,
+					identifier : attribute.name,
+					type : attribute.fieldType,
 					values : [
-							$("[id='from_" + feature.identifier+"']")
+							$("[id='from_" + attribute.name+"']")
 									.val(),
-							$("[id='to_" + feature.identifier+"']")
+							$("[id='to_" + attribute.name+"']")
 									.val()],
 					range : true
 				});
 				$('.feature-filter-dialog').dialog('close');
 			});
 			break;
-		case "bool" :
+		case "BOOL" :
 			$(applyButton).prop('disabled', true);
 			$('input[type=radio]').live('change', function() {
 				$(applyButton).prop('disabled', false);
 			});
 			applyButton.click(function() {
 				molgenis.updateFeatureFilter(featureUri, {
-					name : feature.name,
-					identifier : feature.identifier,
-					type : feature.dataType,
+					name : attribute.label,
+					identifier : attribute.name,
+					type : attribute.fieldType,
 					values : [$(
-							'input[name=bool-feature_' + feature.identifier
+							'input[name=bool-feature_' + attribute.name
 									+ ']:checked').val()]
 				});
 				$('.feature-filter-dialog').dialog('close');
 			});
 			break;
-		case "categorical" :
+		case "CATEGORICAL" :
 			if (config && config.values.length > 0) {
 				$(applyButton).prop('disabled', false);
 			} else {
@@ -608,9 +607,9 @@
 
 			applyButton.click(function() {
 				molgenis.updateFeatureFilter(featureUri, {
-					name : feature.name,
-					identifier : feature.identifier,
-					type : feature.dataType,
+					name : attribute.label,
+					identifier : attribute.name,
+					type : attribute.fieldType,
 					values : $.makeArray($('.cat-value:checked').map(
 							function() {
 								return $(this).val();
@@ -633,7 +632,7 @@
 	$('.feature-filter-dialog').html(items.join('')).append(divContainer);
 
 	$('.feature-filter-dialog').dialog({
-		title : feature.name,
+		title : attribute.label,
 		dialogClass : 'ui-dialog-shadow'
 	});
 	$('.feature-filter-dialog').dialog('open');
@@ -651,13 +650,13 @@
 		}
 	});
 
-	if (feature.dataType == 'date') {
+	if (attribute.fieldType === 'DATE') {
 		$('.date').datetimepicker({
 			format : 'yyyy-MM-dd',
 			language : 'en',
 			pickTime : false
 		});
-	} else if (feature.dataType == 'datetime') {
+	} else if (attribute.fieldType === 'DATE_TIME') {
 		$('.date').datetimepicker({
 			format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
 			language : 'en',
@@ -672,9 +671,6 @@
 molgenis.createGenericFeatureFieldNew = function(items, attribute, config, applyButton, featureUri, wizard) {
 	var divContainer = $('<div />');
 	var filter = null;
-
-	alert(attribute.description);
-	console.log(attribute);
 	
 //	description: "The weight of a subject."
 //	fieldType: "DECIMAL"
@@ -688,30 +684,30 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 //	unique: false
 	
 	switch (attribute.fieldType) {
-		case "html" :
-		case "mref" :
-		case "xref" :
-		case "email" :
-		case "hyperlink" :
-		case "text" :
+		case "HTML" :
+		case "MREF" :
+		case "XREF" :
+		case "EMAIL" :
+		case "HYPERLINK" :
+		case "TEXT" :
 		case "STRING" :
 			if (config == null) {
 				filter = $('<input type="text" id="text_'
-						+ attribute.identifier + '">');
+						+ attribute.name + '">');
 			} else {
 
 				filter = $('<input type="text" id="text_'
-						+ attribute.identifier
+						+ attribute.name
 						+ '" placeholder="filter text" autofocus="autofocus" value="'
 						+ config.values[0] + '">');
 			}
 			divContainer.append(filter);
 			if (wizard) {
-                $("[id='text_" + attribute.identifier+"']").change(
+                $("[id='text_" + attribute.name + "']").change(
 						function() {
 							molgenis.updateFeatureFilter(featureUri, {
 								name : attribute.label,
-								identifier : feature.identifier,
+								identifier : attribute.name,
 								type : attribute.fieldType,
 								values : [$(this).val()]
 							});
@@ -719,19 +715,19 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 						});
 			}
 			break;
-		case "date" :
-		case "datetime" :
+		case "DATE" :
+		case "DATE_TIME" :
 			var datePickerFrom = $('<div id="from_' + attribute.name
 					+ '" class="input-append date" />');
 			var filterFrom;
 
 			if (config == null) {
 				filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
-								+ attribute.identifier
+								+ attribute.name
 								+ '"  type="text" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 			} else {
 				filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
-								+ attribute.identifier
+								+ attribute.name
 								+ '"  type="text" value="'
 								+ config.values[0].replace("T", "'T'")
 								+ '" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
@@ -764,10 +760,9 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 					$('<span>To:</span>')).after(filterTo);
 			divContainer.append(filter);
 			break;
-		case "long" :
-		case "integer" :
-		case "int" :
-		case "decimal" :
+		case "LONG" :
+		case "INT" :
+		case "DECIMAL" :
 			var fromFilter;
 			var toFilter;
 
@@ -802,8 +797,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			if (wizard) {
 				divContainer
 						.find(
-                        $("[id='from_"
-												+ feature.identifier+"']"))
+                        $("[id='from_" + attribute.name +"']"))
 						.change(
 								function() {
 
@@ -812,23 +806,23 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 													featureUri,
 													{
 														name : attribute.label,
-														identifier : feature.identifier,
-														type : feature.dataType,
+														identifier : attribute.name,
+														type : attribute.fieldType,
 														values : [
 																$(
                                                                     $("[id='from_"
-																						+ feature.identifier+"']"))
+																						+ attribute.name + "']"))
 																		.val(),
 																$(
                                                                     $("[id='to_"
-																						+ feature.identifier+"']"))
+																						+ attribute.name + "']"))
 																		.val()],
 														range : true
 													});
 
 								});
 				divContainer
-						.find($("[id='to_" + feature.identifier+"']"))
+						.find($("[id='to_" + attribute.name + "']"))
 						.change(
 								function() {
 									molgenis
@@ -836,66 +830,66 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 													featureUri,
 													{
 														name : attribute.label,
-														identifier : feature.identifier,
-														type : feature.dataType,
+														identifier : attribute.name,
+														type : attribute.fieldType,
 														values : [
 																$(
                                                                     $("[id='from_"
-																						+ feature.identifier+"']"))
+																						+ attribute.name +"']"))
 																		.val(),
 																$(
                                                                     $("[id='to_"
-																						+ feature.identifier+"']"))
+																						+ attribute.name + "']"))
 																		.val()],
 														range : true
 													});
 								});
 			}
 			break;
-		case "bool" :
+		case "BOOL" :
 			if (config == null) {
 				filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-						+ feature.identifier
+						+ attribute.name
 						+ '" name="bool-feature_'
-						+ feature.identifier
+						+ attribute.name
 						+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-						+ feature.identifier
+						+ attribute.name
 						+ '" name="bool-feature_'
-						+ feature.identifier
+						+ attribute.name
 						+ '" value="false">False</label>');
 
 			} else {
 				if (config.values[0] == 'true') {
 					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" name="bool-feature_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" name="bool-feature_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" value="false">False</label>');
 				} else {
 					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" name="bool-feature_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" name="bool-feature_'
-							+ feature.identifier
+							+ attribute.name
 							+ '" checked value="false">False</label>');
 				}
 			}
 			divContainer.append(filter);
 			if (wizard) {
 				filter.find(
-						'input[name="bool-feature_' + feature.identifier
+						'input[name="bool-feature_' + attribute.name
 								+ '"]').change(function() {
 					molgenis.updateFeatureFilter(featureUri, {
 						name : attribute.label,
-						identifier : feature.identifier,
-						type : feature.dataType,
+						identifier : attribute.name,
+						type : attribute.fieldType,
 						values : [$(this).val()]
 					});
 
@@ -903,7 +897,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			}
 
 			break;
-		case "categorical" :
+		case "CATEGORICAL" :
 			$.ajax({
 				type : 'POST',
 				url : '/api/v1/category?_method=GET',
@@ -911,7 +905,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 					q : [{
 						"field" : "observableFeature_Identifier",
 						"operator" : "EQUALS",
-						"value" : feature.identifier
+						"value" : attribute.name
 					}]
 				}),
 				contentType : 'application/json',
@@ -926,17 +920,17 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 												config.values) > -1)) {
 									input = $('<input type="checkbox" id="'
 											+ this.name + '_'
-											+ feature.identifier
+											+ attribute.name
 											+ '" "class="cat-value" name="'
-											+ feature.identifier
+											+ attribute.name
 											+ '" value="' + this.name
 											+ '"checked>');
 								} else {
 									input = $('<input type="checkbox" id="'
 											+ this.name + '_'
-											+ feature.identifier
+											+ attribute.name
 											+ '" class="cat-value" name="'
-											+ feature.identifier
+											+ attribute.name
 											+ '" value="' + this.name
 											+ '">');
 								}
@@ -949,14 +943,14 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			divContainer.append(filter);
 			if (wizard) {
 				divContainer.find(
-						'input[name="' + feature.identifier + '"]').click(
+						'input[name="' + attribute.name + '"]').click(
 						function() {
 							molgenis.updateFeatureFilter(featureUri, {
 								name : attribute.label,
-								identifier : feature.identifier,
-								type : feature.dataType,
+								identifier : attribute.name,
+								type : attribute.fieldType,
 								values : $.makeArray($(
-										'input[name="' + feature.identifier
+										'input[name="' + attribute.name
 												+ '"]:checked').map(
 										function() {
 											return $(this).val();
@@ -966,13 +960,14 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			}
 			break;
 		default :
-			console.log("TODO: '" + feature.dataType + "' not supported");
+			console.log("TODO: '" + attribute.fieldType + "' not supported");
 			return;
 	}
 
-	if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
+	if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
+		// FIXME get working for generic data explorer
 		divContainer
-				.find($("[id='text_" + feature.identifier+"']"))
+				.find($("[id='text_" + attribute.name +"']"))
 				.autocomplete(
 						{
 							source : function(request, response) {
@@ -1006,7 +1001,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 						});
 	}
 
-	if (feature.dataType == 'date') {
+	if (attribute.fieldType === 'DATE') {
 		var container = divContainer.find('.date').datetimepicker({
 			format : 'yyyy-MM-dd',
 			language : 'en',
@@ -1023,21 +1018,22 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 												featureUri,
 												{
 													name : attribute.label,
-													identifier : feature.identifier,
-													type : feature.dataType,
+													identifier : attribute.name,
+													type : attribute.fieldType,
 													range : true,
 													values : [
-															    $("[id='date-feature-from_"+ feature.identifier
+															    $("[id='date-feature-from_"+ attribute.name
                                                                     +"']")
 																	.val(),
                                                             $("[id='date-feature-to_"
-																			+ feature.identifier
+																			+ attribute.name
                                                                         +"']")
 																	.val()]
 												});
 							});
 		}
-	} else if (feature.dataType == 'datetime') {
+	} else if (attribute.fieldType === 'DATE_TIME') {
+		// FIXME get working for generic data explorer
 		var container = divContainer.find('.date').datetimepicker({
 			format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
 			language : 'en',
@@ -1053,17 +1049,17 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 												featureUri,
 												{
 													name : attribute.label,
-													identifier : feature.identifier,
-													type : feature.dataType,
+													identifier : attribute.name,
+													type : attribute.fieldType,
 													range : true,
 													values : [
-															$("[id='date-feature-from_"+feature.identifier+"']")
+															$("[id='date-feature-from_" + attribute.name + "']")
 
 																	.val()
 																	.replace(
 																			"'T'",
 																			"T"),
-															$("[id='date-feature-to_"+ feature.identifier+"']")
+															$("[id='date-feature-to_"+ attribute.name + "']")
 																	.val()
 																	.replace(
 																			"'T'",
@@ -1568,7 +1564,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 		$('#feature-filters').html(items.join(''));
 
 		$('.feature-filter-edit').click(function() {
-			molgenis.openFeatureFilterDialog($(this).data('href'));
+			molgenis.openFeatureFilterDialogNew($(this).data('href'));
 			return false;
 		});
 		$('.feature-filter-remove').click(function() {
@@ -1870,19 +1866,20 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 				.change(
 						function() {
 							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
-							restApi.getAsync(
-											$('#dataset-select').val(),
-											null,
-											null,
-											function(dataSet) {
-												selectedDataSet = dataSet;
-												
-												//TODO NIEUWE CODE
-												molgenis.createFeatureSelectionTree(dataSet);
-												
-												//TODO OUDE CODE
-												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-											});
+//							molgenis.createFeatureSelectionTree($('#dataset-select').val());
+//							restApi.getAsync(
+//											$('#dataset-select').val(),
+//											null,
+//											null,
+//											function(dataSet) {
+//												selectedDataSet = dataSet;
+//												
+//												//TODO NIEUWE CODE
+//												molgenis.createFeatureSelectionTree(dataSet);
+//												
+//												//TODO OUDE CODE
+//												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+//											});
 							if (checkDataViewer)
 								molgenis.onDataSetSelectionChange($(this).val());
 							else
