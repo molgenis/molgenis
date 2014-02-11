@@ -34,9 +34,9 @@
 			<div id="dataset-select-container" class="pull-right form-horizontal">
 				<label class="control-label" for="dataset-select">Choose a dataset:</label>
 				<div class="controls">
-					<select data-placeholder="Choose a Dataset" id="dataset-select">
-						<#list dataSets as dataSet>
-							<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+					<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
+						<#list entitiesNames as entityName>
+							<option value="${entityName}" <#if entityName == selectedEntityName> selected</#if>>${entityName}</option>
 						</#list>
 					</select>
 				</div>

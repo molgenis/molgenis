@@ -44,9 +44,12 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntityNotFoundException;
@@ -108,7 +111,51 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
-		return new EntityMetaDataResponse(meta);
+		return new EntityMetaDataResponse(meta, meta.getAttributes());
+	}
+
+	/**
+	 * TODO JJ 
+	 * Gets the metadata for an entity
+	 * 
+	 * Example url: /api/v1/person/meta
+	 * 
+	 * @param entityNameRaw
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/tree", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityMetaDataResponse getMetaDataTree(@PathVariable("entityName") String inputEntityName)
+	{
+		String entityName = getEntityName(inputEntityName);
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		return new EntityMetaDataResponse(meta, meta.getLevelOneAttributes());
+	}
+	
+	/**
+	 * TODO JJ 
+	 * Gets the metadata for an entity
+	 * 
+	 * Example url: /api/v1/person/meta
+	 * 
+	 * @param entityNameRaw
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponse getAttributeMetaData(
+			@PathVariable("entityName") String inputEntityParentName,
+			@PathVariable("attributeName") String inputAttributeParentName)
+	{
+		String entityName = getEntityName(inputEntityParentName);
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		for(AttributeMetaData attributeMetaData : meta.getLevelOneAttributes())
+		{
+			if(attributeMetaData.getName().equals(inputAttributeParentName)){
+				return new AttributeMetaDataResponse(inputEntityParentName, attributeMetaData);
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -240,10 +287,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName")
-	String entityNameRaw, @Valid
-	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
-	String... expandFields)
+	public EntityCollectionResponse retrieveEntityCollection(
+			@PathVariable("entityName") String entityNameRaw, 
+			@Valid EntityCollectionRequest request, 
+			@RequestParam(value = "expand", required = false) String... expandFields)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(

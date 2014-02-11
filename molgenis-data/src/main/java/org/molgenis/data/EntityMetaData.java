@@ -25,6 +25,13 @@ public interface EntityMetaData
 	 * Meta data describing all attributes returns all attributes, including those of super classes
 	 */
 	Iterable<AttributeMetaData> getAttributes();
+	
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	Iterable<AttributeMetaData> getLevelOneAttributes();	
 
 	/**
 	 * Attribute that is used as unique Id. If no label exist, returns null.

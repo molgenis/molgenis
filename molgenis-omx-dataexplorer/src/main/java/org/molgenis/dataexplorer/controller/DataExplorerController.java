@@ -117,6 +117,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
+	 * TODO JJ
+	 * 
 	 * Show the explorer page
 	 * 
 	 * @param model
@@ -124,10 +126,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+		String selectedEntityName, Model model) throws Exception
 	{
-		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
-
 		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
 		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
@@ -136,44 +136,19 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
-				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
+		Iterable<String> names = dataService.getEntityNames();
+		List<String> entitiesNames = Lists.newArrayList(names.iterator());
+		if (entitiesNames.isEmpty()) throw new IllegalArgumentException("Entities names are not found");
+		model.addAttribute("entitiesNames", entitiesNames);
 
-		model.addAttribute("dataSets", dataSets);
-
-		if (dataSets != null && !dataSets.isEmpty())
+		if (selectedEntityName == null)
 		{
-			// determine selected data set and add to model
-			DataSet selectedDataSet = null;
-			if (selectedDataSetIdentifier != null)
-			{
-				for (DataSet dataSet : dataSets)
-				{
-					if (dataSet.getIdentifier().equals(selectedDataSetIdentifier))
-					{
-						selectedDataSet = dataSet;
-						break;
-					}
-				}
-
-				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
-						+ " is not a valid data set identifier");
-			}
-			else
-			{
-				// select first data set by default
-				selectedDataSet = dataSets.iterator().next();
-			}
-			model.addAttribute("selectedDataSet", selectedDataSet);
-			for (DataSet dataSet : dataSets)
-			{
-				if (isGenomeBrowserDataSet(dataSet))
-				{
-					genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
-				}
-			}
-			model.addAttribute("genomeBrowserSets", genomeBrowserSets);
+			selectedEntityName = entitiesNames.get(0);
 		}
+		model.addAttribute("selectedEntityName", selectedEntityName);
+
+		// Init genome browser
+		this.addGenomeBrowserSetsToModel(model);
 
 		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
@@ -195,6 +170,21 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
 
 		return "view-dataexplorer";
+	}
+
+	private void addGenomeBrowserSetsToModel(Model model)
+	{
+		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
+		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
+				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
+		for (DataSet dataSet : dataSets)
+		{
+			if (isGenomeBrowserDataSet(dataSet))
+			{
+				genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
+			}
+		}
+		model.addAttribute("genomeBrowserSets", genomeBrowserSets);
 	}
 
 	private boolean isGenomeBrowserDataSet(DataSet selectedDataSet)
