@@ -834,8 +834,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	@Override
 	public Iterable<AttributeMetaData> getLevelOneAttributes()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getEntityMetaData().getAttributes();
 	}
 
 }
