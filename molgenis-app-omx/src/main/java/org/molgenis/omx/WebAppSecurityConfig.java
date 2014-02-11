@@ -38,7 +38,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	protected void configureUrlAuthorization(
 			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
 	{
-
 		@SuppressWarnings("rawtypes")
 		List<AccessDecisionVoter> listOfVoters = new ArrayList<AccessDecisionVoter>();
 		listOfVoters.add(new WebExpressionVoter());
@@ -48,7 +47,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
 		// DAS datasource uses the database, unautheticated users can
 		// not see any data
-
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()
