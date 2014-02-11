@@ -39,21 +39,17 @@ import org.springframework.transaction.annotation.Transactional;
  * */
 public class OmxDataSetAnnotator
 {
+	private static final String PROTOCOL_SUFFIX = "_annotator_id";
 	DataService dataService;
 	DataSetsIndexer indexer;
 
 	/**
-	 * <p>
-	 * This constructor...
-	 * </p>
-	 * 
 	 * @param DataService
 	 * @param DataSetsIndexer
 	 * 
 	 * */
 	public OmxDataSetAnnotator(DataService dataService, DataSetsIndexer indexer)
 	{
-		// TODO Make this more spring-like?
 		this.dataService = dataService;
 		this.indexer = indexer;
 	}
@@ -89,7 +85,10 @@ public class OmxDataSetAnnotator
 		List<String> outputMetadataNames = getMetadataNamesAsList(annotator.getOutputMetaData());
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, repo.getName()), DataSet.class);
-		addAnnotationResultProtocol(annotator, dataSet, outputMetadataNames);
+		Protocol resultProtocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.IDENTIFIER, annotator.getName() + PROTOCOL_SUFFIX), Protocol.class);
+		if(resultProtocol == null){
+			addAnnotationResultProtocol(annotator, dataSet, outputMetadataNames);
+		}
 		addAnnotationResults(inputMetadataNames, outputMetadataNames, dataSet, entityIterator);
 		indexResultDataSet(dataSet);
 	}
@@ -130,15 +129,14 @@ public class OmxDataSetAnnotator
 	private void addAnnotationResultProtocol(RepositoryAnnotator annotator, DataSet dataSet,
 			List<String> outputMetadataNames)
 	{
-		Protocol resultProtocol = new Protocol();
 		
-		resultProtocol.setIdentifier(annotator.getClass().getName() + UUID.randomUUID());
-		resultProtocol.setName(annotator.getClass().getName());
+		Protocol resultProtocol = new Protocol();
+		resultProtocol.setIdentifier(annotator.getName() + PROTOCOL_SUFFIX);
+		resultProtocol.setName(annotator.getName());
 		dataService.add(Protocol.ENTITY_NAME, resultProtocol);
-
-		addOutputFeatures(resultProtocol, outputMetadataNames);
+		addOutputFeatures(resultProtocol, outputMetadataNames, annotator.getName());
 		dataService.update(Protocol.ENTITY_NAME, resultProtocol);
-
+	
 		Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
 				new QueryImpl().eq(Protocol.IDENTIFIER, dataSet.getProtocolUsed().getIdentifier()), Protocol.class);
 
@@ -159,13 +157,13 @@ public class OmxDataSetAnnotator
 		return inputFeatureNames;
 	}
 
-	private void addOutputFeatures(Protocol resultProtocol, List<String> featureNames)
+	private void addOutputFeatures(Protocol resultProtocol, List<String> featureNames, String prefix)
 	{
 		for (String name : featureNames)
 		{
 			ObservableFeature newFeature = new ObservableFeature();
 			if(dataService.findOne(ObservableFeature.ENTITY_NAME, new QueryImpl().eq(ObservableFeature.IDENTIFIER, name + "_id")) == null){
-				newFeature.setIdentifier(name + "_id");
+				newFeature.setIdentifier(prefix + name + "_id");
 				newFeature.setName(name);
 				dataService.add(ObservableFeature.ENTITY_NAME, newFeature);
 				
