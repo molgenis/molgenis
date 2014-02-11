@@ -277,7 +277,8 @@ public class ApplyAlgorithms
 		{
 			if (Iterables.size(entry.getValue().getAttributeNames()) != featureNames.size()) continue;
 			Object result = ScriptEvaluator.eval(algorithmScript, entry.getValue());
-			results.put(entry.getKey(), Context.toString(result));
+			if (result instanceof String) results.put(entry.getKey(), Context.toString(result));
+			else results.put(entry.getKey(), Context.toNumber(result));
 		}
 		return results;
 	}
