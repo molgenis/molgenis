@@ -16,7 +16,7 @@ public class AttributeMetaDataResponse
 	private String refThis = null;
 	private String label = null;
 	private boolean unique = false;
-	private String identifier = null;
+	private String name = null;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -27,7 +27,7 @@ public class AttributeMetaDataResponse
 		defaultValue = attr.getDefaultValue();
 		idAttribute = attr.isIdAtrribute();
 		labelAttribute = attr.isLabelAttribute();
-		identifier = attr.getName();
+		name = attr.getName();
 
 		if (attr.getRefEntity() != null)
 		{
@@ -101,14 +101,14 @@ public class AttributeMetaDataResponse
 		this.refThis = refThis;
 	}
 
-	public String getIdentifier()
+	public String getName()
 	{
-		return identifier;
+		return name;
 	}
 
-	public void setIdentifier(String identifier)
+	public void setName(String name)
 	{
-		this.identifier = identifier;
+		this.name = name;
 	}
 
 }
