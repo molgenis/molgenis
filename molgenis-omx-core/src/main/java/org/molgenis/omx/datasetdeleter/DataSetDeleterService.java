@@ -1,9 +1,16 @@
 package org.molgenis.omx.datasetdeleter;
 
-import org.molgenis.framework.db.DatabaseException;
-import org.molgenis.omx.observ.DataSet;
-
 public interface DataSetDeleterService
 {
-	DataSet delete(String dataSetIdentifier, boolean deleteMetaData) throws DatabaseException;
+	/**
+	 * Deletes data set data (DataSet, ObervationSets, ObservedValues, Values) and optionally data set meta data
+	 * (Protocol, Category, ObservableFeature). Data set meta data is only deleted is no references exist to the meta
+	 * data from other data sets.
+	 * 
+	 * @param dataSetIdentifier
+	 * @param deleteMetadata
+	 *            whether or not to try to delete data set meta data
+	 * @return name of the deleted data set
+	 */
+	String deleteData(String dataSetIdentifier, boolean deleteMetadata);
 }

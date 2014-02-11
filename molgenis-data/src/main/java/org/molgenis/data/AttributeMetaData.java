@@ -13,6 +13,11 @@ public interface AttributeMetaData
 	String getName();
 
 	/**
+	 * Label of the attribute if set else returns name
+	 */
+	String getLabel();
+
+	/**
 	 * Description of the attribute
 	 */
 	String getDescription();
@@ -31,6 +36,16 @@ public interface AttributeMetaData
 	 * Whether attribute is readonly
 	 */
 	boolean isReadonly();
+
+	/**
+	 * Wether attribute should have an unique value for each entity
+	 */
+	boolean isUnique();
+
+	/**
+	 * Should this attribute be visible to the user?
+	 */
+	boolean isVisible();
 
 	/**
 	 * Default value

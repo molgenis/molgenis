@@ -139,7 +139,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			model.addAttribute("back", back);
 		}
 
-		Repository<? extends Entity> repo = createAndValidateEntity(entityName, Permission.WRITE);
+		Repository repo = createAndValidateEntity(entityName, Permission.WRITE);
 		Entity entity = BeanUtils.instantiateClass(repo.getEntityClass());
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
@@ -202,9 +202,9 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 		return entity;
 	}
 
-	private Repository<? extends Entity> createAndValidateEntity(String entityName, Permission permission)
+	private Repository createAndValidateEntity(String entityName, Permission permission)
 	{
-		Repository<? extends Entity> repo = dataService.getRepositoryByEntityName(entityName);
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
 
 		if (!molgenisPermissionService.hasPermissionOnEntity(entityName, permission))
 		{

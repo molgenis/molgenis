@@ -6,14 +6,13 @@ import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.genomebrowser.controller.GenomebrowserController;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.SecurityUtils;
@@ -76,11 +75,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userAdmin.setLastName(USERNAME_ADMIN);
 		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
-		UserAuthority suAuthority = new UserAuthority();
-		suAuthority.setMolgenisUser(userAdmin);
-		suAuthority.setRole("ROLE_SU");
-		dataService.add(UserAuthority.ENTITY_NAME, suAuthority);
-
 		MolgenisUser userUser = new MolgenisUser();
 		userUser.setUsername(USERNAME_USER);
 		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
@@ -139,6 +133,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(GenomebrowserController.KARYOTYPEENDPOINT,
 				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
 
+		// Charts include/exclude charts
+		runtimePropertyMap.put(DataExplorerController.KEY_APP_INCLUDE_CHARTS,
+				DataExplorerController.INCLUDE_CHARTS_MODULE + "");
+
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
 			RuntimeProperty runtimeProperty = new RuntimeProperty();
@@ -153,7 +151,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@Override
 	@Transactional
 	@RunAsSystem
-	public boolean isDatabasePopulated() throws DatabaseException
+	public boolean isDatabasePopulated()
 	{
 		return dataService.count(MolgenisUser.ENTITY_NAME, new QueryImpl()) > 0;
 	}

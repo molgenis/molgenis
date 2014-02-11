@@ -1,5 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologyannotator;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,16 +14,26 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Lists;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.omx.protocol.CategoryRepository;
+import org.molgenis.omx.protocol.ProtocolTreeRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -75,13 +87,109 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	@Override
 	@Transactional
+	public String uploadFeatures(File uploadFile, String datasetName) throws IOException
+	{
+		CsvRepository csvRepository = null;
+		try
+		{
+			boolean existingDataSet = dataService.findOne(DataSet.ENTITY_NAME,
+					new QueryImpl().eq(DataSet.IDENTIFIER, datasetName + "_dataset" + "_identifier")) != null;
+			if (existingDataSet) return "the dataset name has existed";
+
+			// load the features into memory
+			List<CellProcessor> cellProcessors = Arrays.<CellProcessor> asList(new TrimProcessor(),
+					new LowerCaseProcessor(true, false));
+			csvRepository = new CsvRepository(uploadFile, cellProcessors);
+			List<String> requiredColumns = new ArrayList<String>(Arrays.asList(ObservableFeature.NAME.toLowerCase(),
+					ObservableFeature.DESCRIPTION));
+			Iterator<AttributeMetaData> columnNamesIterator = csvRepository.getAttributes().iterator();
+			while (columnNamesIterator.hasNext())
+			{
+				requiredColumns.remove(columnNamesIterator.next().getName());
+			}
+			if (requiredColumns.size() > 0) return "The header(s) " + requiredColumns.toString() + " is missing";
+
+			List<String> featureIdentifiers = new ArrayList<String>();
+			List<ObservableFeature> fList = new ArrayList<ObservableFeature>();
+			Iterator<org.molgenis.data.Entity> entityIterator = csvRepository.iterator();
+			while (entityIterator.hasNext())
+			{
+				org.molgenis.data.Entity t = entityIterator.next();
+				ObservableFeature f = new ObservableFeature();
+				f.setName(t.getString(ObservableFeature.NAME.toLowerCase()));
+				f.setDescription(t.getString(ObservableFeature.DESCRIPTION));
+				f.setIdentifier(datasetName + "_" + f.getName() + "_identifier");
+				featureIdentifiers.add(f.getIdentifier());
+				fList.add(f);
+			}
+
+			if (featureIdentifiers.size() == 0) return "Please check the uploaded file, there are no features in the file!";
+			List<String> checkExistingFeatures = checkExistingFeatures(featureIdentifiers);
+			if (checkExistingFeatures.size() > 0) return "The features : " + checkExistingFeatures
+					+ " exist in the database already! Please remove them from uploaded file!";
+
+			// create protocol and link the features
+			Protocol prot = new Protocol();
+			prot.setName(datasetName + "_protocol");
+			prot.setIdentifier(datasetName + "_protocol" + "_identifier");
+			prot.setFeatures(fList);
+
+			// create dataset
+			DataSet dataSet = new DataSet();
+			dataSet.setName(datasetName);
+			dataSet.setIdentifier(datasetName + "_dataset" + "_identifier");
+			dataSet.setProtocolUsed(prot);
+
+			dataService.add(ObservableFeature.ENTITY_NAME, fList);
+			dataService.add(Protocol.ENTITY_NAME, prot);
+			dataService.add(DataSet.ENTITY_NAME, dataSet);
+
+			searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
+					"protocolTree-" + dataSet.getId()));
+			searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
+					dataService));
+		}
+		catch (IOException e)
+		{
+			logger.error("Failed to read CSV file!");
+			return "Failed to import the features, please check your file again.";
+		}
+		finally
+		{
+			if (csvRepository != null) csvRepository.close();
+		}
+
+		return "";
+	}
+
+	private List<String> checkExistingFeatures(List<String> featureIdentifiers)
+	{
+		List<String> existingFeatures = new ArrayList<String>();
+		if (featureIdentifiers.size() > 0)
+		{
+			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().in(ObservableFeature.IDENTIFIER, new ArrayList<String>(featureIdentifiers)),
+					ObservableFeature.class);
+
+			for (ObservableFeature feature : features)
+			{
+				existingFeatures.add(feature.getName());
+			}
+		}
+		return existingFeatures;
+	}
+
+	@Override
+	@Transactional
 	public void removeAnnotations(Integer dataSetId)
 	{
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId);
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
-		queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), queryRules, null);
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100000);
+		q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
+
+		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), q, null);
 		SearchResult result = searchService.search(request);
 
 		List<Integer> listOfFeatureIds = new ArrayList<Integer>();
@@ -95,20 +203,26 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 		List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
 
-		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.ID, listOfFeatureIds));
-		for (ObservableFeature feature : features)
+		if (!listOfFeatureIds.isEmpty())
 		{
-			List<OntologyTerm> definitions = feature.getDefinitions();
-			if (definitions != null && definitions.size() > 0)
+			Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().in(ObservableFeature.ID, listOfFeatureIds), ObservableFeature.class);
+			for (ObservableFeature feature : features)
 			{
-				ObservableFeature newFeature = copyObject(feature);
-				newFeature.setDefinitions(new ArrayList<OntologyTerm>());
-				featuresToUpdate.add(newFeature);
+				List<OntologyTerm> definitions = feature.getDefinitions();
+				if (definitions != null && definitions.size() > 0)
+				{
+					ObservableFeature newFeature = copyObject(feature);
+					newFeature.setDefinitions(new ArrayList<OntologyTerm>());
+					featuresToUpdate.add(newFeature);
+				}
 			}
 		}
-		dataService.update(ObservableFeature.ENTITY_NAME, featuresToUpdate);
 
+		if (!featuresToUpdate.isEmpty())
+		{
+			dataService.update(ObservableFeature.ENTITY_NAME, featuresToUpdate);
+		}
 	}
 
 	public ObservableFeature copyObject(ObservableFeature feature)
@@ -130,11 +244,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (documentTypes == null) documentTypes = searchAllOntologies();
 
 			PorterStemmer stemmer = new PorterStemmer();
-			List<QueryRule> queryRules = new ArrayList<QueryRule>();
-			queryRules.add(new QueryRule("type", Operator.SEARCH, "observablefeature"));
-			queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, queryRules, null);
+
+			QueryImpl q = new QueryImpl();
+			q.pageSize(100000);
+			q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
+			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, q, null);
 			SearchResult result = searchService.search(request);
+
 			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
 
 			Iterator<Hit> iterator = result.iterator();
@@ -143,7 +259,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				Hit hit = iterator.next();
 				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get("id").toString());
 
-				ObservableFeature f = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId);
+				ObservableFeature f = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
+						ObservableFeature.class);
 				ObservableFeature feature = toObservableFeature(f);
 
 				String name = hit.getColumnValueMap().get("name").toString().toLowerCase()
@@ -163,7 +280,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				feature.setDefinitions(definitions);
 				featuresToUpdate.add(feature);
 			}
-			System.out.println(featuresToUpdate);
 			dataService.update(ObservableFeature.ENTITY_NAME, featuresToUpdate);
 		}
 		finally
@@ -200,10 +316,12 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	public List<String> searchAllOntologies()
 	{
 		List<String> ontologyUris = new ArrayList<String>();
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		queryRules.add(new QueryRule("entity_type", Operator.SEARCH, "indexedOntology"));
-		queryRules.add(new QueryRule(Operator.LIMIT, 100000));
-		SearchResult result = searchService.search(new SearchRequest(null, queryRules, null));
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100000);
+		q.addRule(new QueryRule("entity_type", Operator.SEARCH, "indexedOntology"));
+
+		SearchResult result = searchService.search(new SearchRequest(null, q, null));
 		for (Hit hit : result.getSearchHits())
 		{
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
@@ -247,20 +365,26 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms
 					.add(eachTerm);
 		}
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		queryRules.add(new QueryRule(Operator.LIMIT, 100));
+
+		QueryImpl q = new QueryImpl();
+		q.pageSize(100);
+
+		boolean first = true;
 		for (String term : uniqueTerms)
 		{
 			if (!term.isEmpty() && !term.matches(" +"))
 			{
+				if (!first)
+				{
+					q.addRule(new QueryRule(Operator.OR));
+				}
 				term = term.replaceAll("[^(a-zA-Z0-9 )]", "");
-				queryRules.add(new QueryRule("ontologyTermSynonym", Operator.SEARCH, term));
-				queryRules.add(new QueryRule(Operator.OR));
+				q.addRule(new QueryRule("ontologyTermSynonym", Operator.SEARCH, term));
+				first = false;
 			}
 		}
-		if (queryRules.size() > 0) queryRules.remove(queryRules.size() - 1);
 
-		SearchRequest request = new SearchRequest(documentType, queryRules, null);
+		SearchRequest request = new SearchRequest(documentType, q, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
 		List<TermComparison> listOfHits = new ArrayList<TermComparison>();
@@ -312,17 +436,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			{
 				identifiers.add(uri);
 			}
-
-			// if (!definitions.contains(definition))
-			// {
-			// definitions.add(definition);
-			// }
 		}
 
 		if (mapUriTerm.size() > 0)
 		{
 			Iterable<OntologyTerm> ots = dataService.findAll(OntologyTerm.ENTITY_NAME,
-					new QueryImpl().in(OntologyTerm.IDENTIFIER, new ArrayList<String>(mapUriTerm.keySet())));
+					new QueryImpl().in(OntologyTerm.IDENTIFIER, new ArrayList<String>(mapUriTerm.keySet())),
+					OntologyTerm.class);
 
 			for (OntologyTerm ot : ots)
 				mapUriTerm.remove(ot.getIdentifier());
@@ -338,19 +458,20 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			String ontologyName = data.get("ontologyName").toString();
 			ontologyInfo.put(ontologyUri, ontologyName);
 
-			String ontologyLabel = data.get("ontologyLabel").toString();
-			String oontologyTermSynonym = data.get("ontologyTermSynonym").toString();
-			String term = ontologyLabel == null ? oontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
-					+ oontologyTermSynonym.toLowerCase();
-			String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
+			String ontologyLabel = data.get("ontologyLabel") == null ? StringUtils.EMPTY : data.get("ontologyLabel")
+					.toString();
+			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString();
+			String term = ontologyLabel.isEmpty() ? ontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
+					+ ontologyTermSynonym.toLowerCase();
+			String termIdentifier = ontologyLabel.isEmpty() ? uri : ontologyLabel + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
 			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);
 			ot.setName(term);
-			ot.setDefinition(oontologyTermSynonym);
+			ot.setDefinition(ontologyTermSynonym);
 
 			Ontology ontology = dataService.findOne(Ontology.ENTITY_NAME,
-					new QueryImpl().eq(Ontology.IDENTIFIER, ontologyUri));
+					new QueryImpl().eq(Ontology.IDENTIFIER, ontologyUri), Ontology.class);
 
 			ot.setOntology(ontology);
 
@@ -359,16 +480,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		if (listOfOntologyTerms.size() > 0) addOntologies(ontologyInfo);
 		if (listOfOntologyTerms.size() > 0) dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
 
-		if (identifiers.isEmpty())
-		{
-			return Collections.emptyList();
-		}
+		if (identifiers.isEmpty()) return Collections.emptyList();
+		Iterable<OntologyTerm> definitions = dataService.findAll(OntologyTerm.ENTITY_NAME,
+				new QueryImpl().in(OntologyTerm.IDENTIFIER, identifiers), OntologyTerm.class);
 
-		System.out.println(identifiers);
-		List<OntologyTerm> definitions = dataService.findAllAsList(OntologyTerm.ENTITY_NAME,
-				new QueryImpl().in(OntologyTerm.IDENTIFIER, identifiers));
-
-		return definitions;
+		return Lists.newArrayList(definitions);
 	}
 
 	private void addOntologies(Map<String, String> ontologyInfo)
@@ -377,7 +493,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		List<Ontology> listOfOntologies = new ArrayList<Ontology>();
 
 		Iterable<Ontology> ontologies = dataService.findAll(Ontology.ENTITY_NAME,
-				new QueryImpl().in(Ontology.ONTOLOGYURI, new ArrayList<String>(ontologyInfo.keySet())));
+				new QueryImpl().in(Ontology.ONTOLOGYURI, new ArrayList<String>(ontologyInfo.keySet())), Ontology.class);
 
 		for (Ontology ontology : ontologies)
 		{

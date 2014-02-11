@@ -13,6 +13,7 @@ import java.util.List;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -39,8 +40,8 @@ public class StudyDataRequestDecoratorTest
 	private static Authentication AUTHENTICATION_PREVIOUS;
 	private Authentication authentication;
 
-	private StudyDataRequestDecorator<StudyDataRequest> studyDataRequestDecorator;
-	private CrudRepositoryDecorator<StudyDataRequest> crudRepositoryDecorator;
+	private StudyDataRequestDecorator studyDataRequestDecorator;
+	private CrudRepositoryDecorator crudRepositoryDecorator;
 	private List<QueryRule> adminRules, userRules;
 	private MolgenisUser userUser, adminUser;
 	private StudyDataRequest userStudyDataRequest, adminStudyDataRequest;
@@ -62,12 +63,11 @@ public class StudyDataRequestDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
-	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp()
 	{
 		crudRepositoryDecorator = mock(CrudRepositoryDecorator.class);
-		studyDataRequestDecorator = new StudyDataRequestDecorator<StudyDataRequest>(crudRepositoryDecorator);
+		studyDataRequestDecorator = new StudyDataRequestDecorator(crudRepositoryDecorator);
 
 		userUser = when(mock(MolgenisUser.class).getUsername()).thenReturn(USERNAME_USER).getMock();
 		when(userUser.getId()).thenReturn(0);
@@ -100,17 +100,18 @@ public class StudyDataRequestDecoratorTest
 		when(crudRepositoryDecorator.findOne(exampleAdminId)).thenReturn(adminStudyDataRequest);
 
 		when(crudRepositoryDecorator.findAll(exampleUserIds)).thenReturn(
-				Collections.singletonList(userStudyDataRequest));
+				Lists.<Entity> newArrayList(userStudyDataRequest));
 		when(crudRepositoryDecorator.findAll(exampleAdminIds)).thenReturn(
-				Collections.singletonList(adminStudyDataRequest));
+				Lists.<Entity> newArrayList(adminStudyDataRequest));
 		when(crudRepositoryDecorator.findAll(exampleUserAdminIds)).thenReturn(
-				Arrays.asList(userStudyDataRequest, adminStudyDataRequest));
+				Arrays.<Entity> asList(userStudyDataRequest, adminStudyDataRequest));
 	}
 
+	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void StudyDataRequestDecorator()
 	{
-		new StudyDataRequestDecorator<StudyDataRequest>(null);
+		new StudyDataRequestDecorator(null);
 	}
 
 	@Test
@@ -133,7 +134,6 @@ public class StudyDataRequestDecoratorTest
 		assertEquals(argument.getValue().getRules(), adminRules);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void countQuery_User()
 	{
@@ -144,7 +144,6 @@ public class StudyDataRequestDecoratorTest
 		assertEquals(argument.getValue().getRules(), createList(exampleRule, userRules));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void countQuery_Admin()
 	{
@@ -333,7 +332,6 @@ public class StudyDataRequestDecoratorTest
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void findAllQuery_User()
 	{
@@ -344,7 +342,6 @@ public class StudyDataRequestDecoratorTest
 		assertEquals(argument.getValue().getRules(), createList(exampleRule, userRules));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void findAllQuery_Admin()
 	{
@@ -355,7 +352,6 @@ public class StudyDataRequestDecoratorTest
 		assertEquals(argument.getValue().getRules(), createList(exampleRule, adminRules));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void findOneQuery_User()
 	{
@@ -366,7 +362,6 @@ public class StudyDataRequestDecoratorTest
 		assertEquals(argument.getValue().getRules(), createList(exampleRule, userRules));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void findOneQuery_Admin()
 	{
@@ -412,7 +407,7 @@ public class StudyDataRequestDecoratorTest
 	public void findAllIterable_User()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
-		Iterable<StudyDataRequest> entities = studyDataRequestDecorator.findAll(exampleUserIds);
+		Iterable<Entity> entities = studyDataRequestDecorator.findAll(exampleUserIds);
 		assertEquals(entities, Arrays.asList(userStudyDataRequest));
 	}
 
@@ -434,7 +429,7 @@ public class StudyDataRequestDecoratorTest
 	public void findAllIterable_Admin()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
-		Iterable<StudyDataRequest> entities = studyDataRequestDecorator.findAll(exampleAdminIds);
+		Iterable<Entity> entities = studyDataRequestDecorator.findAll(exampleAdminIds);
 		assertEquals(entities, Arrays.asList(adminStudyDataRequest));
 	}
 
@@ -442,7 +437,7 @@ public class StudyDataRequestDecoratorTest
 	public void findAllIterable_AdminAsUser()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
-		Iterable<StudyDataRequest> entities = studyDataRequestDecorator.findAll(exampleUserIds);
+		Iterable<Entity> entities = studyDataRequestDecorator.findAll(exampleUserIds);
 		assertEquals(entities, Arrays.asList(userStudyDataRequest));
 	}
 
@@ -585,13 +580,13 @@ public class StudyDataRequestDecoratorTest
 	}
 
 	@SuppressWarnings(
-	{ "unchecked", "rawtypes", "deprecation" })
+	{ "unchecked", "rawtypes" })
 	@Test
 	public void deleteAll_User()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(userRules))).thenReturn(
-				Collections.singletonList(userStudyDataRequest));
+				Lists.<Entity> newArrayList(userStudyDataRequest));
 		studyDataRequestDecorator.deleteAll();
 		ArgumentCaptor<Iterable> argument = ArgumentCaptor.forClass(Iterable.class);
 		verify(crudRepositoryDecorator).delete(argument.capture());
@@ -599,13 +594,13 @@ public class StudyDataRequestDecoratorTest
 	}
 
 	@SuppressWarnings(
-	{ "rawtypes", "deprecation", "unchecked" })
+	{ "rawtypes", "unchecked" })
 	@Test
 	public void deleteAll_Admin()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
-				Collections.singletonList(adminStudyDataRequest));
+				Lists.<Entity> newArrayList(adminStudyDataRequest));
 		studyDataRequestDecorator.deleteAll();
 		ArgumentCaptor<Iterable> argument = ArgumentCaptor.forClass(Iterable.class);
 		verify(crudRepositoryDecorator).delete(argument.capture());
@@ -613,38 +608,36 @@ public class StudyDataRequestDecoratorTest
 	}
 
 	@SuppressWarnings(
-	{ "rawtypes", "deprecation", "unchecked" })
+	{ "rawtypes", "unchecked" })
 	@Test
 	public void deleteAll_AdminAsUser()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
-				Collections.singletonList(userStudyDataRequest));
+				Lists.<Entity> newArrayList(userStudyDataRequest));
 		studyDataRequestDecorator.deleteAll();
 		ArgumentCaptor<Iterable> argument = ArgumentCaptor.forClass(Iterable.class);
 		verify(crudRepositoryDecorator).delete(argument.capture());
 		assertEquals(argument.getValue(), Collections.singletonList(userStudyDataRequest));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void iterator_User()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(userRules))).thenReturn(
-				Collections.singletonList(userStudyDataRequest));
-		assertEquals(Lists.<StudyDataRequest> newArrayList(studyDataRequestDecorator.iterator()),
+				Lists.<Entity> newArrayList(userStudyDataRequest));
+		assertEquals(Lists.newArrayList(studyDataRequestDecorator.iterator()),
 				Collections.singletonList(userStudyDataRequest));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	public void iterator_Admin()
 	{
 		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		when(crudRepositoryDecorator.findAll(new QueryImpl(adminRules))).thenReturn(
-				Collections.singletonList(adminStudyDataRequest));
-		assertEquals(Lists.<StudyDataRequest> newArrayList(studyDataRequestDecorator.iterator()),
+				Lists.<Entity> newArrayList(adminStudyDataRequest));
+		assertEquals(Lists.newArrayList(studyDataRequestDecorator.iterator()),
 				Collections.singletonList(adminStudyDataRequest));
 	}
 

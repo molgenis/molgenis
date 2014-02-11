@@ -9,15 +9,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.molgenis.util.ListEscapeUtils;
 
 /**
  * Writable implementation for an excel sheet
  */
-public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
+public class ExcelSheetWriter extends AbstractWritable
 {
 	private final Sheet sheet;
 	private int row;
@@ -44,7 +44,7 @@ public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
 	 * Add a new row to the sheet
 	 */
 	@Override
-	public void add(Entity entity)
+	public Integer add(Entity entity)
 	{
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
@@ -57,6 +57,8 @@ public class ExcelSheetWriter<E extends Entity> extends AbstractWritable<E>
 			Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
 			cell.setCellValue(toValue(entity.get(attributeName)));
 		}
+
+		return entity.getIdValue();
 	}
 
 	/**

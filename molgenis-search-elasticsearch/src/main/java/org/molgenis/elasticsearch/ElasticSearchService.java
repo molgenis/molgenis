@@ -25,18 +25,16 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.tupletable.TableException;
-import org.molgenis.framework.tupletable.TupleTable;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.data.Entity;
 
 /**
  * ElasticSearch implementation of the SearchService interface
@@ -51,6 +49,7 @@ public class ElasticSearchService implements SearchService
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser(REST_API_BASE_URL);
+	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 
 	public ElasticSearchService(Client client, String indexName)
 	{
@@ -83,10 +82,10 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public long count(String documentType, List<QueryRule> queryRules)
+	public long count(String documentType, Query q)
 	{
 
-		SearchRequest request = new SearchRequest(documentType, queryRules, Collections.<String> emptyList());
+		SearchRequest request = new SearchRequest(documentType, q, Collections.<String> emptyList());
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
@@ -94,7 +93,7 @@ public class ElasticSearchService implements SearchService
 
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
 	{
-		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
+
 		List<String> documentTypes = null;
 		if (request.getDocumentType() != null)
 		{
@@ -105,15 +104,17 @@ public class ElasticSearchService implements SearchService
 			}
 		}
 
-		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentTypes, searchType,
-				request.getQueryRules(), request.getFieldsToReturn());
+		SearchRequestBuilder builder = client.prepareSearch(indexName);
+
+		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
+				request.getFieldsToReturn());
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("SearchRequestBuilder:" + requestBuilder);
+			LOG.debug("SearchRequestBuilder:" + builder);
 		}
 
-		SearchResponse response = requestBuilder.execute().actionGet();
+		SearchResponse response = builder.execute().actionGet();
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("SearchResponse:" + response);
@@ -124,19 +125,18 @@ public class ElasticSearchService implements SearchService
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
-
-		SearchRequestGenerator generator = new SearchRequestGenerator(client.prepareSearch(indexName));
-
+		SearchRequestBuilder builder = client.prepareSearch(indexName);
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
-		SearchRequestBuilder requestBuilder = generator.buildSearchRequest(documentType, searchType,
-				request.getQueryRules(), request.getFieldsToReturn());
+
+		generator
+				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn());
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("SearchRequestBuilder:" + requestBuilder);
+			LOG.debug("SearchRequestBuilder:" + builder);
 		}
 
-		SearchResponse response = requestBuilder.execute().actionGet();
+		SearchResponse response = builder.execute().actionGet();
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("SearchResponse:" + response);
@@ -146,69 +146,31 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void updateIndex(String documentType, Iterable<? extends Entity> entities)
+	public void indexRepository(Repository repository)
 	{
-		if (!entities.iterator().hasNext())
+		if (!repository.iterator().hasNext())
 		{
 			return;
 		}
 
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
-		deleteDocumentsByType(documentTypeSantized);
-
-		LOG.info("Going to insert documents of type [" + documentType + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
-
-		BulkRequestBuilder request = requestGenerator.buildIndexRequest(documentTypeSantized, entities);
-		LOG.info("Request created");
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("BulkRequest:" + request);
-		}
-
-		BulkResponse response = request.execute().actionGet();
-		LOG.info("Request done");
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("BulkResponse:" + response);
-		}
-
-		if (response.hasFailures())
-		{
-			throw new ElasticSearchException(response.buildFailureMessage());
-		}
-
-	}
-
-	@Override
-	public void indexTupleTable(String documentType, TupleTable tupleTable)
-	{
 		try
 		{
-			if (tupleTable.getCount() == 0)
-			{
-				return;
-			}
+			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
+			createMappings(repository);
 		}
-		catch (TableException e)
+		catch (IOException e)
 		{
-			throw new RuntimeException(e);
+			String msg = "Exception creating mapping for repository [" + repository.getName() + "]";
+			LOG.error(msg, e);
+			throw new ElasticSearchException(msg, e);
 		}
 
-		String documentTypeSantized = sanitizeMapperType(documentType);
+		LOG.info("Going to update index [" + indexName + "] for repository type [" + repository.getName() + "]");
+		deleteDocumentsByType(repository.getName());
 
-		LOG.info("Going to create mapping for documentType [" + documentType + "]");
-		createMappings(documentTypeSantized, tupleTable);
-
-		LOG.info("Going to update index [" + indexName + "] for document type [" + documentType + "]");
-		deleteDocumentsByType(documentTypeSantized);
-
-		LOG.info("Going to insert documents of type [" + documentType + "]");
+		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
-
-		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
+		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
 			LOG.info("Request created");
@@ -285,29 +247,28 @@ public class ElasticSearchService implements SearchService
 	}
 
 	@Override
-	public void updateIndexTupleTable(String documentType, TupleTable tupleTable)
+	public void updateRepositoryIndex(Repository repository)
 	{
+		if (!repository.iterator().hasNext())
+		{
+			return;
+		}
+
 		try
 		{
-			if (tupleTable.getCount() == 0)
-			{
-				return;
-			}
+			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
+			createMappings(repository);
 		}
-		catch (TableException e)
+		catch (IOException e)
 		{
-			throw new RuntimeException(e);
+			String msg = "Exception creating mapping for repository [" + repository.getName() + "]";
+			LOG.error(msg, e);
+			throw new ElasticSearchException(msg, e);
 		}
 
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		LOG.info("Going to create mapping for documentType [" + documentType + "]");
-		createMappings(documentTypeSantized, tupleTable);
-
-		LOG.info("Going to insert documents of type [" + documentType + "]");
+		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
 		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
-
-		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(documentTypeSantized, tupleTable);
+		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
 			LOG.info("Request created");
@@ -363,39 +324,21 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
-	private void createMappings(String documentType, TupleTable tupleTable)
+	private void createMappings(Repository repository) throws IOException
 	{
-		String documentTypeSantized = sanitizeMapperType(documentType);
-
-		XContentBuilder jsonBuilder;
-		try
-		{
-			jsonBuilder = MappingsBuilder.buildMapping(documentTypeSantized, tupleTable);
-		}
-		catch (Exception e)
-		{
-			String msg = "Exception creating mapping for documentType [" + documentType + "]";
-			LOG.error(msg, e);
-			throw new ElasticSearchException(msg, e);
-		}
-
-		try
-		{
-			LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
-		}
-		catch (IOException e)
-		{
-			LOG.error(e);
-		}
+		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(repository);
+		LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
-				.setType(documentTypeSantized).setSource(jsonBuilder).execute().actionGet();
+				.setType(sanitizeMapperType(repository.getName())).setSource(jsonBuilder).execute().actionGet();
 
 		if (!response.isAcknowledged())
 		{
-			throw new ElasticSearchException("Creation of mapping for documentType [" + documentType
+			throw new ElasticSearchException("Creation of mapping for documentType [" + repository.getName()
 					+ "] failed. Response=" + response);
 		}
-		LOG.info("Mapping for documentType [" + documentType + "] created");
+
+		LOG.info("Mapping for documentType [" + repository.getName() + "] created");
 	}
+
 }

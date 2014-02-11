@@ -2,23 +2,24 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.EntitiesImporter;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.DataSetImportedEvent;
+import org.molgenis.util.EntityImportedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -27,24 +28,15 @@ import org.springframework.validation.ObjectError;
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
 {
+	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
+
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
-	private final DataService dataService;
-	private final EntitiesImporter entitiesImporter;
-	private final DataSetImporterService dataSetImporterService;
+	@Autowired
+	private OmxImporterService omxImporterService;
 
 	@Autowired
-	public ValidationResultWizardPage(DataService dataService, EntitiesImporter entitiesImporter,
-			DataSetImporterService dataSetImporterService)
-	{
-		this.dataService = dataService;
-		this.entitiesImporter = entitiesImporter;
-		this.dataSetImporterService = dataSetImporterService;
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (entitiesImporter == null) throw new IllegalArgumentException("EntitiesImporter is null");
-		if (dataSetImporterService == null) throw new IllegalArgumentException("DataSetImporterService is null");
-	}
+	private DataService dataService;
 
 	@Override
 	public String getTitle()
@@ -66,50 +58,71 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 		if (entityImportOption != null)
 		{
-			return doImport(entityImportOption, result, importWizard);
-		}
-
-		return null;
-	}
-
-	private String doImport(String entityAction, BindingResult result, ImportWizard importWizard)
-	{
-
-		File file = importWizard.getFile();
-		try
-		{
-			// convert input to database action
-			DatabaseAction entityDbAction = toDatabaseAction(entityAction);
-			if (entityDbAction == null) throw new IOException("unknown database action: " + entityAction);
-
-			// import entities
-			EntityImportReport importReport = entitiesImporter.importEntities(file, entityDbAction);
-			importWizard.setImportResult(importReport);
-
-			// import dataset instances
-			if (importWizard.getDataImportable() != null)
+			try
 			{
-				List<String> dataSetSheetNames = new ArrayList<String>();
-				for (Entry<String, Boolean> entry : importWizard.getDataImportable().entrySet())
-					if (entry.getValue() == true) dataSetSheetNames.add("dataset_" + entry.getKey());
+				// convert input to database action
+				DatabaseAction entityDbAction = toDatabaseAction(entityImportOption);
+				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
-				dataSetImporterService.importDataSet(file, dataSetSheetNames);
+				RepositorySource repositorySource = dataService.createFileRepositorySource(importWizard.getFile());
+				EntityImportReport importReport = omxImporterService.doImport(repositorySource.getRepositories(),
+						entityDbAction);
+				importWizard.setImportResult(importReport);
+
+				// publish dataset imported event(s)
+				Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
+				for (DataSet dataSet : dataSets)
+					ApplicationContextProvider.getApplicationContext().publishEvent(
+							new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+
+				// publish protocol imported event(s)
+				Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
+						new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
+				for (Protocol protocol : protocols)
+					ApplicationContextProvider.getApplicationContext().publishEvent(
+							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
+
+				return "File successfully imported.";
 			}
+			catch (MolgenisValidationException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
 
-			// publish dataset imported event(s)
+				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br /><br />");
+				for (ConstraintViolation violation : e.getViolations())
+				{
+					sb.append(violation.getMessage());
 
-			Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl());
-			for (DataSet dataSet : dataSets)
-				ApplicationContextProvider.getApplicationContext().publishEvent(
-						new DataSetImportedEvent(this, dataSet.getId()));
+					if (violation.getImportInfo() != null)
+					{
+						sb.append(" ").append(violation.getImportInfo());
+					}
 
-			return "File successfully imported.";
+					sb.append("<br />");
 
-		}
-		catch (Exception e)
-		{
-			logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityAction + "]", e);
-			result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+				}
+
+				result.addError(new ObjectError("wizard", sb.toString()));
+			}
+			catch (RuntimeException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+			}
+			catch (IOException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+			}
+			catch (ValueConverterException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+			}
 		}
 
 		return null;
@@ -129,5 +142,4 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 		return dbAction;
 	}
-
 }

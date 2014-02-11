@@ -39,7 +39,7 @@ import ${entity.namespace}.${JavaName(entity)};
 /**
  * Reads ${JavaName(entity)} from a delimited (csv) file, resolving xrefs to ids where needed, that is the tricky bit ;-)
  */
-public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaName(entity)}>
+public class ${JavaName(entity)}EntityImporter implements EntityImporter
 {
 	private static final Logger logger = Logger.getLogger(${JavaName(entity)}EntityImporter.class);
 	private static int BATCH_SIZE = 10000;
@@ -55,33 +55,74 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 	 * @return number of elements imported
 	 */
 	@Override
-	public int importEntity(Repository<? extends Entity> repository, DataService dataService, DatabaseAction dbAction)
+	public int importEntity(Repository repository, DataService dataService, DatabaseAction dbAction)
 	{
 		//wrapper to count
 		final AtomicInteger total = new AtomicInteger(0);
-	try {
-		
-			// cache for entities of which xrefs couldn't be resolved (e.g. if there is a self-refence)
-			// these entities can be updated with their xrefs in a second round when all entities are in the database
-			List<${JavaName(entity)}> ${name(entity)}sMissingRefs = new ArrayList<${JavaName(entity)}>();
-			List<Entity> entityMissingRefs = new ArrayList<Entity>();
+	
+		// cache for entities of which xrefs couldn't be resolved (e.g. if there is a self-refence)
+		// these entities can be updated with their xrefs in a second round when all entities are in the database
+		List<${JavaName(entity)}> ${name(entity)}sMissingRefs = new ArrayList<${JavaName(entity)}>();
+		List<Entity> entityMissingRefs = new ArrayList<Entity>();
 
-			// cache for objects to be imported from file (in batch)
-			List<${JavaName(entity)}> ${name(entity)}List = new ArrayList<${JavaName(entity)}>(BATCH_SIZE); // FIXME
-			List<Entity> entityList = new ArrayList<Entity>(BATCH_SIZE);
+		// cache for objects to be imported from file (in batch)
+		List<${JavaName(entity)}> ${name(entity)}List = new ArrayList<${JavaName(entity)}>(BATCH_SIZE); // FIXME
+		List<Entity> entityList = new ArrayList<Entity>(BATCH_SIZE);
 
-			CrudRepository<${JavaName(entity)}> crudRepository = dataService.getCrudRepository("${entity.name}");
+		CrudRepository crudRepository = dataService.getCrudRepository("${entity.name}");
 		
-			for (Entity entity : repository)
+		for (Entity entity : repository)
+		{
+			// skip empty rows
+			if (!hasValues(entity)) continue;
+
+			// parse object, setting defaults and values from file
+			${JavaName(entity)} object = new ${JavaName(entity)}();
+			object.set(entity);
+			${name(entity)}List.add(object);
+			entityList.add(entity);
+
+			if (!resolveForeignKeys(dataService, entity, object, crudRepository))
 			{
-				// skip empty rows
-				if (!hasValues(entity)) continue;
+				${name(entity)}sMissingRefs.add(object);
+				entityMissingRefs.add(entity);
+				${name(entity)}List.remove(object);
+				entityList.remove(entity);
+			}
 
-				// parse object, setting defaults and values from file
-				${JavaName(entity)} object = new ${JavaName(entity)}();
-				object.set(entity);
-				${name(entity)}List.add(object);
-				entityList.add(entity);
+			// add to db when batch size is reached
+			if (${name(entity)}List.size() == BATCH_SIZE)
+			{
+				<#if entity.getXrefLabels()?exists>
+				//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
+				crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
+				<#else>
+				//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
+				crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
+				</#if>
+
+				// clear for next batch
+				${name(entity)}List.clear();
+				entityList.clear();
+
+				// keep count
+				total.set(total.get() + BATCH_SIZE);
+
+				crudRepository.flush();
+				crudRepository.clearCache();
+			}
+		}
+
+		// add remaining elements to the database
+		if (!${name(entity)}List.isEmpty())
+		{
+			total.set(total.get() + ${name(entity)}List.size());
+
+			// resolve foreign keys, again keeping track of those entities that could not be solved
+			for (int i = 0; i < ${name(entity)}List.size(); i++)
+			{
+				Entity entity = entityList.get(i);
+				${JavaName(entity)} object = ${name(entity)}List.get(i);
 
 				if (!resolveForeignKeys(dataService, entity, object, crudRepository))
 				{
@@ -90,9 +131,38 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 					${name(entity)}List.remove(object);
 					entityList.remove(entity);
 				}
+			}
 
-				// add to db when batch size is reached
-				if (${name(entity)}List.size() == BATCH_SIZE)
+			<#if entity.getXrefLabels()?exists>
+			//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
+			crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
+			<#else>
+			//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
+			crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
+			</#if>
+			${name(entity)}List.clear();
+			entityList.clear();
+		}
+
+		// Try to resolve FK's for entities until all are resolved or we have more then 100 iterations
+		if (!${name(entity)}sMissingRefs.isEmpty())
+		{
+			int iterationCount = 0;
+
+			do
+			{
+				int index = new java.util.Random().nextInt(${name(entity)}sMissingRefs.size());
+				Entity entity = entityMissingRefs.get(index);
+				${JavaName(entity)} object = ${name(entity)}sMissingRefs.get(index);
+
+				if (resolveForeignKeys(dataService, entity, object, crudRepository))
+				{
+					${name(entity)}List.add(object);
+					entityMissingRefs.remove(entity);
+					${name(entity)}sMissingRefs.remove(object);
+				}
+
+				if (!${name(entity)}List.isEmpty())
 				{
 					<#if entity.getXrefLabels()?exists>
 					//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
@@ -101,106 +171,28 @@ public class ${JavaName(entity)}EntityImporter implements EntityImporter<${JavaN
 					//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
 					crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
 					</#if>
-
-					// clear for next batch
 					${name(entity)}List.clear();
-					entityList.clear();
-
-					// keep count
-					total.set(total.get() + BATCH_SIZE);
-
-					crudRepository.flush();
-					crudRepository.clearCache();
 				}
-			}
 
-			// add remaining elements to the database
-			if (!${name(entity)}List.isEmpty())
-			{
-				total.set(total.get() + ${name(entity)}List.size());
-
-				// resolve foreign keys, again keeping track of those entities that could not be solved
-				for (int i = 0; i < ${name(entity)}List.size(); i++)
+				if (iterationCount++ > 100000)
 				{
-					Entity entity = entityList.get(i);
-					${JavaName(entity)} object = ${name(entity)}List.get(i);
-
-					if (!resolveForeignKeys(dataService, entity, object, crudRepository))
+					String identifier = "";
+					String name = "";
+					for (${JavaName(entity)} blaat : ${name(entity)}sMissingRefs)
 					{
-						${name(entity)}sMissingRefs.add(object);
-						entityMissingRefs.add(entity);
-						${name(entity)}List.remove(object);
-						entityList.remove(entity);
+						identifier = blaat.getString("Identifier");
+						name = blaat.getString("Name");
 					}
+					throw new MolgenisDataException(
+							"Import of '${name(entity)}' entity failed:"
+									+ "This is probably caused by a(n) '${name(entity)}' that has a reference but that does not exist."
+									+ "(identifier:" + identifier + ", name:" + name + ")"); 
 				}
-
-				<#if entity.getXrefLabels()?exists>
-				//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
-				crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
-				<#else>
-				//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
-				crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
-				</#if>
-				${name(entity)}List.clear();
-				entityList.clear();
 			}
-
-			// Try to resolve FK's for entities until all are resolved or we have more then 100 iterations
-			if (!${name(entity)}sMissingRefs.isEmpty())
-			{
-				int iterationCount = 0;
-
-				do
-				{
-					int index = new java.util.Random().nextInt(${name(entity)}sMissingRefs.size());
-					Entity entity = entityMissingRefs.get(index);
-					${JavaName(entity)} object = ${name(entity)}sMissingRefs.get(index);
-
-					if (resolveForeignKeys(dataService, entity, object, crudRepository))
-					{
-						${name(entity)}List.add(object);
-						entityMissingRefs.remove(entity);
-						${name(entity)}sMissingRefs.remove(object);
-					}
-
-					if (!${name(entity)}List.isEmpty())
-					{
-						<#if entity.getXrefLabels()?exists>
-						//update objects in the database using xref_label defined secondary key(s) '${csv(entity.getXrefLabels())}' defined in xref_label
-						crudRepository.update(${name(entity)}List,dbAction<#list entity.getXrefLabels() as label>, "${label}"</#list>);
-						<#else>
-						//update objects in the database using primary key(<#list entity.getAllKeys()[0].fields as field><#if field_index != 0>,</#if>${field.name}</#list>)
-						crudRepository.update(${name(entity)}List,dbAction<#list entity.getAllKeys()[0].fields as field>, "${field.name}"</#list>);
-						</#if>
-						${name(entity)}List.clear();
-					}
-
-					if (iterationCount++ > 1000)
-					{
-						String identifier = "";
-						String name = "";
-						for (${JavaName(entity)} blaat : ${name(entity)}sMissingRefs)
-						{
-							identifier = blaat.getString("Identifier");
-							name = blaat.getString("Name");
-						}
-						throw new Exception(
-								"Import of '${name(entity)}' entity failed:"
-										+ "This is probably caused by a(n) '${name(entity)}' that has a reference but that does not exist."
-										+ "(identifier:" + identifier + ", name:" + name + ")");
-					}
-				}
-				while (!${name(entity)}sMissingRefs.isEmpty());
-			}
-
-			logger.info("imported " + total.get() + " ${name(entity)} from CSV");
-		
-		} 
-		catch(Exception e) 
-		{
-			logger.error("Error importing repository [" + repository.getName() + "]", e);
-			throw new MolgenisDataException(e);
+			while (!${name(entity)}sMissingRefs.isEmpty());
 		}
+
+		logger.info("imported " + total.get() + " ${name(entity)} from CSV");
 		
 		return total.get();
 	}	

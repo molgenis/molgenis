@@ -133,7 +133,6 @@
 <script>
 	//Remote validation rules for unique fields (check if unique)
 	var remoteRules = {
-		<#-- TODO
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
 				${field.name?uncap_first}: {
@@ -153,7 +152,7 @@
 							}
 								
 							<#if form.primaryKey??>
-							if (apiResponse.items[0].href.endsWith('${form.primaryKey}')) {
+							if (apiResponse.items[0].href.endsWith('${form.primaryKey?c}')) {
 								return 'true'; //Update
 							}
 							</#if>
@@ -164,11 +163,9 @@
 				},
 			</#if>
 		</#list>
-		-->
 	};
 	
 	var remoteMessages = {
-		<#-- TODO
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
 				${field.name?uncap_first}: {
@@ -176,7 +173,6 @@
 				},
 			</#if>
 		</#list>
-		-->
 	};
 </script>
 </#macro>

@@ -1,6 +1,6 @@
 package org.molgenis.omx.utils;
 
-import org.molgenis.util.tuple.Cell;
+import org.molgenis.util.Cell;
 
 public class ValueCell<T> implements Cell<T>
 {

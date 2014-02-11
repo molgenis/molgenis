@@ -2,43 +2,35 @@ package org.molgenis.omx.biobankconnect.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.util.tuple.Tuple;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 
 public class OpalToOmxConvertor extends AbstractOmxConvertor
 {
-	public OpalToOmxConvertor(String studyName, String filePath) throws IOException
+	public OpalToOmxConvertor(String studyName, String filePath) throws IOException, InvalidFormatException
 	{
 		super(studyName, filePath);
 	}
 
 	@Override
-	public void collectProtocolInfo(ExcelReader reader) throws IOException
+	public void collectProtocolInfo(RepositorySource repositorySource) throws IOException
 	{
 		System.out.println("No protocol involved in OPAL format!");
 	}
 
-	public void collectVariableInfo(ExcelReader reader) throws IOException
+	@Override
+	public void collectVariableInfo(RepositorySource repositorySource) throws IOException
 	{
-		ExcelSheetReader variableSheet = reader.getSheet(0);
-		Iterator<?> colNamesIterator = variableSheet.colNamesIterator();
-		List<String> colNamesList = new ArrayList<String>();
-		while (colNamesIterator.hasNext())
+		Repository repo = repositorySource.getRepository("Variables");
+		for (Entity entity : repo)
 		{
-			colNamesList.add(colNamesIterator.next().toString());
-		}
-
-		Iterator<Tuple> rowTuples = variableSheet.iterator();
-		while (rowTuples.hasNext())
-		{
-			Tuple eachRow = rowTuples.next();
-			String variableName = eachRow.getString("name");
-			String label = eachRow.getString("label:en");
-			String dataType = eachRow.getString("valueType");
+			String variableName = entity.getString("name");
+			String label = entity.getString("label:en");
+			String dataType = entity.getString("valueType");
 
 			if (variableName != null) variableName = variableName.trim();
 			if (label != null) label = label.trim();
@@ -52,26 +44,19 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 		}
 	}
 
-	public void collectCategoryInfo(ExcelReader reader) throws IOException
+	@Override
+	public void collectCategoryInfo(RepositorySource repositorySource) throws IOException
 	{
-		ExcelSheetReader categoryReader = reader.getSheet(1);
-		Iterator<?> iterator = categoryReader.colNamesIterator();
-		List<String> listOfColumnHeaders = new ArrayList<String>();
-		while (iterator.hasNext())
+		Repository repo = repositorySource.getRepository("Categories");
+		for (Entity entity : repo)
 		{
-			listOfColumnHeaders.add(iterator.next().toString());
-		}
-		Iterator<Tuple> listOfRows = categoryReader.iterator();
-		while (listOfRows.hasNext())
-		{
-			Tuple eachRow = listOfRows.next();
-			String featureID = eachRow.getString("variable");
+			String featureID = entity.getString("variable");
 			if (featureID != null)
 			{
 				featureID = featureID.trim();
 
-				String code = eachRow.getString("name");
-				String categoryDescription = eachRow.getString("label:en");
+				String code = entity.getString("name");
+				String categoryDescription = entity.getString("label:en");
 
 				List<UniqueCategory> listOfCategoriesPerVariable = null;
 				if (featureCategoryLinks.containsKey(featureID))
@@ -91,8 +76,9 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	/**
 	 * @param args
 	 * @throws IOException
+	 * @throws InvalidFormatException
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 		new OpalToOmxConvertor(args[0], args[1]);
 	}

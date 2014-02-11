@@ -15,23 +15,24 @@ import org.apache.poi.ss.util.CellReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 
 /**
- * ExcelSheet Repository implementation
+ * ExcelSheet {@link org.molgenis.data.Repository} implementation
  * 
  * It is assumed that the first row of the sheet is the header row.
  * 
  * All attributes will be of the string type. The cell values are converted to string.
  * 
- * 
+ * The url of this Repository is defined as excel://${filename}/${sheetname}
  */
-public class ExcelRepository extends AbstractRepository<ExcelEntity>
+public class ExcelRepository extends AbstractRepository
 {
+	public static final String BASE_URL = "excel://";
 	private final Sheet sheet;
 
 	/** process cells after reading */
@@ -40,14 +41,14 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	private Map<String, Integer> colNamesMap;
 	private EntityMetaData entityMetaData;
 
-	public ExcelRepository(Sheet sheet)
+	public ExcelRepository(String fileName, Sheet sheet)
 	{
-		this(sheet, null);
+		this(fileName, sheet, null);
 	}
 
-	public ExcelRepository(Sheet sheet, List<CellProcessor> cellProcessors)
+	public ExcelRepository(String fileName, Sheet sheet, List<CellProcessor> cellProcessors)
 	{
-		if (sheet == null) throw new IllegalArgumentException("sheet is null");
+		super(BASE_URL + fileName + "/" + sheet.getSheetName());
 		this.sheet = sheet;
 		this.cellProcessors = cellProcessors;
 	}
@@ -58,10 +59,10 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	}
 
 	@Override
-	public Iterator<ExcelEntity> iterator()
+	public Iterator<Entity> iterator()
 	{
 		final Iterator<Row> it = sheet.iterator();
-		if (!it.hasNext()) return Collections.<ExcelEntity> emptyList().iterator();
+		if (!it.hasNext()) return Collections.<Entity> emptyList().iterator();
 
 		// create column header index once and reuse
 		Row headerRow = it.next();
@@ -70,9 +71,9 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 			colNamesMap = toColNamesMap(headerRow);
 		}
 
-		if (!it.hasNext()) return Collections.<ExcelEntity> emptyList().iterator();
+		if (!it.hasNext()) return Collections.<Entity> emptyList().iterator();
 
-		return new Iterator<ExcelEntity>()
+		return new Iterator<Entity>()
 		{
 			@Override
 			public boolean hasNext()
@@ -101,7 +102,7 @@ public class ExcelRepository extends AbstractRepository<ExcelEntity>
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		if (entityMetaData == null)
 		{

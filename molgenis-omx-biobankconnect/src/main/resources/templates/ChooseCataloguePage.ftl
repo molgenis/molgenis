@@ -1,4 +1,4 @@
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data" action="">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
@@ -47,21 +47,78 @@
 			</div>
 		</div>
 	</div>
+	<div class="row-fluid">
+		<div id="import-features-modal" class="modal hide">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3>Import features</h3>
+			</div>
+			<div class="modal-body">
+				<div><strong>Please input dataSet name</strong></div>
+				<div><input type="text" id="dataSetName" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div><br>
+				<div><strong>Please upload features</strong></div>
+				<div>
+					<div class="fileupload fileupload-new" data-provides="fileupload">
+						<div class="input-append">
+							<div class="uneditable-input">
+								<i class="icon-file fileupload-exists"></i>
+								<span class="fileupload-preview"></span>
+							</div>
+							<span class="btn btn-file btn-info">
+								<span class="fileupload-new">Select file</span>
+								<span class="fileupload-exists">Change</span>
+								<input type="file" id="uploadedOntology" name="file" required/>
+							</span>
+							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
+						</div>
+						<div class="float-right"><a href="/html/example-data.csv">Download example data</a></div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<a href="#" class="btn" data-dismiss="modal">Close</a>
+				<a href="#" class="btn btn-primary" id="import-features">Import features</a>
+			</div>
+		</div>
+	</div>
 	<script type="text/javascript">
-		$(document).ready(function(){
+		$(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
-			$('#selectedDataSetId').change(function(){
+			molgenis.ontologyMatcherRunning(function(){
 				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
-			});
-			if($('#selectedDataSetId option').length === 0){
-				$('.pager li.next').addClass('disabled');
-			}
-			$('#import-data-button').click(function(){
-				$('#wizardForm').attr({
-					'action' : '/menu/main/importwizard',
-					'method' : 'GET'
-				}).submit();
+				$('#selectedDataSetId').change(function(){
+					molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+				});
+				if($('#selectedDataSetId option').length === 0){
+					$('.pager li.next').addClass('disabled');
+				}
+				$('#import-data-button').click(function(){
+					$('#import-features-modal').modal('show');
+					return false;
+				});
+				$('#import-features').click(function(){
+					var alert = {};
+					var uploadedFile = $('#uploadedOntology').val();
+					if($('#dataSetName').val() === ''){
+						alert.message = 'Please define the dataset name!';
+						molgenis.createAlert([alert], 'error');
+						$('#import-features-modal').modal('hide');
+					}else if(uploadedFile === '' || uploadedFile.substr(uploadedFile.length - 4, uploadedFile.length) !== '.csv'){
+						alert.message = 'Please upload your file in CSV';
+						molgenis.createAlert([alert], 'error');
+						$('#import-features-modal').modal('hide');
+					}else{
+						$('#wizardForm').attr({
+							'action' : '${context_url}/uploadfeatures',
+							'method' : 'POST'
+						}).submit();
+					}
+				});
+				<#if message??>
+					var alert = {};
+					alert.message = '${message}';
+					molgenis.createAlert([alert], 'error');
+				</#if>
 			});
 		});
 	</script>

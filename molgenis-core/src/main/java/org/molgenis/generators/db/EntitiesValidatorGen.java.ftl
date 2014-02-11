@@ -29,9 +29,8 @@ import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.Repository;
-import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.model.MolgenisModelException;
@@ -78,22 +77,21 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 
-		EntitySource entitySource = dataService.createEntitySource(file);
+		RepositorySource repositorySource = dataService.createFileRepositorySource(file);
 		try
 		{
-			for (String entityName : entitySource.getEntityNames())
+			for (Repository repository : repositorySource.getRepositories())
 			{
-				Repository<? extends org.molgenis.data.Entity> repository = entitySource
-						.getRepositoryByEntityName(entityName);
 				try
 				{
-					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(entityName.toLowerCase());
+					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(repository.getName().toLowerCase());
 					if (isImportableEntity)
 					{
-						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(entityName.toLowerCase());
-						validateTable(entityName, repository, entityClazz, validationReport);
+						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(repository.getName()
+								.toLowerCase());
+						validateTable(repository.getName(), repository, entityClazz, validationReport);
 					}
-					validationReport.getSheetsImportable().put(entityName, isImportableEntity);
+					validationReport.getSheetsImportable().put(repository.getName(), isImportableEntity);
 				}
 				finally
 				{
@@ -105,21 +103,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		{
 			throw new IOException(e);
 		}
-		catch (DatabaseException e)
-		{
-			throw new IOException(e);
-		}
-		finally
-		{
-			entitySource.close();
-		}
 
 		return validationReport;
 	}
-
-	private void validateTable(String entityName, Repository<? extends org.molgenis.data.Entity> repository,
+	
+	private void validateTable(String entityName, Repository repository,
 			Class<? extends Entity> entityClazz, EntitiesValidationReport validationReport)
-			throws MolgenisModelException, DatabaseException, IOException
+			throws MolgenisModelException, IOException
 	{
 		List<Field> entityFields = new JDBCMetaDatabase().getEntity(entityClazz.getSimpleName()).getAllFields();
 
@@ -206,7 +196,8 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		validationReport.getFieldsRequired().put(entityName, requiredFields.keySet());
 		validationReport.getFieldsAvailable().put(entityName, availableFields.keySet());
 	}
-	private List<String> getXrefNames(Field field) throws MolgenisModelException, DatabaseException
+	
+	private List<String> getXrefNames(Field field) throws MolgenisModelException
 	{
 		if (!field.isXRef()) return Collections.emptyList();
 

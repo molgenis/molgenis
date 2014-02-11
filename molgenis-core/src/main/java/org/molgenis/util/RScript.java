@@ -30,10 +30,10 @@ public class RScript
 	public String R_COMMAND = "R CMD BATCH --vanilla --slave";
 
 	/** logger */
-	private Logger logger = Logger.getLogger(RScript.class.getSimpleName());
+	private final Logger logger = Logger.getLogger(RScript.class.getSimpleName());
 
 	/** buffer containing the script */
-	private StringBuffer script = new StringBuffer();
+	private final StringBuffer script = new StringBuffer();
 
 	/** here the error messages will be stored after execution */
 	private String error;
@@ -239,15 +239,9 @@ public class RScript
 	/** Helper function to delete a file */
 	public void deleteFile(String path) throws Exception
 	{
-		try
-		{
-			File toDelete = new File(path);
-			toDelete.delete();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		File toDelete = new File(path);
+		boolean ok = toDelete.delete();
+		if (!ok) throw new IOException("failed to delete " + path);
 	}
 
 	/**

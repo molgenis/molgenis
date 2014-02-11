@@ -12,6 +12,7 @@ public class EntityForm implements Form
 	private final EntityMetaData entityMetaData;
 	private Entity entity;
 	private Integer primaryKey;
+	private boolean unique;
 	private final boolean hasWritePermission;
 	private final List<SubEntityForm> subForms = new ArrayList<SubEntityForm>();
 
@@ -74,6 +75,11 @@ public class EntityForm implements Form
 	public Entity getEntity()
 	{
 		return entity;
+	}
+
+	public boolean isUnique()
+	{
+		return unique;
 	}
 
 	@Override

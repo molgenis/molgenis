@@ -22,12 +22,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.processor.AbstractCellProcessor;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.io.processor.AbstractCellProcessor;
-import org.molgenis.io.processor.CellProcessor;
 import org.springframework.util.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -37,8 +37,9 @@ import au.com.bytecode.opencsv.CSVReader;
  * 
  * The filename without the extension is considered to be the entityname
  */
-public class CsvRepository extends AbstractRepository<Entity>
+public class CsvRepository extends AbstractRepository
 {
+	public static final String BASE_URL = "csv://";
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	public static final char DEFAULT_SEPARATOR = ',';
 
@@ -54,32 +55,35 @@ public class CsvRepository extends AbstractRepository<Entity>
 	 */
 	private Map<String, Integer> colNamesMap;
 	private DefaultEntityMetaData entityMetaData;
-	private final String entityName;
+	private final String sheetName;
 
-	public CsvRepository(Reader reader, String entityName, List<CellProcessor> cellProcessors)
+	public CsvRepository(String fileName, Reader reader, String entityName, List<CellProcessor> cellProcessors)
 	{
-		this(reader, DEFAULT_SEPARATOR, entityName, cellProcessors);
+		this(fileName, reader, DEFAULT_SEPARATOR, entityName, cellProcessors);
 	}
 
-	public CsvRepository(Reader reader, char separator, String entityName, @Nullable
+	public CsvRepository(String fileName, Reader reader, char separator, String sheetName, @Nullable
 	List<CellProcessor> cellProcessors)
 	{
+		super(BASE_URL + fileName);
+
+		if (fileName == null) throw new IllegalArgumentException("fileName is null");
 		if (reader == null) throw new IllegalArgumentException("reader is null");
-		if (entityName == null) throw new IllegalArgumentException("entityName is null");
+		if (sheetName == null) throw new IllegalArgumentException("entityName is null");
 		this.csvReader = new CSVReader(reader, separator);
-		this.entityName = entityName;
+		this.sheetName = sheetName;
 		this.cellProcessors = cellProcessors;
 	}
 
 	public CsvRepository(File file, List<CellProcessor> cellProcessors) throws FileNotFoundException
 	{
-		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), StringUtils.stripFilenameExtension(file
-				.getName()), cellProcessors);
+		this(file.getName(), new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), StringUtils
+				.stripFilenameExtension(file.getName()), cellProcessors);
 	}
 
 	public CsvRepository(File file, char separator, List<CellProcessor> cellProcessors) throws FileNotFoundException
 	{
-		this(new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), separator, StringUtils
+		this(file.getName(), new InputStreamReader(new FileInputStream(file), CHARSET_UTF8), separator, StringUtils
 				.stripFilenameExtension(file.getName()), cellProcessors);
 	}
 
@@ -148,8 +152,7 @@ public class CsvRepository extends AbstractRepository<Entity>
 						}
 						catch (IOException e)
 						{
-							throw new MolgenisDataException("Exception reading line of csv file [" + entityName + "]",
-									e);
+							throw new MolgenisDataException("Exception reading line of csv file [" + sheetName + "]", e);
 						}
 					}
 
@@ -166,13 +169,13 @@ public class CsvRepository extends AbstractRepository<Entity>
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisDataException("Exception getting iterator for csv file [" + entityName + "]", e);
+			throw new MolgenisDataException("Exception getting iterator for csv file [" + sheetName + "]", e);
 		}
 
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		try
 		{
@@ -183,7 +186,7 @@ public class CsvRepository extends AbstractRepository<Entity>
 
 			if (entityMetaData == null)
 			{
-				entityMetaData = new DefaultEntityMetaData(entityName);
+				entityMetaData = new DefaultEntityMetaData(sheetName);
 
 				for (String attrName : colNamesMap.keySet())
 				{
@@ -197,7 +200,7 @@ public class CsvRepository extends AbstractRepository<Entity>
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisDataException("Exception getting EntityMetaData for csv file [" + entityName + "]", e);
+			throw new MolgenisDataException("Exception getting EntityMetaData for csv file [" + sheetName + "]", e);
 		}
 	}
 

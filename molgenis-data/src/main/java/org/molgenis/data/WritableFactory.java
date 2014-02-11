@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Creates a new Entity Writable
  */
-public interface WritableFactory<E extends Entity> extends Closeable
+public interface WritableFactory extends Closeable
 {
-	Writable<E> createWritable(String entityName, List<String> attributeNames);
+	Writable createWritable(String entityName, List<String> attributeNames);
 }

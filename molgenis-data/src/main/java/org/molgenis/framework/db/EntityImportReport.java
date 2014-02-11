@@ -5,21 +5,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntityImportReport implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	private List<String> progressLog;
-	private Map<String, String> messages;
+	private Map<String, AtomicInteger> nrImportedEntitiesMap;
 	private String errorItem;
 	private int nrImported;
 
 	public EntityImportReport()
 	{
 		progressLog = new ArrayList<String>();
-		messages = new HashMap<String, String>();
+		nrImportedEntitiesMap = new HashMap<String, AtomicInteger>();
 		errorItem = "no error found";
+		nrImported = 0;
 	}
 
 	public List<String> getProgressLog()
@@ -32,14 +34,25 @@ public class EntityImportReport implements Serializable
 		this.progressLog = progressLog;
 	}
 
-	public Map<String, String> getMessages()
+	public void addEntityCount(String entityName, int count)
 	{
-		return messages;
+		AtomicInteger entityCount = nrImportedEntitiesMap.get(entityName);
+		if (entityCount == null)
+		{
+			entityCount = new AtomicInteger(0);
+			nrImportedEntitiesMap.put(entityName, entityCount);
+		}
+		entityCount.addAndGet(count);
 	}
 
-	public void setMessages(Map<String, String> messages)
+	public Map<String, AtomicInteger> getNrImportedEntitiesMap()
 	{
-		this.messages = messages;
+		return nrImportedEntitiesMap;
+	}
+
+	public void setNrImportedEntitiesMap(Map<String, AtomicInteger> nrImportedEntitiesMap)
+	{
+		this.nrImportedEntitiesMap = nrImportedEntitiesMap;
 	}
 
 	public String getErrorItem()
@@ -60,5 +73,23 @@ public class EntityImportReport implements Serializable
 	public void addNrImported(int nrImported)
 	{
 		this.nrImported += nrImported;
+	}
+
+	public void addEntityImportReport(EntityImportReport entityImportReport)
+	{
+		progressLog.addAll(entityImportReport.getProgressLog());
+		for (Map.Entry<String, AtomicInteger> entry : entityImportReport.getNrImportedEntitiesMap().entrySet())
+		{
+			String entityName = entry.getKey();
+			AtomicInteger entityCount = nrImportedEntitiesMap.get(entityName);
+			if (entityCount == null)
+			{
+				entityCount = new AtomicInteger(0);
+				nrImportedEntitiesMap.put(entityName, entityCount);
+			}
+			entityCount.addAndGet(entry.getValue().get());
+		}
+		errorItem = entityImportReport.getErrorItem();
+		nrImported += entityImportReport.getNrImported();
 	}
 }

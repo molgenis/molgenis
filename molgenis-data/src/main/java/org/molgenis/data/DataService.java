@@ -1,24 +1,34 @@
 package org.molgenis.data;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+
+import org.molgenis.data.support.FileRepositorySource;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
  * 
  * Main entry point for the DataApi
  */
-public interface DataService extends RepositoryCollection, Iterable<EntitySource>
+public interface DataService extends RepositoryCollection
 {
-	/**
-	 * Register a new EntitySource.
-	 * 
-	 * You should first register the EntitySourceFactory for this EntitySource
-	 */
-	void registerEntitySource(String url);
 
-	void registerFactory(EntitySourceFactory entitySourceFactory);
+	/**
+	 * Add a repository to the DataService
+	 * 
+	 * @throws MolgenisDataException
+	 *             if entity name is already registered
+	 * @param repository
+	 */
+	void addRepository(Repository repository);
+
+	/**
+	 * Add all repositories of a RepositorySource
+	 * 
+	 * @param repositorySource
+	 */
+	void addRepositories(RepositorySource repositorySource);
 
 	/**
 	 * return number of entities matched by query
@@ -32,14 +42,14 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName);
+	Iterable<Entity> findAll(String entityName);
 
 	/**
 	 * Find entities that match a query. Returns empty Iterable if no matches.
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Query q);
+	Iterable<Entity> findAll(String entityName, Query q);
 
 	/**
 	 * Find entities based on id. Returns empty Iterable if no matches.
@@ -48,7 +58,7 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * @param ids
 	 * @return
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids);
+	Iterable<Entity> findAll(String entityName, Iterable<Integer> ids);
 
 	@Deprecated
 	/**
@@ -66,46 +76,56 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	<E extends Entity> E findOne(String entityName, Integer id);
+	Entity findOne(String entityName, Integer id);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 */
-	<E extends Entity> E findOne(String entityName, Query q);
+	Entity findOne(String entityName, Query q);
 
 	/**
 	 * Adds an entity to it's repository
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Writable
+	 * 
+	 * @return the id of the entity
 	 */
-	<E extends Entity> void add(String entityName, E entity);
+	Integer add(String entityName, Entity entity);
 
-	<E extends Entity> void add(String entityName, Iterable<E> entities);
+	void add(String entityName, Iterable<? extends Entity> entities);
 
 	/**
 	 * Updates an entity
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
-	<E extends Entity> void update(String entityName, E entity);
+	void update(String entityName, Entity entity);
 
-	<E extends Entity> void update(String entityName, Iterable<E> entities);
+	void update(String entityName, Iterable<? extends Entity> entities);
 
 	/**
 	 * Deletes an entity
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
-	<E extends Entity> void delete(String entityName, E entity);
+	void delete(String entityName, Entity entity);
 
 	/**
 	 * Deletes entities
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
 	 */
-	<E extends Entity> void delete(String entityName, Iterable<E> entity);
+	void delete(String entityName, Iterable<? extends Entity> entity);
+
+	/**
+	 * Deletes an entity by it's id
+	 * 
+	 * @param entityName
+	 * @param id
+	 */
+	void delete(String entityName, int id);
 
 	/**
 	 * Get a CrudRepository by entity name
@@ -114,16 +134,7 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * 
 	 * throws MolgenisDataException if the repository doesn't implement CrudRepository
 	 */
-	<E extends Entity> CrudRepository<E> getCrudRepository(String entityName);
-
-	/**
-	 * Creates a new file based entity source (like excel, csv)
-	 * 
-	 * Does not register the EntitySource
-	 */
-	EntitySource createEntitySource(File file) throws IOException;
-
-	EntitySource getEntitySource(String url);
+	CrudRepository getCrudRepository(String entityName);
 
 	/**
 	 * Returns all entity classes. Returns empty Iterable if no entity classes.
@@ -131,4 +142,43 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * @return
 	 */
 	Iterable<Class<? extends Entity>> getEntityClasses();
+
+	/**
+	 * type-safe find entities that match a query
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz);
+
+	/**
+	 * type-safe find all entities
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz);
+
+	/**
+	 * type-safe find entities that match a stream of ids
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz);
+
+	<E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz);
+
+	/**
+	 * type-save find an entity by it's id
+	 */
+	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
+
+	/**
+	 * Add a FileRepositorySource so it can be used by the 'createFileRepositySource' factory method
+	 * 
+	 * @param fileRepositorySource
+	 */
+	void addFileRepositorySourceClass(Class<? extends FileRepositorySource> clazz, Set<String> fileExtensions);
+
+	/**
+	 * Factory method for creating a new FileRepositorySource
+	 * 
+	 * For example an excel file
+	 * 
+	 * @param file
+	 * @return
+	 */
+	FileRepositorySource createFileRepositorySource(File file);
 }

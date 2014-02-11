@@ -20,6 +20,11 @@
 	
   	<dependencies>
   		<dependency>
+			<groupId>net.sf.jwordnet</groupId>
+			<artifactId>jwnl</artifactId>
+			<version>1.4_rc3</version>
+		</dependency>
+  		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 		    <artifactId>owlapi-api</artifactId>
 		    <version>3.4.5</version>
@@ -59,6 +64,21 @@
             <artifactId>molgenis-search-elasticsearch</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-csv</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-excel</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context-support</artifactId>

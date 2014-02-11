@@ -2,65 +2,67 @@ package org.molgenis.omx.biobankconnect.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.util.tuple.Tuple;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
+import org.molgenis.data.UnknownEntityException;
 
 public class PhenoToOmxConvertor extends AbstractOmxConvertor
 {
-	public PhenoToOmxConvertor(String studyName, String filePath) throws IOException
+	public PhenoToOmxConvertor(String studyName, String filePath) throws IOException, InvalidFormatException
 	{
 		super(studyName, filePath);
 	}
 
 	@Override
-	public void collectProtocolInfo(ExcelReader reader) throws IOException
+	public void collectProtocolInfo(RepositorySource repositorySource) throws IOException
 	{
-		if (reader.getSheet("Protocol") != null)
+		try
 		{
-			ExcelSheetReader measurementReader = reader.getSheet("Protocol");
-			Iterator<Tuple> rows = measurementReader.iterator();
-			while (rows.hasNext())
+			Repository repo = repositorySource.getRepository("Protocol");
+			for (Entity entity : repo)
 			{
-				Tuple tuple = rows.next();
-				String name = tuple.getString("name");
+				String name = entity.getString("name");
 				if (!protocolFeatureLinks.containsKey(name))
 				{
 					protocolFeatureLinks.put(name, new ArrayList<String>());
 				}
-				if (!tuple.getString("Features_name").isEmpty())
+				if (!entity.getString("Features_name").isEmpty())
 				{
-					for (String featureName : tuple.getString("Features_name").split(","))
+					for (String featureName : entity.getString("Features_name").split(","))
 					{
 						protocolFeatureLinks.get(name).add(createFeatureIdentifier(featureName));
 					}
 				}
 			}
 		}
+		catch (UnknownEntityException e)
+		{
+			System.out.println("Missing Protocol");
+		}
+
 	}
 
 	@Override
-	public void collectVariableInfo(ExcelReader reader) throws IOException
+	public void collectVariableInfo(RepositorySource repositorySource) throws IOException
 	{
-		ExcelSheetReader measurementReader = reader.getSheet("Measurement");
-		Iterator<Tuple> rows = measurementReader.iterator();
-		while (rows.hasNext())
+		Repository repo = repositorySource.getRepository("Measurement");
+		for (Entity entity : repo)
 		{
-			Tuple tuple = rows.next();
-			String featureName = tuple.getString("name");
-			String description = tuple.getString("description");
+			String featureName = entity.getString("name");
+			String description = entity.getString("description");
 			String dataType = "string";
-			if (!tuple.getString("categories_name").isEmpty())
+			if (!entity.getString("categories_name").isEmpty())
 			{
 				dataType = "categorical";
 
 				if (!featureCategoryLinks.containsKey(featureName)) featureCategoryLinks.put(featureName,
 						new ArrayList<UniqueCategory>());
 				List<UniqueCategory> listOfCategories = featureCategoryLinks.get(featureName);
-				for (String categoryName : tuple.getString("categories_name").split(","))
+				for (String categoryName : entity.getString("categories_name").split(","))
 				{
 					UniqueCategory category = copyCategoryContent(categoryInfo.get(categoryName));
 					category.setIdentifier(createCategoryIdentifier(featureName + "_" + category.getCode()));
@@ -77,16 +79,14 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectCategoryInfo(ExcelReader reader) throws IOException
+	public void collectCategoryInfo(RepositorySource repositorySource) throws IOException
 	{
-		ExcelSheetReader measurementReader = reader.getSheet("Category");
-		Iterator<Tuple> rows = measurementReader.iterator();
-		while (rows.hasNext())
+		Repository repo = repositorySource.getRepository("Category");
+		for (Entity entity : repo)
 		{
-			Tuple tuple = rows.next();
-			String name = tuple.getString("name");
-			String description = tuple.getString("description");
-			String code = tuple.getString("code_string");
+			String name = entity.getString("name");
+			String description = entity.getString("description");
+			String code = entity.getString("code_string");
 			categoryInfo.put(name, new UniqueCategory(name, code, description));
 		}
 	}
@@ -99,8 +99,9 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	/**
 	 * @param args
 	 * @throws IOException
+	 * @throws InvalidFormatException
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 		new PhenoToOmxConvertor(args[0], args[1]);
 	}

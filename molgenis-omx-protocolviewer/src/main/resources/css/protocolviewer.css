@@ -26,7 +26,7 @@ ul.dynatree-container {
 	height: 26px;	
 }
 
-#dataset-browser {
+#catalog-container {
 	max-height: 500px;
 	overflow-y: auto;
 }
@@ -35,13 +35,13 @@ ul.dynatree-container {
 	min-height: 200px;
 }
 
-#feature-selection {
+#feature-selection-table-container {
 	min-height: 270px;
 	max-height: 370px;
 	overflow-y: auto;
 }
 
-#feature-selection td.center {
+#feature-selection-table td.center {
 	text-align: center;
 }
 
@@ -67,8 +67,13 @@ i:hover {
 }
 
 #orderdata-selection-table-container {
-	max-height: 300px;
+	max-height: 250px;
 	overflow: auto;
+}
+
+#orderdata-selection-table-pager {
+	margin-top: 10px;
+	margin-bottom: 0px;	
 }
 
 #orderdata-list-container {

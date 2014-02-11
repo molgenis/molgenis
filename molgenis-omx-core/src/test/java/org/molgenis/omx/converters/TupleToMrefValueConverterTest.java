@@ -10,11 +10,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.value.MrefValue;
-import org.molgenis.util.tuple.Cell;
-import org.molgenis.util.tuple.KeyValueTuple;
+import org.molgenis.util.Cell;
 import org.testng.annotations.Test;
 
 public class TupleToMrefValueConverterTest
@@ -32,7 +32,7 @@ public class TupleToMrefValueConverterTest
 		MrefValue value = new MrefValue();
 		value.setValue(Arrays.asList(ch1, ch2));
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
-		List<Cell<String>> cells = new TupleToMrefValueConverter(characteristicLoadingCache).toCell(value).getValue();
+		List<Cell<String>> cells = new EntityToMrefValueConverter(characteristicLoadingCache).toCell(value).getValue();
 
 		Iterator<Cell<String>> it = cells.iterator();
 		assertTrue(it.hasNext());
@@ -47,7 +47,7 @@ public class TupleToMrefValueConverterTest
 	}
 
 	@Test
-	public void fromTuple() throws ValueConverterException, DatabaseException
+	public void fromTuple() throws ValueConverterException
 	{
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
 		Characteristic ch1 = when(mock(Characteristic.class).getName()).thenReturn("ch1").getMock();
@@ -55,9 +55,8 @@ public class TupleToMrefValueConverterTest
 		when(characteristicLoadingCache.findCharacteristics(Arrays.asList("ch1", "ch2"))).thenReturn(
 				Arrays.asList(ch1, ch2));
 		String colName = "col";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, Arrays.asList("ch1", "ch2"));
-		MrefValue value = new TupleToMrefValueConverter(characteristicLoadingCache).fromTuple(tuple, colName, null);
+		Entity entity = new MapEntity(colName, Arrays.asList("ch1", "ch2"));
+		MrefValue value = new EntityToMrefValueConverter(characteristicLoadingCache).fromEntity(entity, colName, null);
 		assertEquals(value.getValue(), Arrays.asList(ch1, ch2));
 	}
 }

@@ -54,6 +54,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
 
+		.antMatchers("/logo/**").permitAll()
+
 		.antMatchers("/account/**").permitAll()
 
 		.antMatchers("/css/**").permitAll()
@@ -71,7 +73,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.antMatchers("/search").permitAll()
 
 		.antMatchers("/captcha").permitAll()
-		
+
 		.antMatchers("/dataindexerstatus").authenticated()
 
 		.anyRequest().denyAll().and()
@@ -185,4 +187,5 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		return new MolgenisPermissionServiceImpl();
 	}
+
 }

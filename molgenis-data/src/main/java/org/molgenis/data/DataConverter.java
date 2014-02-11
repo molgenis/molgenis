@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
 
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
 {
 	private static ConversionService conversionService;
@@ -39,6 +41,8 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
+		if (conversionService == null) return source.toString();
+
 		return convert(source, String.class);
 	}
 
@@ -70,11 +74,18 @@ public class DataConverter
 		return convert(source, Double.class);
 	}
 
-	public static Date toDate(Object source)
+	public static java.sql.Date toDate(Object source)
 	{
 		if (source == null) return null;
-		if (source instanceof Date) return (Date) source;
-		return convert(source, Date.class);
+		if (source instanceof java.sql.Date) return (java.sql.Date) source;
+		return convert(source, java.sql.Date.class);
+	}
+
+	public static java.util.Date toUtilDate(Object source)
+	{
+		if (source == null) return null;
+		if (source instanceof java.util.Date) return (java.util.Date) source;
+		return convert(source, java.util.Date.class);
 	}
 
 	public static Timestamp toTimestamp(Object source)
@@ -82,7 +93,7 @@ public class DataConverter
 		if (source == null) return null;
 		else if (source instanceof Timestamp) return (Timestamp) source;
 		else if (source instanceof Date) return new Timestamp(((Date) source).getTime());
-		return new Timestamp(convert(source, Date.class).getTime());
+		return new Timestamp(convert(source, java.util.Date.class).getTime());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -94,18 +105,31 @@ public class DataConverter
 		else return ListEscapeUtils.toList(source.toString());
 	}
 
-	// TODO: Improve code of getIntList (maybe merge with getList above?)
 	public static List<Integer> toIntList(Object source)
 	{
 		if (source == null) return null;
+		else if (source instanceof String)
+		{
+			List<String> stringList = ListEscapeUtils.toList((String) source);
+			List<Integer> intList = new ArrayList<Integer>();
+			for (String s : stringList)
+			{
+				if (!StringUtils.isNumeric(s))
+				{
+					throw new IllegalArgumentException(s + " is not an integer");
+				}
+				intList.add(Integer.parseInt(s));
+			}
+
+			return intList;
+		}
 		else if (source instanceof List<?>)
 		{
 			// it seems we need explicit cast to Int sometimes
 			ArrayList<Integer> intList = new ArrayList<Integer>();
 			for (Object o : (List<?>) source)
 			{
-				if (o instanceof Integer) intList.add((Integer) o);
-				else if (o instanceof String) intList.add(Integer.parseInt((String) o));
+				intList.add(toInt(o));
 			}
 			return intList;
 		}

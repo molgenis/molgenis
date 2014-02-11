@@ -25,21 +25,31 @@ public class QueryImpl implements Query
 		this.rules.add(new ArrayList<QueryRule>());
 	}
 
-	@Deprecated
+	public QueryImpl(Query q)
+	{
+		this();
+		for (QueryRule rule : q.getRules())
+		{
+			addRule(rule);
+		}
+		this.pageSize = q.getPageSize();
+		this.offset = q.getOffset();
+		this.sort = q.getSort();
+	}
+
 	public QueryImpl(QueryRule queryRule)
 	{
 		this(Arrays.asList(queryRule));
 	}
 
-	@Deprecated
 	public QueryImpl(List<QueryRule> queryRules)
 	{
 		this.rules.add(new ArrayList<QueryRule>(queryRules));
 	}
 
-	public void addRule(QueryRule addRules)
+	public void addRule(QueryRule rule)
 	{
-		this.rules.get(this.rules.size() - 1).add(addRules);
+		this.rules.get(this.rules.size() - 1).add(rule);
 	}
 
 	@Override
@@ -47,6 +57,7 @@ public class QueryImpl implements Query
 	{
 		if (this.rules.size() > 1) throw new MolgenisDataException(
 				"Nested query not closed, use unnest() or unnestAll()");
+
 		if (this.rules.size() > 0)
 		{
 			List<QueryRule> rules = this.rules.get(this.rules.size() - 1);
@@ -197,9 +208,30 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Query pageSize(int pageSize)
+	{
+		setPageSize(pageSize);
+		return this;
+	}
+
+	@Override
+	public Query offset(int offset)
+	{
+		setOffset(offset);
+		return this;
+	}
+
+	@Override
+	public Query sort(Sort sort)
+	{
+		setSort(sort);
+		return this;
+	}
+
+	@Override
 	public String toString()
 	{
-		return "QueryImpl [rules=" + rules + ", order=" + order + ", pageSize=" + pageSize + ", offset=" + offset
+		return "QueryImpl [rules=" + getRules() + ", order=" + order + ", pageSize=" + pageSize + ", offset=" + offset
 				+ ", sort=" + sort + "]";
 	}
 

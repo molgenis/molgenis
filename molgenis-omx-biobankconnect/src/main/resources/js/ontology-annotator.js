@@ -19,11 +19,13 @@
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
-				queryRules : [{
-					field : 'type',
-					operator : 'EQUALS',
-					value : 'observablefeature'
-				}]
+				query : {
+					rules : [[{
+						field : 'type',
+						operator : 'EQUALS',
+						value : 'observablefeature'
+					}]]
+				}
 			};
 			searchApi.search(request, function(searchResponse){
 				var sortRule = null;
@@ -71,26 +73,32 @@
 	
 	ns.OntologyAnnotator.prototype.createMatrixForDataItems = function() {
 		var documentType = 'protocolTree-' + getselectedDataSetId();
-		var query = [{
-			field : 'type',
-			operator : 'SEARCH',
-			value : 'observablefeature'
-		}];
+		
+		var q = {
+				rules : [[{
+					field : 'type',
+					operator : 'SEARCH',
+					value : 'observablefeature'
+				}]]
+		}
 		
 		var queryText = $('#search-dataitem').val();
 		if(queryText !== ''){
-			query.push({
+			q.rules[0].push({
 				operator : 'AND'
 			});
-			query.push({
+			q.rules[0].push({
 				operator : 'SEARCH',
 				value : queryText
 			});
 			pagination.reset();
 		}
-		if(sortRule !== null) query.push(sortRule);
+		if(sortRule !== null)
+		{
+			q.sort = sortRule;
+		}
 		
-		searchApi.search(pagination.createSearchRequest(documentType, query), function(searchResponse) {
+		searchApi.search(pagination.createSearchRequest(documentType, q), function(searchResponse) {
 			
 			var searchHits = searchResponse.searchHits;
 			var tableObject = $('#dataitem-table');
@@ -158,7 +166,7 @@
 			var headerRow = $('<tr />');
 			var firstColumn = $('<th>Name</th>').css('width', '15%').appendTo(headerRow);
 			if (sortRule) {
-				if (sortRule.operator == 'SORTASC') {
+				if (sortRule.orders[0].direction == 'ASC') {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 				} else {
 					$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -171,15 +179,19 @@
 			
 			// Sort click
 			$(firstColumn).find('.ui-icon').click(function() {
-				if (sortRule && sortRule.operator == 'SORTASC') {
+				if (sortRule && sortRule.orders[0].direction == 'ASC') {
 					sortRule = {
-						value : 'name',
-						operator : 'SORTDESC'
+							orders: [{
+								property: 'name',
+								direction: 'DESC'
+							}]
 					};
 				} else {
 					sortRule = {
-						value : 'name',
-						operator : 'SORTASC'
+							orders: [{
+								property: 'name',
+								direction: 'ASC'
+							}]
 					};
 				}
 				ns.OntologyAnnotator.prototype.createMatrixForDataItems();
@@ -296,36 +308,32 @@
 		}
 		
 		function createSearchRequest() {
-			var queryRules = [];
-			//todo: how to unlimit the search result
-			queryRules.push({
-				operator : 'LIMIT',
-				value : 1000000
-			});
-			queryRules.push({
-				operator : 'SEARCH',
-				value : 'indexedOntology'
-			});
-			
 			var searchRequest = {
 				documentType : null,
-				queryRules : queryRules
+				pageSize: 1000000,
+				query : {
+					rules:[[{
+						operator : 'SEARCH',
+						value : 'indexedOntology'
+					}]]
+				}
 			};
+			
 			return searchRequest;
 		}
 	};
 
-	ns.OntologyAnnotator.prototype.confirmation = function(title){
+	ns.OntologyAnnotator.prototype.confirmation = function(title, message, action){
 		standardModal.createModalCallback(title, function(modal){
 			var confirmButton = $('<button type="btn" class="btn btn-primary">Confirm</button>').click(function(){
 				modal.modal('hide');
 				$('#spinner').modal();
 				$('#wizardForm').attr({
-					'action' : molgenis.getContextUrl() + '/annotate/remove',
+					'action' : molgenis.getContextUrl() + action,
 					'method' : 'POST'
 				}).submit();
 			});
-			modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove all annotations?</strong></p>');
+			modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>' + message + '</strong></p>');
 			modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
 			modal.css({
 				'margin-top' : 200
@@ -375,13 +383,13 @@
 		},{
 			operator : 'SEARCH',
 			value : query
-		},{
-			operator : 'LIMIT',
-			value : 20
 		}];
 		var searchRequest = {
 			documentType : 'protocolTree-' + dataSetId,
-			queryRules : queryRules
+			query : {
+				pageSize: 20,
+				rules : [queryRules]
+			}
 		};
 		
 		searchApi.search(searchRequest, function(searchReponse){
@@ -411,13 +419,13 @@
 			field : field,
 			operator : 'EQUALS',
 			value : query,
-		},{
-			operator : 'LIMIT',
-			value : 40
 		}];
 		var searchRequest = {
 			documentType : null,
-			queryRules : queryRules
+			query : {
+				pageSize: 40,
+				rules: [queryRules]
+			}
 		};
 		searchApi.search(searchRequest, function(searchReponse){
 			var result = [];
@@ -452,13 +460,12 @@
 			value : 'observablefeature'
 		});
 		
-		queryRules.push({
-			operator : 'LIMIT',
-			value : 100000
-		});
 		var searchRequest = {
 			documentType : null,
-			queryRules : queryRules
+			query : {
+				pageSize: 100000,
+				rules: [queryRules]
+			}
 		};
 		searchApi.search(searchRequest, function(searchResponse){
 			$.each(searchResponse.searchHits, function(index, hit){
@@ -468,28 +475,6 @@
 		});
 	}
 	
-	function searchOntologyTermByUri(ontologyTerm, options, callback){
-		var queryRules = [{
-			field : ontologyTermIRI,
-			operator : 'EQUALS',
-			value : ontologyTerm.termAccession,
-		}];
-		if(options !== undefined && options !== null){
-			queryRules = queryRules.concat(options);
-		}
-		var searchRequest = {
-			documentType : 'ontologyTerm-' + ontologyTerm.ontology.ontologyURI,
-			queryRules : queryRules
-		};
-		searchApi.search(searchRequest, function(searchReponse){
-			var ontologyTerm = null;
-			$.each(searchReponse.searchHits, function(index, hit){
-				ontologyTerm = hit;
-				return false;
-			});
-			callback(ontologyTerm);
-		});
-	}
 
 	function i18nDescription(feature){
 		if(feature.description === undefined) feature.description = '';

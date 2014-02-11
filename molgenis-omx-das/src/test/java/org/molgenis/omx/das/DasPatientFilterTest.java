@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mockito.ArgumentCaptor;
+import org.molgenis.omx.das.impl.DasPatientFilter;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -35,7 +36,6 @@ public class DasPatientFilterTest
 	private HttpServletResponse responseNoPatient;
 	private RequestDispatcher requestDispatcher;
 
-	@SuppressWarnings("unchecked")
 	@BeforeTest
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
@@ -47,7 +47,7 @@ public class DasPatientFilterTest
 		chain = mock(FilterChain.class);
 		requestDispatcher = mock(RequestDispatcher.class);
 		filter = new DasPatientFilter();
-		when(request.getRequestURI()).thenReturn("/das/col7a1/patient502/features");
+		when(request.getRequestURI()).thenReturn("/das/col7a1/patient_502/features");
 		when(request.getQueryString()).thenReturn("3:48618447,48640609;maxbins=636");
 		when(request.getRequestDispatcher("/das/col7a1/features")).thenReturn(requestDispatcher);
 		requestNoPatient = mock(HttpServletRequest.class);
@@ -65,7 +65,7 @@ public class DasPatientFilterTest
 		ArgumentCaptor<HttpServletResponse> argumentResponse = ArgumentCaptor.forClass(HttpServletResponse.class);
 		filter.doFilter(request, response, chain);
 		verify(requestDispatcher).forward(argumentRequest.capture(), argumentResponse.capture());
-		assertEquals("3,502:48618447,48640609;maxbins=636", argumentRequest.getValue().getQueryString());
+		assertEquals("3,patient_502:48618447,48640609;maxbins=636", argumentRequest.getValue().getQueryString());
 	}
 
 	@Test()

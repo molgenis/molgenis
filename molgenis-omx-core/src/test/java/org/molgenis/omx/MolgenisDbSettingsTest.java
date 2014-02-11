@@ -40,19 +40,21 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 					+ "_property0");
 			RuntimeProperty property0 = new RuntimeProperty();
 			property0.setValue("value0");
-			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q)).thenReturn(property0);
+			property0.setName("property0");
+			property0.setIdentifier(RuntimeProperty.class.getSimpleName() + "_property0");
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q, RuntimeProperty.class)).thenReturn(property0);
 
 			Query q1 = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName()
 					+ "_property1");
 			RuntimeProperty property1 = new RuntimeProperty();
 			property1.setValue("true");
-			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q1)).thenReturn(property1);
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q1, RuntimeProperty.class)).thenReturn(property1);
 
 			Query q2 = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName()
 					+ "_property2");
 			RuntimeProperty property2 = new RuntimeProperty();
 			property2.setValue("false");
-			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q2)).thenReturn(property2);
+			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q2, RuntimeProperty.class)).thenReturn(property2);
 
 			return dataservice;
 		}
@@ -115,12 +117,12 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void setProperty()
 	{
-		molgenisDbSettings.setProperty("property0", "value0");
+		molgenisDbSettings.setProperty("property0", "value0-updated");
 
 		RuntimeProperty property0 = new RuntimeProperty();
 		property0.setIdentifier(RuntimeProperty.class.getSimpleName() + "_property0");
 		property0.setName("property0");
 		property0.setValue("value0-updated");
-		verify(dataService).add(RuntimeProperty.ENTITY_NAME, property0);
+		verify(dataService).update(RuntimeProperty.ENTITY_NAME, property0);
 	}
 }

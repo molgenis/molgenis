@@ -19,17 +19,16 @@ import org.molgenis.catalog.CatalogModel;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
-import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Writable;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.io.TupleWriter;
-import org.molgenis.io.excel.ExcelWriter;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
-import org.molgenis.study.StudyDefinitionMeta;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -79,10 +78,9 @@ public class StudyManagerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String getStudyDefinitions(Model model) throws DatabaseException
+	public String getStudyDefinitions(Model model)
 	{
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
 		return VIEW_NAME;
@@ -92,25 +90,24 @@ public class StudyManagerController extends MolgenisPluginController
 	 * Returns a list of meta data for each study definition
 	 * 
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
-	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta() throws DatabaseException
+	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta()
 	{
-		List<StudyDefinitionMeta> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions();
+		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions();
 		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
 		List<StudyDefinitionMetaModel> models = Lists.transform(studyDefinitions,
-				new Function<StudyDefinitionMeta, StudyDefinitionMetaModel>()
+				new Function<StudyDefinition, StudyDefinitionMetaModel>()
 				{
 					@Override
-					public StudyDefinitionMetaModel apply(StudyDefinitionMeta studyDefinitionMeta)
+					public StudyDefinitionMetaModel apply(StudyDefinition studyDefinition)
 					{
-						String id = studyDefinitionMeta.getId();
-						String name = studyDefinitionMeta.getName();
-						String email = studyDefinitionMeta.getEmail();
-						Date date = studyDefinitionMeta.getDate();
+						String id = studyDefinition.getId();
+						String name = studyDefinition.getName();
+						String email = studyDefinition.getAuthorEmail();
+						Date date = studyDefinition.getDateCreated();
 						boolean loaded;
 						try
 						{
@@ -188,11 +185,9 @@ public class StudyManagerController extends MolgenisPluginController
 	 * @param id
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/load", method = RequestMethod.POST)
 	public String loadStudyDefinition(@RequestParam(value = "id", required = false) String id, Model model)
-			throws DatabaseException
 	{
 		try
 		{
@@ -229,7 +224,7 @@ public class StudyManagerController extends MolgenisPluginController
 		// TODO remove code duplication (see ProtocolViewerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
-		List<CatalogItem> catalogItems = studyDefinition.getItems();
+		List<CatalogItem> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
 			Collections.sort(catalogItems, new Comparator<CatalogItem>()
@@ -244,17 +239,19 @@ public class StudyManagerController extends MolgenisPluginController
 		ExcelWriter excelWriter = new ExcelWriter(response.getOutputStream());
 		try
 		{
-			TupleWriter sheetWriter = excelWriter.createTupleWriter("Variables");
+			Writable sheetWriter = excelWriter.createWritable("Variables", header);
 			try
 			{
-				sheetWriter.writeColNames(header);
-				for (CatalogItem catalogItem : catalogItems)
+				if (catalogItems != null)
 				{
-					KeyValueTuple tuple = new KeyValueTuple();
-					tuple.set(header.get(0), catalogItem.getId());
-					tuple.set(header.get(1), catalogItem.getName());
-					tuple.set(header.get(2), catalogItem.getDescription());
-					sheetWriter.write(tuple);
+					for (CatalogItem catalogItem : catalogItems)
+					{
+						Entity entity = new MapEntity();
+						entity.set(header.get(0), catalogItem.getId());
+						entity.set(header.get(1), catalogItem.getName());
+						entity.set(header.get(2), catalogItem.getDescription());
+						sheetWriter.add(entity);
+					}
 				}
 			}
 			finally

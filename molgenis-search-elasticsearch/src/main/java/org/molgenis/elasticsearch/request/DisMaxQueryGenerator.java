@@ -1,62 +1,60 @@
 package org.molgenis.elasticsearch.request;
 
-import static org.molgenis.framework.db.QueryRule.Operator.DIS_MAX;
-import static org.molgenis.framework.db.QueryRule.Operator.SHOULD;
-
-import java.util.Arrays;
-import java.util.List;
+import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
+import static org.molgenis.data.QueryRule.Operator.SHOULD;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.BaseQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.molgenis.framework.db.QueryRule;
-import org.molgenis.framework.db.QueryRule.Operator;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 
-public class DisMaxQueryGenerator extends AbstractQueryRulePartGenerator
+public class DisMaxQueryGenerator implements QueryPartGenerator
 {
-	private static final List<Operator> SUPPORTED_OPERATORS = Arrays.asList(SHOULD, DIS_MAX);
-
-	public DisMaxQueryGenerator()
-	{
-		super(SUPPORTED_OPERATORS);
-	}
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
 	{
-		if (queryRules.size() > 0) searchRequestBuilder.setQuery(buildQueryString(queryRules.get(0)));
+		if (!query.getRules().isEmpty())
+		{
+			// SHOULD and DIS_MAX or always the first QueryRule
+			if (query.getRules().get(0).getOperator() == SHOULD || query.getRules().get(0).getOperator() == DIS_MAX)
+			{
+				searchRequestBuilder.setQuery(buildQueryString(query.getRules().get(0)));
+			}
+		}
 	}
 
-	public BaseQueryBuilder buildQueryString(QueryRule query)
+	public BaseQueryBuilder buildQueryString(QueryRule queryRule)
 	{
-		if (query.getOperator().equals(SHOULD))
+		if (queryRule.getOperator().equals(SHOULD))
 		{
 			BoolQueryBuilder builder = QueryBuilders.boolQuery();
-			for (QueryRule subQuery : query.getNestedRules())
+			for (QueryRule subQuery : queryRule.getNestedRules())
 			{
 				builder.should(buildQueryString(subQuery));
 			}
 			return builder;
 		}
-		else if (query.getOperator().equals(DIS_MAX))
+		else if (queryRule.getOperator().equals(DIS_MAX))
 		{
 			DisMaxQueryBuilder builder = QueryBuilders.disMaxQuery();
-			for (QueryRule subQuery : query.getNestedRules())
+			for (QueryRule subQuery : queryRule.getNestedRules())
 			{
 				builder.add(buildQueryString(subQuery));
 			}
 			builder.tieBreaker((float) 0.0);
-			if (query.getValue() != null)
+			if (queryRule.getValue() != null)
 			{
-				builder.boost(Float.parseFloat(query.getValue().toString()));
+				builder.boost(Float.parseFloat(queryRule.getValue().toString()));
 			}
 			return builder;
 		}
 		else
 		{
-			return QueryBuilders.fieldQuery(query.getField(), query.getValue());
+			return QueryBuilders.fieldQuery(queryRule.getField(), queryRule.getValue());
 		}
 	}
 }

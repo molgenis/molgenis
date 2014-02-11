@@ -1,9 +1,12 @@
 package org.molgenis.data.support;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 
 /**
  * Simple Entity implementation based on a Map
@@ -16,6 +19,11 @@ public class MapEntity extends AbstractEntity
 
 	public MapEntity()
 	{
+	}
+
+	public MapEntity(Entity other)
+	{
+		set(other);
 	}
 
 	public MapEntity(String idAttributeName)
@@ -36,7 +44,13 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public Object get(String attributeName)
 	{
-		return values.get(attributeName);
+		Object value = values.get(attributeName);
+		if (value == null)
+		{
+			value = values.get(attributeName.toLowerCase());
+		}
+
+		return value;
 	}
 
 	@Override
@@ -48,7 +62,10 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public void set(Entity other)
 	{
-		throw new UnsupportedOperationException();
+		for (String attributeName : other.getAttributeNames())
+		{
+			set(attributeName, other.get(attributeName));
+		}
 	}
 
 	@Override
@@ -84,4 +101,53 @@ public class MapEntity extends AbstractEntity
 	{
 		return values.keySet();
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((idAttributeName == null) ? 0 : idAttributeName.hashCode());
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		MapEntity other = (MapEntity) obj;
+		if (idAttributeName == null)
+		{
+			if (other.idAttributeName != null) return false;
+		}
+		else if (!idAttributeName.equals(other.idAttributeName)) return false;
+		if (values == null)
+		{
+			if (other.values != null) return false;
+		}
+		else if (!values.equals(other.values)) return false;
+		return true;
+	}
+
+	@Override
+	public List<String> getLabelAttributeNames()
+	{
+		return Collections.emptyList();
+	}
+
+	@Override
+	public void set(Entity entity, boolean strict)
+	{
+		set(entity);
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return null;
+	}
+
 }

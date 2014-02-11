@@ -5,72 +5,77 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.molgenis.io.excel.ExcelReader;
-import org.molgenis.io.excel.ExcelSheetReader;
-import org.molgenis.io.excel.ExcelSheetWriter;
-import org.molgenis.io.excel.ExcelWriter;
-import org.molgenis.util.tuple.KeyValueTuple;
-import org.molgenis.util.tuple.Tuple;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
+import org.molgenis.data.Writable;
+import org.molgenis.data.WritableFactory;
+import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.processor.TrimProcessor;
+import org.molgenis.data.support.MapEntity;
 
 public class SampleTabOmxConverter
 {
-	private String submissionID;
-	private Map<String, String> unitOntologyTermsForFeatures;
+	private final String submissionID;
+	private final Map<String, String> unitOntologyTermsForFeatures;
 
-	public SampleTabOmxConverter(String inputFilePath, String submissionID) throws IOException
+	public SampleTabOmxConverter(String inputFilePath, String submissionID, String sheetName) throws IOException,
+			InvalidFormatException
 	{
 		this.submissionID = submissionID;
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
-		ExcelReader reader = new ExcelReader(new File(inputFilePath));
-		ExcelWriter writer = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
+
+		RepositorySource repositorySource = new ExcelRepositorySource(new File(inputFilePath), new TrimProcessor());
+		WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
+
 		try
 		{
-			ExcelSheetReader sheet = reader.getSheet(0);
+			Repository repo = repositorySource.getRepository(sheetName);
 			try
 			{
 				// Collect headers as features to be imported in Omx-format
-				List<String> listOfColumns = collectColumns(sheet);
+				List<String> listOfColumns = collectColumns(repo);
 				// Collect observableFeatures
 				List<String> listOfObservableFeatures = collectObservableFeatures(listOfColumns);
-				addObserableFeatureTab(writer, listOfObservableFeatures);
-				addProtocolTab(writer, listOfObservableFeatures);
-				addDataSet(writer);
-				addSDataSetMatrix(writer, sheet, listOfObservableFeatures);
-				addOntologyTermTab(writer);
+				addObserableFeatureTab(writableFactory, listOfObservableFeatures);
+				addProtocolTab(writableFactory, listOfObservableFeatures);
+				addDataSet(writableFactory);
+				addSDataSetMatrix(writableFactory, repo, listOfObservableFeatures);
+				addOntologyTermTab(writableFactory);
 			}
 			finally
 			{
-				sheet.close();
+				repo.close();
 			}
 		}
 		finally
 		{
-			reader.close();
-			writer.close();
+			writableFactory.close();
 		}
 	}
 
-	private void addOntologyTermTab(ExcelWriter writer) throws IOException
+	private void addOntologyTermTab(WritableFactory writableFactory) throws IOException
 	{
-		ExcelSheetWriter ontologyTermSheet = (ExcelSheetWriter) writer.createTupleWriter("ontologyTerm");
+		Writable ontologyTermSheet = writableFactory
+				.createWritable("ontologyTerm", Arrays.asList("identifier", "name"));
 		try
 		{
-			List<String> headers = Arrays.asList("identifier", "name");
-			ontologyTermSheet.writeColNames(headers);
 			for (Entry<String, String> entry : unitOntologyTermsForFeatures.entrySet())
 			{
 				String ontologyTerm = entry.getValue();
-				KeyValueTuple newRow = new KeyValueTuple();
+				Entity newRow = new MapEntity();
 				newRow.set("identifier", createIdentifier(ontologyTerm));
 				newRow.set("name", ontologyTerm);
-				ontologyTermSheet.write(newRow);
+				ontologyTermSheet.add(newRow);
 				unitOntologyTermsForFeatures.put(entry.getKey(), createIdentifier(ontologyTerm));
 			}
 		}
@@ -80,25 +85,21 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	private void addObserableFeatureTab(ExcelWriter writer, List<String> listOfObservableFeatures) throws IOException
+	private void addObserableFeatureTab(WritableFactory writableFactory, List<String> listOfObservableFeatures)
+			throws IOException
 	{
-		ExcelSheetWriter observableFeatureSheet = (ExcelSheetWriter) writer.createTupleWriter("observableFeature");
+		List<String> headers = Arrays.asList("identifier", "name", "unit_Identifier");
+		Writable observableFeatureSheet = writableFactory.createWritable("observableFeature", headers);
 		try
 		{
-			List<String> headers = Arrays.asList("identifier", "name", "unit_Identifier");
-			observableFeatureSheet.writeColNames(headers);
 			for (String eachFeature : listOfObservableFeatures)
 			{
 				eachFeature = pattenMatchExtractFeature(eachFeature);
-				KeyValueTuple newRow = new KeyValueTuple();
+				Entity newRow = new MapEntity();
 				newRow.set("identifier", createIdentifier(eachFeature));
 				newRow.set("name", eachFeature);
-				// if (unitOntologyTermsForFeatures.containsKey(eachFeature))
-				// {
-				// newRow.set("unit_Identifier",
-				// unitOntologyTermsForFeatures.get(eachFeature));
-				// }
-				observableFeatureSheet.write(newRow);
+
+				observableFeatureSheet.add(newRow);
 			}
 		}
 		finally
@@ -107,14 +108,14 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	private void addProtocolTab(ExcelWriter writer, List<String> listOfObservableFeatures) throws IOException
+	private void addProtocolTab(WritableFactory writableFactory, List<String> listOfObservableFeatures)
+			throws IOException
 	{
-		ExcelSheetWriter protocolSheet = (ExcelSheetWriter) writer.createTupleWriter("protocol");
+		List<String> headers = Arrays.asList("identifier", "name", "features_Identifier");
+		Writable protocolSheet = writableFactory.createWritable("protocol", headers);
 		try
 		{
-			List<String> headers = Arrays.asList("identifier", "name", "features_Identifier");
-			protocolSheet.writeColNames(headers);
-			KeyValueTuple row = new KeyValueTuple();
+			Entity row = new MapEntity();
 			row.set("identifier", submissionID + "-protocol");
 			row.set("name", submissionID + "-protocol");
 
@@ -125,7 +126,7 @@ public class SampleTabOmxConverter
 			}
 			featureIdentifier.deleteCharAt(featureIdentifier.length() - 1);
 			row.set("features_Identifier", featureIdentifier.toString());
-			protocolSheet.write(row);
+			protocolSheet.add(row);
 		}
 		finally
 		{
@@ -133,58 +134,54 @@ public class SampleTabOmxConverter
 		}
 	}
 
-	// Copy the values from one file to the other by using Tuple
-	private void addSDataSetMatrix(ExcelWriter writer, ExcelSheetReader inputSheet,
+	// Copy the values from one file to the other by using Entity
+	private void addSDataSetMatrix(WritableFactory writableFactory, Repository inputSheet,
 			List<String> listOfObservableFeatures) throws IOException
 	{
-		ExcelSheetWriter dataSetSheetMatrix = (ExcelSheetWriter) writer.createTupleWriter("dataset_" + submissionID
-				+ "-dataset");
+		Map<String, String> headerMapper = new HashMap<String, String>();
+		for (String originalHeader : listOfObservableFeatures)
+			headerMapper.put(originalHeader, createIdentifier(pattenMatchExtractFeature(originalHeader)));
+
+		Writable writable = writableFactory.createWritable("dataset_" + submissionID + "-dataset",
+				new ArrayList<String>(headerMapper.values()));
 		try
 		{
-			Map<String, String> headerMapper = new HashMap<String, String>();
-			for (String originalHeader : listOfObservableFeatures)
-				headerMapper.put(originalHeader, createIdentifier(pattenMatchExtractFeature(originalHeader)));
 
-			dataSetSheetMatrix.writeColNames(headerMapper.values());
-
-			Iterator<Tuple> inputRows = inputSheet.iterator();
-			while (inputRows.hasNext())
+			for (Entity entity : inputSheet)
 			{
-				Tuple eachRow = inputRows.next();
-				KeyValueTuple newRow = new KeyValueTuple();
-				for (String eachField : eachRow.getColNames())
+				Entity newRow = new MapEntity();
+				for (String eachField : entity.getAttributeNames())
 				{
 					if (headerMapper.containsKey(eachField))
 					{
-						String value = eachRow.getString(eachField);
+						String value = entity.getString(eachField);
 						newRow.set(headerMapper.get(eachField), value);
 					}
 				}
-				dataSetSheetMatrix.write(newRow);
+				writable.add(newRow);
 			}
 		}
 		finally
 		{
-			dataSetSheetMatrix.close();
+			writable.close();
 		}
 	}
 
-	private void addDataSet(ExcelWriter writer) throws IOException
+	private void addDataSet(WritableFactory writableFactory) throws IOException
 	{
-		ExcelSheetWriter dataSetSheet = (ExcelSheetWriter) writer.createTupleWriter("dataset");
+		Writable writable = writableFactory.createWritable("dataset",
+				Arrays.asList("identifier", "name", "protocolused_identifier"));
 		try
 		{
-			List<String> datatSetHeaders = Arrays.asList("identifier", "name", "protocolused_identifier");
-			dataSetSheet.writeColNames(datatSetHeaders);
-			KeyValueTuple dataSetRow = new KeyValueTuple();
+			Entity dataSetRow = new MapEntity();
 			dataSetRow.set("identifier", submissionID + "-dataset");
 			dataSetRow.set("name", submissionID + "-dataset");
 			dataSetRow.set("protocolused_identifier", submissionID + "-protocol");
-			dataSetSheet.write(dataSetRow);
+			writable.add(dataSetRow);
 		}
 		finally
 		{
-			dataSetSheet.close();
+			writable.close();
 		}
 	}
 
@@ -208,13 +205,12 @@ public class SampleTabOmxConverter
 		return listOfObservableFeatures;
 	}
 
-	private List<String> collectColumns(ExcelSheetReader sheet) throws IOException
+	private List<String> collectColumns(Repository repo) throws IOException
 	{
 		List<String> listOfFeatures = new ArrayList<String>();
-		Iterator<String> columnNames = sheet.colNamesIterator();
-		while (columnNames.hasNext())
+		for (AttributeMetaData attr : repo.getAttributes())
 		{
-			listOfFeatures.add(columnNames.next());
+			listOfFeatures.add(attr.getName());
 		}
 		return listOfFeatures;
 	}
@@ -237,12 +233,12 @@ public class SampleTabOmxConverter
 		return identifiier.toString();
 	}
 
-	public static void main(String args[]) throws IOException
+	public static void main(String args[]) throws IOException, InvalidFormatException
 	{
-		new SampleTabOmxConverter(args[0], "GCR-ada");
+		new SampleTabOmxConverter(args[0], "GCR-ada", args[1]);
 		if (args.length != 2)
 		{
-			System.err.println("Usage: <sample_data.xlsx> submission-id ");
+			System.err.println("Usage: <sample_data.xlsx> <sheetname>");
 			return;
 		}
 

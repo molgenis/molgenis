@@ -1,43 +1,55 @@
 package org.molgenis.omx.studymanager;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
+import org.molgenis.data.DataService;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.StudyDefinition;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class OmxStudyDefinition implements StudyDefinition
 {
 	private final StudyDataRequest studyDataRequest;
+	private final DataService dataService;
 
-	public OmxStudyDefinition(StudyDataRequest studyDataRequest)
+	public OmxStudyDefinition(StudyDataRequest studyDataRequest, DataService dataService)
 	{
 		if (studyDataRequest == null) throw new IllegalArgumentException("study data request is null");
+		if (dataService == null) throw new IllegalArgumentException("data service is null");
 		this.studyDataRequest = studyDataRequest;
+		this.dataService = dataService;
 	}
 
 	@Override
 	public String getId()
 	{
-		return getStudyDataRequest().getIdentifier();
+		return studyDataRequest.getId().toString();
 	}
 
 	@Override
 	public void setId(String id)
 	{
-		getStudyDataRequest().setIdentifier(id);
+		studyDataRequest.setId(Integer.valueOf(id));
 	}
 
 	@Override
 	public String getName()
 	{
-		return getStudyDataRequest().getName();
+		return studyDataRequest.getName();
+	}
+
+	@Override
+	public void setName(String name)
+	{
+		studyDataRequest.setName(name);
 	}
 
 	@Override
@@ -53,9 +65,22 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public List<CatalogItem> getItems()
+	public Date getDateCreated()
 	{
-		return Lists.transform(getStudyDataRequest().getFeatures(), new Function<ObservableFeature, CatalogItem>()
+		return new Date(studyDataRequest.getRequestDate().getTime());
+	}
+
+	@Override
+	public Status getStatus()
+	{
+		String requestStatus = studyDataRequest.getRequestStatus();
+		return Status.valueOf(requestStatus.toUpperCase());
+	}
+
+	@Override
+	public Iterable<CatalogItem> getItems()
+	{
+		return Lists.transform(studyDataRequest.getFeatures(), new Function<ObservableFeature, CatalogItem>()
 		{
 			@Override
 			public CatalogItem apply(ObservableFeature observableFeature)
@@ -66,16 +91,46 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
+	public void setItems(Iterable<CatalogItem> items)
+	{
+		List<ObservableFeature> features;
+		if (items.iterator().hasNext())
+		{
+			Iterable<ObservableFeature> featuresIterable = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					Iterables.transform(items, new Function<CatalogItem, Integer>()
+					{
+						@Override
+						public Integer apply(CatalogItem catalogItem)
+						{
+							return Integer.valueOf(catalogItem.getId());
+						}
+					}), ObservableFeature.class);
+			features = Lists.newArrayList(featuresIterable);
+		}
+		else
+		{
+			features = Collections.emptyList();
+		}
+		studyDataRequest.setFeatures(features);
+	}
+
+	@Override
 	public List<String> getAuthors()
 	{
-		MolgenisUser molgenisUser = getStudyDataRequest().getMolgenisUser();
+		MolgenisUser molgenisUser = studyDataRequest.getMolgenisUser();
 		return Collections.singletonList(molgenisUser.getFirstName() + ' ' + molgenisUser.getLastName());
 	}
 
 	@Override
 	public String getAuthorEmail()
 	{
-		return getStudyDataRequest().getMolgenisUser().getEmail();
+		return studyDataRequest.getMolgenisUser().getEmail();
+	}
+
+	@Override
+	public String getRequestProposalForm()
+	{
+		return studyDataRequest.getRequestForm();
 	}
 
 	@Override

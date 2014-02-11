@@ -1,12 +1,8 @@
 package org.molgenis.data.support;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,20 +10,21 @@ import java.util.Set;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
-import org.molgenis.data.EntitySourceFactory;
-import org.molgenis.data.FileBasedEntitySourceFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Implementation of the DataService interface
@@ -35,86 +32,62 @@ import com.google.common.collect.Lists;
 @Component
 public class DataServiceImpl implements DataService
 {
-	// Key: entity name, value:EntitySourceFactory
-	private final Map<String, EntitySourceFactory> entitySourceFactoryByEntityName = new LinkedHashMap<String, EntitySourceFactory>();
+	private final List<Repository> repositories = Lists.newArrayList();
+	private final Map<String, Class<? extends FileRepositorySource>> fileRepositorySources = Maps.newHashMap();
 
-	// Key: entity name, value:EntitySource url of the entity
-	private final Map<String, String> entitySourceUrlByEntityName = new HashMap<String, String>();
+	@Override
+	public void addRepository(Repository newRepository)
+	{
+		for (Repository repository : repositories)
+		{
+			if (repository.getName().equalsIgnoreCase(newRepository.getName()))
+			{
+				throw new MolgenisDataException("Entity [" + repository.getName() + "] already registered.");
+			}
+		}
 
-	// Key: EntitySourceFactory.urlPrefix, value:EntitySource
-	private final Map<String, EntitySourceFactory> entitySourceFactoryByUrlPrefix = new HashMap<String, EntitySourceFactory>();
-
-	private final Map<String, FileBasedEntitySourceFactory> fileBasedEntitySourceFactoryByFileExtension = new HashMap<String, FileBasedEntitySourceFactory>();
+		repositories.add(newRepository);
+	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return entitySourceFactoryByEntityName.keySet();
-	}
-
-	@Override
-	public Repository<? extends Entity> getRepositoryByEntityName(String entityName)
-	{
-		EntitySourceFactory factory = entitySourceFactoryByEntityName.get(entityName);
-		if (factory == null)
+		return Lists.transform(repositories, new Function<Repository, String>()
 		{
-			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-		}
-
-		String url = entitySourceUrlByEntityName.get(entityName);
-		EntitySource entitySource = factory.create(url);
-
-		return entitySource.getRepositoryByEntityName(entityName);
-	}
-
-	@Override
-	public Iterator<EntitySource> iterator()
-	{
-		Set<EntitySource> entitySources = new LinkedHashSet<EntitySource>();
-		for (String entityName : entitySourceUrlByEntityName.keySet())
-		{
-			String url = entitySourceUrlByEntityName.get(entityName);
-			EntitySourceFactory factory = entitySourceFactoryByEntityName.get(entityName);
-			entitySources.add(factory.create(url));
-		}
-
-		return entitySources.iterator();
-	}
-
-	/**
-	 * Register a new EntitySourceFactory of an EntitySource implementation
-	 */
-	@Override
-	public void registerFactory(EntitySourceFactory entitySourceFactory)
-	{
-		if (entitySourceFactoryByUrlPrefix.get(entitySourceFactory.getUrlPrefix()) != null)
-		{
-			throw new MolgenisDataException(entitySourceFactory.getUrlPrefix() + " already registered");
-		}
-
-		entitySourceFactoryByUrlPrefix.put(entitySourceFactory.getUrlPrefix(), entitySourceFactory);
-
-		if (entitySourceFactory instanceof FileBasedEntitySourceFactory)
-		{
-			FileBasedEntitySourceFactory factory = (FileBasedEntitySourceFactory) entitySourceFactory;
-			for (String fileExtension : factory.getFileExtensions())
+			@Override
+			public String apply(Repository repository)
 			{
-				fileBasedEntitySourceFactoryByFileExtension.put(fileExtension, factory);
+				return repository.getName();
+			}
+		});
+	}
+
+	@Override
+	public Repository getRepositoryByEntityName(String entityName)
+	{
+		for (Repository repository : repositories)
+		{
+			if (repository.getName().equalsIgnoreCase(entityName))
+			{
+				return repository;
 			}
 		}
+
+		throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 	}
 
 	@Override
-	public void registerEntitySource(String url)
+	public Repository getRepositoryByUrl(String url)
 	{
-		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
-		EntitySource entitySource = entitySourceFactory.create(url);
-
-		for (String entityName : entitySource.getEntityNames())
+		for (Repository repository : repositories)
 		{
-			entitySourceFactoryByEntityName.put(entityName, entitySourceFactory);
-			entitySourceUrlByEntityName.put(entityName, url);
+			if (repository.getUrl().equalsIgnoreCase(url))
+			{
+				return repository;
+			}
 		}
+
+		return null;
 	}
 
 	@Override
@@ -124,178 +97,129 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName)
+	public Iterable<Entity> findAll(String entityName)
 	{
 		return findAll(entityName, new QueryImpl());
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Query q)
+	public Iterable<Entity> findAll(String entityName, Query q)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findAll(q);
+		return getQueryable(entityName).findAll(q);
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids)
+	public Iterable<Entity> findAll(String entityName, Iterable<Integer> ids)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findAll(ids);
+		return getQueryable(entityName).findAll(ids);
 	}
 
 	@Override
-	public <E extends Entity> List<E> findAllAsList(String entityName, Query q)
+	public List<Entity> findAllAsList(String entityName, Query q)
 	{
-		Iterable<E> iterable = findAll(entityName, q);
+		Iterable<Entity> iterable = findAll(entityName, q);
 		return Lists.newArrayList(iterable);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Integer id)
+	public Entity findOne(String entityName, Integer id)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findOne(id);
+		return getQueryable(entityName).findOne(id);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Query q)
+	public Entity findOne(String entityName, Query q)
 	{
-		Queryable<E> queryable = getQueryable(entityName);
-		return queryable.findOne(q);
+		return getQueryable(entityName).findOne(q);
 	}
 
 	@Override
-	public <E extends Entity> void add(String entityName, E entity)
+	public Integer add(String entityName, Entity entity)
 	{
-		Writable<E> writable = getWritable(entityName);
-		writable.add(entity);
+		return getWritable(entityName).add(entity);
 	}
 
 	@Override
-	public <E extends Entity> void add(String entityName, Iterable<E> entities)
+	public void add(String entityName, Iterable<? extends Entity> entities)
 	{
-		Writable<E> writable = getWritable(entityName);
-		writable.add(entities);
+		getWritable(entityName).add(entities);
 	}
 
 	@Override
-	public <E extends Entity> void update(String entityName, E entity)
+	public void update(String entityName, Entity entity)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
-		updateable.update(entity);
+		getUpdateable(entityName).update(entity);
 	}
 
 	@Override
-	public <E extends Entity> void update(String entityName, Iterable<E> entities)
+	public void update(String entityName, Iterable<? extends Entity> entities)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
+		Updateable updateable = getUpdateable(entityName);
 		updateable.update(entities);
 	}
 
 	@Override
-	public <E extends Entity> void delete(String entityName, E entity)
+	public void delete(String entityName, Entity entity)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
+		Updateable updateable = getUpdateable(entityName);
 		updateable.delete(entity);
 	}
 
 	@Override
-	public <E extends Entity> void delete(String entityName, Iterable<E> entities)
+	public void delete(String entityName, Iterable<? extends Entity> entities)
 	{
-		Updateable<E> updateable = getUpdateable(entityName);
-		updateable.delete(entities);
+		getUpdateable(entityName).delete(entities);
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E extends Entity> Queryable<E> getQueryable(String entityName)
+	@Override
+	public void delete(String entityName, int id)
 	{
-		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		getUpdateable(entityName).deleteById(id);
+	}
+
+	private <E extends Entity> Queryable getQueryable(String entityName)
+	{
+		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Queryable))
 		{
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't queryable");
 		}
 
-		return (Queryable<E>) repo;
+		return (Queryable) repo;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E extends Entity> Writable<E> getWritable(String entityName)
+	private Writable getWritable(String entityName)
 	{
-		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Writable))
 		{
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't writable");
 		}
 
-		return (Writable<E>) repo;
+		return (Writable) repo;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E extends Entity> Updateable<E> getUpdateable(String entityName)
+	private Updateable getUpdateable(String entityName)
 	{
-		Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Updateable))
 		{
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't updateable");
 		}
 
-		return (Updateable<E>) repo;
+		return (Updateable) repo;
 	}
 
 	@Override
-	public EntitySource createEntitySource(File file) throws IOException
+	public CrudRepository getCrudRepository(String entityName)
 	{
-		if (!file.isFile())
-		{
-			throw new MolgenisDataException("File [" + file.getAbsolutePath() + "] is not a file");
-		}
-
-		String extension = StringUtils.getFilenameExtension(file.getName());
-		FileBasedEntitySourceFactory factory = fileBasedEntitySourceFactoryByFileExtension.get(extension);
-		if (factory == null)
-		{
-			throw new MolgenisDataException("Unknown file extension [" + extension + "]");
-		}
-
-		return factory.create(file);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E extends Entity> CrudRepository<E> getCrudRepository(String entityName)
-	{
-		Repository<? extends Entity> repository = getRepositoryByEntityName(entityName);
+		Repository repository = getRepositoryByEntityName(entityName);
 		if (repository instanceof CrudRepository)
 		{
-			return (CrudRepository<E>) repository;
+			return (CrudRepository) repository;
 		}
 
 		throw new MolgenisDataException("Repository [" + repository.getName() + "] isn't a CrudRepository");
-	}
-
-	@Override
-	public EntitySource getEntitySource(String url)
-	{
-		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
-		return entitySourceFactory.create(url);
-	}
-
-	private EntitySourceFactory getEntitySourcefactory(String url)
-	{
-		int index = url.indexOf("://");
-		if (index == -1)
-		{
-			throw new MolgenisDataException("Incorrect url format should be of format prefix://");
-		}
-
-		String prefix = url.substring(0, index + "://".length());
-		EntitySourceFactory entitySourceFactory = entitySourceFactoryByUrlPrefix.get(prefix);
-		if (entitySourceFactory == null)
-		{
-			throw new MolgenisDataException("Unknown EntitySource url prefix [" + prefix + "]");
-		}
-
-		return entitySourceFactory;
 	}
 
 	@Override
@@ -304,10 +228,83 @@ public class DataServiceImpl implements DataService
 		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
 		for (String entityName : getEntityNames())
 		{
-			Repository<? extends Entity> repo = getRepositoryByEntityName(entityName);
+			Repository repo = getRepositoryByEntityName(entityName);
 			entityClasses.add(repo.getEntityClass());
 		}
 
 		return entityClasses;
 	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz)
+	{
+		return getQueryable(entityName).findAll(q, clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz)
+	{
+		return getQueryable(entityName).findAll(ids, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz)
+	{
+		return getQueryable(entityName).findOne(id, clazz);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
+	{
+		return getQueryable(entityName).findOne(q, clazz);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
+	{
+		return findAll(entityName, new QueryImpl(), clazz);
+	}
+
+	@Override
+	public void addFileRepositorySourceClass(Class<? extends FileRepositorySource> clazz, Set<String> fileExtensions)
+	{
+		for (String extension : fileExtensions)
+		{
+			fileRepositorySources.put(extension.toLowerCase(), clazz);
+		}
+	}
+
+	@Override
+	public FileRepositorySource createFileRepositorySource(File file)
+	{
+		String extension = StringUtils.getFilenameExtension(file.getName());
+		Class<? extends FileRepositorySource> clazz = fileRepositorySources.get(extension.toLowerCase());
+		if (clazz == null)
+		{
+			throw new MolgenisDataException("Unknown extension '" + extension + "'");
+		}
+
+		Constructor<? extends FileRepositorySource> ctor;
+		try
+		{
+			ctor = clazz.getConstructor(File.class);
+		}
+		catch (Exception e)
+		{
+			throw new MolgenisDataException("Exception creating [" + clazz
+					+ "]  missing constructor FileRepositorySource(File file)");
+		}
+
+		return BeanUtils.instantiateClass(ctor, file);
+	}
+
+	@Override
+	public void addRepositories(RepositorySource repositorySource)
+	{
+		for (Repository repository : repositorySource.getRepositories())
+		{
+			addRepository(repository);
+		}
+	}
+
 }

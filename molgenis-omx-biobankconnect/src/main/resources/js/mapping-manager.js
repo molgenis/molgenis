@@ -15,7 +15,6 @@
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
-	var scoreMappingAbsoluteScore = "store_mapping_absolute_score";
 	
 	ns.MappingManager = function MappingManager(){
 		
@@ -34,11 +33,13 @@
 			}).items;
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
-				queryRules : [{
-					field : 'type',
-					operator : 'EQUALS',
-					value : 'observablefeature'
-				}]
+				query:{
+					rules :[[{
+						field : 'type',
+						operator : 'EQUALS',
+						value : 'observablefeature'
+					}]]
+				}
 			};
 			searchApi.search(request, function(searchResponse){
 				sortRule = null;
@@ -84,23 +85,31 @@
 		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
 			var documentType = 'protocolTree-' + dataSetMapping.items[0].identifier.split('-')[1];
-			var query = [{
-				operator : 'SEARCH',
-				value : 'observablefeature'
-			}];
+			
+			var q = {
+					rules : [[{
+						operator : 'SEARCH',
+						value : 'observablefeature'
+					}]]
+			}
+			
 			var queryText = $('#search-dataitem').val();
 			if(queryText !== ''){
-				query.push({
+				q.rules[0].push({
 					operator : 'AND'
 				});
-				query.push({
+				q.rules[0].push({
 					operator : 'SEARCH',
 					value : queryText
 				});
 				pagination.reset();
 			}
-			if(sortRule !== null) query.push(sortRule);
-			searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
+			if(sortRule !== null)
+			{
+				q.sort = sortRule;
+			}
+			
+			searchApi.search(pagination.createSearchRequest(documentType, q),function(searchResponse) {
 				createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
 					$('#dataitem-table').empty().append(createDynamicTableHeader(involedDataSets)).append(tableBody);
 					pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
@@ -153,16 +162,15 @@
 				});
 				allFeatureCollection.push(hitInfo.id);
 			});
-			queryRules.push({
-				operator : 'LIMIT',
-				value : 100000 
-			});
 			
 			$.each(dataSets, function(index, dataSet){
 				var tuple = {};
 				var searchRequest = {
 					documentType : dataSet.identifier,
-					queryRules :queryRules
+					query : {
+						pageSize: 10000,
+						rules: [queryRules]
+					}
 				};	
 				searchApi.search(searchRequest, function(searchResponse) {
 					var searchHits = searchResponse.searchHits;	
@@ -219,7 +227,7 @@
 			$.each(tuple, function(index, mappings){
 				if(mappings.length > 1){
 					mappings.sort(function(a,b){
-						return naturalSort(b.score, a.score);
+						return molgenis.naturalSort(b.score, a.score);
 					});
 				}
 			});
@@ -230,7 +238,6 @@
 			//create table header
 			var involvedDataSetIds = [];
 			var involvedDataSetNames = [];
-			var selectedDataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
 			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
 					var dataSetIdArray = dataSet.identifier.split('-');
@@ -238,6 +245,7 @@
 				}
 			});
 			involvedDataSetIds.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
+			biobankDataSets = sortOrderOfDataSets(biobankDataSets, involvedDataSetIds);
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
 				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
@@ -255,6 +263,20 @@
 				tableBody.append(createRowForMappingTable(mappingPerStudy, mappingDataSets, featureId, cachedFeatures));
 			});
 			callback(tableBody, involvedDataSetNames);
+			
+			function sortOrderOfDataSets(biobankDataSets, involvedDataSetIds){
+				var sortedDataSets = [];
+				$.each(involvedDataSetIds, function(index, dataSetId){
+					for(var i = 0; i < biobankDataSets.length; i++){
+						var currentDataSet = biobankDataSets[i];
+						if(ns.hrefToId(currentDataSet.href) === dataSetId){
+							sortedDataSets.splice(index, 0, currentDataSet);
+							break;
+						}
+					}
+				});
+				return sortedDataSets;
+			}
 		}
 		
 		function createDynamicTableHeader(involedDataSets){
@@ -266,7 +288,7 @@
 				if(i === 0){
 					firstColumn = $('<th class="text-align-center">' + involedDataSets[i] + '</th>').css('width', '40%').appendTo(dataSetRow);
 					if (sortRule) {
-						if (sortRule.operator == 'SORTASC') {
+						if (sortRule.orders[0].direction == 'ASC') {
 							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-s down float-right"></span>').appendTo(firstColumn);
 						} else {
 							$('<span data-value="Name" class="ui-icon ui-icon-triangle-1-n up float-right"></span>').appendTo(firstColumn);
@@ -283,15 +305,19 @@
 			
 			if(firstColumn !== null){
 				$(firstColumn).find('.ui-icon').click(function() {
-					if (sortRule && sortRule.operator == 'SORTASC') {
+					if (sortRule && sortRule.orders[0].direction == 'ASC') {
 						sortRule = {
-							value : 'name',
-							operator : 'SORTDESC'
+								orders: [{
+									property: 'name',
+									direction: 'DESC'
+								}]
 						};
 					} else {
 						sortRule = {
-							value : 'name',
-							operator : 'SORTASC'
+								orders: [{
+									property: 'name',
+									direction: 'ASC'
+								}]
 						};
 					}
 					ns.MappingManager.prototype.createMatrixForDataItems();
@@ -564,11 +590,13 @@
 			function replaceMappingInTable(feature){
 				var searchRequest = {
 					'documentType' : 'protocolTree-' + ns.MappingManager.prototype.getSelectedDataSet(),
-					'queryRules' : [{
-						'field' : 'id',
-						'operator' : 'EQUALS',
-						'value' : ns.hrefToId(feature.href).toString()
-					}]
+					'query' : {
+						'rules':[[{
+							'field' : 'id',
+							'operator' : 'EQUALS',
+							'value' : ns.hrefToId(feature.href).toString()
+						}]]
+					}
 				}
 				searchApi.search(searchRequest, function(searchResponse){
 					var storedRowInfo = $('body').data('clickedRow');
@@ -780,7 +808,7 @@
 			$.each(map, function(score, mappings){
 				if(mappings.length > 1 && score > 0){
 					mappings.sort(function(a,b){
-						return naturalSort(b.comparedScore, a.comparedScore);
+						return molgenis.naturalSort(b.comparedScore, a.comparedScore);
 					});
 				}
 				topTenOrder = topTenOrder.concat(mappings);
@@ -896,8 +924,13 @@
 	
 	ns.MappingManager.prototype.downloadMappings = function(){
 		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
+		var mappedDataSetIds = [];
+		$.each(biobankDataSets, function(index, dataSet){
+			if(ns.hrefToId(dataSet.href) !== selectedDataSet) mappedDataSetIds.push(ns.hrefToId(dataSet.href));
+		});
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
+			'matchedDataSetIds' : mappedDataSetIds,
 			'documentType' : dataSet.identifier
 		};
 		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});

@@ -30,6 +30,11 @@
            	<artifactId>hibernate-validator</artifactId>
            	<version>4.2.0.Final</version>
        	</dependency>
-		
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>10.10.1.1</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

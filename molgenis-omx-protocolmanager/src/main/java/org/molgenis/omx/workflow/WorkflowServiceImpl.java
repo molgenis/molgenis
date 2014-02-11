@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
@@ -19,12 +21,12 @@ import org.molgenis.omx.observ.value.MrefValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.observ.value.XrefValue;
 import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
@@ -43,7 +45,7 @@ public class WorkflowServiceImpl implements WorkflowService
 	@Override
 	public Workflow getWorkflow(Integer workflowId) throws WorkflowException
 	{
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowId);
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowId, Protocol.class);
 		if (protocol == null) throw new WorkflowException("Unknown workflow [" + workflowId + "]");
 
 		return createWorkflow(protocol);
@@ -53,9 +55,10 @@ public class WorkflowServiceImpl implements WorkflowService
 	@Override
 	public List<Workflow> getWorkflows()
 	{
-		List<Protocol> workflows = dataService.findAllAsList(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.ROOT, true));
-		return Lists.transform(workflows, new Function<Protocol, Workflow>()
+		Iterable<Protocol> workflows = dataService.findAll(Protocol.ENTITY_NAME,
+				new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
+
+		return Lists.transform(Lists.newArrayList(workflows), new Function<Protocol, Workflow>()
 		{
 
 			@Override
@@ -69,7 +72,7 @@ public class WorkflowServiceImpl implements WorkflowService
 	@Override
 	public WorkflowElement getWorkflowElement(Integer workflowElementId) throws WorkflowException
 	{
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowElementId);
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowElementId, Protocol.class);
 		if (protocol == null) throw new WorkflowException("Unknown workflow element [" + workflowElementId + "]");
 
 		return new WorkflowElement(protocol, dataService);
@@ -100,7 +103,8 @@ public class WorkflowServiceImpl implements WorkflowService
 	@Transactional
 	public void deleteWorkflowElementDataRow(Integer workflowElementDataRowId) throws WorkflowException
 	{
-		ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME, workflowElementDataRowId);
+		ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME, workflowElementDataRowId,
+				ObservationSet.class);
 		if (observationSet == null)
 		{
 			throw new WorkflowException("Unknown workflow element data row [" + workflowElementDataRowId + "]");
@@ -161,7 +165,7 @@ public class WorkflowServiceImpl implements WorkflowService
 			for (Integer workflowElementDataRowId : workflowElementDataRowIds)
 			{
 				ObservationSet sourceObservationSet = dataService.findOne(ObservationSet.ENTITY_NAME,
-						workflowElementDataRowId);
+						workflowElementDataRowId, ObservationSet.class);
 				ObservationSetFlow observationSetFlow = new ObservationSetFlow();
 				observationSetFlow.setSource(sourceObservationSet);
 				observationSetFlow.setDestination(destinationObservationSet);
@@ -171,9 +175,9 @@ public class WorkflowServiceImpl implements WorkflowService
 			dataService.add(ObservationSetFlow.ENTITY_NAME, observationSetFlows);
 
 			// create values for output features
-			Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowElementId);
-			List<ProtocolFlow> protocolFlows = dataService.findAllAsList(ProtocolFlow.ENTITY_NAME,
-					new QueryImpl().eq(ProtocolFlow.DESTINATION, protocol));
+			Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowElementId, Protocol.class);
+			Iterable<ProtocolFlow> protocolFlows = dataService.findAll(ProtocolFlow.ENTITY_NAME,
+					new QueryImpl().eq(ProtocolFlow.DESTINATION, protocol), ProtocolFlow.class);
 
 			for (ProtocolFlow protocolFlow : protocolFlows)
 			{
@@ -183,10 +187,10 @@ public class WorkflowServiceImpl implements WorkflowService
 				List<Value> outputValues = new ArrayList<Value>();
 				for (ObservationSetFlow observationSetFlow : observationSetFlows)
 				{
-					List<ObservedValue> inputObservedValues = dataService.findAllAsList(
+					List<ObservedValue> inputObservedValues = Lists.newArrayList(dataService.findAll(
 							ObservedValue.ENTITY_NAME,
 							new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSetFlow.getSource()).and()
-									.eq(ObservedValue.FEATURE, inputFeature));
+									.eq(ObservedValue.FEATURE, inputFeature), ObservedValue.class));
 
 					if (inputObservedValues.isEmpty()) throw new RuntimeException("missing value");
 					else if (inputObservedValues.size() > 1) throw new RuntimeException("expected exactly one value");
@@ -231,17 +235,18 @@ public class WorkflowServiceImpl implements WorkflowService
 	public void createOrUpdateWorkflowElementDataRowValue(Integer workflowElementDataRowId, Integer featureId,
 			String rawValue)
 	{
-		ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME, workflowElementDataRowId);
-		ObservableFeature observableFeature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId);
+		ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME, workflowElementDataRowId,
+				ObservationSet.class);
+		ObservableFeature observableFeature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
+				ObservableFeature.class);
 
-		List<ObservedValue> observedValues = dataService.findAllAsList(
+		List<ObservedValue> observedValues = Lists.newArrayList(dataService.findAll(
 				ObservedValue.ENTITY_NAME,
 				new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
-						.eq(ObservedValue.FEATURE, observableFeature));
+						.eq(ObservedValue.FEATURE, observableFeature), ObservedValue.class));
 
 		String colName = "key";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, rawValue);
+		Entity entity = new MapEntity(colName, rawValue);
 
 		if (observedValues.isEmpty())
 		{
@@ -258,13 +263,13 @@ public class WorkflowServiceImpl implements WorkflowService
 				characteristic.setName(rawValue);
 				dataService.add(Characteristic.ENTITY_NAME, characteristic);
 
-				tuple.set(colName, characteristicIdentifier);
+				entity.set(colName, characteristicIdentifier);
 			}
 
 			Value value;
 			try
 			{
-				value = new ValueConverter(dataService).fromTuple(tuple, colName, observableFeature);
+				value = new ValueConverter(dataService).fromEntity(entity, colName, observableFeature);
 			}
 			catch (ValueConverterException e)
 			{
@@ -293,7 +298,7 @@ public class WorkflowServiceImpl implements WorkflowService
 			{
 				try
 				{
-					new ValueConverter(dataService).updateFromTuple(tuple, colName, observableFeature, value);
+					new ValueConverter(dataService).updateFromEntity(entity, colName, observableFeature, value);
 				}
 				catch (ValueConverterException e)
 				{
@@ -308,11 +313,11 @@ public class WorkflowServiceImpl implements WorkflowService
 	private DataSet getDataSetForWorkFlowElement(Integer workflowElementId)
 	{
 		// get data set for the given workflow element
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowElementId);
-		List<DataSet> dataSets = dataService.findAllAsList(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.PROTOCOLUSED, protocol));
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, workflowElementId, Protocol.class);
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
+				new QueryImpl().eq(DataSet.PROTOCOLUSED, protocol), DataSet.class);
 
-		if (dataSets.size() != 1) throw new RuntimeException("Workflow element must have exactly one data set");
-		return dataSets.get(0);
+		if (Iterables.size(dataSets) != 1) throw new RuntimeException("Workflow element must have exactly one data set");
+		return dataSets.iterator().next();
 	}
 }

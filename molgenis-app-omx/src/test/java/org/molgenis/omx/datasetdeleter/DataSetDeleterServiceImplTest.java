@@ -46,7 +46,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	private static Protocol protocol1;
 	private static Protocol protocol2;
 	private static Protocol protocol3;
-	private static List<Protocol> allProtocols;
+	private static List<Entity> allEntities;
 	private static List<Protocol> subProtocols;
 	private static ObservationSet observationSet0;
 	private static ObservationSet observationSet1;
@@ -76,9 +76,8 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 
 	@SuppressWarnings("deprecation")
 	@Captor
-	private final ArgumentCaptor<ArrayList<ObservationSet>> captorObservationSetsArrayList = new ArgumentCaptor<ArrayList<ObservationSet>>();
+	private final ArgumentCaptor<List<ObservationSet>> captorObservationSetsArrayList = new ArgumentCaptor<List<ObservationSet>>();
 
-	
 	@SuppressWarnings("deprecation")
 	@Captor
 	private final ArgumentCaptor<ArrayList<ObservedValue>> captorObservedValues = new ArgumentCaptor<ArrayList<ObservedValue>>();
@@ -117,7 +116,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		features0 = new ArrayList<ObservableFeature>();
 		features1 = new ArrayList<ObservableFeature>();
-		allProtocols = new ArrayList<Protocol>();
+		allEntities = new ArrayList<Entity>();
 		subProtocols = new ArrayList<Protocol>();
 		subProtocols1 = new ArrayList<Protocol>();
 		categories = new ArrayList<Category>();
@@ -157,10 +156,10 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		protocol3.setSubprotocols(subProtocols1);
 		protocol3.setId(3);
 
-		allProtocols.add(protocol0);
-		allProtocols.add(protocol1);
-		allProtocols.add(protocol2);
-		allProtocols.add(protocol3);
+		allEntities.add(protocol0);
+		allEntities.add(protocol1);
+		allEntities.add(protocol2);
+		allEntities.add(protocol3);
 
 		subProtocols.add(protocol0);
 
@@ -169,7 +168,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		protocolUsed.setIdentifier("protocolUsed_identifier");
 		protocolUsed.setId(100);
 		protocolUsed.setSubprotocols(subProtocols);
-		allProtocols.add(protocolUsed);
+		allEntities.add(protocolUsed);
 
 		dataset = new DataSet();
 		dataset.setId(0);
@@ -180,7 +179,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		observationSet0 = new ObservationSet();
 		observationSet0.setId(0);
 		observationSet0.setPartOfDataSet(dataset);
-		
+
 		observationSets0 = new ArrayList<Entity>();
 		observationSets0.add(observationSet0);
 
@@ -240,35 +239,37 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void countReferringProtocolsSingleReferences()
 	{
-		int result = dataSetDeleterServiceImpl.countReferringProtocols(protocol0, allProtocols);
+		int result = dataSetDeleterServiceImpl.countReferringEntities(protocol0, allEntities);
 		assertEquals(1, result);
 	}
 
 	@Test
 	public void countReferringProtocolMultipleReferences()
 	{
-		int result = dataSetDeleterServiceImpl.countReferringProtocols(protocol1, allProtocols);
+		int result = dataSetDeleterServiceImpl.countReferringEntities(protocol1, allEntities);
 		assertEquals(2, result);
 	}
 
 	@Test
 	public void delete() throws IOException
 	{
-		when(dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(dataset);
-		
-		dataSetDeleterServiceImpl.delete("dataset1", true);
+		when(
+				dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"),
+						DataSet.class)).thenReturn(dataset);
+
+		dataSetDeleterServiceImpl.deleteData("dataset1", true);
 		verify(dataService).delete(DataSet.ENTITY_NAME, dataset);
 	}
 
 	@Test
 	public void deleteNoMetadata() throws IOException
 	{
-		when(dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(dataset);
-		
-		dataSetDeleterServiceImpl.delete("dataset1", false);
-		verify(dataService, Mockito.times(0)).delete(DataSet.ENTITY_NAME, dataset);
+		when(
+				dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"),
+						DataSet.class)).thenReturn(dataset);
+
+		dataSetDeleterServiceImpl.deleteData("dataset1", false);
+		verify(dataService, Mockito.times(1)).delete(DataSet.ENTITY_NAME, dataset);
 	}
 
 	@Test
@@ -281,13 +282,14 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteData()
 	{
-		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset))).thenReturn(observationSets0);
+		when(
+				dataService.findAllAsList(ObservationSet.ENTITY_NAME,
+						new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset))).thenReturn(observationSets0);
 		dataSetDeleterServiceImpl.deleteData(dataset);
 		// verify that only observationsets and abservedvalues belonging to the dataset are removed
-		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservationSet.ENTITY_NAME), captorObservationSetsArrayList.capture());
-		
-		
+		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservationSet.ENTITY_NAME),
+				captorObservationSetsArrayList.capture());
+
 		assertEquals(new Integer(0), captorObservationSetsArrayList.getValue().get(0).getId());
 		assertEquals(1, captorObservationSetsArrayList.getValue().size());
 	}
@@ -295,7 +297,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteFeatures()
 	{
-		dataSetDeleterServiceImpl.deleteFeatures(features0, allProtocols);
+		dataSetDeleterServiceImpl.deleteFeatures(features0, allEntities);
 		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservableFeature.ENTITY_NAME), captorFeatures.capture());
 		assertEquals("feature0", captorFeatures.getValue().get(0).getIdentifier());
 		assertEquals(1, captorFeatures.getValue().size());
@@ -304,7 +306,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteProtocol()
 	{
-		dataSetDeleterServiceImpl.deleteProtocol(protocolUsed, allProtocols);
+		dataSetDeleterServiceImpl.deleteProtocol(protocolUsed, allEntities);
 		verify(dataService).delete(Protocol.ENTITY_NAME, protocolUsed);
 		verify(dataService).delete(Protocol.ENTITY_NAME, subProtocols);
 		verify(dataService, Mockito.times(0)).delete(Protocol.ENTITY_NAME, protocol1);

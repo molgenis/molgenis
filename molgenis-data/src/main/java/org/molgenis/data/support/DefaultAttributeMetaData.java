@@ -20,11 +20,15 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private Object defaultValue = null;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
-	private String refEntityName = null;
+	private EntityMetaData refEntity = null;
+	private String label = null;
+	private boolean visible = true;
+	private boolean unique = false;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		if (fieldType == null) throw new IllegalArgumentException("FieldType cannot be null");
 		this.name = name;
 		this.fieldType = fieldType;
 	}
@@ -110,12 +114,45 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public EntityMetaData getRefEntity()
 	{
-		return EntityMetaDataCache.get(refEntityName);
+		return refEntity;
 	}
 
-	public void setRefEntityName(String refEntityName)
+	public void setRefEntity(EntityMetaData refEntity)
 	{
-		this.refEntityName = refEntityName;
+		this.refEntity = refEntity;
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return label == null ? name : label;
+	}
+
+	public void setLabel(String label)
+	{
+		this.label = label;
+	}
+
+	@Override
+	public boolean isVisible()
+	{
+		return visible;
+	}
+
+	public void setVisible(boolean visible)
+	{
+		this.visible = visible;
+	}
+
+	@Override
+	public boolean isUnique()
+	{
+		return unique;
+	}
+
+	public void setUnique(boolean unique)
+	{
+		this.unique = unique;
 	}
 
 }

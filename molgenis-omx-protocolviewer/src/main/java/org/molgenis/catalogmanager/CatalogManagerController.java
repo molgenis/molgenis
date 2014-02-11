@@ -1,6 +1,7 @@
 package org.molgenis.catalogmanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.molgenis.catalog.CatalogModel;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -52,13 +54,12 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * 
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 * @throws UnknownCatalogException
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String listCatalogs(Model model)
 	{
-		Iterable<CatalogMeta> catalogs = catalogManagerService.findCatalogs();
+		Iterable<CatalogMeta> catalogs = catalogManagerService.getCatalogs();
 		LOG.debug("Got catalogs from service");
 
 		List<CatalogMetaModel> models = new ArrayList<CatalogMetaModel>();
@@ -91,11 +92,9 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * @param id
 	 * @param model
 	 * @return
-	 * @throws DatabaseException
 	 */
 	@RequestMapping(value = "/load", params = "load", method = RequestMethod.POST)
-	public String loadCatalog(@RequestParam(value = "id", required = false)
-	String id, Model model)
+	public String loadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
@@ -126,8 +125,7 @@ public class CatalogManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/load", params = "unload", method = RequestMethod.POST)
-	public String unloadCatalog(@RequestParam(value = "id", required = false)
-	String id, Model model)
+	public String unloadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
@@ -159,8 +157,7 @@ public class CatalogManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getCatalog(@PathVariable
-	String id) throws UnknownCatalogException
+	public CatalogModel getCatalog(@PathVariable String id) throws UnknownCatalogException
 	{
 		Catalog catalog = catalogManagerService.getCatalog(id);
 		return CatalogModelBuilder.create(catalog);
@@ -168,6 +165,7 @@ public class CatalogManagerController extends MolgenisPluginController
 
 	@ExceptionHandler(
 	{ Exception.class, RuntimeException.class })
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleException(Exception e, HttpServletRequest request)
 	{
 		LOG.error("An exception occured in the " + CatalogManagerController.class.getSimpleName(), e);
@@ -179,8 +177,12 @@ public class CatalogManagerController extends MolgenisPluginController
 	}
 
 	@ExceptionHandler(UnknownCatalogException.class)
+	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public void handleUnknownCatalogException()
+	public ErrorMessageResponse handleUnknownCatalogException(UnknownCatalogException e)
 	{
+		LOG.error("", e);
+		return new ErrorMessageResponse(
+				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 }

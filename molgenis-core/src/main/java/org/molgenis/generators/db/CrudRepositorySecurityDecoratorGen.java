@@ -80,11 +80,8 @@ public class CrudRepositorySecurityDecoratorGen extends ForEachEntityGenerator
 						packageName.replace(".", "/") + "/" + GeneratorHelper.getJavaName(entity.getName()) + getType()
 								+ getExtension());
 				templateArgs.put("package", packageName);
-				templateArgs
-						.put("databaseImp",
-								options.mapper_implementation.equals(MolgenisOptions.MapperImplementation.JPA) ? "jpa" : "jdbc");
-
 				templateArgs.remove("authorizable");
+
 				for (Entity e : entity.getAllImplements())
 				{
 					if ("Authorizable".equals(e.getName()))

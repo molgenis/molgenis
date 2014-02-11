@@ -2,8 +2,9 @@ package org.molgenis.omx.converters;
 
 import static org.testng.Assert.assertEquals;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.observ.value.TextValue;
-import org.molgenis.util.tuple.KeyValueTuple;
 import org.testng.annotations.Test;
 
 public class TupleToTextValueConverterTest
@@ -13,7 +14,7 @@ public class TupleToTextValueConverterTest
 	{
 		TextValue value = new TextValue();
 		value.setValue("value");
-		assertEquals(new TupleToTextValueConverter().toCell(value).getValue(), "value");
+		assertEquals(new EntityToTextValueConverter().toCell(value).getValue(), "value");
 	}
 
 	@Test
@@ -23,9 +24,8 @@ public class TupleToTextValueConverterTest
 		value.setValue("value");
 
 		String colName = "col";
-		KeyValueTuple tuple = new KeyValueTuple();
-		tuple.set(colName, "value");
-		new TupleToTextValueConverter().updateFromTuple(tuple, colName, null, value);
+		Entity entity = new MapEntity(colName, "value");
+		new EntityToTextValueConverter().updateFromEntity(entity, colName, null, value);
 		assertEquals(value.getValue(), "value");
 	}
 }
