@@ -133,7 +133,7 @@
 				return 1;
 		}
 		return 0;
-	}
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -379,6 +379,10 @@ $(function() {
 		return href.substring(href.lastIndexOf('/') + 1);
 	};
 
+	molgenis.RestClient.prototype.getHref = function(entityName, primaryKey) {
+		return '/api/v1/' + entityName + (primaryKey ? '/' + primaryKey : '');
+	};
+	
 	molgenis.RestClient.prototype.remove = function(href, callback) {
 		$.ajax({
 			type : 'POST',
@@ -523,7 +527,7 @@ function showSpinner(callback) {
 	var spinner = $('#spinner');
 	if (spinner.length === 0) {
 		var items = [];
-		items.push('<div id="spinner" class="modal hide fade" data-backdrop="">');
+		items.push('<div id="spinner" class="modal hide fade" data-backdrop="static">');
 		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
 		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
@@ -532,16 +536,19 @@ function showSpinner(callback) {
 	}
 	
 	if (callback) {
-		$('#spinner').on('shown', function() {
+		spinner.on('shown', function() {
 			callback();
 		});
 	}
 	
-	spinner.modal('show');
+	
+	var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+	$('#spinner').data('timeout', timeout);
 }
 
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
+		clearTimeout($('#spinner').data('timeout'));
 		$('#spinner').modal('hide');
 	}
 }

@@ -6,9 +6,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.mail.MessagingException;
@@ -44,6 +47,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -87,35 +91,88 @@ public class ProtocolViewerController extends MolgenisPluginController
 	// TODO change to catalogId/selection
 	@RequestMapping(value = "/selection/{catalogId}", method = GET)
 	@ResponseBody
-	public List<String> getSelection(@PathVariable Integer catalogId) throws UnknownStudyDefinitionException,
-			UnknownCatalogException
+	public SelectedItemsResponse getSelection(@PathVariable Integer catalogId,
+			@RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end,
+			@RequestParam(value = "excludes[]", required = false) String[] excludedItems)
+			throws UnknownStudyDefinitionException, UnknownCatalogException
 	{
+		Integer total;
+		List<SelectedItemResponse> selectedFeatureUris;
 		if (SecurityUtils.currentUserIsAuthenticated())
 		{
 			StudyDefinition studyDefinition = protocolViewerService.getStudyDefinitionDraftForCurrentUser(catalogId
 					.toString());
-			List<String> selectedFeatureUris;
+
 			if (studyDefinition != null)
 			{
-				selectedFeatureUris = Lists.transform(studyDefinition.getItems(), new Function<CatalogItem, String>()
+				Iterable<CatalogItem> catalogItems = studyDefinition.getItems();
+
+				// exclude specific items
+				if (excludedItems != null)
 				{
-					@Override
-					public String apply(CatalogItem catalogItem)
+					final Set<String> excludedItemsSet = new HashSet<String>(Arrays.asList(excludedItems));
+					catalogItems = Lists.newArrayList(Iterables.filter(catalogItems, new Predicate<CatalogItem>()
 					{
-						return "/api/v1/observablefeature/" + catalogItem.getId();
-					}
-				});
+						@Override
+						public boolean apply(CatalogItem catalogItem)
+						{
+							return !excludedItemsSet.contains(catalogItem.getId());
+						}
+					}));
+				}
+
+				// convert to feature uris
+				selectedFeatureUris = Lists.newArrayList(Iterables.transform(catalogItems,
+						new Function<CatalogItem, SelectedItemResponse>()
+						{
+							@Override
+							public SelectedItemResponse apply(CatalogItem catalogItem)
+							{
+								String featureUri = "/api/v1/observablefeature/" + catalogItem.getId();
+								List<String> protocolUris = Lists.newArrayList(Iterables.transform(
+										catalogItem.getPath(), new Function<String, String>()
+										{
+											@Override
+											public String apply(String pathElement)
+											{
+												return "/api/v1/protocol/" + pathElement;
+											}
+
+										}));
+
+								return new SelectedItemResponse(featureUri, protocolUris);
+							}
+						}));
+
+				if (start != null && end != null)
+				{
+					end = Math.min(selectedFeatureUris.size(), end);
+					total = selectedFeatureUris.size();
+					selectedFeatureUris = selectedFeatureUris.subList(start, end);
+				}
+				else
+				{
+					start = 0;
+					end = selectedFeatureUris.size();
+					total = selectedFeatureUris.size();
+				}
 			}
 			else
 			{
-				selectedFeatureUris = Collections.<String> emptyList();
+				start = 0;
+				end = 0;
+				total = 0;
+				selectedFeatureUris = Collections.emptyList();
 			}
-			return selectedFeatureUris;
 		}
 		else
 		{
-			return Collections.emptyList();
+			start = 0;
+			end = 0;
+			total = 0;
+			selectedFeatureUris = Collections.emptyList();
 		}
+		return new SelectedItemsResponse(start, end, total, selectedFeatureUris);
 	}
 
 	@RequestMapping(value = "/download/{catalogId}", method = GET)
@@ -134,24 +191,25 @@ public class ProtocolViewerController extends MolgenisPluginController
 				catalogId.toString());
 	}
 
-	@RequestMapping(value = "/cart/replace/{catalogId}", method = RequestMethod.POST)
-	// TODO improve URL
+	@RequestMapping(value = "/cart/add/{catalogId}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void emptyAndAddToCart(@Valid @RequestBody FeaturesRequest featuresRequest, @PathVariable Integer catalogId)
+	public void addToCart(@Valid @RequestBody CartUpdateRequest cartUpdateRequest, @PathVariable Integer catalogId)
 			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
+		protocolViewerService
+				.addToStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(), catalogId.toString());
+	}
 
-		protocolViewerService.updateStudyDefinitionDraftForCurrentUser(
-				Lists.transform(featuresRequest.getFeatures(), new Function<FeatureRequest, Integer>()
-				{
-					@Override
-					@Nullable
-					public Integer apply(@Nullable FeatureRequest featureRequest)
-					{
-						return featureRequest != null ? featureRequest.getFeature() : null;
-					}
-				}), catalogId.toString());
+	@RequestMapping(value = "/cart/remove/{catalogId}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void removeFromCart(@Valid @RequestBody CartUpdateRequest cartUpdateRequest, @PathVariable Integer catalogId)
+			throws UnknownCatalogException, UnknownStudyDefinitionException
+	{
+		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
+		logger.info("remove from cart: " + cartUpdateRequest.getHref());
+		protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(),
+				catalogId.toString());
 	}
 
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
@@ -234,40 +292,6 @@ public class ProtocolViewerController extends MolgenisPluginController
 		return molgenisSettings.getBooleanProperty(KEY_ACTION_ORDER, DEFAULT_KEY_ACTION_ORDER);
 	}
 
-	private static class FeaturesRequest // TODO rename
-	{
-		@NotNull
-		private List<FeatureRequest> features;
-
-		public List<FeatureRequest> getFeatures()
-		{
-			return features;
-		}
-
-		@SuppressWarnings("unused")
-		public void setFeatures(List<FeatureRequest> features)
-		{
-			this.features = features;
-		}
-	}
-
-	private static class FeatureRequest // TODO rename
-	{
-		@NotNull
-		private Integer feature;
-
-		public Integer getFeature()
-		{
-			return feature;
-		}
-
-		@SuppressWarnings("unused")
-		public void setFeature(Integer feature)
-		{
-			this.feature = feature;
-		}
-	}
-
 	private static class StudyDefinitionsResponse
 	{
 		private final List<StudyDefinitionResponse> orders;
@@ -321,6 +345,87 @@ public class ProtocolViewerController extends MolgenisPluginController
 		public String getOrderStatus()
 		{
 			return orderStatus;
+		}
+	}
+
+	private static class SelectedItemsResponse
+	{
+		private final Integer start;
+		private final Integer end;
+		private final Integer total;
+		private final List<SelectedItemResponse> items;
+
+		public SelectedItemsResponse(Integer start, Integer end, Integer total, List<SelectedItemResponse> items)
+		{
+			this.start = start;
+			this.end = end;
+			this.total = total;
+			this.items = items;
+		}
+
+		@SuppressWarnings("unused")
+		public Integer getStart()
+		{
+			return start;
+		}
+
+		@SuppressWarnings("unused")
+		public Integer getEnd()
+		{
+			return end;
+		}
+
+		@SuppressWarnings("unused")
+		public Integer getTotal()
+		{
+			return total;
+		}
+
+		@SuppressWarnings("unused")
+		public List<SelectedItemResponse> getItems()
+		{
+			return items;
+		}
+	}
+
+	private static class SelectedItemResponse
+	{
+		private final String feature;
+		private final List<String> path;
+
+		public SelectedItemResponse(String feature, List<String> path)
+		{
+			this.feature = feature;
+			this.path = path;
+		}
+
+		@SuppressWarnings("unused")
+		public String getFeature()
+		{
+			return feature;
+		}
+
+		@SuppressWarnings("unused")
+		public List<String> getPath()
+		{
+			return path;
+		}
+	}
+
+	private static final class CartUpdateRequest
+	{
+		@NotNull
+		private String href;
+
+		public String getHref()
+		{
+			return href;
+		}
+
+		@SuppressWarnings("unused")
+		public void setHref(String href)
+		{
+			this.href = href;
 		}
 	}
 }

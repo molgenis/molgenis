@@ -174,8 +174,6 @@ public class CategoryRepository extends AbstractRepository implements Countable
 	@Override
 	public Iterable<AttributeMetaData> getLevelOneAttributes()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getEntityMetaData().getAttributes();
 	}
-
 }
