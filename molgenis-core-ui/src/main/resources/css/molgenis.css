@@ -1,0 +1,69 @@
+.nav, .navbar {
+	margin-bottom: 10px;
+}
+
+/*TODO: put this back when topmenu issue is solved
+body{
+	padding-top:60px;
+}*/
+
+.btn-link 	{
+	text-shadow:none;
+}
+
+.navbar .nav li{
+	margin-bottom:-5px;
+}
+
+.navbar .nav li img {
+	margin-top:-5px;
+}
+
+.nav-tabs>li>a {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-right: 8px;
+	padding-left: 8px;
+}
+
+#molgenis-menu.nav li.active a {
+	background-color: #3079C2;
+	color: white;
+}
+
+#molgenis-breadcrumb {
+	margin-bottom: -10px;
+	font-size:10px;
+	float:left;	
+}
+
+#plugin-container {
+	background: #F8FAFB;
+	padding: 10px;
+	margin-bottom: 10px;
+	
+}
+
+#molgenis-footer p {
+	text-align: center;
+	font: menu;
+	font-style: italic;
+}
+
+#spinner {
+	width: 180px;
+	margin:150px 100px 0px -100px;
+}
+
+#spinner img {
+	display: block;
+	margin:0 auto;
+}
+
+.modal-backdrop.fade.in {
+	opacity: .3;
+}
+
+.alert {
+	margin-bottom: 10px;
+}
