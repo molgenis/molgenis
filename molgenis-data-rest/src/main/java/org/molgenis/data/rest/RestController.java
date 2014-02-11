@@ -106,42 +106,56 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaData getMetaData(@PathVariable("entityName")
+	public EntityMetaDataResponse getMetaData(@PathVariable("entityName")
 	String entityNameRaw)
 	{
 		String entityName = getEntityName(entityNameRaw);
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		return new EntityMetaDataResponse(meta, meta.getAttributes());
+	}
 
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getName());
-		meta.setDescription(repo.getDescription());
-		meta.setLabel(repo.getLabel());
-
-		for (AttributeMetaData attr : repo.getAttributes())
+	/**
+	 * TODO JJ 
+	 * Gets the metadata for an entity
+	 * 
+	 * Example url: /api/v1/person/meta
+	 * 
+	 * @param entityNameRaw
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/tree", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityMetaDataResponse getMetaDataTree(@PathVariable("entityName") String inputEntityName)
+	{
+		String entityName = getEntityName(inputEntityName);
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		return new EntityMetaDataResponse(meta, meta.getLevelOneAttributes());
+	}
+	
+	/**
+	 * TODO JJ 
+	 * Gets the metadata for an entity
+	 * 
+	 * Example url: /api/v1/person/meta
+	 * 
+	 * @param entityNameRaw
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponse getAttributeMetaData(
+			@PathVariable("entityName") String inputEntityParentName,
+			@PathVariable("attributeName") String inputAttributeParentName)
+	{
+		String entityName = getEntityName(inputEntityParentName);
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		for(AttributeMetaData attributeMetaData : meta.getLevelOneAttributes())
 		{
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
-			{
-				DefaultAttributeMetaData copy = new DefaultAttributeMetaData(attr.getName(), attr.getDataType()
-						.getEnumType());
-				copy.setDefaultValue(attr.getDefaultValue());
-				copy.setDescription(attr.getDescription());
-				copy.setIdAttribute(attr.isIdAtrribute());
-				copy.setLabel(attr.getLabel());
-				copy.setLabelAttribute(attr.isLabelAttribute());
-				copy.setNillable(attr.isNillable());
-				copy.setReadOnly(attr.isReadonly());
-
-				if (attr.getRefEntity() != null)
-				{
-					copy.setRefEntity(attr.getRefEntity());
-				}
-
-				copy.setVisible(attr.isVisible());
-
-				meta.addAttributeMetaData(copy);
+			if(attributeMetaData.getName().equals(inputAttributeParentName)){
+				return new AttributeMetaDataResponse(inputEntityParentName, attributeMetaData);
 			}
 		}
-
-		return meta;
+		return null;
 	}
 
 	/**
@@ -273,24 +287,16 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName")
-	String entityNameRaw, @Valid
-	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
-	String... expandFields)
+	public EntityCollectionResponse retrieveEntityCollection(
+			@PathVariable("entityName") String entityNameRaw, 
+			@Valid EntityCollectionRequest request, 
+			@RequestParam(value = "expand", required = false) String... expandFields)
 	{
-		try
-		{
-			String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-			Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
-					Arrays.asList(expandFields));
+		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
+		Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
+				Arrays.asList(expandFields));
 
-			return retrieveEntityCollectionInternal(entityName, request, expandFieldSet);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return retrieveEntityCollectionInternal(entityName, request, expandFieldSet);
 	}
 
 	/**

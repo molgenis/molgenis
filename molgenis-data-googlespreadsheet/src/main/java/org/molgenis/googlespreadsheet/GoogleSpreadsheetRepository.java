@@ -26,6 +26,8 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {
+	public static final String BASE_URL = "googless://";
+
 	public enum Visibility
 	{
 		PUBLIC, PRIVATE;
@@ -53,6 +55,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey,
 			String worksheetId, Visibility visibility) throws IOException, ServiceException
 	{
+		super(BASE_URL + spreadsheetKey + "/" + worksheetId);
 		if (spreadsheetService == null) throw new IllegalArgumentException("spreadsheetService is null");
 		if (spreadsheetKey == null) throw new IllegalArgumentException("spreadsheetKey is null");
 		if (worksheetId == null) throw new IllegalArgumentException("worksheetId is null");
@@ -174,6 +177,13 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		}
 
 		return entityMetaData;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

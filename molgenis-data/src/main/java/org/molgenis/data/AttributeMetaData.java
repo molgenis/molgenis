@@ -5,7 +5,7 @@ import org.molgenis.fieldtypes.FieldType;
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
  */
-public interface AttributeMetaData
+public interface AttributeMetaData 
 {
 	/**
 	 * Name of the attribute

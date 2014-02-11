@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -27,6 +28,7 @@ import org.molgenis.omx.utils.I18nTools;
 
 public class ProtocolTreeRepository extends AbstractRepository implements Countable
 {
+	public static final String BASE_URL = "protocolTree://";
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
 	private static final String FIELD_IDENTIFIER = "identifier";
@@ -64,6 +66,7 @@ public class ProtocolTreeRepository extends AbstractRepository implements Counta
 
 	public ProtocolTreeRepository(Protocol protocol, DataService dataService, String name)
 	{
+		super(BASE_URL + name);
 		if (protocol == null) throw new IllegalArgumentException("protocol cannot be null");
 		this.protocol = protocol;
 		if (dataService == null) throw new IllegalArgumentException("dataService cannot be null");
@@ -221,4 +224,12 @@ public class ProtocolTreeRepository extends AbstractRepository implements Counta
 
 		}
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

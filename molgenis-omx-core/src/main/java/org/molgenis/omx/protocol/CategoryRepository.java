@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -28,6 +29,7 @@ import com.google.common.collect.Iterables;
 
 public class CategoryRepository extends AbstractRepository implements Countable
 {
+	public static final String BASE_URL = "featureCategory://";
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
 	private static final String FIELD_NAME = "name";
@@ -60,6 +62,7 @@ public class CategoryRepository extends AbstractRepository implements Countable
 
 	public CategoryRepository(Protocol protocol, Integer id, DataService dataService)
 	{
+		super(BASE_URL + id);
 		if (protocol == null) throw new IllegalArgumentException("protocol cannot be null");
 		this.protocol = protocol;
 		if (dataService == null) throw new IllegalArgumentException("dataService cannot be null");
@@ -167,4 +170,12 @@ public class CategoryRepository extends AbstractRepository implements Countable
 		}
 
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

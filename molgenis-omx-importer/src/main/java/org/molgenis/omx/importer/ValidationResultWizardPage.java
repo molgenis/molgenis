@@ -8,8 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -62,9 +64,9 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
-				EntitySource repository = dataService.createEntitySource(importWizard.getFile());
-				EntityImportReport importReport = omxImporterService.doImport(repository,
-						importWizard.getDataImportable(), entityDbAction);
+				RepositorySource repositorySource = dataService.createFileRepositorySource(importWizard.getFile());
+				EntityImportReport importReport = omxImporterService.doImport(repositorySource.getRepositories(),
+						entityDbAction);
 				importWizard.setImportResult(importReport);
 
 				// publish dataset imported event(s)
@@ -81,6 +83,27 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
 
 				return "File successfully imported.";
+			}
+			catch (MolgenisValidationException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+
+				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br /><br />");
+				for (ConstraintViolation violation : e.getViolations())
+				{
+					sb.append(violation.getMessage());
+
+					if (violation.getImportInfo() != null)
+					{
+						sb.append(" ").append(violation.getImportInfo());
+					}
+
+					sb.append("<br />");
+
+				}
+
+				result.addError(new ObjectError("wizard", sb.toString()));
 			}
 			catch (RuntimeException e)
 			{

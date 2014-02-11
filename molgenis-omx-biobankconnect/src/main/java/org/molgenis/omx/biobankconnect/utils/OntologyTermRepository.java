@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -36,6 +37,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 
 	public OntologyTermRepository(OntologyLoader loader, String name)
 	{
+		super("ontologyterm://" + name);
 		this.loader = loader;
 		this.ontologyName = this.loader.getOntologyName();
 		this.ontologyIRI = this.loader.getOntologyIRI();
@@ -150,4 +152,12 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 			}
 		}
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
