@@ -3,21 +3,22 @@
 
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
-
+	var maxItems = 10000;
+	
 	function createTreeConfig(settings, callback) {
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
 				$.each(tree, function(protocolId, subTree) {
-					var protocolUri = '/api/v1/protocol/' + protocolId;
+					var protocolUri = restApi.getHref('protocol', protocolId);
 					var protocol = restApi.get(protocolUri, subTree ? ['features'] : []);
 					
 					// create protocol node
 					var node = {
 						key : protocolUri,
 						title : protocol.name,
-						isFolder : true,
-						isLazy: subTree === null,
-						expand: subTree !== null
+						folder : true,
+						lazy: subTree === null,
+						expanded: !settings.displaySiblings
 					};
 					if (protocol.description)
 						node.tooltip = molgenis.i18n.get(protocol.description);
@@ -39,8 +40,8 @@
 								var featureNode = {
 									key : feature.href,
 									title : feature.name,
-									isFolder : false,
-									select: selectedNodes.hasOwnProperty(feature.href)
+									folder : false,
+									selected: selectedNodes.hasOwnProperty(feature.href)
 								};
 								if (feature.description)
 									featureNode.tooltip = molgenis.i18n.get(feature.description);
@@ -67,8 +68,14 @@
 			$.each(settings.selectedItems, function() {
 				selectedNodes[this] = null;
 			});
+			
 			createTreeNodesRec(tree, selectedNodes, nodes);
-			treeConfig.children = nodes;
+			// disable checkboxes of root nodes
+			$.each(nodes, function(i, node) {
+				node.hideCheckbox = true;
+				node.expanded = true;
+			});
+			treeConfig.source = nodes;
 			callback(treeConfig);
 		}
 			
@@ -77,67 +84,76 @@
 			minExpandLevel : 2,
 			debugLevel : 0,
 			checkbox : settings.selection,
-			onPostInit : function() {
+			keyPathSeparator: '|',
+			init : function() {
 				if (settings.onInit)
 					settings.onInit();
 			},
-			onLazyRead : function(node) {
-				node.setLazyNodeStatus(DTNodeStatus_Loading);
-				
-				// TODO deal with multiple entity pages
-				restApi.getAsync(node.data.key, [ 'features', 'subprotocols' ], null, function(protocol) {
-					var children = [];
-					if (protocol.subprotocols) {
+			lazyload : function (e, data) {
+				var node = data.node;
+				data.result = $.Deferred(function (dfd) {
+					restApi.getAsync(node.key + '/subprotocols?num=' + maxItems, null, null, function(subprotocols) {
+						var children = [];
+						if(subprotocols.total > subprotocols.num) {
+							molgenis.createAlert([ {
+								'message' : 'Protocol contains more than ' + subprotocols.num + ' subprotocols'
+							} ], 'error');
+						}
 						if (settings.sort)
-							protocol.subprotocols.items.sort(settings.sort);
-						// TODO deal with multiple entity pages
-						$.each(protocol.subprotocols.items, function() {
+							subprotocols.items.sort(settings.sort);
+						$.each(subprotocols.items, function() {
 							children.push({
 								key : this.href,
 								title : this.name,
 								tooltip : molgenis.i18n.get(this.description),
-								isFolder : true,
-								isLazy : true,
-								select: node.isSelected()
+								folder : true,
+								lazy : true,
+								selected: node.selected
 							});
 						});
-					}
-					if (protocol.features) {
-						if (settings.sort)
-							protocol.features.items.sort(settings.sort);
-						// TODO deal with multiple entity pages
-						$.each(protocol.features.items, function() {
-							children.push({
-								key : this.href,
-								title : this.name,
-								tooltip : molgenis.i18n.get(this.description),
-								select: node.isSelected()
+						
+						restApi.getAsync(node.key + '/features?num=' + maxItems, null, null, function(features) {
+							if(features.total > features.num) {
+								molgenis.createAlert([ {
+									'message' : 'Protocol contains more than ' + features.num + ' features'
+								} ], 'error');
+							}
+							if (settings.sort)
+								features.items.sort(settings.sort);
+							$.each(features.items, function() {
+								children.push({
+									key : this.href,
+									title : this.name,
+									tooltip : molgenis.i18n.get(this.description),
+									selected: node.selected
+								});
 							});
+							
+							dfd.resolve(children);
 						});
-					}
-					
-					node.setLazyNodeStatus(DTNodeStatus_Ok);
-					node.addChild(children);
+					});
 				});
 			},
-			onClick : function(node, event) {
-				if (node.getEventTargetType(event) === 'title' || node.getEventTargetType(event) === 'icon') {
-					if (node.data.isFolder) {
+			click : function(e, data) {
+				var node = data.node;
+				if (data.targetType === 'title' || data.targetType === 'icon') {
+					if (node.folder) {
 						if (settings.onFolderClick)
-							settings.onFolderClick(node.data.key);
+							settings.onFolderClick(node.key);
 					} else {
 						if (settings.onItemClick)
-							settings.onItemClick(node.data.key);
+							settings.onItemClick(node.key);
 					}
 				}
 			},
-			onSelect : function(select, node) {
-				if (node.data.isFolder) {
+			select : function(e, data) {
+				var node = data.node;
+				if (node.folder) {
 					if (settings.onFolderSelect)
-						settings.onFolderSelect(node.data.key, select);
+						settings.onFolderSelect(node.key, node.selected, node.getKeyPath());
 				} else {
 					if (settings.onItemSelect)
-						settings.onItemSelect(node.data.key, select);
+						settings.onItemSelect(node.key, node.selected, node.getKeyPath());
 				}
 			}
 		};
@@ -159,9 +175,9 @@
 		if(settings.displayedItems.length > 0) {
 			// FIXME search API does not support IN query
 			var searchRequest = {
-				documentType : 'protocolTree-' + settings.protocolId,
-				query : {
-					rules :	(function() {
+				'documentType' : 'protocolTree-' + settings.protocolId,
+				'query' : {
+					'rules' :	(function() {
 							var queryRules = [];
 							$.each(settings.displayedItems, function(i, item) {
 								if (i > 0) {
@@ -176,7 +192,8 @@
 								});
 							});
 							return [queryRules];
-						}())
+						}()),
+					'pageSize' : 1000000
 				}
 			};
 			searchApi.search(searchRequest, function(searchResponse) {				
@@ -196,13 +213,21 @@
 				if (settings.displaySiblings) {
 					var entityIds = Object.keys(subTrees);
 					if(entityIds.length > 0) {
-						var q = { q: [ {
-							field : 'id',
-							operator : 'IN',
-							value : Object.keys(subTrees)
-						} ]};
-						// TODO deal with multiple entity pages
-						restApi.getAsync('/api/v1/protocol', [ 'features', 'subprotocols' ], q, function(protocols) {
+						var q = {
+							q : [ {
+								field : 'id',
+								operator : 'IN',
+								value : Object.keys(subTrees)
+							} ],
+							num : maxItems
+						};
+						restApi.getAsync(restApi.getHref('protocol'), [ 'features', 'subprotocols' ], q, function(protocols) {
+							if(protocols.total > protocols.num) {
+								molgenis.createAlert([ {
+									'message' : 'Maximum number of protocols reached (' + protocols.num + ')'
+								} ], 'error');
+							}
+							
 							$.each(protocols.items, function(i, protocol) {
 								var subTree = subTrees[parseInt(restApi.getPrimaryKeyFromHref(protocol.href))];
 								$.each(protocol.features.items, function(i, feature) {
@@ -247,19 +272,23 @@
 					//FIXME get unlimited number of search results
 					'pageSize' : 1000000
 				}
-			};			
+			};
+			
 			searchApi.search(searchRequest, function(searchResponse){
 				var visibleItems = {};
-				$.each(settings.selectedItems, function() {
-					visibleItems[this] = null;
-				});
 				$.each(searchResponse.searchHits, function() {
-					visibleItems[this.id] = null;
+					visibleItems[this.columnValueMap.id] = null;
 				});
-				var treeSettings = $.extend({}, settings, { displayedItems: Object.keys(visibleItems), displaySiblings: false });
+				
+				var treeSettings = $.extend({}, settings, {
+					displayedItems : $.map(Object.keys(visibleItems), function(visibleItem) {
+						return restApi.getHref('protocol', visibleItem);
+					}),
+					displaySiblings : false,
+				});
 				createTreeConfig(treeSettings, callback);
 			});
-		}	
+		}
 	};
 	
 	// default pager settings
@@ -282,9 +311,9 @@
 		items.push('<button class="catalog-search-btn btn" type="button"><i class="icon-large icon-search"></i></button>');
 		items.push('<button class="catalog-search-clear-btn btn" type="button"><i class="icon-large icon-remove"></i></button>');
 		items.push('</div>');
-		items.push('<div class="catalog-tree"></div>');
-		items.push('<div class="catalog-search-tree"></div>');
-		$('.catalog-tree', container).dynatree('destroy'); // cleanup
+		items.push('<div id="catalog-tree" class="catalog-tree"></div>');
+		items.push('<div id="catalog-search-tree" class="catalog-search-tree"></div>');
+		$('.catalog-tree', container).fancytree('destroy'); // cleanup
 		container.html(items.join(''));
 
 		// create catalog
@@ -301,79 +330,25 @@
 		
 		// catalog plugin methods
 		container.data('catalog', {
-			/**
-			 * Async retrieve selected items from tree. 
-			 * 
-			 * Dynatree does not expand lazy nodes on selection, so we retrieve all descendant features 
-			 * of lazy protocol nodes through the entity REST API. 
-			 */
-			'getSelectedItems' : function(callback) {
-				function getSelectedItemsRec(protocolUris, selectedItems, callback) {					
-					var q = { q: [ {
-						field : 'id',
-						operator : 'IN',
-						value : $.map(protocolUris, function(protocolUri) {
-							return parseInt(restApi.getPrimaryKeyFromHref(protocolUri));
-						})
-					} ]};
-					// TODO deal with multiple entity pages
-					restApi.getAsync('/api/v1/protocol', [ 'features', 'subprotocols' ], q, function(protocols) {
-						if (protocols.items && protocols.items.length > 0) {
-							var subprotocolUris = [];
-							$.each(protocols.items,
-									function() {
-										var self = this;
-										if (self.subprotocols && self.subprotocols.items
-												&& self.subprotocols.items.length > 0) {
-											$.each(self.subprotocols.items, function() {
-												subprotocolUris.push(this.href);
-											});
-										}
-										if (self.features && self.features.items && self.features.items.length > 0) {
-											$.each(self.features.items, function() {
-												selectedItems.push({'item': this.href, 'parent': self.href});
-											});
-										}
-									});
-							if (subprotocolUris.length > 0) {
-								getSelectedItemsRec(subprotocolUris, selectedItems, callback);
-							} else {
-								callback(selectedItems);
-							}
-						}
-					});
-				}
-				
-				// retrieve all selected nodes (items and folders)
-				var selectedNodes = catalogTree.dynatree('getTree').getSelectedNodes();
-				if(selectedNodes.length > 0) {
-					// divide nodes in selected items and lazy folders
-					var selectedItems = [];
-					var selectedLazyNodes = [];
-					$.each(selectedNodes, function() {
-						if(this.data.isFolder) {
-							if(this.isLazy()) {
-								selectedLazyNodes.push(this);
-							}
-						} else {
-							selectedItems.push({'item': this.data.key, 'parent': this.getParent().data.key});
-						}
-					});
-					if(selectedLazyNodes.length == 0) {
-						// no lazy folders
-						callback(selectedItems);
-					} else {
-						// determine all items for lazy folders
-						getSelectedItemsRec($.map(selectedLazyNodes, function(node){ return node.data.key;}), selectedItems, callback);
-					}
-				} else {
-					// no selected nodes
-					callback([]);
-				}
-			},
 			selectItem : function(options) {
-				// TODO if item does not exist load item
-				catalogTree.dynatree('getTree').getNodeByKey(options.feature).select(options.select);
+				// (de)select item in catalog tree
+				var node = catalogTree.fancytree('getTree').getNodeByKey(options.feature);
+				if(node)
+					node.setSelected(options.select);
+				else {
+					// load (de)selected item
+					var keyPath = options.path.join('|') + '|' + options.feature;
+					catalogTree.fancytree('getTree').loadKeyPath(keyPath, function(node, status){
+						if(node.key === options.feature)
+							node.setSelected(options.select);
+					});
+				}
+				// (de)select item in search tree
+				if(!catalogSearchTree.is(':empty')) {
+					var node = catalogSearchTree.fancytree('getTree').getNodeByKey(options.feature);
+					if(node)
+						node.setSelected(options.select);
+				}
 			}
 		});
 
@@ -387,13 +362,36 @@
 
 		searchBtn.click(function(e) {
 			e.preventDefault();
-			createSearchTreeConfig(searchText.val(), settings, container, function(treeConfig) {				
+			
+			function selectNode(key, selected, keyPath) {
+				var node = catalogTree.fancytree('getTree').getNodeByKey(key);
+				if(node) node.setSelected(selected);
+				else {
+					catalogTree.fancytree('getTree').loadKeyPath(keyPath, function(node, status){
+						if(node.key === key) node.setSelected(selected);
+					});
+				}
+			}
+			
+			// connect search tree events to catalog tree events
+			var treeSettings = $.extend({}, settings, {
+				selectedItems : (function() {
+					var nodes = catalogTree.fancytree('getTree').getSelectedNodes();
+					return $.map(nodes, function(node) {
+						return node.key;
+					});
+				})(),
+				onFolderSelect : selectNode,
+				onItemSelect : selectNode
+			});
+			
+			createSearchTreeConfig(searchText.val(), treeSettings, container, function(treeConfig) {				
 				if(!catalogSearchTree.is(':empty')) {
-					catalogSearchTree.dynatree('destroy');
+					catalogSearchTree.fancytree('destroy');
 					catalogSearchTree.empty();
 				}
 				if(catalogTree.is(':visible')) catalogTree.hide();
-				catalogSearchTree.dynatree(treeConfig);
+				catalogSearchTree.fancytree(treeConfig);
 				if(catalogSearchTree.is(':hidden')) catalogSearchTree.show();
 			});
 		});
@@ -401,17 +399,18 @@
 		searchClearBtn.click(function(e) {
 			e.preventDefault();
 			if(!catalogSearchTree.is(':empty')) {
-				if(catalogSearchTree.is(':visible')) catalogTree.hide();
-				catalogSearchTree.dynatree('destroy');
+				if(catalogSearchTree.is(':visible')) catalogSearchTree.hide();
+				catalogSearchTree.fancytree('destroy');
 				catalogSearchTree.empty();
-				if(catalogTree.is(':hidden')) catalogSearchTree.show();
+				searchText.val('');
+				if(catalogTree.is(':hidden')) catalogTree.show();
 			}
 		});
 		
 		// create tree
-		var displayedItems = settings.selectedItems.length > 0 ? settings.selectedItems : ['/api/v1/protocol/' + settings.protocolId];
+		var displayedItems = settings.selectedItems.length > 0 ? settings.selectedItems : [restApi.getHref('protocol', settings.protocolId)];
 		createTreeConfig($.extend({}, settings, {displayedItems: displayedItems, displaySiblings: true}), function(treeConfig) {
-			catalogTree.dynatree(treeConfig);
+			catalogTree.fancytree(treeConfig);
 		});
 
 		return this;

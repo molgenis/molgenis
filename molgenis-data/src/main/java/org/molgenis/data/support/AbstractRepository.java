@@ -7,6 +7,18 @@ import org.molgenis.data.Repository;
 
 public abstract class AbstractRepository implements Repository
 {
+	private final String url;
+
+	public AbstractRepository(String url)
+	{
+		this.url = url;
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return url;
+	}
 
 	@Override
 	public String getName()

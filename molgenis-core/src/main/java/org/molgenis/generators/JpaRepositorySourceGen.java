@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisOptions;
 import org.molgenis.model.elements.Model;
@@ -15,14 +16,12 @@ import org.molgenis.model.elements.Model;
 import freemarker.template.Template;
 
 /**
- * Generates org.molgenis.data.jpa.JpaEntitySourceImpl
- * 
- * For now we have only 1 JpaEntitySource per application
- * 
+ * Generates the JpaRepositorySource
  */
-public class JpaEntitySourceGen extends Generator
+public class JpaRepositorySourceGen extends Generator
 {
-	private static Logger logger = Logger.getLogger(JpaEntitySourceGen.class);
+
+	private static Logger logger = Logger.getLogger(JpaRepositorySourceGen.class);
 
 	@Override
 	public void generate(Model model, MolgenisOptions options) throws Exception
@@ -35,7 +34,7 @@ public class JpaEntitySourceGen extends Generator
 		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
 		Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		File target = new File(getSourcePath(options) + "/org/molgenis/data/jpa/JpaEntitySourceImpl.java");
+		File target = new File(getSourcePath(options) + "/org/molgenis/data/jpa/JpaRepositorySource.java");
 
 		boolean created = target.getParentFile().mkdirs();
 		if (!created && !target.getParentFile().exists())
@@ -48,8 +47,14 @@ public class JpaEntitySourceGen extends Generator
 		templateArgs.put("disable_decorators", options.disable_decorators);
 
 		OutputStream targetOut = new FileOutputStream(target);
-		template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
-		targetOut.close();
+		try
+		{
+			template.process(templateArgs, new OutputStreamWriter(targetOut, Charset.forName("UTF-8")));
+		}
+		finally
+		{
+			IOUtils.closeQuietly(targetOut);
+		}
 
 		logger.info("generated " + target);
 	}
@@ -59,5 +64,4 @@ public class JpaEntitySourceGen extends Generator
 	{
 		return "Generates org.molgenis.data.jpa.JpaEntitySourceImpl";
 	}
-
 }

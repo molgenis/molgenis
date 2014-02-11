@@ -2,23 +2,14 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -163,59 +154,57 @@ public class UploadWizardPage extends AbstractWizardPage
 
 	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException
 	{
-		EntitySource entitySource = dataService.createEntitySource(file);
+		RepositorySource repositorySource = dataService.createFileRepositorySource(file);
+
+		// get dataset identifiers (case insensitive)
+		Set<String> datasetIdentifiers = new HashSet<String>();
+
+		Repository repo = null;
 		try
 		{
-			// get dataset identifiers (case insensitive)
-			Set<String> datasetIdentifiers = new HashSet<String>();
-
-			Repository repo = null;
-			try
+			repo = repositorySource.getRepository(DATASET_PREFIX);
+			if (repo != null)
 			{
-				repo = entitySource.getRepositoryByEntityName(DATASET_PREFIX);
 				for (Entity entity : repo)
 				{
 					String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
 					if (identifier != null) datasetIdentifiers.add(identifier);
 				}
 			}
-			catch (UnknownEntityException e)
-			{
-				// Ok, no dataset sheet
-			}
-			finally
-			{
-				if (repo != null)
-				{
-					repo.close();
-				}
-			}
-
-			// validate dataset matrices
-			Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
-
-			// determine if dataset matrices can be imported
-			for (String tableName : entitySource.getEntityNames())
-			{
-				if (tableName.toLowerCase().startsWith(DATASET_PREFIX + "_"))
-				{
-					String identifier = tableName.substring((DATASET_PREFIX + "_").length());
-
-					// Check if dataset is present in the excel or in the database
-					boolean canImport = datasetIdentifiers.contains(identifier)
-							|| (dataService.findOne(DataSet.ENTITY_NAME,
-									new QueryImpl().eq(DataSet.IDENTIFIER, identifier)) != null);
-
-					dataSetValidationMap.put(identifier, canImport);
-				}
-			}
-
-			return dataSetValidationMap;
+		}
+		catch (UnknownEntityException e)
+		{
+			// Ok, no dataset sheet
 		}
 		finally
 		{
-			entitySource.close();
+			if (repo != null)
+			{
+				repo.close();
+			}
 		}
+
+		// validate dataset matrices
+		Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
+
+		// determine if dataset matrices can be imported
+		for (Repository repository : repositorySource.getRepositories())
+		{
+			if (repository.getName().toLowerCase().startsWith(DATASET_PREFIX + "_"))
+			{
+				String identifier = repository.getName().substring((DATASET_PREFIX + "_").length());
+
+				// Check if dataset is present in the excel or in the database
+				boolean canImport = datasetIdentifiers.contains(identifier)
+						|| (dataService
+								.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier)) != null);
+
+				dataSetValidationMap.put(identifier, canImport);
+			}
+		}
+
+		return dataSetValidationMap;
+
 	}
 
 }

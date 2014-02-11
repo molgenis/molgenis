@@ -11,4 +11,6 @@ public interface CatalogItem
 	public String getCode();
 
 	public String getCodeSystem();
+
+	public Iterable<String> getPath();
 }

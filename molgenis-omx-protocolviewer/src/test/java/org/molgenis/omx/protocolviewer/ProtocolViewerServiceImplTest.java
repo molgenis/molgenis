@@ -20,12 +20,12 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
-import org.mockito.ArgumentCaptor;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
+import org.molgenis.data.DataService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.protocolviewer.ProtocolViewerServiceImplTest.Config;
@@ -97,6 +97,12 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
 		}
 	}
 
@@ -271,21 +277,18 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 		verify(javaMailSender).send(any(MimeMessage.class));
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
-	@Test
-	public void updateStudyDefinitionDraftForCurrentUser() throws UnknownCatalogException
+	@Test(expectedExceptions = UnknownCatalogException.class)
+	public void addToStudyDefinitionDraftForCurrentUser_UnknownCatalogException() throws UnknownCatalogException
 	{
-		protocolViewerService.updateStudyDefinitionDraftForCurrentUser(Arrays.asList(0, 1, 2), catalog0.getId());
-		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
-		verify(studyDefinitionCatalog0UserDraft).setItems(argument.capture());
-		assertEquals(argument.getValue(), Arrays.asList(catalogItem0, catalogItem1, catalogItem2));
+		when(catalogService.getCatalog("unknown")).thenThrow(new UnknownCatalogException());
+		protocolViewerService.addToStudyDefinitionDraftForCurrentUser("/api/v1/protocol/0", "unknown");
 	}
 
 	@Test(expectedExceptions = UnknownCatalogException.class)
-	public void updateStudyDefinitionDraftForCurrentUser_UnknownCatalogException() throws UnknownCatalogException
+	public void removeFromStudyDefinitionDraftForCurrentUser_UnknownCatalogException() throws UnknownCatalogException
 	{
-		protocolViewerService.updateStudyDefinitionDraftForCurrentUser(Arrays.asList(0, 1, 2), "unknown");
+		when(catalogService.getCatalog("unknown")).thenThrow(new UnknownCatalogException());
+		protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser("/api/v1/protocol/0", "unknown");
 	}
 
 	@Test

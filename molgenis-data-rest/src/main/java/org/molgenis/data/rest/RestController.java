@@ -44,12 +44,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntityNotFoundException;
@@ -106,42 +103,12 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaData getMetaData(@PathVariable("entityName")
+	public EntityMetaDataResponse getMetaData(@PathVariable("entityName")
 	String entityNameRaw)
 	{
 		String entityName = getEntityName(entityNameRaw);
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
-
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getName());
-		meta.setDescription(repo.getDescription());
-		meta.setLabel(repo.getLabel());
-
-		for (AttributeMetaData attr : repo.getAttributes())
-		{
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
-			{
-				DefaultAttributeMetaData copy = new DefaultAttributeMetaData(attr.getName(), attr.getDataType()
-						.getEnumType());
-				copy.setDefaultValue(attr.getDefaultValue());
-				copy.setDescription(attr.getDescription());
-				copy.setIdAttribute(attr.isIdAtrribute());
-				copy.setLabel(attr.getLabel());
-				copy.setLabelAttribute(attr.isLabelAttribute());
-				copy.setNillable(attr.isNillable());
-				copy.setReadOnly(attr.isReadonly());
-
-				if (attr.getRefEntity() != null)
-				{
-					copy.setRefEntity(attr.getRefEntity());
-				}
-
-				copy.setVisible(attr.isVisible());
-
-				meta.addAttributeMetaData(copy);
-			}
-		}
-
-		return meta;
+		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
+		return new EntityMetaDataResponse(meta);
 	}
 
 	/**
@@ -278,19 +245,11 @@ public class RestController
 	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
 	String... expandFields)
 	{
-		try
-		{
-			String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-			Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
-					Arrays.asList(expandFields));
+		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
+		Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
+				Arrays.asList(expandFields));
 
-			return retrieveEntityCollectionInternal(entityName, request, expandFieldSet);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return retrieveEntityCollectionInternal(entityName, request, expandFieldSet);
 	}
 
 	/**

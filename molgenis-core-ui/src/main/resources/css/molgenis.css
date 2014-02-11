@@ -1,10 +1,6 @@
-#molgenisheader {
-   margin-bottom: 10px;
- }
- 
- .nav {
-   margin-bottom: 10px;
- }
+.nav, .navbar {
+	margin-bottom: 10px;
+}
 
 /*TODO: put this back when topmenu issue is solved
 body{
@@ -62,6 +58,10 @@ body{
 #spinner img {
 	display: block;
 	margin:0 auto;
+}
+
+.modal-backdrop.fade.in {
+	opacity: .3;
 }
 
 .alert {
