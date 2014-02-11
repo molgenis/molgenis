@@ -12,7 +12,7 @@ public class CategoricalMethodsTest extends MolgenisJsTest
 	@Test
 	public void map()
 	{
-		Object result = ScriptEvaluator.eval("$('gender').map({'10':'1','20':'2'})", new MapEntity("gender", 2));
-		assertEquals(Integer.parseInt(result.toString()), 20);
+		Object result = ScriptEvaluator.eval("$('gender').map({'2':'20','B2':'B'})", new MapEntity("gender", 'B'));
+		assertEquals(result.toString(), "B2");
 	}
 }

@@ -27,7 +27,7 @@ public class CategoricalMethods
 	{
 		if (args.length != 1)
 		{
-			throw new IllegalArgumentException("div expects one argument. Example: $('gender').div('10':'1','20':'2')");
+			throw new IllegalArgumentException("div expects one argument. Example: $('gender').div({'A':'1','B':'2'})");
 		}
 		Map<String, String> mappings = new HashMap<String, String>();
 		if (args[0] instanceof NativeObject)
@@ -35,7 +35,14 @@ public class CategoricalMethods
 			NativeObject object = (NativeObject) args[0];
 			for (Object id : object.getAllIds())
 			{
-				mappings.put(object.get(Integer.parseInt(id.toString()), thisObj).toString(), id.toString());
+				if (id instanceof Integer)
+				{
+					mappings.put(object.get(Integer.parseInt(id.toString()), thisObj).toString(), id.toString());
+				}
+				else
+				{
+					mappings.put(object.get(id.toString(), thisObj).toString(), id.toString());
+				}
 			}
 		}
 		StringBuilder result = new StringBuilder();
