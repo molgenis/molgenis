@@ -36,6 +36,17 @@ public class DefaultEntityMetaData implements EntityMetaData
 
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
+	
+	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
+	{
+		for(AttributeMetaData attributeMetaData :attributeMetaDataList){
+			if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
+			if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
+					"Name of the AttributeMetaData cannot be null");
+	
+			attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
+		}
+	}
 
 	@Override
 	public List<AttributeMetaData> getAttributes()
@@ -76,6 +87,13 @@ public class DefaultEntityMetaData implements EntityMetaData
 	{
 		if (attributeName == null) throw new IllegalArgumentException("AttributeName is null");
 		return attributes.get(attributeName.toLowerCase());
+	}
+	
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -223,4 +224,12 @@ public class ProtocolTreeRepository extends AbstractRepository implements Counta
 
 		}
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

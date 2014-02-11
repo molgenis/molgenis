@@ -15,6 +15,144 @@
 		return selectedDataSet.identifier;
 	};
 
+	//TODO NEW CODE GENERIC DATAEXPLORER
+	molgenis.createFeatureSelectionTree = function(entityName) {
+		var entityUri = "/api/v1/" + entityName + "/meta/tree"
+		
+		restApi.getAsync("/api/v1/celiacsprue/meta/tree", null, null, 
+			function(entityMetaData) {
+			
+				var container = $('#feature-selection');
+				
+				// Clean #feature-selection
+				if (container.children('ul').length > 0) {
+					container.dynatree('destroy');
+				}
+				container.empty();
+				
+				// Error message
+				if (!entityMetaData) {
+					container.append("<p>No features available</p>"); 
+					return;
+				}
+				
+				// render tree and open first branch
+				container.dynatree({
+					checkbox : !aggregateView,
+					selectMode : 3,
+					minExpandLevel : 2,
+					debugLevel : 0,
+					children : [{
+						key : entityMetaData,
+						title : entityMetaData.label,
+						icon : false,
+						isFolder : true,
+						isLazy : true,
+						children : createChildren("/api/v1/" + entityMetaData.name + "/meta/tree"
+								, {select : true}, {})
+					}],
+					onLazyRead : function(node) {
+						// workaround for dynatree lazy parent node select bug
+						var opts = node.isSelected() ? {expand : true, select : true} : {};
+						
+						console.log("node.data.key: " + node.data.key);
+						console.log(node.data);
+						
+						var children = createChildren(node.data.key, opts, opts);
+						node.setLazyNodeStatus(DTNodeStatus_Ok);
+						node.addChild(children);
+					},
+					onClick : function(node, event) {
+						// target type null is filter icon
+						if ((node.getEventTargetType(event) === "title"
+								|| node.getEventTargetType(event) === "icon" 
+									|| node.getEventTargetType(event) === null)
+							&& !node.data.isFolder){
+							molgenis.openFeatureFilterDialogNew(node.data.key);
+						}
+						
+						//Clean the select boxes of the charts designer
+						if (molgenis.charts) {
+							molgenis.charts.dataexplorer.resetChartDesigners();
+						}
+					}
+					
+					//TODO IMPLEMET
+//					},
+//					onSelect : function(select, node) {
+//						// workaround for dynatree lazy parent node select bug
+//						if (select) expandNodeRec(node);
+//						onNodeSelectionChange(this.getSelectedNodes());
+//					},
+//					onPostInit : function() {
+//						onNodeSelectionChange(this.getSelectedNodes());
+//					}
+				});
+			}
+		);
+					
+		function createChildren(href, featureOpts, protocolOpts) {
+			var children = [];
+			var attributes = restApi.get(href).attributes;
+			
+			// ALLEEN VOOR DEBUG
+			console.log("START");
+			console.log(entityUri);
+			console.log(attributes);
+			console.log(featureOpts);
+			console.log(protocolOpts);
+			console.log("END");
+				
+			Object.keys(attributes).map(function(prop) {
+				console.log(attributes[prop]);
+				console.log(attributes[prop].fieldType);
+				
+				// HAS Attributes
+				if(attributes[prop].fieldType === "HAS"){
+					children.push($.extend({
+						key : attributes[prop].refEntity["href"] + "/tree",
+						title : attributes[prop].label,
+						tooltip : attributes[prop].description,
+						isFolder : true,
+						isLazy : protocolOpts.expand != true,
+						children : protocolOpts.expand ? createChildren(
+								attributes[prop].refEntity["href"] + "/tree", featureOpts, protocolOpts) : null
+					}, protocolOpts));
+				}
+				else {
+					children.push($.extend({
+						key : attributes[prop].refThis,
+						title : attributes[prop].label,
+						tooltip : attributes[prop].description,
+						icon : "../../img/filter-bw.png",
+						isFolder : false
+					}, featureOpts));
+				}
+			});
+
+			return children;		
+		}
+	};
+	
+	//TODO NEW CODE GENERIC DATAEXPLORER
+	molgenis.openFeatureFilterDialogNew = function(attributeUri) {
+		restApi.getAsync(attributeUri, null, null,
+			function(feature) {
+				var items = [];
+				if (feature.description) {
+					items.push('<h3>Description</h3><p>' + feature.description + '</p>');
+				}
+				items.push('<h3>Filter:</h3>');
+				var config = featureFilters[attributeUri];
+				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
+				var divContainer = molgenis.createGenericFeatureFieldNew(items, feature, config, applyButton, attributeUri, false);
+				
+				//TODO 
+				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, attributeUri);
+			}
+		);
+	};
+	
 	molgenis.createFeatureSelection = function(protocolUri) {
 		function createChildren(protocolUri, featureOpts, protocolOpts) {
 			var subprotocols = restApi.get(protocolUri
@@ -35,8 +173,7 @@
 				});
 			}
 
-			var featureNodes = createFeatureNodes(protocolUri + '/features',
-					featureOpts);
+			var featureNodes = createFeatureNodes(protocolUri + '/features', featureOpts);
 			$.each(featureNodes, function() {
 				children.push(this);
 			});
@@ -215,11 +352,16 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
-			selectedDataSet = dataSet;
-			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-			molgenis.updateGenomeBrowser(dataSet);
-		});
+		
+		//TODO NEW CODE GENERIC DATAEXPLORER
+		molgenis.createFeatureSelectionTree(dataSetUri);
+		
+		//TODO OUDE CODE
+//		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
+//			selectedDataSet = dataSet;
+//			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+//			molgenis.updateGenomeBrowser(dataSet);
+//		});
 	};
 
 	molgenis.onFeatureSelectionChange = function(featureUris) {
@@ -523,6 +665,417 @@
 		});
 	}
 }	;
+
+
+//TODO start new code
+//Generic part for filter fields
+molgenis.createGenericFeatureFieldNew = function(items, attribute, config, applyButton, featureUri, wizard) {
+	var divContainer = $('<div />');
+	var filter = null;
+
+	alert(attribute.description);
+	console.log(attribute);
+	
+//	description: "The weight of a subject."
+//	fieldType: "DECIMAL"
+//	idAttribute: false
+//	identifier: "Celiac_Weight"
+//	label: "Weight"
+//	labelAttribute: false
+//	nillable: true
+//	readOnly: false
+//	refThis: "/api/v1/Celiac_Personal_Protocol/meta/Celiac_Weight"
+//	unique: false
+	
+	switch (attribute.fieldType) {
+		case "html" :
+		case "mref" :
+		case "xref" :
+		case "email" :
+		case "hyperlink" :
+		case "text" :
+		case "STRING" :
+			if (config == null) {
+				filter = $('<input type="text" id="text_'
+						+ attribute.identifier + '">');
+			} else {
+
+				filter = $('<input type="text" id="text_'
+						+ attribute.identifier
+						+ '" placeholder="filter text" autofocus="autofocus" value="'
+						+ config.values[0] + '">');
+			}
+			divContainer.append(filter);
+			if (wizard) {
+                $("[id='text_" + attribute.identifier+"']").change(
+						function() {
+							molgenis.updateFeatureFilter(featureUri, {
+								name : attribute.label,
+								identifier : feature.identifier,
+								type : attribute.fieldType,
+								values : [$(this).val()]
+							});
+
+						});
+			}
+			break;
+		case "date" :
+		case "datetime" :
+			var datePickerFrom = $('<div id="from_' + attribute.name
+					+ '" class="input-append date" />');
+			var filterFrom;
+
+			if (config == null) {
+				filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
+								+ attribute.identifier
+								+ '"  type="text" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+			} else {
+				filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
+								+ attribute.identifier
+								+ '"  type="text" value="'
+								+ config.values[0].replace("T", "'T'")
+								+ '" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+			}
+
+			datePickerFrom.on('changeDate', function(e) {
+                $("[id='date-feature-to_" + attribute.name+"']").val(
+                		$("[id='date-feature-from_" + attribute.name+"']").val()
+                );
+			});
+
+			var datePickerTo = $('<div id="to_' + attribute.name
+					+ '" class="input-append date" />');
+			var filterTo;
+
+			if (config == null)
+				filterTo = datePickerTo
+						.append($('<input id="date-feature-to_'
+								+ attribute.name
+								+ '" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+			else
+				filterTo = datePickerTo
+						.append($('<input id="date-feature-to_'
+								+ attribute.name
+								+ '" type="text" value="'
+								+ config.values[1].replace("T", "'T'")
+								+ '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+
+			filter = $('<span>From:<span>').after(filterFrom).after(
+					$('<span>To:</span>')).after(filterTo);
+			divContainer.append(filter);
+			break;
+		case "long" :
+		case "integer" :
+		case "int" :
+		case "decimal" :
+			var fromFilter;
+			var toFilter;
+
+			if (config == null) {
+				fromFilter = $('<input id="from_' + attribute.name
+						+ '" type="number" step="any" style="width:100px">');
+				toFilter = $('<input id="to_' + attribute.name
+						+ '" type="number" step="any" style="width:100px">');
+			} else {
+				fromFilter = $('<input id="from_'
+						+ attribute.name
+						+ '" type="number" step="any" style="width:100px" value="'
+						+ config.values[0] + '">');
+				toFilter = $('<input id="to_'
+						+ attribute.name
+						+ '" type="number" step="any" style="width:100px" value="'
+						+ config.values[1] + '">');
+			}
+
+			fromFilter.on('keyup input', function() {
+				// If 'from' changed set 'to' at the same value
+				$("[id='to_" + attribute.name+"']").val(
+						$("[id='from_"
+												+ attribute.name + '')
+								.val());
+			});
+
+			filter = $('<span>From:<span>').after(fromFilter).after(
+					$('<span>To:</span>')).after(toFilter);
+
+			divContainer.append(filter);
+			if (wizard) {
+				divContainer
+						.find(
+                        $("[id='from_"
+												+ feature.identifier+"']"))
+						.change(
+								function() {
+
+									molgenis
+											.updateFeatureFilter(
+													featureUri,
+													{
+														name : attribute.label,
+														identifier : feature.identifier,
+														type : feature.dataType,
+														values : [
+																$(
+                                                                    $("[id='from_"
+																						+ feature.identifier+"']"))
+																		.val(),
+																$(
+                                                                    $("[id='to_"
+																						+ feature.identifier+"']"))
+																		.val()],
+														range : true
+													});
+
+								});
+				divContainer
+						.find($("[id='to_" + feature.identifier+"']"))
+						.change(
+								function() {
+									molgenis
+											.updateFeatureFilter(
+													featureUri,
+													{
+														name : attribute.label,
+														identifier : feature.identifier,
+														type : feature.dataType,
+														values : [
+																$(
+                                                                    $("[id='from_"
+																						+ feature.identifier+"']"))
+																		.val(),
+																$(
+                                                                    $("[id='to_"
+																						+ feature.identifier+"']"))
+																		.val()],
+														range : true
+													});
+								});
+			}
+			break;
+		case "bool" :
+			if (config == null) {
+				filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
+						+ feature.identifier
+						+ '" name="bool-feature_'
+						+ feature.identifier
+						+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
+						+ feature.identifier
+						+ '" name="bool-feature_'
+						+ feature.identifier
+						+ '" value="false">False</label>');
+
+			} else {
+				if (config.values[0] == 'true') {
+					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
+							+ feature.identifier
+							+ '" name="bool-feature_'
+							+ feature.identifier
+							+ '" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
+							+ feature.identifier
+							+ '" name="bool-feature_'
+							+ feature.identifier
+							+ '" value="false">False</label>');
+				} else {
+					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
+							+ feature.identifier
+							+ '" name="bool-feature_'
+							+ feature.identifier
+							+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
+							+ feature.identifier
+							+ '" name="bool-feature_'
+							+ feature.identifier
+							+ '" checked value="false">False</label>');
+				}
+			}
+			divContainer.append(filter);
+			if (wizard) {
+				filter.find(
+						'input[name="bool-feature_' + feature.identifier
+								+ '"]').change(function() {
+					molgenis.updateFeatureFilter(featureUri, {
+						name : attribute.label,
+						identifier : feature.identifier,
+						type : feature.dataType,
+						values : [$(this).val()]
+					});
+
+				});
+			}
+
+			break;
+		case "categorical" :
+			$.ajax({
+				type : 'POST',
+				url : '/api/v1/category?_method=GET',
+				data : JSON.stringify({
+					q : [{
+						"field" : "observableFeature_Identifier",
+						"operator" : "EQUALS",
+						"value" : feature.identifier
+					}]
+				}),
+				contentType : 'application/json',
+				async : false,
+				success : function(categories) {
+					filter = [];
+					$.each(categories.items,
+							function() {
+								var input;
+								if (config
+										&& ($.inArray(this.name,
+												config.values) > -1)) {
+									input = $('<input type="checkbox" id="'
+											+ this.name + '_'
+											+ feature.identifier
+											+ '" "class="cat-value" name="'
+											+ feature.identifier
+											+ '" value="' + this.name
+											+ '"checked>');
+								} else {
+									input = $('<input type="checkbox" id="'
+											+ this.name + '_'
+											+ feature.identifier
+											+ '" class="cat-value" name="'
+											+ feature.identifier
+											+ '" value="' + this.name
+											+ '">');
+								}
+								filter.push($('<label class="checkbox">')
+										.html(' ' + this.name).prepend(
+												input));
+							});
+				}
+			});
+			divContainer.append(filter);
+			if (wizard) {
+				divContainer.find(
+						'input[name="' + feature.identifier + '"]').click(
+						function() {
+							molgenis.updateFeatureFilter(featureUri, {
+								name : attribute.label,
+								identifier : feature.identifier,
+								type : feature.dataType,
+								values : $.makeArray($(
+										'input[name="' + feature.identifier
+												+ '"]:checked').map(
+										function() {
+											return $(this).val();
+										}))
+							});
+						});
+			}
+			break;
+		default :
+			console.log("TODO: '" + feature.dataType + "' not supported");
+			return;
+	}
+
+	if ((feature.dataType == 'xref') || (feature.dataType == 'mref')) {
+		divContainer
+				.find($("[id='text_" + feature.identifier+"']"))
+				.autocomplete(
+						{
+							source : function(request, response) {
+								$
+										.ajax({
+											type : 'POST',
+											url : '/api/v1/characteristic?_method=GET',
+											data : JSON.stringify({
+												num : 15,
+												q : [{
+													"field" : "name",
+													"operator" : "LIKE",
+													"value" : request.term
+												}]
+											}),
+											contentType : 'application/json',
+											async : true,
+											success : function(
+													characteristicList) {
+												response($
+														.map(
+																characteristicList.items,
+																function(
+																		item) {
+																	return item.name;
+																}));
+											}
+										});
+							},
+							minLength : 2
+						});
+	}
+
+	if (feature.dataType == 'date') {
+		var container = divContainer.find('.date').datetimepicker({
+			format : 'yyyy-MM-dd',
+			language : 'en',
+			pickTime : false
+		});
+
+		if (wizard) {
+			container
+					.on(
+							'changeDate',
+							function(e) {
+								molgenis
+										.updateFeatureFilter(
+												featureUri,
+												{
+													name : attribute.label,
+													identifier : feature.identifier,
+													type : feature.dataType,
+													range : true,
+													values : [
+															    $("[id='date-feature-from_"+ feature.identifier
+                                                                    +"']")
+																	.val(),
+                                                            $("[id='date-feature-to_"
+																			+ feature.identifier
+                                                                        +"']")
+																	.val()]
+												});
+							});
+		}
+	} else if (feature.dataType == 'datetime') {
+		var container = divContainer.find('.date').datetimepicker({
+			format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
+			language : 'en',
+			pickTime : true
+		});
+		if (wizard) {
+			container
+					.on(
+							'changeDate',
+							function(e) {
+								molgenis
+										.updateFeatureFilter(
+												featureUri,
+												{
+													name : attribute.label,
+													identifier : feature.identifier,
+													type : feature.dataType,
+													range : true,
+													values : [
+															$("[id='date-feature-from_"+feature.identifier+"']")
+
+																	.val()
+																	.replace(
+																			"'T'",
+																			"T"),
+															$("[id='date-feature-to_"+ feature.identifier+"']")
+																	.val()
+																	.replace(
+																			"'T'",
+																			"T")]
+												});
+							});
+		}
+	}
+
+	return divContainer;
+};
+// TODO JJ end new codeÍ
 
 	//Generic part for filter fields
 	molgenis.createGenericFeatureField = function(items, feature, config,
@@ -1316,21 +1869,22 @@
 		$('#dataset-select')
 				.change(
 						function() {
-							var checkDataViewer = $('#dataexplorer-grid-data')
-									.is(':visible');
-							restApi
-									.getAsync(
+							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+							restApi.getAsync(
 											$('#dataset-select').val(),
 											null,
 											null,
 											function(dataSet) {
 												selectedDataSet = dataSet;
-												molgenis
-														.createFeatureSelection(dataSet.protocolUsed.href);
+												
+												//TODO NIEUWE CODE
+												molgenis.createFeatureSelectionTree(dataSet);
+												
+												//TODO OUDE CODE
+												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
 											});
 							if (checkDataViewer)
-								molgenis
-										.onDataSetSelectionChange($(this).val());
+								molgenis.onDataSetSelectionChange($(this).val());
 							else
 								molgenis.initializeAggregate($(this).val());
 						});

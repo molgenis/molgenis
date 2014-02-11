@@ -22,6 +22,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -828,6 +829,13 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 		E e = BeanUtils.instantiate(clazz);
 		e.set(entity);
 		return e;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
