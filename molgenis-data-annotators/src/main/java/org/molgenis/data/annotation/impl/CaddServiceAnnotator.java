@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -18,12 +19,16 @@ import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * This class...
+ * This class performs a system call to cross reference a chromosome 
+ * and genomic location with a tabix indexed file. A match can result in 1, 2 or 3 hits.
+ * These matches are reduced to one based on a reference and alternative nucleotide base.
+ * The remaining hit will be used to parse two CADD scores.
  * </p>
  * 
  * <p>
@@ -47,26 +52,18 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 	private static final String CADD_SCALED = "CADD_SCALED";
 	private static final String CADD_ABS = "CADD_ABS";
 
-	// system call used to call tabix, includes the file
-	private static final String SYSTEM_CALL = "/Users/mdehaan/bin/tools/tabix-0.2.6/tabix /Users/mdehaan/Downloads/1000G.vcf.gz ";
-
 	@Autowired
 	DataService dataService;
 
-	/**
-	 * <p>
-	 * This method...
-	 * </p>
-	 * 
-	 * @param Iterator<Entity>
-	 * @return Iterator<Entity>
-	 * 
-	 * */
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
 		List<Entity> results = new ArrayList<Entity>();
-
+		String systemCall = molgenisSettings.getProperty("CADD_Command");
+		
 		while (source.hasNext())
 		{
 			Entity entity = source.next();
@@ -82,7 +79,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 			try
 			{
 				Runtime runTime = Runtime.getRuntime();
-				Process process = runTime.exec(SYSTEM_CALL + chromosome + ":" + position + "-" + position);
+				Process process = runTime.exec(systemCall + chromosome + ":" + position + "-" + position);
 
 				process.waitFor();
 
@@ -160,9 +157,17 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public Boolean canAnnotate()
+	public Boolean canAnnotate(EntityMetaData inputMetaData)
 	{
-		return true;
+		boolean canAnnotate = true;
+		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
+		for(AttributeMetaData attribute : inputAttributes){
+			if(inputMetaData.getAttribute(attribute.getName()) == null){
+				//all attributes from the inputmetadata must be present to annotate.
+				canAnnotate = false;
+			}
+		}
+		return canAnnotate;
 	}
 
 	@Override
