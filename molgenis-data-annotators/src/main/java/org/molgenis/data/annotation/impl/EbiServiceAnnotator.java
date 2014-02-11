@@ -16,6 +16,7 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -29,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * This class...
+ * This class calls the EBI CHeMBL webservice with a uniprot ID. The webservice returns
+ * a map with information on the submitted protein ID.
  * </p>
  * 
  * <p>
@@ -55,15 +57,6 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	@Autowired
 	DataService dataService;
 
-	/**
-	 * <p>
-	 * This method...
-	 * </p>
-	 * 
-	 * @param Iterator<Entity>
-	 * @return Iterator<Entity>
-	 * 
-	 * */
 	@Override
 	@Transactional
 	public Iterator<Entity> annotate(Iterator<Entity> source)
@@ -142,10 +135,17 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	}
 	
 	@Override
-	public Boolean canAnnotate()
+	public Boolean canAnnotate(EntityMetaData inputMetaData)
 	{
-		//TODO implement!
-		return true;
+		boolean canAnnotate = true;
+		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
+		for(AttributeMetaData attribute : inputAttributes){
+			if(inputMetaData.getAttribute(attribute.getName()) == null){
+				//all attributes from the inputmetadata must be present to annotate.
+				canAnnotate = false;
+			}
+		}
+		return canAnnotate;
 	}
 	
 	@Override
