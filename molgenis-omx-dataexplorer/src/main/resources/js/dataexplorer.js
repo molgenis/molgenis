@@ -136,7 +136,6 @@
 	
 	//TODO NEW CODE GENERIC DATAEXPLORER
 	molgenis.openFeatureFilterDialogNew = function(attributeUri) {
-		console.log(attributeUri);
 		restApi.getAsync(attributeUri, null, null,
 			function(feature) {
 				var items = [];
@@ -1866,6 +1865,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 				.change(
 						function() {
 							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+							// FIXME disabled, discuss why this is needed
 //							molgenis.createFeatureSelectionTree($('#dataset-select').val());
 //							restApi.getAsync(
 //											$('#dataset-select').val(),
