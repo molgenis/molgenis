@@ -12,14 +12,14 @@
 	var aggregateView = false;
 
 	molgenis.getSelectedDataSetIdentifier = function() {
-		return selectedDataSet.identifier;
+		return selectedDataSet.name;
 	};
 
 	//TODO NEW CODE GENERIC DATAEXPLORER
 	molgenis.createFeatureSelectionTree = function(entityName) {
-		var entityUri = "/api/v1/" + entityName + "/meta/tree"
+		var entityUri = entityName + "/meta/tree";
 		
-		restApi.getAsync("/api/v1/celiacsprue/meta/tree", null, null, 
+		restApi.getAsync(entityName + '/meta/tree', null, null, 
 			function(entityMetaData) {
 			
 				var container = $('#feature-selection');
@@ -55,8 +55,8 @@
 						// workaround for dynatree lazy parent node select bug
 						var opts = node.isSelected() ? {expand : true, select : true} : {};
 						
-						console.log("node.data.key: " + node.data.key);
-						console.log(node.data);
+						//console.log("node.data.key: " + node.data.key);
+						//console.log(node.data);
 						
 						var children = createChildren(node.data.key, opts, opts);
 						node.setLazyNodeStatus(DTNodeStatus_Ok);
@@ -67,26 +67,28 @@
 						if ((node.getEventTargetType(event) === "title"
 								|| node.getEventTargetType(event) === "icon" 
 									|| node.getEventTargetType(event) === null)
-							&& !node.data.isFolder){
+							&& !node.data.isFolder)
+						{
 							molgenis.openFeatureFilterDialogNew(node.data.key);
 						}
 						
 						//Clean the select boxes of the charts designer
-						if (molgenis.charts) {
+						if (molgenis.charts) 
+						{
 							molgenis.charts.dataexplorer.resetChartDesigners();
 						}
+					},
+					onSelect : function(select, node) {
+						// workaround for dynatree lazy parent node select bug
+						if (select) 
+						{
+							expandNodeRec(node);
+						}
+						onNodeSelectionChangeNew(this.getSelectedNodes());
+					},
+					onPostInit : function() {
+						onNodeSelectionChangeNew(this.getSelectedNodes());
 					}
-					
-					//TODO IMPLEMET
-//					},
-//					onSelect : function(select, node) {
-//						// workaround for dynatree lazy parent node select bug
-//						if (select) expandNodeRec(node);
-//						onNodeSelectionChange(this.getSelectedNodes());
-//					},
-//					onPostInit : function() {
-//						onNodeSelectionChange(this.getSelectedNodes());
-//					}
 				});
 			}
 		);
@@ -96,16 +98,16 @@
 			var attributes = restApi.get(href).attributes;
 			
 			// ALLEEN VOOR DEBUG
-			console.log("START");
-			console.log(entityUri);
-			console.log(attributes);
-			console.log(featureOpts);
-			console.log(protocolOpts);
-			console.log("END");
+//			console.log("START");
+//			console.log(entityUri);
+//			console.log(attributes);
+//			console.log(featureOpts);
+//			console.log(protocolOpts);
+//			console.log("END");
 				
 			Object.keys(attributes).map(function(prop) {
-				console.log(attributes[prop]);
-				console.log(attributes[prop].fieldType);
+				//console.log(attributes[prop]);
+				//console.log(attributes[prop].fieldType);
 				
 				// HAS Attributes
 				if(attributes[prop].fieldType === "HAS"){
@@ -131,6 +133,43 @@
 			});
 
 			return children;		
+		}
+		
+		function onNodeSelectionChangeNew(selectedNodes) {
+			function getSiblingPos(node) {
+				var pos = 0;
+				do {
+					node = node.getPrevSibling();
+					if (node == null)
+						break;
+					else
+						++pos;
+				} while (true);
+				return pos;
+			}
+			
+			var sortedNodes = selectedNodes.sort(function(node1, node2) {
+				var diff = node1.getLevel() - node2.getLevel();
+				if (diff == 0) {
+					diff = getSiblingPos(node1.getParent())
+							- getSiblingPos(node2.getParent());
+					if (diff == 0)
+						diff = getSiblingPos(node1) - getSiblingPos(node2);
+				}
+				return diff <= 0 ? -1 : 1;
+			});
+			
+			var sortedFeatures = $.map(sortedNodes, function(node) {
+				return node.data.isFolder || node.data.key == 'more'
+						? null
+						: node.data.key;
+			});
+			
+			//TODO JJ
+//			console.log("sortedFeatures");
+//			console.log(sortedFeatures);
+			
+			molgenis.onFeatureSelectionChangeNew(sortedFeatures);
 		}
 	};
 	
@@ -342,7 +381,7 @@
 		}
 	};
 
-	molgenis.onDataSetSelectionChange = function(dataSetUri) {
+	molgenis.onDataSetSelectionChange = function(entityUri) {
 		// reset
 		featureFilters = {};
 		$('#feature-filters p').remove();
@@ -352,11 +391,11 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
+		//console.log("bla");
+		//console.log(selectedDataSet);
+		molgenis.createFeatureSelectionTree(entityUri);
 		
-		//TODO NEW CODE GENERIC DATAEXPLORER
-		molgenis.createFeatureSelectionTree(dataSetUri);
-		
-		//TODO OUDE CODE
+// OUDE CODE
 //		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
 //			selectedDataSet = dataSet;
 //			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
@@ -364,8 +403,9 @@
 //		});
 	};
 
-	molgenis.onFeatureSelectionChange = function(featureUris) {
-		selectedFeatures = featureUris;
+	// TODO JJ NEW CODE
+	molgenis.onFeatureSelectionChangeNew = function(attributeUris) {
+		selectedFeatures = attributeUris;
 		molgenis.updateObservationSetsTable();
 	};
 
@@ -382,7 +422,6 @@
 			molgenis.search(function(searchResponse) {
 				var maxRowsPerPage = resultsTable.getMaxRows();
 				var nrRows = searchResponse.totalHitCount;
-
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 
 				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
@@ -673,8 +712,8 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	var divContainer = $('<div />');
 	var filter = null;
 
-	alert(attribute.description);
-	console.log(attribute);
+	
+	//console.log(attribute);
 	
 //	description: "The weight of a subject."
 //	fieldType: "DECIMAL"
@@ -966,7 +1005,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			}
 			break;
 		default :
-			console.log("TODO: '" + feature.dataType + "' not supported");
+			//console.log("TODO: '" + feature.dataType + "' not supported");
 			return;
 	}
 
@@ -1366,7 +1405,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 				}
 				break;
 			default :
-				console.log("TODO: '" + feature.dataType + "' not supported");
+				//console.log("TODO: '" + feature.dataType + "' not supported");
 				return;
 		}
 
@@ -1582,8 +1621,11 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	};
 
 	molgenis.createSearchRequest = function(includeLimitOffset) {
+		
+		alert("selectedDataSet: " + selectedDataSet.name);
+		
 		var searchRequest = {
-			documentType : selectedDataSet.identifier,
+			documentType : selectedDataSet,
 			query : {
 				rules : [[]]
 			}
@@ -1667,7 +1709,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 		if (sortRule) {
 			searchRequest.query.sort = sortRule;
 		}
-
+		
 		searchRequest.fieldsToReturn = [];
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
@@ -1866,28 +1908,26 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	$(function() {
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
-		$('#dataset-select')
-				.change(
-						function() {
-							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
-							restApi.getAsync(
-											$('#dataset-select').val(),
-											null,
-											null,
-											function(dataSet) {
-												selectedDataSet = dataSet;
-												
-												//TODO NIEUWE CODE
-												molgenis.createFeatureSelectionTree(dataSet);
-												
-												//TODO OUDE CODE
-												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-											});
-							if (checkDataViewer)
-								molgenis.onDataSetSelectionChange($(this).val());
-							else
-								molgenis.initializeAggregate($(this).val());
-						});
+		$('#dataset-select').change(
+			function() {
+				var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+				//TODO
+				//"/api/v1/" + $('#dataset-select').val() + "/meta/tree",
+				var entityUri = "/api/v1/celiacsprue/meta/tree";
+				restApi.getAsync(
+								entityUri,
+								null,
+								null,
+								function(entityMetaDataTree) {
+									selectedDataSet = entityMetaDataTree;
+								});
+
+				if (checkDataViewer)
+					molgenis.onDataSetSelectionChange(entityUri);
+				else
+					molgenis.initializeAggregate(entityUri);
+			}
+		);
 
 		resultsTable = new molgenis.ResultsTable();
 
