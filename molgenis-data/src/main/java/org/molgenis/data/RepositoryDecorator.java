@@ -88,8 +88,7 @@ public class RepositoryDecorator implements Repository
 	@Override
 	public Iterable<AttributeMetaData> getLevelOneAttributes()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return decoratedRepository.getLevelOneAttributes();
 	}
 
 }

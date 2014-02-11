@@ -156,8 +156,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	@Override
 	public Iterable<AttributeMetaData> getLevelOneAttributes()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getEntityMetaData().getAttributes();
 	}
 
 }
