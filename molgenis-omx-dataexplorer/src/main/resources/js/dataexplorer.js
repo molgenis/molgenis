@@ -12,16 +12,15 @@
 	var aggregateView = false;
 
 	molgenis.getSelectedDataSetIdentifier = function() {
-		return selectedDataSet.name;
+		return selectedDataSet.identifier;
 	};
 
 	//TODO NEW CODE GENERIC DATAEXPLORER
-	molgenis.createFeatureSelectionTree = function(entityUri) {
-		var entityMetaUri = entityUri + "/meta/tree";
+	molgenis.createFeatureSelectionTree = function(entityName) {
+		var entityUri = entityName + "/meta/tree";
 		
-		restApi.getAsync(entityMetaUri, null, null, 
+		restApi.getAsync(entityName + '/meta/tree', null, null, 
 			function(entityMetaData) {
-				selectedDataSet = entityMetaData;
 			
 				var container = $('#feature-selection');
 				
@@ -56,8 +55,8 @@
 						// workaround for dynatree lazy parent node select bug
 						var opts = node.isSelected() ? {expand : true, select : true} : {};
 						
-						//console.log("node.data.key: " + node.data.key);
-						//console.log(node.data);
+						console.log("node.data.key: " + node.data.key);
+						console.log(node.data);
 						
 						var children = createChildren(node.data.key, opts, opts);
 						node.setLazyNodeStatus(DTNodeStatus_Ok);
@@ -68,31 +67,26 @@
 						if ((node.getEventTargetType(event) === "title"
 								|| node.getEventTargetType(event) === "icon" 
 									|| node.getEventTargetType(event) === null)
-							&& !node.data.isFolder)
-						{
+							&& !node.data.isFolder){
 							molgenis.openFeatureFilterDialogNew(node.data.key);
 						}
 						
 						//Clean the select boxes of the charts designer
-						if (molgenis.charts) 
-						{
+						if (molgenis.charts) {
 							molgenis.charts.dataexplorer.resetChartDesigners();
 						}
-					},
-					onSelect : function(select, node) {
-						// workaround for dynatree lazy parent node select bug
-						alert("onSelect");
-						alert(select);
-						if (select) 
-						{
-							expandNodeRec(node);
-						}
-						onNodeSelectionChangeNew(this.getSelectedNodes());
-					},
-					onPostInit : function() {
-						alert("postInit");
-						onNodeSelectionChangeNew(this.getSelectedNodes());
 					}
+					
+					//TODO IMPLEMET
+//					},
+//					onSelect : function(select, node) {
+//						// workaround for dynatree lazy parent node select bug
+//						if (select) expandNodeRec(node);
+//						onNodeSelectionChange(this.getSelectedNodes());
+//					},
+//					onPostInit : function() {
+//						onNodeSelectionChange(this.getSelectedNodes());
+//					}
 				});
 			}
 		);
@@ -101,7 +95,18 @@
 			var children = [];
 			var attributes = restApi.get(href).attributes;
 			
-			Object.keys(attributes).map(function(prop) {	
+			// ALLEEN VOOR DEBUG
+			console.log("START");
+			console.log(entityUri);
+			console.log(attributes);
+			console.log(featureOpts);
+			console.log(protocolOpts);
+			console.log("END");
+				
+			Object.keys(attributes).map(function(prop) {
+				console.log(attributes[prop]);
+				console.log(attributes[prop].fieldType);
+				
 				// HAS Attributes
 				if(attributes[prop].fieldType === "HAS"){
 					children.push($.extend({
@@ -125,51 +130,7 @@
 				}
 			});
 
-		
 			return children;		
-		}
-		
-		function expandNodeRec(node) {
-			if (node.childList == undefined) {
-				node.toggleExpand();
-			} else {
-				$.each(node.childList, function() {
-					expandNodeRec(this);
-				});
-			}
-		}
-		
-		function onNodeSelectionChangeNew(selectedNodes) {
-			function getSiblingPos(node) {
-				var pos = 0;
-				do {
-					node = node.getPrevSibling();
-					if (node == null)
-						break;
-					else
-						++pos;
-				} while (true);
-				return pos;
-			}
-			
-			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				var diff = node1.getLevel() - node2.getLevel();
-				if (diff == 0) {
-					diff = getSiblingPos(node1.getParent())
-							- getSiblingPos(node2.getParent());
-					if (diff == 0)
-						diff = getSiblingPos(node1) - getSiblingPos(node2);
-				}
-				return diff <= 0 ? -1 : 1;
-			});
-			
-			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder || node.data.key == 'more'
-						? null
-						: node.data.key;
-			});
-			
-			molgenis.onFeatureSelectionChangeNew(sortedFeatures);
 		}
 	};
 	
@@ -191,8 +152,197 @@
 			}
 		);
 	};
+	
+	molgenis.createFeatureSelection = function(protocolUri) {
+		function createChildren(protocolUri, featureOpts, protocolOpts) {
+			var subprotocols = restApi.get(protocolUri
+					+ '/subprotocols?num=500');
 
-	molgenis.onDataSetSelectionChange = function(entityUri) {
+			var children = [];
+			if (subprotocols.items) {
+				$.each(subprotocols.items, function() {
+					children.push($.extend({
+						key : this.href,
+						title : this.name,
+						tooltip : this.description,
+						isFolder : true,
+						isLazy : protocolOpts.expand != true,
+						children : protocolOpts.expand ? createChildren(
+								this.href, featureOpts, protocolOpts) : null
+					}, protocolOpts));
+				});
+			}
+
+			var featureNodes = createFeatureNodes(protocolUri + '/features', featureOpts);
+			$.each(featureNodes, function() {
+				children.push(this);
+			});
+
+			return children;
+		}
+
+		function createFeatureNodes(protocolFeaturesUri, featureOpts) {
+			var features = restApi.get(protocolFeaturesUri);
+			var nodes = [];
+
+			if (features.items) {
+
+				$.each(features.items, function() {
+					nodes.push($.extend({
+						key : this.href,
+						title : this.name,
+						tooltip : this.description,
+						icon : "../../img/filter-bw.png"
+					}, featureOpts));
+				});
+
+				if (features.nextHref) {
+					nodes.push($.extend({
+						key : 'more',
+						nextHref : features.nextHref,
+						title : '<i>more...</i>',
+						icon : false,
+						hideCheckbox : true,
+						tooltip : 'Load more'
+					}));
+				}
+			}
+
+			return nodes;
+		}
+
+		function expandNodeRec(node) {
+			if (node.childList == undefined) {
+				node.toggleExpand();
+			} else {
+				$.each(node.childList, function() {
+					expandNodeRec(this);
+				});
+			}
+		}
+
+		function onNodeSelectionChange(selectedNodes) {
+			function getSiblingPos(node) {
+				var pos = 0;
+				do {
+					node = node.getPrevSibling();
+					if (node == null)
+						break;
+					else
+						++pos;
+				} while (true);
+				return pos;
+			}
+			var sortedNodes = selectedNodes.sort(function(node1, node2) {
+				var diff = node1.getLevel() - node2.getLevel();
+				if (diff == 0) {
+					diff = getSiblingPos(node1.getParent())
+							- getSiblingPos(node2.getParent());
+					if (diff == 0)
+						diff = getSiblingPos(node1) - getSiblingPos(node2);
+				}
+				return diff <= 0 ? -1 : 1;
+			});
+			var sortedFeatures = $.map(sortedNodes, function(node) {
+				return node.data.isFolder || node.data.key == 'more'
+						? null
+						: node.data.key;
+			});
+			molgenis.onFeatureSelectionChange(sortedFeatures);
+		}
+
+		restApi
+				.getAsync(
+						protocolUri,
+						null,
+						null,
+						function(protocol) {
+							var container = $('#feature-selection');
+							if (container.children('ul').length > 0) {
+								container.dynatree('destroy');
+							}
+							container.empty();
+							if (typeof protocol === 'undefined') {
+								container
+										.append("<p>No features available</p>");
+								return;
+							}
+
+							// render tree and open first branch
+							container
+									.dynatree({
+										checkbox : !aggregateView,
+										selectMode : 3,
+										minExpandLevel : 2,
+										debugLevel : 0,
+										children : [{
+											key : protocol.href,
+											title : protocol.name,
+											icon : false,
+											isFolder : true,
+											isLazy : true,
+											children : createChildren(
+													protocol.href, {
+														select : true
+													}, {})
+										}],
+										onLazyRead : function(node) {
+											// workaround for dynatree lazy parent node select bug
+											var opts = node.isSelected() ? {
+												expand : true,
+												select : true
+											} : {};
+											var children = createChildren(
+													node.data.key, opts, opts);
+											node
+													.setLazyNodeStatus(DTNodeStatus_Ok);
+											node.addChild(children);
+										},
+										onClick : function(node, event) {
+
+											if (node.data.key == 'more') {
+												var nextFeatureNodes = createFeatureNodes(
+														node.data.nextHref, {});
+												node.remove();
+												node.parent
+														.addChild(nextFeatureNodes);
+											}
+											// target type null is filter icon
+											if ((node.getEventTargetType(event) === "title"
+													|| node
+															.getEventTargetType(event) === "icon" || node
+													.getEventTargetType(event) === null)
+													&& !node.data.isFolder)
+												molgenis
+														.openFeatureFilterDialogNew(node.data.key);
+
+											//Clean the select boxes of the charts designer
+											if (molgenis.charts) {
+												molgenis.charts.dataexplorer
+														.resetChartDesigners();
+											}
+										},
+										onSelect : function(select, node) {
+											// workaround for dynatree lazy parent node select bug
+											if (select)
+												expandNodeRec(node);
+											onNodeSelectionChange(this
+													.getSelectedNodes());
+										},
+										onPostInit : function() {
+											onNodeSelectionChange(this
+													.getSelectedNodes());
+										}
+									});
+						});
+
+		//Clean the select boxes of the charts designer
+		if (molgenis.charts) {
+			molgenis.charts.dataexplorer.resetChartDesigners();
+		}
+	};
+
+	molgenis.onDataSetSelectionChange = function(dataSetUri) {
 		// reset
 		featureFilters = {};
 		$('#feature-filters p').remove();
@@ -202,18 +352,20 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-		molgenis.createFeatureSelectionTree(entityUri);
 		
-// OUDE CODE
-		restApi.getAsync(entityUri + "/meta/tree", null, null, function(dataSet) {
-			selectedDataSet = dataSet;
-			//molgenis.updateGenomeBrowser(dataSet);
-		});
+		//TODO NEW CODE GENERIC DATAEXPLORER
+		molgenis.createFeatureSelectionTree(dataSetUri);
+		
+		//TODO OUDE CODE
+//		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
+//			selectedDataSet = dataSet;
+//			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+//			molgenis.updateGenomeBrowser(dataSet);
+//		});
 	};
 
-	// TODO JJ NEW CODE
-	molgenis.onFeatureSelectionChangeNew = function(attributeUris) {
-		selectedFeatures = attributeUris;
+	molgenis.onFeatureSelectionChange = function(featureUris) {
+		selectedFeatures = featureUris;
 		molgenis.updateObservationSetsTable();
 	};
 
@@ -228,16 +380,11 @@
 	molgenis.updateObservationSetsTable = function() {
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
-				console.log("updateObservationSetsTable");
-				console.log("searchResponse");
-				console.log(searchResponse);
-				console.log("selectedFeatures");
-				console.log(selectedFeatures);
 				var maxRowsPerPage = resultsTable.getMaxRows();
 				var nrRows = searchResponse.totalHitCount;
-				console.log("maxRowsPerPage: " + maxRowsPerPage);
-				console.log("nrRows: " + nrRows);
+
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
+
 				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 			});
 		} else {
@@ -250,7 +397,6 @@
 	molgenis.updateObservationSetsTablePage = function() {
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
-				console.log("updateObservationSetsTablePage");
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 			});
 		} else {
@@ -260,7 +406,7 @@
 		}
 	};
 
-	molgenis.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {		
+	molgenis.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
 		molgenis.updateObservationSetsTablePager(nrRows, maxRowsPerPage);
 		molgenis.updateObservationSetsTableHeader(nrRows);
 	};
@@ -556,7 +702,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			}
 			divContainer.append(filter);
 			if (wizard) {
-              $("[id='text_" + attribute.name + "']").change(
+                $("[id='text_" + attribute.name + "']").change(
 						function() {
 							molgenis.updateFeatureFilter(featureUri, {
 								name : attribute.label,
@@ -587,9 +733,9 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			}
 
 			datePickerFrom.on('changeDate', function(e) {
-              $("[id='date-feature-to_" + attribute.name+"']").val(
-              		$("[id='date-feature-from_" + attribute.name+"']").val()
-              );
+                $("[id='date-feature-to_" + attribute.name+"']").val(
+                		$("[id='date-feature-from_" + attribute.name+"']").val()
+                );
 			});
 
 			var datePickerTo = $('<div id="to_' + attribute.name
@@ -650,7 +796,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 			if (wizard) {
 				divContainer
 						.find(
-                      $("[id='from_" + attribute.name +"']"))
+                        $("[id='from_" + attribute.name +"']"))
 						.change(
 								function() {
 
@@ -663,11 +809,11 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 														type : attribute.fieldType,
 														values : [
 																$(
-                                                                  $("[id='from_"
+                                                                    $("[id='from_"
 																						+ attribute.name + "']"))
 																		.val(),
 																$(
-                                                                  $("[id='to_"
+                                                                    $("[id='to_"
 																						+ attribute.name + "']"))
 																		.val()],
 														range : true
@@ -687,11 +833,11 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 														type : attribute.fieldType,
 														values : [
 																$(
-                                                                  $("[id='from_"
+                                                                    $("[id='from_"
 																						+ attribute.name +"']"))
 																		.val(),
 																$(
-                                                                  $("[id='to_"
+                                                                    $("[id='to_"
 																						+ attribute.name + "']"))
 																		.val()],
 														range : true
@@ -876,11 +1022,11 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 													range : true,
 													values : [
 															    $("[id='date-feature-from_"+ attribute.name
-                                                                  +"']")
+                                                                    +"']")
 																	.val(),
-                                                          $("[id='date-feature-to_"
+                                                            $("[id='date-feature-to_"
 																			+ attribute.name
-                                                                      +"']")
+                                                                        +"']")
 																	.val()]
 												});
 							});
@@ -1215,7 +1361,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 				}
 				break;
 			default :
-				//console.log("TODO: '" + feature.dataType + "' not supported");
+				console.log("TODO: '" + feature.dataType + "' not supported");
 				return;
 		}
 
@@ -1431,9 +1577,8 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	};
 
 	molgenis.createSearchRequest = function(includeLimitOffset) {
-		
 		var searchRequest = {
-			documentType : selectedDataSet.name,
+			documentType : selectedDataSet.identifier,
 			query : {
 				rules : [[]]
 			}
@@ -1517,13 +1662,13 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 		if (sortRule) {
 			searchRequest.query.sort = sortRule;
 		}
-		
+
 		searchRequest.fieldsToReturn = [];
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
-			searchRequest.fieldsToReturn.push(feature.name);
+			searchRequest.fieldsToReturn.push(feature.identifier);
 			if (feature.dataType === 'xref' || feature.dataType === 'mref')
-				searchRequest.fieldsToReturn.push("key-" + feature.name);
+				searchRequest.fieldsToReturn.push("key-" + feature.identifier);
 		});
 
 		return searchRequest;
@@ -1716,30 +1861,31 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	$(function() {
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
-		$('#dataset-select').change(
-				function() {
-					var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
-					// FIXME disabled, discuss why this is needed
-//					molgenis.createFeatureSelectionTree($('#dataset-select').val());
-//					restApi.getAsync(
-//									$('#dataset-select').val(),
-//									null,
-//									null,
-//									function(dataSet) {
-//										selectedDataSet = dataSet;
-//										
-//										//TODO NIEUWE CODE
-//										molgenis.createFeatureSelectionTree(dataSet);
-//										
-//										//TODO OUDE CODE
-//										//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-//									});
-					if (checkDataViewer)
-						molgenis.onDataSetSelectionChange($(this).val());
-					else
-						molgenis.initializeAggregate($(this).val());
-				});
-		
+		$('#dataset-select')
+				.change(
+						function() {
+							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+							// FIXME disabled, discuss why this is needed
+//							molgenis.createFeatureSelectionTree($('#dataset-select').val());
+//							restApi.getAsync(
+//											$('#dataset-select').val(),
+//											null,
+//											null,
+//											function(dataSet) {
+//												selectedDataSet = dataSet;
+//												
+//												//TODO NIEUWE CODE
+//												molgenis.createFeatureSelectionTree(dataSet);
+//												
+//												//TODO OUDE CODE
+//												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
+//											});
+							if (checkDataViewer)
+								molgenis.onDataSetSelectionChange($(this).val());
+							else
+								molgenis.initializeAggregate($(this).val());
+						});
+
 		resultsTable = new molgenis.ResultsTable();
 
 		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]')
@@ -1753,7 +1899,6 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 						});
 
 		$("#observationset-search").focus();
-		
 		$("#observationset-search").change(function(e) {
 			molgenis.searchObservationSets($(this).val());
 		});
