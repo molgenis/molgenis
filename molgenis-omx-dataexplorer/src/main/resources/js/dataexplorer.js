@@ -12,15 +12,15 @@
 	var aggregateView = false;
 
 	molgenis.getSelectedDataSetIdentifier = function() {
-		return selectedDataSet.identifier;
+		return selectedDataSet.name;
 	};
 
-	//TODO NEW CODE GENERIC DATAEXPLORER
-	molgenis.createFeatureSelectionTree = function(entityName) {
-		var entityUri = entityName + "/meta/tree";
+	molgenis.createFeatureSelectionTree = function(entityUri) {
+		var entityMetaUri = entityUri + "/meta/tree";
 		
-		restApi.getAsync(entityName + '/meta/tree', null, null, 
+		restApi.getAsync(entityMetaUri, null, null, 
 			function(entityMetaData) {
+				selectedDataSet = entityMetaData;
 			
 				var container = $('#feature-selection');
 				
@@ -53,11 +53,7 @@
 					}],
 					onLazyRead : function(node) {
 						// workaround for dynatree lazy parent node select bug
-						var opts = node.isSelected() ? {expand : true, select : true} : {};
-						
-						console.log("node.data.key: " + node.data.key);
-						console.log(node.data);
-						
+						var opts = node.isSelected() ? {expand : true, select : true} : {};						
 						var children = createChildren(node.data.key, opts, opts);
 						node.setLazyNodeStatus(DTNodeStatus_Ok);
 						node.addChild(children);
@@ -67,26 +63,28 @@
 						if ((node.getEventTargetType(event) === "title"
 								|| node.getEventTargetType(event) === "icon" 
 									|| node.getEventTargetType(event) === null)
-							&& !node.data.isFolder){
+							&& !node.data.isFolder)
+						{
 							molgenis.openFeatureFilterDialogNew(node.data.key);
 						}
 						
 						//Clean the select boxes of the charts designer
-						if (molgenis.charts) {
+						if (molgenis.charts) 
+						{
 							molgenis.charts.dataexplorer.resetChartDesigners();
 						}
+					},
+					onSelect : function(select, node) {
+						// workaround for dynatree lazy parent node select bug
+						if (select) 
+						{
+							expandNodeRec(node);
+						}
+						onNodeSelectionChangeNew(this.getSelectedNodes());
+					},
+					onPostInit : function() {
+						onNodeSelectionChangeNew(this.getSelectedNodes());
 					}
-					
-					//TODO IMPLEMET
-//					},
-//					onSelect : function(select, node) {
-//						// workaround for dynatree lazy parent node select bug
-//						if (select) expandNodeRec(node);
-//						onNodeSelectionChange(this.getSelectedNodes());
-//					},
-//					onPostInit : function() {
-//						onNodeSelectionChange(this.getSelectedNodes());
-//					}
 				});
 			}
 		);
@@ -95,18 +93,7 @@
 			var children = [];
 			var attributes = restApi.get(href).attributes;
 			
-			// ALLEEN VOOR DEBUG
-			console.log("START");
-			console.log(entityUri);
-			console.log(attributes);
-			console.log(featureOpts);
-			console.log(protocolOpts);
-			console.log("END");
-				
-			Object.keys(attributes).map(function(prop) {
-				console.log(attributes[prop]);
-				console.log(attributes[prop].fieldType);
-				
+			Object.keys(attributes).map(function(prop) {	
 				// HAS Attributes
 				if(attributes[prop].fieldType === "HAS"){
 					children.push($.extend({
@@ -130,11 +117,55 @@
 				}
 			});
 
+		
 			return children;		
+		}
+		
+		function expandNodeRec(node) {
+			if (node.childList == undefined) {
+				node.toggleExpand();
+			} else {
+				$.each(node.childList, function() {
+					expandNodeRec(this);
+				});
+			}
+		}
+		
+		function onNodeSelectionChangeNew(selectedNodes) {
+			function getSiblingPos(node) {
+				var pos = 0;
+				do {
+					node = node.getPrevSibling();
+					if (node == null)
+						break;
+					else
+						++pos;
+				} while (true);
+				return pos;
+			}
+			
+			var sortedNodes = selectedNodes.sort(function(node1, node2) {
+				var diff = node1.getLevel() - node2.getLevel();
+				if (diff == 0) {
+					diff = getSiblingPos(node1.getParent())
+							- getSiblingPos(node2.getParent());
+					if (diff == 0)
+						diff = getSiblingPos(node1) - getSiblingPos(node2);
+				}
+				return diff <= 0 ? -1 : 1;
+			});
+			
+			var sortedFeatures = $.map(sortedNodes, function(node) {
+				return node.data.isFolder || node.data.key == 'more'
+						? null
+						: node.data.key;
+			});
+
+			molgenis.onFeatureSelectionChangeNew(sortedFeatures);
+
 		}
 	};
 	
-	//TODO NEW CODE GENERIC DATAEXPLORER
 	molgenis.openFeatureFilterDialogNew = function(attributeUri) {
 		restApi.getAsync(attributeUri, null, null,
 			function(feature) {
@@ -147,202 +178,12 @@
 				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 				var divContainer = molgenis.createGenericFeatureFieldNew(items, feature, config, applyButton, attributeUri, false);
 				
-				//TODO 
 				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, attributeUri);
 			}
 		);
 	};
-	
-	molgenis.createFeatureSelection = function(protocolUri) {
-		function createChildren(protocolUri, featureOpts, protocolOpts) {
-			var subprotocols = restApi.get(protocolUri
-					+ '/subprotocols?num=500');
 
-			var children = [];
-			if (subprotocols.items) {
-				$.each(subprotocols.items, function() {
-					children.push($.extend({
-						key : this.href,
-						title : this.name,
-						tooltip : this.description,
-						isFolder : true,
-						isLazy : protocolOpts.expand != true,
-						children : protocolOpts.expand ? createChildren(
-								this.href, featureOpts, protocolOpts) : null
-					}, protocolOpts));
-				});
-			}
-
-			var featureNodes = createFeatureNodes(protocolUri + '/features', featureOpts);
-			$.each(featureNodes, function() {
-				children.push(this);
-			});
-
-			return children;
-		}
-
-		function createFeatureNodes(protocolFeaturesUri, featureOpts) {
-			var features = restApi.get(protocolFeaturesUri);
-			var nodes = [];
-
-			if (features.items) {
-
-				$.each(features.items, function() {
-					nodes.push($.extend({
-						key : this.href,
-						title : this.name,
-						tooltip : this.description,
-						icon : "../../img/filter-bw.png"
-					}, featureOpts));
-				});
-
-				if (features.nextHref) {
-					nodes.push($.extend({
-						key : 'more',
-						nextHref : features.nextHref,
-						title : '<i>more...</i>',
-						icon : false,
-						hideCheckbox : true,
-						tooltip : 'Load more'
-					}));
-				}
-			}
-
-			return nodes;
-		}
-
-		function expandNodeRec(node) {
-			if (node.childList == undefined) {
-				node.toggleExpand();
-			} else {
-				$.each(node.childList, function() {
-					expandNodeRec(this);
-				});
-			}
-		}
-
-		function onNodeSelectionChange(selectedNodes) {
-			function getSiblingPos(node) {
-				var pos = 0;
-				do {
-					node = node.getPrevSibling();
-					if (node == null)
-						break;
-					else
-						++pos;
-				} while (true);
-				return pos;
-			}
-			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				var diff = node1.getLevel() - node2.getLevel();
-				if (diff == 0) {
-					diff = getSiblingPos(node1.getParent())
-							- getSiblingPos(node2.getParent());
-					if (diff == 0)
-						diff = getSiblingPos(node1) - getSiblingPos(node2);
-				}
-				return diff <= 0 ? -1 : 1;
-			});
-			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder || node.data.key == 'more'
-						? null
-						: node.data.key;
-			});
-			molgenis.onFeatureSelectionChange(sortedFeatures);
-		}
-
-		restApi
-				.getAsync(
-						protocolUri,
-						null,
-						null,
-						function(protocol) {
-							var container = $('#feature-selection');
-							if (container.children('ul').length > 0) {
-								container.dynatree('destroy');
-							}
-							container.empty();
-							if (typeof protocol === 'undefined') {
-								container
-										.append("<p>No features available</p>");
-								return;
-							}
-
-							// render tree and open first branch
-							container
-									.dynatree({
-										checkbox : !aggregateView,
-										selectMode : 3,
-										minExpandLevel : 2,
-										debugLevel : 0,
-										children : [{
-											key : protocol.href,
-											title : protocol.name,
-											icon : false,
-											isFolder : true,
-											isLazy : true,
-											children : createChildren(
-													protocol.href, {
-														select : true
-													}, {})
-										}],
-										onLazyRead : function(node) {
-											// workaround for dynatree lazy parent node select bug
-											var opts = node.isSelected() ? {
-												expand : true,
-												select : true
-											} : {};
-											var children = createChildren(
-													node.data.key, opts, opts);
-											node
-													.setLazyNodeStatus(DTNodeStatus_Ok);
-											node.addChild(children);
-										},
-										onClick : function(node, event) {
-
-											if (node.data.key == 'more') {
-												var nextFeatureNodes = createFeatureNodes(
-														node.data.nextHref, {});
-												node.remove();
-												node.parent
-														.addChild(nextFeatureNodes);
-											}
-											// target type null is filter icon
-											if ((node.getEventTargetType(event) === "title"
-													|| node
-															.getEventTargetType(event) === "icon" || node
-													.getEventTargetType(event) === null)
-													&& !node.data.isFolder)
-												molgenis
-														.openFeatureFilterDialogNew(node.data.key);
-
-											//Clean the select boxes of the charts designer
-											if (molgenis.charts) {
-												molgenis.charts.dataexplorer
-														.resetChartDesigners();
-											}
-										},
-										onSelect : function(select, node) {
-											// workaround for dynatree lazy parent node select bug
-											if (select)
-												expandNodeRec(node);
-											onNodeSelectionChange(this
-													.getSelectedNodes());
-										},
-										onPostInit : function() {
-											onNodeSelectionChange(this
-													.getSelectedNodes());
-										}
-									});
-						});
-
-		//Clean the select boxes of the charts designer
-		if (molgenis.charts) {
-			molgenis.charts.dataexplorer.resetChartDesigners();
-		}
-	};
-
-	molgenis.onDataSetSelectionChange = function(dataSetUri) {
+	molgenis.onDataSetSelectionChange = function(entityUri) {
 		// reset
 		featureFilters = {};
 		$('#feature-filters p').remove();
@@ -352,20 +193,11 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-		
-		//TODO NEW CODE GENERIC DATAEXPLORER
-		molgenis.createFeatureSelectionTree(dataSetUri);
-		
-		//TODO OUDE CODE
-//		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
-//			selectedDataSet = dataSet;
-//			molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-//			molgenis.updateGenomeBrowser(dataSet);
-//		});
+		molgenis.createFeatureSelectionTree(entityUri);
 	};
 
-	molgenis.onFeatureSelectionChange = function(featureUris) {
-		selectedFeatures = featureUris;
+	molgenis.onFeatureSelectionChangeNew = function(attributeUris) {
+		selectedFeatures = attributeUris;
 		molgenis.updateObservationSetsTable();
 	};
 
@@ -382,9 +214,7 @@
 			molgenis.search(function(searchResponse) {
 				var maxRowsPerPage = resultsTable.getMaxRows();
 				var nrRows = searchResponse.totalHitCount;
-
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
-
 				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 			});
 		} else {
@@ -397,6 +227,7 @@
 	molgenis.updateObservationSetsTablePage = function() {
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
+				console.log("updateObservationSetsTablePage");
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 			});
 		} else {
@@ -406,7 +237,7 @@
 		}
 	};
 
-	molgenis.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {
+	molgenis.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {		
 		molgenis.updateObservationSetsTablePager(nrRows, maxRowsPerPage);
 		molgenis.updateObservationSetsTableHeader(nrRows);
 	};
@@ -554,321 +385,288 @@
 				});
 
 				break;
-			break;
-		case "LONG" :
-		case "INT" :
-		case "DECIMAL" :
-			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
-					name : attribute.label,
-					identifier : attribute.name,
-					type : attribute.fieldType,
-					values : [
-							$("[id='from_" + attribute.name+"']")
-									.val(),
-							$("[id='to_" + attribute.name+"']")
-									.val()],
-					range : true
+			case "LONG" :
+			case "INT" :
+			case "DECIMAL" :
+				applyButton.click(function() {
+					molgenis.updateFeatureFilter(featureUri, {
+						name : attribute.label,
+						identifier : attribute.name,
+						type : attribute.fieldType,
+						values : [
+								$("[id='from_" + attribute.name+"']")
+										.val(),
+								$("[id='to_" + attribute.name+"']")
+										.val()],
+						range : true
+					});
+					$('.feature-filter-dialog').dialog('close');
 				});
-				$('.feature-filter-dialog').dialog('close');
-			});
-			break;
-		case "BOOL" :
-			$(applyButton).prop('disabled', true);
-			$('input[type=radio]').live('change', function() {
-				$(applyButton).prop('disabled', false);
-			});
-			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
-					name : attribute.label,
-					identifier : attribute.name,
-					type : attribute.fieldType,
-					values : [$(
-							'input[name=bool-feature_' + attribute.name
-									+ ']:checked').val()]
-				});
-				$('.feature-filter-dialog').dialog('close');
-			});
-			break;
-		case "CATEGORICAL" :
-			if (config && config.values.length > 0) {
-				$(applyButton).prop('disabled', false);
-			} else {
+				break;
+			case "BOOL" :
 				$(applyButton).prop('disabled', true);
-			}
-			$('.cat-value').live('change', function() {
-				if ($('.cat-value:checked').length > 0) {
-					applyButton.removeAttr('disabled');
+				$('input[type=radio]').live('change', function() {
+					$(applyButton).prop('disabled', false);
+				});
+				applyButton.click(function() {
+					molgenis.updateFeatureFilter(featureUri, {
+						name : attribute.label,
+						identifier : attribute.name,
+						type : attribute.fieldType,
+						values : [$(
+								'input[name=bool-feature_' + attribute.name
+										+ ']:checked').val()]
+					});
+					$('.feature-filter-dialog').dialog('close');
+				});
+				break;
+			case "CATEGORICAL" :
+				if (config && config.values.length > 0) {
+					$(applyButton).prop('disabled', false);
 				} else {
 					$(applyButton).prop('disabled', true);
 				}
-			});
-
-			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
-					name : attribute.label,
-					identifier : attribute.name,
-					type : attribute.fieldType,
-					values : $.makeArray($('.cat-value:checked').map(
-							function() {
-								return $(this).val();
-							}))
+				$('.cat-value').live('change', function() {
+					if ($('.cat-value:checked').length > 0) {
+						applyButton.removeAttr('disabled');
+					} else {
+						$(applyButton).prop('disabled', true);
+					}
 				});
+	
+				applyButton.click(function() {
+					molgenis.updateFeatureFilter(featureUri, {
+						name : attribute.label,
+						identifier : attribute.name,
+						type : attribute.fieldType,
+						values : $.makeArray($('.cat-value:checked').map(
+								function() {
+									return $(this).val();
+								}))
+					});
+					$('.feature-filter-dialog').dialog('close');
+				});
+				break;
+			default :
+				return;
+	
+		}
+		
+		var applyButtonHolder = $('<div id="applybutton-holder" />').append(
+				applyButton);
+		if ($.isArray(divContainer)) {
+			divContainer.push(applyButtonHolder);
+		} else {
+			divContainer.after(applyButtonHolder);
+		}
+		$('.feature-filter-dialog').html(items.join('')).append(divContainer);
+	
+		$('.feature-filter-dialog').dialog({
+			title : attribute.label,
+			dialogClass : 'ui-dialog-shadow'
+		});
+		$('.feature-filter-dialog').dialog('open');
+	
+		$('.feature-filter-dialog').keyup(function(e) {
+			if (e.keyCode == 13) // enter
+			{
+				if (applyButton.attr("disabled") != "disabled") {//enter only works if button is enabled (filter input is given)
+					applyButton.click();
+				}
+			}
+			if (e.keyCode == 27)// esc
+			{
 				$('.feature-filter-dialog').dialog('close');
-			});
-			break;
-		default :
-			return;
-
-	}
-	var applyButtonHolder = $('<div id="applybutton-holder" />').append(
-			applyButton);
-	if ($.isArray(divContainer)) {
-		divContainer.push(applyButtonHolder);
-	} else {
-		divContainer.after(applyButtonHolder);
-	}
-	$('.feature-filter-dialog').html(items.join('')).append(divContainer);
-
-	$('.feature-filter-dialog').dialog({
-		title : attribute.label,
-		dialogClass : 'ui-dialog-shadow'
-	});
-	$('.feature-filter-dialog').dialog('open');
-
-	$('.feature-filter-dialog').keyup(function(e) {
-		if (e.keyCode == 13) // enter
-		{
-			if (applyButton.attr("disabled") != "disabled") {//enter only works if button is enabled (filter input is given)
-				applyButton.click();
 			}
-		}
-		if (e.keyCode == 27)// esc
-		{
-			$('.feature-filter-dialog').dialog('close');
-		}
-	});
-
-	if (attribute.fieldType === 'DATE') {
-		$('.date').datetimepicker({
-			format : 'yyyy-MM-dd',
-			language : 'en',
-			pickTime : false
 		});
-	} else if (attribute.fieldType === 'DATE_TIME') {
-		$('.date').datetimepicker({
-			format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
-			language : 'en',
-			pickTime : true
-		});
-	}
-}	;
-
-
-//TODO start new code
-//Generic part for filter fields
-molgenis.createGenericFeatureFieldNew = function(items, attribute, config, applyButton, featureUri, wizard) {
-	var divContainer = $('<div />');
-	var filter = null;
 	
-//	description: "The weight of a subject."
-//	fieldType: "DECIMAL"
-//	idAttribute: false
-//	identifier: "Celiac_Weight"
-//	label: "Weight"
-//	labelAttribute: false
-//	nillable: true
-//	readOnly: false
-//	refThis: "/api/v1/Celiac_Personal_Protocol/meta/Celiac_Weight"
-//	unique: false
-	
-	switch (attribute.fieldType) {
-		case "HTML" :
-		case "MREF" :
-		case "XREF" :
-		case "EMAIL" :
-		case "HYPERLINK" :
-		case "TEXT" :
-		case "STRING" :
-			if (config == null) {
-				filter = $('<input type="text" id="text_'
-						+ attribute.name + '">');
-			} else {
-
-				filter = $('<input type="text" id="text_'
-						+ attribute.name
-						+ '" placeholder="filter text" autofocus="autofocus" value="'
-						+ config.values[0] + '">');
-			}
-			divContainer.append(filter);
-			if (wizard) {
-                $("[id='text_" + attribute.name + "']").change(
-						function() {
-							molgenis.updateFeatureFilter(featureUri, {
-								name : attribute.label,
-								identifier : attribute.name,
-								type : attribute.fieldType,
-								values : [$(this).val()]
-							});
-
-						});
-			}
-			break;
-		case "DATE" :
-		case "DATE_TIME" :
-			var datePickerFrom = $('<div id="from_' + attribute.name
-					+ '" class="input-append date" />');
-			var filterFrom;
-
-			if (config == null) {
-				filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
-								+ attribute.name
-								+ '"  type="text" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-			} else {
-				filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
-								+ attribute.name
-								+ '"  type="text" value="'
-								+ config.values[0].replace("T", "'T'")
-								+ '" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-			}
-
-			datePickerFrom.on('changeDate', function(e) {
-                $("[id='date-feature-to_" + attribute.name+"']").val(
-                		$("[id='date-feature-from_" + attribute.name+"']").val()
-                );
+		if (attribute.fieldType === 'DATE') {
+			$('.date').datetimepicker({
+				format : 'yyyy-MM-dd',
+				language : 'en',
+				pickTime : false
 			});
-
-			var datePickerTo = $('<div id="to_' + attribute.name
-					+ '" class="input-append date" />');
-			var filterTo;
-
-			if (config == null)
-				filterTo = datePickerTo
-						.append($('<input id="date-feature-to_'
-								+ attribute.name
-								+ '" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-			else
-				filterTo = datePickerTo
-						.append($('<input id="date-feature-to_'
-								+ attribute.name
-								+ '" type="text" value="'
-								+ config.values[1].replace("T", "'T'")
-								+ '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-
-			filter = $('<span>From:<span>').after(filterFrom).after(
-					$('<span>To:</span>')).after(filterTo);
-			divContainer.append(filter);
-			break;
-		case "LONG" :
-		case "INT" :
-		case "DECIMAL" :
-			var fromFilter;
-			var toFilter;
-
-			if (config == null) {
-				fromFilter = $('<input id="from_' + attribute.name
-						+ '" type="number" step="any" style="width:100px">');
-				toFilter = $('<input id="to_' + attribute.name
-						+ '" type="number" step="any" style="width:100px">');
-			} else {
-				fromFilter = $('<input id="from_'
-						+ attribute.name
-						+ '" type="number" step="any" style="width:100px" value="'
-						+ config.values[0] + '">');
-				toFilter = $('<input id="to_'
-						+ attribute.name
-						+ '" type="number" step="any" style="width:100px" value="'
-						+ config.values[1] + '">');
-			}
-
-			fromFilter.on('keyup input', function() {
-				// If 'from' changed set 'to' at the same value
-				$("[id='to_" + attribute.name+"']").val(
-						$("[id='from_"
-												+ attribute.name + '')
-								.val());
+		} else if (attribute.fieldType === 'DATE_TIME') {
+			$('.date').datetimepicker({
+				format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
+				language : 'en',
+				pickTime : true
 			});
+		}
+	};
 
-			filter = $('<span>From:<span>').after(fromFilter).after(
-					$('<span>To:</span>')).after(toFilter);
-
-			divContainer.append(filter);
-			if (wizard) {
-				divContainer
-						.find(
-                        $("[id='from_" + attribute.name +"']"))
-						.change(
-								function() {
-
-									molgenis
-											.updateFeatureFilter(
-													featureUri,
-													{
-														name : attribute.label,
-														identifier : attribute.name,
-														type : attribute.fieldType,
-														values : [
-																$(
-                                                                    $("[id='from_"
-																						+ attribute.name + "']"))
-																		.val(),
-																$(
-                                                                    $("[id='to_"
-																						+ attribute.name + "']"))
-																		.val()],
-														range : true
-													});
-
-								});
-				divContainer
-						.find($("[id='to_" + attribute.name + "']"))
-						.change(
-								function() {
-									molgenis
-											.updateFeatureFilter(
-													featureUri,
-													{
-														name : attribute.label,
-														identifier : attribute.name,
-														type : attribute.fieldType,
-														values : [
-																$(
-                                                                    $("[id='from_"
-																						+ attribute.name +"']"))
-																		.val(),
-																$(
-                                                                    $("[id='to_"
-																						+ attribute.name + "']"))
-																		.val()],
-														range : true
-													});
-								});
-			}
-			break;
-		case "BOOL" :
-			if (config == null) {
-				filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-						+ attribute.name
-						+ '" name="bool-feature_'
-						+ attribute.name
-						+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-						+ attribute.name
-						+ '" name="bool-feature_'
-						+ attribute.name
-						+ '" value="false">False</label>');
-
-			} else {
-				if (config.values[0] == 'true') {
-					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-							+ attribute.name
-							+ '" name="bool-feature_'
-							+ attribute.name
-							+ '" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-							+ attribute.name
-							+ '" name="bool-feature_'
-							+ attribute.name
-							+ '" value="false">False</label>');
+	//Generic part for filter fields
+	molgenis.createGenericFeatureFieldNew = function(items, attribute, config, applyButton, featureUri, wizard) {
+		var divContainer = $('<div />');
+		var filter = null;
+		
+		switch (attribute.fieldType) {
+			case "HTML" :
+			case "MREF" :
+			case "XREF" :
+			case "EMAIL" :
+			case "HYPERLINK" :
+			case "TEXT" :
+			case "STRING" :
+				if (config == null) {
+					filter = $('<input type="text" id="text_'
+							+ attribute.name + '">');
 				} else {
+	
+					filter = $('<input type="text" id="text_'
+							+ attribute.name
+							+ '" placeholder="filter text" autofocus="autofocus" value="'
+							+ config.values[0] + '">');
+				}
+				divContainer.append(filter);
+				if (wizard) {
+	              $("[id='text_" + attribute.name + "']").change(
+							function() {
+								molgenis.updateFeatureFilter(featureUri, {
+									name : attribute.label,
+									identifier : attribute.name,
+									type : attribute.fieldType,
+									values : [$(this).val()]
+								});
+	
+							});
+				}
+				break;
+			case "DATE" :
+			case "DATE_TIME" :
+				var datePickerFrom = $('<div id="from_' + attribute.name
+						+ '" class="input-append date" />');
+				var filterFrom;
+	
+				if (config == null) {
+					filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
+									+ attribute.name
+									+ '"  type="text" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+				} else {
+					filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
+									+ attribute.name
+									+ '"  type="text" value="'
+									+ config.values[0].replace("T", "'T'")
+									+ '" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+				}
+	
+				datePickerFrom.on('changeDate', function(e) {
+	              $("[id='date-feature-to_" + attribute.name+"']").val(
+	              		$("[id='date-feature-from_" + attribute.name+"']").val()
+	              );
+				});
+	
+				var datePickerTo = $('<div id="to_' + attribute.name
+						+ '" class="input-append date" />');
+				var filterTo;
+	
+				if (config == null)
+					filterTo = datePickerTo
+							.append($('<input id="date-feature-to_'
+									+ attribute.name
+									+ '" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+				else
+					filterTo = datePickerTo
+							.append($('<input id="date-feature-to_'
+									+ attribute.name
+									+ '" type="text" value="'
+									+ config.values[1].replace("T", "'T'")
+									+ '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+	
+				filter = $('<span>From:<span>').after(filterFrom).after(
+						$('<span>To:</span>')).after(filterTo);
+				divContainer.append(filter);
+				break;
+			case "LONG" :
+			case "INT" :
+			case "DECIMAL" :
+				var fromFilter;
+				var toFilter;
+	
+				if (config == null) {
+					fromFilter = $('<input id="from_' + attribute.name
+							+ '" type="number" step="any" style="width:100px">');
+					toFilter = $('<input id="to_' + attribute.name
+							+ '" type="number" step="any" style="width:100px">');
+				} else {
+					fromFilter = $('<input id="from_'
+							+ attribute.name
+							+ '" type="number" step="any" style="width:100px" value="'
+							+ config.values[0] + '">');
+					toFilter = $('<input id="to_'
+							+ attribute.name
+							+ '" type="number" step="any" style="width:100px" value="'
+							+ config.values[1] + '">');
+				}
+	
+				fromFilter.on('keyup input', function() {
+					// If 'from' changed set 'to' at the same value
+					$("[id='to_" + attribute.name+"']").val(
+							$("[id='from_"
+													+ attribute.name + '')
+									.val());
+				});
+	
+				filter = $('<span>From:<span>').after(fromFilter).after(
+						$('<span>To:</span>')).after(toFilter);
+	
+				divContainer.append(filter);
+				if (wizard) {
+					divContainer
+							.find(
+	                      $("[id='from_" + attribute.name +"']"))
+							.change(
+									function() {
+	
+										molgenis
+												.updateFeatureFilter(
+														featureUri,
+														{
+															name : attribute.label,
+															identifier : attribute.name,
+															type : attribute.fieldType,
+															values : [
+																	$(
+	                                                                  $("[id='from_"
+																							+ attribute.name + "']"))
+																			.val(),
+																	$(
+	                                                                  $("[id='to_"
+	
+																							+ attribute.name + "']"))
+																			.val()],
+															range : true
+														});
+	
+									});
+					divContainer
+							.find($("[id='to_" + attribute.name + "']"))
+							.change(
+									function() {
+										molgenis
+												.updateFeatureFilter(
+														featureUri,
+														{
+															name : attribute.label,
+															identifier : attribute.name,
+															type : attribute.fieldType,
+															values : [
+																	$(
+	                                                                  $("[id='from_"
+																							+ attribute.name +"']"))
+																			.val(),
+																	$(
+	                                                                  $("[id='to_"
+	
+																							+ attribute.name + "']"))
+																			.val()],
+															range : true
+														});
+									});
+				}
+				break;
+			case "BOOL" :
+				if (config == null) {
 					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
 							+ attribute.name
 							+ '" name="bool-feature_'
@@ -877,200 +675,220 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 							+ attribute.name
 							+ '" name="bool-feature_'
 							+ attribute.name
-							+ '" checked value="false">False</label>');
+							+ '" value="false">False</label>');
+	
+				} else {
+					if (config.values[0] == 'true') {
+						filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
+								+ attribute.name
+								+ '" name="bool-feature_'
+								+ attribute.name
+								+ '" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
+								+ attribute.name
+								+ '" name="bool-feature_'
+								+ attribute.name
+								+ '" value="false">False</label>');
+					} else {
+						filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
+								+ attribute.name
+								+ '" name="bool-feature_'
+								+ attribute.name
+								+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
+								+ attribute.name
+								+ '" name="bool-feature_'
+								+ attribute.name
+								+ '" checked value="false">False</label>');
+					}
 				}
-			}
-			divContainer.append(filter);
-			if (wizard) {
-				filter.find(
-						'input[name="bool-feature_' + attribute.name
-								+ '"]').change(function() {
-					molgenis.updateFeatureFilter(featureUri, {
-						name : attribute.label,
-						identifier : attribute.name,
-						type : attribute.fieldType,
-						values : [$(this).val()]
+				divContainer.append(filter);
+				if (wizard) {
+					filter.find(
+							'input[name="bool-feature_' + attribute.name
+									+ '"]').change(function() {
+						molgenis.updateFeatureFilter(featureUri, {
+							name : attribute.label,
+							identifier : attribute.name,
+							type : attribute.fieldType,
+							values : [$(this).val()]
+						});
+	
 					});
-
+				}
+	
+				break;
+			case "CATEGORICAL" :
+				$.ajax({
+					type : 'POST',
+					url : '/api/v1/category?_method=GET',
+					data : JSON.stringify({
+						q : [{
+							"field" : "observableFeature_Identifier",
+							"operator" : "EQUALS",
+							"value" : attribute.name
+						}]
+					}),
+					contentType : 'application/json',
+					async : false,
+					success : function(categories) {
+						filter = [];
+						$.each(categories.items,
+								function() {
+									var input;
+									if (config
+											&& ($.inArray(this.name,
+													config.values) > -1)) {
+										input = $('<input type="checkbox" id="'
+												+ this.name + '_'
+												+ attribute.name
+												+ '" "class="cat-value" name="'
+												+ attribute.name
+												+ '" value="' + this.name
+												+ '"checked>');
+									} else {
+										input = $('<input type="checkbox" id="'
+												+ this.name + '_'
+												+ attribute.name
+												+ '" class="cat-value" name="'
+												+ attribute.name
+												+ '" value="' + this.name
+												+ '">');
+									}
+									filter.push($('<label class="checkbox">')
+											.html(' ' + this.name).prepend(
+													input));
+								});
+					}
 				});
-			}
-
-			break;
-		case "CATEGORICAL" :
-			$.ajax({
-				type : 'POST',
-				url : '/api/v1/category?_method=GET',
-				data : JSON.stringify({
-					q : [{
-						"field" : "observableFeature_Identifier",
-						"operator" : "EQUALS",
-						"value" : attribute.name
-					}]
-				}),
-				contentType : 'application/json',
-				async : false,
-				success : function(categories) {
-					filter = [];
-					$.each(categories.items,
+				divContainer.append(filter);
+				if (wizard) {
+					divContainer.find(
+							'input[name="' + attribute.name + '"]').click(
 							function() {
-								var input;
-								if (config
-										&& ($.inArray(this.name,
-												config.values) > -1)) {
-									input = $('<input type="checkbox" id="'
-											+ this.name + '_'
-											+ attribute.name
-											+ '" "class="cat-value" name="'
-											+ attribute.name
-											+ '" value="' + this.name
-											+ '"checked>');
-								} else {
-									input = $('<input type="checkbox" id="'
-											+ this.name + '_'
-											+ attribute.name
-											+ '" class="cat-value" name="'
-											+ attribute.name
-											+ '" value="' + this.name
-											+ '">');
-								}
-								filter.push($('<label class="checkbox">')
-										.html(' ' + this.name).prepend(
-												input));
+								molgenis.updateFeatureFilter(featureUri, {
+									name : attribute.label,
+									identifier : attribute.name,
+									type : attribute.fieldType,
+									values : $.makeArray($(
+											'input[name="' + attribute.name
+													+ '"]:checked').map(
+											function() {
+												return $(this).val();
+											}))
+								});
 							});
 				}
+				break;
+			default :
+				return;
+		}
+	
+		if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
+			// FIXME get working for generic data explorer
+			divContainer
+					.find($("[id='text_" + attribute.name +"']"))
+					.autocomplete(
+							{
+								source : function(request, response) {
+									$
+											.ajax({
+												type : 'POST',
+												url : '/api/v1/characteristic?_method=GET',
+												data : JSON.stringify({
+													num : 15,
+													q : [{
+														"field" : "name",
+														"operator" : "LIKE",
+														"value" : request.term
+													}]
+												}),
+												contentType : 'application/json',
+												async : true,
+												success : function(
+														characteristicList) {
+													response($
+															.map(
+																	characteristicList.items,
+																	function(
+																			item) {
+																		return item.name;
+																	}));
+												}
+											});
+								},
+								minLength : 2
+							});
+		}
+	
+		if (attribute.fieldType === 'DATE') {
+			var container = divContainer.find('.date').datetimepicker({
+				format : 'yyyy-MM-dd',
+				language : 'en',
+				pickTime : false
 			});
-			divContainer.append(filter);
+	
 			if (wizard) {
-				divContainer.find(
-						'input[name="' + attribute.name + '"]').click(
-						function() {
-							molgenis.updateFeatureFilter(featureUri, {
-								name : attribute.label,
-								identifier : attribute.name,
-								type : attribute.fieldType,
-								values : $.makeArray($(
-										'input[name="' + attribute.name
-												+ '"]:checked').map(
-										function() {
-											return $(this).val();
-										}))
-							});
-						});
+				container
+						.on(
+								'changeDate',
+								function(e) {
+									molgenis
+											.updateFeatureFilter(
+													featureUri,
+													{
+														name : attribute.label,
+														identifier : attribute.name,
+														type : attribute.fieldType,
+														range : true,
+														values : [
+																    $("[id='date-feature-from_"+ attribute.name
+	                                                                    +"']")
+																		.val(),
+	                                                            $("[id='date-feature-to_"
+																				+ attribute.name
+	                                                                        +"']")
+																		.val()]
+													});
+								});
 			}
-			break;
-		default :
-			console.log("TODO: '" + attribute.fieldType + "' not supported");
-			return;
-	}
-
-	if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
-		// FIXME get working for generic data explorer
-		divContainer
-				.find($("[id='text_" + attribute.name +"']"))
-				.autocomplete(
-						{
-							source : function(request, response) {
-								$
-										.ajax({
-											type : 'POST',
-											url : '/api/v1/characteristic?_method=GET',
-											data : JSON.stringify({
-												num : 15,
-												q : [{
-													"field" : "name",
-													"operator" : "LIKE",
-													"value" : request.term
-												}]
-											}),
-											contentType : 'application/json',
-											async : true,
-											success : function(
-													characteristicList) {
-												response($
-														.map(
-																characteristicList.items,
-																function(
-																		item) {
-																	return item.name;
-																}));
-											}
-										});
-							},
-							minLength : 2
-						});
-	}
-
-	if (attribute.fieldType === 'DATE') {
-		var container = divContainer.find('.date').datetimepicker({
-			format : 'yyyy-MM-dd',
-			language : 'en',
-			pickTime : false
-		});
-
-		if (wizard) {
-			container
-					.on(
-							'changeDate',
-							function(e) {
-								molgenis
-										.updateFeatureFilter(
-												featureUri,
-												{
-													name : attribute.label,
-													identifier : attribute.name,
-													type : attribute.fieldType,
-													range : true,
-													values : [
-															    $("[id='date-feature-from_"+ attribute.name
-                                                                    +"']")
-																	.val(),
-                                                            $("[id='date-feature-to_"
-																			+ attribute.name
-                                                                        +"']")
-																	.val()]
-												});
-							});
+		} else if (attribute.fieldType === 'DATE_TIME') {
+			// FIXME get working for generic data explorer
+			var container = divContainer.find('.date').datetimepicker({
+				format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
+				language : 'en',
+				pickTime : true
+			});
+			if (wizard) {
+				container
+						.on(
+								'changeDate',
+								function(e) {
+									molgenis
+											.updateFeatureFilter(
+													featureUri,
+													{
+														name : attribute.label,
+														identifier : attribute.name,
+														type : attribute.fieldType,
+														range : true,
+														values : [
+																$("[id='date-feature-from_" + attribute.name + "']")
+	
+																		.val()
+																		.replace(
+																				"'T'",
+																				"T"),
+																$("[id='date-feature-to_"+ attribute.name + "']")
+																		.val()
+																		.replace(
+																				"'T'",
+																				"T")]
+													});
+								});
+			}
 		}
-	} else if (attribute.fieldType === 'DATE_TIME') {
-		// FIXME get working for generic data explorer
-		var container = divContainer.find('.date').datetimepicker({
-			format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
-			language : 'en',
-			pickTime : true
-		});
-		if (wizard) {
-			container
-					.on(
-							'changeDate',
-							function(e) {
-								molgenis
-										.updateFeatureFilter(
-												featureUri,
-												{
-													name : attribute.label,
-													identifier : attribute.name,
-													type : attribute.fieldType,
-													range : true,
-													values : [
-															$("[id='date-feature-from_" + attribute.name + "']")
-
-																	.val()
-																	.replace(
-																			"'T'",
-																			"T"),
-															$("[id='date-feature-to_"+ attribute.name + "']")
-																	.val()
-																	.replace(
-																			"'T'",
-																			"T")]
-												});
-							});
-		}
-	}
-
-	return divContainer;
-};
-// TODO JJ end new codeÍ
+	
+		return divContainer;
+	};
 
 	//Generic part for filter fields
 	molgenis.createGenericFeatureField = function(items, feature, config,
@@ -1361,7 +1179,6 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 				}
 				break;
 			default :
-				console.log("TODO: '" + feature.dataType + "' not supported");
 				return;
 		}
 
@@ -1577,8 +1394,9 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	};
 
 	molgenis.createSearchRequest = function(includeLimitOffset) {
+		
 		var searchRequest = {
-			documentType : selectedDataSet.identifier,
+			documentType : selectedDataSet.name,
 			query : {
 				rules : [[]]
 			}
@@ -1662,13 +1480,13 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 		if (sortRule) {
 			searchRequest.query.sort = sortRule;
 		}
-
+		
 		searchRequest.fieldsToReturn = [];
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
-			searchRequest.fieldsToReturn.push(feature.identifier);
+			searchRequest.fieldsToReturn.push(feature.name);
 			if (feature.dataType === 'xref' || feature.dataType === 'mref')
-				searchRequest.fieldsToReturn.push("key-" + feature.identifier);
+				searchRequest.fieldsToReturn.push("key-" + feature.name);
 		});
 
 		return searchRequest;
@@ -1861,31 +1679,15 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 	$(function() {
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
-		$('#dataset-select')
-				.change(
-						function() {
-							var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
-							// FIXME disabled, discuss why this is needed
-//							molgenis.createFeatureSelectionTree($('#dataset-select').val());
-//							restApi.getAsync(
-//											$('#dataset-select').val(),
-//											null,
-//											null,
-//											function(dataSet) {
-//												selectedDataSet = dataSet;
-//												
-//												//TODO NIEUWE CODE
-//												molgenis.createFeatureSelectionTree(dataSet);
-//												
-//												//TODO OUDE CODE
-//												//molgenis.createFeatureSelection(dataSet.protocolUsed.href);
-//											});
-							if (checkDataViewer)
-								molgenis.onDataSetSelectionChange($(this).val());
-							else
-								molgenis.initializeAggregate($(this).val());
-						});
-
+		$('#dataset-select').change(
+				function() {
+					var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
+					if (checkDataViewer)
+						molgenis.onDataSetSelectionChange($(this).val());
+					else
+						molgenis.initializeAggregate($(this).val());
+				});
+		
 		resultsTable = new molgenis.ResultsTable();
 
 		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]')
@@ -1899,6 +1701,7 @@ molgenis.createGenericFeatureFieldNew = function(items, attribute, config, apply
 						});
 
 		$("#observationset-search").focus();
+		
 		$("#observationset-search").change(function(e) {
 			molgenis.searchObservationSets($(this).val());
 		});
