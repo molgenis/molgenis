@@ -17,9 +17,9 @@
 
 	//TODO NEW CODE GENERIC DATAEXPLORER
 	molgenis.createFeatureSelectionTree = function(entityName) {
-		var entityUri = "/api/v1/" + entityName + "/meta/tree"
+		var entityUri = entityName + "/meta/tree";
 		
-		restApi.getAsync("/api/v1/celiacsprue/meta/tree", null, null, 
+		restApi.getAsync(entityName + '/meta/tree', null, null, 
 			function(entityMetaData) {
 			
 				var container = $('#feature-selection');
