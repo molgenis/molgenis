@@ -1,12 +1,8 @@
 package org.molgenis.data.omx.annotation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
@@ -27,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.spel.ast.Indexer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -85,7 +84,10 @@ public class OmxDataSetAnnotator
 		List<String> outputMetadataNames = getMetadataNamesAsList(annotator.getOutputMetaData());
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, repo.getName()), DataSet.class);
-		Protocol resultProtocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.IDENTIFIER, annotator.getName() + PROTOCOL_SUFFIX), Protocol.class);
+		if(createCopy){
+            dataSet = copy(dataSet);
+        }
+        Protocol resultProtocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.IDENTIFIER, annotator.getName() + PROTOCOL_SUFFIX), Protocol.class);
 		if(resultProtocol == null){
 			addAnnotationResultProtocol(annotator, dataSet, outputMetadataNames);
 		}
@@ -223,4 +225,35 @@ public class OmxDataSetAnnotator
 		}		
 		return areEqual;
 	}
+
+    @Transactional
+    public DataSet copy(DataSet original)
+    {
+        Date date = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy_HH:mm");
+        String dateString = sdf.format(date);
+
+        DataSet copy = new DataSet();
+        copy.setProtocolUsed(original.getProtocolUsed());
+        copy.setName(original.getName() + "_results_" + dateString);
+        copy.setIdentifier(original.getIdentifier() + cal.getTimeInMillis());
+        copy.setStartTime(date);
+        copy.setEndTime(date);
+
+        Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME, new QueryImpl().eq(ObservationSet.PARTOFDATASET, original), ObservationSet.class);
+        List<ObservationSet> copiedObservationSets = new ArrayList<ObservationSet>();
+        for(ObservationSet observationSet : observationSets){
+            observationSet.setPartOfDataSet(copy);
+            observationSet.setIdentifier(observationSet.getIdentifier() + new Date().getTime());
+            copiedObservationSets.add(observationSet);
+        }
+
+        dataService.add(DataSet.ENTITY_NAME, copy);
+        dataService.add(ObservationSet.ENTITY_NAME, copiedObservationSets);
+
+        return copy;
+    }
+
 }
