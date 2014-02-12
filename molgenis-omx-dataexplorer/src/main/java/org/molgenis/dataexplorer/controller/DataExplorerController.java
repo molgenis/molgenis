@@ -16,12 +16,15 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -33,7 +36,6 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -50,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 //import org.molgenis.data.csv
@@ -286,6 +290,7 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
+		// TODO create utility class to extract info from entity/attribute uris
 		String[] attributeUriTokens = request.getAttributeUri().split("/");
 		String entityName = attributeUriTokens[3];
 		String attributeName = attributeUriTokens[5];
@@ -302,15 +307,31 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public String filterwizard(@RequestBody @Valid @NotNull FilterWizardRequest request, Model model)
+	public String filterwizard(@RequestBody @Valid FilterWizardRequest request, Model model)
 	{
-		String dataSetIdentifier = request.getDataSetIdentifier();
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
+		// TODO create utility class to extract info from entity/attribute uris
+		String[] entityUriTokens = request.getEntityUri().split("/");
+		String entityName = entityUriTokens[entityUriTokens.length - 1];
 
-		model.addAttribute("listOfallProtocols", listOfallProtocols);
-		model.addAttribute("identifier", dataSetIdentifier);
+		CrudRepository repository = dataService.getCrudRepository(entityName);
+		Iterable<AttributeMetaData> attributeMetaDataIterable = Iterables.filter(repository.getLevelOneAttributes(),
+				new Predicate<AttributeMetaData>()
+				{
+					@Override
+					public boolean apply(AttributeMetaData attributeMetaData)
+					{
+						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS;
+					}
+				});
+
+		List<EntityMetaData> entityMetaDataGroups = new ArrayList<EntityMetaData>();
+		entityMetaDataGroups.add(repository);
+		for (AttributeMetaData attributeMetaData : attributeMetaDataIterable)
+		{
+			entityMetaDataGroups.add(attributeMetaData.getRefEntity());
+		}
+
+		model.addAttribute("entityMetaDataGroups", entityMetaDataGroups);
 		return "view-filter-dialog";
 	}
 

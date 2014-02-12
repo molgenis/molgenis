@@ -1289,43 +1289,24 @@
 	};
 
 	molgenis.createFeatureFilterField = function(elements) {
-		var featureIds = [];
+		var attributes = {};
 		$.each(elements, function(index, element) {
-			var href = $(element).attr('data-molgenis-url');
-			var id = href.substring(href.lastIndexOf('/') + 1);
-			featureIds.push(id);
+			var attributeUri = $(element).attr('data-molgenis-url');
+			attributes[attributeUri] = restApi.get(attributeUri);
 		});
-
-		var features = restApi.get('/api/v1/observablefeature', null, {
-			q : [{
-				field : 'id',
-				operator : 'IN',
-				value : featureIds
-			}],
-			num : 500
+		
+		$.each(elements, function(index, element) {
+			var attributeUri = $(element).attr('data-molgenis-url');
+			
+			var config = featureFilters[attributeUri];
+			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
+			var divContainer = molgenis
+					.createGenericFeatureFieldNew(null, attributes[attributeUri],
+							config, applyButton, attributeUri,
+							true);
+			var trElement = $(element).closest('tr');
+			trElement.append(divContainer);
 		});
-		var map = {};
-		$.each(features.items, function(index, feature) {
-			map[feature.href] = feature;
-		});
-
-		$
-				.each(
-						elements,
-						function(index, element) {
-							var items = [];
-							var featureUri = $(element).attr(
-									'data-molgenis-url');
-							var feature = map[featureUri];
-							var config = featureFilters[feature.href];
-							var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-							var divContainer = molgenis
-									.createGenericFeatureField(items, feature,
-											config, applyButton, feature.href,
-											true);
-							var trElement = $(element).closest('tr');
-							trElement.append(divContainer);
-						});
 	};
 
 	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
@@ -1537,23 +1518,14 @@
 	};
 
 	molgenis.filterDialog = function() {
-		var datasetId = $('#dataset-select').val();
-
-		var filterDialogRequest = {
-			'dataSetIdentifier' : selectedDataSet.identifier,
-			'dataSetName' : selectedDataSet.name,
-			'dataSetId' : datasetId
-		};
-
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/filterdialog',
-			data : JSON.stringify(filterDialogRequest),
+			data : JSON.stringify({'entityUri' : $('#dataset-select').val()}),
 			contentType : 'application/json',
 			success : function(result) {
 				$(function() {
 					var modal = $('#filter-dialog-modal').html(result);
-
 					$('#filter-dialog-modal').show();
 				});
 			}
