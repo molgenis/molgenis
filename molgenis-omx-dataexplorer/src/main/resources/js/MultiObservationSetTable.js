@@ -29,16 +29,16 @@
 		items.push('<thead>');
 		$.each(selectedFeatures, function(i, val) {
 			var feature = restApi.get(this);
-			if (sortRule && sortRule.orders[0].property == feature.identifier) {
+			if (sortRule && sortRule.orders[0].property == feature.name) {
 				if (sortRule.orders[0].direction == 'ASC') {
-					items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
+					items.push('<th>' + feature.label + '<span data-value="' + feature.name
 							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 				} else {
-					items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
+					items.push('<th>' + feature.label + '<span data-value="' + feature.name
 							+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
 				}
 			} else {
-				items.push('<th>' + feature.name + '<span data-value="' + feature.identifier
+				items.push('<th>' + feature.label + '<span data-value="' + feature.name
 						+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 			}
 		});
@@ -56,26 +56,26 @@
 
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
-				var value = columnValueMap[feature.identifier];
+				var value = columnValueMap[feature.name];
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
-					if (feature.dataType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						var valueKey = columnValueMap['key-' + feature.identifier];
-						var valueValue = formatTableCellValue(value, feature.dataType);
+					if (feature.fieldType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var valueKey = columnValueMap['key-' + feature.name];
+						var valueValue = formatTableCellValue(value, feature.fieldType);
 						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
 					}	
-					else if (feature.dataType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						var valueKeys = columnValueMap['key-' + feature.identifier];
+					else if (feature.fieldType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var valueKeys = columnValueMap['key-' + feature.name];
 						var valueValues = value.split(',');
 						for (var i = 0; i < valueValues.length; i++) {
 							var valueKey = valueKeys[i];
-							var valueValue = formatTableCellValue(valueValues[i], feature.dataType);
+							var valueValue = formatTableCellValue(valueValues[i], feature.fieldType);
 						    if(i > 0) cellValue +=  ',';
 						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
 						}
 					}
 					else{
-						cellValue = formatTableCellValue(value, feature.dataType);
+						cellValue = formatTableCellValue(value, feature.fieldType);
 					}
 					items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
 				} else {

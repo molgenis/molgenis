@@ -159,8 +159,7 @@ public class StoreMappingRepository extends AbstractRepository
 	@Override
 	public Iterable<AttributeMetaData> getLevelOneAttributes()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getEntityMetaData().getAttributes();
 	}
 
 }

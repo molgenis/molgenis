@@ -107,20 +107,19 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	{
 		return decoratedRepository.getAttributes();
 	}
-	
+
 	@Override
 	public Iterable<AttributeMetaData> getLevelOneAttributes()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return decoratedRepository.getLevelOneAttributes();
 	}
-	
+
 	@Override
 	public void close() throws IOException
 	{
 		decoratedRepository.close();
 	}
-	
+
 	@Override
 	public void deleteById(Iterable<Integer> ids)
 	{
