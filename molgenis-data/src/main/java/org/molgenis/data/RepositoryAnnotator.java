@@ -7,7 +7,7 @@ public interface RepositoryAnnotator {
 	Iterator<Entity> annotate (Iterator<Entity> source);  
 	EntityMetaData getOutputMetaData ();
 	EntityMetaData getInputMetaData ();
-	Boolean canAnnotate ();
+	Boolean canAnnotate (EntityMetaData sourceMetaData);
 	String getName();
 	
 }

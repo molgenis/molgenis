@@ -6,6 +6,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryAnnotator;
@@ -90,10 +91,17 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public Boolean canAnnotate()
+	public Boolean canAnnotate(EntityMetaData inputMetaData)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		boolean canAnnotate = true;
+		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
+		for(AttributeMetaData attribute : inputAttributes){
+			if(inputMetaData.getAttribute(attribute.getName()) == null){
+				//all attributes from the inputmetadata must be present to annotate.
+				canAnnotate = false;
+			}
+		}
+		return canAnnotate;
 	}
 
 	@Override
