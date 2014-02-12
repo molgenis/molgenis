@@ -115,11 +115,11 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			catch (InterruptedException e)
 			{
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 
 		}
