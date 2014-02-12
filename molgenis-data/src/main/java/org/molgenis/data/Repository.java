@@ -10,4 +10,6 @@ public interface Repository extends EntityMetaData, Iterable<Entity>, Closeable
 	Class<? extends Entity> getEntityClass();
 
 	<E extends Entity> Iterable<E> iterator(Class<E> clazz);
+
+	String getUrl();
 }

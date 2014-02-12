@@ -60,8 +60,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	private Entity newEntity;
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -140,7 +138,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"name\":\"name\",\"fieldType\":\"STRING\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"label\":\"name\",\"visible\":true,\"unique\":false}}}"));
+								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"fieldType\":\"STRING\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"label\":\"name\",\"unique\":false}}}"));
 
 	}
 

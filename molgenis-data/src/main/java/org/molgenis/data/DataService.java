@@ -1,24 +1,34 @@
 package org.molgenis.data;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+
+import org.molgenis.data.support.FileRepositorySource;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
  * 
  * Main entry point for the DataApi
  */
-public interface DataService extends RepositoryCollection, Iterable<EntitySource>
+public interface DataService extends RepositoryCollection
 {
-	/**
-	 * Register a new EntitySource.
-	 * 
-	 * You should first register the EntitySourceFactory for this EntitySource
-	 */
-	void registerEntitySource(String url);
 
-	void registerFactory(EntitySourceFactory entitySourceFactory);
+	/**
+	 * Add a repository to the DataService
+	 * 
+	 * @throws MolgenisDataException
+	 *             if entity name is already registered
+	 * @param repository
+	 */
+	void addRepository(Repository repository);
+
+	/**
+	 * Add all repositories of a RepositorySource
+	 * 
+	 * @param repositorySource
+	 */
+	void addRepositories(RepositorySource repositorySource);
 
 	/**
 	 * return number of entities matched by query
@@ -127,15 +137,6 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	CrudRepository getCrudRepository(String entityName);
 
 	/**
-	 * Creates a new file based entity source (like excel, csv)
-	 * 
-	 * Does not register the EntitySource
-	 */
-	EntitySource createEntitySource(File file) throws IOException;
-
-	EntitySource getEntitySource(String url);
-
-	/**
 	 * Returns all entity classes. Returns empty Iterable if no entity classes.
 	 * 
 	 * @return
@@ -163,4 +164,21 @@ public interface DataService extends RepositoryCollection, Iterable<EntitySource
 	 * type-save find an entity by it's id
 	 */
 	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
+
+	/**
+	 * Add a FileRepositorySource so it can be used by the 'createFileRepositySource' factory method
+	 * 
+	 * @param fileRepositorySource
+	 */
+	void addFileRepositorySourceClass(Class<? extends FileRepositorySource> clazz, Set<String> fileExtensions);
+
+	/**
+	 * Factory method for creating a new FileRepositorySource
+	 * 
+	 * For example an excel file
+	 * 
+	 * @param file
+	 * @return
+	 */
+	FileRepositorySource createFileRepositorySource(File file);
 }

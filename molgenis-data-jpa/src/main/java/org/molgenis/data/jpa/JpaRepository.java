@@ -45,6 +45,8 @@ import com.google.common.collect.Lists;
  */
 public class JpaRepository extends AbstractRepository implements CrudRepository
 {
+	public static final String BASE_URL = "jpa://";
+
 	@PersistenceContext
 	private EntityManager entityManager;
 	private final Class<? extends Entity> entityClass;
@@ -53,6 +55,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
 	{
+		super(BASE_URL + entityClass.getName());
 		this.entityClass = entityClass;
 		this.entityMetaData = entityMetaData;
 	}
@@ -137,6 +140,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
+
 		return getEntityManager().find(getEntityClass(), id);
 	}
 
@@ -765,6 +769,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
@@ -777,6 +782,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(q));
@@ -784,6 +790,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
@@ -804,6 +811,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		Entity entity = findOne(q);

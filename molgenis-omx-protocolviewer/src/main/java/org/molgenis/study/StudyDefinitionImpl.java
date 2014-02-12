@@ -15,7 +15,7 @@ public class StudyDefinitionImpl implements StudyDefinition
 	private Status status;
 	private List<String> authors;
 	private String authorEmail;
-	private List<CatalogItem> items;
+	private Iterable<CatalogItem> items;
 	private String requestForm;
 
 	public StudyDefinitionImpl()
@@ -139,13 +139,13 @@ public class StudyDefinitionImpl implements StudyDefinition
 	}
 
 	@Override
-	public List<CatalogItem> getItems()
+	public Iterable<CatalogItem> getItems()
 	{
 		return items;
 	}
 
 	@Override
-	public void setItems(List<CatalogItem> items)
+	public void setItems(Iterable<CatalogItem> items)
 	{
 		this.items = items;
 	}

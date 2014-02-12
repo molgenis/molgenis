@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.molgenis.variome;
 
 import static org.molgenis.variome.VariomeController.URI;
@@ -12,14 +9,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.toolAnnotators.CaddAnnotator;
+import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.molgenis.toolAnnotators.*;
 
 /**
  * Controller wrapper for the VariomeService.
@@ -55,7 +52,13 @@ public class VariomeController extends MolgenisPluginController{
 	DataService dataService;
 	
 	@Autowired
-	RepositoryAnnotator caddAnnotator;
+	DataSetsIndexer indexer;
+
+	@Resource(name = "ebiService")
+	RepositoryAnnotator ebiServiceAnnotator;
+	
+	@Resource(name = "caddService")
+	RepositoryAnnotator caddServiceAnnotator;
 	
 	@Autowired
 	public VariomeController(VariomeService pluginVariomeService)
@@ -141,7 +144,10 @@ public class VariomeController extends MolgenisPluginController{
 		//TODO: Check which tools are selected, run annotators based on selection via scheduler
 		// Each tool will add to the feature and value lists 
 		
-		caddAnnotator.annotate(dataService.getRepositoryByEntityName("CAR_Batch123"));
+		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, indexer);
+		
+		//omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
+		//omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
 		
 		return "view-result-page";
 	}

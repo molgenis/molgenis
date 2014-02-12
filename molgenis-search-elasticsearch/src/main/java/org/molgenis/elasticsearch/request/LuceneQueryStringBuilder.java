@@ -76,14 +76,19 @@ public class LuceneQueryStringBuilder
 				{
 					sb.append("-");
 				}
-
 				Object value = getValue(queryRule);
+
 				if (((value == null) || (value.equals(""))) && (queryRule.getOperator() == Operator.EQUALS))
 				{
 					sb.append("_missing_:" + queryRule.getField());
 				}
 				else
 				{
+					if (value.toString().matches("[\\.\\d]*") || !queryRule.getOperator().equals(SEARCH))
+					{
+						StringBuilder stringTransformer = new StringBuilder();
+						value = stringTransformer.append("\"").append(value).append("\"").toString();
+					}
 
 					if (queryRule.getField() != null)
 					{
@@ -149,7 +154,8 @@ public class LuceneQueryStringBuilder
 			}
 			else if (valueObj instanceof Double)
 			{
-				// store Double as Integer if integer value of the double is the same as the double
+				// store Double as Integer if integer value of the double is the
+				// same as the double
 				double doubleValue = ((Double) valueObj).doubleValue();
 				value = DoubleMath.isMathematicalInteger(doubleValue) ? Integer.valueOf((int) doubleValue) : valueObj;
 			}

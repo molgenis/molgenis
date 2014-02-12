@@ -7,6 +7,18 @@ import org.molgenis.data.Repository;
 
 public abstract class AbstractRepository implements Repository
 {
+	private final String url;
+
+	public AbstractRepository(String url)
+	{
+		this.url = url;
+	}
+
+	@Override
+	public String getUrl()
+	{
+		return url;
+	}
 
 	@Override
 	public String getName()
@@ -53,7 +65,7 @@ public abstract class AbstractRepository implements Repository
 	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
-		return (Iterable<E>) new ConvertingIterable<E>(clazz, this);
+		return new ConvertingIterable<E>(clazz, this);
 	}
 
 	protected abstract EntityMetaData getEntityMetaData();

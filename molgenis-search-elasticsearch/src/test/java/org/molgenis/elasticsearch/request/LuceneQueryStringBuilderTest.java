@@ -28,20 +28,20 @@ public class LuceneQueryStringBuilderTest
 	public void testBuildQueryString()
 	{
 		assertEquals(buildQueryString(Collections.<QueryRule> emptyList()), "*:*");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"))), "test:xxx");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"))), "test:\"xxx\"");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, null))), "_missing_:test");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", SEARCH, "xxx"))), "test:xxx");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule(SEARCH, "xxx"))), "xxx");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", NOT, "xxx"))), "-test:xxx");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", LIKE, "xxx"))), "test:*xxx*");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", LESS, 9))), "test:{* TO 9}");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", LESS_EQUAL, 9))), "test:[* TO 9]");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", GREATER, 9))), "test:{9 TO *}");
-		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", GREATER_EQUAL, 9))), "test:[9 TO *]");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", NOT, "xxx"))), "-test:\"xxx\"");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", LIKE, "xxx"))), "test:*\"xxx\"*");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", LESS, 9))), "test:{* TO \"9\"}");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", LESS_EQUAL, 9))), "test:[* TO \"9\"]");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", GREATER, 9))), "test:{\"9\" TO *}");
+		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", GREATER_EQUAL, 9))), "test:[\"9\" TO *]");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"), new QueryRule(AND),
-				new QueryRule("aaa", EQUALS, "yyy"))), "test:xxx AND aaa:yyy");
+				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\" AND aaa:\"yyy\"");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"), new QueryRule(OR),
-				new QueryRule("aaa", EQUALS, "yyy"))), "test:xxx OR aaa:yyy");
+				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\" OR aaa:\"yyy\"");
 	}
 
 	@Test

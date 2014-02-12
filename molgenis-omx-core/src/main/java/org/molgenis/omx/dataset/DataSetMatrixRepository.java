@@ -27,10 +27,11 @@ import org.molgenis.omx.observ.value.Value;
  */
 public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository implements Countable
 {
+	public static final String BASE_URL = "dataset://";
 
 	public DataSetMatrixRepository(DataService dataService, String dataSetIdentifier)
 	{
-		super(dataService, dataSetIdentifier);
+		super(BASE_URL + dataSetIdentifier, dataService, dataSetIdentifier);
 	}
 
 	@Override

@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+
 public class ConvertGidsMain
 {
 
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 
 		if (args.length != 3)

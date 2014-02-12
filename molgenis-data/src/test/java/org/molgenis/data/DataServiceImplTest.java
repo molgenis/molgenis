@@ -17,30 +17,23 @@ import org.testng.annotations.Test;
 
 public class DataServiceImplTest
 {
-	private final String url = "test://";
 	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2");
-	private Repository repo;
-	private EntitySource entitySource;
+	private Repository repo1;
+	private Repository repo2;
 	private DataServiceImpl dataService;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		repo = mock(Repository.class);
-
-		entitySource = mock(EntitySource.class);
-		when(entitySource.getUrl()).thenReturn(url);
-		when(entitySource.getEntityNames()).thenReturn(entityNames);
-		when(entitySource.getRepositoryByEntityName("Entity1")).thenReturn(repo);
-		when(entitySource.getRepositoryByEntityName("Entity2")).thenReturn(repo);
-
-		EntitySourceFactory factory = mock(EntitySourceFactory.class);
-		when(factory.getUrlPrefix()).thenReturn("test://");
-		when(factory.create(url)).thenReturn(entitySource);
-
 		dataService = new DataServiceImpl();
-		dataService.registerFactory(factory);
-		dataService.registerEntitySource(url);
+
+		repo1 = mock(Repository.class);
+		when(repo1.getName()).thenReturn("Entity1");
+		dataService.addRepository(repo1);
+
+		repo2 = mock(Repository.class);
+		when(repo2.getName()).thenReturn("Entity2");
+		dataService.addRepository(repo2);
 	}
 
 	@Test
@@ -58,17 +51,8 @@ public class DataServiceImplTest
 	@Test
 	public void getRepositoryByEntityName()
 	{
-		assertEquals(dataService.getRepositoryByEntityName("Entity1"), repo);
-		assertEquals(dataService.getRepositoryByEntityName("Entity2"), repo);
+		assertEquals(dataService.getRepositoryByEntityName("Entity1"), repo1);
+		assertEquals(dataService.getRepositoryByEntityName("Entity2"), repo2);
 	}
 
-	@Test
-	public void iterator()
-	{
-		Iterator<EntitySource> it = dataService.iterator();
-		assertNotNull(it);
-		assertTrue(it.hasNext());
-		assertEquals(it.next(), entitySource);
-		assertFalse(it.hasNext());
-	}
 }

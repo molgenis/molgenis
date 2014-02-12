@@ -22,16 +22,17 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 /**
- * ExcelSheet Repository implementation
+ * ExcelSheet {@link org.molgenis.data.Repository} implementation
  * 
  * It is assumed that the first row of the sheet is the header row.
  * 
  * All attributes will be of the string type. The cell values are converted to string.
  * 
- * 
+ * The url of this Repository is defined as excel://${filename}/${sheetname}
  */
 public class ExcelRepository extends AbstractRepository
 {
+	public static final String BASE_URL = "excel://";
 	private final Sheet sheet;
 
 	/** process cells after reading */
@@ -40,14 +41,14 @@ public class ExcelRepository extends AbstractRepository
 	private Map<String, Integer> colNamesMap;
 	private EntityMetaData entityMetaData;
 
-	public ExcelRepository(Sheet sheet)
+	public ExcelRepository(String fileName, Sheet sheet)
 	{
-		this(sheet, null);
+		this(fileName, sheet, null);
 	}
 
-	public ExcelRepository(Sheet sheet, List<CellProcessor> cellProcessors)
+	public ExcelRepository(String fileName, Sheet sheet, List<CellProcessor> cellProcessors)
 	{
-		if (sheet == null) throw new IllegalArgumentException("sheet is null");
+		super(BASE_URL + fileName + "/" + sheet.getSheetName());
 		this.sheet = sheet;
 		this.cellProcessors = cellProcessors;
 	}

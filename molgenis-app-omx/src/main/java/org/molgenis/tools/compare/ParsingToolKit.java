@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.RepositorySource;
+import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.processor.TrimProcessor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
@@ -38,10 +40,10 @@ public class ParsingToolKit
 	}
 
 	// Convert a value to max 256 characters
-	public void convertTo256Characters(String file) throws IOException
+	public void convertTo256Characters(String file) throws IOException, InvalidFormatException
 	{
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository repo = entitySource.getRepositoryByEntityName("ontologyterm");
+		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
+		Repository repo = repositorySource.getRepository("ontologyterm");
 
 		for (Entity entity : repo)
 		{
@@ -56,7 +58,6 @@ public class ParsingToolKit
 				System.out.println(name);
 			}
 		}
-		entitySource.close();
 	}
 
 	// Parse your password
@@ -103,10 +104,10 @@ public class ParsingToolKit
 	// Palga project specific
 	// This code reads an excelfile and produces a list with in the first column the Palga-code and the second
 	// column a list of all the referring terms
-	public void check(String file) throws IOException
+	public void check(String file) throws IOException, InvalidFormatException
 	{
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository repo = entitySource.getRepositoryByEntityName("dataset_palga");
+		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
+		Repository repo = repositorySource.getRepository("dataset_palga");
 		List<String> list = null;
 		List<List<String>> listOfLists = new ArrayList<List<String>>();
 		for (Entity entity : repo)
@@ -127,7 +128,5 @@ public class ParsingToolKit
 			System.out.println(all);
 
 		}
-
-		entitySource.close();
 	}
 }

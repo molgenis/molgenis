@@ -9,15 +9,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.RepositorySource;
+import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.processor.TrimProcessor;
 
 public class CategoryParser
 {
 
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 		if (args.length != 2)
 		{
@@ -30,10 +32,10 @@ public class CategoryParser
 		vc.check(args[0], args[1]);
 	}
 
-	public void check(String file, String datasetMatrix) throws IOException
+	public void check(String file, String datasetMatrix) throws IOException, InvalidFormatException
 	{
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository repo = entitySource.getRepositoryByEntityName("observablefeature");
+		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
+		Repository repo = repositorySource.getRepository("observablefeature");
 
 		List<String> listOfCategoricalFeatures = new ArrayList<String>();
 		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
@@ -47,7 +49,7 @@ public class CategoryParser
 			}
 		}
 
-		Repository readObservableDataMatrixRepo = entitySource.getRepositoryByEntityName(datasetMatrix);
+		Repository readObservableDataMatrixRepo = repositorySource.getRepository(datasetMatrix);
 
 		for (Entity entity : readObservableDataMatrixRepo)
 		{
@@ -61,7 +63,6 @@ public class CategoryParser
 			}
 		}
 		printForCategoryTab(hashCategories);
-		entitySource.close();
 	}
 
 	public void printAsList(Map<String, List<String>> hashCategories)

@@ -16,4 +16,12 @@ public interface RepositoryCollection
 	 * @throws UnknownEntityException
 	 */
 	Repository getRepositoryByEntityName(String name);
+
+	/**
+	 * Get a repository by url
+	 * 
+	 * @param name
+	 * @return Repository or null if not found
+	 */
+	Repository getRepositoryByUrl(String url);
 }

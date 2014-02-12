@@ -23,8 +23,9 @@
                 </div>
             </div>
         </form>
-        <div id="orderdata-selection-table-container">
-            <table id="orderdata-selection-table" class="table table-striped table-condensed"></table>
+        <div id="orderdata-selection-container">
+            <div id="orderdata-selection-table-container"></div>
+            <div id="orderdata-selection-table-pager"></div>
         </div>
     </div>
     <div class="modal-footer">
@@ -34,7 +35,8 @@
 </div>
 <script type="text/javascript">
     $(function () {
-        var deletedFeatures = [];
+    	var nrFeatures = 0;
+        var pendingDeletes = [];
         var modal = $('#orderdata-modal');
         var submitBtn = $('#orderdata-btn');
         var cancelBtn = $('#orderdata-btn-close');
@@ -53,52 +55,71 @@
 
     <#-- modal events -->
         modal.on('show', function () {
-            submitBtn.attr('disabled', false);
-            cancelBtn.attr('disabled', false);
-            deletedFeatures = [];
-            $.ajax({
-                type: 'GET',
-                url: pluginUri + '/selection/' + catalogId,
-                success: function (selection) {
-                    var container = $('#orderdata-selection-table-container');
-                    if (selection.length == 0) {
-                        submitBtn.addClass('disabled');
-                        container.append('<p>no variables selected</p>');
-                    } else {
-                        submitBtn.removeClass('disabled');
-                        var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
-                        table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
-                        var body = $('<tbody>');
-
-                        $.each(selection, function (i, featureUri) {
-                        	var feature = molgenis.Catalog.getFeature(featureUri);
-                            var row = $('<tr>');
-                            row.append('<td>' + feature.name + '</td>');
-                            console.log(feature.description);
-                            console.log(molgenis);
-                            console.log(molgenis.i18n);
-                            console.log(molgenis.i18n.get(feature.description));
-                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
-
-                            var deleteCol = $('<td class="center">');
-                            var deleteBtn = $('<i class="icon-remove"></i>');
-                            deleteBtn.click(function () {
-                                deletedFeatures.push({
-                                    'feature': feature.id
-                                });
-                                row.remove();
-                                // restore focus
-                                form.find('input:visible:first').focus();
-                            });
-                            deleteBtn.appendTo(deleteCol);
-
-                            row.append(deleteCol);
-                            body.append(row);
-                        });
-                        table.append(body).appendTo(container);
-                    }
-                }
-            });
+        	submitBtn.addClass('disabled');
+            pendingDeletes = [];
+            
+            function updateFeatureSelectionContainer(page) {
+	            var nrItemsPerPage = 20;
+				var start = page ? page.start : 0;
+				var end = page ? page.end : nrItemsPerPage;
+				
+				var pendingDeleteIds = $.map(pendingDeletes, function(pendingDelete){return pendingDelete.feature;});
+				$.ajax({
+					url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end + '&excludes[]=' + pendingDeleteIds.join(','),
+					success : function(selection) {
+						var selectionTable = $('#orderdata-selection-table-container');
+						var selectionTablePager = $('#orderdata-selection-table-pager');
+						
+						if(selection.total === 0) {
+							submitBtn.addClass('disabled');
+							selectionTable.html('<p>No variables selected</p>');
+							selectionTablePager.empty();
+						} else {
+							submitBtn.removeClass('disabled');
+								if(page === undefined) {
+								selectionTablePager.pager({
+									'nrItems' : selection.total,
+									'nrItemsPerPage' : nrItemsPerPage,
+									'onPageChange' : updateFeatureSelectionContainer
+								});	
+							}
+							var table = $('<table id="orderdata-selection-table" class="table table-striped table-condensed listtable"></table>');
+	                        table.append($('<thead><tr><th>Variable</th><th>Description</th><th>Remove</th></tr></thead>'));
+	                        var body = $('<tbody>');
+	
+	                        $.each(selection.items, function (i, item) {
+	                        	var feature = molgenis.Catalog.getFeature(item.feature);
+	                            var row = $('<tr>');
+	                            row.append('<td>' + feature.name + '</td>');
+	                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
+	
+	                            var deleteCol = $('<td class="center">');
+	                            var deleteBtn = $('<i class="icon-remove"></i>');
+	                            deleteBtn.click(function () {
+	                                pendingDeletes.push({
+	                                    'feature': feature.href.substring(feature.href.lastIndexOf('/') + 1)
+	                                });
+	                                updateFeatureSelectionContainer();
+	                                // restore focus
+	                                form.find('input:visible:first').focus();
+	                            });
+	                            deleteBtn.appendTo(deleteCol);
+	
+	                            row.append(deleteCol);
+	                            body.append(row);
+	                        });
+	                        table.append(body);
+	                        selectionTable.html(table);
+						}
+					},
+					error : function(xhr) {
+						molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+					}
+				});
+            };
+            
+            // create selection table with pager
+			updateFeatureSelectionContainer();
         });
         modal.on('shown', function () {
             form.find('input:visible:first').focus();
@@ -119,7 +140,7 @@
                 modal.modal('hide');
             }
         });
-        $('#orderdata-btn-close').click(function () {
+        cancelBtn.click(function () {
             modal.modal('hide');
         });
 
@@ -128,11 +149,11 @@
             e.preventDefault();
             e.stopPropagation();
             if (form.valid()) {
-                if (deletedFeatures.length > 0) {
+                if (pendingDeletes.length > 0) {
                     $.ajax({
                         type: 'POST',
-                        url: pluginUri + '/cart/remove',
-                        data: JSON.stringify({features: deletedFeatures}),
+                        url: pluginUri + '/cart/remove/' + catalogId,
+                        data: JSON.stringify({features: pendingDeletes}),
                         contentType: 'application/json',
                         success: function () {
                             order();
@@ -151,7 +172,8 @@
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
-            form.submit();
+            if(!submitBtn.hasClass('disabled'))
+            	form.submit();
         });
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
             if (e.which == 13) {
@@ -163,8 +185,7 @@
 
         function order() {
             showSpinner();
-            submitBtn.attr('disabled', true);
-            cancelBtn.attr('disabled', true);
+            submitBtn.addClass('disabled');
             $.ajax({
                 type: 'POST',
                 url: pluginUri + '/order',

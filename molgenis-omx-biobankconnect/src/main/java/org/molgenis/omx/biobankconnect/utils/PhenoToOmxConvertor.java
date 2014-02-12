@@ -4,24 +4,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.UnknownEntityException;
 
 public class PhenoToOmxConvertor extends AbstractOmxConvertor
 {
-	public PhenoToOmxConvertor(String studyName, String filePath) throws IOException
+	public PhenoToOmxConvertor(String studyName, String filePath) throws IOException, InvalidFormatException
 	{
 		super(studyName, filePath);
 	}
 
 	@Override
-	public void collectProtocolInfo(EntitySource entitySource) throws IOException
+	public void collectProtocolInfo(RepositorySource repositorySource) throws IOException
 	{
 		try
 		{
-			Repository repo = entitySource.getRepositoryByEntityName("Protocol");
+			Repository repo = repositorySource.getRepository("Protocol");
 			for (Entity entity : repo)
 			{
 				String name = entity.getString("name");
@@ -46,9 +47,9 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectVariableInfo(EntitySource entitySource) throws IOException
+	public void collectVariableInfo(RepositorySource repositorySource) throws IOException
 	{
-		Repository repo = entitySource.getRepositoryByEntityName("Measurement");
+		Repository repo = repositorySource.getRepository("Measurement");
 		for (Entity entity : repo)
 		{
 			String featureName = entity.getString("name");
@@ -78,9 +79,9 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectCategoryInfo(EntitySource entitySource) throws IOException
+	public void collectCategoryInfo(RepositorySource repositorySource) throws IOException
 	{
-		Repository repo = entitySource.getRepositoryByEntityName("Category");
+		Repository repo = repositorySource.getRepository("Category");
 		for (Entity entity : repo)
 		{
 			String name = entity.getString("name");
@@ -98,8 +99,9 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	/**
 	 * @param args
 	 * @throws IOException
+	 * @throws InvalidFormatException
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 		new PhenoToOmxConvertor(args[0], args[1]);
 	}

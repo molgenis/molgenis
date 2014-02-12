@@ -12,9 +12,9 @@
 package ${package};
 
 import org.molgenis.data.jpa.JpaRepository;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component("${JavaName(entity)}Repository")
+@Repository("${JavaName(entity)}Repository")
 public class ${JavaName(entity)}Repository extends JpaRepository
 {	
 	public ${JavaName(entity)}Repository()

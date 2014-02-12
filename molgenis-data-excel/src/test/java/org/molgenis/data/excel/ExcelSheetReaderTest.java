@@ -35,20 +35,13 @@ public class ExcelSheetReaderTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		Workbook workbook = WorkbookFactory.create(is);
-		excelSheetReader = new ExcelRepository(workbook.getSheet("test"));
+		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"));
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
 		IOUtils.closeQuietly(is);
-	}
-
-	@SuppressWarnings("resource")
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void ExcelSheetReader()
-	{
-		new ExcelRepository(null, null);
 	}
 
 	@Test

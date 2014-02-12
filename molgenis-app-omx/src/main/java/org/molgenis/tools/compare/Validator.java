@@ -11,11 +11,13 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.processor.TrimProcessor;
 
 /**
  * This script is created to compare 2 excelfiles. The files are given via the arguments
@@ -26,12 +28,12 @@ public class Validator
 	private final static String IDENTIFIER = "id_sample";
 	private final static String IDENTIFIER2 = "id_individual";
 
-	public void check(String excelFile1, String file2, BufferedWriter logger) throws IOException
+	public void check(String excelFile1, String file2, BufferedWriter logger) throws IOException,
+			InvalidFormatException
 	{
 		ValidationFile excelfile = new ValidationFile();
-		EntitySource excelReaderReferenceFile = new ExcelEntitySourceFactory().create(new File(excelFile1));
-		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile
-				.getRepositoryByEntityName("dataset_celiac_sprue");
+		RepositorySource excelReaderReferenceFile = new ExcelRepositorySource(new File(excelFile1), new TrimProcessor());
+		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
 		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
 
 		ValidationFile csvFile = new ValidationFile();
@@ -127,7 +129,6 @@ public class Validator
 		finally
 		{
 			IOUtils.closeQuietly(csvReaderFileToCompare);
-			IOUtils.closeQuietly(excelReaderReferenceFile);
 		}
 	}
 
@@ -170,8 +171,9 @@ public class Validator
 	/**
 	 * @param args
 	 * @throws FileNotFoundException
+	 * @throws InvalidFormatException
 	 */
-	public static void main(String[] args) throws FileNotFoundException
+	public static void main(String[] args) throws FileNotFoundException, InvalidFormatException
 	{
 		if (args.length != 3)
 		{

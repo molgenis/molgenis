@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -22,6 +24,7 @@ import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Writable;
@@ -29,6 +32,9 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
@@ -66,6 +72,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	private StudyManagerService studyManagerService;
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+	@Autowired
+	private DataService dataService;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_PROTOCOLVIEWER')")
@@ -95,7 +103,6 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
-
 		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(
 				SecurityUtils.getCurrentUsername(), StudyDefinition.Status.DRAFT);
 		for (StudyDefinition studyDefinition : studyDefinitions)
@@ -172,8 +179,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null) throw new UnknownStudyDefinitionException("no study definition draft for user");
 
-		List<CatalogItem> catalogItems = studyDefinition.getItems();
-		if (catalogItems == null || catalogItems.isEmpty())
+		Iterable<CatalogItem> catalogItems = studyDefinition.getItems();
+		if (catalogItems == null || !catalogItems.iterator().hasNext())
 		{
 			throw new IllegalArgumentException("feature list is null or empty");
 		}
@@ -211,25 +218,70 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor = UnknownCatalogException.class)
-	public void updateStudyDefinitionDraftForCurrentUser(List<Integer> catalogItemIds, String catalogId)
+	public void addToStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId)
 			throws UnknownCatalogException
 	{
+		final Catalog catalog = catalogService.getCatalog(catalogId);
+
+		List<String> catalogItemIds = getCatalogItemIds(resourceUri);
+
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null)
 		{
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
 
-		final Catalog catalog = catalogService.getCatalog(catalogId);
-		List<CatalogItem> catalogItems = Lists.transform(catalogItemIds, new Function<Integer, CatalogItem>()
+		Iterable<CatalogItem> catalogItems = Iterables.transform(catalogItemIds, new Function<String, CatalogItem>()
 		{
 			@Override
-			public CatalogItem apply(final Integer catalogItemId)
+			public CatalogItem apply(String catalogItemId)
 			{
-				return catalog.findItem(catalogItemId.toString());
+				return catalog.findItem(catalogItemId);
 			}
 		});
-		studyDefinition.setItems(catalogItems);
+		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), catalogItems));
+
+		try
+		{
+			studyManagerService.updateStudyDefinition(studyDefinition);
+		}
+		catch (UnknownStudyDefinitionException e)
+		{
+			logger.error("", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
+	@Transactional(rollbackFor = UnknownCatalogException.class)
+	public void removeFromStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId)
+			throws UnknownCatalogException
+	{
+		final Catalog catalog = catalogService.getCatalog(catalogId);
+
+		final Set<String> catalogItemIds = new HashSet<String>(getCatalogItemIds(resourceUri));
+
+		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
+		if (studyDefinition == null)
+		{
+			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
+		}
+
+		// verify that items to remove are part of this catalog
+		for (String catalogItemId : catalogItemIds)
+			catalog.findItem(catalogItemId);
+
+		Iterable<CatalogItem> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
+				new Predicate<CatalogItem>()
+				{
+					@Override
+					public boolean apply(CatalogItem catalogItem)
+					{
+						return !catalogItemIds.contains(catalogItem.getId());
+					}
+				});
+		studyDefinition.setItems(newCatalogItems);
 
 		try
 		{
@@ -327,6 +379,39 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		finally
 		{
 			excelWriter.close();
+		}
+	}
+
+	/**
+	 * 
+	 * @param resourceUri
+	 *            e.g. /api/v1/protocol/123
+	 * @return
+	 */
+	private List<String> getCatalogItemIds(String resourceUri)
+	{
+		String[] tokens = resourceUri.split("/");
+		String entityName = tokens[tokens.length - 2];
+		String entityId = tokens[tokens.length - 1];
+		if (ObservableFeature.ENTITY_NAME.equalsIgnoreCase(entityName))
+		{
+			return Arrays.<String> asList(entityId);
+		}
+		else if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
+		{
+			Protocol rootProtocol = dataService
+					.findOne(Protocol.ENTITY_NAME, Integer.valueOf(entityId), Protocol.class);
+			List<String> featureIds = new ArrayList<String>();
+			for (Protocol protocol : ProtocolUtils.getProtocolDescendants(rootProtocol))
+			{
+				for (ObservableFeature feature : protocol.getFeatures())
+					featureIds.add(feature.getId().toString());
+			}
+			return featureIds;
+		}
+		else
+		{
+			throw new IllegalArgumentException("invalid entity name [" + entityName + "]");
 		}
 	}
 }

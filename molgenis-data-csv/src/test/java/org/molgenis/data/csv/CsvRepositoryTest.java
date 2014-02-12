@@ -30,14 +30,15 @@ public class CsvRepositoryTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CsvRepository()
 	{
-		new CsvRepository((Reader) null, null, null);
+		new CsvRepository(null, (Reader) null, null, null);
 	}
 
 	@Test
 	public void addCellProcessor_header() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(new StringReader("col1,col2\nval1,val2"), ',', "test", null);
+		CsvRepository csvRepository = new CsvRepository("test.csv", new StringReader("col1,col2\nval1,val2"), ',',
+				"test", null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -58,7 +59,8 @@ public class CsvRepositoryTest
 	public void addCellProcessor_data() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(new StringReader("col1,col2\nval1,val2"), ',', "test", null);
+		CsvRepository csvRepository = new CsvRepository("test.csv", new StringReader("col1,col2\nval1,val2"), ',',
+				"test", null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -158,7 +160,7 @@ public class CsvRepositoryTest
 	public void iterator_noValues() throws IOException
 	{
 		String csvString = "col1,col2,col3";
-		CsvRepository csvRepository = new CsvRepository(new StringReader(csvString), "test", null);
+		CsvRepository csvRepository = new CsvRepository("test.csv", new StringReader(csvString), "test", null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -174,7 +176,7 @@ public class CsvRepositoryTest
 	public void iterator_emptyValues() throws IOException
 	{
 		String csvString = "col1,col2,col3\n,,\n";
-		CsvRepository csvRepository = new CsvRepository(new StringReader(csvString), "test", null);
+		CsvRepository csvRepository = new CsvRepository("test.csv", new StringReader(csvString), "test", null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -190,8 +192,8 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_separator() throws IOException
 	{
-		CsvRepository tsvRepository = new CsvRepository(new StringReader("col1\tcol2\nval1\tval2\n"), '\t', "test",
-				null);
+		CsvRepository tsvRepository = new CsvRepository("test.csv", new StringReader("col1\tcol2\nval1\tval2\n"), '\t',
+				"test", null);
 		try
 		{
 			Iterator<Entity> it = tsvRepository.iterator();
@@ -210,7 +212,7 @@ public class CsvRepositoryTest
 	public void close() throws IOException
 	{
 		Reader reader = mock(Reader.class);
-		CsvRepository csvRepository = new CsvRepository(reader, "test", null);
+		CsvRepository csvRepository = new CsvRepository("test.csv", reader, "test", null);
 		csvRepository.close();
 		verify(reader).close();
 	}

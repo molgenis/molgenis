@@ -3,8 +3,9 @@ package org.molgenis.framework.db;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.Ordered;
 
-public class WebAppDatabasePopulator implements ApplicationListener<ContextRefreshedEvent>
+public class WebAppDatabasePopulator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private static final Logger logger = Logger.getLogger(WebAppDatabasePopulator.class);
 
@@ -26,5 +27,11 @@ public class WebAppDatabasePopulator implements ApplicationListener<ContextRefre
 			webAppDatabasePopulatorService.populateDatabase();
 			logger.info("initialized application database");
 		}
+	}
+
+	@Override
+	public int getOrder()
+	{
+		return Ordered.HIGHEST_PRECEDENCE + 1;
 	}
 }

@@ -20,18 +20,20 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
 import org.molgenis.data.Writable;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelRepositorySource;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -113,9 +115,8 @@ public class EvaluationController extends MolgenisPluginController
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public void verify(@RequestParam(value = "selectedDataSet", required = false)
 	String selectedDataSetId, @RequestParam
-	Part file, HttpServletResponse response, Model model) throws IOException
+	Part file, HttpServletResponse response, Model model) throws IOException, InvalidFormatException
 	{
-		EntitySource reader = null;
 		ExcelWriter excelWriterRanks = null;
 
 		try
@@ -135,8 +136,8 @@ public class EvaluationController extends MolgenisPluginController
 				Writable sheetWriteBiobankRanks = null;
 				Writable sheetWriteSpssInput = null;
 
-				reader = new ExcelEntitySourceFactory().create(uploadFile);
-				Repository inputSheet = reader.getRepositoryByEntityName("Sheet1");
+				RepositorySource repositorySource = new ExcelRepositorySource(uploadFile, new TrimProcessor());
+				Repository inputSheet = repositorySource.getRepository("Sheet1");
 
 				List<String> biobankNames = new ArrayList<String>();
 				for (AttributeMetaData attr : inputSheet.getAttributes())
@@ -360,7 +361,6 @@ public class EvaluationController extends MolgenisPluginController
 		}
 		finally
 		{
-			if (reader != null) reader.close();
 			if (excelWriterRanks != null) IOUtils.closeQuietly(excelWriterRanks);
 		}
 	}

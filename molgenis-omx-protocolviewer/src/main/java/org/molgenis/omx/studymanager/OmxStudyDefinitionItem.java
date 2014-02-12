@@ -1,11 +1,16 @@
 package org.molgenis.omx.studymanager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+
+import com.google.common.collect.Lists;
 
 public class OmxStudyDefinitionItem implements CatalogItem
 {
@@ -55,5 +60,24 @@ public class OmxStudyDefinitionItem implements CatalogItem
 			Ontology ontology = ontologyTerm.get(0).getOntology();
 			return ontology != null ? ontology.getOntologyAccession() : null;
 		}
+	}
+
+	@Override
+	public List<String> getPath()
+	{
+		List<String> protocolPath = new ArrayList<String>();
+		Collection<Protocol> protocols = observableFeature.getFeaturesProtocolCollection();
+		while (protocols != null && !protocols.isEmpty())
+		{
+			if (protocols.size() != 1)
+			{
+				throw new RuntimeException("Catalog item (group) must belong to one catalog (instead of "
+						+ protocols.size() + ')');
+			}
+			Protocol protocol = protocols.iterator().next();
+			protocolPath.add(protocol.getId().toString());
+			protocols = protocol.getSubprotocolsProtocolCollection();
+		}
+		return Lists.reverse(protocolPath);
 	}
 }

@@ -9,13 +9,11 @@ The molgenis-data-csv package is a csv (comma separated values) file backend for
 **The light grey classes are provided by the core molgenis-data module**
 
 ### CsvRepository
-Repository implementation for a csv file. The name of the file without the extension is considered to be the entityname end the first row is considered to contain the attributenames. All attributes are considered to be of type 'string' because there is no way for the user to define it (yet). 
+`Repository` implementation for a csv file. The name of the file without the extension is considered to be the entityname end the first row is considered to contain the attributenames. All attributes are considered to be of type 'string' because there is no way for the user to define it (yet). 
+
 
 ### CsvEntitySource
-EntitySource implementation for csv files. You can use csv, txt, tsv or zip files. Csv and txt files must have a comma as separator, tsv a tab. Zip files are a collection of csv, txt or tsv files. The names of the files are the entity names.
-
-### CsvEntitySourceFactory
-EntitySourceFactory implementation for csv. The url prefix for excel is `csv://`. You can create an `EntitySource` using a file or an molgenis data url.
+`EntitySource` that creates `CsvRepositories`. It can be a csv,txt,tsv or zip file. The zipfile must contain csv,txt or tsv files. The name of the repository is the filename without the extension. If it is a zipfile the `CsvEntitySource` has multiple repositories, if not it has one repository.
 
 ### CsvWriter
 With a `CsvWriter` you can write entities to a csv file.
@@ -37,23 +35,15 @@ finally
 {
  	repo.close();
 }
-
 ```
 
 ***Print all csv filenames (entitynames) in a zip file***
 
 ```
-EntitySource entitySource = new CsvEntitySourceFactory().create(new File("/Users/test/test.zip"));
-try
+RepositorySource repositorySource = new CsvRepositorySource(new File("/Users/test/test.zip"));
+for (Repository repository : repositorySource.getRepositories())
 {
-    for (String name : entitySource.getEntityNames())
-    {
-        System.out.println(name);
-    }
-}
-finally
-{
-    entitySource.close();
+	System.out.println(repository.getName());
 }
 ```
 
@@ -61,7 +51,7 @@ finally
 
 ```
 DataService dataService = ...;
-dataService.registerEntitySource("csv:///users/test/test.csv");
+dataService.addRepository(new CsvRepository(new File("/Users/test/test.csv"));
 ```
 
 ***Write entities to a csv file***
@@ -79,6 +69,5 @@ finally
 {
 	writable.close();
 }
-
 ```
 
