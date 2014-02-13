@@ -90,14 +90,10 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 					results.add(new MapEntity(resultMap));
 				}
 			}
-			catch (RuntimeException e)
+			catch (Exception e)
 			{
 				httpGet.abort();
-				throw e;
-			}
-			catch (IOException e)
-			{
-				httpGet.abort();
+                //TODO: how to handle exceptions at this point
 				throw new RuntimeException(e);
 			}
 		}
@@ -115,14 +111,17 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		String[] chembleFeatures = new String[]
-				{ "targetType", "chemblId", "geneNames", "description", "compoundCount", "bioactivityCount",
-						"proteinAccession", "synonyms", "organism", "preferredName" };
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-		
-		for(String attribute : chembleFeatures){
-			metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
-		}
+        DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("targetType", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("chemblId", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("geneNames", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("description", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.INT));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.INT));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("proteinAccession", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("synonyms", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("organism", FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData("preferredName", FieldTypeEnum.STRING));
 		return metadata;
 	}
 
