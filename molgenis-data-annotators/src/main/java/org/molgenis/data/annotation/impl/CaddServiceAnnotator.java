@@ -68,10 +68,10 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 		{
 			Entity entity = source.next();
 
-			String chromosome = entity.get(CHROMOSOME).toString();
-			String position = entity.get(POSITION).toString();
-			String reference = entity.get(REFERENCE).toString();
-			String alternative = entity.get(ALTERNATIVE).toString();
+			String chromosome = entity.getString(CHROMOSOME);
+			String position = entity.getString(POSITION);
+			String reference = entity.getString(REFERENCE);
+			String alternative = entity.getString(ALTERNATIVE);
 
 			String caddAbs = "";
 			String caddScaled = "";
@@ -137,7 +137,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 
 		for (String attribute : caddFeatures)
 		{
-			metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
+			metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.INT));
 		}
 
 		return metadata;
@@ -149,7 +149,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.LONG));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
 

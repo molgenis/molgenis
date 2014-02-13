@@ -63,7 +63,7 @@ public class VariomeController extends MolgenisPluginController{
 	@Resource(name = "dbnsfpVariantService")
 	RepositoryAnnotator dbnsfpVariantServiceAnnotator;
 	
-	@Resource(name = "dbnsfpVariantService")
+	@Resource(name = "dbnsfpGeneService")
 	RepositoryAnnotator dbnsfpGeneServiceAnnotator;
 	
 	@Autowired

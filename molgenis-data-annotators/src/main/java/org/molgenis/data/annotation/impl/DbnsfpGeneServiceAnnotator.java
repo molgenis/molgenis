@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,8 +16,11 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +48,7 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpGeneService")
 public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 {
+	private static final String CHROMOSOME = "chrom";
 	private static final String POSITION = "pos";
 
 	// FIXME set runtime property for file location
@@ -55,15 +61,65 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 	{
 		List<Entity> results = new ArrayList<Entity>();
 
-		while (source.hasNext())
+		try
 		{
-			Entity entity = source.next();
-			Integer position = entity.getInt(POSITION);
+			List<HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
 
-			// TODO call variant to gene class to get a gene value with which i can
-			// retrieve dbnsfp gene lines
+			while (source.hasNext())
+			{
+				Entity entity = source.next();
+				Long position = entity.getLong(POSITION);
+				String chromosome = entity.getString(CHROMOSOME);
+
+				List<Locus> locus = new ArrayList<Locus>(Arrays.asList(new Locus(chromosome, position)));
+				List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, locus);
+
+				FileReader reader = new FileReader(new File(GENE_FILE));
+				BufferedReader bufferedReader = new BufferedReader(reader);
+
+				while (bufferedReader.ready())
+				{
+					String line = bufferedReader.readLine();
+					String[] lineSplit = line.split("\t");
+					for (String gene : geneSymbols)
+					{
+						if (lineSplit[0].equals(gene))
+						{
+							int lineSplitIndex = 0;
+
+							HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+							for (String feature : FEATURES)
+							{
+								if (feature != null)
+								{
+									resultMap.put(feature, lineSplit[lineSplitIndex]);
+									lineSplitIndex = lineSplitIndex + 1;
+								}
+							}
+
+							resultMap.put(CHROMOSOME, chromosome);
+							resultMap.put(POSITION, position);
+
+							results.add(new MapEntity(resultMap));
+						}
+					}
+				}
+
+				bufferedReader.close();
+			}
 
 		}
+
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+
 		return results.iterator();
 	}
 
@@ -90,6 +146,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.LONG));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
 
 		return metadata;
 	}
