@@ -23,7 +23,7 @@
 	};
 
 	molgenis.ResultsTable.prototype.build = function(searchResponse, selectedFeatures, restApi) {
-		var nrRows = searchResponse.totalHitCount;
+		var nrRows = searchResponse.total;
 
 		var items = [];
 		items.push('<thead>');
@@ -50,13 +50,14 @@
 			items.push('<tr><td class="nothing-found" colspan="' + selectedFeatures.length + '">Nothing found</td></tr>');
 		}
 
-		for ( var i = 0; i < searchResponse.searchHits.length; ++i) {
+		for ( var i = 0; i < searchResponse.items.length; ++i) {
 			items.push('<tr>');
-			var columnValueMap = searchResponse.searchHits[i].columnValueMap;
+			var columnValueMap = searchResponse.items[i];
 
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
-				var value = columnValueMap[feature.name];
+				var key = (feature.name).charAt(0).toLowerCase() + feature.name.slice(1);
+				var value = columnValueMap[key];
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
 					if (feature.fieldType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){

@@ -29,11 +29,13 @@ public class AttributeMetaDataResponse
 		labelAttribute = attr.isLabelAttribute();
 		name = attr.getName();
 
-		if (attr.getRefEntity() != null)
+		if (FieldTypeEnum.HAS.equals(attr.getDataType().getEnumType()))
 		{
 			String href = String.format("%s/%s/meta", RestController.BASE_URI, attr.getRefEntity().getName());
 			refEntity = new Href(href);
-		} else {
+		}
+		else
+		{
 			setRefThis(String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attr.getName()));
 		}
 
