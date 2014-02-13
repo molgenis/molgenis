@@ -60,12 +60,12 @@
 				var value = columnValueMap[key];
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
-					if (feature.fieldType === "XREF" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+					if (feature.fieldType === "XREF" && (typeof molgenis.entityExplorerUrl !== "undefined")){
 						var attributeName = restApi.get(value.href).identifier;
 						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + attributeName + '">' 
 							+ formatTableCellValue(attributeName, feature.fieldType) + '</a>';
 					}	
-					else if (feature.fieldType === "MREF" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+					else if (feature.fieldType === "MREF" && (typeof molgenis.entityExplorerUrl !== "undefined")){
 						var itemsMref = restApi.get(value.href).items;
 						for(var i=0; i < itemsMref.length; i++){
 						    if(i > 0) cellValue +=  ',';
