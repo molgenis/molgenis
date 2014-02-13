@@ -1528,10 +1528,16 @@
 	};
 
 	molgenis.download = function() {
-		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
+		var searchRequest = molgenis.createSearchRequest(false);
+		
 		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
-			searchRequest : jsonRequest
+			// Workaround, see http://stackoverflow.com/a/9970672
+			'dataRequest' : JSON.stringify({
+				'entityName' : searchRequest.documentType,
+				'attributeNames' : searchRequest.fieldsToReturn,
+				'query' : searchRequest.query
+			})
 		});
 		parent.hideSpinner();
 	};

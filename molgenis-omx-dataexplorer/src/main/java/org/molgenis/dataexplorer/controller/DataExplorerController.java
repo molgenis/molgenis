@@ -9,14 +9,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -25,17 +25,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -69,8 +64,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-
-	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
 
 	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
 	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
@@ -185,63 +178,47 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest") String searchRequest, HttpServletResponse response)
+	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
 	{
-		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
-		logger.info("Download request: [" + searchRequest + "]");
+		// Workaround because binding with @RequestBody is not possible:
+		// http://stackoverflow.com/a/9970672
+		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
+		logger.info("Download request: [" + dataRequestStr + "]");
+		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
-		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-		request.getQuery().pageSize(DOWNLOAD_SEARCH_LIMIT).offset(0);
+		String entityName = dataRequest.getEntityName();
+		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
-		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
+		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-		CsvWriter writer = null;
+		CsvWriter csvWriter = new CsvWriter(response.getOutputStream());
 		try
 		{
-			writer = new CsvWriter(response.getWriter());
-
-			// The fieldsToReturn contain identifiers, we need the names
-			Map<String, String> nameByIdentifier = getFeatureNames(request.getFieldsToReturn());
-
-			// Keep order
-			List<String> names = new ArrayList<String>();
-			for (String identifier : request.getFieldsToReturn())
-			{
-				String name = nameByIdentifier.get(identifier);
-				if (name != null)
-				{
-					names.add(name);
-				}
-			}
-
-			writer.writeAttributeNames(names);
-			int count = 0;
-			SearchResult searchResult;
-
-			do
-			{
-				request.getQuery().offset(count);
-				searchResult = searchService.search(request);
-
-				for (Hit hit : searchResult.getSearchHits())
-				{
-					Entity entity = new MapEntity();
-					for (String field : request.getFieldsToReturn())
+			csvWriter.writeAttributeNames(Iterables.transform(
+					Iterables.filter(repository.getAttributes(), new Predicate<AttributeMetaData>()
 					{
-						entity.set(nameByIdentifier.get(field), hit.getColumnValueMap().get(field));
-					}
-					writer.add(entity);
-				}
-
-				count += searchResult.getSearchHits().size();
-			}
-			while (count < searchResult.getTotalHitCount());
+						@Override
+						public boolean apply(AttributeMetaData attributeMetaData)
+						{
+							return attributes.contains(attributeMetaData.getName());
+						}
+					}), new Function<AttributeMetaData, String>()
+					{
+						@Override
+						public String apply(AttributeMetaData attributeMetaData)
+						{
+							return attributeMetaData.getName();
+						}
+					}));
+			csvWriter.add(dataService.findAll(entityName, dataRequest.getQuery()));
 		}
 		finally
 		{
-			IOUtils.closeQuietly(writer);
+			csvWriter.close();
 		}
 	}
 
@@ -296,26 +273,5 @@ public class DataExplorerController extends MolgenisPluginController
 
 		model.addAttribute("entityMetaDataGroups", entityMetaDataGroups);
 		return "view-filter-dialog";
-	}
-
-	// Get feature names by feature identifiers
-	private Map<String, String> getFeatureNames(List<String> identifiers)
-	{
-		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers), ObservableFeature.class);
-
-		Map<String, String> nameByIdentifier = new LinkedHashMap<String, String>();
-		for (ObservableFeature feature : features)
-		{
-			nameByIdentifier.put(feature.getIdentifier(), feature.getName());
-		}
-
-		return nameByIdentifier;
-	}
-
-	private String getCsvFileName(String dataSetName)
-	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 }
