@@ -13,7 +13,8 @@
 					<div id="filter-nav-content" class="tab-content">
 						<#list entityMetaDataGroups as entityMetaData>
 							<div class="tab-pane" id="${entityMetaData.name}-tab">
-							<#list entityMetaData.attributes as attributeMetaData>	
+							<#list entityMetaData.levelOneAttributes as attributeMetaData>
+								<#if attributeMetaData.dataType.enumType != "HAS">
 								<table id="${attributeMetaData.name}-table">
 									<tr>
 									  	<td>
@@ -21,6 +22,7 @@
 							  			</td>
 					  				</tr>
 					   	  	  	</table>
+					   	  	  	</#if>
 							</#list>
 						   </div>
 					   </#list>

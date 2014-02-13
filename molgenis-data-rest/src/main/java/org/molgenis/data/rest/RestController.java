@@ -44,12 +44,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntityNotFoundException;
@@ -106,8 +103,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse getMetaData(@PathVariable("entityName")
-	String entityNameRaw)
+	public EntityMetaDataResponse getMetaData(@PathVariable("entityName") String entityNameRaw)
 	{
 		String entityName = getEntityName(entityNameRaw);
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
@@ -115,8 +111,7 @@ public class RestController
 	}
 
 	/**
-	 * TODO JJ 
-	 * Gets the metadata for an entity
+	 * TODO JJ Gets the metadata for an entity
 	 * 
 	 * Example url: /api/v1/person/meta
 	 * 
@@ -131,10 +126,9 @@ public class RestController
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		return new EntityMetaDataResponse(meta, meta.getLevelOneAttributes());
 	}
-	
+
 	/**
-	 * TODO JJ 
-	 * Gets the metadata for an entity
+	 * TODO JJ Gets the metadata for an entity
 	 * 
 	 * Example url: /api/v1/person/meta
 	 * 
@@ -143,15 +137,15 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse getAttributeMetaData(
-			@PathVariable("entityName") String inputEntityParentName,
+	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName") String inputEntityParentName,
 			@PathVariable("attributeName") String inputAttributeParentName)
 	{
 		String entityName = getEntityName(inputEntityParentName);
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
-		for(AttributeMetaData attributeMetaData : meta.getLevelOneAttributes())
+		for (AttributeMetaData attributeMetaData : meta.getAttributes())
 		{
-			if(attributeMetaData.getName().equals(inputAttributeParentName)){
+			if (attributeMetaData.getName().equals(inputAttributeParentName))
+			{
 				return new AttributeMetaDataResponse(inputEntityParentName, attributeMetaData);
 			}
 		}
@@ -175,10 +169,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object> retrieve(@PathVariable("entityName")
-	String entityNameRaw, @PathVariable("id")
-	Integer id, @RequestParam(value = "expand", required = false)
-	String... expandFields)
+	public Map<String, Object> retrieve(@PathVariable("entityName") String entityNameRaw,
+			@PathVariable("id") Integer id, @RequestParam(value = "expand", required = false) String... expandFields)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
@@ -212,12 +204,9 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Object retrieveRef(@PathVariable("entityName")
-	String entityNameRaw, @PathVariable("id")
-	Integer id, @PathVariable("refAttributeName")
-	String refAttributeName, @Valid
-	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
-	String... expandFields)
+	public Object retrieveRef(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+			@PathVariable("refAttributeName") String refAttributeName, @Valid EntityCollectionRequest request,
+			@RequestParam(value = "expand", required = false) String... expandFields)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
@@ -287,9 +276,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollection(
-			@PathVariable("entityName") String entityNameRaw, 
-			@Valid EntityCollectionRequest request, 
+	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityNameRaw,
+			@Valid EntityCollectionRequest request,
 			@RequestParam(value = "expand", required = false) String... expandFields)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
@@ -314,11 +302,9 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName")
-	String entityNameRaw, @Valid
-	@RequestBody
-	EntityCollectionRequest request, @RequestParam(value = "expand", required = false)
-	String... expandFields)
+	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityNameRaw,
+			@Valid @RequestBody EntityCollectionRequest request,
+			@RequestParam(value = "expand", required = false) String... expandFields)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> expandFieldSet = expandFields == null ? Collections.<String> emptySet() : new HashSet<String>(
@@ -337,8 +323,8 @@ public class RestController
 	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
-	public void createFromFormPost(@PathVariable("entityName")
-	String entityNameRaw, HttpServletRequest request, HttpServletResponse response)
+	public void createFromFormPost(@PathVariable("entityName") String entityNameRaw, HttpServletRequest request,
+			HttpServletResponse response)
 	{
 		String entityName = getEntityName(entityNameRaw);
 
@@ -352,9 +338,8 @@ public class RestController
 	}
 
 	@RequestMapping(value = "/{entityName}", method = POST)
-	public void create(@PathVariable("entityName")
-	String entityNameRaw, @RequestBody
-	Map<String, Object> entityMap, HttpServletResponse response) throws EntityNotFoundException
+	public void create(@PathVariable("entityName") String entityNameRaw, @RequestBody Map<String, Object> entityMap,
+			HttpServletResponse response) throws EntityNotFoundException
 	{
 		if (entityMap == null)
 		{
@@ -376,10 +361,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
 	@ResponseStatus(OK)
-	public void update(@PathVariable("entityName")
-	String entityNameRaw, @PathVariable("id")
-	Integer id, @RequestBody
-	Map<String, Object> entityMap)
+	public void update(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+			@RequestBody Map<String, Object> entityMap)
 	{
 		String entityName = getEntityName(entityNameRaw);
 		updateInternal(entityName, id, entityMap);
@@ -396,10 +379,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updatePost(@PathVariable("entityName")
-	String entityNameRaw, @PathVariable("id")
-	Integer id, @RequestBody
-	Map<String, Object> entityMap)
+	public void updatePost(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+			@RequestBody Map<String, Object> entityMap)
 	{
 		String entityName = getEntityName(entityNameRaw);
 		updateInternal(entityName, id, entityMap);
@@ -419,9 +400,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
-	public void updateFromFormPost(@PathVariable("entityName")
-	String entityNameRaw, @PathVariable("id")
-	Integer id, HttpServletRequest request)
+	public void updateFromFormPost(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+			HttpServletRequest request)
 	{
 		String entityName = getEntityName(entityNameRaw);
 
@@ -443,9 +423,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void delete(@PathVariable("entityName")
-	String entityNameRaw, @PathVariable
-	Integer id)
+	public void delete(@PathVariable("entityName") String entityNameRaw, @PathVariable Integer id)
 	{
 		String entityName = getEntityName(entityNameRaw);
 		dataService.delete(entityName, id);
@@ -462,9 +440,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
-	public void deletePost(@PathVariable("entityName")
-	String entityName, @PathVariable
-	Integer id)
+	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Integer id)
 	{
 		delete(entityName, id);
 	}
