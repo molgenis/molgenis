@@ -12,6 +12,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -21,14 +22,23 @@ import org.molgenis.data.support.DefaultEntityMetaData;
  * <p>
  * <b>dbNSFP returns:</b>
  * 
- * chr	pos(1-coor)	ref	alt	aaref	aaalt	hg18_pos(1-coor)	genename	Uniprot_acc	Uniprot_id	Uniprot_aapos	Interpro_domain	cds_strand	refcodon	SLR_test_statistic 	codonpos	fold-degenerate	Ancestral_allele	Ensembl_geneid	Ensembl_transcriptid	aapos	aapos_SIFT	aapos_FATHMM	SIFT_score	SIFT_score_converted	SIFT_pred	Polyphen2_HDIV_score	
- * Polyphen2_HDIV_pred	Polyphen2_HVAR_score	Polyphen2_HVAR_pred	LRT_score	LRT_score_converted	LRT_pred	MutationTaster_score	MutationTaster_score_converted	MutationTaster_pred	MutationAssessor_score	MutationAssessor_score_converted	MutationAssessor_pred	FATHMM_score	FATHMM_score_converted	FATHMM_pred	RadialSVM_score	RadialSVM_score_converted	
- * RadialSVM_pred	LR_score	LR_pred	Reliability_index	GERP++_NR	GERP++_RS	phyloP	29way_pi	29way_logOdds	LRT_Omega	UniSNP_ids	1000Gp1_AC	1000Gp1_AF	1000Gp1_AFR_AC	1000Gp1_AFR_AF	1000Gp1_EUR_AC	1000Gp1_EUR_AF	1000Gp1_AMR_AC	1000Gp1_AMR_AF	1000Gp1_ASN_AC	1000Gp1_ASN_AF	ESP6500_AA_AF	ESP6500_EA_AF
+ * chr pos(1-coor) ref alt aaref aaalt hg18_pos(1-coor) genename Uniprot_acc Uniprot_id Uniprot_aapos Interpro_domain
+ * cds_strand refcodon SLR_test_statistic codonpos fold-degenerate Ancestral_allele Ensembl_geneid Ensembl_transcriptid
+ * aapos aapos_SIFT aapos_FATHMM SIFT_score SIFT_score_converted SIFT_pred Polyphen2_HDIV_score Polyphen2_HDIV_pred
+ * Polyphen2_HVAR_score Polyphen2_HVAR_pred LRT_score LRT_score_converted LRT_pred MutationTaster_score
+ * MutationTaster_score_converted MutationTaster_pred MutationAssessor_score MutationAssessor_score_converted
+ * MutationAssessor_pred FATHMM_score FATHMM_score_converted FATHMM_pred RadialSVM_score RadialSVM_score_converted
+ * RadialSVM_pred LR_score LR_pred Reliability_index GERP++_NR GERP++_RS phyloP 29way_pi 29way_logOdds LRT_Omega
+ * UniSNP_ids 1000Gp1_AC 1000Gp1_AF 1000Gp1_AFR_AC 1000Gp1_AFR_AF 1000Gp1_EUR_AC 1000Gp1_EUR_AF 1000Gp1_AMR_AC
+ * 1000Gp1_AMR_AF 1000Gp1_ASN_AC 1000Gp1_ASN_AF ESP6500_AA_AF ESP6500_EA_AF
  * </p>
  * 
  * @author mdehaan
  * 
+ * @version dbNSFP version 2.3 downloaded January 26, 2014
+ * 
  * */
+@Component("dbnsfpService")
 public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 {
 	// the dbnsfp service is dependant on these four values,
@@ -37,24 +47,73 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 	private static final String POSITION = "pos";
 	private static final String REFERENCE = "ref";
 	private static final String ALTERNATIVE = "alt";
-	
+
 	// the prefix for chromosome files
-	private static final String CHROMOSOME_FILE = "/Users/bin/tools/dbfnsp/dbNSFP2.3_variant.chr";
-	
-	/**
-	 * <p>
-	 * This method...
-	 * </p>
-	 * 
-	 * @param Iterator<Entity>
-	 * @return Iterator<Entity>
-	 * 
-	 * */
+	private static final String CHROMOSOME_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_variant.chr";
+
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		System.out.println("were in the annotator");
+
+		List<Entity> results = new ArrayList<Entity>();
+		Map<String, List<String>> chromosomeMap = new HashMap<String, List<String>>();
+
+		System.out.println("Making the map");
+		while (source.hasNext())
+		{
+			Entity entity = source.next();
+			List<String> mapValues = new ArrayList<String>();
+
+			String chromosome = entity.getString(CHROMOSOME);
+			mapValues.add(entity.getString(REFERENCE));
+			mapValues.add(entity.getString(ALTERNATIVE));
+			mapValues.add(entity.getString(POSITION));
+
+			if (chromosomeMap.containsKey(chromosome))
+			{
+				chromosomeMap.get(chromosome).addAll(mapValues);
+			}
+			else
+			{
+				chromosomeMap.put(chromosome, mapValues);
+			}
+
+		}
+
+		// FileReader reader = new FileReader(new File(CHROMOSOME_FILE + chromosome));
+		// BufferedReader bufferedReader = new BufferedReader(reader);
+		//
+		// String line = "";
+		// int count = 0;
+		//
+		//
+		// while (bufferedReader.ready())
+		// {
+		// count = count +1;
+		// if(count % 100000 == 0){
+		// System.out.println(count + " lines processed");
+		// }
+		//
+		// line = bufferedReader.readLine();
+		// if (line.contains(chromosome + "\t" + position))
+		// {
+		// if (line.contains("\t" + reference + "\t") && line.contains("\t" + alternative + "\t"))
+		// {
+		// // do stuff with the line, add it to the resultMap
+		// System.out.println(line);
+		// }
+		// else
+		// {
+		// System.out.println("no line found omgLKHEIQHei");
+		// // TODO what if this variant does not exist in the dbnsfp database?
+		// }
+		// }
+		// }
+		//
+		// bufferedReader.close();
+
+		return results.iterator();
 	}
 
 	/**
@@ -85,9 +144,9 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
-		
+
 		return metadata;
-		
+
 	}
 
 	@Override
@@ -95,9 +154,11 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 	{
 		boolean canAnnotate = true;
 		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for(AttributeMetaData attribute : inputAttributes){
-			if(inputMetaData.getAttribute(attribute.getName()) == null){
-				//all attributes from the inputmetadata must be present to annotate.
+		for (AttributeMetaData attribute : inputAttributes)
+		{
+			if (inputMetaData.getAttribute(attribute.getName()) == null)
+			{
+				// all attributes from the inputmetadata must be present to annotate.
 				canAnnotate = false;
 			}
 		}
@@ -131,8 +192,7 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 		String[] chromosomes =
 		{ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
 				"20", "21", "22", "X", "Y" };
-		
-		
+
 		for (int i = 0; i < args.length; i += 2)
 		{
 			if (args[i].equalsIgnoreCase("-c"))
@@ -191,7 +251,7 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 			}
 			if (args[i].equalsIgnoreCase("-p")) preserveVcf = true;
 		}
-	
+
 		PrintWriter out = new PrintWriter(new FileWriter(outfile));
 		PrintWriter out2 = new PrintWriter(new FileWriter(outfile + ".err"));
 
@@ -844,6 +904,4 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 		return outStr;
 	}
 
-	
-	
 }
