@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.impl;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
+import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
 import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
@@ -45,14 +46,23 @@ import java.util.*;
  *
  */
 @Component("omimHpoService")
-public class OmimHpoAnnotator implements RepositoryAnnotator {
-
-    // the OmimHpoAnnotator is dependant on these two values
-    private static final String CHROMOSOME = "chrom";
-    private static final String POSITION = "pos";
+public class OmimHpoAnnotator extends LocusAnnotator {
 
     // output
-    private static final String IETS = "iets";
+    private static final String OMIM_DISO = "Disease_OMIM";
+    private static final String OMIM_LINK = "Hyperlink_OMIM";
+    private static final String OMIM_ALL = "Full_info_HPO";
+    private static final String HPO_DESC = "Symptoms_HPO";
+    private static final String HPO_LINK = "Hyperlinks_HPO";
+    private static final String HPO_ALL = "Full_info_HPO";
+
+    /**
+     * full info fields can be big due to many symptoms or diseases..
+     *
+     * KCNJ13
+     *   [HPOTerm{id='HP:0000486', description='Strabismus', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000007', description='Autosomal recessive inheritance', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000639', description='Nystagmus', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000505', description='Visual impairment', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0100543', description='Cognitive impairment', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000365', description='Hearing impairment', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0004374', description='Hemiplegia/hemiparesis', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000512', description='Abnormal electroretinogram', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000639', description='Nystagmus', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0002084', description='Encephalocele', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0007360', description='Aplasia/Hypoplasia of the cerebellum', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000505', description='Visual impairment', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0007703', description='Abnormal retinal pigmentation', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000648', description='Optic atrophy', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0100689', description='Decreased corneal thickness', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0001252', description='Muscular hypotonia', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0002269', description='Abnormality of neuronal migration', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0001250', description='Seizures', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='OMIM', diseaseDbEntry=193230, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000006', description='Autosomal dominant inheritance', diseaseDb='OMIM', diseaseDbEntry=193230, geneName='KCNJ13', geneEntrezID=3769}]
+     *   [OMIMTerm{entry=614186, name='Leber congenital amaurosis 16', type=3, causedBy=603208, cytoLoc='2q37.1', hgncIds=[KCNJ13, SVD, LCA16]}, OMIMTerm{entry=193230, name='Snowflake vitreoretinal degeneration', type=3, causedBy=603208, cytoLoc='2q37.1', hgncIds=[KCNJ13, SVD, LCA16]}]
+     */
 
     @Autowired
     DataService dataService;
@@ -66,46 +76,21 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
         return "OmimHpo";
     }
 
-    @Override
-    public Boolean canAnnotate(EntityMetaData inputMetaData)
-    {
-        boolean canAnnotate = true;
-        Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-        for(AttributeMetaData attribute : inputAttributes){
-            if(inputMetaData.getAttribute(attribute.getName()) == null){
-                //all attributes from the inputmetadata must be present to annotate.
-                canAnnotate = false;
-            }
-        }
-        return canAnnotate;
-    }
+
 
     @Override
     public EntityMetaData getOutputMetaData()
     {
-        String[] caddFeatures = new String[]
-                { IETS };
-
         DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-        for (String attribute : caddFeatures)
-        {
-            metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, MolgenisFieldTypes.FieldTypeEnum.STRING));
-        }
-
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISO, MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESC, MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
         return metadata;
     }
 
-    @Override
-    public EntityMetaData getInputMetaData()
-    {
-        DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.STRING));
-
-        return metadata;
-    }
 
 
 
@@ -125,8 +110,8 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
             {
                 Entity entity = source.next();
 
-                String chromosome = entity.get(CHROMOSOME).toString();
-                String position = entity.get(POSITION).toString();
+                String chromosome = entity.getString(CHROMOSOME);
+                Long position = entity.getLong(POSITION);
 
                 String caddAbs = "";
                 String caddScaled = "";
@@ -144,12 +129,39 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
         return results.iterator();
     }
 
+    /**
+     *  e.g.
+     *  OMIM:614887	PEX14	5195	HP:0002240	Hepatomegaly
+     *
+     *  becomes:
+     *  HPOTerm{id='HP:0002240', description='Hepatomegaly', diseaseDb='OMIM', diseaseDbEntry=614887, geneName='PEX14', geneEntrezID=5195}
+     *
+     * @return
+     * @throws IOException
+     */
     public static List<HPOTerm> hpoTerms() throws IOException {
         List<HPOTerm> res = new ArrayList<HPOTerm>();
-        ArrayList<String> omimRaw = readLinesFromURL(
+        ArrayList<String> hpoRaw = readLinesFromURL(
                 "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt", "ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt");
 
+        if(hpoRaw.get(0).startsWith("#"))
+        {
+            hpoRaw.remove(0);
+        }
 
+        for(String s : hpoRaw)
+        {
+            String[] split = s.split("\t");
+            String diseaseDb = split[0].split(":")[0];
+            int diseaseDbID = Integer.parseInt(split[0].split(":")[1]);
+            String geneSymbol = split[1];
+            int geneEntrezId = Integer.parseInt(split[2]);
+            String hpoId = split[3];
+            String description = split[4];
+            HPOTerm h = new HPOTerm(hpoId, description, diseaseDb, diseaseDbID, geneSymbol, geneEntrezId);
+            res.add(h);
+          //  System.out.println(h);
+        }
 
         return res;
     }
@@ -162,6 +174,9 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
      *
      * But do store this one:
      * Leukemia, acute myelogenous, 601626 (3)|GMPS|600358|3q25.31
+     *
+     * becomes:
+     * OMIMTerm{id=601626, name='Leukemia, acute myelogenous', type=3, causedBy=600358, cytoLoc='3q25.31', hgncIds=[GMPS]}
      *
      * @return
      * @throws IOException
@@ -178,14 +193,14 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
 
             // System.out.println(pipeSplit[0]);
 
-            Integer entryID = null;
+            Integer omimEntry = null;
             try{
-                String id = pipeSplit[0].substring(pipeSplit[0].length()-10, pipeSplit[0].length()-4);
+                String entry = pipeSplit[0].substring(pipeSplit[0].length()-10, pipeSplit[0].length()-4);
                 //        System.out.println(id);
-                entryID = Integer.parseInt(id);
+                omimEntry = Integer.parseInt(entry);
             }catch(Exception e){};
 
-            if(entryID!=null)
+            if(omimEntry!=null)
             {
                 String name = pipeSplit[0].substring(0, pipeSplit[0].length()-12);
                 int type = Integer.parseInt(pipeSplit[0].substring(pipeSplit[0].length()-2, pipeSplit[0].length()-1));
@@ -193,9 +208,9 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
                 int mutationId = Integer.parseInt(pipeSplit[2]);
                 String cytoLoc = pipeSplit[3];
 
-                OMIMTerm ot = new OMIMTerm(entryID, name, type, mutationId, cytoLoc, genes);
+                OMIMTerm ot = new OMIMTerm(omimEntry, name, type, mutationId, cytoLoc, genes);
 
-                System.out.println(ot);
+               // System.out.println(ot);
                 res.add(ot);
             }
 
@@ -204,6 +219,11 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
         return res;
     }
 
+    /**
+     * output: map of GeneSymbol to HGNCLoc(GeneSymbol, Start, End, Chrom)
+     * @return
+     * @throws IOException
+     */
     public static Map<String, HGNCLoc> getHgncLocs() throws IOException {
         ArrayList<String> geneLocs = readLinesFromURL(
                 "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv",
@@ -271,7 +291,67 @@ public class OmimHpoAnnotator implements RepositoryAnnotator {
 
 
     public static void main(String [ ] args) throws IOException {
-        omimTerms();
+
+
+
+
+        List<String> genes = Arrays.asList(new String[]{"DYSF","ALMS1","HS6ST1","NEB","SCN1A","LRP2","CHRNA1","TTN","FASTKD2","CPS1","KCNJ13","COL6A3","FANCD2","BTD","MRPL3","CLDN16","SCARB2","FRAS1","MANBA","FGA","PDE4D","MEF2C","MEGF10","ADAMTS2","TNXB","NDUFAF4","BRAT1","PMS2","SBDS","NCF1","PEX1","ADAM9","NDUFAF6","VPS13B","TG","PLEC","TRPM6","ABCA1","MUSK","DFNB31"});
+
+        List<HPOTerm> hpoTerms = hpoTerms();
+        List<OMIMTerm> omimTerms = omimTerms();
+
+        Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
+        Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
+
+        for(String gene : genes)
+        {
+            System.out.println(gene);
+            System.out.println("\t" + geneToHpoTerm.get(gene));
+            System.out.println("\t" + geneToOmimTerm.get(gene));
+        }
+
+
 
     }
+
+    private static Map<String, List<OMIMTerm>> geneToOmimTerms(List<OMIMTerm> omimTerms) {
+        Map<String, List<OMIMTerm>> res = new HashMap<String, List<OMIMTerm>>();
+        for(OMIMTerm o : omimTerms)
+        {
+            for(String geneSymbol : o.getHgncIds())
+            {
+                if(res.containsKey(geneSymbol))
+                {
+                    res.get(geneSymbol).add(o);
+                }
+                else
+                {
+                    ArrayList<OMIMTerm> bla = new ArrayList<OMIMTerm>();
+                    bla.add(o);
+                    res.put(geneSymbol, bla);
+                }
+            }
+        }
+        return res;
+    }
+
+    private static Map<String, List<HPOTerm>> geneToHpoTerms(List<HPOTerm> hpoTerms) {
+        Map<String, List<HPOTerm>> res = new HashMap<String, List<HPOTerm>>();
+        for(HPOTerm h : hpoTerms)
+        {
+            if(res.containsKey(h.getGeneName()))
+            {
+                res.get(h.getGeneName()).add(h);
+            }
+            else
+            {
+                ArrayList<HPOTerm> bla = new ArrayList<HPOTerm>();
+                bla.add(h);
+                res.put(h.getGeneName(), bla);
+            }
+        }
+        return res;
+    }
+
+
 }

@@ -7,15 +7,15 @@ import java.util.List;
  */
 public class OMIMTerm {
 
-    int id; //the omim entry nr for this disorder
-    String name; // name of this disorder
+    int entry; //the omim entry nr for this disorder, NOT AN IDENTIFIER
+    String name; // name of this disorder, IDENTIFIER
     int type; //1, 2, 3 or 4, see http://www.omim.org/help/faq section 1.6
     int causedBy; //id of the causing gene/mutation
     String cytoLoc; //cytogenetic location
     List<String> hgncIds; //list of HGNC gene symbols that are associated
 
-    public OMIMTerm(int id, String name, int type, int causedBy, String cytoLoc, List<String> hgncIds) {
-        this.id = id;
+    public OMIMTerm(int entry, String name, int type, int causedBy, String cytoLoc, List<String> hgncIds) {
+        this.entry = entry;
         this.name = name;
         this.type = type;
         this.causedBy = causedBy;
@@ -23,8 +23,8 @@ public class OMIMTerm {
         this.hgncIds = hgncIds;
     }
 
-    public int getId() {
-        return id;
+    public int getEntry() {
+        return entry;
     }
 
     public String getName() {
@@ -50,7 +50,7 @@ public class OMIMTerm {
     @Override
     public String toString() {
         return "OMIMTerm{" +
-                "id=" + id +
+                "entry=" + entry +
                 ", name='" + name + '\'' +
                 ", type=" + type +
                 ", causedBy=" + causedBy +
