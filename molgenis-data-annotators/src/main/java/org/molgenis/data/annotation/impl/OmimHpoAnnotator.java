@@ -348,28 +348,6 @@ public class OmimHpoAnnotator extends LocusAnnotator {
     }
 
 
-
-    public static void main(String [ ] args) throws Exception {
-
-        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l)));
-
-        List<Entity> inputs = new ArrayList<Entity>();
-        for(Locus l : loci)
-        {
-            HashMap<String, Object> inputMap = new HashMap<String, Object>();
-            inputMap.put(CHROMOSOME, l.getChrom());
-            inputMap.put(POSITION, l.getPos());
-            inputs.add(new MapEntity(inputMap));
-        }
-
-        Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
-        while(res.hasNext())
-        {
-            System.out.println(res.next().toString());
-        }
-
-    }
-
     private static Map<String, List<OMIMTerm>> geneToOmimTerms(List<OMIMTerm> omimTerms) {
         Map<String, List<OMIMTerm>> res = new HashMap<String, List<OMIMTerm>>();
         for(OMIMTerm o : omimTerms)
@@ -435,5 +413,26 @@ public class OmimHpoAnnotator extends LocusAnnotator {
         return hgncSymbols;
     }
 
+
+    public static void main(String [ ] args) throws Exception {
+
+        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("11", 6637740l)));
+
+        List<Entity> inputs = new ArrayList<Entity>();
+        for(Locus l : loci)
+        {
+            HashMap<String, Object> inputMap = new HashMap<String, Object>();
+            inputMap.put(CHROMOSOME, l.getChrom());
+            inputMap.put(POSITION, l.getPos());
+            inputs.add(new MapEntity(inputMap));
+        }
+
+        Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
+        while(res.hasNext())
+        {
+            System.out.println(res.next().toString());
+        }
+
+    }
 
 }
