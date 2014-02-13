@@ -60,19 +60,17 @@
 				var value = columnValueMap[key];
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
-					if (feature.fieldType.toLowerCase() == "xref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						var valueKey = columnValueMap['key-' + feature.name];
-						var valueValue = formatTableCellValue(value, feature.fieldType);
-						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
+					if (feature.fieldType === "XREF" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var attributeName = restApi.get(value.href).identifier;
+						cellValue = '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + attributeName + '">' 
+							+ formatTableCellValue(attributeName, feature.fieldType) + '</a>';
 					}	
-					else if (feature.fieldType.toLowerCase() == "mref" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
-						var valueKeys = columnValueMap['key-' + feature.name];
-						var valueValues = value.split(',');
-						for (var i = 0; i < valueValues.length; i++) {
-							var valueKey = valueKeys[i];
-							var valueValue = formatTableCellValue(valueValues[i], feature.fieldType);
+					else if (feature.fieldType === "MREF" && (typeof molgenis.entityExplorerUrl !== 'undefined')){
+						var itemsMref = restApi.get(value.href).items;
+						for(var i=0; i < itemsMref.length; i++){
 						    if(i > 0) cellValue +=  ',';
-						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + valueKey + '">' + valueValue + '</a>';
+						    cellValue += '<a href="'+ molgenis.entityExplorerUrl +'?entity=Characteristic&identifier=' + itemsMref[i].identifier + '">' 
+						    	+ formatTableCellValue(itemsMref[i].identifier, feature.fieldType) + '</a>';
 						}
 					}
 					else{
