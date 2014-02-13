@@ -14,11 +14,13 @@ import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * This class...
+ * This class uses a chromosome to approach a dbNSFP chromosome variant file, it then checks all locations
+ * recorded for a chromosome in the data set, for every line, and uses a matching line to add annotation to
+ * the data set variant.
  * </p>
  * 
  * <p>
- * <b>dbNSFP returns:</b>
+ * <b>dbNSFP variant returns:</b>
  * 
  * chr pos(1-coor) ref alt aaref aaalt hg18_pos(1-coor) genename Uniprot_acc Uniprot_id Uniprot_aapos Interpro_domain
  * cds_strand refcodon SLR_test_statistic codonpos fold-degenerate Ancestral_allele Ensembl_geneid Ensembl_transcriptid
@@ -36,8 +38,8 @@ import org.springframework.stereotype.Component;
  * @version dbNSFP version 2.3 downloaded January 26, 2014
  * 
  * */
-@Component("dbnsfpService")
-public class DbnsfpServiceAnnotator implements RepositoryAnnotator
+@Component("dbnsfpVariantService")
+public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator
 {
 	// the dbnsfp service is dependant on these four values,
 	// without them no annotations can be returned
@@ -46,51 +48,17 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 	private static final String REFERENCE = "ref";
 	private static final String ALTERNATIVE = "alt";
 
-	// the prefix for chromosome files, change this into runtime property
+	//FIXME the prefix for chromosome files, change this into runtime property
 	private static final String CHROMOSOME_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_variant.chr";
 
 	// we want to know features, so take the first chromosome file and retrieve them from the header
 	private static final String[] FEATURES = determineFeatures();
 
-	private static String[] determineFeatures()
-	{
-		String[] features = null;
-
-		try
-		{
-			FileReader reader = new FileReader(new File(CHROMOSOME_FILE + "1"));
-			BufferedReader bufferedReader = new BufferedReader(reader);
-
-			String line = bufferedReader.readLine();
-			features = line.split("\t");
-			bufferedReader.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			throw new RuntimeException(e);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		features[0] = null;
-		features[1] = null;
-		features[2] = null;
-		features[3] = null;
-
-		return features;
-	}
-
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
-		System.out.println("were in the annotator");
-
 		List<Entity> results = new ArrayList<Entity>();
 		Map<String, List<String[]>> chromosomeMap = new HashMap<String, List<String[]>>();
-
-		System.out.println("Making the map");
 
 		// Make a map with data pulled from every Entity
 		while (source.hasNext())
@@ -99,7 +67,7 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 
 			List<String[]> listOfTriplets = new ArrayList<String[]>();
 
-			// a triplet exists out of position, reference and alternative
+			// a triplet contains position, reference and alternative
 			String[] triplets = new String[3];
 
 			String chromosome = entity.getString(CHROMOSOME);
@@ -122,15 +90,10 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 			}
 		}
 
-		System.out.println("Looping through the chromosome files\n");
-
 		try
 		{
-			// now we only read the files necessary with the help of the chromosome key set
 			for (String chromosomeInMap : chromosomeMap.keySet())
 			{
-				System.out.println("Reading file containing chromosome [" + chromosomeInMap + "]");
-
 				FileReader reader = new FileReader(new File(CHROMOSOME_FILE + chromosomeInMap));
 				BufferedReader bufferedReader = new BufferedReader(reader);
 
@@ -152,17 +115,18 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 							String reference = charArraysForThisChromosome.get(i)[1];
 							String alternative = charArraysForThisChromosome.get(i)[2];
 
-							if (lineSplit[2].toUpperCase().equals(reference.toUpperCase()) && lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
+							if (lineSplit[2].toUpperCase().equals(reference.toUpperCase())
+									&& lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
 							{
 								int lineSplitIndex = 4; // skip the first four elements: chrom, pos, ref, alt
 
 								// we have a match with a line
 								HashMap<String, Object> resultMap = new HashMap<String, Object>();
-								
+
 								for (String feature : FEATURES)
 								{
 									if (feature != null)
-									{										
+									{
 										resultMap.put(feature, lineSplit[lineSplitIndex]);
 										lineSplitIndex = lineSplitIndex + 1;
 									}
@@ -222,6 +186,7 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 		{
 			if (attribute != null)
 			{
+				// FIXME not all attributes are strings
 				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
 			}
 		}
@@ -250,13 +215,13 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public Boolean canAnnotate(EntityMetaData inputMetaData)
+	public Boolean canAnnotate(EntityMetaData sourceMetaData)
 	{
 		boolean canAnnotate = true;
 		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
 		for (AttributeMetaData attribute : inputAttributes)
 		{
-			if (inputMetaData.getAttribute(attribute.getName()) == null)
+			if (sourceMetaData.getAttribute(attribute.getName()) == null)
 			{
 				// all attributes from the inputmetadata must be present to annotate.
 				canAnnotate = false;
@@ -269,6 +234,36 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 	@Override
 	public String getName()
 	{
-		return "dbNSFP";
+		return "dbNSFP-Variant";
+	}
+	
+	private static String[] determineFeatures()
+	{
+		String[] features = null;
+
+		try
+		{
+			FileReader reader = new FileReader(new File(CHROMOSOME_FILE + "1"));
+			BufferedReader bufferedReader = new BufferedReader(reader);
+
+			String line = bufferedReader.readLine();
+			features = line.split("\t");
+			bufferedReader.close();
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		features[0] = null;
+		features[1] = null;
+		features[2] = null;
+		features[3] = null;
+
+		return features;
 	}
 }

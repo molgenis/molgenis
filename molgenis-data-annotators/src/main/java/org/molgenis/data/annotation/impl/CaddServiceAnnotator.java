@@ -157,12 +157,12 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public Boolean canAnnotate(EntityMetaData inputMetaData)
+	public Boolean canAnnotate(EntityMetaData sourceMetaData)
 	{
 		boolean canAnnotate = true;
 		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
 		for(AttributeMetaData attribute : inputAttributes){
-			if(inputMetaData.getAttribute(attribute.getName()) == null){
+			if(sourceMetaData.getAttribute(attribute.getName()) == null){
 				//all attributes from the inputmetadata must be present to annotate.
 				canAnnotate = false;
 			}
