@@ -6,13 +6,13 @@
 	var featureFilters = {};
 	var selectedFeatures = [];
 	var searchQuery = null;
-	var selectedDataSet = null;
+	var selectedRepoMetadata = null;
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
 	var aggregateView = false;
 
 	molgenis.getSelectedDataSetIdentifier = function() {
-		return selectedDataSet.name;
+		return selectedRepoMetadata.name;
 	};
 
 	molgenis.createFeatureSelectionTree = function(entityUri) {
@@ -20,7 +20,7 @@
 		
 		restApi.getAsync(entityMetaUri, null, null, 
 			function(entityMetaData) {
-				selectedDataSet = entityMetaData;
+				selectedRepoMetadata = entityMetaData;
 			
 				var container = $('#feature-selection');
 				
@@ -213,7 +213,7 @@
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
 				var maxRowsPerPage = resultsTable.getMaxRows();
-				var nrRows = searchResponse.totalHitCount;
+				var nrRows = searchResponse.items.length;
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 			});
@@ -227,7 +227,6 @@
 	molgenis.updateObservationSetsTablePage = function() {
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
-				console.log("updateObservationSetsTablePage");
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 			});
 		} else {
@@ -1371,13 +1370,15 @@
 	};
 
 	molgenis.search = function(callback) {
-		searchApi.search(molgenis.createSearchRequest(true), callback);
+		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name,null,null, callback);
+		
+//		searchApi.search(molgenis.createSearchRequest(true), callback);
 	};
 
 	molgenis.createSearchRequest = function(includeLimitOffset) {
 		
 		var searchRequest = {
-			documentType : selectedDataSet.name,
+			documentType : selectedRepoMetadata.name,
 			query : {
 				rules : [[]]
 			}
@@ -1466,7 +1467,7 @@
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
 			searchRequest.fieldsToReturn.push(feature.name);
-			if (feature.dataType === 'xref' || feature.dataType === 'mref')
+			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
 				searchRequest.fieldsToReturn.push("key-" + feature.name);
 		});
 
@@ -1630,7 +1631,7 @@
 							molgenis.initializeAggregate($('#dataset-select')
 									.val());
 							molgenis
-									.createFeatureSelectionTree($('#dataset-select').val());
+									.createFeatureSelection(selectedRepoMetadata.protocolUsed.href);
 						});
 
 		$("#observationset-search").focus();
