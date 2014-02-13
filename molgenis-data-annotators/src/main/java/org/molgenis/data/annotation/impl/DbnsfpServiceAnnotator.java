@@ -129,7 +129,6 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 			// now we only read the files necessary with the help of the chromosome key set
 			for (String chromosomeInMap : chromosomeMap.keySet())
 			{
-				HashMap<String, Object> resultMap = new HashMap<String, Object>();
 				System.out.println("Reading file containing chromosome [" + chromosomeInMap + "]");
 
 				FileReader reader = new FileReader(new File(CHROMOSOME_FILE + chromosomeInMap));
@@ -153,16 +152,17 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 							String reference = charArraysForThisChromosome.get(i)[1];
 							String alternative = charArraysForThisChromosome.get(i)[2];
 
-							if (lineSplit[2].equals(reference) && lineSplit[3].equals(alternative))
+							if (lineSplit[2].toUpperCase().equals(reference.toUpperCase()) && lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
 							{
-								int lineSplitIndex = 4;
+								int lineSplitIndex = 4; // skip the first four elements: chrom, pos, ref, alt
 
 								// we have a match with a line
+								HashMap<String, Object> resultMap = new HashMap<String, Object>();
+								
 								for (String feature : FEATURES)
 								{
 									if (feature != null)
-									{
-										System.out.println(lineSplit[lineSplitIndex]);
+									{										
 										resultMap.put(feature, lineSplit[lineSplitIndex]);
 										lineSplitIndex = lineSplitIndex + 1;
 									}

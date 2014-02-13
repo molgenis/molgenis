@@ -89,12 +89,12 @@ public class OmxDataSetAnnotator
 		if(resultProtocol == null){
 			addAnnotationResultProtocol(annotator, dataSet, outputMetadataNames);
 		}
-		addAnnotationResults(inputMetadataNames, outputMetadataNames, dataSet, entityIterator);
+		addAnnotationResults(inputMetadataNames, outputMetadataNames, dataSet, entityIterator, annotator.getName());
 		indexResultDataSet(dataSet);
 	}
 
 	private void addAnnotationResults(List<String> inputMetadataNames, List<String> outputMetadataNames,
-			DataSet dataSet, Iterator<Entity> entityIterator)
+			DataSet dataSet, Iterator<Entity> entityIterator, String prefix)
 	{
 		Iterable<ObservationSet> osSet = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
@@ -112,7 +112,7 @@ public class OmxDataSetAnnotator
 				{
 					for (String columnName : outputMetadataNames)
 					{
-						addValue(entity, os, columnName);
+						addValue(entity, os, columnName, prefix);
 					}
 				}
 			}		
@@ -172,7 +172,7 @@ public class OmxDataSetAnnotator
 		}
 	}
 
-	private void addValue(Entity entity, ObservationSet os, String columnName)
+	private void addValue(Entity entity, ObservationSet os, String columnName, String prefix)
 	{
 		StringValue sv = new StringValue();
 		sv.setValue(entity.get(columnName).toString());
@@ -181,7 +181,7 @@ public class OmxDataSetAnnotator
 		ObservedValue ov = new ObservedValue();
 
 		ObservableFeature thisFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.IDENTIFIER, columnName + "_id"),
+				new QueryImpl().eq(ObservableFeature.IDENTIFIER, prefix + columnName + "_id"),
 				ObservableFeature.class);
 
 		ov.setFeature(thisFeature);
