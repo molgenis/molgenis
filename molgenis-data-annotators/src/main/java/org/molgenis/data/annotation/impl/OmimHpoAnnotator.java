@@ -96,7 +96,7 @@ public class OmimHpoAnnotator extends LocusAnnotator {
     public Iterator<Entity> annotate(Iterator<Entity> source)
     {
         List<Entity> results = new ArrayList<Entity>();
-        
+
         try{
 
             List<Locus> loci = new ArrayList<Locus>();
@@ -119,17 +119,54 @@ public class OmimHpoAnnotator extends LocusAnnotator {
             Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
 
 
-            for(Locus l : loci){
+            for(int i=0; i<loci.size();i++)
+            {
                 HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+                Locus l = loci.get(i);
+                String geneSymbol = geneSymbols.get(i);
 
                 resultMap.put(CHROMOSOME, l.getChrom());
                 resultMap.put(POSITION, l.getPos());
-                resultMap.put(OMIM_DISO, "todo");
-                resultMap.put(OMIM_LINK, "todo");
-                resultMap.put(OMIM_ALL, "todo");
-                resultMap.put(HPO_DESC, "todo");
-                resultMap.put(HPO_LINK, "todo");
-                resultMap.put(HPO_ALL, "todo");
+
+                StringBuffer omimDisorders = new StringBuffer();
+                for(OMIMTerm o : geneToOmimTerm.get(geneSymbol))
+                {
+                    omimDisorders.append(o.getName() + " / ");
+                }
+                omimDisorders.delete(omimDisorders.length()-3, omimDisorders.length());
+                resultMap.put(OMIM_DISO, omimDisorders.toString());
+
+
+                StringBuffer hpoDescriptions = new StringBuffer();
+                for(HPOTerm h : geneToHpoTerm.get(geneSymbol))
+                {
+                    hpoDescriptions.append(h.getDescription() + " / ");
+                }
+                hpoDescriptions.delete(hpoDescriptions.length()-3, hpoDescriptions.length());
+                resultMap.put(HPO_DESC, hpoDescriptions.toString());
+
+
+                StringBuffer omimLinks = new StringBuffer();
+                for(OMIMTerm o : geneToOmimTerm.get(geneSymbol))
+                {
+                    omimLinks.append("<a href=\"http://www.omim.org/entry/"+o.getEntry()+"\">" + o.getEntry() + "</a> / ");
+                }
+                omimLinks.delete(omimLinks.length()-3, omimLinks.length());
+                resultMap.put(OMIM_LINK, omimLinks.toString());
+
+
+                StringBuffer hpoLinks = new StringBuffer();
+                for(HPOTerm h : geneToHpoTerm.get(geneSymbol))
+                {
+                    hpoLinks.append("<a href=\"http://www.human-phenotype-ontology.org/hpoweb/showterm?id="+h.getId()+"\">" + h.getId() + "</a> / ");
+                }
+                hpoLinks.delete(hpoLinks.length()-3, hpoLinks.length());
+                resultMap.put(HPO_LINK, hpoLinks.toString());
+
+
+                resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
+                resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
 
                 results.add(new MapEntity(resultMap));
             }
@@ -316,18 +353,19 @@ public class OmimHpoAnnotator extends LocusAnnotator {
 
         List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l)));
 
-        List<HGNCLoc> hgncLocs = getHgncLocs();
-        List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
-        List<HPOTerm> hpoTerms = hpoTerms();
-        List<OMIMTerm> omimTerms = omimTerms();
-        Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
-        Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
-
-        for(String gene : geneSymbols)
+        List<Entity> inputs = new ArrayList<Entity>();
+        for(Locus l : loci)
         {
-            System.out.println(gene);
-            System.out.println("\t" + geneToHpoTerm.get(gene));
-            System.out.println("\t" + geneToOmimTerm.get(gene));
+            HashMap<String, Object> inputMap = new HashMap<String, Object>();
+            inputMap.put(CHROMOSOME, l.getChrom());
+            inputMap.put(POSITION, l.getPos());
+            inputs.add(new MapEntity(inputMap));
+        }
+
+        Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
+        while(res.hasNext())
+        {
+            System.out.println(res.next().toString());
         }
 
     }
