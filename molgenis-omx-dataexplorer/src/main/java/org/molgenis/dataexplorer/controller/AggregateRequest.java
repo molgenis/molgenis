@@ -1,40 +1,19 @@
 package org.molgenis.dataexplorer.controller;
 
-import org.molgenis.search.SearchRequest;
+import javax.validation.constraints.NotNull;
 
 public class AggregateRequest
 {
+	@NotNull
+	private String attributeUri;
 
-	private final String documentType;
-	private final Integer featureId;
-	private final SearchRequest searchRequest;
-	private final String dataType;
-
-	public AggregateRequest(String documentType, Integer featureId, SearchRequest searchRequest, String dataType)
+	public String getAttributeUri()
 	{
-		this.documentType = documentType;
-		this.featureId = featureId;
-		this.searchRequest = searchRequest;
-		this.dataType = dataType;
+		return attributeUri;
 	}
 
-	public String getDocumentType()
+	public void setAttributeUri(String attributeUri)
 	{
-		return documentType;
-	}
-
-	public Integer getFeatureId()
-	{
-		return featureId;
-	}
-
-	public SearchRequest getSearchRequest()
-	{
-		return searchRequest;
-	}
-
-	public String getDataType()
-	{
-		return dataType;
+		this.attributeUri = attributeUri;
 	}
 }

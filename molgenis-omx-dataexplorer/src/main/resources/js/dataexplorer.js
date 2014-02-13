@@ -1289,43 +1289,24 @@
 	};
 
 	molgenis.createFeatureFilterField = function(elements) {
-		var featureIds = [];
+		var attributes = {};
 		$.each(elements, function(index, element) {
-			var href = $(element).attr('data-molgenis-url');
-			var id = href.substring(href.lastIndexOf('/') + 1);
-			featureIds.push(id);
+			var attributeUri = $(element).attr('data-molgenis-url');
+			attributes[attributeUri] = restApi.get(attributeUri);
 		});
-
-		var features = restApi.get('/api/v1/observablefeature', null, {
-			q : [{
-				field : 'id',
-				operator : 'IN',
-				value : featureIds
-			}],
-			num : 500
+		
+		$.each(elements, function(index, element) {
+			var attributeUri = $(element).attr('data-molgenis-url');
+			
+			var config = featureFilters[attributeUri];
+			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
+			var divContainer = molgenis
+					.createGenericFeatureFieldNew(null, attributes[attributeUri],
+							config, applyButton, attributeUri,
+							true);
+			var trElement = $(element).closest('tr');
+			trElement.append(divContainer);
 		});
-		var map = {};
-		$.each(features.items, function(index, feature) {
-			map[feature.href] = feature;
-		});
-
-		$
-				.each(
-						elements,
-						function(index, element) {
-							var items = [];
-							var featureUri = $(element).attr(
-									'data-molgenis-url');
-							var feature = map[featureUri];
-							var config = featureFilters[feature.href];
-							var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-							var divContainer = molgenis
-									.createGenericFeatureField(items, feature,
-											config, applyButton, feature.href,
-											true);
-							var trElement = $(element).closest('tr');
-							trElement.append(divContainer);
-						});
 	};
 
 	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
@@ -1492,72 +1473,33 @@
 		return searchRequest;
 	};
 
-	molgenis.initializeAggregate = function(dataSetUri) {
-		selectedDataSet = restApi.get(dataSetUri, null, null);
-		var queryRules = [];
-
-		queryRules.push({
-			'field' : 'dataType',
-			'operator' : 'EQUALS',
-			'value' : 'categorical'
-		});
-		queryRules.push({
-			'operator' : 'OR'
-		});
-		queryRules.push({
-			'field' : 'dataType',
-			'operator' : 'EQUALS',
-			'value' : 'bool'
-		});
-
-		var fragments = selectedDataSet.href.split("/");
-		var searchRequest = {
-			'documentType' : "protocolTree-" + fragments[fragments.length - 1],
-			'featureFilters' : featureFilters,
-			query : {
-				'rules' : [queryRules],
-				'pageSize' : 1000000
-			}
-		};
-
-		searchApi.search(searchRequest, function(searchResponse) {
-
-			var searchHits = searchResponse.searchHits;
+	molgenis.initializeAggregate = function(entityUri) {
+		var entityMetaUri = entityUri + '/meta';
+		restApi.getAsync(entityMetaUri, null, null, function(entityMetaData) {
 			var selectTag = $('<select id="selectFeature"/>');
-
-			if (searchHits.length === 0)
+			if(Object.keys(entityMetaData.attributes).length === 0) {
 				selectTag.attr('disabled', 'disabled');
-
-			$.each(searchHits, function(index, hit) {
-				selectTag.append('<option value=' + hit.columnValueMap.id + '>'
-						+ hit.columnValueMap.name + '</option>');
-			});
-			$('#feature-select').empty().append(selectTag);
-			if (searchHits.length > 0)
+			} else {
+				$.each(entityMetaData.attributes, function(key, attribute) {
+					if(attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL') {
+						selectTag.append('<option value="' + entityMetaUri + '/' + key + '">' + attribute.label + '</option>');
+					}
+				});
+				$('#feature-select').empty().append(selectTag);
 				molgenis.loadAggregate(selectTag.val());
-			selectTag.chosen();
-			selectTag.change(function() {
-				molgenis.loadAggregate($(this).val());
-			});
+				selectTag.chosen();
+				selectTag.change(function() {
+					molgenis.loadAggregate($(this).val());
+				});
+			}
 		});
 	};
 
-	molgenis.loadAggregate = function(featureId) {
-		var searchRequest = molgenis.createSearchRequest();
-		searchRequest.query.pageSize = 1000000;
-
-		var feature = restApi.get('/api/v1/observablefeature/' + featureId);
-		searchRequest.fieldsToReturn = [feature.identifier];
-		var aggregateRequest = {
-			'documentType' : selectedDataSet.identifier,
-			'featureId' : featureId,
-			'searchRequest' : searchRequest,
-			'dataType' : feature.dataType
-		};
+	molgenis.loadAggregate = function(attributeUri) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/aggregate',
-			data : JSON.stringify(aggregateRequest),
+			data : JSON.stringify({'attributeUri': attributeUri}),
 			contentType : 'application/json',
 			success : function(aggregateResult) {
 				var table = $('<table />').addClass('table table-striped');
@@ -1576,23 +1518,14 @@
 	};
 
 	molgenis.filterDialog = function() {
-		var datasetId = $('#dataset-select').val();
-
-		var filterDialogRequest = {
-			'dataSetIdentifier' : selectedDataSet.identifier,
-			'dataSetName' : selectedDataSet.name,
-			'dataSetId' : datasetId
-		};
-
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/filterdialog',
-			data : JSON.stringify(filterDialogRequest),
+			data : JSON.stringify({'entityUri' : $('#dataset-select').val()}),
 			contentType : 'application/json',
 			success : function(result) {
 				$(function() {
 					var modal = $('#filter-dialog-modal').html(result);
-
 					$('#filter-dialog-modal').show();
 				});
 			}
@@ -1697,7 +1630,7 @@
 							molgenis.initializeAggregate($('#dataset-select')
 									.val());
 							molgenis
-									.createFeatureSelection(selectedDataSet.protocolUsed.href);
+									.createFeatureSelectionTree($('#dataset-select').val());
 						});
 
 		$("#observationset-search").focus();

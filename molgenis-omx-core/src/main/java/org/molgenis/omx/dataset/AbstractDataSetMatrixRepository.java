@@ -23,6 +23,7 @@ import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.protocol.ProtocolEntityMetaData;
 
 /**
  * Base class for DataSetMatrixRepository and OmxRepository
@@ -75,9 +76,10 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 
 		return metaData;
 	}
-	
+
 	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes() {
+	public Iterable<AttributeMetaData> getLevelOneAttributes()
+	{
 		final Characteristic characteristic = getCharacteristic();
 		final Protocol protocol = getProtocol(characteristic);
 		final List<AttributeMetaData> attributeMetaDataList = new ArrayList<AttributeMetaData>();
@@ -91,33 +93,33 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 
 		return attributeMetaDataList;
 	}
-	
+
 	/**
 	 * TODO
 	 * 
 	 * @param characteristic
 	 * @return
 	 */
-	protected Protocol getProtocol(Characteristic characteristic) 
+	protected Protocol getProtocol(Characteristic characteristic)
 	{
 		final Protocol protocol;
-		
-		if(characteristic instanceof DataSet) 
+
+		if (characteristic instanceof DataSet)
 		{
 			protocol = ((DataSet) characteristic).getProtocolUsed();
 		}
-		else if(characteristic instanceof Protocol)
+		else if (characteristic instanceof Protocol)
 		{
 			protocol = (Protocol) characteristic;
-		} 
-		else 
+		}
+		else
 		{
 			protocol = null;
 		}
-		
+
 		return protocol;
 	}
-	
+
 	/**
 	 * TODO
 	 * 
@@ -130,12 +132,12 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 		for (ObservableFeature feature : features)
 		{
 			FieldTypeEnum fieldType = MolgenisFieldTypes.getType(feature.getDataType()).getEnumType();
-			
+
 			if (fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF))
 			{
 				fieldType = FieldTypeEnum.STRING;
 			}
-			
+
 			DefaultAttributeMetaData attr = new DefaultAttributeMetaData(feature.getIdentifier(), fieldType);
 			attr.setDescription(feature.getDescription());
 			attr.setLabel(feature.getName());
@@ -156,11 +158,9 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	{
 		for (Protocol subProtocol : protocols)
 		{
-			DefaultEntityMetaData meta = new DefaultEntityMetaData(subProtocol.getIdentifier());
-			//DefaultEntityMetaData meta = new DefaultEntityMetaData(subProtocol.getName());
-			meta.setLabel(subProtocol.getLabelValue());
+			EntityMetaData refEntityMetaData = new ProtocolEntityMetaData(subProtocol);
 			DefaultAttributeMetaData attr = new DefaultAttributeMetaData(subProtocol.getName(), FieldTypeEnum.HAS);
-			attr.setRefEntity(meta);
+			attr.setRefEntity(refEntityMetaData);
 			defaultAttributeMetaDataList.add(attr);
 		}
 	}
@@ -175,14 +175,13 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 		// Add id attribute (is id of ObservationSet)
 		DefaultAttributeMetaData attr = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
 		attr.setDescription("id");
-		
+
 		attr.setLabel("id");
 		attr.setIdAttribute(true);
 		attr.setLabelAttribute(false);
 		attr.setVisible(false);
 		defaultAttributeMetaDataList.add(attr);
 	}
-
 
 	protected Set<String> getAttributeNames()
 	{
@@ -199,11 +198,11 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	protected Characteristic getCharacteristic()
 	{
 		Characteristic characteristic;
-		
+
 		characteristic = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-		
-		if (characteristic == null) 
+
+		if (characteristic == null)
 		{
 			characteristic = dataService.findOne(Protocol.ENTITY_NAME,
 					new QueryImpl().eq(Protocol.IDENTIFIER, dataSetIdentifier), Protocol.class);
@@ -216,7 +215,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 
 		return characteristic;
 	}
-	
+
 	protected DataSet getDataSet()
 	{
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
@@ -231,8 +230,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	}
 
 	/**
-	 * Recursive method; 
-	 * Gets all features from protocol including subprotocols
+	 * Recursive method; Gets all features from protocol including subprotocols
 	 * 
 	 * @param protocol
 	 * @param features

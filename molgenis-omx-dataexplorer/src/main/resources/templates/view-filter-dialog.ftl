@@ -6,26 +6,24 @@
 			<form>
 				<div id="filter-wizard" >
 					<ul id="filter-nav">
-						<#list listOfallProtocols as protocol>
-					   <li><a href="#${protocol.identifier}-tab" data-toggle="tab">${protocol.name}</a></li>
-					   </#list>
+						<#list entityMetaDataGroups as entityMetaData>
+						<li><a href="#${entityMetaData.name}-tab" data-toggle="tab">${entityMetaData.label}</a></li>
+						</#list>
 					</ul>	
 					<div id="filter-nav-content" class="tab-content">
-						<#list listOfallProtocols as protocol>
-							<div class="tab-pane" id="${protocol.identifier}-tab">	
-								<table id="${protocol.identifier}-table">
-									<#if protocol.features?has_content>
-									   	<#list protocol.features as feature> 
-										  	<tr>
-											  	<td>
-											  		<a class="test" data-molgenis-url="/api/v1/observablefeature/${feature.id?c}" style="btn">${feature.name}</a>
-									  			</td>
-							  				</tr>
-									   	</#list>
-								   	<#else>
-								   		No features
-							   		</#if>
+						<#list entityMetaDataGroups as entityMetaData>
+							<div class="tab-pane" id="${entityMetaData.name}-tab">
+							<#list entityMetaData.levelOneAttributes as attributeMetaData>
+								<#if attributeMetaData.dataType.enumType != "HAS">
+								<table id="${attributeMetaData.name}-table">
+									<tr>
+									  	<td>
+									  		<a class="test" data-molgenis-url="/api/v1/${entityMetaData.name}/meta/${attributeMetaData.name}" style="btn">${attributeMetaData.label}</a>
+							  			</td>
+					  				</tr>
 					   	  	  	</table>
+					   	  	  	</#if>
+							</#list>
 						   </div>
 					   </#list>
 						<ul class="pager wizard">
