@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -33,17 +32,13 @@ import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -148,7 +143,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 
 		// Init genome browser
-		this.addGenomeBrowserSetsToModel(model);
+		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
 
 		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
 		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
@@ -172,55 +167,21 @@ public class DataExplorerController extends MolgenisPluginController
 		return "view-dataexplorer";
 	}
 
-	private void addGenomeBrowserSetsToModel(Model model)
+	private Map<String, String> getGenomeBrowserSetsToModel()
 	{
 		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
-		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
-				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
-		for (DataSet dataSet : dataSets)
+		for (String entityName : dataService.getEntityNames())
 		{
-			if (isGenomeBrowserDataSet(dataSet))
+			Repository repository = dataService.getRepositoryByEntityName(entityName);
+			AttributeMetaData attributeStartPosition = repository.getAttribute(MUTATION_START_POSITION);
+			AttributeMetaData attributeId = repository.getAttribute(MUTATION_ID);
+			AttributeMetaData attributeChromosome = repository.getAttribute(MUTATION_CHROMOSOME);
+			if (attributeStartPosition != null && attributeId != null && attributeChromosome != null)
 			{
-				genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
+				genomeBrowserSets.put(entityName, repository.getLabel());
 			}
 		}
-		model.addAttribute("genomeBrowserSets", genomeBrowserSets);
-	}
-
-	private boolean isGenomeBrowserDataSet(DataSet selectedDataSet)
-	{
-		Collection<Protocol> protocols = new ArrayList<Protocol>();
-		protocols.add(selectedDataSet.getProtocolUsed());
-		return containsGenomeBrowserProtocol(protocols);
-	}
-
-	private boolean containsGenomeBrowserProtocol(Collection<Protocol> protocols)
-	{
-		boolean hasStartPosition = false;
-		boolean hasChromosome = false;
-		boolean hasId = false;
-		boolean hasGenomeBrowserprotocol = false;
-		boolean hasGenomeBrowserSubprotocol = false;
-
-		for (Protocol protocol : protocols)
-		{
-			List<ObservableFeature> features = protocol.getFeatures();
-			for (ObservableFeature feature : features)
-			{
-				if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
-				else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
-				else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
-			}
-			if (hasStartPosition && hasChromosome && hasId)
-			{
-				hasGenomeBrowserprotocol = true;
-			}
-			else
-			{
-				hasGenomeBrowserSubprotocol = containsGenomeBrowserProtocol(protocol.getSubprotocols());
-			}
-		}
-		return hasGenomeBrowserprotocol || hasGenomeBrowserSubprotocol;
+		return genomeBrowserSets;
 	}
 
 	@RequestMapping(value = "/download", method = POST)

@@ -8,14 +8,13 @@
 	var searchQuery = null;
 	var selectedRepoMetadata = null;
 	var restApi = new molgenis.RestClient();
-	var searchApi = new molgenis.SearchClient();
 	var aggregateView = false;
 
-	molgenis.getSelectedDataSetIdentifier = function() {
+	molgenis.getSelectedEntityName = function() {
 		return selectedRepoMetadata.name;
 	};
 
-	molgenis.createFeatureSelectionTree = function(entityUri) {
+	molgenis.createAttributeTree = function(entityUri) {
 		var entityMetaUri = entityUri + "/meta/tree";
 		
 		restApi.getAsync(entityMetaUri, null, null, 
@@ -193,7 +192,8 @@
 		$("#observationset-search").val("");
 		$('#data-table-pager').empty();
 		pager = null;
-		molgenis.createFeatureSelectionTree(entityUri);
+		molgenis.createAttributeTree(entityUri);
+		molgenis.updateGenomeBrowser(entityUri);
 	};
 
 	molgenis.onFeatureSelectionChangeNew = function(attributeUris) {
@@ -1308,20 +1308,14 @@
 		});
 	};
 
-	molgenis.updateFeatureFilter = function(featureUri, featureFilter) {
-		var start = molgenis.getFeatureByIdentifier('start_nucleotide');
-		var chromosome = molgenis.getFeatureByIdentifier('chromosome');
-		if (start != undefined && chromosome != undefined) {
-			if (featureUri == start.href) {
-				dalliance.setLocation(dalliance.chr, featureFilter.values[0],
-						featureFilter.values[1]);
-			} else if (featureUri == chromosome.href) {
-				dalliance.setLocation(featureFilter.values[0],
-						dalliance.viewStart, dalliance.viewEnd);
-			}
-		}
-		featureFilters[featureUri] = featureFilter;
-		molgenis.onFeatureFilterChange(featureFilters);
+	molgenis.updateFeatureFilter = function(attributeUri, featureFilter) {
+		restApi.getAsync(attributeUri, null, null, function(attribute) {
+			// TODO implement elegant solution for genome browser specific code
+			if(attribute.name === 'start_nucleotide') dalliance.setLocation(dalliance.chr, featureFilter.values[0], featureFilter.values[1]);
+			if(attribute.name === 'chromosome') dalliance.setLocation(featureFilter.values[0], dalliance.viewStart, dalliance.viewEnd);
+			featureFilters[attributeUri] = featureFilter;
+			molgenis.onFeatureFilterChange(featureFilters);
+		});
 	};
 
 	molgenis.removeFeatureFilter = function(featureUri) {
@@ -1527,11 +1521,11 @@
 			success : function(result) {
 				$(function() {
 					var modal = $('#filter-dialog-modal').html(result);
-					$('#filter-dialog-modal').show();
+					modal.show();
 				});
 			}
 		});
-	}
+	};
 
 	molgenis.download = function() {
 		var jsonRequest = JSON.stringify(molgenis.createSearchRequest(false));
@@ -1543,70 +1537,59 @@
 	};
 
 	//--BEGIN genome browser--
-	molgenis.updateGenomeBrowser = function(dataSet) {
-		if (dataSet.identifier in genomeBrowserDataSets) {
-			document.getElementById('genomebrowser').style.display = 'block';
-			document.getElementById('genomebrowser').style.visibility = 'visible';
-			dalliance.reset();
-			var dallianceTrack = [{
-				name : dataSet.name,
-				uri : '/das/molgenis/dataset_' + dataSet.identifier + '/',
-				desc : "Selected dataset",
-				stylesheet_uri : '/css/selected_dataset-track.xml'
-			}];
-			dalliance.addTier(dallianceTrack[0]);
-			$.each(genomeBrowserDataSets, function(dataSetIdentifier,
-					dataSetName) {
-				if (dataSetIdentifier != molgenis
-						.getSelectedDataSetIdentifier()) {
-					var dallianceTrack = [{
-						name : dataSetName,
-						uri : '/das/molgenis/dataset_' + dataSetIdentifier
-								+ '/',
-						desc : "unselected dataset",
-						stylesheet_uri : '/css/not_selected_dataset-track.xml'
-					}];
-					dalliance.addTier(dallianceTrack[0]);
-				}
-			});
-		} else {
-			document.getElementById('genomebrowser').style.display = 'none';
-		}
-	}
+	molgenis.updateGenomeBrowser = function(entityUri) {
+		restApi.getAsync(entityUri + '/meta', null, null, function(entity) {
+			if (entity.name in genomeBrowserDataSets) {
+				document.getElementById('genomebrowser').style.display = 'block';
+				document.getElementById('genomebrowser').style.visibility = 'visible';
+				dalliance.reset();
+				var dallianceTrack = [{
+					name : entity.label,
+					uri : '/das/molgenis/dataset_' + entity.name + '/',
+					desc : "Selected dataset",
+					stylesheet_uri : '/css/selected_dataset-track.xml'
+				}];
+				dalliance.addTier(dallianceTrack[0]);
+				$.each(genomeBrowserDataSets, function(entityName, entityLabel) {
+					if (entityName != molgenis.getSelectedEntityName()) {
+						var dallianceTrack = [{
+							name : entityLabel,
+							uri : '/das/molgenis/dataset_' + entityName + '/',
+							desc : "unselected dataset",
+							stylesheet_uri : '/css/not_selected_dataset-track.xml'
+						}];
+						dalliance.addTier(dallianceTrack[0]);
+					}
+				});
+			} else {
+				document.getElementById('genomebrowser').style.display = 'none';
+			}	
+		});
+	};
 
 	molgenis.setDallianceFilter = function() {
-		var start = molgenis.getFeatureByIdentifier('start_nucleotide');
-		var chromosome = molgenis.getFeatureByIdentifier('chromosome');
-		molgenis.updateFeatureFilter(start.href, {
-			name : start.name,
-			identifier : start.identifier,
-			type : start.dataType,
-			range : true,
-			values : [Math.floor(dalliance.viewStart).toString(),
-					Math.floor(dalliance.viewEnd).toString()]
+		var entityName = molgenis.getSelectedEntityName();
+		restApi.getAsync('/api/v1/' + entityName + '/meta', null, null, function(entity) {
+			$.each(entity.attributes, function(key, attribute) {
+				if(key === 'start_nucleotide') {
+					molgenis.updateFeatureFilter(attribute.refThis, {
+						name : attribute.label,
+						identifier : attribute.name,
+						type : attribute.fieldType,
+						range : true,
+						values : [Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString()]
+					});
+				} else if(key === 'chromosome') {
+					molgenis.updateFeatureFilter(attribute.refThis, {
+						name : attribute.label,
+						identifier : attribute.name,
+						type : attribute.fieldType,
+						values : [dalliance.chr]
+					});
+				}
+			});
 		});
-		molgenis.updateFeatureFilter(chromosome.href, {
-			name : chromosome.name,
-			identifier : chromosome.identifier,
-			type : chromosome.dataType,
-			values : [dalliance.chr]
-		});
-	}
-	molgenis.getFeatureByIdentifier = function(identifier) {
-		var feature;
-		var searchHit = restApi.get('/api/v1/observablefeature', null, {
-			q : [{
-				field : 'identifier',
-				operator : 'EQUALS',
-				value : identifier
-			}],
-			num : 500
-		});
-		if (searchHit.items.length > 0) {
-			feature = searchHit.items[0];
-		}
-		return feature;
-	}
+	};
 	//--END genome browser--
 
 	// on document ready
