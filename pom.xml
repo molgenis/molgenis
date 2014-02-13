@@ -561,7 +561,6 @@
 		<module>molgenis-data-rest</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
-		<module>molgenis-variome</module>
 		<module>molgenis-js</module>
 		
 	</modules>
