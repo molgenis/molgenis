@@ -3,10 +3,8 @@ package org.molgenis.data.annotation.impl;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.LocusAnnotator;
+import org.molgenis.data.annotation.impl.datastructures.*;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
-import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
-import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -98,13 +96,10 @@ public class OmimHpoAnnotator extends LocusAnnotator {
     public Iterator<Entity> annotate(Iterator<Entity> source)
     {
         List<Entity> results = new ArrayList<Entity>();
-        String systemCall = molgenisSettings.getProperty("OmimHpoAnnotator_data_location");
-
-        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
+        
         try{
 
-        Map<String, HGNCLoc> hgncLocs = getHgncLocs();
+            List<Locus> loci = new ArrayList<Locus>();
 
             while (source.hasNext())
             {
@@ -112,14 +107,43 @@ public class OmimHpoAnnotator extends LocusAnnotator {
 
                 String chromosome = entity.getString(CHROMOSOME);
                 Long position = entity.getLong(POSITION);
-
-                String caddAbs = "";
-                String caddScaled = "";
-
-
-
-
+                Locus l = new Locus(chromosome, position);
+                loci.add(l);
             }
+
+            List<HGNCLoc> hgncLocs = getHgncLocs();
+            List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
+            List<HPOTerm> hpoTerms = hpoTerms();
+            List<OMIMTerm> omimTerms = omimTerms();
+            Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
+            Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
+
+
+            for(Locus l : loci){
+                HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+                resultMap.put(CHROMOSOME, l.getChrom());
+                resultMap.put(POSITION, l.getPos());
+                resultMap.put(OMIM_DISO, "todo");
+                resultMap.put(OMIM_LINK, "todo");
+                resultMap.put(OMIM_ALL, "todo");
+                resultMap.put(HPO_DESC, "todo");
+                resultMap.put(HPO_LINK, "todo");
+                resultMap.put(HPO_ALL, "todo");
+
+                results.add(new MapEntity(resultMap));
+            }
+
+
+
+//            for(String gene : geneSymbols)
+//            {
+//                System.out.println(gene);
+//                System.out.println("\t" + geneToHpoTerm.get(gene));
+//                System.out.println("\t" + geneToOmimTerm.get(gene));
+//            }
+
+
         }
         catch(Exception e)
         {
@@ -224,19 +248,17 @@ public class OmimHpoAnnotator extends LocusAnnotator {
      * @return
      * @throws IOException
      */
-    public static Map<String, HGNCLoc> getHgncLocs() throws IOException {
+    public static List<HGNCLoc> getHgncLocs() throws IOException {
         ArrayList<String> geneLocs = readLinesFromURL(
                 "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv",
                 "GRCh37p13_HGNC_GeneLocations_noPatches.tsv");
-
-        Map<String, HGNCLoc> res = new HashMap<String,HGNCLoc>();
-
+       List<HGNCLoc> res = new ArrayList<HGNCLoc>();
         for(String s : geneLocs)
         {
             String[] split = s.split("\t");
             HGNCLoc h = new HGNCLoc(split[0],Long.parseLong(split[1]), Long.parseLong(split[2]), split[3]);
             if(h.getChrom().matches("[0-9]+|X")){
-                res.put(split[0], h);
+                res.add(h);
             }
         }
         return res;
@@ -290,27 +312,23 @@ public class OmimHpoAnnotator extends LocusAnnotator {
 
 
 
-    public static void main(String [ ] args) throws IOException {
+    public static void main(String [ ] args) throws Exception {
 
+        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l)));
 
-
-
-        List<String> genes = Arrays.asList(new String[]{"DYSF","ALMS1","HS6ST1","NEB","SCN1A","LRP2","CHRNA1","TTN","FASTKD2","CPS1","KCNJ13","COL6A3","FANCD2","BTD","MRPL3","CLDN16","SCARB2","FRAS1","MANBA","FGA","PDE4D","MEF2C","MEGF10","ADAMTS2","TNXB","NDUFAF4","BRAT1","PMS2","SBDS","NCF1","PEX1","ADAM9","NDUFAF6","VPS13B","TG","PLEC","TRPM6","ABCA1","MUSK","DFNB31"});
-
+        List<HGNCLoc> hgncLocs = getHgncLocs();
+        List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
         List<HPOTerm> hpoTerms = hpoTerms();
         List<OMIMTerm> omimTerms = omimTerms();
-
         Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
         Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
 
-        for(String gene : genes)
+        for(String gene : geneSymbols)
         {
             System.out.println(gene);
             System.out.println("\t" + geneToHpoTerm.get(gene));
             System.out.println("\t" + geneToOmimTerm.get(gene));
         }
-
-
 
     }
 
@@ -351,6 +369,32 @@ public class OmimHpoAnnotator extends LocusAnnotator {
             }
         }
         return res;
+    }
+
+    //
+    // for each locus in the list, get the HGNC symbol in the output list
+    //
+    public static List<String> locationToHGNC(List<HGNCLoc> hgncLocs, List<Locus> loci) throws Exception {
+        List<String> hgncSymbols = new ArrayList<String>();
+        for(Locus l : loci)
+        {
+            boolean variantMapped = false;
+            for(HGNCLoc h : hgncLocs)
+            {
+                if(h.getChrom().equals(l.getChrom()) && l.getPos() >= (h.getStart()-5) && l.getPos() <= (h.getEnd()+5))
+                {
+                    hgncSymbols.add(h.getHgnc());
+                    variantMapped = true;
+                    break;
+                }
+            }
+            if(!variantMapped)
+            {
+                // System.out.println("FAILED TO MAP: " + v);
+                throw new Exception("Could not map locus to HGNC: " + l.toString());
+            }
+        }
+        return hgncSymbols;
     }
 
 
