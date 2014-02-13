@@ -30,8 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * This class calls the EBI CHeMBL webservice with a uniprot ID. The webservice returns
- * a map with information on the submitted protein ID.
+ * This class calls the EBI CHeMBL webservice with a uniprot ID. The webservice returns a map with information on the
+ * submitted protein ID.
  * </p>
  * 
  * <p>
@@ -63,11 +63,11 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	{
 		HttpClient httpClient = new DefaultHttpClient();
 		List<Entity> results = new ArrayList<Entity>();
-		
+
 		while (source.hasNext())
-		{	
+		{
 			Entity entity = source.next();
-			HttpGet httpGet = new HttpGet(EBI_CHEMBLWS_URL + entity.get(UNIPROT_ID)+".json");
+			HttpGet httpGet = new HttpGet(EBI_CHEMBLWS_URL + entity.get(UNIPROT_ID) + ".json");
 
 			try
 			{
@@ -93,7 +93,7 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 			catch (Exception e)
 			{
 				httpGet.abort();
-                //TODO: how to handle exceptions at this point
+				// TODO: how to handle exceptions at this point
 				throw new RuntimeException(e);
 			}
 		}
@@ -104,24 +104,26 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 	{
 		JsonFactory factory = new JsonFactory();
 		ObjectMapper mapper = new ObjectMapper(factory);
-		TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>(){};
+		TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>()
+		{
+		};
 		return mapper.readValue(result, typeRef);
 	}
 
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-        DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("targetType", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("chemblId", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("geneNames", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("description", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.INT));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.INT));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("proteinAccession", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("synonyms", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("organism", FieldTypeEnum.STRING));
-        metadata.addAttributeMetaData(new DefaultAttributeMetaData("preferredName", FieldTypeEnum.STRING));
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("targetType", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("chemblId", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("geneNames", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("description", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("proteinAccession", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("synonyms", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("organism", FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("preferredName", FieldTypeEnum.STRING));
 		return metadata;
 	}
 
@@ -132,21 +134,23 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
-	
+
 	@Override
 	public Boolean canAnnotate(EntityMetaData inputMetaData)
 	{
 		boolean canAnnotate = true;
 		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for(AttributeMetaData attribute : inputAttributes){
-			if(inputMetaData.getAttribute(attribute.getName()) == null){
-				//all attributes from the inputmetadata must be present to annotate.
+		for (AttributeMetaData attribute : inputAttributes)
+		{
+			if (inputMetaData.getAttribute(attribute.getName()) == null)
+			{
+				// all attributes from the inputmetadata must be present to annotate.
 				canAnnotate = false;
 			}
 		}
 		return canAnnotate;
 	}
-	
+
 	@Override
 	public String getName()
 	{
