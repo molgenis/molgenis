@@ -1,28 +1,27 @@
 package org.molgenis.data.omx.annotation;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Date;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryAnnotator;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.support.QueryImpl;
-
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservedValue;
-import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.ObservationSet;
+import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.transaction.annotation.Transactional;
