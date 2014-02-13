@@ -162,6 +162,7 @@ public class DbnsfpServiceAnnotator implements RepositoryAnnotator
 				canAnnotate = false;
 			}
 		}
+		
 		return canAnnotate;
 	}
 
