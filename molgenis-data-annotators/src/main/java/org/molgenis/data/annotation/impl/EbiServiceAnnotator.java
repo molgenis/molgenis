@@ -143,9 +143,10 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 		for (AttributeMetaData attribute : inputAttributes)
 		{
 			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
-			else if(!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType())){
-                canAnnotate = false;
-            }
+			else if (!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType()))
+			{
+				canAnnotate = false;
+			}
 		}
 		return canAnnotate;
 	}

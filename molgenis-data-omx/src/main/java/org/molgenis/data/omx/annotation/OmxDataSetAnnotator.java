@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * */
 public class OmxDataSetAnnotator
 {
-    //FIXME unit test this class!
+	// FIXME unit test this class!
 	private static final String PROTOCOL_SUFFIX = "_annotator_id";
 	DataService dataService;
 	DataSetsIndexer indexer;
@@ -84,13 +84,15 @@ public class OmxDataSetAnnotator
 				new QueryImpl().eq(Protocol.IDENTIFIER, annotator.getName() + PROTOCOL_SUFFIX), Protocol.class);
 		if (resultProtocol == null)
 		{
-			resultProtocol = createAnnotationResultProtocol(annotator, dataSet, annotator.getOutputMetaData().getAttributes());
+			resultProtocol = createAnnotationResultProtocol(annotator, dataSet, annotator.getOutputMetaData()
+					.getAttributes());
 		}
 		if (!dataSet.getProtocolUsed().getSubprotocols().contains(resultProtocol))
 		{
 			addAnnotationResultProtocol(dataSet, resultProtocol);
 		}
-		addAnnotationResults(inputMetadataNames, getMetadataNamesAsList(annotator.getOutputMetaData()), dataSet, entityIterator, annotator);
+		addAnnotationResults(inputMetadataNames, getMetadataNamesAsList(annotator.getOutputMetaData()), dataSet,
+				entityIterator, annotator);
 
 		indexResultDataSet(dataSet);
 	}
@@ -164,7 +166,7 @@ public class OmxDataSetAnnotator
 
 	private void addOutputFeatures(Protocol resultProtocol, Iterable<AttributeMetaData> metaData, String prefix)
 	{
-		for (AttributeMetaData attributeMetaData: metaData)
+		for (AttributeMetaData attributeMetaData : metaData)
 		{
 			ObservableFeature newFeature = new ObservableFeature();
 			if (dataService.findOne(ObservableFeature.ENTITY_NAME,
@@ -172,7 +174,7 @@ public class OmxDataSetAnnotator
 			{
 				newFeature.setIdentifier(prefix + attributeMetaData.getName());
 				newFeature.setName(attributeMetaData.getLabel());
-                newFeature.setDataType(attributeMetaData.getDataType().toString());
+				newFeature.setDataType(attributeMetaData.getDataType().toString());
 				dataService.add(ObservableFeature.ENTITY_NAME, newFeature);
 
 				resultProtocol.getFeatures().add(newFeature);
@@ -205,7 +207,7 @@ public class OmxDataSetAnnotator
 		for (String inputFeatureName : inputFeatureNames)
 		{
 			ObservableFeature inputFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-                    new QueryImpl().eq(ObservableFeature.IDENTIFIER, inputFeatureName), ObservableFeature.class);
+					new QueryImpl().eq(ObservableFeature.IDENTIFIER, inputFeatureName), ObservableFeature.class);
 
 			// retrieve a value from this observation set based on a specified feature
 			ObservedValue value = valueRepo.findOne(
