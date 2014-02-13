@@ -21,10 +21,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -55,8 +55,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
-//import org.molgenis.data.csv
 
 /**
  * Controller class for the data explorer.
@@ -313,13 +311,17 @@ public class DataExplorerController extends MolgenisPluginController
 		String[] entityUriTokens = request.getEntityUri().split("/");
 		String entityName = entityUriTokens[entityUriTokens.length - 1];
 
-		CrudRepository repository = dataService.getCrudRepository(entityName);
+		Repository repository = dataService.getRepositoryByEntityName(entityName);
 		Iterable<AttributeMetaData> attributeMetaDataIterable = Iterables.filter(repository.getLevelOneAttributes(),
 				new Predicate<AttributeMetaData>()
 				{
 					@Override
 					public boolean apply(AttributeMetaData attributeMetaData)
 					{
+						if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS)
+						{
+							attributeMetaData.getRefEntity().getLevelOneAttributes();
+						}
 						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS;
 					}
 				});
