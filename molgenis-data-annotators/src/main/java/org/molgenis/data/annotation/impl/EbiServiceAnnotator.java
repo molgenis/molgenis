@@ -142,11 +142,10 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
 		for (AttributeMetaData attribute : inputAttributes)
 		{
-			if (inputMetaData.getAttribute(attribute.getName()) == null)
-			{
-				// all attributes from the inputmetadata must be present to annotate.
-				canAnnotate = false;
-			}
+			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
+			else if(!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType())){
+                canAnnotate = false;
+            }
 		}
 		return canAnnotate;
 	}

@@ -74,7 +74,6 @@ public class OmxDataSetAnnotator
 		Iterator<Entity> entityIterator = annotator.annotate(repo.iterator());
 
 		List<String> inputMetadataNames = getMetadataNamesAsList(annotator.getInputMetaData());
-		List<String> outputMetadataNames = getMetadataNamesAsList(annotator.getOutputMetaData());
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, repo.getName()), DataSet.class);
 		if (createCopy)
@@ -85,13 +84,13 @@ public class OmxDataSetAnnotator
 				new QueryImpl().eq(Protocol.IDENTIFIER, annotator.getName() + PROTOCOL_SUFFIX), Protocol.class);
 		if (resultProtocol == null)
 		{
-			resultProtocol = createAnnotationResultProtocol(annotator, dataSet, outputMetadataNames);
+			resultProtocol = createAnnotationResultProtocol(annotator, dataSet, annotator.getOutputMetaData().getAttributes());
 		}
 		if (!dataSet.getProtocolUsed().getSubprotocols().contains(resultProtocol))
 		{
 			addAnnotationResultProtocol(dataSet, resultProtocol);
 		}
-		addAnnotationResults(inputMetadataNames, outputMetadataNames, dataSet, entityIterator, annotator);
+		addAnnotationResults(inputMetadataNames, getMetadataNamesAsList(annotator.getOutputMetaData()), dataSet, entityIterator, annotator);
 
 		indexResultDataSet(dataSet);
 	}
@@ -130,7 +129,7 @@ public class OmxDataSetAnnotator
 	}
 
 	private Protocol createAnnotationResultProtocol(RepositoryAnnotator annotator, DataSet dataSet,
-			List<String> outputMetadataNames)
+			Iterable<AttributeMetaData> outputMetadataNames)
 	{
 
 		Protocol resultProtocol = new Protocol();
@@ -163,16 +162,17 @@ public class OmxDataSetAnnotator
 		return inputFeatureNames;
 	}
 
-	private void addOutputFeatures(Protocol resultProtocol, List<String> featureNames, String prefix)
+	private void addOutputFeatures(Protocol resultProtocol, Iterable<AttributeMetaData> metaData, String prefix)
 	{
-		for (String name : featureNames)
+		for (AttributeMetaData attributeMetaData: metaData)
 		{
 			ObservableFeature newFeature = new ObservableFeature();
 			if (dataService.findOne(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().eq(ObservableFeature.IDENTIFIER, name + "_id")) == null)
+					new QueryImpl().eq(ObservableFeature.IDENTIFIER, attributeMetaData.getName())) == null)
 			{
-				newFeature.setIdentifier(prefix + name + "_id");
-				newFeature.setName(name);
+				newFeature.setIdentifier(prefix + attributeMetaData.getName());
+				newFeature.setName(attributeMetaData.getLabel());
+                newFeature.setDataType(attributeMetaData.getDataType().toString());
 				dataService.add(ObservableFeature.ENTITY_NAME, newFeature);
 
 				resultProtocol.getFeatures().add(newFeature);
@@ -190,7 +190,7 @@ public class OmxDataSetAnnotator
 		ObservedValue ov = new ObservedValue();
 
 		ObservableFeature thisFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.IDENTIFIER, prefix + columnName + "_id"), ObservableFeature.class);
+				new QueryImpl().eq(ObservableFeature.IDENTIFIER, prefix + columnName), ObservableFeature.class);
 
 		ov.setFeature(thisFeature);
 		ov.setObservationSet(os);
