@@ -204,7 +204,6 @@
 	molgenis.searchObservationSets = function(query) {
 		// Reset
 		resultsTable.resetSortRule();
-
 		searchQuery = query;
 		molgenis.updateObservationSetsTable();
 	};
@@ -1364,9 +1363,11 @@
 	};
 
 	molgenis.search = function(callback) {
-		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name,null,null, callback);
 		
-//		searchApi.search(molgenis.createSearchRequest(true), callback);
+		var searchRequest = molgenis.createSearchRequest(true);
+		var rule = searchRequest.query.rules[0];
+		var q = (rule.length > 0 ? {'q':rule} : null);
+		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name,null,q,callback);
 	};
 
 	molgenis.createSearchRequest = function(includeLimitOffset) {
