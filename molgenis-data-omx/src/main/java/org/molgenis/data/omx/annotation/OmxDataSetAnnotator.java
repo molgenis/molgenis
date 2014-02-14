@@ -22,6 +22,7 @@ import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.StringValue;
+import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.spel.ast.Indexer;
@@ -174,9 +175,9 @@ public class OmxDataSetAnnotator
 
 	private void addValue(Entity entity, ObservationSet os, String columnName, String prefix)
 	{
-		StringValue sv = new StringValue();
-		sv.setValue(entity.get(columnName).toString());
-		dataService.add(StringValue.ENTITY_NAME, sv);
+		TextValue tv = new TextValue();
+		tv.setValue(entity.get(columnName).toString());
+		dataService.add(TextValue.ENTITY_NAME, tv);
 
 		ObservedValue ov = new ObservedValue();
 
@@ -186,7 +187,7 @@ public class OmxDataSetAnnotator
 
 		ov.setFeature(thisFeature);
 		ov.setObservationSet(os);
-		ov.setValue(sv);
+		ov.setValue(tv);
 		dataService.add(ObservedValue.ENTITY_NAME, ov);
 	}
 

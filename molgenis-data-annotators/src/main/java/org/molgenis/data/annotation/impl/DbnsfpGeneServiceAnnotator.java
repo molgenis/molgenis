@@ -92,7 +92,6 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 						if (lineSplit[0].equals(gene))
 						{
 							int lineSplitIndex = 0;
-
 							HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 							for (String feature : FEATURES)
@@ -102,6 +101,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 									resultMap.put(feature, lineSplit[lineSplitIndex]);
 									lineSplitIndex = lineSplitIndex + 1;
 								}
+
 							}
 
 							resultMap.put(CHROMOSOME, chromosome);
@@ -126,7 +126,9 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 			throw new RuntimeException(e);
 		}
 
+		System.out.println(results);
 		return results.iterator();
+
 	}
 
 	@Override
@@ -139,7 +141,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 			if (attribute != null)
 			{
 				// FIXME not all attributes are strings
-				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
+				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.TEXT));
 			}
 		}
 
