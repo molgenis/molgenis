@@ -18,6 +18,7 @@ import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.search.DataSetsIndexer;
+import org.molgenis.search.SearchService;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,9 @@ public class VariomeController extends MolgenisPluginController{
 	
 	@Autowired
 	DataService dataService;
+	
+	@Autowired
+	SearchService searchService;
 	
 	@Autowired
 	DataSetsIndexer indexer;
@@ -150,7 +154,7 @@ public class VariomeController extends MolgenisPluginController{
 		//TODO: Check which tools are selected, run annotators based on selection via scheduler
 		// Each tool will add to the feature and value lists 
 		
-		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, indexer);
+		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer);
 		
 		//omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
 		//omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
