@@ -52,21 +52,22 @@ public class OmxDataSetAnnotator
 		this.indexer = indexer;
 	}
 
-    /**
-     * helper function to use multiple annotators on a repository, if the createRepo boolean is true
-     * only a 1 copy of the set will be made and used for all annotators
-     *
-     * @param annotators
-     * @param repo
-     * @param createCopy
-     */
-    public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy)
-    {
-        for(RepositoryAnnotator annotator : annotators){
-            repo = annotate(annotator, repo, createCopy);
-            createCopy = false;
-        }
-    }
+	/**
+	 * helper function to use multiple annotators on a repository, if the createRepo boolean is true only a 1 copy of
+	 * the set will be made and used for all annotators
+	 * 
+	 * @param annotators
+	 * @param repo
+	 * @param createCopy
+	 */
+	public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy)
+	{
+		for (RepositoryAnnotator annotator : annotators)
+		{
+			repo = annotate(annotator, repo, createCopy);
+			createCopy = false;
+		}
+	}
 
 	/**
 	 * <p>
@@ -111,7 +112,7 @@ public class OmxDataSetAnnotator
 				entityIterator, annotator);
 
 		indexResultDataSet(dataSet);
-        return dataService.getRepositoryByEntityName(dataSet.getName());
+		return dataService.getRepositoryByEntityName(dataSet.getName());
 	}
 
 	private void addAnnotationResults(List<String> inputMetadataNames, List<String> outputMetadataNames,
