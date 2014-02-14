@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  * This class uses a repository and calls an annotation service to add features and values to an existing data set.
  * </p>
  * 
- * @author mdehaan
+ * @authors mdehaan,bcharbon
  * 
  * */
 public class OmxDataSetAnnotator
@@ -52,6 +52,22 @@ public class OmxDataSetAnnotator
 		this.indexer = indexer;
 	}
 
+    /**
+     * helper function to use multiple annotators on a repository, if the createRepo boolean is true
+     * only a 1 copy of the set will be made and used for all annotators
+     *
+     * @param annotators
+     * @param repo
+     * @param createCopy
+     */
+    public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy)
+    {
+        for(RepositoryAnnotator annotator : annotators){
+            repo = annotate(annotator, repo, createCopy);
+            createCopy = false;
+        }
+    }
+
 	/**
 	 * <p>
 	 * This method calls an annotation service and creates an entity of annotations based on one or more columns. Input
@@ -68,7 +84,7 @@ public class OmxDataSetAnnotator
 	 * 
 	 * */
 	@Transactional
-	public void annotate(RepositoryAnnotator annotator, Repository repo, boolean createCopy)
+	public Repository annotate(RepositoryAnnotator annotator, Repository repo, boolean createCopy)
 	{
 
 		Iterator<Entity> entityIterator = annotator.annotate(repo.iterator());
@@ -95,6 +111,7 @@ public class OmxDataSetAnnotator
 				entityIterator, annotator);
 
 		indexResultDataSet(dataSet);
+        return dataService.getRepositoryByEntityName(dataSet.getName());
 	}
 
 	private void addAnnotationResults(List<String> inputMetadataNames, List<String> outputMetadataNames,
