@@ -4,17 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -84,8 +83,8 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 
 				if (!"".equals(result))
 				{
-					HashMap<String, Object> rootMap = jsonStringToMap(result);
-					HashMap<String, Object> resultMap = (HashMap) rootMap.get("target");
+					Map<String, Object> rootMap = jsonStringToMap(result);
+					Map<String, Object> resultMap = (Map) rootMap.get("target");
 					resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
 					results.add(new MapEntity(resultMap));
 				}
@@ -100,14 +99,11 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 		return results.iterator();
 	}
 
-	private static HashMap<String, Object> jsonStringToMap(String result) throws IOException
+	private static Map<String, Object> jsonStringToMap(String result) throws IOException
 	{
-		JsonFactory factory = new JsonFactory();
-		ObjectMapper mapper = new ObjectMapper(factory);
-		TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>()
-		{
-		};
-		return mapper.readValue(result, typeRef);
+        Gson gson = new Gson();
+        Map<String, Object> resultMap = gson.fromJson(result, new TypeToken<Map<String, Object>>() {}.getType());
+		return resultMap;
 	}
 
 	@Override
@@ -118,8 +114,8 @@ public class EbiServiceAnnotator implements RepositoryAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("chemblId", FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("geneNames", FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("description", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("compoundCount", FieldTypeEnum.DECIMAL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("bioactivityCount", FieldTypeEnum.DECIMAL));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("proteinAccession", FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("synonyms", FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("organism", FieldTypeEnum.STRING));
