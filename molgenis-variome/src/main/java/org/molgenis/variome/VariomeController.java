@@ -156,10 +156,10 @@ public class VariomeController extends MolgenisPluginController{
 		
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer);
 		
-		//omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), false);
+		omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), true);
 		//omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
-		//omxDataSetAnnotator.annotate(dbnsfpVariantServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
-		omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
+		//omxDataSetAnnotator.annotate(dbnsfpVariantServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), true);
+		//omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
 		
 		return "view-result-page";
 	}

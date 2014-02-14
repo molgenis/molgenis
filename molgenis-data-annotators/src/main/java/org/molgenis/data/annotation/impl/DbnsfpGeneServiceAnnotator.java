@@ -126,7 +126,6 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 			throw new RuntimeException(e);
 		}
 
-		System.out.println(results);
 		return results.iterator();
 
 	}
