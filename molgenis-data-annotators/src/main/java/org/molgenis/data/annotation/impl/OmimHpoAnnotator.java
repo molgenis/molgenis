@@ -120,65 +120,57 @@ public class OmimHpoAnnotator extends LocusAnnotator {
 
             for(int i=0; i<loci.size();i++)
             {
-                HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
                 Locus l = loci.get(i);
                 String geneSymbol = geneSymbols.get(i);
 
-                resultMap.put(CHROMOSOME, l.getChrom());
-                resultMap.put(POSITION, l.getPos());
-
-                StringBuffer omimDisorders = new StringBuffer();
-                for(OMIMTerm o : geneToOmimTerm.get(geneSymbol))
+                if(geneSymbol != null && geneToOmimTerm.containsKey(geneSymbol) && geneToHpoTerm.containsKey(geneSymbol))
                 {
-                    omimDisorders.append(o.getName() + " / ");
+                    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+                    resultMap.put(CHROMOSOME, l.getChrom());
+                    resultMap.put(POSITION, l.getPos());
+
+                    StringBuffer omimDisorders = new StringBuffer();
+                    for(OMIMTerm o : geneToOmimTerm.get(geneSymbol))
+                    {
+                        omimDisorders.append(o.getName() + " / ");
+                    }
+                    omimDisorders.delete(omimDisorders.length()-3, omimDisorders.length());
+                    resultMap.put(OMIM_DISO, omimDisorders.toString());
+
+                    StringBuffer omimLinks = new StringBuffer();
+                    for(OMIMTerm o : geneToOmimTerm.get(geneSymbol))
+                    {
+                        omimLinks.append("<a href=\"http://www.omim.org/entry/"+o.getEntry()+"\">" + o.getEntry() + "</a> / ");
+                    }
+                    omimLinks.delete(omimLinks.length()-3, omimLinks.length());
+                    resultMap.put(OMIM_LINK, omimLinks.toString());
+
+                    resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
+
+                    StringBuffer hpoDescriptions = new StringBuffer();
+                    for(HPOTerm h : geneToHpoTerm.get(geneSymbol))
+                    {
+                        hpoDescriptions.append(h.getDescription() + " / ");
+                    }
+                    hpoDescriptions.delete(hpoDescriptions.length()-3, hpoDescriptions.length());
+                    resultMap.put(HPO_DESC, hpoDescriptions.toString());
+
+                    StringBuffer hpoLinks = new StringBuffer();
+                    for(HPOTerm h : geneToHpoTerm.get(geneSymbol))
+                    {
+                        hpoLinks.append("<a href=\"http://www.human-phenotype-ontology.org/hpoweb/showterm?id="+h.getId()+"\">" + h.getId() + "</a> / ");
+                    }
+                    hpoLinks.delete(hpoLinks.length()-3, hpoLinks.length());
+                    resultMap.put(HPO_LINK, hpoLinks.toString());
+
+                    resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
+
+                    results.add(new MapEntity(resultMap));
                 }
-                omimDisorders.delete(omimDisorders.length()-3, omimDisorders.length());
-                resultMap.put(OMIM_DISO, omimDisorders.toString());
 
-
-                StringBuffer hpoDescriptions = new StringBuffer();
-                for(HPOTerm h : geneToHpoTerm.get(geneSymbol))
-                {
-                    hpoDescriptions.append(h.getDescription() + " / ");
-                }
-                hpoDescriptions.delete(hpoDescriptions.length()-3, hpoDescriptions.length());
-                resultMap.put(HPO_DESC, hpoDescriptions.toString());
-
-
-                StringBuffer omimLinks = new StringBuffer();
-                for(OMIMTerm o : geneToOmimTerm.get(geneSymbol))
-                {
-                    omimLinks.append("<a href=\"http://www.omim.org/entry/"+o.getEntry()+"\">" + o.getEntry() + "</a> / ");
-                }
-                omimLinks.delete(omimLinks.length()-3, omimLinks.length());
-                resultMap.put(OMIM_LINK, omimLinks.toString());
-
-
-                StringBuffer hpoLinks = new StringBuffer();
-                for(HPOTerm h : geneToHpoTerm.get(geneSymbol))
-                {
-                    hpoLinks.append("<a href=\"http://www.human-phenotype-ontology.org/hpoweb/showterm?id="+h.getId()+"\">" + h.getId() + "</a> / ");
-                }
-                hpoLinks.delete(hpoLinks.length()-3, hpoLinks.length());
-                resultMap.put(HPO_LINK, hpoLinks.toString());
-
-
-                resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
-                resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
-
-                results.add(new MapEntity(resultMap));
             }
-
-
-
-//            for(String gene : geneSymbols)
-//            {
-//                System.out.println(gene);
-//                System.out.println("\t" + geneToHpoTerm.get(gene));
-//                System.out.println("\t" + geneToOmimTerm.get(gene));
-//            }
-
 
         }
         catch(Exception e)
@@ -220,7 +212,6 @@ public class OmimHpoAnnotator extends LocusAnnotator {
             String description = split[4];
             HPOTerm h = new HPOTerm(hpoId, description, diseaseDb, diseaseDbID, geneSymbol, geneEntrezId);
             res.add(h);
-          //  System.out.println(h);
         }
 
         return res;
@@ -248,15 +239,10 @@ public class OmimHpoAnnotator extends LocusAnnotator {
 
         for(String s : omimRaw)
         {
-
             String[] pipeSplit = s.split("\\|");
-
-            // System.out.println(pipeSplit[0]);
-
             Integer omimEntry = null;
             try{
                 String entry = pipeSplit[0].substring(pipeSplit[0].length()-10, pipeSplit[0].length()-4);
-                //        System.out.println(id);
                 omimEntry = Integer.parseInt(entry);
             }catch(Exception e){};
 
@@ -267,10 +253,7 @@ public class OmimHpoAnnotator extends LocusAnnotator {
                 List<String> genes = Arrays.asList(pipeSplit[1].split(", "));
                 int mutationId = Integer.parseInt(pipeSplit[2]);
                 String cytoLoc = pipeSplit[3];
-
                 OMIMTerm ot = new OMIMTerm(omimEntry, name, type, mutationId, cytoLoc, genes);
-
-               // System.out.println(ot);
                 res.add(ot);
             }
 
@@ -405,8 +388,8 @@ public class OmimHpoAnnotator extends LocusAnnotator {
             }
             if(!variantMapped)
             {
-                // System.out.println("FAILED TO MAP: " + v);
-                throw new Exception("Could not map locus to HGNC: " + l.toString());
+                //throw new Exception("Could not map locus to HGNC: " + l.toString());
+                hgncSymbols.add(null);
             }
         }
         return hgncSymbols;
@@ -414,7 +397,8 @@ public class OmimHpoAnnotator extends LocusAnnotator {
 
     public static void main(String [ ] args) throws Exception {
 
-        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("11", 6637740l)));
+        //includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
+        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1", 18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
 
         List<Entity> inputs = new ArrayList<Entity>();
         for(Locus l : loci)
