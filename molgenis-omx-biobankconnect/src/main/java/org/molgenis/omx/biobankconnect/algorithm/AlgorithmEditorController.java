@@ -196,8 +196,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
 
-		Collection<Object> results = applyAlgorithms.createValueFromAlgorithm(request.getSelectedDataSetIds().get(0),
-				request.getAlgorithmScript()).values();
+		Collection<Object> results = applyAlgorithms.createValueFromAlgorithm(request.getFeatureId(),
+				request.getSelectedDataSetIds().get(0), request.getAlgorithmScript()).values();
 
 		jsonResults.put("results", results);
 		jsonResults.put("totalCounts", Iterables.size(observationSets));

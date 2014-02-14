@@ -107,8 +107,8 @@ public class ApplyAlgorithms
 				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
 						ObservableFeature.class);
 				String algorithmScript = hit.getColumnValueMap().get(STORE_MAPPING_ALGORITHM_SCRIPT).toString();
-				for (Entry<Integer, Object> entry : createValueFromAlgorithm(sourceDataSetId, algorithmScript)
-						.entrySet())
+				for (Entry<Integer, Object> entry : createValueFromAlgorithm(featureId, sourceDataSetId,
+						algorithmScript).entrySet())
 				{
 					Integer observationSetId = entry.getKey();
 					if (!observationSetMap.containsKey(observationSetId))
@@ -233,7 +233,8 @@ public class ApplyAlgorithms
 		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + targetDataSetId, query, null));
 	}
 
-	public Map<Integer, Object> createValueFromAlgorithm(Integer sourceDataSetId, String algorithmScript)
+	public Map<Integer, Object> createValueFromAlgorithm(Integer featureId, Integer sourceDataSetId,
+			String algorithmScript)
 	{
 		if (algorithmScript.isEmpty()) return Collections.emptyMap();
 		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
@@ -272,13 +273,20 @@ public class ApplyAlgorithms
 			}
 		}
 
+		ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
+				ObservableFeature.class);
+
 		Map<Integer, Object> results = new HashMap<Integer, Object>();
 		for (Entry<Integer, MapEntity> entry : eachIndividualValues.entrySet())
 		{
 			if (Iterables.size(entry.getValue().getAttributeNames()) != featureNames.size()) continue;
 			Object result = ScriptEvaluator.eval(algorithmScript, entry.getValue());
-			if (result instanceof Double) results.put(entry.getKey(), Context.toNumber(result));
-			else if (result instanceof Integer) results.put(entry.getKey(), Integer.parseInt(Context.toString(result)));
+			if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.INT.toString())) results.put(
+					entry.getKey(), Integer.parseInt(Context.toString(result)));
+			else if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString())) results
+					.put(entry.getKey(), Integer.parseInt(Context.toString(result)));
+			else if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString())) results
+					.put(entry.getKey(), Context.toNumber(result));
 			else results.put(entry.getKey(), Context.toString(result));
 		}
 		return results;
