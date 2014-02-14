@@ -65,7 +65,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 		{
 			List<HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
 
-			while (source.hasNext())
+			entityIterator: while (source.hasNext())
 			{
 				Entity entity = source.next();
 				Long position = entity.getLong(POSITION);
@@ -74,6 +74,11 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 				List<Locus> locus = new ArrayList<Locus>(Arrays.asList(new Locus(chromosome, position)));
 				List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, locus);
 
+				if (geneSymbols == null)
+				{
+					continue entityIterator;
+				}
+
 				FileReader reader = new FileReader(new File(GENE_FILE));
 				BufferedReader bufferedReader = new BufferedReader(reader);
 
@@ -81,6 +86,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 				{
 					String line = bufferedReader.readLine();
 					String[] lineSplit = line.split("\t");
+
 					for (String gene : geneSymbols)
 					{
 						if (lineSplit[0].equals(gene))
@@ -104,11 +110,11 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 							results.add(new MapEntity(resultMap));
 						}
 					}
+
 				}
 
 				bufferedReader.close();
 			}
-
 		}
 
 		catch (IOException e)
