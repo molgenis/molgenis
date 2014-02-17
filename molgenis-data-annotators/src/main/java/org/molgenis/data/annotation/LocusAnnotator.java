@@ -19,7 +19,6 @@ public abstract class LocusAnnotator implements RepositoryAnnotator {
      * TODO: needs genome build and possible organism !?
      */
 
-
     @Override
     public EntityMetaData getInputMetaData()
     {
@@ -32,23 +31,25 @@ public abstract class LocusAnnotator implements RepositoryAnnotator {
     }
 
     /**
-     * TODO: data type check
      * @param inputMetaData
      * @return
      */
-    @Override
     public Boolean canAnnotate(EntityMetaData inputMetaData)
-    {
-        boolean canAnnotate = true;
-        Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-        for(AttributeMetaData attribute : inputAttributes){
-            if(inputMetaData.getAttribute(attribute.getName()) == null){
-                //all attributes from the inputmetadata must be present to annotate.
-                canAnnotate = false;
-            }
-        }
-        return canAnnotate;
-    }
+	{
+		boolean canAnnotate = true;
+		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
+
+		for (AttributeMetaData attribute : inputAttributes)
+		{
+			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
+			else if (!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType()))
+			{
+
+				canAnnotate = false;
+			}
+		}
+		return canAnnotate;
+	}
 
 
 
