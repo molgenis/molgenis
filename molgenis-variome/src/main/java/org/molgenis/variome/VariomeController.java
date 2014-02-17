@@ -71,7 +71,7 @@ public class VariomeController extends MolgenisPluginController{
 	RepositoryAnnotator dbnsfpGeneServiceAnnotator;
 	
 	@Resource(name = "omimHpoService")
-	RepositoryAnnotator OmimHpoAnnotator;
+	RepositoryAnnotator omimHpoAnnotator;
 	
 	@Autowired
 	public VariomeController(VariomeService pluginVariomeService)
@@ -162,8 +162,8 @@ public class VariomeController extends MolgenisPluginController{
 		//omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"), true);
 		//omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
 		//omxDataSetAnnotator.annotate(dbnsfpVariantServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), true);
-		//omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), false);
-		omxDataSetAnnotator.annotate(OmimHpoAnnotator, dataService.getRepositoryByEntityName("variantSet"), true);
+		omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"), true);
+		//omxDataSetAnnotator.annotate(omimHpoAnnotator, dataService.getRepositoryByEntityName("variantSet"), true);
 		
 		return "view-result-page";
 	}
