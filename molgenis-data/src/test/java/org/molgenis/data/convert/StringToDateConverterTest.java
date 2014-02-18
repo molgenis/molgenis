@@ -13,7 +13,7 @@ public class StringToDateConverterTest
 	public void convert()
 	{
 		Date d = new Date();
-		String s = MolgenisDateFormat.getDateFormat().format(d);
+		String s = MolgenisDateFormat.getDateTimeFormat().format(d);
 		assertEquals(new StringToDateConverter().convert(s).getTime(), d.getTime(), 1000);
 	}
 	
