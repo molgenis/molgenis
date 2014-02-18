@@ -2,7 +2,6 @@ package org.molgenis.data.omx;
 
 import org.molgenis.data.DataService;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.SystemSecurityToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,12 +45,6 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 			for (DataSet dataSet : dataService.findAll(DataSet.ENTITY_NAME, DataSet.class))
 			{
 				OmxRepository repo = new OmxRepository(dataService, searchService, dataSet.getIdentifier());
-				dataService.addRepository(repo);
-			}
-			
-			for (Protocol protocol : dataService.findAll(Protocol.ENTITY_NAME, Protocol.class))
-			{
-				OmxRepository repo = new OmxRepository(dataService, searchService, protocol.getIdentifier());
 				dataService.addRepository(repo);
 			}
 		}
