@@ -2,10 +2,185 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=["variome.css", "jquery-ui-1.10.3.custom.css", "chosen.css", "bootstrap-fileupload.css"]>
-<#assign js=["jquery-ui-1.10.3.custom.min.js", "chosen.jquery.min.js", "bootstrap-fileupload.js"]>
+<#assign js=["jquery-ui-1.10.3.custom.min.js", "chosen.jquery.min.js", "bootstrap-fileupload.js", "jquery.bootstrap.wizard.js"]>
 
 <@header css js />
+<@wizard />
 
+<#macro wizard>
+<div class="row-fluid">
+	<div class="span12">
+		<div id="rootwizard" class="tabbable tabs-left">
+		
+			<@selectionTabs />
+		
+			<div class="tab-content" style="height:auto;">
+	    	
+				<#--Panel 1: Input variants, manual or file(s)-->
+				<div class="tab-pane" id="tab1">
+     				<div class="row-fluid">
+     					<div>
+						<#-- Data set selection box -->			
+						<select data-placeholder="Choose a Dataset" id="dataset-select">
+							<#list dataSets as dataSet>
+								<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+							</#list>
+						</select>
+						</div>
+						<div>
+							!!Report back things user did (i.e added xxx as a dataset or selected dataset xxx)
+						</div>
+				
+						<hr></hr>
+	
+ 						<#--bootstrap - jquery file upload form-->
+			     		<form role="form" action="${context_url}/upload-file" method="post" enctype="multipart/form-data" boundary="_FPSEP91465b27654aa128979fb2_">
+							<div class="form-group">
+								<div class="fileupload fileupload-new" data-provides="fileupload">
+									<div class="input-group">
+			        					
+			        					<div class="form-control uneditable-input"><i class="icon-file fileupload-exists"></i> 
+			    							<span class="fileupload-preview"></span>
+										</div>
+							
+										<div class="input-group-btn">
+							                <a class="btn btn-default btn-file">
+							                    <span class="fileupload-new">Select file</span>
+							                    <span class="fileupload-exists">Change</span>
+							                    <input name="file-input-field" type="file" class="file-input"/>
+							            	</a>
+									            	
+							                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
+							                	Remove
+							                </a>           
+							            </div>
+							            
+							        </div>
+							    </div>
+							</div>
+							
+							<button onClick="showSpinner();" type="submit" class="btn">Add</button>	
+						</form>
+					
+					</div>						
+				</div>
+			
+			<#--Panel 2: Input gene panels or genomic locations-->
+			<div class="tab-pane" id="tab2">
+				<div class="checkbox">
+						<label>
+  							<input type="checkbox"> Onco Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known onco diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
+						</label>
+  					</div>
+  					
+  					<div class="checkbox">
+						<label>
+  							<input type="checkbox"> Cardiac Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known cardiac diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
+						</label>
+  					</div>
+  					
+  					<div class="checkbox">
+						<label>
+  							<input type="checkbox"> Preconception Panel
+  							<span id="help-icon-hover" href="#" data-placement="auto" 
+  								data-toggle="tooltip" 
+  								title="Panel containing transcript regions from known preconception diagnostic genes. Ensemble build 73, GRCh37.12" 
+  								class="icon-question-sign">
+  							</span>
+						</label>
+					</div>
+				</div>
+			
+				<#--Panel 3: Phenotype selection-->
+				<div class="tab-pane" id="tab3">
+					<form class="form-horizontal" role="form" action="${context_url}/upload-phenotype-filter" method="post">
+						<h6>Select a phenotype database</h6>
+				
+						<select name="" class="form-control">
+						    <option value="phenotype-database-hpo">HPO database</option>
+						    <option value="phenotype-database-cgd">CGD database</option>
+							<option value="phenotype-database-omim">OMIM database</option>
+						</select>
+				
+						<h6>Select a phenotype</h6>
+			
+						<select class="phenotypeSelect" data-placeholder="Make a selection.." multiple class="chosen">
+							<option value="#">Disease Y</option>
+							<option value="#">Disease X</option>
+						</select>
+				
+						<button type="submit" class="btn">Add</button>
+						
+					</form>
+			
+					<hr></hr>
+			
+					<h5>Selected phenotypes</h5>
+					<h7>No phenotypes selected</h7>
+					
+				</div>
+				
+				<#--Panel 4: Annotation tool / database selection-->
+				<div class="tab-pane" id="tab4">
+					List of annotation tools here that can be used for the selected data set here.
+				</div>
+			    
+			    <!--
+				<ul class="pager wizard">
+					<li class="previous first" style="display:none;"><a href="#">First</a></li>
+					<li class="previous"><a href="#">Previous</a></li>
+					<li class="next last" style="display:none;"><a href="#">Last</a></li>
+				  	<li class="next"><a href="#">Next</a></li>
+				</ul>
+				-->	
+				
+			</div>
+		</div>
+	</div>
+</div>
+</#macro>
+
+<#macro selectionTabs>
+	<ul>
+	  	<li><a href="#tab1" data-toggle="tab">Select or Upload a Dataset</a></li>
+		<li><a href="#tab2" data-toggle="tab">Filter by: Genome</a></li>
+		<li><a href="#tab3" data-toggle="tab">Filter by: Phenotype</a></li>
+		<li><a href="#tab4" data-toggle="tab">Select your annotation</a></li>
+		
+		<li>
+			<a><form role="form" action="${context_url}/execute-variant-app" method="post">
+				<button type="submit" href="http://localhost:8080/menu/main/dataexplorer" 
+					action="http://localhost:8080/menu/main/dataexplorer" class="btn">Go</button>
+			</form></a>
+		</li>
+	</ul>
+</#macro>
+
+
+<script>
+	$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
+	$("#accordion").accordion({ heightStyle: false});
+	$("#variant-selection-tabs").tabs();
+	$("#region-selection-tabs").tabs();
+	$(".phenotypeSelect	").chosen();
+	$("#dataset-select").chosen();
+	$(".icon-question-sign").tooltip();
+</script>
+
+<@footer />
+
+<#--Old UI design. Can be removed when code no longer needed-->
+<#macro accordionMenu>
 <div class="span12">
 	<div id="accordion">
 	
@@ -22,7 +197,7 @@
 			  	</ul>
 			  	
 			  	<div id="panel-1-tab-1">
-			    	<form role="form" action="${context_url}/upload-vcf" method="post" enctype="multipart/form-data" boundary="_FPSEP91465b27654aa128979fb2_">
+			    	<form role="form" action="${context_url}/upload-file" method="post" enctype="multipart/form-data" boundary="_FPSEP91465b27654aa128979fb2_">
 						<div class="form-group">
 							<div class="fileupload fileupload-new" data-provides="fileupload">
     							<div class="input-group">
@@ -37,7 +212,7 @@
 						                <a class="btn btn-default btn-file">
 						                    <span class="fileupload-new">Select file</span>
 						                    <span class="fileupload-exists">Change</span>
-						                    <input name="vcf-file-input-field" type="file" class="file-input"/>
+						                    <input name="file-input-field" type="file" class="file-input"/>
 						            	</a>
 						            	
 						                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
@@ -49,7 +224,7 @@
 						    </div>
 						</div>
 				
-						<button type="submit" class="btn">Add</button>	
+						<button onClick="$('#spinner').modal('show');" type="submit" class="btn">Add</button>	
 					</form>
 			  	</div>
 			  	
@@ -315,13 +490,4 @@
 		</form>
 	</div>
 </div>	
-
-<script>
-	$("#accordion").accordion({ heightStyle: false});
-	$("#variant-selection-tabs").tabs();
-	$("#region-selection-tabs").tabs();
-	$(".phenotypeSelect	").chosen();
-	$(".icon-question-sign").tooltip();
-</script>
-
-<@footer />
+</#macro>
