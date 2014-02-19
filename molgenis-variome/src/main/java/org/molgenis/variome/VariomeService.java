@@ -1,12 +1,14 @@
 package org.molgenis.variome;
 
+import org.springframework.ui.Model;
+
 /**
  * Interface that must be implemented by a VariomeService
  * 
- * @author Mark-de-Haan
+ * @author mdehaan
  * 
  */
 public interface VariomeService
 {
-	void dataSetAnnotater();
+	void tsvToOmxRepository(String file, Model model);
 }
