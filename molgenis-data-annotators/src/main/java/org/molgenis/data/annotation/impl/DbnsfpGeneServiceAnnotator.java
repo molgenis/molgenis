@@ -105,7 +105,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator
 							}
 
 							resultMap.put(CHROMOSOME, chromosome);
-							resultMap.put(POSITION, position);
+							resultMap.put(POSITION, position.toString());
 
 							results.add(new MapEntity(resultMap));
 						}
