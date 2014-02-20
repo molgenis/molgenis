@@ -8,6 +8,8 @@ import org.molgenis.omx.protocol.ProtocolEntityMetaData;
 public class DataSetEntityMetaData extends AbstractEntityMetaData
 {
 	private final DataSet dataSet;
+	private transient Iterable<AttributeMetaData> cachedAttributes;
+	private transient Iterable<AttributeMetaData> cachedAtomicAttributes;
 
 	public DataSetEntityMetaData(DataSet dataSet)
 	{
@@ -36,12 +38,20 @@ public class DataSetEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributes()
 	{
-		return new ProtocolEntityMetaData(dataSet.getProtocolUsed()).getAttributes();
+		if (cachedAttributes == null)
+		{
+			cachedAttributes = new ProtocolEntityMetaData(dataSet.getProtocolUsed()).getAttributes();
+		}
+		return cachedAttributes;
 	}
 
 	@Override
 	public Iterable<AttributeMetaData> getAtomicAttributes()
 	{
-		return new ProtocolEntityMetaData(dataSet.getProtocolUsed()).getAtomicAttributes();
+		if (cachedAtomicAttributes == null)
+		{
+			cachedAtomicAttributes = new ProtocolEntityMetaData(dataSet.getProtocolUsed()).getAtomicAttributes();
+		}
+		return cachedAtomicAttributes;
 	}
 }
