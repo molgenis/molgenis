@@ -16,7 +16,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.converters.ValueConverter;
