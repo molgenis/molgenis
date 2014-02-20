@@ -97,18 +97,18 @@
 				// HAS Attributes
 				if(attributes[prop].fieldType === "HAS"){
 					children.push($.extend({
-						key : attributes[prop]["refThis"],
+						key : attributes[prop]["href"],
 						title : attributes[prop].label,
 						tooltip : attributes[prop].description,
 						isFolder : true,
 						isLazy : protocolOpts.expand != true,
 						children : protocolOpts.expand ? createChildren(
-								attributes[prop]["refThis"], featureOpts, protocolOpts) : null
+								attributes[prop]["href"], featureOpts, protocolOpts) : null
 					}, protocolOpts));
 				}
 				else {
 					children.push($.extend({
-						key : attributes[prop].refThis,
+						key : attributes[prop].href,
 						title : attributes[prop].label,
 						tooltip : attributes[prop].description,
 						icon : "../../img/filter-bw.png",
@@ -1587,7 +1587,7 @@
 		restApi.getAsync('/api/v1/' + entityName + '/meta', null, null, function(entity) {
 			$.each(entity.attributes, function(key, attribute) {
 				if(key === 'start_nucleotide') {
-					molgenis.updateFeatureFilter(attribute.refThis, {
+					molgenis.updateFeatureFilter(attribute.href, {
 						name : attribute.label,
 						identifier : attribute.name,
 						type : attribute.fieldType,
@@ -1595,7 +1595,7 @@
 						values : [Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString()]
 					});
 				} else if(key === 'chromosome') {
-					molgenis.updateFeatureFilter(attribute.refThis, {
+					molgenis.updateFeatureFilter(attribute.href, {
 						name : attribute.label,
 						identifier : attribute.name,
 						type : attribute.fieldType,

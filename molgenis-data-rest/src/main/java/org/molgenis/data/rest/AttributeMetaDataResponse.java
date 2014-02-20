@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -13,19 +14,19 @@ import com.google.common.collect.Lists;
 
 public class AttributeMetaDataResponse
 {
+	private final String href;
 	private final FieldTypeEnum fieldType;
-	private String description = null;
-	private boolean nillable = true;
-	private boolean readOnly = false;
-	private Object defaultValue = null;
-	private boolean idAttribute = false;
-	private boolean labelAttribute = false;
-	private final Href refEntity = null;
-	private String refThis = null;
-	private String label = null;
-	private boolean unique = false;
-	private String name = null;
+	private final String name;
+	private final String label;
+	private final String description;
 	private final List<?> attributes;
+	private final Href refEntity;
+	private final boolean nillable;
+	private final boolean readOnly;
+	private final Object defaultValue;
+	private final boolean idAttribute;
+	private final boolean labelAttribute;
+	private final boolean unique;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -35,20 +36,19 @@ public class AttributeMetaDataResponse
 	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr,
 			final Set<String> expandFieldSet)
 	{
-		fieldType = attr.getDataType().getEnumType();
-		description = attr.getDescription();
-		nillable = attr.isNillable();
-		readOnly = attr.isReadonly();
-		defaultValue = attr.getDefaultValue();
-		idAttribute = attr.isIdAtrribute();
-		labelAttribute = attr.isLabelAttribute();
-		name = attr.getName();
-		setRefThis(String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attr.getName()));
+		String attrName = attr.getName();
 
-		label = attr.getLabel();
-		unique = attr.isUnique();
+		this.href = String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attrName);
+		this.fieldType = attr.getDataType().getEnumType();
+		this.name = attrName;
+		this.label = attr.getLabel();
+		this.description = attr.getDescription();
+
+		EntityMetaData refEntity = attr.getRefEntity();
+		this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
+				entityParentName)) : null;
+
 		Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-
 		this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
 				new Function<AttributeMetaData, Object>()
 				{
@@ -67,6 +67,18 @@ public class AttributeMetaDataResponse
 						}
 					}
 				})) : null;
+
+		this.nillable = attr.isNillable();
+		this.readOnly = attr.isReadonly();
+		this.defaultValue = attr.getDefaultValue();
+		this.idAttribute = attr.isIdAtrribute();
+		this.labelAttribute = attr.isLabelAttribute();
+		this.unique = attr.isUnique();
+	}
+
+	public String getHref()
+	{
+		return href;
 	}
 
 	public FieldTypeEnum getFieldType()
@@ -74,9 +86,29 @@ public class AttributeMetaDataResponse
 		return fieldType;
 	}
 
+	public String getName()
+	{
+		return name;
+	}
+
+	public String getLabel()
+	{
+		return label;
+	}
+
 	public String getDescription()
 	{
 		return description;
+	}
+
+	public List<?> getAttributes()
+	{
+		return attributes;
+	}
+
+	public Href getRefEntity()
+	{
+		return refEntity;
 	}
 
 	public boolean isNillable()
@@ -104,43 +136,8 @@ public class AttributeMetaDataResponse
 		return labelAttribute;
 	}
 
-	public Href getRefEntity()
-	{
-		return refEntity;
-	}
-
-	public String getLabel()
-	{
-		return label;
-	}
-
 	public boolean isUnique()
 	{
 		return unique;
-	}
-
-	public String getRefThis()
-	{
-		return refThis;
-	}
-
-	public void setRefThis(String refThis)
-	{
-		this.refThis = refThis;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
-	public List<?> getAttributes()
-	{
-		return attributes;
 	}
 }

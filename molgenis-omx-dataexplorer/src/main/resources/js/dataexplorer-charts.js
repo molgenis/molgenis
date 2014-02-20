@@ -102,7 +102,7 @@
 		var listItems = [];
 		listItems.push('<option value='+ '-1' +'>select</option>');
 		$.each(features, function (index) {
-			listItems.push('<option value=' + features[index].refThis + '>' + features[index].name + '</option>');
+			listItems.push('<option value=' + features[index].href + '>' + features[index].name + '</option>');
 		});
 		return listItems.join('');
 	};
