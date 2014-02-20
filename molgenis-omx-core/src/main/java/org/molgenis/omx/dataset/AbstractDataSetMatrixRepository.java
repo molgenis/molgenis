@@ -8,7 +8,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
@@ -47,9 +46,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		Query q = new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier);
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, q, DataSet.class);
-		return new DataSetEntityMetaData(dataSet);
+		return new DataSetEntityMetaData(getDataSet());
 	}
 
 	protected Set<String> getAttributeNames()
