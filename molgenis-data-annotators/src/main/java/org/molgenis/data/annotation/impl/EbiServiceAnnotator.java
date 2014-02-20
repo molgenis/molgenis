@@ -49,14 +49,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Component("ebiService")
 public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
 {
-	// Web url to call the EBI web service
+    // Web url to call the EBI web service
 	private static final String EBI_CHEMBLWS_URL = "https://www.ebi.ac.uk/chemblws/targets/uniprot/";
 
 	// EBI service is dependant on this ID when the web service is called
 	// If Uniprot ID is not in a data set, the web service cannot be used
 	public static final String UNIPROT_ID = "uniprot_id";
+    public static final String EBI_CHE_MBL = "EBI-CHeMBL";
 
-	@Autowired
+    @Autowired
 	DataService dataService;
 
 	@Autowired
@@ -71,7 +72,7 @@ public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationList
 	@Override
 	public String getName()
 	{
-		return "EBI-CHeMBL";
+		return EBI_CHE_MBL;
 	}
 
 	@Override
