@@ -20,14 +20,14 @@ import org.molgenis.search.SearchService;
  */
 public class OmxRepositoryIterator implements Iterator<Entity>
 {
-	private static final int BATCH_SIZE = 1000;
+	static final int BATCH_SIZE = 1000;
 
 	private final String dataSetIdentifier;
 	private final SearchService searchService;
 	private final DataService dataService;
 	private Iterator<Hit> hits;
 	private final Set<String> attributeNames;
-	private final long pageSize;
+	private long pageSize;
 	private int count;
 	private final Query query;
 	private EntityMetaData cachedEntityMetaData;
@@ -67,6 +67,7 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	{
 		if (!hits.hasNext())
 		{
+			pageSize = (count - 1);
 			query.offset(count);
 			SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 			SearchResult result = searchService.search(request);
@@ -76,7 +77,6 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		Hit hit = hits.next();
 		count++;
 
-		// lazy initialization
 		if (cachedEntityMetaData == null)
 		{
 			cachedEntityMetaData = dataService.getRepositoryByEntityName(dataSetIdentifier);
@@ -89,4 +89,5 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	{
 		throw new UnsupportedOperationException("Remove not supported");
 	}
+
 }
