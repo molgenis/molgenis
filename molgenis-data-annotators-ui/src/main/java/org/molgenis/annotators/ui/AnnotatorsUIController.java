@@ -181,10 +181,10 @@ public class AnnotatorsUIController extends MolgenisPluginController
 		// true);
 		// omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"),
 		// false);
-		omxDataSetAnnotator.annotate(dbnsfpVariantServiceAnnotator,
-				dataService.getRepositoryByEntityName("variantSet"), true);
-		omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"),
-				true);
+		//omxDataSetAnnotator.annotate(dbnsfpVariantServiceAnnotator,
+		//		dataService.getRepositoryByEntityName("variantSet"), true);
+		//omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"),
+		//		true);
 		// omxDataSetAnnotator.annotate(omimHpoAnnotator, dataService.getRepositoryByEntityName("5gpm set"), true);
 
 		return "view-result-page";
