@@ -213,7 +213,7 @@
 		if (selectedFeatures.length > 0) {
 			molgenis.search(function(searchResponse) {
 				var maxRowsPerPage = resultsTable.getMaxRows();
-				var nrRows = searchResponse.items.length;
+				var nrRows = searchResponse.total;
 				resultsTable.build(searchResponse, selectedFeatures, restApi);
 				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
 			});
@@ -1364,39 +1364,31 @@
 	};
 
 	molgenis.search = function(callback) {
-		
-		var searchRequest = molgenis.createSearchRequest(true);
-		var rule = searchRequest.query.rules[0];
-		var q = (rule.length > 0 ? {'q':rule} : null);
-		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name,null,q,callback);
+		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name,null, molgenis.createEntityCollectionRequest(true),callback);
 	};
 
-	molgenis.createSearchRequest = function(includeLimitOffset) {
-		
-		var searchRequest = {
-			documentType : selectedRepoMetadata.name,
-			query : {
-				rules : [[]]
-			}
+	molgenis.createEntityCollectionRequest = function(includeLimitOffset) {
+		var entityCollectionRequest = {
+			start : null,
+			num : null,
+			q : []
 		};
-
+	
 		if (includeLimitOffset) {
-			searchRequest.query.pageSize = resultsTable.getMaxRows();
-
+			entityCollectionRequest.num = resultsTable.getMaxRows();
 			if (pager != null) {
 				var page = $('#data-table-pager').pager('getPage');
 				if (page > 1) {
-					var offset = (page - 1) * resultsTable.getMaxRows();
-					searchRequest.query.offset = offset;
+					entityCollectionRequest.start = (page - 1) * resultsTable.getMaxRows();
 				}
 			}
 		}
-
+		
 		var count = 0;
 
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
-				searchRequest.query.rules[0].push({
+				entityCollectionRequest.q.push({
 					operator : 'SEARCH',
 					value : searchQuery
 				});
@@ -1406,7 +1398,7 @@
 
 		$.each(featureFilters, function(featureUri, filter) {
 			if (count > 0) {
-				searchRequest.query.rules[0].push({
+				entityCollectionRequest.q.push({
 					operator : 'AND'
 				});
 			}
@@ -1416,7 +1408,7 @@
 					// Range filter
 					var rangeAnd = false;
 					if ((index == 0) && (value != '')) {
-						searchRequest.query.rules[0].push({
+						entityCollectionRequest.q.push({
 							field : filter.identifier,
 							operator : 'GREATER_EQUAL',
 							value : value
@@ -1424,50 +1416,61 @@
 						rangeAnd = true;
 					}
 					if (rangeAnd) {
-						searchRequest.query.rules[0].push({
+						entityCollectionRequest.q.push({
 							operator : 'AND'
 						});
 					}
 					if ((index == 1) && (value != '')) {
-						searchRequest.query.rules[0].push({
+						entityCollectionRequest.q.push({
 							field : filter.identifier,
 							operator : 'LESS_EQUAL',
 							value : value
 						});
 					}
-
 				} else {
 					if (index > 0) {
-						searchRequest.query.rules[0].push({
+						entityCollectionRequest.q.push({
 							operator : 'OR'
 						});
 					}
-					searchRequest.query.rules[0].push({
+					entityCollectionRequest.q.push({
 						field : filter.identifier,
 						operator : 'EQUALS',
 						value : value
 					});
 				}
-
 			});
-
 			count++;
 		});
+
+		return entityCollectionRequest;
+		
+	};
+	
+	molgenis.createDownloadDataRequest = function() {
+		var entityCollectionRequest = molgenis.createEntityCollectionRequest(false);
+		
+		var dataRequest = {
+			entityName : selectedRepoMetadata.name,
+			attributeNames: [],
+			query : {
+				rules : [entityCollectionRequest.q]
+			}
+		};
 
 		var sortRule = resultsTable.getSortRule();
 		if (sortRule) {
 			searchRequest.query.sort = sortRule;
 		}
 		
-		searchRequest.fieldsToReturn = [];
 		$.each(selectedFeatures, function() {
 			var feature = restApi.get(this);
-			searchRequest.fieldsToReturn.push(feature.name);
+			dataRequest.attributeNames.push(feature.name);
 			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
-				searchRequest.fieldsToReturn.push("key-" + feature.name);
+				dataRequest.attributeNames.push("key-" + feature.name);
 		});
 
-		return searchRequest;
+		return dataRequest;
 	};
 
 	molgenis.initializeAggregate = function(entityUri) {
@@ -1530,16 +1533,20 @@
 	};
 
 	molgenis.download = function() {
-		var searchRequest = molgenis.createSearchRequest(false);
+		var entityCollectionRequest = molgenis.createEntityCollectionRequest(false);
 		
+		var fieldsToReturn = [];
+		$.each(selectedFeatures, function() {
+			var feature = restApi.get(this);
+			fieldsToReturn.push(feature.name);
+			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
+				fieldsToReturn.push("key-" + feature.name);
+		});
+	
 		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
-			'dataRequest' : JSON.stringify({
-				'entityName' : searchRequest.documentType,
-				'attributeNames' : searchRequest.fieldsToReturn,
-				'query' : searchRequest.query
-			})
+			'dataRequest' : JSON.stringify(molgenis.createDownloadDataRequest())
 		});
 		parent.hideSpinner();
 	};
