@@ -2,14 +2,15 @@ package org.molgenis.data.annotation.impl;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.*;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -43,7 +44,7 @@ import java.util.*;
  * 
  */
 @Component("omimHpoService")
-public class OmimHpoAnnotator extends LocusAnnotator
+public class OmimHpoAnnotator extends LocusAnnotator 
 {
 
 	// output
@@ -98,6 +99,21 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+	@Autowired
+	AnnotationService annotatorService;
+	
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		annotatorService.addAnnotator(this);
+	}
+	
+	@Override
+	public String getName()
+	{
+		return "OmimHpo";
+	}
+	
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
@@ -189,26 +205,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		}
 
 		return results.iterator();
-	}
-
-	@Override
-	public EntityMetaData getOutputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISO, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESC, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		return metadata;
-	}
-
-	@Override
-	public String getName()
-	{
-		return "OmimHpo";
-	}
+	}	
 
 	/**
 	 * e.g. OMIM:614887 PEX14 5195 HP:0002240 Hepatomegaly
@@ -437,30 +434,17 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		}
 		return hgncSymbols;
 	}
-
-	public static void main(String[] args) throws Exception
+	
+	@Override
+	public EntityMetaData getOutputMetaData()
 	{
-
-		// includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
-		List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l),
-				new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1",
-						18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
-
-		List<Entity> inputs = new ArrayList<Entity>();
-		for (Locus l : loci)
-		{
-			HashMap<String, Object> inputMap = new HashMap<String, Object>();
-			inputMap.put(CHROMOSOME, l.getChrom());
-			inputMap.put(POSITION, l.getPos());
-			inputs.add(new MapEntity(inputMap));
-		}
-
-		Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
-		while (res.hasNext())
-		{
-			System.out.println(res.next().toString());
-		}
-
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISO, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESC, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		return metadata;
 	}
-
 }
