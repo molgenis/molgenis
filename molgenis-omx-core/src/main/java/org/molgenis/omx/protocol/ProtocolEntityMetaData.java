@@ -13,7 +13,7 @@ import com.google.common.collect.Iterables;
 public class ProtocolEntityMetaData extends AbstractEntityMetaData
 {
 	private final Protocol protocol;
-	private Iterable<AttributeMetaData> cachedAttributesMetaData;
+	private transient Iterable<AttributeMetaData> cachedAttributesMetaData;
 
 	public ProtocolEntityMetaData(Protocol protocol)
 	{
