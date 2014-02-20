@@ -17,7 +17,7 @@ public abstract class FieldType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/**
+    /**
 	 * For xref purposes we sometimes need a handle of the field this type was defined as part of.
 	 */
 	protected Field f;
@@ -168,4 +168,21 @@ public abstract class FieldType implements Serializable
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS");
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FieldType fieldType = (FieldType) o;
+
+        if (f != null ? !f.equals(fieldType.f) : fieldType.f != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return f != null ? f.hashCode() : 0;
+    }
 }
