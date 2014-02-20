@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -169,11 +168,5 @@ public class CategoryRepository extends AbstractRepository implements Countable
 			}
 		}
 
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return getEntityMetaData().getAttributes();
 	}
 }

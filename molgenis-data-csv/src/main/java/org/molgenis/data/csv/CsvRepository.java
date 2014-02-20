@@ -241,10 +241,4 @@ public class CsvRepository extends AbstractRepository
 	{
 		return MapEntity.class;
 	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return getEntityMetaData().getAttributes();
-	}
 }

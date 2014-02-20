@@ -109,12 +109,6 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	}
 
 	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return decoratedRepository.getLevelOneAttributes();
-	}
-
-	@Override
 	public void close() throws IOException
 	{
 		decoratedRepository.close();

@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -72,11 +71,4 @@ public class OntologyRepository extends AbstractRepository implements Countable
 
 		return metaData;
 	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return getEntityMetaData().getAttributes();
-	}
-
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -155,11 +154,4 @@ public class StoreMappingRepository extends AbstractRepository
 			getFeatures(subProtocol, features);
 		}
 	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return getEntityMetaData().getAttributes();
-	}
-
 }
