@@ -20,7 +20,7 @@ import org.molgenis.search.SearchService;
  */
 public class OmxRepositoryIterator implements Iterator<Entity>
 {
-	public static final int BATCH_SIZE = 1000;
+	static final int BATCH_SIZE = 1000;
 
 	private final String dataSetIdentifier;
 	private final SearchService searchService;
