@@ -1,9 +1,11 @@
 package org.molgenis.omx.protocol;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.omx.observ.CharacteristicMetaData;
 import org.molgenis.omx.observ.ObservableFeature;
 
 public class ObservableFeatureAttributeMetaData implements AttributeMetaData
@@ -84,6 +86,17 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 
 	@Override
 	public EntityMetaData getRefEntity()
+	{
+		FieldTypeEnum dataType = getDataType().getEnumType();
+		if (dataType == FieldTypeEnum.XREF || dataType == FieldTypeEnum.MREF)
+		{
+			return new CharacteristicMetaData();
+		}
+		return null;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getAttributeParts()
 	{
 		return null;
 	}
