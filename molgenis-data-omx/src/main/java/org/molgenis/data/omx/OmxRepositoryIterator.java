@@ -25,12 +25,14 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	private final String dataSetIdentifier;
 	private final SearchService searchService;
 	private final DataService dataService;
-	private Iterator<Hit> hits;
 	private final Set<String> attributeNames;
 	private final long pageSize;
-	private int count;
 	private final Query query;
-	private EntityMetaData cachedEntityMetaData;
+
+	private int count;
+	private Iterator<Hit> hits;
+
+	private transient EntityMetaData cachedEntityMetaData;
 
 	public OmxRepositoryIterator(String dataSetIdentifier, SearchService searchService, DataService dataService,
 			Query q, Set<String> attributeNames)
