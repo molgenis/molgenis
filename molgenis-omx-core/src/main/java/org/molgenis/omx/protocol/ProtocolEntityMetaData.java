@@ -1,22 +1,19 @@
 package org.molgenis.omx.protocol;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.utils.ProtocolUtils;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
-public class ProtocolEntityMetaData implements EntityMetaData
+public class ProtocolEntityMetaData extends AbstractEntityMetaData
 {
 	private final Protocol protocol;
+	private Iterable<AttributeMetaData> cachedAttributesMetaData;
 
 	public ProtocolEntityMetaData(Protocol protocol)
 	{
@@ -45,104 +42,46 @@ public class ProtocolEntityMetaData implements EntityMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributes()
 	{
-		List<Protocol> protocols = ProtocolUtils.getProtocolDescendants(protocol, true);
-
-		Iterable<AttributeMetaData> attributeMetaDataIterable = new ArrayList<AttributeMetaData>();
-		for (Protocol protocol : protocols)
+		if (cachedAttributesMetaData == null)
 		{
-			Iterable<AttributeMetaData> attributeMetaData = Iterables.transform(protocol.getFeatures(),
-					new Function<ObservableFeature, AttributeMetaData>()
-					{
-						@Override
-						public AttributeMetaData apply(ObservableFeature observableFeature)
-						{
-							return new ObservableFeatureAttributeMetaData(observableFeature);
-						}
-					});
-			attributeMetaDataIterable = Iterables.concat(attributeMetaDataIterable, attributeMetaData);
-		}
-		return attributeMetaDataIterable;
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		Iterable<AttributeMetaData> allIterable = Collections.emptyList();
-
-		List<Protocol> subprotocols = protocol.getSubprotocols();
-		if (subprotocols != null)
-		{
-			Iterable<AttributeMetaData> protocolsIterable = Iterables.transform(subprotocols,
-					new Function<Protocol, AttributeMetaData>()
-					{
-
-						@Override
-						public AttributeMetaData apply(Protocol protocol)
-						{
-							return new ProtocolAttributeMetaData(protocol);
-						}
-
-					});
-			allIterable = Iterables.concat(allIterable, protocolsIterable);
-		}
-
-		List<ObservableFeature> features = protocol.getFeatures();
-		if (features != null)
-		{
-			Iterable<AttributeMetaData> featuresIterable = Iterables.transform(features,
-					new Function<ObservableFeature, AttributeMetaData>()
-					{
-						@Override
-						public AttributeMetaData apply(ObservableFeature observableFeature)
-						{
-							return new ObservableFeatureAttributeMetaData(observableFeature);
-						}
-					});
-			allIterable = Iterables.concat(allIterable, featuresIterable);
-		}
-
-		return Lists.newArrayList(allIterable);
-	}
-
-	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		for (AttributeMetaData attribute : getAttributes())
-		{
-			if (attribute.isIdAtrribute())
+			// get compound attributes (subprotocols)
+			Iterable<AttributeMetaData> subprotocolsAttributeMetaData;
+			Iterable<Protocol> subprotocols = protocol.getSubprotocols();
+			if (subprotocols != null)
 			{
-				return attribute;
+				subprotocolsAttributeMetaData = Iterables.transform(subprotocols,
+						new Function<Protocol, AttributeMetaData>()
+						{
+							@Override
+							public AttributeMetaData apply(Protocol protocol)
+							{
+								return new ProtocolAttributeMetaData(protocol);
+							}
+
+						});
 			}
-		}
+			else subprotocolsAttributeMetaData = Collections.emptyList();
 
-		return null;
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		for (AttributeMetaData attribute : getAttributes())
-		{
-			if (attribute.isLabelAttribute())
+			// get non-compound attributes (observable features)
+			Iterable<AttributeMetaData> observableFeaturesAttributeMetaData;
+			Iterable<ObservableFeature> observableFeatures = protocol.getFeatures();
+			if (observableFeatures != null)
 			{
-				return attribute;
+				observableFeaturesAttributeMetaData = Iterables.transform(protocol.getFeatures(),
+						new Function<ObservableFeature, AttributeMetaData>()
+						{
+							@Override
+							public AttributeMetaData apply(ObservableFeature observableFeature)
+							{
+								return new ObservableFeatureAttributeMetaData(observableFeature);
+							}
+						});
 			}
+			else observableFeaturesAttributeMetaData = Collections.emptyList();
+
+			cachedAttributesMetaData = Iterables.concat(subprotocolsAttributeMetaData,
+					observableFeaturesAttributeMetaData);
 		}
-
-		return null;
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		for (AttributeMetaData attribute : getAttributes())
-		{
-			if (attribute.getName().equals(attributeName))
-			{
-				return attribute;
-			}
-		}
-
-		return null;
+		return cachedAttributesMetaData;
 	}
 }

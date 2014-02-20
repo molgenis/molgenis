@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 
-public class DefaultEntityMetaData implements EntityMetaData
+public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
 	private String label;
@@ -91,12 +90,6 @@ public class DefaultEntityMetaData implements EntityMetaData
 	}
 
 	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return getAttributes();
-	}
-
-	@Override
 	public String getLabel()
 	{
 		return label != null ? label : name;
@@ -141,5 +134,4 @@ public class DefaultEntityMetaData implements EntityMetaData
 		else if (!name.equals(other.name)) return false;
 		return true;
 	}
-
 }

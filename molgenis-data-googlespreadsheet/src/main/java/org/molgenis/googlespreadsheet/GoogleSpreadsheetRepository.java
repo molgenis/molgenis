@@ -178,11 +178,4 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 
 		return entityMetaData;
 	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return getEntityMetaData().getAttributes();
-	}
-
 }

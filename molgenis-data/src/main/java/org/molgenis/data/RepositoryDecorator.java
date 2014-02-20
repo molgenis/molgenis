@@ -38,6 +38,12 @@ public class RepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Iterable<AttributeMetaData> getAtomicAttributes()
+	{
+		return decoratedRepository.getAtomicAttributes();
+	}
+
+	@Override
 	public AttributeMetaData getIdAttribute()
 	{
 		return decoratedRepository.getIdAttribute();
@@ -84,11 +90,4 @@ public class RepositoryDecorator implements Repository
 	{
 		return decoratedRepository.getUrl();
 	}
-
-	@Override
-	public Iterable<AttributeMetaData> getLevelOneAttributes()
-	{
-		return decoratedRepository.getLevelOneAttributes();
-	}
-
 }

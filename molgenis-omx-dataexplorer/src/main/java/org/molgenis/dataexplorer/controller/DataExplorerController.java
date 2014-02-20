@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,13 +34,16 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -250,7 +254,7 @@ public class DataExplorerController extends MolgenisPluginController
 		String entityName = entityUriTokens[entityUriTokens.length - 1];
 
 		Repository repository = dataService.getRepositoryByEntityName(entityName);
-		Iterable<AttributeMetaData> attributeMetaDataIterable = Iterables.filter(repository.getLevelOneAttributes(),
+		Iterable<AttributeMetaData> attributeMetaDataIterable = Iterables.filter(repository.getAttributes(),
 				new Predicate<AttributeMetaData>()
 				{
 					@Override
@@ -258,7 +262,7 @@ public class DataExplorerController extends MolgenisPluginController
 					{
 						if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS)
 						{
-							attributeMetaData.getRefEntity().getLevelOneAttributes();
+							attributeMetaData.getRefEntity().getAttributes();
 						}
 						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS;
 					}
@@ -273,5 +277,15 @@ public class DataExplorerController extends MolgenisPluginController
 
 		model.addAttribute("entityMetaDataGroups", entityMetaDataGroups);
 		return "view-filter-dialog";
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
+	{
+		logger.error(null, e);
+		return Collections.singletonMap("errorMessage",
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }

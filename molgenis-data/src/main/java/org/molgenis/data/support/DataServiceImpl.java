@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -32,54 +32,43 @@ import com.google.common.collect.Maps;
 @Component
 public class DataServiceImpl implements DataService
 {
-	private final List<Repository> repositories = Lists.newArrayList();
+	private final Map<String, Repository> repositories;
 	private final Map<String, Class<? extends FileRepositorySource>> fileRepositorySources = Maps.newHashMap();
+
+	public DataServiceImpl()
+	{
+		this.repositories = new LinkedHashMap<String, Repository>();
+	}
 
 	@Override
 	public void addRepository(Repository newRepository)
 	{
-		for (Repository repository : repositories)
+		String repositoryName = newRepository.getName();
+		if (repositories.containsKey(repositoryName))
 		{
-			if (repository.getName().equalsIgnoreCase(newRepository.getName()))
-			{
-				throw new MolgenisDataException("Entity [" + repository.getName() + "] already registered.");
-			}
+			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
 		}
-
-		repositories.add(newRepository);
+		repositories.put(repositoryName, newRepository);
 	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return Lists.transform(repositories, new Function<Repository, String>()
-		{
-			@Override
-			public String apply(Repository repository)
-			{
-				return repository.getName();
-			}
-		});
+		return repositories.keySet();
 	}
 
 	@Override
 	public Repository getRepositoryByEntityName(String entityName)
 	{
-		for (Repository repository : repositories)
-		{
-			if (repository.getName().equalsIgnoreCase(entityName))
-			{
-				return repository;
-			}
-		}
-
-		throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		Repository repository = repositories.get(entityName);
+		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		else return repository;
 	}
 
 	@Override
 	public Repository getRepositoryByUrl(String url)
 	{
-		for (Repository repository : repositories)
+		for (Repository repository : repositories.values())
 		{
 			if (repository.getUrl().equalsIgnoreCase(url))
 			{

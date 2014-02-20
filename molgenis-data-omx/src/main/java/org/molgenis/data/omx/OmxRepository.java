@@ -44,6 +44,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	private static int FLUSH_SIZE = 20;
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
 	private final SearchService searchService;
+	private final DataService dataService;
 	private final ValueConverter valueConverter;
 	private LoadingCache<String, ObservableFeature> observableFeatureCache = null;
 
@@ -51,13 +52,15 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	{
 		super(BASE_URL + dataSetIdentifier, dataService, dataSetIdentifier);
 		this.searchService = searchService;
+		this.dataService = dataService;
 		this.valueConverter = new ValueConverter(dataService);
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return new OmxRepositoryIterator(dataSetIdentifier, searchService, new QueryImpl(), getAttributeNames());
+		return new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService, new QueryImpl(),
+				getAttributeNames());
 	}
 
 	@Override
@@ -80,7 +83,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 			@Override
 			public Iterator<Entity> iterator()
 			{
-				return new OmxRepositoryIterator(dataSetIdentifier, searchService, q, getAttributeNames());
+				return new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService, q, getAttributeNames());
 			}
 		};
 	}

@@ -11,7 +11,7 @@ public class DateToStringConverter implements Converter<Date, String>
 	@Override
 	public String convert(Date source)
 	{
-		return MolgenisDateFormat.getDateFormat().format(source);
+		return MolgenisDateFormat.getDateTimeFormat().format(source);
 	}
 
 }

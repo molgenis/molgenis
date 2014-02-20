@@ -15,7 +15,7 @@
 	};
 
 	molgenis.createAttributeTree = function(entityUri) {
-		var entityMetaUri = entityUri + "/meta/tree";
+		var entityMetaUri = entityUri + "/meta";
 		
 		restApi.getAsync(entityMetaUri, null, null, 
 			function(entityMetaData) {
@@ -47,7 +47,7 @@
 						icon : false,
 						isFolder : true,
 						isLazy : true,
-						children : createChildren("/api/v1/" + entityMetaData.name + "/meta/tree"
+						children : createChildren("/api/v1/" + entityMetaData.name + "/meta"
 								, {select : true}, {})
 					}],
 					onLazyRead : function(node) {
@@ -89,25 +89,26 @@
 		);
 					
 		function createChildren(href, featureOpts, protocolOpts) {
+			// FIXME async
 			var children = [];
-			var attributes = restApi.get(href).attributes;
+			var attributes = restApi.get(href, ['attributes']).attributes;
 			
 			Object.keys(attributes).map(function(prop) {	
 				// HAS Attributes
 				if(attributes[prop].fieldType === "HAS"){
 					children.push($.extend({
-						key : attributes[prop].refEntity["href"] + "/tree",
+						key : attributes[prop]["href"],
 						title : attributes[prop].label,
 						tooltip : attributes[prop].description,
 						isFolder : true,
 						isLazy : protocolOpts.expand != true,
 						children : protocolOpts.expand ? createChildren(
-								attributes[prop].refEntity["href"] + "/tree", featureOpts, protocolOpts) : null
+								attributes[prop]["href"], featureOpts, protocolOpts) : null
 					}, protocolOpts));
 				}
 				else {
 					children.push($.extend({
-						key : attributes[prop].refThis,
+						key : attributes[prop].href,
 						title : attributes[prop].label,
 						tooltip : attributes[prop].description,
 						icon : "../../img/filter-bw.png",
@@ -1586,7 +1587,7 @@
 		restApi.getAsync('/api/v1/' + entityName + '/meta', null, null, function(entity) {
 			$.each(entity.attributes, function(key, attribute) {
 				if(key === 'start_nucleotide') {
-					molgenis.updateFeatureFilter(attribute.refThis, {
+					molgenis.updateFeatureFilter(attribute.href, {
 						name : attribute.label,
 						identifier : attribute.name,
 						type : attribute.fieldType,
@@ -1594,7 +1595,7 @@
 						values : [Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString()]
 					});
 				} else if(key === 'chromosome') {
-					molgenis.updateFeatureFilter(attribute.refThis, {
+					molgenis.updateFeatureFilter(attribute.href, {
 						name : attribute.label,
 						identifier : attribute.name,
 						type : attribute.fieldType,
