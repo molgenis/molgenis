@@ -1,12 +1,12 @@
 package org.molgenis.data.omx;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -24,17 +24,20 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 
 	private final String dataSetIdentifier;
 	private final SearchService searchService;
+	private final DataService dataService;
 	private Iterator<Hit> hits;
 	private final Set<String> attributeNames;
 	private final long pageSize;
 	private int count;
 	private final Query query;
+	private EntityMetaData cachedEntityMetaData;
 
-	public OmxRepositoryIterator(String dataSetIdentifier, SearchService searchService, Query q,
-			Set<String> attributeNames)
+	public OmxRepositoryIterator(String dataSetIdentifier, SearchService searchService, DataService dataService,
+			Query q, Set<String> attributeNames)
 	{
 		this.dataSetIdentifier = dataSetIdentifier;
 		this.searchService = searchService;
+		this.dataService = dataService;
 		this.attributeNames = attributeNames;
 
 		query = q.getPageSize() == 0 ? new QueryImpl(q).pageSize(BATCH_SIZE) : q;
@@ -73,29 +76,17 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		Hit hit = hits.next();
 		count++;
 
-		return hitToEntity(hit);
+		// lazy initialization
+		if (cachedEntityMetaData == null)
+		{
+			cachedEntityMetaData = dataService.getRepositoryByEntityName(dataSetIdentifier);
+		}
+		return new HitEntity(hit, attributeNames, cachedEntityMetaData, dataService);
 	}
 
 	@Override
 	public void remove()
 	{
 		throw new UnsupportedOperationException("Remove not supported");
-	}
-
-	private Entity hitToEntity(Hit hit)
-	{
-		MapEntity entity = new MapEntity("id");
-		Map<String, Object> values = hit.getColumnValueMap();
-
-		for (Map.Entry<String, Object> entry : values.entrySet())
-		{
-			String attr = entry.getKey();
-			if (attributeNames.contains(attr))
-			{
-				entity.set(attr.toLowerCase(), entry.getValue());
-			}
-		}
-
-		return entity;
 	}
 }
