@@ -1,11 +1,19 @@
 package org.molgenis.omx.protocol;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class ProtocolAttributeMetaData implements AttributeMetaData
 {
@@ -87,5 +95,45 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 	public EntityMetaData getRefEntity()
 	{
 		return new ProtocolEntityMetaData(protocol);
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getAttributeParts()
+	{
+		Iterable<AttributeMetaData> allIterable = Collections.emptyList();
+
+		List<Protocol> subprotocols = protocol.getSubprotocols();
+		if (subprotocols != null)
+		{
+			Iterable<AttributeMetaData> protocolsIterable = Iterables.transform(subprotocols,
+					new Function<Protocol, AttributeMetaData>()
+					{
+
+						@Override
+						public AttributeMetaData apply(Protocol protocol)
+						{
+							return new ProtocolAttributeMetaData(protocol);
+						}
+
+					});
+			allIterable = Iterables.concat(allIterable, protocolsIterable);
+		}
+
+		List<ObservableFeature> features = protocol.getFeatures();
+		if (features != null)
+		{
+			Iterable<AttributeMetaData> featuresIterable = Iterables.transform(features,
+					new Function<ObservableFeature, AttributeMetaData>()
+					{
+						@Override
+						public AttributeMetaData apply(ObservableFeature observableFeature)
+						{
+							return new ObservableFeatureAttributeMetaData(observableFeature);
+						}
+					});
+			allIterable = Iterables.concat(allIterable, featuresIterable);
+		}
+
+		return Lists.newArrayList(allIterable);
 	}
 }
