@@ -1,7 +1,9 @@
 package org.molgenis.data.rest;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -13,7 +15,31 @@ public class EntityMetaDataResponse
 	private final String name;
 	private final String label;
 	private final String description;
-	private final Map<String, AttributeMetaDataResponse> attributes = new LinkedHashMap<String, AttributeMetaDataResponse>();
+	private final Map<String, Object> attributes;
+
+	public EntityMetaDataResponse(EntityMetaData meta, Set<String> expandFieldSet)
+	{
+		name = meta.getName();
+		description = meta.getDescription();
+		label = meta.getLabel();
+		attributes = new LinkedHashMap<String, Object>();
+
+		for (AttributeMetaData attr : meta.getAttributes())
+		{
+			if (attr.isVisible() && !attr.getName().equals("__Type"))
+			{
+				if (expandFieldSet != null && expandFieldSet.contains("attributes"))
+				{
+					attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
+				}
+				else
+				{
+					String attrHref = String.format("%s/%s/meta/%s", RestController.BASE_URI, name, attr.getName());
+					attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
+				}
+			}
+		}
+	}
 
 	public String getName()
 	{
@@ -30,24 +56,8 @@ public class EntityMetaDataResponse
 		return description;
 	}
 
-	public Map<String, AttributeMetaDataResponse> getAttributes()
+	public Map<String, Object> getAttributes()
 	{
 		return ImmutableMap.copyOf(attributes);
 	}
-
-	public EntityMetaDataResponse(EntityMetaData meta, Iterable<AttributeMetaData> metaDataAttributes)
-	{
-		name = meta.getName();
-		description = meta.getDescription();
-		label = meta.getLabel();
-
-		for (AttributeMetaData attr : metaDataAttributes)
-		{
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
-			{
-				attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
-			}
-		}
-	}
-
 }
