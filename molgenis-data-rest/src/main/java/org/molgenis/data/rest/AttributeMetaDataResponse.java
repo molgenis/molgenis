@@ -1,7 +1,15 @@
 package org.molgenis.data.rest;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class AttributeMetaDataResponse
 {
@@ -12,13 +20,20 @@ public class AttributeMetaDataResponse
 	private Object defaultValue = null;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
-	private Href refEntity = null;
+	private final Href refEntity = null;
 	private String refThis = null;
 	private String label = null;
 	private boolean unique = false;
 	private String name = null;
+	private final List<?> attributes;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
+	{
+		this(entityParentName, attr, null);
+	}
+
+	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr,
+			final Set<String> expandFieldSet)
 	{
 		fieldType = attr.getDataType().getEnumType();
 		description = attr.getDescription();
@@ -28,19 +43,30 @@ public class AttributeMetaDataResponse
 		idAttribute = attr.isIdAtrribute();
 		labelAttribute = attr.isLabelAttribute();
 		name = attr.getName();
-
-		if (FieldTypeEnum.HAS.equals(attr.getDataType().getEnumType()))
-		{
-			String href = String.format("%s/%s/meta", RestController.BASE_URI, attr.getRefEntity().getName());
-			refEntity = new Href(href);
-		}
-		else
-		{
-			setRefThis(String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attr.getName()));
-		}
+		setRefThis(String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attr.getName()));
 
 		label = attr.getLabel();
 		unique = attr.isUnique();
+		Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
+
+		this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
+				new Function<AttributeMetaData, Object>()
+				{
+
+					@Override
+					public Object apply(AttributeMetaData attributeMetaData)
+					{
+						if (expandFieldSet != null && expandFieldSet.contains("attributes"))
+						{
+							return new AttributeMetaDataResponse(entityParentName, attributeMetaData, null);
+						}
+						else
+						{
+							return Collections.<String, Object> singletonMap("href", String.format("%s/%s/meta/%s",
+									RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
+						}
+					}
+				})) : null;
 	}
 
 	public FieldTypeEnum getFieldType()
@@ -113,4 +139,8 @@ public class AttributeMetaDataResponse
 		this.name = name;
 	}
 
+	public List<?> getAttributes()
+	{
+		return attributes;
+	}
 }
