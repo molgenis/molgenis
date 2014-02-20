@@ -1,1 +1,7 @@
+#dataset-select-container {
+	height:100px;
+}
 
+#dataset-select-position-container {
+	position:absolute;
+}

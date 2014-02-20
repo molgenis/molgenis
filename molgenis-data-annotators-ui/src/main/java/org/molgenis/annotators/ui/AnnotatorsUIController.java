@@ -107,7 +107,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 		model.addAttribute("dataSets", dataSets);
 
-		//
+		// TODO add the real list of annotators from the annotation registry
 		model.addAttribute("annotators", new ArrayList<String>());
 
 		if (dataSets != null && !dataSets.isEmpty())
@@ -133,19 +133,24 @@ public class AnnotatorsUIController extends MolgenisPluginController
 				// select first data set by default
 				selectedDataSet = dataSets.iterator().next();
 			}
+			
 			model.addAttribute("selectedDataSet", selectedDataSet);
 		}
 
 		return "view-annotation-ui";
 	}
+	
+	@RequestMapping(value = "/change-current-dataset", method = RequestMethod.GET)
+	public String changeSelectedDataSet(@RequestParam("dataset-select") String userSelectedDataSet){
+		System.out.println("CHANGED TO " + userSelectedDataSet);
+		return "view-annotation-ui";
+	}
 
-	@RequestMapping(value = "/create-new-data-set-from-tsv", headers = "content-type=multipart/*", method = RequestMethod.POST)
+	@RequestMapping(value = "/create-new-dataset-from-tsv", headers = "content-type=multipart/*", method = RequestMethod.POST)
 	public String handleVcfInput(@RequestParam("file-input-field")
-	Part part, @RequestParam("data-set-name")
+	Part part, @RequestParam("dataset-name")
 	String submittedDataSetName, Model model) throws IOException
 	{
-		System.out.println(submittedDataSetName);
-
 		if (!part.equals(null) && part.getSize() > 5000000)
 		{ // 5mb limit
 			throw new RuntimeException("File too large");
@@ -164,11 +169,14 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/execute-variant-app", method = RequestMethod.POST)
-	public String filterMyVariants()
+	public String filterMyVariants(@RequestParam("annotation-form") List<String> selectedAnnotators)
 	{
-
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer);
-
+		for(String annotator : selectedAnnotators){
+			//TODO annotate
+		}
+		
+		
 		// omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"),
 		// true);
 		// omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"),
