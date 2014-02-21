@@ -275,6 +275,7 @@ public class DataExplorerController extends MolgenisPluginController
 			entityMetaDataGroups.add(attributeMetaData.getRefEntity());
 		}
 
+		model.addAttribute("entityName", entityName);
 		model.addAttribute("entityMetaDataGroups", entityMetaDataGroups);
 		return "view-filter-dialog";
 	}

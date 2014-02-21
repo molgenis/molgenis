@@ -9,7 +9,7 @@
 	var selectedRepoMetadata = null;
 	var restApi = new molgenis.RestClient();
 	var aggregateView = false;
-
+	
 	molgenis.getSelectedEntityName = function() {
 		return selectedRepoMetadata.name;
 	};
@@ -79,10 +79,10 @@
 						{
 							expandNodeRec(node);
 						}
-						onNodeSelectionChangeNew(this.getSelectedNodes());
+						onNodeSelectionChange(this.getSelectedNodes());
 					},
 					onPostInit : function() {
-						onNodeSelectionChangeNew(this.getSelectedNodes());
+						onNodeSelectionChange(this.getSelectedNodes());
 					}
 				});
 			}
@@ -131,7 +131,7 @@
 			}
 		}
 		
-		function onNodeSelectionChangeNew(selectedNodes) {
+		function onNodeSelectionChange(selectedNodes) {
 			function getSiblingPos(node) {
 				var pos = 0;
 				do {
@@ -161,7 +161,7 @@
 						: node.data.key;
 			});
 
-			molgenis.onFeatureSelectionChangeNew(sortedFeatures);
+			molgenis.onFeatureSelectionChange(sortedFeatures);
 
 		}
 	};
@@ -177,6 +177,7 @@
 				var config = featureFilters[attributeUri];
 				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 				var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton, attributeUri, false);
+				
 				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, attributeUri);
 			}
 		);
@@ -193,10 +194,11 @@
 		$('#data-table-pager').empty();
 		pager = null;
 		molgenis.createAttributeTree(entityUri);
+		molgenis.initializeAggregate(entityUri);
 		molgenis.updateGenomeBrowser(entityUri);
 	};
 
-	molgenis.onFeatureSelectionChangeNew = function(attributeUris) {
+	molgenis.onFeatureSelectionChange = function(attributeUris) {
 		selectedFeatures = attributeUris;
 		molgenis.updateObservationSetsTable();
 	};
@@ -872,8 +874,10 @@
 			
 			var config = featureFilters[attributeUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-			var divContainer = molgenis.createGenericFeatureField(
-					null, attributes[attributeUri], config, applyButton, attributeUri, true);
+			var divContainer = molgenis
+					.createGenericFeatureField(null, attributes[attributeUri],
+							config, applyButton, attributeUri,
+							true);
 			var trElement = $(element).closest('tr');
 			trElement.append(divContainer);
 		});
@@ -1046,7 +1050,7 @@
 
 	molgenis.initializeAggregate = function(entityUri) {
 		var entityMetaUri = entityUri + '/meta';
-		restApi.getAsync(entityMetaUri, null, null, function(entityMetaData) {
+		restApi.getAsync(entityMetaUri, ['attributes'], null, function(entityMetaData) {
 			var selectTag = $('<select id="selectFeature"/>');
 			if(Object.keys(entityMetaData.attributes).length === 0) {
 				selectTag.attr('disabled', 'disabled');
@@ -1104,16 +1108,6 @@
 	};
 
 	molgenis.download = function() {
-		var entityCollectionRequest = molgenis.createEntityCollectionRequest(false);
-		
-		var fieldsToReturn = [];
-		$.each(selectedFeatures, function() {
-			var feature = restApi.get(this);
-			fieldsToReturn.push(feature.name);
-			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
-				fieldsToReturn.push("key-" + feature.name);
-		});
-	
 		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
@@ -1182,26 +1176,15 @@
 	$(function() {
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
-		$('#dataset-select').change(
-				function() {
-					var checkDataViewer = $('#dataexplorer-grid-data').is(':visible');
-					if (checkDataViewer)
-						molgenis.onDataSetSelectionChange($(this).val());
-					else
-						molgenis.initializeAggregate($(this).val());
-				});
-		
+		$('#dataset-select').change(function() {
+			molgenis.onDataSetSelectionChange($(this).val());
+		});
+			
 		resultsTable = new molgenis.ResultsTable();
 
-		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]')
-				.on(
-						'shown',
-						function(e) {
-							molgenis.initializeAggregate($('#dataset-select')
-									.val());
-							molgenis
-									.createFeatureSelection(selectedRepoMetadata.protocolUsed.href);
-						});
+		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('shown', function(e) {
+			molgenis.initializeAggregate($('#dataset-select').val());
+		});
 
 		$("#observationset-search").focus();
 		

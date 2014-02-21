@@ -25,12 +25,14 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	private final String dataSetIdentifier;
 	private final SearchService searchService;
 	private final DataService dataService;
-	private Iterator<Hit> hits;
 	private final Set<String> attributeNames;
 	private long pageSize;
-	private int count;
 	private final Query query;
-	private EntityMetaData cachedEntityMetaData;
+
+	private int count;
+	private Iterator<Hit> hits;
+
+	private transient EntityMetaData cachedEntityMetaData;
 
 	public OmxRepositoryIterator(String dataSetIdentifier, SearchService searchService, DataService dataService,
 			Query q, Set<String> attributeNames)
@@ -44,13 +46,14 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 
 		SearchResult result = searchService.search(request);
+		long maxHitCount = result.getTotalHitCount() - q.getOffset();
 		if (q.getPageSize() == 0)
 		{
-			pageSize = result.getTotalHitCount();
+			pageSize = maxHitCount;
 		}
 		else
 		{
-			pageSize = result.getTotalHitCount() < q.getPageSize() ? result.getTotalHitCount() : q.getPageSize();
+			pageSize = maxHitCount < q.getPageSize() ? maxHitCount : q.getPageSize();
 		}
 
 		hits = result.iterator();
@@ -67,7 +70,6 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 	{
 		if (!hits.hasNext())
 		{
-			pageSize = (count - 1);
 			query.offset(count);
 			SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 			SearchResult result = searchService.search(request);

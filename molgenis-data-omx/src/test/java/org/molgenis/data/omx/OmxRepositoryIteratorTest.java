@@ -7,16 +7,21 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -78,5 +83,137 @@ public class OmxRepositoryIteratorTest
 		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchServiceMock, dataService, q,
 				attributeNames);
 		assertEquals(Iterators.size(it), hits.size());
+	}
+
+	@Test
+	public void testIteratorPageSizeLargerThanBatchSize()
+	{
+		int nrEntities = OmxRepositoryIterator.BATCH_SIZE + 10;
+		String dataSetIdentifier = "identifier";
+		String attrName = "attr1";
+		List<String> attributeNames = Collections.singletonList(attrName);
+
+		List<Hit> hits1 = new ArrayList<Hit>();
+		for (int i = 0; i < OmxRepositoryIterator.BATCH_SIZE; i++)
+			hits1.add(new Hit("id", dataSetIdentifier, Collections.<String, Object> singletonMap(attrName, "val" + i)));
+		List<Hit> hits2 = new ArrayList<Hit>();
+		for (int i = 0; i < nrEntities - OmxRepositoryIterator.BATCH_SIZE; i++)
+			hits2.add(new Hit("id", dataSetIdentifier, Collections.<String, Object> singletonMap(attrName, "val"
+					+ (OmxRepositoryIterator.BATCH_SIZE + i))));
+
+		Query q1 = new QueryImpl().pageSize(OmxRepositoryIterator.BATCH_SIZE).offset(0);
+		SearchRequest request1 = new SearchRequest(dataSetIdentifier, q1, null);
+		SearchResult result1 = new SearchResult(nrEntities, hits1);
+
+		Query q2 = new QueryImpl().pageSize(OmxRepositoryIterator.BATCH_SIZE).offset(OmxRepositoryIterator.BATCH_SIZE);
+		SearchRequest request2 = new SearchRequest(dataSetIdentifier, q2, null);
+		SearchResult result2 = new SearchResult(nrEntities, hits2);
+
+		SearchService searchService = mock(SearchService.class);
+		when(searchService.search(request1)).thenReturn(result1);
+		when(searchService.search(request2)).thenReturn(result2);
+
+		DataService dataService = mock(DataService.class);
+		Repository repository = mock(Repository.class);
+		AttributeMetaData attributeMetaData = mock(AttributeMetaData.class);
+		FieldType fieldType = mock(FieldType.class);
+		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
+		when(attributeMetaData.getDataType()).thenReturn(fieldType);
+		when(repository.getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
+
+		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService,
+				new QueryImpl(), new HashSet<String>(attributeNames));
+
+		int count = 0;
+		for (; it.hasNext(); ++count)
+		{
+			assertEquals(it.next().get(attrName), "val" + count);
+		}
+		assertEquals(count, nrEntities);
+	}
+
+	@Test
+	public void testIteratorPageSizeSmallerThanBatchSizeNoOffset()
+	{
+		int nrEntities = OmxRepositoryIterator.BATCH_SIZE - 10;
+		String dataSetIdentifier = "identifier";
+		String attrName = "attr1";
+		List<String> attributeNames = Collections.singletonList(attrName);
+		int pageSize = 20;
+		int offset = 0;
+
+		List<Hit> hits1 = new ArrayList<Hit>();
+		for (int i = 0; i < OmxRepositoryIterator.BATCH_SIZE; i++)
+			hits1.add(new Hit("id", dataSetIdentifier, Collections.<String, Object> singletonMap(attrName, "val" + i)));
+
+		Query q1 = new QueryImpl().pageSize(pageSize).offset(offset);
+		SearchRequest request1 = new SearchRequest(dataSetIdentifier, q1, null);
+		SearchResult result1 = new SearchResult(nrEntities, hits1);
+
+		SearchService searchService = mock(SearchService.class);
+		when(searchService.search(request1)).thenReturn(result1);
+
+		DataService dataService = mock(DataService.class);
+		Repository repository = mock(Repository.class);
+		AttributeMetaData attributeMetaData = mock(AttributeMetaData.class);
+		FieldType fieldType = mock(FieldType.class);
+		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
+		when(attributeMetaData.getDataType()).thenReturn(fieldType);
+		when(repository.getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
+
+		Query q = new QueryImpl().pageSize(pageSize).offset(offset);
+		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService, q,
+				new HashSet<String>(attributeNames));
+
+		int count = 0;
+		for (; it.hasNext(); ++count)
+		{
+			assertEquals(it.next().get(attrName), "val" + count);
+		}
+		assertEquals(count, pageSize);
+	}
+
+	@Test
+	public void testIteratorPageSizeSmallerThanBatchSizeWithOffset()
+	{
+		int nrEntities = OmxRepositoryIterator.BATCH_SIZE - 10;
+		String dataSetIdentifier = "identifier";
+		String attrName = "attr1";
+		List<String> attributeNames = Collections.singletonList(attrName);
+		int pageSize = 20;
+		int offset = nrEntities - 10;
+
+		List<Hit> hits1 = new ArrayList<Hit>();
+		for (int i = 0; i < OmxRepositoryIterator.BATCH_SIZE; i++)
+			hits1.add(new Hit("id", dataSetIdentifier, Collections.<String, Object> singletonMap(attrName, "val" + i)));
+
+		Query q1 = new QueryImpl().pageSize(pageSize).offset(offset);
+		SearchRequest request1 = new SearchRequest(dataSetIdentifier, q1, null);
+		SearchResult result1 = new SearchResult(nrEntities, hits1);
+
+		SearchService searchService = mock(SearchService.class);
+		when(searchService.search(request1)).thenReturn(result1);
+
+		DataService dataService = mock(DataService.class);
+		Repository repository = mock(Repository.class);
+		AttributeMetaData attributeMetaData = mock(AttributeMetaData.class);
+		FieldType fieldType = mock(FieldType.class);
+		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
+		when(attributeMetaData.getDataType()).thenReturn(fieldType);
+		when(repository.getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
+
+		Query q = new QueryImpl().pageSize(pageSize).offset(offset);
+		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService, q,
+				new HashSet<String>(attributeNames));
+
+		int count = 0;
+		for (; it.hasNext(); ++count)
+		{
+			assertEquals(it.next().get(attrName), "val" + count);
+		}
+		assertEquals(count, nrEntities - offset);
 	}
 }
