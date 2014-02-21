@@ -614,8 +614,8 @@ public class RestController
 
 		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-		Query q = new QueryImpl(resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum()).offset(
-				request.getStart());
+		Query q = new QueryImpl(resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum())
+				.offset(request.getStart()).sort(request.getSort());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
 		Long count = ((Queryable) meta).count(q);

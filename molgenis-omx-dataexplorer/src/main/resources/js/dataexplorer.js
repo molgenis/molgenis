@@ -947,7 +947,8 @@
 		var entityCollectionRequest = {
 			start : null,
 			num : null,
-			q : []
+			q : [],
+			sort: resultsTable.getSortRule()
 		};
 	
 		if (includeLimitOffset) {
