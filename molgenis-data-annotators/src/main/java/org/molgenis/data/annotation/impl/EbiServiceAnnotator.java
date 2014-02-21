@@ -3,10 +3,11 @@ package org.molgenis.data.annotation.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -19,6 +20,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -47,7 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  * */
 @Component("ebiService")
-public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
+public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
 {
     // Web url to call the EBI web service
 	private static final String EBI_CHEMBLWS_URL = "https://www.ebi.ac.uk/chemblws/targets/uniprot/";
@@ -56,18 +58,15 @@ public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationList
 	// If Uniprot ID is not in a data set, the web service cannot be used
 	public static final String UNIPROT_ID = "uniprot_id";
     public static final String EBI_CHE_MBL = "EBI-CHeMBL";
+    private final DefaultHttpClient httpClient;
 
     @Autowired
 	DataService dataService;
 
-	@Autowired
-	AnnotationService annotatorService;
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
+    public EbiServiceAnnotator() {
+        httpClient = new DefaultHttpClient();
+    }
 
 	@Override
 	public String getName()
@@ -83,75 +82,58 @@ public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationList
 		return metadata;
 	}
 
-	@Override
-	public boolean canAnnotate(EntityMetaData inputMetaData)
+    @Override
+    public List<Entity> annotateEntity(Entity entity) {
+        HttpGet httpGet = new HttpGet(getServiceUri(entity));
+        Entity resultEntity = null;
+        List<Object> annotatedInput = new ArrayList<Object>();
+        if(!annotatedInput.contains(entity.get(UNIPROT_ID))){
+            annotatedInput.add(entity.get(UNIPROT_ID));
+            try
+            {
+                HttpResponse response = httpClient.execute(httpGet);
+                BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+
+                String output;
+                StringBuilder result = new StringBuilder();
+
+                while ((output = br.readLine()) != null)
+                {
+                    result.append(output);
+                }
+                resultEntity = parseResult(entity, result.toString());
+            }
+            catch (Exception e)
+            {
+                httpGet.abort();
+                // TODO: how to handle exceptions at this point
+                throw new RuntimeException(e);
+            }
+        }
+        return Collections.singletonList(resultEntity);
+    }
+
+    private String getServiceUri(Entity entity)
 	{
-		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for (AttributeMetaData attribute : inputAttributes)
-		{
-			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
-			else if (!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType()))
-			{
-				canAnnotate = false;
-			}
-		}
-		return canAnnotate;
+        StringBuilder uriStringBuilder = new StringBuilder();
+        uriStringBuilder.append(EBI_CHEMBLWS_URL);
+        uriStringBuilder.append(entity.get(UNIPROT_ID));
+        uriStringBuilder.append(".json");
+
+		return uriStringBuilder.toString();
 	}
 
-	@Override
-	@Transactional
-	public Iterator<Entity> annotate(Iterator<Entity> source)
+	private Entity parseResult(Entity entity, String json) throws IOException
 	{
-		HttpClient httpClient = new DefaultHttpClient();
-		List<Entity> results = new ArrayList<Entity>();
-
-		while (source.hasNext())
+        Entity result = new MapEntity();
+		if (!"".equals(json))
 		{
-			Entity entity = source.next();
-			HttpGet httpGet = new HttpGet(getServiceUri(entity));
-
-			try
-			{
-				HttpResponse response = httpClient.execute(httpGet);
-				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
-
-				String output;
-				String result = "";
-
-				while ((output = br.readLine()) != null)
-				{
-					result += output;
-				}
-
-				results = parseResult(entity, result);
-			}
-			catch (Exception e)
-			{
-				httpGet.abort();
-				// TODO: how to handle exceptions at this point
-				throw new RuntimeException(e);
-			}
-		}
-		return results.iterator();
-	}
-
-	private String getServiceUri(Entity entity)
-	{
-		return EBI_CHEMBLWS_URL + entity.get(UNIPROT_ID) + ".json";
-	}
-
-	private List<Entity> parseResult(Entity entity, String result) throws IOException
-	{
-		List<Entity> results = new ArrayList<Entity>();
-		if (!"".equals(result))
-		{
-			Map<String, Object> rootMap = jsonStringToMap(result);
+			Map<String, Object> rootMap = jsonStringToMap(json);
 			Map<String, Object> resultMap = (Map) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
-			results.add(new MapEntity(resultMap));
+			result = new MapEntity(resultMap);
 		}
-		return results;
+		return result;
 	}
 
 	private static Map<String, Object> jsonStringToMap(String result) throws IOException
