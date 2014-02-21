@@ -265,7 +265,7 @@ public class OmxDataSetAnnotator
 		boolean areEqual = true;
 		for (String inputFeatureName : inputFeatureNames)
 		{
-			if (!entity.get(inputFeatureName).equals(inputValues.get(inputFeatureName)))
+			if (!inputValues.get(inputFeatureName).equals(entity.get(inputFeatureName)))
 			{
 				areEqual = false;
 				break;
