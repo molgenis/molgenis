@@ -16,6 +16,8 @@ public class EntityMetaDataResponse
 	private final String label;
 	private final String description;
 	private final Map<String, Object> attributes;
+	private final String nameAttribute;
+	private final String labelAttribute;
 
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> expandFieldSet)
 	{
@@ -39,6 +41,10 @@ public class EntityMetaDataResponse
 				}
 			}
 		}
+		AttributeMetaData idAttribute = meta.getIdAttribute();
+		this.nameAttribute = idAttribute != null ? idAttribute.getName() : null;
+		AttributeMetaData labelAttribute = meta.getLabelAttribute();
+		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 	}
 
 	public String getName()
@@ -59,5 +65,15 @@ public class EntityMetaDataResponse
 	public Map<String, Object> getAttributes()
 	{
 		return ImmutableMap.copyOf(attributes);
+	}
+
+	public String getNameAttribute()
+	{
+		return nameAttribute;
+	}
+
+	public String getLabelAttribute()
+	{
+		return labelAttribute;
 	}
 }

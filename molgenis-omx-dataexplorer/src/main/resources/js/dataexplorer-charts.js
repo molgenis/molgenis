@@ -181,7 +181,7 @@
 		var width = 1024;
 		var height = 576; 
 		var title = $('#scatterplot-title').val();
-		var searchRequest = molgenis.createSearchRequest();
+		var searchRequest = molgenis.createEntityCollectionRequest();
 		var query = searchRequest.query;
 		var x, y, xAxisLabel, yAxisLabel, split;
 		
