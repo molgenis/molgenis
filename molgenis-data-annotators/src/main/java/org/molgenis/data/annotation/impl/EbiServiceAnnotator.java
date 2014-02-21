@@ -3,10 +3,8 @@ package org.molgenis.data.annotation.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -101,57 +99,69 @@ public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationList
 
 	@Override
 	@Transactional
-	public Iterator<Entity> annotate(Iterator<Entity> source)
+	public Iterator<Entity> annotate(final Iterator<Entity> source)
 	{
-		HttpClient httpClient = new DefaultHttpClient();
-		List<Entity> results = new ArrayList<Entity>();
+        final HttpClient httpClient = new DefaultHttpClient();
+        return new Iterator<Entity>() {
+            @Override
+            public boolean hasNext() {
+                return source.hasNext();  //To change body of implemented methods use File | Settings | File Templates.
+            }
 
-		while (source.hasNext())
-		{
-			Entity entity = source.next();
-			HttpGet httpGet = new HttpGet(getServiceUri(entity));
+            @Override
+            public Entity next() {
+                return annotateEntity(httpClient, source.next());  //To change body of implemented methods use File | Settings | File Templates.
+            }
 
-			try
-			{
-				HttpResponse response = httpClient.execute(httpGet);
-				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
-
-				String output;
-				String result = "";
-
-				while ((output = br.readLine()) != null)
-				{
-					result += output;
-				}
-
-				results = parseResult(entity, result);
-			}
-			catch (Exception e)
-			{
-				httpGet.abort();
-				// TODO: how to handle exceptions at this point
-				throw new RuntimeException(e);
-			}
-		}
-		return results.iterator();
+            @Override
+            public void remove() {
+                //
+            }
+        };
 	}
 
-	private String getServiceUri(Entity entity)
+    private Entity annotateEntity(HttpClient httpClient, Entity entity) {
+        HttpGet httpGet = new HttpGet(getServiceUri(entity));
+        Entity resultEntity = null;
+        try
+        {
+            HttpResponse response = httpClient.execute(httpGet);
+            BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+
+            String output;
+            String result = "";
+
+            while ((output = br.readLine()) != null)
+            {
+                result += output;
+            }
+            resultEntity = parseResult(entity, result);
+        }
+        catch (Exception e)
+        {
+            httpGet.abort();
+            // TODO: how to handle exceptions at this point
+            throw new RuntimeException(e);
+        }
+        return resultEntity;
+    }
+
+    private String getServiceUri(Entity entity)
 	{
 		return EBI_CHEMBLWS_URL + entity.get(UNIPROT_ID) + ".json";
 	}
 
-	private List<Entity> parseResult(Entity entity, String result) throws IOException
+	private Entity parseResult(Entity entity, String json) throws IOException
 	{
-		List<Entity> results = new ArrayList<Entity>();
-		if (!"".equals(result))
+        Entity result = new MapEntity();
+		if (!"".equals(json))
 		{
-			Map<String, Object> rootMap = jsonStringToMap(result);
+			Map<String, Object> rootMap = jsonStringToMap(json);
 			Map<String, Object> resultMap = (Map) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
-			results.add(new MapEntity(resultMap));
+			result = new MapEntity(resultMap);
 		}
-		return results;
+		return result;
 	}
 
 	private static Map<String, Object> jsonStringToMap(String result) throws IOException
