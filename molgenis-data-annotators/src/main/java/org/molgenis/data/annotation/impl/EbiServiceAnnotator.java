@@ -105,12 +105,12 @@ public class EbiServiceAnnotator implements RepositoryAnnotator, ApplicationList
         return new Iterator<Entity>() {
             @Override
             public boolean hasNext() {
-                return source.hasNext();  //To change body of implemented methods use File | Settings | File Templates.
+                return source.hasNext();
             }
 
             @Override
             public Entity next() {
-                return annotateEntity(httpClient, source.next());  //To change body of implemented methods use File | Settings | File Templates.
+                return annotateEntity(httpClient, source.next());
             }
 
             @Override
