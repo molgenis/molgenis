@@ -13,12 +13,12 @@
 					<div id="filter-nav-content" class="tab-content">
 						<#list entityMetaDataGroups as entityMetaData>
 							<div class="tab-pane" id="${entityMetaData.name}-tab">
-							<#list entityMetaData.attributes as attributeMetaData>
+							<#list entityMetaData.attributes.iterator() as attributeMetaData>
 								<#if attributeMetaData.dataType.enumType != "HAS">
 								<table id="${attributeMetaData.name}-table">
 									<tr>
 									  	<td>
-									  		<a class="test" data-molgenis-url="/api/v1/${entityMetaData.name}/meta/${attributeMetaData.name}" style="btn">${attributeMetaData.label}</a>
+									  		<a class="test" data-molgenis-url="/api/v1/${entityName}/meta/${attributeMetaData.name}" style="btn">${attributeMetaData.label}</a>
 							  			</td>
 					  				</tr>
 					   	  	  	</table>
