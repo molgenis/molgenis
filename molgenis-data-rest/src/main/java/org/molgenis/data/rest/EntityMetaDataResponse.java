@@ -66,4 +66,14 @@ public class EntityMetaDataResponse
 	{
 		return ImmutableMap.copyOf(attributes);
 	}
+
+	public String getNameAttribute()
+	{
+		return nameAttribute;
+	}
+
+	public String getLabelAttribute()
+	{
+		return labelAttribute;
+	}
 }
