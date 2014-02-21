@@ -15,7 +15,7 @@ public interface Query
 	List<QueryRule> getRules();
 
 	/**
-	 * Size of a page. Synonym: limit
+	 * Size of a page. Synonym: maxResults
 	 */
 	int getPageSize();
 
