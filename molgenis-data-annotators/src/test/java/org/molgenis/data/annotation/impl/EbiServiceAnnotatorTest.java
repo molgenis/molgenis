@@ -76,7 +76,7 @@ public class EbiServiceAnnotatorTest
 	}
 
 	@Test
-	public void findCatalogs() throws IllegalStateException, IOException
+	public void annotate() throws IllegalStateException, IOException
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
