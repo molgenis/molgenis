@@ -47,9 +47,6 @@ public class EntityMetaDataResponse
 
 			for (AttributeMetaData attr : meta.getAttributes())
 			{
-				// only include requested fields
-				if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
-
 				if (attr.isVisible() && !attr.getName().equals("__Type"))
 				{
 					if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes"))
