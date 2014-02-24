@@ -12,36 +12,71 @@ import com.google.common.collect.ImmutableMap;
 
 public class EntityMetaDataResponse
 {
+	private final String href;
 	private final String name;
 	private final String label;
 	private final String description;
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
 
-	public EntityMetaDataResponse(EntityMetaData meta, Set<String> expandFieldSet)
+	public EntityMetaDataResponse(EntityMetaData meta, Set<String> fieldSet, Set<String> expandFieldSet)
 	{
-		name = meta.getName();
-		description = meta.getDescription();
-		label = meta.getLabel();
-		attributes = new LinkedHashMap<String, Object>();
+		this.href = String.format("%s/%s/meta", RestController.BASE_URI, meta.getName());
 
-		for (AttributeMetaData attr : meta.getAttributes())
+		if (fieldSet == null || fieldSet.contains("name".toLowerCase()))
 		{
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
+			this.name = meta.getName();
+		}
+		else this.name = null;
+
+		if (fieldSet == null || fieldSet.contains("description".toLowerCase()))
+		{
+			this.description = meta.getDescription();
+		}
+		else this.description = null;
+
+		if (fieldSet == null || fieldSet.contains("label".toLowerCase()))
+		{
+			label = meta.getLabel();
+		}
+		else this.label = null;
+
+		if (fieldSet == null || fieldSet.contains("attributes".toLowerCase()))
+		{
+			this.attributes = new LinkedHashMap<String, Object>();
+
+			for (AttributeMetaData attr : meta.getAttributes())
 			{
-				if (expandFieldSet != null && expandFieldSet.contains("attributes"))
+				// only include requested fields
+				if (fieldSet != null && !fieldSet.contains(attr.getName().toLowerCase())) continue;
+
+				if (attr.isVisible() && !attr.getName().equals("__Type"))
 				{
-					attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
-				}
-				else
-				{
-					String attrHref = String.format("%s/%s/meta/%s", RestController.BASE_URI, name, attr.getName());
-					attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
+					if (expandFieldSet != null && expandFieldSet.contains("attributes"))
+					{
+						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
+					}
+					else
+					{
+						String attrHref = String.format("%s/%s/meta/%s", RestController.BASE_URI, name, attr.getName());
+						this.attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
+					}
 				}
 			}
 		}
-		AttributeMetaData labelAttribute = meta.getLabelAttribute();
-		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
+		else this.attributes = null;
+
+		if (fieldSet == null || fieldSet.contains("labelAttribute".toLowerCase()))
+		{
+			AttributeMetaData labelAttribute = meta.getLabelAttribute();
+			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
+		}
+		else this.labelAttribute = null;
+	}
+
+	public String getHref()
+	{
+		return href;
 	}
 
 	public String getName()
