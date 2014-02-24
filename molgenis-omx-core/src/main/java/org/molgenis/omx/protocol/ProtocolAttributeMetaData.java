@@ -46,7 +46,7 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 	@Override
 	public FieldType getDataType()
 	{
-		return MolgenisFieldTypes.getType(FieldTypeEnum.HAS.toString().toLowerCase());
+		return MolgenisFieldTypes.getType(FieldTypeEnum.COMPOUND.toString().toLowerCase());
 	}
 
 	@Override

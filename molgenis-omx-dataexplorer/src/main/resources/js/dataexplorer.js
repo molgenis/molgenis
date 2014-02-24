@@ -94,8 +94,8 @@
 			var attributes = restApi.get(href, ['attributes']).attributes;
 			
 			Object.keys(attributes).map(function(prop) {	
-				// HAS Attributes
-				if(attributes[prop].fieldType === "HAS"){
+				// compound attributes
+				if(attributes[prop].fieldType === 'COMPOUND'){
 					children.push($.extend({
 						key : attributes[prop]["href"],
 						title : attributes[prop].label,

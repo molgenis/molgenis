@@ -260,11 +260,11 @@ public class DataExplorerController extends MolgenisPluginController
 					@Override
 					public boolean apply(AttributeMetaData attributeMetaData)
 					{
-						if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS)
+						if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
 						{
 							attributeMetaData.getRefEntity().getAttributes();
 						}
-						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.HAS;
+						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND;
 					}
 				});
 
