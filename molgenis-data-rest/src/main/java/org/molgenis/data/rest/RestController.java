@@ -557,7 +557,7 @@ public class RestController
 	{
 		Entity entity = new MapEntity();
 
-		for (AttributeMetaData attr : meta.getAttributes())
+		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			String paramName = StringUtils.uncapitalize(attr.getName());
 			Object paramValue = request.get(paramName);
