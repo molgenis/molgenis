@@ -14,7 +14,7 @@
 						<#list entityMetaDataGroups as entityMetaData>
 							<div class="tab-pane" id="${entityMetaData.name}-tab">
 							<#list entityMetaData.attributes.iterator() as attributeMetaData>
-								<#if attributeMetaData.dataType.enumType != "HAS">
+								<#if attributeMetaData.dataType.enumType != "COMPOUND">
 								<table id="${attributeMetaData.name}-table">
 									<tr>
 									  	<td>

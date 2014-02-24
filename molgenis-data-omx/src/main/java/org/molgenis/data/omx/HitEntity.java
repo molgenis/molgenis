@@ -120,7 +120,7 @@ public class HitEntity extends AbstractEntity
 					Object attributeValue = caseInsensitiveColumnValueMap.get(caseInsensitiveAttributeName);
 					return attributeValue;
 				}
-				case HAS:
+				case COMPOUND:
 				{
 					AttributeMetaData compoundAttribute = entityMetaData.getAttribute(caseInsensitiveAttributeName);
 					return compoundAttribute.getAttributeParts();

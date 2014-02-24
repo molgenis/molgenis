@@ -6,8 +6,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
 
-/** 'Has' means that another entity is embedded in as attribute. MetaData of this entity can be retrieved using getRefEntity() */
-public class HasField extends FieldType
+/**
+ * Compound field is a field that consists of multiple fields
+ */
+public class CompoundField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
 
@@ -97,7 +99,7 @@ public class HasField extends FieldType
 	@Override
 	public FieldTypeEnum getEnumType()
 	{
-		return FieldTypeEnum.HAS;
+		return FieldTypeEnum.COMPOUND;
 	}
 
 }

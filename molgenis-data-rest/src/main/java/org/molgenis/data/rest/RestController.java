@@ -1,6 +1,6 @@
 package org.molgenis.data.rest;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HAS;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -223,7 +223,7 @@ public class RestController
 				refAttributeName);
 		switch (attr.getDataType().getEnumType())
 		{
-			case HAS:
+			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
 				entityHasAttributeMap.put("href", attrHref);
 				@SuppressWarnings("unchecked")
@@ -644,7 +644,7 @@ public class RestController
 				String attrName = getAttributeName(attr);
 				FieldTypeEnum attrType = attr.getDataType().getEnumType();
 
-				if (attrType == HAS)
+				if (attrType == COMPOUND)
 				{
 					if (expandFields.contains(attrName))
 					{
