@@ -92,6 +92,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getAttribute("name")).thenReturn(attrName);
 		when(repo.getIdAttribute()).thenReturn(attrId);
 		when(repo.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(repo.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
 		when(repo.getName()).thenReturn(PERSON);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
@@ -138,7 +139,19 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"fieldType\":\"STRING\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"refThis\":\"/api/v1/Person/meta/name\",\"label\":\"name\",\"unique\":false,\"name\":\"name\"}}}"));
+								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"}},\"nameAttribute\":\"id\"}"));
+
+	}
+
+	@Test
+	public void getMetaDataExpandAttributes() throws Exception
+	{
+		mockMvc.perform(get(BASE_URI + "/person/meta?expand=attributes"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(
+						content()
+								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"unique\":false}},\"nameAttribute\":\"id\"}"));
 
 	}
 
