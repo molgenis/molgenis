@@ -28,16 +28,25 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	public boolean canAnnotate(EntityMetaData inputMetaData)
+	public boolean canAnnotate(EntityMetaData repoMetaData)
 	{
 		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for (AttributeMetaData attribute : inputAttributes)
+		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData().getAttributes();
+		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
 		{
-			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
-			else if (!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType()))
+			// one of the needed attributes not present? we can not annotate
+			if (repoMetaData.getAttribute(annotatorAttribute.getName()) == null)
 			{
 				canAnnotate = false;
+				break;
+			}
+			
+			// one of the needed attributes not of the correct type? we can not annotate
+			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+					.equals(annotatorAttribute.getDataType()))
+			{
+				canAnnotate = false;
+				break;
 			}
 		}
 		return canAnnotate;
