@@ -28,6 +28,7 @@
 			</ul>
 		
 			<div class="tab-content" style="height:auto;">
+				<#--panel code located in seperate macros for readability-->
 		    	<@panel1 />
 		    	<@panel2 />
 		    	<@panel3 />
@@ -47,7 +48,7 @@
 				<div id="dataset-select-position-container" class="controls">
 					<select name="dataset-select" id="dataset-select">
 						<#list dataSets as dataSet>
-							<option name="dataset-select" value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+							<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
 						</#list>
 					</select>
 				</div>
@@ -136,20 +137,9 @@
 	<div class="tab-pane" id="tab4">
 		<h4>Selected data set: <i>${selectedDataSet.name}</i></h4>
 		<hr></hr>
-		<h5>Annotations available</h5>
-		<hr></hr>
 		
-		<form role="form">
-			<div class="form-group">
-			
-				<label class="checkbox-inline">
-  					<input type="checkbox" id="inlineCheckbox1" value="option1"> 1
-				</label>
-				
-			</div>
-		</form>	
-		
-		List of annotation tools here that can be used for the selected data set.
+		<#-- located in a seperate macro for readability-->
+		<@annotationCheckboxes />	
 	</div>
 </#macro>
 
@@ -165,7 +155,7 @@
   		<div class="modal-body">	
 			<div class="form-group has-succes">	
 				<label>Name of your new dataset</label>
-				<input type="text" id="dataset-name" name="dataset-name" required="required"
+				<input type="text" id="dataset-name" name="dataset-name" required
 					class="form-control" placeholder="enter your data set name here">
 			</div>
 			
@@ -202,24 +192,56 @@
 </div>
 </#macro>
 
-<script>
-	$('#createDataSet').click(function(){
-		if($('#dataset-name').val() === null || $('#dataset-name').val().length === 0){
-			//alert('Please define the dataset name!');
-			return false;
-		}
-	});
+<#macro annotationCheckboxes>
+	<form role="form-horizontal">
+		<div class="form-group">
+			<div class="control">
+				<h5>Annotations available</h5>
+				<hr></hr>
+				<#list allAnnotators?keys as annotator>
+					<#if allAnnotators[annotator]>
+						<label class="checkbox">
+							<input type="checkbox" class="checkbox" name="${annotator}" id="${annotator}_id" value="${annotator}"> ${annotator}
+						</label>							
+					</#if>
+				</#list>
+				
+				<hr></hr>
+				<h5>Annotations not available
+				<a id="disabled-tooltip" 
+				title= "These annotations are not available for the selected data set because the data set does not contain the correct data" 
+					data-toggle="tooltip" data-placement="top-right"><span 
+							class="icon icon-question-sign"></span></a>
+							
+							</h5> 
+				<hr></hr>
+				
+				<#list allAnnotators?keys as annotator>
+					<#if allAnnotators[annotator]>
+						<#-- Do nothing-->
+					<#else>
+						<label class="checkbox">
+							<input type="checkbox" class="checkbox" name="${annotator}" id="${annotator}_id" value="${annotator}" disabled> ${annotator}
+							
+						</label>	
+					</#if>
+				</#list>
+			</div>	
+		</div>
+	</form>	
+</#macro>
 
+<script>
 	$("#dataset-select").change(function() {
 		//alert("Handler has changed!");
-		window.location.href="${context_url}/change-current-dataset";
+		window.location.href="/menu/main/annotateUI/change-current-dataset";
 	});
 
-
+	
+	$("#disabled-tooltip").tooltip();
+	
 	$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
 	$("#dataset-select").chosen();
-	
-	
 		
 	// disable the filtering tabs for now
 	$("#rootwizard").bootstrapWizard('disable', 1);

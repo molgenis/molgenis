@@ -2,16 +2,10 @@ package org.molgenis.annotators.ui;
 
 import static org.molgenis.annotators.ui.AnnotatorsUIController.URI;
 
-import java.io.File;
 import java.io.IOException;
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +13,13 @@ import javax.annotation.Resource;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -28,14 +27,12 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.FileStore;
-import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -70,6 +67,9 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@Autowired
 	SearchService searchService;
+
+	@Autowired
+	AnnotationService annotationService;
 
 	@Autowired
 	DataSetsIndexer indexer;
@@ -107,13 +107,10 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 		model.addAttribute("dataSets", dataSets);
 
-		// TODO add the real list of annotators from the annotation registry
-		model.addAttribute("annotators", new ArrayList<String>());
-
+		DataSet selectedDataSet = null;
 		if (dataSets != null && !dataSets.isEmpty())
 		{
 			// determine selected data set and add to model
-			DataSet selectedDataSet = null;
 			if (selectedDataSetIdentifier != null)
 			{
 				for (DataSet dataSet : dataSets)
@@ -133,15 +130,31 @@ public class AnnotatorsUIController extends MolgenisPluginController
 				// select first data set by default
 				selectedDataSet = dataSets.iterator().next();
 			}
-			
+
 			model.addAttribute("selectedDataSet", selectedDataSet);
 		}
+		
+		Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
+		
+		Repository repo = dataService.getRepositoryByEntityName(selectedDataSet.getIdentifier());
+		
+		for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
+		{
+			mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
+		}
+		
+		System.out.println(mapOfAnnotators);
 
+		model.addAttribute("allAnnotators", mapOfAnnotators);
+		
 		return "view-annotation-ui";
 	}
-	
+
 	@RequestMapping(value = "/change-current-dataset", method = RequestMethod.GET)
-	public String changeSelectedDataSet(@RequestParam("dataset-select") String userSelectedDataSet){
+	public String changeSelectedDataSet(@RequestParam("dataset-select")
+	String userSelectedDataSet)
+	{
+
 		System.out.println("CHANGED TO " + userSelectedDataSet);
 		return "view-annotation-ui";
 	}
@@ -169,23 +182,10 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/execute-variant-app", method = RequestMethod.POST)
-	public String filterMyVariants(@RequestParam("annotation-form") List<String> selectedAnnotators)
+	public String filterMyVariants()
 	{
+
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer);
-		for(String annotator : selectedAnnotators){
-			//TODO annotate
-		}
-		
-		
-		// omxDataSetAnnotator.annotate(ebiServiceAnnotator, dataService.getRepositoryByEntityName("uniprotTest"),
-		// true);
-		// omxDataSetAnnotator.annotate(caddServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"),
-		// false);
-		//omxDataSetAnnotator.annotate(dbnsfpVariantServiceAnnotator,
-		//		dataService.getRepositoryByEntityName("variantSet"), true);
-		//omxDataSetAnnotator.annotate(dbnsfpGeneServiceAnnotator, dataService.getRepositoryByEntityName("variantSet"),
-		//		true);
-		// omxDataSetAnnotator.annotate(omimHpoAnnotator, dataService.getRepositoryByEntityName("5gpm set"), true);
 
 		return "view-result-page";
 	}
