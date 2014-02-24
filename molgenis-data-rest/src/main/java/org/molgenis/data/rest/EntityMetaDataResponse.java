@@ -21,11 +21,12 @@ public class EntityMetaDataResponse
 
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet, Set<String> attributeExpandsSet)
 	{
-		this.href = String.format("%s/%s/meta", RestController.BASE_URI, meta.getName());
+		String name = meta.getName();
+		this.href = String.format("%s/%s/meta", RestController.BASE_URI, name);
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
-			this.name = meta.getName();
+			this.name = name;
 		}
 		else this.name = null;
 
