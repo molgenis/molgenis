@@ -29,19 +29,19 @@
 								
 								//When user first clicks in dropdown term is empty, then when user types we get called with the term, create query for it
 								if (query.term.length > 0) {
-									q = {q:[{field:'${field.refEntity.labelAttribute.name!?uncap_first}',operator:'LIKE',value:query.term}]};
+									q = {q:[{field:'${field.refEntity.labelAttributes[0].name!?uncap_first}',operator:'LIKE',value:query.term}]};
 								}
 								
 								restApi.getAsync(url, null, q, function(entities) {
 									$.each(entities.items, function(index, entity) {
-										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!?uncap_first}']});
+										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttributes[0].name!?uncap_first}']});
 									});
 									query.callback(queryResult);
 								});
 							},
 							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />', text: '${entity.get(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
+								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />', text: '${entity.get(fieldName).get(field.refEntity.labelAttributes[0].name)!?html}'});
 							}
 							</#if>
 						});
@@ -63,7 +63,7 @@
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
 							<#list entity.get(fieldName) as xrefEntity>
-								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
+								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttributes[0].name)!?html}'});
 							</#list>
 						</#if>
 								
@@ -81,12 +81,12 @@
 								
 								//When user first clicks in dropdown term is empty, then when user types we get called with the term, create query for it
 								if (query.term.length > 0) {
-									q = {q:[{field:'${field.refEntity.labelAttribute.name!?uncap_first}',operator:'LIKE',value:query.term}]};
+									q = {q:[{field:'${field.refEntity.labelAttributes[0].name!?uncap_first}',operator:'LIKE',value:query.term}]};
 								}
 								
 								restApi.getAsync(url, null, q, function(entities) {
 									$.each(entities.items, function(index, entity) {
-										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!?uncap_first}']});
+										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttributes[0].name!?uncap_first}']});
 									});
 									query.callback(queryResult);
 								});

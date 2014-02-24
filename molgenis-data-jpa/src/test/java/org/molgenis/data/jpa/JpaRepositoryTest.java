@@ -8,9 +8,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -18,26 +15,13 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
-public class JpaRepositoryTest
+public class JpaRepositoryTest extends BaseJpaTest
 {
-	private EntityManager entityManager;
-	private JpaRepository repo;
-
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		entityManager = Persistence.createEntityManagerFactory("molgenis").createEntityManager();
-		repo = new JpaRepository(entityManager, Person.class, new PersonMetaData());
-		entityManager.getTransaction().begin();
-	}
-
 	@Test
 	public void testAddAndretrieve()
 	{
@@ -424,13 +408,6 @@ public class JpaRepositoryTest
 		System.out.println(it);
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));
-	}
-
-	@AfterMethod
-	public void afterMethod()
-	{
-		entityManager.getTransaction().rollback();
-		entityManager.close();
 	}
 
 }

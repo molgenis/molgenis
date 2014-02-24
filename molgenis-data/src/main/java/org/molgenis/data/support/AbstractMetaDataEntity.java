@@ -3,11 +3,15 @@ package org.molgenis.data.support;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 public abstract class AbstractMetaDataEntity extends AbstractEntity
 {
@@ -20,13 +24,14 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 		this.metaData = metaData;
 	}
 
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return metaData;
 	}
 
 	@Override
-	public void set(Entity entity)
+	public void set(Entity entity, boolean strict)
 	{
 		for (AttributeMetaData attribute : metaData.getAttributes())
 		{
@@ -60,15 +65,17 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	@Override
 	public String getLabelValue()
 	{
-		AttributeMetaData labelAttribute = metaData.getLabelAttribute();
-		if (labelAttribute == null)
+		List<String> labels = Lists.transform(metaData.getLabelAttributes(), new Function<AttributeMetaData, String>()
 		{
-			return null;
-		}
+			@Override
+			public String apply(AttributeMetaData attr)
+			{
+				Object label = get(attr.getName());
+				return DataConverter.convert(label, String.class);
+			}
+		});
 
-		Object label = get(labelAttribute.getName());
-
-		return DataConverter.convert(label, String.class);
+		return labels.isEmpty() ? null : StringUtils.join(labels, ':');
 	}
 
 	@Override

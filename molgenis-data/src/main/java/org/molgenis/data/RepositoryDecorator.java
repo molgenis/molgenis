@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 public class RepositoryDecorator implements Repository
 {
@@ -44,9 +45,9 @@ public class RepositoryDecorator implements Repository
 	}
 
 	@Override
-	public AttributeMetaData getLabelAttribute()
+	public List<AttributeMetaData> getLabelAttributes()
 	{
-		return decoratedRepository.getLabelAttribute();
+		return decoratedRepository.getLabelAttributes();
 	}
 
 	@Override

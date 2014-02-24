@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -51,9 +53,9 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public AttributeMetaData getLabelAttribute()
+	public List<AttributeMetaData> getLabelAttributes()
 	{
-		return getEntityMetaData().getLabelAttribute();
+		return getEntityMetaData().getLabelAttributes();
 	}
 
 	@Override

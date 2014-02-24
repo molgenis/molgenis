@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
@@ -31,7 +32,16 @@ public class DataConverter
 
 		if (conversionService == null)
 		{
-			conversionService = ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
+			if (ApplicationContextProvider.getApplicationContext() == null)
+			{
+				// We are not in a Spring managed environment
+				conversionService = new DefaultConversionService();
+			}
+			else
+			{
+				conversionService = ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
+			}
+
 		}
 
 		return conversionService.convert(source, targetType);
@@ -78,6 +88,7 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof java.sql.Date) return (java.sql.Date) source;
+		if (source instanceof java.util.Date) return new java.sql.Date(((java.util.Date) source).getTime());
 		return convert(source, java.sql.Date.class);
 	}
 

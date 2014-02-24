@@ -1,13 +1,13 @@
 package org.molgenis.data.omx.annotation;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Date;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
@@ -19,6 +19,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -48,6 +49,7 @@ public class OmxDataSetAnnotator
 	private final SearchService searchService;
 	DataService dataService;
 	DataSetsIndexer indexer;
+	private final EntityValidator entityValidator;
 
 	/**
 	 * @param dataService
@@ -55,11 +57,13 @@ public class OmxDataSetAnnotator
 	 * @param indexer
 	 * 
 	 * */
-	public OmxDataSetAnnotator(DataService dataService, SearchService searchService, DataSetsIndexer indexer)
+	public OmxDataSetAnnotator(DataService dataService, SearchService searchService, DataSetsIndexer indexer,
+			EntityValidator entityValidator)
 	{
 		this.dataService = dataService;
 		this.searchService = searchService;
 		this.indexer = indexer;
+		this.entityValidator = entityValidator;
 	}
 
 	/**
@@ -226,7 +230,7 @@ public class OmxDataSetAnnotator
 				new QueryImpl().eq(ObservableFeature.IDENTIFIER, prefix + columnName), ObservableFeature.class);
 		ValueConverter valueConverter = new ValueConverter(dataService);
 		Value value = valueConverter.fromEntity(entity, columnName, thisFeature);
-        dataService.add(Value.ENTITY_NAME, value);
+		dataService.add(Value.ENTITY_NAME, value);
 
 		ObservedValue observedValue = new ObservedValue();
 		observedValue.setFeature(thisFeature);
@@ -300,7 +304,7 @@ public class OmxDataSetAnnotator
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, original), ObservationSet.class);
 		dataService.add(DataSet.ENTITY_NAME, copy);
-		OmxRepository repo = new OmxRepository(dataService, searchService, copy.getIdentifier());
+		OmxRepository repo = new OmxRepository(dataService, searchService, copy.getIdentifier(), entityValidator);
 		dataService.addRepository(repo);
 
 		for (ObservationSet observationSet : observationSets)
