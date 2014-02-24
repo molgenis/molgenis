@@ -196,7 +196,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 				observationSet.setPartOfDataSet(dataSet);
 				dataService.add(ObservationSet.ENTITY_NAME, observationSet);
 
-				for (AttributeMetaData attr : getAttributes())
+				for (AttributeMetaData attr : getAtomicAttributes())
 				{
 					if (!attr.isIdAtrribute())
 					{

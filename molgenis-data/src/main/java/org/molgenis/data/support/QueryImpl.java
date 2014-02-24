@@ -14,7 +14,6 @@ import org.springframework.data.domain.Sort;
 public class QueryImpl implements Query
 {
 	private final List<List<QueryRule>> rules = new ArrayList<List<QueryRule>>();
-	private final List<QueryRule> order = new ArrayList<QueryRule>();
 
 	private int pageSize;
 	private int offset;
@@ -231,8 +230,8 @@ public class QueryImpl implements Query
 	@Override
 	public String toString()
 	{
-		return "QueryImpl [rules=" + getRules() + ", order=" + order + ", pageSize=" + pageSize + ", offset=" + offset
-				+ ", sort=" + sort + "]";
+		return "QueryImpl [rules=" + getRules() + ", pageSize=" + pageSize + ", offset=" + offset + ", sort=" + sort
+				+ "]";
 	}
 
 	@Override
@@ -241,7 +240,6 @@ public class QueryImpl implements Query
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + offset;
-		result = prime * result + ((order == null) ? 0 : order.hashCode());
 		result = prime * result + pageSize;
 		result = prime * result + ((rules == null) ? 0 : rules.hashCode());
 		result = prime * result + ((sort == null) ? 0 : sort.hashCode());
@@ -256,11 +254,6 @@ public class QueryImpl implements Query
 		if (getClass() != obj.getClass()) return false;
 		QueryImpl other = (QueryImpl) obj;
 		if (offset != other.offset) return false;
-		if (order == null)
-		{
-			if (other.order != null) return false;
-		}
-		else if (!order.equals(other.order)) return false;
 		if (pageSize != other.pageSize) return false;
 		if (rules == null)
 		{
